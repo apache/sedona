@@ -85,6 +85,22 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testCentroid() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((2 2, 0 0, 2 0, 0 2))') AS geom");
+        Table boundaryTable = polygonTable.select(call(Functions.ST_Centroid.class.getSimpleName(), $("geom")));
+        Geometry result = (Geometry) first(boundaryTable).getField(0);
+        assertEquals("POINT (1 1)", result.toString());
+    }
+
+    @Test
+    public void testCollectionExtract() {
+        Table collectionTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION(POINT(0 0), LINESTRING(1 1, 2 2))') AS collection");
+        Table resultTable = collectionTable.select(call(Functions.ST_CollectionExtract.class.getSimpleName(), $("collection")));
+        Geometry result = (Point) first(resultTable).getField(0);
+        assertEquals("MULTILINESTRING ((1 1, 2 2))", result.toString());
+    }
+
+    @Test
     public void testConcaveHull() {
         Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))') as geom");
         Table concaveHullPolygonTable = polygonTable.select(call(Functions.ST_ConcaveHull.class.getSimpleName(), $("geom"), 1.0, true));
@@ -95,6 +111,20 @@ public class FunctionTest extends TestBase{
         Table concaveHullPolygonTable2 = polygonTable2.select(call(Functions.ST_ConcaveHull.class.getSimpleName(), $("geom"), 1.0));
         Geometry result2 = (Geometry) first(concaveHullPolygonTable2).getField(0);
         assertEquals("POLYGON ((0 0, 1 1, 1 0, 0 0))", result2.toString());
+    }
+
+    @Test
+    public void testDifference() {
+        Table table = tableEnv.sqlQuery("SELECT ST_Difference(ST_GeomFromWKT('LINESTRING(50 100, 50 200)'), ST_GeomFromWKT('LINESTRING(50 50, 50 150)'))");
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("LINESTRING (50 150, 50 200)", result.toString());
+    }
+
+    @Test
+    public void testDump() {
+        Table table = tableEnv.sqlQuery("SELECT ST_AsText((ST_Dump(ST_GeomFromText('POINT (0 0)'))).geom)");
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("POINT (0 0)", result.toString());
     }
 
     @Test
