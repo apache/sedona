@@ -131,9 +131,11 @@ public class FunctionTest extends TestBase{
 
     @Test
     public void testDump() {
-        Table table = tableEnv.sqlQuery("SELECT ST_AsText((ST_Dump(ST_GeomFromText('POINT (0 0)'))).geom)");
-        String result = (String) first(table).getField(0).toString();
-        assertEquals("POINT (0 0)", result);
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTIPOINT ((0 0), (1 1))') AS geom");
+        table = table.select(call(Functions.ST_Dump.class.getSimpleName(), $("geom")));
+        Geometry[] result = (Geometry[]) first(table).getField(0);
+        assertEquals("POINT (0 0)", result[0].toString());
+        assertEquals("POINT (1 1)", result[1].toString());
     }
 
     @Test
