@@ -118,7 +118,7 @@ public class FunctionTest extends TestBase{
         Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))') as geom");
         Table concaveHullPolygonTable = polygonTable.select(call(Functions.ST_ConvexHull.class.getSimpleName(), $("geom")));
         Geometry result = (Geometry) first(concaveHullPolygonTable).getField(0);
-        assertEquals("POLYGON ((0 0, 1 2, 3 2, 5 0, 0 0)", result.toString());
+        assertEquals("POLYGON ((0 0, 1 2, 3 2, 5 0, 0 0))", result.toString());
     }
 
     @Test
@@ -132,8 +132,8 @@ public class FunctionTest extends TestBase{
     @Test
     public void testDump() {
         Table table = tableEnv.sqlQuery("SELECT ST_AsText((ST_Dump(ST_GeomFromText('POINT (0 0)'))).geom)");
-        Geometry result = (Geometry) first(table).getField(0);
-        assertEquals("POINT (0 0)", result.toString());
+        String result = (String) first(table).getField(0).toString();
+        assertEquals("POINT (0 0)", result);
     }
 
     @Test
