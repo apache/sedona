@@ -350,6 +350,43 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
         assert(distanceJoinDf.count() == expected)
       })
     }
+
+    it("Passed ST_HausdorffDistance with densityFrac <= distance in a broadcast join") {
+      val sampleCount = 100
+      val distance = 1.0
+      val densityFrac = 0.5
+      val polygonDf = buildPolygonDf.limit(sampleCount).repartition(3)
+      val pointDf = buildPointDf.limit(sampleCount).repartition(5)
+      val expected = bruteForceDistanceJoinHausdorff(sampleCount, distance, 0.5, true)
+
+      var distanceJoinDF = pointDf.alias("pointDf").join(
+      broadcast(polygonDf).alias("polygonDF"), expr(s"ST_HausdorffDistance(pointDf.pointshape, polygonDf.polygonshape, $densityFrac) <= $distance"))
+      assert(distanceJoinDF.queryExecution.sparkPlan.collect{case p: BroadcastIndexJoinExec => p}.size == 1)
+      assert(distanceJoinDF.count() == expected)
+
+      distanceJoinDF = broadcast(pointDf).alias("pointDf").join(polygonDf.alias("polygonDf"), expr(s"ST_HausdorffDistance(pointDf.pointshape, polygonDf.polygonshape, $densityFrac) <= $distance"))
+
+      assert(distanceJoinDF.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
+      assert(distanceJoinDF.count() == expected)
+    }
+
+    it("Passed ST_HausdorffDistance <= distance in a broadcast join") {
+      val sampleCount = 200
+      val distance = 2.0
+      val polygonDf = buildPolygonDf.limit(sampleCount).repartition(3)
+      val pointDf = buildPointDf.limit(sampleCount).repartition(5)
+      val expected = bruteForceDistanceJoinHausdorff(sampleCount, distance, 0, true)
+
+      var distanceJoinDF = pointDf.alias("pointDf").join(
+        broadcast(polygonDf).alias("polygonDF"), expr(s"ST_HausdorffDistance(pointDf.pointshape, polygonDf.polygonshape) <= $distance"))
+      assert(distanceJoinDF.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
+      assert(distanceJoinDF.count() == expected)
+
+      distanceJoinDF = broadcast(pointDf).alias("pointDf").join(polygonDf.alias("polygonDf"), expr(s"ST_HausdorffDistance(pointDf.pointshape, polygonDf.polygonshape) <= $distance"))
+
+      assert(distanceJoinDF.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
+      assert(distanceJoinDF.count() == expected)
+    }
   }
 
   describe("Sedona-SQL Broadcast Index Join Test for left semi joins") {
