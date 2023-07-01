@@ -157,6 +157,8 @@ object Catalog {
     function[ST_Affine](null, null, null, null, null, null),
     function[ST_Affine](),
     function[ST_BoundingDiagonal](),
+    function[ST_Angle](),
+    function[ST_Degrees](),
     function[ST_HausdorffDistance](-1),
     // Expression for rasters
     function[RS_NormalizedDifference](),

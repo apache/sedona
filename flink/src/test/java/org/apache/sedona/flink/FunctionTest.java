@@ -789,6 +789,16 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testAngle() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_Angle(ST_GeomFromWKT('LINESTRING (0 0, 1 1)'), ST_GeomFromWKT('LINESTRING (0 0, 3 2)'))" + " AS " + polygonColNames[0]);
+        polyTable = polyTable.select(call(Functions.ST_Degrees.class.getSimpleName(), $(polygonColNames[0])));
+        Double expected = 11.309932474020195;
+        Double actual = (Double) first(polyTable).getField(0);
+        assertEquals(expected, actual, 1e-9);
+
+    }
+
+    @Test
     public void testHausdorffDistance() {
         Table polyTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (0.0 1.0)') AS g1, ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)') AS g2");
         Table actualTable = polyTable.select(call(Functions.ST_HausdorffDistance.class.getSimpleName(), $("g1"), $("g2"), 0.4));
