@@ -93,10 +93,6 @@ If the given geometry is empty, the result is also empty.
 Format: `ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)`  
 Format: `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
 
-Since: `1.5.0`
-
-Example:
-
 ```sql
 ST_Affine(geometry, 1, 2, 4, 1, 1, 2, 3, 2, 5, 4, 8, 3)
 ```
@@ -130,6 +126,74 @@ Input: `POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))`
 
 Output: `POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))`
 
+## ST_Angle
+
+Introduction: Computes and returns the angle between two vectors represented by the provided points or linestrings.
+
+There are three variants possible for ST_Angle:
+
+`ST_Angle(Geometry point1, Geometry point2, Geometry point3, Geometry point4)`
+Computes the angle formed by vectors represented by point1 - point2 and point3 - point4
+
+`ST_Angle(Geometry point1, Geometry point2, Geometry point3)`
+Computes the angle formed by vectors represented by point2 - point1 and point2 - point3
+
+`ST_Angle(Geometry line1, Geometry line2)`
+Computes the angle formed by vectors S1 - E1 and S2 - E2, where S and E denote start and end points respectively
+
+!!!Note
+    If any other geometry type is provided, ST_Angle throws an IllegalArgumentException.
+    Additionally, if any of the provided geometry is empty, ST_Angle throws an IllegalArgumentException.
+
+!!!Note
+    If a 3D geometry is provided, ST_Angle computes the angle ignoring the z ordinate, equivalent to calling ST_Angle for corresponding 2D geometries.
+
+!!!Tip
+    ST_Angle returns the angle in radian between 0 and 2\Pi. To convert the angle to degrees, use [ST_Degrees](./#st_degrees).
+
+
+Format: `ST_Angle(p1, p2, p3, p4) | ST_Angle(p1, p2, p3) | ST_Angle(line1, line2)`
+
+
+Since: `1.5.0`
+
+Example:
+
+```sql
+ST_Angle(p1, p2, p3, p4)
+```
+
+Input: `p1: POINT (0 0)`
+
+Input: `p2: POINT (1 1)`
+
+Input: `p3: POINT (1 0)`
+
+Input: `p4: POINT(6 2)`
+
+Output: 0.4048917862850834
+
+```sql
+ST_Angle(p1, p2, p3)
+```
+
+Input: `p1: POINT (1 1)`
+
+Input: `p2: POINT (0 0)`
+
+Input: `p3: POINT(3 2)`
+
+Output: 0.19739555984988044
+
+```sql
+ST_Angle(line1, line2)
+```
+
+Input: `line1: LINESTRING (0 0, 1 1)`
+
+Input: `line2: LINESTRING (0 0, 3 2)`
+
+Output: 0.19739555984988044
 
 ## ST_Area
 
@@ -528,6 +592,22 @@ Spark SQL example:
 SELECT ST_ConvexHull(polygondf.countyshape)
 FROM polygondf
 ```
+
+## ST_Degrees
+
+Introduction: Convert an angle in radian to degrees.
+
+Format: `ST_Degrees(angleInRadian)`
+
+Since: `1.5.0`
+
+Example:
+
+```sql
+SELECT ST_Degrees(0.19739555984988044)
+```
+
+Output: 11.309932474020195
 
 ## ST_Difference
 

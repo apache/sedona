@@ -338,6 +338,7 @@ object st_functions extends DataFrameAPI {
   def ST_FrechetDistance(g1: Column, g2: Column): Column = wrapExpression[ST_FrechetDistance](g1, g2)
 
   def ST_FrechetDistance(g1: String, g2: String): Column = wrapExpression[ST_FrechetDistance](g1, g2)
+
   def ST_Affine(geometry: Column, a: Column, b: Column, c: Column, d: Column, e: Column, f: Column, g: Column, h: Column, i: Column, xOff: Column, yOff: Column, zOff: Column): Column =
     wrapExpression[ST_Affine](geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)
 
@@ -356,6 +357,21 @@ object st_functions extends DataFrameAPI {
   def ST_BoundingDiagonal(geometry: String) =
     wrapExpression[ST_BoundingDiagonal](geometry)
 
+  def ST_Angle(p1: Column, p2: Column, p3: Column, p4: Column): Column = wrapExpression[ST_Angle](p1, p2, p3, p4)
+
+  def ST_Angle(p1: String, p2: String, p3: String, p4: String): Column = wrapExpression[ST_Angle](p1, p2, p3, p4)
+
+  def ST_Angle(p1: Column, p2: Column, p3: Column): Column = wrapExpression[ST_Angle](p1, p2, p3)
+
+  def ST_Angle(p1: String, p2: String, p3: String): Column = wrapExpression[ST_Angle](p1, p2, p3)
+
+  def ST_Angle(line1: Column, line2: Column): Column = wrapExpression[ST_Angle](line1, line2)
+
+  def ST_Angle(line1: String, line2: String): Column = wrapExpression[ST_Angle](line1, line2)
+
+  def ST_Degrees(angleInRadian: Column): Column = wrapExpression[ST_Degrees](angleInRadian)
+
+  def ST_Degrees(angleInRadian: Double): Column = wrapExpression[ST_Degrees](angleInRadian)
   def ST_HausdorffDistance(g1: Column, g2: Column) = wrapExpression[ST_HausdorffDistance](g1, g2, -1)
 
   def ST_HausdorffDistance(g1: String, g2: String) = wrapExpression[ST_HausdorffDistance](g1, g2, -1);
@@ -365,3 +381,4 @@ object st_functions extends DataFrameAPI {
   def ST_HausdorffDistance(g1: String, g2: String, densityFrac: Double) = wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac);
 
 }
+ 

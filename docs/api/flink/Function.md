@@ -131,6 +131,74 @@ Input: `POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))`
 
 Output: `POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))`
 
+## ST_Angle
+
+Introduction: Compute and return the angle between two vectors represented by the provided points or linestrings.
+
+There are three variants possible for ST_Angle:
+
+`ST_Angle(Geometry point1, Geometry point2, Geometry point3, Geometry point4)`
+Computes the angle formed by vectors represented by point1 - point2 and point3 - point4
+
+`ST_Angle(Geometry point1, Geometry point2, Geometry point3)`
+Computes the angle formed by vectors represented by point2 - point1 and point2 - point3
+
+`ST_Angle(Geometry line1, Geometry line2)`
+Computes the angle formed by vectors S1 - E1 and S2 - E2, where S and E denote start and end points respectively
+
+!!!Note
+    If any other geometry type is provided, ST_Angle throws an IllegalArgumentException.
+    Additionally, if any of the provided geometry is empty, ST_Angle throws an IllegalArgumentException.
+
+!!!Note
+    If a 3D geometry is provided, ST_Angle computes the angle ignoring the z ordinate, equivalent to calling ST_Angle for corresponding 2D geometries.
+
+!!!Tip
+    ST_Angle returns the angle in radian between 0 and 2\Pi. To convert the angle to degrees, use [ST_Degrees](./#st_degrees).
+
+
+Format: `ST_Angle(p1, p2, p3, p4) | ST_Angle(p1, p2, p3) | ST_Angle(line1, line2)`
+
+Since: `1.5.0`
+
+Example:
+
+```sql
+ST_Angle(p1, p2, p3, p4)
+```
+
+Input: `p1: POINT (0 0)`
+
+Input: `p2: POINT (1 1)`
+
+Input: `p3: POINT (1 0)`
+
+Input: `p4: POINT(6 2)`
+
+Output: 0.4048917862850834
+
+```sql
+ST_Angle(p1, p2, p3)
+```
+
+Input: `p1: POINT (1 1)`
+
+Input: `p2: POINT (0 0)`
+
+Input: `p3: POINT(3 2)`
+
+Output: 0.19739555984988044
+
+```sql
+ST_Angle(line1, line2)
+```
+
+Input: `line1: LINESTRING (0 0, 1 1)`
+
+Input: `line2: LINESTRING (0 0, 3 2)`
+
+Output: 0.19739555984988044
+
 ## ST_Area
 
 Introduction: Return the area of A
@@ -363,6 +431,20 @@ Input: `MULTILINESTRING((0 0, 10 0, 10 10, 0 10, 0 0),(10 10, 20 10, 20 20, 10 2
 
 Output: `MULTIPOLYGON(((0 0,0 10,10 10,10 0,0 0)),((10 10,10 20,20 20,20 10,10 10)))`
 
+## ST_Centroid
+
+Introduction: Return the centroid point of A
+
+Format: `ST_Centroid (A:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_Centroid(polygondf.countyshape)
+FROM polygondf
+```
+
 ## ST_ClosestPoint
 
 Introduction: Returns the 2-dimensional point on geom1 that is closest to geom2. This is the first point of the shortest line between the geometries. If using 3D geometries, the Z coordinates will be ignored. If you have a 3D Geometry, you may prefer to use ST_3DClosestPoint.
@@ -389,6 +471,46 @@ Input: `g1: 'POLYGON ((190 150, 20 10, 160 70, 190 150))', g2: ST_Buffer('POINT(
 
 Output: `POINT(131.59149149528952 101.89887534906197)`
 
+## ST_CollectionExtract
+
+Introduction: Returns a homogeneous multi-geometry from a given geometry collection.
+
+The type numbers are:
+1. POINT
+2. LINESTRING
+3. POLYGON
+
+If the type parameter is omitted a multi-geometry of the highest dimension is returned.
+
+Format: `ST_CollectionExtract (A:geometry)`
+
+Format: `ST_CollectionExtract (A:geometry, type:Int)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+WITH test_data as (
+    ST_GeomFromText(
+        'GEOMETRYCOLLECTION(POINT(40 10), POLYGON((0 0, 0 5, 5 5, 5 0, 0 0)))'
+    ) as geom
+)
+SELECT ST_CollectionExtract(geom) as c1, ST_CollectionExtract(geom, 1) as c2
+FROM test_data
+
+```
+
+Result:
+
+```
++----------------------------------------------------------------------------+
+|c1                                        |c2                               |
++----------------------------------------------------------------------------+
+|MULTIPOLYGON(((0 0, 0 5, 5 5, 5 0, 0 0))) |MULTIPOINT(40 10)                |              |
++----------------------------------------------------------------------------+
+```
+
 ## ST_ConcaveHull
 
 Introduction: Return the Concave Hull of polgyon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
@@ -409,6 +531,20 @@ FROM polygondf
 Input: `Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))`
 
 Output: `POLYGON ((1 2, 2 2, 3 2, 5 0, 4 0, 1 0, 0 0, 1 2))`
+
+## ST_ConvexHull
+
+Introduction: Return the Convex Hull of polgyon A
+
+Format: `ST_ConvexHull (A:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_ConvexHull(polygondf.countyshape)
+FROM polygondf
+```
 
 ## ST_Dimension
 
@@ -487,6 +623,58 @@ SELECT ST_DistanceSpheroid(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromW
 ```
 
 Output: `544430.9411996207`
+
+## ST_Degrees
+
+Introduction: Convert an angle in radian to degrees.
+
+Format: `ST_Degrees(angleInRadian)`
+
+Since: `1.5.0`
+
+Example:
+
+```sql
+SELECT ST_Degrees(0.19739555984988044)
+```
+
+Output: 11.309932474020195
+
+## ST_Difference
+
+Introduction: Return the difference between geometry A and B (return part of geometry A that does not intersect geometry B)
+
+Format: `ST_Difference (A:geometry, B:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_Difference(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((0 -4, 4 -4, 4 4, 0 4, 0 -4))'))
+```
+
+Result:
+
+```
+POLYGON ((0 -3, -3 -3, -3 3, 0 3, 0 -3))
+```
+
+## ST_Dump
+
+Introduction: It expands the geometries. If the geometry is simple (Point, Polygon Linestring etc.) it returns the geometry
+itself, if the geometry is collection or multi it returns record for each of collection components.
+
+Format: `ST_Dump(geom: geometry)`
+
+Since: `v1.5.0`
+
+SQL example:
+```sql
+SELECT ST_Dump(ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))'))
+```
+
+Output: `[POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]`
 
 ## ST_Envelope
 
