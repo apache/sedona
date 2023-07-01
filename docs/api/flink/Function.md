@@ -431,6 +431,60 @@ Input: `MULTILINESTRING((0 0, 10 0, 10 10, 0 10, 0 0),(10 10, 20 10, 20 20, 10 2
 
 Output: `MULTIPOLYGON(((0 0,0 10,10 10,10 0,0 0)),((10 10,10 20,20 20,20 10,10 10)))`
 
+## ST_Centroid
+
+Introduction: Return the centroid point of A
+
+Format: `ST_Centroid (A:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_Centroid(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_CollectionExtract
+
+Introduction: Returns a homogeneous multi-geometry from a given geometry collection.
+
+The type numbers are:
+1. POINT
+2. LINESTRING
+3. POLYGON
+
+If the type parameter is omitted a multi-geometry of the highest dimension is returned.
+
+Format: `ST_CollectionExtract (A:geometry)`
+
+Format: `ST_CollectionExtract (A:geometry, type:Int)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+WITH test_data as (
+    ST_GeomFromText(
+        'GEOMETRYCOLLECTION(POINT(40 10), POLYGON((0 0, 0 5, 5 5, 5 0, 0 0)))'
+    ) as geom
+)
+SELECT ST_CollectionExtract(geom) as c1, ST_CollectionExtract(geom, 1) as c2
+FROM test_data
+
+```
+
+Result:
+
+```
++----------------------------------------------------------------------------+
+|c1                                        |c2                               |
++----------------------------------------------------------------------------+
+|MULTIPOLYGON(((0 0, 0 5, 5 5, 5 0, 0 0))) |MULTIPOINT(40 10)                |              |
++----------------------------------------------------------------------------+
+```
+
 ## ST_ConcaveHull
 
 Introduction: Return the Concave Hull of polgyon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
@@ -451,6 +505,20 @@ FROM polygondf
 Input: `Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))`
 
 Output: `POLYGON ((1 2, 2 2, 3 2, 5 0, 4 0, 1 0, 0 0, 1 2))`
+
+## ST_ConvexHull
+
+Introduction: Return the Convex Hull of polgyon A
+
+Format: `ST_ConvexHull (A:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_ConvexHull(polygondf.countyshape)
+FROM polygondf
+```
 
 ## ST_Dimension
 
@@ -545,6 +613,42 @@ SELECT ST_Degrees(0.19739555984988044)
 ```
 
 Output: 11.309932474020195
+
+## ST_Difference
+
+Introduction: Return the difference between geometry A and B (return part of geometry A that does not intersect geometry B)
+
+Format: `ST_Difference (A:geometry, B:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_Difference(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((0 -4, 4 -4, 4 4, 0 4, 0 -4))'))
+```
+
+Result:
+
+```
+POLYGON ((0 -3, -3 -3, -3 3, 0 3, 0 -3))
+```
+
+## ST_Dump
+
+Introduction: It expands the geometries. If the geometry is simple (Point, Polygon Linestring etc.) it returns the geometry
+itself, if the geometry is collection or multi it returns record for each of collection components.
+
+Format: `ST_Dump(geom: geometry)`
+
+Since: `v1.5.0`
+
+SQL example:
+```sql
+SELECT ST_Dump(ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))'))
+```
+
+Output: `[POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]`
 
 ## ST_Envelope
 
