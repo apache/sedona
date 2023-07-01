@@ -437,9 +437,9 @@ Introduction: Return the centroid point of A
 
 Format: `ST_Centroid (A:geometry)`
 
-Since: `v1.0.0`
+Since: `v1.5.0`
 
-Spark SQL example:
+Example:
 ```sql
 SELECT ST_Centroid(polygondf.countyshape)
 FROM polygondf
@@ -460,7 +460,7 @@ Format: `ST_CollectionExtract (A:geometry)`
 
 Format: `ST_CollectionExtract (A:geometry, type:Int)`
 
-Since: `v1.2.1`
+Since: `v1.5.0`
 
 Example:
 
@@ -512,9 +512,9 @@ Introduction: Return the Convex Hull of polgyon A
 
 Format: `ST_ConvexHull (A:geometry)`
 
-Since: `v1.0.0`
+Since: `v1.5.0`
 
-Spark SQL example:
+Example:
 ```sql
 SELECT ST_ConvexHull(polygondf.countyshape)
 FROM polygondf
@@ -620,7 +620,7 @@ Introduction: Return the difference between geometry A and B (return part of geo
 
 Format: `ST_Difference (A:geometry, B:geometry)`
 
-Since: `v1.2.0`
+Since: `v1.5.0`
 
 Example:
 
@@ -641,7 +641,7 @@ itself, if the geometry is collection or multi it returns record for each of col
 
 Format: `ST_Dump(geom: geometry)`
 
-Since: `v1.0.0`
+Since: `v1.5.0`
 
 SQL example:
 ```sql
