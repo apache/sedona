@@ -46,7 +46,7 @@ RangeJoin polygonshape#20: geometry, pointshape#43: geometry, false
 
 ## Distance join
 
-Introduction: Find geometries from A and geometries from B such that the distance of each geometry pair is less or equal than a certain distance. It supports the planar Euclidean distance calculators `ST_Distance` and `ST_HausdorffDistance` and the meter-based geodesic distance calculators `ST_DistanceSpheroid` and `ST_DistanceSphere`.
+Introduction: Find geometries from A and geometries from B such that the distance of each geometry pair is less or equal than a certain distance. It supports the planar Euclidean distance calculators `ST_Distance`, `ST_HausdorffDistance`, `ST_FrechetDistance` and the meter-based geodesic distance calculators `ST_DistanceSpheroid` and `ST_DistanceSphere`.
 
 Spark SQL Example for planar Euclidean distance:
 
@@ -63,6 +63,12 @@ FROM pointDf, polygonDF
 WHERE ST_HausdorffDistance(pointDf.pointshape, polygonDf.polygonshape, 0.3) < 2
 ```
 
+```sql
+SELECT *
+FROM pointDf, polygonDF
+WHERE ST_FrechetDistance(pointDf.pointshape, polygonDf.polygonshape) < 2
+```
+
 *Consider ==intersects within a certain distance==*
 ```sql
 SELECT *
@@ -76,6 +82,12 @@ FROM pointDf, polygonDF
 WHERE ST_HausdorffDistance(pointDf.pointshape, polygonDf.polygonshape) <= 2
 ```
 
+```sql
+SELECT *
+FROM pointDf, polygonDF
+WHERE ST_FrechetDistance(pointDf.pointshape, polygonDf.polygonshape) <= 2
+```
+
 Spark SQL Physical plan:
 ```
 == Physical Plan ==
@@ -87,7 +99,7 @@ DistanceJoin pointshape1#12: geometry, pointshape2#33: geometry, 2.0, true
 ```
 
 !!!warning
-	If you use planar euclidean distance functions like `ST_Distance` or `ST_HausdorffDistance` as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of `distance` should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See [ST_Transform](Function.md#st_transform). If you don't want to transform your data, please consider using `ST_DistanceSpheroid` or `ST_DistanceSphere`.
+	If you use planar euclidean distance functions like `ST_Distance`, `ST_HausdorffDistance` or `ST_FrechetDistance` as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of `distance` should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See [ST_Transform](Function.md#st_transform). If you don't want to transform your data, please consider using `ST_DistanceSpheroid` or `ST_DistanceSphere`.
 
 Spark SQL Example for meter-based geodesic distance `ST_DistanceSpheroid` (works for `ST_DistanceSphere` too):
 
@@ -138,7 +150,7 @@ BroadcastIndexJoin pointshape#52: geometry, BuildRight, BuildRight, false ST_Con
       +- FileScan csv
 ```
 
-This also works for distance joins with `ST_Distance`, `ST_DistanceSpheroid`, `ST_DistanceSphere` or `ST_HausdorffDistance`:
+This also works for distance joins with `ST_Distance`, `ST_DistanceSpheroid`, `ST_DistanceSphere`, `ST_HausdorffDistance` or `ST_FrechetDistance`:
 
 ```scala
 pointDf1.alias("pointDf1").join(broadcast(pointDf2).alias("pointDf2"), expr("ST_Distance(pointDf1.pointshape, pointDf2.pointshape) <= 2"))
