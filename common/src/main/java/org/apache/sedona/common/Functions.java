@@ -455,7 +455,7 @@ public class Functions {
             return GEOMETRY_FACTORY.createPoint(closestPoints[0]);
         }
         catch (Exception e) {
-            return null;
+            throw new IllegalArgumentException("ST_ClosestPoint doesn't support empty geometry object.");
         }
     }
 

@@ -1258,13 +1258,14 @@ public class FunctionsTest {
         // One of the object is empty
         Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
         LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
-        Geometry actual = Functions.closestPoint(point, emptyLineString);
-        assertNull(actual);
-
+        String expected = "ST_ClosestPoint doesn't support empty geometry object.";
+        Exception e1 = assertThrows(IllegalArgumentException.class, () -> Functions.closestPoint(point, emptyLineString));
+        assertEquals(expected, e1.getMessage());
+        
         // Both objects are empty
         Polygon emptyPolygon = GEOMETRY_FACTORY.createPolygon();
-        Geometry actual2 = Functions.closestPoint(emptyPolygon, emptyLineString);
-        assertNull(actual2);
+        Exception e2 = assertThrows(IllegalArgumentException.class, () -> Functions.closestPoint(emptyPolygon, emptyLineString));
+        assertEquals(expected, e2.getMessage());
     }
 
     @Test
