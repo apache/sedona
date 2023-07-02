@@ -73,6 +73,9 @@ object st_functions extends DataFrameAPI {
   def ST_Centroid(geometry: Column): Column = wrapExpression[ST_Centroid](geometry)
   def ST_Centroid(geometry: String): Column = wrapExpression[ST_Centroid](geometry)
 
+  def ST_ClosestPoint(a: Column, b: Column): Column = wrapExpression[ST_ClosestPoint](a, b)
+  def ST_ClosestPoint(a: String, b: String): Column = wrapExpression[ST_ClosestPoint](a, b)
+
   def ST_Collect(geoms: Column): Column = wrapExpression[ST_Collect](geoms)
   def ST_Collect(geoms: String): Column = wrapExpression[ST_Collect](geoms)
   def ST_Collect(geoms: Any*): Column = wrapVarArgExpression[ST_Collect](geoms)

@@ -85,6 +85,12 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testClosestPoint() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (160 40)') AS g1, ST_GeomFromWKT('POINT (10 10)') as g2");
+        table = table.select(call(Functions.ST_ClosestPoint.class.getSimpleName(), $("g1"), $("g2")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("POINT (160 40)", result.toString());
+    }   
     public void testCentroid() {
         Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('POLYGON ((2 2, 0 0, 2 0, 0 2, 2 2))') as geom");
         Table resultTable = polygonTable.select(call(Functions.ST_Centroid.class.getSimpleName(), $("geom")));

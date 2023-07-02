@@ -445,6 +445,32 @@ SELECT ST_Centroid(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_ClosestPoint
+
+Introduction: Returns the 2-dimensional point on geom1 that is closest to geom2. This is the first point of the shortest line between the geometries. If using 3D geometries, the Z coordinates will be ignored. If you have a 3D Geometry, you may prefer to use ST_3DClosestPoint.
+It will throw an exception indicates illegal argument if one of the params is an empty geometry.
+
+Format: `ST_ClosestPoint(g1: geomtry, g2: geometry)`
+
+Since: `1.5.0`
+
+Example1:
+```sql
+SELECT ST_AsText( ST_ClosestPoint(g1, g2)) As ptwkt;
+```
+
+Input: `g1: POINT (160 40), g2: LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190)`
+
+Output: `POINT(160 40)`
+
+Input: `g1: LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190), g2: POINT (160 40)`
+
+Output: `POINT(125.75342465753425 115.34246575342466)`
+
+Input: `g1: 'POLYGON ((190 150, 20 10, 160 70, 190 150))', g2: ST_Buffer('POINT(80 160)', 30)`
+
+Output: `POINT(131.59149149528952 101.89887534906197)`
+
 ## ST_Collect
 
 Introduction: Returns MultiGeometry object based on geometry column/s or array with geometries

@@ -601,6 +601,14 @@ case class ST_SetPoint(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_ClosestPoint(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.closestPoint _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_IsRing(inputExpressions: Seq[Expression])
   extends InferredExpression(ST_IsRing.isRing _) {
 

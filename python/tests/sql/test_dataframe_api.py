@@ -76,6 +76,7 @@ test_configurations = [
     (stf.ST_Centroid, ("geom",), "triangle_geom", "ST_PrecisionReduce(geom, 2)", "POINT (0.67 0.33)"),
     (stf.ST_Collect, (lambda: f.expr("array(a, b)"),), "two_points", "", "MULTIPOINT Z (0 0 0, 3 0 4)"),
     (stf.ST_Collect, ("a", "b"), "two_points", "", "MULTIPOINT Z (0 0 0, 3 0 4)"),
+    (stf.ST_ClosestPoint, ("point", "line",), "point_and_line", "", "POINT (0 1)"),
     (stf.ST_CollectionExtract, ("geom",), "geom_collection", "", "MULTILINESTRING ((0 0, 1 0))"),
     (stf.ST_CollectionExtract, ("geom", 1), "geom_collection", "", "MULTIPOINT (0 0)"),
     (stf.ST_ConcaveHull, ("geom", 1.0), "triangle_geom", "", "POLYGON ((0 0, 1 1, 1 0, 0 0))"),
