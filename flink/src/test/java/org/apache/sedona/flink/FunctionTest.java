@@ -181,7 +181,7 @@ public class FunctionTest extends TestBase{
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(1 1, 2 2, 3 3)') AS geom");
         table = table.select(call(Functions.ST_GeometryType.class.getSimpleName(), $("geom")));
         String result = (String) first(table).getField(0);
-        assertEquals("LINESTRING", result.toString());
+        assertEquals("ST_LineString", result.toString());
     }
 
     @Test
@@ -280,10 +280,10 @@ public class FunctionTest extends TestBase{
 
     @Test
     public void testIntersection() {
-        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (0 0)') AS g1, ST_GeomFromWKT('LINESTRING ( 2 0, 0 2 )') as g2");
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (0 0)') AS g1, ST_GeomFromWKT('LINESTRING ( 0 0, 0 2 )') as g2");
         table = table.select(call(Functions.ST_Intersection.class.getSimpleName(), $("g1"), $("g2")));
         Geometry result = (Geometry) first(table).getField(0);
-        assertEquals("GEOMETRYCOLLECTION EMPTY", result.toString());
+        assertEquals("POINT (0 0)", result.toString());
     }
 
     @Test
@@ -307,7 +307,7 @@ public class FunctionTest extends TestBase{
     @Test
     public void testLineInterpolatePoint() {
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 2 0)') AS line");
-        table = table.select(call(Functions.ST_Intersection.class.getSimpleName(), $("line"), 0.5));
+        table = table.select(call(Functions.ST_LineInterpolatePoint.class.getSimpleName(), $("line"), 0.5));
         Geometry result = (Geometry) first(table).getField(0);
         assertEquals("POINT (1 0)", result.toString());
     }
