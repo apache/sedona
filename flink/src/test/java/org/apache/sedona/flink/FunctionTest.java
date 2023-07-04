@@ -359,6 +359,14 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testReducePrecision() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('POINT(0.12 0.23)') AS geom");
+        Table resultTable = polygonTable.select(call(Functions.ST_ReducePrecision.class.getSimpleName(), $("geom"), 1));
+        Geometry point = (Geometry) first(resultTable).getField(0);
+        assertEquals("POINT (0.1 0.2)", point.toString());
+    }
+
+    @Test
     public void testReverse() {
         Table polygonTable = createPolygonTable(1);
         Table ReversedTable = polygonTable.select(call(Functions.ST_Reverse.class.getSimpleName(), $(polygonColNames[0])));
