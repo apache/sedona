@@ -303,7 +303,7 @@ case class ST_SimplifyPreserveTopology(inputExpressions: Seq[Expression])
   * @param inputExpressions The first arg is a geom and the second arg is an integer scale, specifying the number of decimal places of the new coordinate. The last decimal place will
   *                         be rounded to the nearest number.
   */
-case class ST_PrecisionReduce(inputExpressions: Seq[Expression])
+case class ST_ReducePrecision(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.reducePrecision _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {

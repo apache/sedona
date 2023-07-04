@@ -1552,18 +1552,18 @@ SELECT ST_AsText(ST_PointOnSurface(ST_GeomFromText('LINESTRING(0 5 1, 0 0 1, 0 1
 
 ```
 
-## ST_PrecisionReduce
+## ST_ReducePrecision
 
 Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded.
 
-Format: `ST_PrecisionReduce (A:geometry, B:int)`
+Format: `ST_ReducePrecision (A:geometry, B:int)`
 
 Since: `v1.0.0`
 
 Spark SQL example:
 
 ```sql
-SELECT ST_PrecisionReduce(polygondf.countyshape, 9)
+SELECT ST_ReducePrecision(polygondf.countyshape, 9)
 FROM polygondf
 ```
 The new coordinates will only have 9 decimal places.

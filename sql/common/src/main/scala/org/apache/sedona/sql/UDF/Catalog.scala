@@ -75,7 +75,7 @@ object Catalog {
     function[ST_Union](),
     function[ST_IsValid](),
     function[ST_IsEmpty](),
-    function[ST_PrecisionReduce](),
+    function[ST_ReducePrecision](),
     function[ST_Equals](),
     function[ST_Touches](),
     function[ST_Overlaps](),
