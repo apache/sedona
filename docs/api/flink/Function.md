@@ -1145,6 +1145,135 @@ Output:
 +-----------------------------------------+
 ```
 
+## ST_LineMerge
+
+Introduction: Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.
+
+!!!note
+    Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
+
+Format: `ST_LineMerge (A:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_LineMerge(geometry)
+FROM df
+```
+
+## ST_LineSubstring
+
+Introduction: Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length. Second and third arguments are Double values between 0 and 1. This only works with LINESTRINGs.
+
+Format: `ST_LineSubstring (geom: geometry, startfraction: Double, endfraction: Double)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_LineSubstring(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.333, 0.666) as Substring
+```
+
+Output:
+```
++------------------------------------------------------------------------------------------------+
+|Substring                                                                                       |
++------------------------------------------------------------------------------------------------+
+|LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140.21046313888758)|
++------------------------------------------------------------------------------------------------+
+```
+
+## ST_MakePolygon
+
+Introduction: Function to convert closed linestring to polygon including holes
+
+Format: `ST_MakePolygon(geom: geometry, holes: array<geometry>)`
+
+Since: `v1.5.0`
+
+Example:
+
+Query:
+```sql
+SELECT
+    ST_MakePolygon(
+        ST_GeomFromText('LINESTRING(7 -1, 7 6, 9 6, 9 1, 7 -1)'),
+        ARRAY(ST_GeomFromText('LINESTRING(6 2, 8 2, 8 1, 6 1, 6 2)'))
+    ) AS polygon
+```
+
+Result:
+
+```
++----------------------------------------------------------------+
+|polygon                                                         |
++----------------------------------------------------------------+
+|POLYGON ((7 -1, 7 6, 9 6, 9 1, 7 -1), (6 2, 8 2, 8 1, 6 1, 6 2))|
++----------------------------------------------------------------+
+
+```
+
+## ST_MakeValid
+
+Introduction: Given an invalid geometry, create a valid representation of the geometry.
+
+Collapsed geometries are either converted to empty (keepCollaped=true) or a valid geometry of lower dimension (keepCollapsed=false).
+Default is keepCollapsed=false.
+
+Format: `ST_MakeValid (A:geometry)`
+
+Format: `ST_MakeValid (A:geometry, keepCollapsed:Boolean)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+WITH linestring AS (
+    SELECT ST_GeomFromWKT('LINESTRING(1 1, 1 1)') AS geom
+) SELECT ST_MakeValid(geom), ST_MakeValid(geom, true) FROM linestring
+```
+
+Result:
+```
++------------------+------------------------+
+|st_makevalid(geom)|st_makevalid(geom, true)|
++------------------+------------------------+
+|  LINESTRING EMPTY|             POINT (1 1)|
++------------------+------------------------+
+```
+
+## ST_Multi
+
+Introduction: Returns a MultiGeometry object based on the geometry input.
+ST_Multi is basically an alias for ST_Collect with one geometry.
+
+Format
+
+`ST_Multi(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_Multi(
+    ST_GeomFromText('POINT(1 1)')
+) AS geom
+```
+
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|MULTIPOINT (1 1)                                               |
++---------------------------------------------------------------+
+```
+
+
 ## ST_Normalize
 
 Introduction: Returns the input geometry in its normalized form.
