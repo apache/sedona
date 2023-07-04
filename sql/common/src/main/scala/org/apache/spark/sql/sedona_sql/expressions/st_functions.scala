@@ -178,8 +178,8 @@ object st_functions extends DataFrameAPI {
   def ST_MakeValid(geometry: Column, keepCollapsed: Column): Column = wrapExpression[ST_MakeValid](geometry, keepCollapsed)
   def ST_MakeValid(geometry: String, keepCollapsed: Boolean): Column = wrapExpression[ST_MakeValid](geometry, keepCollapsed)
 
-  def ST_MinimumBoundingCircle(geometry: Column): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, BufferParameters.DEFAULT_QUADRANT_SEGMENTS)
-  def ST_MinimumBoundingCircle(geometry: String): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, BufferParameters.DEFAULT_QUADRANT_SEGMENTS)
+  def ST_MinimumBoundingCircle(geometry: Column): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6)
+  def ST_MinimumBoundingCircle(geometry: String): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6)
   def ST_MinimumBoundingCircle(geometry: Column, quadrantSegments: Column): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, quadrantSegments)
   def ST_MinimumBoundingCircle(geometry: String, quadrantSegments: Int): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, quadrantSegments)
 

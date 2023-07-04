@@ -626,8 +626,8 @@ class dataFrameAPITestScala extends TestBaseScala {
     it("Passed ST_MinimumBoundingCircle with default quadrantSegments") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom")
       val df = baseDf.select(ST_MinimumBoundingCircle("geom").as("geom")).selectExpr("ST_ReducePrecision(geom, 2)")
-      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
-      val expectedResult = "POLYGON ((0.99 -0.1, 0.96 -0.19, 0.92 -0.28, 0.85 -0.35, 0.78 -0.42, 0.69 -0.46, 0.6 -0.49, 0.5 -0.5, 0.4 -0.49, 0.31 -0.46, 0.22 -0.42, 0.15 -0.35, 0.08 -0.28, 0.04 -0.19, 0.01 -0.1, 0 0, 0.01 0.1, 0.04 0.19, 0.08 0.28, 0.15 0.35, 0.22 0.42, 0.31 0.46, 0.4 0.49, 0.5 0.5, 0.6 0.49, 0.69 0.46, 0.78 0.42, 0.85 0.35, 0.92 0.28, 0.96 0.19, 0.99 0.1, 1 0, 0.99 -0.1))"
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinates().length
+      val expectedResult = BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6 * 4 + 1;
       assert(actualResult == expectedResult)
     }
 
