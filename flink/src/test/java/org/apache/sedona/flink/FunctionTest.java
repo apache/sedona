@@ -718,7 +718,8 @@ public class FunctionTest extends TestBase{
 
     @Test 
     public void testMakePolygonWithHoles() {
-        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 2 0)') AS line, array(ST_GeomFromWKT('LINESTRING (0.5 0.1, 0.7 0.1, 0.7 0.3, 0.5 0.1)')) AS holes");
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromText('LINESTRING (0 0, 1 0, 1 1, 0 0)') AS line," +
+                                        "array[ST_GeomFromText('LINESTRING (0.5 0.1, 0.7 0.1, 0.7 0.3, 0.5 0.1)')] AS holes");
         table = table.select(call(Functions.ST_MakePolygon.class.getSimpleName(), $("line"), $("holes")));
         Geometry result = (Geometry) first(table).getField(0);
         assertEquals("POLYGON ((0 0, 1 0, 1 1, 0 0), (0.5 0.1, 0.7 0.1, 0.7 0.3, 0.5 0.1))", result.toString());

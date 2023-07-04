@@ -14,6 +14,7 @@
 package org.apache.sedona.flink.expressions;
 
 import org.apache.flink.table.annotation.DataTypeHint;
+import org.apache.flink.table.annotation.InputGroup;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.operation.buffer.BufferParameters;
@@ -619,7 +620,7 @@ public class Functions {
     public static class ST_MakePolygon extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
-                             @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry[].class) Object o2) {
+                             @DataTypeHint(inputGroup = InputGroup.ANY) Object o2) {
             Geometry outerLinestring = (Geometry) o1;
             Geometry[] interiorLinestrings = (Geometry[]) o2;
             return org.apache.sedona.common.Functions.makePolygon(outerLinestring, interiorLinestrings);
@@ -638,6 +639,12 @@ public class Functions {
                              @DataTypeHint("Boolean") Boolean keepCollapsed) {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.makeValid(geom, keepCollapsed);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.makeValid(geom, false);
         }
     }
 
