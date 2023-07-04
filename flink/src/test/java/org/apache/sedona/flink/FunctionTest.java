@@ -25,6 +25,7 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -781,6 +782,26 @@ public class FunctionTest extends TestBase{
         table = table.select(call(Functions.ST_MakeValid.class.getSimpleName(), $("polygon")));
         Geometry result = (Geometry) first(table).getField(0);
         assertEquals("MULTIPOLYGON (((1 5, 3 3, 1 1, 1 5)), ((5 3, 7 5, 7 1, 5 3)))", result.toString());
+    }
+
+    @Test 
+    public void testMinimumBoundingCircle() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom");
+        table = table.select(call(Functions.ST_MinimumBoundingCircle.class.getSimpleName(), $("geom")));
+        Geometry result = (Geometry) first(table).getField(0);
+        Integer actual = result.getCoordinates().length;
+        Integer expected = BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6 * 4 + 1;
+        assertEquals(actual, expected);
+    }
+
+    @Test 
+    public void testMinimumBoundingCircleWithQuadrantSegments() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom");
+        table = table.select(call(Functions.ST_MinimumBoundingCircle.class.getSimpleName(), $("geom"), 2));
+        Geometry result = (Geometry) first(table).getField(0);
+        Integer actual = result.getCoordinates().length;
+        Integer expected = 2 * 4 + 1;
+        assertEquals(actual, expected);
     }
 
     @Test 

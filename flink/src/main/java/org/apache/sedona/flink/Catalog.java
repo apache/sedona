@@ -112,6 +112,7 @@ public class Catalog {
                 new Functions.ST_LineSubstring(),
                 new Functions.ST_MakePolygon(),
                 new Functions.ST_MakeValid(),
+                new Functions.ST_MinimumBoundingCircle(),
                 new Functions.ST_Multi(),
                 new Functions.ST_Split(),
                 new Functions.ST_S2CellIDs(),
