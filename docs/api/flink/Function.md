@@ -1,3 +1,37 @@
+## GeometryType
+
+Introduction: Returns the type of the geometry as a string. Eg: 'LINESTRING', 'POLYGON', 'MULTIPOINT', etc. This function also indicates if the geometry is measured, by returning a string of the form 'POINTM'.
+
+Format: `GeometryType (A:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'));
+```
+
+Result:
+
+```
+ geometrytype
+--------------
+ LINESTRING
+```
+
+```sql
+SELECT GeometryType(ST_GeomFromText('POINTM(0 0 1)'));
+```
+
+Result:
+
+```
+ geometrytype
+--------------
+ POINTM
+```
+
 ## ST_3DDistance
 
 Introduction: Return the 3-dimensional minimum cartesian distance between A and B
@@ -42,7 +76,7 @@ Introduction: Apply an affine transformation to the given geometry.
 
 ST_Affine has 2 overloaded signatures: 
 
-`ST_Affine(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)` 
+`ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)` 
 
 `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
 
@@ -57,12 +91,12 @@ Based on the invoked function, the following transformation is applied:
 
 If the given geometry is empty, the result is also empty. 
 
-Format: `ST_Affine(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)`  
+Format: `ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)`  
 Format: `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
 
 Since: `1.5.0`
 
-Example:
+Examples:
 
 ```sql
 ST_Affine(geometry, 1, 2, 4, 1, 1, 2, 3, 2, 5, 4, 8, 3)
@@ -74,11 +108,11 @@ Output: `LINESTRING EMPTY`
 
 Input: `POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))`
 
-Output: `POLYGON Z((5 8 16, 7 9 20, 13 16 37, 5 8 16))`
+Output: `POLYGON Z((9 11 11, 11 12 13, 18 16 23, 9 11 11))`
 
 Input: `POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0), (1 0.5, 1 0.75, 1.5 0.75, 1.5 0.5, 1 0.5))`
 
-Output: `POLYGON ((2 6, 4 7, 5 11, 3 10, 2 6), (3 6.5, 3.5 6.75, 4 8.75, 3.5 8.5, 3 6.5))`
+Output: `POLYGON((5 9, 7 10, 8 11, 6 10, 5 9), (6 9.5, 6.5 9.75, 7 10.25, 6.5 10, 6 9.5))`
 
 
 ```sql
@@ -96,6 +130,74 @@ Output: `GEOMETRYCOLLECTION (MULTIPOLYGON (((2 3, 4 5, 5 6, 3 4, 2 3), (3 4, 3.5
 Input: `POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))`
 
 Output: `POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))`
+
+## ST_Angle
+
+Introduction: Compute and return the angle between two vectors represented by the provided points or linestrings.
+
+There are three variants possible for ST_Angle:
+
+`ST_Angle(Geometry point1, Geometry point2, Geometry point3, Geometry point4)`
+Computes the angle formed by vectors represented by point1 - point2 and point3 - point4
+
+`ST_Angle(Geometry point1, Geometry point2, Geometry point3)`
+Computes the angle formed by vectors represented by point2 - point1 and point2 - point3
+
+`ST_Angle(Geometry line1, Geometry line2)`
+Computes the angle formed by vectors S1 - E1 and S2 - E2, where S and E denote start and end points respectively
+
+!!!Note
+    If any other geometry type is provided, ST_Angle throws an IllegalArgumentException.
+    Additionally, if any of the provided geometry is empty, ST_Angle throws an IllegalArgumentException.
+
+!!!Note
+    If a 3D geometry is provided, ST_Angle computes the angle ignoring the z ordinate, equivalent to calling ST_Angle for corresponding 2D geometries.
+
+!!!Tip
+    ST_Angle returns the angle in radian between 0 and 2\Pi. To convert the angle to degrees, use [ST_Degrees](./#st_degrees).
+
+
+Format: `ST_Angle(p1, p2, p3, p4) | ST_Angle(p1, p2, p3) | ST_Angle(line1, line2)`
+
+Since: `1.5.0`
+
+Example:
+
+```sql
+ST_Angle(p1, p2, p3, p4)
+```
+
+Input: `p1: POINT (0 0)`
+
+Input: `p2: POINT (1 1)`
+
+Input: `p3: POINT (1 0)`
+
+Input: `p4: POINT(6 2)`
+
+Output: 0.4048917862850834
+
+```sql
+ST_Angle(p1, p2, p3)
+```
+
+Input: `p1: POINT (1 1)`
+
+Input: `p2: POINT (0 0)`
+
+Input: `p3: POINT(3 2)`
+
+Output: 0.19739555984988044
+
+```sql
+ST_Angle(line1, line2)
+```
+
+Input: `line1: LINESTRING (0 0, 1 1)`
+
+Input: `line2: LINESTRING (0 0, 3 2)`
+
+Output: 0.19739555984988044
 
 ## ST_Area
 
@@ -329,6 +431,86 @@ Input: `MULTILINESTRING((0 0, 10 0, 10 10, 0 10, 0 0),(10 10, 20 10, 20 20, 10 2
 
 Output: `MULTIPOLYGON(((0 0,0 10,10 10,10 0,0 0)),((10 10,10 20,20 20,20 10,10 10)))`
 
+## ST_Centroid
+
+Introduction: Return the centroid point of A
+
+Format: `ST_Centroid (A:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_Centroid(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_ClosestPoint
+
+Introduction: Returns the 2-dimensional point on geom1 that is closest to geom2. This is the first point of the shortest line between the geometries. If using 3D geometries, the Z coordinates will be ignored. If you have a 3D Geometry, you may prefer to use ST_3DClosestPoint.
+It will throw an exception indicates illegal argument if one of the params is an empty geometry.
+
+Format: `ST_ClosestPoint(g1: geomtry, g2: geometry)`
+
+Since: `1.5.0`
+
+Example1:
+```sql
+SELECT ST_AsText( ST_ClosestPoint(g1, g2)) As ptwkt;
+```
+
+Input: `g1: POINT (160 40), g2: LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190)`
+
+Output: `POINT(160 40)`
+
+Input: `g1: LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190), g2: POINT (160 40)`
+
+Output: `POINT(125.75342465753425 115.34246575342466)`
+
+Input: `g1: 'POLYGON ((190 150, 20 10, 160 70, 190 150))', g2: ST_Buffer('POINT(80 160)', 30)`
+
+Output: `POINT(131.59149149528952 101.89887534906197)`
+
+## ST_CollectionExtract
+
+Introduction: Returns a homogeneous multi-geometry from a given geometry collection.
+
+The type numbers are:
+1. POINT
+2. LINESTRING
+3. POLYGON
+
+If the type parameter is omitted a multi-geometry of the highest dimension is returned.
+
+Format: `ST_CollectionExtract (A:geometry)`
+
+Format: `ST_CollectionExtract (A:geometry, type:Int)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+WITH test_data as (
+    ST_GeomFromText(
+        'GEOMETRYCOLLECTION(POINT(40 10), POLYGON((0 0, 0 5, 5 5, 5 0, 0 0)))'
+    ) as geom
+)
+SELECT ST_CollectionExtract(geom) as c1, ST_CollectionExtract(geom, 1) as c2
+FROM test_data
+
+```
+
+Result:
+
+```
++----------------------------------------------------------------------------+
+|c1                                        |c2                               |
++----------------------------------------------------------------------------+
+|MULTIPOLYGON(((0 0, 0 5, 5 5, 5 0, 0 0))) |MULTIPOINT(40 10)                |              |
++----------------------------------------------------------------------------+
+```
+
 ## ST_ConcaveHull
 
 Introduction: Return the Concave Hull of polgyon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
@@ -349,6 +531,20 @@ FROM polygondf
 Input: `Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))`
 
 Output: `POLYGON ((1 2, 2 2, 3 2, 5 0, 4 0, 1 0, 0 0, 1 2))`
+
+## ST_ConvexHull
+
+Introduction: Return the Convex Hull of polgyon A
+
+Format: `ST_ConvexHull (A:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_ConvexHull(polygondf.countyshape)
+FROM polygondf
+```
 
 ## ST_Dimension
 
@@ -427,6 +623,88 @@ SELECT ST_DistanceSpheroid(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromW
 ```
 
 Output: `544430.9411996207`
+
+## ST_Degrees
+
+Introduction: Convert an angle in radian to degrees.
+
+Format: `ST_Degrees(angleInRadian)`
+
+Since: `1.5.0`
+
+Example:
+
+```sql
+SELECT ST_Degrees(0.19739555984988044)
+```
+
+Output: 11.309932474020195
+
+## ST_Difference
+
+Introduction: Return the difference between geometry A and B (return part of geometry A that does not intersect geometry B)
+
+Format: `ST_Difference (A:geometry, B:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_Difference(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((0 -4, 4 -4, 4 4, 0 4, 0 -4))'))
+```
+
+Result:
+
+```
+POLYGON ((0 -3, -3 -3, -3 3, 0 3, 0 -3))
+```
+
+## ST_Dump
+
+Introduction: It expands the geometries. If the geometry is simple (Point, Polygon Linestring etc.) it returns the geometry
+itself, if the geometry is collection or multi it returns record for each of collection components.
+
+Format: `ST_Dump(geom: geometry)`
+
+Since: `v1.5.0`
+
+SQL example:
+```sql
+SELECT ST_Dump(ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))'))
+```
+
+Output: `[POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]`
+
+## ST_DumpPoints
+
+Introduction: Returns list of Points which geometry consists of.
+
+Format: `ST_DumpPoints(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_DumpPoints(ST_GeomFromText('LINESTRING (0 0, 1 1, 1 0)'))
+```
+
+Output: `[POINT (0 0), POINT (0 1), POINT (1 1), POINT (1 0), POINT (0 0)]`
+
+## ST_EndPoint
+
+Introduction: Returns last point of given linestring.
+
+Format: `ST_EndPoint(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_EndPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'))
+```
+
+Output: `POINT(160 170)`
 
 ## ST_Envelope
 
@@ -635,6 +913,20 @@ SELECT ST_GeometryN(ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))'), 1
 
 Output: `POINT (3 4)`
 
+## ST_GeometryType
+
+Introduction: Returns the type of the geometry as a string. EG: 'ST_Linestring', 'ST_Polygon' etc.
+
+Format: `ST_GeometryType (A:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_GeometryType(polygondf.countyshape)
+FROM polygondf
+```
+
 ## ST_HausdorffDistance
 
 Introduction: Returns a discretized (and hence approximate) [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance) between the given 2 geometries. 
@@ -689,6 +981,21 @@ SELECT ST_InteriorRingN(ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1
 ```
 
 Output: `LINEARRING (1 1, 2 1, 2 2, 1 2, 1 1)`
+
+## ST_Intersection
+
+Introduction: Return the intersection geometry of A and B
+
+Format: `ST_Intersection (A:geometry, B:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_Intersection(polygondf.countyshape, polygondf.countyshape)
+FROM polygondf
+```
 
 ## ST_IsClosed
 
@@ -815,6 +1122,157 @@ FROM df
 Input: `MULTIPOINT((10 40), (40 30), (20 20), (30 10))`
 
 Output: `LINESTRING (10 40, 40 30, 20 20, 30 10)`
+
+## ST_LineInterpolatePoint
+
+Introduction: Returns a point interpolated along a line. First argument must be a LINESTRING. Second argument is a Double between 0 and 1 representing fraction of total linestring length the point has to be located.
+
+Format: `ST_LineInterpolatePoint (geom: geometry, fraction: Double)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_LineInterpolatePoint(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.2) as Interpolated
+```
+
+Output:
+```
++-----------------------------------------+
+|Interpolated                             |
++-----------------------------------------+
+|POINT (51.5974135047432 76.5974135047432)|
++-----------------------------------------+
+```
+
+## ST_LineMerge
+
+Introduction: Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.
+
+!!!note
+    Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
+
+Format: `ST_LineMerge (A:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_LineMerge(geometry)
+FROM df
+```
+
+## ST_LineSubstring
+
+Introduction: Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length. Second and third arguments are Double values between 0 and 1. This only works with LINESTRINGs.
+
+Format: `ST_LineSubstring (geom: geometry, startfraction: Double, endfraction: Double)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_LineSubstring(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.333, 0.666) as Substring
+```
+
+Output:
+```
++------------------------------------------------------------------------------------------------+
+|Substring                                                                                       |
++------------------------------------------------------------------------------------------------+
+|LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140.21046313888758)|
++------------------------------------------------------------------------------------------------+
+```
+
+## ST_MakePolygon
+
+Introduction: Function to convert closed linestring to polygon including holes
+
+Format: `ST_MakePolygon(geom: geometry, holes: array<geometry>)`
+
+Since: `v1.5.0`
+
+Example:
+
+Query:
+```sql
+SELECT
+    ST_MakePolygon(
+        ST_GeomFromText('LINESTRING(7 -1, 7 6, 9 6, 9 1, 7 -1)'),
+        ARRAY(ST_GeomFromText('LINESTRING(6 2, 8 2, 8 1, 6 1, 6 2)'))
+    ) AS polygon
+```
+
+Result:
+
+```
++----------------------------------------------------------------+
+|polygon                                                         |
++----------------------------------------------------------------+
+|POLYGON ((7 -1, 7 6, 9 6, 9 1, 7 -1), (6 2, 8 2, 8 1, 6 1, 6 2))|
++----------------------------------------------------------------+
+
+```
+
+## ST_MakeValid
+
+Introduction: Given an invalid geometry, create a valid representation of the geometry.
+
+Collapsed geometries are either converted to empty (keepCollaped=true) or a valid geometry of lower dimension (keepCollapsed=false).
+Default is keepCollapsed=false.
+
+Format: `ST_MakeValid (A:geometry)`
+
+Format: `ST_MakeValid (A:geometry, keepCollapsed:Boolean)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+WITH linestring AS (
+    SELECT ST_GeomFromWKT('LINESTRING(1 1, 1 1)') AS geom
+) SELECT ST_MakeValid(geom), ST_MakeValid(geom, true) FROM linestring
+```
+
+Result:
+```
++------------------+------------------------+
+|st_makevalid(geom)|st_makevalid(geom, true)|
++------------------+------------------------+
+|  LINESTRING EMPTY|             POINT (1 1)|
++------------------+------------------------+
+```
+
+## ST_Multi
+
+Introduction: Returns a MultiGeometry object based on the geometry input.
+ST_Multi is basically an alias for ST_Collect with one geometry.
+
+Format
+
+`ST_Multi(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_Multi(
+    ST_GeomFromText('POINT(1 1)')
+) AS geom
+```
+
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|MULTIPOINT (1 1)                                               |
++---------------------------------------------------------------+
+```
+
 
 ## ST_Normalize
 

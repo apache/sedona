@@ -85,6 +85,28 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testClosestPoint() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (160 40)') AS g1, ST_GeomFromWKT('POINT (10 10)') as g2");
+        table = table.select(call(Functions.ST_ClosestPoint.class.getSimpleName(), $("g1"), $("g2")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("POINT (160 40)", result.toString());
+    }   
+    public void testCentroid() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('POLYGON ((2 2, 0 0, 2 0, 0 2, 2 2))') as geom");
+        Table resultTable = polygonTable.select(call(Functions.ST_Centroid.class.getSimpleName(), $("geom")));
+        Geometry result = (Geometry) first(resultTable).getField(0);
+        assertEquals("POINT (1 1)", result.toString());
+    }
+
+    @Test
+    public void testCollectionExtract() {
+        Table collectionTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('GEOMETRYCOLLECTION(POINT(0 0), LINESTRING(1 1, 2 2))') as collection");
+        Table resultTable = collectionTable.select(call(Functions.ST_CollectionExtract.class.getSimpleName(), $("collection")));
+        Geometry result = (Geometry) first(resultTable).getField(0);
+        assertEquals("MULTILINESTRING ((1 1, 2 2))", result.toString());
+    }
+
+    @Test
     public void testConcaveHull() {
         Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))') as geom");
         Table concaveHullPolygonTable = polygonTable.select(call(Functions.ST_ConcaveHull.class.getSimpleName(), $("geom"), 1.0, true));
@@ -95,6 +117,48 @@ public class FunctionTest extends TestBase{
         Table concaveHullPolygonTable2 = polygonTable2.select(call(Functions.ST_ConcaveHull.class.getSimpleName(), $("geom"), 1.0));
         Geometry result2 = (Geometry) first(concaveHullPolygonTable2).getField(0);
         assertEquals("POLYGON ((0 0, 1 1, 1 0, 0 0))", result2.toString());
+    }
+
+    @Test
+    public void testConvexHull() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))') as geom");
+        Table concaveHullPolygonTable = polygonTable.select(call(Functions.ST_ConvexHull.class.getSimpleName(), $("geom")));
+        Geometry result = (Geometry) first(concaveHullPolygonTable).getField(0);
+        assertEquals("POLYGON ((0 0, 1 2, 3 2, 5 0, 0 0))", result.toString());
+    }
+
+    @Test
+    public void testDifference() {
+        Table lineTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(50 100, 50 200)') AS g1, ST_GeomFromWKT('LINESTRING(50 50, 50 150)') as g2");
+        Table resultTable = lineTable.select(call(Functions.ST_Difference.class.getSimpleName(), $("g1"), $("g2")));
+        Geometry result = (Geometry) first(resultTable).getField(0);
+        assertEquals("LINESTRING (50 150, 50 200)", result.toString());
+    }
+
+    @Test
+    public void testDump() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTIPOINT ((0 0), (1 1))') AS geom");
+        table = table.select(call(Functions.ST_Dump.class.getSimpleName(), $("geom")));
+        Geometry[] result = (Geometry[]) first(table).getField(0);
+        assertEquals("POINT (0 0)", result[0].toString());
+        assertEquals("POINT (1 1)", result[1].toString());
+    }
+
+    @Test
+    public void testDumpPoints() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom");
+        table = table.select(call(Functions.ST_DumpPoints.class.getSimpleName(), $("geom")));
+        Geometry[] result = (Geometry[]) first(table).getField(0);
+        assertEquals("POINT (0 0)", result[0].toString());
+        assertEquals("POINT (1 0)", result[1].toString());
+    }
+
+    @Test
+    public void testEndPoint() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(1 1, 2 2, 3 3)') AS geom");
+        table = table.select(call(Functions.ST_EndPoint.class.getSimpleName(), $("geom")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("POINT (3 3)", result.toString());
     }
 
     @Test
@@ -110,6 +174,14 @@ public class FunctionTest extends TestBase{
         Table flippedTable = pointTable.select(call(Functions.ST_FlipCoordinates.class.getSimpleName(), $(pointColNames[0])));
         Geometry result = (Geometry) first(flippedTable).getField(0);
         assertEquals("POINT (-117.99 32.01)", result.toString());
+    }
+
+    @Test
+    public void testSTGeometryType() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(1 1, 2 2, 3 3)') AS geom");
+        table = table.select(call(Functions.ST_GeometryType.class.getSimpleName(), $("geom")));
+        String result = (String) first(table).getField(0);
+        assertEquals("ST_LineString", result.toString());
     }
 
     @Test
@@ -153,7 +225,6 @@ public class FunctionTest extends TestBase{
 
     }
 
-
     @Test
     public void testDimension(){
         Table pointTable = tableEnv.sqlQuery(
@@ -164,6 +235,7 @@ public class FunctionTest extends TestBase{
                 "SELECT ST_Dimension(ST_GeomFromWKT('GEOMETRYCOLLECTION(MULTIPOLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)), ((2 2, 2 3, 3 3, 3 2, 2 2))), MULTIPOINT(6 6, 7 7, 8 8))'))");
         assertEquals(2, first(pointTable).getField(0));
     }
+
     @Test
     public void testDistance() {
         Table pointTable = createPointTable(testDataSize);
@@ -205,6 +277,15 @@ public class FunctionTest extends TestBase{
         assertEquals(Math.sqrt(3), first(pointTable).getField(0));
     }
 
+
+    @Test
+    public void testIntersection() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (0 0)') AS g1, ST_GeomFromWKT('LINESTRING ( 0 0, 0 2 )') as g2");
+        table = table.select(call(Functions.ST_Intersection.class.getSimpleName(), $("g1"), $("g2")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("POINT (0 0)", result.toString());
+    }
+
     @Test
     public void testLength() {
         Table polygonTable = createPolygonTable(1);
@@ -221,6 +302,14 @@ public class FunctionTest extends TestBase{
         Double expected = 20037508.342789244;
         Double actual = (Double) first(tbl).getField(0);
         assertEquals(expected, actual, 0.1);
+    }
+
+    @Test
+    public void testLineInterpolatePoint() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 2 0)') AS line");
+        table = table.select(call(Functions.ST_LineInterpolatePoint.class.getSimpleName(), $("line"), 0.5));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("POINT (1 0)", result.toString());
     }
 
     @Test
@@ -248,6 +337,17 @@ public class FunctionTest extends TestBase{
                 call("ST_GeoHash", $(pointColNames[0]), 5)
         );
         assertEquals(first(pointTable).getField(0), "s0000");
+    }
+
+    @Test
+    public void testGeometryType() {
+        Table pointTable = tableEnv.sqlQuery(
+                        "SELECT GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))");
+        assertEquals("LINESTRING", first(pointTable).getField(0));
+
+        pointTable = tableEnv.sqlQuery(
+                "SELECT GeometryType(ST_GeomFromText('POINTM(2.0 3.5 10.2)'))");
+        assertEquals("POINTM", first(pointTable).getField(0));
     }
 
     @Test
@@ -634,6 +734,55 @@ public class FunctionTest extends TestBase{
         assertEquals("LINESTRING (10 40, 40 30, 20 20, 30 10)", first(pointTable).getField(0).toString());
     }
 
+    @Test 
+    public void testLineMerge() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTILINESTRING((10 160, 60 120), (120 140, 60 120), (120 140, 180 120))') AS multiline");
+        table = table.select(call(Functions.ST_LineMerge.class.getSimpleName(), $("multiline")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("LINESTRING (10 160, 60 120, 120 140, 180 120)", result.toString());
+    }
+
+    @Test 
+    public void testLineSubString() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 2 0)') AS line");
+        table = table.select(call(Functions.ST_LineSubstring.class.getSimpleName(), $("line"), 0.5, 1.0));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("LINESTRING (1 0, 2 0)", result.toString());
+    }
+
+    @Test 
+    public void testMakePolygon() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)') AS line");
+        table = table.select(call(Functions.ST_MakePolygon.class.getSimpleName(), $("line")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("POLYGON ((0 0, 1 0, 1 1, 0 0))", result.toString());
+    }
+
+    @Test 
+    public void testMakePolygonWithHoles() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromText('LINESTRING (0 0, 1 0, 1 1, 0 0)') AS line," +
+                                        "array[ST_GeomFromText('LINESTRING (0.5 0.1, 0.7 0.1, 0.7 0.3, 0.5 0.1)')] AS holes");
+        table = table.select(call(Functions.ST_MakePolygon.class.getSimpleName(), $("line"), $("holes")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("POLYGON ((0 0, 1 0, 1 1, 0 0), (0.5 0.1, 0.7 0.1, 0.7 0.3, 0.5 0.1))", result.toString());
+    }
+
+    @Test 
+    public void testMakeValid() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((1 5, 1 1, 3 3, 5 3, 7 1, 7 5, 5 3, 3 3, 1 5))') AS polygon");
+        table = table.select(call(Functions.ST_MakeValid.class.getSimpleName(), $("polygon")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("MULTIPOLYGON (((1 5, 3 3, 1 1, 1 5)), ((5 3, 7 5, 7 1, 5 3)))", result.toString());
+    }
+
+    @Test 
+    public void testMulti() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (0 0)') AS geom");
+        table = table.select(call(Functions.ST_Multi.class.getSimpleName(), $("geom")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("MULTIPOINT ((0 0))", result.toString());
+    }
+
     @Test
     public void testSplit() {
         Table pointTable = tableEnv.sqlQuery("SELECT ST_Split(ST_GeomFromWKT('LINESTRING (0 0, 1.5 1.5, 2 2)'), ST_GeomFromWKT('MULTIPOINT (0.5 0.5, 1 1)'))");
@@ -755,12 +904,36 @@ public class FunctionTest extends TestBase{
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void testAffine() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))')" + " AS " + polygonColNames[0]);
+        Table polyTableDefault = polyTable.select(call(Functions.ST_Affine.class.getSimpleName(), $(polygonColNames[0]), 1, 2, 1, 2, 1, 2)).as(polygonColNames[0]).select(call(Functions.ST_AsText.class.getSimpleName(), $(polygonColNames[0])));
+        polyTable = polyTable.select(call(Functions.ST_Affine.class.getSimpleName(), $(polygonColNames[0]), 1, 2, 4, 1, 1, 2, 3, 2, 5, 4, 8, 3)).as(polygonColNames[0]).select(call(Functions.ST_AsText.class.getSimpleName(), $(polygonColNames[0])));
+        String expectedDefault = "POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))";
+        String actualDefault = (String) first(polyTableDefault).getField(0);
+        String expected = "POLYGON Z((9 11 11, 11 12 13, 18 16 23, 9 11 11))";
+        String actual = (String) first(polyTable).getField(0);
+        assertEquals(expected, actual);
+        assertEquals(expectedDefault, actualDefault);
+    }
+
+    @Test
     public void testBoundingDiagonal() {
         Table polyTable = tableEnv.sqlQuery("SELECT ST_BoundingDiagonal(ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'))" +" AS " + polygonColNames[0]);
         polyTable = polyTable.select(call(Functions.ST_AsText.class.getSimpleName(), $(polygonColNames[0])));
         String expected = "LINESTRING (1 0, 2 1)";
         String actual = (String) first(polyTable).getField(0);
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testAngle() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_Angle(ST_GeomFromWKT('LINESTRING (0 0, 1 1)'), ST_GeomFromWKT('LINESTRING (0 0, 3 2)'))" + " AS " + polygonColNames[0]);
+        polyTable = polyTable.select(call(Functions.ST_Degrees.class.getSimpleName(), $(polygonColNames[0])));
+        Double expected = 11.309932474020195;
+        Double actual = (Double) first(polyTable).getField(0);
+        assertEquals(expected, actual, 1e-9);
+
     }
 
     @Test

@@ -36,6 +36,7 @@ object Catalog {
 
   val expressions: Seq[FunctionDescription] = Seq(
     // Expression for vectors
+    function[GeometryType](),
     function[ST_PointFromText](),
     function[ST_PolygonFromText](),
     function[ST_LineStringFromText](),
@@ -99,6 +100,7 @@ object Catalog {
     function[ST_Y](),
     function[ST_Z](),
     function[ST_StartPoint](),
+    function[ST_ClosestPoint](),
     function[ST_Boundary](),
     function[ST_MinimumBoundingRadius](),
     function[ST_MinimumBoundingCircle](BufferParameters.DEFAULT_QUADRANT_SEGMENTS),
@@ -155,7 +157,10 @@ object Catalog {
     function[ST_Translate](0.0),
     function[ST_FrechetDistance](),
     function[ST_Affine](null, null, null, null, null, null),
+    function[ST_Affine](),
     function[ST_BoundingDiagonal](),
+    function[ST_Angle](),
+    function[ST_Degrees](),
     function[ST_HausdorffDistance](-1),
     // Expression for rasters
     function[RS_NormalizedDifference](),
