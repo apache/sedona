@@ -1000,4 +1000,18 @@ public class Functions {
     public static Double hausdorffDistance(Geometry g1, Geometry g2) throws Exception{
         return GeomUtils.getHausdorffDistance(g1, g2, -1);
     }
+
+    public static int coordDim(Geometry geom) {
+        int dimensions = 0;
+        Coordinate coord = geom.getCoordinate();
+        if(!Double.isNaN(coord.getX()))
+            dimensions++;
+        if(!Double.isNaN(coord.getY()))
+            dimensions++;
+        if(!Double.isNaN(coord.getZ()))
+            dimensions++;
+        if(!Double.isNaN(coord.getM()))
+            dimensions++;
+        return dimensions;
+    }
 }

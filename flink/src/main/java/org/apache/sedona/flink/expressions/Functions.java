@@ -687,4 +687,12 @@ public class Functions {
             return org.apache.sedona.common.Functions.hausdorffDistance(geom1, geom2);
         }
     }
+
+    public static class ST_CoordDim extends ScalarFunction {
+        @DataTypeHint("Integer")
+        public Integer eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.coordDim(geom);
+        }
+    }
 }

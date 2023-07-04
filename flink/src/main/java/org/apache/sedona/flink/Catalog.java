@@ -104,6 +104,7 @@ public class Catalog {
                 new Functions.ST_Affine(),
                 new Functions.ST_BoundingDiagonal(),
                 new Functions.ST_HausdorffDistance(),
+                new Functions.ST_CoordDim(),
         };
     }
 

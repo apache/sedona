@@ -1162,3 +1162,9 @@ class TestPredicateJoin(TestBase):
         actual_default = actual_df_default.take(1)[0][0]
         assert expected == actual
         assert expected == actual_default
+
+    def test_st_coord_dim(self):
+
+        point_df = self.spark.sql("SELECT ST_GeomFromWkt('POINT(7 8 6)') AS geom")
+        point_row = [pt_row[0] for pt_row in point_df.selectExpr("ST_CoordDim(geo)").collect()]
+        assert(point_row == [3])

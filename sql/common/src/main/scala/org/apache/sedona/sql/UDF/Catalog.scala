@@ -46,6 +46,7 @@ object Catalog {
     function[ST_GeomFromGeoJSON](),
     function[ST_GeomFromGML](),
     function[ST_GeomFromKML](),
+    function[ST_CoordDim](),
     function[ST_Point](),
     function[ST_PointZ](0),
     function[ST_PolygonFromEnvelope](),

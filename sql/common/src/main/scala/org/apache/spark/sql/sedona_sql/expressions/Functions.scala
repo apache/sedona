@@ -1038,3 +1038,16 @@ case class ST_HausdorffDistance(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+/**
+ * Return the number of ddimensions in geometry.
+ *
+ * @param inputExpressions
+ * */
+case class ST_CoordDim(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.coordDim _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
