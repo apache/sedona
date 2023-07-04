@@ -431,6 +431,86 @@ Input: `MULTILINESTRING((0 0, 10 0, 10 10, 0 10, 0 0),(10 10, 20 10, 20 20, 10 2
 
 Output: `MULTIPOLYGON(((0 0,0 10,10 10,10 0,0 0)),((10 10,10 20,20 20,20 10,10 10)))`
 
+## ST_Centroid
+
+Introduction: Return the centroid point of A
+
+Format: `ST_Centroid (A:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_Centroid(polygondf.countyshape)
+FROM polygondf
+```
+
+## ST_ClosestPoint
+
+Introduction: Returns the 2-dimensional point on geom1 that is closest to geom2. This is the first point of the shortest line between the geometries. If using 3D geometries, the Z coordinates will be ignored. If you have a 3D Geometry, you may prefer to use ST_3DClosestPoint.
+It will throw an exception indicates illegal argument if one of the params is an empty geometry.
+
+Format: `ST_ClosestPoint(g1: geomtry, g2: geometry)`
+
+Since: `1.5.0`
+
+Example1:
+```sql
+SELECT ST_AsText( ST_ClosestPoint(g1, g2)) As ptwkt;
+```
+
+Input: `g1: POINT (160 40), g2: LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190)`
+
+Output: `POINT(160 40)`
+
+Input: `g1: LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190), g2: POINT (160 40)`
+
+Output: `POINT(125.75342465753425 115.34246575342466)`
+
+Input: `g1: 'POLYGON ((190 150, 20 10, 160 70, 190 150))', g2: ST_Buffer('POINT(80 160)', 30)`
+
+Output: `POINT(131.59149149528952 101.89887534906197)`
+
+## ST_CollectionExtract
+
+Introduction: Returns a homogeneous multi-geometry from a given geometry collection.
+
+The type numbers are:
+1. POINT
+2. LINESTRING
+3. POLYGON
+
+If the type parameter is omitted a multi-geometry of the highest dimension is returned.
+
+Format: `ST_CollectionExtract (A:geometry)`
+
+Format: `ST_CollectionExtract (A:geometry, type:Int)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+WITH test_data as (
+    ST_GeomFromText(
+        'GEOMETRYCOLLECTION(POINT(40 10), POLYGON((0 0, 0 5, 5 5, 5 0, 0 0)))'
+    ) as geom
+)
+SELECT ST_CollectionExtract(geom) as c1, ST_CollectionExtract(geom, 1) as c2
+FROM test_data
+
+```
+
+Result:
+
+```
++----------------------------------------------------------------------------+
+|c1                                        |c2                               |
++----------------------------------------------------------------------------+
+|MULTIPOLYGON(((0 0, 0 5, 5 5, 5 0, 0 0))) |MULTIPOINT(40 10)                |              |
++----------------------------------------------------------------------------+
+```
+
 ## ST_ConcaveHull
 
 Introduction: Return the Concave Hull of polgyon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
@@ -451,6 +531,20 @@ FROM polygondf
 Input: `Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))`
 
 Output: `POLYGON ((1 2, 2 2, 3 2, 5 0, 4 0, 1 0, 0 0, 1 2))`
+
+## ST_ConvexHull
+
+Introduction: Return the Convex Hull of polgyon A
+
+Format: `ST_ConvexHull (A:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_ConvexHull(polygondf.countyshape)
+FROM polygondf
+```
 
 ## ST_Dimension
 
@@ -545,6 +639,72 @@ SELECT ST_Degrees(0.19739555984988044)
 ```
 
 Output: 11.309932474020195
+
+## ST_Difference
+
+Introduction: Return the difference between geometry A and B (return part of geometry A that does not intersect geometry B)
+
+Format: `ST_Difference (A:geometry, B:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_Difference(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((0 -4, 4 -4, 4 4, 0 4, 0 -4))'))
+```
+
+Result:
+
+```
+POLYGON ((0 -3, -3 -3, -3 3, 0 3, 0 -3))
+```
+
+## ST_Dump
+
+Introduction: It expands the geometries. If the geometry is simple (Point, Polygon Linestring etc.) it returns the geometry
+itself, if the geometry is collection or multi it returns record for each of collection components.
+
+Format: `ST_Dump(geom: geometry)`
+
+Since: `v1.5.0`
+
+SQL example:
+```sql
+SELECT ST_Dump(ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))'))
+```
+
+Output: `[POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]`
+
+## ST_DumpPoints
+
+Introduction: Returns list of Points which geometry consists of.
+
+Format: `ST_DumpPoints(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_DumpPoints(ST_GeomFromText('LINESTRING (0 0, 1 1, 1 0)'))
+```
+
+Output: `[POINT (0 0), POINT (0 1), POINT (1 1), POINT (1 0), POINT (0 0)]`
+
+## ST_EndPoint
+
+Introduction: Returns last point of given linestring.
+
+Format: `ST_EndPoint(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_EndPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'))
+```
+
+Output: `POINT(160 170)`
 
 ## ST_Envelope
 
@@ -753,6 +913,20 @@ SELECT ST_GeometryN(ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))'), 1
 
 Output: `POINT (3 4)`
 
+## ST_GeometryType
+
+Introduction: Returns the type of the geometry as a string. EG: 'ST_Linestring', 'ST_Polygon' etc.
+
+Format: `ST_GeometryType (A:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_GeometryType(polygondf.countyshape)
+FROM polygondf
+```
+
 ## ST_HausdorffDistance
 
 Introduction: Returns a discretized (and hence approximate) [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance) between the given 2 geometries. 
@@ -807,6 +981,21 @@ SELECT ST_InteriorRingN(ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1
 ```
 
 Output: `LINEARRING (1 1, 2 1, 2 2, 1 2, 1 1)`
+
+## ST_Intersection
+
+Introduction: Return the intersection geometry of A and B
+
+Format: `ST_Intersection (A:geometry, B:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_Intersection(polygondf.countyshape, polygondf.countyshape)
+FROM polygondf
+```
 
 ## ST_IsClosed
 
@@ -933,6 +1122,28 @@ FROM df
 Input: `MULTIPOINT((10 40), (40 30), (20 20), (30 10))`
 
 Output: `LINESTRING (10 40, 40 30, 20 20, 30 10)`
+
+## ST_LineInterpolatePoint
+
+Introduction: Returns a point interpolated along a line. First argument must be a LINESTRING. Second argument is a Double between 0 and 1 representing fraction of total linestring length the point has to be located.
+
+Format: `ST_LineInterpolatePoint (geom: geometry, fraction: Double)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_LineInterpolatePoint(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.2) as Interpolated
+```
+
+Output:
+```
++-----------------------------------------+
+|Interpolated                             |
++-----------------------------------------+
+|POINT (51.5974135047432 76.5974135047432)|
++-----------------------------------------+
+```
 
 ## ST_Normalize
 

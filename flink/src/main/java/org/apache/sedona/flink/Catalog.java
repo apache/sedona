@@ -16,6 +16,8 @@ package org.apache.sedona.flink;
 import org.apache.flink.table.functions.UserDefinedFunction;
 import org.apache.sedona.flink.expressions.*;
 
+import scala.Function;
+
 public class Catalog {
     public static UserDefinedFunction[] getFuncs() {
         return new UserDefinedFunction[]{
@@ -42,15 +44,26 @@ public class Catalog {
                 new Functions.ST_Azimuth(),
                 new Functions.ST_Boundary(),
                 new Functions.ST_Buffer(),
+                new Functions.ST_ClosestPoint(),
+                new Functions.ST_Centroid(),
+                new Functions.ST_CollectionExtract(),
                 new Functions.ST_ConcaveHull(),
+                new Functions.ST_ConvexHull(),
                 new Functions.ST_Envelope(),
+                new Functions.ST_Difference(),
                 new Functions.ST_Dimension(),
                 new Functions.ST_Distance(),
                 new Functions.ST_DistanceSphere(),
                 new Functions.ST_DistanceSpheroid(),
                 new Functions.ST_3DDistance(),
+                new Functions.ST_Dump(),
+                new Functions.ST_DumpPoints(),
+                new Functions.ST_EndPoint(),
+                new Functions.ST_GeometryType(),
+                new Functions.ST_Intersection(),
                 new Functions.ST_Length(),
                 new Functions.ST_LengthSpheroid(),
+                new Functions.ST_LineInterpolatePoint(),
                 new Functions.ST_Transform(),
                 new Functions.ST_FlipCoordinates(),
                 new Functions.ST_GeoHash(),

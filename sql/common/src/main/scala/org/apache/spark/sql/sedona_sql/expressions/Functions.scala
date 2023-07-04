@@ -601,6 +601,14 @@ case class ST_SetPoint(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_ClosestPoint(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.closestPoint _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_IsRing(inputExpressions: Seq[Expression])
   extends InferredExpression(ST_IsRing.isRing _) {
 
@@ -1036,7 +1044,7 @@ case class ST_BoundingDiagonal(inputExpressions: Seq[Expression])
 }
 
 case class ST_HausdorffDistance(inputExpressions: Seq[Expression])
-  extends InferredExpression(inferrableFunction3(Functions.hausdorffDistance)) {
+  extends InferredExpression(inferrableFunction3(Functions.hausdorffDistance), inferrableFunction2(Functions.hausdorffDistance)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -1062,4 +1070,3 @@ case class ST_Degrees(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
-
