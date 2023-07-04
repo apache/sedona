@@ -210,8 +210,8 @@ object st_functions extends DataFrameAPI {
   def ST_PointOnSurface(geometry: Column): Column = wrapExpression[ST_PointOnSurface](geometry)
   def ST_PointOnSurface(geometry: String): Column = wrapExpression[ST_PointOnSurface](geometry)
 
-  def ST_PrecisionReduce(geometry: Column, precision: Column): Column = wrapExpression[ST_PrecisionReduce](geometry, precision)
-  def ST_PrecisionReduce(geometry: String, precision: Int): Column = wrapExpression[ST_PrecisionReduce](geometry, precision)
+  def ST_ReducePrecision(geometry: Column, precision: Column): Column = wrapExpression[ST_ReducePrecision](geometry, precision)
+  def ST_ReducePrecision(geometry: String, precision: Int): Column = wrapExpression[ST_ReducePrecision](geometry, precision)
 
   def ST_RemovePoint(lineString: Column, index: Column): Column = wrapExpression[ST_RemovePoint](lineString, index)
   def ST_RemovePoint(lineString: String, index: Int): Column = wrapExpression[ST_RemovePoint](lineString, index)
