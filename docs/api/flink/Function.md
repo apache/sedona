@@ -676,6 +676,36 @@ SELECT ST_Dump(ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))'
 
 Output: `[POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]`
 
+## ST_DumpPoints
+
+Introduction: Returns list of Points which geometry consists of.
+
+Format: `ST_DumpPoints(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_DumpPoints(ST_GeomFromText('LINESTRING (0 0, 1 1, 1 0)'))
+```
+
+Output: `[POINT (0 0), POINT (0 1), POINT (1 1), POINT (1 0), POINT (0 0)]`
+
+## ST_EndPoint
+
+Introduction: Returns last point of given linestring.
+
+Format: `ST_EndPoint(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_EndPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'))
+```
+
+Output: `POINT(160 170)`
+
 ## ST_Envelope
 
 Introduction: Return the envelop boundary of A
@@ -883,6 +913,20 @@ SELECT ST_GeometryN(ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))'), 1
 
 Output: `POINT (3 4)`
 
+## ST_GeometryType
+
+Introduction: Returns the type of the geometry as a string. EG: 'ST_Linestring', 'ST_Polygon' etc.
+
+Format: `ST_GeometryType (A:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_GeometryType(polygondf.countyshape)
+FROM polygondf
+```
+
 ## ST_HausdorffDistance
 
 Introduction: Returns a discretized (and hence approximate) [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance) between the given 2 geometries. 
@@ -937,6 +981,21 @@ SELECT ST_InteriorRingN(ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1
 ```
 
 Output: `LINEARRING (1 1, 2 1, 2 2, 1 2, 1 1)`
+
+## ST_Intersection
+
+Introduction: Return the intersection geometry of A and B
+
+Format: `ST_Intersection (A:geometry, B:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_Intersection(polygondf.countyshape, polygondf.countyshape)
+FROM polygondf
+```
 
 ## ST_IsClosed
 
@@ -1063,6 +1122,28 @@ FROM df
 Input: `MULTIPOINT((10 40), (40 30), (20 20), (30 10))`
 
 Output: `LINESTRING (10 40, 40 30, 20 20, 30 10)`
+
+## ST_LineInterpolatePoint
+
+Introduction: Returns a point interpolated along a line. First argument must be a LINESTRING. Second argument is a Double between 0 and 1 representing fraction of total linestring length the point has to be located.
+
+Format: `ST_LineInterpolatePoint (geom: geometry, fraction: Double)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_LineInterpolatePoint(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.2) as Interpolated
+```
+
+Output:
+```
++-----------------------------------------+
+|Interpolated                             |
++-----------------------------------------+
+|POINT (51.5974135047432 76.5974135047432)|
++-----------------------------------------+
+```
 
 ## ST_LineMerge
 
@@ -1191,6 +1272,7 @@ Result:
 |MULTIPOINT (1 1)                                               |
 +---------------------------------------------------------------+
 ```
+
 
 ## ST_Normalize
 
