@@ -1388,7 +1388,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
     When("Using ST_MinimumBoundingCircle function")
 
-    val circleTable = geometryTable.selectExpr("ST_MinimumBoundingCircle(geom) as geom")
+    val circleTable = geometryTable.selectExpr("ST_MinimumBoundingCircle(geom, 8) as geom")
     val circleTableWithSeg = geometryTable.selectExpr("ST_MinimumBoundingCircle(geom, 1) as geom")
 
     Then("Result should match List of circles")
