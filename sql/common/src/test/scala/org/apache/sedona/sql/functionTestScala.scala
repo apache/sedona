@@ -23,6 +23,7 @@ import org.apache.commons.codec.binary.Hex
 import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.catalyst.expressions.{GenericRow, GenericRowWithSchema}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.sedona_sql.expressions.ST_Degrees
 import org.apache.spark.sql.{DataFrame, Row}
 import org.geotools.referencing.CRS
 import org.junit.Assert.assertEquals
@@ -1912,6 +1913,22 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
   }
 
+  it("should pass ST_ClosestPoint") {
+    val geomTestCases = Map(
+      ("'POINT (160 40)'", "'LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190)'") -> "POINT (160 40)",
+      ("'LINESTRING (0 0, 100 0)'", "'LINESTRING (0 0, 50 50, 100 0)'") -> "POINT (0 0)"
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val g1 = geom._1
+      val g2 = geom._2
+      val df = sparkSession.sql(s"SELECT ST_ClosestPoint(ST_GeomFromWKT($g1), ST_GeomFromWKT($g2))")
+      val actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText
+      val expected = expectedResult
+      assertEquals(expected, actual)
+
+    }
+  }
+
   it("Should pass ST_AreaSpheroid") {
     val geomTestCases = Map(
       ("'POINT (51.3168 -0.56)'") -> "0.0",
@@ -2017,16 +2034,15 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       val actual = df.take(1)(0).get(0).asInstanceOf[Double]
       val expected = expectedResult
       assertEquals(expected, actual, 1e-9)
-
     }
   }
 
   it ("should pass ST_Affine") {
     val geomTestCases = Map (
-      ("'POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))'")-> ("'POLYGON Z((5 8 16, 7 9 20, 13 16 37, 5 8 16))'", "'POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))'"),
+      ("'POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))'")-> ("'POLYGON Z((9 11 11, 11 12 13, 18 16 23, 9 11 11))'", "'POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))'"),
       ("'LINESTRING EMPTY'") -> ("'LINESTRING EMPTY'", "'LINESTRING EMPTY'"),
       ("'GEOMETRYCOLLECTION (MULTIPOLYGON (((1 0, 1 1, 2 1, 2 0, 1 0), (1 0.5, 1 0.75, 1.5 0.75, 1.5 0.5, 1 0.5)), ((5 0, 5 5, 7 5, 7 0, 5 0))), POINT (10 10))'")->
-                                                    ("'GEOMETRYCOLLECTION (MULTIPOLYGON (((2 6, 4 7, 5 11, 3 10, 2 6), (3 6.5, 3.5 6.75, 4 8.75, 3.5 8.5, 3 6.5)), ((6 22, 16 27, 18 35, 8 30, 6 22))), POINT (31 52))'",
+                                                    ("'GEOMETRYCOLLECTION (MULTIPOLYGON (((5 9, 7 10, 8 11, 6 10, 5 9), (6 9.5, 6.5 9.75, 7 10.25, 6.5 10, 6 9.5)), ((9 13, 19 18, 21 20, 11 15, 9 13))), POINT (34 28))'",
                                                     "'GEOMETRYCOLLECTION (MULTIPOLYGON (((2 3, 4 5, 5 6, 3 4, 2 3), (3 4, 3.5 4.5, 4 5, 3.5 4.5, 3 4)), ((6 7, 16 17, 18 19, 8 9, 6 7))), POINT (31 32))'")
     )
     for (((geom), expectedResult) <- geomTestCases) {
@@ -2045,7 +2061,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   it ("should pass ST_BoundingDiagonal") {
     val geomTestCases = Map (
-      ("'POINT (10 10)'")-> "'LINESTRING (10 10, 10 10)'",
+      ("'POINT (10 10)'") -> "'LINESTRING (10 10, 10 10)'",
       ("'POLYGON ((1 1 1, 4 4 4, 0 9 3, 0 9 9, 1 1 1))'") -> "'LINESTRING Z(0 1 1, 4 9 9)'",
       ("'GEOMETRYCOLLECTION (MULTIPOLYGON (((1 1, 1 -1, 2 2, 2 9, 9 1, 1 1)), ((5 5, 4 4, 2 2 , 5 5))), POINT (-1 0))'") -> "'LINESTRING (-1 -1, 9 9)'"
     )
@@ -2054,6 +2070,67 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       val actual = df.take(1)(0).get(0).asInstanceOf[String]
       val expected = df.take(1)(0).get(1).asInstanceOf[String]
       assertEquals(expected, actual)
+    }
+  }
+
+  it ("should pass ST_Angle - 4 points") {
+    val geomTestCases = Map (
+      ("'POINT (0 0)'", "'POINT (1 1)'", "'POINT (1 0)'", "'POINT (6 2)'") -> (0.4048917862850834, 23.198590513648185)
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val p1 = geom._1
+      val p2 = geom._2
+      val p3 = geom._3
+      val p4 = geom._4
+      val df = sparkSession.sql(s"SELECT ST_Angle(ST_GeomFromWKT($p1), ST_GeomFromWKT($p2), ST_GeomFromWKT($p3), ST_GeomFromWKT($p4)) AS angleInRadian")
+      val expectedRadian = expectedResult._1
+      val expectedDegrees = expectedResult._2
+
+      val actualRadian = df.take(1)(0).get(0).asInstanceOf[Double]
+      val actualDegrees = df.selectExpr("ST_Degrees(angleInRadian)").take(1)(0).get(0).asInstanceOf[Double]
+
+      assertEquals(expectedRadian, actualRadian, 1e-9)
+      assertEquals(expectedDegrees, actualDegrees, 1e-9)
+    }
+  }
+
+  it ("should pass ST_Angle - 3 points") {
+    val geomTestCases = Map(
+      ("'POINT (1 1)'", "'POINT (0 0)'", "'POINT (3 2)'") -> (0.19739555984988044, 11.309932474020195)
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val p1 = geom._1
+      val p2 = geom._2
+      val p3 = geom._3
+      val df = sparkSession.sql(s"SELECT ST_Angle(ST_GeomFromWKT($p1), ST_GeomFromWKT($p2), ST_GeomFromWKT($p3)) AS angleInRadian")
+      val expectedRadian = expectedResult._1
+      val expectedDegrees = expectedResult._2
+
+      val actualRadian = df.take(1)(0).get(0).asInstanceOf[Double]
+      val actualDegrees = df.selectExpr("ST_Degrees(angleInRadian)").take(1)(0).get(0).asInstanceOf[Double]
+
+      assertEquals(expectedRadian, actualRadian, 1e-9)
+      assertEquals(expectedDegrees, actualDegrees, 1e-9)
+    }
+  }
+
+  it ("should pass ST_Angle - 2 lines") {
+    val geomTestCases = Map(
+      ("'LINESTRING (0 0, 1 1)'", "'LINESTRING (0 0, 3 2)'") -> (0.19739555984988044, 11.309932474020195)
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val p1 = geom._1
+      val p2 = geom._2
+
+      val df = sparkSession.sql(s"SELECT ST_Angle(ST_GeomFromWKT($p1), ST_GeomFromWKT($p2)) AS angleInRadian")
+      val expectedRadian = expectedResult._1
+      val expectedDegrees = expectedResult._2
+
+      val actualRadian = df.take(1)(0).get(0).asInstanceOf[Double]
+      val actualDegrees = df.selectExpr("ST_Degrees(angleInRadian)").take(1)(0).get(0).asInstanceOf[Double]
+
+      assertEquals(expectedRadian, actualRadian, 1e-9)
+      assertEquals(expectedDegrees, actualDegrees, 1e-9)
     }
   }
 
@@ -2078,6 +2155,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
   }
 
+
   it("Passed ST_CoordDim with 3D point") {
     val test = sparkSession.sql("SELECT ST_CoordDim(ST_GeomFromWKT('POINT(1 1 2)'))")
     assert(test.take(1)(0).get(0).asInstanceOf[Int] == 3)
@@ -2096,6 +2174,25 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
   it("Passed ST_CoordDim with XYZM point") {
     val test = sparkSession.sql("SELECT ST_CoordDim(ST_GeomFromWKT('POINT ZM(1 2 3 4)'))")
     assert(test.take(1)(0).get(0).asInstanceOf[Int] == 4)
+
+  it ("should pass GeometryType") {
+    val geomTestCases = Map (
+      ("'POINT (51.3168 -0.56)'") -> "'POINT'",
+      ("'POINT (0 0 1)'") -> "'POINT'",
+      ("'LINESTRING (0 0, 0 90)'") -> "'LINESTRING'",
+      ("'POLYGON ((0 0,0 5,5 0,0 0))'") -> "'POLYGON'",
+      ("'POINTM (1 2 3)'") -> "'POINTM'",
+      ("'LINESTRINGM (0 0 1, 0 90 1)'") -> "'LINESTRINGM'",
+      ("'POLYGONM ((0 0 1, 0 5 1, 5 0 1, 0 0 1))'") -> "'POLYGONM'"
+    )
+    for ((geom, expectedResult) <- geomTestCases) {
+        val df = sparkSession.sql(s"SELECT GeometryType(ST_GeomFromText($geom)), " +
+          s"$expectedResult")
+        val actual = df.take(1)(0).get(0).asInstanceOf[String]
+        val expected = df.take(1)(0).get(1).asInstanceOf[String]
+        assertEquals(expected, actual)
+    }
+
   }
   
 }

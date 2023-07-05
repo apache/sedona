@@ -24,6 +24,7 @@ from sedona.sql.dataframe_api import call_sedona_function, ColumnOrName, ColumnO
 
 
 __all__ = [
+    "GeometryType",
     "ST_3DDistance",
     "ST_AddPoint",
     "ST_Area",
@@ -42,6 +43,7 @@ __all__ = [
     "ST_Centroid",
     "ST_Collect",
     "ST_CollectionExtract",
+    "ST_ClosestPoint",
     "ST_ConcaveHull",
     "ST_ConvexHull",
     "ST_Difference",
@@ -113,6 +115,8 @@ __all__ = [
     "ST_Force3D",
     "ST_NRings",
     "ST_Translate",
+    "ST_Angle",
+    "ST_Degrees",
     "ST_FrechetDistance",
     "ST_CoordDim",
     "ST_Affine",
@@ -122,6 +126,17 @@ __all__ = [
 
 _call_st_function = partial(call_sedona_function, "st_functions")
 
+@validate_argument_types
+def GeometryType(geometry: ColumnOrName):
+    """Return the type of the geometry as a string.
+    This function also indicates if the geometry is measured, by returning a string of the form 'POINTM'.
+
+    :param geometry: Geometry column to calculate the dimension for.
+    :type geometry: ColumnOrName
+    :return: Type of geometry as a string column.
+    :rtype: Column
+    """
+    return _call_st_function("GeometryType", geometry)
 
 @validate_argument_types
 def ST_3DDistance(a: ColumnOrName, b: ColumnOrName) -> Column:
@@ -360,6 +375,21 @@ def ST_CollectionExtract(collection: ColumnOrName, geom_type: Optional[Union[Col
     """
     args = (collection,) if geom_type is None else (collection, geom_type)
     return _call_st_function("ST_CollectionExtract", args)
+
+
+@validate_argument_types
+def ST_ClosestPoint(a: ColumnOrName, b: ColumnOrName) -> Column:
+    """Returns the 2-dimensional point on geom1 that is closest to geom2. 
+    This is the first point of the shortest line between the geometries.
+
+    :param a: Geometry column to use in the calculation.
+    :type a: ColumnOrName
+    :param b: Geometry column to use in the calculation.
+    :type b: ColumnOrName
+    :return: the 2-dimensional point on a that is closest to b.
+    :rtype: Column
+    """
+    return _call_st_function("ST_ClosestPoint", (a, b))
 
 
 @validate_argument_types
@@ -1329,7 +1359,9 @@ def ST_Affine(geometry: ColumnOrName, a: Union[ColumnOrName, float], b: Union[Co
     :param zOff: Default 0.0
     :return: Geometry with affine transformation applied
     """
-    args = (geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)
+    args = (geometry, a, b, d, e, xOff, yOff)
+    if not [x for x in (c, f, g, h, i, zOff) if x is None]:
+        args = (geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)
     return _call_st_function("ST_Affine", args)
 
 
@@ -1343,6 +1375,41 @@ def ST_BoundingDiagonal(geometry: ColumnOrName) -> Column:
 
     return _call_st_function("ST_BoundingDiagonal", geometry)
 
+
+@validate_argument_types
+def ST_Angle(g1: ColumnOrName, g2: ColumnOrName, g3: Optional[ColumnOrName] = None, g4: Optional[ColumnOrName] = None) -> Column:
+    """
+    Returns the computed angle between vectors formed by given geometries in radian. Range of result is between 0 and 2 * pi.
+    3 Variants:
+        Angle(Point1, Point2, Point3, Point4)
+            Computes angle formed by vectors formed by Point1-Point2 and Point3-Point4
+        Angle(Point1, Point2, Point3)
+            Computes angle formed by angle Point1-Point2-Point3
+        Angle(Line1, Line2)
+            Computes angle between vectors formed by S1-E1 and S2-E2, where S and E are start and endpoints.
+    :param g1: Point or Line
+    :param g2: Point or Line
+    :param g3: Point or None
+    :param g4: Point or None
+    :return: Returns the computed angle
+    """
+    args = (g1, g2)
+    if g3 is not None:
+        if g4 is not None:
+            args = (g1, g2, g3, g4)
+        else:
+            args = (g1, g2, g3)
+    # args = (g1, g2, g3, g4)
+    return _call_st_function("ST_Angle", args)
+
+@validate_argument_types
+def ST_Degrees(angleInRadian: Union[ColumnOrName, float]) -> Column:
+    """
+    Converts a given angle from radian to degrees
+    :param angleInRadian: Angle in Radian
+    :return: Angle in Degrees
+    """
+    return _call_st_function("ST_Degrees", angleInRadian)
 @validate_argument_types
 def ST_HausdorffDistance(g1: ColumnOrName, g2: ColumnOrName, densityFrac: Optional[Union[ColumnOrName, float]] = -1) -> Column:
     """
@@ -1366,3 +1433,4 @@ def ST_CoordDim(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_CoordDim", geometry)
+

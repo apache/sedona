@@ -15,7 +15,6 @@ package org.apache.sedona.common;
 
 import com.google.common.geometry.S2CellId;
 import com.google.common.math.DoubleMath;
-import com.sun.org.apache.xpath.internal.operations.Mult;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.utils.GeomUtils;
@@ -31,7 +30,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 public class FunctionsTest {
     public static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
@@ -311,7 +309,7 @@ public class FunctionsTest {
         Integer expectedResult = 0;
         assertEquals(actualResult, expectedResult);
 
-        LineString lineString3D = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
+        LineString lineString3D = GEOMETRY_FACTORY.createLineString(coordArray3d(1, 0, 1, 1, 1, 2));
         actualResult = Functions.dimension(lineString3D);
         expectedResult = 1;
         assertEquals(actualResult, expectedResult);
@@ -1034,10 +1032,117 @@ public class FunctionsTest {
     }
 
     @Test
+    public void angleFourPoints() {
+        Point start1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+        Point end1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+        Point start2 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 0));
+        Point end2 = GEOMETRY_FACTORY.createPoint(new Coordinate(6, 2));
+
+        double expected = 0.4048917862850834;
+        double expectedDegrees = 23.198590513648185;
+        double reverseExpectedDegrees = 336.8014094863518;
+        double reverseExpected = 5.878293520894503;
+
+        double actualPointsFour = Functions.angle(start1, end1, start2, end2);
+        double actualPointsFourDegrees = Functions.degrees(actualPointsFour);
+        double actualPointsFourReverse = Functions.angle(start2, end2, start1, end1);
+        double actualPointsFourReverseDegrees = Functions.degrees(actualPointsFourReverse);
+
+        assertEquals(expected, actualPointsFour, 1e-9);
+        assertEquals(expectedDegrees, actualPointsFourDegrees, 1e-9);
+        assertEquals(reverseExpected, actualPointsFourReverse, 1e-9);
+        assertEquals(reverseExpectedDegrees, actualPointsFourReverseDegrees, 1e-9);
+    }
+
+    @Test
+    public void angleFourPoints3D() {
+        Point start1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0, 4));
+        Point end1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 5));
+        Point start2 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 0, 9));
+        Point end2 = GEOMETRY_FACTORY.createPoint(new Coordinate(6, 2, 2));
+
+        double expected = 0.4048917862850834;
+        double expectedDegrees = 23.198590513648185;
+        double reverseExpectedDegrees = 336.8014094863518;
+        double reverseExpected = 5.878293520894503;
+
+        double actualPointsFour = Functions.angle(start1, end1, start2, end2);
+        double actualPointsFourDegrees = Functions.degrees(actualPointsFour);
+        double actualPointsFourReverse = Functions.angle(start2, end2, start1, end1);
+        double actualPointsFourReverseDegrees = Functions.degrees(actualPointsFourReverse);
+
+        assertEquals(expected, actualPointsFour, 1e-9);
+        assertEquals(expectedDegrees, actualPointsFourDegrees, 1e-9);
+        assertEquals(reverseExpected, actualPointsFourReverse, 1e-9);
+        assertEquals(reverseExpectedDegrees, actualPointsFourReverseDegrees, 1e-9);
+    }
+
+
+
+    @Test
+    public void angleThreePoints() {
+        Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+        Point point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+        Point point3 = GEOMETRY_FACTORY.createPoint(new Coordinate(3, 2));
+
+        double expected = 0.19739555984988044;
+        double expectedDegrees = 11.309932474020195;
+
+
+        double actualPointsThree = Functions.angle(point1, point2, point3);
+        double actualPointsThreeDegrees = Functions.degrees(actualPointsThree);
+
+        assertEquals(expected, actualPointsThree, 1e-9);
+        assertEquals(expectedDegrees, actualPointsThreeDegrees, 1e-9);
+
+    }
+
+    @Test
+    public void angleTwoLineStrings() {
+        LineString lineString1 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 1, 1));
+        LineString lineString2 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 3, 2));
+
+        double expected = 0.19739555984988044;
+        double expectedDegrees = 11.309932474020195;
+        double reverseExpected = 6.085789747329706;
+        double reverseExpectedDegrees = 348.69006752597977;
+
+        double actualLineString = Functions.angle(lineString1, lineString2);
+        double actualLineStringReverse = Functions.angle(lineString2, lineString1);
+        double actualLineStringDegrees = Functions.degrees(actualLineString);
+        double actualLineStringReverseDegrees = Functions.degrees(actualLineStringReverse);
+
+        assertEquals(expected, actualLineString, 1e-9);
+        assertEquals(reverseExpected, actualLineStringReverse, 1e-9);
+        assertEquals(expectedDegrees, actualLineStringDegrees, 1e-9);
+        assertEquals(reverseExpectedDegrees, actualLineStringReverseDegrees, 1e-9);
+    }
+
+    @Test
+    public void angleInvalidEmptyGeom() {
+        Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(3, 5));
+        Point point2 = GEOMETRY_FACTORY.createPoint();
+        Point point3 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.angle(point1, point2, point3));
+        assertEquals("ST_Angle cannot support empty geometries.", e.getMessage());
+    }
+
+    @Test
+    public void angleInvalidUnsupportedGeom() {
+        Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(3, 5));
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
+        Point point3 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.angle(point1, polygon, point3));
+        assertEquals("ST_Angle supports either only POINT or only LINESTRING geometries.", e.getMessage());
+    }
+
+
     public void affineEmpty3D() {
         LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
         String expected = emptyLineString.toText();
-        String actual = Functions.affine(emptyLineString, 1.0, 1.0, 2.0, 3.0, 5.0, 6.0, 2.0, 3.0, 4.0, 4.0, 5.0, 6.0).toText();
+        String actual = Functions.affine(emptyLineString, 1.0, 1.0, 4.0, 2.0, 2.0, 4.0, 5.0, 5.0, 6.0, 3.0, 3.0, 6.0).toText();
         assertEquals(expected, actual);
     }
 
@@ -1052,8 +1157,8 @@ public class FunctionsTest {
    @Test
     public void affine3DGeom2D() {
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
-        String expected = GEOMETRY_FACTORY.createLineString(coordArray(6, 8, 7, 11, 8, 14)).toText();
-        String actual = Functions.affine(lineString, 1.0, 1.0, 2.0, 3.0, 5.0, 6.0, 2.0, 3.0, 4.0, 4.0, 5.0, 6.0).toText();
+        String expected = GEOMETRY_FACTORY.createLineString(coordArray(4, 5, 5, 7, 6, 9)).toText();
+        String actual = Functions.affine(lineString, 1.0, 1.0, 4.0, 2.0, 2.0, 4.0, 5.0, 5.0, 6.0, 3.0, 3.0, 6.0).toText();
         assertEquals(expected, actual);
     }
 
@@ -1061,8 +1166,8 @@ public class FunctionsTest {
     public void affine3DGeom3D() {
         WKTWriter wktWriter = new WKTWriter(3);
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray3d(1, 0, 1, 1, 1, 2, 1, 2, 2));
-        String expected = wktWriter.write(GEOMETRY_FACTORY.createLineString(coordArray3d(8, 11, 15, 11, 17, 24, 12, 20, 28)));
-        String actual = wktWriter.write(Functions.affine(lineString, 1.0, 1.0, 2.0, 3.0, 5.0, 6.0, 2.0, 3.0, 4.0, 4.0, 5.0, 6.0));
+        String expected = wktWriter.write(GEOMETRY_FACTORY.createLineString(coordArray3d(8, 9, 17, 13, 15, 28, 14, 17, 33)));
+        String actual = wktWriter.write(Functions.affine(lineString, 1.0, 1.0, 4.0, 2.0, 2.0, 4.0, 5.0, 5.0, 6.0, 3.0, 3.0, 6.0));
         assertEquals(expected, actual);
     }
 
@@ -1073,11 +1178,11 @@ public class FunctionsTest {
         Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 1, 1, 1, 2, 2, 2, 1, 0, 1));
         MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon1, polygon2});
         Geometry geomCollection = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point3D, multiPolygon})});
-        Geometry actualGeomCollection = Functions.affine(geomCollection, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 3.0, 3.0, 1.0, 2.0, 3.0, 3.0);
+        Geometry actualGeomCollection = Functions.affine(geomCollection, 1.0, 2.0, 1.0, 3.0, 1.0, 2.0, 3.0, 1.0, 2.0, 2.0, 3.0, 3.0);
         WKTWriter wktWriter3D = new WKTWriter(3);
-        Point expectedPoint3D = GEOMETRY_FACTORY.createPoint(new Coordinate(7, 8, 9));
-        Polygon expectedPolygon1 = GEOMETRY_FACTORY.createPolygon(coordArray3d(8, 9, 10, 10, 11, 12, 11, 12, 13, 9, 10, 11, 8, 9, 10));
-        Polygon expectedPolygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(5, 6, 7, 7, 8, 9, 13, 14, 15, 5, 6, 7));
+        Point expectedPoint3D = GEOMETRY_FACTORY.createPoint(new Coordinate(6, 9, 9));
+        Polygon expectedPolygon1 = GEOMETRY_FACTORY.createPolygon(coordArray3d(5, 10, 10,7, 11, 11, 8, 14, 14, 6, 13, 13, 5, 10, 10));
+        Polygon expectedPolygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(4, 8, 8, 6, 9, 9, 10, 15, 15, 4, 8, 8));
         assertEquals(wktWriter3D.write(expectedPoint3D), wktWriter3D.write(actualGeomCollection.getGeometryN(0).getGeometryN(0)));
         assertEquals(wktWriter3D.write(expectedPolygon1), wktWriter3D.write(actualGeomCollection.getGeometryN(0).getGeometryN(1).getGeometryN(0)));
         assertEquals(wktWriter3D.write(expectedPolygon2), wktWriter3D.write(actualGeomCollection.getGeometryN(0).getGeometryN(1).getGeometryN(1)));
@@ -1115,6 +1220,159 @@ public class FunctionsTest {
         assertEquals(expectedPoint3D.toText(), actualGeomCollection.getGeometryN(0).getGeometryN(0).toText());
         assertEquals(expectedPolygon1.toText(), actualGeomCollection.getGeometryN(0).getGeometryN(1).getGeometryN(0).toText());
         assertEquals(expectedPolygon2.toText(), actualGeomCollection.getGeometryN(0).getGeometryN(1).getGeometryN(1).toText());
+    }
+
+    @Test
+    public void geometryTypeWithMeasured2D() {
+        String expected1 = "POINT";
+        String actual1 = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createPoint(new Coordinate(10, 5)));
+        assertEquals(expected1, actual1);
+        
+        // Create a point with measure value
+        CoordinateXYM coords = new CoordinateXYM(2, 3, 4);
+        Point measuredPoint = GEOMETRY_FACTORY.createPoint(coords);
+        String expected2 = "POINTM";
+        String actual2 = Functions.geometryTypeWithMeasured(measuredPoint);
+        assertEquals(expected2, actual2);
+
+        // Create a linestring with measure value
+        CoordinateXYM[] coordsLineString = new CoordinateXYM[] {new CoordinateXYM(1, 2, 3), new CoordinateXYM(4, 5, 6)};
+        LineString measuredLineString = GEOMETRY_FACTORY.createLineString(coordsLineString);
+        String expected3 = "LINESTRINGM";
+        String actual3 = Functions.geometryTypeWithMeasured(measuredLineString);
+        assertEquals(expected3, actual3);
+
+        // Create a polygon with measure value
+        CoordinateXYM[] coordsPolygon = new CoordinateXYM[] {new CoordinateXYM(0, 0, 0), new CoordinateXYM(1, 1, 0), new CoordinateXYM(0, 1, 0), new CoordinateXYM(0, 0, 0)};
+        Polygon measuredPolygon = GEOMETRY_FACTORY.createPolygon(coordsPolygon);
+        String expected4 = "POLYGONM";
+        String actual4 = Functions.geometryTypeWithMeasured(measuredPolygon);
+        assertEquals(expected4, actual4);
+    }
+
+    @Test
+    public void geometryTypeWithMeasured3D() {
+        String expected1 = "POINT";
+        String actual1 = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createPoint(new Coordinate(10, 5, 1)));
+        assertEquals(expected1, actual1);
+        
+        // Create a point with measure value
+        CoordinateXYZM coordsPoint = new CoordinateXYZM(2, 3, 4, 0);
+        Point measuredPoint = GEOMETRY_FACTORY.createPoint(coordsPoint);
+        String expected2 = "POINTM";
+        String actual2 = Functions.geometryTypeWithMeasured(measuredPoint);
+        assertEquals(expected2, actual2);
+
+        // Create a linestring with measure value
+        CoordinateXYZM[] coordsLineString = new CoordinateXYZM[] {new CoordinateXYZM(1, 2, 3, 0), new CoordinateXYZM(4, 5, 6, 0)};
+        LineString measuredLineString = GEOMETRY_FACTORY.createLineString(coordsLineString);
+        String expected3 = "LINESTRINGM";
+        String actual3 = Functions.geometryTypeWithMeasured(measuredLineString);
+        assertEquals(expected3, actual3);
+
+        // Create a polygon with measure value
+        CoordinateXYZM[] coordsPolygon = new CoordinateXYZM[] {new CoordinateXYZM(0, 0, 0, 0), new CoordinateXYZM(1, 1, 0, 0), new CoordinateXYZM(0, 1, 0, 0), new CoordinateXYZM(0, 0, 0, 0)};
+        Polygon measuredPolygon = GEOMETRY_FACTORY.createPolygon(coordsPolygon);
+        String expected4 = "POLYGONM";
+        String actual4 = Functions.geometryTypeWithMeasured(measuredPolygon);
+        assertEquals(expected4, actual4);
+    }
+
+    @Test
+    public void geometryTypeWithMeasuredCollection() {
+        String expected1 = "GEOMETRYCOLLECTION";
+        String actual1 = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {GEOMETRY_FACTORY.createPoint(new Coordinate(10, 5))}));
+        assertEquals(expected1, actual1);
+        
+        // Create a geometrycollection with measure value
+        CoordinateXYM coords = new CoordinateXYM(2, 3, 4);
+        Point measuredPoint = GEOMETRY_FACTORY.createPoint(coords);
+        String expected2 = "GEOMETRYCOLLECTIONM";
+        String actual2 = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {measuredPoint}));
+        assertEquals(expected2, actual2);
+
+        // Create a geometrycollection with measure value
+        CoordinateXYM[] coordsLineString = new CoordinateXYM[] {new CoordinateXYM(1, 2, 3), new CoordinateXYM(4, 5, 6)};
+        LineString measuredLineString = GEOMETRY_FACTORY.createLineString(coordsLineString);
+        String expected3 = "GEOMETRYCOLLECTIONM";
+        String actual3 = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {measuredLineString}));
+        assertEquals(expected3, actual3);
+
+        // Create a geometrycollection with measure value
+        CoordinateXYM[] coordsPolygon = new CoordinateXYM[] {new CoordinateXYM(0, 0, 0), new CoordinateXYM(1, 1, 0), new CoordinateXYM(0, 1, 0), new CoordinateXYM(0, 0, 0)};
+        Polygon measuredPolygon = GEOMETRY_FACTORY.createPolygon(coordsPolygon);
+        String expected4 = "GEOMETRYCOLLECTIONM";
+        String actual4 = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {measuredPolygon}));
+        assertEquals(expected4, actual4);
+    }
+
+    @Test
+    public void closestPoint() {
+        Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+        LineString lineString1 = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
+        String expected1 = "POINT (1 1)";
+        String actual1 = Functions.closestPoint(point1, lineString1).toText();
+        assertEquals(expected1, actual1);
+
+        Point point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(160, 40));
+        LineString lineString2 = GEOMETRY_FACTORY.createLineString(coordArray(10, 30, 50, 50, 30, 110, 70, 90, 180, 140, 130, 190));
+        String expected2 = "POINT (160 40)";
+        String actual2 = Functions.closestPoint(point2, lineString2).toText();
+        assertEquals(expected2, actual2);
+        Point expectedPoint3 = GEOMETRY_FACTORY.createPoint(new Coordinate(125.75342465753425, 115.34246575342466));
+        Double expected3 = Functions.closestPoint(lineString2, point2).distance(expectedPoint3);
+        assertEquals(expected3, 0, 1e-6);
+
+        Point point4 = GEOMETRY_FACTORY.createPoint(new Coordinate(80, 160));
+        Polygon polygonA = GEOMETRY_FACTORY.createPolygon(coordArray(190, 150, 20, 10, 160, 70, 190, 150));
+        Geometry polygonB = Functions.buffer(point4, 30);
+        Point expectedPoint4 = GEOMETRY_FACTORY.createPoint(new Coordinate(131.59149149528952, 101.89887534906197));
+        Double expected4 = Functions.closestPoint(polygonA, polygonB).distance(expectedPoint4);
+        assertEquals(expected4, 0, 1e-6);
+    }
+
+    @Test
+    public void closestPoint3d() {
+        // One of the object is 3D
+        Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1,10000));
+        LineString lineString1 = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
+        String expected1 = "POINT (1 1)";
+        String actual1 = Functions.closestPoint(point1, lineString1).toText();
+        assertEquals(expected1, actual1);
+
+        // Both of the object are 3D
+        LineString lineString3D = GEOMETRY_FACTORY.createLineString(coordArray3d(1, 0, 100, 1, 1, 20, 2, 1, 40, 2, 0, 60, 1, 0, 70));
+        String expected2 = "POINT (1 1)";
+        String actual2 = Functions.closestPoint(point1, lineString3D).toText();
+        assertEquals(expected2, actual2);
+    }
+
+    @Test
+    public void closestPointGeomtryCollection() {
+        LineString line = GEOMETRY_FACTORY.createLineString(coordArray(2, 0, 0, 2));
+        Geometry[] geometry = new Geometry[] {
+                GEOMETRY_FACTORY.createLineString(coordArray(2, 0, 2, 1)),
+                GEOMETRY_FACTORY.createPolygon(coordArray(0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0))
+        };
+        GeometryCollection geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(geometry);
+        String actual1 = Functions.closestPoint(line, geometryCollection).toText();
+        String expected1 = "POINT (2 0)";
+        assertEquals(actual1 ,expected1);
+    }
+
+    @Test
+    public void closestPointEmpty() {
+        // One of the object is empty
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+        LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
+        String expected = "ST_ClosestPoint doesn't support empty geometry object.";
+        Exception e1 = assertThrows(IllegalArgumentException.class, () -> Functions.closestPoint(point, emptyLineString));
+        assertEquals(expected, e1.getMessage());
+        
+        // Both objects are empty
+        Polygon emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+        Exception e2 = assertThrows(IllegalArgumentException.class, () -> Functions.closestPoint(emptyPolygon, emptyLineString));
+        assertEquals(expected, e2.getMessage());
     }
 
     @Test

@@ -1,3 +1,37 @@
+## GeometryType
+
+Introduction: Returns the type of the geometry as a string. Eg: 'LINESTRING', 'POLYGON', 'MULTIPOINT', etc. This function also indicates if the geometry is measured, by returning a string of the form 'POINTM'.
+
+Format: `GeometryType (A:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'));
+```
+
+Result:
+
+```
+ geometrytype
+--------------
+ LINESTRING
+```
+
+```sql
+SELECT GeometryType(ST_GeomFromText('POINTM(0 0 1)'));
+```
+
+Result:
+
+```
+ geometrytype
+--------------
+ POINTM
+```
+
 ## ST_3DDistance
 
 Introduction: Return the 3-dimensional minimum cartesian distance between A and B
@@ -41,7 +75,7 @@ Introduction: Apply an affine transformation to the given geometry.
 
 ST_Affine has 2 overloaded signatures:
 
-`ST_Affine(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)`
+`ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)`
 
 `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
 
@@ -56,12 +90,8 @@ Based on the invoked function, the following transformation is applied:
 
 If the given geometry is empty, the result is also empty.
 
-Format: `ST_Affine(geometry, a, b, d, e, xOff, yOff, c, f, g, h, i, zOff)`  
+Format: `ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)`  
 Format: `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
-
-Since: `1.5.0`
-
-Example:
 
 ```sql
 ST_Affine(geometry, 1, 2, 4, 1, 1, 2, 3, 2, 5, 4, 8, 3)
@@ -73,11 +103,11 @@ Output: `LINESTRING EMPTY`
 
 Input: `POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))`
 
-Output: `POLYGON Z((5 8 16, 7 9 20, 13 16 37, 5 8 16))`
+Output: `POLYGON Z((9 11 11, 11 12 13, 18 16 23, 9 11 11))`
 
 Input: `POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0), (1 0.5, 1 0.75, 1.5 0.75, 1.5 0.5, 1 0.5))`
 
-Output: `POLYGON ((2 6, 4 7, 5 11, 3 10, 2 6), (3 6.5, 3.5 6.75, 4 8.75, 3.5 8.5, 3 6.5))`
+Output: `POLYGON((5 9, 7 10, 8 11, 6 10, 5 9), (6 9.5, 6.5 9.75, 7 10.25, 6.5 10, 6 9.5))`
 
 
 ```sql
@@ -96,6 +126,74 @@ Input: `POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))`
 
 Output: `POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))`
 
+## ST_Angle
+
+Introduction: Computes and returns the angle between two vectors represented by the provided points or linestrings.
+
+There are three variants possible for ST_Angle:
+
+`ST_Angle(Geometry point1, Geometry point2, Geometry point3, Geometry point4)`
+Computes the angle formed by vectors represented by point1 - point2 and point3 - point4
+
+`ST_Angle(Geometry point1, Geometry point2, Geometry point3)`
+Computes the angle formed by vectors represented by point2 - point1 and point2 - point3
+
+`ST_Angle(Geometry line1, Geometry line2)`
+Computes the angle formed by vectors S1 - E1 and S2 - E2, where S and E denote start and end points respectively
+
+!!!Note
+    If any other geometry type is provided, ST_Angle throws an IllegalArgumentException.
+    Additionally, if any of the provided geometry is empty, ST_Angle throws an IllegalArgumentException.
+
+!!!Note
+    If a 3D geometry is provided, ST_Angle computes the angle ignoring the z ordinate, equivalent to calling ST_Angle for corresponding 2D geometries.
+
+!!!Tip
+    ST_Angle returns the angle in radian between 0 and 2\Pi. To convert the angle to degrees, use [ST_Degrees](./#st_degrees).
+
+
+Format: `ST_Angle(p1, p2, p3, p4) | ST_Angle(p1, p2, p3) | ST_Angle(line1, line2)`
+
+
+Since: `1.5.0`
+
+Example:
+
+```sql
+ST_Angle(p1, p2, p3, p4)
+```
+
+Input: `p1: POINT (0 0)`
+
+Input: `p2: POINT (1 1)`
+
+Input: `p3: POINT (1 0)`
+
+Input: `p4: POINT(6 2)`
+
+Output: 0.4048917862850834
+
+```sql
+ST_Angle(p1, p2, p3)
+```
+
+Input: `p1: POINT (1 1)`
+
+Input: `p2: POINT (0 0)`
+
+Input: `p3: POINT(3 2)`
+
+Output: 0.19739555984988044
+
+```sql
+ST_Angle(line1, line2)
+```
+
+Input: `line1: LINESTRING (0 0, 1 1)`
+
+Input: `line2: LINESTRING (0 0, 3 2)`
+
+Output: 0.19739555984988044
 
 ## ST_Area
 
@@ -347,6 +445,32 @@ SELECT ST_Centroid(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_ClosestPoint
+
+Introduction: Returns the 2-dimensional point on geom1 that is closest to geom2. This is the first point of the shortest line between the geometries. If using 3D geometries, the Z coordinates will be ignored. If you have a 3D Geometry, you may prefer to use ST_3DClosestPoint.
+It will throw an exception indicates illegal argument if one of the params is an empty geometry.
+
+Format: `ST_ClosestPoint(g1: geomtry, g2: geometry)`
+
+Since: `1.5.0`
+
+Example1:
+```sql
+SELECT ST_AsText( ST_ClosestPoint(g1, g2)) As ptwkt;
+```
+
+Input: `g1: POINT (160 40), g2: LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190)`
+
+Output: `POINT(160 40)`
+
+Input: `g1: LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190), g2: POINT (160 40)`
+
+Output: `POINT(125.75342465753425 115.34246575342466)`
+
+Input: `g1: 'POLYGON ((190 150, 20 10, 160 70, 190 150))', g2: ST_Buffer('POINT(80 160)', 30)`
+
+Output: `POINT(131.59149149528952 101.89887534906197)`
+
 ## ST_Collect
 
 Introduction: Returns MultiGeometry object based on geometry column/s or array with geometries
@@ -468,6 +592,22 @@ Spark SQL example:
 SELECT ST_ConvexHull(polygondf.countyshape)
 FROM polygondf
 ```
+
+## ST_Degrees
+
+Introduction: Convert an angle in radian to degrees.
+
+Format: `ST_Degrees(angleInRadian)`
+
+Since: `1.5.0`
+
+Example:
+
+```sql
+SELECT ST_Degrees(0.19739555984988044)
+```
+
+Output: 11.309932474020195
 
 ## ST_Difference
 
