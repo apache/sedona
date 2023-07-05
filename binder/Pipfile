@@ -16,10 +16,12 @@ shapely="==1.8.4"
 geopandas="==0.11.1"
 pyspark="==3.3.2"
 attrs="*"
-ipykernel = "*"
 apache-sedona="==1.4.1"
 matplotlib = "*"
 descartes = "*"
+keplergl="==0.3.2"
+ipykernel = "*"
+jupyterlab = "*"
 
 [requires]
 python_version = "3.9"
