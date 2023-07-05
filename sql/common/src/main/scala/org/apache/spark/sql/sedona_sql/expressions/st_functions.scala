@@ -73,6 +73,9 @@ object st_functions extends DataFrameAPI {
   def ST_Centroid(geometry: Column): Column = wrapExpression[ST_Centroid](geometry)
   def ST_Centroid(geometry: String): Column = wrapExpression[ST_Centroid](geometry)
 
+  def ST_ClosestPoint(a: Column, b: Column): Column = wrapExpression[ST_ClosestPoint](a, b)
+  def ST_ClosestPoint(a: String, b: String): Column = wrapExpression[ST_ClosestPoint](a, b)
+
   def ST_Collect(geoms: Column): Column = wrapExpression[ST_Collect](geoms)
   def ST_Collect(geoms: String): Column = wrapExpression[ST_Collect](geoms)
   def ST_Collect(geoms: Any*): Column = wrapVarArgExpression[ST_Collect](geoms)
@@ -335,6 +338,7 @@ object st_functions extends DataFrameAPI {
   def ST_FrechetDistance(g1: Column, g2: Column): Column = wrapExpression[ST_FrechetDistance](g1, g2)
 
   def ST_FrechetDistance(g1: String, g2: String): Column = wrapExpression[ST_FrechetDistance](g1, g2)
+
   def ST_Affine(geometry: Column, a: Column, b: Column, c: Column, d: Column, e: Column, f: Column, g: Column, h: Column, i: Column, xOff: Column, yOff: Column, zOff: Column): Column =
     wrapExpression[ST_Affine](geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)
 
@@ -377,3 +381,4 @@ object st_functions extends DataFrameAPI {
   def ST_HausdorffDistance(g1: String, g2: String, densityFrac: Double) = wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac);
 
 }
+ 

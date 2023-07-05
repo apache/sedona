@@ -702,6 +702,14 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_ClosestPoint") {
+      val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (0 1)') as g1, ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)') as g2")
+      val df = polyDf.select(ST_ClosestPoint("g1", "g2"))
+      val expected = "POINT (0 1)"
+      val actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      assertEquals(expected, actual)
+    }
+
     it ("Passed ST_AsEWKT") {
       val baseDf = sparkSession.sql("SELECT ST_SetSRID(ST_Point(0.0, 0.0), 4326) AS point")
       val df = baseDf.select(ST_AsEWKT("point"))
