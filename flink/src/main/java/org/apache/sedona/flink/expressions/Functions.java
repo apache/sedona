@@ -14,8 +14,10 @@
 package org.apache.sedona.flink.expressions;
 
 import org.apache.flink.table.annotation.DataTypeHint;
+import org.apache.flink.table.annotation.InputGroup;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
@@ -638,6 +640,62 @@ public class Functions {
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.lineFromMultiPoint(geom);
+        }
+    }
+
+    public static class ST_LineMerge extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.lineMerge(geom);
+        }
+    }
+
+    public static class ST_LineSubstring extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Double") Double startFraction, @DataTypeHint("Double") Double endFraction) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.lineSubString(geom, startFraction, endFraction);
+        }
+    }
+    
+    public static class ST_MakePolygon extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
+                             @DataTypeHint(inputGroup = InputGroup.ANY) Object o2) {
+            Geometry outerLinestring = (Geometry) o1;
+            Geometry[] interiorLinestrings = (Geometry[]) o2;
+            return org.apache.sedona.common.Functions.makePolygon(outerLinestring, interiorLinestrings);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry linestring = (Geometry) o;
+            return org.apache.sedona.common.Functions.makePolygon(linestring, null);
+        }
+    }
+
+    public static class ST_MakeValid extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Boolean") Boolean keepCollapsed) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.makeValid(geom, keepCollapsed);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.makeValid(geom, false);
+        }
+    }
+
+    public static class ST_Multi extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.createMultiGeometryFromOneElement(geom);
         }
     }
 
