@@ -1246,7 +1246,7 @@ Result:
 
 ## ST_MinimumBoundingCircle
 
-Introduction: Returns the smallest circle polygon that contains a geometry. The optional quadrantSegments parameter determines how many segments to use per quadrant (default is 12) and the default number of segments has been changed to 48 since v1.5.0. 
+Introduction: Returns the smallest circle polygon that contains a geometry. The optional quadrantSegments parameter determines how many segments to use per quadrant and the default number of segments is 48. 
 
 Format: `ST_MinimumBoundingCircle(geom: geometry, [Optional] quadrantSegments:int)`
 
@@ -1495,7 +1495,7 @@ FROM df
 
 ## ST_ReducePrecision
 
-Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded. This function was called ST_PrecisionReduce in versions prior to v1.5.0.
+Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded. 
 
 Format: `ST_ReducePrecision (A:geometry, B:int)`
 
