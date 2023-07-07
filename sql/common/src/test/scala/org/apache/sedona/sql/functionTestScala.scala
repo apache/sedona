@@ -2174,6 +2174,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
   it("Passed ST_CoordDim with XYZM point") {
     val test = sparkSession.sql("SELECT ST_CoordDim(ST_GeomFromWKT('POINT ZM(1 2 3 4)'))")
     assert(test.take(1)(0).get(0).asInstanceOf[Int] == 4)
+  }
 
   it ("should pass GeometryType") {
     val geomTestCases = Map (
