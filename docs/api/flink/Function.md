@@ -1244,6 +1244,19 @@ Result:
 +------------------+------------------------+
 ```
 
+## ST_MinimumBoundingCircle
+
+Introduction: Returns the smallest circle polygon that contains a geometry. The optional quadrantSegments parameter determines how many segments to use per quadrant (default is 12) and the default number of segments has been changed to 48 since v1.5.0. 
+
+Format: `ST_MinimumBoundingCircle(geom: geometry, [Optional] quadrantSegments:int)`
+
+Since: `v1.0.1`
+
+Example:
+```sql
+SELECT ST_MinimumBoundingCircle(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
+
+
 ## ST_Multi
 
 Introduction: Returns a MultiGeometry object based on the geometry input.
@@ -1479,6 +1492,22 @@ FROM df
 4.  Input: `LINESTRING(0 5 1, 0 0 1, 0 10 2)`
 
     Output: `POINT Z(0 0 1)`
+
+## ST_ReducePrecision
+
+Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded. This function was called ST_PrecisionReduce in versions prior to v1.5.0.
+
+Format: `ST_ReducePrecision (A:geometry, B:int)`
+
+Since: `v1.0.0`
+
+Example:
+
+```sql
+SELECT ST_ReducePrecision(polygondf.countyshape, 9)
+FROM polygondf
+```
+The new coordinates will only have 9 decimal places.
 
 ## ST_Reverse
 
