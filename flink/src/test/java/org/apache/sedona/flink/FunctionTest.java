@@ -783,10 +783,43 @@ public class FunctionTest extends TestBase{
         assertEquals("MULTIPOINT ((0 0))", result.toString());
     }
 
+    @Test 
+    public void testStartPoint() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom");
+        table = table.select(call(Functions.ST_StartPoint.class.getSimpleName(), $("geom")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("POINT (0 0)", result.toString());
+    }
+
+    @Test 
+    public void testSimplifyPreserveTopology() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 0.9, 1 1, 0 0))') AS geom");
+        table = table.select(call(Functions.ST_SimplifyPreserveTopology.class.getSimpleName(), $("geom"), 0.2));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("POLYGON ((0 0, 1 0, 1 1, 0 0))", result.toString());
+    }
+
     @Test
     public void testSplit() {
         Table pointTable = tableEnv.sqlQuery("SELECT ST_Split(ST_GeomFromWKT('LINESTRING (0 0, 1.5 1.5, 2 2)'), ST_GeomFromWKT('MULTIPOINT (0.5 0.5, 1 1)'))");
         assertEquals("MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))", ((Geometry)first(pointTable).getField(0)).norm().toText());
+    }
+
+    @Test 
+    public void testSubdivide() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)') AS geom");
+        table = table.select(call(Functions.ST_Subdivide.class.getSimpleName(), $("geom"), 5));
+        Geometry[] result = (Geometry[]) first(table).getField(0);
+        assertEquals("LINESTRING (0 0, 2.5 0)", result[0].toString());
+        assertEquals("LINESTRING (2.5 0, 5 0)", result[1].toString());
+    }
+
+    @Test 
+    public void testSymDifference() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))') AS a, ST_GeomFromWKT('POLYGON ((0 -2, 2 -2, 2 0, 0 0, 0 -2))') AS b");
+        table = table.select(call(Functions.ST_SymDifference.class.getSimpleName(), $("a"), $("b")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("MULTIPOLYGON (((0 -1, -1 -1, -1 1, 1 1, 1 0, 0 0, 0 -1)), ((0 -1, 1 -1, 1 0, 2 0, 2 -2, 0 -2, 0 -1)))", result.toString());
     }
 
     @Test

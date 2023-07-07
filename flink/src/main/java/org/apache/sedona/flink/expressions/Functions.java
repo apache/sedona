@@ -699,6 +699,14 @@ public class Functions {
         }
     }
 
+    public static class ST_StartPoint extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.startPoint(geom);
+        }
+    }
+
     public static class ST_Split extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
@@ -715,6 +723,34 @@ public class Functions {
                              @DataTypeHint("INT") Integer level) {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.s2CellIDs(geom, level);
+        }
+    }
+
+    public static class ST_SimplifyPreserveTopology extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                               @DataTypeHint("Double") Double distanceTolerance) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.simplifyPreserveTopology(geom, distanceTolerance);
+        }
+    }
+
+    public static class ST_Subdivide extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry[].class)
+        public Geometry[] eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                               @DataTypeHint("INT") Integer maxVertices) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.subDivide(geom, maxVertices);
+        }
+    }
+
+    public static class ST_SymDifference extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
+                             @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            return org.apache.sedona.common.Functions.symDifference(geom1, geom2);
         }
     }
 
