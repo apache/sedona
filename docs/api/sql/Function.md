@@ -1302,7 +1302,7 @@ It would also sometimes return multiple geometries for a single geometry input.
 
 ## ST_MinimumBoundingCircle
 
-Introduction: Returns the smallest circle polygon that contains a geometry.
+Introduction: Returns the smallest circle polygon that contains a geometry. The optional quadrantSegments parameter determines how many segments to use per quadrant (default is 12) and the default number of segments has been changed to 48 since v1.5.0. 
 
 Format: `ST_MinimumBoundingCircle(geom: geometry, [Optional] quadrantSegments:int)`
 
@@ -1554,7 +1554,7 @@ SELECT ST_AsText(ST_PointOnSurface(ST_GeomFromText('LINESTRING(0 5 1, 0 0 1, 0 1
 
 ## ST_ReducePrecision
 
-Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded.
+Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded. This function was called ST_PrecisionReduce in versions prior to v1.5.0.
 
 Format: `ST_ReducePrecision (A:geometry, B:int)`
 
