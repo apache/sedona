@@ -16,38 +16,59 @@ package org.apache.sedona.common.raster;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 
+import javax.media.jai.PlanarImage;
+import javax.media.jai.RenderedImageAdapter;
 import javax.media.jai.remote.SerializableRenderedImage;
-
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Field;
 
 public class Serde {
 
+    static final Field field;
+    static {
+        try {
+            field = GridCoverage2D.class.getDeclaredField("serializedImage");
+            field.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static byte[] serialize(GridCoverage2D raster) throws IOException {
         // GridCoverage2D created by GridCoverage2DReaders contain references that are not serializable.
-        // Wrap the RenderedImage in SerializableRenderedImage to make it serializable.
-        if (!(raster.getRenderedImage() instanceof SerializableRenderedImage)) {
-            RenderedImage renderedImage = new SerializableRenderedImage(
-                    raster.getRenderedImage(),
-                    false,
-                    null,
-                    "gzip",
-                    null,
-                    null
-            );
-            raster = new GridCoverageFactory().create(
-                    raster.getName(),
-                    renderedImage,
-                    raster.getGridGeometry(),
-                    raster.getSampleDimensions(),
-                    null,
-                    raster.getProperties()
-            );
+        // Wrap the RenderedImage in DeepCopiedRenderedImage to make it serializable.
+        RenderedImage deepCopiedRenderedImage = null;
+        RenderedImage renderedImage = raster.getRenderedImage();
+        while (renderedImage instanceof RenderedImageAdapter) {
+            renderedImage = ((RenderedImageAdapter) renderedImage).getWrappedImage();
         }
+        if (renderedImage instanceof DeepCopiedRenderedImage) {
+            deepCopiedRenderedImage = renderedImage;
+        } else {
+            deepCopiedRenderedImage = new DeepCopiedRenderedImage(raster.getRenderedImage());
+        }
+        raster = new GridCoverageFactory().create(
+                raster.getName(),
+                deepCopiedRenderedImage,
+                raster.getGridGeometry(),
+                raster.getSampleDimensions(),
+                null,
+                raster.getProperties());
+
+        // Set the serializedImage so that GridCoverage2D will serialize the DeepCopiedRenderedImage object
+        // we created above, rather than creating a SerializedRenderedImage and serialize it. The whole point
+        // of DeepCopiedRenderedImage of getting rid of SerializedRenderedImage, which is problematic.
+        try {
+            field.set(raster, deepCopiedRenderedImage);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
                 oos.writeObject(raster);
