@@ -1250,7 +1250,7 @@ Introduction: Returns the smallest circle polygon that contains a geometry. The 
 
 Format: `ST_MinimumBoundingCircle(geom: geometry, [Optional] quadrantSegments:int)`
 
-Since: `v1.0.1`
+Since: `v1.5.0`
 
 Example:
 ```sql
@@ -1499,7 +1499,7 @@ Introduction: Reduce the decimals places in the coordinates of the geometry to t
 
 Format: `ST_ReducePrecision (A:geometry, B:int)`
 
-Since: `v1.0.0`
+Since: `v1.5.0`
 
 Example:
 
