@@ -17,6 +17,25 @@ Output:
 POLYGON((0 0,20 0,20 60,0 60,0 0))
 ```
 
+### RS_Intersects
+
+Introduction: Returns true if the envelope of the raster intersects the given geometry. If the geometry does not have a
+defined SRID, it is considered to be in the same CRS with the raster. If the geometry has a defined SRID, the geometry
+will be transformed to the CRS of the raster before the intersection test.
+
+Format: `RS_Intersects (raster: Raster, geom: Geometry)`
+
+Since: `v1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_Intersects(raster, ST_SetSRID(ST_PolygonFromEnvelope(0, 0, 10, 10), 4326)) FROM raster_table
+```
+Output:
+```
+true
+```
+
 ### RS_MetaData
 
 Introduction: Returns the metadata of the raster as an array of double. The array contains the following values:

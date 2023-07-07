@@ -17,13 +17,18 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.geometry.Envelope2D;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Before;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import javax.media.jai.RasterFactory;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -53,6 +58,38 @@ public class RasterTestBase {
         double cellSize = 2;
         return RasterConstructors.makeEmptyRaster(numBands, widthInPixel, heightInPixel, upperLeftX, upperLeftY, cellSize);
     }
+
+    GridCoverage2D createRandomRaster(int dataBufferType, int widthInPixel, int heightInPixel,
+                                      double upperLeftX, double upperLeftY, double pixelSize,
+                                      int numBand, String crsCode) {
+        WritableRaster raster =
+                RasterFactory.createBandedRaster(
+                        dataBufferType, widthInPixel, heightInPixel, numBand, null);
+        for (int b = 0; b < numBand; b++) {
+            for (int y = 0; y < heightInPixel; y++) {
+                for (int x = 0; x < widthInPixel; x++) {
+                    double value = Math.random() * 255;
+                    raster.setSample(x, y, b, value);
+                }
+            }
+        }
+        CoordinateReferenceSystem crs = null;
+        if (crsCode != null && !crsCode.isEmpty()) {
+            try {
+                crs = CRS.decode(crsCode);
+            } catch (FactoryException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        double x1 = upperLeftX;
+        double x2 = upperLeftX + widthInPixel * pixelSize;
+        double y1 = upperLeftY - heightInPixel * pixelSize;
+        double y2 = upperLeftY;
+        ReferencedEnvelope referencedEnvelope = new ReferencedEnvelope(x1, x2, y1, y2, crs);
+        GridCoverageFactory factory = new GridCoverageFactory();
+        return factory.create("random-raster", raster, referencedEnvelope);
+    }
+
     GridCoverage2D createMultibandRaster() throws IOException {
         GridCoverageFactory factory = new GridCoverageFactory();
         BufferedImage image = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);
