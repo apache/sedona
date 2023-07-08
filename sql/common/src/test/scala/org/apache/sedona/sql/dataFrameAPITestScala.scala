@@ -22,6 +22,7 @@ import scala.collection.mutable.WrappedArray
 import org.apache.commons.codec.binary.Hex
 import org.apache.spark.sql.functions.{col, lit}
 import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.operation.buffer.BufferParameters
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
 import org.apache.spark.sql.sedona_sql.expressions.st_functions._
 import org.apache.spark.sql.sedona_sql.expressions.st_predicates._
@@ -177,7 +178,7 @@ class dataFrameAPITestScala extends TestBaseScala {
 
     it("Passed ST_Buffer") {
       val polygonDf = sparkSession.sql("SELECT ST_Point(1.0, 1.0) AS geom")
-      val df = polygonDf.select(ST_Buffer("geom", 1.0).as("geom")).selectExpr("ST_PrecisionReduce(geom, 2)")
+      val df = polygonDf.select(ST_Buffer("geom", 1.0).as("geom")).selectExpr("ST_ReducePrecision(geom, 2)")
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POLYGON ((1.98 0.8, 1.92 0.62, 1.83 0.44, 1.71 0.29, 1.56 0.17, 1.38 0.08, 1.2 0.02, 1 0, 0.8 0.02, 0.62 0.08, 0.44 0.17, 0.29 0.29, 0.17 0.44, 0.08 0.62, 0.02 0.8, 0 1, 0.02 1.2, 0.08 1.38, 0.17 1.56, 0.29 1.71, 0.44 1.83, 0.62 1.92, 0.8 1.98, 1 2, 1.2 1.98, 1.38 1.92, 1.56 1.83, 1.71 1.71, 1.83 1.56, 1.92 1.38, 1.98 1.2, 2 1, 1.98 0.8))"
       assert(actualResult == expectedResult)
@@ -257,7 +258,7 @@ class dataFrameAPITestScala extends TestBaseScala {
 
     it("Passed ST_Transform") {
       val pointDf = sparkSession.sql("SELECT ST_Point(1.0, 1.0) AS geom")
-      val df = pointDf.select(ST_Transform($"geom", lit("EPSG:4326"), lit("EPSG:32649")).as("geom")).selectExpr("ST_PrecisionReduce(geom, 2)")
+      val df = pointDf.select(ST_Transform($"geom", lit("EPSG:4326"), lit("EPSG:32649")).as("geom")).selectExpr("ST_ReducePrecision(geom, 2)")
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POINT (-33741810.95 1823994.03)"
       assert(actualResult == expectedResult)
@@ -278,9 +279,9 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult)
     }
 
-    it("Passed ST_PrecisionReduce") {
+    it("Passed ST_ReducePrecision") {
       val pointDf = sparkSession.sql("SELECT ST_Point(0.12, 0.23) AS geom")
-      val df = pointDf.select(ST_PrecisionReduce("geom", 1))
+      val df = pointDf.select(ST_ReducePrecision("geom", 1))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POINT (0.1 0.2)"
       assert(actualResult == expectedResult)
@@ -625,15 +626,15 @@ class dataFrameAPITestScala extends TestBaseScala {
 
     it("Passed ST_MinimumBoundingCircle with default quadrantSegments") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom")
-      val df = baseDf.select(ST_MinimumBoundingCircle("geom").as("geom")).selectExpr("ST_PrecisionReduce(geom, 2)")
-      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
-      val expectedResult = "POLYGON ((0.99 -0.1, 0.96 -0.19, 0.92 -0.28, 0.85 -0.35, 0.78 -0.42, 0.69 -0.46, 0.6 -0.49, 0.5 -0.5, 0.4 -0.49, 0.31 -0.46, 0.22 -0.42, 0.15 -0.35, 0.08 -0.28, 0.04 -0.19, 0.01 -0.1, 0 0, 0.01 0.1, 0.04 0.19, 0.08 0.28, 0.15 0.35, 0.22 0.42, 0.31 0.46, 0.4 0.49, 0.5 0.5, 0.6 0.49, 0.69 0.46, 0.78 0.42, 0.85 0.35, 0.92 0.28, 0.96 0.19, 0.99 0.1, 1 0, 0.99 -0.1))"
+      val df = baseDf.select(ST_MinimumBoundingCircle("geom").as("geom")).selectExpr("ST_ReducePrecision(geom, 2)")
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinates().length
+      val expectedResult = BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6 * 4 + 1;
       assert(actualResult == expectedResult)
     }
 
     it("Passed ST_MinimumBoundingCircle with specified quadrantSegments") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom")
-      val df = baseDf.select(ST_MinimumBoundingCircle("geom", 2).as("geom")).selectExpr("ST_PrecisionReduce(geom, 2)")
+      val df = baseDf.select(ST_MinimumBoundingCircle("geom", 2).as("geom")).selectExpr("ST_ReducePrecision(geom, 2)")
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POLYGON ((0.85 -0.35, 0.5 -0.5, 0.15 -0.35, 0 0, 0.15 0.35, 0.5 0.5, 0.85 0.35, 1 0, 0.85 -0.35))"
       assert(actualResult == expectedResult)

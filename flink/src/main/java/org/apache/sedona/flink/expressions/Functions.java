@@ -352,6 +352,15 @@ public class Functions {
         }
     }
 
+    public static class ST_ReducePrecision extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Integer") Integer precisionScale) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.reducePrecision(geom, precisionScale);
+        }
+    }
+
     public static class ST_Reverse extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
@@ -375,7 +384,7 @@ public class Functions {
             return org.apache.sedona.common.Functions.interiorRingN(geom, n);
         }
     }
-
+    
     public static class ST_PointN extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, int n) {
@@ -688,6 +697,21 @@ public class Functions {
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.makeValid(geom, false);
+        }
+    }
+
+    public static class ST_MinimumBoundingCircle extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Integer") Integer quadrantSegments) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.minimumBoundingCircle(geom, quadrantSegments);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.minimumBoundingCircle(geom, BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6);
         }
     }
 

@@ -305,15 +305,15 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(testtable.take(1).head.get(0) == null)
     }
 
-    it("Passed ST_PrecisionReduce") {
+    it("Passed ST_ReducePrecision") {
       var testtable = sparkSession.sql(
         """
-          |SELECT ST_PrecisionReduce(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)'), 8)
+          |SELECT ST_ReducePrecision(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)'), 8)
         """.stripMargin)
       assert(testtable.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinates()(0).x == 0.12345679)
       testtable = sparkSession.sql(
         """
-          |SELECT ST_PrecisionReduce(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)'), 11)
+          |SELECT ST_ReducePrecision(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)'), 11)
         """.stripMargin)
       assert(testtable.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinates()(0).x == 0.12345678901)
 
@@ -1388,7 +1388,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
     When("Using ST_MinimumBoundingCircle function")
 
-    val circleTable = geometryTable.selectExpr("ST_MinimumBoundingCircle(geom) as geom")
+    val circleTable = geometryTable.selectExpr("ST_MinimumBoundingCircle(geom, 8) as geom")
     val circleTableWithSeg = geometryTable.selectExpr("ST_MinimumBoundingCircle(geom, 1) as geom")
 
     Then("Result should match List of circles")
@@ -1706,7 +1706,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_SimplifyPreserveTopology(null, 1)")
     assert(functionDf.first().get(0) == null)
-    functionDf = sparkSession.sql("select ST_PrecisionReduce(null, 1)")
+    functionDf = sparkSession.sql("select ST_ReducePrecision(null, 1)")
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_AsText(null)")
     assert(functionDf.first().get(0) == null)

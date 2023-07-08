@@ -77,10 +77,10 @@ test_that("ST_Buffer() works as expected", {
   )
 })
 
-test_that("ST_PrecisionReduce() works as expected", {
+test_that("ST_ReducePrecision() works as expected", {
   sdf <- sdf_len(sc, 1) %>%
     dplyr::mutate(rectangle = ST_PolygonFromEnvelope(-40.12345678, -30.12345678, 40.11111111, 30.11111111)) %>%
-    dplyr::mutate(rectangle = ST_PrecisionReduce(rectangle, 2)) %>%
+    dplyr::mutate(rectangle = ST_ReducePrecision(rectangle, 2)) %>%
     # NOTE: the extra `sdf_register()` call is a workaround until SPARK-37202 is
     # fixed
     sdf_register(name = random_string())
