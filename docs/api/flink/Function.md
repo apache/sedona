@@ -1256,6 +1256,18 @@ Example:
 ```sql
 SELECT ST_MinimumBoundingCircle(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
 
+## ST_MinimumBoundingRadius
+
+Introduction: Returns a struct containing the center point and radius of the smallest circle that contains a geometry.
+
+Format: `ST_MinimumBoundingRadius(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_MinimumBoundingRadius(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
+```
 
 ## ST_Multi
 
