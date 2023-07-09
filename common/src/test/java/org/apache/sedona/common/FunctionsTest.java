@@ -764,6 +764,21 @@ public class FunctionsTest {
     }
 
     @Test
+    public void minimumBoundingRadius() {
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+        assertEquals("POINT (0 0)", Functions.minimumBoundingRadius(point).getLeft().toString());
+        assertEquals(0, Functions.minimumBoundingRadius(point).getRight(), 1e-6);
+
+        LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 0, 10));
+        assertEquals("POINT (0 5)", Functions.minimumBoundingRadius(line).getLeft().toString());
+        assertEquals(5, Functions.minimumBoundingRadius(line).getRight(), 1e-6);
+
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 10, 10, 10, 10, 0, 0, 0));
+        assertEquals("POINT (5 5)", Functions.minimumBoundingRadius(polygon).getLeft().toString());
+        assertEquals(7.071067, Functions.minimumBoundingRadius(polygon).getRight(), 1e-6);
+    }
+
+    @Test
     public void nRingsPolygonOnlyExternal() throws Exception {
         Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
         Integer expected = 1;

@@ -14,6 +14,7 @@
 package org.apache.sedona.flink;
 
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.api.Table;
 import org.apache.sedona.flink.expressions.Functions;
 import org.geotools.referencing.CRS;
@@ -802,6 +803,15 @@ public class FunctionTest extends TestBase{
         Integer actual = result.getCoordinates().length;
         Integer expected = 2 * 4 + 1;
         assertEquals(actual, expected);
+    }
+
+    @Test 
+    public void testMinimumBoundingRadius() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom");
+        table = table.select(call(Functions.ST_MinimumBoundingRadius.class.getSimpleName(), $("geom")));
+        Pair<Geometry, Double> result = (Pair<Geometry, Double>) first(table).getField(0);
+        assertEquals("POINT (0.5 0)", result.getLeft().toString());
+        assertEquals(0.5, result.getRight(), 1e-6);
     }
 
     @Test 

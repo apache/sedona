@@ -13,6 +13,7 @@
  */
 package org.apache.sedona.flink.expressions;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.annotation.InputGroup;
 import org.apache.flink.table.functions.ScalarFunction;
@@ -712,6 +713,14 @@ public class Functions {
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.minimumBoundingCircle(geom, BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6);
+        }
+    }
+
+    public static class ST_MinimumBoundingRadius extends ScalarFunction {
+        @DataTypeHint(value = "RAW")
+        public Pair<Geometry, Double> eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.minimumBoundingRadius(geom);
         }
     }
 

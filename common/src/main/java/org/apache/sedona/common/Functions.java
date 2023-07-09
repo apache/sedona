@@ -14,6 +14,8 @@
 package org.apache.sedona.common;
 
 import com.google.common.geometry.S2CellId;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.GeomUtils;
@@ -534,6 +536,14 @@ public class Functions {
             }
         }
         return circle;
+    }
+
+    public static Pair<Geometry, Double> minimumBoundingRadius(Geometry geometry) {
+        MinimumBoundingCircle minimumBoundingCircle = new MinimumBoundingCircle(geometry);
+        Coordinate coods = minimumBoundingCircle.getCentre();
+        double radius = minimumBoundingCircle.getRadius();
+        Point centre = GEOMETRY_FACTORY.createPoint(coods);
+        return Pair.of(centre, radius);
     }
 
     public static Geometry lineSubString(Geometry geom, double fromFraction, double toFraction) {
