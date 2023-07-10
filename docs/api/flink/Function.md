@@ -546,6 +546,30 @@ SELECT ST_ConvexHull(polygondf.countyshape)
 FROM polygondf
 ```
 
+##  ST_CoordDim
+
+Introduction: Returns the coordinate dimensions of the geometry.
+
+Format: `ST_CoordDim(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example with x, y, z coordinate:
+
+```sql
+SELECT ST_CoordDim(ST_GeomFromText('POINT(1 1 2'))
+```
+
+Output: `3`
+
+Example with x, y coordinate:
+
+```sql
+SELECT ST_CoordDim(ST_GeomFromEWKT('POINT(3 7)'))
+```
+
+Output: `2`
+
 ## ST_Dimension
 
 Introduction: Return the topological dimension of this Geometry object, which must be less than or equal to the coordinate dimension. OGC SPEC s2.1.1.1 - returns 0 for POINT, 1 for LINESTRING, 2 for POLYGON, and the largest dimension of the components of a GEOMETRYCOLLECTION. If the dimension is unknown (e.g. for an empty GEOMETRYCOLLECTION) 0 is returned.
@@ -1789,24 +1813,3 @@ SELECT ST_ZMin(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'))
 Output: `4.0`
 
 
-##  ST_CoordDim
-
-Introduction: Returns the coordinate dimensions of the geometry. 
-
-Format: `ST_CoordDim(geom: geometry)`
-
-Spark SQL example:
-
-```sql
-SELECT ST_CoordDim(ST_GeomFromText('POINT(1 1 2'))
-```
-
-Output: `3`
-
-Spark SQL example:
-
-```sql
-SELECT ST_CoordDim(ST_GeomFromEWKT('POINT(3 7)'))
-```
-
-Output: `2`
