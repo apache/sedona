@@ -548,7 +548,7 @@ FROM polygondf
 
 ##  ST_CoordDim
 
-Introduction: Returns the coordinate dimensions of the geometry.
+Introduction: Returns the coordinate dimensions of the geometry. It is an alias of `ST_NDims`.
 
 Format: `ST_CoordDim(geom: geometry)`
 
