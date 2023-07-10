@@ -1047,16 +1047,6 @@ public class Functions {
     }
 
     public static int coordDim(Geometry geom) {
-        int dimensions = 0;
-        Coordinate coord = geom.getCoordinate();
-        if(!Double.isNaN(coord.getX()))
-            dimensions++;
-        if(!Double.isNaN(coord.getY()))
-            dimensions++;
-        if(!Double.isNaN(coord.getZ()))
-            dimensions++;
-        if(!Double.isNaN(coord.getM()))
-            dimensions++;
-        return dimensions;
+        return  nDims(geom);
     }
 }
