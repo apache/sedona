@@ -958,7 +958,7 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
-    public void testCoordDim() {
+    public void testCoordDimFor3D() {
         Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT(1 2 1)') AS " + polygonColNames[0]);
         polygonTable = polygonTable.select(call(Functions.ST_CoordDim.class.getSimpleName(), $(polygonColNames[0])));
         int result = (int) first(polygonTable).getField(0);
