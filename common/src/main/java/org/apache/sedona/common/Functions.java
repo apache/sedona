@@ -1046,7 +1046,4 @@ public class Functions {
         return GeomUtils.getHausdorffDistance(g1, g2, -1);
     }
 
-    public static int coordDim(Geometry geom) {
-        return  nDims(geom);
-    }
 }

@@ -858,7 +858,7 @@ public class Functions {
         @DataTypeHint("Integer")
         public Integer eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
-            return org.apache.sedona.common.Functions.coordDim(geom);
+            return org.apache.sedona.common.Functions.nDims(geom);
         }
     }
 
