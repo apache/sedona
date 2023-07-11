@@ -87,7 +87,7 @@ __all__ = [
     "ST_NumInteriorRings",
     "ST_PointN",
     "ST_PointOnSurface",
-    "ST_PrecisionReduce",
+    "ST_ReducePrecision",
     "ST_RemovePoint",
     "ST_Reverse",
     "ST_S2CellIDs",
@@ -966,7 +966,7 @@ def ST_PointOnSurface(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_PrecisionReduce(geometry: ColumnOrName, precision: Union[ColumnOrName, int]) -> Column:
+def ST_ReducePrecision(geometry: ColumnOrName, precision: Union[ColumnOrName, int]) -> Column:
     """Reduce the precision of the coordinates in geometry to a specified number of decimal places.
 
     :param geometry: Geometry to reduce the precision of.
@@ -976,7 +976,7 @@ def ST_PrecisionReduce(geometry: ColumnOrName, precision: Union[ColumnOrName, in
     :return: Geometry with precision reduced to the indicated number of decimal places as a geometry column, empty geometry if an invalid precision is passed.
     :rtype: Column
     """
-    return _call_st_function("ST_PrecisionReduce", (geometry, precision))
+    return _call_st_function("ST_ReducePrecision", (geometry, precision))
 
 
 @validate_argument_types

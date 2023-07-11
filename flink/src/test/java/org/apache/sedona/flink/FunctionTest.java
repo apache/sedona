@@ -14,6 +14,7 @@
 package org.apache.sedona.flink;
 
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.api.Table;
 import org.apache.sedona.flink.expressions.Functions;
 import org.geotools.referencing.CRS;
@@ -25,6 +26,7 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -356,6 +358,14 @@ public class FunctionTest extends TestBase{
         Table surfaceTable = pointTable.select(call(Functions.ST_PointOnSurface.class.getSimpleName(), $(pointColNames[0])));
         Geometry result = (Geometry) first(surfaceTable).getField(0);
         assertEquals("POINT (32.01 -117.99)", result.toString());
+    }
+
+    @Test
+    public void testReducePrecision() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('POINT(0.12 0.23)') AS geom");
+        Table resultTable = polygonTable.select(call(Functions.ST_ReducePrecision.class.getSimpleName(), $("geom"), 1));
+        Geometry point = (Geometry) first(resultTable).getField(0);
+        assertEquals("POINT (0.1 0.2)", point.toString());
     }
 
     @Test
@@ -776,6 +786,35 @@ public class FunctionTest extends TestBase{
     }
 
     @Test 
+    public void testMinimumBoundingCircle() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom");
+        table = table.select(call(Functions.ST_MinimumBoundingCircle.class.getSimpleName(), $("geom")));
+        Geometry result = (Geometry) first(table).getField(0);
+        Integer actual = result.getCoordinates().length;
+        Integer expected = BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6 * 4 + 1;
+        assertEquals(actual, expected);
+    }
+
+    @Test 
+    public void testMinimumBoundingCircleWithQuadrantSegments() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom");
+        table = table.select(call(Functions.ST_MinimumBoundingCircle.class.getSimpleName(), $("geom"), 2));
+        Geometry result = (Geometry) first(table).getField(0);
+        Integer actual = result.getCoordinates().length;
+        Integer expected = 2 * 4 + 1;
+        assertEquals(actual, expected);
+    }
+
+    @Test 
+    public void testMinimumBoundingRadius() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom");
+        table = table.select(call(Functions.ST_MinimumBoundingRadius.class.getSimpleName(), $("geom")));
+        Pair<Geometry, Double> result = (Pair<Geometry, Double>) first(table).getField(0);
+        assertEquals("POINT (0.5 0)", result.getLeft().toString());
+        assertEquals(0.5, result.getRight(), 1e-6);
+    }
+
+    @Test 
     public void testMulti() {
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (0 0)') AS geom");
         table = table.select(call(Functions.ST_Multi.class.getSimpleName(), $("geom")));
@@ -783,10 +822,43 @@ public class FunctionTest extends TestBase{
         assertEquals("MULTIPOINT ((0 0))", result.toString());
     }
 
+    @Test 
+    public void testStartPoint() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom");
+        table = table.select(call(Functions.ST_StartPoint.class.getSimpleName(), $("geom")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("POINT (0 0)", result.toString());
+    }
+
+    @Test 
+    public void testSimplifyPreserveTopology() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 0.9, 1 1, 0 0))') AS geom");
+        table = table.select(call(Functions.ST_SimplifyPreserveTopology.class.getSimpleName(), $("geom"), 0.2));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("POLYGON ((0 0, 1 0, 1 1, 0 0))", result.toString());
+    }
+
     @Test
     public void testSplit() {
         Table pointTable = tableEnv.sqlQuery("SELECT ST_Split(ST_GeomFromWKT('LINESTRING (0 0, 1.5 1.5, 2 2)'), ST_GeomFromWKT('MULTIPOINT (0.5 0.5, 1 1)'))");
         assertEquals("MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))", ((Geometry)first(pointTable).getField(0)).norm().toText());
+    }
+
+    @Test 
+    public void testSubdivide() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)') AS geom");
+        table = table.select(call(Functions.ST_Subdivide.class.getSimpleName(), $("geom"), 5));
+        Geometry[] result = (Geometry[]) first(table).getField(0);
+        assertEquals("LINESTRING (0 0, 2.5 0)", result[0].toString());
+        assertEquals("LINESTRING (2.5 0, 5 0)", result[1].toString());
+    }
+
+    @Test 
+    public void testSymDifference() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))') AS a, ST_GeomFromWKT('POLYGON ((0 -2, 2 -2, 2 0, 0 0, 0 -2))') AS b");
+        table = table.select(call(Functions.ST_SymDifference.class.getSimpleName(), $("a"), $("b")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("MULTIPOLYGON (((0 -1, -1 -1, -1 1, 1 1, 1 0, 0 0, 0 -1)), ((0 -1, 1 -1, 1 0, 2 0, 2 -2, 0 -2, 0 -1)))", result.toString());
     }
 
     @Test

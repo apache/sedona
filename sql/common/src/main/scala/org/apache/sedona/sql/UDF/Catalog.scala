@@ -75,7 +75,7 @@ object Catalog {
     function[ST_Union](),
     function[ST_IsValid](),
     function[ST_IsEmpty](),
-    function[ST_PrecisionReduce](),
+    function[ST_ReducePrecision](),
     function[ST_Equals](),
     function[ST_Touches](),
     function[ST_Overlaps](),
@@ -102,7 +102,7 @@ object Catalog {
     function[ST_ClosestPoint](),
     function[ST_Boundary](),
     function[ST_MinimumBoundingRadius](),
-    function[ST_MinimumBoundingCircle](BufferParameters.DEFAULT_QUADRANT_SEGMENTS),
+    function[ST_MinimumBoundingCircle](BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6),
     function[ST_EndPoint](),
     function[ST_ExteriorRing](),
     function[ST_GeometryN](),
@@ -200,6 +200,7 @@ object Catalog {
     function[RS_SRID](),
     function[RS_Value](1),
     function[RS_Values](1),
+    function[RS_Intersects](),
     function[RS_AsGeoTiff](),
     function[RS_AsArcGrid]()
   )

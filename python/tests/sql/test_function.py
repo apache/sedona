@@ -230,11 +230,11 @@ class TestPredicateJoin(TestBase):
 
     def test_st_precision_reduce(self):
         test_table = self.spark.sql(
-            """SELECT ST_PrecisionReduce(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)'), 8)""")
+            """SELECT ST_ReducePrecision(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)'), 8)""")
         test_table.show(truncate=False)
         assert test_table.take(1)[0][0].x == 0.12345679
         test_table = self.spark.sql(
-            """SELECT ST_PrecisionReduce(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)'), 11)""")
+            """SELECT ST_ReducePrecision(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)'), 11)""")
         test_table.show(truncate=False)
         assert test_table.take(1)[0][0].x == 0.12345678901
 

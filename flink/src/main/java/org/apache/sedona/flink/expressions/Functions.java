@@ -13,6 +13,7 @@
  */
 package org.apache.sedona.flink.expressions;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.annotation.InputGroup;
 import org.apache.flink.table.functions.ScalarFunction;
@@ -352,6 +353,15 @@ public class Functions {
         }
     }
 
+    public static class ST_ReducePrecision extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Integer") Integer precisionScale) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.reducePrecision(geom, precisionScale);
+        }
+    }
+
     public static class ST_Reverse extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
@@ -375,7 +385,7 @@ public class Functions {
             return org.apache.sedona.common.Functions.interiorRingN(geom, n);
         }
     }
-
+    
     public static class ST_PointN extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, int n) {
@@ -691,11 +701,42 @@ public class Functions {
         }
     }
 
+    public static class ST_MinimumBoundingCircle extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Integer") Integer quadrantSegments) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.minimumBoundingCircle(geom, quadrantSegments);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.minimumBoundingCircle(geom, BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6);
+        }
+    }
+
+    public static class ST_MinimumBoundingRadius extends ScalarFunction {
+        @DataTypeHint(value = "RAW")
+        public Pair<Geometry, Double> eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.minimumBoundingRadius(geom);
+        }
+    }
+
     public static class ST_Multi extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.createMultiGeometryFromOneElement(geom);
+        }
+    }
+
+    public static class ST_StartPoint extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.startPoint(geom);
         }
     }
 
@@ -715,6 +756,34 @@ public class Functions {
                              @DataTypeHint("INT") Integer level) {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.s2CellIDs(geom, level);
+        }
+    }
+
+    public static class ST_SimplifyPreserveTopology extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                               @DataTypeHint("Double") Double distanceTolerance) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.simplifyPreserveTopology(geom, distanceTolerance);
+        }
+    }
+
+    public static class ST_Subdivide extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry[].class)
+        public Geometry[] eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                               @DataTypeHint("INT") Integer maxVertices) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.subDivide(geom, maxVertices);
+        }
+    }
+
+    public static class ST_SymDifference extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
+                             @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            return org.apache.sedona.common.Functions.symDifference(geom1, geom2);
         }
     }
 

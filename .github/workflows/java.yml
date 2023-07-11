@@ -7,6 +7,9 @@ on:
   pull_request:
     branches:
       - '*'
+
+env:
+  MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
       
 jobs:
   build:

@@ -435,5 +435,22 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         df.selectExpr("RS_BandAsArray(RS_AddBandFromArray(raster, band, 100), 1)").collect()
       }
     }
+
+    it("Passed RS_Intersects") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+        .selectExpr("path", "RS_FromGeoTiff(content) as raster")
+
+      // query window without SRID
+      assert(df.selectExpr("RS_Intersects(raster, ST_Point(-13076178,4003651))").first().getBoolean(0))
+      assert(!df.selectExpr("RS_Intersects(raster, ST_Point(-13055247,3979620))").first().getBoolean(0))
+
+      // query window and raster are in the same CRS
+      assert(df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(-13067806,4009116), 3857))").first().getBoolean(0))
+      assert(!df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(-13057457,4027023), 3857))").first().getBoolean(0))
+
+      // query window and raster not in the same CRS
+      assert(df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(33.81798,-117.47993), 4326))").first().getBoolean(0))
+      assert(!df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(33.97896,-117.27868), 4326))").first().getBoolean(0))
+    }
   }
 }
