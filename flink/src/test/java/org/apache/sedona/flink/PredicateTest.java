@@ -14,10 +14,13 @@
 package org.apache.sedona.flink;
 
 import org.apache.flink.table.api.Table;
+import org.apache.sedona.flink.expressions.Predicates;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.apache.flink.table.api.Expressions.$;
+import static org.apache.flink.table.api.Expressions.call;
 
 public class PredicateTest extends TestBase{
     @BeforeClass
@@ -80,11 +83,43 @@ public class PredicateTest extends TestBase{
     }
 
     @Test
+    public void testCrosses() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTIPOINT((0 0), (2 2))') AS g1, ST_GeomFromWKT('LINESTRING(-1 -1, 1 1)') as g2");
+        table = table.select(call(Predicates.ST_Crosses.class.getSimpleName(), $("g1"), $("g2")));
+        Boolean actual = (Boolean) first(table).getField(0);
+        assertEquals(true, actual);
+    }
+
+    @Test
+    public void testEquals() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 2 2)') AS g1, ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)') as g2");
+        table = table.select(call(Predicates.ST_Equals.class.getSimpleName(), $("g1"), $("g2")));
+        Boolean actual = (Boolean) first(table).getField(0);
+        assertEquals(true, actual);
+    }
+
+    @Test
     public void testOrderingEquals() {
         Table lineStringTable = createLineStringTable(testDataSize);
         String lineString = createLineStringWKT(testDataSize).get(0).getField(0).toString();
         String expr = "ST_OrderingEquals(ST_GeomFromWkt('" + lineString + "'), geom_linestring)";
         Table result = lineStringTable.filter(expr);
         assertEquals(1, count(result));
+    }
+
+    @Test
+    public void testOverlaps() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 2 2)') AS g1, ST_GeomFromWKT('LINESTRING (1 1, 3 3)') as g2");
+        table = table.select(call(Predicates.ST_Overlaps.class.getSimpleName(), $("g1"), $("g2")));
+        Boolean actual = (Boolean) first(table).getField(0);
+        assertEquals(true, actual);
+    }
+
+    @Test
+    public void testTouches() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS g1, ST_GeomFromWKT('LINESTRING (0 0, 1 1)') as g2");
+        table = table.select(call(Predicates.ST_Touches.class.getSimpleName(), $("g1"), $("g2")));
+        Boolean actual = (Boolean) first(table).getField(0);
+        assertEquals(true, actual);
     }
 }
