@@ -6,7 +6,7 @@ verify_ssl = true
 [dev-packages]
 pytest="*"
 notebook="==6.0.0"
-jupyter="*"
+jupyter = "*"
 mkdocs="*"
 pytest-cov = "*"
 
@@ -23,7 +23,7 @@ keplergl = "==0.3.2"
 ipywidgets = "*"
 jupyterlab-widgets = "*"
 ipykernel = "*"
-jupyterlab = "*"
+jupyterlab = "==3.6.4"
 
 [requires]
 python_version = "3.9"
