@@ -452,5 +452,16 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(33.81798,-117.47993), 4326))").first().getBoolean(0))
       assert(!df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(33.97896,-117.27868), 4326))").first().getBoolean(0))
     }
+
+    it("Passed RS_AddBandFromArray collect generated raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster", "RS_BandAsArray(RS_FromGeoTiff(content), 1) as band")
+      df = df.selectExpr("RS_AddBandFromArray(raster, band, 1) as raster", "band")
+      var raster = df.collect().head.getAs[GridCoverage2D](0)
+      assert(raster.getNumSampleDimensions == 1)
+      df = df.selectExpr("RS_AddBandFromArray(raster, band, 2) as raster", "band")
+      raster = df.collect().head.getAs[GridCoverage2D](0)
+      assert(raster.getNumSampleDimensions == 2)
+    }
   }
 }
