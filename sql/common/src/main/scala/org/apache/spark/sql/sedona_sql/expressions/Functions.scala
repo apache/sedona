@@ -1077,7 +1077,7 @@ case class ST_Degrees(inputExpressions: Seq[Expression])
  * @param inputExpressions
  * */
 case class ST_CoordDim(inputExpressions: Seq[Expression])
-  extends InferredExpression(Functions.coordDim _) {
+  extends InferredExpression(Functions.nDims _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
     copy(inputExpressions = newChildren)
   }
