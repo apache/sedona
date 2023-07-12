@@ -82,6 +82,7 @@ test_configurations = [
     (stf.ST_ConcaveHull, ("geom", 1.0), "triangle_geom", "", "POLYGON ((0 0, 1 1, 1 0, 0 0))"),
     (stf.ST_ConcaveHull, ("geom", 1.0, True), "triangle_geom", "", "POLYGON ((1 1, 1 0, 0 0, 1 1))"),
     (stf.ST_ConvexHull, ("geom",), "triangle_geom", "", "POLYGON ((0 0, 1 1, 1 0, 0 0))"),
+    (stf.ST_CoordDim, ("point",), "point_geom", "", 2),
     (stf.ST_Difference, ("a", "b"), "overlapping_polys", "", "POLYGON ((1 0, 0 0, 0 1, 1 1, 1 0))"),
     (stf.ST_Dimension, ("geom",), "geometry_geom_collection", "", 1),
     (stf.ST_Distance, ("a", "b"), "two_points", "", 3.0),
