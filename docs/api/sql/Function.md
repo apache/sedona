@@ -593,6 +593,30 @@ SELECT ST_ConvexHull(polygondf.countyshape)
 FROM polygondf
 ```
 
+##  ST_CoordDim
+
+Introduction: Returns the coordinate dimensions of the geometry. It is an alias of `ST_NDims`.
+
+Format: `ST_CoordDim(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example with x, y, z coordinate:
+
+```sql
+SELECT ST_CoordDim(ST_GeomFromText('POINT(1 1 2'))
+```
+
+Output: `3`
+
+Example with x, y coordinate:
+
+```sql
+SELECT ST_CoordDim(ST_GeomFromEWKT('POINT(3 7)'))
+```
+
+Output: `2`
+
 ## ST_Degrees
 
 Introduction: Convert an angle in radian to degrees.

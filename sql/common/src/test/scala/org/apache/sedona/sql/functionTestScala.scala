@@ -2155,6 +2155,27 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
   }
 
+
+  it("Passed ST_CoordDim with 3D point") {
+    val test = sparkSession.sql("SELECT ST_CoordDim(ST_GeomFromWKT('POINT(1 1 2)'))")
+    assert(test.take(1)(0).get(0).asInstanceOf[Int] == 3)
+  }
+
+  it("Passed ST_CoordDim with Z coordinates") {
+    val test = sparkSession.sql("SELECT ST_CoordDim(ST_GeomFromWKT('POINTZ(1 1 0.5)'))")
+    assert(test.take(1)(0).get(0).asInstanceOf[Int] == 3)
+  }
+
+  it("Passed ST_CoordDim with XYM point") {
+    val test = sparkSession.sql("SELECT ST_CoordDim(ST_GeomFromWKT('POINT M(1 2 3)'))")
+    assert(test.take(1)(0).get(0).asInstanceOf[Int] == 3)
+  }
+
+  it("Passed ST_CoordDim with XYZM point") {
+    val test = sparkSession.sql("SELECT ST_CoordDim(ST_GeomFromWKT('POINT ZM(1 2 3 4)'))")
+    assert(test.take(1)(0).get(0).asInstanceOf[Int] == 4)
+  }
+
   it ("should pass GeometryType") {
     val geomTestCases = Map (
       ("'POINT (51.3168 -0.56)'") -> "'POINT'",
@@ -2172,6 +2193,7 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         val expected = df.take(1)(0).get(1).asInstanceOf[String]
         assertEquals(expected, actual)
     }
+
   }
   
 }

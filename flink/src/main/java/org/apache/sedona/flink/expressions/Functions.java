@@ -922,6 +922,15 @@ public class Functions {
         }
     }
 
+
+    public static class ST_CoordDim extends ScalarFunction {
+        @DataTypeHint("Integer")
+        public Integer eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.nDims(geom);
+        }
+    }
+
     public static class ST_Angle extends ScalarFunction {
 
         @DataTypeHint("Double")
@@ -962,6 +971,7 @@ public class Functions {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint("Double") Double angleInRadian) {
             return org.apache.sedona.common.Functions.degrees(angleInRadian);
+
         }
     }
 }

@@ -1020,4 +1020,21 @@ public class FunctionTest extends TestBase{
         assertEquals(expected, actual);
         assertEquals(expectedDefault, actualDefault);
     }
+
+    @Test
+    public void testCoordDimFor2D() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT(3 7)') AS " + polygonColNames[0]);
+        polygonTable = polygonTable.select(call(Functions.ST_CoordDim.class.getSimpleName(), $(polygonColNames[0])));
+        int result = (int) first(polygonTable).getField(0);
+        assertEquals(2, result, 0);
+    }
+
+    @Test
+    public void testCoordDimFor3D() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT(1 2 1)') AS " + polygonColNames[0]);
+        polygonTable = polygonTable.select(call(Functions.ST_CoordDim.class.getSimpleName(), $(polygonColNames[0])));
+        int result = (int) first(polygonTable).getField(0);
+        assertEquals(3, result, 0);
+    }
+
 }

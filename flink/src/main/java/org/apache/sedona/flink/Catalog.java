@@ -132,6 +132,7 @@ public class Catalog {
                 new Functions.ST_Angle(),
                 new Functions.ST_Degrees(),
                 new Functions.ST_HausdorffDistance(),
+                new Functions.ST_CoordDim(),
         };
     }
 

@@ -1055,4 +1055,5 @@ public class Functions {
     public static Double hausdorffDistance(Geometry g1, Geometry g2) throws Exception{
         return GeomUtils.getHausdorffDistance(g1, g2, -1);
     }
+
 }

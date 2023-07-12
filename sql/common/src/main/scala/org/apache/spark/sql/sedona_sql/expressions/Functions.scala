@@ -1070,3 +1070,16 @@ case class ST_Degrees(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+/**
+ * Return the number of ddimensions in geometry.
+ *
+ * @param inputExpressions
+ * */
+case class ST_CoordDim(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.nDims _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
