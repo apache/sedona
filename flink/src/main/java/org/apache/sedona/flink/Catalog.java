@@ -24,6 +24,7 @@ public class Catalog {
                 new Aggregators.ST_Envelope_Aggr(),
                 new Aggregators.ST_Union_Aggr(),
                 new Constructors.ST_Point(),
+                new Constructors.ST_PointZ(),
                 new Constructors.ST_PointFromText(),
                 new Constructors.ST_LineStringFromText(),
                 new Constructors.ST_LineFromText(),
@@ -140,11 +141,15 @@ public class Catalog {
         return new UserDefinedFunction[]{
                 new Predicates.ST_Intersects(),
                 new Predicates.ST_Contains(),
+                new Predicates.ST_Crosses(),
                 new Predicates.ST_Within(),
                 new Predicates.ST_Covers(),
                 new Predicates.ST_CoveredBy(),
                 new Predicates.ST_Disjoint(),
+                new Predicates.ST_Equals(),
                 new Predicates.ST_OrderingEquals(),
+                new Predicates.ST_Overlaps(),
+                new Predicates.ST_Touches(),
         };
     }
 }

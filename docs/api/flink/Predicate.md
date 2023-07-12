@@ -13,6 +13,21 @@ FROM pointdf
 WHERE ST_Contains(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
 ```
 
+## ST_Crosses
+
+Introduction: Return true if A crosses B
+
+Format: `ST_Crosses (A:geometry, B:geometry)`
+
+Since: `v1.5.0`
+
+SQL example:
+```sql
+SELECT * 
+FROM pointdf 
+WHERE ST_Crosses(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
+```
+
 ## ST_Disjoint
 
 Introduction: Return true if A and B are disjoint
@@ -21,11 +36,26 @@ Format: `ST_Disjoint (A:geometry, B:geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL example:
+SQL example:
 ```sql
 SELECT *
 FROM pointdf 
 WHERE ST_Disjoinnt(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
+```
+
+## ST_Equals
+
+Introduction: Return true if A equals to B
+
+Format: `ST_Equals (A:geometry, B:geometry)`
+
+Since: `v1.5.0`
+
+SQL example:
+```sql
+SELECT * 
+FROM pointdf 
+WHERE ST_Equals(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
 ```
 
 ## ST_Intersects
@@ -41,6 +71,36 @@ SQL example:
 SELECT * 
 FROM pointdf 
 WHERE ST_Intersects(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
+```
+
+## ST_Overlaps
+
+Introduction: Return true if A overlaps B
+
+Format: `ST_Overlaps (A:geometry, B:geometry)`
+
+Since: `v1.5.0`
+
+SQL example:
+```sql
+SELECT *
+FROM geom
+WHERE ST_Overlaps(geom.geom_a, geom.geom_b)
+```
+
+## ST_Touches
+
+Introduction: Return true if A touches B
+
+Format: `ST_Touches (A:geometry, B:geometry)`
+
+Since: `v1.5.0`
+
+SQL example:
+```sql
+SELECT * 
+FROM pointdf 
+WHERE ST_Touches(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
 ```
 
 ## ST_Within

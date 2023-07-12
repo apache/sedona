@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.wololo.jts2geojson.GeoJSONReader;
 
@@ -71,6 +72,31 @@ public class ConstructorTest extends TestBase{
         String expected = "POINT (1 2)";
 
         assertEquals(expected, result);
+    }
+
+    @Test
+    public void testPointZ() {
+        List<Row> data = new ArrayList<>();
+        data.add(Row.of(2.0, 2.0, 5.0, "point"));
+        String[] colNames = new String[]{"x", "y", "z", "name_point"};
+
+        TypeInformation<?>[] colTypes = {
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.STRING_TYPE_INFO};
+        RowTypeInfo typeInfo = new RowTypeInfo(colTypes, colNames);
+        DataStream<Row> ds = env.fromCollection(data).returns(typeInfo);
+        Table pointTable = tableEnv.fromDataStream(ds);
+
+        Table geomTable = pointTable
+                .select(call(Constructors.ST_PointZ.class.getSimpleName(), $(colNames[0]), $(colNames[1]), $(colNames[2]))
+                        .as(colNames[3]));
+
+        Point result = first(geomTable)
+                .getFieldAs(colNames[3]);
+
+        assertEquals(5.0, result.getCoordinate().getZ(), 1e-6);
     }
 
     @Test
