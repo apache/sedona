@@ -25,6 +25,8 @@ import geopandas as gpd
 
 class TestVisualization(TestBase):
 
+    """ _repr_html() creates a html encoded string of the current map data, can be used to assert data equality """
+
     def test_basic_map_creation(self):
         sedona_kepler_map = SedonaKepler.create_map()
         kepler_map = KeplerGl()
