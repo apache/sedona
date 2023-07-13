@@ -6,7 +6,7 @@ on:
       - master
   pull_request:
     branches:
-      - '*'
+      - 'r-*'
 
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
