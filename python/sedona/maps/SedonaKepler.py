@@ -34,7 +34,7 @@ class SedonaKepler:
         :return: A map object
         """
         if df is not None:
-            geoDf = SedonaKepler._convertToGdf(df, geometry_col)
+            geoDf = SedonaKepler._convert_to_gdf(df, geometry_col)
             dataDict = {name: geoDf}
             map = KeplerGl(data=dataDict)
         else:
@@ -55,12 +55,12 @@ class SedonaKepler:
         :param geometry_col: [Optional] Custom name of geometry_column if any, if no name is provided, a default name of 'geometry' is assumed.
         :return: Does not return anything, adds df directly to the given map object
         """
-        geoDf = SedonaKepler._convertToGdf(df, geometry_col)
+        geoDf = SedonaKepler._convert_to_gdf(df, geometry_col)
         map.add_data(geoDf, name=name)
 
 
     @classmethod
-    def _convertToGdf(cls, df, geometry_col="geometry"):
+    def _convert_to_gdf(cls, df, geometry_col="geometry"):
         """
         Converts a SedonaDataFrame to a GeoPandasDataFrame and also renames geometry column to a standard name of 'geometry'
         :param df: SedonaDataFrame to convert
