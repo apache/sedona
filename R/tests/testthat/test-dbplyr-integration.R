@@ -63,7 +63,8 @@ test_that("ST_Buffer() works as expected", {
     # NOTE: the extra `sdf_register()` call is a workaround until SPARK-37202 is
     # fixed
     sdf_register(name = random_string()) %>%
-    dplyr::compute()
+    # dplyr::compute()
+    identity()
 
   expect_equal(
     sdf %>%
@@ -107,7 +108,8 @@ test_that("ST_SimplifyPreserveTopology() works as expected", {
     # NOTE: the extra `sdf_register()` call is a workaround until SPARK-37202 is
     # fixed
     sdf_register(name = random_string()) %>%
-    dplyr::compute()
+    # dplyr::compute()
+    identity()
 
   expect_equal(
     sdf %>%
