@@ -514,12 +514,12 @@ Spatial query results can be visualized in Jupyter lab/notebook using SedonaKepl
 
 SedonaKepler exposes APIs to create interactive and customizable map visualizations using [KeplerGl](https://kepler.gl/).
 
-### Creating a map object using SedonaKepler.createMap
+### Creating a map object using SedonaKepler.create_map
 
-SedonaKepler exposes a createMap API with the following signature:
+SedonaKepler exposes a create_map API with the following signature:
 
 ```python
-createMap(df: SedonaDataFrame=None, name: str='unnamed', geometry_col: str='geometry', config: dict=None) -> map
+create_map(df: SedonaDataFrame=None, name: str='unnamed', geometry_col: str='geometry', config: dict=None) -> map
 ```
 
 The parameter 'name' is used to associate the passed SedonaDataFrame in the map object and any config applied to the map is linked to this name. It is recommended you pass a unique identifier to the dataframe here.
@@ -529,7 +529,7 @@ The parameter 'geometry_col' is used to identify the geometry containing column.
 !!!Note
 	Failure to pass the correct geometry column name (if it has a name other than 'geometry') will result in a failure to create a map object.
 
-If no SedonaDataFrame object is passed, an empty map (with config applied if passed) is returned. A SedonaDataFrame can be added later using the method `addDf`
+If no SedonaDataFrame object is passed, an empty map (with config applied if passed) is returned. A SedonaDataFrame can be added later using the method `add_df`
 
 A map config can be passed optionally to apply pre-apply customizations to the map.
 
@@ -541,20 +541,20 @@ A map config can be passed optionally to apply pre-apply customizations to the m
 
 	=== "Python"
 		```python
-		map = SedonaKepler.createMap(df=groupedresult, name="AirportCount", geometry_col="country_geom")
+		map = SedonaKepler.create_map(df=groupedresult, name="AirportCount", geometry_col="country_geom")
 		map
 		```
 
-### Adding SedonaDataFrame to a map object using SedonaKepler.addDf
-SedonaKepler exposes a addDf API with the following signature:
+### Adding SedonaDataFrame to a map object using SedonaKepler.add_df
+SedonaKepler exposes a add_df API with the following signature:
 
 ```python
-addDf(map, df: SedonaDataFrame, name: str='unnamed', geometry_col='geometry')
+add_df(map, df: SedonaDataFrame, name: str='unnamed', geometry_col='geometry')
 ```
 
 This API can be used to add a SedonaDataFrame to an already created map object. The map object passed is directly mutated and nothing is returned.
 
-The parameters name and geometry_col have the same conditions as 'createMap'
+The parameters name and geometry_col have the same conditions as 'create_map'
 
 !!!Note
 	If the passed map object already has a dataframe added, this method will overwrite it with the passed SedonaDataFrame.
@@ -562,8 +562,8 @@ The parameters name and geometry_col have the same conditions as 'createMap'
 !!! abstract "Example usage (Referenced from Sedona Jupyter examples)"
 	=== "Python"
 		```python
-		map = SedonaKepler.createMap()
-		SedonaKepler.addDf(map, groupedresult, name="AirportCount", geometry_col="country_geom")
+		map = SedonaKepler.create_map()
+		SedonaKepler.add_df(map, groupedresult, name="AirportCount", geometry_col="country_geom")
 		map
 		```
 

@@ -6,7 +6,7 @@ import geopandas as gpd
 class SedonaKepler:
 
     @classmethod
-    def createMap(cls, df=None, name="unnamed", geometry_col="geometry", config=None):
+    def create_map(cls, df=None, name="unnamed", geometry_col="geometry", config=None):
         """
         Creates a map visualization using kepler, optionally taking a sedona dataFrame as data input
         :param df: [Optional] SedonaDataFrame to plot on the map
@@ -29,7 +29,7 @@ class SedonaKepler:
         return map
 
     @classmethod
-    def addDf(cls, map, df, name="unnamed", geometry_col="geometry"):
+    def add_df(cls, map, df, name="unnamed", geometry_col="geometry"):
         """
         Adds a SedonaDataFrame to a given map object.
         :param map: Map object to add SedonaDataFrame to
