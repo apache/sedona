@@ -101,6 +101,32 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testCollectWithTwoInputs() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1 2)') AS g1, ST_GeomFromWKT('POINT (-2 3)') as g2");
+        Table resultTable = pointTable.select(call(Functions.ST_Collect.class.getSimpleName(), $("g1"), $("g2")));
+        Geometry result1 = (Geometry) first(resultTable).getField(0);
+        assertEquals("MULTIPOINT ((1 2), (-2 3))", result1.toString());
+
+        Table collectionTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1 2)') AS g1, ST_GeomFromWKT('LINESTRING(1 2, 3 4)') as g2");
+        resultTable = collectionTable.select(call(Functions.ST_Collect.class.getSimpleName(), $("g1"), $("g2")));
+        Geometry result2 = (Geometry) first(resultTable).getField(0);
+        assertEquals("GEOMETRYCOLLECTION (POINT (1 2), LINESTRING (1 2, 3 4))", result2.toString());
+    }
+
+    @Test
+    public void testCollectWithArray() {
+        Table lineTable = tableEnv.sqlQuery("SELECT array[ST_GeomFromText('LINESTRING(1 2, 3 4)'), ST_GeomFromText('LINESTRING(3 4, 4 5)')] as lines");
+        Table resultTable = lineTable.select(call(Functions.ST_Collect.class.getSimpleName(), $("lines")));
+        Geometry result1 = (Geometry) first(resultTable).getField(0);
+        assertEquals("MULTILINESTRING ((1 2, 3 4), (3 4, 4 5))", result1.toString());
+
+        Table collectionTable = tableEnv.sqlQuery("SELECT array[ST_GeomFromText('POINT(0 0)'), ST_GeomFromText('LINESTRING(3 4, 4 5)')] as lines");
+        resultTable = collectionTable.select(call(Functions.ST_Collect.class.getSimpleName(), $("lines")));
+        Geometry result2 = (Geometry) first(resultTable).getField(0);
+        assertEquals("GEOMETRYCOLLECTION (POINT (0 0), LINESTRING (3 4, 4 5))", result2.toString());
+    }
+
+    @Test
     public void testCollectionExtract() {
         Table collectionTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('GEOMETRYCOLLECTION(POINT(0 0), LINESTRING(1 1, 2 2))') as collection");
         Table resultTable = collectionTable.select(call(Functions.ST_CollectionExtract.class.getSimpleName(), $("collection")));
