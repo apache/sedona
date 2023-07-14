@@ -41,7 +41,8 @@ class TestVisualization(TestBase):
 
         polygon_wkt_df.createOrReplaceTempView("polygontable")
         polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-        polygon_gdf = gpd.GeoDataFrame(data=polygon_df.toPandas(), geometry="countyshape")
+        polygon_df_copy = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+        polygon_gdf = gpd.GeoDataFrame(data=polygon_df_copy.toPandas(), geometry="countyshape")
         sedona_kepler_map = SedonaKepler.create_map(df=polygon_df, name="data_1", geometry_col="countyshape")
         polygon_gdf_renamed = polygon_gdf.rename(columns={"countyshape": "geometry"})
         kepler_map = KeplerGl(data={"data_1": polygon_gdf_renamed})
@@ -57,11 +58,12 @@ class TestVisualization(TestBase):
 
         polygon_wkt_df.createOrReplaceTempView("polygontable")
         polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-        polygon_gdf = gpd.GeoDataFrame(data=polygon_df.toPandas(), geometry="countyshape")
+        polygon_df_copy = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+        polygon_gdf = gpd.GeoDataFrame(data=polygon_df_copy.toPandas(), geometry="countyshape")
         polygon_gdf_renamed = polygon_gdf.rename(columns={"countyshape": "geometry"})
         sedona_kepler_empty_map = SedonaKepler.create_map()
         SedonaKepler.add_df(sedona_kepler_empty_map, polygon_df, name="data_1", geometry_col="countyshape")
-        kepler_map = KeplerGl(data={"data_1": polygon_gdf_renamed})
+        kepler_map = KeplerGl(data={"data_1": polygon_gdf_renamed.copy()})
         assert sedona_kepler_empty_map._repr_html_() == kepler_map._repr_html_()
         assert sedona_kepler_empty_map.config == kepler_map.config
 
@@ -169,14 +171,14 @@ class TestVisualization(TestBase):
 
         polygon_wkt_df.createOrReplaceTempView("polygontable")
         polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+        polygon_df_copy = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
         polygon_gdf = gpd.GeoDataFrame(data=polygon_df.toPandas(), geometry="countyshape")
         polygon_gdf_renamed = polygon_gdf.rename(columns={"countyshape": "geometry"})
 
         sedona_kepler_map = SedonaKepler.create_map(df=polygon_df, name="data_1", geometry_col="countyshape", config=config)
-        kepler_map = KeplerGl(data={"data_1": polygon_gdf_renamed}, config=config)
-        SedonaKepler.add_df(sedona_kepler_map, polygon_df, name="data_2", geometry_col="countyshape")
-        kepler_map.add_data(polygon_gdf_renamed, name="data_2")
+        kepler_map = KeplerGl(data={"data_1": polygon_gdf_renamed.copy()}, config=config)
+        SedonaKepler.add_df(sedona_kepler_map, polygon_df_copy, name="data_2", geometry_col="countyshape")
+        kepler_map.add_data(polygon_gdf_renamed.copy(), name="data_2")
 
         assert sedona_kepler_map._repr_html_() == kepler_map._repr_html_()
         assert sedona_kepler_map.config == kepler_map.config
-
