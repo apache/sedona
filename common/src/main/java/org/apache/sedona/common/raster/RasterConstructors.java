@@ -13,6 +13,7 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.raster.inputstream.ByteArrayImageInputStream;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
@@ -29,27 +30,20 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.RasterFactory;
-
 import java.awt.image.DataBuffer;
 import java.awt.image.WritableRaster;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 public class RasterConstructors
 {
-
     public static GridCoverage2D fromArcInfoAsciiGrid(byte[] bytes) throws IOException {
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes)) {
-            ArcGridReader reader = new ArcGridReader(inputStream);
-            return reader.read(null);
-        }
+        ArcGridReader reader = new ArcGridReader(new ByteArrayImageInputStream(bytes));
+        return reader.read(null);
     }
 
     public static GridCoverage2D fromGeoTiff(byte[] bytes) throws IOException {
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes)) {
-            GeoTiffReader geoTiffReader = new GeoTiffReader(inputStream);
-            return geoTiffReader.read(null);
-        }
+        GeoTiffReader geoTiffReader = new GeoTiffReader(new ByteArrayImageInputStream(bytes));
+        return geoTiffReader.read(null);
     }
 
     /**
@@ -105,7 +99,6 @@ public class RasterConstructors
         if (scaleY == Integer.MAX_VALUE) {
             actualScaleY = scaleX;
         }
-        System.out.println("makeEmptyRaster: " + numBand + ", " + widthInPixel + ", " + heightInPixel + ", " + upperLeftX + ", " + upperLeftY + ", " + scaleX + ", " + actualScaleY + ", " + skewX + ", " + skewY + ", " + srid);
         // Create a new empty raster
         WritableRaster raster = RasterFactory.createBandedRaster(DataBuffer.TYPE_DOUBLE, widthInPixel, heightInPixel, numBand, null);
         MathTransform transform = new AffineTransform2D(scaleX, skewY, skewX, -actualScaleY, upperLeftX + scaleX / 2, upperLeftY - actualScaleY / 2);
