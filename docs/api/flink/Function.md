@@ -471,6 +471,58 @@ Input: `g1: 'POLYGON ((190 150, 20 10, 160 70, 190 150))', g2: ST_Buffer('POINT(
 
 Output: `POINT(131.59149149528952 101.89887534906197)`
 
+## ST_Collect
+
+Introduction: Returns MultiGeometry object based on geometry column/s or array with geometries
+
+Format
+
+`ST_Collect(*geom: geometry)`
+
+`ST_Collect(geom: array<geometry>)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_Collect(
+    ST_GeomFromText('POINT(21.427834 52.042576573)'),
+    ST_GeomFromText('POINT(45.342524 56.342354355)')
+) AS geom
+```
+
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|MULTIPOINT ((21.427834 52.042576573), (45.342524 56.342354355))|
++---------------------------------------------------------------+
+```
+
+Example:
+
+```sql
+SELECT ST_Collect(
+    Array(
+        ST_GeomFromText('POINT(21.427834 52.042576573)'),
+        ST_GeomFromText('POINT(45.342524 56.342354355)')
+    )
+) AS geom
+```
+
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|MULTIPOINT ((21.427834 52.042576573), (45.342524 56.342354355))|
++---------------------------------------------------------------+
+```
+
 ## ST_CollectionExtract
 
 Introduction: Returns a homogeneous multi-geometry from a given geometry collection.
