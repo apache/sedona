@@ -557,7 +557,7 @@ This API can be used to add a SedonaDataFrame to an already created map object. 
 The parameters name and geometry_col have the same conditions as 'create_map'
 
 !!!Tip
-	This method can be used to add mutliple dataframes to a map object to be able to visualize them together.
+	This method can be used to add multiple dataframes to a map object to be able to visualize them together.
 
 !!! abstract "Example usage (Referenced from Sedona Jupyter examples)"
 	=== "Python"
