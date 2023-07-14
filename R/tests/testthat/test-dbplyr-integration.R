@@ -185,7 +185,6 @@ test_that("ST_RemovePoint() works as expected", {
   sdf <- sdf_len(sc, 1) %>%
     dplyr::mutate(linestring = ST_GeomFromText("LINESTRING(0 0, 21 52, 1 1, 1 0)")) %>%
     dplyr::transmute(linestring = ST_RemovePoint(linestring, 1)) 
-    sdf_register(name = random_string())
   df <- sdf %>% collect()
 
   expect_equal(nrow(df), 1)
