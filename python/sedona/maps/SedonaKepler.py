@@ -19,7 +19,6 @@ from keplergl import KeplerGl
 import geopandas as gpd
 
 
-
 class SedonaKepler:
 
     @classmethod
@@ -33,31 +32,27 @@ class SedonaKepler:
         :param config: [Optional] A map config to be applied to the rendered map
         :return: A map object
         """
+        kepler_map = KeplerGl()
         if df is not None:
-            geoDf = SedonaKepler._convert_to_gdf(df, geometry_col)
-            dataDict = {name: geoDf}
-            map = KeplerGl(data=dataDict)
-        else:
-            map = KeplerGl()
+            SedonaKepler.add_df(kepler_map, df, name, geometry_col)
 
         if config is not None:
-            map.config = config
+            kepler_map.config = config
 
-        return map
+        return kepler_map
 
     @classmethod
-    def add_df(cls, map, df, name="unnamed", geometry_col="geometry"):
+    def add_df(cls, kepler_map, df, name="unnamed", geometry_col="geometry"):
         """
         Adds a SedonaDataFrame to a given map object.
-        :param map: Map object to add SedonaDataFrame to
+        :param kepler_map: Map object to add SedonaDataFrame to
         :param df: SedonaDataFrame to add
         :param name: [Optional] Name to assign to the dataframe, default name assigned is 'unnamed'
         :param geometry_col: [Optional] Custom name of geometry_column if any, if no name is provided, a default name of 'geometry' is assumed.
         :return: Does not return anything, adds df directly to the given map object
         """
-        geoDf = SedonaKepler._convert_to_gdf(df, geometry_col)
-        map.add_data(geoDf, name=name)
-
+        geo_df = SedonaKepler._convert_to_gdf(df, geometry_col)
+        kepler_map.add_data(geo_df, name=name)
 
     @classmethod
     def _convert_to_gdf(cls, df, geometry_col="geometry"):
@@ -67,9 +62,8 @@ class SedonaKepler:
         :param geometry_col: [Optional]
         :return:
         """
-        pandasDf = df.toPandas()
-        geoDf = gpd.GeoDataFrame(pandasDf, geometry=geometry_col)
+        pandas_df = df.toPandas()
+        geo_df = gpd.GeoDataFrame(pandas_df, geometry=geometry_col)
         if geometry_col != "geometry":
-            geoDf = geoDf.rename(columns={geometry_col: "geometry"})
-        return geoDf
-
+            geo_df = geo_df.rename(columns={geometry_col: "geometry"})
+        return geo_df

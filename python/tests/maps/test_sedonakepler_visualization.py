@@ -19,19 +19,17 @@ from keplergl import KeplerGl
 from sedona.maps.SedonaKepler import SedonaKepler
 from tests.test_base import TestBase
 from tests import mixed_wkt_geometry_input_location
+from tests import csv_point_input_location
 import geopandas as gpd
 
 
-
 class TestVisualization(TestBase):
-
     """ _repr_html() creates a html encoded string of the current map data, can be used to assert data equality """
 
     def test_basic_map_creation(self):
         sedona_kepler_map = SedonaKepler.create_map()
         kepler_map = KeplerGl()
         assert sedona_kepler_map.config == kepler_map.config
-
 
     def test_map_creation_with_df(self):
         polygon_wkt_df = self.spark.read.format("csv"). \
@@ -41,14 +39,15 @@ class TestVisualization(TestBase):
 
         polygon_wkt_df.createOrReplaceTempView("polygontable")
         polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-        polygon_df_copy = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-        polygon_gdf = gpd.GeoDataFrame(data=polygon_df_copy.toPandas(), geometry="countyshape")
-        sedona_kepler_map = SedonaKepler.create_map(df=polygon_df, name="data_1", geometry_col="countyshape")
+        polygon_gdf = gpd.GeoDataFrame(data=polygon_df.toPandas(), geometry="countyshape")
         polygon_gdf_renamed = polygon_gdf.rename(columns={"countyshape": "geometry"})
-        kepler_map = KeplerGl(data={"data_1": polygon_gdf_renamed})
+
+        sedona_kepler_map = SedonaKepler.create_map(df=polygon_df, name="data_1", geometry_col="countyshape")
+        kepler_map = KeplerGl()
+        kepler_map.add_data(data=polygon_gdf_renamed, name="data_1")
+
         assert sedona_kepler_map._repr_html_() == kepler_map._repr_html_()
         assert sedona_kepler_map.config == kepler_map.config
-
 
     def test_df_addition(self):
         polygon_wkt_df = self.spark.read.format("csv"). \
@@ -57,17 +56,19 @@ class TestVisualization(TestBase):
             load(mixed_wkt_geometry_input_location)
 
         polygon_wkt_df.createOrReplaceTempView("polygontable")
+
         polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-        polygon_df_copy = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-        polygon_gdf = gpd.GeoDataFrame(data=polygon_df_copy.toPandas(), geometry="countyshape")
+        polygon_gdf = gpd.GeoDataFrame(data=polygon_df.toPandas(), geometry="countyshape")
         polygon_gdf_renamed = polygon_gdf.rename(columns={"countyshape": "geometry"})
+
         sedona_kepler_empty_map = SedonaKepler.create_map()
         SedonaKepler.add_df(sedona_kepler_empty_map, polygon_df, name="data_1", geometry_col="countyshape")
-        kepler_map = KeplerGl(data={"data_1": polygon_gdf_renamed.copy()})
+
+        kepler_map = KeplerGl()
+        kepler_map.add_data(polygon_gdf_renamed, name="data_1")
+
         assert sedona_kepler_empty_map._repr_html_() == kepler_map._repr_html_()
         assert sedona_kepler_empty_map.config == kepler_map.config
-
-
 
     def test_adding_multiple_datasets(self):
         config = {'version': 'v1',
@@ -84,26 +85,28 @@ class TestVisualization(TestBase):
                                                                                'strokeOpacity': 0.8,
                                                                                'thickness': 0.5,
                                                                                'strokeColor': [18, 92, 119],
-                                                                               'colorRange': {'name': 'Uber Viz Sequential 6',
-                                                                                              'type': 'sequential',
-                                                                                              'category': 'Uber',
-                                                                                              'colors': ['#E6FAFA',
-                                                                                                         '#C1E5E6',
-                                                                                                         '#9DD0D4',
-                                                                                                         '#75BBC1',
-                                                                                                         '#4BA7AF',
-                                                                                                         '#00939C',
-                                                                                                         '#108188',
-                                                                                                         '#0E7077']},
-                                                                               'strokeColorRange': {'name': 'Global Warming',
-                                                                                                    'type': 'sequential',
-                                                                                                    'category': 'Uber',
-                                                                                                    'colors': ['#5A1846',
-                                                                                                               '#900C3F',
-                                                                                                               '#C70039',
-                                                                                                               '#E3611C',
-                                                                                                               '#F1920E',
-                                                                                                               '#FFC300']},
+                                                                               'colorRange': {
+                                                                                   'name': 'Uber Viz Sequential 6',
+                                                                                   'type': 'sequential',
+                                                                                   'category': 'Uber',
+                                                                                   'colors': ['#E6FAFA',
+                                                                                              '#C1E5E6',
+                                                                                              '#9DD0D4',
+                                                                                              '#75BBC1',
+                                                                                              '#4BA7AF',
+                                                                                              '#00939C',
+                                                                                              '#108188',
+                                                                                              '#0E7077']},
+                                                                               'strokeColorRange': {
+                                                                                   'name': 'Global Warming',
+                                                                                   'type': 'sequential',
+                                                                                   'category': 'Uber',
+                                                                                   'colors': ['#5A1846',
+                                                                                              '#900C3F',
+                                                                                              '#C70039',
+                                                                                              '#E3611C',
+                                                                                              '#F1920E',
+                                                                                              '#FFC300']},
                                                                                'radius': 10,
                                                                                'sizeRange': [0, 10],
                                                                                'radiusRange': [0, 50],
@@ -132,15 +135,17 @@ class TestVisualization(TestBase):
                                                                          'heightScale': 'linear',
                                                                          'radiusField': None,
                                                                          'radiusScale': 'linear'}}],
-                                          'interactionConfig': {'tooltip': {'fieldsToShow': {'AirportCount': [{'name': 'NAME_EN',
-                                                                                                               'format': None},
-                                                                                                              {'name': 'AirportCount', 'format': None}]},
-                                                                            'compareMode': False,
-                                                                            'compareType': 'absolute',
-                                                                            'enabled': True},
-                                                                'brush': {'size': 0.5, 'enabled': False},
-                                                                'geocoder': {'enabled': False},
-                                                                'coordinate': {'enabled': False}},
+                                          'interactionConfig': {
+                                              'tooltip': {'fieldsToShow': {'AirportCount': [{'name': 'NAME_EN',
+                                                                                             'format': None},
+                                                                                            {'name': 'AirportCount',
+                                                                                             'format': None}]},
+                                                          'compareMode': False,
+                                                          'compareType': 'absolute',
+                                                          'enabled': True},
+                                              'brush': {'size': 0.5, 'enabled': False},
+                                              'geocoder': {'enabled': False},
+                                              'coordinate': {'enabled': False}},
                                           'layerBlending': 'normal',
                                           'splitMaps': [],
                                           'animationConfig': {'currentTime': None, 'speed': 1}},
@@ -169,16 +174,28 @@ class TestVisualization(TestBase):
             option("header", "false"). \
             load(mixed_wkt_geometry_input_location)
 
+        point_csv_df = self.spark.read.format("csv"). \
+            option("delimiter", ","). \
+            option("header", "false"). \
+            load(csv_point_input_location)
+
+        point_csv_df.createOrReplaceTempView("pointtable")
+        point_df = self.spark.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
         polygon_wkt_df.createOrReplaceTempView("polygontable")
         polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-        polygon_df_copy = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-        polygon_gdf = gpd.GeoDataFrame(data=polygon_df.toPandas(), geometry="countyshape")
-        polygon_gdf_renamed = polygon_gdf.rename(columns={"countyshape": "geometry"})
 
         sedona_kepler_map = SedonaKepler.create_map(df=polygon_df, name="data_1", geometry_col="countyshape", config=config)
-        kepler_map = KeplerGl(data={"data_1": polygon_gdf_renamed.copy()}, config=config)
-        SedonaKepler.add_df(sedona_kepler_map, polygon_df_copy, name="data_2", geometry_col="countyshape")
-        kepler_map.add_data(polygon_gdf_renamed.copy(), name="data_2")
+        # SedonaKepler.add_df(sedona_kepler_map, polygon_df, "data_1", "countyshape")
+        SedonaKepler.add_df(sedona_kepler_map, point_df, name="data_2", geometry_col="arealandmark")
+
+        polygon_gdf = gpd.GeoDataFrame(data=polygon_df.toPandas(), geometry="countyshape")
+        polygon_gdf_renamed = polygon_gdf.rename(columns={"countyshape": "geometry"})
+        point_gdf = gpd.GeoDataFrame(data=point_df.toPandas(), geometry="arealandmark")
+        point_gdf_renamed = point_gdf.rename(columns={"arealandmark": "geometry"})
+
+        kepler_map = KeplerGl(config=config)
+        kepler_map.add_data(polygon_gdf_renamed, "data_1")
+        kepler_map.add_data(point_gdf_renamed, name="data_2")
 
         assert sedona_kepler_map._repr_html_() == kepler_map._repr_html_()
         assert sedona_kepler_map.config == kepler_map.config
