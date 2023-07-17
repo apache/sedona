@@ -61,6 +61,11 @@ public class AggregatorTest extends TestBase{
         Table result = polygonTable.select(call("ST_Intersection_Aggr", $(polygonColNames[0])));
         Row last = last(result);
         assertEquals("LINESTRING EMPTY", last.getField(0).toString());
+
+        polygonTable = createPolygonOverlappingTable(3);
+        result = polygonTable.select(call("ST_Intersection_Aggr", $(polygonColNames[0])));
+        last = last(result);
+        assertEquals("LINESTRING (1 1, 1 0)", last.getField(0).toString());
     }
 
     @Test
