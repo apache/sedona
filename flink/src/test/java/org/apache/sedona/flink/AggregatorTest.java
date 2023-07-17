@@ -19,8 +19,6 @@ import org.apache.flink.util.CloseableIterator;
 import org.apache.sedona.flink.expressions.Functions;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Polygon;
 
 import static org.apache.flink.table.api.Expressions.*;
