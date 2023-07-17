@@ -19,6 +19,8 @@ import org.apache.flink.util.CloseableIterator;
 import org.apache.sedona.flink.expressions.Functions;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Polygon;
 
 import static org.apache.flink.table.api.Expressions.*;
@@ -53,6 +55,14 @@ public class AggregatorTest extends TestBase{
                 "WHERE row_num <= 5");
         assertEquals(0.0, first(resultTable).getField(0));
         assertEquals(5.656854249492381, last(resultTable).getField(0));
+    }
+
+    @Test
+    public void testIntersection_Aggr(){
+        Table polygonTable = createPolygonOverlappingTable(testDataSize);
+        Table result = polygonTable.select(call("ST_Intersection_Aggr", $(polygonColNames[0])));
+        Row last = last(result);
+        assertEquals("LINESTRING EMPTY", last.getField(0).toString());
     }
 
     @Test
