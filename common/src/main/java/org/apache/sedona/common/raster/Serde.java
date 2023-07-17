@@ -50,7 +50,7 @@ public class Serde {
         if (renderedImage instanceof DeepCopiedRenderedImage) {
             deepCopiedRenderedImage = renderedImage;
         } else {
-            deepCopiedRenderedImage = new DeepCopiedRenderedImage(raster.getRenderedImage());
+            deepCopiedRenderedImage = new DeepCopiedRenderedImage(renderedImage);
         }
         raster = new GridCoverageFactory().create(
                 raster.getName(),
