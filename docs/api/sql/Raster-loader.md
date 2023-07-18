@@ -191,7 +191,7 @@ Output:
 
 Introduction: Create an array that is filled by the given value
 
-Format: `RS_Array(length:Int, value: Decimal)`
+Format: `RS_Array(length:Int, value: Double)`
 
 Since: `v1.1.0`
 

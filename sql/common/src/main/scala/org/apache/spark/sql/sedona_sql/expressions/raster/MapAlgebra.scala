@@ -22,6 +22,7 @@ import org.apache.sedona.common.raster.{MapAlgebra, Serde}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression}
+import org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
 import org.apache.spark.sql.sedona_sql.expressions.raster.implicits.RasterInputExpressionEnhancer
@@ -352,29 +353,30 @@ case class RS_Count(inputExpressions: Seq[Expression])
 
 // Multiply a factor to all values of a band
 case class RS_MultiplyFactor(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
+  extends Expression with ImplicitCastInputTypes with CodegenFallback with UserDataGeneratator {
   assert(inputExpressions.length == 2)
 
   override def nullable: Boolean = false
 
   override def eval(inputRow: InternalRow): Any = {
     val band = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    val target = inputExpressions(1).eval(inputRow).asInstanceOf[Int]
-    new GenericArrayData(multiply(band, target))
+    val factor = inputExpressions(1).eval(inputRow).asInstanceOf[Double]
+    new GenericArrayData(multiply(band, factor))
 
   }
 
-  private def multiply(band: Array[Double], target: Int):Array[Double] = {
+  private def multiply(band: Array[Double], factor: Double):Array[Double] = {
 
     var result = new Array[Double](band.length)
     for(i<-0 until band.length) {
 
-      result(i) = band(i)*target
+      result(i) = band(i) * factor
 
     }
     result
-
   }
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(ArrayType(DoubleType), DoubleType)
 
   override def dataType: DataType = ArrayType(DoubleType)
 

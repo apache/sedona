@@ -517,7 +517,7 @@ val multiplyDF = spark.sql("select RS_Multiply(band1, band2) as multiplyBands fr
 
 Introduction: Multiply a factor to a spectral band in a geotiff image
 
-Format: `RS_MultiplyFactor (Band1: Array[Double], Factor: Int)`
+Format: `RS_MultiplyFactor (Band1: Array[Double], Factor: Double)`
 
 Since: `v1.1.0`
 
@@ -527,6 +527,8 @@ Spark SQL example:
 val multiplyFactorDF = spark.sql("select RS_MultiplyFactor(band1, 2) as multiplyfactor from dataframe")
 
 ```
+
+This function only accepts integer as factor before `v1.5.0`.
 
 ### RS_Normalize
 
