@@ -505,6 +505,81 @@ The details of a join query is available here [Join query](../api/sql/Optimizer.
 
 There are lots of other functions can be combined with these queries. Please read [SedonaSQL functions](../api/sql/Function.md) and [SedonaSQL aggregate functions](../api/sql/AggregateFunction.md).
 
+## Visualize query results
+
+==Sedona >= 1.5.0==
+
+
+Spatial query results can be visualized in Jupyter lab/notebook using SedonaKepler. 
+
+SedonaKepler exposes APIs to create interactive and customizable map visualizations using [KeplerGl](https://kepler.gl/).
+
+### Creating a map object using SedonaKepler.create_map
+
+SedonaKepler exposes a create_map API with the following signature:
+
+```python
+create_map(df: SedonaDataFrame=None, name: str='unnamed', geometry_col: str='geometry', config: dict=None) -> map
+```
+
+The parameter 'name' is used to associate the passed SedonaDataFrame in the map object and any config applied to the map is linked to this name. It is recommended you pass a unique identifier to the dataframe here.
+
+The parameter 'geometry_col' is used to identify the geometry containing column. This is required if the column has a name other than the standard 'geometry'.
+
+!!!Note
+	Failure to pass the correct geometry column name (if it has a name other than 'geometry') will result in a failure to create a map object.
+
+If no SedonaDataFrame object is passed, an empty map (with config applied if passed) is returned. A SedonaDataFrame can be added later using the method `add_df`
+
+A map config can be passed optionally to apply pre-apply customizations to the map.
+
+!!!Note 
+	The map config references every customization with the name assigned to the SedonaDataFrame being displayed, if there is a mismatch in the name, the config will not be applied to the map object.
+
+
+!!! abstract "Example usage (Referenced from Sedona Jupyter examples)"
+
+	=== "Python"
+		```python
+		map = SedonaKepler.create_map(df=groupedresult, name="AirportCount", geometry_col="country_geom")
+		map
+		```
+
+### Adding SedonaDataFrame to a map object using SedonaKepler.add_df
+SedonaKepler exposes a add_df API with the following signature:
+
+```python
+add_df(map, df: SedonaDataFrame, name: str='unnamed', geometry_col='geometry')
+```
+
+This API can be used to add a SedonaDataFrame to an already created map object. The map object passed is directly mutated and nothing is returned.
+
+The parameters name and geometry_col have the same conditions as 'create_map'
+
+!!!Tip
+	This method can be used to add multiple dataframes to a map object to be able to visualize them together.
+
+!!! abstract "Example usage (Referenced from Sedona Jupyter examples)"
+	=== "Python"
+		```python
+		map = SedonaKepler.create_map()
+		SedonaKepler.add_df(map, groupedresult, name="AirportCount", geometry_col="country_geom")
+		map
+		```
+
+### Setting a config via the map 
+A map rendered by accessing the map object created by SedonaKepler includes a config panel which can be used to customize the map
+
+<img src="../../image/sedona_customization.gif" width="1000">
+
+
+### Saving and setting config
+
+A map object's current config can be accessed by accessing its 'config' attribute like `map.config`. This config can be saved for future use or use across notebooks if the exact same map is to be rendered everytime.
+
+!!!Note
+	The map config references each applied customization with the name given to the dataframe and hence will work only on maps with the same name of dataframe supplied.
+	For more details refer to keplerGl documentation [here](https://docs.kepler.gl/docs/keplergl-jupyter#6.-match-config-with-data)
 ## Save to permanent storage
 
 To save a Spatial DataFrame to some permanent storage such as Hive tables and HDFS, you can simply convert each geometry in the Geometry type column back to a plain String and save the plain DataFrame to wherever you want.
