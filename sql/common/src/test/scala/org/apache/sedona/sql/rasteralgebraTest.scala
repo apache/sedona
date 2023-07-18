@@ -71,6 +71,12 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(inputDf.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
     }
 
+    it("Passed RS_MultiplyFactor with double factor") {
+      val inputDf = Seq((Seq(200.0, 400.0, 600.0))).toDF("Band")
+      val expectedDF = Seq((Seq(20.0, 40.0, 60.0))).toDF("multiply")
+      val actualDF = inputDf.selectExpr("RS_MultiplyFactor(Band, 0.1) as multiply")
+      assert(actualDF.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
+    }
   }
 
   describe("Should pass basic statistical tests") {
@@ -201,6 +207,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       var df = Seq((Seq(800.0, 900.0, 0.0, 255.0)), (Seq(100.0, 200.0, 700.0, 900.0))).toDF("Band")
       df = df.selectExpr("RS_Normalize(Band) as normalizedBand")
       assert(df.first().getAs[mutable.WrappedArray[Double]](0)(1) == 255)
+    }
+
+    it("should pass RS_Array") {
+      val df = sparkSession.sql("SELECT RS_Array(6, 1e-6) as band")
+      val result = df.first().getAs[mutable.WrappedArray[Double]](0)
+      assert(result.length == 6)
+      assert(result sameElements Array.fill[Double](6)(1e-6))
     }
   }
 
