@@ -384,5 +384,9 @@ object st_functions extends DataFrameAPI {
 
   def ST_CoordDim(geometry: String): Column = wrapExpression[ST_CoordDim](geometry)
 
+  def ST_IsCollection(geometry: Column): Column = wrapExpression[ST_IsCollection](geometry)
+
+  def ST_IsCollection(geometry: String): Column = wrapExpression[ST_IsCollection](geometry)
+
 }
  

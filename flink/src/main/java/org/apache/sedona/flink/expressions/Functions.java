@@ -13,6 +13,7 @@
  */
 package org.apache.sedona.flink.expressions;
 
+import org.apache.calcite.interpreter.Scalar;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.annotation.InputGroup;
@@ -945,6 +946,14 @@ public class Functions {
         public Integer eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.nDims(geom);
+        }
+    }
+
+    public static class ST_IsCollection extends ScalarFunction {
+        @DataTypeHint("Boolean")
+        public boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.isCollection(geom);
         }
     }
 

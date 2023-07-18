@@ -104,6 +104,7 @@ test_configurations = [
     (stf.ST_HausdorffDistance, ("point", "line",), "point_and_line", "", 5.0990195135927845),
     (stf.ST_InteriorRingN, ("geom", 0), "geom_with_hole", "", "LINESTRING (1 1, 2 2, 2 1, 1 1)"),
     (stf.ST_Intersection, ("a", "b"), "overlapping_polys", "", "POLYGON ((2 0, 1 0, 1 1, 2 1, 2 0))"),
+    (stf.ST_IsCollection, ("geom",), "geom_collection", "", True),
     (stf.ST_IsClosed, ("geom",), "closed_linestring_geom", "", True),
     (stf.ST_IsEmpty, ("geom",), "empty_geom", "", True),
     (stf.ST_IsRing, ("line",), "linestring_geom", "", False),

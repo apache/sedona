@@ -111,6 +111,7 @@ object Catalog {
     function[ST_Dump](),
     function[ST_DumpPoints](),
     function[ST_IsClosed](),
+    function[ST_IsCollection](),
     function[ST_NumInteriorRings](),
     function[ST_AddPoint](-1),
     function[ST_RemovePoint](-1),

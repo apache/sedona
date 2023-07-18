@@ -1087,6 +1087,20 @@ Example:
 SELECT ST_IsClosed(ST_GeomFromText('LINESTRING(0 0, 1 1, 1 0)'))
 ```
 
+## ST_IsCollection
+
+Introduction: Returns `TRUE` if the argument type is a geometry collection type.
+
+Format: `ST_IsCollection(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_IsCollection(ST_GeomFromText('MULTIPOINT(0 0), (6 6)'))
+```
+
 ## ST_IsEmpty
 
 Introduction: Test if a geometry is empty geometry
