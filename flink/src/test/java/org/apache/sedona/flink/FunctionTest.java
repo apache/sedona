@@ -1049,16 +1049,18 @@ public class FunctionTest extends TestBase{
 
     @Test
     public void testIsCollectionForCollection() {
-        Table collectionTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION(POINT(2 3), POINT(4 6), LINESTRING(15 15, 20 20)') AS collection");
-        Table resultTable = collectionTable.select(call(Functions.ST_IsCollection.class.getSimpleName()), $("collection"));
-        assertTrue((boolean) first(resultTable).getField(0));
+        Table collectionTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION(POINT(2 3), POINT(4 6), LINESTRING(15 15, 20 20))') AS collection");
+        Table resultTable = collectionTable.select(call(Functions.ST_IsCollection.class.getSimpleName(), $("collection")));
+        boolean result = (boolean) first(resultTable).getField(0);
+        assertTrue(result);
     }
 
     @Test
     public void testIsCollectionForNotCollection() {
         Table collectionTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT(10 10)') AS collection");
         Table resultTable = collectionTable.select(call(Functions.ST_IsCollection.class.getSimpleName(), $("collection")));
-        assertFalse((boolean) first(resultTable).getField(0));
+        boolean result = (boolean) first(resultTable).getField(0);
+        assertFalse(result);
     }
 
     @Test

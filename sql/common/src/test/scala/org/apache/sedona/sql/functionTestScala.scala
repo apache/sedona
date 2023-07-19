@@ -2177,8 +2177,9 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
   }
 
   it("Should pass ST_IsCollection") {
-    val test = sparkSession.sql("SELECT ST_IsCollection(ST_GeomFromText('GEOMETRYCOLLECTION(POINT(2 3), POINT(4 6), LINESTRING(15 15, 20 20)'))")
-    assert(test.take(1)(0).get(0).asInstanceOf[Boolean] == true)
+    val test = sparkSession.sql("SELECT ST_IsCollection(ST_GeomFromText('GEOMETRYCOLLECTION(POINT(2 3), POINT(4 6), LINESTRING(15 15, 20 20))'))")
+    val expected = true
+    assert(test.take(1)(0).get(0).asInstanceOf[Boolean] == expected)
   }
 
   it ("should pass GeometryType") {
