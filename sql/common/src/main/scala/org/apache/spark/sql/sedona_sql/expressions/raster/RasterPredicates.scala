@@ -19,31 +19,11 @@
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
 import org.apache.sedona.common.raster.RasterPredicates
-import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression}
-import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
-import org.apache.spark.sql.sedona_sql.expressions.implicits.InputExpressionEnhancer
-import org.apache.spark.sql.sedona_sql.expressions.raster.implicits.RasterInputExpressionEnhancer
-import org.apache.spark.sql.types.{AbstractDataType, BooleanType, DataType}
+import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
-case class RS_Intersects(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {
-
-  override def eval(input: InternalRow): Any = {
-    val raster = inputExpressions.head.toRaster(input)
-    val geom = inputExpressions(1).toGeometry(input)
-    if (raster == null || geom == null) {
-      null
-    } else {
-      RasterPredicates.rsIntersects(raster, geom)
-    }
-  }
-
-  override def nullable: Boolean = true
-  override def dataType: DataType = BooleanType
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, GeometryUDT)
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_Intersects(inputExpressions: Seq[Expression]) extends InferredExpression(RasterPredicates.rsIntersects _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

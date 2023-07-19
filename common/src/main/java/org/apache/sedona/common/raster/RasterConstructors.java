@@ -93,15 +93,9 @@ public class RasterConstructors
         } else {
             crs = CRS.decode("EPSG:" + srid);
         }
-        // If scaleY is not defined, use scaleX
-        // MAX_VALUE is used to indicate that the scaleY is not defined
-        double actualScaleY = scaleY;
-        if (scaleY == Integer.MAX_VALUE) {
-            actualScaleY = scaleX;
-        }
         // Create a new empty raster
         WritableRaster raster = RasterFactory.createBandedRaster(DataBuffer.TYPE_DOUBLE, widthInPixel, heightInPixel, numBand, null);
-        MathTransform transform = new AffineTransform2D(scaleX, skewY, skewX, -actualScaleY, upperLeftX + scaleX / 2, upperLeftY - actualScaleY / 2);
+        MathTransform transform = new AffineTransform2D(scaleX, skewY, skewX, -scaleY, upperLeftX + scaleX / 2, upperLeftY - scaleY / 2);
         GridGeometry2D gridGeometry = new GridGeometry2D(new GridEnvelope2D(0, 0, widthInPixel, heightInPixel), transform, crs);
         ReferencedEnvelope referencedEnvelope = new ReferencedEnvelope(gridGeometry.getEnvelope2D());
         // Create a new coverage

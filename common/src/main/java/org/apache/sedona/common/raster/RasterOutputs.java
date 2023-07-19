@@ -35,7 +35,7 @@ import java.io.IOException;
 
 public class RasterOutputs
 {
-    public static byte[] asGeoTiff(GridCoverage2D raster, String compressionType, float compressionQuality) {
+    public static byte[] asGeoTiff(GridCoverage2D raster, String compressionType, double compressionQuality) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         GridCoverageWriter writer;
         try {
@@ -52,7 +52,7 @@ public class RasterOutputs
             params.setCompressionType(compressionType);
             // Should be a value between 0 and 1
             // 0 means max compression, 1 means no compression
-            params.setCompressionQuality(compressionQuality);
+            params.setCompressionQuality((float) compressionQuality);
             defaultParams.parameter(AbstractGridFormat.GEOTOOLS_WRITE_PARAMS.getName().toString()).setValue(params);
         }
         GeneralParameterValue[] wps = defaultParams.values().toArray(new GeneralParameterValue[0]);
@@ -65,6 +65,10 @@ public class RasterOutputs
             throw new RuntimeException(e);
         }
         return out.toByteArray();
+    }
+
+    public static byte[] asGeoTiff(GridCoverage2D raster) {
+        return asGeoTiff(raster, null, -1);
     }
 
     public static byte[] asArcGrid(GridCoverage2D raster, int sourceBand) {
@@ -92,5 +96,9 @@ public class RasterOutputs
             throw new RuntimeException(e);
         }
         return out.toByteArray();
+    }
+
+    public static byte[] asArcGrid(GridCoverage2D raster) {
+        return asArcGrid(raster, -1);
     }
 }
