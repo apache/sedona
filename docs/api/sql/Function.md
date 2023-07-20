@@ -1084,7 +1084,11 @@ Output: `false`
 
 ## ST_IsCollection
 
-Introduction: Returns `TRUE` if the argument type is a geometry collection type.
+Introduction: Returns `TRUE` if the geometry type of the input is a geometry collection type.
+Collection types are the following:
+
+- GEOMETRYCOLLECTION
+- MULTI{POINT, POLYGON, LINESTRING}
 
 Format: `ST_IsCollection(geom: geometry)`
 
