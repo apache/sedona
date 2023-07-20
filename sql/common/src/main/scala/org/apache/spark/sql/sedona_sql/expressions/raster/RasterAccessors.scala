@@ -19,103 +19,30 @@
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
 import org.apache.sedona.common.raster.RasterAccessors
-import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression}
-import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.util.GenericArrayData
-import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
-import org.apache.spark.sql.sedona_sql.expressions.implicits.GeometryEnhancer
-import org.apache.spark.sql.sedona_sql.expressions.raster.implicits.RasterInputExpressionEnhancer
-import org.apache.spark.sql.types.{AbstractDataType, ArrayType, DataType, DoubleType, IntegerType}
+import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
-case class RS_Envelope(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val raster = inputExpressions(0).toRaster(input)
-    if (raster == null) {
-      null
-    } else {
-      RasterAccessors.envelope(raster).toGenericArrayData
-    }
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_Envelope(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.envelope _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT)
 }
 
-case class RS_NumBands(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val raster = inputExpressions(0).toRaster(input)
-    if (raster == null) {
-      null
-    } else {
-      RasterAccessors.numBands(raster)
-    }
-  }
-
-  override def dataType: DataType = IntegerType
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_NumBands(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.numBands _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT)
 }
 
-case class RS_SRID(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val raster = inputExpressions(0).toRaster(input)
-    if (raster == null) {
-      null
-    } else {
-      RasterAccessors.srid(raster)
-    }
-  }
-
-  override def dataType: DataType = IntegerType
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_SRID(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.srid _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT)
 }
 
-case class RS_Metadata(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val raster = inputExpressions(0).toRaster(input)
-    if (raster == null) {
-      null
-    } else {
-      new GenericArrayData(RasterAccessors.metadata(raster))
-    }
-  }
-
-  override def dataType: DataType = ArrayType(DoubleType)
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_Metadata(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.metadata _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT)
 }

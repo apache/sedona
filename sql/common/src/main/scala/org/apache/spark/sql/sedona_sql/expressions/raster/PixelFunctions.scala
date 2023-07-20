@@ -25,34 +25,15 @@ import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
-import org.apache.spark.sql.sedona_sql.expressions.implicits.InputExpressionEnhancer
 import org.apache.spark.sql.sedona_sql.expressions.raster.implicits.RasterInputExpressionEnhancer
 import org.apache.spark.sql.types.{AbstractDataType, ArrayType, DataType, DoubleType, IntegerType}
+import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
-case class RS_Value(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {
-
-  override def nullable: Boolean = true
-
-  override def dataType: DataType = DoubleType
-
-  override def eval(input: InternalRow): Any = {
-    val raster = inputExpressions.head.toRaster(input)
-    val geom = inputExpressions(1).toGeometry(input)
-    val band = inputExpressions(2).eval(input).asInstanceOf[Int]
-    if (raster == null || geom == null) {
-      null
-    } else {
-      PixelFunctions.value(raster, geom, band)
-    }
-  }
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_Value(inputExpressions: Seq[Expression]) extends InferredExpression(PixelFunctions.value _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, GeometryUDT, IntegerType)
 }
 
 case class RS_Values(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {
