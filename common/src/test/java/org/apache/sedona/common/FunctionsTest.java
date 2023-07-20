@@ -1153,6 +1153,27 @@ public class FunctionsTest {
         assertEquals("ST_Angle supports either only POINT or only LINESTRING geometries.", e.getMessage());
     }
 
+    @Test
+    public void isCollectionWithCollection() {
+        Point[] points = new Point[]{
+                GEOMETRY_FACTORY.createPoint(new Coordinate(5.0, 6.0)),
+                GEOMETRY_FACTORY.createPoint(new Coordinate(7.0, 8.0))
+        };
+        GeometryCollection geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(points);
+
+        boolean actualResult = Functions.isCollection(geometryCollection);
+        boolean expectedResult = true;
+        assertEquals(actualResult, expectedResult);
+    }
+
+    @Test
+    public void isCollectionWithOutCollection() {
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(6.0, 6.0));
+
+        boolean actualResult = Functions.isCollection(point);
+        boolean expectedResult = false;
+        assertEquals(actualResult, expectedResult);
+    }
 
     public void affineEmpty3D() {
         LineString emptyLineString = GEOMETRY_FACTORY.createLineString();

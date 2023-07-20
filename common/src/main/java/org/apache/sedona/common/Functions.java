@@ -988,6 +988,14 @@ public class Functions {
         return GeomUtils.getFrechetDistance(g1, g2);
     }
 
+    public static boolean isCollection(Geometry geometry) {
+        String geoType = geometry.getGeometryType();
+        return Geometry.TYPENAME_GEOMETRYCOLLECTION.equalsIgnoreCase(geoType) ||
+                Geometry.TYPENAME_MULTIPOINT.equalsIgnoreCase(geoType) ||
+                Geometry.TYPENAME_MULTIPOLYGON.equalsIgnoreCase(geoType) ||
+                Geometry.TYPENAME_MULTILINESTRING.equalsIgnoreCase(geoType);
+    }
+
     public static Geometry boundingDiagonal(Geometry geometry) {
         if (geometry.isEmpty()) {
             return GEOMETRY_FACTORY.createLineString();

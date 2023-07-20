@@ -1082,6 +1082,33 @@ SELECT ST_IsClosed(ST_GeomFromText('LINESTRING(0 0, 1 1, 1 0)'))
 
 Output: `false`
 
+## ST_IsCollection
+
+Introduction: Returns `TRUE` if the geometry type of the input is a geometry collection type.
+Collection types are the following:
+
+- GEOMETRYCOLLECTION
+- MULTI{POINT, POLYGON, LINESTRING}
+
+Format: `ST_IsCollection(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_IsCollection(ST_GeomFromText('MULTIPOINT(0 0), (6 6)'))
+```
+
+Output: `true`
+
+Example:
+```sql
+SELECT ST_IsCollection(ST_GeomFromText('POINT(5 5)'))
+```
+
+Output: `false`
+
 ## ST_IsEmpty
 
 Introduction: Test if a geometry is empty geometry

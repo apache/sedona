@@ -948,6 +948,14 @@ public class Functions {
         }
     }
 
+    public static class ST_IsCollection extends ScalarFunction {
+        @DataTypeHint("Boolean")
+        public boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.isCollection(geom);
+        }
+    }
+
     public static class ST_Angle extends ScalarFunction {
 
         @DataTypeHint("Double")
