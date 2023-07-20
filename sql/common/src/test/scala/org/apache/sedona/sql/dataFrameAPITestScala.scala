@@ -1076,6 +1076,22 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(expected == actual)
     }
 
+    it("Passed ST_IsCollection with a collection") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION(POINT(3 2), POINT(6 4))') AS collection")
+      val df = baseDf.select(ST_IsCollection("collection"))
+      val actualResult = df.take(1)(0).getBoolean(0)
+      val expectedResult = true
+      assert(actualResult == expectedResult)
+    }
+
+    it("Passed ST_IsCollection without a collection") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT(9 9)') AS collection")
+      val df = baseDf.select(ST_IsCollection("collection"))
+      val actualResult = df.take(1)(0).getBoolean(0)
+      val expectedResult = false
+      assert(actualResult == expectedResult)
+    }
+
     it("Passed ST_Angle - 4 Points") {
       val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (10 10)') AS p1, ST_GeomFromWKT('POINT (0 0)') AS p2," +
         " ST_GeomFromWKT('POINT (90 90)') AS p3, ST_GeomFromWKT('POINT (100 80)') AS p4")
