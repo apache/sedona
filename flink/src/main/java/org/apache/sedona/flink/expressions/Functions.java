@@ -13,7 +13,6 @@
  */
 package org.apache.sedona.flink.expressions;
 
-import org.apache.calcite.interpreter.Scalar;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.annotation.InputGroup;
