@@ -988,6 +988,14 @@ public class Functions {
         return GeomUtils.getFrechetDistance(g1, g2);
     }
 
+    public static boolean isCollection(Geometry geometry) {
+        String geoType = geometry.getGeometryType();
+        return Geometry.TYPENAME_GEOMETRYCOLLECTION.equalsIgnoreCase(geoType) ||
+                Geometry.TYPENAME_MULTIPOINT.equalsIgnoreCase(geoType) ||
+                Geometry.TYPENAME_MULTIPOLYGON.equalsIgnoreCase(geoType) ||
+                Geometry.TYPENAME_MULTILINESTRING.equalsIgnoreCase(geoType);
+    }
+
     public static Geometry boundingDiagonal(Geometry geometry) {
         if (geometry.isEmpty()) {
             return GEOMETRY_FACTORY.createLineString();
@@ -1055,4 +1063,5 @@ public class Functions {
     public static Double hausdorffDistance(Geometry g1, Geometry g2) throws Exception{
         return GeomUtils.getHausdorffDistance(g1, g2, -1);
     }
+
 }

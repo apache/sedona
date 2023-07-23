@@ -593,6 +593,30 @@ SELECT ST_ConvexHull(polygondf.countyshape)
 FROM polygondf
 ```
 
+##  ST_CoordDim
+
+Introduction: Returns the coordinate dimensions of the geometry. It is an alias of `ST_NDims`.
+
+Format: `ST_CoordDim(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example with x, y, z coordinate:
+
+```sql
+SELECT ST_CoordDim(ST_GeomFromText('POINT(1 1 2'))
+```
+
+Output: `3`
+
+Example with x, y coordinate:
+
+```sql
+SELECT ST_CoordDim(ST_GeomFromEWKT('POINT(3 7)'))
+```
+
+Output: `2`
+
 ## ST_Degrees
 
 Introduction: Convert an angle in radian to degrees.
@@ -1054,6 +1078,33 @@ Since: `v1.0.0`
 Spark SQL example:
 ```sql
 SELECT ST_IsClosed(ST_GeomFromText('LINESTRING(0 0, 1 1, 1 0)'))
+```
+
+Output: `false`
+
+## ST_IsCollection
+
+Introduction: Returns `TRUE` if the geometry type of the input is a geometry collection type.
+Collection types are the following:
+
+- GEOMETRYCOLLECTION
+- MULTI{POINT, POLYGON, LINESTRING}
+
+Format: `ST_IsCollection(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_IsCollection(ST_GeomFromText('MULTIPOINT(0 0), (6 6)'))
+```
+
+Output: `true`
+
+Example:
+```sql
+SELECT ST_IsCollection(ST_GeomFromText('POINT(5 5)'))
 ```
 
 Output: `false`

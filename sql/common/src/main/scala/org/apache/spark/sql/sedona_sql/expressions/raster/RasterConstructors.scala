@@ -18,105 +18,38 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
-import org.apache.sedona.common.raster.{RasterConstructors, Serde}
-import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, ImplicitCastInputTypes}
-import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
-import org.apache.spark.sql.sedona_sql.expressions.SerdeAware
-import org.apache.spark.sql.sedona_sql.expressions.raster.implicits._
-import org.apache.spark.sql.types._
-import org.geotools.coverage.grid.GridCoverage2D
+import org.apache.sedona.common.raster.RasterConstructors
+import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
-
-case class RS_FromArcInfoAsciiGrid(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback
-  with ExpectsInputTypes with SerdeAware {
-
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    Option(evalWithoutSerialization(input)).map(Serde.serialize).orNull
-  }
-
-  override def dataType: DataType = RasterUDT
-
-  override def children: Seq[Expression] = inputExpressions
+case class RS_FromArcInfoAsciiGrid(inputExpressions: Seq[Expression])
+  extends InferredExpression(RasterConstructors.fromArcInfoAsciiGrid _) {
+  override def foldable: Boolean = false
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
-  }
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(BinaryType)
-
-  override def evalWithoutSerialization(input: InternalRow): GridCoverage2D = {
-    val bytes = inputExpressions(0).eval(input).asInstanceOf[Array[Byte]]
-    if (bytes == null) {
-      null
-    } else {
-      RasterConstructors.fromArcInfoAsciiGrid(bytes)
-    }
   }
 }
 
-case class RS_FromGeoTiff(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback
-  with ExpectsInputTypes with SerdeAware {
+case class RS_FromGeoTiff(inputExpressions: Seq[Expression])
+  extends InferredExpression(RasterConstructors.fromGeoTiff _) {
 
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    Option(evalWithoutSerialization(input)).map(Serde.serialize).orNull
-  }
-
-  override def dataType: DataType = RasterUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  override def foldable: Boolean = false
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
-  }
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(BinaryType)
-
-  override def evalWithoutSerialization(input: InternalRow): GridCoverage2D = {
-    val bytes = inputExpressions(0).eval(input).asInstanceOf[Array[Byte]]
-    if (bytes == null) {
-      null
-    } else {
-      RasterConstructors.fromGeoTiff(bytes)
-    }
   }
 }
 
-case class RS_MakeEmptyRaster(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback
-  with ImplicitCastInputTypes with SerdeAware {
+case class RS_MakeEmptyRaster(inputExpressions: Seq[Expression])
+  extends InferredExpression(
+    inferrableFunction6(RasterConstructors.makeEmptyRaster),
+    inferrableFunction10(RasterConstructors.makeEmptyRaster)) {
 
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    Option(evalWithoutSerialization(input)).map(Serde.serialize).orNull
-  }
-
-  override def dataType: DataType = RasterUDT
-
-  override def children: Seq[Expression] = inputExpressions
+  override def foldable: Boolean = false
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
-  }
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(IntegerType, IntegerType, IntegerType, DecimalType, DecimalType, DecimalType, DecimalType, DecimalType, DecimalType, IntegerType)
-
-  override def evalWithoutSerialization(input: InternalRow): GridCoverage2D = {
-    val numBands = inputExpressions(0).eval(input).asInstanceOf[Int]
-    val widthInPixels = inputExpressions(1).eval(input).asInstanceOf[Int]
-    val heightInPixel = inputExpressions(2).eval(input).asInstanceOf[Int]
-    val upperLeftX = inputExpressions(3).eval(input).asInstanceOf[Decimal].toDouble
-    val upperLeftY = inputExpressions(4).eval(input).asInstanceOf[Decimal].toDouble
-    val pixelSizeX = inputExpressions(5).eval(input).asInstanceOf[Decimal].toDouble
-    val pixelSizeY = inputExpressions(6).eval(input).asInstanceOf[Decimal].toDouble
-    val skewX = inputExpressions(7).eval(input).asInstanceOf[Decimal].toDouble
-    val skewY = inputExpressions(8).eval(input).asInstanceOf[Decimal].toDouble
-    val srid = inputExpressions(9).eval(input).asInstanceOf[Int]
-    RasterConstructors.makeEmptyRaster(numBands, widthInPixels, heightInPixel, upperLeftX, upperLeftY, pixelSizeX, pixelSizeY, skewX, skewY, srid)
   }
 }

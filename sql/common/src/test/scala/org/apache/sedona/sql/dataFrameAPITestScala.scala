@@ -1044,6 +1044,54 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertEquals(expected, actual)
     }
 
+    it("Passed ST_CoordDim with 3D point") {
+      val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT(1 1 2)') AS geom")
+      val expected = 3
+      val df = polyDf.select(ST_CoordDim("geom"))
+      val actual = df.take(1)(0).getInt(0)
+      assert(expected == actual)
+    }
+
+    it("Passed ST_CoordDim with Z coordinates") {
+      val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINTZ(1 1 0.5)') AS geom")
+      val expected = 3
+      val df = polyDf.select(ST_CoordDim("geom"))
+      val actual = df.take(1)(0).getInt(0)
+      assert(expected == actual)
+    }
+
+    it("Passed ST_CoordDim with XYM point") {
+      val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT M(1 2 3)') AS geom")
+      val expected = 3
+      val df = polyDf.select(ST_CoordDim("geom"))
+      val actual = df.take(1)(0).getInt(0)
+      assert(expected == actual)
+    }
+
+    it("Passed ST_CoordDim with XYZM point") {
+      val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT ZM(1 2 3 4)') AS geom")
+      val expected = 4
+      val df = polyDf.select(ST_CoordDim("geom"))
+      val actual = df.take(1)(0).getInt(0)
+      assert(expected == actual)
+    }
+
+    it("Passed ST_IsCollection with a collection") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION(POINT(3 2), POINT(6 4))') AS collection")
+      val df = baseDf.select(ST_IsCollection("collection"))
+      val actualResult = df.take(1)(0).getBoolean(0)
+      val expectedResult = true
+      assert(actualResult == expectedResult)
+    }
+
+    it("Passed ST_IsCollection without a collection") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT(9 9)') AS collection")
+      val df = baseDf.select(ST_IsCollection("collection"))
+      val actualResult = df.take(1)(0).getBoolean(0)
+      val expectedResult = false
+      assert(actualResult == expectedResult)
+    }
+
     it("Passed ST_Angle - 4 Points") {
       val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (10 10)') AS p1, ST_GeomFromWKT('POINT (0 0)') AS p2," +
         " ST_GeomFromWKT('POINT (90 90)') AS p3, ST_GeomFromWKT('POINT (100 80)') AS p4")

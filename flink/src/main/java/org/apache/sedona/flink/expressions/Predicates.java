@@ -33,7 +33,7 @@ public class Predicates {
         {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
-            return geom1.intersects(geom2);
+            return org.apache.sedona.common.Predicates.intersects(geom1, geom2);
         }
     }
 
@@ -53,7 +53,7 @@ public class Predicates {
         {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
-            return geom1.contains(geom2);
+            return org.apache.sedona.common.Predicates.contains(geom1, geom2);
         }
     }
 
@@ -72,7 +72,7 @@ public class Predicates {
         {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
-            return geom1.within(geom2);
+            return org.apache.sedona.common.Predicates.within(geom1, geom2);
         }
     }
 
@@ -92,7 +92,7 @@ public class Predicates {
         {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
-            return geom1.covers(geom2);
+            return org.apache.sedona.common.Predicates.covers(geom1, geom2);
         }
     }
 
@@ -112,7 +112,25 @@ public class Predicates {
         {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
-            return geom1.coveredBy(geom2);
+            return org.apache.sedona.common.Predicates.coveredBy(geom1, geom2);
+        }
+    }
+
+    public static class ST_Crosses extends ScalarFunction
+    {
+        /**
+         * Constructor for relation checking without duplicate removal
+         */
+        public ST_Crosses()
+        {
+        }
+
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2)
+        {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            return org.apache.sedona.common.Predicates.crosses(geom1, geom2);
         }
     }
 
@@ -132,7 +150,27 @@ public class Predicates {
         {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
-            return geom1.disjoint(geom2);
+            return org.apache.sedona.common.Predicates.disjoint(geom1, geom2);
+        }
+    }
+
+    public static class ST_Equals
+            extends ScalarFunction
+    {
+
+        /**
+         * Constructor for relation checking without duplicate removal
+         */
+        public ST_Equals()
+        {
+        }
+
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2)
+        {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            return org.apache.sedona.common.Predicates.equals(geom1, geom2);
         }
     }
 
@@ -152,7 +190,47 @@ public class Predicates {
         {
             Geometry geom1 = (Geometry) o1;
             Geometry geom2 = (Geometry) o2;
-            return geom1.equalsExact(geom2);
+            return org.apache.sedona.common.Predicates.orderingEquals(geom1, geom2);
+        }
+    }
+
+    public static class ST_Overlaps
+            extends ScalarFunction
+    {
+
+        /**
+         * Constructor for relation checking without duplicate removal
+         */
+        public ST_Overlaps()
+        {
+        }
+
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2)
+        {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            return org.apache.sedona.common.Predicates.overlaps(geom1, geom2);
+        }
+    }
+
+    public static class ST_Touches
+            extends ScalarFunction
+    {
+
+        /**
+         * Constructor for relation checking without duplicate removal
+         */
+        public ST_Touches()
+        {
+        }
+
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2)
+        {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            return org.apache.sedona.common.Predicates.touches(geom1, geom2);
         }
     }
 }

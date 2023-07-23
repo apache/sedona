@@ -19,59 +19,21 @@
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
 import org.apache.sedona.common.raster.RasterOutputs
-import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
-import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.sedona_sql.expressions.raster.implicits.RasterInputExpressionEnhancer
-import org.apache.spark.sql.types._
-import org.apache.spark.unsafe.types.UTF8String
+import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
-// Expected Types (RasterUDT, StringType, IntegerType) or (RasterUDT, StringType, DecimalType)
-case class RS_AsGeoTiff(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback {
-
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val raster = inputExpressions(0).toRaster(input)
-    if (raster == null) return null
-    // If there are more than one input expressions, the additional ones are used as parameters
-    if (inputExpressions.length > 1) {
-      RasterOutputs.asGeoTiff(raster, inputExpressions(1).eval(input).asInstanceOf[UTF8String].toString, inputExpressions(2).eval(input).toString.toFloat)
-    }
-    else {
-      RasterOutputs.asGeoTiff(raster, null, -1)
-    }
-  }
-
-  override def dataType: DataType = BinaryType
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_AsGeoTiff(inputExpressions: Seq[Expression])
+  extends InferredExpression(inferrableFunction3(RasterOutputs.asGeoTiff),
+    inferrableFunction1(RasterOutputs.asGeoTiff)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-case class RS_AsArcGrid(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback {
-
-  override def nullable: Boolean = true
-
-  override def eval(input: InternalRow): Any = {
-    val raster = inputExpressions(0).toRaster(input)
-    if (raster == null) return null
-    // If there are more than one input expressions, the additional ones are used as parameters
-    if (inputExpressions.length > 1) {
-      RasterOutputs.asArcGrid(raster, inputExpressions(1).eval(input).asInstanceOf[Int])
-    }
-    else {
-      RasterOutputs.asArcGrid(raster, -1)
-    }
-  }
-
-  override def dataType: DataType = BinaryType
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_AsArcGrid(inputExpressions: Seq[Expression])
+  extends InferredExpression(inferrableFunction2(RasterOutputs.asArcGrid),
+    inferrableFunction1(RasterOutputs.asArcGrid)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

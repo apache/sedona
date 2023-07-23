@@ -22,8 +22,10 @@ public class Catalog {
     public static UserDefinedFunction[] getFuncs() {
         return new UserDefinedFunction[]{
                 new Aggregators.ST_Envelope_Aggr(),
+                new Aggregators.ST_Intersection_Aggr(),
                 new Aggregators.ST_Union_Aggr(),
                 new Constructors.ST_Point(),
+                new Constructors.ST_PointZ(),
                 new Constructors.ST_PointFromText(),
                 new Constructors.ST_LineStringFromText(),
                 new Constructors.ST_LineFromText(),
@@ -46,6 +48,7 @@ public class Catalog {
                 new Functions.ST_Buffer(),
                 new Functions.ST_ClosestPoint(),
                 new Functions.ST_Centroid(),
+                new Functions.ST_Collect(),
                 new Functions.ST_CollectionExtract(),
                 new Functions.ST_ConcaveHull(),
                 new Functions.ST_ConvexHull(),
@@ -132,6 +135,8 @@ public class Catalog {
                 new Functions.ST_Angle(),
                 new Functions.ST_Degrees(),
                 new Functions.ST_HausdorffDistance(),
+                new Functions.ST_IsCollection(),
+                new Functions.ST_CoordDim(),
         };
     }
 
@@ -139,11 +144,15 @@ public class Catalog {
         return new UserDefinedFunction[]{
                 new Predicates.ST_Intersects(),
                 new Predicates.ST_Contains(),
+                new Predicates.ST_Crosses(),
                 new Predicates.ST_Within(),
                 new Predicates.ST_Covers(),
                 new Predicates.ST_CoveredBy(),
                 new Predicates.ST_Disjoint(),
+                new Predicates.ST_Equals(),
                 new Predicates.ST_OrderingEquals(),
+                new Predicates.ST_Overlaps(),
+                new Predicates.ST_Touches(),
         };
     }
 }

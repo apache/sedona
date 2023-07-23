@@ -118,6 +118,8 @@ __all__ = [
     "ST_Angle",
     "ST_Degrees",
     "ST_FrechetDistance",
+    "ST_CoordDim",
+    "ST_IsCollection",
     "ST_Affine",
     "ST_BoundingDiagonal"
 ]
@@ -1422,3 +1424,24 @@ def ST_HausdorffDistance(g1: ColumnOrName, g2: ColumnOrName, densityFrac: Option
     args = (g1, g2, densityFrac)
     return _call_st_function("ST_HausdorffDistance", args)
 
+@validate_argument_types
+def ST_CoordDim(geometry: ColumnOrName) -> Column:
+    """Return the number of dimensions contained in a coordinate
+
+    :param geometry: Geometry column to return for.
+    :type geometry: ColumnOrName
+    :return: Number of dimensinos in a coordinate column as an integer column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_CoordDim", geometry)
+
+@validate_argument_types
+def ST_IsCollection(geometry: ColumnOrName) -> Column:
+    """Check if the geometry is of GeometryCollection type.
+
+    :param geometry: Column for geometry collection
+    :type geometry: ColumnOrName
+    :return: True if geometry is a collection of geometries.
+    :rtype: Column
+    """
+    return _call_st_function("ST_IsCollection", geometry)

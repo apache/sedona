@@ -471,6 +471,58 @@ Input: `g1: 'POLYGON ((190 150, 20 10, 160 70, 190 150))', g2: ST_Buffer('POINT(
 
 Output: `POINT(131.59149149528952 101.89887534906197)`
 
+## ST_Collect
+
+Introduction: Returns MultiGeometry object based on geometry column/s or array with geometries
+
+Format
+
+`ST_Collect(*geom: geometry)`
+
+`ST_Collect(geom: array<geometry>)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_Collect(
+    ST_GeomFromText('POINT(21.427834 52.042576573)'),
+    ST_GeomFromText('POINT(45.342524 56.342354355)')
+) AS geom
+```
+
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|MULTIPOINT ((21.427834 52.042576573), (45.342524 56.342354355))|
++---------------------------------------------------------------+
+```
+
+Example:
+
+```sql
+SELECT ST_Collect(
+    Array(
+        ST_GeomFromText('POINT(21.427834 52.042576573)'),
+        ST_GeomFromText('POINT(45.342524 56.342354355)')
+    )
+) AS geom
+```
+
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|MULTIPOINT ((21.427834 52.042576573), (45.342524 56.342354355))|
++---------------------------------------------------------------+
+```
+
 ## ST_CollectionExtract
 
 Introduction: Returns a homogeneous multi-geometry from a given geometry collection.
@@ -545,6 +597,30 @@ Example:
 SELECT ST_ConvexHull(polygondf.countyshape)
 FROM polygondf
 ```
+
+##  ST_CoordDim
+
+Introduction: Returns the coordinate dimensions of the geometry. It is an alias of `ST_NDims`.
+
+Format: `ST_CoordDim(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example with x, y, z coordinate:
+
+```sql
+SELECT ST_CoordDim(ST_GeomFromText('POINT(1 1 2'))
+```
+
+Output: `3`
+
+Example with x, y coordinate:
+
+```sql
+SELECT ST_CoordDim(ST_GeomFromEWKT('POINT(3 7)'))
+```
+
+Output: `2`
 
 ## ST_Dimension
 
@@ -1010,6 +1086,34 @@ Example:
 ```sql
 SELECT ST_IsClosed(ST_GeomFromText('LINESTRING(0 0, 1 1, 1 0)'))
 ```
+
+## ST_IsCollection
+
+Introduction: Returns `TRUE` if the geometry type of the input is a geometry collection type. 
+Collection types are the following:
+
+- GEOMETRYCOLLECTION
+- MULTI{POINT, POLYGON, LINESTRING}
+
+Format: `ST_IsCollection(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_IsCollection(ST_GeomFromText('MULTIPOINT(0 0), (6 6)'))
+```
+
+Output: `true`
+
+Example:
+
+```sql
+SELECT ST_IsCollection(ST_GeomFromText('POINT(5 5)'))
+```
+
+Output: `false`
 
 ## ST_IsEmpty
 
@@ -1932,3 +2036,5 @@ SELECT ST_ZMin(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'))
 ```
 
 Output: `4.0`
+
+

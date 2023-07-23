@@ -22,6 +22,7 @@ package org.apache.spark.sql.sedona_sql.expressions.raster
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeArrayData}
+import org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.expressions.UserDataGeneratator
 import org.apache.spark.sql.types._
@@ -126,14 +127,14 @@ case class RS_GetBand(inputExpressions: Seq[Expression])
 }
 
 case class RS_Array(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
+  extends Expression with ImplicitCastInputTypes with CodegenFallback with UserDataGeneratator {
   override def nullable: Boolean = false
 
   override def eval(inputRow: InternalRow): Any = {
     // This is an expression which takes one input expressions
     assert(inputExpressions.length == 2)
     val len =inputExpressions(0).eval(inputRow).asInstanceOf[Int]
-    val num = inputExpressions(1).eval(inputRow).asInstanceOf[Decimal].toDouble
+    val num = inputExpressions(1).eval(inputRow).asInstanceOf[Double]
     val result = createarray(len, num)
     new GenericArrayData(result)
   }
@@ -147,6 +148,8 @@ case class RS_Array(inputExpressions: Seq[Expression])
     }
     result
   }
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(IntegerType, DoubleType)
 
   override def dataType: DataType = ArrayType(DoubleType)
 

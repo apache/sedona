@@ -38,9 +38,19 @@ public class Constructors {
     public static class ST_Point extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y) throws ParseException {
-            Coordinate coordinates = new Coordinate(x, y);
-            GeometryFactory geometryFactory = new GeometryFactory();
-            return geometryFactory.createPoint(coordinates);
+            return org.apache.sedona.common.Constructors.point(x, y);
+        }
+    }
+
+    public static class ST_PointZ extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y, @DataTypeHint("Double") Double z) throws ParseException {
+            return eval(x, y, z, 0);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y, @DataTypeHint("Double") Double z, @DataTypeHint("Integer") Integer srid) throws ParseException {
+            return org.apache.sedona.common.Constructors.pointZ(x, y, z, srid);
         }
     }
 

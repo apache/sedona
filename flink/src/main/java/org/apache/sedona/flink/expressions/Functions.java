@@ -91,6 +91,23 @@ public class Functions {
             return org.apache.sedona.common.Functions.getCentroid(geom);
         }
     }
+
+    public static class ST_Collect extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, 
+                             @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2  ) {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            Geometry[] geoms = new Geometry[]{geom1, geom2};
+            return org.apache.sedona.common.Functions.createMultiGeometry(geoms);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(inputGroup = InputGroup.ANY) Object o) {
+            Geometry[] geoms = (Geometry[]) o;
+            return org.apache.sedona.common.Functions.createMultiGeometry(geoms);
+        }
+    }
     
     public static class ST_CollectionExtract extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
@@ -922,6 +939,23 @@ public class Functions {
         }
     }
 
+
+    public static class ST_CoordDim extends ScalarFunction {
+        @DataTypeHint("Integer")
+        public Integer eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.nDims(geom);
+        }
+    }
+
+    public static class ST_IsCollection extends ScalarFunction {
+        @DataTypeHint("Boolean")
+        public boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.isCollection(geom);
+        }
+    }
+
     public static class ST_Angle extends ScalarFunction {
 
         @DataTypeHint("Double")
@@ -962,6 +996,7 @@ public class Functions {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint("Double") Double angleInRadian) {
             return org.apache.sedona.common.Functions.degrees(angleInRadian);
+
         }
     }
 }
