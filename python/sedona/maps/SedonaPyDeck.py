@@ -21,12 +21,13 @@ from sedona.maps.SedonaMapUtils import SedonaMapUtils
 
 class SedonaPyDeck:
 
-
-    ## User Facing APIs
+    # User Facing APIs
     @classmethod
-    def create_choropleth_map(cls, df, fill_color=None, plot_col=None, initial_view_state=None, map_style=None, map_provider=None):
+    def create_choropleth_map(cls, df, fill_color=None, plot_col=None, initial_view_state=None, map_style=None,
+                              map_provider=None, elevation_col=0):
         """
         Create a pydeck map with a choropleth layer added
+        :param elevation_col: Optional elevation for the polygons
         :param df: SedonaDataFrame to plot on the choropleth map.
         :param fill_color: color scheme to fill the map with.
                 If no color scheme is given, a default color scheme is created using the 'plot_col' column as the quantizing column
@@ -37,29 +38,39 @@ class SedonaPyDeck:
         :return: A pydeck Map object with choropleth layer added:
         """
 
-        gdf = SedonaPyDeck.prepare_df(df)
+        if initial_view_state is None:
+            gdf = SedonaPyDeck._prepare_df_(df, add_coords=True)
+            initial_view_state = pdk.data_utils.compute_view(gdf['coordinate_array_sedona'])
+        else:
+            gdf = SedonaPyDeck._prepare_df_(df)
+
         if fill_color is None:
             fill_color = SedonaPyDeck._create_default_fill_color_(gdf, plot_col)
+
         choropleth_layer = pdk.Layer(
             'GeoJsonLayer',  # `type` positional argument is here
             data=gdf,
             auto_highlight=True,
             get_fill_color=fill_color,
             opacity=1.0,
+            get_elevation=elevation_col,
             stroked=False,
-            extruded=False,
+            extruded=True,
             wireframe=True,
             pickable=True
         )
 
-        p_map = pdk.Deck(layers=[choropleth_layer], map_style='light')
-        SedonaPyDeck._set_optional_parameters_(p_map, map_style, map_provider, initial_view_state)
-        return p_map
+        map_ = pdk.Deck(layers=[choropleth_layer], initial_view_state=initial_view_state)
+        SedonaPyDeck._set_optional_parameters_(p_map=map_, map_style=map_style, map_provider=map_provider)
+        return map_
 
     @classmethod
-    def create_polygon_map(cls, df, fill_color="[135, 206, 250, 255]", elevation_col=0, initial_view_state=None, map_style=None, map_provider=None):
+    def create_geometry_map(cls, df, fill_color="[85, 183, 177, 255]", line_color="[85, 183, 177, 255]",
+                            elevation_col=0, initial_view_state=None,
+                            map_style=None, map_provider=None):
         """
-        Create a pydeck map with a GeoJsonLayer added for plotting polygons
+        Create a pydeck map with a GeoJsonLayer added for plotting given geometries.
+        :param line_color:
         :param df: SedonaDataFrame with polygons
         :param fill_color: Optional color for the plotted polygons
         :param elevation_col: Optional column/numeric value to determine elevation for plotted polygons
@@ -68,37 +79,54 @@ class SedonaPyDeck:
         :param map_provider: optional map_provider of the pydeck map
         :return: A pydeck map with a GeoJsonLayer map added
         """
-        gdf = SedonaPyDeck.prepare_df(df)
-        polygon_layer = pdk.Layer(
-            'GeoJsonLayer',  # `type` positional argument is here
-            data=gdf,
-            auto_highlight=True,
-            get_fill_color=fill_color,
-            opacity=1.0,
-            stroked=False,
-            extruded=True,
-            get_elevation=elevation_col,
-            wireframe=True,
-            pickable=True
-        )
+        geometry_col = SedonaMapUtils.__get_geometry_col__(df)
+        gdf = SedonaPyDeck._prepare_df_(df, geometry_col=geometry_col)
+        geom_type = gdf[geometry_col][0].geom_type
+        # if SedonaMapUtils.__is_geom_collection__(geom_type):
+        #     layer = SedonaPyDeck._create_geom_collection_layer_(gdf, fill_color=fill_color, elevation_col=elevation_col, line_color=line_color)
+        #     if initial_view_state is None:
+        #         SedonaPyDeck._create_coord_column_(gdf, geometry_col=geometry_col)
+        # elif geom_type == "Polygon":
+        #     layer = SedonaPyDeck._create_polygon_layer_(gdf, fill_color, elevation_col)
+        #     if initial_view_state is None:
+        #         SedonaPyDeck._create_coord_column_(gdf, geometry_col=geometry_col)
+        # elif geom_type == "LineString":
+        #     layer = SedonaPyDeck._create_line_layer_(gdf, line_color)
+        #     if initial_view_state is None:
+        #         SedonaPyDeck._create_coord_column_(gdf, geometry_col=geometry_col)
+        # elif geom_type == "Point":
+        #     layer = SedonaPyDeck._create_point_layer_(gdf, fill_color)
+        #     SedonaPyDeck._create_coord_column_(gdf, geometry_col=geometry_col)
+        type_list = SedonaPyDeck._create_coord_column_(gdf, geometry_col=geometry_col)
+        if len(type_list) == 3:
+            if line_color == "[85, 183, 177, 255]":
+                line_color = "[237, 119, 79]"
 
-        p_map = pdk.Deck(layers=[polygon_layer], map_style='light')
-        SedonaPyDeck._set_optional_parameters_(p_map, map_style, map_provider, initial_view_state)
-        return p_map
+        layer = SedonaPyDeck._create_fat_layer_(gdf, fill_color=fill_color, elevation_col=elevation_col,
+                                                line_color=line_color)
+
+        if initial_view_state is None:
+            initial_view_state = pdk.data_utils.compute_view(gdf['coordinate_array_sedona'])
+
+        if elevation_col != 0 and geom_type == "Polygon":
+            initial_view_state.pitch = 45  # If polygons are elevated, change the pitch to visualize the elevation better
+        map_ = pdk.Deck(layers=[layer], map_style='dark', initial_view_state=initial_view_state)
+        SedonaPyDeck._set_optional_parameters_(p_map=map_, map_style=map_style, map_provider=map_provider)
+        return map_
 
     @classmethod
-    def create_scatterplot_map(cls, df, fill_color="[255, 140, 0]", initial_view_state=None, map_style=None, map_provider=None):
+    def create_scatterplot_map(cls, df, fill_color="[255, 140, 0]", initial_view_state=None, map_style=None,
+                               map_provider=None):
         """
         Create a pydeck map with a scatterplot layer
         :param df: SedonaDataFrame to plot
-        :param position_col: column with ST_POINTS to be used to plot pointsf
         :param fill_color: color of the points
         :param initial_view_state: optional initial view state of a pydeck map
         :param map_style: optional map_style to be added to the pydeck map
         :param map_provider: optional map_provider to be added to the pydeck map
         :return: A pydeck map object with a scatterplot layer added
         """
-        gdf = SedonaPyDeck.prepare_df(df, add_coords=True)
+        gdf = SedonaPyDeck._prepare_df_(df, add_coords=True)
         layer = pdk.Layer(
             "ScatterplotLayer",
             data=gdf,
@@ -109,17 +137,19 @@ class SedonaPyDeck:
             get_fill_color=fill_color,
         )
 
-        map_ = pdk.Deck(layers=[layer], map_style='dark')
-        SedonaPyDeck._set_optional_parameters_(map_, map_style, map_provider, initial_view_state)
+        if initial_view_state is None:
+            initial_view_state = pdk.data_utils.compute_view(gdf['coordinate_array_sedona'])
+
+        map_ = pdk.Deck(layers=[layer], initial_view_state=initial_view_state)
+        SedonaPyDeck._set_optional_parameters_(p_map=map_, map_style=map_style, map_provider=map_provider)
         return map_
 
-
     @classmethod
-    def create_heatmap(cls, df, color_range=None, weight=1, aggregation="SUM", initial_view_state=None, map_style=None, map_provider=None):
+    def create_heatmap(cls, df, color_range=None, weight=1, aggregation="SUM", initial_view_state=None, map_style=None,
+                       map_provider=None):
         """
         Create a pydeck map with a heatmap layer added
         :param df: SedonaDataFrame to be used to plot the heatmap
-        :param position_col: Column with ST_Points to be used to plot the heatmap
         :param color_range: Optional color_range for the heatmap
         :param weight: Optional column to determine weight of each point while plotting the heatmap
         :param aggregation: Optional aggregation to use for the heatmap (used when rendering a zoomed out heatmap)
@@ -129,7 +159,8 @@ class SedonaPyDeck:
         :return: A pydeck map with a heatmap layer added
         """
 
-        gdf = SedonaPyDeck.prepare_df(df, add_coords=True)
+        gdf = SedonaPyDeck._prepare_df_(df, add_coords=True)
+
         if color_range is None:
             color_range = [
                 [255, 255, 178],
@@ -147,71 +178,85 @@ class SedonaPyDeck:
             opacity=0.8,
             filled=True,
             get_position='coordinate_array_sedona',
-            aggregation = pdk.types.String(aggregation),
+            aggregation=pdk.types.String(aggregation),
             color_range=color_range,
             get_weight=weight
         )
 
+        if initial_view_state is None:
+            initial_view_state = pdk.data_utils.compute_view(gdf['coordinate_array_sedona'])
 
-        map_ = pdk.Deck(layers=[layer])
-        SedonaPyDeck._set_optional_parameters_(map_, map_style, map_provider, initial_view_state)
+        map_ = pdk.Deck(layers=[layer], initial_view_state=initial_view_state)
+        SedonaPyDeck._set_optional_parameters_(p_map=map_, map_style=map_style, map_provider=map_provider)
 
         return map_
 
     @classmethod
-    def prepare_df(cls, df, add_coords=False):
+    def _prepare_df_(cls, df, add_coords=False, geometry_col=None):
         """
         Convert a SedonaDataFrame to a GeoPandas DataFrame without renaming the column (as it is not necessary while rendering a pydeck map)
         :param df: SedonaDataFrame
         :param add_coords: Used to decide if a coordinate column containing lists of point coordinates is to be added to the resultant gdf.
         :return: GeoPandas DataFrame
         """
-        geometry_col = SedonaMapUtils.__get_geometry_col__(df=df)
+        if geometry_col is None:
+            geometry_col = SedonaMapUtils.__get_geometry_col__(df=df)
         gdf = SedonaMapUtils.__convert_to_gdf__(df, rename=False, geometry_col=geometry_col)
         if add_coords is True:
-            SedonaPyDeck._create_coord_column(gdf=gdf, geometry_col=geometry_col)
+            SedonaPyDeck._create_coord_column_(gdf=gdf, geometry_col=geometry_col)
         return gdf
 
-
-    ##Utility APIs specific to SedonaPyDeck
-
+    # Utility APIs specific to SedonaPyDeck
     @classmethod
-    def _set_optional_parameters_(cls, p_map, map_style, map_provider, initial_view_state):
+    def _set_optional_parameters_(cls, p_map, map_style, map_provider):
         """
         Set optional parameters to a given pydeck map
         (Parameters are self-explanatory for a pydeck map)
         :param p_map:
         :param map_style:
         :param map_provider:
-        :param initial_view_state:
         """
-        if initial_view_state is not None:
-            p_map.initial_view_state = initial_view_state
-
         if map_style is not None:
             p_map.map_style = map_style
 
         if map_provider is not None:
             p_map.map_provider = map_provider
 
-
     @classmethod
     def _create_default_fill_color_(cls, gdf, plot_col):
         """
         Create a default color for choropleth layer based on a given max value"
-        :param plot_max:
         :param plot_col:
         :return: fill_color string for pydeck map
         """
         plot_max = gdf[plot_col].max()
-        return "[135, 206, 250, ({0} / {1}) * 255 + 15]".format(plot_col, plot_max)
-
+        return "[85, 183, 177, ({0} / {1}) * 255 + 15]".format(plot_col, plot_max)
 
     @classmethod
-    def _create_coord_column(cls, gdf, geometry_col):
+    def _create_coord_column_(cls, gdf, geometry_col, add_points=False):
         """
         Create a coordinate column in a given GeoPandas Dataframe, this coordinate column contains coordinates of a ST_Point in a list format of [longitude, latitude]
         :param gdf: GeoPandas Dataframe
         :param geometry_col: column with ST_Points
         """
-        gdf['coordinate_array_sedona'] = gdf.apply(lambda val: list(val[geometry_col].coords[0]), axis=1)
+        type_list = []
+        gdf['coordinate_array_sedona'] = gdf.apply(
+            lambda val: list(SedonaMapUtils.__extract_coordinate__(val[geometry_col], type_list)), axis=1)
+        return type_list
+
+    @classmethod
+    def _create_fat_layer_(cls, gdf, fill_color, line_color, elevation_col):
+        layer = pdk.Layer(
+            'GeoJsonLayer',  # `type` positional argument is here
+            data=gdf,
+            auto_highlight=True,
+            get_fill_color=fill_color,
+            opacity=1.0,
+            stroked=False,
+            extruded=True,
+            get_elevation=elevation_col,
+            get_line_color=line_color,
+            pickable=True,
+        )
+
+        return layer

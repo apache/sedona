@@ -540,15 +540,19 @@ More details on the parameters and their default values can be found on the pyde
 
 #### Creating a Polygon map using SedonaPyDeck
 
-SedonaPyDeck exposes a create_polygon_map API which can be used to visualize a polygon map out of the passed SedonaDataFrame containing polygons:
+SedonaPyDeck exposes a create_geometry_map API which can be used to visualize a passed SedonaDataFrame containing any type of geometries:
 
 ```python
-def create_polygon_map(cls, df, fill_color="[135, 206, 250, 255]", elevation_col=0, initial_view_state=None, map_style=None, map_provider=None):
+def create_geometry_map(cls, df, fill_color="[85, 183, 177, 255]", line_color="[85, 183, 177, 255]",
+						elevation_col=0, initial_view_state=None,
+						map_style=None, map_provider=None)
 ```
 
-The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.
+The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color polygons or point geometries in the map
 
-The parameter `elevation_col` can be given a static elevation or elevation based on column values like `fill_color`.
+The parameter `line_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color the line geometries in the map.
+
+The parameter `elevation_col` can be given a static elevation or elevation based on column values like `fill_color`, this only works for the polygon geometries in the map.
 
 Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
 More details on the parameters and their default values can be found on the pydeck website.
@@ -584,20 +588,6 @@ One of "MEAN" or "SUM" can be provided. By default, SedonaPyDeck uses "MEAN" as 
 
 Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
 More details on the parameters and their default values can be found on the pydeck website.
-
-#### Creating complex maps using SedonaPyDeck and pydeck:
-
-pydeck supports creating complex maps with multiple layers of different types, custom views and initial view states.
-If the user wishes to do so, they can follow pydeck documentation.
-In order to aid in creating such maps, SedonaPyDeck exposes a prepare_df API which can be used to prepare a SedonaDataFrame for use with pydeck.
-
-```python
-def prepare_df(cls, df, add_coords=False):
-```
-
-`prepare_df` returns a GeoPandas DataFrame which can be directly used with pydeck. 
-In order to be able to plot points using pydeck, the resultant gdf needs to have point coordinates in a list, 
-`add_coords` parameter can be used to add a column `coordinate_array_sedona` to the resultant gdf which can be used as the value to `get_position` parameter of pydeck Deck.
 
 
 ### SedonaKepler
