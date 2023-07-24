@@ -369,11 +369,16 @@ Format: `ST_Boundary(geom: geometry)`
 Since: `v1.3.0`
 
 Example:
+
 ```sql
 SELECT ST_Boundary(ST_GeomFromText('POLYGON ((1 1, 0 0, -1 1, 1 1))'))
 ```
 
-Output: `LINEARRING (1 1, 0 0, -1 1, 1 1)`
+Output:
+
+```
+LINEARRING (1 1, 0 0, -1 1, 1 1)
+```
 
 ## ST_BoundingDiagonal
 

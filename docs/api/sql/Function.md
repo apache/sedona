@@ -362,11 +362,16 @@ Format: `ST_Boundary(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_Boundary(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
 ```
 
-Output: `LINESTRING (1 1, 0 0, -1 1, 1 1)`
+Output:
+
+```
+LINESTRING (1 1, 0 0, -1 1, 1 1)
+```
 
 ## ST_BoundingDiagonal
 
