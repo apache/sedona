@@ -239,7 +239,11 @@ Example:
 SELECT ST_AreaSpheroid(ST_GeomFromWKT('Polygon ((35 34, 30 28, 34 25, 35 34))'))
 ```
 
-Output: `201824850811.76245`
+Output: 
+
+```
+201824850811.76245
+```
 
 ## ST_AsBinary
 
