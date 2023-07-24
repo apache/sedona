@@ -272,9 +272,15 @@ Format: `ST_AsEWKB (A:geometry)`
 Since: `v1.1.1`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_AsEWKB(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsEWKB(ST_SetSrid(ST_GeomFromWKT('POINT (1 1)'), 3021))
+```
+
+Output:
+
+```
+0101000020cd0b0000000000000000f03f000000000000f03f
 ```
 
 ## ST_AsEWKT
