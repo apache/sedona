@@ -507,27 +507,122 @@ There are lots of other functions can be combined with these queries. Please rea
 
 ## Visualize query results
 
-==Sedona >= 1.5.0==
+Sedona provides `SedonaPyDeck` and `SedonaKepler` wrappers, both of which expose APIs to create interactive map visualizations from SedonaDataFrames in a Jupyter environment.
+
+!!!Note
+	Both SedonaPyDeck and SedonaKepler expect the default geometry order to be lon-lat. If your dataframe has geometries in the lat-lon order, please check out [ST_FlipCoordinates](https://sedona.apache.org/latest-snapshot/api/sql/Function/#st_flipcoordinates)
+
+### SedonaPyDeck
+Spatial query results can be visualized in Jupyter lab/notebook using SedonaPyDeck.
+
+SedonaPyDeck exposes APIs to create interactive map visualizations using [pydeck](https://pydeck.gl/index.html#) based on [deck.gl](https://deck.gl/)
+
+
+#### Creating a Choropleth map using SedonaPyDeck
+
+SedonaPyDeck exposes a create_choropleth_map API which can be used to visualize a choropleth map out of the passed SedonaDataFrame containing polygons with an observation:
+
+```python
+def create_choropleth_map(cls, df, fill_color=None, plot_col=None, initial_view_state=None, map_style=None,
+						  map_provider=None, elevation_col=0)
+```
+
+The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.
+
+For example, all these are valid values of fill_color:
+```python
+fill_color=[255, 12, 250]
+fill_color=[0, 12, 250, 255]
+fill_color='[0, 12, 240, AirportCount * 10]' ## AirportCount is a column in the passed df
+```
+
+Instead of giving a `fill_color` parameter, a 'plot_col' can be passed which specifies the column to decide the choropleth. 
+SedonaPyDeck then creates a default color scheme based on the values of the column passed.
+
+The parameter `elevation_col` can be given a numeric or a string value (containing the column with/without operations on it) to set a 3D elevation to the plotted polygons if any.
+
+
+Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
+More details on the parameters and their default values can be found on the pydeck website.
+
+#### Creating a Geometry map using SedonaPyDeck
+
+SedonaPyDeck exposes a create_geometry_map API which can be used to visualize a passed SedonaDataFrame containing any type of geometries:
+
+```python
+def create_geometry_map(cls, df, fill_color="[85, 183, 177, 255]", line_color="[85, 183, 177, 255]",
+						elevation_col=0, initial_view_state=None,
+						map_style=None, map_provider=None):
+```
+
+The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color polygons or point geometries in the map
+
+The parameter `line_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color the line geometries in the map.
+
+The parameter `elevation_col` can be given a static elevation or elevation based on column values like `fill_color`, this only works for the polygon geometries in the map.
+
+Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
+More details on the parameters and their default values can be found on the pydeck website as well by deck.gl [here](https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/geojson-layer.md)
+
+#### Creating a Scatterplot map using SedonaPyDeck
+
+SedonaPyDeck exposes a create_scatterplot_map API which can be used to visualize a scatterplot out of the passed SedonaDataFrame containing points:
+
+```python
+def create_scatterplot_map(cls, df, fill_color="[255, 140, 0]", radius_col=1, radius_min_pixels = 1, radius_max_pixels = 10, radius_scale=1, initial_view_state=None, map_style=None, map_provider=None)
+```
+
+The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.
+
+The parameter `radius_col` can be given a numeric value or a string value consisting of any operations on the column, in order to specify the radius of the plotted point.
+
+The parameter `radius_min_pixels` can be given a numeric value that would set the minimum radius in pixels. This can be used to prevent the plotted circle from getting too small when zoomed out.
+
+The parameter `radius_max_pixels` can be given a numeric value that would set the maximum radius in pixels. This can be used to prevent the circle from getting too big when zoomed in.
+
+The parameter `radius_scale` can be given a numeric value that sets a global radius multiplier for all points. 
+
+Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
+More details on the parameters and their default values can be found on the pydeck website as well by deck.gl [here](https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/scatterplot-layer.md)
+
+
+#### Creating a heatmap using SedonaPyDeck 
+
+SedonaPyDeck exposes a create_heatmap API which can be used to visualize a heatmap out of the passed SedonaDataFrame containing points:
+```python
+def create_heatmap(cls, df, color_range=None, weight=1, aggregation="SUM", initial_view_state=None, map_style=None,
+				   map_provider=None)
+```
+
+The parameter `color_range` can be optionally given a list of RGB values, SedonaPyDeck by default uses `6-class YlOrRd` as color_range.
+More examples can be found on [colorbrewer](https://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
+
+The parameter `weight` can be given a numeric value or a string with column and operations on it to determine weight of each point while plotting a heatmap.
+By default, SedonaPyDeck assigns a weight of 1 to each point
+
+The parameter `aggregation` can be used to define aggregation strategy to use when aggregating heatmap to a lower resolution (zooming out). 
+One of "MEAN" or "SUM" can be provided. By default, SedonaPyDeck uses "MEAN" as the aggregation strategy.
+
+Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
+More details on the parameters and their default values can be found on the pydeck website as well by deck.gl [here](https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/aggregation-layers/heatmap-layer.md)
+
+
+### SedonaKepler
 
 
 Spatial query results can be visualized in Jupyter lab/notebook using SedonaKepler. 
 
 SedonaKepler exposes APIs to create interactive and customizable map visualizations using [KeplerGl](https://kepler.gl/).
 
-### Creating a map object using SedonaKepler.create_map
+#### Creating a map object using SedonaKepler.create_map
 
 SedonaKepler exposes a create_map API with the following signature:
 
 ```python
-create_map(df: SedonaDataFrame=None, name: str='unnamed', geometry_col: str='geometry', config: dict=None) -> map
+create_map(df: SedonaDataFrame=None, name: str='unnamed', config: dict=None) -> map
 ```
 
 The parameter 'name' is used to associate the passed SedonaDataFrame in the map object and any config applied to the map is linked to this name. It is recommended you pass a unique identifier to the dataframe here.
-
-The parameter 'geometry_col' is used to identify the geometry containing column. This is required if the column has a name other than the standard 'geometry'.
-
-!!!Note
-	Failure to pass the correct geometry column name (if it has a name other than 'geometry') will result in a failure to create a map object.
 
 If no SedonaDataFrame object is passed, an empty map (with config applied if passed) is returned. A SedonaDataFrame can be added later using the method `add_df`
 
@@ -541,20 +636,20 @@ A map config can be passed optionally to apply pre-apply customizations to the m
 
 	=== "Python"
 		```python
-		map = SedonaKepler.create_map(df=groupedresult, name="AirportCount", geometry_col="country_geom")
+		map = SedonaKepler.create_map(df=groupedresult, name="AirportCount")
 		map
 		```
 
-### Adding SedonaDataFrame to a map object using SedonaKepler.add_df
+#### Adding SedonaDataFrame to a map object using SedonaKepler.add_df
 SedonaKepler exposes a add_df API with the following signature:
 
 ```python
-add_df(map, df: SedonaDataFrame, name: str='unnamed', geometry_col='geometry')
+add_df(map, df: SedonaDataFrame, name: str='unnamed')
 ```
 
 This API can be used to add a SedonaDataFrame to an already created map object. The map object passed is directly mutated and nothing is returned.
 
-The parameters name and geometry_col have the same conditions as 'create_map'
+The parameters name has the same conditions as 'create_map'
 
 !!!Tip
 	This method can be used to add multiple dataframes to a map object to be able to visualize them together.
@@ -563,17 +658,17 @@ The parameters name and geometry_col have the same conditions as 'create_map'
 	=== "Python"
 		```python
 		map = SedonaKepler.create_map()
-		SedonaKepler.add_df(map, groupedresult, name="AirportCount", geometry_col="country_geom")
+		SedonaKepler.add_df(map, groupedresult, name="AirportCount")
 		map
 		```
 
-### Setting a config via the map 
+#### Setting a config via the map 
 A map rendered by accessing the map object created by SedonaKepler includes a config panel which can be used to customize the map
 
 <img src="../../image/sedona_customization.gif" width="1000">
 
 
-### Saving and setting config
+#### Saving and setting config
 
 A map object's current config can be accessed by accessing its 'config' attribute like `map.config`. This config can be saved for future use or use across notebooks if the exact same map is to be rendered everytime.
 
