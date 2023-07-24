@@ -348,9 +348,15 @@ Format: `ST_AsGML (A:geometry)`
 Since: `v1.3.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_AsGML(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsGML(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
+```
+
+Output:
+
+```
+1.0,1.0 8.0,1.0 8.0,8.0 1.0,8.0 1.0,1.0
 ```
 
 ## ST_AsKML
