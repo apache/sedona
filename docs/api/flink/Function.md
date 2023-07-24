@@ -367,10 +367,16 @@ Format: `ST_AsKML (A:geometry)`
 
 Since: `v1.3.0`
 
-Spark SQL example:
+Example:
+
 ```sql
-SELECT ST_AsKML(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsKML(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
+```
+
+Output:
+
+```
+1.0,1.0 8.0,1.0 8.0,8.0 1.0,8.0 1.0,1.0
 ```
 
 ## ST_AsText
