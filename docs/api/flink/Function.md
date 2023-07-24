@@ -302,8 +302,13 @@ Since: `v1.2.1`
 
 Spark SQL example:
 ```sql
-SELECT ST_AsEWKT(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsEWKT(ST_SetSrid(ST_GeomFromWKT('POLYGON((0 0,0 1,1 1,1 0,0 0))'), 4326))
+```
+
+Output:
+
+```
+SRID=4326;POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))
 ```
 
 ## ST_AsGeoJSON
