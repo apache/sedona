@@ -321,8 +321,22 @@ Since: `v1.3.0`
 
 Spark SQL example:
 ```sql
-SELECT ST_AsGeoJSON(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsGeoJSON(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
+```
+
+Output:
+
+```json
+{
+  "type":"Polygon",
+  "coordinates":[
+    [[1.0,1.0],
+      [8.0,1.0],
+      [8.0,8.0],
+      [1.0,8.0],
+      [1.0,1.0]]
+  ]
+}
 ```
 
 ## ST_AsGML
