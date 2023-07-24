@@ -248,9 +248,15 @@ Format: `ST_AsBinary (A:geometry)`
 Since: `v1.1.1`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_AsBinary(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsBinary(ST_GeomFromWKT('POINT (1 1)'))
+```
+
+Output:
+
+```
+0101000000000000000000f87f000000000000f87f
 ```
 
 ## ST_AsEWKB

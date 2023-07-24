@@ -256,8 +256,13 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_AsBinary(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsBinary(ST_GeomFromWKT('POINT (1 1)'))
+```
+
+Output:
+
+```
+0101000000000000000000f87f000000000000f87f
 ```
 
 ## ST_AsEWKB
