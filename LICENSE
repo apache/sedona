@@ -217,6 +217,13 @@ BSD 3-Clause License
 --------------------------------------
 python/src/pygeos/c_api.h (modified based on https://github.com/pygeos/pygeos/blob/master/src/c_api.h)
 
+Google Buildings License
+--------------------------------------
+https://creativecommons.org/licenses/by/4.0/ (CC by 4.0)
+
+Chicago Crimes License
+--------------------------------------
+licenses/Chicago-Crimes-License (referenced from https://www.chicago.gov/city/en/narr/foia/data_disclaimer.html)
 
 No-copyright data used in unit tests
 --------------------------------------

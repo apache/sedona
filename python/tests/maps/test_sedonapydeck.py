@@ -55,7 +55,6 @@ class TestVisualization(TestBase):
         res = self.isMapEqual(sedona_map=sedona_pydeck_map, pydeck_map=p_map)
         assert res is True
 
-
     def testPolygonMap(self):
         buildings_csv_df = self.spark.read.format("csv"). \
             option("delimiter", ","). \
@@ -83,7 +82,6 @@ class TestVisualization(TestBase):
         res = self.isMapEqual(sedona_map=sedona_pydeck_map, pydeck_map=p_map)
         assert res is True
 
-
     def testScatterplotMap(self):
         chicago_crimes_csv_df = self.spark.read.format("csv"). \
             option("delimiter", ","). \
@@ -103,6 +101,10 @@ class TestVisualization(TestBase):
             filled=True,
             get_position='coordinate_array_sedona',
             get_fill_color="[255, 140, 0]",
+            get_radius=1,
+            radius_min_pixels=1,
+            radius_max_pixels=10,
+            radius_scale=1
         )
 
         p_map = pdk.Deck(layers=[layer])
@@ -147,6 +149,8 @@ class TestVisualization(TestBase):
     def isMapEqual(self, pydeck_map, sedona_map):
         sedona_dict = json.loads(sedona_map.to_json())
         pydeck_dict = json.loads(pydeck_map.to_json())
+        if len(sedona_dict.keys()) != len(pydeck_dict.keys()):
+            return False
         res = True
         for key in sedona_dict:
             try:
@@ -170,6 +174,8 @@ class TestVisualization(TestBase):
             return False
         res = True
         for i in range(len(pydeck_layer)):
+            if len(pydeck_layer[i].keys()) != len(sedona_layer[i].keys()):
+                return False
             try:
                 for key in pydeck_layer[i]:
                     if key == 'data' or key == 'id':
