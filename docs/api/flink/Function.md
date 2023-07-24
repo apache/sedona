@@ -43,8 +43,13 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_3DDistance(polygondf.countyshape, polygondf.countyshape)
-FROM polygondf
+SELECT ST_3DDistance(ST_GeomFromText("POINT Z (0 0 -5)"), 
+                     ST_GeomFromText("POINT Z(1  1 -6"))
+```
+
+Output:
+```
+1.7320508075688772
 ```
 
 ## ST_AddPoint
@@ -210,8 +215,12 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_Area(polygondf.countyshape)
-FROM polygondf
+SELECT ST_Area(ST_GeomFromText("POLYGON(0 0, 0 10, 10 10, 0 10, 0 0)"))
+```
+
+Output:
+```
+10
 ```
 
 ## ST_AreaSpheroid
