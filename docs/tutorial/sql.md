@@ -507,8 +507,6 @@ There are lots of other functions can be combined with these queries. Please rea
 
 ## Visualize query results
 
-==Sedona >= 1.5.0==
-
 ### SedonaPyDeck
 Spatial query results can be visualized in Jupyter lab/notebook using SedonaPyDeck.
 
@@ -520,7 +518,8 @@ SedonaPyDeck exposes APIs to create interactive map visualizations using [pydeck
 SedonaPyDeck exposes a create_choropleth_map API which can be used to visualize a choropleth map out of the passed SedonaDataFrame containing polygons with an observation:
 
 ```python
-def create_choropleth_map(cls, df, fill_color=None, plot_col=None, initial_view_state=None, map_style=None, map_provider=None):
+def create_choropleth_map(cls, df, fill_color=None, plot_col=None, initial_view_state=None, map_style=None,
+						  map_provider=None, elevation_col=0)
 ```
 
 The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.
@@ -533,19 +532,22 @@ fill_color='[0, 12, 240, AirportCount * 10]' ## AirportCount is a column in the 
 ```
 
 Instead of giving a `fill_color` parameter, a 'plot_col' can be passed which specifies the column to decide the choropleth. 
-SedonaPyDeck then creates a default color scheme based on the values of the column passed
+SedonaPyDeck then creates a default color scheme based on the values of the column passed.
+
+The parameter `elevation_col` can be given a numeric or a string value (containing the column with/without operations on it) to set a 3D elevation to the plotted polygons if any.
+
 
 Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
 More details on the parameters and their default values can be found on the pydeck website.
 
-#### Creating a Polygon map using SedonaPyDeck
+#### Creating a Geometry map using SedonaPyDeck
 
 SedonaPyDeck exposes a create_geometry_map API which can be used to visualize a passed SedonaDataFrame containing any type of geometries:
 
 ```python
 def create_geometry_map(cls, df, fill_color="[85, 183, 177, 255]", line_color="[85, 183, 177, 255]",
 						elevation_col=0, initial_view_state=None,
-						map_style=None, map_provider=None)
+						map_style=None, map_provider=None):
 ```
 
 The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color polygons or point geometries in the map
@@ -555,26 +557,36 @@ The parameter `line_color` can be given a list of RGB/RGBA values, or a string t
 The parameter `elevation_col` can be given a static elevation or elevation based on column values like `fill_color`, this only works for the polygon geometries in the map.
 
 Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the pydeck website.
+More details on the parameters and their default values can be found on the pydeck website as well by deck.gl [here](https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/geojson-layer.md)
 
 #### Creating a Scatterplot map using SedonaPyDeck
 
 SedonaPyDeck exposes a create_scatterplot_map API which can be used to visualize a scatterplot out of the passed SedonaDataFrame containing points:
 
 ```python
-def create_scatterplot_map(cls, df, fill_color="[255, 140, 0]", initial_view_state=None, map_style=None, map_provider=None):
+def create_scatterplot_map(cls, df, fill_color="[255, 140, 0]", radius_col=1, radius_min_pixels = 1, radius_max_pixels = 10, radius_scale=1, initial_view_state=None, map_style=None, map_provider=None)
 ```
 
 The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.
 
+The parameter `radius_col` can be given a numeric value or a string value consisting of any operations on the column, in order to specify the radius of the plotted point.
+
+The parameter `radius_min_pixels` can be given a numeric value that would set the minimum radius in pixels. This can be used to prevent the plotted circle from getting too small when zoomed out.
+
+The parameter `radius_max_pixels` can be given a numeric value that would set the maximum radius in pixels. This can be used to prevent the circle from getting too big when zoomed in.
+
+The parameter `radius_scale` can be given a numeric value that sets a global radius multiplier for all points. 
+
 Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the pydeck website.
+More details on the parameters and their default values can be found on the pydeck website as well by deck.gl [here](https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/scatterplot-layer.md)
+
 
 #### Creating a heatmap using SedonaPyDeck 
 
 SedonaPyDeck exposes a create_heatmap API which can be used to visualize a heatmap out of the passed SedonaDataFrame containing points:
 ```python
-def create_heatmap(cls, df, color_range=None, weight=1, aggregation=None, initial_view_state=None, map_style=None, map_provider=None):
+def create_heatmap(cls, df, color_range=None, weight=1, aggregation="SUM", initial_view_state=None, map_style=None,
+				   map_provider=None)
 ```
 
 The parameter `color_range` can be optionally given a list of RGB values, SedonaPyDeck by default uses `6-class YlOrRd` as color_range.
@@ -587,7 +599,7 @@ The parameter `aggregation` can be used to define aggregation strategy to use wh
 One of "MEAN" or "SUM" can be provided. By default, SedonaPyDeck uses "MEAN" as the aggregation strategy.
 
 Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the pydeck website.
+More details on the parameters and their default values can be found on the pydeck website as well by deck.gl [here](https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/aggregation-layers/heatmap-layer.md)
 
 
 ### SedonaKepler

@@ -82,21 +82,6 @@ class SedonaPyDeck:
         geometry_col = SedonaMapUtils.__get_geometry_col__(df)
         gdf = SedonaPyDeck._prepare_df_(df, geometry_col=geometry_col)
         geom_type = gdf[geometry_col][0].geom_type
-        # if SedonaMapUtils.__is_geom_collection__(geom_type):
-        #     layer = SedonaPyDeck._create_geom_collection_layer_(gdf, fill_color=fill_color, elevation_col=elevation_col, line_color=line_color)
-        #     if initial_view_state is None:
-        #         SedonaPyDeck._create_coord_column_(gdf, geometry_col=geometry_col)
-        # elif geom_type == "Polygon":
-        #     layer = SedonaPyDeck._create_polygon_layer_(gdf, fill_color, elevation_col)
-        #     if initial_view_state is None:
-        #         SedonaPyDeck._create_coord_column_(gdf, geometry_col=geometry_col)
-        # elif geom_type == "LineString":
-        #     layer = SedonaPyDeck._create_line_layer_(gdf, line_color)
-        #     if initial_view_state is None:
-        #         SedonaPyDeck._create_coord_column_(gdf, geometry_col=geometry_col)
-        # elif geom_type == "Point":
-        #     layer = SedonaPyDeck._create_point_layer_(gdf, fill_color)
-        #     SedonaPyDeck._create_coord_column_(gdf, geometry_col=geometry_col)
         type_list = SedonaPyDeck._create_coord_column_(gdf, geometry_col=geometry_col)
         if len(type_list) == 3:
             if line_color == "[85, 183, 177, 255]":
@@ -115,10 +100,14 @@ class SedonaPyDeck:
         return map_
 
     @classmethod
-    def create_scatterplot_map(cls, df, fill_color="[255, 140, 0]", initial_view_state=None, map_style=None,
+    def create_scatterplot_map(cls, df, fill_color="[255, 140, 0]", radius_col=1, radius_min_pixels = 1, radius_max_pixels = 10, radius_scale=1, initial_view_state=None, map_style=None,
                                map_provider=None):
         """
         Create a pydeck map with a scatterplot layer
+        :param radius_scale:
+        :param radius_max_pixels:
+        :param radius_min_pixels:
+        :param radius_col:
         :param df: SedonaDataFrame to plot
         :param fill_color: color of the points
         :param initial_view_state: optional initial view state of a pydeck map
@@ -133,6 +122,10 @@ class SedonaPyDeck:
             pickable=True,
             opacity=0.8,
             filled=True,
+            get_radius=radius_col,
+            radius_min_pixels=radius_min_pixels,
+            radius_max_pixels=radius_max_pixels,
+            radius_scale=radius_scale,
             get_position='coordinate_array_sedona',
             get_fill_color=fill_color,
         )
