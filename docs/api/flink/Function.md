@@ -354,7 +354,11 @@ Example:
 SELECT ST_Azimuth(ST_POINT(0.0, 25.0), ST_POINT(0.0, 0.0))
 ```
 
-Output: `3.141592653589793`
+Output:
+
+```
+3.141592653589793
+```
 
 ## ST_Boundary
 
