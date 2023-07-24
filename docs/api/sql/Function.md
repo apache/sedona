@@ -385,9 +385,15 @@ Format: `ST_AsText (A:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_AsText(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsText(ST_SetSRID(ST_Point(1.0,1.0), 3021))
+```
+
+Output:
+
+```
+POINT (1 1)
 ```
 
 ## ST_Azimuth
