@@ -1520,17 +1520,13 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_AsEWKT(ST_Normalize(ST_GeomFromWKT('POLYGON((0 1, 1 1, 1 0, 0 0, 0 1))'))) AS geom
+SELECT ST_AsEWKT(ST_Normalize(ST_GeomFromWKT('POLYGON((0 1, 1 1, 1 0, 0 0, 0 1))')))
 ```
 
 Result:
 
 ```
-+-----------------------------------+
-|geom                               |
-+-----------------------------------+
-|POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))|
-+-----------------------------------+
+POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))
 ```
 
 ## ST_NPoints
