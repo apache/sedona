@@ -1083,9 +1083,15 @@ Format: `ST_GeometryType (A:geometry)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
-SELECT ST_GeometryType(polygondf.countyshape)
-FROM polygondf
+SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))
+```
+
+Output:
+
+```
+ST_LINESTRING
 ```
 
 ## ST_HausdorffDistance
