@@ -82,10 +82,10 @@ class SedonaPyDeck:
         geometry_col = SedonaMapUtils.__get_geometry_col__(df)
         gdf = SedonaPyDeck._prepare_df_(df, geometry_col=geometry_col)
         geom_type = gdf[geometry_col][0].geom_type
-        type_list = SedonaPyDeck._create_coord_column_(gdf, geometry_col=geometry_col)
-        if len(type_list) == 3:
-            if line_color == "[85, 183, 177, 255]":
-                line_color = "[237, 119, 79]"
+        SedonaPyDeck._create_coord_column_(gdf, geometry_col=geometry_col)
+        # if len(type_list) >= 2:  # change line colors if any to make it more visible.
+        #     if line_color == "[85, 183, 177, 255]":
+        #         line_color = "[237, 119, 79]"
 
         layer = SedonaPyDeck._create_fat_layer_(gdf, fill_color=fill_color, elevation_col=elevation_col,
                                                 line_color=line_color)
@@ -100,7 +100,8 @@ class SedonaPyDeck:
         return map_
 
     @classmethod
-    def create_scatterplot_map(cls, df, fill_color="[255, 140, 0]", radius_col=1, radius_min_pixels = 1, radius_max_pixels = 10, radius_scale=1, initial_view_state=None, map_style=None,
+    def create_scatterplot_map(cls, df, fill_color="[255, 140, 0]", radius_col=1, radius_min_pixels=1,
+                               radius_max_pixels=10, radius_scale=1, initial_view_state=None, map_style=None,
                                map_provider=None):
         """
         Create a pydeck map with a scatterplot layer
@@ -235,7 +236,6 @@ class SedonaPyDeck:
         type_list = []
         gdf['coordinate_array_sedona'] = gdf.apply(
             lambda val: list(SedonaMapUtils.__extract_coordinate__(val[geometry_col], type_list)), axis=1)
-        return type_list
 
     @classmethod
     def _create_fat_layer_(cls, gdf, fill_color, line_color, elevation_col):
@@ -244,12 +244,13 @@ class SedonaPyDeck:
             data=gdf,
             auto_highlight=True,
             get_fill_color=fill_color,
-            opacity=1.0,
+            opacity=0.4,
             stroked=False,
             extruded=True,
             get_elevation=elevation_col,
             get_line_color=line_color,
             pickable=True,
+            get_line_width=3
         )
 
         return layer
