@@ -460,8 +460,13 @@ Since: `v1.5.0`
 
 Example:
 ```sql
-SELECT ST_Centroid(polygondf.countyshape)
-FROM polygondf
+SELECT ST_Centroid(ST_GeomFromWTK('MULTIPOINT(-1  0, -1 2, 7 8, 9 8, 10 6)'))
+```
+
+Output:
+
+```
+POINT (4.8 4.8) 
 ```
 
 ## ST_ClosestPoint

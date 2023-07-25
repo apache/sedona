@@ -460,9 +460,15 @@ Format: `ST_Centroid (A:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_Centroid(polygondf.countyshape)
-FROM polygondf
+SELECT ST_Centroid(ST_GeomFromWTK('MULTIPOINT(-1  0, -1 2, 7 8, 9 8, 10 6)'))
+```
+
+Output:
+
+```
+POINT (4.8 4.8) 
 ```
 
 ## ST_ClosestPoint
