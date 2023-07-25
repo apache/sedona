@@ -1466,20 +1466,15 @@ Since: `v1.2.0`
 Example:
 
 ```sql
-SELECT ST_Multi(
-    ST_GeomFromText('POINT(1 1)')
-) AS geom
+SELECT ST_Multi(ST_GeomFromText('POINT(1 1)'))
 ```
 
-Result:
+Output:
 
 ```
-+---------------------------------------------------------------+
-|geom                                                           |
-+---------------------------------------------------------------+
-|MULTIPOINT (1 1)                                               |
-+---------------------------------------------------------------+
+MULTIPOINT (1 1)
 ```
+
 ## ST_NDims
 
 Introduction: Returns the coordinate dimension of the geometry.
