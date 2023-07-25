@@ -828,11 +828,16 @@ Format: `ST_DumpPoints(geom: geometry)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 SELECT ST_DumpPoints(ST_GeomFromText('LINESTRING (0 0, 1 1, 1 0)'))
 ```
 
-Output: `[POINT (0 0), POINT (0 1), POINT (1 1), POINT (1 0), POINT (0 0)]`
+Output: 
+
+```
+[POINT (0 0), POINT (0 1), POINT (1 1), POINT (1 0), POINT (0 0)]
+```
 
 ## ST_EndPoint
 
