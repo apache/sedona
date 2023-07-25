@@ -1609,11 +1609,16 @@ Format: `ST_NumInteriorRings(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_NumInteriorRings(ST_GeomFromText('POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))'))
 ```
 
-Output: `1`
+Output: 
+
+```
+1
+```
 
 ## ST_NumPoints
 Introduction: Returns number of points in a LineString
