@@ -616,9 +616,15 @@ Format: `ST_ConvexHull (A:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_ConvexHull(polygondf.countyshape)
-FROM polygondf
+SELECT ST_ConvexHull(ST_GeomFromText('POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))'))
+```
+
+Output:
+
+```
+POLYGON ((20 40, 175 150, 125 100, 20 40))
 ```
 
 ##  ST_CoordDim
