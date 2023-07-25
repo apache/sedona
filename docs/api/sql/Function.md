@@ -1035,7 +1035,7 @@ Format: `ST_GeometricMedian(geom: geometry)`
 
 Default parameters: `tolerance: 1e-6, maxIter: 1000, failIfNotConverged: false`
 
-Since: `1.4.1`
+Since: `v1.4.1`
 
 Example:
 ```sql
