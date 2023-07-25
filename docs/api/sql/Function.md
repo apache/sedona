@@ -1132,8 +1132,8 @@ Spark SQL example:
 
 ```sql
 SELECT ST_Intersection(
-    ST_GeomFromWTK("POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))"),
-    ST_GeomFromWTK("POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))")
+    ST_GeomFromWKT("POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))"),
+    ST_GeomFromWKT("POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))")
     )
 ```
 
@@ -1250,7 +1250,7 @@ Since: `v1.0.0`
 Spark SQL example:
 
 ```sql
-SELECT ST_IsSimple(ST_GeomFromWTK('POLYGON((1 1, 3 1, 3 3, 1 3, 1 1))'))
+SELECT ST_IsSimple(ST_GeomFromWKT('POLYGON((1 1, 3 1, 3 3, 1 3, 1 1))'))
 ```
 
 Output:
