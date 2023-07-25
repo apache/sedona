@@ -665,7 +665,7 @@ Introduction: Convert an angle in radian to degrees.
 
 Format: `ST_Degrees(angleInRadian)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
 Example:
 
@@ -673,7 +673,11 @@ Example:
 SELECT ST_Degrees(0.19739555984988044)
 ```
 
-Output: 11.309932474020195
+Output: 
+
+```
+11.309932474020195
+```
 
 ## ST_Difference
 
