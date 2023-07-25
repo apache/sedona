@@ -1014,20 +1014,14 @@ Since: `v1.2.0`
 
 Example: 
 
-Query:
-
 ```sql
 SELECT ST_GeoHash(ST_GeomFromText('POINT(21.427834 52.042576573)'), 5) AS geohash
 ```
 
-Result:
+Output:
 
 ```
-+-----------------------------+
-|geohash                      |
-+-----------------------------+
-|u3r0p                        |
-+-----------------------------+
+u3r0p
 ```
 
 ## ST_GeometricMedian
