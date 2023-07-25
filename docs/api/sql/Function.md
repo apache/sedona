@@ -1181,14 +1181,23 @@ Example:
 SELECT ST_IsCollection(ST_GeomFromText('MULTIPOINT(0 0), (6 6)'))
 ```
 
-Output: `true`
+Output: 
+
+```
+true
+```
 
 Example:
+
 ```sql
 SELECT ST_IsCollection(ST_GeomFromText('POINT(5 5)'))
 ```
 
-Output: `false`
+Output: 
+
+```
+false
+```
 
 ## ST_IsEmpty
 
