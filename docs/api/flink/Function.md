@@ -1582,10 +1582,16 @@ Format: `ST_NumGeometries (A:geometry)`
 
 Since: `v1.3.0`
 
-Example:
+Example
+
 ```sql
-SELECT ST_NumGeometries(df.geometry)
-FROM df
+SELECT ST_NumGeometries(ST_GeomFromWKT('LINESTRING (-29 -27, -30 -29.7, -45 -33)'))
+```
+
+Output:
+
+```
+1
 ```
 
 ## ST_NumInteriorRings
