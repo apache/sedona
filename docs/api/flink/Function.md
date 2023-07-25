@@ -1111,11 +1111,16 @@ Format: `ST_InteriorRingN(geom: geometry, n: Int)`
 Since: `v1.3.0`
 
 Example:
+
 ```sql
 SELECT ST_InteriorRingN(ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))'), 0)
 ```
 
-Output: `LINEARRING (1 1, 2 1, 2 2, 1 2, 1 1)`
+Output: 
+
+```
+LINEARRING (1 1, 2 1, 2 2, 1 2, 1 1)
+```
 
 ## ST_Intersection
 
