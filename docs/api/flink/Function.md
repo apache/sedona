@@ -907,15 +907,17 @@ Format: `ST_FlipCoordinates(A:geometry)`
 
 Since: `v1.2.0`
 
-Spark SQL example:
+Example:
+
 ```sql
-SELECT ST_FlipCoordinates(df.geometry)
-FROM df
+SELECT ST_FlipCoordinates(ST_GeomFromWTK("POINT (1 2)"))
 ```
 
-Input: `POINT (1 2)`
+Output:
 
-Output: `POINT (2 1)`
+```
+POINT (2 1)
+```
 
 ## ST_Force_2D
 
