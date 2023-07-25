@@ -15,11 +15,11 @@
 # limitations under the License.
 #
 
-FROM kartikeyhadiya/base-jdk
+FROM junhao/base-jdk
 
 ARG python_version=3.9
 RUN python_version=`echo ${python_version} | cut -d '.' -f 1-2`
-ARG sedona_version=1.4.0
+ARG sedona_version=1.4.1
 ARG geotools_wrapper_version=1.4.0-28.2
 
 COPY docker/spark-sedona-jupyterlab/requirements.txt /opt/requirements.txt
