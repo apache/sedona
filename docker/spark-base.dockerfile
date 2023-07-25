@@ -15,13 +15,13 @@
 # limitations under the License.
 #
 
-FROM kartikeyhadiya/base-jdk
+FROM junhao/base-jdk
 
 # -- Layer: Apache Spark
 
 ARG spark_version=3.3.2
 ARG hadoop_version=3
-ARG sedona_version=1.4.0
+ARG sedona_version=1.4.1
 ARG geotools_wrapper_version=1.4.0-28.2
 
 ENV SPARK_HOME /opt/spark
