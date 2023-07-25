@@ -1332,19 +1332,13 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_AsText(
-    ST_LineFromMultiPoint(ST_GeomFromText('MULTIPOINT((10 40), (40 30), (20 20), (30 10))'))
-) AS geom
+SELECT ST_LineFromMultiPoint(ST_GeomFromText('MULTIPOINT((10 40), (40 30), (20 20), (30 10))'))
 ```
 
-Result:
+Output:
 
 ```
-+---------------------------------------------------------------+
-|geom                                                           |
-+---------------------------------------------------------------+
-|LINESTRING (10 40, 40 30, 20 20, 30 10)                        |
-+---------------------------------------------------------------+
+LINESTRING (10 40, 40 30, 20 20, 30 10)
 ```
 
 ## ST_LineInterpolatePoint

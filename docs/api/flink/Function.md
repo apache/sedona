@@ -1334,13 +1334,14 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_LineFromMultiPoint(df.geometry) AS geom
-FROM df
+SELECT ST_LineFromMultiPoint(ST_GeomFromText('MULTIPOINT((10 40), (40 30), (20 20), (30 10))'))
 ```
 
-Input: `MULTIPOINT((10 40), (40 30), (20 20), (30 10))`
+Output:
 
-Output: `LINESTRING (10 40, 40 30, 20 20, 30 10)`
+```
+LINESTRING (10 40, 40 30, 20 20, 30 10)
+```
 
 ## ST_LineInterpolatePoint
 
