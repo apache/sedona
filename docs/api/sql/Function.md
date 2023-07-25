@@ -751,18 +751,28 @@ Format: `ST_DistanceSphere (A:geometry)`
 Since: `v1.4.1`
 
 Spark SQL example 1:
+
 ```sql
 SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))
 ```
 
-Output: `543796.9506134904`
+Output: 
+
+```
+543796.9506134904
+```
 
 Spark SQL example 2:
+
 ```sql
 SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'), 6378137.0)
 ```
 
-Output: `544405.4459192449`
+Output: 
+
+```
+544405.4459192449
+```
 
 
 ## ST_DistanceSpheroid
