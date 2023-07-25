@@ -665,6 +665,7 @@ Format: `ST_Dimension (A:geometry), ST_Dimension (C:geometrycollection), `
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 SELECT ST_Dimension('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))');
 ```
@@ -672,8 +673,6 @@ SELECT ST_Dimension('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))');
 Result:
 
 ```
-ST_Dimension
------------
 1
 ```
 
