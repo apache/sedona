@@ -1152,11 +1152,16 @@ Format: `ST_IsClosed(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_IsClosed(ST_GeomFromText('LINESTRING(0 0, 1 1, 1 0)'))
 ```
 
-Output: `false`
+Output: 
+
+```
+false
+```
 
 ## ST_IsCollection
 

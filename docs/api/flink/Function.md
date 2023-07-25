@@ -1159,6 +1159,12 @@ Example:
 SELECT ST_IsClosed(ST_GeomFromText('LINESTRING(0 0, 1 1, 1 0)'))
 ```
 
+Output:
+
+```
+false
+```
+
 ## ST_IsCollection
 
 Introduction: Returns `TRUE` if the geometry type of the input is a geometry collection type. 
