@@ -1515,13 +1515,17 @@ Format: `ST_NDims(geom: geometry)`
 
 Since: `v1.3.1`
 
-Spark SQL example with z co-rodinate:
+Example with z coordinate:
 
 ```sql
 SELECT ST_NDims(ST_GeomFromEWKT('POINT(1 1 2)'))
 ```
 
-Output: `3`
+Output: 
+
+```
+3
+```
 
 Example with x,y coordinate:
 
@@ -1529,7 +1533,11 @@ Example with x,y coordinate:
 SELECT ST_NDims(ST_GeomFromText('POINT(1 1)'))
 ```
 
-Output: `2`
+Output: 
+
+```
+2
+```
 
 ## ST_NRings
 
