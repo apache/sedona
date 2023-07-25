@@ -773,7 +773,11 @@ Example:
 SELECT ST_Degrees(0.19739555984988044)
 ```
 
-Output: 11.309932474020195
+Output: 
+
+```
+11.309932474020195
+```
 
 ## ST_Difference
 
