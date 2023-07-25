@@ -1235,7 +1235,11 @@ Example:
 SELECT ST_IsRing(ST_GeomFromText("LINESTRING(0 0, 0 1, 1 1, 1 0, 0 0)"))
 ```
 
-Output: `true`
+Output: 
+
+```
+true
+```
 
 ## ST_IsSimple
 
