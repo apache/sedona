@@ -890,13 +890,14 @@ Since: `v1.2.1`
 Examples:
 
 ```sql
-SELECT ST_ExteriorRing(df.geometry)
-FROM df
+SELECT ST_ExteriorRing(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
-Input: `POLYGON ((0 0, 1 1, 2 1, 0 1, 1 -1, 0 0))`
+Output:
 
-Output: `LINESTRING (0 0, 1 1, 2 1, 0 1, 1 -1, 0 0)`
+```
+LINESTRING (0 0, 1 1, 1 2, 1 1, 0 0)
+```
 
 ## ST_FlipCoordinates
 

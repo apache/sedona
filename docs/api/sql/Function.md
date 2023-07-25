@@ -883,11 +883,16 @@ Format: `ST_ExteriorRing(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_ExteriorRing(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
-Output: `LINESTRING (0 0, 1 1, 1 2, 1 1, 0 0)`
+Output: 
+
+```
+LINESTRING (0 0, 1 1, 1 2, 1 1, 0 0)
+```
 
 ## ST_FlipCoordinates
 
