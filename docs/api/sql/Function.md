@@ -1270,8 +1270,13 @@ Since: `v1.0.0`
 Spark SQL example:
 
 ```sql
-SELECT ST_IsValid(polygondf.countyshape)
-FROM polygondf
+SELECT ST_IsValid(ST_GeomFromWKT('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0), (15 15, 15 20, 20 20, 20 15, 15 15))'))
+```
+
+Output:
+
+```
+false
 ```
 
 ## ST_Length
