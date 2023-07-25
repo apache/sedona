@@ -1250,8 +1250,13 @@ Since: `v1.0.0`
 Spark SQL example:
 
 ```sql
-SELECT ST_IsSimple(polygondf.countyshape)
-FROM polygondf
+SELECT ST_IsSimple(ST_GeomFromWTK('POLYGON((1 1, 3 1, 3 3, 1 3, 1 1))'))
+```
+
+Output:
+
+```
+true
 ```
 
 ## ST_IsValid

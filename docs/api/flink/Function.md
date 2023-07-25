@@ -1252,8 +1252,13 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_IsSimple(polygondf.countyshape)
-FROM polygondf
+SELECT ST_IsSimple(ST_GeomFromWTK('POLYGON((1 1, 3 1, 3 3, 1 3, 1 1))'))
+```
+
+Output:
+
+```
+true
 ```
 
 ## ST_IsValid
