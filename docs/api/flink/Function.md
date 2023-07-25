@@ -1292,8 +1292,13 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_Length(polygondf.countyshape)
-FROM polygondf
+SELECT ST_Length(ST_GeomFromWKT('LINESTRING(38 16,38 50,65 50,66 16,38 16)'))
+```
+
+Output:
+
+```
+123.0147027033899
 ```
 
 ## ST_LengthSpheroid
