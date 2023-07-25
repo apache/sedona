@@ -825,7 +825,11 @@ Example:
 SELECT ST_Degrees(0.19739555984988044)
 ```
 
-Output: 11.309932474020195
+Output: 
+
+```
+11.309932474020195
+```
 
 ## ST_Difference
 
@@ -861,7 +865,11 @@ SQL example:
 SELECT ST_Dump(ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))'))
 ```
 
-Output: `[POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]`
+Output: 
+
+```
+[POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]
+```
 
 ## ST_DumpPoints
 
@@ -872,11 +880,16 @@ Format: `ST_DumpPoints(geom: geometry)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 SELECT ST_DumpPoints(ST_GeomFromText('LINESTRING (0 0, 1 1, 1 0)'))
 ```
 
-Output: `[POINT (0 0), POINT (0 1), POINT (1 1), POINT (1 0), POINT (0 0)]`
+Output: 
+
+```
+[POINT (0 0), POINT (0 1), POINT (1 1), POINT (1 0), POINT (0 0)]
+```
 
 ## ST_EndPoint
 
@@ -887,11 +900,16 @@ Format: `ST_EndPoint(geom: geometry)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 SELECT ST_EndPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'))
 ```
 
-Output: `POINT(160 170)`
+Output: 
+
+```
+POINT(160 170)
+```
 
 ## ST_Envelope
 
@@ -904,8 +922,13 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_Envelope(polygondf.countyshape)
-FROM polygondf
+SELECT ST_Envelope(ST_GeomFromWKT('LINESTRING(0 0, 1 3)'))
+```
+
+Output:
+
+```
+POLYGON ((0 0, 0 3, 1 3, 1 0, 0 0))
 ```
 
 ## ST_ExteriorRing
@@ -919,13 +942,14 @@ Since: `v1.2.1`
 Examples:
 
 ```sql
-SELECT ST_ExteriorRing(df.geometry)
-FROM df
+SELECT ST_ExteriorRing(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
-Input: `POLYGON ((0 0, 1 1, 2 1, 0 1, 1 -1, 0 0))`
+Output:
 
-Output: `LINESTRING (0 0, 1 1, 2 1, 0 1, 1 -1, 0 0)`
+```
+LINESTRING (0 0, 1 1, 1 2, 1 1, 0 0)
+```
 
 ## ST_FlipCoordinates
 
@@ -935,15 +959,17 @@ Format: `ST_FlipCoordinates(A:geometry)`
 
 Since: `v1.2.0`
 
-Spark SQL example:
+Example:
+
 ```sql
-SELECT ST_FlipCoordinates(df.geometry)
-FROM df
+SELECT ST_FlipCoordinates(ST_GeomFromWKT("POINT (1 2)"))
 ```
 
-Input: `POINT (1 2)`
+Output:
 
-Output: `POINT (2 1)`
+```
+POINT (2 1)
+```
 
 ## ST_Force_2D
 
@@ -956,13 +982,14 @@ Since: `v1.2.1`
 Example:
 
 ```sql
-SELECT ST_Force_2D(df.geometry) AS geom
-FROM df
+SELECT ST_Force_2D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'))
 ```
 
-Input: `POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
+Output:
 
-Output: `POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))`
+```
+POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))
+```
 
 ## ST_Force3D
 Introduction: Forces the geometry into a 3-dimensional model so that all output representations will have X, Y and Z coordinates.
@@ -1039,20 +1066,14 @@ Since: `v1.2.0`
 
 Example: 
 
-Query:
-
 ```sql
 SELECT ST_GeoHash(ST_GeomFromText('POINT(21.427834 52.042576573)'), 5) AS geohash
 ```
 
-Result:
+Output:
 
 ```
-+-----------------------------+
-|geohash                      |
-+-----------------------------+
-|u3r0p                        |
-+-----------------------------+
+u3r0p
 ```
 
 ## ST_GeometricMedian
@@ -1073,7 +1094,7 @@ Format: `ST_GeometricMedian(geom: geometry)`
 
 Default parameters: `tolerance: 1e-6, maxIter: 1000, failIfNotConverged: false`
 
-Since: `1.4.1`
+Since: `v1.4.1`
 
 Example:
 ```sql
@@ -1094,11 +1115,16 @@ Format: `ST_GeometryN(geom: geometry, n: Int)`
 Since: `v1.3.0`
 
 Example:
+
 ```sql
 SELECT ST_GeometryN(ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))'), 1)
 ```
 
-Output: `POINT (3 4)`
+Output: 
+
+```
+POINT (3 4)
+```
 
 ## ST_GeometryType
 
@@ -1109,9 +1135,15 @@ Format: `ST_GeometryType (A:geometry)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
-SELECT ST_GeometryType(polygondf.countyshape)
-FROM polygondf
+SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))
+```
+
+Output:
+
+```
+ST_LINESTRING
 ```
 
 ## ST_HausdorffDistance
