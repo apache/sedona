@@ -1312,11 +1312,16 @@ Format: `ST_LengthSpheroid (A:geometry)`
 Since: `v1.4.1`
 
 Example:
+
 ```sql
 SELECT ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 0 90, 0 0))'))
 ```
 
-Output: `20037508.342789244`
+Output: 
+
+```
+20037508.342789244
+```
 
 ## ST_LineFromMultiPoint
 
