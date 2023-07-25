@@ -641,15 +641,23 @@ Example with x, y, z coordinate:
 SELECT ST_CoordDim(ST_GeomFromText('POINT(1 1 2'))
 ```
 
-Output: `3`
+Output: 
+
+```
+3
+```
 
 Example with x, y coordinate:
 
 ```sql
-SELECT ST_CoordDim(ST_GeomFromEWKT('POINT(3 7)'))
+SELECT ST_CoordDim(ST_GeomFromWKT('POINT(3 7)'))
 ```
 
-Output: `2`
+Output: 
+
+```
+2
+```
 
 ## ST_Degrees
 
