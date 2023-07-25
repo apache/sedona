@@ -729,9 +729,15 @@ Format: `ST_Distance (A:geometry, B:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_Distance(polygondf.countyshape, polygondf.countyshape)
-FROM polygondf
+SELECT ST_Distance(ST_GeomFromText('POINT(72 42)'), ST_GeomFromText('LINESTRING(-72 -42, 82 92)'))
+```
+
+Output:
+
+```
+31.155515639003543
 ```
 
 ## ST_DistanceSphere
