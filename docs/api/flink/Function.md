@@ -1133,8 +1133,16 @@ Since: `v1.5.0`
 Example:
 
 ```sql
-SELECT ST_Intersection(polygondf.countyshape, polygondf.countyshape)
-FROM polygondf
+SELECT ST_Intersection(
+    ST_GeomFromWTK("POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))"),
+    ST_GeomFromWTK("POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))")
+    )
+```
+
+Output:
+
+```
+POLYGON ((2 8, 8 8, 8 2, 2 2, 2 8))
 ```
 
 ## ST_IsClosed
