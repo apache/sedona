@@ -24,6 +24,7 @@ from sedona.sql.dataframe_api import call_sedona_function, ColumnOrName, ColumnO
 
 
 __all__ = [
+    "GeometryType",
     "ST_3DDistance",
     "ST_AddPoint",
     "ST_Area",
@@ -42,9 +43,11 @@ __all__ = [
     "ST_Centroid",
     "ST_Collect",
     "ST_CollectionExtract",
+    "ST_ClosestPoint",
     "ST_ConcaveHull",
     "ST_ConvexHull",
     "ST_Difference",
+    "ST_Dimension",
     "ST_Distance",
     "ST_DistanceSphere",
     "ST_DistanceSpheroid",
@@ -84,7 +87,7 @@ __all__ = [
     "ST_NumInteriorRings",
     "ST_PointN",
     "ST_PointOnSurface",
-    "ST_PrecisionReduce",
+    "ST_ReducePrecision",
     "ST_RemovePoint",
     "ST_Reverse",
     "ST_S2CellIDs",
@@ -111,12 +114,30 @@ __all__ = [
     "ST_NumPoints",
     "ST_Force3D",
     "ST_NRings",
-    "ST_Translate"
+    "ST_Translate",
+    "ST_Angle",
+    "ST_Degrees",
+    "ST_FrechetDistance",
+    "ST_CoordDim",
+    "ST_IsCollection",
+    "ST_Affine",
+    "ST_BoundingDiagonal"
 ]
 
 
 _call_st_function = partial(call_sedona_function, "st_functions")
 
+@validate_argument_types
+def GeometryType(geometry: ColumnOrName):
+    """Return the type of the geometry as a string.
+    This function also indicates if the geometry is measured, by returning a string of the form 'POINTM'.
+
+    :param geometry: Geometry column to calculate the dimension for.
+    :type geometry: ColumnOrName
+    :return: Type of geometry as a string column.
+    :rtype: Column
+    """
+    return _call_st_function("GeometryType", geometry)
 
 @validate_argument_types
 def ST_3DDistance(a: ColumnOrName, b: ColumnOrName) -> Column:
@@ -358,6 +379,21 @@ def ST_CollectionExtract(collection: ColumnOrName, geom_type: Optional[Union[Col
 
 
 @validate_argument_types
+def ST_ClosestPoint(a: ColumnOrName, b: ColumnOrName) -> Column:
+    """Returns the 2-dimensional point on geom1 that is closest to geom2. 
+    This is the first point of the shortest line between the geometries.
+
+    :param a: Geometry column to use in the calculation.
+    :type a: ColumnOrName
+    :param b: Geometry column to use in the calculation.
+    :type b: ColumnOrName
+    :return: the 2-dimensional point on a that is closest to b.
+    :rtype: Column
+    """
+    return _call_st_function("ST_ClosestPoint", (a, b))
+
+
+@validate_argument_types
 def ST_ConcaveHull(geometry: ColumnOrName, pctConvex: Union[ColumnOrName, float], allowHoles: Optional[Union[ColumnOrName, bool]] = None) -> Column:
     """Generate the cancave hull of a geometry column.
 
@@ -384,6 +420,16 @@ def ST_ConvexHull(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_ConvexHull", geometry)
 
+@validate_argument_types
+def ST_Dimension(geometry: ColumnOrName):
+    """Calculate the inherent dimension of a geometry column.
+
+    :param geometry: Geometry column to calculate the dimension for.
+    :type geometry: ColumnOrName
+    :return: Dimension of geometry as an integer column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_Dimension", geometry)
 
 @validate_argument_types
 def ST_Difference(a: ColumnOrName, b: ColumnOrName) -> Column:
@@ -922,7 +968,7 @@ def ST_PointOnSurface(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_PrecisionReduce(geometry: ColumnOrName, precision: Union[ColumnOrName, int]) -> Column:
+def ST_ReducePrecision(geometry: ColumnOrName, precision: Union[ColumnOrName, int]) -> Column:
     """Reduce the precision of the coordinates in geometry to a specified number of decimal places.
 
     :param geometry: Geometry to reduce the precision of.
@@ -932,7 +978,7 @@ def ST_PrecisionReduce(geometry: ColumnOrName, precision: Union[ColumnOrName, in
     :return: Geometry with precision reduced to the indicated number of decimal places as a geometry column, empty geometry if an invalid precision is passed.
     :rtype: Column
     """
-    return _call_st_function("ST_PrecisionReduce", (geometry, precision))
+    return _call_st_function("ST_ReducePrecision", (geometry, precision))
 
 
 @validate_argument_types
@@ -1277,3 +1323,125 @@ def ST_Translate(geometry: ColumnOrName, deltaX: Union[ColumnOrName, float], del
     args = (geometry, deltaX, deltaY, deltaZ)
     return _call_st_function("ST_Translate", args)
 
+def ST_FrechetDistance(g1: ColumnOrName, g2: ColumnOrName) -> Column:
+    """
+    Computes discrete frechet distance between the two geometries.
+    If any of the geometry is empty, ST_FrechetDistance returns 0
+    :param g1:
+    :param g2:
+    :return: Computed Discrete Frechet Distance between g1 and g2
+    """
+
+    args = (g1, g2)
+    return _call_st_function("ST_FrechetDistance", args)
+
+@validate_argument_types
+def ST_Affine(geometry: ColumnOrName, a: Union[ColumnOrName, float], b: Union[ColumnOrName, float], d: Union[ColumnOrName, float],
+                e: Union[ColumnOrName, float], xOff: Union[ColumnOrName, float], yOff: Union[ColumnOrName, float], c: Optional[Union[ColumnOrName, float]] = None, f: Optional[Union[ColumnOrName, float]] = None,
+                g: Optional[Union[ColumnOrName, float]] = None, h: Optional[Union[ColumnOrName, float]] = None,
+                i: Optional[Union[ColumnOrName, float]] = None,  zOff: Optional[Union[ColumnOrName, float]] = None) -> Column:
+    """
+    Apply a 3D/2D affine tranformation to the given geometry
+    x = a * x + b * y + c * z + xOff | x = a * x + b * y + xOff
+    y = d * x + e * y + f * z + yOff | y = d * x + e * y + yOff
+    z = g * x + h * y + i * z + zOff
+    :param geometry: Geometry to apply affine transformation to
+    :param a:
+    :param b:
+    :param c: Default 0.0
+    :param d:
+    :param e:
+    :param f: Default 0.0
+    :param g: Default 0.0
+    :param h: Default 0.0
+    :param i: Default 0.0
+    :param xOff:
+    :param yOff:
+    :param zOff: Default 0.0
+    :return: Geometry with affine transformation applied
+    """
+    args = (geometry, a, b, d, e, xOff, yOff)
+    if not [x for x in (c, f, g, h, i, zOff) if x is None]:
+        args = (geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)
+    return _call_st_function("ST_Affine", args)
+
+
+def ST_BoundingDiagonal(geometry: ColumnOrName) -> Column:
+    """
+    Returns a LineString with the min/max values of each dimension of the bounding box of the given geometry as its
+    start/end coordinates.
+    :param geometry: Geometry to return bounding diagonal of.
+    :return: LineString spanning min and max values of each dimension of the given geometry
+    """
+
+    return _call_st_function("ST_BoundingDiagonal", geometry)
+
+
+@validate_argument_types
+def ST_Angle(g1: ColumnOrName, g2: ColumnOrName, g3: Optional[ColumnOrName] = None, g4: Optional[ColumnOrName] = None) -> Column:
+    """
+    Returns the computed angle between vectors formed by given geometries in radian. Range of result is between 0 and 2 * pi.
+    3 Variants:
+        Angle(Point1, Point2, Point3, Point4)
+            Computes angle formed by vectors formed by Point1-Point2 and Point3-Point4
+        Angle(Point1, Point2, Point3)
+            Computes angle formed by angle Point1-Point2-Point3
+        Angle(Line1, Line2)
+            Computes angle between vectors formed by S1-E1 and S2-E2, where S and E are start and endpoints.
+    :param g1: Point or Line
+    :param g2: Point or Line
+    :param g3: Point or None
+    :param g4: Point or None
+    :return: Returns the computed angle
+    """
+    args = (g1, g2)
+    if g3 is not None:
+        if g4 is not None:
+            args = (g1, g2, g3, g4)
+        else:
+            args = (g1, g2, g3)
+    # args = (g1, g2, g3, g4)
+    return _call_st_function("ST_Angle", args)
+
+@validate_argument_types
+def ST_Degrees(angleInRadian: Union[ColumnOrName, float]) -> Column:
+    """
+    Converts a given angle from radian to degrees
+    :param angleInRadian: Angle in Radian
+    :return: Angle in Degrees
+    """
+    return _call_st_function("ST_Degrees", angleInRadian)
+@validate_argument_types
+def ST_HausdorffDistance(g1: ColumnOrName, g2: ColumnOrName, densityFrac: Optional[Union[ColumnOrName, float]] = -1) -> Column:
+    """
+    Returns discretized (and hence approximate) hausdorff distance between two given geometries.
+    Optionally, a distance fraction can also be provided which decreases the gap between actual and discretized hausforff distance
+    :param g1:
+    :param g2:
+    :param densityFrac: Optional
+    :return:
+    """
+    args = (g1, g2, densityFrac)
+    return _call_st_function("ST_HausdorffDistance", args)
+
+@validate_argument_types
+def ST_CoordDim(geometry: ColumnOrName) -> Column:
+    """Return the number of dimensions contained in a coordinate
+
+    :param geometry: Geometry column to return for.
+    :type geometry: ColumnOrName
+    :return: Number of dimensinos in a coordinate column as an integer column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_CoordDim", geometry)
+
+@validate_argument_types
+def ST_IsCollection(geometry: ColumnOrName) -> Column:
+    """Check if the geometry is of GeometryCollection type.
+
+    :param geometry: Column for geometry collection
+    :type geometry: ColumnOrName
+    :return: True if geometry is a collection of geometries.
+    :rtype: Column
+    """
+    return _call_st_function("ST_IsCollection", geometry)

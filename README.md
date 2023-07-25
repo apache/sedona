@@ -34,7 +34,7 @@ These are some of the key features of Apache Sedona, but it may offer additional
 
 Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
 
-[![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
+[![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://sedona.apache.org/latest/community/discord-invite-form.html)
 
 
 ## When to use Sedona?
@@ -127,7 +127,7 @@ Please visit [Apache Sedona website](http://sedona.apache.org/) for detailed inf
 
 Follow Sedona on Twitter for fresh news: [Sedona@Twitter](https://twitter.com/ApacheSedona)
 
-Join the Sedona Discord community: [![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
+Join the Sedona Discord community: [![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://sedona.apache.org/latest/community/discord-invite-form.html)
 
 [Sedona JIRA](https://issues.apache.org/jira/projects/SEDONA): Bugs, Pull Requests, and other similar issues
 

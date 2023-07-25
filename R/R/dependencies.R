@@ -139,9 +139,9 @@ sedona_dbplyr_sql_variant <- function() {
           "ST_Buffer(", geometry, ", CAST(", buffer, " AS DOUBLE))"
         )
       },
-      ST_PrecisionReduce = function(geometry, precision) {
+      ST_ReducePrecision = function(geometry, precision) {
         dbplyr::build_sql(
-          "ST_PrecisionReduce(", geometry, ", CAST(", precision, " AS INTEGER))"
+          "ST_ReducePrecision(", geometry, ", CAST(", precision, " AS INTEGER))"
         )
       },
       ST_SimplifyPreserveTopology = function(geometry, distance_tolerance) {

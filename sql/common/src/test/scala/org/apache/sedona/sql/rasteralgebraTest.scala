@@ -71,6 +71,12 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(inputDf.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
     }
 
+    it("Passed RS_MultiplyFactor with double factor") {
+      val inputDf = Seq((Seq(200.0, 400.0, 600.0))).toDF("Band")
+      val expectedDF = Seq((Seq(20.0, 40.0, 60.0))).toDF("multiply")
+      val actualDF = inputDf.selectExpr("RS_MultiplyFactor(Band, 0.1) as multiply")
+      assert(actualDF.first().getAs[mutable.WrappedArray[Double]](0) == expectedDF.first().getAs[mutable.WrappedArray[Double]](0))
+    }
   }
 
   describe("Should pass basic statistical tests") {
@@ -201,6 +207,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       var df = Seq((Seq(800.0, 900.0, 0.0, 255.0)), (Seq(100.0, 200.0, 700.0, 900.0))).toDF("Band")
       df = df.selectExpr("RS_Normalize(Band) as normalizedBand")
       assert(df.first().getAs[mutable.WrappedArray[Double]](0)(1) == 255)
+    }
+
+    it("should pass RS_Array") {
+      val df = sparkSession.sql("SELECT RS_Array(6, 1e-6) as band")
+      val result = df.first().getAs[mutable.WrappedArray[Double]](0)
+      assert(result.length == 6)
+      assert(result sameElements Array.fill[Double](6)(1e-6))
     }
   }
 
@@ -434,6 +447,34 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       intercept[Exception] {
         df.selectExpr("RS_BandAsArray(RS_AddBandFromArray(raster, band, 100), 1)").collect()
       }
+    }
+
+    it("Passed RS_Intersects") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+        .selectExpr("path", "RS_FromGeoTiff(content) as raster")
+
+      // query window without SRID
+      assert(df.selectExpr("RS_Intersects(raster, ST_Point(-13076178,4003651))").first().getBoolean(0))
+      assert(!df.selectExpr("RS_Intersects(raster, ST_Point(-13055247,3979620))").first().getBoolean(0))
+
+      // query window and raster are in the same CRS
+      assert(df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(-13067806,4009116), 3857))").first().getBoolean(0))
+      assert(!df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(-13057457,4027023), 3857))").first().getBoolean(0))
+
+      // query window and raster not in the same CRS
+      assert(df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(33.81798,-117.47993), 4326))").first().getBoolean(0))
+      assert(!df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(33.97896,-117.27868), 4326))").first().getBoolean(0))
+    }
+
+    it("Passed RS_AddBandFromArray collect generated raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster", "RS_BandAsArray(RS_FromGeoTiff(content), 1) as band")
+      df = df.selectExpr("RS_AddBandFromArray(raster, band, 1) as raster", "band")
+      var raster = df.collect().head.getAs[GridCoverage2D](0)
+      assert(raster.getNumSampleDimensions == 1)
+      df = df.selectExpr("RS_AddBandFromArray(raster, band, 2) as raster", "band")
+      raster = df.collect().head.getAs[GridCoverage2D](0)
+      assert(raster.getNumSampleDimensions == 2)
     }
   }
 }

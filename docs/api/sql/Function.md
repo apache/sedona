@@ -1,3 +1,37 @@
+## GeometryType
+
+Introduction: Returns the type of the geometry as a string. Eg: 'LINESTRING', 'POLYGON', 'MULTIPOINT', etc. This function also indicates if the geometry is measured, by returning a string of the form 'POINTM'.
+
+Format: `GeometryType (A:geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'));
+```
+
+Result:
+
+```
+ geometrytype
+--------------
+ LINESTRING
+```
+
+```sql
+SELECT GeometryType(ST_GeomFromText('POINTM(0 0 1)'));
+```
+
+Result:
+
+```
+ geometrytype
+--------------
+ POINTM
+```
+
 ## ST_3DDistance
 
 Introduction: Return the 3-dimensional minimum cartesian distance between A and B
@@ -8,8 +42,12 @@ Since: `v1.2.0`
 
 Spark SQL example:
 ```sql
-SELECT ST_3DDistance(polygondf.countyshape, polygondf.countyshape)
-FROM polygondf
+SELECT ST_3DDistance(ST_GeomFromText("POINT Z (0 0 -5)"), 
+                     ST_GeomFromText("POINT Z(1  1 -6"))
+```
+Output:
+```
+1.7320508075688772
 ```
 
 ## ST_AddPoint
@@ -35,6 +73,132 @@ LINESTRING(0 0, 21 52, 1 1, 1 0)
 LINESTRING(0 0, 1 1, 1 0, 21 52)
 ```
 
+## ST_Affine
+
+Introduction: Apply an affine transformation to the given geometry.
+
+ST_Affine has 2 overloaded signatures:
+
+`ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)`
+
+`ST_Affine(geometry, a, b, d, e, xOff, yOff)`
+
+
+Based on the invoked function, the following transformation is applied:
+
+`x = a * x + b * y + c * z + xOff OR x = a * x + b * y + xOff`
+
+`y = d * x + e * y + f * z + yOff OR y = d * x + e * y + yOff`
+
+`z = g * x + f * y + i * z + zOff OR z = g * x + f * y + zOff`
+
+If the given geometry is empty, the result is also empty.
+
+Format: `ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)`  
+Format: `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
+
+```sql
+ST_Affine(geometry, 1, 2, 4, 1, 1, 2, 3, 2, 5, 4, 8, 3)
+```
+
+Input: `LINESTRING EMPTY`
+
+Output: `LINESTRING EMPTY`
+
+Input: `POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))`
+
+Output: `POLYGON Z((9 11 11, 11 12 13, 18 16 23, 9 11 11))`
+
+Input: `POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0), (1 0.5, 1 0.75, 1.5 0.75, 1.5 0.5, 1 0.5))`
+
+Output: `POLYGON((5 9, 7 10, 8 11, 6 10, 5 9), (6 9.5, 6.5 9.75, 7 10.25, 6.5 10, 6 9.5))`
+
+
+```sql
+ST_Affine(geometry, 1, 2, 1, 2, 1, 2)
+```
+
+Input: `POLYGON EMPTY`
+
+Output: `POLYGON EMPTY`
+
+Input: `GEOMETRYCOLLECTION (MULTIPOLYGON (((1 0, 1 1, 2 1, 2 0, 1 0), (1 0.5, 1 0.75, 1.5 0.75, 1.5 0.5, 1 0.5)), ((5 0, 5 5, 7 5, 7 0, 5 0))), POINT (10 10))`
+
+Output: `GEOMETRYCOLLECTION (MULTIPOLYGON (((2 3, 4 5, 5 6, 3 4, 2 3), (3 4, 3.5 4.5, 4 5, 3.5 4.5, 3 4)), ((6 7, 16 17, 18 19, 8 9, 6 7))), POINT (31 32))`
+
+Input: `POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))`
+
+Output: `POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))`
+
+## ST_Angle
+
+Introduction: Computes and returns the angle between two vectors represented by the provided points or linestrings.
+
+There are three variants possible for ST_Angle:
+
+`ST_Angle(Geometry point1, Geometry point2, Geometry point3, Geometry point4)`
+Computes the angle formed by vectors represented by point1 - point2 and point3 - point4
+
+`ST_Angle(Geometry point1, Geometry point2, Geometry point3)`
+Computes the angle formed by vectors represented by point2 - point1 and point2 - point3
+
+`ST_Angle(Geometry line1, Geometry line2)`
+Computes the angle formed by vectors S1 - E1 and S2 - E2, where S and E denote start and end points respectively
+
+!!!Note
+    If any other geometry type is provided, ST_Angle throws an IllegalArgumentException.
+    Additionally, if any of the provided geometry is empty, ST_Angle throws an IllegalArgumentException.
+
+!!!Note
+    If a 3D geometry is provided, ST_Angle computes the angle ignoring the z ordinate, equivalent to calling ST_Angle for corresponding 2D geometries.
+
+!!!Tip
+    ST_Angle returns the angle in radian between 0 and 2\Pi. To convert the angle to degrees, use [ST_Degrees](./#st_degrees).
+
+
+Format: `ST_Angle(p1, p2, p3, p4) | ST_Angle(p1, p2, p3) | ST_Angle(line1, line2)`
+
+
+Since: `1.5.0`
+
+Example:
+
+```sql
+ST_Angle(p1, p2, p3, p4)
+```
+
+Input: `p1: POINT (0 0)`
+
+Input: `p2: POINT (1 1)`
+
+Input: `p3: POINT (1 0)`
+
+Input: `p4: POINT(6 2)`
+
+Output: 0.4048917862850834
+
+```sql
+ST_Angle(p1, p2, p3)
+```
+
+Input: `p1: POINT (1 1)`
+
+Input: `p2: POINT (0 0)`
+
+Input: `p3: POINT(3 2)`
+
+Output: 0.19739555984988044
+
+```sql
+ST_Angle(line1, line2)
+```
+
+Input: `line1: LINESTRING (0 0, 1 1)`
+
+Input: `line2: LINESTRING (0 0, 3 2)`
+
+Output: 0.19739555984988044
+
 ## ST_Area
 
 Introduction: Return the area of A
@@ -45,8 +209,12 @@ Since: `v1.0.0`
 
 Spark SQL example:
 ```sql
-SELECT ST_Area(polygondf.countyshape)
-FROM polygondf
+SELECT ST_Area(ST_GeomFromText("POLYGON(0 0, 0 10, 10 10, 0 10, 0 0)"))
+```
+
+Output:
+```
+10
 ```
 
 ## ST_AreaSpheroid
@@ -65,7 +233,11 @@ Spark SQL example:
 SELECT ST_AreaSpheroid(ST_GeomFromWKT('Polygon ((35 34, 30 28, 34 25, 35 34))'))
 ```
 
-Output: `201824850811.76245`
+Output: 
+
+```
+201824850811.76245
+```
 
 ## ST_AsBinary
 
@@ -76,9 +248,15 @@ Format: `ST_AsBinary (A:geometry)`
 Since: `v1.1.1`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_AsBinary(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsBinary(ST_GeomFromWKT('POINT (1 1)'))
+```
+
+Output:
+
+```
+0101000000000000000000f87f000000000000f87f
 ```
 
 ## ST_AsEWKB
@@ -94,9 +272,15 @@ Format: `ST_AsEWKB (A:geometry)`
 Since: `v1.1.1`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_AsEWKB(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsEWKB(ST_SetSrid(ST_GeomFromWKT('POINT (1 1)'), 3021))
+```
+
+Output:
+
+```
+0101000020cd0b0000000000000000f03f000000000000f03f
 ```
 
 ## ST_AsEWKT
@@ -112,9 +296,15 @@ Format: `ST_AsEWKT (A:geometry)`
 Since: `v1.2.1`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_AsEWKT(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsEWKT(ST_SetSrid(ST_GeomFromWKT('POLYGON((0 0,0 1,1 1,1 0,0 0))'), 4326))
+```
+
+Output:
+
+```
+SRID=4326;POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))
 ```
 
 ## ST_AsGeoJSON
@@ -126,9 +316,24 @@ Format: `ST_AsGeoJSON (A:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_AsGeoJSON(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsGeoJSON(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
+```
+
+Output:
+
+```json
+{
+  "type":"Polygon",
+  "coordinates":[
+    [[1.0,1.0],
+      [8.0,1.0],
+      [8.0,8.0],
+      [1.0,8.0],
+      [1.0,1.0]]
+  ]
+}
 ```
 
 ## ST_AsGML
@@ -140,9 +345,15 @@ Format: `ST_AsGML (A:geometry)`
 Since: `v1.3.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_AsGML(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsGML(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
+```
+
+Output:
+
+```
+1.0,1.0 8.0,1.0 8.0,8.0 1.0,8.0 1.0,1.0
 ```
 
 ## ST_AsKML
@@ -154,9 +365,15 @@ Format: `ST_AsKML (A:geometry)`
 Since: `v1.3.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_AsKML(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsKML(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
+```
+
+Output:
+
+```
+1.0,1.0 8.0,1.0 8.0,8.0 1.0,8.0 1.0,1.0
 ```
 
 ## ST_AsText
@@ -168,9 +385,15 @@ Format: `ST_AsText (A:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_AsText(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsText(ST_SetSRID(ST_Point(1.0,1.0), 3021))
+```
+
+Output:
+
+```
+POINT (1 1)
 ```
 
 ## ST_Azimuth
@@ -202,6 +425,33 @@ SELECT ST_Boundary(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
 ```
 
 Output: `LINESTRING (1 1, 0 0, -1 1, 1 1)`
+
+## ST_BoundingDiagonal
+
+Introduction: Returns a linestring spanning minimum and maximum values of each dimension of the given geometry's coordinates as its start and end point respectively.
+If an empty geometry is provided, the returned LineString is also empty.
+If a single vertex (POINT) is provided, the returned LineString has both the start and end points same as the points coordinates
+
+Format: `ST_BoundingDiagonal(geom: geometry)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+```sql
+SELECT ST_BoundingDiagonal(ST_GeomFromWKT(geom))
+```
+
+Input: `POLYGON ((1 1 1, 3 3 3, 0 1 4, 4 4 0, 1 1 1))`
+
+Output: `LINESTRING Z(0 1 1, 4 4 4)`
+
+Input: `POINT (10 10)`
+
+Output: `LINESTRING (10 10, 10 10)`
+
+Input: `GEOMETRYCOLLECTION(POLYGON ((5 5 5, -1 2 3, -1 -1 0, 5 5 5)), POINT (10 3 3))`
+
+Output: `LINESTRING Z(-1 -1 0, 10 5 5)`
 
 ## ST_Buffer
 
@@ -257,6 +507,32 @@ Spark SQL example:
 SELECT ST_Centroid(polygondf.countyshape)
 FROM polygondf
 ```
+
+## ST_ClosestPoint
+
+Introduction: Returns the 2-dimensional point on geom1 that is closest to geom2. This is the first point of the shortest line between the geometries. If using 3D geometries, the Z coordinates will be ignored. If you have a 3D Geometry, you may prefer to use ST_3DClosestPoint.
+It will throw an exception indicates illegal argument if one of the params is an empty geometry.
+
+Format: `ST_ClosestPoint(g1: geomtry, g2: geometry)`
+
+Since: `1.5.0`
+
+Example1:
+```sql
+SELECT ST_AsText( ST_ClosestPoint(g1, g2)) As ptwkt;
+```
+
+Input: `g1: POINT (160 40), g2: LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190)`
+
+Output: `POINT(160 40)`
+
+Input: `g1: LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190), g2: POINT (160 40)`
+
+Output: `POINT(125.75342465753425 115.34246575342466)`
+
+Input: `g1: 'POLYGON ((190 150, 20 10, 160 70, 190 150))', g2: ST_Buffer('POINT(80 160)', 30)`
+
+Output: `POINT(131.59149149528952 101.89887534906197)`
 
 ## ST_Collect
 
@@ -380,6 +656,46 @@ SELECT ST_ConvexHull(polygondf.countyshape)
 FROM polygondf
 ```
 
+##  ST_CoordDim
+
+Introduction: Returns the coordinate dimensions of the geometry. It is an alias of `ST_NDims`.
+
+Format: `ST_CoordDim(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example with x, y, z coordinate:
+
+```sql
+SELECT ST_CoordDim(ST_GeomFromText('POINT(1 1 2'))
+```
+
+Output: `3`
+
+Example with x, y coordinate:
+
+```sql
+SELECT ST_CoordDim(ST_GeomFromEWKT('POINT(3 7)'))
+```
+
+Output: `2`
+
+## ST_Degrees
+
+Introduction: Convert an angle in radian to degrees.
+
+Format: `ST_Degrees(angleInRadian)`
+
+Since: `1.5.0`
+
+Example:
+
+```sql
+SELECT ST_Degrees(0.19739555984988044)
+```
+
+Output: 11.309932474020195
+
 ## ST_Difference
 
 Introduction: Return the difference between geometry A and B (return part of geometry A that does not intersect geometry B)
@@ -399,6 +715,28 @@ Result:
 ```
 POLYGON ((0 -3, -3 -3, -3 3, 0 3, 0 -3))
 ```
+
+## ST_Dimension
+
+Introduction: Return the topological dimension of this Geometry object, which must be less than or equal to the coordinate dimension. OGC SPEC s2.1.1.1 - returns 0 for POINT, 1 for LINESTRING, 2 for POLYGON, and the largest dimension of the components of a GEOMETRYCOLLECTION. If the dimension is unknown (e.g. for an empty GEOMETRYCOLLECTION) 0 is returned.
+
+Format: `ST_Dimension (A:geometry), ST_Dimension (C:geometrycollection), `
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_Dimension('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))');
+```
+
+Result:
+
+```
+ST_Dimension
+-----------
+1
+```
+
 
 ## ST_Distance
 
@@ -619,6 +957,26 @@ Input: `LINESTRING EMPTY`
 
 Output: `LINESTRING EMPTY`
 
+## ST_FrechetDistance
+
+Introduction: Computes and returns discrete [Frechet Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_distance) between the given two geometrie,
+based on [Computing Discrete Frechet Distance](http://www.kr.tuwien.ac.at/staff/eiter/et-archive/cdtr9464.pdf)
+
+If any of the geometries is empty, returns 0.0
+
+Format: `ST_FrechetDistance(g1: geomtry, g2: geometry)`
+
+Since: `1.5.0`
+
+Example:
+```sql
+SELECT ST_FrechetDistance(g1, g2)
+```
+
+Input: `g1: POINT (0 1), g2: LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)`
+
+Output: `5.0990195135927845`
+
 ## ST_GeoHash
 
 Introduction: Returns GeoHash of the geometry with given precision
@@ -704,6 +1062,44 @@ SELECT ST_GeometryType(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_HausdorffDistance
+
+Introduction: Returns a discretized (and hence approximate) [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance) between the given 2 geometries.
+Optionally, a densityFraction parameter can be specified, which gives more accurate results by densifying segments before computing hausdorff distance between them.
+Each segment is broken down into equal-length subsegments whose ratio with segment length is closest to the given density fraction.
+
+Hence, the lower the densityFrac value, the more accurate is the computed hausdorff distance, and the more time it takes to compute it.
+
+If any of the geometry is empty, 0.0 is returned.
+
+!!!Note
+    Accepted range of densityFrac is (0.0, 1.0], if any other value is provided, ST_HausdorffDistance throws an IllegalArgumentException
+
+
+!!!Note
+    Even though the function accepts 3D geometry, the z ordinate is ignored and the computed hausdorff distance is equivalent to the geometries not having the z ordinate.
+
+Format: `ST_HausdorffDistance(g1: geometry, g2: geometry, densityFrac)`
+
+Since: `v1.5.0`
+
+Example:
+```sql
+SELECT ST_HausdorffDistance(g1, g2, 0.1)
+```
+
+Input: `g1: POINT (0.0 1.0), g2: LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)`
+
+Output: `5.0990195135927845`
+
+```sql
+SELECT ST_HausdorffDistance(ST_GeomFromText(), ST_GeomFromText())
+```
+
+Input: `g1: POLYGON Z((1 0 1, 1 1 2, 2 1 5, 2 0 1, 1 0 1)), g2: POLYGON Z((4 0 4, 6 1 4, 6 4 9, 6 1 3, 4 0 4))`
+
+Output: `5.0`
+
 ## ST_InteriorRingN
 
 Introduction: Returns the Nth interior linestring ring of the polygon geometry. Returns NULL if the geometry is not a polygon or the given N is out of range
@@ -745,6 +1141,33 @@ Since: `v1.0.0`
 Spark SQL example:
 ```sql
 SELECT ST_IsClosed(ST_GeomFromText('LINESTRING(0 0, 1 1, 1 0)'))
+```
+
+Output: `false`
+
+## ST_IsCollection
+
+Introduction: Returns `TRUE` if the geometry type of the input is a geometry collection type.
+Collection types are the following:
+
+- GEOMETRYCOLLECTION
+- MULTI{POINT, POLYGON, LINESTRING}
+
+Format: `ST_IsCollection(geom: geometry)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_IsCollection(ST_GeomFromText('MULTIPOINT(0 0), (6 6)'))
+```
+
+Output: `true`
+
+Example:
+```sql
+SELECT ST_IsCollection(ST_GeomFromText('POINT(5 5)'))
 ```
 
 Output: `false`
@@ -993,7 +1416,7 @@ It would also sometimes return multiple geometries for a single geometry input.
 
 ## ST_MinimumBoundingCircle
 
-Introduction: Returns the smallest circle polygon that contains a geometry.
+Introduction: Returns the smallest circle polygon that contains a geometry. The optional quadrantSegments parameter determines how many segments to use per quadrant and the default number of segments has been changed to 48 since v1.5.0. 
 
 Format: `ST_MinimumBoundingCircle(geom: geometry, [Optional] quadrantSegments:int)`
 
@@ -1243,18 +1666,18 @@ SELECT ST_AsText(ST_PointOnSurface(ST_GeomFromText('LINESTRING(0 5 1, 0 0 1, 0 1
 
 ```
 
-## ST_PrecisionReduce
+## ST_ReducePrecision
 
-Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded.
+Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded. This function was called ST_PrecisionReduce in versions prior to v1.5.0.
 
-Format: `ST_PrecisionReduce (A:geometry, B:int)`
+Format: `ST_ReducePrecision (A:geometry, B:int)`
 
 Since: `v1.0.0`
 
 Spark SQL example:
 
 ```sql
-SELECT ST_PrecisionReduce(polygondf.countyshape, 9)
+SELECT ST_ReducePrecision(polygondf.countyshape, 9)
 FROM polygondf
 ```
 The new coordinates will only have 9 decimal places.

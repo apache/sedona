@@ -128,7 +128,7 @@ extra:
     - icon: fontawesome/brands/twitter
       link: 'https://twitter.com/ApacheSedona'
   sedona:
-    current_version: 1.4.0
+    current_version: 1.4.1
     current_geotools: 1.4.0-28.2
   sedona_create_release:
     current_version: 1.4.1

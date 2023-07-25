@@ -413,6 +413,7 @@ Run the following script to build Javadoc and Scaladoc of sedona modules and mov
 #!/bin/bash
 
 mvn -q clean install -DskipTests
+rm -rf docs/api/javadoc && mkdir docs/api/javadoc
 mv core/target/apidocs docs/api/javadoc/core
 mv viz/target/apidocs docs/api/javadoc/viz
 mv sql/common/target/site/scaladocs docs/api/javadoc/sql

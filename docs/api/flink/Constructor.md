@@ -176,6 +176,20 @@ SELECT ST_Point(x, y) AS pointshape
 FROM pointtable
 ```
 
+## ST_PointZ
+
+Introduction: Construct a Point from X, Y and Z and an optional srid. If srid is not set, it defaults to 0 (unknown).
+
+Format: `ST_PointZ (X:decimal, Y:decimal, Z:decimal)`
+Format: `ST_PointZ (X:decimal, Y:decimal, Z:decimal, srid:integer)`
+
+Since: `v1.5.0`
+
+SQL example:
+```sql
+SELECT ST_PointZ(1.0, 2.0, 3.0) AS pointshape
+```
+
 ## ST_PointFromText
 
 Introduction: Construct a Point from Text, delimited by Delimiter

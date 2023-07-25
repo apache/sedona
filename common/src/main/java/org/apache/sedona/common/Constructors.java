@@ -148,8 +148,6 @@ public class Constructors {
     }
 
     public static Geometry geomFromGeoHash(String geoHash, Integer precision) {
-        System.out.println(geoHash);
-        System.out.println(precision);
         try {
             return GeoHashDecoder.decode(geoHash, precision);
         } catch (GeoHashDecoder.InvalidGeoHashException e) {

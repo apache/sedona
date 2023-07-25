@@ -23,6 +23,9 @@ import org.apache.spark.sql.sedona_sql.expressions.collect.{ST_Collect}
 import org.locationtech.jts.operation.buffer.BufferParameters
 
 object st_functions extends DataFrameAPI {
+  def GeometryType(geometry: Column): Column = wrapExpression[GeometryType](geometry)
+  def GeometryType(geometry: String): Column = wrapExpression[GeometryType](geometry)
+
   def ST_3DDistance(a: Column, b: Column): Column = wrapExpression[ST_3DDistance](a, b)
   def ST_3DDistance(a: String, b: String): Column = wrapExpression[ST_3DDistance](a, b)
 
@@ -70,6 +73,9 @@ object st_functions extends DataFrameAPI {
   def ST_Centroid(geometry: Column): Column = wrapExpression[ST_Centroid](geometry)
   def ST_Centroid(geometry: String): Column = wrapExpression[ST_Centroid](geometry)
 
+  def ST_ClosestPoint(a: Column, b: Column): Column = wrapExpression[ST_ClosestPoint](a, b)
+  def ST_ClosestPoint(a: String, b: String): Column = wrapExpression[ST_ClosestPoint](a, b)
+
   def ST_Collect(geoms: Column): Column = wrapExpression[ST_Collect](geoms)
   def ST_Collect(geoms: String): Column = wrapExpression[ST_Collect](geoms)
   def ST_Collect(geoms: Any*): Column = wrapVarArgExpression[ST_Collect](geoms)
@@ -89,6 +95,9 @@ object st_functions extends DataFrameAPI {
 
   def ST_Difference(a: Column, b: Column): Column = wrapExpression[ST_Difference](a, b)
   def ST_Difference(a: String, b: String): Column = wrapExpression[ST_Difference](a, b)
+
+  def ST_Dimension(geometry: Column): Column = wrapExpression[ST_Dimension](geometry)
+  def ST_Dimension(geometry: String): Column = wrapExpression[ST_Dimension](geometry)
 
   def ST_Distance(a: Column, b: Column): Column = wrapExpression[ST_Distance](a, b)
   def ST_Distance(a: String, b: String): Column = wrapExpression[ST_Distance](a, b)
@@ -169,8 +178,8 @@ object st_functions extends DataFrameAPI {
   def ST_MakeValid(geometry: Column, keepCollapsed: Column): Column = wrapExpression[ST_MakeValid](geometry, keepCollapsed)
   def ST_MakeValid(geometry: String, keepCollapsed: Boolean): Column = wrapExpression[ST_MakeValid](geometry, keepCollapsed)
 
-  def ST_MinimumBoundingCircle(geometry: Column): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, BufferParameters.DEFAULT_QUADRANT_SEGMENTS)
-  def ST_MinimumBoundingCircle(geometry: String): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, BufferParameters.DEFAULT_QUADRANT_SEGMENTS)
+  def ST_MinimumBoundingCircle(geometry: Column): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6)
+  def ST_MinimumBoundingCircle(geometry: String): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6)
   def ST_MinimumBoundingCircle(geometry: Column, quadrantSegments: Column): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, quadrantSegments)
   def ST_MinimumBoundingCircle(geometry: String, quadrantSegments: Int): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, quadrantSegments)
 
@@ -201,8 +210,8 @@ object st_functions extends DataFrameAPI {
   def ST_PointOnSurface(geometry: Column): Column = wrapExpression[ST_PointOnSurface](geometry)
   def ST_PointOnSurface(geometry: String): Column = wrapExpression[ST_PointOnSurface](geometry)
 
-  def ST_PrecisionReduce(geometry: Column, precision: Column): Column = wrapExpression[ST_PrecisionReduce](geometry, precision)
-  def ST_PrecisionReduce(geometry: String, precision: Int): Column = wrapExpression[ST_PrecisionReduce](geometry, precision)
+  def ST_ReducePrecision(geometry: Column, precision: Column): Column = wrapExpression[ST_ReducePrecision](geometry, precision)
+  def ST_ReducePrecision(geometry: String, precision: Int): Column = wrapExpression[ST_ReducePrecision](geometry, precision)
 
   def ST_RemovePoint(lineString: Column, index: Column): Column = wrapExpression[ST_RemovePoint](lineString, index)
   def ST_RemovePoint(lineString: String, index: Int): Column = wrapExpression[ST_RemovePoint](lineString, index)
@@ -326,5 +335,58 @@ object st_functions extends DataFrameAPI {
 
   def ST_Translate(geometry: String, deltaX: Double, deltaY: Double): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, 0.0)
 
+  def ST_FrechetDistance(g1: Column, g2: Column): Column = wrapExpression[ST_FrechetDistance](g1, g2)
+
+  def ST_FrechetDistance(g1: String, g2: String): Column = wrapExpression[ST_FrechetDistance](g1, g2)
+
+  def ST_Affine(geometry: Column, a: Column, b: Column, c: Column, d: Column, e: Column, f: Column, g: Column, h: Column, i: Column, xOff: Column, yOff: Column, zOff: Column): Column =
+    wrapExpression[ST_Affine](geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)
+
+  def ST_Affine(geometry: String, a: Double, b: Double, c: Double, d: Double, e: Double, f: Double, g: Double, h: Double, i: Double, xOff: Double, yOff: Double, zOff: Double): Column =
+    wrapExpression[ST_Affine](geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)
+
+  def ST_Affine(geometry: Column, a: Column, b: Column, d: Column, e: Column, xOff: Column, yOff: Column) =
+    wrapExpression[ST_Affine](geometry, a, b, d, e, xOff, yOff)
+
+  def ST_Affine(geometry: String, a: Double, b: Double, d: Double, e: Double, xOff: Double, yOff: Double) =
+    wrapExpression[ST_Affine](geometry, a, b, d, e, xOff, yOff)
+
+  def ST_BoundingDiagonal(geometry: Column) =
+    wrapExpression[ST_BoundingDiagonal](geometry)
+
+  def ST_BoundingDiagonal(geometry: String) =
+    wrapExpression[ST_BoundingDiagonal](geometry)
+
+  def ST_Angle(p1: Column, p2: Column, p3: Column, p4: Column): Column = wrapExpression[ST_Angle](p1, p2, p3, p4)
+
+  def ST_Angle(p1: String, p2: String, p3: String, p4: String): Column = wrapExpression[ST_Angle](p1, p2, p3, p4)
+
+  def ST_Angle(p1: Column, p2: Column, p3: Column): Column = wrapExpression[ST_Angle](p1, p2, p3)
+
+  def ST_Angle(p1: String, p2: String, p3: String): Column = wrapExpression[ST_Angle](p1, p2, p3)
+
+  def ST_Angle(line1: Column, line2: Column): Column = wrapExpression[ST_Angle](line1, line2)
+
+  def ST_Angle(line1: String, line2: String): Column = wrapExpression[ST_Angle](line1, line2)
+
+  def ST_Degrees(angleInRadian: Column): Column = wrapExpression[ST_Degrees](angleInRadian)
+
+  def ST_Degrees(angleInRadian: Double): Column = wrapExpression[ST_Degrees](angleInRadian)
+  def ST_HausdorffDistance(g1: Column, g2: Column) = wrapExpression[ST_HausdorffDistance](g1, g2, -1)
+
+  def ST_HausdorffDistance(g1: String, g2: String) = wrapExpression[ST_HausdorffDistance](g1, g2, -1);
+
+  def ST_HausdorffDistance(g1: Column, g2: Column, densityFrac: Column) = wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac);
+
+  def ST_HausdorffDistance(g1: String, g2: String, densityFrac: Double) = wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac);
+
+  def ST_CoordDim(geometry: Column): Column = wrapExpression[ST_CoordDim](geometry)
+
+  def ST_CoordDim(geometry: String): Column = wrapExpression[ST_CoordDim](geometry)
+
+  def ST_IsCollection(geometry: Column): Column = wrapExpression[ST_IsCollection](geometry)
+
+  def ST_IsCollection(geometry: String): Column = wrapExpression[ST_IsCollection](geometry)
 
 }
+ 
