@@ -1629,16 +1629,22 @@ Introduction: Returns number of points in a LineString
     `SELECT ST_NumPoints(ST_GeomFromWKT('MULTIPOINT ((0 0), (1 1), (0 1), (2 2))'))`
 
     Output: `IllegalArgumentException: Unsupported geometry type: MultiPoint, only LineString geometry is supported.`
+
 Format: `ST_NumPoints(geom: geometry)`
 
 Since: `v1.4.1`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_NumPoints(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'))
 ```
 
-Output: `3`
+Output: 
+
+```
+3
+```
 
 ## ST_PointN
 

@@ -1630,11 +1630,16 @@ Format: `ST_NumPoints(geom: geometry)`
 Since: `v1.4.1`
 
 Example:
+
 ```sql
 SELECT ST_NumPoints(ST_GeomFromText('LINESTRING(1 2, 1 3)'))
 ```
 
-Output: `2`
+Output: 
+
+```
+2
+```
 
 ## ST_PointN
 
