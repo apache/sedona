@@ -1200,11 +1200,16 @@ Format: `ST_InteriorRingN(geom: geometry, n: Int)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_InteriorRingN(ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))'), 0)
 ```
 
-Output: `LINESTRING (1 1, 2 1, 2 2, 1 2, 1 1)`
+Output: 
+
+```
+LINESTRING (1 1, 2 1, 2 2, 1 2, 1 1)
+```
 
 ## ST_Intersection
 
@@ -1217,8 +1222,16 @@ Since: `v1.0.0`
 Spark SQL example:
 
 ```sql
-SELECT ST_Intersection(polygondf.countyshape, polygondf.countyshape)
-FROM polygondf
+SELECT ST_Intersection(
+    ST_GeomFromWKT("POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))"),
+    ST_GeomFromWKT("POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))")
+    )
+```
+
+Output:
+
+```
+POLYGON ((2 8, 8 8, 8 2, 2 2, 2 8))
 ```
 
 ## ST_IsClosed
@@ -1230,11 +1243,16 @@ Format: `ST_IsClosed(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_IsClosed(ST_GeomFromText('LINESTRING(0 0, 1 1, 1 0)'))
 ```
 
-Output: `false`
+Output: 
+
+```
+false
+```
 
 ## ST_IsCollection
 
@@ -1254,14 +1272,23 @@ Example:
 SELECT ST_IsCollection(ST_GeomFromText('MULTIPOINT(0 0), (6 6)'))
 ```
 
-Output: `true`
+Output: 
+
+```
+true
+```
 
 Example:
+
 ```sql
 SELECT ST_IsCollection(ST_GeomFromText('POINT(5 5)'))
 ```
 
-Output: `false`
+Output: 
+
+```
+false
+```
 
 ## ST_IsEmpty
 
@@ -1274,8 +1301,13 @@ Since: `v1.2.1`
 Spark SQL example:
 
 ```sql
-SELECT ST_IsEmpty(polygondf.countyshape)
-FROM polygondf
+SELECT ST_IsEmpty(ST_GeomFromWKT('POLYGON((0 0,0 1,1 1,1 0,0 0))'))
+```
+
+Output:
+
+```
+false
 ```
 
 ## ST_IsRing
@@ -1287,11 +1319,16 @@ Format: `ST_IsRing(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_IsRing(ST_GeomFromText("LINESTRING(0 0, 0 1, 1 1, 1 0, 0 0)"))
 ```
 
-Output: `true`
+Output: 
+
+```
+true
+```
 
 ## ST_IsSimple
 
@@ -1304,8 +1341,13 @@ Since: `v1.0.0`
 Spark SQL example:
 
 ```sql
-SELECT ST_IsSimple(polygondf.countyshape)
-FROM polygondf
+SELECT ST_IsSimple(ST_GeomFromWKT('POLYGON((1 1, 3 1, 3 3, 1 3, 1 1))'))
+```
+
+Output:
+
+```
+true
 ```
 
 ## ST_IsValid
@@ -1319,8 +1361,13 @@ Since: `v1.0.0`
 Spark SQL example:
 
 ```sql
-SELECT ST_IsValid(polygondf.countyshape)
-FROM polygondf
+SELECT ST_IsValid(ST_GeomFromWKT('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0), (15 15, 15 20, 20 20, 20 15, 15 15))'))
+```
+
+Output:
+
+```
+false
 ```
 
 ## ST_Length
@@ -1332,9 +1379,15 @@ Format: ST_Length (A:geometry)
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_Length(polygondf.countyshape)
-FROM polygondf
+SELECT ST_Length(ST_GeomFromWKT('LINESTRING(38 16,38 50,65 50,66 16,38 16)'))
+```
+
+Output:
+
+```
+123.0147027033899
 ```
 
 ## ST_LengthSpheroid
@@ -1348,11 +1401,16 @@ Format: `ST_LengthSpheroid (A:geometry)`
 Since: `v1.4.1`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 0 90, 0 0))'))
 ```
 
-Output: `20037508.342789244`
+Output: 
+
+```
+20037508.342789244
+```
 
 ## ST_LineFromMultiPoint
 
@@ -1365,19 +1423,13 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_AsText(
-    ST_LineFromMultiPoint(ST_GeomFromText('MULTIPOINT((10 40), (40 30), (20 20), (30 10))'))
-) AS geom
+SELECT ST_LineFromMultiPoint(ST_GeomFromText('MULTIPOINT((10 40), (40 30), (20 20), (30 10))'))
 ```
 
-Result:
+Output:
 
 ```
-+---------------------------------------------------------------+
-|geom                                                           |
-+---------------------------------------------------------------+
-|LINESTRING (10 40, 40 30, 20 20, 30 10)                        |
-+---------------------------------------------------------------+
+LINESTRING (10 40, 40 30, 20 20, 30 10)
 ```
 
 ## ST_LineInterpolatePoint
@@ -1389,17 +1441,14 @@ Format: `ST_LineInterpolatePoint (geom: geometry, fraction: Double)`
 Since: `v1.0.1`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_LineInterpolatePoint(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.2) as Interpolated
+SELECT ST_LineInterpolatePoint(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.2)
 ```
 
 Output:
 ```
-+-----------------------------------------+
-|Interpolated                             |
-+-----------------------------------------+
-|POINT (51.5974135047432 76.5974135047432)|
-+-----------------------------------------+
+POINT (51.5974135047432 76.5974135047432)
 ```
 
 ## ST_LineMerge
