@@ -413,7 +413,11 @@ Example:
 SELECT ST_Azimuth(ST_POINT(0.0, 25.0), ST_POINT(0.0, 0.0))
 ```
 
-Output: `3.141592653589793`
+Output:
+
+```
+3.141592653589793
+```
 
 ## ST_Boundary
 
@@ -424,11 +428,16 @@ Format: `ST_Boundary(geom: geometry)`
 Since: `v1.3.0`
 
 Example:
+
 ```sql
 SELECT ST_Boundary(ST_GeomFromText('POLYGON ((1 1, 0 0, -1 1, 1 1))'))
 ```
 
-Output: `LINEARRING (1 1, 0 0, -1 1, 1 1)`
+Output:
+
+```
+LINEARRING (1 1, 0 0, -1 1, 1 1)
+```
 
 ## ST_BoundingDiagonal
 
@@ -465,10 +474,16 @@ Format: `ST_Buffer (A:geometry, buffer: Double)`
 
 Since: `v1.2.0`
 
-Spark SQL example:
+Example:
+
 ```sql
-SELECT ST_Buffer(polygondf.countyshape, 1)
-FROM polygondf
+SELECT ST_Buffer(ST_GeomFromWKT("POINT(0 0)"), 1)
+```
+
+Output:
+
+```
+POLYGON ((1 0, 0.9807852804032304 -0.1950903220161282, 0.9238795325112867 -0.3826834323650898, 0.8314696123025452 -0.5555702330196022, 0.7071067811865476 -0.7071067811865475, 0.5555702330196023 -0.8314696123025452, 0.3826834323650898 -0.9238795325112867, 0.1950903220161283 -0.9807852804032304, 0.0000000000000001 -1, -0.1950903220161282 -0.9807852804032304, -0.3826834323650897 -0.9238795325112867, -0.555570233019602 -0.8314696123025453, -0.7071067811865475 -0.7071067811865476, -0.8314696123025453 -0.5555702330196022, -0.9238795325112867 -0.3826834323650899, -0.9807852804032304 -0.1950903220161286, -1 -0.0000000000000001, -0.9807852804032304 0.1950903220161284, -0.9238795325112868 0.3826834323650897, -0.8314696123025455 0.555570233019602, -0.7071067811865477 0.7071067811865475, -0.5555702330196022 0.8314696123025452, -0.3826834323650903 0.9238795325112865, -0.1950903220161287 0.9807852804032303, -0.0000000000000002 1, 0.1950903220161283 0.9807852804032304, 0.38268343236509 0.9238795325112866, 0.5555702330196018 0.8314696123025455, 0.7071067811865474 0.7071067811865477, 0.8314696123025452 0.5555702330196022, 0.9238795325112865 0.3826834323650904, 0.9807852804032303 0.1950903220161287, 1 0))
 ```
 
 ## ST_BuildArea
@@ -500,8 +515,13 @@ Since: `v1.5.0`
 
 Example:
 ```sql
-SELECT ST_Centroid(polygondf.countyshape)
-FROM polygondf
+SELECT ST_Centroid(ST_GeomFromWKT('MULTIPOINT(-1  0, -1 2, 7 8, 9 8, 10 6)'))
+```
+
+Output:
+
+```
+POINT (4.8 4.8) 
 ```
 
 ## ST_ClosestPoint
@@ -635,14 +655,14 @@ Since: `v1.4.0`
 Example:
 
 ```sql
-SELECT ST_ConcaveHull(polygondf.countyshape, pctConvex)`
-FROM polygondf
+SELECT ST_ConcaveHull(ST_GeomFromWKT('POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))'), 1)
 ```
 
-Input: `Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))`
+Output:
 
-Output: `POLYGON ((1 2, 2 2, 3 2, 5 0, 4 0, 1 0, 0 0, 1 2))`
-
+```
+POLYGON ((125 100, 20 40, 50 60, 175 150, 125 100))  
+```
 ## ST_ConvexHull
 
 Introduction: Return the Convex Hull of polgyon A
@@ -652,9 +672,15 @@ Format: `ST_ConvexHull (A:geometry)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
-SELECT ST_ConvexHull(polygondf.countyshape)
-FROM polygondf
+SELECT ST_ConvexHull(ST_GeomFromText('POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))'))
+```
+
+Output:
+
+```
+POLYGON ((20 40, 175 150, 125 100, 20 40))
 ```
 
 ##  ST_CoordDim
@@ -671,15 +697,23 @@ Example with x, y, z coordinate:
 SELECT ST_CoordDim(ST_GeomFromText('POINT(1 1 2'))
 ```
 
-Output: `3`
+Output: 
+
+```
+3
+```
 
 Example with x, y coordinate:
 
 ```sql
-SELECT ST_CoordDim(ST_GeomFromEWKT('POINT(3 7)'))
+SELECT ST_CoordDim(ST_GeomFromWKT('POINT(3 7)'))
 ```
 
-Output: `2`
+Output: 
+
+```
+2
+```
 
 ## ST_Dimension
 
@@ -690,6 +724,7 @@ Format: `ST_Dimension (A:geometry), ST_Dimension (C:geometrycollection), `
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 SELECT ST_Dimension('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))');
 ```
@@ -697,8 +732,6 @@ SELECT ST_Dimension('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))');
 Result:
 
 ```
-ST_Dimension
------------
 1
 ```
 
@@ -710,10 +743,16 @@ Format: `ST_Distance (A:geometry, B:geometry)`
 
 Since: `v1.2.0`
 
-Spark SQL example:
+Example:
+
 ```sql
-SELECT ST_Distance(polygondf.countyshape, polygondf.countyshape)
-FROM polygondf
+SELECT ST_Distance(ST_GeomFromText('POINT(72 42)'), ST_GeomFromText('LINESTRING(-72 -42, 82 92)'))
+```
+
+Output:
+
+```
+31.155515639003543
 ```
 
 ## ST_DistanceSphere
@@ -732,7 +771,11 @@ Example 1:
 SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))
 ```
 
-Output: `543796.9506134904`
+Output: 
+
+```
+543796.9506134904
+```
 
 Example 2:
 
@@ -740,7 +783,11 @@ Example 2:
 SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'), 6378137.0)
 ```
 
-Output: `544405.4459192449`
+Output: 
+
+```
+544405.4459192449
+```
 
 ## ST_DistanceSpheroid
 
@@ -753,11 +800,16 @@ Format: `ST_DistanceSpheroid (A:geometry)`
 Since: `v1.4.1`
 
 Example:
+
 ```sql
 SELECT ST_DistanceSpheroid(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))
 ```
 
-Output: `544430.9411996207`
+Output: 
+
+```
+544430.9411996207
+```
 
 ## ST_Degrees
 

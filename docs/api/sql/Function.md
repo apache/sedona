@@ -405,11 +405,16 @@ Format: `ST_Azimuth(pointA: Point, pointB: Point)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_Azimuth(ST_POINT(0.0, 25.0), ST_POINT(0.0, 0.0))
 ```
 
-Output: `3.141592653589793`
+Output:
+
+```
+3.141592653589793
+```
 
 ## ST_Boundary
 
@@ -420,11 +425,16 @@ Format: `ST_Boundary(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_Boundary(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
+SELECT ST_Boundary(ST_GeomFromWKT('POLYGON((1 1,0 0, -1 1, 1 1))'))
 ```
 
-Output: `LINESTRING (1 1, 0 0, -1 1, 1 1)`
+Output:
+
+```
+LINESTRING (1 1, 0 0, -1 1, 1 1)
+```
 
 ## ST_BoundingDiagonal
 
@@ -462,9 +472,15 @@ Format: `ST_Buffer (A:geometry, buffer: Double)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_Buffer(polygondf.countyshape, 1)
-FROM polygondf
+SELECT ST_Buffer(ST_GeomFromWKT("POINT(0 0)"), 1)
+```
+
+Output:
+
+```
+POLYGON ((1 0, 0.9807852804032304 -0.1950903220161282, 0.9238795325112867 -0.3826834323650898, 0.8314696123025452 -0.5555702330196022, 0.7071067811865476 -0.7071067811865475, 0.5555702330196023 -0.8314696123025452, 0.3826834323650898 -0.9238795325112867, 0.1950903220161283 -0.9807852804032304, 0.0000000000000001 -1, -0.1950903220161282 -0.9807852804032304, -0.3826834323650897 -0.9238795325112867, -0.555570233019602 -0.8314696123025453, -0.7071067811865475 -0.7071067811865476, -0.8314696123025453 -0.5555702330196022, -0.9238795325112867 -0.3826834323650899, -0.9807852804032304 -0.1950903220161286, -1 -0.0000000000000001, -0.9807852804032304 0.1950903220161284, -0.9238795325112868 0.3826834323650897, -0.8314696123025455 0.555570233019602, -0.7071067811865477 0.7071067811865475, -0.5555702330196022 0.8314696123025452, -0.3826834323650903 0.9238795325112865, -0.1950903220161287 0.9807852804032303, -0.0000000000000002 1, 0.1950903220161283 0.9807852804032304, 0.38268343236509 0.9238795325112866, 0.5555702330196018 0.8314696123025455, 0.7071067811865474 0.7071067811865477, 0.8314696123025452 0.5555702330196022, 0.9238795325112865 0.3826834323650904, 0.9807852804032303 0.1950903220161287, 1 0))
 ```
 
 ## ST_BuildArea
@@ -479,7 +495,7 @@ Example:
 
 ```sql
 SELECT ST_BuildArea(
-    ST_GeomFromText('MULTILINESTRING((0 0, 20 0, 20 20, 0 20, 0 0),(2 2, 18 2, 18 18, 2 18, 2 2))')
+    ST_GeomFromWKT('MULTILINESTRING((0 0, 20 0, 20 20, 0 20, 0 0),(2 2, 18 2, 18 18, 2 18, 2 2))')
 ) AS geom
 ```
 
@@ -503,9 +519,15 @@ Format: `ST_Centroid (A:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_Centroid(polygondf.countyshape)
-FROM polygondf
+SELECT ST_Centroid(ST_GeomFromWKT('MULTIPOINT(-1  0, -1 2, 7 8, 9 8, 10 6)'))
+```
+
+Output:
+
+```
+POINT (4.8 4.8) 
 ```
 
 ## ST_ClosestPoint
@@ -637,9 +659,15 @@ Format: `ST_ConcaveHull (A:geometry, pctConvex:float, allowHoles:Boolean)`
 Since: `v1.4.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_ConcaveHull(polygondf.countyshape, pctConvex)`
-FROM polygondf
+SELECT ST_ConcaveHull(ST_GeomFromWKT('POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))'), 1)
+```
+
+Output:
+
+```
+POLYGON ((125 100, 20 40, 50 60, 175 150, 125 100))  
 ```
 
 ## ST_ConvexHull
@@ -651,9 +679,15 @@ Format: `ST_ConvexHull (A:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_ConvexHull(polygondf.countyshape)
-FROM polygondf
+SELECT ST_ConvexHull(ST_GeomFromText('POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))'))
+```
+
+Output:
+
+```
+POLYGON ((20 40, 175 150, 125 100, 20 40))
 ```
 
 ##  ST_CoordDim
@@ -670,15 +704,23 @@ Example with x, y, z coordinate:
 SELECT ST_CoordDim(ST_GeomFromText('POINT(1 1 2'))
 ```
 
-Output: `3`
+Output: 
+
+```
+3
+```
 
 Example with x, y coordinate:
 
 ```sql
-SELECT ST_CoordDim(ST_GeomFromEWKT('POINT(3 7)'))
+SELECT ST_CoordDim(ST_GeomFromWKT('POINT(3 7)'))
 ```
 
-Output: `2`
+Output: 
+
+```
+2
+```
 
 ## ST_Degrees
 
@@ -686,7 +728,7 @@ Introduction: Convert an angle in radian to degrees.
 
 Format: `ST_Degrees(angleInRadian)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
 Example:
 
@@ -694,7 +736,11 @@ Example:
 SELECT ST_Degrees(0.19739555984988044)
 ```
 
-Output: 11.309932474020195
+Output: 
+
+```
+11.309932474020195
+```
 
 ## ST_Difference
 
@@ -710,7 +756,7 @@ Example:
 SELECT ST_Difference(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((0 -4, 4 -4, 4 4, 0 4, 0 -4))'))
 ```
 
-Result:
+Output:
 
 ```
 POLYGON ((0 -3, -3 -3, -3 3, 0 3, 0 -3))
@@ -725,15 +771,14 @@ Format: `ST_Dimension (A:geometry), ST_Dimension (C:geometrycollection), `
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 SELECT ST_Dimension('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))');
 ```
 
-Result:
+Output:
 
 ```
-ST_Dimension
------------
 1
 ```
 
@@ -747,9 +792,15 @@ Format: `ST_Distance (A:geometry, B:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_Distance(polygondf.countyshape, polygondf.countyshape)
-FROM polygondf
+SELECT ST_Distance(ST_GeomFromText('POINT(72 42)'), ST_GeomFromText('LINESTRING(-72 -42, 82 92)'))
+```
+
+Output:
+
+```
+31.155515639003543
 ```
 
 ## ST_DistanceSphere
@@ -763,18 +814,28 @@ Format: `ST_DistanceSphere (A:geometry)`
 Since: `v1.4.1`
 
 Spark SQL example 1:
+
 ```sql
 SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))
 ```
 
-Output: `543796.9506134904`
+Output: 
+
+```
+543796.9506134904
+```
 
 Spark SQL example 2:
+
 ```sql
 SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'), 6378137.0)
 ```
 
-Output: `544405.4459192449`
+Output: 
+
+```
+544405.4459192449
+```
 
 
 ## ST_DistanceSpheroid
@@ -788,11 +849,16 @@ Format: `ST_DistanceSpheroid (A:geometry)`
 Since: `v1.4.1`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_DistanceSpheroid(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))
 ```
 
-Output: `544430.9411996207`
+Output: 
+
+```
+544430.9411996207
+```
 
 ## ST_Dump
 
