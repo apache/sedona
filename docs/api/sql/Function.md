@@ -1056,11 +1056,16 @@ Format: `ST_GeometryN(geom: geometry, n: Int)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_GeometryN(ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))'), 1)
 ```
 
-Output: `POINT (3 4)`
+Output: 
+
+```
+POINT (3 4)
+```
 
 ## ST_GeometryType
 
