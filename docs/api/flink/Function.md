@@ -741,11 +741,16 @@ Format: `ST_DistanceSpheroid (A:geometry)`
 Since: `v1.4.1`
 
 Example:
+
 ```sql
 SELECT ST_DistanceSpheroid(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))
 ```
 
-Output: `544430.9411996207`
+Output: 
+
+```
+544430.9411996207
+```
 
 ## ST_Degrees
 
