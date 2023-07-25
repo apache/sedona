@@ -1321,8 +1321,13 @@ Since: `v1.5.0`
 
 Example:
 ```sql
-SELECT ST_LineMerge(geometry)
-FROM df
+SELECT ST_LineMerge(ST_GeomFromWKT('MULTILINESTRING ((-29 -27, -30 -29.7, -45 -33), (-45 -33, -46 -32))'))
+```
+
+Output:
+
+```
+LINESTRING (-29 -27, -30 -29.7, -45 -33, -46 -32)
 ```
 
 ## ST_LineSubstring
