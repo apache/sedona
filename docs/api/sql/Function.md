@@ -865,8 +865,13 @@ Since: `v1.0.0`
 Spark SQL example:
 
 ```sql
-SELECT ST_Envelope(polygondf.countyshape)
-FROM polygondf
+SELECT ST_Envelope(ST_GeomFromWTK('LINESTRING(0 0, 1 3)'))
+```
+
+Output:
+
+```
+POLYGON ((0 0, 0 3, 1 3, 1 0, 0 0))
 ```
 
 ## ST_ExteriorRing
