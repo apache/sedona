@@ -930,13 +930,14 @@ Since: `v1.2.1`
 Example:
 
 ```sql
-SELECT ST_Force_2D(df.geometry) AS geom
-FROM df
+SELECT ST_Force_2D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'))
 ```
 
-Input: `POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
+Output:
 
-Output: `POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))`
+```
+POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))
+```
 
 ## ST_Force3D
 Introduction: Forces the geometry into a 3-dimensional model so that all output representations will have X, Y and Z coordinates.
