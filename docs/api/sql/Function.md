@@ -1656,17 +1656,13 @@ Since: `v1.2.1`
 
 Spark SQL example:
 ```sql
-SELECT ST_PointN(ST_GeomFromText("LINESTRING(0 0, 1 2, 2 4, 3 6)"), 2) AS geom
+SELECT ST_PointN(ST_GeomFromText("LINESTRING(0 0, 1 2, 2 4, 3 6)"), 2)
 ```
 
 Result:
 
 ```
-+---------------------------------------------------------------+
-|geom                                                           |
-+---------------------------------------------------------------+
-|POINT (1 2)                                                    |
-+---------------------------------------------------------------+
+POINT (1 2)
 ```
 
 ## ST_PointOnSurface
