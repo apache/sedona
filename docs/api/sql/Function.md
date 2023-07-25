@@ -600,9 +600,15 @@ Format: `ST_ConcaveHull (A:geometry, pctConvex:float, allowHoles:Boolean)`
 Since: `v1.4.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_ConcaveHull(polygondf.countyshape, pctConvex)`
-FROM polygondf
+SELECT ST_ConcaveHull(ST_GeomFromWTK('POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))'), 1)
+```
+
+Output:
+
+```
+POLYGON ((125 100, 20 40, 50 60, 175 150, 125 100))  
 ```
 
 ## ST_ConvexHull

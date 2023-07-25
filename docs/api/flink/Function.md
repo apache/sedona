@@ -600,14 +600,14 @@ Since: `v1.4.0`
 Example:
 
 ```sql
-SELECT ST_ConcaveHull(polygondf.countyshape, pctConvex)`
-FROM polygondf
+SELECT ST_ConcaveHull(ST_GeomFromWTK('POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))'), 1)
 ```
 
-Input: `Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))`
+Output:
 
-Output: `POLYGON ((1 2, 2 2, 3 2, 5 0, 4 0, 1 0, 0 0, 1 2))`
-
+```
+POLYGON ((125 100, 20 40, 50 60, 175 150, 125 100))  
+```
 ## ST_ConvexHull
 
 Introduction: Return the Convex Hull of polgyon A
