@@ -364,7 +364,7 @@ Since: `v1.0.0`
 Spark SQL example:
 
 ```sql
-SELECT ST_Boundary(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
+SELECT ST_Boundary(ST_GeomFromWKT('POLYGON((1 1,0 0, -1 1, 1 1))'))
 ```
 
 Output:
@@ -411,7 +411,7 @@ Since: `v1.0.0`
 Spark SQL example:
 
 ```sql
-SELECT ST_Buffer(ST_GeomFromWTK("POINT(0 0)"), 1)
+SELECT ST_Buffer(ST_GeomFromWKT("POINT(0 0)"), 1)
 ```
 
 Output:
@@ -432,7 +432,7 @@ Example:
 
 ```sql
 SELECT ST_BuildArea(
-    ST_GeomFromText('MULTILINESTRING((0 0, 20 0, 20 20, 0 20, 0 0),(2 2, 18 2, 18 18, 2 18, 2 2))')
+    ST_GeomFromWKT('MULTILINESTRING((0 0, 20 0, 20 20, 0 20, 0 0),(2 2, 18 2, 18 18, 2 18, 2 2))')
 ) AS geom
 ```
 
@@ -458,7 +458,7 @@ Since: `v1.0.0`
 Spark SQL example:
 
 ```sql
-SELECT ST_Centroid(ST_GeomFromWTK('MULTIPOINT(-1  0, -1 2, 7 8, 9 8, 10 6)'))
+SELECT ST_Centroid(ST_GeomFromWKT('MULTIPOINT(-1  0, -1 2, 7 8, 9 8, 10 6)'))
 ```
 
 Output:
@@ -598,7 +598,7 @@ Since: `v1.4.0`
 Spark SQL example:
 
 ```sql
-SELECT ST_ConcaveHull(ST_GeomFromWTK('POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))'), 1)
+SELECT ST_ConcaveHull(ST_GeomFromWKT('POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))'), 1)
 ```
 
 Output:
