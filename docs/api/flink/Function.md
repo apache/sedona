@@ -870,7 +870,7 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_Envelope(ST_GeomFromWTK('LINESTRING(0 0, 1 3)'))
+SELECT ST_Envelope(ST_GeomFromWKT('LINESTRING(0 0, 1 3)'))
 ```
 
 Output:
@@ -910,7 +910,7 @@ Since: `v1.2.0`
 Example:
 
 ```sql
-SELECT ST_FlipCoordinates(ST_GeomFromWTK("POINT (1 2)"))
+SELECT ST_FlipCoordinates(ST_GeomFromWKT("POINT (1 2)"))
 ```
 
 Output:
