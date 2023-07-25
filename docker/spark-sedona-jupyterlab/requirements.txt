@@ -7,6 +7,6 @@ pyspark==3.3.2
 attrs
 pyarrow
 ipykernel
-apache-sedona==1.4.0
+apache-sedona==1.4.1
 matplotlib
 descartes
