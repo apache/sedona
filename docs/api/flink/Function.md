@@ -1352,17 +1352,14 @@ Format: `ST_LineInterpolatePoint (geom: geometry, fraction: Double)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
-SELECT ST_LineInterpolatePoint(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.2) as Interpolated
+SELECT ST_LineInterpolatePoint(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.2)
 ```
 
 Output:
 ```
-+-----------------------------------------+
-|Interpolated                             |
-+-----------------------------------------+
-|POINT (51.5974135047432 76.5974135047432)|
-+-----------------------------------------+
+POINT (51.5974135047432 76.5974135047432)
 ```
 
 ## ST_LineMerge
