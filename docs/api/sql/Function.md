@@ -693,7 +693,7 @@ Example:
 SELECT ST_Difference(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((0 -4, 4 -4, 4 4, 0 4, 0 -4))'))
 ```
 
-Result:
+Output:
 
 ```
 POLYGON ((0 -3, -3 -3, -3 3, 0 3, 0 -3))
