@@ -43,8 +43,13 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_3DDistance(polygondf.countyshape, polygondf.countyshape)
-FROM polygondf
+SELECT ST_3DDistance(ST_GeomFromText("POINT Z (0 0 -5)"), 
+                     ST_GeomFromText("POINT Z(1  1 -6"))
+```
+
+Output:
+```
+1.7320508075688772
 ```
 
 ## ST_AddPoint
@@ -210,8 +215,12 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_Area(polygondf.countyshape)
-FROM polygondf
+SELECT ST_Area(ST_GeomFromText("POLYGON(0 0, 0 10, 10 10, 0 10, 0 0)"))
+```
+
+Output:
+```
+10
 ```
 
 ## ST_AreaSpheroid
@@ -230,7 +239,11 @@ Example:
 SELECT ST_AreaSpheroid(ST_GeomFromWKT('Polygon ((35 34, 30 28, 34 25, 35 34))'))
 ```
 
-Output: `201824850811.76245`
+Output: 
+
+```
+201824850811.76245
+```
 
 ## ST_AsBinary
 
@@ -243,8 +256,13 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_AsBinary(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsBinary(ST_GeomFromWKT('POINT (1 1)'))
+```
+
+Output:
+
+```
+0101000000000000000000f87f000000000000f87f
 ```
 
 ## ST_AsEWKB
@@ -261,8 +279,13 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_AsEWKB(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsEWKB(ST_SetSrid(ST_GeomFromWKT('POINT (1 1)'), 3021))
+```
+
+Output:
+
+```
+0101000020cd0b0000000000000000f03f000000000000f03f
 ```
 
 ## ST_AsEWKT
@@ -279,8 +302,13 @@ Since: `v1.2.1`
 
 Spark SQL example:
 ```sql
-SELECT ST_AsEWKT(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsEWKT(ST_SetSrid(ST_GeomFromWKT('POLYGON((0 0,0 1,1 1,1 0,0 0))'), 4326))
+```
+
+Output:
+
+```
+SRID=4326;POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))
 ```
 
 ## ST_AsGeoJSON
@@ -293,8 +321,22 @@ Since: `v1.3.0`
 
 Spark SQL example:
 ```sql
-SELECT ST_AsGeoJSON(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsGeoJSON(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
+```
+
+Output:
+
+```json
+{
+  "type":"Polygon",
+  "coordinates":[
+    [[1.0,1.0],
+      [8.0,1.0],
+      [8.0,8.0],
+      [1.0,8.0],
+      [1.0,1.0]]
+  ]
+}
 ```
 
 ## ST_AsGML
@@ -306,9 +348,15 @@ Format: `ST_AsGML (A:geometry)`
 Since: `v1.3.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_AsGML(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsGML(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
+```
+
+Output:
+
+```
+1.0,1.0 8.0,1.0 8.0,8.0 1.0,8.0 1.0,1.0
 ```
 
 ## ST_AsKML
@@ -319,10 +367,16 @@ Format: `ST_AsKML (A:geometry)`
 
 Since: `v1.3.0`
 
-Spark SQL example:
+Example:
+
 ```sql
-SELECT ST_AsKML(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsKML(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
+```
+
+Output:
+
+```
+1.0,1.0 8.0,1.0 8.0,8.0 1.0,8.0 1.0,1.0
 ```
 
 ## ST_AsText
@@ -336,8 +390,13 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_AsText(polygondf.countyshape)
-FROM polygondf
+SELECT ST_AsText(ST_SetSRID(ST_Point(1.0,1.0), 3021))
+```
+
+Output:
+
+```
+POINT (1 1)
 ```
 
 ## ST_Azimuth
