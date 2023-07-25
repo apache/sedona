@@ -1493,14 +1493,20 @@ POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))
 
 Introduction: Returns the number of points of the geometry
 
-Since: `v1.3.0`
-
 Format: `ST_NPoints (A:geometry)`
 
+Since: `v1.3.0`
+
 Example:
+
 ```sql
-SELECT ST_NPoints(polygondf.countyshape)
-FROM polygondf
+SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))
+```
+
+Output:
+
+```
+4
 ```
 
 ## ST_NDims
