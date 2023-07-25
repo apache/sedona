@@ -838,11 +838,16 @@ Format: `ST_EndPoint(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_EndPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'))
 ```
 
-Output: `POINT(160 170)`
+Output: 
+
+```
+POINT(160 170)
+```
 
 ## ST_Envelope
 
