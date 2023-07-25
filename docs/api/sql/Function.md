@@ -808,7 +808,11 @@ Spark SQL example:
 SELECT ST_Dump(ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))'))
 ```
 
-Output: `[POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]`
+Output: 
+
+```
+[POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]
+```
 
 ## ST_DumpPoints
 
