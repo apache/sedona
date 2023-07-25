@@ -1441,8 +1441,15 @@ Format: `ST_MinimumBoundingRadius(geom: geometry)`
 Since: `v1.0.1`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_MinimumBoundingRadius(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
+```
+
+Output:
+
+```
+{POINT (0 1), 1.0}
 ```
 
 ## ST_Multi
