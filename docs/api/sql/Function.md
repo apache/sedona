@@ -1210,8 +1210,13 @@ Since: `v1.2.1`
 Spark SQL example:
 
 ```sql
-SELECT ST_IsEmpty(polygondf.countyshape)
-FROM polygondf
+SELECT ST_IsEmpty(ST_GeomFromWKT('POLYGON((0 0,0 1,1 1,1 0,0 0))'))
+```
+
+Output:
+
+```
+false
 ```
 
 ## ST_IsRing
