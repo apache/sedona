@@ -2005,13 +2005,14 @@ Since: `v1.2.1`
 Example:
 
 ```sql
-SELECT ST_XMax(df.geometry) AS xmax
-FROM df
+SELECT ST_XMax(ST_GeomFromText('POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))'))
 ```
 
-Input: `POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))`
+Output: 
 
-Output: `2`
+```
+2
+```
 
 ## ST_XMin
 
