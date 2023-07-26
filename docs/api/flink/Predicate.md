@@ -68,10 +68,15 @@ Format: `ST_Disjoint (A:geometry, B:geometry)`
 Since: `v1.2.1`
 
 SQL example:
+
 ```sql
-SELECT *
-FROM pointdf 
-WHERE ST_Disjoinnt(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
+SELECT ST_Disjoint(ST_GeomFromWKT('POLYGON((1 4, 4.5 4, 4.5 2, 1 2, 1 4))'),ST_GeomFromWKT('POLYGON((5 4, 6 4, 6 2, 5 2, 5 4))'))
+```
+
+Output:
+
+```
+true
 ```
 
 ## ST_Equals
