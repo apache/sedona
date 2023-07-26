@@ -1832,11 +1832,16 @@ Format: `ST_StartPoint(geom: geometry)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 SELECT ST_StartPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'))
 ```
 
-Output: `POINT(100 150)`
+Output: 
+
+```
+POINT(100 150)
+```
 
 ## ST_SubDivide
 
