@@ -2186,11 +2186,16 @@ Format: `ST_Y_Min (A:geometry)`
 Since: `v1.2.1`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_YMin(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
-Output : 0
+Output: 
+
+```
+0
+```
 
 ## ST_Z
 
