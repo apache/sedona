@@ -7,10 +7,36 @@ Format: `ST_Contains (A:geometry, B:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT * 
 FROM pointdf 
 WHERE ST_Contains(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
+```
+
+Output:
+
+```
+POINT (1.1 101.1) 
+POINT (2.1 102.1) 
+POINT (3.1 103.1) 
+POINT (4.1 104.1) 
+POINT (5.1 105.1) 
+POINT (6.1 106.1) 
+POINT (7.1 107.1) 
+POINT (8.1 108.1) 
+POINT (9.1 109.1) 
+POINT (10.1 110.1)
+POINT (11.1 111.1)
+POINT (12.1 112.1)
+POINT (13.1 113.1)
+POINT (14.1 114.1)
+POINT (15.1 115.1)
+POINT (16.1 116.1)
+POINT (17.1 117.1)
+POINT (18.1 118.1)
+POINT (19.1 119.1)
+POINT (20.1 120.1)
 ```
 
 ## ST_Crosses
