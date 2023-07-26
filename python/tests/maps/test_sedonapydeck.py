@@ -70,12 +70,13 @@ class TestVisualization(TestBase):
             data=buildings_gdf,
             auto_highlight=True,
             get_fill_color="[85, 183, 177, 255]",
-            opacity=1.0,
+            opacity=0.4,
             stroked=False,
             extruded=True,
             get_elevation='confidence * 10',
             pickable=True,
-            get_line_color="[85, 183, 177, 255]"
+            get_line_color="[85, 183, 177, 255]",
+            get_line_width=3
         )
         p_map = pdk.Deck(layers=[polygon_layer])
         sedona_pydeck_map = SedonaPyDeck.create_geometry_map(df=buildings_df, elevation_col='confidence * 10')
