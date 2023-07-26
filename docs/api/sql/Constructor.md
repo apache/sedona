@@ -122,8 +122,23 @@ Format:
 Since: `v1.3.0`
 
 SQL example:
+
 ```sql
-SELECT ST_GeomFromGML('<gml:LineString srsName="EPSG:4269"><gml:coordinates>-71.16028,42.258729 -71.160837,42.259112 -71.161143,42.25932</gml:coordinates></gml:LineString>') AS geometry
+SELECT ST_GeomFromGML('
+    <gml:LineString srsName="EPSG:4269">
+    	<gml:coordinates>
+        	-71.16028,42.258729  
+        	-71.160837,42.259112
+        	-71.161143,42.25932
+    	</gml:coordinates>
+    </gml:LineString>
+')
+```
+
+Output:
+
+```
+LINESTRING (-71.16028 42.258729, -71.160837 42.259112, -71.161143 42.25932)
 ```
 
 ## ST_GeomFromKML
