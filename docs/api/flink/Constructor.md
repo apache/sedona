@@ -191,9 +191,9 @@ POINT(40.7128 -74.006)
 
 ## ST_LineFromText
 
-Introduction: Construct a LineString from Text, delimited by Delimiter (Optional)
+Introduction: Construct a LineString from Text
 
-Format: `ST_LineFromText (Text:string, Delimiter:char)`
+Format: `ST_LineFromText (Text:string)`
 
 Since: `v1.2.1`
 
