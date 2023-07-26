@@ -1679,10 +1679,16 @@ Since: `v1.5.0`
 Example:
 
 ```sql
-SELECT ST_ReducePrecision(polygondf.countyshape, 9)
-FROM polygondf
+SELECT ST_ReducePrecision(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)')
+    , 9)
 ```
 The new coordinates will only have 9 decimal places.
+
+Output:
+
+```
+POINT (0.123456789 0.123456789)
+```
 
 ## ST_Reverse
 
