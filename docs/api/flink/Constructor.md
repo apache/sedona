@@ -123,7 +123,7 @@ LINESTRING (-71.1663 42.2614, -71.1667 42.2616)
 
 ## ST_GeomFromText
 
-Introduction: Construct a Geometry from Wkt. Alias of  [ST_GeomFromWKT](#ST_GeomFromWKT)
+Introduction: Construct a Geometry from WKT. Alias of  [ST_GeomFromWKT](#ST_GeomFromWKT)
 
 Format:
 `ST_GeomFromText (Wkt:string)`
@@ -131,8 +131,15 @@ Format:
 Since: `v1.2.1`
 
 SQL example:
+
 ```sql
-SELECT ST_GeomFromText('POINT(40.7128 -74.0060)') AS geometry
+SELECT ST_GeomFromText('POINT(40.7128 -74.0060)')
+```
+
+Output:
+
+```
+POINT(40.7128 -74.006)
 ```
 
 ## ST_GeomFromWKB
