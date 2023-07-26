@@ -2131,13 +2131,14 @@ Since: `v1.2.1`
 Example:
 
 ```sql
-SELECT ST_XMin(df.geometry) AS xmin
-FROM df
+SELECT ST_XMin(ST_GeomFromText('POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))'))
 ```
 
-Input: `POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))`
+Output: 
 
-Output: `-1`
+```
+-1
+```
 
 ## ST_Y
 
