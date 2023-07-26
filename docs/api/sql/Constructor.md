@@ -217,7 +217,7 @@ LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061
 
 ## ST_GeomFromWKT
 
-Introduction: Construct a Geometry from Wkt. If srid is not set, it defaults to 0 (unknown).
+Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown).
 
 Format:
 `ST_GeomFromWKT (Wkt:string)`
@@ -228,13 +228,15 @@ Since: `v1.0.0`
 The optional srid parameter was added in `v1.3.1`
 
 Spark SQL example:
-```sql
-SELECT ST_GeomFromWKT(polygontable._c0) AS polygonshape
-FROM polygontable
-```
 
 ```sql
-SELECT ST_GeomFromWKT('POINT(40.7128 -74.0060)') AS geometry
+SELECT ST_GeomFromWKT('POINT(40.7128 -74.0060)')
+```
+
+Output:
+
+```
+POINT(40.7128 -74.006)
 ```
 
 ## ST_LineFromText

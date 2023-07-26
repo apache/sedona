@@ -171,7 +171,7 @@ FROM polygontable
 
 ## ST_GeomFromWKT
 
-Introduction: Construct a Geometry from Wkt
+Introduction: Construct a Geometry from WKT
 
 Format:
 `ST_GeomFromWKT (Wkt:string)`
@@ -180,7 +180,13 @@ Since: `v1.2.0`
 
 SQL example:
 ```sql
-SELECT ST_GeomFromWKT('POINT(40.7128 -74.0060)') AS geometry
+SELECT ST_GeomFromWKT('POINT(40.7128 -74.0060)')
+```
+
+Output:
+
+```
+POINT(40.7128 -74.006)
 ```
 
 ## ST_LineFromText
