@@ -103,8 +103,22 @@ Format:
 Since: `v1.3.0`
 
 SQL example:
+
 ```sql
-SELECT ST_GeomFromKML('<LineString><coordinates>-71.1663,42.2614 -71.1667,42.2616</coordinates></LineString>') AS geometry
+SELECT ST_GeomFromKML('
+	<LineString>
+		<coordinates>
+			-71.1663,42.2614 
+			-71.1667,42.2616
+		</coordinates>
+	</LineString>
+')
+```
+
+Output:
+
+```
+LINESTRING (-71.1663 42.2614, -71.1667 42.2616)
 ```
 
 ## ST_GeomFromText
