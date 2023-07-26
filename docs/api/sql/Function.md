@@ -2089,11 +2089,16 @@ Format: `ST_X(pointA: Point)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_X(ST_POINT(0.0 25.0))
 ```
 
-Output: `0.0`
+Output: 
+
+```
+0.0
+```
 
 ## ST_XMax
 
