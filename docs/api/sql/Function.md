@@ -1699,11 +1699,16 @@ Format: `ST_RemovePoint(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_RemovePoint(ST_GeomFromText("LINESTRING(0 0, 1 1, 1 0)"), 1)
 ```
 
-Output: `LINESTRING(0 0, 1 0)`
+Output: 
+
+```
+LINESTRING(0 0, 1 0)
+```
 
 ## ST_Reverse
 

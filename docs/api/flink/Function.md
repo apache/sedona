@@ -1720,11 +1720,16 @@ Format: `ST_RemovePoint(geom: geometry)`
 Since: `v1.3.0`
 
 Example:
+
 ```sql
 SELECT ST_RemovePoint(ST_GeomFromText("LINESTRING(0 0, 1 1, 1 0)"), 1)
 ```
 
-Output: `LINESTRING(0 0, 1 0)`
+Output: 
+
+```
+LINESTRING(0 0, 1 0)
+```
 
 ## ST_S2CellIDs
 
