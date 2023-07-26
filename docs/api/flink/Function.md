@@ -1701,13 +1701,14 @@ Since: `v1.2.1`
 Example:
 
 ```sql
-SELECT ST_Reverse(df.geometry) AS geom
-FROM df
+SELECT ST_Reverse(ST_GeomFromWKT('LINESTRING(0 0, 1 2, 2 4, 3 6)'))
 ```
 
-Input: `POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))`
+Output:
 
-Output: `POLYGON ((-0.5 -0.5, 0.5 -0.5, 0.5 0.5, -0.5 0.5, -0.5 -0.5))`
+```
+LINESTRING (3 6, 2 4, 1 2, 0 0)
+```
 
 ## ST_RemovePoint
 

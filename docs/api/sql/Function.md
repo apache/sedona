@@ -1721,19 +1721,13 @@ Since: `v1.2.1`
 Example:
 
 ```sql
-SELECT ST_AsText(
-    ST_Reverse(ST_GeomFromText('LINESTRING(0 0, 1 2, 2 4, 3 6)'))
-) AS geom
+SELECT ST_Reverse(ST_GeomFromWKT('LINESTRING(0 0, 1 2, 2 4, 3 6)'))
 ```
 
-Result:
+Output:
 
 ```
-+---------------------------------------------------------------+
-|geom                                                           |
-+---------------------------------------------------------------+
-|LINESTRING (3 6, 2 4, 1 2, 0 0)                                |
-+---------------------------------------------------------------+
+LINESTRING (3 6, 2 4, 1 2, 0 0)
 ```
 
 ## ST_S2CellIDs
