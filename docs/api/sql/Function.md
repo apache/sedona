@@ -2226,11 +2226,16 @@ Format: `ST_ZMax(geom: geometry)`
 Since: `v1.3.1`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_ZMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
-Output: `1.0`
+Output: 
+
+```
+1.0
+```
 
 ## ST_ZMin
 
