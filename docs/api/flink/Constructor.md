@@ -311,8 +311,15 @@ Format: `ST_PointFromText (Text:string, Delimiter:char)`
 Since: `v1.2.0`
 
 SQL example:
+
 ```sql
-SELECT ST_PointFromText('40.7128,-74.0060', ',') AS pointshape
+SELECT ST_PointFromText('40.7128,-74.0060', ',')
+```
+
+Output:
+
+```
+POINT (40.7128 -74.006)
 ```
 
 ## ST_PolygonFromEnvelope
