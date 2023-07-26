@@ -7,8 +7,15 @@ Format: `ST_GeomFromGeoHash(geohash: string, precision: int)`
 Since: `v1.2.1`
 
 SQL example:
+
 ```sql
 SELECT ST_GeomFromGeoHash('s00twy01mt', 4) AS geom
+```
+
+Output:
+
+```
+POLYGON ((0.703125 0.87890625, 0.703125 1.0546875, 1.0546875 1.0546875, 1.0546875 0.87890625, 0.703125 0.87890625))
 ```
 
 ## ST_GeomFromGeoJSON
