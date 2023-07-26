@@ -237,9 +237,15 @@ Format: `ST_MLineFromText (Text:string, Srid: int)`
 Since: `1.3.1`
 
 SQL example:
+
 ```sql
-SELECT ST_MLineFromText('MULTILINESTRING((1 2, 3 4), (4 5, 6 7))') AS multiLine
-SELECT ST_MLineFromText('MULTILINESTRING((1 2, 3 4), (4 5, 6 7))', 4269) AS multiLine
+SELECT ST_MLineFromText('MULTILINESTRING((1 2, 3 4), (4 5, 6 7))')
+```
+
+Output:
+
+```
+MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))
 ```
 
 ## ST_MPolyFromText
