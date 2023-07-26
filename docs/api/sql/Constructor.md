@@ -269,14 +269,17 @@ Format: `ST_LineStringFromText (Text:string, Delimiter:char)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```sql
-SELECT ST_LineStringFromText(linestringtable._c0,',') AS linestringshape
-FROM linestringtable
-```
 
 ```sql
-SELECT ST_LineStringFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794', ',') AS linestringshape
+SELECT ST_LineStringFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794', ',')
 ```
+
+Output:
+
+```
+LINESTRING (-74.0428197 40.6867969, -74.0421975 40.6921336, -74.050802 40.6912794)
+```
+
 ## ST_MLineFromText
 
 Introduction: Construct a MultiLineString from Wkt. If srid is not set, it defaults to 0 (unknown).

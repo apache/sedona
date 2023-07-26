@@ -216,9 +216,16 @@ Format: `ST_LineStringFromText (Text:string, Delimiter:char)`
 
 Since: `v1.2.1`
 
-Spark SQL example:
+Example:
+
 ```sql
-SELECT ST_LineStringFromText('Linestring(1 2, 3 4)') AS line
+SELECT ST_LineStringFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794', ',')
+```
+
+Output:
+
+```
+LINESTRING (-74.0428197 40.6867969, -74.0421975 40.6921336, -74.050802 40.6912794)
 ```
 
 ## ST_MLineFromText
