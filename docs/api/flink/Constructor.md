@@ -331,10 +331,15 @@ Format: `ST_PolygonFromEnvelope (MinX:decimal, MinY:decimal, MaxX:decimal, MaxY:
 Since: `v1.2.0`
 
 SQL example:
+
 ```sql
-SELECT *
-FROM pointdf
-WHERE ST_Contains(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.pointshape)
+SELECT ST_PolygonFromEnvelope(double(1.234),double(2.234),double(3.345),double(3.345))
+```
+
+Output:
+
+```
+POLYGON ((1.234 2.234, 1.234 3.345, 3.345 3.345, 3.345 2.234, 1.234 2.234))
 ```
 
 ## ST_PolygonFromText
