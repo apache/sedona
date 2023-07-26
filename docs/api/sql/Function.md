@@ -1821,13 +1821,18 @@ Since: `v1.4.0`
 Format: `ST_Split (input: geometry, blade: geometry)`
 
 Spark SQL Example:
+
 ```sql
 SELECT ST_Split(
     ST_GeomFromWKT('LINESTRING (0 0, 1.5 1.5, 2 2)'),
     ST_GeomFromWKT('MULTIPOINT (0.5 0.5, 1 1)'))
 ```
 
-Output: `MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))`
+Output: 
+
+```
+MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))
+```
 
 ## ST_SRID
 
