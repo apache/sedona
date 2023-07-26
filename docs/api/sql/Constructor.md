@@ -350,15 +350,24 @@ POINT (1.2345 2.3456)
 ## ST_PointZ
 
 Introduction: Construct a Point from X, Y and Z and an optional srid. If srid is not set, it defaults to 0 (unknown).
+Must use ST_AsEWKT function to print the Z coordinate.
 
 Format: `ST_PointZ (X:decimal, Y:decimal, Z:decimal)`
+
 Format: `ST_PointZ (X:decimal, Y:decimal, Z:decimal, srid:integer)`
 
 Since: `v1.4.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_PointZ(1.0, 2.0, 3.0) AS pointshape
+SELECT ST_AsEWKT(ST_PointZ(1.2345, 2.3456, 3.4567))
+```
+
+Output:
+
+```
+POINT Z(1.2345 2.3456 3.4567)
 ```
 
 ## ST_PointFromText
