@@ -2147,11 +2147,16 @@ Format: `ST_Y(pointA: Point)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_Y(ST_POINT(0.0 25.0))
 ```
 
-Output: `25.0`
+Output: 
+
+```
+25.0
+```
 
 ## ST_YMax
 
