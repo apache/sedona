@@ -1762,17 +1762,13 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_SetPoint(ST_GeomFromText('LINESTRING (0 0, 0 1, 1 1)'), 2, ST_GeomFromText('POINT (1 0)')) AS geom
+SELECT ST_SetPoint(ST_GeomFromText('LINESTRING (0 0, 0 1, 1 1)'), 2, ST_GeomFromText('POINT (1 0)'))
 ```
 
-Result:
+Output:
 
 ```
-+--------------------------+
-|geom                      |
-+--------------------------+
-|LINESTRING (0 0, 0 1, 1 0)|
-+--------------------------+
+LINESTRING (0 0, 0 1, 1 0)
 ```
 
 ## ST_SetSRID
