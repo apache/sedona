@@ -6,6 +6,7 @@ geopandas<=0.11.1
 pyspark==3.3.2
 attrs
 pyarrow
+keplergl==0.3.2
 ipykernel
 apache-sedona==1.4.1
 matplotlib
