@@ -1848,10 +1848,16 @@ Since: `v1.5.0`
 Example:
 
 ```sql
-SELECT ST_ReducePrecision(polygondf.countyshape, 9)
-FROM polygondf
+SELECT ST_ReducePrecision(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)')
+    , 9)
 ```
 The new coordinates will only have 9 decimal places.
+
+Output:
+
+```
+POINT (0.123456789 0.123456789)
+```
 
 ## ST_Reverse
 
@@ -1864,13 +1870,14 @@ Since: `v1.2.1`
 Example:
 
 ```sql
-SELECT ST_Reverse(df.geometry) AS geom
-FROM df
+SELECT ST_Reverse(ST_GeomFromWKT('LINESTRING(0 0, 1 2, 2 4, 3 6)'))
 ```
 
-Input: `POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))`
+Output:
 
-Output: `POLYGON ((-0.5 -0.5, 0.5 -0.5, 0.5 0.5, -0.5 0.5, -0.5 -0.5))`
+```
+LINESTRING (3 6, 2 4, 1 2, 0 0)
+```
 
 ## ST_RemovePoint
 
@@ -1883,11 +1890,16 @@ Format: `ST_RemovePoint(geom: geometry)`
 Since: `v1.3.0`
 
 Example:
+
 ```sql
 SELECT ST_RemovePoint(ST_GeomFromText("LINESTRING(0 0, 1 1, 1 0)"), 1)
 ```
 
-Output: `LINESTRING(0 0, 1 0)`
+Output: 
+
+```
+LINESTRING(0 0, 1 0)
+```
 
 ## ST_S2CellIDs
 
@@ -1900,11 +1912,13 @@ Format: `ST_S2CellIDs(geom: geometry, level: Int)`
 Since: `v1.4.0`
 
 Example:
+
 ```SQL
 SELECT ST_S2CellIDs(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'), 6)
 ```
 
 Output:
+
 ```
 [1159395429071192064, 1159958379024613376, 1160521328978034688, 1161084278931456000, 1170091478186196992, 1170654428139618304]
 ```
@@ -1920,17 +1934,13 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_SetPoint(ST_GeomFromText('LINESTRING (0 0, 0 1, 1 1)'), 2, ST_GeomFromText('POINT (1 0)')) AS geom
+SELECT ST_SetPoint(ST_GeomFromText('LINESTRING (0 0, 0 1, 1 1)'), 2, ST_GeomFromText('POINT (1 0)'))
 ```
 
-Result:
+Output:
 
 ```
-+--------------------------------+
-|                           geom |
-+--------------------------------+
-|     LINESTRING (0 0, 0 1, 1 0) |
-+--------------------------------+
+LINESTRING (0 0, 0 1, 1 0)
 ```
 
 ## ST_SetSRID
@@ -1971,9 +1981,15 @@ Since: `v1.5.0`
 Format: `ST_SimplifyPreserveTopology (A:geometry, distanceTolerance: Double)`
 
 Example:
+
 ```sql
-SELECT ST_SimplifyPreserveTopology(polygondf.countyshape, 10.0)
-FROM polygondf
+SELECT ST_SimplifyPreserveTopology(ST_GeomFromText('POLYGON((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33,46 34, 47 44, 35 36, 45 33, 43 19, 29 21, 29 22,35 26, 24 39, 8 25))'), 10)
+```
+
+Output:
+
+```
+POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))
 ```
 
 ## ST_StartPoint
@@ -1985,11 +2001,16 @@ Format: `ST_StartPoint(geom: geometry)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 SELECT ST_StartPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'))
 ```
 
-Output: `POINT(100 150)`
+Output: 
+
+```
+POINT(100 150)
+```
 
 ## ST_SubDivide
 
@@ -2059,7 +2080,7 @@ Example:
 SELECT ST_SymDifference(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((-2 -3, 4 -3, 4 3, -2 3, -2 -3))'))
 ```
 
-Result:
+Output:
 
 ```
 MULTIPOLYGON (((-2 -3, -3 -3, -3 3, -2 3, -2 -3)), ((3 -3, 3 3, 4 3, 4 -3, 3 -3)))
@@ -2131,11 +2152,16 @@ Format: `ST_X(pointA: Point)`
 Since: `v1.3.0`
 
 Example:
+
 ```sql
 SELECT ST_X(ST_POINT(0.0 25.0))
 ```
 
-Output: `0.0`
+Output: 
+
+```
+0.0
+```
 
 ## ST_XMax
 
@@ -2148,13 +2174,14 @@ Since: `v1.2.1`
 Example:
 
 ```sql
-SELECT ST_XMax(df.geometry) AS xmax
-FROM df
+SELECT ST_XMax(ST_GeomFromText('POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))'))
 ```
 
-Input: `POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))`
+Output: 
 
-Output: `2`
+```
+2
+```
 
 ## ST_XMin
 
@@ -2167,13 +2194,14 @@ Since: `v1.2.1`
 Example:
 
 ```sql
-SELECT ST_XMin(df.geometry) AS xmin
-FROM df
+SELECT ST_XMin(ST_GeomFromText('POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))'))
 ```
 
-Input: `POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))`
+Output:
 
-Output: `-1`
+```
+-1
+```
 
 ## ST_Y
 
@@ -2184,11 +2212,16 @@ Format: `ST_Y(pointA: Point)`
 Since: `v1.3.0`
 
 Example:
+
 ```sql
 SELECT ST_Y(ST_POINT(0.0 25.0))
 ```
 
-Output: `25.0`
+Output: 
+
+```
+25.0
+```
 
 ## ST_YMax
 
@@ -2198,12 +2231,17 @@ Format: `ST_YMax (A:geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL example:
+Example:
+
 ```sql
 SELECT ST_YMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
-Output : 2
+Output : 
+
+```
+2
+```
 
 ## ST_YMin
 
@@ -2213,12 +2251,17 @@ Format: `ST_Y_Min (A:geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL example:
+Example:
+
 ```sql
 SELECT ST_YMin(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
-Output : 0
+Output: 
+
+```
+0
+```
 
 ## ST_Z
 
@@ -2229,11 +2272,16 @@ Format: `ST_Z(pointA: Point)`
 Since: `v1.3.0`
 
 Example:
+
 ```sql
 SELECT ST_Z(ST_POINT(0.0 25.0 11.0))
 ```
 
-Output: `11.0`
+Output: 
+
+```
+11.0
+```
 
 ## ST_ZMax
 
@@ -2248,7 +2296,11 @@ Spark SQL example:
 SELECT ST_ZMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
-Output: `1.0`
+Output: 
+
+```
+1.0
+```
 
 ## ST_ZMin
 
@@ -2258,11 +2310,16 @@ Format: `ST_ZMin(geom: geometry)`
 
 Since: `v1.3.1`
 
-Spark SQL example:
+Example:
+
 ```sql
 SELECT ST_ZMin(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'))
 ```
 
-Output: `4.0`
+Output: 
+
+```
+4.0
+```
 
 
