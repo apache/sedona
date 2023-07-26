@@ -48,10 +48,15 @@ Format: `ST_Crosses (A:geometry, B:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT * 
-FROM pointdf 
-WHERE ST_Crosses(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
+SELECT ST_Crosses(ST_GeomFromWKT('POLYGON((1 1, 4 1, 4 4, 1 4, 1 1))'),ST_GeomFromWKT('POLYGON((2 2, 5 2, 5 5, 2 5, 2 2))'))
+```
+
+Output:
+
+```
+false
 ```
 
 ## ST_Disjoint
