@@ -1812,9 +1812,15 @@ Since: `v1.5.0`
 Format: `ST_SimplifyPreserveTopology (A:geometry, distanceTolerance: Double)`
 
 Example:
+
 ```sql
-SELECT ST_SimplifyPreserveTopology(polygondf.countyshape, 10.0)
-FROM polygondf
+SELECT ST_SimplifyPreserveTopology(ST_GeomFromText('POLYGON((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33,46 34, 47 44, 35 36, 45 33, 43 19, 29 21, 29 22,35 26, 24 39, 8 25))'), 10)
+```
+
+Output:
+
+```
+POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))
 ```
 
 ## ST_StartPoint
