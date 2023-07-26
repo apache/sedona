@@ -249,13 +249,15 @@ Format:
 Since: `v1.2.1`
 
 Spark SQL example:
-```sql
-SELECT ST_LineFromText(linetable._c0) AS lineshape
-FROM linetable
-```
 
 ```sql
-SELECT ST_LineFromText('Linestring(1 2, 3 4)') AS line
+SELECT ST_LineFromText('LINESTRING(1 2,3 4)')
+```
+
+Output:
+
+```
+LINESTRING (1 2, 3 4)
 ```
 
 ## ST_LineStringFromText
