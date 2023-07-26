@@ -277,9 +277,15 @@ Format: `ST_Point (X:decimal, Y:decimal)`
 Since: `v1.2.1`
 
 SQL example:
+
 ```sql
-SELECT ST_Point(x, y) AS pointshape
-FROM pointtable
+SELECT ST_Point(double(1.2345), 2.3456)
+```
+
+Output:
+
+```
+POINT (1.2345 2.3456)
 ```
 
 ## ST_PointZ

@@ -336,9 +336,15 @@ In `v1.4.0` an optional Z parameter was removed to be more consistent with other
 If you are upgrading from an older version of Sedona - please use ST_PointZ to create 3D points.
 
 Spark SQL example:
+
 ```sql
-SELECT ST_Point(CAST(pointtable._c0 AS Decimal(24,20)), CAST(pointtable._c1 AS Decimal(24,20))) AS pointshape
-FROM pointtable
+SELECT ST_Point(double(1.2345), 2.3456)
+```
+
+Output:
+
+```
+POINT (1.2345 2.3456)
 ```
 
 ## ST_PointZ
