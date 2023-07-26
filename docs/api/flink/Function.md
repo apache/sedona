@@ -2139,11 +2139,16 @@ Format: `ST_ZMin(geom: geometry)`
 
 Since: `v1.3.1`
 
-Spark SQL example:
+Example:
+
 ```sql
 SELECT ST_ZMin(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'))
 ```
 
-Output: `4.0`
+Output: 
+
+```
+4.0
+```
 
 
