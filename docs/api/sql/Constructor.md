@@ -410,11 +410,13 @@ Format: `ST_PolygonFromText (Text:string, Delimiter:char)`
 Since: `v1.0.0`
 
 Spark SQL example:
-```sql
-SELECT ST_PolygonFromText(polygontable._c0,',') AS polygonshape
-FROM polygontable
-```
 
 ```sql
-SELECT ST_PolygonFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794,-74.0428197,40.6867969', ',') AS polygonshape
+SELECT ST_PolygonFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794,-74.0428197,40.6867969', ',')
+```
+
+Output:
+
+```
+POLYGON ((-74.0428197 40.6867969, -74.0421975 40.6921336, -74.050802 40.6912794, -74.0428197 40.6867969))
 ```
