@@ -27,9 +27,41 @@ Format: `ST_GeomFromGeoJSON (GeoJson:string)`
 Since: `v1.2.0`
 
 SQL example:
+
 ```sql
-SELECT ST_GeomFromGeoJSON(polygontable._c0) AS polygonshape
-FROM polygontable
+SELECT ST_GeomFromGeoJSON('{
+   "type":"Feature",
+   "properties":{
+      "STATEFP":"01",
+      "COUNTYFP":"077",
+      "TRACTCE":"011501",
+      "BLKGRPCE":"5",
+      "AFFGEOID":"1500000US010770115015",
+      "GEOID":"010770115015",
+      "NAME":"5",
+      "LSAD":"BG",
+      "ALAND":6844991,
+      "AWATER":32636
+   },
+   "geometry":{
+      "type":"Polygon",
+      "coordinates":[
+         [
+            [-87.621765, 34.873444],
+            [-87.617535, 34.873369],
+            [-87.62119, 34.85053],
+            [-87.62144, 34.865379],
+            [-87.621765, 34.873444]
+         ]
+      ]
+   }
+}')
+```
+
+Output:
+
+```
+POLYGON ((-87.621765 34.873444, -87.617535 34.873369, -87.62119 34.85053, -87.62144 34.865379, -87.621765 34.873444))
 ```
 
 ## ST_GeomFromGML
