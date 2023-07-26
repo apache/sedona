@@ -2101,11 +2101,16 @@ Format: `ST_Z(pointA: Point)`
 Since: `v1.3.0`
 
 Example:
+
 ```sql
 SELECT ST_Z(ST_POINT(0.0 25.0 11.0))
 ```
 
-Output: `11.0`
+Output: 
+
+```
+11.0
+```
 
 ## ST_ZMax
 
