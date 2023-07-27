@@ -77,7 +77,7 @@ class SedonaMapUtils:
     @classmethod
     def _extract_first_sub_geometry_(cls, geom):
         while SedonaMapUtils.__is_geom_collection__(geom.geom_type):
-            return SedonaMapUtils._extract_first_sub_geometry_(geom.geoms[0])
+            geom = geom.geoms[0]
         return geom
 
     @classmethod
