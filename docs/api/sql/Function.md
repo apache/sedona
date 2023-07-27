@@ -1782,9 +1782,15 @@ Format: `ST_SetSRID (A:geometry, srid: Integer)`
 Since: `v1.1.1`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_SetSRID(polygondf.countyshape, 3021)
-FROM polygondf
+SELECT ST_AsEWKT(ST_SetSRID(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'), 3021))
+```
+
+Output:
+
+```
+SRID=3021;POLYGON ((1 1, 8 1, 8 8, 1 8, 1 1))
 ```
 
 ## ST_SimplifyPreserveTopology

@@ -1773,9 +1773,15 @@ Format: `ST_SetSRID (A:geometry, srid: integer)`
 Since: `v1.3.0`
 
 Example:
+
 ```sql
-SELECT ST_SetSRID(polygondf.countyshape, 3021)
-FROM polygondf
+SELECT ST_AsEWKT(ST_SetSRID(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'), 3021))
+```
+
+Output:
+
+```
+SRID=3021;POLYGON ((1 1, 8 1, 8 8, 1 8, 1 1))
 ```
 
 ## ST_SRID
