@@ -167,7 +167,7 @@ POINT(40.7128 -74.006)
 
 ## ST_GeomFromWKB
 
-Introduction: Construct a Geometry from WKB string or Binary
+Introduction: Construct a Geometry from WKB string or Binary. This function also supports EWKB format.
 
 Format:
 `ST_GeomFromWKB (Wkb:string)`
@@ -176,9 +176,27 @@ Format:
 Since: `v1.2.0`
 
 SQL example:
+
 ```sql
-SELECT ST_GeomFromWKB(polygontable._c0) AS polygonshape
-FROM polygontable
+SELECT ST_GeomFromWKB([01 02 00 00 00 02 00 00 00 00 00 00 00 84 D6 00 C0 00 00 00 00 80 B5 D6 BF 00 00 00 60 E1 EF F7 BF 00 00 00 80 07 5D E5 BF])
+```
+
+Output:
+
+```
+LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)
+```
+
+SQL example:
+
+```sql
+SELECT ST_asEWKT(ST_GeomFromWKB('01010000a0e6100000000000000000f03f000000000000f03f000000000000f03f'))
+```
+
+Output:
+
+```
+SRID=4326;POINT Z(1 1 1)
 ```
 
 Format:

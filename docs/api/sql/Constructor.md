@@ -218,7 +218,7 @@ POINT(40.7128 -74.006)
 
 ## ST_GeomFromWKB
 
-Introduction: Construct a Geometry from WKB string or Binary
+Introduction: Construct a Geometry from WKB string or Binary. This function also supports EWKB format.
 
 Format:
 `ST_GeomFromWKB (Wkb:string)`
@@ -236,6 +236,18 @@ Output:
 
 ```
 LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)
+```
+
+Spark SQL example:
+
+```sql
+SELECT ST_asEWKT(ST_GeomFromWKB('01010000a0e6100000000000000000f03f000000000000f03f000000000000f03f'))
+```
+
+Output:
+
+```
+SRID=4326;POINT Z(1 1 1)
 ```
 
 ## ST_GeomFromWKT
