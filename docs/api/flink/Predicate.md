@@ -221,8 +221,13 @@ Format: `ST_CoveredBy (A:geometry, B:geometry)`
 Since: `v1.3.0`
 
 SQL example:
+
 ```sql
-SELECT * 
-FROM pointdf 
-WHERE ST_CoveredBy(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
+SELECT ST_CoveredBy(ST_GeomFromWKT('POLYGON((0 0,3 0,3 3,0 3,0 0))'),  ST_GeomFromWKT('POLYGON((1 1,2 1,2 2,1 2,1 1))'))
+```
+
+Output:
+
+```
+false
 ```
