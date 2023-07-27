@@ -927,35 +927,16 @@ Since: `1.4.1`
 
 Example: 
 
-```sql
-SELECT ST_Force3D(df.geometry) AS geom
-from df
-```
-
-Input: `LINESTRING(0 1, 1 2, 2 1)`
-
-Output: `LINESTRING Z(0 1 0, 1 2 0, 2 1 0)`
-
-Input: `POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
-
-Output: `POLYGON Z((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
 
 ```sql
-SELECT ST_Force3D(df.geometry, 2.3) AS geom
-from df
+SELECT ST_AsText(ST_Force3D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))')))
 ```
 
-Input: `LINESTRING(0 1, 1 2, 2 1)`
+Output:
 
-Output: `LINESTRING Z(0 1 2.3, 1 2 2.3, 2 1 2.3)`
-
-Input: `POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
-
-Output: `POLYGON Z((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))`
-
-Input: `LINESTRING EMPTY`
-
-Output: `LINESTRING EMPTY`
+```
+POLYGON Z((0 0 2, 0 5 2, 5 0 2, 0 0 2), (1 1 2, 3 1 2, 1 3 2, 1 1 2))
+```
 
 ## ST_FrechetDistance
 
