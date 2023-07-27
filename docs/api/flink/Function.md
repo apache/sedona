@@ -1793,9 +1793,15 @@ Format: `ST_SRID (A:geometry)`
 Since: `v1.3.0`
 
 Example:
+
 ```sql
-SELECT ST_SRID(polygondf.countyshape)
-FROM polygondf
+SELECT ST_SRID(ST_SetSRID(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'), 3021))
+```
+
+Output:
+
+```
+3021
 ```
 
 ## ST_SimplifyPreserveTopology
