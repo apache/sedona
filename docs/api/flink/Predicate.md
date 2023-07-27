@@ -129,10 +129,15 @@ Format: `ST_Touches (A:geometry, B:geometry)`
 Since: `v1.5.0`
 
 SQL example:
+
 ```sql
-SELECT * 
-FROM pointdf 
-WHERE ST_Touches(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
+SELECT ST_Touches(ST_GeomFromWKT('LINESTRING(0 0,1 1,0 2)'), ST_GeomFromWKT('POINT(0 2)'))
+```
+
+Output:
+
+```
+true
 ```
 
 ## ST_Within
