@@ -35,7 +35,7 @@ RUN apt-get update -y && \
     apt-get install -y curl && \
     curl https://archive.apache.org/dist/spark/spark-${spark_version}/spark-${spark_version}-bin-hadoop${hadoop_version}.tgz -o spark.tgz && \
     tar -xf spark.tgz && \
-    mv spark-${spark_version}-bin-hadoop${hadoop_version} /opt/spark && \
+    mv spark-${spark_version}-bin-hadoop${hadoop_version} $SPARK_HOME && \
     mkdir /opt/spark/logs && \
     rm spark.tgz && \
     # -- Copy sedona jars to Spark jars

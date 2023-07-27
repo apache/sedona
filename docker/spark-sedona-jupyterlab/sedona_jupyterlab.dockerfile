@@ -29,8 +29,7 @@ RUN apt-get update -y && \
     apt-get install -y python3-pip && \
     pip3 install --upgrade pip
 RUN pip3 install -r /opt/requirements.txt
-RUN apt-get install -y curl && \
-    curl https://dlcdn.apache.org/sedona/${sedona_version}/apache-sedona-${sedona_version}-bin.tar.gz -o sedona.tar.gz && \
+RUN curl https://dlcdn.apache.org/sedona/${sedona_version}/apache-sedona-${sedona_version}-bin.tar.gz -o sedona.tar.gz && \
     tar -xf sedona.tar.gz && \
     # -- Copy sedona jars to PySpark jars
     mv apache-sedona-${sedona_version}-bin/* /usr/local/lib/python${python_version}/dist-packages/pyspark/jars/ && \
