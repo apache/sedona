@@ -1936,13 +1936,15 @@ Since: `1.4.1`
 
 Example: 
 
-Input: `ST_Translate(GEOMETRYCOLLECTION(MULTIPOLYGON (((1 0, 1 1, 2 1, 2 0, 1 0)), ((1 2, 3 4, 3 5, 1 2))), POINT(1, 1, 1), LINESTRING EMPTY), 2, 2, 3)`
+```sql
+SELECT ST_Translate(ST_GeomFromText('POINT(-71.01 42.37)'),1,2)
+```
 
-Output: `GEOMETRYCOLLECTION(MULTIPOLYGON (((3 2, 3 3, 4 3, 4 2, 3 2)), ((3 4, 5 6, 5 7, 3 4))), POINT(3, 3, 4), LINESTRING EMPTY)`
+Output:
 
-Input: `ST_Translate(POINT(1, 3, 2), 1, 2)`
-
-Output: `POINT(2, 5, 2)`
+```
+POINT (-70.01 44.37)
+```
 
 
 
