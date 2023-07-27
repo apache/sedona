@@ -19,6 +19,8 @@
 package org.apache.sedona.common.raster;
 
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridGeometry2D;
+import org.geotools.coverage.processing.operation.Affine;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
@@ -27,6 +29,7 @@ import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.opengis.metadata.spatial.PixelOrientation;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -52,6 +55,16 @@ public class RasterAccessors
     public static int numBands(GridCoverage2D raster) {
         return raster.getNumSampleDimensions();
     }
+
+    public static int getWidth(GridCoverage2D raster) {
+        return raster.getGridGeometry().getGridRange().getSpan(0);
+    }
+
+    public static int getHeight(GridCoverage2D raster) {
+        return raster.getGridGeometry().getGridRange().getSpan(1);
+    }
+
+
 
     public static Geometry envelope(GridCoverage2D raster) throws FactoryException {
         Envelope2D envelope2D = raster.getEnvelope2D();

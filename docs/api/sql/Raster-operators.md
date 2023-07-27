@@ -1,3 +1,41 @@
+## Raster Accessors
+
+### RS_Height
+
+Introduction: Returns the height of the raster.
+
+Format: `RS_Height(raster: Raster)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_Height(raster) FROM rasters
+```
+
+Output:
+```
+512
+```
+
+### RS_Width
+
+Introduction: Returns the width of the raster.
+
+Format: `RS_Width(raster: Raster)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_Width(raster) FROM rasters
+```
+
+Output:
+```
+517
+```
+
 ## Raster based operators
 
 ### RS_Envelope
