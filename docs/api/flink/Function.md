@@ -1906,16 +1906,16 @@ Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional
 
 Since: `v1.2.0`
 
-Example (simple):
+Example:
+
 ```sql
-SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857') 
-FROM polygondf
+SELECT ST_AsText(ST_Transform(ST_GeomFromText('POLYGON((170 50,170 72,-130 72,-130 50,170 50))'),'EPSG:4326', 'EPSG:32649', false))
 ```
 
-Example (with optional parameters):
-```sql
-SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857', false)
-FROM polygondf
+Output:
+
+```
+POLYGON ((8766047.980342899 17809098.336766362, 5122546.516721856 18580261.912528664, 3240775.0740796793 -13688660.50985159, 4556241.924514083 -12463044.21488129, 8766047.980342899 17809098.336766362))
 ```
 
 !!!note
