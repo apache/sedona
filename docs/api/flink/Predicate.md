@@ -87,11 +87,17 @@ Format: `ST_Intersects (A:geometry, B:geometry)`
 Since: `v1.2.0`
 
 SQL example:
+
 ```sql
-SELECT * 
-FROM pointdf 
-WHERE ST_Intersects(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
+SELECT ST_Intersects(ST_GeomFromWKT('LINESTRING(-43.23456 72.4567,-43.23456 72.4568)'), ST_GeomFromWKT('POINT(-43.23456 72.4567772)'))
 ```
+
+Output:
+
+```
+true
+```
+
 
 ## ST_Overlaps
 
