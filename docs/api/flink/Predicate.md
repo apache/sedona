@@ -108,11 +108,17 @@ Format: `ST_Overlaps (A:geometry, B:geometry)`
 Since: `v1.5.0`
 
 SQL example:
+
 ```sql
-SELECT *
-FROM geom
-WHERE ST_Overlaps(geom.geom_a, geom.geom_b)
+SELECT ST_Overlaps(ST_GeomFromWKT('POLYGON((2.5 2.5, 2.5 4.5, 4.5 4.5, 4.5 2.5, 2.5 2.5))'), ST_GeomFromWKT('POLYGON((4 4, 4 6, 6 6, 6 4, 4 4))'))
 ```
+
+Output:
+
+```
+true
+```
+
 
 ## ST_Touches
 
