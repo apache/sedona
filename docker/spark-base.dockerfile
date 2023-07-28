@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-FROM junhao/base-jdk
+FROM apache/spark-py:v3.3.2
 
 # -- Layer: Apache Spark
 
