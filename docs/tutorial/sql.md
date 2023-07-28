@@ -512,6 +512,9 @@ Sedona provides `SedonaPyDeck` and `SedonaKepler` wrappers, both of which expose
 !!!Note
 	Both SedonaPyDeck and SedonaKepler expect the default geometry order to be lon-lat. If your dataframe has geometries in the lat-lon order, please check out [ST_FlipCoordinates](https://sedona.apache.org/latest-snapshot/api/sql/Function/#st_flipcoordinates)
 
+!!!Note
+	Both SedonaPyDeck and SedonaKepler are designed to work with SedonaDataFrames containing only 1 geometry column. Passing dataframes with multiple geometry columns will cause errors.
+
 ### SedonaPyDeck
 Spatial query results can be visualized in Jupyter lab/notebook using SedonaPyDeck.
 
