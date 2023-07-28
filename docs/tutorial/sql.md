@@ -512,11 +512,21 @@ Sedona provides `SedonaPyDeck` and `SedonaKepler` wrappers, both of which expose
 !!!Note
 	Both SedonaPyDeck and SedonaKepler expect the default geometry order to be lon-lat. If your dataframe has geometries in the lat-lon order, please check out [ST_FlipCoordinates](https://sedona.apache.org/latest-snapshot/api/sql/Function/#st_flipcoordinates)
 
+!!!Note
+	Both SedonaPyDeck and SedonaKepler are designed to work with SedonaDataFrames containing only 1 geometry column. Passing dataframes with multiple geometry columns will cause errors.
+
 ### SedonaPyDeck
 Spatial query results can be visualized in Jupyter lab/notebook using SedonaPyDeck.
 
 SedonaPyDeck exposes APIs to create interactive map visualizations using [pydeck](https://pydeck.gl/index.html#) based on [deck.gl](https://deck.gl/)
 
+!!!Note
+	To use SedonaPyDeck, GeoPandas and PyDeck must be installed. We recommend the following installation commands:
+	```
+	pip install 'pandas<=1.3.5'
+	pip install 'geopandas<=0.10.2'
+	pip install pydeck==0.8.0
+	```
 
 #### Creating a Choropleth map using SedonaPyDeck
 
@@ -609,10 +619,17 @@ More details on the parameters and their default values can be found on the pyde
 
 ### SedonaKepler
 
-
 Spatial query results can be visualized in Jupyter lab/notebook using SedonaKepler. 
 
 SedonaKepler exposes APIs to create interactive and customizable map visualizations using [KeplerGl](https://kepler.gl/).
+
+!!!Note
+	To use SedonaKepler, GeoPandas and KeplerGL must be installed. We recommend the following installation commands:
+	```
+	pip install 'pandas<=1.3.5'
+	pip install 'geopandas<=0.10.2'
+	pip install keplergl==0.3.2
+	```
 
 #### Creating a map object using SedonaKepler.create_map
 
