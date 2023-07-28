@@ -928,13 +928,37 @@ Since: `1.4.1`
 Spark SQL Example:
 
 ```sql
-SELECT ST_AsText(ST_Force3D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))')))
+SELECT ST_AsText(ST_Force3D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'), 2.3))
 ```
 
 Output:
 
 ```
 POLYGON Z((0 0 2, 0 5 2, 5 0 2, 0 0 2), (1 1 2, 3 1 2, 1 3 2, 1 1 2))
+```
+
+Spark SQL Example:
+
+```sql
+SELECT ST_AsText(ST_Force3D(ST_GeomFromText('LINESTRING(0 1,1 0,2 0)'), 2.3))
+```
+
+Output:
+
+```
+LINESTRING Z(0 1 2.3, 1 0 2.3, 2 0 2.3)
+```
+
+Spark SQL Example:
+
+```sql
+SELECT ST_AsText(ST_Force3D(ST_GeomFromText('LINESTRING EMPTY')))
+```
+
+Output:
+
+```
+LINESTRING EMPTY
 ```
 
 ## ST_FrechetDistance
