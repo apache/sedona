@@ -946,7 +946,7 @@ LINESTRING Z(0 1 2.3, 1 0 2.3, 2 0 2.3)
 Spark SQL Example:
 
 ```sql
-SELECT ST_AsText(ST_Force3D(ST_GeomFromText('LINESTRING EMPTY')))
+SELECT ST_AsText(ST_Force3D(ST_GeomFromText('LINESTRING EMPTY'), 3))
 ```
 
 Output:
