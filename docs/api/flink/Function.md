@@ -169,40 +169,38 @@ Since: `1.5.0`
 Example:
 
 ```sql
-ST_Angle(p1, p2, p3, p4)
+ST_Angle(ST_GeomFromWKT('POINT(0 0)'), ST_GeomFromWKT('POINT (1 1)'), ST_GeomFromWKT('POINT(1 0)'), ST_GeomFromWKT('POINT(6 2)'))
 ```
 
-Input: `p1: POINT (0 0)`
+Output:
 
-Input: `p2: POINT (1 1)`
+```
+0.4048917862850834
+```
 
-Input: `p3: POINT (1 0)`
-
-Input: `p4: POINT(6 2)`
-
-Output: 0.4048917862850834
+Example:
 
 ```sql
-ST_Angle(p1, p2, p3)
+ST_Angle(ST_GeomFromWKT('POINT (1 1)'), ST_GeomFromWKT('POINT (0 0)'), ST_GeomFromWKT('POINT(3 2)'))
 ```
 
-Input: `p1: POINT (1 1)`
+Output:
 
-Input: `p2: POINT (0 0)`
+```
+0.19739555984988044
+```
 
-Input: `p3: POINT(3 2)`
-
-Output: 0.19739555984988044
+Example:
 
 ```sql
-ST_Angle(line1, line2)
+ST_Angle(ST_GeomFromWKT('LINESTRING (0 0, 1 1)'), ST_GeomFromWKT('LINESTRING (0 0, 3 2)'))
 ```
 
-Input: `line1: LINESTRING (0 0, 1 1)`
+Output:
 
-Input: `line2: LINESTRING (0 0, 3 2)`
-
-Output: 0.19739555984988044
+```
+0.19739555984988044
+```
 
 ## ST_Area
 
