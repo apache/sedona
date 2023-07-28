@@ -948,13 +948,16 @@ Format: `ST_FrechetDistance(g1: geomtry, g2: geometry)`
 Since: `1.5.0`
 
 Example:
+
 ```sql
-SELECT ST_FrechetDistance(g1, g2)
+SELECT ST_FrechetDistance(ST_GeomFromWKT('POINT (0 1)'), ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)'))
 ```
 
-Input: `g1: POINT (0 1), g2: LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)`
+Output:
 
-Output: `5.0990195135927845`
+```
+5.0990195135927845
+```
 
 ## ST_GeoHash
 
