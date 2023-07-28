@@ -520,6 +520,13 @@ Spatial query results can be visualized in Jupyter lab/notebook using SedonaPyDe
 
 SedonaPyDeck exposes APIs to create interactive map visualizations using [pydeck](https://pydeck.gl/index.html#) based on [deck.gl](https://deck.gl/)
 
+!!!Note
+	To use SedonaPyDeck, GeoPandas and PyDeck must be installed. We recommend the following installation commands:
+	```
+	pip install 'pandas<=1.3.5'
+	pip install 'geopandas<=0.10.2'
+	pip install pydeck==0.8.0
+	```
 
 #### Creating a Choropleth map using SedonaPyDeck
 
@@ -612,10 +619,17 @@ More details on the parameters and their default values can be found on the pyde
 
 ### SedonaKepler
 
-
 Spatial query results can be visualized in Jupyter lab/notebook using SedonaKepler. 
 
 SedonaKepler exposes APIs to create interactive and customizable map visualizations using [KeplerGl](https://kepler.gl/).
+
+!!!Note
+	To use SedonaKepler, GeoPandas and KeplerGL must be installed. We recommend the following installation commands:
+	```
+	pip install 'pandas<=1.3.5'
+	pip install 'geopandas<=0.10.2'
+	pip install keplergl==0.3.2
+	```
 
 #### Creating a map object using SedonaKepler.create_map
 
