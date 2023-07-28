@@ -58,3 +58,16 @@ case class RS_Height(inputExpressions: Seq[Expression]) extends InferredExpressi
     copy(inputExpressions = newChildren)
   }
 }
+
+
+case class RS_ScaleX(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.getScaleX _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class RS_ScaleY(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.getScaleY _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
