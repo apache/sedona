@@ -2057,6 +2057,18 @@ Since: `1.4.1`
 Example:
 
 ```sql
+SELECT ST_Translate(ST_GeomFromText('GEOMETRYCOLLECTION(MULTIPOLYGON(((3 2,3 3,4 3,4 2,3 2)),((3 4,5 6,5 7,3 4))), POINT(1 1 1), LINESTRING EMPTY)'), 2, 2, 3)
+```
+
+Output:
+
+```
+GEOMETRYCOLLECTION (MULTIPOLYGON (((5 4, 5 5, 6 5, 6 4, 5 4)), ((5 6, 7 8, 7 9, 5 6))), POINT (3 3), LINESTRING EMPTY)
+```
+
+Example:
+
+```sql
 SELECT ST_Translate(ST_GeomFromText('POINT(-71.01 42.37)'),1,2)
 ```
 
