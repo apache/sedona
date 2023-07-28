@@ -403,11 +403,16 @@ Format: `ST_Azimuth(pointA: Point, pointB: Point)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_Azimuth(ST_POINT(0.0, 25.0), ST_POINT(0.0, 0.0))
 ```
 
-Output: `3.141592653589793`
+Output:
+
+```
+3.141592653589793
+```
 
 ## ST_Boundary
 
@@ -418,11 +423,16 @@ Format: `ST_Boundary(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_Boundary(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
+SELECT ST_Boundary(ST_GeomFromWKT('POLYGON((1 1,0 0, -1 1, 1 1))'))
 ```
 
-Output: `LINESTRING (1 1, 0 0, -1 1, 1 1)`
+Output:
+
+```
+LINESTRING (1 1, 0 0, -1 1, 1 1)
+```
 
 ## ST_BoundingDiagonal
 
@@ -460,9 +470,15 @@ Format: `ST_Buffer (A:geometry, buffer: Double)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_Buffer(polygondf.countyshape, 1)
-FROM polygondf
+SELECT ST_Buffer(ST_GeomFromWKT("POINT(0 0)"), 1)
+```
+
+Output:
+
+```
+POLYGON ((1 0, 0.9807852804032304 -0.1950903220161282, 0.9238795325112867 -0.3826834323650898, 0.8314696123025452 -0.5555702330196022, 0.7071067811865476 -0.7071067811865475, 0.5555702330196023 -0.8314696123025452, 0.3826834323650898 -0.9238795325112867, 0.1950903220161283 -0.9807852804032304, 0.0000000000000001 -1, -0.1950903220161282 -0.9807852804032304, -0.3826834323650897 -0.9238795325112867, -0.555570233019602 -0.8314696123025453, -0.7071067811865475 -0.7071067811865476, -0.8314696123025453 -0.5555702330196022, -0.9238795325112867 -0.3826834323650899, -0.9807852804032304 -0.1950903220161286, -1 -0.0000000000000001, -0.9807852804032304 0.1950903220161284, -0.9238795325112868 0.3826834323650897, -0.8314696123025455 0.555570233019602, -0.7071067811865477 0.7071067811865475, -0.5555702330196022 0.8314696123025452, -0.3826834323650903 0.9238795325112865, -0.1950903220161287 0.9807852804032303, -0.0000000000000002 1, 0.1950903220161283 0.9807852804032304, 0.38268343236509 0.9238795325112866, 0.5555702330196018 0.8314696123025455, 0.7071067811865474 0.7071067811865477, 0.8314696123025452 0.5555702330196022, 0.9238795325112865 0.3826834323650904, 0.9807852804032303 0.1950903220161287, 1 0))
 ```
 
 ## ST_BuildArea
@@ -477,7 +493,7 @@ Example:
 
 ```sql
 SELECT ST_BuildArea(
-    ST_GeomFromText('MULTILINESTRING((0 0, 20 0, 20 20, 0 20, 0 0),(2 2, 18 2, 18 18, 2 18, 2 2))')
+    ST_GeomFromWKT('MULTILINESTRING((0 0, 20 0, 20 20, 0 20, 0 0),(2 2, 18 2, 18 18, 2 18, 2 2))')
 ) AS geom
 ```
 
@@ -501,9 +517,15 @@ Format: `ST_Centroid (A:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_Centroid(polygondf.countyshape)
-FROM polygondf
+SELECT ST_Centroid(ST_GeomFromWKT('MULTIPOINT(-1  0, -1 2, 7 8, 9 8, 10 6)'))
+```
+
+Output:
+
+```
+POINT (4.8 4.8) 
 ```
 
 ## ST_ClosestPoint
@@ -635,9 +657,15 @@ Format: `ST_ConcaveHull (A:geometry, pctConvex:float, allowHoles:Boolean)`
 Since: `v1.4.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_ConcaveHull(polygondf.countyshape, pctConvex)`
-FROM polygondf
+SELECT ST_ConcaveHull(ST_GeomFromWKT('POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))'), 1)
+```
+
+Output:
+
+```
+POLYGON ((125 100, 20 40, 50 60, 175 150, 125 100))  
 ```
 
 ## ST_ConvexHull
@@ -649,9 +677,15 @@ Format: `ST_ConvexHull (A:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_ConvexHull(polygondf.countyshape)
-FROM polygondf
+SELECT ST_ConvexHull(ST_GeomFromText('POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))'))
+```
+
+Output:
+
+```
+POLYGON ((20 40, 175 150, 125 100, 20 40))
 ```
 
 ##  ST_CoordDim
@@ -668,15 +702,23 @@ Example with x, y, z coordinate:
 SELECT ST_CoordDim(ST_GeomFromText('POINT(1 1 2'))
 ```
 
-Output: `3`
+Output: 
+
+```
+3
+```
 
 Example with x, y coordinate:
 
 ```sql
-SELECT ST_CoordDim(ST_GeomFromEWKT('POINT(3 7)'))
+SELECT ST_CoordDim(ST_GeomFromWKT('POINT(3 7)'))
 ```
 
-Output: `2`
+Output: 
+
+```
+2
+```
 
 ## ST_Degrees
 
@@ -684,7 +726,7 @@ Introduction: Convert an angle in radian to degrees.
 
 Format: `ST_Degrees(angleInRadian)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
 Example:
 
@@ -692,7 +734,11 @@ Example:
 SELECT ST_Degrees(0.19739555984988044)
 ```
 
-Output: 11.309932474020195
+Output: 
+
+```
+11.309932474020195
+```
 
 ## ST_Difference
 
@@ -708,7 +754,7 @@ Example:
 SELECT ST_Difference(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((0 -4, 4 -4, 4 4, 0 4, 0 -4))'))
 ```
 
-Result:
+Output:
 
 ```
 POLYGON ((0 -3, -3 -3, -3 3, 0 3, 0 -3))
@@ -723,15 +769,14 @@ Format: `ST_Dimension (A:geometry), ST_Dimension (C:geometrycollection), `
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 SELECT ST_Dimension('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))');
 ```
 
-Result:
+Output:
 
 ```
-ST_Dimension
------------
 1
 ```
 
@@ -745,9 +790,15 @@ Format: `ST_Distance (A:geometry, B:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_Distance(polygondf.countyshape, polygondf.countyshape)
-FROM polygondf
+SELECT ST_Distance(ST_GeomFromText('POINT(72 42)'), ST_GeomFromText('LINESTRING(-72 -42, 82 92)'))
+```
+
+Output:
+
+```
+31.155515639003543
 ```
 
 ## ST_DistanceSphere
@@ -761,18 +812,28 @@ Format: `ST_DistanceSphere (A:geometry)`
 Since: `v1.4.1`
 
 Spark SQL example 1:
+
 ```sql
 SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))
 ```
 
-Output: `543796.9506134904`
+Output: 
+
+```
+543796.9506134904
+```
 
 Spark SQL example 2:
+
 ```sql
 SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'), 6378137.0)
 ```
 
-Output: `544405.4459192449`
+Output: 
+
+```
+544405.4459192449
+```
 
 
 ## ST_DistanceSpheroid
@@ -786,11 +847,16 @@ Format: `ST_DistanceSpheroid (A:geometry)`
 Since: `v1.4.1`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_DistanceSpheroid(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT('POINT (55.9533 -3.1883)'))
 ```
 
-Output: `544430.9411996207`
+Output: 
+
+```
+544430.9411996207
+```
 
 ## ST_Dump
 
@@ -806,7 +872,11 @@ Spark SQL example:
 SELECT ST_Dump(ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))'))
 ```
 
-Output: `[POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]`
+Output: 
+
+```
+[POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]
+```
 
 ## ST_DumpPoints
 
@@ -817,11 +887,16 @@ Format: `ST_DumpPoints(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_DumpPoints(ST_GeomFromText('LINESTRING (0 0, 1 1, 1 0)'))
 ```
 
-Output: `[POINT (0 0), POINT (0 1), POINT (1 1), POINT (1 0), POINT (0 0)]`
+Output: 
+
+```
+[POINT (0 0), POINT (0 1), POINT (1 1), POINT (1 0), POINT (0 0)]
+```
 
 ## ST_EndPoint
 
@@ -832,11 +907,16 @@ Format: `ST_EndPoint(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_EndPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'))
 ```
 
-Output: `POINT(160 170)`
+Output: 
+
+```
+POINT(160 170)
+```
 
 ## ST_Envelope
 
@@ -849,8 +929,13 @@ Since: `v1.0.0`
 Spark SQL example:
 
 ```sql
-SELECT ST_Envelope(polygondf.countyshape)
-FROM polygondf
+SELECT ST_Envelope(ST_GeomFromWKT('LINESTRING(0 0, 1 3)'))
+```
+
+Output:
+
+```
+POLYGON ((0 0, 0 3, 1 3, 1 0, 0 0))
 ```
 
 ## ST_ExteriorRing
@@ -862,11 +947,16 @@ Format: `ST_ExteriorRing(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_ExteriorRing(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
-Output: `LINESTRING (0 0, 1 1, 1 2, 1 1, 0 0)`
+Output: 
+
+```
+LINESTRING (0 0, 1 1, 1 2, 1 1, 0 0)
+```
 
 ## ST_FlipCoordinates
 
@@ -877,14 +967,16 @@ Format: `ST_FlipCoordinates(A:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_FlipCoordinates(df.geometry)
-FROM df
+SELECT ST_FlipCoordinates(ST_GeomFromWKT("POINT (1 2)"))
 ```
 
-Input: `POINT (1 2)`
+Output: 
 
-Output: `POINT (2 1)`
+```
+POINT (2 1)
+```
 
 ## ST_Force_2D
 
@@ -900,7 +992,7 @@ Example:
 SELECT ST_Force_2D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'))
 ```
 
-Result:
+Output:
 
 ```
 POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))
@@ -988,20 +1080,14 @@ Since: `v1.1.1`
 
 Example:
 
-Query:
-
 ```sql
 SELECT ST_GeoHash(ST_GeomFromText('POINT(21.427834 52.042576573)'), 5) AS geohash
 ```
 
-Result:
+Output:
 
 ```
-+-----------------------------+
-|geohash                      |
-+-----------------------------+
-|u3r0p                        |
-+-----------------------------+
+u3r0p
 ```
 
 ## ST_GeometricMedian
@@ -1022,7 +1108,7 @@ Format: `ST_GeometricMedian(geom: geometry)`
 
 Default parameters: `tolerance: 1e-6, maxIter: 1000, failIfNotConverged: false`
 
-Since: `1.4.1`
+Since: `v1.4.1`
 
 Example:
 ```sql
@@ -1043,11 +1129,16 @@ Format: `ST_GeometryN(geom: geometry, n: Int)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_GeometryN(ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))'), 1)
 ```
 
-Output: `POINT (3 4)`
+Output: 
+
+```
+POINT (3 4)
+```
 
 ## ST_GeometryType
 
@@ -1058,9 +1149,15 @@ Format: `ST_GeometryType (A:geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_GeometryType(polygondf.countyshape)
-FROM polygondf
+SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))
+```
+
+Output:
+
+```
+ST_LINESTRING
 ```
 
 ## ST_HausdorffDistance
@@ -1117,11 +1214,16 @@ Format: `ST_InteriorRingN(geom: geometry, n: Int)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_InteriorRingN(ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))'), 0)
 ```
 
-Output: `LINESTRING (1 1, 2 1, 2 2, 1 2, 1 1)`
+Output: 
+
+```
+LINESTRING (1 1, 2 1, 2 2, 1 2, 1 1)
+```
 
 ## ST_Intersection
 
@@ -1134,8 +1236,16 @@ Since: `v1.0.0`
 Spark SQL example:
 
 ```sql
-SELECT ST_Intersection(polygondf.countyshape, polygondf.countyshape)
-FROM polygondf
+SELECT ST_Intersection(
+    ST_GeomFromWKT("POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))"),
+    ST_GeomFromWKT("POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))")
+    )
+```
+
+Output:
+
+```
+POLYGON ((2 8, 8 8, 8 2, 2 2, 2 8))
 ```
 
 ## ST_IsClosed
@@ -1147,11 +1257,16 @@ Format: `ST_IsClosed(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_IsClosed(ST_GeomFromText('LINESTRING(0 0, 1 1, 1 0)'))
 ```
 
-Output: `false`
+Output: 
+
+```
+false
+```
 
 ## ST_IsCollection
 
@@ -1171,14 +1286,23 @@ Example:
 SELECT ST_IsCollection(ST_GeomFromText('MULTIPOINT(0 0), (6 6)'))
 ```
 
-Output: `true`
+Output: 
+
+```
+true
+```
 
 Example:
+
 ```sql
 SELECT ST_IsCollection(ST_GeomFromText('POINT(5 5)'))
 ```
 
-Output: `false`
+Output: 
+
+```
+false
+```
 
 ## ST_IsEmpty
 
@@ -1191,8 +1315,13 @@ Since: `v1.2.1`
 Spark SQL example:
 
 ```sql
-SELECT ST_IsEmpty(polygondf.countyshape)
-FROM polygondf
+SELECT ST_IsEmpty(ST_GeomFromWKT('POLYGON((0 0,0 1,1 1,1 0,0 0))'))
+```
+
+Output:
+
+```
+false
 ```
 
 ## ST_IsRing
@@ -1204,11 +1333,16 @@ Format: `ST_IsRing(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_IsRing(ST_GeomFromText("LINESTRING(0 0, 0 1, 1 1, 1 0, 0 0)"))
 ```
 
-Output: `true`
+Output: 
+
+```
+true
+```
 
 ## ST_IsSimple
 
@@ -1221,8 +1355,13 @@ Since: `v1.0.0`
 Spark SQL example:
 
 ```sql
-SELECT ST_IsSimple(polygondf.countyshape)
-FROM polygondf
+SELECT ST_IsSimple(ST_GeomFromWKT('POLYGON((1 1, 3 1, 3 3, 1 3, 1 1))'))
+```
+
+Output:
+
+```
+true
 ```
 
 ## ST_IsValid
@@ -1236,8 +1375,13 @@ Since: `v1.0.0`
 Spark SQL example:
 
 ```sql
-SELECT ST_IsValid(polygondf.countyshape)
-FROM polygondf
+SELECT ST_IsValid(ST_GeomFromWKT('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0), (15 15, 15 20, 20 20, 20 15, 15 15))'))
+```
+
+Output:
+
+```
+false
 ```
 
 ## ST_Length
@@ -1249,9 +1393,15 @@ Format: ST_Length (A:geometry)
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_Length(polygondf.countyshape)
-FROM polygondf
+SELECT ST_Length(ST_GeomFromWKT('LINESTRING(38 16,38 50,65 50,66 16,38 16)'))
+```
+
+Output:
+
+```
+123.0147027033899
 ```
 
 ## ST_LengthSpheroid
@@ -1265,11 +1415,16 @@ Format: `ST_LengthSpheroid (A:geometry)`
 Since: `v1.4.1`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 0 90, 0 0))'))
 ```
 
-Output: `20037508.342789244`
+Output: 
+
+```
+20037508.342789244
+```
 
 ## ST_LineFromMultiPoint
 
@@ -1282,19 +1437,13 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_AsText(
-    ST_LineFromMultiPoint(ST_GeomFromText('MULTIPOINT((10 40), (40 30), (20 20), (30 10))'))
-) AS geom
+SELECT ST_LineFromMultiPoint(ST_GeomFromText('MULTIPOINT((10 40), (40 30), (20 20), (30 10))'))
 ```
 
-Result:
+Output:
 
 ```
-+---------------------------------------------------------------+
-|geom                                                           |
-+---------------------------------------------------------------+
-|LINESTRING (10 40, 40 30, 20 20, 30 10)                        |
-+---------------------------------------------------------------+
+LINESTRING (10 40, 40 30, 20 20, 30 10)
 ```
 
 ## ST_LineInterpolatePoint
@@ -1306,17 +1455,14 @@ Format: `ST_LineInterpolatePoint (geom: geometry, fraction: Double)`
 Since: `v1.0.1`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_LineInterpolatePoint(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.2) as Interpolated
+SELECT ST_LineInterpolatePoint(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.2)
 ```
 
 Output:
 ```
-+-----------------------------------------+
-|Interpolated                             |
-+-----------------------------------------+
-|POINT (51.5974135047432 76.5974135047432)|
-+-----------------------------------------+
+POINT (51.5974135047432 76.5974135047432)
 ```
 
 ## ST_LineMerge
@@ -1330,9 +1476,16 @@ Format: `ST_LineMerge (A:geometry)`
 
 Since: `v1.0.0`
 
+Spark SQL example:
+
 ```sql
-SELECT ST_LineMerge(geometry)
-FROM df
+SELECT ST_LineMerge(ST_GeomFromWKT('MULTILINESTRING ((-29 -27, -30 -29.7, -45 -33), (-45 -33, -46 -32))'))
+```
+
+Output:
+
+```
+LINESTRING (-29 -27, -30 -29.7, -45 -33, -46 -32)
 ```
 
 ## ST_LineSubstring
@@ -1344,17 +1497,15 @@ Format: `ST_LineSubstring (geom: geometry, startfraction: Double, endfraction: D
 Since: `v1.0.1`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_LineSubstring(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.333, 0.666) as Substring
+SELECT ST_LineSubstring(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.333, 0.666)
 ```
 
 Output:
+
 ```
-+------------------------------------------------------------------------------------------------+
-|Substring                                                                                       |
-+------------------------------------------------------------------------------------------------+
-|LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140.21046313888758)|
-+------------------------------------------------------------------------------------------------+
+LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140.21046313888758)
 ```
 
 ## ST_MakePolygon
@@ -1367,24 +1518,17 @@ Since: `v1.1.0`
 
 Example:
 
-Query:
 ```sql
-SELECT
-    ST_MakePolygon(
+SELECT ST_MakePolygon(
         ST_GeomFromText('LINESTRING(7 -1, 7 6, 9 6, 9 1, 7 -1)'),
         ARRAY(ST_GeomFromText('LINESTRING(6 2, 8 2, 8 1, 6 1, 6 2)'))
-    ) AS polygon
+    ) 
 ```
 
-Result:
+Output:
 
 ```
-+----------------------------------------------------------------+
-|polygon                                                         |
-+----------------------------------------------------------------+
-|POLYGON ((7 -1, 7 6, 9 6, 9 1, 7 -1), (6 2, 8 2, 8 1, 6 1, 6 2))|
-+----------------------------------------------------------------+
-
+POLYGON ((7 -1, 7 6, 9 6, 9 1, 7 -1), (6 2, 8 2, 8 1, 6 1, 6 2))
 ```
 
 ## ST_MakeValid
@@ -1431,8 +1575,15 @@ Format: `ST_MinimumBoundingCircle(geom: geometry, [Optional] quadrantSegments:in
 Since: `v1.0.1`
 
 Spark SQL example:
+
 ```sql
-SELECT ST_MinimumBoundingCircle(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
+SELECT ST_MinimumBoundingCircle(ST_GeomFromWKT('LINESTRING(0 0, 0 1)'))
+```
+
+Output:
+
+```
+POLYGON ((0.5 0.5, 0.4997322937381828 0.4836404585891119, 0.4989294616193017 0.4672984353849285, 0.4975923633360985 0.4509914298352197, 0.4957224306869052 0.4347369038899742, 0.4933216660424395 0.4185522633027057, 0.4903926402016152 0.4024548389919359, 0.4869384896386668 0.3864618684828134, 0.4829629131445342 0.3705904774487396, 0.4784701678661044 0.3548576613727689, 0.4734650647475528 0.3392802673484192, 0.4679529633786629 0.3238749760393833, 0.4619397662556434 0.3086582838174551, 0.4554319124605879 0.2936464850978027, 0.4484363707663442 0.2788556548904993, 0.4409606321741775 0.2643016315870012, 0.4330127018922194 0.25, 0.4246010907632894 0.2359660746748161, 0.4157348061512726 0.2222148834901989, 0.4064233422958076 0.2087611515660989, 0.3966766701456176 0.1956192854956397, 0.3865052266813685 0.1828033579181773, 0.3759199037394887 0.1703270924499656, 0.3649320363489179 0.1582038489885644, 0.3535533905932738 0.1464466094067263, 0.3417961510114357 0.1350679636510822, 0.3296729075500345 0.1240800962605114, 0.3171966420818228 0.1134947733186316, 0.3043807145043603 0.1033233298543824, 0.2912388484339011 0.0935766577041924, 0.2777851165098012 0.0842651938487274, 0.264033925325184 0.0753989092367106, 0.2500000000000001 0.0669872981077807, 0.2356983684129989 0.0590393678258225, 0.2211443451095007 0.0515636292336559, 0.2063535149021975 0.0445680875394122, 0.1913417161825449 0.0380602337443566, 0.1761250239606168 0.0320470366213372, 0.1607197326515808 0.0265349352524472, 0.1451423386272312 0.0215298321338956, 0.1294095225512605 0.0170370868554659, 0.1135381315171867 0.0130615103613332, 0.0975451610080642 0.0096073597983848, 0.0814477366972944 0.0066783339575605, 0.0652630961100259 0.0042775693130948, 0.0490085701647804 0.0024076366639016, 0.0327015646150716 0.0010705383806983, 0.0163595414108882 0.0002677062618172, 0 0, -0.016359541410888 0.0002677062618172, -0.0327015646150715 0.0010705383806983, -0.0490085701647802 0.0024076366639015, -0.0652630961100257 0.0042775693130948, -0.0814477366972942 0.0066783339575605, -0.097545161008064 0.0096073597983847, -0.1135381315171866 0.0130615103613332, -0.1294095225512603 0.0170370868554658, -0.1451423386272311 0.0215298321338955, -0.1607197326515807 0.0265349352524472, -0.1761250239606166 0.0320470366213371, -0.1913417161825448 0.0380602337443566, -0.2063535149021973 0.044568087539412, -0.2211443451095006 0.0515636292336558, -0.2356983684129987 0.0590393678258224, -0.2499999999999999 0.0669872981077806, -0.264033925325184 0.0753989092367106, -0.277785116509801 0.0842651938487273, -0.291238848433901 0.0935766577041924, -0.3043807145043602 0.1033233298543823, -0.3171966420818227 0.1134947733186314, -0.3296729075500343 0.1240800962605111, -0.3417961510114356 0.1350679636510821, -0.3535533905932737 0.1464466094067262, -0.3649320363489177 0.1582038489885642, -0.3759199037394886 0.1703270924499655, -0.3865052266813683 0.1828033579181771, -0.3966766701456175 0.1956192854956396, -0.4064233422958076 0.2087611515660989, -0.4157348061512725 0.2222148834901987, -0.4246010907632894 0.235966074674816, -0.4330127018922192 0.2499999999999998, -0.4409606321741775 0.264301631587001, -0.4484363707663441 0.2788556548904991, -0.4554319124605878 0.2936464850978025, -0.4619397662556434 0.3086582838174551, -0.4679529633786628 0.3238749760393831, -0.4734650647475528 0.3392802673484191, -0.4784701678661044 0.3548576613727686, -0.4829629131445341 0.3705904774487395, -0.4869384896386668 0.3864618684828132, -0.4903926402016152 0.4024548389919357, -0.4933216660424395 0.4185522633027056, -0.4957224306869052 0.434736903889974, -0.4975923633360984 0.4509914298352196, -0.4989294616193017 0.4672984353849282, -0.4997322937381828 0.4836404585891118, -0.5 0.4999999999999999, -0.4997322937381828 0.5163595414108879, -0.4989294616193017 0.5327015646150715, -0.4975923633360985 0.5490085701647801, -0.4957224306869052 0.5652630961100257, -0.4933216660424395 0.5814477366972941, -0.4903926402016153 0.597545161008064, -0.4869384896386668 0.6135381315171865, -0.4829629131445342 0.6294095225512601, -0.4784701678661045 0.645142338627231, -0.4734650647475529 0.6607197326515806, -0.4679529633786629 0.6761250239606166, -0.4619397662556435 0.6913417161825446, -0.455431912460588 0.7063535149021972, -0.4484363707663442 0.7211443451095005, -0.4409606321741776 0.7356983684129986, -0.4330127018922194 0.7499999999999999, -0.4246010907632896 0.7640339253251838, -0.4157348061512727 0.777785116509801, -0.4064233422958078 0.7912388484339008, -0.3966766701456177 0.8043807145043602, -0.3865052266813686 0.8171966420818226, -0.3759199037394889 0.8296729075500342, -0.3649320363489179 0.8417961510114356, -0.353553390593274 0.8535533905932735, -0.3417961510114358 0.8649320363489177, -0.3296729075500345 0.8759199037394887, -0.317196642081823 0.8865052266813683, -0.3043807145043604 0.8966766701456175, -0.2912388484339011 0.9064233422958076, -0.2777851165098015 0.9157348061512725, -0.2640339253251843 0.9246010907632893, -0.2500000000000002 0.9330127018922192, -0.235698368412999 0.9409606321741775, -0.2211443451095007 0.9484363707663441, -0.2063535149021977 0.9554319124605877, -0.1913417161825452 0.9619397662556433, -0.176125023960617 0.9679529633786628, -0.1607197326515809 0.9734650647475528, -0.1451423386272312 0.9784701678661044, -0.1294095225512608 0.9829629131445341, -0.1135381315171869 0.9869384896386668, -0.0975451610080643 0.9903926402016152, -0.0814477366972945 0.9933216660424395, -0.0652630961100262 0.9957224306869051, -0.0490085701647807 0.9975923633360984, -0.0327015646150718 0.9989294616193017, -0.0163595414108883 0.9997322937381828, -0.0000000000000001 1, 0.0163595414108876 0.9997322937381828, 0.0327015646150712 0.9989294616193019, 0.04900857016478 0.9975923633360985, 0.0652630961100256 0.9957224306869052, 0.0814477366972943 0.9933216660424395, 0.0975451610080637 0.9903926402016153, 0.1135381315171863 0.9869384896386669, 0.1294095225512601 0.9829629131445342, 0.145142338627231 0.9784701678661045, 0.1607197326515807 0.9734650647475529, 0.1761250239606164 0.967952963378663, 0.1913417161825446 0.9619397662556435, 0.2063535149021972 0.955431912460588, 0.2211443451095005 0.9484363707663442, 0.2356983684129984 0.9409606321741777, 0.2499999999999997 0.9330127018922195, 0.2640339253251837 0.9246010907632896, 0.2777851165098009 0.9157348061512727, 0.291238848433901 0.9064233422958077, 0.3043807145043599 0.8966766701456179, 0.3171966420818225 0.8865052266813687, 0.3296729075500342 0.8759199037394889, 0.3417961510114355 0.8649320363489179, 0.3535533905932737 0.8535533905932738, 0.3649320363489175 0.841796151011436, 0.3759199037394885 0.8296729075500346, 0.3865052266813683 0.817196642081823, 0.3966766701456175 0.8043807145043604, 0.4064233422958076 0.7912388484339011, 0.4157348061512723 0.7777851165098015, 0.4246010907632893 0.7640339253251842, 0.4330127018922192 0.7500000000000002, 0.4409606321741774 0.735698368412999, 0.4484363707663439 0.7211443451095011, 0.4554319124605877 0.7063535149021978, 0.4619397662556433 0.6913417161825453, 0.4679529633786628 0.676125023960617, 0.4734650647475528 0.6607197326515809, 0.4784701678661043 0.6451423386272317, 0.482962913144534 0.6294095225512608, 0.4869384896386668 0.613538131517187, 0.4903926402016152 0.5975451610080643, 0.4933216660424395 0.5814477366972945, 0.4957224306869051 0.5652630961100262, 0.4975923633360984 0.5490085701647807, 0.4989294616193017 0.5327015646150718, 0.4997322937381828 0.5163595414108882, 0.5 0.5))
 ```
 
 ## ST_MinimumBoundingRadius
@@ -1444,8 +1595,15 @@ Format: `ST_MinimumBoundingRadius(geom: geometry)`
 Since: `v1.0.1`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_MinimumBoundingRadius(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
+```
+
+Output:
+
+```
+{POINT (0 1), 1.0}
 ```
 
 ## ST_Multi
@@ -1462,20 +1620,15 @@ Since: `v1.2.0`
 Example:
 
 ```sql
-SELECT ST_Multi(
-    ST_GeomFromText('POINT(1 1)')
-) AS geom
+SELECT ST_Multi(ST_GeomFromText('POINT(1 1)'))
 ```
 
-Result:
+Output:
 
 ```
-+---------------------------------------------------------------+
-|geom                                                           |
-+---------------------------------------------------------------+
-|MULTIPOINT (1 1)                                               |
-+---------------------------------------------------------------+
+MULTIPOINT (1 1)
 ```
+
 ## ST_NDims
 
 Introduction: Returns the coordinate dimension of the geometry.
@@ -1484,13 +1637,17 @@ Format: `ST_NDims(geom: geometry)`
 
 Since: `v1.3.1`
 
-Spark SQL example with z co-rodinate:
+Spark SQL example with z coordinate:
 
 ```sql
 SELECT ST_NDims(ST_GeomFromEWKT('POINT(1 1 2)'))
 ```
 
-Output: `3`
+Output: 
+
+```
+3
+```
 
 Spark SQL example with x,y coordinate:
 
@@ -1498,7 +1655,11 @@ Spark SQL example with x,y coordinate:
 SELECT ST_NDims(ST_GeomFromText('POINT(1 1)'))
 ```
 
-Output: `2`
+Output: 
+
+```
+2
+```
 
 ## ST_Normalize
 
@@ -1513,30 +1674,33 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_AsEWKT(ST_Normalize(ST_GeomFromWKT('POLYGON((0 1, 1 1, 1 0, 0 0, 0 1))'))) AS geom
+SELECT ST_AsEWKT(ST_Normalize(ST_GeomFromWKT('POLYGON((0 1, 1 1, 1 0, 0 0, 0 1))')))
 ```
 
 Result:
 
 ```
-+-----------------------------------+
-|geom                               |
-+-----------------------------------+
-|POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))|
-+-----------------------------------+
+POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))
 ```
 
 ## ST_NPoints
 
 Introduction: Return points of the geometry
 
-Since: `v1.0.0`
-
 Format: `ST_NPoints (A:geometry)`
 
+Since: `v1.0.0`
+
+Example:
+
 ```sql
-SELECT ST_NPoints(polygondf.countyshape)
-FROM polygondf
+SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))
+```
+
+Output:
+
+```
+4
 ```
 
 ## ST_NRings
@@ -1578,9 +1742,16 @@ Format: `ST_NumGeometries (A:geometry)`
 
 Since: `v1.0.0`
 
+Example
+
 ```sql
-SELECT ST_NumGeometries(df.geometry)
-FROM df
+SELECT ST_NumGeometries(ST_GeomFromWKT('LINESTRING (-29 -27, -30 -29.7, -45 -33)'))
+```
+
+Output:
+
+```
+1
 ```
 
 ## ST_NumInteriorRings
@@ -1592,11 +1763,16 @@ Format: `ST_NumInteriorRings(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_NumInteriorRings(ST_GeomFromText('POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))'))
 ```
 
-Output: `1`
+Output: 
+
+```
+1
+```
 
 ## ST_NumPoints
 Introduction: Returns number of points in a LineString
@@ -1607,16 +1783,22 @@ Introduction: Returns number of points in a LineString
     `SELECT ST_NumPoints(ST_GeomFromWKT('MULTIPOINT ((0 0), (1 1), (0 1), (2 2))'))`
 
     Output: `IllegalArgumentException: Unsupported geometry type: MultiPoint, only LineString geometry is supported.`
+
 Format: `ST_NumPoints(geom: geometry)`
 
 Since: `v1.4.1`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_NumPoints(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'))
 ```
 
-Output: `3`
+Output: 
+
+```
+3
+```
 
 ## ST_PointN
 
@@ -1628,17 +1810,13 @@ Since: `v1.2.1`
 
 Spark SQL example:
 ```sql
-SELECT ST_PointN(ST_GeomFromText("LINESTRING(0 0, 1 2, 2 4, 3 6)"), 2) AS geom
+SELECT ST_PointN(ST_GeomFromText("LINESTRING(0 0, 1 2, 2 4, 3 6)"), 2)
 ```
 
 Result:
 
 ```
-+---------------------------------------------------------------+
-|geom                                                           |
-+---------------------------------------------------------------+
-|POINT (1 2)                                                    |
-+---------------------------------------------------------------+
+POINT (1 2)
 ```
 
 ## ST_PointOnSurface
@@ -1685,10 +1863,16 @@ Since: `v1.0.0`
 Spark SQL example:
 
 ```sql
-SELECT ST_ReducePrecision(polygondf.countyshape, 9)
-FROM polygondf
+SELECT ST_ReducePrecision(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)')
+    , 9)
 ```
 The new coordinates will only have 9 decimal places.
+
+Output:
+
+```
+POINT (0.123456789 0.123456789)
+```
 
 ## ST_RemovePoint
 
@@ -1701,11 +1885,16 @@ Format: `ST_RemovePoint(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_RemovePoint(ST_GeomFromText("LINESTRING(0 0, 1 1, 1 0)"), 1)
 ```
 
-Output: `LINESTRING(0 0, 1 0)`
+Output: 
+
+```
+LINESTRING(0 0, 1 0)
+```
 
 ## ST_Reverse
 
@@ -1718,19 +1907,13 @@ Since: `v1.2.1`
 Example:
 
 ```sql
-SELECT ST_AsText(
-    ST_Reverse(ST_GeomFromText('LINESTRING(0 0, 1 2, 2 4, 3 6)'))
-) AS geom
+SELECT ST_Reverse(ST_GeomFromWKT('LINESTRING(0 0, 1 2, 2 4, 3 6)'))
 ```
 
-Result:
+Output:
 
 ```
-+---------------------------------------------------------------+
-|geom                                                           |
-+---------------------------------------------------------------+
-|LINESTRING (3 6, 2 4, 1 2, 0 0)                                |
-+---------------------------------------------------------------+
+LINESTRING (3 6, 2 4, 1 2, 0 0)
 ```
 
 ## ST_S2CellIDs
@@ -1744,17 +1927,14 @@ Format: `ST_S2CellIDs(geom: geometry, level: Int)`
 Since: `v1.4.0`
 
 Spark SQL example:
+
 ```SQL
 SELECT ST_S2CellIDs(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'), 6)
 ```
 
 Output:
 ```
-+------------------------------------------------------------------------------------------------------------------------------+
-|st_s2cellids(st_geomfromtext(LINESTRING(1 3 4, 5 6 7), 0), 6)                                                                 |
-+------------------------------------------------------------------------------------------------------------------------------+
-|[1159395429071192064, 1159958379024613376, 1160521328978034688, 1161084278931456000, 1170091478186196992, 1170654428139618304]|
-+------------------------------------------------------------------------------------------------------------------------------+
+[1159395429071192064, 1159958379024613376, 1160521328978034688, 1161084278931456000, 1170091478186196992, 1170654428139618304]
 ```
 
 ## ST_SetPoint
@@ -1768,17 +1948,13 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_SetPoint(ST_GeomFromText('LINESTRING (0 0, 0 1, 1 1)'), 2, ST_GeomFromText('POINT (1 0)')) AS geom
+SELECT ST_SetPoint(ST_GeomFromText('LINESTRING (0 0, 0 1, 1 1)'), 2, ST_GeomFromText('POINT (1 0)'))
 ```
 
-Result:
+Output:
 
 ```
-+--------------------------+
-|geom                      |
-+--------------------------+
-|LINESTRING (0 0, 0 1, 1 0)|
-+--------------------------+
+LINESTRING (0 0, 0 1, 1 0)
 ```
 
 ## ST_SetSRID
@@ -1810,9 +1986,16 @@ Since: `v1.0.0`
 
 Format: `ST_SimplifyPreserveTopology (A:geometry, distanceTolerance: Double)`
 
+Example:
+
 ```sql
-SELECT ST_SimplifyPreserveTopology(polygondf.countyshape, 10.0)
-FROM polygondf
+SELECT ST_SimplifyPreserveTopology(ST_GeomFromText('POLYGON((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33,46 34, 47 44, 35 36, 45 33, 43 19, 29 21, 29 22,35 26, 24 39, 8 25))'), 10)
+```
+
+Output:
+
+```
+POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))
 ```
 
 ## ST_Split
@@ -1830,13 +2013,18 @@ Since: `v1.4.0`
 Format: `ST_Split (input: geometry, blade: geometry)`
 
 Spark SQL Example:
+
 ```sql
 SELECT ST_Split(
     ST_GeomFromWKT('LINESTRING (0 0, 1.5 1.5, 2 2)'),
     ST_GeomFromWKT('MULTIPOINT (0.5 0.5, 1 1)'))
 ```
 
-Output: `MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))`
+Output: 
+
+```
+MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))
+```
 
 ## ST_SRID
 
@@ -1867,11 +2055,16 @@ Format: `ST_StartPoint(geom: geometry)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_StartPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'))
 ```
 
-Output: `POINT(100 150)`
+Output: 
+
+```
+POINT(100 150)
+```
 
 ## ST_SubDivide
 
@@ -2003,7 +2196,7 @@ Example:
 SELECT ST_SymDifference(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((-2 -3, 4 -3, 4 3, -2 3, -2 -3))'))
 ```
 
-Result:
+Output:
 
 ```
 MULTIPOLYGON (((-2 -3, -3 -3, -3 3, -2 3, -2 -3)), ((3 -3, 3 3, 4 3, 4 -3, 3 -3)))
@@ -2093,7 +2286,7 @@ Example:
 SELECT ST_Union(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((1 -2, 5 0, 1 2, 1 -2))'))
 ```
 
-Result:
+Output:
 
 ```
 POLYGON ((3 -1, 3 -3, -3 -3, -3 3, 3 3, 3 1, 5 0, 3 -1))
@@ -2108,11 +2301,16 @@ Format: `ST_X(pointA: Point)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_X(ST_POINT(0.0 25.0))
 ```
 
-Output: `0.0`
+Output: 
+
+```
+0.0
+```
 
 ## ST_XMax
 
@@ -2125,13 +2323,14 @@ Since: `v1.2.1`
 Example:
 
 ```sql
-SELECT ST_XMax(df.geometry) AS xmax
-FROM df
+SELECT ST_XMax(ST_GeomFromText('POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))'))
 ```
 
-Input: `POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))`
+Output:
 
-Output: `2`
+```
+2
+```
 
 ## ST_XMin
 
@@ -2144,13 +2343,14 @@ Since: `v1.2.1`
 Example:
 
 ```sql
-SELECT ST_XMin(df.geometry) AS xmin
-FROM df
+SELECT ST_XMin(ST_GeomFromText('POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))'))
 ```
 
-Input: `POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))`
+Output: 
 
-Output: `-1`
+```
+-1
+```
 
 ## ST_Y
 
@@ -2161,11 +2361,16 @@ Format: `ST_Y(pointA: Point)`
 Since: `v1.0.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_Y(ST_POINT(0.0 25.0))
 ```
 
-Output: `25.0`
+Output: 
+
+```
+25.0
+```
 
 ## ST_YMax
 
@@ -2180,7 +2385,11 @@ Spark SQL example:
 SELECT ST_YMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
-Output: 2
+Output: 
+
+```
+2
+```
 
 ## ST_YMin
 
@@ -2191,11 +2400,16 @@ Format: `ST_Y_Min (A:geometry)`
 Since: `v1.2.1`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_YMin(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
-Output : 0
+Output: 
+
+```
+0
+```
 
 ## ST_Z
 
@@ -2206,11 +2420,16 @@ Format: `ST_Z(pointA: Point)`
 Since: `v1.2.0`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_Z(ST_POINT(0.0 25.0 11.0))
 ```
 
-Output: `11.0`
+Output: 
+
+```
+11.0
+```
 
 ## ST_ZMax
 
@@ -2221,11 +2440,16 @@ Format: `ST_ZMax(geom: geometry)`
 Since: `v1.3.1`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_ZMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
-Output: `1.0`
+Output: 
+
+```
+1.0
+```
 
 ## ST_ZMin
 
@@ -2236,9 +2460,14 @@ Format: `ST_ZMin(geom: geometry)`
 Since: `v1.3.1`
 
 Spark SQL example:
+
 ```sql
 SELECT ST_ZMin(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'))
 ```
 
-Output: `4.0`
+Output: 
+
+```
+4.0
+```
 

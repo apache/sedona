@@ -18,15 +18,14 @@
  */
 package org.apache.sedona.common.raster;
 
-import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.DirectPosition2D;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
+import org.opengis.coverage.PointOutsideCoverageException;
+import org.opengis.geometry.DirectPosition;
 import org.opengis.referencing.operation.TransformException;
 
-import java.awt.image.Raster;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,8 +46,6 @@ public class PixelFunctions
             // Invalid band index. Return nulls.
             return geometries.stream().map(geom -> (Double) null).collect(Collectors.toList());
         }
-        Raster raster = rasterGeom.getRenderedImage().getData();
-        GridGeometry2D gridGeometry = rasterGeom.getGridGeometry();
         double[] noDataValues = rasterGeom.getSampleDimension(band - 1).getNoDataValues();
         DoublePredicate isNoData = d -> noDataValues != null && DoubleStream.of(noDataValues).anyMatch(noDataValue -> Double.compare(noDataValue, d) == 0);
         double[] pixelBuffer = new double[numBands];
@@ -59,16 +56,16 @@ public class PixelFunctions
                 result.add(null);
             } else {
                 Point point = ensurePoint(geom);
-                DirectPosition2D directPosition2D = new DirectPosition2D(point.getX(), point.getY());
-                GridCoordinates2D gridCoordinates2D = gridGeometry.worldToGrid(directPosition2D);
+                DirectPosition directPosition2D = new DirectPosition2D(point.getX(), point.getY());
                 try {
-                    double pixel = raster.getPixel(gridCoordinates2D.x, gridCoordinates2D.y, pixelBuffer)[band - 1];
+                    rasterGeom.evaluate(directPosition2D, pixelBuffer);
+                    double pixel = pixelBuffer[band - 1];
                     if (isNoData.test(pixel)) {
                         result.add(null);
                     } else {
                         result.add(pixel);
                     }
-                } catch (ArrayIndexOutOfBoundsException exc) {
+                } catch (PointOutsideCoverageException | ArrayIndexOutOfBoundsException exc) {
                     // Points outside the extent should return null
                     result.add(null);
                 }
