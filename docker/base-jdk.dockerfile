@@ -23,7 +23,8 @@ FROM openjdk:${debian_buster_image_tag}
 ARG shared_workspace=/opt/workspace
 ARG python_version=3.7.12
 
-RUN mkdir -p ${shared_workspace}
+RUN mkdir -p ${shared_workspace} && \
+    apt install -y curl
 RUN cd /usr/bin && \
     curl -O https://www.python.org/ftp/python/${python_version}/Python-${python_version}.tar.xz && \
     tar -xf Python-${python_version}.tar.xz && cd Python-${python_version} && ./configure --with-ensurepip=install && make -j 8 &&\
