@@ -205,7 +205,9 @@ object Catalog {
     function[RS_AsGeoTiff](),
     function[RS_AsArcGrid](),
     function[RS_Width](),
-    function[RS_Height]()
+    function[RS_Height](),
+    function[RS_ScaleX](),
+    function[RS_ScaleY]()
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(
