@@ -1067,21 +1067,28 @@ Format: `ST_HausdorffDistance(g1: geometry, g2: geometry, densityFrac)`
 Since: `v1.5.0`
 
 Example:
-```sql
-SELECT ST_HausdorffDistance(g1, g2, 0.1)
-```
-
-Input: `g1: POINT (0.0 1.0), g2: LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)`
-
-Output: `5.0990195135927845`
 
 ```sql
-SELECT ST_HausdorffDistance(ST_GeomFromText(), ST_GeomFromText())
+SELECT ST_HausdorffDistance(ST_GeomFromWKT('POINT (0.0 1.0)'), ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)'), 0.1)
 ```
 
-Input: `g1: POLYGON Z((1 0 1, 1 1 2, 2 1 5, 2 0 1, 1 0 1)), g2: POLYGON Z((4 0 4, 6 1 4, 6 4 9, 6 1 3, 4 0 4))`
+Output: 
 
-Output: `5.0`
+```
+5.0990195135927845
+```
+
+Example:
+
+```sql
+SELECT ST_HausdorffDistance(ST_GeomFromText('POLYGON Z((1 0 1, 1 1 2, 2 1 5, 2 0 1, 1 0 1))'), ST_GeomFromText('POLYGON Z((4 0 4, 6 1 4, 6 4 9, 6 1 3, 4 0 4))'))
+```
+
+Output: 
+
+```
+5.0
+```
 
 ## ST_InteriorRingN
 
