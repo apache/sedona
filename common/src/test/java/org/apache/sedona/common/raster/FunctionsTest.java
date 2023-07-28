@@ -68,6 +68,15 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
+    public void testPixelAsPoint() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 123, -230, 8);
+        Geometry actualPoint = PixelFunctions.getPixelAsPoint(emptyRaster, 0, 0);
+        Coordinate coordinates = actualPoint.getCoordinate();
+        assertEquals(coordinates.x, 123, 1e-9);
+        assertEquals(coordinates.y, -230, 1e-9);
+    }
+
+    @Test
     public void values() throws TransformException {
         // The function 'value' is implemented using 'values'.
         // These test only cover bits not already covered by tests for 'value'

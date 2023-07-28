@@ -1,3 +1,36 @@
+## Pixel Functions
+
+### RS_PixelAsPoint
+
+Introduction: Returns a point geometry of the specified pixel's upper-left corner.
+
+!!!Note
+    If the pixel coordinates specified do not exist in the raster (out of bounds), RS_PixelAsPoint throws an IllegalArgumentException.
+
+Format: `RS_PixelAsPoint(raster: Raster, colX: int, rowY: int)`
+
+Since: `1.5.0`
+
+Spark SQL examples:
+
+```sql
+SELECT ST_AsText(RS_PixelAsPoint(raster, 1, 0)) from rasters
+```
+
+Output: 
+```
+POINT (123.19, -12)
+```
+
+```sql
+SELECT ST_AsText(RS_PixelAsPoint(raster, 6, 1)) from rasters
+```
+
+Output:
+```
+IllegalArgumentException: Specified pixel coordinates do not lie in the raster
+```
+
 ## Raster Accessors
 
 ### RS_Height

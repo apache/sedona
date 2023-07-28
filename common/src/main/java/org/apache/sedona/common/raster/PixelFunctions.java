@@ -18,14 +18,21 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridEnvelope2D;
+import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.DirectPosition2D;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.opengis.coverage.PointOutsideCoverageException;
 import org.opengis.geometry.DirectPosition;
+import org.opengis.metadata.spatial.PixelOrientation;
 import org.opengis.referencing.operation.TransformException;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,9 +42,24 @@ import java.util.stream.DoubleStream;
 
 public class PixelFunctions
 {
+    private static GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
     public static Double value(GridCoverage2D rasterGeom, Geometry geometry, int band) throws TransformException
     {
         return values(rasterGeom, Collections.singletonList(geometry), band).get(0);
+    }
+
+    public static Geometry getPixelAsPoint(GridCoverage2D raster, int colX, int rowY) throws TransformException {
+        GridGeometry2D gridGeometry2D = raster.getGridGeometry();
+        GridEnvelope2D gridEnvelope2D = gridGeometry2D.getGridRange2D();
+        GridCoordinates2D gridCoordinates2D = new GridCoordinates2D(colX, rowY);
+        if (gridEnvelope2D.contains(gridCoordinates2D)) {
+            Point2D point2D = gridGeometry2D.getGridToCRS2D(PixelOrientation.UPPER_LEFT).transform(gridCoordinates2D, null);
+            DirectPosition2D directPosition2D = new DirectPosition2D(gridGeometry2D.getCoordinateReferenceSystem2D(), point2D.getX(), point2D.getY());
+            Coordinate pointCoord = new Coordinate(directPosition2D.getX(), directPosition2D.getY());
+            return GEOMETRY_FACTORY.createPoint(pointCoord);
+        }else {
+            throw new IllegalArgumentException("Specified pixel coordinates do not lie in the raster");
+        }
     }
 
     public static List<Double> values(GridCoverage2D rasterGeom, List<Geometry> geometries, int band) throws TransformException {
