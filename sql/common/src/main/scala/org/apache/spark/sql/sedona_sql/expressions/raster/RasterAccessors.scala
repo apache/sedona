@@ -57,7 +57,6 @@ case class RS_Height(inputExpressions: Seq[Expression]) extends InferredExpressi
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
-<<<<<<< HEAD
 }
 
 
@@ -72,6 +71,4 @@ case class RS_ScaleY(inputExpressions: Seq[Expression]) extends InferredExpressi
     copy(inputExpressions = newChildren)
   }
 }
-=======
-}
->>>>>>> sedona-master
+
