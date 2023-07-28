@@ -53,6 +53,16 @@ public class RasterAccessors
         return raster.getNumSampleDimensions();
     }
 
+    public static int getWidth(GridCoverage2D raster) {
+        return raster.getGridGeometry().getGridRange().getSpan(0);
+    }
+
+    public static int getHeight(GridCoverage2D raster) {
+        return raster.getGridGeometry().getGridRange().getSpan(1);
+    }
+
+
+
     public static Geometry envelope(GridCoverage2D raster) throws FactoryException {
         Envelope2D envelope2D = raster.getEnvelope2D();
 

@@ -43,6 +43,12 @@ public class RasterAccessorsTest extends RasterTestBase
         assertEquals(1, RasterAccessors.numBands(oneBandRaster));
         assertEquals(4, RasterAccessors.numBands(multiBandRaster));
     }
+    @Test
+    public void testWidthAndHeight() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 10, 20, 0, 0, 8);
+        assertEquals(20, RasterAccessors.getHeight(emptyRaster));
+        assertEquals(10, RasterAccessors.getWidth(emptyRaster));
+    }
 
     @Test
     public void testSrid() throws FactoryException {
