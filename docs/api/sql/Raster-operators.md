@@ -20,7 +20,7 @@ Output:
 
 ### RS_ScaleX
 
-Introduction: Returns the pixel width of the raster in map units.
+Introduction: Returns the pixel width of the raster in CRS units.
 !!!Note
     RS_ScaleX attempts to get an Affine transform on the grid in order to return scaleX (See [World File](https://en.wikipedia.org/wiki/World_file) for more details). If the transform on the geometry is not an Affine transform, RS_ScaleX will throw an UnsupportedException:
     ```
@@ -43,7 +43,7 @@ Output:
 
 ### RS_ScaleY
 
-Introduction: Returns the pixel height of the raster in map units.
+Introduction: Returns the pixel height of the raster in CRS units.
 !!!Note
     RS_ScaleY attempts to get an Affine transform on the grid in order to return scaleX (See [World File](https://en.wikipedia.org/wiki/World_file) for more details). If the transform on the geometry is not an Affine transform, RS_ScaleY will throw an UnsupportedException:
     ```
