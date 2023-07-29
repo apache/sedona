@@ -15,6 +15,8 @@ package org.apache.sedona.common.raster;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
+import org.geotools.data.DataSourceException;
+import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -30,11 +32,15 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 public class RasterTestBase {
     String arc = "NCOLS 2\nNROWS 2\nXLLCORNER 378922\nYLLCORNER 4072345\nCELLSIZE 30\nNODATA_VALUE 0\n0 1 2 3\n";
+
+    String resourceFolder = System.getProperty("user.dir") + "/../core/src/test/resources/";
+
     GridCoverage2D oneBandRaster;
     GridCoverage2D multiBandRaster;
     byte[] geoTiff;
@@ -100,5 +106,11 @@ public class RasterTestBase {
             }
         }
         return factory.create("test", image, new Envelope2D(DefaultGeographicCRS.WGS84, 0, 0, 10, 10));
+    }
+
+    GridCoverage2D rasterFromGeoTiff(String filePath) throws IOException {
+        File geoTiffFile = new File(filePath);
+        GridCoverage2D raster = new GeoTiffReader(geoTiffFile).read(null);
+        return raster;
     }
 }
