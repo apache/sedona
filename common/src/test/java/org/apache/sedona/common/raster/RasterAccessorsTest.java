@@ -68,6 +68,16 @@ public class RasterAccessorsTest extends RasterTestBase
     }
 
     @Test
+    public void testUpperLeftY() throws FactoryException {
+        GridCoverage2D gridCoverage2D = RasterConstructors.makeEmptyRaster(1, 3, 4, 1,2, 5);
+        double upperLeftY = RasterAccessors.getUpperLeftY(gridCoverage2D);
+        assertEquals(2, upperLeftY, 0.1d);
+
+        gridCoverage2D = RasterConstructors.makeEmptyRaster(10, 7, 8, 5, 6, 9);
+        upperLeftY = RasterAccessors.getUpperLeftY(gridCoverage2D);
+        assertEquals(6, upperLeftY, 0.1d);    }
+
+    @Test
     public void testMetaData()
             throws FactoryException
     {
