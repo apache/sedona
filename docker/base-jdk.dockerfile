@@ -52,10 +52,10 @@ ARG shared_workspace=/opt/workspace
 # RUN export JAVA_HOME
 
 RUN apt-get update && \
-    apt-get install -y openjdk-11-jdk ca-certificates-java && \
+    apt-get install -y openjdk-8-jdk ca-certificates-java && \
     apt-get clean && \
     update-ca-certificates -f
-ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
 RUN export JAVA_HOME
 ENV SHARED_WORKSPACE=${shared_workspace}
 
