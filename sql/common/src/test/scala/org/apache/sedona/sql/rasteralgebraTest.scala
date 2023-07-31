@@ -410,6 +410,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expected, result, 1e12)
     }
 
+    it("Passed RS_UpperLeftY") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_UpperLeftY(RS_FromGeoTiff(content))").first().getDouble(0)
+      val expected: Double = 4021262.7487925636
+      assertEquals(expected, result, 1e8)
+    }
+
     it("Passed RS_Metadata") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val result = df.selectExpr("RS_Metadata(RS_FromGeoTiff(content))").first().getSeq(0)
