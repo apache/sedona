@@ -502,5 +502,19 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       raster = df.collect().head.getAs[GridCoverage2D](0)
       assert(raster.getNumSampleDimensions == 2)
     }
+
+    it("Passed RS_ScaleX with raster") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_ScaleX(RS_FromGeoTiff(content))").first().getDouble(0)
+      val expected: Double = 72.32861272132695
+      assertEquals(expected, result, 1e-9)
+    }
+
+    it("Passed RS_ScaleY with raster") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_ScaleY(RS_FromGeoTiff(content))").first().getDouble(0)
+      val expected: Double = -72.32861272132695
+      assertEquals(expected, result, 1e-9)
+    }
   }
 }

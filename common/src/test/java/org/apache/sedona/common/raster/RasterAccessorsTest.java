@@ -75,7 +75,20 @@ public class RasterAccessorsTest extends RasterTestBase
 
         gridCoverage2D = RasterConstructors.makeEmptyRaster(10, 7, 8, 5, 6, 9);
         upperLeftY = RasterAccessors.getUpperLeftY(gridCoverage2D);
-        assertEquals(6, upperLeftY, 0.1d);    }
+        assertEquals(6, upperLeftY, 0.1d);    
+    }
+
+    @Test
+    public void testScaleX() throws UnsupportedOperationException, FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 10, 15, 0, 0, 1, 2, 0, 0, 0);
+        assertEquals(1, RasterAccessors.getScaleX(emptyRaster), 1e-9);
+    }
+
+    @Test
+    public void testScaleY() throws UnsupportedOperationException, FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 10, 15, 0, 0, 1, 2, 0, 0, 0);
+        assertEquals(-2, RasterAccessors.getScaleY(emptyRaster), 1e-9);
+    }
 
     @Test
     public void testMetaData()
