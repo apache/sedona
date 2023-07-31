@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-FROM apache/spark-py:v3.3.2
+FROM junhao/base-jdk
 
 # -- Layer: Apache Spark
 
@@ -39,7 +39,7 @@ RUN apt-get update -y && \
     mkdir /opt/spark/logs && \
     rm spark.tgz && \
     # -- Copy sedona jars to Spark jars
-    curl https://dlcdn.apache.org/sedona/${sedona_version}/apache-sedona-${sedona_version}-bin.tar.gz -o sedona.tar.gz && \
+RUN curl https://dlcdn.apache.org/sedona/${sedona_version}/apache-sedona-${sedona_version}-bin.tar.gz -o sedona.tar.gz && \
     tar -xf sedona.tar.gz && \
     mv apache-sedona-${sedona_version}-bin/* /${SPARK_HOME}/jars/ && \
     rm -r apache-sedona-${sedona_version}-bin sedona.tar.gz && \
