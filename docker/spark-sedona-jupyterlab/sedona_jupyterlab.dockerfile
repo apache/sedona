@@ -26,7 +26,7 @@ COPY docker/spark-sedona-jupyterlab/requirements.txt /opt/requirements.txt
 COPY binder/* /opt/workspace/examples/
 
 RUN apt-get update -y && \
-    apt-get install -y python3-pip && \
+    apt-get install -y python3-pip curl && \
     pip3 install --upgrade pip
 RUN pip3 install -r /opt/requirements.txt
 RUN curl https://dlcdn.apache.org/sedona/${sedona_version}/apache-sedona-${sedona_version}-bin.tar.gz -o sedona.tar.gz && \
