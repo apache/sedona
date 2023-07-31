@@ -18,6 +18,26 @@ Output:
 512
 ```
 
+### RS_UpperLeftX
+
+Introduction: Returns the X coordinate of the upper-left corner of the raster.
+
+Format: `RS_UpperLeftX(raster: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_UpperLeftX(raster) FROM rasters
+```
+
+Output:
+
+```
+5
+```
+
 ### RS_Width
 
 Introduction: Returns the width of the raster.
