@@ -39,10 +39,9 @@ RUN apt-get update -y && \
     mkdir /opt/spark/logs && \
     rm spark.tgz && \
     # -- Copy sedona jars to Spark jars
-RUN curl https://dlcdn.apache.org/sedona/${sedona_version}/apache-sedona-${sedona_version}-bin.tar.gz -o sedona.tar.gz && \
-    tar -xf sedona.tar.gz && \
-    mv apache-sedona-${sedona_version}-bin/* ${SPARK_HOME}/jars/ && \
-    rm -r apache-sedona-${sedona_version}-bin sedona.tar.gz && \
+RUN curl https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.0_2.12/1.4.1/sedona-spark-shaded-3.0_2.12-1.4.1.jar && \
+    # tar -xf spark.tgz && \
+    mv sedona-spark-shaded-3.0_2.12-1.4.1.jar $SPARK_HOME && \
     # -- Copy geotools-wrapper jars to Spark jars
     curl https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/${geotools_wrapper_version}/geotools-wrapper-${geotools_wrapper_version}.jar -o geotools-wrapper-${geotools_wrapper_version}.jar && \
     mv geotools-wrapper-${geotools_wrapper_version}.jar ${SPARK_HOME}/jars/
