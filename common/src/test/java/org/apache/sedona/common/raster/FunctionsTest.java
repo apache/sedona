@@ -22,7 +22,6 @@ import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
-import java.awt.image.Raster;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
