@@ -41,10 +41,13 @@ RUN apt-get update -y && \
     # -- Copy sedona jars to Spark jars
 RUN curl https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.0_2.12/1.4.1/sedona-spark-shaded-3.0_2.12-1.4.1.jar -o sedona-spark-shaded-3.0_2.12-1.4.1.jar && \
     # tar -xf spark.tgz && \
+    mkdir -p ${SPARK_HOME}/python/pyspark/jars && \
     mv sedona-spark-shaded-3.0_2.12-1.4.1.jar ${SPARK_HOME}/jars/ && \
+    mv sedona-spark-shaded-3.0_2.12-1.4.1.jar ${SPARK_HOME}/python/pyspark/jars && \
     # -- Copy geotools-wrapper jars to Spark jars
     curl https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/${geotools_wrapper_version}/geotools-wrapper-${geotools_wrapper_version}.jar -o geotools-wrapper-${geotools_wrapper_version}.jar && \
-    mv geotools-wrapper-${geotools_wrapper_version}.jar ${SPARK_HOME}/jars/
+    mv geotools-wrapper-${geotools_wrapper_version}.jar ${SPARK_HOME}/jars/ && \
+    mv geotools-wrapper-${geotools_wrapper_version}.jar ${SPARK_HOME}/python/pyspark/jars
 
 # -- Runtime
 
