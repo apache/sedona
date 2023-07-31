@@ -38,6 +38,26 @@ Output:
 5
 ```
 
+### RS_UpperLeftY
+
+Introduction: Returns the Y coordinate of the upper-left corner of the raster.
+
+Format: `RS_UpperLeftY(raster: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_UpperLeftY(raster) FROM rasters
+```
+
+Output:
+
+```
+6
+```
+
 ### RS_Width
 
 Introduction: Returns the width of the raster.
