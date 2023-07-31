@@ -66,6 +66,11 @@ public class RasterAccessors
         return envelope2D.getMinX();
     }
 
+    public static double getUpperLeftY(GridCoverage2D raster) {
+        Envelope2D envelope2D = raster.getEnvelope2D();
+        return envelope2D.getMaxY();
+    }
+
     public static Geometry envelope(GridCoverage2D raster) throws FactoryException {
         Envelope2D envelope2D = raster.getEnvelope2D();
 
