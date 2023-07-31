@@ -21,6 +21,7 @@ ARG python_version=3.9
 RUN python_version=`echo ${python_version} | cut -d '.' -f 1-2`
 ARG sedona_version=1.4.1
 ARG geotools_wrapper_version=1.4.0-28.2
+ENV SPARK_HOME /opt/spark
 
 COPY docker/spark-sedona-jupyterlab/requirements.txt /opt/requirements.txt
 COPY binder/* /opt/workspace/examples/
@@ -32,11 +33,11 @@ RUN pip3 install -r /opt/requirements.txt
 RUN curl https://dlcdn.apache.org/sedona/${sedona_version}/apache-sedona-${sedona_version}-bin.tar.gz -o sedona.tar.gz && \
     tar -xf sedona.tar.gz && \
     # -- Copy sedona jars to PySpark jars
-    mv apache-sedona-${sedona_version}-bin/* /usr/local/lib/python${python_version}/dist-packages/pyspark/jars/ && \
+    mv apache-sedona-${sedona_version}-bin/* /${SPARK_HOME}/jars/  && \
     rm sedona.tar.gz && \
     # -- Copy geotools-wrapper jars to PySpark jars
     curl https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/${geotools_wrapper_version}/geotools-wrapper-${geotools_wrapper_version}.jar -o geotools-wrapper-${geotools_wrapper_version}.jar && \
-    mv geotools-wrapper-${geotools_wrapper_version}.jar /usr/local/lib/python${python_version}/dist-packages/pyspark/jars/ 
+    mv geotools-wrapper-${geotools_wrapper_version}.jar /${SPARK_HOME}/jars/  
 
 # -- Runtime
 
