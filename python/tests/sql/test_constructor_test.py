@@ -60,6 +60,12 @@ class TestConstructors(TestBase):
         polygon_df.show(10)
         assert polygon_df.count() == 100
 
+    def test_st_geom_from_ewkt(self):
+        input_df = self.spark.createDataFrame([("SRID=4269;LineString(1 2, 3 4)",)], ["ewkt"])
+        input_df.createOrReplaceTempView("input_ewkt")
+        line_df = self.spark.sql("select ST_LineFromText(ewkt) as geom from input_ewkt")
+        assert line_df.count() == 1
+
     def test_st_geom_from_wkt_3d(self):
         input_df = self.spark.createDataFrame([
             ("Point(21 52 87)",),
