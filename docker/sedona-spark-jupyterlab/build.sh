@@ -40,8 +40,14 @@ docker build \
     -f docker/spark-base.dockerfile \
     -t sedona/spark-base:${SPARK_VERSION} .
 
+# Check the exit code of the Docker build
+if [ $? -eq 1 ]; then
+  echo "Docker build failed. Exiting the script."
+  exit 1
+fi
+
 if [ "$SEDONA_VERSION" = "latest" ]; then
-    # Code to execute when SEDONA_VERSION is "SNAPSHOT"
+    # Code to execute when SEDONA_VERSION is "latest"
     mvn install -DskipTests  -Dspark=${SEDONA_SPARK_VERSION} -Dgeotools -Dscala=2.12
     docker build \
     --progress=plain \
@@ -49,8 +55,14 @@ if [ "$SEDONA_VERSION" = "latest" ]; then
     --build-arg sedona_spark_version="${SEDONA_SPARK_VERSION}" \
     -f docker/sedona-snapshot.dockerfile \
     -t sedona/sedona:${SEDONA_VERSION} .
+
+    # Check the exit code of the Docker build
+    if [ $? -eq 1 ]; then
+      echo "Docker build failed. Exiting the script."
+      exit 1
+    fi
 else
-    # Code to execute when SEDONA_VERSION is not "SNAPSHOT"
+    # Code to execute when SEDONA_VERSION is not "latest"
     docker build \
     --progress=plain \
     --build-arg spark_version="${SPARK_VERSION}" \
@@ -59,6 +71,11 @@ else
     --build-arg sedona_spark_version="${SEDONA_SPARK_VERSION}" \
     -f docker/sedona-release.dockerfile \
     -t sedona/sedona:${SEDONA_VERSION} .
+    # Check the exit code of the Docker build
+    if [ $? -eq 1 ]; then
+      echo "Docker build failed. Exiting the script."
+      exit 1
+    fi
 fi
 
 docker build \
@@ -66,3 +83,9 @@ docker build \
     --build-arg sedona_version="${SEDONA_VERSION}" \
     -f docker/sedona-spark-jupyterlab/sedona_jupyterlab.dockerfile \
     -t sedona/sedona_jupyterlab:${SEDONA_VERSION} .
+
+# Check the exit code of the Docker build
+if [ $? -eq 1 ]; then
+  echo "Docker build failed. Exiting the script."
+  exit 1
+fi

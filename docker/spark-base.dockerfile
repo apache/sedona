@@ -20,6 +20,9 @@ FROM ubuntu:22.04
 ARG shared_workspace=/opt/workspace
 ARG spark_version=3.3.2
 ARG hadoop_version=3
+ARG HADOOP_S3_VERSION=3.3.4
+ARG AWS_SDK_VERSION=1.12.402
+ARG SPARK_XML_VERSION=0.16.0
 
 # Set up envs
 ENV SHARED_WORKSPACE=${shared_workspace}
@@ -43,6 +46,13 @@ RUN curl https://archive.apache.org/dist/spark/spark-${spark_version}/spark-${sp
 RUN tar -xf spark.tgz && mv spark-${spark_version}-bin-hadoop${hadoop_version}/* ${SPARK_HOME}/
 RUN rm spark.tgz && rm -rf spark-${spark_version}-bin-hadoop${hadoop_version}
 RUN pip3 install pyspark==${spark_version}
+
+# Add S3 jars
+RUN curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_S3_VERSION}/hadoop-aws-${HADOOP_S3_VERSION}.jar -o ${SPARK_HOME}/jars/hadoop-aws-${HADOOP_S3_VERSION}.jar
+RUN curl https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/${AWS_SDK_VERSION}/aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar -o ${SPARK_HOME}/jars/aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar
+
+# Add spark-xml jar
+RUN curl https://repo1.maven.org/maven2/com/databricks/spark-xml_2.12/${SPARK_XML_VERSION}/spark-xml_2.12-${SPARK_XML_VERSION}.jar -o ${SPARK_HOME}/jars/spark-xml_2.12-${SPARK_XML_VERSION}.jar
 
 # Set up master IP address and executor memory
 RUN cp $SPARK_HOME/conf/spark-defaults.conf.template $SPARK_HOME/conf/spark-defaults.conf
