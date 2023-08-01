@@ -230,6 +230,26 @@ Output:
 POINT(40.7128 -74.006)
 ```
 
+## ST_GeomFromEWKT
+
+Introduction: Construct a Geometry from OGC Extended WKT
+
+Format:
+`ST_GeomFromEWKT (EWkt:string)`
+
+Since: `v1.5.0`
+
+SQL example:
+```sql
+SELECT ST_GeomFromEWKT('SRID=4269;POINT(40.7128 -74.0060)')
+```
+
+Output:
+
+```
+POINT(40.7128 -74.006)
+```
+
 ## ST_LineFromText
 
 Introduction: Construct a LineString from Text
