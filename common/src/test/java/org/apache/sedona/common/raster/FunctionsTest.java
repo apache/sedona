@@ -22,6 +22,7 @@ import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -71,6 +72,7 @@ public class FunctionsTest extends RasterTestBase {
         Coordinate coordinates = actualPoint.getCoordinate();
         assertEquals(123, coordinates.x, 1e-9);
         assertEquals(-230, coordinates.y, 1e-9);
+        assertEquals(0, actualPoint.getSRID());
     }
 
     @Test
@@ -80,15 +82,29 @@ public class FunctionsTest extends RasterTestBase {
         Coordinate coordinates = actualPoint.getCoordinate();
         assertEquals(139, coordinates.x, 1e-9);
         assertEquals(-262, coordinates.y, 1e-9);
+        assertEquals(0, actualPoint.getSRID());
     }
 
     @Test
-    public void testPixelAsPointRandom() throws FactoryException, TransformException {
-        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 5, 10, 123, -230, 8);
-        Geometry actualPoint = PixelFunctions.getPixelAsPoint(emptyRaster, 4, 1);
+    public void testPixelAsPointCustomSRIDPlanar() throws FactoryException, TransformException {
+        int srid = 3857;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, -123, 54, 5, 5, 3, 4, srid);
+        Geometry actualPoint = PixelFunctions.getPixelAsPoint(emptyRaster, 0, 0);
         Coordinate coordinates = actualPoint.getCoordinate();
-        assertEquals(155, coordinates.x, 1e-9);
-        assertEquals(-238, coordinates.y, 1e-9);
+        assertEquals(-123, coordinates.x, 1e-9);
+        assertEquals(54, coordinates.y, 1e-9);
+        assertEquals(srid, actualPoint.getSRID());
+    }
+
+    @Test
+    public void testPixelAsPointSRIDSpherical() throws FactoryException, TransformException {
+        int srid = 4326;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, -123, 54, 5, 10, 0, 0, srid);
+        Geometry actualPoint = PixelFunctions.getPixelAsPoint(emptyRaster, 1, 2);
+        Coordinate coordinates = actualPoint.getCoordinate();
+        assertEquals(-118, coordinates.x, 1e-9);
+        assertEquals(34, coordinates.y, 1e-9);
+        assertEquals(srid, actualPoint.getSRID());
     }
 
     @Test
@@ -97,9 +113,8 @@ public class FunctionsTest extends RasterTestBase {
         Exception e = assertThrows(IllegalArgumentException.class, () -> PixelFunctions.getPixelAsPoint(emptyRaster, 5, 1));
         String expectedMessage = "Specified pixel coordinates do not lie in the raster";
         assertEquals(expectedMessage, e.getMessage());
-
     }
-
+    
     @Test
     public void values() throws TransformException {
         // The function 'value' is implemented using 'values'.
