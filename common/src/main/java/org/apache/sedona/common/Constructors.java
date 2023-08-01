@@ -54,8 +54,8 @@ public class Constructors {
         if (index != -1) {
             int semicolonIndex = ewkt.indexOf(';', index);
             if (semicolonIndex != -1) {
-                SRID = Integer.parseInt(ewkt.substring(index + 5, semicolonIndex)); // Extract SRID
-                wkt = ewkt.substring(semicolonIndex + 1); // Extract the remains
+                SRID = Integer.parseInt(ewkt.substring(index + 5, semicolonIndex));
+                wkt = ewkt.substring(semicolonIndex + 1);
             }
             else {
                 throw new ParseException("Invalid EWKT string");
