@@ -88,7 +88,7 @@ public class FunctionsTest extends RasterTestBase {
     @Test
     public void testPixelAsPointCustomSRIDPlanar() throws FactoryException, TransformException {
         int srid = 3857;
-        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, -123, 54, 5, 5, 3, 4, srid);
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -123, 54, 5, 5, 0, 0, srid);
         Geometry actualPoint = PixelFunctions.getPixelAsPoint(emptyRaster, 0, 0);
         Coordinate coordinates = actualPoint.getCoordinate();
         assertEquals(-123, coordinates.x, 1e-9);
@@ -114,7 +114,7 @@ public class FunctionsTest extends RasterTestBase {
         String expectedMessage = "Specified pixel coordinates do not lie in the raster";
         assertEquals(expectedMessage, e.getMessage());
     }
-    
+
     @Test
     public void values() throws TransformException {
         // The function 'value' is implemented using 'values'.
