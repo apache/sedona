@@ -16,10 +16,10 @@
 #
 
 ARG sedona_version=1.4.1
-FROM sedona/sedona-release:${sedona_version}
+FROM sedona/sedona:${sedona_version}
 
 # Install Python dependencies
-COPY docker/spark-sedona-jupyterlab/requirements.txt /opt/requirements.txt
+COPY docker/sedona-spark-jupyterlab/requirements.txt /opt/requirements.txt
 RUN pip3 install -r /opt/requirements.txt
 
 COPY binder/*.ipynb /opt/workspace/examples/

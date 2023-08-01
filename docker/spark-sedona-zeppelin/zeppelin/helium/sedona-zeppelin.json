@@ -1,8 +1,0 @@
-{
-    "type": "VISUALIZATION",
-    "name": "sedona-zeppelin",
-    "description": "Zeppelin visualization support for Sedona",
-    "artifact": "/opt/zeppelin/sedona_mapviz_widget",
-    "license": "BSD-2-Clause",
-    "icon": "<i class='fa fa-globe'></i>"
-  }

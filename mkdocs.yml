@@ -17,6 +17,7 @@ nav:
         - Install Sedona Python: setup/install-python.md
         - Install Sedona R: api/rdocs
         - Install Sedona-Zeppelin: setup/zeppelin.md
+        - Play Sedona in Docker: setup/docker.md
         - Install on Databricks: setup/databricks.md
         - Install on AWS EMR: setup/emr.md
         - Set up Spark cluster: setup/cluster.md

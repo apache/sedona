@@ -19,9 +19,9 @@
 
 # -- Software Stack Version
 
-SPARK_VERSION="3.4.1"
+SPARK_VERSION=$1
 HADOOP_VERSION="3"
-SEDONA_VERSION="1.4.1"
+SEDONA_VERSION=$2
 GEOTOOLS_WRAPPER_VERSION="1.4.0-28.2"
 
 lower_version=$(echo -e $SPARK_VERSION"\n3.4" | sort -V | head -n1)
@@ -31,29 +31,40 @@ else
     SEDONA_SPARK_VERSION=3.0
 fi
 
-# -- Building the Images
+# -- Building the images
 
 docker build \
     --progress=plain \
     --build-arg spark_version="${SPARK_VERSION}" \
     --build-arg hadoop_version="${HADOOP_VERSION}" \
     -f docker/spark-base.dockerfile \
-    -t sedona/spark-base:latest \
     -t sedona/spark-base:${SPARK_VERSION} .
 
-docker build \
+if [ "$SEDONA_VERSION" = "latest" ]; then
+    # Code to execute when SEDONA_VERSION is "SNAPSHOT"
+    # mvn install -DskipTests  -Dspark=${SEDONA_SPARK_VERSION} -Dgeotools -Dscala=2.12
+    docker build \
+    --progress=plain \
+    --build-arg spark_version="${SPARK_VERSION}" \
+    --build-arg sedona_spark_version="${SEDONA_SPARK_VERSION}" \
+    -f docker/sedona-snapshot.dockerfile \
+    -t sedona/sedona:${SEDONA_VERSION} .
+else
+    # Code to execute when SEDONA_VERSION is not "SNAPSHOT"
+    docker build \
     --progress=plain \
     --build-arg spark_version="${SPARK_VERSION}" \
     --build-arg sedona_version="${SEDONA_VERSION}" \
     --build-arg geotools_wrapper_version="${GEOTOOLS_WRAPPER_VERSION}" \
     --build-arg sedona_spark_version="${SEDONA_SPARK_VERSION}" \
     -f docker/sedona-release.dockerfile \
-    -t sedona/sedona-release:latest \
-    -t sedona/sedona-release:${SEDONA_VERSION} .
+    -t sedona/sedona:${SEDONA_VERSION} .
+fi
+
+
 
 docker build \
     --progress=plain \
     --build-arg sedona_version="${SEDONA_VERSION}" \
-    -f docker/spark-sedona-jupyterlab/sedona_jupyterlab.dockerfile \
-    -t sedona/sedona_jupyterlab:latest \
+    -f docker/sedona-spark-jupyterlab/sedona_jupyterlab.dockerfile \
     -t sedona/sedona_jupyterlab:${SEDONA_VERSION} .

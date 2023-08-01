@@ -18,9 +18,20 @@
 ARG spark_version=3.3.2
 FROM sedona/spark-base:${spark_version}
 
+# -- Layer: Apache Spark
+ARG sedona_spark_version=3.0
+
+
+ADD spark-shaded/target/sedona-spark-shaded-*.jar $SPARK_HOME/jars/
+
+# Install Sedona Python
+RUN mkdir /opt/sedona
+RUN mkdir /opt/sedona/python
+COPY ./python /opt/sedona/python/
+WORKDIR /opt/sedona/python
+RUN pip3 install shapely==1.8.4
+RUN pip3 install .
+
 # -- Runtime
 
-ARG spark_worker_web_ui=8081
-
-EXPOSE ${spark_worker_web_ui}
-CMD bin/spark-class org.apache.spark.deploy.worker.Worker spark://${SPARK_MASTER_HOST}:${SPARK_MASTER_PORT} >> logs/spark-worker.out
+WORKDIR ${SPARK_HOME}

@@ -1,0 +1,53 @@
+name: Scala and Java build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
+
+env:
+  MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
+      
+jobs:
+  build:
+    strategy:
+      fail-fast: true
+      matrix:
+        os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
+        include:
+          - spark: 3.4.1
+            sedona: 1.4.1
+            geotools: 1.4.0-28.2
+          - spark: 3.4.1
+            sedona: latest
+            geotools: 1.4.0-28.2
+          - spark: 3.3.2
+            sedona: latest
+            geotools: 1.4.0-28.2
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.jdk }}
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.7'
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    - env:
+        SPARK_VERSION: ${{ matrix.spark }}
+        SEDONA_VERSION: ${{ matrix.sedona }}
+        GEOTOOLS_WRAPPER_VERSION: ${{ matrix.geotools }}
+      run: ./docker/spark-sedona-jupyterlab/build.sh $SPARK_VERSION $SEDONA_VERSION $GEOTOOLS_WRAPPER_VERSION

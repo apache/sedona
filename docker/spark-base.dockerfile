@@ -34,10 +34,8 @@ ENV PYSPARK_DRIVER_PYTHON jupyter
 VOLUME ${shared_workspace}
 
 # Set up OS libraries
-
-# GCC is needed for cross-platform Python package compilation
 RUN apt-get update
-RUN apt-get install -y openjdk-11-jdk-headless curl python3-pip
+RUN apt-get install -y openjdk-19-jdk-headless curl python3-pip maven
 RUN pip3 install --upgrade pip && pip3 install pipenv
 
 # Download Spark jar and set up PySpark
@@ -46,11 +44,15 @@ RUN tar -xf spark.tgz && mv spark-${spark_version}-bin-hadoop${hadoop_version}/*
 RUN rm spark.tgz && rm -rf spark-${spark_version}-bin-hadoop${hadoop_version}
 RUN pip3 install pyspark==${spark_version}
 
+# Set up master IP address and executor memory
+RUN cp $SPARK_HOME/conf/spark-defaults.conf.template $SPARK_HOME/conf/spark-defaults.conf
+RUN echo "spark.driver.memory 4g" >> $SPARK_HOME/conf/spark-defaults.conf
+# This is to exhaust all memory on the local machine
+RUN echo "spark.executor.memory 4g" >> $SPARK_HOME/conf/spark-defaults.conf
+
 # The following libraries are needed when build this image with GeoPandas on Apple chip mac
 RUN apt-get install -y gdal-bin libgdal-dev
 
-# Required by Spark
-# RUN apt-get install -y procps
 
 # Required if run the cluster mode
 RUN apt-get install -y openssh-client openssh-server
