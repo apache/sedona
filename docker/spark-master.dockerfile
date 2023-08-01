@@ -16,7 +16,7 @@
 #
 
 ARG spark_version=3.3.2
-FROM kartikeyhadiya/spark-base:${spark_version}
+FROM sedona/spark-base:${spark_version}
 
 # -- Runtime
 

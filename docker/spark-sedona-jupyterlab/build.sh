@@ -19,49 +19,41 @@
 
 # -- Software Stack Version
 
-PYTHON_VERSION="3.9.17"
-SPARK_VERSION="3.3.2"
+SPARK_VERSION="3.4.1"
 HADOOP_VERSION="3"
-SEDONA_VERSION="1.4.0"
+SEDONA_VERSION="1.4.1"
 GEOTOOLS_WRAPPER_VERSION="1.4.0-28.2"
+
+lower_version=$(echo -e $SPARK_VERSION"\n3.4" | sort -V | head -n1)
+if [ $lower_version = "3.4" ]; then
+    SEDONA_SPARK_VERSION=3.4
+else
+    SEDONA_SPARK_VERSION=3.0
+fi
 
 # -- Building the Images
 
 docker build \
-    --no-cache \
-    --build-arg python_version="${PYTHON_VERSION}" \
-    -f docker/base-jdk.dockerfile \
-    -t kartikeyhadiya/base-jdk:latest .
-
-docker build \
-    --no-cache \
+    --progress=plain \
     --build-arg spark_version="${SPARK_VERSION}" \
     --build-arg hadoop_version="${HADOOP_VERSION}" \
-    --build-arg sedona_version="${SEDONA_VERSION}" \
-    --build-arg geotools_wrapper_version="${GEOTOOLS_WRAPPER_VERSION}" \
     -f docker/spark-base.dockerfile \
-    -t kartikeyhadiya/spark-base:latest \
-    -t kartikeyhadiya/spark-base:${SPARK_VERSION} .
+    -t sedona/spark-base:latest \
+    -t sedona/spark-base:${SPARK_VERSION} .
 
 docker build \
-    --no-cache \
+    --progress=plain \
     --build-arg spark_version="${SPARK_VERSION}" \
-    -f docker/spark-master.dockerfile \
-    -t kartikeyhadiya/spark-master:latest \
-    -t kartikeyhadiya/spark-master:${SPARK_VERSION} .
-
-docker build \
-    --no-cache \
-    --build-arg spark_version="${SPARK_VERSION}" \
-    -f docker/spark-worker.dockerfile \
-    -t kartikeyhadiya/spark-worker:latest \
-    -t kartikeyhadiya/spark-worker:${SPARK_VERSION} .
-
-docker build \
-    --no-cache \
     --build-arg sedona_version="${SEDONA_VERSION}" \
     --build-arg geotools_wrapper_version="${GEOTOOLS_WRAPPER_VERSION}" \
-    --build-arg python_version="${PYTHON_VERSION}" \
+    --build-arg sedona_spark_version="${SEDONA_SPARK_VERSION}" \
+    -f docker/sedona-release.dockerfile \
+    -t sedona/sedona-release:latest \
+    -t sedona/sedona-release:${SEDONA_VERSION} .
+
+docker build \
+    --progress=plain \
+    --build-arg sedona_version="${SEDONA_VERSION}" \
     -f docker/spark-sedona-jupyterlab/sedona_jupyterlab.dockerfile \
-    -t kartikeyhadiya/sedona_jupyterlab:latest \
-    -t kartikeyhadiya/sedona_jupyterlab:${SEDONA_VERSION} .
+    -t sedona/sedona_jupyterlab:latest \
+    -t sedona/sedona_jupyterlab:${SEDONA_VERSION} .

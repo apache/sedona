@@ -15,34 +15,26 @@
 # limitations under the License.
 #
 
-FROM kartikeyhadiya/spark-base:3.3.2
-
-ARG python_version=3.9
-RUN python_version=`echo ${python_version} | cut -d '.' -f 1-2`
 ARG sedona_version=1.4.1
-ARG geotools_wrapper_version=1.4.0-28.2
-ENV SPARK_HOME /opt/spark
+FROM sedona/sedona-release:${sedona_version}
 
+# Install Python dependencies
 COPY docker/spark-sedona-jupyterlab/requirements.txt /opt/requirements.txt
-COPY binder/* /opt/workspace/examples/
-
-RUN apt-get update -y && \
-    apt-get install -y python3-pip curl && \
-    pip3 install --upgrade pip
 RUN pip3 install -r /opt/requirements.txt
-# RUN curl https://dlcdn.apache.org/sedona/${sedona_version}/apache-sedona-${sedona_version}-bin.tar.gz -o sedona.tar.gz && \
-#     tar -xf sedona.tar.gz && \
-#     # -- Copy sedona jars to PySpark jars
-#     mv apache-sedona-${sedona_version}-bin/* ${SPARK_HOME}/jars/  && \
-#     rm sedona.tar.gz && \
-#     # -- Copy geotools-wrapper jars to PySpark jars
-#     curl https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/${geotools_wrapper_version}/geotools-wrapper-${geotools_wrapper_version}.jar -o geotools-wrapper-${geotools_wrapper_version}.jar && \
-#     mv geotools-wrapper-${geotools_wrapper_version}.jar ${SPARK_HOME}/jars/  
 
-# -- Runtime
+COPY binder/*.ipynb /opt/workspace/examples/
+COPY binder/*.py /opt/workspace/examples/
+COPY binder/data /opt/workspace/examples/data
+
+# Add the master IP address to all notebooks
+RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i 's/config = SedonaContext.builder()/config = SedonaContext.builder().master(\\"spark:\/\/localhost:7077\\")/' {} +
+# Delete packages configured by the notebooks
+RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/spark\.jars\.packages/d' {} +
+RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/org\.apache\.sedona:sedona-spark-shaded-/d' {} +
+RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/org\.datasyslab:geotools-wrapper:/d' {} +
 
 EXPOSE 8888
 
 WORKDIR ${SHARED_WORKSPACE}
 
-CMD jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=
+CMD service ssh start && ${SPARK_HOME}/sbin/start-all.sh && jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=

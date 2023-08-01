@@ -18,9 +18,19 @@
 ARG spark_version=3.3.2
 FROM sedona/spark-base:${spark_version}
 
+# -- Layer: Apache Spark
+ARG sedona_version=1.4.1
+ARG geotools_wrapper_version=1.4.0-28.2
+ARG sedona_spark_version=3.0
+
+# Download Sedona
+RUN curl https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-${sedona_spark_version}_2.12/${sedona_version}/sedona-spark-shaded-${sedona_spark_version}_2.12-${sedona_version}.jar -o $SPARK_HOME/jars/sedona-spark-shaded-${sedona_spark_version}_2.12-${sedona_version}.jar
+RUN curl https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/${geotools_wrapper_version}/geotools-wrapper-${geotools_wrapper_version}.jar -o $SPARK_HOME/jars/geotools-wrapper-${geotools_wrapper_version}.jar 
+
+# Install Sedona Python
+RUN pip3 install shapely==1.8.4
+RUN pip3 install apache-sedona==${sedona_version}
+
 # -- Runtime
 
-ARG spark_worker_web_ui=8081
-
-EXPOSE ${spark_worker_web_ui}
-CMD bin/spark-class org.apache.spark.deploy.worker.Worker spark://${SPARK_MASTER_HOST}:${SPARK_MASTER_PORT} >> logs/spark-worker.out
+WORKDIR ${SPARK_HOME}

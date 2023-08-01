@@ -15,40 +15,55 @@
 # limitations under the License.
 #
 
-FROM junhao/base-jdk
+FROM ubuntu:22.04
 
-# -- Layer: Apache Spark
-
+ARG shared_workspace=/opt/workspace
 ARG spark_version=3.3.2
 ARG hadoop_version=3
-ARG sedona_version=1.4.1
-ARG geotools_wrapper_version=1.4.0-28.2
 
+# Set up envs
+ENV SHARED_WORKSPACE=${shared_workspace}
 ENV SPARK_HOME /opt/spark
-ENV SPARK_MASTER_HOST spark-master
+RUN mkdir ${SPARK_HOME}
+ENV SPARK_MASTER_HOST localhost
 ENV SPARK_MASTER_PORT 7077
 ENV PYTHONPATH=$SPARK_HOME/python
 ENV PYSPARK_PYTHON python3
 ENV PYSPARK_DRIVER_PYTHON jupyter
 
-RUN apt-get update -y && \
-    apt-get install -y curl && \
-    curl https://archive.apache.org/dist/spark/spark-${spark_version}/spark-${spark_version}-bin-hadoop${hadoop_version}.tgz -o spark.tgz && \
-    tar -xf spark.tgz && \
-    mv spark-${spark_version}-bin-hadoop${hadoop_version} $SPARK_HOME && \
-    mkdir /opt/spark/logs && \
-    rm spark.tgz
-    # -- Copy sedona jars to Spark jars
-RUN curl https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.0_2.12/1.4.1/sedona-spark-shaded-3.0_2.12-1.4.1.jar -o sedona-spark-shaded-3.0_2.12-1.4.1.jar && \
-    # tar -xf spark.tgz && \
-    mkdir -p ${SPARK_HOME}/python/pyspark/jars && \
-    cp sedona-spark-shaded-3.0_2.12-1.4.1.jar ${SPARK_HOME}/jars/ && \
-    mv sedona-spark-shaded-3.0_2.12-1.4.1.jar ${SPARK_HOME}/python/pyspark/jars && \
-    # -- Copy geotools-wrapper jars to Spark jars
-    curl https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/${geotools_wrapper_version}/geotools-wrapper-${geotools_wrapper_version}.jar -o geotools-wrapper-${geotools_wrapper_version}.jar && \
-    cp geotools-wrapper-${geotools_wrapper_version}.jar ${SPARK_HOME}/jars/ && \
-    mv geotools-wrapper-${geotools_wrapper_version}.jar ${SPARK_HOME}/python/pyspark/jars
+VOLUME ${shared_workspace}
 
-# -- Runtime
+# Set up OS libraries
 
-WORKDIR ${SPARK_HOME}
+# GCC is needed for cross-platform Python package compilation
+RUN apt-get update
+RUN apt-get install -y openjdk-11-jdk-headless curl python3-pip
+RUN pip3 install --upgrade pip && pip3 install pipenv
+
+# Download Spark jar and set up PySpark
+RUN curl https://archive.apache.org/dist/spark/spark-${spark_version}/spark-${spark_version}-bin-hadoop${hadoop_version}.tgz -o spark.tgz
+RUN tar -xf spark.tgz && mv spark-${spark_version}-bin-hadoop${hadoop_version}/* ${SPARK_HOME}/
+RUN rm spark.tgz && rm -rf spark-${spark_version}-bin-hadoop${hadoop_version}
+RUN pip3 install pyspark==${spark_version}
+
+# The following libraries are needed when build this image with GeoPandas on Apple chip mac
+RUN apt-get install -y gdal-bin libgdal-dev
+
+# Required by Spark
+# RUN apt-get install -y procps
+
+# Required if run the cluster mode
+RUN apt-get install -y openssh-client openssh-server
+RUN systemctl enable ssh
+
+# Enable nopassword ssh
+RUN ssh-keygen -t rsa -f ~/.ssh/id_rsa -N ""
+RUN cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+RUN chmod 600 ~/.ssh/authorized_keys
+
+# Expose Spark ports: master UI, worker UI, and job UI
+EXPOSE 8080
+EXPOSE 8081
+EXPOSE 4040
+
+CMD bash

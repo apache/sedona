@@ -11,7 +11,7 @@ mkdocs="*"
 pytest-cov = "*"
 
 [packages]
-pandas="*"
+pandas="1.3.5"
 shapely="==1.8.4"
 geopandas="==0.11.1"
 pyspark="==3.3.2"
