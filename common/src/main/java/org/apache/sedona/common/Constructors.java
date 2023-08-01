@@ -43,6 +43,31 @@ public class Constructors {
         return new WKTReader(geometryFactory).read(wkt);
     }
 
+    public static Geometry geomFromEWKT(String ewkt) throws ParseException {
+        if (ewkt == null) {
+            return null;
+        }
+        int SRID = 0;
+        String wkt = ewkt;
+        
+        int index = ewkt.indexOf("SRID=");
+        if (index != -1) {
+            int semicolonIndex = ewkt.indexOf(';', index);
+            if (semicolonIndex != -1) {
+                SRID = Integer.parseInt(ewkt.substring(index + 5, semicolonIndex)); // Extract SRID
+                wkt = ewkt.substring(semicolonIndex + 1); // Extract the remains
+            }
+            else {
+                throw new ParseException("Invalid EWKT string");
+            }
+        }
+        else {
+            SRID = 0;
+        }
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), SRID);
+        return new WKTReader(geometryFactory).read(wkt);
+    }
+
     public static Geometry geomFromWKB(byte[] wkb) throws ParseException {
         return new WKBReader().read(wkb);
     }
