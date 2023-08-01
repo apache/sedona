@@ -94,6 +94,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult.getSRID == 4326)
     }
 
+    it("passed st_geomfromewkt") {
+      val df = sparkSession.sql("SELECT 'SRID=4269;POINT(0.0 1.0)' AS wkt").select(ST_GeomFromWKT("wkt"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry]
+      assert(actualResult.toText == "POINT (0 1)")
+      assert(actualResult.getSRID == 4326)
+    }
+
     it("passed st_geomfromtext") {
       val df = sparkSession.sql("SELECT 'POINT(0.0 1.0)' AS wkt").select(ST_GeomFromText("wkt"))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
