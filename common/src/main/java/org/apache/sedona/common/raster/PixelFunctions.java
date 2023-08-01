@@ -23,10 +23,8 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.DirectPosition2D;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
+import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.*;
 import org.opengis.coverage.PointOutsideCoverageException;
 import org.opengis.geometry.DirectPosition;
 import org.opengis.metadata.spatial.PixelOrientation;
@@ -52,10 +50,19 @@ public class PixelFunctions
         GridGeometry2D gridGeometry2D = raster.getGridGeometry();
         GridEnvelope2D gridEnvelope2D = gridGeometry2D.getGridRange2D();
         GridCoordinates2D gridCoordinates2D = new GridCoordinates2D(colX, rowY);
+        int srid = 0;
+        String srs = CRS.toSRS(raster.getCoordinateReferenceSystem2D(), true);
+        if (!"Generic cartesian 2D".equalsIgnoreCase(srs)) {
+           srid = Integer.parseInt(srs);
+        }
         if (gridEnvelope2D.contains(gridCoordinates2D)) {
             Point2D point2D = gridGeometry2D.getGridToCRS2D(PixelOrientation.UPPER_LEFT).transform(gridCoordinates2D, null);
             DirectPosition2D directPosition2D = new DirectPosition2D(gridGeometry2D.getCoordinateReferenceSystem2D(), point2D.getX(), point2D.getY());
             Coordinate pointCoord = new Coordinate(directPosition2D.getX(), directPosition2D.getY());
+            if (srid != 0) {
+                GeometryFactory factory = new GeometryFactory(new PrecisionModel(), srid);
+                return factory.createPoint(pointCoord);
+            }
             return GEOMETRY_FACTORY.createPoint(pointCoord);
         }else {
             throw new IllegalArgumentException("Specified pixel coordinates do not lie in the raster");
