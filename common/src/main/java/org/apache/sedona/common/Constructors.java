@@ -61,9 +61,6 @@ public class Constructors {
                 throw new ParseException("Invalid EWKT string");
             }
         }
-        else {
-            SRID = 0;
-        }
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), SRID);
         return new WKTReader(geometryFactory).read(wkt);
     }
