@@ -42,7 +42,7 @@ docker build \
 
 if [ "$SEDONA_VERSION" = "latest" ]; then
     # Code to execute when SEDONA_VERSION is "SNAPSHOT"
-    # mvn install -DskipTests  -Dspark=${SEDONA_SPARK_VERSION} -Dgeotools -Dscala=2.12
+    mvn install -DskipTests  -Dspark=${SEDONA_SPARK_VERSION} -Dgeotools -Dscala=2.12
     docker build \
     --progress=plain \
     --build-arg spark_version="${SPARK_VERSION}" \
@@ -60,8 +60,6 @@ else
     -f docker/sedona-release.dockerfile \
     -t sedona/sedona:${SEDONA_VERSION} .
 fi
-
-
 
 docker build \
     --progress=plain \
