@@ -17,75 +17,32 @@
 # limitations under the License.
 #
 
-# -- Software Stack Version
-
 SPARK_VERSION=$1
-HADOOP_VERSION="3"
 SEDONA_VERSION=$2
-GEOTOOLS_WRAPPER_VERSION="1.4.0-28.2"
-
-lower_version=$(echo -e $SPARK_VERSION"\n3.4" | sort -V | head -n1)
-if [ $lower_version = "3.4" ]; then
-    SEDONA_SPARK_VERSION=3.4
-else
-    SEDONA_SPARK_VERSION=3.0
-fi
-
-# -- Building the images
-
-docker build \
-    --progress=plain \
-    --build-arg spark_version="${SPARK_VERSION}" \
-    --build-arg hadoop_version="${HADOOP_VERSION}" \
-    -f docker/spark-base.dockerfile \
-    -t sedona/spark-base:${SPARK_VERSION} .
-
-# Check the exit code of the Docker build
-if [ $? -eq 1 ]; then
-  echo "Docker build failed. Exiting the script."
-  exit 1
-fi
+BUILD_MODE=$3
 
 if [ "$SEDONA_VERSION" = "latest" ]; then
-    # Code to execute when SEDONA_VERSION is "latest"
+    # The compilation must take place outside Docker to avoid unnecessary maven packages
     mvn install -DskipTests  -Dspark=${SEDONA_SPARK_VERSION} -Dgeotools -Dscala=2.12
-    docker build \
-    --progress=plain \
-    --build-arg spark_version="${SPARK_VERSION}" \
-    --build-arg sedona_spark_version="${SEDONA_SPARK_VERSION}" \
-    -f docker/sedona-snapshot.dockerfile \
-    -t sedona/sedona:${SEDONA_VERSION} .
-
-    # Check the exit code of the Docker build
-    if [ $? -eq 1 ]; then
-      echo "Docker build failed. Exiting the script."
-      exit 1
-    fi
-else
-    # Code to execute when SEDONA_VERSION is not "latest"
-    docker build \
-    --progress=plain \
-    --build-arg spark_version="${SPARK_VERSION}" \
-    --build-arg sedona_version="${SEDONA_VERSION}" \
-    --build-arg geotools_wrapper_version="${GEOTOOLS_WRAPPER_VERSION}" \
-    --build-arg sedona_spark_version="${SEDONA_SPARK_VERSION}" \
-    -f docker/sedona-release.dockerfile \
-    -t sedona/sedona:${SEDONA_VERSION} .
-    # Check the exit code of the Docker build
-    if [ $? -eq 1 ]; then
-      echo "Docker build failed. Exiting the script."
-      exit 1
-    fi
 fi
 
-docker build \
+# -- Building the image
+
+if [ -z "$BUILD_MODE" ] || [ "$BUILD_MODE" = "local" ]; then
+    # If local, build the image for the local environment
+    docker build \
     --progress=plain \
+    --build-arg spark_version="${SPARK_VERSION}" \
     --build-arg sedona_version="${SEDONA_VERSION}" \
     -f docker/sedona-spark-jupyterlab/sedona_jupyterlab.dockerfile \
-    -t sedona/sedona_jupyterlab:${SEDONA_VERSION} .
-
-# Check the exit code of the Docker build
-if [ $? -eq 1 ]; then
-  echo "Docker build failed. Exiting the script."
-  exit 1
+    -t sedona/sedona-jupyterlab:${SEDONA_VERSION} .
+else
+    # If release, build the image for cross-platform
+    docker buildx build --platform linux/amd64,linux/arm64 \
+    --progress=plain \
+    --output type=registry \
+    --build-arg spark_version="${SPARK_VERSION}" \
+    --build-arg sedona_version="${SEDONA_VERSION}" \
+    -f docker/sedona-spark-jupyterlab/sedona_jupyterlab.dockerfile \
+    -t drjiayu/sedona-jupyterlab:${SEDONA_VERSION} .
 fi

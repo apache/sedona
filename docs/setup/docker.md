@@ -6,25 +6,49 @@ Dockerfiles for Apache Sedona with JupyterLab and 1 master node and 1 worker nod
 
 ### Pull the image from DockerHub
 
+Format:
+
+```bash
+docker pull drjiayu/sedona-jupyterlab:<sedona_version>
+```
+
+Example 1: Pull the latest image of Sedona master branch
+
+```bash
+docker pull drjiayu/sedona-jupyterlab:latest
+```
+
+Example 2: Pull the image of a specific Sedona release
+
+```bash
+docker pull drjiayu/sedona-jupyterlab:1.4.1
+```
+
 ### Start the container
 
 Format:
 
 ```bash
-docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 sedona/sedona_jupyterlab:<sedona_version>
+docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 drjiayu/sedona-jupyterlab:<sedona_version>
 ```
 
-Example:
+Example 1:
 
 ```bash
-docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 sedona/sedona_jupyterlab:latest
+docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 drjiayu/sedona-jupyterlab:latest
+```
+
+Example 2:
+
+```bash
+docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 drjiayu/sedona-jupyterlab:1.4.1
 ```
 
 This command will bind the container's ports 8888, 8080, 8081, 4040 to the host's ports 8888, 8080, 8081, 4040 respectively.
 
 ### Start coding
 
-Open your browser and go to http://localhost:8888/ to start coding with Sedona.
+Open your browser and go to [http://localhost:8888/](http://localhost:8888/) to start coding with Sedona.
 
 ### Notes
 
@@ -42,7 +66,7 @@ Requirements: docker ([How?](https://docs.docker.com/engine/install/))
 Format: 
 
 ```bash
-./docker/sedona-spark-jupyterlab/build.sh <spark_version> <sedona_version>
+./docker/sedona-spark-jupyterlab/build.sh <spark_version> <sedona_version> <build_mode>
 ```
 
 Example:
@@ -51,6 +75,8 @@ Example:
 ./docker/sedona-spark-jupyterlab/build.sh 3.4.1 1.4.1
 ```
 
+`build_mode` is optional. If its value is not given or is `local`, the script will build the image locally. Otherwise, it will start a cross-platform compilation and push images directly to DockerHub.
+
 ### Build the image against the latest Sedona master
 
 Requirements: docker ([How?](https://docs.docker.com/engine/install/)), JDK <= 19, maven3
@@ -58,7 +84,7 @@ Requirements: docker ([How?](https://docs.docker.com/engine/install/)), JDK <= 1
 Format:
 
 ```bash
-./docker/sedona-spark-jupyterlab/build.sh <spark_version> latest
+./docker/sedona-spark-jupyterlab/build.sh <spark_version> latest <build_mode>
 ```
 
 Example: 
@@ -66,6 +92,8 @@ Example:
 ```bash
 ./docker/sedona-spark-jupyterlab/build.sh 3.4.1 latest
 ```
+
+`build_mode` is optional. If its value is not given or is `local`, the script will build the image locally. Otherwise, it will start a cross-platform compilation and push images directly to DockerHub.
 
 ### Notes
 
@@ -84,3 +112,19 @@ This docker image can only be built against Sedona 1.4.1+ and Spark 3.0+
 * Spark job UI: http://localhost:4040
 * Spark master web UI: http://localhost:8080/
 * Spark web UI: http://localhost:8081/
+
+## How to push to DockerHub
+
+Format:
+
+```bash
+docker login
+./docker/sedona-spark-jupyterlab/build.sh <spark_version> <sedona_version> release
+```
+
+Example:
+
+```bash
+docker login
+./docker/sedona-spark-jupyterlab/build.sh 3.4.1 1.4.1 release
+```
