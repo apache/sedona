@@ -53,7 +53,7 @@ public class GeometryFunctionsTest extends RasterTestBase {
 
     @Test
     public void testConvexHullFromRasterFile() throws FactoryException, TransformException, IOException {
-        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");//RasterConstructors.makeEmptyRaster(1, 5, 10, 156, -132, 5, 10, 3, 5, 0);
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
         Geometry convexHull = GeometryFunctions.convexHull(raster);
         Coordinate[] coordinates = convexHull.getCoordinates();
         Coordinate expectedCoordOne = new Coordinate(-13095817.809482181, 4021262.7487925636);
