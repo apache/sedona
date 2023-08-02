@@ -241,7 +241,7 @@ Since: `v1.5.0`
 
 SQL example:
 ```sql
-SELECT ST_GeomFromEWKT('SRID=4269;POINT(40.7128 -74.0060)')
+SELECT ST_AsText(ST_GeomFromEWKT('SRID=4269;POINT(40.7128 -74.0060)'))
 ```
 
 Output:
