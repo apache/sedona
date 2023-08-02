@@ -31,6 +31,7 @@ __all__ = [
     "ST_GeomFromText",
     "ST_GeomFromWKB",
     "ST_GeomFromWKT",
+    "ST_GeomFromEWKT",
     "ST_LineFromText",
     "ST_LineStringFromText",
     "ST_Point",
@@ -131,6 +132,17 @@ def ST_GeomFromWKT(wkt: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_constructor_function("ST_GeomFromWKT", wkt)
+
+@validate_argument_types
+def ST_GeomFromEWKT(ewkt: ColumnOrName) -> Column:
+    """Generate a geometry column from a OGC Extended Well-Known Text (WKT) string column.
+
+    :param ewkt: OGC Extended WKT string column to generate from.
+    :type ewkt: ColumnOrName
+    :return: Geometry column representing the EWKT string.
+    :rtype: Column
+    """
+    return _call_constructor_function("ST_GeomFromEWKT", ewkt)
 
 
 @validate_argument_types

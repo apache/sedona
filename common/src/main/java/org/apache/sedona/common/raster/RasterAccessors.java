@@ -63,6 +63,15 @@ public class RasterAccessors
         return raster.getGridGeometry().getGridRange().getSpan(1);
     }
 
+    public static double getUpperLeftX(GridCoverage2D raster) {
+        Envelope2D envelope2D = raster.getEnvelope2D();
+        return envelope2D.getMinX();
+    }
+
+    public static double getUpperLeftY(GridCoverage2D raster) {
+        Envelope2D envelope2D = raster.getEnvelope2D();
+        return envelope2D.getMaxY();
+    }
 
     public static double getScaleX(GridCoverage2D raster) {
         return getAffineTransform(raster).getScaleX();
@@ -80,7 +89,6 @@ public class RasterAccessors
         }
         return (AffineTransform2D) crsTransform;
     }
-
 
     public static Geometry envelope(GridCoverage2D raster) throws FactoryException {
         Envelope2D envelope2D = raster.getEnvelope2D();

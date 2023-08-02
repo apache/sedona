@@ -93,6 +93,29 @@ class constructorTestScala extends TestBaseScala {
       assert(thrown.getMessage == "Unknown geometry type: NOT (line 1)")
     }
 
+    it("Passed ST_GeomFromEWKT") {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      var polygonDf = sparkSession.sql("select ST_GeomFromEWKT(polygontable._c0) as countyshape from polygontable")
+      assert(polygonDf.count() == 100)
+      val nullGeom = sparkSession.sql("select ST_GeomFromEWKT(null)")
+      assert(nullGeom.first().isNullAt(0))
+      val pointDf = sparkSession.sql("select ST_GeomFromEWKT('SRID=4269;POINT(-71.064544 42.28787)')")
+      assert(pointDf.count() == 1)
+      // Fail on wrong input type
+      intercept[Exception] {
+        sparkSession.sql("SELECT ST_GeomFromEWKT(0)").collect()
+      }
+    }
+
+    it("Passed ST_GeomFromEWKT invalid input") {
+      // Fail on non wkt strings
+      val thrown = intercept[Exception] {
+        sparkSession.sql("SELECT ST_GeomFromEWKT('not wkt')").collect()
+      }
+      assert(thrown.getMessage == "Unknown geometry type: NOT (line 1)")
+    }
+
     it("Passed ST_LineFromText") {
       val geometryDf = Seq("Linestring(1 2, 3 4)").map(wkt => Tuple1(wkt)).toDF("geom")
       geometryDf.createOrReplaceTempView("linetable")

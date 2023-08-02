@@ -91,6 +91,19 @@ case class ST_GeomFromWKT(inputExpressions: Seq[Expression])
   }
 }
 
+/**
+  * Return a Geometry from a OGC Extended WKT string
+  *
+  * @param inputExpressions This function takes a geometry string. The string format must be OGC Extended Well-Known text (EWKT) representation.
+  */
+case class ST_GeomFromEWKT(inputExpressions: Seq[Expression])
+  extends InferredExpression(Constructors.geomFromEWKT _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 
 /**
   * Return a Geometry from a WKT string

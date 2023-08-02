@@ -37,6 +37,27 @@ public class ConstructorsTest {
         ParseException invalid = assertThrows(ParseException.class, () -> Constructors.geomFromWKT("not valid", 0));
         assertEquals("Unknown geometry type: NOT (line 1)", invalid.getMessage());
     }
+
+    @Test
+    public void geomFromEWKT() throws ParseException {
+        assertNull(Constructors.geomFromEWKT(null));
+
+        Geometry geom = Constructors.geomFromEWKT("POINT (1 1)");
+        assertEquals(0, geom.getSRID());
+        assertEquals("POINT (1 1)", geom.toText());
+
+        geom = Constructors.geomFromEWKT("SRID=4269; POINT (1 1)");
+        assertEquals(4269, geom.getSRID());
+        assertEquals("POINT (1 1)", geom.toText());
+
+        geom = Constructors.geomFromEWKT("SRID=4269;POINT (1 1)");
+        assertEquals(4269, geom.getSRID());
+        assertEquals("POINT (1 1)", geom.toText());
+
+        ParseException invalid = assertThrows(ParseException.class, () -> Constructors.geomFromEWKT("not valid"));
+        assertEquals("Unknown geometry type: NOT (line 1)", invalid.getMessage());
+    }
+
     @Test
     public void mLineFromWKT() throws ParseException {
         assertNull(Constructors.mLineFromText(null, 0));

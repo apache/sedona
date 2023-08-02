@@ -149,6 +149,23 @@ public class ConstructorTest extends TestBase{
     }
 
     @Test
+    public void testGeomFromEWKT() {
+        List<Row> data = new ArrayList<>();
+        data.add(Row.of("SRID=123;MULTILINESTRING((1 2, 3 4), (4 5, 6 7))", "multiline", 0L));
+
+        Table geomTable = createTextTable(data, multilinestringColNames);
+        geomTable = geomTable
+                .select(call(Constructors.ST_GeomFromEWKT.class.getSimpleName(),
+                        $(multilinestringColNames[0]))
+                        .as(multilinestringColNames[0]), $(multilinestringColNames[1]));
+        String result = first(geomTable)
+                .getFieldAs(0)
+                .toString();
+        String expectedGeom = "MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))";
+        assertEquals(expectedGeom, result);
+    }
+
+    @Test
     public void testGeomFromText() {
         List<Row> data = createPolygonWKT(testDataSize);
         Table wktTable = createTextTable(data, polygonColNames);
