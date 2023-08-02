@@ -96,8 +96,10 @@ public class RasterConstructors
         // Create a new empty raster
         WritableRaster raster = RasterFactory.createBandedRaster(DataBuffer.TYPE_DOUBLE, widthInPixel, heightInPixel, numBand, null);
         MathTransform transform = new AffineTransform2D(scaleX, skewY, skewX, -scaleY, upperLeftX + scaleX / 2, upperLeftY - scaleY / 2);
+        GridGeometry2D gridGeometry = new GridGeometry2D(new GridEnvelope2D(0, 0, widthInPixel, heightInPixel), transform, crs);
+        ReferencedEnvelope referencedEnvelope = new ReferencedEnvelope(gridGeometry.getEnvelope2D());
         // Create a new coverage
         GridCoverageFactory gridCoverageFactory = CoverageFactoryFinder.getGridCoverageFactory(null);
-        return gridCoverageFactory.create("genericCoverage", raster, crs, transform, null, null, null, null, null);
+        return gridCoverageFactory.create("genericCoverage", raster, referencedEnvelope);
     }
 }
