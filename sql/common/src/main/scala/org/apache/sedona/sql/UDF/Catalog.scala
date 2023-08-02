@@ -43,6 +43,7 @@ object Catalog {
     function[ST_GeomFromText](0),
     function[ST_LineFromText](),
     function[ST_GeomFromWKT](0),
+    function[ST_GeomFromEWKT](),
     function[ST_GeomFromWKB](),
     function[ST_GeomFromGeoJSON](),
     function[ST_GeomFromGML](),

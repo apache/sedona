@@ -32,6 +32,7 @@ public class Catalog {
                 new Constructors.ST_PolygonFromText(),
                 new Constructors.ST_PolygonFromEnvelope(),
                 new Constructors.ST_GeomFromWKT(),
+                new Constructors.ST_GeomFromEWKT(),
                 new Constructors.ST_GeomFromText(),
                 new Constructors.ST_GeomFromWKB(),
                 new Constructors.ST_GeomFromGeoJSON(),
