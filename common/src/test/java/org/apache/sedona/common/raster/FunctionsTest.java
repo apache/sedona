@@ -22,6 +22,7 @@ import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -112,6 +113,17 @@ public class FunctionsTest extends RasterTestBase {
         Exception e = assertThrows(IndexOutOfBoundsException.class, () -> PixelFunctions.getPixelAsPoint(emptyRaster, 6, 1));
         String expectedMessage = "Specified pixel coordinates (6, 1) do not lie in the raster";
         assertEquals(expectedMessage, e.getMessage());
+    }
+
+    @Test
+    public void testPixelAsPointFromRasterFile() throws IOException, TransformException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+        Geometry actualPoint = PixelFunctions.getPixelAsPoint(raster, 1, 1);
+        Coordinate coordinate = actualPoint.getCoordinate();
+        double expectedX = -13095817.809482181;
+        double expectedY = 4021262.7487925636;
+        assertEquals(expectedX, coordinate.getX(), 0.2d);
+        assertEquals(expectedY, coordinate.getY(), 0.2d);
     }
 
     @Test
