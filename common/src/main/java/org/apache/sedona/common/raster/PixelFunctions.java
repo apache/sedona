@@ -49,7 +49,7 @@ public class PixelFunctions
     public static Geometry getPixelAsPoint(GridCoverage2D raster, int colX, int rowY) throws TransformException {
         GridGeometry2D gridGeometry2D = raster.getGridGeometry();
         GridEnvelope2D gridEnvelope2D = gridGeometry2D.getGridRange2D();
-        GridCoordinates2D gridCoordinates2D = new GridCoordinates2D(colX, rowY);
+        GridCoordinates2D gridCoordinates2D = new GridCoordinates2D(colX - 1, rowY - 1);
         int srid = 0;
         String srs = CRS.toSRS(raster.getCoordinateReferenceSystem2D(), true);
         if (!"Generic cartesian 2D".equalsIgnoreCase(srs)) {
@@ -65,7 +65,7 @@ public class PixelFunctions
             }
             return GEOMETRY_FACTORY.createPoint(pointCoord);
         }else {
-            throw new IllegalArgumentException("Specified pixel coordinates do not lie in the raster");
+            throw new IndexOutOfBoundsException(String.format("Specified pixel coordinates (%d, %d) do not lie in the raster", colX, rowY));
         }
     }
 
