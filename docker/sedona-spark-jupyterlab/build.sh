@@ -23,7 +23,7 @@ BUILD_MODE=$3
 
 if [ "$SEDONA_VERSION" = "latest" ]; then
     # The compilation must take place outside Docker to avoid unnecessary maven packages
-    mvn install -DskipTests  -Dspark=${SEDONA_SPARK_VERSION} -Dgeotools -Dscala=2.12
+    mvn clean install -DskipTests  -Dspark=${SEDONA_SPARK_VERSION} -Dgeotools -Dscala=2.12
 fi
 
 # -- Building the image
