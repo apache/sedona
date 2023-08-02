@@ -445,7 +445,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val skewX = 0.0
       val skewY = 0.0
       val srid = 0
-      result = sparkSession.sql(s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize, $cellSize, $skewX, $skewY, $srid))").first().getSeq(0)
+      result = sparkSession.sql(s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize, -$cellSize, $skewX, $skewY, $srid))").first().getSeq(0)
       assertEquals(numBands, result(9), 0.001)
     }
 

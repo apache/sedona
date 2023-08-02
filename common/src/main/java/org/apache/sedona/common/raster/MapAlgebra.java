@@ -18,25 +18,15 @@
  */
 package org.apache.sedona.common.raster;
 
-import com.sun.media.imageioimpl.common.BogusColorSpace;
-import org.geotools.coverage.CoverageFactoryFinder;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.GridCoverageFactory;
 
 import javax.media.jai.RasterFactory;
-
 import java.awt.Point;
-import java.awt.Transparency;
-import java.awt.color.ColorSpace;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
-import java.util.Arrays;
 
 public class MapAlgebra
 {
@@ -134,7 +124,7 @@ public class MapAlgebra
         System.arraycopy(originalSampleDimensions, 0, sampleDimensions, 0, originalSampleDimensions.length);
         sampleDimensions[numBand - 1] = new GridSampleDimension("band" + numBand);
         // Construct a GridCoverage2D with the copied image.
-        return createCompatibleGridCoverage2D(gridCoverage2D, wr, sampleDimensions);
+        return RasterUtils.create(wr, gridCoverage2D.getGridGeometry(), sampleDimensions);
     }
 
     private static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, double[] bandValues) {
@@ -155,20 +145,6 @@ public class MapAlgebra
             }
         }
         // Create a new GridCoverage2D with the copied image
-        return createCompatibleGridCoverage2D(gridCoverage2D, wr, gridCoverage2D.getSampleDimensions());
-    }
-
-    private static GridCoverage2D createCompatibleGridCoverage2D(GridCoverage2D gridCoverage2D, WritableRaster wr, GridSampleDimension[] bands) {
-        int rasterDataType = wr.getDataBuffer().getDataType();
-        int numBand = wr.getNumBands();
-        final ColorSpace cs = new BogusColorSpace(numBand);
-        final int[] nBits = new int[numBand];
-        Arrays.fill(nBits, DataBuffer.getDataTypeSize(rasterDataType));
-        ColorModel colorModel =
-                new ComponentColorModel(cs, nBits, false, true, Transparency.OPAQUE, rasterDataType);
-        final RenderedImage image = new BufferedImage(colorModel, wr, false, null);
-        GridCoverageFactory gridCoverageFactory = CoverageFactoryFinder.getGridCoverageFactory(null);
-        return gridCoverageFactory.create(gridCoverage2D.getName(), image, gridCoverage2D.getCoordinateReferenceSystem(),
-                gridCoverage2D.getGridGeometry().getGridToCRS(), bands, null, null);
+        return RasterUtils.create(wr, gridCoverage2D.getGridGeometry(), gridCoverage2D.getSampleDimensions());
     }
 }
