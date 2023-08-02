@@ -23,12 +23,6 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
-case class RS_Envelope(inputExpressions: Seq[Expression]) extends InferredExpression(GeometryFunctions.envelope _) {
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
 case class RS_NumBands(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.numBands _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

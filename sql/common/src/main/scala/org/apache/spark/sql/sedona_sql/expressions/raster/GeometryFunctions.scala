@@ -28,3 +28,10 @@ case class RS_ConvexHull(inputExpressions: Seq[Expression]) extends InferredExpr
     copy(inputExpressions = newChildren)
   }
 }
+
+case class RS_Envelope(inputExpressions: Seq[Expression]) extends InferredExpression(GeometryFunctions.envelope _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
