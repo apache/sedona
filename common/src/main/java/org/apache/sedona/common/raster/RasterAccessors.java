@@ -18,9 +18,9 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.GridGeometry2D;
-import org.geotools.coverage.processing.operation.Affine;
+import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
@@ -31,9 +31,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
 
-import java.awt.image.RenderedImage;
 import java.util.Optional;
 
 public class RasterAccessors
@@ -64,30 +62,21 @@ public class RasterAccessors
     }
 
     public static double getUpperLeftX(GridCoverage2D raster) {
-        Envelope2D envelope2D = raster.getEnvelope2D();
-        return envelope2D.getMinX();
+        AffineTransform2D affine = RasterUtils.getGDALAffineTransform(raster);
+        return affine.getTranslateX();
     }
 
     public static double getUpperLeftY(GridCoverage2D raster) {
-        Envelope2D envelope2D = raster.getEnvelope2D();
-        return envelope2D.getMaxY();
+        AffineTransform2D affine = RasterUtils.getGDALAffineTransform(raster);
+        return affine.getTranslateY();
     }
 
     public static double getScaleX(GridCoverage2D raster) {
-        return getAffineTransform(raster).getScaleX();
+        return RasterUtils.getGDALAffineTransform(raster).getScaleX();
     }
 
     public static double getScaleY(GridCoverage2D raster) {
-        return getAffineTransform(raster).getScaleY();
-    }
-
-    private static AffineTransform2D getAffineTransform(GridCoverage2D raster) throws UnsupportedOperationException {
-        GridGeometry2D gridGeometry2D = raster.getGridGeometry();
-        MathTransform crsTransform = gridGeometry2D.getGridToCRS2D();
-        if (!(crsTransform instanceof AffineTransform2D)) {
-            throw new UnsupportedOperationException("Only AffineTransform2D is supported");
-        }
-        return (AffineTransform2D) crsTransform;
+        return RasterUtils.getGDALAffineTransform(raster).getScaleY();
     }
 
     public static Geometry envelope(GridCoverage2D raster) throws FactoryException {
@@ -100,16 +89,16 @@ public class RasterAccessors
 
     /**
      * Returns the metadata of a raster as an array of doubles.
-     * @param raster
+     * @param raster the raster
      * @return double[] with the following values:
-     * 0: minX: upper left x
-     * 1: maxY: upper left y
+     * 0: upperLeftX: upper left x
+     * 1: upperLeftY: upper left y
      * 2: width: number of pixels on x axis
      * 3: height: number of pixels on y axis
      * 4: scaleX: pixel width
      * 5: scaleY: pixel height
-     * 6: shearX: skew on x axis
-     * 7: shearY: skew on y axis
+     * 6: skewX: skew on x axis
+     * 7: skewY: skew on y axis
      * 8: srid
      * 9: numBands
      * @throws FactoryException
@@ -117,23 +106,21 @@ public class RasterAccessors
     public static double[] metadata(GridCoverage2D raster)
             throws FactoryException
     {
-        RenderedImage image = raster.getRenderedImage();
-        // Georeference metadata
-        Envelope2D envelope2D = raster.getEnvelope2D();
-        MathTransform gridToCRS = raster.getGridGeometry().getGridToCRS2D();
-        if (gridToCRS instanceof AffineTransform2D) {
-            AffineTransform2D affine = (AffineTransform2D) gridToCRS;
+        // Get Geo-reference metadata
+        GridEnvelope2D gridRange = raster.getGridGeometry().getGridRange2D();
+        AffineTransform2D affine = RasterUtils.getGDALAffineTransform(raster);
 
-            // Get the affine parameters
-            double scaleX = affine.getScaleX();
-            double scaleY = affine.getScaleY();
-            double shearX = affine.getShearX();
-            double shearY = affine.getShearY();
-            return new double[] {envelope2D.getMinX(), envelope2D.getMaxY(), image.getWidth(), image.getHeight(), scaleX, scaleY, shearX, shearY, srid(raster), raster.getNumSampleDimensions()};
-        }
-        else {
-            // Handle the case where gridToCRS is not an AffineTransform2D
-            throw new UnsupportedOperationException("Only AffineTransform2D is supported");
-        }
+        // Get the affine parameters
+        double upperLeftX = affine.getTranslateX();
+        double upperLeftY = affine.getTranslateY();
+        double scaleX = affine.getScaleX();
+        double scaleY = affine.getScaleY();
+        double skewX = affine.getShearX();
+        double skewY = affine.getShearY();
+        return new double[] {
+                upperLeftX, upperLeftY,
+                gridRange.getWidth(), gridRange.getHeight(),
+                scaleX, scaleY, skewX, skewY,
+                srid(raster), raster.getNumSampleDimensions()};
     }
 }
