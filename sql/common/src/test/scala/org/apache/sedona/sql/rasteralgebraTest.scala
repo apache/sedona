@@ -541,6 +541,22 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
       assertEquals(expectedCoordOne.getX, coordinates(4).getX, 0.5d)
       assertEquals(expectedCoordOne.getY, coordinates(4).getY, 0.5d)
+
+    }
+
+    it("Passed RS_PixelAsPoint with raster") {
+      val widthInPixel = 5
+      val heightInPixel = 10
+      val upperLeftX = 123.19
+      val upperLeftY = -12
+      val cellSize = 4
+      val numBands = 2
+      val result = sparkSession.sql(s"SELECT RS_PixelAsPoint(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 2, 1)").first().getAs[Geometry](0);
+      val expectedX = 127.19
+      val expectedY = -12
+      val actualCoordinates = result.getCoordinate;
+      assertEquals(expectedX, actualCoordinates.x, 1e-5)
+      assertEquals(expectedY, actualCoordinates.y, 1e-5)
     }
   }
 }

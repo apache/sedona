@@ -24,6 +24,8 @@ import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.FactoryException;
 
+import java.io.IOException;
+
 import static org.junit.Assert.assertEquals;
 
 public class RasterAccessorsTest extends RasterTestBase
@@ -71,6 +73,14 @@ public class RasterAccessorsTest extends RasterTestBase
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 10, 20, 0, 0, 8);
         assertEquals(20, RasterAccessors.getHeight(emptyRaster));
         assertEquals(10, RasterAccessors.getWidth(emptyRaster));
+
+    }
+
+    @Test
+    public void testWidthAndHeightFromRasterFile() throws IOException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+        assertEquals(512, RasterAccessors.getWidth(raster));
+        assertEquals(517, RasterAccessors.getHeight(raster));
     }
 
     @Test
@@ -112,7 +122,7 @@ public class RasterAccessorsTest extends RasterTestBase
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 10, 15, 0, 0, 1, -2, 0, 0, 0);
         assertEquals(-2, RasterAccessors.getScaleY(emptyRaster), 1e-9);
     }
-
+    
     @Test
     public void testMetaData()
             throws FactoryException

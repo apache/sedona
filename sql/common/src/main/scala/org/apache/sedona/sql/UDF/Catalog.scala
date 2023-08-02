@@ -211,6 +211,7 @@ object Catalog {
     function[RS_UpperLeftY](),
     function[RS_ScaleX](),
     function[RS_ScaleY](),
+    function[RS_PixelAsPoint](),
     function[RS_ConvexHull]()
   )
 
