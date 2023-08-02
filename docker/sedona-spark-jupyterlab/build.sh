@@ -31,7 +31,6 @@ fi
 if [ -z "$BUILD_MODE" ] || [ "$BUILD_MODE" = "local" ]; then
     # If local, build the image for the local environment
     docker build \
-    --progress=plain \
     --build-arg spark_version="${SPARK_VERSION}" \
     --build-arg sedona_version="${SEDONA_VERSION}" \
     -f docker/sedona-spark-jupyterlab/sedona-jupyterlab.dockerfile \
