@@ -80,7 +80,7 @@ Format: `RS_MakeEmptyRaster(numBands:Int, width: Int, height: Int, upperleftX: D
 SQL example 1 (with 2 bands):
 
 ```sql
-SELECT RS_MakeEmptyRaster(2, 10, 10, 0.0, 0.0, 1.0) as raster
+SELECT RS_MakeEmptyRaster(2, 10, 10, 0.0, 0.0, 1.0)
 ```
 
 Output:
@@ -95,16 +95,16 @@ Output:
 SQL example 1 (with 2 bands, scale, skew, and SRID):
 
 ```sql
-SELECT RS_MakeEmptyRaster(2, 10, 10, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 4326) as raster
+SELECT RS_MakeEmptyRaster(2, 10, 10, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 4326)
 ```
 
 Output:
 ```
-+--------------------------------------------------------------+
-|rs_makeemptyraster(2, 10, 10, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0)|
-+--------------------------------------------------------------+
-|                                          GridCoverage2D["g...|
-+--------------------------------------------------------------+
++------------------------------------------------------------------+
+|rs_makeemptyraster(2, 10, 10, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 4326)|
++------------------------------------------------------------------+
+|                                              GridCoverage2D["g...|
++------------------------------------------------------------------+
 ```
 
 ## Load GeoTiff to Array[Double] format

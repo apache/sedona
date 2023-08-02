@@ -164,12 +164,12 @@ true
 
 Introduction: Returns the metadata of the raster as an array of double. The array contains the following values:
 
-- 0: upper left x coordinate of the raster, in terms of CRS units (the minimum x coordinate)
-- 1: upper left y coordinate of the raster, in terms of CRS units (the maximum y coordinate)
+- 0: upper left x coordinate of the raster, in terms of CRS units
+- 1: upper left y coordinate of the raster, in terms of CRS units
 - 2: width of the raster, in terms of pixels
 - 3: height of the raster, in terms of pixels
 - 4: width of a pixel, in terms of CRS units (scaleX)
-- 5: height of a pixel, in terms of CRS units (scaleY)
+- 5: height of a pixel, in terms of CRS units (scaleY), may be negative
 - 6: skew in x direction (rotation x)
 - 7: skew in y direction (rotation y)
 - 8: srid of the raster
