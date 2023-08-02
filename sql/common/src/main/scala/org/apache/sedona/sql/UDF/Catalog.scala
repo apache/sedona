@@ -43,6 +43,7 @@ object Catalog {
     function[ST_GeomFromText](0),
     function[ST_LineFromText](),
     function[ST_GeomFromWKT](0),
+    function[ST_GeomFromEWKT](),
     function[ST_GeomFromWKB](),
     function[ST_GeomFromGeoJSON](),
     function[ST_GeomFromGML](),
@@ -203,7 +204,13 @@ object Catalog {
     function[RS_Values](1),
     function[RS_Intersects](),
     function[RS_AsGeoTiff](),
-    function[RS_AsArcGrid]()
+    function[RS_AsArcGrid](),
+    function[RS_Width](),
+    function[RS_Height](),
+    function[RS_UpperLeftX](),
+    function[RS_UpperLeftY](),
+    function[RS_ScaleX](),
+    function[RS_ScaleY]()
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(

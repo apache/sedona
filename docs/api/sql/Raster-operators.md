@@ -1,3 +1,127 @@
+## Raster Accessors
+
+### RS_Height
+
+Introduction: Returns the height of the raster.
+
+Format: `RS_Height(raster: Raster)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_Height(raster) FROM rasters
+```
+
+Output:
+```
+512
+```
+
+### RS_ScaleX
+
+Introduction: Returns the pixel width of the raster in CRS units.
+!!!Note
+    RS_ScaleX attempts to get an Affine transform on the grid in order to return scaleX (See [World File](https://en.wikipedia.org/wiki/World_file) for more details). If the transform on the geometry is not an Affine transform, RS_ScaleX will throw an UnsupportedException:
+    ```
+    UnsupportedOperationException("Only AffineTransform2D is supported")
+    ```
+
+Format: `RS_ScaleX(raster: Raster)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_ScaleX(raster) FROM rasters
+```
+
+Output:
+```
+1
+```
+
+### RS_ScaleY
+
+Introduction: Returns the pixel height of the raster in CRS units.
+!!!Note
+    RS_ScaleY attempts to get an Affine transform on the grid in order to return scaleX (See [World File](https://en.wikipedia.org/wiki/World_file) for more details). If the transform on the geometry is not an Affine transform, RS_ScaleY will throw an UnsupportedException:
+    ```
+    UnsupportedOperationException("Only AffineTransform2D is supported")
+    ```
+
+Format: `RS_ScaleY(raster: Raster)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_ScaleY(raster) FROM rasters
+```
+
+Output:
+```
+-2
+```
+
+### RS_UpperLeftX
+
+Introduction: Returns the X coordinate of the upper-left corner of the raster.
+
+Format: `RS_UpperLeftX(raster: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_UpperLeftX(raster) FROM rasters
+```
+
+Output:
+
+```
+5
+```
+
+### RS_UpperLeftY
+
+Introduction: Returns the Y coordinate of the upper-left corner of the raster.
+
+Format: `RS_UpperLeftY(raster: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_UpperLeftY(raster) FROM rasters
+```
+
+Output:
+
+```
+6
+```
+
+### RS_Width
+
+Introduction: Returns the width of the raster.
+
+Format: `RS_Width(raster: Raster)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_Width(raster) FROM rasters
+```
+
+Output:
+```
+517
+```
+
 ## Raster based operators
 
 ### RS_Envelope

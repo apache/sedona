@@ -7,10 +7,15 @@ Format: `ST_Contains (A:geometry, B:geometry)`
 Since: `v1.2.0`
 
 SQL example:
+
 ```sql
-SELECT * 
-FROM pointdf 
-WHERE ST_Contains(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
+SELECT ST_Contains(ST_GeomFromWKT('POLYGON((175 150,20 40,50 60,125 100,175 150))'), ST_GeomFromWKT('POINT(174 149)'))
+```
+
+Output:
+
+```
+false
 ```
 
 ## ST_Crosses
@@ -22,10 +27,15 @@ Format: `ST_Crosses (A:geometry, B:geometry)`
 Since: `v1.5.0`
 
 SQL example:
+
 ```sql
-SELECT * 
-FROM pointdf 
-WHERE ST_Crosses(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
+SELECT ST_Crosses(ST_GeomFromWKT('POLYGON((1 1, 4 1, 4 4, 1 4, 1 1))'),ST_GeomFromWKT('POLYGON((2 2, 5 2, 5 5, 2 5, 2 2))'))
+```
+
+Output:
+
+```
+false
 ```
 
 ## ST_Disjoint
@@ -37,10 +47,15 @@ Format: `ST_Disjoint (A:geometry, B:geometry)`
 Since: `v1.2.1`
 
 SQL example:
+
 ```sql
-SELECT *
-FROM pointdf 
-WHERE ST_Disjoinnt(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
+SELECT ST_Disjoint(ST_GeomFromWKT('POLYGON((1 4, 4.5 4, 4.5 2, 1 2, 1 4))'),ST_GeomFromWKT('POLYGON((5 4, 6 4, 6 2, 5 2, 5 4))'))
+```
+
+Output:
+
+```
+true
 ```
 
 ## ST_Equals
@@ -52,10 +67,15 @@ Format: `ST_Equals (A:geometry, B:geometry)`
 Since: `v1.5.0`
 
 SQL example:
+
 ```sql
-SELECT * 
-FROM pointdf 
-WHERE ST_Equals(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
+SELECT ST_Equals(ST_GeomFromWKT('LINESTRING(0 0,10 10)'), ST_GeomFromWKT('LINESTRING(0 0,5 5,10 10)'))
+```
+
+Output:
+
+```
+true
 ```
 
 ## ST_Intersects
@@ -67,11 +87,17 @@ Format: `ST_Intersects (A:geometry, B:geometry)`
 Since: `v1.2.0`
 
 SQL example:
+
 ```sql
-SELECT * 
-FROM pointdf 
-WHERE ST_Intersects(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
+SELECT ST_Intersects(ST_GeomFromWKT('LINESTRING(-43.23456 72.4567,-43.23456 72.4568)'), ST_GeomFromWKT('POINT(-43.23456 72.4567772)'))
 ```
+
+Output:
+
+```
+true
+```
+
 
 ## ST_Overlaps
 
@@ -82,11 +108,17 @@ Format: `ST_Overlaps (A:geometry, B:geometry)`
 Since: `v1.5.0`
 
 SQL example:
+
 ```sql
-SELECT *
-FROM geom
-WHERE ST_Overlaps(geom.geom_a, geom.geom_b)
+SELECT ST_Overlaps(ST_GeomFromWKT('POLYGON((2.5 2.5, 2.5 4.5, 4.5 4.5, 4.5 2.5, 2.5 2.5))'), ST_GeomFromWKT('POLYGON((4 4, 4 6, 6 6, 6 4, 4 4))'))
 ```
+
+Output:
+
+```
+true
+```
+
 
 ## ST_Touches
 
@@ -97,10 +129,15 @@ Format: `ST_Touches (A:geometry, B:geometry)`
 Since: `v1.5.0`
 
 SQL example:
+
 ```sql
-SELECT * 
-FROM pointdf 
-WHERE ST_Touches(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
+SELECT ST_Touches(ST_GeomFromWKT('LINESTRING(0 0,1 1,0 2)'), ST_GeomFromWKT('POINT(0 2)'))
+```
+
+Output:
+
+```
+true
 ```
 
 ## ST_Within
@@ -112,10 +149,15 @@ Format: `ST_Within (A:geometry, B:geometry)`
 Since: `v1.3.0`
 
 SQL example:
+
 ```sql
-SELECT * 
-FROM pointdf 
-WHERE ST_Within(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
+SELECT ST_Within(ST_GeomFromWKT('POLYGON((0 0,3 0,3 3,0 3,0 0))'), ST_GeomFromWKT('POLYGON((1 1,2 1,2 2,1 2,1 1))'))
+```
+
+Output:
+
+```
+false
 ```
 
 ## ST_OrderingEquals
@@ -126,18 +168,28 @@ Format: `ST_OrderingEquals(A: geometry, B: geometry)`
 Since: `v1.2.1`
 
 SQL example 1:
+
 ```sql
 SELECT ST_OrderingEquals(ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'), ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'))
 ```
 
-Output: `true`
+Output:
+
+```
+true
+```
 
 SQL example 2:
+
 ```sql
 SELECT ST_OrderingEquals(ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'), ST_GeomFromWKT('POLYGON((0 2, -2 0, 2 0, 0 2))'))
 ```
 
-Output: `false`
+Output:
+
+```
+false
+```
 
 ## ST_Covers
 
@@ -148,11 +200,17 @@ Format: `ST_Covers (A:geometry, B:geometry)`
 Since: `v1.3.0`
 
 SQL example:
+
 ```sql
-SELECT * 
-FROM pointdf 
-WHERE ST_Covers(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), pointdf.arealandmark)
+SELECT ST_Covers(ST_GeomFromWKT('POLYGON((-2 0,0 2,2 0,-2 0))'), ST_GeomFromWKT('POLYGON((-1 0,0 1,1 0,-1 0))'))
 ```
+
+Output:
+
+```
+true
+```
+
 
 ## ST_CoveredBy
 
@@ -163,8 +221,13 @@ Format: `ST_CoveredBy (A:geometry, B:geometry)`
 Since: `v1.3.0`
 
 SQL example:
+
 ```sql
-SELECT * 
-FROM pointdf 
-WHERE ST_CoveredBy(pointdf.arealandmark, ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0))
+SELECT ST_CoveredBy(ST_GeomFromWKT('POLYGON((0 0,3 0,3 3,0 3,0 0))'),  ST_GeomFromWKT('POLYGON((1 1,2 1,2 2,1 2,1 1))'))
+```
+
+Output:
+
+```
+false
 ```

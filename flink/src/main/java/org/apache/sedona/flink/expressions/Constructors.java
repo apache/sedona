@@ -134,6 +134,13 @@ public class Constructors {
         }
     }
 
+    public static class ST_GeomFromEWKT extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String wktString) throws ParseException {
+            return org.apache.sedona.common.Constructors.geomFromEWKT(wktString);
+        }
+    }
+
     public static class ST_GeomFromText extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String wktString) throws ParseException {

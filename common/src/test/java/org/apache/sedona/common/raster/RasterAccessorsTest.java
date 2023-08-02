@@ -43,11 +43,51 @@ public class RasterAccessorsTest extends RasterTestBase
         assertEquals(1, RasterAccessors.numBands(oneBandRaster));
         assertEquals(4, RasterAccessors.numBands(multiBandRaster));
     }
+    @Test
+    public void testWidthAndHeight() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 10, 20, 0, 0, 8);
+        assertEquals(20, RasterAccessors.getHeight(emptyRaster));
+        assertEquals(10, RasterAccessors.getWidth(emptyRaster));
+    }
 
     @Test
     public void testSrid() throws FactoryException {
         assertEquals(0, RasterAccessors.srid(oneBandRaster));
         assertEquals(4326, RasterAccessors.srid(multiBandRaster));
+    }
+
+    @Test
+    public void testUpperLeftX() throws FactoryException {
+        GridCoverage2D gridCoverage2D = RasterConstructors.makeEmptyRaster(1, 3, 4, 1,2, 5);
+        double upperLeftX = RasterAccessors.getUpperLeftX(gridCoverage2D);
+        assertEquals(1, upperLeftX, 0.1d);
+
+        gridCoverage2D = RasterConstructors.makeEmptyRaster(10, 7, 8, 5, 6, 9);
+        upperLeftX = RasterAccessors.getUpperLeftX(gridCoverage2D);
+        assertEquals(5, upperLeftX, 0.1d);
+    }
+
+    @Test
+    public void testUpperLeftY() throws FactoryException {
+        GridCoverage2D gridCoverage2D = RasterConstructors.makeEmptyRaster(1, 3, 4, 1,2, 5);
+        double upperLeftY = RasterAccessors.getUpperLeftY(gridCoverage2D);
+        assertEquals(2, upperLeftY, 0.1d);
+
+        gridCoverage2D = RasterConstructors.makeEmptyRaster(10, 7, 8, 5, 6, 9);
+        upperLeftY = RasterAccessors.getUpperLeftY(gridCoverage2D);
+        assertEquals(6, upperLeftY, 0.1d);    
+    }
+
+    @Test
+    public void testScaleX() throws UnsupportedOperationException, FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 10, 15, 0, 0, 1, 2, 0, 0, 0);
+        assertEquals(1, RasterAccessors.getScaleX(emptyRaster), 1e-9);
+    }
+
+    @Test
+    public void testScaleY() throws UnsupportedOperationException, FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 10, 15, 0, 0, 1, 2, 0, 0, 0);
+        assertEquals(-2, RasterAccessors.getScaleY(emptyRaster), 1e-9);
     }
 
     @Test
