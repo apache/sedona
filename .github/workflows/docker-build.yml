@@ -46,6 +46,7 @@ jobs:
       if: runner.os == 'macos'
       run: |
         brew install docker
+        colima start
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         SEDONA_VERSION: ${{ matrix.sedona }}
