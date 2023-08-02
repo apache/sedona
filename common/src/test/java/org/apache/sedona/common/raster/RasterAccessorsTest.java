@@ -20,8 +20,6 @@ package org.apache.sedona.common.raster;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.FactoryException;
 
 import java.io.IOException;
@@ -30,38 +28,6 @@ import static org.junit.Assert.assertEquals;
 
 public class RasterAccessorsTest extends RasterTestBase
 {
-    @Test
-    public void envelope() throws FactoryException
-    {
-        Geometry envelope = GeometryFunctions.envelope(oneBandRaster);
-        assertEquals(3600.0d, envelope.getArea(), 0.1d);
-        assertEquals(378922.0d + 30.0d, envelope.getCentroid().getX(), 0.1d);
-        assertEquals(4072345.0d + 30.0d, envelope.getCentroid().getY(), 0.1d);
-        assertEquals(4326, GeometryFunctions.envelope(multiBandRaster).getSRID());
-    }
-
-    @Test
-    public void testEnvelopeUsingSkewedRaster() throws FactoryException {
-        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 100, 100, 5, 4, 3, -2, 0.1, 0.15, 3857);
-        Geometry envelope = GeometryFunctions.envelope(raster);
-        Envelope env = envelope.getEnvelopeInternal();
-        // The expected values were obtained by running the following query in PostGIS:
-        // SELECT ST_AsText(ST_Envelope(ST_MakeEmptyRaster(100, 100, 5, 4, 3, -2, 0.1, 0.15, 3857)));
-        assertEquals(5, env.getMinX(), 1e-9);
-        assertEquals(315, env.getMaxX(), 1e-9);
-        assertEquals(-196, env.getMinY(), 1e-9);
-        assertEquals(19, env.getMaxY(), 1e-9);
-
-        raster = RasterConstructors.makeEmptyRaster(1, 800, 700, 5, 4, 0.3, -0.2, -0.1, -0.15, 3857);
-        envelope = GeometryFunctions.envelope(raster);
-        env = envelope.getEnvelopeInternal();
-        // The expected values were obtained by running the following query in PostGIS:
-        // SELECT ST_AsText(ST_Envelope(ST_MakeEmptyRaster(800, 700, 5, 4, 0.3, -0.2, -0.1, -0.15, 3857)));
-        assertEquals(-65, env.getMinX(), 1e-9);
-        assertEquals(245, env.getMaxX(), 1e-9);
-        assertEquals(-256, env.getMinY(), 1e-9);
-        assertEquals(4, env.getMaxY(), 1e-9);
-    }
 
     @Test
     public void testNumBands() {
