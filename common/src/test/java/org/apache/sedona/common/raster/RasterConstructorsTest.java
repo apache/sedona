@@ -30,7 +30,7 @@ public class RasterConstructorsTest
     public void fromArcInfoAsciiGrid() throws IOException, FactoryException {
         GridCoverage2D gridCoverage2D = RasterConstructors.fromArcInfoAsciiGrid(arc.getBytes(StandardCharsets.UTF_8));
 
-        Geometry envelope = RasterAccessors.envelope(gridCoverage2D);
+        Geometry envelope = GeometryFunctions.envelope(gridCoverage2D);
         assertEquals(3600, envelope.getArea(), 0.1);
         assertEquals(378922d + 30, envelope.getCentroid().getX(), 0.1);
         assertEquals(4072345d + 30, envelope.getCentroid().getY(), 0.1);
@@ -44,7 +44,7 @@ public class RasterConstructorsTest
     public void fromGeoTiff() throws IOException, FactoryException {
         GridCoverage2D gridCoverage2D = RasterConstructors.fromGeoTiff(geoTiff);
 
-        Geometry envelope = RasterAccessors.envelope(gridCoverage2D);
+        Geometry envelope = GeometryFunctions.envelope(gridCoverage2D);
         assertEquals(100, envelope.getArea(), 0.1);
         assertEquals(5, envelope.getCentroid().getX(), 0.1);
         assertEquals(5, envelope.getCentroid().getY(), 0.1);
@@ -64,7 +64,7 @@ public class RasterConstructorsTest
         int numBands = 1;
 
         GridCoverage2D gridCoverage2D = RasterConstructors.makeEmptyRaster(numBands, widthInPixel, heightInPixel, upperLeftX, upperLeftY, pixelSize);
-        Geometry envelope = RasterAccessors.envelope(gridCoverage2D);
+        Geometry envelope = GeometryFunctions.envelope(gridCoverage2D);
         assertEquals(upperLeftX, envelope.getEnvelopeInternal().getMinX(), 0.001);
         assertEquals(upperLeftX + widthInPixel * pixelSize, envelope.getEnvelopeInternal().getMaxX(), 0.001);
         assertEquals(upperLeftY - heightInPixel * pixelSize, envelope.getEnvelopeInternal().getMinY(), 0.001);
@@ -81,7 +81,7 @@ public class RasterConstructorsTest
         assertEquals(1, gridCoverage2D.getNumSampleDimensions());
 
         gridCoverage2D = RasterConstructors.makeEmptyRaster(numBands, widthInPixel, heightInPixel, upperLeftX, upperLeftY, pixelSize, -pixelSize - 1, 0, 0, 0);
-        envelope = RasterAccessors.envelope(gridCoverage2D);
+        envelope = GeometryFunctions.envelope(gridCoverage2D);
         assertEquals(upperLeftX, envelope.getEnvelopeInternal().getMinX(), 0.001);
         assertEquals(upperLeftX + widthInPixel * pixelSize, envelope.getEnvelopeInternal().getMaxX(), 0.001);
         assertEquals(upperLeftY - heightInPixel * (pixelSize + 1), envelope.getEnvelopeInternal().getMinY(), 0.001);

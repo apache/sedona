@@ -21,6 +21,7 @@ package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.geometry.Envelope2D;
 import org.locationtech.jts.geom.*;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
@@ -58,5 +59,13 @@ public class GeometryFunctions {
         Coordinate coordFour = new Coordinate(point.getX(), point.getY());
 
         return geometryFactory.createPolygon(new Coordinate[] {coordOne, coordTwo, coordThree, coordFour, coordOne});
+    }
+
+    public static Geometry envelope(GridCoverage2D raster) throws FactoryException {
+        Envelope2D envelope2D = raster.getEnvelope2D();
+
+        Envelope envelope = new Envelope(envelope2D.getMinX(), envelope2D.getMaxX(), envelope2D.getMinY(), envelope2D.getMaxY());
+        int srid = RasterAccessors.srid(raster);
+        return new GeometryFactory(new PrecisionModel(), srid).toGeometry(envelope);
     }
 }

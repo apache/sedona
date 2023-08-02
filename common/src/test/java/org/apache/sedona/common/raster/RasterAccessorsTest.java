@@ -33,17 +33,17 @@ public class RasterAccessorsTest extends RasterTestBase
     @Test
     public void envelope() throws FactoryException
     {
-        Geometry envelope = RasterAccessors.envelope(oneBandRaster);
+        Geometry envelope = GeometryFunctions.envelope(oneBandRaster);
         assertEquals(3600.0d, envelope.getArea(), 0.1d);
         assertEquals(378922.0d + 30.0d, envelope.getCentroid().getX(), 0.1d);
         assertEquals(4072345.0d + 30.0d, envelope.getCentroid().getY(), 0.1d);
-        assertEquals(4326, RasterAccessors.envelope(multiBandRaster).getSRID());
+        assertEquals(4326, GeometryFunctions.envelope(multiBandRaster).getSRID());
     }
 
     @Test
     public void testEnvelopeUsingSkewedRaster() throws FactoryException {
         GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 100, 100, 5, 4, 3, -2, 0.1, 0.15, 3857);
-        Geometry envelope = RasterAccessors.envelope(raster);
+        Geometry envelope = GeometryFunctions.envelope(raster);
         Envelope env = envelope.getEnvelopeInternal();
         // The expected values were obtained by running the following query in PostGIS:
         // SELECT ST_AsText(ST_Envelope(ST_MakeEmptyRaster(100, 100, 5, 4, 3, -2, 0.1, 0.15, 3857)));
@@ -53,7 +53,7 @@ public class RasterAccessorsTest extends RasterTestBase
         assertEquals(19, env.getMaxY(), 1e-9);
 
         raster = RasterConstructors.makeEmptyRaster(1, 800, 700, 5, 4, 0.3, -0.2, -0.1, -0.15, 3857);
-        envelope = RasterAccessors.envelope(raster);
+        envelope = GeometryFunctions.envelope(raster);
         env = envelope.getEnvelopeInternal();
         // The expected values were obtained by running the following query in PostGIS:
         // SELECT ST_AsText(ST_Envelope(ST_MakeEmptyRaster(800, 700, 5, 4, 0.3, -0.2, -0.1, -0.15, 3857)));
