@@ -22,14 +22,12 @@ import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class FunctionsTest extends RasterTestBase {
 
@@ -65,6 +63,67 @@ public class FunctionsTest extends RasterTestBase {
         // Multiband raster
         assertEquals(9d, PixelFunctions.value(multiBandRaster, point(4.5d,4.5d), 3), 0.1d);
         assertEquals(255d, PixelFunctions.value(multiBandRaster, point(4.5d,4.5d), 4), 0.1d);
+    }
+
+    @Test
+    public void testPixelAsPointUpperLeft() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 123, -230, 8);
+        Geometry actualPoint = PixelFunctions.getPixelAsPoint(emptyRaster, 1, 1);
+        Coordinate coordinates = actualPoint.getCoordinate();
+        assertEquals(123, coordinates.x, 1e-9);
+        assertEquals(-230, coordinates.y, 1e-9);
+        assertEquals(0, actualPoint.getSRID());
+    }
+
+    @Test
+    public void testPixelAsPointMiddle() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 5, 10, 123, -230, 8);
+        Geometry actualPoint = PixelFunctions.getPixelAsPoint(emptyRaster, 3, 5);
+        Coordinate coordinates = actualPoint.getCoordinate();
+        assertEquals(139, coordinates.x, 1e-9);
+        assertEquals(-262, coordinates.y, 1e-9);
+        assertEquals(0, actualPoint.getSRID());
+    }
+
+    @Test
+    public void testPixelAsPointCustomSRIDPlanar() throws FactoryException, TransformException {
+        int srid = 3857;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -123, 54, 5, 5, 0, 0, srid);
+        Geometry actualPoint = PixelFunctions.getPixelAsPoint(emptyRaster, 1, 1);
+        Coordinate coordinates = actualPoint.getCoordinate();
+        assertEquals(-123, coordinates.x, 1e-9);
+        assertEquals(54, coordinates.y, 1e-9);
+        assertEquals(srid, actualPoint.getSRID());
+    }
+
+    @Test
+    public void testPixelAsPointSRIDSpherical() throws FactoryException, TransformException {
+        int srid = 4326;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, srid);
+        Geometry actualPoint = PixelFunctions.getPixelAsPoint(emptyRaster, 2, 3);
+        Coordinate coordinates = actualPoint.getCoordinate();
+        assertEquals(-118, coordinates.x, 1e-9);
+        assertEquals(34, coordinates.y, 1e-9);
+        assertEquals(srid, actualPoint.getSRID());
+    }
+
+    @Test
+    public void testPixelAsPointOutOfBounds() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 5, 10, 123, -230, 8);
+        Exception e = assertThrows(IndexOutOfBoundsException.class, () -> PixelFunctions.getPixelAsPoint(emptyRaster, 6, 1));
+        String expectedMessage = "Specified pixel coordinates (6, 1) do not lie in the raster";
+        assertEquals(expectedMessage, e.getMessage());
+    }
+
+    @Test
+    public void testPixelAsPointFromRasterFile() throws IOException, TransformException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+        Geometry actualPoint = PixelFunctions.getPixelAsPoint(raster, 1, 1);
+        Coordinate coordinate = actualPoint.getCoordinate();
+        double expectedX = -13095817.809482181;
+        double expectedY = 4021262.7487925636;
+        assertEquals(expectedX, coordinate.getX(), 0.2d);
+        assertEquals(expectedY, coordinate.getY(), 0.2d);
     }
 
     @Test
