@@ -524,7 +524,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val upperLeftY = -12
       val cellSize = 4
       val numBands = 2
-      val result = sparkSession.sql(s"SELECT RS_PixelAsPoint(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 1, 0)").first().getAs[Geometry](0);
+      val result = sparkSession.sql(s"SELECT RS_PixelAsPoint(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 2, 1)").first().getAs[Geometry](0);
       val expectedX = 127.19
       val expectedY = -12
       val actualCoordinates = result.getCoordinate;
