@@ -34,7 +34,7 @@ if [ -z "$BUILD_MODE" ] || [ "$BUILD_MODE" = "local" ]; then
     --progress=plain \
     --build-arg spark_version="${SPARK_VERSION}" \
     --build-arg sedona_version="${SEDONA_VERSION}" \
-    -f docker/sedona-spark-jupyterlab/sedona_jupyterlab.dockerfile \
+    -f docker/sedona-spark-jupyterlab/sedona-jupyterlab.dockerfile \
     -t sedona/sedona-jupyterlab:${SEDONA_VERSION} .
 else
     # If release, build the image for cross-platform
@@ -43,6 +43,6 @@ else
     --output type=registry \
     --build-arg spark_version="${SPARK_VERSION}" \
     --build-arg sedona_version="${SEDONA_VERSION}" \
-    -f docker/sedona-spark-jupyterlab/sedona_jupyterlab.dockerfile \
+    -f docker/sedona-spark-jupyterlab/sedona-jupyterlab.dockerfile \
     -t drjiayu/sedona-jupyterlab:${SEDONA_VERSION} .
 fi

@@ -61,9 +61,12 @@ RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/spark\.
 RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/org\.apache\.sedona:sedona-spark-shaded-/d' {} +
 RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/org\.datasyslab:geotools-wrapper:/d' {} +
 
-EXPOSE 8888
-
 RUN rm -rf ${SEDONA_HOME}
+
+EXPOSE 8888
+EXPOSE 8080
+EXPOSE 8081
+EXPOSE 4040
 
 WORKDIR ${SHARED_WORKSPACE}
 
