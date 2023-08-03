@@ -75,6 +75,7 @@ __all__ = [
     "ST_LineInterpolatePoint",
     "ST_LineMerge",
     "ST_LineSubstring",
+    "ST_MakeLine",
     "ST_MakePolygon",
     "ST_MakeValid",
     "ST_MinimumBoundingCircle",
@@ -811,6 +812,20 @@ def ST_LineSubstring(line_string: ColumnOrName, start_fraction: ColumnOrNameOrNu
     """
     return _call_st_function("ST_LineSubstring", (line_string, start_fraction, end_fraction))
 
+
+@validate_argument_types
+def ST_MakeLine(geom1: ColumnOrName, geom2: Optional[ColumnOrName] = None) -> Column:
+    """Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error.
+
+    :param geom1: Closed linestring geometry column that describes the exterior ring of the polygon.
+    :type geometry: ColumnOrName
+    :param geom2: Optional column for an array of closed geometry columns that describe holes in the polygon, defaults to None.
+    :type geometry: Optional[ColumnOrName], optional
+    :return: LineString geometry column created from the input geomtries.
+    :rtype: Column
+    """
+    args = (geom1,) if geom2 is None else (geom1, geom2)
+    return _call_st_function("ST_MakeLine", args)
 
 @validate_argument_types
 def ST_MakePolygon(line_string: ColumnOrName, holes: Optional[ColumnOrName] = None) -> Column:

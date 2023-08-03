@@ -692,9 +692,8 @@ public class Functions {
     public static Geometry makeLine(Geometry[] geoms) {
         ArrayList<Coordinate> coordinates = new ArrayList<>();      
         for (Geometry geom : geoms) {
-            Coordinate[] coords = geom.getCoordinates();
             if (geom instanceof Point || geom instanceof MultiPoint || geom instanceof LineString) {
-                for (Coordinate coord : coords) {
+                for (Coordinate coord : geom.getCoordinates()) {
                     coordinates.add(coord);
                 }
             }

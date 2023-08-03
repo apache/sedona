@@ -689,7 +689,7 @@ case class ST_SubDivideExplode(children: Seq[Expression])
 }
 
 case class ST_MakeLine(inputExpressions: Seq[Expression])
-  extends InferredExpression(Functions.makeLine _) {
+  extends InferredExpression(InferrableFunction.allowRightNull(Functions.makeLine _)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
