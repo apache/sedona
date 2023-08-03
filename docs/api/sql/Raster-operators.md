@@ -32,6 +32,44 @@ Output:
 IndexOutOfBoundsException: Specified pixel coordinates (6, 2) do not lie in the raster
 ```
 
+## Geometry Functions
+
+### RS_Envelope
+
+Introduction: Returns the envelope of the raster as a Geometry.
+
+Format: `RS_Envelope (raster: Raster)`
+
+Since: `v1.4.0`
+
+Spark SQL example:
+```sql
+SELECT RS_Envelope(raster) FROM raster_table
+```
+Output:
+```
+POLYGON ((0 0,20 0,20 60,0 60,0 0))
+```
+
+### RS_ConvexHull
+
+Introduction: Return the convex hull geometry of the raster including the NoDataBandValue band pixels. 
+For regular shaped and non-skewed rasters, this gives more or less the same result as RS_ConvexHull and hence is only useful for irregularly shaped or skewed rasters.
+
+Format: `RS_ConvexHull(raster: Raster)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_ConvexHull(SELECT RS_PixelAsPoint(RS_MakeEmptyRaster(1, 5, 10, 156, -132, 5, 10, 3, 5, 0)));
+```
+
+Output:
+```
+POLYGON ((156 -132, 181 -107, 211 -7, 186 -32, 156 -132))
+```
+
 ## Raster Accessors
 
 ### RS_Height
@@ -157,23 +195,6 @@ Output:
 ```
 
 ## Raster based operators
-
-### RS_Envelope
-
-Introduction: Returns the envelope of the raster as a Geometry.
-
-Format: `RS_Envelope (raster: Raster)`
-
-Since: `v1.4.0`
-
-Spark SQL example:
-```sql
-SELECT RS_Envelope(raster) FROM raster_table
-```
-Output:
-```
-POLYGON((0 0,20 0,20 60,0 60,0 0))
-```
 
 ### RS_Intersects
 
