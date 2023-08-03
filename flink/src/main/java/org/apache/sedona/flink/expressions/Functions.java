@@ -686,6 +686,22 @@ public class Functions {
             return org.apache.sedona.common.Functions.lineSubString(geom, startFraction, endFraction);
         }
     }
+
+    public static class ST_MakeLine extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
+                             @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o1;
+            return org.apache.sedona.common.Functions.makeLine(geom1, geom2);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(inputGroup = InputGroup.ANY) Object o) {
+            Geometry[] geoms = (Geometry[]) o;
+            return org.apache.sedona.common.Functions.makeLine(geoms);
+        }
+    }
     
     public static class ST_MakePolygon extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
