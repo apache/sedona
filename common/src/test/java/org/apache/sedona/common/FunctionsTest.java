@@ -530,6 +530,21 @@ public class FunctionsTest {
     }
 
     @Test
+    public void makepolygonWithSRID() {
+        Geometry lineString1 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 1, 1, 1, 0, 0, 0));
+        Geometry actual1 = Functions.makepolygonWithSRID(lineString1, 4326);
+        Geometry expected1 = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 1, 1, 1, 0, 0, 0));
+        assertEquals(expected1.toText(), actual1.toText());
+        assertEquals(4326, actual1.getSRID());
+
+        Geometry lineString2 = GEOMETRY_FACTORY.createLineString(coordArray3d(75, 29, 1, 77, 29, 2, 77, 29, 3, 75, 29, 1));
+        Geometry actual2 = Functions.makepolygonWithSRID(lineString2, 123);
+        Geometry expected2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(75, 29, 1, 77, 29, 2, 77, 29, 3, 75, 29, 1));
+        assertEquals(expected2.toText(), actual2.toText());
+        assertEquals(123, actual2.getSRID());
+    }
+
+    @Test
     public void haversineDistance() {
         // Basic check
         Point p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 90));
