@@ -819,13 +819,11 @@ class TestPredicateJoin(TestBase):
             ]
         ).selectExpr("ST_GeomFromText(_1) AS geom1", "ST_GeomFromText(_2) AS geom2", "_3 AS expected")
 
-        # When calling st_MakePolygon
-        geom_poly = geometry_df.withColumn("linestring", expr("ST_MakeLine(geom1, geom2)"))
+        # When calling st_MakeLine
+        geom_lines = geometry_df.withColumn("linestring", expr("ST_MakeLine(geom1, geom2)"))
 
-        # Then only based on closed linestring geom is created
-        geom_poly.filter("linestring IS NOT NULL").selectExpr("ST_AsText(linestring)", "expected"). \
-            show()
-        result = geom_poly.filter("linestring IS NOT NULL").selectExpr("ST_AsText(linestring)", "expected"). \
+        # Then
+        result = geom_lines.selectExpr("ST_AsText(linestring)", "expected"). \
             collect()
 
         for actual, expected in result:
