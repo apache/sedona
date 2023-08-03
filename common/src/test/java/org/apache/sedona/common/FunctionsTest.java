@@ -806,6 +806,15 @@ public class FunctionsTest {
     }
 
     @Test
+    public void makeLineWithWrongType() {
+        Polygon polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 90, 0, 0));
+        Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 10, 10, 10, 10, 0, 0, 0));
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.makeLine(polygon1, polygon2));
+        assertEquals("ST_MakeLine only supports Point, MultiPoint and LineString geometries", e.getMessage());
+    }
+
+    @Test
     public void minimumBoundingRadius() {
         Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
         assertEquals("POINT (0 0)", Functions.minimumBoundingRadius(point).getLeft().toString());

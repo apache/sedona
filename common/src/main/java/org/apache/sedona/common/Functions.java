@@ -690,12 +690,16 @@ public class Functions {
     }
 
     public static Geometry makeLine(Geometry[] geoms) {
-        ArrayList<Coordinate> coordinates = new ArrayList<>();
-        // HashSet<Coordinate> uniqueSet = new HashSet<>();
-        for (int i = 0; i < geoms.length; i++) {
-            Coordinate[] coords = geoms[i].getCoordinates();
-            for (int j = 0; j < coords.length; j++) {
-                coordinates.add(coords[j]);
+        ArrayList<Coordinate> coordinates = new ArrayList<>();      
+        for (Geometry geom : geoms) {
+            Coordinate[] coords = geom.getCoordinates();
+            if (geom instanceof Point || geom instanceof MultiPoint || geom instanceof LineString) {
+                for (Coordinate coord : coords) {
+                    coordinates.add(coord);
+                }
+            }
+            else {
+                throw new IllegalArgumentException("ST_MakeLine only supports Point, MultiPoint and LineString geometries");
             }
         }
         
