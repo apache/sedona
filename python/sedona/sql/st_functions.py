@@ -817,9 +817,9 @@ def ST_LineSubstring(line_string: ColumnOrName, start_fraction: ColumnOrNameOrNu
 def ST_MakeLine(geom1: ColumnOrName, geom2: Optional[ColumnOrName] = None) -> Column:
     """Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error.
 
-    :param geom1: Closed linestring geometry column that describes the exterior ring of the polygon.
+    :param geom1: Geometry column to convert.
     :type geometry: ColumnOrName
-    :param geom2: Optional column for an array of closed geometry columns that describe holes in the polygon, defaults to None.
+    :param geom2: Geometry column to convert. If geoms is empty, then geom1 is an array of geometries.
     :type geometry: Optional[ColumnOrName], optional
     :return: LineString geometry column created from the input geomtries.
     :rtype: Column
