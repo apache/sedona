@@ -764,6 +764,48 @@ public class FunctionsTest {
     }
 
     @Test
+    public void makeLine() {
+        Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+        Point point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+        String actual = Functions.makeLine(point1, point2).toText();
+        assertEquals("LINESTRING (0 0, 1 1)", actual);
+
+        MultiPoint multiPoint1 = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0.5, 0.5, 1.0, 1.0));
+        MultiPoint multiPoint2 = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0.5, 0.5, 2, 2));
+        String actual2 = Functions.makeLine(multiPoint1, multiPoint2).toText();
+        assertEquals("LINESTRING (0.5 0.5, 1 1, 0.5 0.5, 2 2)", actual2);
+
+        LineString line1 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 1, 1));
+        LineString line2 = GEOMETRY_FACTORY.createLineString(coordArray(2, 2, 3, 3));
+        Geometry[] geoms = new Geometry[]{line1, line2};
+        String actual3 = Functions.makeLine(geoms).toText();
+        assertEquals("LINESTRING (0 0, 1 1, 2 2, 3 3)", actual3);
+    }
+
+    @Test
+    public void makeLine3d() {
+        WKTWriter wktWriter3D = new WKTWriter(3);
+        Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 1));
+        Point point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(2, 2, 2));
+        LineString acutalLinestring = (LineString) Functions.makeLine(point1, point2);
+        LineString expectedLineString = GEOMETRY_FACTORY.createLineString(coordArray3d( 1, 1, 1, 2, 2, 2));
+        assertEquals(wktWriter3D.write(acutalLinestring), wktWriter3D.write(expectedLineString));
+        
+        MultiPoint multiPoint1 = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray3d(0.5, 0.5, 1, 1, 1, 1));
+        MultiPoint multiPoint2 = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray3d(0.5, 0.5, 2, 2, 2, 2));
+        acutalLinestring = (LineString) Functions.makeLine(multiPoint1, multiPoint2);
+        expectedLineString = GEOMETRY_FACTORY.createLineString(coordArray3d( 0.5, 0.5, 1, 1, 1, 1, 0.5, 0.5, 2, 2, 2, 2));
+        assertEquals(wktWriter3D.write(acutalLinestring), wktWriter3D.write(expectedLineString));
+
+        LineString line1 = GEOMETRY_FACTORY.createLineString(coordArray3d(0, 0, 1, 1, 1, 1));
+        LineString line2 = GEOMETRY_FACTORY.createLineString(coordArray3d(2, 2, 2, 2, 3, 3));
+        Geometry[] geoms = new Geometry[]{line1, line2};
+        acutalLinestring = (LineString) Functions.makeLine(geoms);
+        expectedLineString = GEOMETRY_FACTORY.createLineString(coordArray3d( 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3));
+        assertEquals(wktWriter3D.write(acutalLinestring), wktWriter3D.write(expectedLineString));
+    }
+
+    @Test
     public void minimumBoundingRadius() {
         Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
         assertEquals("POINT (0 0)", Functions.minimumBoundingRadius(point).getLeft().toString());

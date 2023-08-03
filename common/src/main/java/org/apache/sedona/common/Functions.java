@@ -684,6 +684,25 @@ public class Functions {
         return GeometrySubDivider.subDivide(geometry, maxVertices);
     }
 
+    public static Geometry makeLine(Geometry geom1, Geometry geom2) {
+       Geometry[] geoms = new Geometry[]{geom1, geom2};
+       return makeLine(geoms);
+    }
+
+    public static Geometry makeLine(Geometry[] geoms) {
+        ArrayList<Coordinate> coordinates = new ArrayList<>();
+        // HashSet<Coordinate> uniqueSet = new HashSet<>();
+        for (int i = 0; i < geoms.length; i++) {
+            Coordinate[] coords = geoms[i].getCoordinates();
+            for (int j = 0; j < coords.length; j++) {
+                coordinates.add(coords[j]);
+            }
+        }
+        
+        Coordinate[] coords = coordinates.toArray(new Coordinate[0]);
+        return GEOMETRY_FACTORY.createLineString(coords);
+    }
+
     public static Geometry makePolygon(Geometry shell, Geometry[] holes) {
         try {
             if (holes != null) {
