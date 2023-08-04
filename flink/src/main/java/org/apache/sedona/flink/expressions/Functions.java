@@ -719,6 +719,15 @@ public class Functions {
         }
     }
 
+    public static class ST_Polygon extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
+                             @DataTypeHint("Integer") Integer srid) {
+            Geometry linestring = (Geometry) o1;
+            return org.apache.sedona.common.Functions.makepolygonWithSRID(linestring, srid);
+        }
+    }
+
     public static class ST_MakeValid extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,

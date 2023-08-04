@@ -795,6 +795,15 @@ public class FunctionTest extends TestBase{
     }
 
     @Test 
+    public void testPolygon() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)') AS line");
+        table = table.select(call(Functions.ST_Polygon.class.getSimpleName(), $("line"), 4236));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("POLYGON ((0 0, 1 0, 1 1, 0 0))", result.toString());
+        assertEquals(4236, result.getSRID());
+    }
+
+    @Test 
     public void testMakePolygon() {
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)') AS line");
         table = table.select(call(Functions.ST_MakePolygon.class.getSimpleName(), $("line")));
