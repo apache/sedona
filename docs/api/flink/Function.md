@@ -1557,6 +1557,26 @@ Output:
 POLYGON ((7 -1, 7 6, 9 6, 9 1, 7 -1), (6 2, 8 2, 8 1, 6 1, 6 2))
 ```
 
+## ST_Polygon
+
+Introduction: Function to create a polygon built from the given LineString and sets the spatial reference system from the srid
+
+Format: `ST_Polygon(geom: geometry, srid: integer)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_AsText( ST_Polygon(ST_GeomFromEWKT('LINESTRING(75 29 1, 77 29 2, 77 29 3, 75 29 1)'), 4326) );
+```
+
+Output:
+
+```
+POLYGON((75 29 1, 77 29 2, 77 29 3, 75 29 1))
+```
+
 ## ST_MakeValid
 
 Introduction: Given an invalid geometry, create a valid representation of the geometry.
