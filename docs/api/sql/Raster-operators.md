@@ -90,6 +90,42 @@ Output:
 512
 ```
 
+### RS_RasterToWorldCoordX
+
+Introduction: Returns the upper left X coordinate of the given row and column of the given raster geometric units of the geo-referenced raster. If any out of bounds values are given, the X coordinate of the assumed point considering existing raster pixel size and skew values will be returned.
+
+Format: `RS_RasterToWorldCoordX(raster: Raster, colX: int, rowY: int)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_RasterToWorldCoordX(ST_MakeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, 4326), 1, 1) from rasters
+```
+
+Output:
+```
+-123
+```
+
+### RS_RasterToWorldCoordY
+
+Introduction: Returns the upper left Y coordinate of the given row and column of the given raster geometric units of the geo-referenced raster. If any out of bounds values are given, the Y coordinate of the assumed point considering existing raster pixel size and skew values will be returned.
+
+Format: `RS_RasterToWorldCoordY(raster: Raster, colX: int, rowY: int)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_RasterToWorldCoordY(ST_MakeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, 4326), 1, 1) from rasters
+```
+
+Output:
+```
+54
+```
+
 ### RS_ScaleX
 
 Introduction: Returns the pixel width of the raster in CRS units.

@@ -558,5 +558,19 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expectedX, actualCoordinates.x, 1e-5)
       assertEquals(expectedY, actualCoordinates.y, 1e-5)
     }
+
+    it("Passed RS_RasterToWorldCoordX with raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_RasterToWorldCoordX(raster, 1, 1)").first().getDouble(0)
+      assertEquals(-13095817.809482181, result, 0.5d)
+    }
+
+    it("Passed RS_RasterToWorldCoordY with raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_RasterToWorldCoordY(raster, 1, 1)").first().getDouble(0)
+      assertEquals(4021262.7487925636, result, 0.5d)
+    }
   }
 }

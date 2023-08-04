@@ -213,7 +213,9 @@ object Catalog {
     function[RS_ScaleX](),
     function[RS_ScaleY](),
     function[RS_PixelAsPoint](),
-    function[RS_ConvexHull]()
+    function[RS_ConvexHull](),
+    function[RS_RasterToWorldCoordX](),
+    function[RS_RasterToWorldCoordY]()
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(
