@@ -18,7 +18,6 @@
  */
 package org.apache.sedona.common.raster;
 
-import org.apache.sedona.common.Constructors;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
@@ -33,7 +32,6 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import java.awt.image.DataBuffer;
-import java.awt.image.Raster;
 import java.io.IOException;
 
 
