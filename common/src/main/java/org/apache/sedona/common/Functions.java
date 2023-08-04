@@ -735,7 +735,9 @@ public class Functions {
 
     public static Geometry makepolygonWithSRID(Geometry lineString, Integer srid) {
         Geometry geom = makePolygon(lineString, null);
-        geom.setSRID(srid);
+        if(geom != null) {
+            geom.setSRID(srid);
+        }
         return geom;
     }
     

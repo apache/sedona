@@ -839,7 +839,7 @@ def ST_Polygon(line_string: ColumnOrName, srid: ColumnOrNameOrNumber) -> Column:
     :return: Polygon geometry column created from the input linestring.
     :rtype: Column
     """
-    return _call_st_function("ST_MakePolygon", (line_string, srid))
+    return _call_st_function("ST_Polygon", (line_string, srid))
 
 @validate_argument_types
 def ST_MakePolygon(line_string: ColumnOrName, holes: Optional[ColumnOrName] = None) -> Column:
