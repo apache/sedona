@@ -1508,6 +1508,40 @@ Output:
 LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140.21046313888758)
 ```
 
+## ST_MakeLine
+
+Introduction: Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error.
+
+Format: `ST_MakeLine(geom1: geometry, geom2: geometry)`
+
+Format: `ST_MakeLine(geoms: array<geometry>)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_AsText( ST_MakeLine(ST_Point(1,2), ST_Point(3,4)) );
+```
+
+Output:
+
+```
+LINESTRING(1 2,3 4)
+```
+
+Example:
+
+```sql
+SELECT ST_AsText( ST_MakeLine( 'LINESTRING(0 0, 1 1)', 'LINESTRING(2 2, 3 3)' ) );
+```
+
+Output:
+
+```
+ LINESTRING(0 0,1 1,2 2,3 3)
+```
+
 ## ST_MakePolygon
 
 Introduction: Function to convert closed linestring to polygon including holes
