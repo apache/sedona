@@ -119,6 +119,7 @@ test_configurations = [
     (stf.ST_LineSubstring, ("line", 0.5, 1.0), "linestring_geom", "", "LINESTRING (2.5 0, 3 0, 4 0, 5 0)"),
     (stf.ST_MakeValid, ("geom",), "invalid_geom", "", "MULTIPOLYGON (((1 5, 3 3, 1 1, 1 5)), ((5 3, 7 5, 7 1, 5 3)))"),
     (stf.ST_MakeLine, ("line1", "line2"), "two_lines", "", "LINESTRING (0 0, 1 1, 0 0, 3 2)"),
+    (stf.ST_Polygon, ("geom", 4236), "closed_linestring_geom", "", "POLYGON ((0 0, 1 0, 1 1, 0 0))"),
     (stf.ST_MakePolygon, ("geom",), "closed_linestring_geom", "", "POLYGON ((0 0, 1 0, 1 1, 0 0))"),
     (stf.ST_MinimumBoundingCircle, ("line", 8), "linestring_geom", "ST_ReducePrecision(geom, 2)", "POLYGON ((4.95 -0.49, 4.81 -0.96, 4.58 -1.39, 4.27 -1.77, 3.89 -2.08, 3.46 -2.31, 2.99 -2.45, 2.5 -2.5, 2.01 -2.45, 1.54 -2.31, 1.11 -2.08, 0.73 -1.77, 0.42 -1.39, 0.19 -0.96, 0.05 -0.49, 0 0, 0.05 0.49, 0.19 0.96, 0.42 1.39, 0.73 1.77, 1.11 2.08, 1.54 2.31, 2.01 2.45, 2.5 2.5, 2.99 2.45, 3.46 2.31, 3.89 2.08, 4.27 1.77, 4.58 1.39, 4.81 0.96, 4.95 0.49, 5 0, 4.95 -0.49))"),
     (stf.ST_MinimumBoundingCircle, ("line", 2), "linestring_geom", "ST_ReducePrecision(geom, 2)", "POLYGON ((4.27 -1.77, 2.5 -2.5, 0.73 -1.77, 0 0, 0.73 1.77, 2.5 2.5, 4.27 1.77, 5 0, 4.27 -1.77))"),

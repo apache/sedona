@@ -76,6 +76,7 @@ __all__ = [
     "ST_LineMerge",
     "ST_LineSubstring",
     "ST_MakeLine",
+    "ST_Polygon"
     "ST_MakePolygon",
     "ST_MakeValid",
     "ST_MinimumBoundingCircle",
@@ -826,6 +827,19 @@ def ST_MakeLine(geom1: ColumnOrName, geom2: Optional[ColumnOrName] = None) -> Co
     """
     args = (geom1,) if geom2 is None else (geom1, geom2)
     return _call_st_function("ST_MakeLine", args)
+
+@validate_argument_types
+def ST_Polygon(line_string: ColumnOrName, srid: ColumnOrNameOrNumber) -> Column:
+    """Create a polygon built from the given LineString and sets the spatial reference system from the srid.
+
+    :param line_string: Closed linestring geometry column that describes the exterior ring of the polygon.
+    :type line_string: ColumnOrName
+    :param srid: Spatial reference system identifier.
+    :type srid: ColumnOrNameOrNumber
+    :return: Polygon geometry column created from the input linestring.
+    :rtype: Column
+    """
+    return _call_st_function("ST_MakePolygon", (line_string, srid))
 
 @validate_argument_types
 def ST_MakePolygon(line_string: ColumnOrName, holes: Optional[ColumnOrName] = None) -> Column:
