@@ -27,6 +27,8 @@ import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.hsqldb.index.Index;
+import org.opengis.coverage.grid.GridCoordinates;
 import org.opengis.metadata.spatial.PixelOrientation;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
@@ -95,5 +97,11 @@ public class RasterUtils {
 
     public static Point2D getCornerCoordinates(GridCoverage2D raster, int colX, int rowY) throws TransformException {
         return raster.getGridGeometry().getGridToCRS2D(PixelOrientation.UPPER_LEFT).transform(new GridCoordinates2D(colX - 1, rowY - 1), null);
+    }
+
+    public static Point2D getCornerCoordinatesWithRangeCheck(GridCoverage2D raster, int colX, int rowY) throws IndexOutOfBoundsException, TransformException {
+        GridCoordinates2D gridCoordinates2D = new GridCoordinates2D(colX - 1, rowY - 1);
+        if (!raster.getGridGeometry().getEnvelope2D().contains(gridCoordinates2D)) throw new IndexOutOfBoundsException(String.format("Specified pixel coordinates (%d, %d) do not lie in the raster", colX, rowY));
+        return raster.getGridGeometry().getGridToCRS2D(PixelOrientation.UPPER_LEFT).transform(gridCoordinates2D, null);
     }
 }
