@@ -168,6 +168,11 @@ object st_functions extends DataFrameAPI {
   def ST_LineSubstring(lineString: Column, startFraction: Column, endFraction: Column): Column = wrapExpression[ST_LineSubstring](lineString, startFraction, endFraction)
   def ST_LineSubstring(lineString: String, startFraction: Double, endFraction: Double): Column = wrapExpression[ST_LineSubstring](lineString, startFraction, endFraction)
 
+  def ST_MakeLine(geoms: Column): Column = wrapExpression[ST_MakeLine](geoms)
+  def ST_MakeLine(geoms: String): Column = wrapExpression[ST_MakeLine](geoms)
+  def ST_MakeLine(geom1: Column, geom2: Column): Column = wrapExpression[ST_MakeLine](geom1, geom2)
+  def ST_MakeLine(geom1: String, geom2: String): Column = wrapExpression[ST_MakeLine](geom1, geom2)
+
   def ST_MakePolygon(lineString: Column): Column = wrapExpression[ST_MakePolygon](lineString, null)
   def ST_MakePolygon(lineString: String): Column = wrapExpression[ST_MakePolygon](lineString, null)
   def ST_MakePolygon(lineString: Column, holes: Column): Column = wrapExpression[ST_MakePolygon](lineString, holes)

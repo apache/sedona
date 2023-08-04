@@ -684,6 +684,28 @@ public class Functions {
         return GeometrySubDivider.subDivide(geometry, maxVertices);
     }
 
+    public static Geometry makeLine(Geometry geom1, Geometry geom2) {
+       Geometry[] geoms = new Geometry[]{geom1, geom2};
+       return makeLine(geoms);
+    }
+
+    public static Geometry makeLine(Geometry[] geoms) {
+        ArrayList<Coordinate> coordinates = new ArrayList<>();      
+        for (Geometry geom : geoms) {
+            if (geom instanceof Point || geom instanceof MultiPoint || geom instanceof LineString) {
+                for (Coordinate coord : geom.getCoordinates()) {
+                    coordinates.add(coord);
+                }
+            }
+            else {
+                throw new IllegalArgumentException("ST_MakeLine only supports Point, MultiPoint and LineString geometries");
+            }
+        }
+        
+        Coordinate[] coords = coordinates.toArray(new Coordinate[0]);
+        return GEOMETRY_FACTORY.createLineString(coords);
+    }
+
     public static Geometry makePolygon(Geometry shell, Geometry[] holes) {
         try {
             if (holes != null) {

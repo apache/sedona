@@ -809,6 +809,26 @@ class TestPredicateJoin(TestBase):
         # Then
         assert lateral_view_result.count() == 16
 
+    def test_st_make_line(self):
+        # Given
+        geometry_df = self.spark.createDataFrame(
+            [
+                ["POINT(0 0)", "POINT(1 1)" , "LINESTRING (0 0, 1 1)"],
+                ["MULTIPOINT ((0 0), (1 1))", "MULTIPOINT ((2 2), (2 3))", "LINESTRING (0 0, 1 1, 2 2, 2 3)"],
+                ["LINESTRING (0 0, 1 1)", "LINESTRING(2 2, 3 3)", "LINESTRING (0 0, 1 1, 2 2, 3 3)"]
+            ]
+        ).selectExpr("ST_GeomFromText(_1) AS geom1", "ST_GeomFromText(_2) AS geom2", "_3 AS expected")
+
+        # When calling st_MakeLine
+        geom_lines = geometry_df.withColumn("linestring", expr("ST_MakeLine(geom1, geom2)"))
+
+        # Then
+        result = geom_lines.selectExpr("ST_AsText(linestring)", "expected"). \
+            collect()
+
+        for actual, expected in result:
+            assert actual == expected
+
     def test_st_make_polygon(self):
         # Given
         geometry_df = self.spark.createDataFrame(
