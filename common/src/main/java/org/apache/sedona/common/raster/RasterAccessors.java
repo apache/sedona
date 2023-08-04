@@ -21,14 +21,9 @@ package org.apache.sedona.common.raster;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridEnvelope2D;
-import org.geotools.geometry.Envelope2D;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.PrecisionModel;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -77,14 +72,6 @@ public class RasterAccessors
 
     public static double getScaleY(GridCoverage2D raster) {
         return RasterUtils.getGDALAffineTransform(raster).getScaleY();
-    }
-
-    public static Geometry envelope(GridCoverage2D raster) throws FactoryException {
-        Envelope2D envelope2D = raster.getEnvelope2D();
-
-        Envelope envelope = new Envelope(envelope2D.getMinX(), envelope2D.getMaxX(), envelope2D.getMinY(), envelope2D.getMaxY());
-        int srid = srid(raster);
-        return new GeometryFactory(new PrecisionModel(), srid).toGeometry(envelope);
     }
 
     /**

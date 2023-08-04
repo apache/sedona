@@ -21,7 +21,7 @@ package org.apache.sedona.sql
 import org.apache.spark.sql.functions.{collect_list, expr}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.junit.Assert.assertEquals
-import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.{Coordinate, Geometry}
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
 import scala.collection.mutable
@@ -515,6 +515,33 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val result = df.selectExpr("RS_ScaleY(RS_FromGeoTiff(content))").first().getDouble(0)
       val expected: Double = -72.32861272132695
       assertEquals(expected, result, 1e-9)
+    }
+
+    it("Passed RS_ConvexHull with raster") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_ConvexHull(RS_FromGeoTiff(content))").first().getAs[Geometry](0);
+      val coordinates = result.getCoordinates;
+
+      val expectedCoordOne = new Coordinate(-13095817.809482181, 4021262.7487925636)
+      val expectedCoordTwo = new Coordinate(-13058785.559768861, 4021262.7487925636)
+      val expectedCoordThree = new Coordinate(-13058785.559768861, 3983868.8560156375)
+      val expectedCoordFour = new Coordinate(-13095817.809482181, 3983868.8560156375)
+
+      assertEquals(expectedCoordOne.getX, coordinates(0).getX, 0.5d)
+      assertEquals(expectedCoordOne.getY, coordinates(0).getY, 0.5d)
+
+      assertEquals(expectedCoordTwo.getX, coordinates(1).getX, 0.5d)
+      assertEquals(expectedCoordTwo.getY, coordinates(1).getY, 0.5d)
+
+      assertEquals(expectedCoordThree.getX, coordinates(2).getX, 0.5d)
+      assertEquals(expectedCoordThree.getY, coordinates(2).getY, 0.5d)
+
+      assertEquals(expectedCoordFour.getX, coordinates(3).getX, 0.5d)
+      assertEquals(expectedCoordFour.getY, coordinates(3).getY, 0.5d)
+
+      assertEquals(expectedCoordOne.getX, coordinates(4).getX, 0.5d)
+      assertEquals(expectedCoordOne.getY, coordinates(4).getY, 0.5d)
+
     }
 
     it("Passed RS_PixelAsPoint with raster") {

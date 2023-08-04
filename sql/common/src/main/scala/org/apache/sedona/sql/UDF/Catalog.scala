@@ -123,6 +123,7 @@ object Catalog {
     function[ST_LineInterpolatePoint](),
     function[ST_SubDivideExplode](),
     function[ST_SubDivide](),
+    function[ST_MakeLine](),
     function[ST_MakePolygon](null),
     function[ST_GeoHash](),
     function[ST_GeomFromGeoHash](null),
@@ -211,7 +212,8 @@ object Catalog {
     function[RS_UpperLeftY](),
     function[RS_ScaleX](),
     function[RS_ScaleY](),
-    function[RS_PixelAsPoint]()
+    function[RS_PixelAsPoint](),
+    function[RS_ConvexHull]()
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(

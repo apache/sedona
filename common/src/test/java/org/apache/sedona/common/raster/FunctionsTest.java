@@ -38,8 +38,8 @@ public class FunctionsTest extends RasterTestBase {
 
         GridCoverage2D oneBandRasterWithUpdatedSrid = RasterEditors.setSrid(oneBandRaster, 4326);
         assertEquals(4326, RasterAccessors.srid(oneBandRasterWithUpdatedSrid));
-        assertEquals(4326, RasterAccessors.envelope(oneBandRasterWithUpdatedSrid).getSRID());
-        assertTrue(RasterAccessors.envelope(oneBandRasterWithUpdatedSrid).equalsTopo(RasterAccessors.envelope(oneBandRaster)));
+        assertEquals(4326, GeometryFunctions.envelope(oneBandRasterWithUpdatedSrid).getSRID());
+        assertTrue(GeometryFunctions.envelope(oneBandRasterWithUpdatedSrid).equalsTopo(GeometryFunctions.envelope(oneBandRaster)));
 
         GridCoverage2D multiBandRasterWithUpdatedSrid = RasterEditors.setSrid(multiBandRaster, 0);
         assertEquals(0 , RasterAccessors.srid(multiBandRasterWithUpdatedSrid));

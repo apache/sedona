@@ -21,15 +21,19 @@ package org.apache.sedona.common.utils;
 import com.sun.media.imageioimpl.common.BogusColorSpace;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
+import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridGeometry2D;
+import org.geotools.geometry.DirectPosition2D;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.opengis.metadata.spatial.PixelOrientation;
 import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
@@ -87,5 +91,9 @@ public class RasterUtils {
             throw new UnsupportedOperationException("Only AffineTransform2D is supported");
         }
         return (AffineTransform2D) crsTransform;
+    }
+
+    public static Point2D getCornerCoordinates(GridCoverage2D raster, int colX, int rowY) throws TransformException {
+        return raster.getGridGeometry().getGridToCRS2D(PixelOrientation.UPPER_LEFT).transform(new GridCoordinates2D(colX - 1, rowY - 1), null);
     }
 }

@@ -786,6 +786,14 @@ public class FunctionTest extends TestBase{
         assertEquals("LINESTRING (1 0, 2 0)", result.toString());
     }
 
+    @Test
+    public void testMakeLine() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (0 0)') AS point1, ST_GeomFromWKT('POINT (1 1)') AS point2");
+        table = table.select(call(Functions.ST_MakeLine.class.getSimpleName(), $("point1"), $("point2")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("LINESTRING (0 0, 1 1)", result.toString());
+    }
+
     @Test 
     public void testMakePolygon() {
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)') AS line");

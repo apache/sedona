@@ -18,16 +18,10 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
-import org.apache.sedona.common.raster.RasterAccessors
+import org.apache.sedona.common.raster.{GeometryFunctions, RasterAccessors}
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
-
-case class RS_Envelope(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.envelope _) {
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
 
 case class RS_NumBands(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.numBands _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
