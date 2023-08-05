@@ -46,20 +46,43 @@ public class RasterPredicates {
     public static boolean rsIntersects(GridCoverage2D raster, Geometry queryWindow) {
         Envelope2D rasterEnvelope2D = raster.getEnvelope2D();
         CoordinateReferenceSystem rasterCRS = rasterEnvelope2D.getCoordinateReferenceSystem();
-        int queryWindowSRID = queryWindow.getSRID();
-        if (rasterCRS != null && !(rasterCRS instanceof DefaultEngineeringCRS) && queryWindowSRID > 0) {
+        queryWindow = convertCRSIfNeeded(queryWindow, rasterCRS);
+        Envelope rasterEnvelope = JTS.toEnvelope(rasterEnvelope2D);
+        Geometry rasterGeometry = GEOMETRY_FACTORY.toGeometry(rasterEnvelope);
+        return rasterGeometry.intersects(queryWindow);
+    }
+
+    public static boolean rsContains(GridCoverage2D raster, Geometry geometry) {
+        Envelope2D rasterEnvelope2D = raster.getEnvelope2D();
+        CoordinateReferenceSystem rasterCRS = rasterEnvelope2D.getCoordinateReferenceSystem();
+        geometry = convertCRSIfNeeded(geometry, rasterCRS);
+        Envelope rasterEnvelope = JTS.toEnvelope(rasterEnvelope2D);
+        Geometry rasterGeometry = GEOMETRY_FACTORY.toGeometry(rasterEnvelope);
+        return  rasterGeometry.contains(geometry);
+    }
+
+    public static boolean rsWithin(GridCoverage2D raster, Geometry geometry) {
+        Envelope2D rasterEnvelope2D = raster.getEnvelope2D();
+        CoordinateReferenceSystem rasterCRS = rasterEnvelope2D.getCoordinateReferenceSystem();
+        geometry = convertCRSIfNeeded(geometry, rasterCRS);
+        Envelope rasterEnvelope = JTS.toEnvelope(rasterEnvelope2D);
+        Geometry rasterGeometry = GEOMETRY_FACTORY.toGeometry(rasterEnvelope);
+        return  rasterGeometry.within(geometry);
+    }
+
+    private static Geometry convertCRSIfNeeded(Geometry geometry, CoordinateReferenceSystem rasterCRS) {
+        int geomSRID = geometry.getSRID();
+        if (rasterCRS != null && !(rasterCRS instanceof DefaultEngineeringCRS) && geomSRID > 0) {
             try {
-                CoordinateReferenceSystem queryWindowCRS = CRS.decode("EPSG:" + queryWindowSRID);
+                CoordinateReferenceSystem queryWindowCRS = CRS.decode("EPSG:" + geomSRID);
                 if (!CRS.equalsIgnoreMetadata(rasterCRS, queryWindowCRS)) {
                     MathTransform transform = CRS.findMathTransform(queryWindowCRS, rasterCRS, true);
-                    queryWindow = JTS.transform(queryWindow, transform);
+                    geometry = JTS.transform(geometry, transform);
                 }
             } catch (FactoryException | TransformException e) {
                 throw new RuntimeException("Cannot transform CRS of query window", e);
             }
         }
-        Envelope rasterEnvelope = JTS.toEnvelope(rasterEnvelope2D);
-        Geometry rasterGeometry = GEOMETRY_FACTORY.toGeometry(rasterEnvelope);
-        return rasterGeometry.intersects(queryWindow);
+        return geometry;
     }
 }
