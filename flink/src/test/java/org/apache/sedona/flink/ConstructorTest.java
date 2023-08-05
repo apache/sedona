@@ -100,6 +100,33 @@ public class ConstructorTest extends TestBase{
     }
 
     @Test
+    public void testPoint() {
+        List<Row> data = new ArrayList<>();
+        data.add(Row.of(1.0, 2.0, "point"));
+        String[] colNames = new String[]{"x", "y", "name_point"};
+
+        TypeInformation<?>[] colTypes = {
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.STRING_TYPE_INFO};
+        RowTypeInfo typeInfo = new RowTypeInfo(colTypes, colNames);
+        DataStream<Row> ds = env.fromCollection(data).returns(typeInfo);
+        Table pointTable = tableEnv.fromDataStream(ds);
+
+        Table geomTable = pointTable
+                .select(call(Constructors.ST_MakePoint.class.getSimpleName(), $(colNames[0]), $(colNames[1]))
+                        .as(colNames[2]));
+
+        String result = first(geomTable)
+                .getFieldAs(colNames[2])
+                .toString();
+
+        String expected = "POINT (1 2)";
+
+        assertEquals(expected, result);
+    }
+
+    @Test
     public void testPointFromText() {
         List<Row> data = createPointWKT(testDataSize);
         Row result = last(createPointTable(testDataSize));
