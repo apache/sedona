@@ -50,6 +50,7 @@ object Catalog {
     function[ST_GeomFromKML](),
     function[ST_CoordDim](),
     function[ST_Point](),
+    function[ST_MakePoint](),
     function[ST_PointZ](0),
     function[ST_PolygonFromEnvelope](),
     function[ST_Contains](),
