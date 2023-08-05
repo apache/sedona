@@ -14,6 +14,7 @@
 package org.apache.sedona.common;
 
 import org.junit.Test;
+import org.apache.sedona.common.utils.GeomUtils;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.io.ParseException;
@@ -104,6 +105,25 @@ public class ConstructorsTest {
         assertTrue(point instanceof Point);
         assertEquals(0, point.getSRID());
         assertEquals("POINT (1 2)", point.toText());
+    }
+
+    @Test
+    public void point3DZ() {
+        Geometry point = Constructors.point(1.0d, 2.0d, 3.0d);
+
+        assertTrue(point instanceof Point);
+        assertEquals(0, point.getSRID());
+        assertEquals("POINT Z(1 2 3)", Functions.asWKT(point));
+    }
+
+    @Test
+    public void point4DZM() {
+        Geometry point = Constructors.point(1.0d, 2.0d, 3.0d, 4.0d);
+
+        assertTrue(point instanceof Point);
+        assertTrue(GeomUtils.isMeasuredGeometry(point));
+        assertEquals(0, point.getSRID());
+        assertEquals("POINT Z(1 2 3)", Functions.asWKT(point));
     }
 
     @Test

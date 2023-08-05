@@ -18,6 +18,7 @@ import org.apache.sedona.common.enums.GeometryType;
 import org.apache.sedona.common.utils.FormatUtils;
 import org.apache.sedona.common.utils.GeoHashDecoder;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateXYZM;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
@@ -102,6 +103,16 @@ public class Constructors {
         // See srid parameter discussion in https://issues.apache.org/jira/browse/SEDONA-234
         GeometryFactory geometryFactory = new GeometryFactory();
         return geometryFactory.createPoint(new Coordinate(x, y));
+    }
+
+    public static Geometry point(double x, double y, double z) {
+        GeometryFactory geometryFactory = new GeometryFactory();
+        return geometryFactory.createPoint(new Coordinate(x, y, z));
+    }
+
+    public static Geometry point(double x, double y, double z, double m) {
+        GeometryFactory geometryFactory = new GeometryFactory();
+        return geometryFactory.createPoint(new CoordinateXYZM(x, y, z, m));
     }
 
     /**
