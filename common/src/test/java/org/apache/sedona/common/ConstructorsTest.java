@@ -108,8 +108,17 @@ public class ConstructorsTest {
     }
 
     @Test
+    public void point2d() {
+        Geometry point = Constructors.makePoint(1.0d, 2.0d, null, null);
+
+        assertTrue(point instanceof Point);
+        assertEquals(0, point.getSRID());
+        assertEquals("POINT (1 2)", Functions.asWKT(point));
+    }
+
+    @Test
     public void point3DZ() {
-        Geometry point = Constructors.point(1.0d, 2.0d, 3.0d);
+        Geometry point = Constructors.makePoint(1.0d, 2.0d, 3.0d, null);
 
         assertTrue(point instanceof Point);
         assertEquals(0, point.getSRID());
@@ -118,7 +127,7 @@ public class ConstructorsTest {
 
     @Test
     public void point4DZM() {
-        Geometry point = Constructors.point(1.0d, 2.0d, 3.0d, 4.0d);
+        Geometry point = Constructors.makePoint(1.0d, 2.0d, 3.0d, 4.0d);
 
         assertTrue(point instanceof Point);
         assertTrue(GeomUtils.isMeasuredGeometry(point));

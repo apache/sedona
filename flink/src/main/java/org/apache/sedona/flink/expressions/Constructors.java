@@ -69,17 +69,17 @@ public class Constructors {
     public static class ST_MakePoint extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y) throws ParseException {
-            return org.apache.sedona.common.Constructors.point(x, y);
+            return org.apache.sedona.common.Constructors.makePoint(x, y, null, null);
         }
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y, @DataTypeHint("Double") Double z) throws ParseException {
-            return org.apache.sedona.common.Constructors.point(x, y, z);
+            return org.apache.sedona.common.Constructors.makePoint(x, y, z, null);
         }
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y, @DataTypeHint("Double") Double z, @DataTypeHint("Double") Double m) throws ParseException {
-            return org.apache.sedona.common.Constructors.point(x, y, z, m);
+            return org.apache.sedona.common.Constructors.makePoint(x, y, z, m);
         }
     }
 

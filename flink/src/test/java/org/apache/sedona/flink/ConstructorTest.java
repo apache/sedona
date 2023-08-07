@@ -100,7 +100,7 @@ public class ConstructorTest extends TestBase{
     }
 
     @Test
-    public void testPoint() {
+    public void testMakePoint() {
         List<Row> data = new ArrayList<>();
         data.add(Row.of(1.0, 2.0, "point"));
         String[] colNames = new String[]{"x", "y", "name_point"};

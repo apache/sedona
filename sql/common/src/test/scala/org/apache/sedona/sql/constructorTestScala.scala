@@ -60,10 +60,10 @@ class constructorTestScala extends TestBaseScala {
     }
 
     it("Passed ST_MakePoint 3D Z and 4D ZM Point") {
-      val pointDf = sparkSession.sql("SELECT ST_MakePoint(1.2345, 2.3456, 3.4567)")
-      assert(pointDf.count() == 1)
-      pointDf = sparkSession.sql("SELECT ST_MakePoint(1.2345, 2.3456, 3.4567, 4.5678)")
-      assert(pointDf.count() == 1)
+      val pointDf3D = sparkSession.sql("SELECT ST_MakePoint(1.2345, 2.3456, 3.4567)")
+      assert(pointDf3D.count() == 1)
+      val pointDf4D = sparkSession.sql("SELECT ST_MakePoint(1.2345, 2.3456, 3.4567, 4.5678)")
+      assert(pointDf4D.count() == 1)
     }
 
     it("Passed ST_MakePoint null safety") {
