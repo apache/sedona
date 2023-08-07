@@ -215,7 +215,7 @@ case class ST_PointZ(inputExpressions: Seq[Expression])
 }
 
 case class ST_MakePoint(inputExpressions: Seq[Expression])
-  extends InferredExpression(Constructors.makePoint _) with FoldableExpression {
+  extends InferredExpression(Constructors.makePoint _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
