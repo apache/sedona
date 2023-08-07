@@ -572,5 +572,15 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val result = df.selectExpr("RS_RasterToWorldCoordY(raster, 1, 1)").first().getDouble(0)
       assertEquals(4021262.7487925636, result, 0.5d)
     }
+
+    it("Passed RS_Contains") {
+      assert(sparkSession.sql("SELECT RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((5 5, 5 10, 10 10, 10 5, 5 5))'))").first().getBoolean(0))
+      assert(!sparkSession.sql("SELECT RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((2 2, 2 25, 20 25, 20 2, 2 2))'))").first().getBoolean(0))
+    }
+
+    it("Passed RS_Within") {
+      assert(sparkSession.sql("SELECT RS_WITHIN(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((0 0, 0 50, 100 50, 100 0, 0 0))'))").first().getBoolean(0))
+      assert(!sparkSession.sql("SELECT RS_WITHIN(RS_MakeEmptyRaster(1, 100, 100, 0, 50, 1), ST_GeomFromWKT('POLYGON ((2 2, 2 25, 20 25, 20 2, 2 2))'))").first().getBoolean(0))
+    }
   }
 }

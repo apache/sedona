@@ -829,6 +829,30 @@ class TestPredicateJoin(TestBase):
         for actual, expected in result:
             assert actual == expected
 
+    def test_st_polygon(self):
+        # Given
+        geometry_df = self.spark.createDataFrame(
+            [
+                ["POINT(21 52)", 4238, None],
+                ["POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))", 4237, None],
+                ["LINESTRING (0 0, 0 1, 1 0, 0 0)", 4236, "POLYGON ((0 0, 0 1, 1 0, 0 0))"]
+            ]
+        ).selectExpr("ST_GeomFromText(_1) AS geom", "_2 AS srid", "_3 AS expected")
+
+        # When calling st_Polygon
+        geom_poly = geometry_df.withColumn("polygon", expr("ST_Polygon(geom, srid)"))
+
+        # Then only based on closed linestring geom is created
+        geom_poly.filter("polygon IS NOT NULL").selectExpr("ST_AsText(polygon)", "expected"). \
+            show()
+        result = geom_poly.filter("polygon IS NOT NULL").selectExpr("ST_AsText(polygon)", "expected"). \
+            collect()
+
+        assert result.__len__() == 1
+
+        for actual, expected in result:
+            assert actual == expected
+
     def test_st_make_polygon(self):
         # Given
         geometry_df = self.spark.createDataFrame(

@@ -251,6 +251,46 @@ Output:
 true
 ```
 
+### RS_Within
+
+Introduction: Returns true if the envelope of the raster is within the given geometry. If the geometry does not have a
+defined SRID, it is considered to be in the same CRS with the raster. If the geometry has a defined SRID, the geometry
+will be transformed to the CRS of the raster before checking the within relationship.
+
+Format: `RS_Within(raster: Raster, geom: Geometry)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((0 0, 0 50, 100 50, 100 0, 0 0))'));
+```
+
+Output:
+```
+true
+```
+
+### RS_Contains
+
+Introduction: Returns true if the envelope of the raster contains the given geometry. If the geometry does not have a
+defined SRID, it is considered to be in the same CRS with the raster. If the geometry has a defined SRID, the geometry
+will be transformed to the CRS of the raster before checking the contains relationship.
+
+Format: `RS_Contains(raster: Raster, geom: Geometry)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((5 5, 5 10, 10 10, 10 5, 5 5))'));
+```
+
+Output:
+```
+true
+```
+
 ### RS_MetaData
 
 Introduction: Returns the metadata of the raster as an array of double. The array contains the following values:
