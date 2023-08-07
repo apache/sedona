@@ -105,16 +105,6 @@ public class Constructors {
         return geometryFactory.createPoint(new Coordinate(x, y));
     }
 
-    public static Geometry point3dz(double x, double y, double z) {
-        GeometryFactory geometryFactory = new GeometryFactory();
-        return geometryFactory.createPoint(new Coordinate(x, y, z));
-    }
-
-    public static Geometry point4dzm(double x, double y, double z, double m) {
-        GeometryFactory geometryFactory = new GeometryFactory();
-        return geometryFactory.createPoint(new CoordinateXYZM(x, y, z, m));
-    }
-
     public static Geometry makePoint(Double x, Double y, Double z, Double m){
         GeometryFactory geometryFactory = new GeometryFactory();
         if (x == null || y == null) {
