@@ -460,7 +460,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(true, resultOutOfBound)
     }
 
-    it("Passed RS_AddBandFromArray") {
+    it("Passed RS_AddBandFromArray - 3 parameters [default no data value]") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster", "RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTiff(content), 1), 2) as band")
       val bandNewExpected:Seq[Double] = df.selectExpr("band").first().getSeq(0)
@@ -473,6 +473,24 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       intercept[Exception] {
         df.selectExpr("RS_BandAsArray(RS_AddBandFromArray(raster, band, 100), 1)").collect()
       }
+    }
+
+    it("Passed RS_AddBandFromArray - adding a new band with 2 parameter convenience function") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster", "RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTiff(content), 1), 2) as band")
+      val bandNewExpected: Seq[Double] = df.selectExpr("band").first().getSeq(0)
+      val bandNewActual: Seq[Double] = df.selectExpr("RS_BandAsArray(RS_AddBandFromArray(raster, band), 2)").first().getSeq(0)
+      for (i <- bandNewExpected.indices) {
+        // The band value needs to be mod 256 because the ColorModel will mod 256.
+        assertEquals(bandNewExpected(i) % 256, bandNewActual(i), 0.001)
+      }
+    }
+
+    it("Passed RS_AddBandFromArray - adding a new band with a custom no data value]") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster", "RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTiff(content), 1), 2) as band")
+      val raster = df.selectExpr("RS_AddBandFromArray(raster, band, 2, 2)").first().getAs[GridCoverage2D](0);
+      assertEquals(2, raster.getSampleDimension(1).getNoDataValues()(0), 1e-9)
     }
 
     it("Passed RS_Intersects") {

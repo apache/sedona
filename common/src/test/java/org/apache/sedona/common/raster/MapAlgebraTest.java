@@ -39,8 +39,10 @@ public class MapAlgebraTest extends RasterTestBase
             band1[i] = i;
         }
         double[] band2 = new double[raster.getRenderedImage().getWidth() * raster.getRenderedImage().getHeight()];
+        double[] band3 = new double[raster.getRenderedImage().getWidth() * raster.getRenderedImage().getHeight()];
         for (int i = 0; i < band2.length; i++) {
             band2[i] = i * 2;
+            band3[i] = i * 3;
         }
         // Replace the first band
         GridCoverage2D rasterWithBand1 = MapAlgebra.addBandFromArray(raster, band1, 1);
@@ -49,12 +51,21 @@ public class MapAlgebraTest extends RasterTestBase
         assertEquals(raster.getCoordinateReferenceSystem2D(), rasterWithBand1.getCoordinateReferenceSystem2D());
         assertEquals(RasterAccessors.srid(raster), RasterAccessors.srid(rasterWithBand1));
 
-        // Append a new band
+        // Append a new band with default noDataValue
         GridCoverage2D rasterWithBand2 = MapAlgebra.addBandFromArray(rasterWithBand1, band2);
         assertEquals(2, RasterAccessors.numBands(rasterWithBand2));
         assertEquals(raster.getEnvelope(), rasterWithBand2.getEnvelope());
         assertEquals(raster.getCoordinateReferenceSystem2D(), rasterWithBand2.getCoordinateReferenceSystem2D());
         assertEquals(RasterAccessors.srid(raster), RasterAccessors.srid(rasterWithBand2));
+        assertNull(rasterWithBand2.getSampleDimension(1).getNoDataValues());
+
+        // Append a new band with custom noDataValue
+        GridCoverage2D rasterWithBand3 = MapAlgebra.addBandFromArray(rasterWithBand2, band3, 3, 2);
+        assertEquals(3, RasterAccessors.numBands(rasterWithBand3));
+        assertEquals(raster.getEnvelope(), rasterWithBand3.getEnvelope());
+        assertEquals(raster.getCoordinateReferenceSystem2D(), rasterWithBand3.getCoordinateReferenceSystem2D());
+        assertEquals(RasterAccessors.srid(raster), RasterAccessors.srid(rasterWithBand3));
+        assertEquals(2, rasterWithBand3.getSampleDimension(2).getNoDataValues()[0], 1e-9);
 
         // Check the value of the first band when use the raster with only one band
         double[] firstBand = MapAlgebra.bandAsArray(rasterWithBand1, 1);
@@ -62,7 +73,9 @@ public class MapAlgebraTest extends RasterTestBase
             assertEquals(i, firstBand[i], 0.1);
         }
         // Check the value of the first band when use the raster with two bands
-        firstBand = MapAlgebra.bandAsArray(rasterWithBand2, 1);
+
+        //Check the value of the first band when use the raster with three bands
+        firstBand = MapAlgebra.bandAsArray(rasterWithBand3, 1);
         for (int i = 0; i < firstBand.length; i++) {
             assertEquals(i, firstBand[i], 0.1);
         }
@@ -70,6 +83,12 @@ public class MapAlgebraTest extends RasterTestBase
         double[] secondBand = MapAlgebra.bandAsArray(rasterWithBand2, 2);
         for (int i = 0; i < secondBand.length; i++) {
             assertEquals(i * 2, secondBand[i], 0.1);
+        }
+
+        // Check the value of the third band
+        double[] thirdBand = MapAlgebra.bandAsArray(rasterWithBand3, 3);
+        for (int i = 0; i < secondBand.length; i++) {
+            assertEquals(i * 3, thirdBand[i], 0.1);
         }
     }
 
