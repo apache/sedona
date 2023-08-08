@@ -24,10 +24,15 @@ import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 public class RasterAccessors
@@ -75,12 +80,62 @@ public class RasterAccessors
         return RasterUtils.getGDALAffineTransform(raster).getScaleY();
     }
 
+    public static double getSkewX(GridCoverage2D raster) {
+        return RasterUtils.getGDALAffineTransform(raster).getShearX();
+    }
+
+    public static double getSkewY(GridCoverage2D raster) {
+        return RasterUtils.getGDALAffineTransform(raster).getShearY();
+    }
+
     public static double getWorldCoordX(GridCoverage2D raster, int colX, int rowY) throws TransformException {
-        return RasterUtils.getCornerCoordinates(raster, colX, rowY).getX();
+        return RasterUtils.getWorldCornerCoordinates(raster, colX, rowY).getX();
     }
 
     public static double getWorldCoordY(GridCoverage2D raster, int colX, int rowY) throws TransformException {
-        return RasterUtils.getCornerCoordinates(raster, colX, rowY).getY();
+        return RasterUtils.getWorldCornerCoordinates(raster, colX, rowY).getY();
+    }
+
+    public static Geometry getGridCoord(GridCoverage2D raster, double longitude, double latitude) throws TransformException {
+        int[] coords = RasterUtils.getGridCoordinatesFromWorld(raster, longitude, latitude);
+        coords = Arrays.stream(coords).map(number -> number + 1).toArray();
+        Geometry point = new GeometryFactory().createPoint(new Coordinate(coords[0], coords[1]));
+        return point;
+    }
+
+    public static Geometry getGridCoord(GridCoverage2D raster, Geometry point) throws TransformException {
+        ensurePoint(point);
+        point = RasterUtils.convertCRSIfNeeded(point, raster.getCoordinateReferenceSystem2D());
+        Point actualPoint = (Point) point;
+        return getGridCoord(raster, actualPoint.getX(), actualPoint.getY());
+    }
+
+    public static int getGridCoordX(GridCoverage2D raster, double longitude, double latitude) throws TransformException {
+        return RasterUtils.getGridCoordinatesFromWorld(raster, longitude, latitude)[0] + 1;
+    }
+
+    public static int getGridCoordX(GridCoverage2D raster, Geometry point) throws TransformException {
+        ensurePoint(point);
+        point = RasterUtils.convertCRSIfNeeded(point, raster.getCoordinateReferenceSystem2D());
+        Point actualPoint = (Point) point;
+        return getGridCoordX(raster, actualPoint.getX(), actualPoint.getY());
+    }
+
+    public static int getGridCoordY(GridCoverage2D raster, double longitude, double latitude) throws TransformException {
+        return RasterUtils.getGridCoordinatesFromWorld(raster, longitude, latitude)[1] + 1;
+    }
+
+    public static int getGridCoordY(GridCoverage2D raster, Geometry point) throws TransformException {
+        ensurePoint(point);
+        point = RasterUtils.convertCRSIfNeeded(point, raster.getCoordinateReferenceSystem2D());
+        Point actualPoint = (Point) point;
+        return getGridCoordY(raster, actualPoint.getX(), actualPoint.getY());
+    }
+
+    private static void ensurePoint(Geometry geometry) throws IllegalArgumentException {
+        if (!(geometry instanceof Point)) {
+            throw new IllegalArgumentException("Only point geometries are expected as real world coordinates");
+        }
     }
 
     /**
