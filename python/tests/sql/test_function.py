@@ -55,7 +55,6 @@ class TestPredicateJoin(TestBase):
             option("header", "false"). \
             load(mixed_wkt_geometry_input_location)
 
-
         polygon_wkt_df.createOrReplaceTempView("polygontable")
         polygon_wkt_df.show()
 
@@ -65,11 +64,6 @@ class TestPredicateJoin(TestBase):
 
         function_df = self.spark.sql("select ST_ConcaveHull(polygondf.countyshape, 1.0) from polygondf")
         function_df.show()
-
-        schema = polygon_df.schema
-        for field in schema.fields:
-            if field.dataType == GeometryType():
-                print(field.name)
 
     def test_st_convex_hull(self):
         polygon_wkt_df = self.spark.read.format("csv"). \
@@ -1163,16 +1157,9 @@ class TestPredicateJoin(TestBase):
         assert cell_ids is None
 
     def test_st_numPoints(self):
-        import pyspark.sql.functions as f
-        schema = "type string, geometry string, properties map<string, string>"
-        df = self.spark.read.schema(schema).json("/Users/jiayu/Downloads/malaysia-small.geojsonl").withColumn("geometry", f.expr("ST_GeomFromGeoJSON(geometry)"))
-        df.show()
-        df.printSchema()
-        import geopandas as gpd
-        pandas_df = df.toPandas()
-        gdf = gpd.GeoDataFrame(pandas_df, geometry="geometry")
-        gdf.info()
-        print(gdf.head())
+        actual = self.spark.sql("SELECT ST_NumPoints(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'))").take(1)[0][0]
+        expected = 3
+        assert expected == actual
 
     def test_force3D(self):
         expected = 3

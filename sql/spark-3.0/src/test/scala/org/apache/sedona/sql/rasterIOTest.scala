@@ -353,19 +353,12 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
     }
 
     it("should read geotiff using binary source and write geotiff back to disk using raster source") {
-      var rasterDf = sparkSession.read.format("binaryFile").load(resourceFolder + "sample.tif").selectExpr("RS_FromGeoTiff(content) as raster")
+      var rasterDf = sparkSession.read.format("binaryFile").load(rasterdatalocation)
       val rasterCount = rasterDf.count()
-//      rasterDf.write.format("raster").mode(SaveMode.Overwrite).save(tempDir + "/raster-written")
-//      rasterDf = sparkSession.read.format("binaryFile").load(tempDir + "/raster-written/*")
-      rasterDf = rasterDf.selectExpr("raster", "RS_Envelope(raster) as geom", "RS_SRID(raster) as srid", "RS_NumBands(raster) as numBands")
-      rasterDf.show()
-      rasterDf.printSchema()
-      rasterDf = rasterDf.selectExpr("RS_BandAsArray(raster, 1) AS band1", "RS_BandAsArray(raster, 2) AS band2", "RS_BandAsArray(raster, 3) AS band3", "raster")
-      rasterDf = rasterDf.selectExpr("RS_GreaterThan(band1, 0) AS band1", "raster")
-      rasterDf.show()
-      rasterDf = rasterDf.selectExpr("RS_AsGeoTiff(RS_AddBandFromArray(raster, band1, 1)) as raster")
-      rasterDf.write.mode(SaveMode.Overwrite).option("rasterFiled", "raster").format("raster").save(resourceFolder + "/raster-written")
-//      assert(rasterDf.count() == rasterCount)
+      rasterDf.write.format("raster").mode(SaveMode.Overwrite).save(tempDir + "/raster-written")
+      rasterDf = sparkSession.read.format("binaryFile").load(tempDir + "/raster-written/*")
+      rasterDf = rasterDf.selectExpr("RS_FromGeoTiff(content)")
+      assert(rasterDf.count() == rasterCount)
     }
 
     it("should read and write geotiff using given options") {
