@@ -133,7 +133,7 @@ public class RasterUtils {
             try {
                 CoordinateReferenceSystem queryWindowCRS = CRS.decode("EPSG:" + geomSRID);
                 if (!CRS.equalsIgnoreMetadata(rasterCRS, queryWindowCRS)) {
-                    geometry = Functions.transform(geometry, queryWindowCRS, rasterCRS, true);
+                    geometry = GeomUtils.transform(geometry, queryWindowCRS, rasterCRS, true);
                 }
             } catch (FactoryException | TransformException e) {
                 throw new RuntimeException("Cannot transform CRS of query window", e);

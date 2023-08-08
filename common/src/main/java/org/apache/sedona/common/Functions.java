@@ -194,13 +194,9 @@ public class Functions {
         throws FactoryException, TransformException {
         CoordinateReferenceSystem sourceCRSCode = parseCRSString(sourceCRS);
         CoordinateReferenceSystem targetCRScode = parseCRSString(targetCRS);
-        return transform(geometry, sourceCRSCode, targetCRScode, lenient);
+        return GeomUtils.transform(geometry, sourceCRSCode, targetCRScode, lenient);
     }
 
-    public static Geometry transform(Geometry geometry, CoordinateReferenceSystem sourceCRS, CoordinateReferenceSystem targetCRS, boolean lenient) throws FactoryException, TransformException {
-        MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, lenient);
-        return JTS.transform(geometry, transform);
-    }
 
     private static CoordinateReferenceSystem parseCRSString(String CRSString)
             throws FactoryException
