@@ -39,6 +39,7 @@ import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
+import org.locationtech.jts.triangulate.VoronoiDiagramBuilder;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -1094,4 +1095,14 @@ public class Functions {
         return GeomUtils.getHausdorffDistance(g1, g2, -1);
     }
 
+    public static Geometry voronoiPolygons(Geometry geom, double tolerance, Geometry extendTo) {
+        VoronoiDiagramBuilder builder = new VoronoiDiagramBuilder();
+        builder.setSites(geom);
+        builder.setTolerance(tolerance);
+        if (extendTo != null) {
+            builder.setClipEnvelope(extendTo.getEnvelopeInternal());
+        }
+        return builder.getDiagram(GEOMETRY_FACTORY);
+    }
+    
 }
