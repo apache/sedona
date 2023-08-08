@@ -97,7 +97,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll{
   describe("SedonaViz in Scala") {
 
     it("should pass scatter plot") {
-      val spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY)
+      val spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions)
       var visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false)
       visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true)
       visualizationOperator.Visualize(sparkContext, spatialRDD)
@@ -119,7 +119,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll{
     }
 
     it("should pass heat map") {
-      val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY)
+      val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions)
       val visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2)
       visualizationOperator.Visualize(sparkContext, spatialRDD)
       val imageGenerator = new ImageGenerator
@@ -128,8 +128,8 @@ class scalaTest extends FunSpec with BeforeAndAfterAll{
     }
 
     it("should pass choropleth map") {
-      val spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY)
-      val queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY)
+      val spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions)
+      val queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions)
       spatialRDD.spatialPartitioning(GridType.KDBTREE)
       queryRDD.spatialPartitioning(spatialRDD.getPartitioner)
       spatialRDD.buildIndex(IndexType.RTREE, true)
@@ -148,7 +148,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll{
     }
 
     it("should pass parallel filtering and rendering without stitching image tiles") {
-      val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY)
+      val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions)
       val visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2, 4, 4, true, true)
       visualizationOperator.Visualize(sparkContext, spatialRDD)
       val imageGenerator = new ImageGenerator
@@ -157,7 +157,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll{
     }
 
     it("should pass parallel filtering and rendering with stitching image tiles") {
-      val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY)
+      val spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions)
       val visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2, 4, 4, true, true)
       visualizationOperator.Visualize(sparkContext, spatialRDD)
       val imageGenerator = new ImageGenerator
@@ -169,7 +169,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll{
     ignore("should pass earth data hdf scatter plot") {
       val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName,
         HDFDataVariableList, HDFDataVariableName, HDFswitchXY, urlPrefix)
-      val spatialRDD = new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)
+      val spatialRDD = new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint)
       val visualizationOperator = new ScatterPlot(1000, 600, spatialRDD.boundaryEnvelope, ColorizeOption.EARTHOBSERVATION, false, false)
       visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.BLUE, true)
       visualizationOperator.Visualize(sparkContext, spatialRDD)

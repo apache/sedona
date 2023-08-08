@@ -53,8 +53,8 @@ public class ChoroplethmapTest
     public void testRectangleRDDVisualization()
             throws Exception
     {
-        PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY());
-        RectangleRDD queryRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
+        RectangleRDD queryRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
         spatialRDD.spatialPartitioning(GridType.KDBTREE);
         queryRDD.spatialPartitioning(spatialRDD.getPartitioner());
         spatialRDD.buildIndex(IndexType.RTREE, true);
@@ -85,8 +85,8 @@ public class ChoroplethmapTest
             throws Exception
     {
         //UserSuppliedPolygonMapper userSuppliedPolygonMapper = new UserSuppliedPolygonMapper();
-        PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY());
-        PolygonRDD queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
+        PolygonRDD queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions);
         spatialRDD.spatialPartitioning(GridType.KDBTREE);
         queryRDD.spatialPartitioning(spatialRDD.getPartitioner());
         spatialRDD.buildIndex(IndexType.RTREE, true);
