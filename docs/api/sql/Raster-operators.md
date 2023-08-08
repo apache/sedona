@@ -235,7 +235,7 @@ Output:
 Introduction: Returns the grid coordinate of the given world coordinates as a Point.
 
 Format: `RS_WorldToRasterCoord(raster: Raster, point: Geometry)`
-        `RS_WorldToRasterCoord(raster: Raster, longitude: double, latitude: point)`
+        `RS_WorldToRasterCoord(raster: Raster, x: double, y: point)`
 
 Since: `1.5.0`
 
@@ -259,7 +259,7 @@ Output:
 Introduction: Returns the X coordinate of the grid coordinate of the given world coordinates as an integer.
 
 Format: `RS_WorldToRasterCoord(raster: Raster, point: Geometry)`
-        `RS_WorldToRasterCoord(raster: Raster, longitude: double, latitude: double)`
+        `RS_WorldToRasterCoord(raster: Raster, x: double, y: double)`
 
 
 Since: `1.5.0`
@@ -287,7 +287,7 @@ Output: `1`
 Introduction: Returns the Y coordinate of the grid coordinate of the given world coordinates as an integer.
 
 Format: `RS_WorldToRasterCoordY(raster: Raster, point: Geometry)`
-        `RS_WorldToRasterCoordY(raster: Raster, longitude: double, latitude: double)`
+        `RS_WorldToRasterCoordY(raster: Raster, x: double, y: double)`
 
 Since: `1.5.0`
 

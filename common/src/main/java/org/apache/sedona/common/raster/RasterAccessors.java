@@ -96,8 +96,8 @@ public class RasterAccessors
         return RasterUtils.getWorldCornerCoordinates(raster, colX, rowY).getY();
     }
 
-    public static Geometry getGridCoord(GridCoverage2D raster, double longitude, double latitude) throws TransformException {
-        int[] coords = RasterUtils.getGridCoordinatesFromWorld(raster, longitude, latitude);
+    public static Geometry getGridCoord(GridCoverage2D raster, double x, double y) throws TransformException {
+        int[] coords = RasterUtils.getGridCoordinatesFromWorld(raster, x, y);
         coords = Arrays.stream(coords).map(number -> number + 1).toArray();
         Geometry point = new GeometryFactory().createPoint(new Coordinate(coords[0], coords[1]));
         return point;
@@ -110,8 +110,8 @@ public class RasterAccessors
         return getGridCoord(raster, actualPoint.getX(), actualPoint.getY());
     }
 
-    public static int getGridCoordX(GridCoverage2D raster, double longitude, double latitude) throws TransformException {
-        return RasterUtils.getGridCoordinatesFromWorld(raster, longitude, latitude)[0] + 1;
+    public static int getGridCoordX(GridCoverage2D raster, double x, double y) throws TransformException {
+        return RasterUtils.getGridCoordinatesFromWorld(raster, x, y)[0] + 1;
     }
 
     public static int getGridCoordX(GridCoverage2D raster, Geometry point) throws TransformException {
@@ -121,8 +121,8 @@ public class RasterAccessors
         return getGridCoordX(raster, actualPoint.getX(), actualPoint.getY());
     }
 
-    public static int getGridCoordY(GridCoverage2D raster, double longitude, double latitude) throws TransformException {
-        return RasterUtils.getGridCoordinatesFromWorld(raster, longitude, latitude)[1] + 1;
+    public static int getGridCoordY(GridCoverage2D raster, double x, double y) throws TransformException {
+        return RasterUtils.getGridCoordinatesFromWorld(raster, x, y)[1] + 1;
     }
 
     public static int getGridCoordY(GridCoverage2D raster, Geometry point) throws TransformException {
