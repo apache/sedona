@@ -1012,9 +1012,9 @@ public class FunctionTest extends TestBase{
 
     @Test
     public void testVoronoiPolygons() {
-        Table polyTable = tableEnv.sqlQuery("SELECT ST_VoronoiPolygons(ST_GeomFromWKT('MULTIPOINT ((0 0), (1 1), (0 1), (2 2))'))");
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_VoronoiPolygons(ST_GeomFromWKT('MULTIPOINT ((0 0), (2 2))'))");
         Geometry result = (Geometry) first(polyTable).getField(0);
-        assertEquals("GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 0.5 0.5, 0 0)), POLYGON ((0 1, 1 1, 0.5 0.5, 0 1)), POLYGON ((1 1, 2 2, 1.5 1.5, 1 1)), POLYGON ((0.5 0.5, 1.5 1.5, 1 1, 0.5 0.5)))", result.toString());
+        assertEquals("GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))", result.toString());
     }
 
     @Test
