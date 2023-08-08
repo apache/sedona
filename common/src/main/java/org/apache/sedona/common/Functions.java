@@ -737,6 +737,14 @@ public class Functions {
         }
     }
 
+    public static Geometry makepolygonWithSRID(Geometry lineString, Integer srid) {
+        Geometry geom = makePolygon(lineString, null);
+        if(geom != null) {
+            geom.setSRID(srid);
+        }
+        return geom;
+    }
+    
     public static Geometry createMultiGeometry(Geometry[] geometries) {
         if (geometries.length > 1){
             return GEOMETRY_FACTORY.buildGeometry(Arrays.asList(geometries));

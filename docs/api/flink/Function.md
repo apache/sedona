@@ -1883,6 +1883,26 @@ FROM df
 
     Output: `POINT Z(0 0 1)`
 
+## ST_Polygon
+
+Introduction: Function to create a polygon built from the given LineString and sets the spatial reference system from the srid
+
+Format: `ST_Polygon(geom: geometry, srid: integer)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_AsText( ST_Polygon(ST_GeomFromEWKT('LINESTRING(75 29 1, 77 29 2, 77 29 3, 75 29 1)'), 4326) );
+```
+
+Output:
+
+```
+POLYGON((75 29 1, 77 29 2, 77 29 3, 75 29 1))
+```
+
 ## ST_ReducePrecision
 
 Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded. 

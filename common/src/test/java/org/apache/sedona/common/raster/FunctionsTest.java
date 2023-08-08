@@ -116,7 +116,7 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
-    public void testPixelAsPointFromRasterFile() throws IOException, TransformException {
+    public void testPixelAsPointFromRasterFile() throws IOException, TransformException, FactoryException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
         Geometry actualPoint = PixelFunctions.getPixelAsPoint(raster, 1, 1);
         Coordinate coordinate = actualPoint.getCoordinate();

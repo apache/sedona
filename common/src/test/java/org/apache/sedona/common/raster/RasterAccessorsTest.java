@@ -18,17 +18,22 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
 import org.junit.Test;
+import org.locationtech.jts.geom.*;
 import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 public class RasterAccessorsTest extends RasterTestBase
 {
-
     @Test
     public void testNumBands() {
         assertEquals(1, RasterAccessors.numBands(oneBandRaster));
@@ -88,7 +93,149 @@ public class RasterAccessorsTest extends RasterTestBase
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 10, 15, 0, 0, 1, -2, 0, 0, 0);
         assertEquals(-2, RasterAccessors.getScaleY(emptyRaster), 1e-9);
     }
-    
+
+    @Test
+    public void testWorldCoordX() throws FactoryException, TransformException {
+        int colX = 1, rowY = 1;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, 4326);
+        double actualX = RasterAccessors.getWorldCoordX(emptyRaster, colX, rowY);
+        double expectedX = -123;
+        assertEquals(expectedX,actualX, 0.1d);
+        colX = 2;
+        expectedX = -118;
+        actualX = RasterAccessors.getWorldCoordX(emptyRaster, colX, rowY);
+        assertEquals(expectedX, actualX, 0.1d);
+    }
+
+    @Test
+    public void testWorldCoordXOutOfBounds() throws FactoryException, TransformException {
+        int colX = 6;
+        int rowY = 5;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, 4326);
+        double actualX = RasterAccessors.getWorldCoordX(emptyRaster, colX, rowY);
+        double expectedX = -98;
+        assertEquals(expectedX, actualX, 0.1d);
+    }
+
+    @Test
+    public void testWorldCoordY() throws FactoryException, TransformException {
+        int colX = 1, rowY = 1;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, 4326);
+        double actualY = RasterAccessors.getWorldCoordY(emptyRaster, colX, rowY);
+        double expectedY = 54;
+        assertEquals(expectedY,actualY, 0.1d);
+        rowY = 2;
+        expectedY = 44;
+        actualY = RasterAccessors.getWorldCoordY(emptyRaster, colX, rowY);
+        assertEquals(expectedY, actualY, 0.1d);
+    }
+
+    @Test
+    public void testWorldCoordYOutOfBounds() throws FactoryException, TransformException{
+        int colX = 4;
+        int rowY = 11;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, 4326);
+        double actualY = RasterAccessors.getWorldCoordY(emptyRaster, colX, rowY);
+        double expectedY = -46;
+        assertEquals(expectedY, actualY, 0.1d);
+    }
+
+    @Test
+    public void testGridCoordLatLon() throws TransformException, FactoryException {
+        double longitude = -123, latitude = 54;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -123, 54, 1, -1, 0, 0, 4326);
+        Coordinate coords = RasterAccessors.getGridCoord(emptyRaster, longitude, latitude).getCoordinate();
+        assertEquals(1, coords.getX(), 1e-9);
+        assertEquals(1, coords.getY(), 1e-9);
+
+        longitude = -118;
+        latitude = 52;
+        coords = RasterAccessors.getGridCoord(emptyRaster, longitude, latitude).getCoordinate();
+        assertEquals(6, coords.getX(), 1e-9);
+        assertEquals(3, coords.getY(), 1e-9);
+    }
+
+    @Test
+    public void testGridCoordPointSameSRID() throws TransformException, FactoryException {
+        double longitude = -123, latitude = 54;
+        int srid = 4326;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -123, 54, 1, -1, 0, 0, srid);
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        Geometry point = geometryFactory.createPoint(new Coordinate(longitude, latitude));
+        Coordinate coords = RasterAccessors.getGridCoord(emptyRaster, point).getCoordinate();
+        assertEquals(1, coords.getX(), 1e-9);
+        assertEquals(1, coords.getY(), 1e-9);
+    }
+
+    @Test
+    public void testGridCoordPointDifferentSRID() throws FactoryException, TransformException {
+        double longitude = -47, latitude = 51;
+        int srid = 4326;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0, srid);
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        Geometry point = geometryFactory.createPoint(new Coordinate(longitude, latitude));
+        point = JTS.transform(point, CRS.findMathTransform(emptyRaster.getCoordinateReferenceSystem(), CRS.decode("EPSG:3857")));
+        point.setSRID(3857);
+        Coordinate coords = RasterAccessors.getGridCoord(emptyRaster, point).getCoordinate();
+        assertEquals(7, coords.getX(), 1e-9);
+        assertEquals(1, coords.getY(), 1e-9);
+    }
+
+    @Test
+    public void testGridCoordPointIllegalGeom() throws FactoryException {
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Geometry polygon = geometryFactory.toGeometry(new Envelope(5, 10, 5, 10));
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0, 4326);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> RasterAccessors.getGridCoord(emptyRaster, polygon));
+        String expectedMessage = "Only point geometries are expected as real world coordinates";
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void testGridCoordXLonLat() throws FactoryException, TransformException {
+        double longitude = -47, latitude = 51;
+        int srid = 4326;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0, srid);
+        int expectedX = 7;
+        int actualX = RasterAccessors.getGridCoordX(emptyRaster, longitude, latitude);
+        assertEquals(expectedX, actualX);
+    }
+
+
+    @Test
+    public void testGridCoordXGeomSameSRID()  throws FactoryException, TransformException {
+        double longitude = -53, latitude = 51;
+        int srid = 4326;
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        Geometry point = geometryFactory.createPoint(new Coordinate(longitude, latitude));
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0, srid);
+        int expectedX = 1;
+        int actualX = RasterAccessors.getGridCoordX(emptyRaster, point);
+        assertEquals(expectedX, actualX);
+    }
+
+    @Test
+    public void testGridCoordSkewedRaster() throws FactoryException, TransformException {
+        double longitude = -30, latitude = 69;
+        GridCoverage2D skewedRaster = RasterConstructors.makeEmptyRaster(1, 100, 100, -53, 51, 2, -2, 4, 5, 4326);
+        Coordinate point = RasterAccessors.getGridCoord(skewedRaster, longitude, latitude).getCoordinate();
+        assertEquals(5, point.getX(), 1e-9);
+        assertEquals(4, point.getY(), 1e-9);
+    }
+
+    @Test
+    public void testGridCoordFromRasterCoord() throws FactoryException, TransformException {
+        int x = 1, y = 1;
+        GridCoordinates2D gridCoordinates2D = new GridCoordinates2D(x, y);
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0, 4326);
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+        Geometry point = geometryFactory.createPoint(new Coordinate(RasterAccessors.getWorldCoordX(emptyRaster, x, y), RasterAccessors.getWorldCoordY(emptyRaster, x, y)));
+        Coordinate gridCoords = RasterAccessors.getGridCoord(emptyRaster, point).getCoordinate();
+        assertEquals(x, gridCoords.getX(), 1e-9);
+        assertEquals(y, gridCoords.getY(), 1e-9);
+    }
+
+
     @Test
     public void testMetaData()
             throws FactoryException

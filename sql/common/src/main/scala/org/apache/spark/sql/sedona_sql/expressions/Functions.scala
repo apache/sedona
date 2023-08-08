@@ -696,6 +696,14 @@ case class ST_MakeLine(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Polygon(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.makepolygonWithSRID _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_MakePolygon(inputExpressions: Seq[Expression])
   extends InferredExpression(InferrableFunction.allowRightNull(Functions.makePolygon)) {
 

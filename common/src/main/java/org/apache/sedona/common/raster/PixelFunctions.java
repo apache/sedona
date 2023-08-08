@@ -18,16 +18,13 @@
  */
 package org.apache.sedona.common.raster;
 
-import org.geotools.coverage.grid.GridCoordinates2D;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.GridEnvelope2D;
-import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.DirectPosition2D;
-import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.*;
 import org.opengis.coverage.PointOutsideCoverageException;
 import org.opengis.geometry.DirectPosition;
-import org.opengis.metadata.spatial.PixelOrientation;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import java.awt.geom.Point2D;
@@ -46,29 +43,16 @@ public class PixelFunctions
         return values(rasterGeom, Collections.singletonList(geometry), band).get(0);
     }
 
-    public static Geometry getPixelAsPoint(GridCoverage2D raster, int colX, int rowY) throws TransformException {
-        GridGeometry2D gridGeometry2D = raster.getGridGeometry();
-        GridEnvelope2D gridEnvelope2D = gridGeometry2D.getGridRange2D();
-        GridCoordinates2D gridCoordinates2D = new GridCoordinates2D(colX - 1, rowY - 1);
-        int srid = 0;
-        String srs = CRS.toSRS(raster.getCoordinateReferenceSystem2D(), true);
-        if (!"Generic cartesian 2D".equalsIgnoreCase(srs)) {
-           srid = Integer.parseInt(srs);
+    public static Geometry getPixelAsPoint(GridCoverage2D raster, int colX, int rowY) throws TransformException, FactoryException {
+        int srid = RasterAccessors.srid(raster);
+        Point2D point2D = RasterUtils.getWorldCornerCoordinatesWithRangeCheck(raster, colX, rowY);
+        Coordinate pointCoord = new Coordinate(point2D.getX(), point2D.getY());
+        if (srid != 0) {
+            GeometryFactory factory = new GeometryFactory(new PrecisionModel(), srid);
+            return factory.createPoint(pointCoord);
         }
-        if (gridEnvelope2D.contains(gridCoordinates2D)) {
-            Point2D point2D = gridGeometry2D.getGridToCRS2D(PixelOrientation.UPPER_LEFT).transform(gridCoordinates2D, null);
-            DirectPosition2D directPosition2D = new DirectPosition2D(gridGeometry2D.getCoordinateReferenceSystem2D(), point2D.getX(), point2D.getY());
-            Coordinate pointCoord = new Coordinate(directPosition2D.getX(), directPosition2D.getY());
-            if (srid != 0) {
-                GeometryFactory factory = new GeometryFactory(new PrecisionModel(), srid);
-                return factory.createPoint(pointCoord);
-            }
-            return GEOMETRY_FACTORY.createPoint(pointCoord);
-        }else {
-            throw new IndexOutOfBoundsException(String.format("Specified pixel coordinates (%d, %d) do not lie in the raster", colX, rowY));
-        }
+        return GEOMETRY_FACTORY.createPoint(pointCoord);
     }
-
     public static List<Double> values(GridCoverage2D rasterGeom, List<Geometry> geometries, int band) throws TransformException {
         int numBands = rasterGeom.getNumSampleDimensions();
         if (band < 1 || band > numBands) {

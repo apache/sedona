@@ -21,15 +21,12 @@ package org.apache.sedona.common.raster;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.CRS;
-import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
+
+import static org.apache.sedona.common.utils.RasterUtils.convertCRSIfNeeded;
 
 public class RasterPredicates {
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
@@ -68,21 +65,5 @@ public class RasterPredicates {
         Envelope rasterEnvelope = JTS.toEnvelope(rasterEnvelope2D);
         Geometry rasterGeometry = GEOMETRY_FACTORY.toGeometry(rasterEnvelope);
         return  rasterGeometry.within(geometry);
-    }
-
-    private static Geometry convertCRSIfNeeded(Geometry geometry, CoordinateReferenceSystem rasterCRS) {
-        int geomSRID = geometry.getSRID();
-        if (rasterCRS != null && !(rasterCRS instanceof DefaultEngineeringCRS) && geomSRID > 0) {
-            try {
-                CoordinateReferenceSystem queryWindowCRS = CRS.decode("EPSG:" + geomSRID);
-                if (!CRS.equalsIgnoreMetadata(rasterCRS, queryWindowCRS)) {
-                    MathTransform transform = CRS.findMathTransform(queryWindowCRS, rasterCRS, true);
-                    geometry = JTS.transform(geometry, transform);
-                }
-            } catch (FactoryException | TransformException e) {
-                throw new RuntimeException("Cannot transform CRS of query window", e);
-            }
-        }
-        return geometry;
     }
 }

@@ -317,6 +317,15 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_Polygon") {
+      val invalidDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)') AS geom")
+      val df = invalidDf.select(ST_Polygon("geom", 4236))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry]
+      val expectedResult = "POLYGON ((0 0, 1 0, 1 1, 0 0))"
+      assert(actualResult.toText()  == expectedResult)
+      assert(actualResult.getSRID() == 4236)
+    }
+
     it("Passed `ST_MakePolygon`") {
       val invalidDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)') AS geom")
       val df = invalidDf.select(ST_MakePolygon("geom"))
