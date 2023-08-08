@@ -1623,9 +1623,12 @@ public class FunctionsTest {
     public void voronoiPolygons() throws Exception {
         MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0, 0, 2, 2));
         Geometry actual1 = Functions.voronoiPolygons(multiPoint, 0, null);
-        assertEquals(false, actual1.isEmpty());
+        assertEquals("GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))", actual1.toText());
 
-        Geometry actual2 = Functions.voronoiPolygons(null, 0, null);
-        assertEquals(true, actual2.isEmpty());
+        Geometry actual2 = Functions.voronoiPolygons(multiPoint, 2, null);
+        assertEquals("GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))", actual2.toText());
+        
+        Geometry actual3 = Functions.voronoiPolygons(null, 0, null);
+        assertEquals(null, actual3);
     }
 }

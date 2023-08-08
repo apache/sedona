@@ -1096,11 +1096,19 @@ public class Functions {
     }
 
     public static Geometry voronoiPolygons(Geometry geom, double tolerance, Geometry extendTo) {
+        if(geom == null) {
+            return null;
+        }
         VoronoiDiagramBuilder builder = new VoronoiDiagramBuilder();
         builder.setSites(geom);
         builder.setTolerance(tolerance);
         if (extendTo != null) {
             builder.setClipEnvelope(extendTo.getEnvelopeInternal());
+        }
+        else{
+            Envelope e = geom.getEnvelopeInternal();
+            e.expandBy(Math.max(e.getWidth(), e.getHeight()));
+            builder.setClipEnvelope(e);
         }
         return builder.getDiagram(GEOMETRY_FACTORY);
     }
