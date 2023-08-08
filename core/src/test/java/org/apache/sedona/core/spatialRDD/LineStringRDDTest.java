@@ -67,6 +67,7 @@ public class LineStringRDDTest
             throws Exception
     {
         LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions);
+        spatialRDD.analyze();
         assertEquals(inputCount, spatialRDD.approximateTotalCount);
         assertEquals(inputBoundary, spatialRDD.boundaryEnvelope);
     }
@@ -76,6 +77,7 @@ public class LineStringRDDTest
             throws Exception
     {
         LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions);
+        spatialRDD.analyze();
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.RTREE, true);
         // Create an empty spatialRDD and manually assemble it
@@ -108,6 +110,7 @@ public class LineStringRDDTest
             throws Exception
     {
         LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions);
+        spatialRDD.analyze();
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.RTREE, true);
         if (spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree) {
@@ -128,6 +131,7 @@ public class LineStringRDDTest
             throws Exception
     {
         LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, numPartitions);
+        spatialRDD.analyze();
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.QUADTREE, true);
         if (spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree) {

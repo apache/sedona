@@ -76,6 +76,7 @@ public class PolygonRDDTest
     public void testConstructor()
     {
         PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions);
+        spatialRDD.analyze();
         assertEquals(inputCount, spatialRDD.approximateTotalCount);
         assertEquals(inputBoundary, spatialRDD.boundaryEnvelope);
     }
@@ -85,6 +86,7 @@ public class PolygonRDDTest
             throws Exception
     {
         PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions);
+        spatialRDD.analyze();
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.RTREE, true);
         // Create an empty spatialRDD and manually assemble it
@@ -98,6 +100,7 @@ public class PolygonRDDTest
     public void testGeoJSONConstructor()
     {
         PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocationGeojson, FileDataSplitter.GEOJSON, true, 4);
+        spatialRDD.analyze();
         assert spatialRDD.approximateTotalCount == 1001;
         assert spatialRDD.boundaryEnvelope != null;
         assertEquals(spatialRDD.rawSpatialRDD.take(1).get(0).getUserData(), "01\t077\t011501\t5\t1500000US010770115015\t010770115015\t5\tBG\t6844991\t32636");
@@ -109,6 +112,7 @@ public class PolygonRDDTest
     public void testWktConstructor()
     {
         PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocationWkt, FileDataSplitter.WKT, true);
+        spatialRDD.analyze();
         assert spatialRDD.approximateTotalCount == 103;
         assert spatialRDD.boundaryEnvelope != null;
         assert spatialRDD.rawSpatialRDD.take(1).get(0).getUserData().equals("31\t039\t00835841\t31039\tCuming\tCuming County\t06\tH1\tG4020\t\t\t\tA\t1477895811\t10447360\t+41.9158651\t-096.7885168");
@@ -118,6 +122,7 @@ public class PolygonRDDTest
     public void testWkbConstructor()
     {
         PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocationWkb, FileDataSplitter.WKB, true);
+        spatialRDD.analyze();
         assert spatialRDD.approximateTotalCount == 103;
         assert spatialRDD.boundaryEnvelope != null;
         assert spatialRDD.rawSpatialRDD.take(1).get(0).getUserData().equals("31\t039\t00835841\t31039\tCuming\tCuming County\t06\tH1\tG4020\t\t\t\tA\t1477895811\t10447360\t+41.9158651\t-096.7885168");
@@ -146,6 +151,7 @@ public class PolygonRDDTest
             throws Exception
     {
         PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions);
+        spatialRDD.analyze();
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.RTREE, true);
         if (spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree) {
@@ -166,6 +172,7 @@ public class PolygonRDDTest
             throws Exception
     {
         PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, numPartitions);
+        spatialRDD.analyze();
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.QUADTREE, true);
         if (spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree) {
