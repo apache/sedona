@@ -18,11 +18,6 @@
  */
 package org.apache.sedona.viz.rdd
 
-import java.awt.Color // scalastyle:ignore illegal.imports
-import java.io.FileInputStream
-import java.util.Properties
-
-import org.locationtech.jts.geom.Envelope
 import org.apache.log4j.{Level, Logger}
 import org.apache.sedona.common.enums.FileDataSplitter
 import org.apache.sedona.core.enums.{GridType, IndexType}
@@ -30,13 +25,17 @@ import org.apache.sedona.core.formatMapper.EarthdataHDFPointMapper
 import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialRDD.{PointRDD, PolygonRDD, RectangleRDD}
 import org.apache.sedona.viz.`extension`.visualizationEffect.{ChoroplethMap, HeatMap, ScatterPlot}
-import org.apache.sedona.viz.core.{ImageGenerator, RasterOverlayOperator}
 import org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+import org.apache.sedona.viz.core.{ImageGenerator, RasterOverlayOperator}
 import org.apache.sedona.viz.utils.{ColorizeOption, ImageType}
 import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
+import org.locationtech.jts.geom.Envelope
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
+
+import java.awt.Color
+import java.io.FileInputStream
+import java.util.Properties
 
 class scalaTest extends FunSpec with BeforeAndAfterAll{
   val sparkConf = new SparkConf().setAppName("scalaTest").setMaster("local[*]")
@@ -130,6 +129,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll{
     it("should pass choropleth map") {
       val spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions)
       val queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions)
+      spatialRDD.analyze();
       spatialRDD.spatialPartitioning(GridType.KDBTREE)
       queryRDD.spatialPartitioning(spatialRDD.getPartitioner)
       spatialRDD.buildIndex(IndexType.RTREE, true)

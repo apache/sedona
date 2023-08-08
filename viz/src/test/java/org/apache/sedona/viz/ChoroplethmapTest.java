@@ -55,6 +55,7 @@ public class ChoroplethmapTest
     {
         PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
         RectangleRDD queryRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
+        spatialRDD.analyze();
         spatialRDD.spatialPartitioning(GridType.KDBTREE);
         queryRDD.spatialPartitioning(spatialRDD.getPartitioner());
         spatialRDD.buildIndex(IndexType.RTREE, true);
@@ -87,6 +88,7 @@ public class ChoroplethmapTest
         //UserSuppliedPolygonMapper userSuppliedPolygonMapper = new UserSuppliedPolygonMapper();
         PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
         PolygonRDD queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions);
+        spatialRDD.analyze();
         spatialRDD.spatialPartitioning(GridType.KDBTREE);
         queryRDD.spatialPartitioning(spatialRDD.getPartitioner());
         spatialRDD.buildIndex(IndexType.RTREE, true);
