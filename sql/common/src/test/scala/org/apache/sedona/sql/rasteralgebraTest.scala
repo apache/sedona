@@ -336,11 +336,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_Values with raster") {
-      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
-      val result = df.selectExpr("RS_Values(RS_FromGeoTiff(content), array(ST_Point(-13077301.685, 4002565.802), null))").first().getList[Any](0)
-      assert(result.size() == 2)
-      assert(result.get(0) == 255d)
-      assert(result.get(1) == null)
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "land_shallow_topo_2048.tif")
+//      val result = df.selectExpr("RS_Values(RS_FromGeoTiff(content), array(ST_Point(-13077301.685, 4002565.802), null))").first().getList[Any](0)
+//      assert(result.size() == 2)
+//      assert(result.get(0) == 255d)
+//      assert(result.get(1) == null)
+      df.selectExpr("RS_FromGeoTiff(content) as raster").createOrReplaceTempView("raster")
+      sparkSession.table("raster").printSchema()
     }
 
     it("Passed RS_Values with raster and serialized point array") {

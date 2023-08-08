@@ -21,6 +21,13 @@ SPARK_VERSION=$1
 SEDONA_VERSION=$2
 BUILD_MODE=$3
 
+lower_version=$(echo -e ${SPARK_VERSION}"\n3.4" | sort -V | head -n1)
+if [ $lower_version = "3.4" ]; then
+    SEDONA_SPARK_VERSION=3.4
+else
+    SEDONA_SPARK_VERSION=3.0
+fi
+
 if [ "$SEDONA_VERSION" = "latest" ]; then
     # The compilation must take place outside Docker to avoid unnecessary maven packages
     mvn clean install -DskipTests  -Dspark=${SEDONA_SPARK_VERSION} -Dgeotools -Dscala=2.12

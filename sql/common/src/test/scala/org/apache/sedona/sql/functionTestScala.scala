@@ -1914,6 +1914,10 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       val expected = df.take(1)(0).get(1).asInstanceOf[java.math.BigDecimal].doubleValue()
       assertEquals(expected, actual, 0.1)
     }
+    sparkSession.sql("SELECT ST_DISTANCE(ST_TRANSFORM(ST_POINT(22.308919, 113.914603), 'epsg:4326', 'epsg:3857'), ST_TRANSFORM(ST_POINT(43.677223, -79.630556), 'epsg:4326', 'epsg:3857')) AS distance").show()
+    sparkSession.sql("SELECT ST_DistanceSphere(ST_POINT(22.308919, 113.914603), ST_POINT(43.677223, -79.630556)) AS distance").show()
+    sparkSession.sql("SELECT ST_DistanceSpheroid(ST_POINT(22.308919, 113.914603), ST_POINT(43.677223, -79.630556)) AS distance").show()
+
   }
 
   it("Should pass ST_DistanceSpheroid") {
