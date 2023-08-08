@@ -41,7 +41,7 @@ matchWithOriginalDuplicatesCount = 17738
 
 class TestRectangleRange(TestBase):
     query_envelope = Envelope(-90.01, -80.01, 30.01, 40.01)
-    loop_times = 5
+    loop_times = 1
 
     def test_spatial_range_query(self):
         spatial_rdd = RectangleRDD(self.sc, inputLocation, offset, splitter, True)

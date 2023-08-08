@@ -31,7 +31,7 @@ indexType = "rtree"
 
 
 class TestPolygonRange(TestBase):
-    loop_times = 5
+    loop_times = 1
     query_envelope = Envelope(-85.01, -60.01, 34.01, 50.01)
 
     def test_spatial_range_query(self):

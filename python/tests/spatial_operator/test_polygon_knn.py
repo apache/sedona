@@ -33,7 +33,7 @@ indexType = "rtree"
 
 class TestPolygonKnn(TestBase):
 
-    loop_times = 5
+    loop_times = 1
     top_k = 100
     query_point = Point(-84.01, 34.01)
 

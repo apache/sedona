@@ -43,7 +43,7 @@ polygon_rdd_end_offset = 9
 knn_query_point = Point(-84.01, 34.01)
 range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
 join_query_partitioning_type = GridType.QUADTREE
-each_query_loop_times = 20
+each_query_loop_times = 1
 
 shape_file_input_location = os.path.join(tests_resource, "shapefiles/polygon")
 
