@@ -17,8 +17,6 @@
 
 import os
 
-from pyspark import StorageLevel
-
 from sedona.core.SpatialRDD import PolygonRDD
 from sedona.core.enums import IndexType, FileDataSplitter
 from sedona.core.geom.envelope import Envelope
@@ -38,7 +36,7 @@ class TestPolygonRange(TestBase):
 
     def test_spatial_range_query(self):
         spatial_rdd = PolygonRDD(
-            self.sc, input_location, splitter, True, StorageLevel.MEMORY_ONLY
+            self.sc, input_location, splitter, True
         )
         for i in range(self.loop_times):
             result_size = RangeQuery.\
@@ -50,7 +48,7 @@ class TestPolygonRange(TestBase):
 
     def test_spatial_range_query_using_index(self):
         spatial_rdd = PolygonRDD(
-            self.sc, input_location, splitter, True, StorageLevel.MEMORY_ONLY
+            self.sc, input_location, splitter, True
         )
         spatial_rdd.buildIndex(IndexType.RTREE, False)
         for i in range(self.loop_times):

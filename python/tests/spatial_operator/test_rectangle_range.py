@@ -17,8 +17,6 @@
 
 import os
 
-from pyspark import StorageLevel
-
 from sedona.core.SpatialRDD import RectangleRDD
 from sedona.core.enums import IndexType, FileDataSplitter
 from sedona.core.geom.envelope import Envelope
@@ -46,7 +44,7 @@ class TestRectangleRange(TestBase):
     loop_times = 5
 
     def test_spatial_range_query(self):
-        spatial_rdd = RectangleRDD(self.sc, inputLocation, offset, splitter, True, StorageLevel.MEMORY_ONLY)
+        spatial_rdd = RectangleRDD(self.sc, inputLocation, offset, splitter, True)
 
         for i in range(self.loop_times):
             result_size = RangeQuery.SpatialRangeQuery(
@@ -58,7 +56,7 @@ class TestRectangleRange(TestBase):
 
     def test_spatial_range_query_using_index(self):
         spatial_rdd = RectangleRDD(
-            self.sc, inputLocation, offset, splitter, True, StorageLevel.MEMORY_ONLY)
+            self.sc, inputLocation, offset, splitter, True)
 
         spatial_rdd.buildIndex(IndexType.RTREE, False)
         for i in range(self.loop_times):
