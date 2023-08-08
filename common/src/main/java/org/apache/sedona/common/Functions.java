@@ -192,12 +192,12 @@ public class Functions {
 
     public static Geometry transform(Geometry geometry, String sourceCRS, String targetCRS, boolean lenient)
         throws FactoryException, TransformException {
+        CoordinateReferenceSystem sourceCRSCode = parseCRSString(sourceCRS);
         CoordinateReferenceSystem targetCRScode = parseCRSString(targetCRS);
-        return transform(geometry, sourceCRS, targetCRScode, lenient);
+        return transform(geometry, sourceCRSCode, targetCRScode, lenient);
     }
 
-    public static Geometry transform(Geometry geometry, String sourceCRSCode, CoordinateReferenceSystem targetCRS, boolean lenient) throws FactoryException, TransformException {
-        CoordinateReferenceSystem sourceCRS = parseCRSString(sourceCRSCode);
+    public static Geometry transform(Geometry geometry, CoordinateReferenceSystem sourceCRS, CoordinateReferenceSystem targetCRS, boolean lenient) throws FactoryException, TransformException {
         MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, lenient);
         return JTS.transform(geometry, transform);
     }
