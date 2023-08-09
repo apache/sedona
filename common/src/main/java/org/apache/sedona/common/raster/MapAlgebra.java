@@ -22,15 +22,16 @@ import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.Category;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.metadata.i18n.Vocabulary;
-import org.geotools.metadata.i18n.VocabularyKeys;
 import org.geotools.util.NumberRange;
+import org.opengis.util.InternationalString;
 
 import javax.media.jai.RasterFactory;
 import java.awt.*;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapAlgebra
 {
@@ -72,7 +73,7 @@ public class MapAlgebra
      * @param bandIndex starts at 1, and no larger than numBands + 1
      * @return
      */
-    public static GridCoverage2D addBandFromArray(GridCoverage2D rasterGeom, double[] bandValues, int bandIndex, double noDataValue) {
+    public static GridCoverage2D addBandFromArray(GridCoverage2D rasterGeom, double[] bandValues, int bandIndex, Double noDataValue) {
         int numBands = rasterGeom.getNumSampleDimensions();
         // Allow the band index to be one larger than the number of bands, which will append the band to the end
         if (bandIndex < 1 || bandIndex > numBands + 1) {
@@ -83,7 +84,7 @@ public class MapAlgebra
             return copyRasterAndAppendBand(rasterGeom, bandValues, noDataValue);
         }
         else {
-            return copyRasterAndReplaceBand(rasterGeom, bandIndex, bandValues);
+            return copyRasterAndReplaceBand(rasterGeom, bandIndex, bandValues, noDataValue, true);
         }
     }
 
@@ -159,7 +160,7 @@ public class MapAlgebra
         return copyRasterAndAppendBand(gridCoverage2D, bandValues, null);
     }
 
-    private static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, double[] bandValues) {
+    private static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, double[] bandValues, Double noDataValue, boolean removeNoDataIfNull) {
         // Do not allow the band index to be out of bounds
         if (bandIndex < 1 || bandIndex > gridCoverage2D.getNumSampleDimensions()) {
             throw new IllegalArgumentException("Band index is out of bounds. Must be between 1 and " + gridCoverage2D.getNumSampleDimensions() + ")");
@@ -176,7 +177,83 @@ public class MapAlgebra
                 wr.setPixel(i, j, bands);
             }
         }
+        GridSampleDimension[] originalSampleDimensions = gridCoverage2D.getSampleDimensions();
+        GridSampleDimension originalBandDimension = originalSampleDimensions[bandIndex - 1];
+        List<Category> categories =  (originalBandDimension.getCategories());
+        InternationalString defaultBandName = gridCoverage2D.getName();
+        Category defaultCategory = containsDefaultBand(categories, defaultBandName);
+        InternationalString bandToReplace = defaultCategory != null ? defaultBandName : null;
+        List<Category> newCategories = new ArrayList<>();
+        if (noDataValue == null && removeNoDataIfNull) {
+            if (originalBandDimension.getNoDataValues() != null) {
+                // remove noDataCategory
+                newCategories = createCategoryDeepCopy(categories, null, false, bandToReplace);
+            }
+        }else if (noDataValue != null) {
+            if (originalBandDimension.getNoDataValues() == null) {
+               // set a new noDataValue
+                newCategories = createCategoryDeepCopy(categories, noDataValue, true, bandToReplace);
+            }else {
+                double originalNoDataValue = originalBandDimension.getNoDataValues()[0];
+                if (originalNoDataValue != noDataValue) {
+                    //change noDataValue here
+                    newCategories = createCategoryDeepCopy(categories, noDataValue, false, bandToReplace);
+                }
+            }
+        }
+
         // Create a new GridCoverage2D with the copied image
-        return RasterUtils.create(wr, gridCoverage2D.getGridGeometry(), gridCoverage2D.getSampleDimensions());
+        if (!newCategories.isEmpty()) {
+            //create band with new categories altogether, no need to add default category
+            Category[] categoryArray = new Category[newCategories.size()];
+            categoryArray = newCategories.toArray(categoryArray);
+            originalSampleDimensions[bandIndex - 1] = new GridSampleDimension(originalBandDimension.getDescription(), categoryArray, null);
+            return RasterUtils.create(wr, gridCoverage2D.getGridGeometry(), originalSampleDimensions);
+        }else {
+            //Have to add default category
+            if (defaultCategory != null) {
+                //previous default category available, reuse it
+                originalSampleDimensions[bandIndex - 1] = new GridSampleDimension(originalBandDimension.getDescription(), new Category[]{defaultCategory}, null);
+                return RasterUtils.create(wr, gridCoverage2D.getGridGeometry(), originalSampleDimensions);
+            }else {
+                //default category not available, enforce its creation
+                return RasterUtils.create(wr, gridCoverage2D.getGridGeometry(), null);
+            }
+        }
+    }
+
+    private static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, double[] bandValues) {
+        return copyRasterAndReplaceBand(gridCoverage2D, bandIndex, bandValues, null, false);
+    }
+
+    private static Category containsDefaultBand(List<Category> categoryNames, InternationalString defaultBandName) {
+        for (Category category: categoryNames) {
+            if (category.getName().equals(defaultBandName)) return category;
+        }
+        return null;
+    }
+
+    private static List<Category> createCategoryDeepCopy(List<Category> categories, Double noDataValue, boolean addNoData, InternationalString defaultBandName) {
+        List<Category> newCategories = new ArrayList<>();
+        int categoryLen = categories.size();
+        for (int i = 0; i < categoryLen; i++) {
+            Category originalCategory = categories.get(i);
+            Category newCategory;
+            if (originalCategory.getName().equals(Category.NODATA.getName())) {
+                if (noDataValue == null) continue;
+                newCategory = new Category(originalCategory.getName(), originalCategory.getColors(), NumberRange.create(noDataValue, noDataValue));
+            }else {
+                if (defaultBandName != null && originalCategory.getName().equals(defaultBandName)) continue; //we do not need the default band if we're adding a custom band. Default band range can mess with newly added band range
+                newCategory = new Category(originalCategory.getName(), originalCategory.getColors(), originalCategory.getRange());
+            }
+            newCategories.add(newCategory);
+        }
+        if (addNoData) {
+            newCategories.add(new Category(
+                    Category.NODATA.getName(),
+                    new Color[] {new Color(0, 0, 0, 0)},
+                    NumberRange.create(noDataValue, noDataValue)));
+        }
+        return newCategories;
     }
 }

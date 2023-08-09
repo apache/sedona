@@ -51,6 +51,30 @@ public class MapAlgebraTest extends RasterTestBase
         assertEquals(raster.getCoordinateReferenceSystem2D(), rasterWithBand1.getCoordinateReferenceSystem2D());
         assertEquals(RasterAccessors.srid(raster), RasterAccessors.srid(rasterWithBand1));
 
+        //replace the first band with a customNoDataValue
+        rasterWithBand1 = MapAlgebra.addBandFromArray(raster, band1, 1, -999d);
+        assertEquals(1, RasterAccessors.numBands(rasterWithBand1));
+        assertEquals(raster.getEnvelope(), rasterWithBand1.getEnvelope());
+        assertEquals(raster.getCoordinateReferenceSystem2D(), rasterWithBand1.getCoordinateReferenceSystem2D());
+        assertEquals(RasterAccessors.srid(raster), RasterAccessors.srid(rasterWithBand1));
+        assertEquals(-999, rasterWithBand1.getSampleDimension(0).getNoDataValues()[0], 1e-9);
+
+        //replace first band with a different customNoDataValue
+        rasterWithBand1 = MapAlgebra.addBandFromArray(raster, band1, 1, -9999d);
+        assertEquals(1, RasterAccessors.numBands(rasterWithBand1));
+        assertEquals(raster.getEnvelope(), rasterWithBand1.getEnvelope());
+        assertEquals(raster.getCoordinateReferenceSystem2D(), rasterWithBand1.getCoordinateReferenceSystem2D());
+        assertEquals(RasterAccessors.srid(raster), RasterAccessors.srid(rasterWithBand1));
+        assertEquals(-9999, rasterWithBand1.getSampleDimension(0).getNoDataValues()[0], 1e-9);
+
+        //remove noDataValue from the first band
+        rasterWithBand1 = MapAlgebra.addBandFromArray(raster, band1, 1, null);
+        assertEquals(1, RasterAccessors.numBands(rasterWithBand1));
+        assertEquals(raster.getEnvelope(), rasterWithBand1.getEnvelope());
+        assertEquals(raster.getCoordinateReferenceSystem2D(), rasterWithBand1.getCoordinateReferenceSystem2D());
+        assertEquals(RasterAccessors.srid(raster), RasterAccessors.srid(rasterWithBand1));
+        assertNull(rasterWithBand1.getSampleDimension(0).getNoDataValues());
+
         // Append a new band with default noDataValue
         GridCoverage2D rasterWithBand2 = MapAlgebra.addBandFromArray(rasterWithBand1, band2);
         assertEquals(2, RasterAccessors.numBands(rasterWithBand2));
@@ -60,7 +84,7 @@ public class MapAlgebraTest extends RasterTestBase
         assertNull(rasterWithBand2.getSampleDimension(1).getNoDataValues());
 
         // Append a new band with custom noDataValue
-        GridCoverage2D rasterWithBand3 = MapAlgebra.addBandFromArray(rasterWithBand2, band3, 3, 2);
+        GridCoverage2D rasterWithBand3 = MapAlgebra.addBandFromArray(rasterWithBand2, band3, 3, 2d);
         assertEquals(3, RasterAccessors.numBands(rasterWithBand3));
         assertEquals(raster.getEnvelope(), rasterWithBand3.getEnvelope());
         assertEquals(raster.getCoordinateReferenceSystem2D(), rasterWithBand3.getCoordinateReferenceSystem2D());
