@@ -147,6 +147,7 @@ sedona_read_dsv_to_typed_rdd <- function(sc,
     max(as.integer(repartition %||% 1L), 1L),
     fmt
   ) %>%
+    set_storage_level(storage_level) %>%
     new_spatial_rdd(type)
 }
 
@@ -210,6 +211,7 @@ sedona_read_shapefile_to_typed_rdd <- function(sc,
     java_context(sc),
     location
   ) %>%
+    set_storage_level(storage_level) %>%
     new_spatial_rdd(type)
 }
 
@@ -238,6 +240,7 @@ sedona_read_geojson_to_typed_rdd <- function(sc,
     has_non_spatial_attrs,
     max(as.integer(repartition %||% 1L), 1L)
   ) %>%
+    set_storage_level(storage_level) %>%
     new_spatial_rdd(type)
 }
 
@@ -302,6 +305,7 @@ sedona_read_geojson <- function(sc,
     allow_invalid_geometries,
     skip_syntactically_invalid_geometries
   ) %>%
+    set_storage_level(storage_level) %>%
     new_spatial_rdd(NULL)
 }
 
@@ -331,6 +335,7 @@ sedona_read_wkb <- function(sc,
     allow_invalid_geometries,
     skip_syntactically_invalid_geometries
   ) %>%
+    set_storage_level(storage_level) %>%
     new_spatial_rdd(NULL)
 }
 
@@ -360,6 +365,7 @@ sedona_read_wkt <- function(sc,
     allow_invalid_geometries,
     skip_syntactically_invalid_geometries
   ) %>%
+    set_storage_level(storage_level) %>%
     new_spatial_rdd(NULL)
 }
 
@@ -375,6 +381,7 @@ sedona_read_shapefile <- function(sc,
     java_context(sc),
     location
   ) %>%
+    set_storage_level(storage_level) %>%
     new_spatial_rdd(NULL)
 }
 
@@ -792,4 +799,19 @@ to_delimiter_enum_value <- function(sc, delimiter) {
   )
 
   sc$state$enums$delimiter[[delimiter]]
+}
+
+set_storage_level <- function(rdd, storage_level) {
+  sc <- spark_connection(rdd)
+  storage_level <- sc$state$object_cache$storage_levels[[storage_level]] %||% {
+    storage_level_obj <- invoke_static(
+      sc, "org.apache.spark.storage.StorageLevel", storage_level
+    )
+    sc$state$object_cache$storage_levels[[storage_level]] <- storage_level_obj
+
+    storage_level_obj
+  }
+  invoke(rdd, "analyze", storage_level)
+
+  rdd
 }
