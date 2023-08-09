@@ -9,7 +9,8 @@ on:
   pull_request:
     branches:
       - '*'
-
+    paths:
+      - 'docker/**'
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
       
