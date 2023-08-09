@@ -230,6 +230,86 @@ Output:
 517
 ```
 
+### RS_WorldToRasterCoord
+
+Introduction: Returns the grid coordinate of the given world coordinates as a Point.
+
+Format: `RS_WorldToRasterCoord(raster: Raster, point: Geometry)`
+        `RS_WorldToRasterCoord(raster: Raster, x: double, y: point)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_WorldToRasterCoord(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0, 4326), -53, 51) from rasters;
+SELECT RS_WorldToRasterCoord(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0, 4326), ST_GeomFromText('POINT (-52 51)')) from rasters;
+```
+
+Output:
+`POINT (1 1)`
+`POINT (2 1)`
+
+!!!Note
+    If the given geometry point is not in the same CRS as the given raster, the given geometry will be transformed to the given raster's CRS. You can use [ST_Transform](../Function/#st_transform) to transform the geometry beforehand.
+
+
+
+### RS_WorldToRasterCoordX
+
+Introduction: Returns the X coordinate of the grid coordinate of the given world coordinates as an integer.
+
+Format: `RS_WorldToRasterCoord(raster: Raster, point: Geometry)`
+        `RS_WorldToRasterCoord(raster: Raster, x: double, y: double)`
+
+
+Since: `1.5.0`
+
+Spark SQL example:
+
+```sql
+SELECT RS_WorldToRasterCoordX(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0), -53, 51) from rasters;
+```
+
+Output: `1`
+
+```sql
+SELECT RS_WorldToRasterCoordX(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0), ST_GeomFromText('POINT (-53 51)')) from rasters;
+```
+
+Output: `1`
+
+!!!Tip
+    For non-skewed rasters, you can provide any value for latitude and the intended value of world longitude, to get the desired answer
+
+
+### RS_WorldToRasterCoordY
+
+Introduction: Returns the Y coordinate of the grid coordinate of the given world coordinates as an integer.
+
+Format: `RS_WorldToRasterCoordY(raster: Raster, point: Geometry)`
+        `RS_WorldToRasterCoordY(raster: Raster, x: double, y: double)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+
+```sql
+SELECT RS_WorldToRasterCoordY(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0), ST_GeomFromText('POINT (-50 50)'));
+```
+
+Output: `2`
+
+```sql
+SELECT RS_WorldToRasterCoordY(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0), -50, 49);
+```
+
+Output: `3`
+
+
+!!!Tip
+    For non-skewed rasters, you can provide any value for longitude and the intended value of world latitude, to get the desired answer
+
+
 ## Raster based operators
 
 ### RS_Intersects
