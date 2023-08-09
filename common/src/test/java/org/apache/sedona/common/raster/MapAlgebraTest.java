@@ -52,7 +52,7 @@ public class MapAlgebraTest extends RasterTestBase
         assertEquals(RasterAccessors.srid(raster), RasterAccessors.srid(rasterWithBand1));
 
         //replace the first band with a customNoDataValue
-        rasterWithBand1 = MapAlgebra.addBandFromArray(raster, band1, 1, -999d);
+        rasterWithBand1 = MapAlgebra.addBandFromArray(rasterWithBand1, band1, 1, -999d);
         assertEquals(1, RasterAccessors.numBands(rasterWithBand1));
         assertEquals(raster.getEnvelope(), rasterWithBand1.getEnvelope());
         assertEquals(raster.getCoordinateReferenceSystem2D(), rasterWithBand1.getCoordinateReferenceSystem2D());
@@ -60,7 +60,7 @@ public class MapAlgebraTest extends RasterTestBase
         assertEquals(-999, rasterWithBand1.getSampleDimension(0).getNoDataValues()[0], 1e-9);
 
         //replace first band with a different customNoDataValue
-        rasterWithBand1 = MapAlgebra.addBandFromArray(raster, band1, 1, -9999d);
+        rasterWithBand1 = MapAlgebra.addBandFromArray(rasterWithBand1, band1, 1, -9999d);
         assertEquals(1, RasterAccessors.numBands(rasterWithBand1));
         assertEquals(raster.getEnvelope(), rasterWithBand1.getEnvelope());
         assertEquals(raster.getCoordinateReferenceSystem2D(), rasterWithBand1.getCoordinateReferenceSystem2D());
@@ -68,7 +68,7 @@ public class MapAlgebraTest extends RasterTestBase
         assertEquals(-9999, rasterWithBand1.getSampleDimension(0).getNoDataValues()[0], 1e-9);
 
         //remove noDataValue from the first band
-        rasterWithBand1 = MapAlgebra.addBandFromArray(raster, band1, 1, null);
+        rasterWithBand1 = MapAlgebra.addBandFromArray(rasterWithBand1, band1, 1, null);
         assertEquals(1, RasterAccessors.numBands(rasterWithBand1));
         assertEquals(raster.getEnvelope(), rasterWithBand1.getEnvelope());
         assertEquals(raster.getCoordinateReferenceSystem2D(), rasterWithBand1.getCoordinateReferenceSystem2D());
