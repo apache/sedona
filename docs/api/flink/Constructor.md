@@ -289,6 +289,50 @@ Output:
 LINESTRING (-74.0428197 40.6867969, -74.0421975 40.6921336, -74.050802 40.6912794)
 ```
 
+## ST_MakePoint
+
+Introduction: Creates a 2D, 3D Z or 4D ZM Point geometry. Use ST_MakePointM to make points with XYM coordinates. Z and M values are optional.
+
+Format: `ST_MakePoint (X:decimal, Y:decimal, Z:decimal, M:decimal)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_AsText(ST_MakePoint(1.2345, 2.3456));
+```
+
+Output:
+
+```
+POINT (1.2345 2.3456)
+```
+
+Example:
+
+```sql
+SELECT ST_AsText(ST_MakePoint(1.2345, 2.3456, 3.4567));
+```
+
+Output:
+
+```
+POINT Z (1.2345 2.3456 3.4567)
+```
+
+Example:
+
+```sql
+SELECT ST_AsText(ST_MakePoint(1.2345, 2.3456, 3.4567, 4));
+```
+
+Output:
+
+```
+POINT ZM (1.2345 2.3456 3.4567 4)
+```
+
 ## ST_MLineFromText
 
 Introduction: Construct a MultiLineString from Text and Optional SRID
