@@ -28,3 +28,15 @@ case class RS_Intersects(inputExpressions: Seq[Expression]) extends InferredExpr
     copy(inputExpressions = newChildren)
   }
 }
+
+case class RS_Within(inputExpressions: Seq[Expression]) extends InferredExpression(RasterPredicates.rsWithin _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class RS_Contains(inputExpressions: Seq[Expression]) extends InferredExpression(RasterPredicates.rsContains _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

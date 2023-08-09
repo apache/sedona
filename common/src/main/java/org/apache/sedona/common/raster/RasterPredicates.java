@@ -18,18 +18,14 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.CRS;
-import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
 
 public class RasterPredicates {
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
@@ -46,20 +42,27 @@ public class RasterPredicates {
     public static boolean rsIntersects(GridCoverage2D raster, Geometry queryWindow) {
         Envelope2D rasterEnvelope2D = raster.getEnvelope2D();
         CoordinateReferenceSystem rasterCRS = rasterEnvelope2D.getCoordinateReferenceSystem();
-        int queryWindowSRID = queryWindow.getSRID();
-        if (rasterCRS != null && !(rasterCRS instanceof DefaultEngineeringCRS) && queryWindowSRID > 0) {
-            try {
-                CoordinateReferenceSystem queryWindowCRS = CRS.decode("EPSG:" + queryWindowSRID);
-                if (!CRS.equalsIgnoreMetadata(rasterCRS, queryWindowCRS)) {
-                    MathTransform transform = CRS.findMathTransform(queryWindowCRS, rasterCRS, true);
-                    queryWindow = JTS.transform(queryWindow, transform);
-                }
-            } catch (FactoryException | TransformException e) {
-                throw new RuntimeException("Cannot transform CRS of query window", e);
-            }
-        }
+        queryWindow = RasterUtils.convertCRSIfNeeded(queryWindow, rasterCRS);
         Envelope rasterEnvelope = JTS.toEnvelope(rasterEnvelope2D);
         Geometry rasterGeometry = GEOMETRY_FACTORY.toGeometry(rasterEnvelope);
         return rasterGeometry.intersects(queryWindow);
+    }
+
+    public static boolean rsContains(GridCoverage2D raster, Geometry geometry) {
+        Envelope2D rasterEnvelope2D = raster.getEnvelope2D();
+        CoordinateReferenceSystem rasterCRS = rasterEnvelope2D.getCoordinateReferenceSystem();
+        geometry = RasterUtils.convertCRSIfNeeded(geometry, rasterCRS);
+        Envelope rasterEnvelope = JTS.toEnvelope(rasterEnvelope2D);
+        Geometry rasterGeometry = GEOMETRY_FACTORY.toGeometry(rasterEnvelope);
+        return  rasterGeometry.contains(geometry);
+    }
+
+    public static boolean rsWithin(GridCoverage2D raster, Geometry geometry) {
+        Envelope2D rasterEnvelope2D = raster.getEnvelope2D();
+        CoordinateReferenceSystem rasterCRS = rasterEnvelope2D.getCoordinateReferenceSystem();
+        geometry = RasterUtils.convertCRSIfNeeded(geometry, rasterCRS);
+        Envelope rasterEnvelope = JTS.toEnvelope(rasterEnvelope2D);
+        Geometry rasterGeometry = GEOMETRY_FACTORY.toGeometry(rasterEnvelope);
+        return  rasterGeometry.within(geometry);
     }
 }

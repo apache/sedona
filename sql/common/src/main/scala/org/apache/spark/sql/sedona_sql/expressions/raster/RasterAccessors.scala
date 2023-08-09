@@ -78,3 +78,32 @@ case class RS_ScaleY(inputExpressions: Seq[Expression]) extends InferredExpressi
   }
 }
 
+case class RS_RasterToWorldCoordX(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.getWorldCoordX _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class RS_RasterToWorldCoordY(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.getWorldCoordY _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+case class RS_WorldToRasterCoord(inputExpressions: Seq[Expression]) extends InferredExpression(inferrableFunction3(RasterAccessors.getGridCoord), inferrableFunction2(RasterAccessors.getGridCoord)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+
+case class RS_WorldToRasterCoordX(inputExpressions: Seq[Expression]) extends InferredExpression(inferrableFunction3(RasterAccessors.getGridCoordX), inferrableFunction2(RasterAccessors.getGridCoordX)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class RS_WorldToRasterCoordY(inputExpressions: Seq[Expression]) extends InferredExpression(inferrableFunction3(RasterAccessors.getGridCoordY), inferrableFunction2(RasterAccessors.getGridCoordY)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

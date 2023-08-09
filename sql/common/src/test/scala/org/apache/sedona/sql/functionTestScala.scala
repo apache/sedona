@@ -337,6 +337,15 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(testtable.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("LINESTRING (1 2, 3 4)"))
     }
 
+    it("Passed ST_Polygon") {
+
+      var testtable = sparkSession.sql(
+        "SELECT ST_Polygon(ST_GeomFromText('LINESTRING(75.15 29.53,77 29,77.6 29.5, 75.15 29.53)'), 4326)"
+      )
+      assert(testtable.take(1)(0).get(0).asInstanceOf[Geometry].toText  == "POLYGON ((75.15 29.53, 77 29, 77.6 29.5, 75.15 29.53))")
+      assert(testtable.take(1)(0).get(0).asInstanceOf[Geometry].getSRID == 4326)
+    }
+
     it("Passed ST_MakeValid On Invalid Polygon") {
 
       val df = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((1 5, 1 1, 3 3, 5 3, 7 1, 7 5, 5 3, 3 3, 1 5))') AS polygon")
