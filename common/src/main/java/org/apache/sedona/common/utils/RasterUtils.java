@@ -19,6 +19,7 @@
 package org.apache.sedona.common.utils;
 
 import com.sun.media.imageioimpl.common.BogusColorSpace;
+import org.apache.sedona.common.Functions;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoordinates2D;
@@ -26,8 +27,15 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.DirectPosition2D;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
+import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.locationtech.jts.geom.Geometry;
+import org.opengis.geometry.DirectPosition;
 import org.opengis.metadata.spatial.PixelOrientation;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
@@ -93,7 +101,44 @@ public class RasterUtils {
         return (AffineTransform2D) crsTransform;
     }
 
-    public static Point2D getCornerCoordinates(GridCoverage2D raster, int colX, int rowY) throws TransformException {
+    public static Point2D getWorldCornerCoordinates(GridCoverage2D raster, int colX, int rowY) throws TransformException {
         return raster.getGridGeometry().getGridToCRS2D(PixelOrientation.UPPER_LEFT).transform(new GridCoordinates2D(colX - 1, rowY - 1), null);
+    }
+
+    /***
+     * Returns the world coordinates of the given grid coordinate. The expected grid coordinates are 1 indexed. The function also enforces a range check to make sure given grid coordinates are actually inside the grid.
+     * @param raster
+     * @param colX
+     * @param rowY
+     * @return
+     * @throws IndexOutOfBoundsException
+     * @throws TransformException
+     */
+    public static Point2D getWorldCornerCoordinatesWithRangeCheck(GridCoverage2D raster, int colX, int rowY) throws IndexOutOfBoundsException, TransformException {
+        GridCoordinates2D gridCoordinates2D = new GridCoordinates2D(colX - 1, rowY - 1);
+        if (!(raster.getGridGeometry().getGridRange2D().contains(gridCoordinates2D))) throw new IndexOutOfBoundsException(String.format("Specified pixel coordinates (%d, %d) do not lie in the raster", colX, rowY));
+        return raster.getGridGeometry().getGridToCRS2D(PixelOrientation.UPPER_LEFT).transform(gridCoordinates2D, null);
+    }
+    public static int[] getGridCoordinatesFromWorld(GridCoverage2D raster, double longitude, double latitude) throws TransformException {
+        DirectPosition2D directPosition2D = new DirectPosition2D(raster.getCoordinateReferenceSystem2D(), longitude, latitude);
+        DirectPosition worldCoord = raster.getGridGeometry().getCRSToGrid2D(PixelOrientation.UPPER_LEFT).transform((DirectPosition) directPosition2D, null);
+        double[] coords = worldCoord.getCoordinate();
+        int[] gridCoords = new int[] {(int) coords[0], (int) coords[1]};
+        return gridCoords;
+    }
+
+    public static Geometry convertCRSIfNeeded(Geometry geometry, CoordinateReferenceSystem rasterCRS) {
+        int geomSRID = geometry.getSRID();
+        if (rasterCRS != null && !(rasterCRS instanceof DefaultEngineeringCRS) && geomSRID > 0) {
+            try {
+                CoordinateReferenceSystem queryWindowCRS = CRS.decode("EPSG:" + geomSRID);
+                if (!CRS.equalsIgnoreMetadata(rasterCRS, queryWindowCRS)) {
+                    geometry = GeomUtils.transform(geometry, queryWindowCRS, rasterCRS, true);
+                }
+            } catch (FactoryException | TransformException e) {
+                throw new RuntimeException("Cannot transform CRS of query window", e);
+            }
+        }
+        return geometry;
     }
 }

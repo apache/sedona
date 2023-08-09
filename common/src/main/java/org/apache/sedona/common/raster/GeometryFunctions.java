@@ -47,15 +47,15 @@ public class GeometryFunctions {
         //start clockwise rotation
 
         //upper right
-        Point2D point = RasterUtils.getCornerCoordinates(raster, width + 1, 1);
+        Point2D point = RasterUtils.getWorldCornerCoordinates(raster, width + 1, 1);
         Coordinate coordTwo = new Coordinate(point.getX(), point.getY());
 
         //lower right
-        point = RasterUtils.getCornerCoordinates(raster, width + 1, height + 1);
+        point = RasterUtils.getWorldCornerCoordinates(raster, width + 1, height + 1);
         Coordinate coordThree = new Coordinate(point.getX(), point.getY());
 
         //lower left
-        point = RasterUtils.getCornerCoordinates(raster, 1, height + 1);
+        point = RasterUtils.getWorldCornerCoordinates(raster, 1, height + 1);
         Coordinate coordFour = new Coordinate(point.getX(), point.getY());
 
         return geometryFactory.createPolygon(new Coordinate[] {coordOne, coordTwo, coordThree, coordFour, coordOne});
