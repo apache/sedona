@@ -235,20 +235,22 @@ public class MapAlgebra
 
     private static List<Category> createCategoryDeepCopy(List<Category> categories, Double noDataValue, boolean addNoData, InternationalString defaultBandName) {
         List<Category> newCategories = new ArrayList<>();
-        int categoryLen = categories.size();
-        for (int i = 0; i < categoryLen; i++) {
-            Category originalCategory = categories.get(i);
+        for (Category originalCategory : categories) {
             Category newCategory;
             if (originalCategory.getName().equals(Category.NODATA.getName())) {
+                //noDataValue removal is intended, skip adding this category to new categories
                 if (noDataValue == null) continue;
+                //noDataValue modification is intended, modify only the range with new noDataValue
                 newCategory = new Category(originalCategory.getName(), originalCategory.getColors(), NumberRange.create(noDataValue, noDataValue));
-            }else {
-                if (defaultBandName != null && originalCategory.getName().equals(defaultBandName)) continue; //we do not need the default band if we're adding a custom band. Default band range can mess with newly added band range
-                newCategory = new Category(originalCategory.getName(), originalCategory.getColors(), originalCategory.getRange());
+            } else {
+                if (defaultBandName != null && originalCategory.getName().equals(defaultBandName))
+                    continue; //we do not need the default band if we're adding a custom band. Default band range can mess with newly added band range
+                newCategory = new Category(originalCategory.getName(), originalCategory.getColors(), originalCategory.getRange()); // add all other categories as is
             }
             newCategories.add(newCategory);
         }
         if (addNoData) {
+            // Addition of an earlier absent noDataValue is intended, manually add a new category to newCategories
             newCategories.add(new Category(
                     Category.NODATA.getName(),
                     new Color[] {new Color(0, 0, 0, 0)},
