@@ -1032,7 +1032,7 @@ case class ST_Translate(inputExpressions: Seq[Expression])
 }
 
 case class ST_VoronoiPolygons(inputExpressions: Seq[Expression])
-  extends InferredExpression(inferrableFunction3(Functions.voronoiPolygons)) with FoldableExpression {
+  extends InferredExpression(nullTolerantInferrableFunction3(Functions.voronoiPolygons)) with FoldableExpression {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
