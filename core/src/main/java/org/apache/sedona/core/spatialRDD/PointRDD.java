@@ -51,7 +51,7 @@ public class PointRDD
      */
     public PointRDD(JavaRDD<Point> rawSpatialRDD)
     {
-        this.rawSpatialRDD = rawSpatialRDD;
+        this.setRawSpatialRDD(rawSpatialRDD);
     }
 
     /**
@@ -136,5 +136,6 @@ public class PointRDD
         if (Offset != null) {this.setRawSpatialRDD(rawTextRDD.mapPartitions(new PointFormatMapper(Offset, splitter, carryInputData)));}
         else {this.setRawSpatialRDD(rawTextRDD.mapPartitions(new PointFormatMapper(splitter, carryInputData)));}
         if (splitter.equals(FileDataSplitter.GEOJSON)) { this.fieldNames = FormatMapper.readGeoJsonPropertyNames(rawTextRDD.take(1).get(0).toString()); }
+        this.analyze();
     }
 }

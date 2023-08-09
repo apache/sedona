@@ -47,7 +47,7 @@ public class LineStringRDD
      */
     public LineStringRDD(JavaRDD<LineString> rawSpatialRDD)
     {
-        this.rawSpatialRDD = rawSpatialRDD;
+        this.setRawSpatialRDD(rawSpatialRDD);
     }
 
     /**
@@ -138,5 +138,6 @@ public class LineStringRDD
             this.setRawSpatialRDD(rawTextRDD.mapPartitions(new LineStringFormatMapper(splitter, carryInputData)));
         }
         if (splitter.equals(FileDataSplitter.GEOJSON)) { this.fieldNames = FormatMapper.readGeoJsonPropertyNames(rawTextRDD.take(1).get(0).toString()); }
+        this.analyze();
     }
 }

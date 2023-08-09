@@ -49,7 +49,7 @@ public class RectangleRDD
      */
     public RectangleRDD(JavaRDD<Polygon> rawSpatialRDD)
     {
-        this.rawSpatialRDD = rawSpatialRDD;
+        this.setRawSpatialRDD(rawSpatialRDD);
     }
 
     /**

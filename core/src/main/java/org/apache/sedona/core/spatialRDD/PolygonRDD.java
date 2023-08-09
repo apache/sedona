@@ -59,7 +59,7 @@ public class PolygonRDD
      */
     public PolygonRDD(JavaRDD<Polygon> rawSpatialRDD)
     {
-        this.rawSpatialRDD = rawSpatialRDD;
+        this.setRawSpatialRDD(rawSpatialRDD);
     }
 
     /**
@@ -150,6 +150,7 @@ public class PolygonRDD
             this.setRawSpatialRDD(rawTextRDD.mapPartitions(new PolygonFormatMapper(splitter, carryInputData)));
         }
         if (splitter.equals(FileDataSplitter.GEOJSON)) { this.fieldNames = FormatMapper.readGeoJsonPropertyNames(rawTextRDD.take(1).get(0).toString()); }
+        this.analyze();
     }
 
     /**
