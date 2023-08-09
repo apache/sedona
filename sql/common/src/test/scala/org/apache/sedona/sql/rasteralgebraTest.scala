@@ -361,7 +361,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_AsGeoTiff") {
-      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/*")
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val resultRaw = df.selectExpr("RS_FromGeoTiff(content) as raster").first().get(0)
       val resultLoaded = df.selectExpr("RS_FromGeoTiff(content) as raster")
         .selectExpr("RS_AsGeoTiff(raster) as geotiff")
