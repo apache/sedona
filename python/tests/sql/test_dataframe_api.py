@@ -45,7 +45,7 @@ test_configurations = [
     (stc.ST_LineStringFromText, ("multiple_point", lambda: f.lit(',')), "constructor", "", "LINESTRING (0 0, 1 0, 1 1, 0 0)"),
     (stc.ST_Point, ("x", "y"), "constructor", "", "POINT (0 1)"),
     (stc.ST_PointFromText, ("single_point", lambda: f.lit(',')), "constructor", "", "POINT (0 1)"),
-    (stc.ST_MakePoint, ("x", "y", "z"), "constructor", "", "POINT Z(0 1 2)"),
+    (stc.ST_MakePoint, ("x", "y", "z"), "constructor", "", "POINT Z (0 1 2)"),
     (stc.ST_PolygonFromEnvelope, ("minx", "miny", "maxx", "maxy"), "min_max_x_y", "", "POLYGON ((0 1, 0 3, 2 3, 2 1, 0 1))"),
     (stc.ST_PolygonFromEnvelope, (0.0, 1.0, 2.0, 3.0), "null", "", "POLYGON ((0 1, 0 3, 2 3, 2 1, 0 1))"),
     (stc.ST_PolygonFromText, ("multiple_point", lambda: f.lit(',')), "constructor", "", "POLYGON ((0 0, 1 0, 1 1, 0 0))"),
