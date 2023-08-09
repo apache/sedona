@@ -48,11 +48,8 @@ class TestConstructors(TestBase):
         point_df = self.spark.sql("select ST_MakePoint(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
         assert point_df.count() == 1000
 
-        point_df = self.spark.sql("SELECT ST_MakePoint(1.2345, 2.3456, 3.4567)")
-        assert point_df.count() == 1
-
-        point_df = self.spark.sql("SELECT ST_MakePoint(1.2345, 2.3456, 3.4567, 4.5678)")
-        assert point_df.count() == 1
+        point_df = self.spark.sql("SELECT ST_AsText(ST_MakePoint(1.2345, 2.3456, 3.4567))")
+        assert point_df.take(1)[0][0] == "POINT Z(1.2345 2.3456 3.4567)"
 
     def test_st_point_from_text(self):
         point_csv_df = self.spark.read.format("csv").\

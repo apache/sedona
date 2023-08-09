@@ -219,8 +219,9 @@ def ST_PointFromText(coords: ColumnOrName, delimiter: ColumnOrName) -> Column:
     return _call_constructor_function("ST_PointFromText", (coords, delimiter))
 
 @validate_argument_types
-def ST_MakePoint(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, z: Optional[ColumnOrNameOrNumber] = None, m: Optional[ColumnOrNameOrNumber] = None) -> Column:
-    """Generate a 2D, 3D Z or 4D ZM Point geometry.
+def ST_MakePoint(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, z: Optional[ColumnOrNameOrNumber] = None) -> Column:
+    """Generate a 2D or a 3D Z Point geometry. If z is None then a 2D point is generated.
+    This function doesn't support M coordinates for creating a 4D ZM Point.
 
     :param x: Either a number or numeric column representing the X coordinate of a point.
     :type x: ColumnOrNameOrNumber
@@ -228,16 +229,12 @@ def ST_MakePoint(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, z: Optional[C
     :type y: ColumnOrNameOrNumber
     :param z: Either a number or numeric column representing the Z coordinate of a point, if None then a 2D point is generated, defaults to None
     :type z: ColumnOrNameOrNumber
-    :param z: Either a number or numeric column representing the measure of a point, if None then a 3D point is generated without measure, defaults to None
-    :type z: ColumnOrNameOrNumber
     :return: Point geometry column generated from the coordinate values.
     :rtype: Column
     """
     args = (x, y)
     if z is not None:
         args = args + (z,)
-    if m is not None:
-        args = args + (m,)
     return _call_constructor_function("ST_MakePoint", (args))
 
 
