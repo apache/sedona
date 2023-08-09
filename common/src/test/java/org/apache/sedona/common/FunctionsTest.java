@@ -1623,12 +1623,22 @@ public class FunctionsTest {
     public void voronoiPolygons() {
         MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0, 0, 2, 2));
         Geometry actual1 = Functions.voronoiPolygons(multiPoint, 0, null);
-        assertEquals("GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))", actual1.toText());
+        assertEquals("GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))",
+                actual1.toText());
 
         Geometry actual2 = Functions.voronoiPolygons(multiPoint, 30, null);
         assertEquals("GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 4, 4 -2, -2 -2)))", actual2.toText());
-        
-        Geometry actual3 = Functions.voronoiPolygons(null, 0, null);
-        assertEquals(null, actual3);
+
+        Geometry buf = Functions.buffer(GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1)), 10);
+        Geometry actual3 = Functions.voronoiPolygons(multiPoint, 0, buf);
+        assertEquals(
+                "GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 -9, -9 -9)), POLYGON ((-9 11, 11 11, 11 -9, -9 11)))",
+                actual3.toText());
+
+        Geometry actual4 = Functions.voronoiPolygons(multiPoint, 30, buf);
+        assertEquals("GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 11, 11 -9, -9 -9)))", actual4.toText());
+
+        Geometry actual5 = Functions.voronoiPolygons(null, 0, null);
+        assertEquals(null, actual5);
     }
 }
