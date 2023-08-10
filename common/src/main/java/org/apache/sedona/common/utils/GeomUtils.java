@@ -171,15 +171,14 @@ public class GeomUtils {
         if (srid != 0) {
             sridString = "SRID=" + String.valueOf(srid) + ";";
         }
-
-        return sridString + new WKTWriter(GeomUtils.getDimension(geometry)).write(geometry);
+        return sridString + new WKTWriter(4).write(geometry);
     }
 
     public static String getWKT(Geometry geometry) {
         if (geometry == null) {
             return null;
         }
-        return new WKTWriter(GeomUtils.getDimension(geometry)).write(geometry);
+        return new WKTWriter(4).write(geometry);
     }
 
     public static byte[] getEWKB(Geometry geometry) {
@@ -254,17 +253,7 @@ public class GeomUtils {
     }
 
     public static int getDimension(Geometry geometry) {
-        int dimension = 2;
-        if (geometry.getCoordinate() == null) {
-            return dimension;
-        }
-        if(!java.lang.Double.isNaN(geometry.getCoordinate().getZ())){
-            dimension = 3;
-        }
-        if(!java.lang.Double.isNaN(geometry.getCoordinate().getM())){
-            dimension = 4;
-        }
-        return dimension;
+        return geometry.getCoordinate() != null && !java.lang.Double.isNaN(geometry.getCoordinate().getZ()) ? 3 : 2;
     }
 
     /**

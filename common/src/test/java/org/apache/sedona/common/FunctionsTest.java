@@ -67,51 +67,80 @@ public class FunctionsTest {
     }
 
     @Test
-    public void asEWKT() {
+    public void asEWKT() throws Exception{
         Geometry geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0));
         String actualResult = Functions.asEWKT(geometry);
         String expectedResult = "POINT (1 2)";
+        Geometry expected = Constructors.geomFromEWKT(expectedResult);
+        assertEquals(expected, geometry);
         assertEquals(actualResult, expectedResult);
 
         geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0, 3.0));
         actualResult = Functions.asEWKT(geometry);
         expectedResult = "POINT Z(1 2 3)";
+        expected = Constructors.geomFromEWKT(expectedResult);
+        assertEquals(expected, geometry);
         assertEquals(actualResult, expectedResult);
         
         geometry = GEOMETRY_FACTORY.createPoint(new CoordinateXYM(1.0, 2.0, 3.0));
         actualResult = Functions.asEWKT(geometry);
         expectedResult = "POINT M(1 2 3)";
+        expected = Constructors.geomFromEWKT(expectedResult);
+        assertEquals(expected, geometry);
         assertEquals(actualResult, expectedResult);
 
         geometry = GEOMETRY_FACTORY.createPoint(new CoordinateXYZM(1.0, 2.0, 3.0, 4.0));
         actualResult = Functions.asEWKT(geometry);
         expectedResult = "POINT ZM(1 2 3 4)";
+        expected = Constructors.geomFromEWKT(expectedResult);
+        assertEquals(expected, geometry);
         assertEquals(actualResult, expectedResult);
     }
 
     @Test
-    public void asWKT() {
+    public void asWKT() throws Exception {
         Geometry geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0));
         String actualResult = Functions.asWKT(geometry);
         String expectedResult = "POINT (1 2)";
+        Geometry expected = Constructors.geomFromEWKT(expectedResult);
+        assertEquals(expected, geometry);
         assertEquals(actualResult, expectedResult);
 
         geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0, 3.0));
         actualResult = Functions.asWKT(geometry);
         expectedResult = "POINT Z(1 2 3)";
+        expected = Constructors.geomFromEWKT(expectedResult);
+        assertEquals(expected, geometry);
         assertEquals(actualResult, expectedResult);
         
         geometry = GEOMETRY_FACTORY.createPoint(new CoordinateXYM(1.0, 2.0, 3.0));
         actualResult = Functions.asWKT(geometry);
         expectedResult = "POINT M(1 2 3)";
+        expected = Constructors.geomFromEWKT(expectedResult);
+        assertEquals(expected, geometry);
         assertEquals(actualResult, expectedResult);
         
         geometry = GEOMETRY_FACTORY.createPoint(new CoordinateXYZM(1.0, 2.0, 3.0, 4.0));
         actualResult = Functions.asWKT(geometry);
         expectedResult = "POINT ZM(1 2 3 4)";
+        expected = Constructors.geomFromEWKT(expectedResult);
+        assertEquals(expected, geometry);
         assertEquals(actualResult, expectedResult);
     }
 
+    @Test
+    public void asWKB() throws Exception{
+        Geometry geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0));
+        byte[] actualResult = Functions.asWKB(geometry);
+        Geometry expected = Constructors.geomFromWKB(actualResult);
+        assertEquals(expected, geometry);
+
+        geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0, 3.0));
+        actualResult = Functions.asWKB(geometry);
+        expected = Constructors.geomFromWKB(actualResult);
+        assertEquals(expected, geometry);
+    }
+    
     @Test
     public void splitLineStringByMultipoint() {
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5, 2.0, 2.0));
