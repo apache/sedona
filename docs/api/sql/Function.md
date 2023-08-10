@@ -264,6 +264,7 @@ EWKB is an extended version of WKB which includes the SRID of the geometry.
 The format originated in PostGIS but is supported by many GIS tools.
 If the geometry is lacking SRID a WKB format is produced.
 [Se ST_SetSRID](#ST_SetSRID)
+It will ignore the M coordinate if present.
 
 Format: `ST_AsEWKB (A:geometry)`
 
@@ -288,6 +289,7 @@ EWKT is an extended version of WKT which includes the SRID of the geometry.
 The format originated in PostGIS but is supported by many GIS tools.
 If the geometry is lacking SRID a WKT format is produced.
 [See ST_SetSRID](#ST_SetSRID)
+It will support M coodinate if present since v1.5.0.
 
 Format: `ST_AsEWKT (A:geometry)`
 
@@ -303,6 +305,30 @@ Output:
 
 ```
 SRID=4326;POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))
+```
+
+Example:
+
+```sql
+SELECT ST_AsEWKT(ST_MakePointM(1.0, 1.0, 1.0))
+```
+
+Output:
+
+```
+POINT M(1 1 1)
+```
+
+Example:
+
+```sql
+SELECT ST_AsEWKT(ST_MakePoint(1.0, 1.0, 1.0, 1.0))
+```
+
+Output:
+
+```
+POINT ZM(1 1 1 1)
 ```
 
 ## ST_AsGeoJSON
@@ -376,7 +402,8 @@ Output:
 
 ## ST_AsText
 
-Introduction: Return the Well-Known Text string representation of a geometry
+Introduction: Return the Well-Known Text string representation of a geometry.
+It will support M coodinate if present since v1.5.0.
 
 Format: `ST_AsText (A:geometry)`
 
@@ -392,6 +419,30 @@ Output:
 
 ```
 POINT (1 1)
+```
+
+Example:
+
+```sql
+SELECT ST_AsText(ST_MakePointM(1.0, 1.0, 1.0))
+```
+
+Output:
+
+```
+POINT M(1 1 1)
+```
+
+Example:
+
+```sql
+SELECT ST_AsText(ST_MakePoint(1.0, 1.0, 1.0, 1.0))
+```
+
+Output:
+
+```
+POINT ZM(1 1 1 1)
 ```
 
 ## ST_Azimuth
