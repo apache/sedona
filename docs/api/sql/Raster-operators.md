@@ -573,7 +573,11 @@ When the bandIndex is RS_NumBands(raster) + 1, it appends the band to the end of
 
 If the bandIndex and noDataValue is not given, a convenience implementation adds a new band with a null noDataValue.
 
-Adding a new band with a custom noDataValue requires bandIndex = RS_NumBands(raster) + 1 and non-null noDataValue to be explicitly specified. Modifying the noDataValue of an existing band is not supported.
+Adding a new band with a custom noDataValue requires bandIndex = RS_NumBands(raster) + 1 and non-null noDataValue to be explicitly specified.
+
+Modifying or Adding a customNoDataValue is also possible by giving an existing band in RS_AddBandFromArray
+
+In order to remove an existing noDataValue from an existing band, pass null as the noDataValue in the RS_AddBandFromArray.
 
 Note that: `bandIndex == RS_NumBands(raster) + 1` is an experimental feature and might not lead to the loss of raster metadata and properties such as color models.
 
