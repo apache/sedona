@@ -304,8 +304,22 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
     it("Passed RS_SetSRID with raster") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
-      val result = df.selectExpr("RS_SRID(RS_SetSRID(RS_FromGeoTiff(content), 4326))").first().getInt(0)
-      assert(result == 4326)
+      val dfRaster = df.selectExpr("RS_FromGeoTiff(content) as rast", "RS_SetSRID(RS_FromGeoTiff(content), 4326) as rast_4326")
+      val dfResult = dfRaster.selectExpr("RS_SRID(rast_4326) as srid_4326", "RS_Metadata(rast) as metadata", "RS_Metadata(rast_4326) as metadata_4326")
+      val result = dfResult.first()
+      assert(result.getInt(0) == 4326)
+      val metadata = result.getSeq[Double](1)
+      val metadata4326 = result.getSeq[Double](2)
+      assert(metadata4326(8) == 4326)
+      assert(metadata(0) == metadata4326(0))
+      assert(metadata(1) == metadata4326(1))
+      assert(metadata(2) == metadata4326(2))
+      assert(metadata(3) == metadata4326(3))
+      assert(metadata(4) == metadata4326(4))
+      assert(metadata(5) == metadata4326(5))
+      assert(metadata(6) == metadata4326(6))
+      assert(metadata(7) == metadata4326(7))
+      assert(metadata(9) == metadata4326(9))
     }
 
     it("Passed RS_SRID should handle null values") {
@@ -589,6 +603,54 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")
       val result = df.selectExpr("RS_RasterToWorldCoordY(raster, 1, 1)").first().getDouble(0)
       assertEquals(4021262.7487925636, result, 0.5d)
+    }
+
+    it("Passed RS_WorldToRasterCoord with raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("ST_AsText(RS_WorldToRasterCoord(raster, -13095817.809482181, 4021262.7487925636))").first().getString(0);
+      val expected = "POINT (1 1)"
+      assertEquals(expected, result )
+    }
+
+    it("Passed RS_WorldToRasterCoordX with raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_WorldToRasterCoordX(raster, -13095817.809482181, 4021262.7487925636)").first().getInt(0);
+      val expected = 1
+      assertEquals(expected, result)
+    }
+
+    it("Passed RS_WorldToRasterCoordY with raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_WorldToRasterCoordY(raster, -13095817.809482181, 4021262.7487925636)").first().getInt(0);
+      val expected = 1
+      assertEquals(expected, result)
+    }
+
+    it("Passed RS_WorldToRasterCoord with raster - geom parameter") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("ST_AsText(RS_WorldToRasterCoord(raster, ST_GeomFromText('POINT (-13095817.809482181 4021262.7487925636)')))").first().getString(0);
+      val expected = "POINT (1 1)"
+      assertEquals(expected, result)
+    }
+
+    it("Passed RS_WorldToRasterCoordX with raster - geom parameter") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_WorldToRasterCoordX(raster, ST_GeomFromText('POINT (-13095817.809482181 4021262.7487925636)'))").first().getInt(0);
+      val expected = 1
+      assertEquals(expected, result)
+    }
+
+    it("Passed RS_WorldToRasterCoordY with raster - geom parameter") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_WorldToRasterCoordY(raster, ST_GeomFromText('POINT (-13095817.809482181 4021262.7487925636)'))").first().getInt(0);
+      val expected = 1
+      assertEquals(expected, result)
     }
 
     it("Passed RS_Contains") {

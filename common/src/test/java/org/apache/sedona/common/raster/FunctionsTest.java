@@ -13,7 +13,10 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.junit.Assert;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -41,8 +44,16 @@ public class FunctionsTest extends RasterTestBase {
         assertEquals(4326, GeometryFunctions.envelope(oneBandRasterWithUpdatedSrid).getSRID());
         assertTrue(GeometryFunctions.envelope(oneBandRasterWithUpdatedSrid).equalsTopo(GeometryFunctions.envelope(oneBandRaster)));
 
+        AffineTransform2D oneBandAffine = RasterUtils.getGDALAffineTransform(oneBandRaster);
+        AffineTransform2D oneBandUpdatedAffine = RasterUtils.getGDALAffineTransform(oneBandRasterWithUpdatedSrid);
+        Assert.assertEquals(oneBandAffine, oneBandUpdatedAffine);
+
         GridCoverage2D multiBandRasterWithUpdatedSrid = RasterEditors.setSrid(multiBandRaster, 0);
         assertEquals(0 , RasterAccessors.srid(multiBandRasterWithUpdatedSrid));
+
+        AffineTransform2D multiBandAffine = RasterUtils.getGDALAffineTransform(multiBandRaster);
+        AffineTransform2D multiBandUpdatedAffine = RasterUtils.getGDALAffineTransform(multiBandRasterWithUpdatedSrid);
+        Assert.assertEquals(multiBandAffine, multiBandUpdatedAffine);
     }
 
     @Test

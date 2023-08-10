@@ -45,7 +45,7 @@ public class PixelFunctions
 
     public static Geometry getPixelAsPoint(GridCoverage2D raster, int colX, int rowY) throws TransformException, FactoryException {
         int srid = RasterAccessors.srid(raster);
-        Point2D point2D = RasterUtils.getCornerCoordinatesWithRangeCheck(raster, colX, rowY);
+        Point2D point2D = RasterUtils.getWorldCornerCoordinatesWithRangeCheck(raster, colX, rowY);
         Coordinate pointCoord = new Coordinate(point2D.getX(), point2D.getY());
         if (srid != 0) {
             GeometryFactory factory = new GeometryFactory(new PrecisionModel(), srid);
