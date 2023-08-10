@@ -221,7 +221,8 @@ object Catalog {
     function[RS_Contains](),
     function[RS_WorldToRasterCoord](),
     function[RS_WorldToRasterCoordX](),
-    function[RS_WorldToRasterCoordY]()
+    function[RS_WorldToRasterCoordY](),
+    function[RS_BandNoDataValue]()
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(
