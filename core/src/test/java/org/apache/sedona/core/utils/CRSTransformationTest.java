@@ -161,7 +161,7 @@ public class CRSTransformationTest
             indexType = IndexType.getIndexType(prop.getProperty("indexType"));
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
             queryEnvelope = new Envelope(30.01, 40.01, -90.01, -80.01);
-            loopTimes = 5;
+            loopTimes = 1;
         }
         catch (IOException ex) {
             ex.printStackTrace();
@@ -202,148 +202,10 @@ public class CRSTransformationTest
     public void testSpatialRangeQuery()
             throws Exception
     {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3005");
-        for (int i = 0; i < loopTimes; i++) {
-            long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).count();
-            assert resultSize == 3127;
-        }
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true);
+        spatialRDD.CRSTransform( "epsg:4326", "epsg:3005");
+        long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).count();
+        assert resultSize == 3127;
         assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).take(10).get(1).getUserData().toString() != null;
-    }
-
-    /**
-     * Test spatial range query using index.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testSpatialRangeQueryUsingIndex()
-            throws Exception
-    {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3005");
-        spatialRDD.buildIndex(IndexType.RTREE, false);
-        for (int i = 0; i < loopTimes; i++) {
-            long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, true).count();
-            assert resultSize == 3127;
-        }
-        assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, true).take(10).get(1).getUserData().toString() != null;
-    }
-
-    /**
-     * Test spatial knn query.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testSpatialKnnQuery()
-            throws Exception
-    {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3005");
-
-        for (int i = 0; i < loopTimes; i++) {
-            List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, false);
-            assert result.size() > 0;
-            assert result.get(0).getUserData().toString() != null;
-            //System.out.println(result.get(0).getUserData().toString());
-        }
-    }
-
-    /**
-     * Test spatial knn query using index.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testSpatialKnnQueryUsingIndex()
-            throws Exception
-    {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3005");
-        pointRDD.buildIndex(IndexType.RTREE, false);
-        for (int i = 0; i < loopTimes; i++) {
-            List<Point> result = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, true);
-            assert result.size() > 0;
-            assert result.get(0).getUserData().toString() != null;
-            //System.out.println(result.get(0).getUserData().toString());
-        }
-    }
-
-    /**
-     * Test spatial KNN correctness.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testSpatialKNNCorrectness()
-            throws Exception
-    {
-        PointRDD pointRDD = new PointRDD(sc, InputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3005");
-        List<Point> resultNoIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, false);
-        pointRDD.buildIndex(IndexType.RTREE, false);
-        List<Point> resultWithIndex = KNNQuery.SpatialKnnQuery(pointRDD, queryPoint, topK, true);
-        GeometryDistanceComparator geometryDistanceComparator = new GeometryDistanceComparator(queryPoint, true);
-        List<Point> resultNoIndexModifiable = new ArrayList<>(resultNoIndex);
-        List<Point> resultWithIndexModifiable = new ArrayList<>(resultWithIndex);
-        Collections.sort(resultNoIndexModifiable, geometryDistanceComparator);
-        Collections.sort(resultWithIndexModifiable, geometryDistanceComparator);
-        int difference = 0;
-        for (int i = 0; i < topK; i++) {
-            if (geometryDistanceComparator.compare(resultNoIndex.get(i), resultWithIndex.get(i)) != 0) {
-                difference++;
-            }
-        }
-        assert difference == 0;
-    }
-
-    /**
-     * Test spatial join query with polygon RDD.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testSpatialJoinQueryWithPolygonRDD()
-            throws Exception
-    {
-
-        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3005");
-
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3005");
-
-        spatialRDD.spatialPartitioning(gridType);
-
-        queryRDD.spatialPartitioning(spatialRDD.getPartitioner());
-
-        List<Tuple2<Polygon, List<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, true).collect();
-
-        assert result.get(1)._1().getUserData() != null;
-        for (int i = 0; i < result.size(); i++) {
-            assert result.get(i)._2().size() == 0 || result.get(i)._2().iterator().next().getUserData() != null;
-        }
-    }
-
-    /**
-     * Test spatial join query with polygon RDD using R tree index.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testSpatialJoinQueryWithPolygonRDDUsingRTreeIndex()
-            throws Exception
-    {
-
-        PolygonRDD queryRDD = new PolygonRDD(sc, InputLocationQueryPolygon, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3005");
-
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3005");
-
-        spatialRDD.spatialPartitioning(gridType);
-
-        spatialRDD.buildIndex(IndexType.RTREE, true);
-
-        queryRDD.spatialPartitioning(spatialRDD.getPartitioner());
-
-        List<Tuple2<Polygon, List<Point>>> result = JoinQuery.SpatialJoinQuery(spatialRDD, queryRDD, false, true).collect();
-
-        assert result.get(1)._1().getUserData() != null;
-        for (int i = 0; i < result.size(); i++) {
-            assert result.get(i)._2().size() == 0 || result.get(i)._2().iterator().next().getUserData() != null;
-        }
     }
 }

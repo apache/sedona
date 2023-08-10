@@ -310,43 +310,6 @@ Output: `3`
     For non-skewed rasters, you can provide any value for longitude and the intended value of world latitude, to get the desired answer
 
 
-## Raster Band Accessors
-
-### RS_BandNoDataValue
-
-Introduction: Returns the no data value in the given band of the given raster. If the band is not provided, by default band 1 is assumed. Band index is 1-indexed. 
-
-!!!Note
-    RS_BandNoDataValue can return null if no noDataValue is present in the given band. 
-
-!!!Note
-    RS_BandNoDataValue will throw an IllegalArgumentException if the provided band is not present in the raster.
-
-
-Format: `RS_BandNoDataValue(rast: Raster, band: Int = 1)`
-
-Since: `1.5.0`
-
-Spark SQL example:
-```sql
-SELECT RS_BandNoDataValue(rast) from rasters;
-```
-
-Output: 0
-
-```sql
-SELECT RS_BandNoDataValue(rast, 2) from rasters;
-```
-
-Output: `IllegalArgumentException: Provided band index is not present in the raster`
-
-Spark SQL example:
-```sql
-SELECT RS_BandNoDataValue(rast) from rasters_no_nodata;
-```
-
-Output: null
-
 ## Raster based operators
 
 ### RS_Intersects
@@ -610,7 +573,11 @@ When the bandIndex is RS_NumBands(raster) + 1, it appends the band to the end of
 
 If the bandIndex and noDataValue is not given, a convenience implementation adds a new band with a null noDataValue.
 
-Adding a new band with a custom noDataValue requires bandIndex = RS_NumBands(raster) + 1 and non-null noDataValue to be explicitly specified. Modifying the noDataValue of an existing band is not supported.
+Adding a new band with a custom noDataValue requires bandIndex = RS_NumBands(raster) + 1 and non-null noDataValue to be explicitly specified.
+
+Modifying or Adding a customNoDataValue is also possible by giving an existing band in RS_AddBandFromArray
+
+In order to remove an existing noDataValue from an existing band, pass null as the noDataValue in the RS_AddBandFromArray.
 
 Note that: `bandIndex == RS_NumBands(raster) + 1` is an experimental feature and might not lead to the loss of raster metadata and properties such as color models.
 

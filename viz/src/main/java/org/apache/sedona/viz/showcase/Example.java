@@ -206,7 +206,7 @@ public class Example
     public static boolean buildScatterPlot(String outputPath)
     {
         try {
-            PolygonRDD spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY());
+            PolygonRDD spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions);
             ScatterPlot visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false);
             visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
             visualizationOperator.Visualize(sparkContext, spatialRDD);
@@ -241,7 +241,7 @@ public class Example
     public static boolean buildHeatMap(String outputPath)
     {
         try {
-            RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY());
+            RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
             HeatMap visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2);
             visualizationOperator.Visualize(sparkContext, spatialRDD);
             SedonaVizImageGenerator imageGenerator = new SedonaVizImageGenerator();
@@ -263,8 +263,8 @@ public class Example
     public static boolean buildChoroplethMap(String outputPath)
     {
         try {
-            PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY());
-            PolygonRDD queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY());
+            PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
+            PolygonRDD queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions);
             spatialRDD.spatialPartitioning(GridType.KDBTREE);
             queryRDD.spatialPartitioning(spatialRDD.getPartitioner());
             spatialRDD.buildIndex(IndexType.RTREE, true);
@@ -300,7 +300,7 @@ public class Example
     public static boolean parallelFilterRenderNoStitch(String outputPath)
     {
         try {
-            RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY());
+            RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
             HeatMap visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2, 4, 4, true, true);
             visualizationOperator.Visualize(sparkContext, spatialRDD);
             SedonaVizImageGenerator imageGenerator = new SedonaVizImageGenerator();
@@ -322,7 +322,7 @@ public class Example
     public static boolean parallelFilterRenderStitch(String outputPath)
     {
         try {
-            RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY());
+            RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
             HeatMap visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2, 4, 4, true, true);
             visualizationOperator.Visualize(sparkContext, spatialRDD);
             ImageGenerator imageGenerator = new ImageGenerator();
@@ -348,7 +348,7 @@ public class Example
         try {
             EarthdataHDFPointMapper earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName,
                     HDFDataVariableList, HDFDataVariableName, HDFswitchXY, urlPrefix);
-            PointRDD spatialRDD = new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY());
+            PointRDD spatialRDD = new PointRDD(sparkContext, earthdataInputLocation, earthdataNumPartitions, earthdataHDFPoint);
             ScatterPlot visualizationOperator = new ScatterPlot(1000, 600, spatialRDD.boundaryEnvelope, ColorizeOption.EARTHOBSERVATION, false, false);
             visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.BLUE, true);
             visualizationOperator.Visualize(sparkContext, spatialRDD);

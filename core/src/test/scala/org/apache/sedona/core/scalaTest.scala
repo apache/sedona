@@ -23,10 +23,8 @@ import org.apache.sedona.common.enums.FileDataSplitter
 import org.apache.sedona.core.enums.{GridType, IndexType, JoinBuildSide}
 import org.apache.sedona.core.formatMapper.EarthdataHDFPointMapper
 import org.apache.sedona.core.spatialOperator.JoinQuery.JoinParams
-import org.apache.sedona.core.spatialOperator.SpatialPredicate
-import org.apache.sedona.core.spatialOperator.{JoinQuery, KNNQuery, RangeQuery}
+import org.apache.sedona.core.spatialOperator.{JoinQuery, KNNQuery, RangeQuery, SpatialPredicate}
 import org.apache.sedona.core.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
-import org.apache.spark.storage.StorageLevel
 import org.locationtech.jts.geom.{Coordinate, Envelope, GeometryFactory}
 
 class scalaTest extends SparkUtil {
@@ -233,21 +231,6 @@ class scalaTest extends SparkUtil {
       var resultSize = 0L
       resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).count
       i = i + 1
-    }
-  }
-
-  test("should pass CRS transformed spatial range query") {
-    val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false, StorageLevel.NONE, "epsg:4326", "epsg:3005")
-    for (i <- 1 to eachQueryLoopTimes) {
-      val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, false).count
-    }
-  }
-
-  test("should pass CRS transformed spatial range query using index") {
-    val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, false, StorageLevel.NONE, "epsg:4326", "epsg:3005")
-    objectRDD.buildIndex(PointRDDIndexType, false)
-    for (i <- 1 to eachQueryLoopTimes) {
-      val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, true).count
     }
   }
 }

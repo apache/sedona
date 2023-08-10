@@ -15,7 +15,6 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from pyspark import StorageLevel
 from shapely.geometry import Point, Polygon, LineString
 from shapely.geometry.base import BaseGeometry
 
@@ -47,8 +46,8 @@ class TestJoinQueryCorrectness(TestBase):
         self.verify_join_result(result_no_index)
 
     def test_on_boundary_point_join_correctness(self):
-        window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set), StorageLevel.MEMORY_ONLY)
-        object_rdd = PointRDD(self.sc.parallelize(self.test_on_boundary_point_set), StorageLevel.MEMORY_ONLY)
+        window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set))
+        object_rdd = PointRDD(self.sc.parallelize(self.test_on_boundary_point_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
         result = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, True, False).collect()
@@ -59,8 +58,8 @@ class TestJoinQueryCorrectness(TestBase):
 
     def test_outside_point_join_correctness(self):
         self.once_before_all()
-        window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set), StorageLevel.MEMORY_ONLY)
-        object_rdd = PointRDD(self.sc.parallelize(self.test_outside_point_set), StorageLevel.MEMORY_ONLY)
+        window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set))
+        object_rdd = PointRDD(self.sc.parallelize(self.test_outside_point_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
         result = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, True, False).collect()
@@ -71,9 +70,9 @@ class TestJoinQueryCorrectness(TestBase):
 
     def test_inside_linestring_join_correctness(self):
         window_rdd = PolygonRDD(
-            self.sc.parallelize(self.test_polygon_window_set), StorageLevel.MEMORY_ONLY
+            self.sc.parallelize(self.test_polygon_window_set)
         )
-        object_rdd = LineStringRDD(self.sc.parallelize(self.test_inside_linestring_set), StorageLevel.MEMORY_ONLY)
+        object_rdd = LineStringRDD(self.sc.parallelize(self.test_inside_linestring_set))
 
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
@@ -84,8 +83,8 @@ class TestJoinQueryCorrectness(TestBase):
         self.verify_join_result(result_no_index)
 
     def test_overlapped_linestring_join_correctness(self):
-        window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set), StorageLevel.MEMORY_ONLY)
-        object_rdd = LineStringRDD(self.sc.parallelize(self.test_overlapped_linestring_set), StorageLevel.MEMORY_ONLY)
+        window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set))
+        object_rdd = LineStringRDD(self.sc.parallelize(self.test_overlapped_linestring_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
         result = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, True, True).collect()
@@ -95,8 +94,8 @@ class TestJoinQueryCorrectness(TestBase):
         self.verify_join_result(result_no_index)
 
     def test_outside_line_string_join_correctness(self):
-        window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set), StorageLevel.MEMORY_ONLY)
-        object_rdd = LineStringRDD(self.sc.parallelize(self.test_outside_linestring_set), StorageLevel.MEMORY_ONLY)
+        window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set))
+        object_rdd = LineStringRDD(self.sc.parallelize(self.test_outside_linestring_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
         result = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, True, False).collect()
@@ -106,9 +105,9 @@ class TestJoinQueryCorrectness(TestBase):
         assert 0 == result_no_index.__len__()
 
     def test_inside_polygon_join_correctness(self):
-        window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set), StorageLevel.MEMORY_ONLY)
+        window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set))
 
-        object_rdd = PolygonRDD(self.sc.parallelize(self.test_inside_polygon_set), StorageLevel.MEMORY_ONLY)
+        object_rdd = PolygonRDD(self.sc.parallelize(self.test_inside_polygon_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
         result = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, True, False).collect()
@@ -118,8 +117,8 @@ class TestJoinQueryCorrectness(TestBase):
         self.verify_join_result(result_no_index)
 
     def test_overlapped_polygon_join_correctness(self):
-        window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set), StorageLevel.MEMORY_ONLY)
-        object_rdd = PolygonRDD(self.sc.parallelize(self.test_overlapped_polygon_set), StorageLevel.MEMORY_ONLY)
+        window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set))
+        object_rdd = PolygonRDD(self.sc.parallelize(self.test_overlapped_polygon_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
         result = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, True, True).collect()
@@ -129,8 +128,8 @@ class TestJoinQueryCorrectness(TestBase):
         self.verify_join_result(result_no_index)
 
     def test_outside_polygon_join_correctness(self):
-        window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set), StorageLevel.MEMORY_ONLY)
-        object_rdd = PolygonRDD(self.sc.parallelize(self.test_outside_polygon_set), StorageLevel.MEMORY_ONLY)
+        window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set))
+        object_rdd = PolygonRDD(self.sc.parallelize(self.test_outside_polygon_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
         result = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, True, False).collect()
@@ -140,9 +139,9 @@ class TestJoinQueryCorrectness(TestBase):
         assert 0 == result_no_index.__len__()
 
     def test_inside_polygon_distance_join_correctness(self):
-        center_geometry_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set), StorageLevel.MEMORY_ONLY)
+        center_geometry_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set))
         window_rdd = CircleRDD(center_geometry_rdd, 0.1)
-        object_rdd = PolygonRDD(self.sc.parallelize(self.test_inside_polygon_set), StorageLevel.MEMORY_ONLY)
+        object_rdd = PolygonRDD(self.sc.parallelize(self.test_inside_polygon_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
         result = JoinQuery.DistanceJoinQuery(object_rdd, window_rdd, True, False).collect()
@@ -152,9 +151,9 @@ class TestJoinQueryCorrectness(TestBase):
         self.verify_join_result(result_no_index)
 
     def test_overlapped_polygon_distance_join_correctness(self):
-        center_geometry_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set), StorageLevel.MEMORY_ONLY)
+        center_geometry_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set))
         window_rdd = CircleRDD(center_geometry_rdd, 0.1)
-        object_rdd = PolygonRDD(self.sc.parallelize(self.test_overlapped_polygon_set), StorageLevel.MEMORY_ONLY)
+        object_rdd = PolygonRDD(self.sc.parallelize(self.test_overlapped_polygon_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
         result = JoinQuery.DistanceJoinQuery(object_rdd, window_rdd, True, True).collect()
@@ -164,9 +163,9 @@ class TestJoinQueryCorrectness(TestBase):
         self.verify_join_result(result_no_index)
 
     def test_outside_polygon_distance_join_correctness(self):
-        center_geometry_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set), StorageLevel.MEMORY_ONLY)
+        center_geometry_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set))
         window_rdd = CircleRDD(center_geometry_rdd, 0.1)
-        object_rdd = PolygonRDD(self.sc.parallelize(self.test_outside_polygon_set), StorageLevel.MEMORY_ONLY)
+        object_rdd = PolygonRDD(self.sc.parallelize(self.test_outside_polygon_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
         result = JoinQuery.DistanceJoinQuery(object_rdd, window_rdd, True, True).collect()
