@@ -340,6 +340,13 @@ SELECT RS_BandNoDataValue(rast, 2) from rasters;
 
 Output: `IllegalArgumentException: Provided band index is not present in the raster`
 
+Spark SQL example:
+```sql
+SELECT RS_BandNoDataValue(rast) from rasters_no_nodata;
+```
+
+Output: null
+
 ## Raster based operators
 
 ### RS_Intersects
