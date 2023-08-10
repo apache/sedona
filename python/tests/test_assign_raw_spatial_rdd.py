@@ -18,7 +18,6 @@
 from sedona.core.SpatialRDD import PointRDD, CircleRDD
 from tests.properties.point_properties import input_location, offset, splitter, num_partitions
 from tests.test_base import TestBase
-from pyspark import StorageLevel
 
 
 class TestSpatialRddAssignment(TestBase):
@@ -30,8 +29,7 @@ class TestSpatialRddAssignment(TestBase):
             offset,
             splitter,
             True,
-            num_partitions,
-            StorageLevel.MEMORY_ONLY
+            num_partitions
         )
         spatial_rdd.analyze()
 
@@ -51,8 +49,7 @@ class TestSpatialRddAssignment(TestBase):
             offset,
             splitter,
             True,
-            num_partitions,
-            StorageLevel.MEMORY_ONLY
+            num_partitions
         )
         circle_rdd = CircleRDD(point_rdd, 1.0)
         circle_rdd.analyze()

@@ -15,8 +15,6 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from pyspark import StorageLevel
-
 from sedona.core.SpatialRDD import PointRDD
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.enums import IndexType, GridType
@@ -52,37 +50,10 @@ class TestPointRDD(TestBase):
         self.compare_count(spatial_rdd_copy, input_count, input_boundary)
         spatial_rdd_copy = PointRDD(spatial_rdd.rawJvmSpatialRDD)
         self.compare_count(spatial_rdd_copy, input_count, input_boundary)
-        spatial_rdd_copy = PointRDD(spatial_rdd.rawJvmSpatialRDD, "epsg:4326", "epsg:5070")
-        self.compare_count(spatial_rdd_copy, input_count, transformed_envelope)
         spatial_rdd_copy = PointRDD(self.sc, input_location, offset, splitter, True, num_partitions)
         self.compare_count(spatial_rdd_copy, input_count, input_boundary)
         spatial_rdd_copy = PointRDD(self.sc, crs_point_test, splitter, True)
         self.compare_count(spatial_rdd_copy, 20000, crs_envelope)
-        spatial_rdd_copy = PointRDD(spatial_rdd.rawJvmSpatialRDD, StorageLevel.MEMORY_ONLY)
-        self.compare_count(spatial_rdd_copy, input_count, input_boundary)
-        spatial_rdd_copy = PointRDD(self.sc, input_location, offset, splitter, True, num_partitions, StorageLevel.MEMORY_ONLY)
-        self.compare_count(spatial_rdd_copy, input_count, input_boundary)
-        spatial_rdd_copy = PointRDD(self.sc, input_location, offset, splitter, True, StorageLevel.MEMORY_ONLY)
-        self.compare_count(spatial_rdd_copy, input_count, input_boundary)
-        spatial_rdd_copy = PointRDD(self.sc, crs_point_test, splitter, True, num_partitions, StorageLevel.MEMORY_ONLY)
-        self.compare_count(spatial_rdd_copy, 20000, crs_envelope)
-        spatial_rdd_copy = PointRDD(self.sc, crs_point_test, splitter, True, StorageLevel.MEMORY_ONLY)
-        self.compare_count(spatial_rdd_copy, 20000, crs_envelope)
-        spatial_rdd_copy = PointRDD(spatial_rdd.rawJvmSpatialRDD, StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:5070")
-        self.compare_count(spatial_rdd_copy, input_count, transformed_envelope)
-        spatial_rdd_copy = PointRDD(self.sc, input_location, offset, splitter, True, num_partitions,
-                                    StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:5070")
-        self.compare_count(spatial_rdd_copy, input_count, transformed_envelope)
-        spatial_rdd_copy = PointRDD(self.sc, input_location, offset, splitter, True,
-                                    StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:5070")
-        self.compare_count(spatial_rdd_copy, input_count, transformed_envelope)
-        spatial_rdd_copy = PointRDD(self.sc, crs_point_test, splitter, True,
-                                    num_partitions, StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:5070")
-
-        self.compare_count(spatial_rdd_copy, 20000, crs_envelope_transformed)
-        spatial_rdd_copy = PointRDD(self.sc, crs_point_test, splitter, True, StorageLevel.MEMORY_ONLY,
-                                    "epsg:4326", "epsg:5070")
-        self.compare_count(spatial_rdd_copy, 20000, crs_envelope_transformed)
 
     def test_empty_constructor(self):
         spatial_rdd = PointRDD(
@@ -91,8 +62,7 @@ class TestPointRDD(TestBase):
             Offset=offset,
             splitter=splitter,
             carryInputData=True,
-            partitions=num_partitions,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=num_partitions
         )
         spatial_rdd.buildIndex(IndexType.RTREE, False)
         spatial_rdd_copy = PointRDD()
@@ -106,8 +76,7 @@ class TestPointRDD(TestBase):
             Offset=offset,
             splitter=splitter,
             carryInputData=False,
-            partitions=10,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=10
         )
         spatial_rdd.analyze()
         spatial_rdd.spatialPartitioning(GridType.QUADTREE)
@@ -121,7 +90,6 @@ class TestPointRDD(TestBase):
             Offset=offset,
             splitter=splitter,
             carryInputData=True,
-            partitions=num_partitions,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=num_partitions
         )
         spatial_rdd.buildIndex(IndexType.RTREE, False)

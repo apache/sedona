@@ -15,8 +15,6 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from pyspark import StorageLevel
-
 from sedona.core.SpatialRDD import PointRDD, CircleRDD
 from tests.test_base import TestBase
 from tests.properties.point_properties import input_location, offset, splitter, num_partitions
@@ -31,8 +29,7 @@ class TestCircleRDD(TestBase):
             offset,
             splitter,
             True,
-            num_partitions,
-            StorageLevel.MEMORY_ONLY
+            num_partitions
         )
 
         circle_rdd = CircleRDD(spatial_rdd, 0.5)

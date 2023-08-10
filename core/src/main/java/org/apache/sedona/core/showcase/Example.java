@@ -191,8 +191,6 @@ public class Example
             testSpatialJoinQueryUsingIndex();
             testDistanceJoinQuery();
             testDistanceJoinQueryUsingIndex();
-            testCRSTransformationSpatialRangeQuery();
-            testCRSTransformationSpatialRangeQueryUsingIndex();
             testLoadShapefileIntoPolygonRDD();
         }
         catch (Exception e) {
@@ -212,7 +210,7 @@ public class Example
     public static void testSpatialRangeQuery()
             throws Exception
     {
-        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
+        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true);
         objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
         for (int i = 0; i < eachQueryLoopTimes; i++) {
             long resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, false).count();
@@ -228,7 +226,7 @@ public class Example
     public static void testSpatialRangeQueryUsingIndex()
             throws Exception
     {
-        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
+        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true);
         objectRDD.buildIndex(PointRDDIndexType, false);
         objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY());
         for (int i = 0; i < eachQueryLoopTimes; i++) {
@@ -245,7 +243,7 @@ public class Example
     public static void testSpatialKnnQuery()
             throws Exception
     {
-        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
+        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true);
         objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
         for (int i = 0; i < eachQueryLoopTimes; i++) {
             List<Point> result = KNNQuery.SpatialKnnQuery(objectRDD, kNNQueryPoint, 1000, false);
@@ -261,7 +259,7 @@ public class Example
     public static void testSpatialKnnQueryUsingIndex()
             throws Exception
     {
-        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
+        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true);
         objectRDD.buildIndex(PointRDDIndexType, false);
         objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY());
         for (int i = 0; i < eachQueryLoopTimes; i++) {
@@ -279,7 +277,7 @@ public class Example
             throws Exception
     {
         queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true);
-        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
+        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true);
 
         objectRDD.spatialPartitioning(joinQueryPartitioningType);
         queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner());
@@ -301,7 +299,7 @@ public class Example
             throws Exception
     {
         queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true);
-        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
+        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true);
 
         objectRDD.spatialPartitioning(joinQueryPartitioningType);
         queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner());
@@ -325,7 +323,7 @@ public class Example
     public static void testDistanceJoinQuery()
             throws Exception
     {
-        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
+        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true);
         CircleRDD queryWindowRDD = new CircleRDD(objectRDD, 0.1);
 
         objectRDD.spatialPartitioning(GridType.QUADTREE);
@@ -349,7 +347,7 @@ public class Example
     public static void testDistanceJoinQueryUsingIndex()
             throws Exception
     {
-        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY());
+        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true);
         CircleRDD queryWindowRDD = new CircleRDD(objectRDD, 0.1);
 
         objectRDD.spatialPartitioning(GridType.QUADTREE);
@@ -363,39 +361,6 @@ public class Example
         for (int i = 0; i < eachQueryLoopTimes; i++) {
             long resultSize = JoinQuery.DistanceJoinQuery(objectRDD, queryWindowRDD, true, true).count();
             assert resultSize > 0;
-        }
-    }
-
-    /**
-     * Test CRS transformation spatial range query.
-     *
-     * @throws Exception the exception
-     */
-    public static void testCRSTransformationSpatialRangeQuery()
-            throws Exception
-    {
-        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3005");
-        objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
-        for (int i = 0; i < eachQueryLoopTimes; i++) {
-            long resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, false).count();
-            assert resultSize > -1;
-        }
-    }
-
-    /**
-     * Test CRS transformation spatial range query using index.
-     *
-     * @throws Exception the exception
-     */
-    public static void testCRSTransformationSpatialRangeQueryUsingIndex()
-            throws Exception
-    {
-        objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true, StorageLevel.MEMORY_ONLY(), "epsg:4326", "epsg:3005");
-        objectRDD.buildIndex(PointRDDIndexType, false);
-        objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY());
-        for (int i = 0; i < eachQueryLoopTimes; i++) {
-            long resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, false, true).count();
-            assert resultSize > -1;
         }
     }
 

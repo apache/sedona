@@ -143,7 +143,8 @@ public class EarthdataMapperRunnableExample
     {
         EarthdataHDFPointMapper earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName,
                 HDFDataVariableList, HDFDataVariableName, urlPrefix);
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint);
+        spatialRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY());
         for (int i = 0; i < loopTimes; i++) {
             long resultSize;
             try {
@@ -164,7 +165,7 @@ public class EarthdataMapperRunnableExample
     {
         EarthdataHDFPointMapper earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName,
                 HDFDataVariableList, HDFDataVariableName, urlPrefix);
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint);
         try {
             spatialRDD.buildIndex(IndexType.RTREE, false);
         }
@@ -172,6 +173,7 @@ public class EarthdataMapperRunnableExample
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
+        spatialRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY());
         for (int i = 0; i < loopTimes; i++) {
             try {
                 long resultSize;

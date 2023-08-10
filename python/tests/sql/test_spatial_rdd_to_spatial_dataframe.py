@@ -17,7 +17,6 @@
 
 import os
 
-from pyspark import StorageLevel
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 from sedona.core.SpatialRDD import PointRDD
@@ -69,8 +68,7 @@ class TestSpatialRDDToDataFrame(TestBase):
             Offset=0,
             splitter=splitter,
             carryInputData=True,
-            partitions=numPartitions,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=numPartitions
         )
 
         raw_spatial_rdd = spatial_rdd.rawSpatialRDD.map(
