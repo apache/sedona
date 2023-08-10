@@ -67,6 +67,52 @@ public class FunctionsTest {
     }
 
     @Test
+    public void asEWKT() {
+        Geometry geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0));
+        String actualResult = Functions.asEWKT(geometry);
+        String expectedResult = "POINT (1 2)";
+        assertEquals(actualResult, expectedResult);
+
+        geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0, 3.0));
+        actualResult = Functions.asEWKT(geometry);
+        expectedResult = "POINT Z(1 2 3)";
+        assertEquals(actualResult, expectedResult);
+        
+        geometry = GEOMETRY_FACTORY.createPoint(new CoordinateXYM(1.0, 2.0, 3.0));
+        actualResult = Functions.asEWKT(geometry);
+        expectedResult = "POINT M(1 2 3)";
+        assertEquals(actualResult, expectedResult);
+
+        geometry = GEOMETRY_FACTORY.createPoint(new CoordinateXYZM(1.0, 2.0, 3.0, 4.0));
+        actualResult = Functions.asEWKT(geometry);
+        expectedResult = "POINT ZM(1 2 3 4)";
+        assertEquals(actualResult, expectedResult);
+    }
+
+    @Test
+    public void asWKT() {
+        Geometry geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0));
+        String actualResult = Functions.asWKT(geometry);
+        String expectedResult = "POINT (1 2)";
+        assertEquals(actualResult, expectedResult);
+
+        geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0, 3.0));
+        actualResult = Functions.asWKT(geometry);
+        expectedResult = "POINT Z(1 2 3)";
+        assertEquals(actualResult, expectedResult);
+        
+        geometry = GEOMETRY_FACTORY.createPoint(new CoordinateXYM(1.0, 2.0, 3.0));
+        actualResult = Functions.asWKT(geometry);
+        expectedResult = "POINT M(1 2 3)";
+        assertEquals(actualResult, expectedResult);
+        
+        geometry = GEOMETRY_FACTORY.createPoint(new CoordinateXYZM(1.0, 2.0, 3.0, 4.0));
+        actualResult = Functions.asWKT(geometry);
+        expectedResult = "POINT ZM(1 2 3 4)";
+        assertEquals(actualResult, expectedResult);
+    }
+
+    @Test
     public void splitLineStringByMultipoint() {
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5, 2.0, 2.0));
         MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0.5, 0.5, 1.0, 1.0));

@@ -254,7 +254,17 @@ public class GeomUtils {
     }
 
     public static int getDimension(Geometry geometry) {
-        return geometry.getCoordinate() != null && !java.lang.Double.isNaN(geometry.getCoordinate().getZ()) ? 3 : 2;
+        int dimension = 2;
+        if (geometry.getCoordinate() == null) {
+            return dimension;
+        }
+        if(!java.lang.Double.isNaN(geometry.getCoordinate().getZ())){
+            dimension = 3;
+        }
+        if(!java.lang.Double.isNaN(geometry.getCoordinate().getM())){
+            dimension = 4;
+        }
+        return dimension;
     }
 
     /**
