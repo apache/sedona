@@ -68,33 +68,34 @@ public class FunctionsTest {
 
     @Test
     public void asEWKT() throws Exception{
-        Geometry geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0));
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4236);
+        Geometry geometry = geometryFactory.createPoint(new Coordinate(1.0, 2.0));
         String actualResult = Functions.asEWKT(geometry);
-        String expectedResult = "POINT (1 2)";
-        Geometry expected = Constructors.geomFromEWKT(expectedResult);
-        assertEquals(expected, geometry);
-        assertEquals(actualResult, expectedResult);
+        String expectedResult = "SRID=4236;POINT (1 2)";
+        Geometry acutal = Constructors.geomFromEWKT(expectedResult);
+        assertEquals(geometry, acutal);
+        assertEquals(expectedResult, actualResult);
 
-        geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0, 3.0));
+        geometry = geometryFactory.createPoint(new Coordinate(1.0, 2.0, 3.0));
         actualResult = Functions.asEWKT(geometry);
-        expectedResult = "POINT Z(1 2 3)";
-        expected = Constructors.geomFromEWKT(expectedResult);
-        assertEquals(expected, geometry);
-        assertEquals(actualResult, expectedResult);
+        expectedResult = "SRID=4236;POINT Z(1 2 3)";
+        acutal = Constructors.geomFromEWKT(expectedResult);
+        assertEquals(geometry, acutal);
+        assertEquals(expectedResult, actualResult);
         
-        geometry = GEOMETRY_FACTORY.createPoint(new CoordinateXYM(1.0, 2.0, 3.0));
+        geometry = geometryFactory.createPoint(new CoordinateXYM(1.0, 2.0, 3.0));
         actualResult = Functions.asEWKT(geometry);
-        expectedResult = "POINT M(1 2 3)";
-        expected = Constructors.geomFromEWKT(expectedResult);
-        assertEquals(expected, geometry);
-        assertEquals(actualResult, expectedResult);
+        expectedResult = "SRID=4236;POINT M(1 2 3)";
+        acutal = Constructors.geomFromEWKT(expectedResult);
+        assertEquals(geometry, acutal);
+        assertEquals(expectedResult, actualResult);
 
-        geometry = GEOMETRY_FACTORY.createPoint(new CoordinateXYZM(1.0, 2.0, 3.0, 4.0));
+        geometry = geometryFactory.createPoint(new CoordinateXYZM(1.0, 2.0, 3.0, 4.0));
         actualResult = Functions.asEWKT(geometry);
-        expectedResult = "POINT ZM(1 2 3 4)";
-        expected = Constructors.geomFromEWKT(expectedResult);
-        assertEquals(expected, geometry);
-        assertEquals(actualResult, expectedResult);
+        expectedResult = "SRID=4236;POINT ZM(1 2 3 4)";
+        acutal = Constructors.geomFromEWKT(expectedResult);
+        assertEquals(geometry, acutal);
+        assertEquals(expectedResult, actualResult);
     }
 
     @Test
@@ -102,30 +103,30 @@ public class FunctionsTest {
         Geometry geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0));
         String actualResult = Functions.asWKT(geometry);
         String expectedResult = "POINT (1 2)";
-        Geometry expected = Constructors.geomFromEWKT(expectedResult);
-        assertEquals(expected, geometry);
-        assertEquals(actualResult, expectedResult);
+        Geometry acutal = Constructors.geomFromEWKT(expectedResult);
+        assertEquals(geometry, acutal);
+        assertEquals(expectedResult, actualResult);
 
         geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0, 3.0));
         actualResult = Functions.asWKT(geometry);
         expectedResult = "POINT Z(1 2 3)";
-        expected = Constructors.geomFromEWKT(expectedResult);
-        assertEquals(expected, geometry);
-        assertEquals(actualResult, expectedResult);
+        acutal = Constructors.geomFromEWKT(expectedResult);
+        assertEquals(geometry, acutal);
+        assertEquals(expectedResult, actualResult);
         
         geometry = GEOMETRY_FACTORY.createPoint(new CoordinateXYM(1.0, 2.0, 3.0));
         actualResult = Functions.asWKT(geometry);
         expectedResult = "POINT M(1 2 3)";
-        expected = Constructors.geomFromEWKT(expectedResult);
-        assertEquals(expected, geometry);
-        assertEquals(actualResult, expectedResult);
+        acutal = Constructors.geomFromEWKT(expectedResult);
+        assertEquals(geometry, acutal);
+        assertEquals(expectedResult, actualResult);
         
         geometry = GEOMETRY_FACTORY.createPoint(new CoordinateXYZM(1.0, 2.0, 3.0, 4.0));
         actualResult = Functions.asWKT(geometry);
         expectedResult = "POINT ZM(1 2 3 4)";
-        expected = Constructors.geomFromEWKT(expectedResult);
-        assertEquals(expected, geometry);
-        assertEquals(actualResult, expectedResult);
+        acutal = Constructors.geomFromEWKT(expectedResult);
+        assertEquals(geometry, acutal);
+        assertEquals(expectedResult, actualResult);
     }
 
     @Test
