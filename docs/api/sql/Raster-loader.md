@@ -51,11 +51,19 @@ df = df.withColumn("raster", f.expr("RS_FromGeoTiff(content)"))
 
 Introduction: Returns an empty raster geometry. Every band in the raster is initialized to `0.0`.
 
-Since: `v1.4.1`
+Since: `v1.5.0`
 
-Format: `RS_MakeEmptyRaster(numBands:Int, width: Int, height: Int, upperleftX: Double, upperleftY: Double, cellSize:Double)`
+Format: `RS_MakeEmptyRaster(numBands:Int, bandDataType:String = 'D', width: Int, height: Int, upperleftX: Double, upperleftY: Double, cellSize:Double)`
 
 * NumBands: The number of bands in the raster. If not specified, the raster will have a single band.
+* BandDataType: Optional parameter specifying the data types of all the bands in the created raster.
+Accepts one of: 
+    1. "D" - 64 bits Double
+    2. "F" - 32 bits Float
+    3. "I" - 32 bits signed Integer
+    4. "S" - 16 bits signed Short
+    5. "US" - 16 bits unsigned Short
+    6. "B" - 8 bits Byte
 * Width: The width of the raster in pixels.
 * Height: The height of the raster in pixels.
 * UpperleftX: The X coordinate of the upper left corner of the raster, in terms of the CRS units.
@@ -64,9 +72,17 @@ Format: `RS_MakeEmptyRaster(numBands:Int, width: Int, height: Int, upperleftX: D
 
 It uses the default Cartesian coordinate system.
 
-Format: `RS_MakeEmptyRaster(numBands:Int, width: Int, height: Int, upperleftX: Double, upperleftY: Double, scaleX:Double, scaleY:Double, skewX:Double, skewY:Double, srid: Int)`
+Format: `RS_MakeEmptyRaster(numBands:Int, bandDataType = 'D', width: Int, height: Int, upperleftX: Double, upperleftY: Double, scaleX:Double, scaleY:Double, skewX:Double, skewY:Double, srid: Int)`
 
 * NumBands: The number of bands in the raster. If not specified, the raster will have a single band.
+* BandDataType: Optional parameter specifying the data types of all the bands in the created raster.
+Accepts one of:
+    1. "D" - 64 bits Double
+    2. "F" - 32 bits Float
+    3. "I" - 32 bits signed Integer
+    4. "S" - 16 bits signed Short
+    5. "US" - 16 bits unsigned Short
+    6. "B" - 8 bits Byte
 * Width: The width of the raster in pixels.
 * Height: The height of the raster in pixels.
 * UpperleftX: The X coordinate of the upper left corner of the raster, in terms of the CRS units.
@@ -76,6 +92,10 @@ Format: `RS_MakeEmptyRaster(numBands:Int, width: Int, height: Int, upperleftX: D
 * SkewX: The skew of the raster on the X axis, in terms of the CRS units.
 * SkewY: The skew of the raster on the Y axis, in terms of the CRS units.
 * SRID: The SRID of the raster. Use 0 if you want to use the default Cartesian coordinate system. Use 4326 if you want to use WGS84.
+
+
+!!!Note
+  If any other value than the accepted values for the bandDataType is provided, RS_MakeEmptyRaster defaults to double as the data type for the raster.
 
 SQL example 1 (with 2 bands):
 
@@ -92,10 +112,42 @@ Output:
 +--------------------------------------------+
 ```
 
-SQL example 1 (with 2 bands, scale, skew, and SRID):
+SQL example 2 (with 2 bands and dataType):
+
+```sql
+SELECT RS_MakeEmptyRaster(2, 'I', 10, 10, 0.0, 0.0, 1.0) - Create a raster with integer datatype
+```
+
+Output:
+```
++--------------------------------------------+
+|rs_makeemptyraster(2, 10, 10, 0.0, 0.0, 1.0)|
++--------------------------------------------+
+|                        GridCoverage2D["g...|
++--------------------------------------------+
+```
+
+
+SQL example 3 (with 2 bands, scale, skew, and SRID):
 
 ```sql
 SELECT RS_MakeEmptyRaster(2, 10, 10, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 4326)
+```
+
+Output:
+```
++------------------------------------------------------------------+
+|rs_makeemptyraster(2, 10, 10, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 4326)|
++------------------------------------------------------------------+
+|                                              GridCoverage2D["g...|
++------------------------------------------------------------------+
+```
+
+
+SQL example 4 (with 2 bands, scale, skew, and SRID):
+
+```sql
+SELECT RS_MakeEmptyRaster(2, 'F', 10, 10, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 4326) - Create a raster with float datatype
 ```
 
 Output:
