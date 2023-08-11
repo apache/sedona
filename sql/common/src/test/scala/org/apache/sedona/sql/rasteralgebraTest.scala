@@ -664,7 +664,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_BandNoDataValue - noDataValueFor for raster from geotiff - default band") {
-      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.TIFF")
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")
       val result = df.selectExpr("RS_BandNoDataValue(raster)").first().getDouble(0)
       assertEquals(0, result, 1e-9)
@@ -678,7 +678,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_BandNoDataValue - noDataValueFor for raster from geotiff - explicit band") {
-      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.TIFF")
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")
       val result = df.selectExpr("RS_BandNoDataValue(raster, 1)").first().getDouble(0)
       assertEquals(0, result, 1e-9)
