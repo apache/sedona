@@ -132,7 +132,7 @@ public class ConstructorsTest {
         assertTrue(point instanceof Point);
         assertTrue(GeomUtils.isMeasuredGeometry(point));
         assertEquals(0, point.getSRID());
-        assertEquals("POINT Z(1 2 3)", Functions.asWKT(point));
+        assertEquals("POINT ZM(1 2 3 4)", Functions.asWKT(point));
     }
 
     @Test
