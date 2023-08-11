@@ -2043,12 +2043,12 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     val geomTestCases = Map(
       ("'MULTIPOINT (0 0, 2 2)'", 0.0) -> ("'GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))'"),
       ("'MULTIPOINT (0 0, 2 2)'", 30) -> ("'GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 4, 4 -2, -2 -2)))'"),
-      ("'LINESTRING EMPTY'") -> ("'GEOMETRYCOLLECTION EMPTY'"),
+      ("'LINESTRING EMPTY'", 0.0) -> ("'GEOMETRYCOLLECTION EMPTY'")
     )
     for (((geom), expectedResult) <- geomTestCases) {
       val g1 = geom._1
-      val g2 = geom._2
-      val df = sparkSession.sql(s"SELECT ST_AsText(ST_VoronoiPolygons(ST_GeomFromWKT($g1), ($g2)))")
+      val tolerance = geom._2
+      val df = sparkSession.sql(s"SELECT ST_AsText(ST_VoronoiPolygons(ST_GeomFromWKT($g1), ($tolerance)))")
       val actual = df.take(1)(0).get(0).asInstanceOf[String]
       val expected = df.take(1)(0).get(1).asInstanceOf[GenericRowWithSchema].get(0).asInstanceOf[String]
       assertEquals(expected, actual)
@@ -2059,12 +2059,13 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     val geomTestCases = Map(
       ("'MULTIPOINT (0 0, 2 2)'", 0.0, "ST_Buffer('POINT(1 1)', 10)") -> ("'GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 -9, -9 -9)), POLYGON ((-9 11, 11 11, 11 -9, -9 11)))'"),
       ("'MULTIPOINT (0 0, 2 2)'", 30, "ST_Buffer('POINT(1 1)', 10)") -> ("'GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 11, 11 -9, -9 -9)))'"),
-      ("'LINESTRING EMPTY'", 0.0, "ST_Buffer('POINT(1 1)', 10)") -> ("'GEOMETRYCOLLECTION EMPTY'"),
+      ("'LINESTRING EMPTY'", 0.0, "ST_Buffer('POINT(1 1)', 10)") -> ("'GEOMETRYCOLLECTION EMPTY'")
     )
     for (((geom), expectedResult) <- geomTestCases) {
       val g1 = geom._1
-      val g2 = geom._2
-      val df = sparkSession.sql(s"SELECT ST_AsText(ST_VoronoiPolygons(ST_GeomFromWKT($g1), ($g2)))")
+      val tolerance = geom._2
+      val extendTo = geom._3
+      val df = sparkSession.sql(s"SELECT ST_AsText(ST_VoronoiPolygons(ST_GeomFromWKT($g1), ($tolerance), ($extendTo)))")
       val actual = df.take(1)(0).get(0).asInstanceOf[String]
       val expected = df.take(1)(0).get(1).asInstanceOf[GenericRowWithSchema].get(0).asInstanceOf[String]
       assertEquals(expected, actual)

@@ -1180,6 +1180,12 @@ class TestPredicateJoin(TestBase):
         actual = actual_df.selectExpr("ST_AsText(geom)").take(1)[0][0]
         assert expected == actual
 
+    def test_voronoiPolygons(self):
+        expected = "GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))"
+        actual_df = self.spark.sql("SELECT ST_VoronoiPolygons(ST_GeomFromText('MULTIPOINT (0 0, 2 2)')) AS geom")
+        actual = actual_df.selectExpr("ST_AsText(geom)").take(1)[0][0]
+        assert expected == actual
+
     def test_frechetDistance(self):
         expected = 5.0990195135927845
         actual_df = self.spark.sql("SELECT ST_FrechetDistance(ST_GeomFromText('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, "

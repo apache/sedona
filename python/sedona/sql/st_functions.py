@@ -117,6 +117,7 @@ __all__ = [
     "ST_Force3D",
     "ST_NRings",
     "ST_Translate",
+    "ST_VoronoiPolygons",
     "ST_Angle",
     "ST_Degrees",
     "ST_FrechetDistance",
@@ -1351,6 +1352,22 @@ def ST_Translate(geometry: ColumnOrName, deltaX: Union[ColumnOrName, float], del
     """
     args = (geometry, deltaX, deltaY, deltaZ)
     return _call_st_function("ST_Translate", args)
+
+@validate_argument_types
+def ST_VoronoiPolygons(geometry: ColumnOrName, tolerance: Optional[Union[ColumnOrName, float]] = 0.0, extendTo: Optional[ColumnOrName] = None) -> Column:
+    """
+    ST_VoronoiPolygons computes a two-dimensional Voronoi diagram from the vertices of the supplied geometry. 
+    The result is a GeometryCollection of Polygons that covers an envelope larger than the extent of the input vertices. 
+    Returns null if input geometry is null. Returns an empty geometry collection if the input geometry contains only one vertex. Returns an empty geometry collection if the extend_to envelope has zero area.
+    :param geometry: Geometry column whose coordinates are to be built from.
+    :param tolerance: The distance within which vertices will be considered equivalent. 
+    Robustness of the algorithm can be improved by supplying a nonzero tolerance distance. (default = 0.0)
+    :param extendTo: If a geometry is supplied as the "extend_to" parameter, the diagram will be extended to cover the envelope of the "extend_to" geometry, unless that envelope is smaller than the default envelope 
+    (default = NULL, default envelope is boundingbox of input geometry extended by about 50% in each direction).
+    :return: The two-dimensional Voronoi diagram geometry.
+    """
+    args = (geometry, tolerance, extendTo)
+    return _call_st_function("ST_VoronoiPolygons", args)
 
 def ST_FrechetDistance(g1: ColumnOrName, g2: ColumnOrName) -> Column:
     """
