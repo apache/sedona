@@ -208,6 +208,9 @@ public class RasterAccessorsTest extends RasterTestBase
 
         emptyRaster = RasterConstructors.makeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2,0 );
         assertEquals(0.1, RasterAccessors.getSkewX(emptyRaster), 0.01d);
+
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -53, 51, 5);
+        assertEquals(0, RasterAccessors.getSkewX(emptyRaster), 0.1d);
     }
 
     @Test
@@ -217,6 +220,9 @@ public class RasterAccessorsTest extends RasterTestBase
 
         emptyRaster = RasterConstructors.makeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2,0 );
         assertEquals(0.2, RasterAccessors.getSkewY(emptyRaster), 0.01d);
+
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -53, 51, 5);
+        assertEquals(0, RasterAccessors.getSkewY(emptyRaster), 0.1d);
     }
 
     @Test
