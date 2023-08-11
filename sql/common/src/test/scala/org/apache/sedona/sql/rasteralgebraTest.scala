@@ -21,7 +21,7 @@ package org.apache.sedona.sql
 import org.apache.spark.sql.connector.catalog.TableChange.ColumnPosition.first
 import org.apache.spark.sql.functions.{collect_list, expr}
 import org.geotools.coverage.grid.GridCoverage2D
-import org.junit.Assert.assertEquals
+import org.junit.Assert.{assertEquals, assertNull}
 import org.locationtech.jts.geom.{Coordinate, Geometry}
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
@@ -671,5 +671,27 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(sparkSession.sql("SELECT RS_WITHIN(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((0 0, 0 50, 100 50, 100 0, 0 0))'))").first().getBoolean(0))
       assert(!sparkSession.sql("SELECT RS_WITHIN(RS_MakeEmptyRaster(1, 100, 100, 0, 50, 1), ST_GeomFromWKT('POLYGON ((2 2, 2 25, 20 25, 20 2, 2 2))'))").first().getBoolean(0))
     }
+
+    it("Passed RS_BandNoDataValue - noDataValueFor for raster from geotiff - default band") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_BandNoDataValue(raster)").first().getDouble(0)
+      assertEquals(0, result, 1e-9)
+    }
+
+    it("Passed RS_BandNoDataValue - null noDataValueFor for raster from geotiff") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_BandNoDataValue(raster)").first().get(0)
+      assertNull(result)
+    }
+
+    it("Passed RS_BandNoDataValue - noDataValueFor for raster from geotiff - explicit band") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_BandNoDataValue(raster, 1)").first().getDouble(0)
+      assertEquals(0, result, 1e-9)
+    }
+
   }
 }
