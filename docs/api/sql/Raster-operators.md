@@ -172,6 +172,46 @@ Output:
 -2
 ```
 
+### RS_SkewX
+
+Introduction: Returns the X skew or rotation parameter.
+
+Format: `RS_SkewX(raster: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Exmaple:
+
+```sql
+SELECT RS_SkewX(raster) FROM rasters
+```
+
+Output:
+
+```
+0.1
+```
+
+### RS_SkewY
+
+Introduction: Returns the Y skew or rotation parameter.
+
+Format: `RS_SkewY(raster: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Exmaple:
+
+```sql
+SELECT RS_SkewY(raster) FROM rasters
+```
+
+Output:
+
+```
+0.2
+```
+
 ### RS_UpperLeftX
 
 Introduction: Returns the X coordinate of the upper-left corner of the raster.
