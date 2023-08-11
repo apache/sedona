@@ -201,6 +201,23 @@ public class RasterAccessorsTest extends RasterTestBase
         assertEquals(expectedX, actualX);
     }
 
+    @Test
+    public void testSkewX() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(10, 2, 4, 6, 4, 1, 1, 2, 7, 0);
+        assertEquals(2, RasterAccessors.getSkewX(emptyRaster), 0.1d);
+
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2,0 );
+        assertEquals(0.1, RasterAccessors.getSkewX(emptyRaster), 0.01d);
+    }
+
+    @Test
+    public void testSkewY() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(10, 2, 4, 6, 4, 1, 1, 2, 7, 0);
+        assertEquals(7, RasterAccessors.getSkewY(emptyRaster), 0.1d);
+
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2,0 );
+        assertEquals(0.2, RasterAccessors.getSkewY(emptyRaster), 0.01d);
+    }
 
     @Test
     public void testGridCoordXGeomSameSRID()  throws FactoryException, TransformException {
