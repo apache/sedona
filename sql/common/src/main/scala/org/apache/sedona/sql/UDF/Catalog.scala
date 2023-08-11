@@ -223,7 +223,8 @@ object Catalog {
     function[RS_WorldToRasterCoord](),
     function[RS_WorldToRasterCoordX](),
     function[RS_WorldToRasterCoordY](),
-    function[RS_BandNoDataValue]()
+    function[RS_BandNoDataValue](),
+    function[RS_BandPixelType]()
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(
