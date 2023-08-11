@@ -131,25 +131,25 @@ class JoinTestBase
     protected PointRDD createPointRDD(String location)
     {
         final PointRDD rdd = new PointRDD(sc, location, 1, splitter, false, numPartitions);
-        return new PointRDD(rdd.rawSpatialRDD, StorageLevel.MEMORY_ONLY());
+        return new PointRDD(rdd.rawSpatialRDD);
     }
 
     protected LineStringRDD createLineStringRDD(String location)
     {
         final LineStringRDD rdd = new LineStringRDD(sc, location, splitter, true, numPartitions);
-        return new LineStringRDD(rdd.rawSpatialRDD, StorageLevel.MEMORY_ONLY());
+        return new LineStringRDD(rdd.rawSpatialRDD);
     }
 
     protected PolygonRDD createPolygonRDD(String location)
     {
         final PolygonRDD rdd = new PolygonRDD(sc, location, splitter, true, numPartitions);
-        return new PolygonRDD(rdd.rawSpatialRDD, StorageLevel.MEMORY_ONLY());
+        return new PolygonRDD(rdd.rawSpatialRDD);
     }
 
     protected RectangleRDD createRectangleRDD(String location)
     {
         final RectangleRDD rdd = new RectangleRDD(sc, location, splitter, true, numPartitions);
-        return new RectangleRDD(rdd.rawSpatialRDD, StorageLevel.MEMORY_ONLY());
+        return new RectangleRDD(rdd.rawSpatialRDD);
     }
 
     protected void partitionRdds(SpatialRDD<? extends Geometry> queryRDD,

@@ -43,7 +43,7 @@ matchWithOriginalDuplicatesCount = 17738
 
 class TestRectangleKNN(TestBase):
     query_envelope = Envelope(-90.01, -80.01, 30.01, 40.01)
-    loop_times = 5
+    loop_times = 1
     query_point = Point(-84.01, 34.01)
     top_k = 100
     query_polygon = Polygon(

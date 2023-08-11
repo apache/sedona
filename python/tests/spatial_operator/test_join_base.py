@@ -16,7 +16,6 @@
 #  under the License.
 
 import pytest
-from pyspark import StorageLevel
 
 from sedona.core.SpatialRDD import RectangleRDD, PolygonRDD, LineStringRDD, PointRDD
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
@@ -32,25 +31,25 @@ class TestJoinBase(TestBase):
         rdd = PointRDD(
             self.sc, location, 1, splitter, False, num_partitions
         )
-        return PointRDD(rdd.rawJvmSpatialRDD, StorageLevel.MEMORY_ONLY)
+        return PointRDD(rdd.rawJvmSpatialRDD)
 
     def create_linestring_rdd(self, location, splitter, num_partitions):
         rdd = LineStringRDD(
             self.sc, location, splitter, True, num_partitions
         )
-        return LineStringRDD(rdd.rawJvmSpatialRDD, StorageLevel.MEMORY_ONLY)
+        return LineStringRDD(rdd.rawJvmSpatialRDD)
 
     def create_polygon_rdd(self, location, splitter, num_partitions):
         rdd = PolygonRDD(
             self.sc, location, splitter, True, num_partitions
         )
-        return PolygonRDD(rdd.rawJvmSpatialRDD, StorageLevel.MEMORY_ONLY)
+        return PolygonRDD(rdd.rawJvmSpatialRDD)
 
     def create_rectangle_rdd(self, location, splitter, num_partitions):
         rdd = RectangleRDD(
             self.sc, location, splitter, True, num_partitions)
         return RectangleRDD(
-            rdd.rawJvmSpatialRDD, StorageLevel.MEMORY_ONLY
+            rdd.rawJvmSpatialRDD
         )
 
     def partition_rdds(self, query_rdd: SpatialRDD, spatial_rdd: SpatialRDD, grid_type):

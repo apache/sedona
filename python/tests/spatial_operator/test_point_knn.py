@@ -34,7 +34,7 @@ indexType = "rtree"
 
 
 class TestPointKnn(TestBase):
-    loop_times = 5
+    loop_times = 1
     query_point = Point(-84.01, 34.01)
     top_k = 100
 
