@@ -180,10 +180,10 @@ Format: `RS_SkewX(raster: Raster)`
 
 Since: `v1.5.0`
 
-Spark SQL Exmaple:
+Spark SQL Example:
 
 ```sql
-SELECT RS_SkewX(raster) FROM rasters
+SELECT RS_SkewX(RS_MakeEmptyRaster(2, 10, 10, 0.0, 0.0, 1.0, -1.0, 0.1, 0.2, 4326))
 ```
 
 Output:
@@ -200,10 +200,10 @@ Format: `RS_SkewY(raster: Raster)`
 
 Since: `v1.5.0`
 
-Spark SQL Exmaple:
+Spark SQL Example:
 
 ```sql
-SELECT RS_SkewY(raster) FROM rasters
+SELECT RS_SkewY(RS_MakeEmptyRaster(2, 10, 10, 0.0, 0.0, 1.0, -1.0, 0.1, 0.2, 4326))
 ```
 
 Output:
