@@ -171,15 +171,14 @@ public class GeomUtils {
         if (srid != 0) {
             sridString = "SRID=" + String.valueOf(srid) + ";";
         }
-
-        return sridString + new WKTWriter(GeomUtils.getDimension(geometry)).write(geometry);
+        return sridString + new WKTWriter(4).write(geometry);
     }
 
     public static String getWKT(Geometry geometry) {
         if (geometry == null) {
             return null;
         }
-        return new WKTWriter(GeomUtils.getDimension(geometry)).write(geometry);
+        return new WKTWriter(4).write(geometry);
     }
 
     public static byte[] getEWKB(Geometry geometry) {
