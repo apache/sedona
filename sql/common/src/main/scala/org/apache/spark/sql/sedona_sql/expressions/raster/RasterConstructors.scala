@@ -44,8 +44,8 @@ case class RS_FromGeoTiff(inputExpressions: Seq[Expression])
 
 case class RS_MakeEmptyRaster(inputExpressions: Seq[Expression])
   extends InferredExpression(
-    inferrableFunction6(RasterConstructors.makeEmptyRaster),
-    inferrableFunction10(RasterConstructors.makeEmptyRaster)) {
+    inferrableFunction6(RasterConstructors.makeEmptyRaster), inferrableFunction7(RasterConstructors.makeEmptyRaster),
+    inferrableFunction10(RasterConstructors.makeEmptyRaster), inferrableFunction11(RasterConstructors.makeEmptyRaster)) {
 
   override def foldable: Boolean = false
 

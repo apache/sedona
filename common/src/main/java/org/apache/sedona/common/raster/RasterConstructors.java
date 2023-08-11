@@ -46,6 +46,7 @@ public class RasterConstructors
     }
 
     /**
+     * Convenience function setting DOUBLE as datatype for the bands
      * Create a new empty raster with the given number of empty bands.
      * The bounding envelope is defined by the upper left corner and the scale.
      * The math formula of the envelope is: minX = upperLeftX = lowerLeftX, minY (lowerLeftY) = upperLeftY - height * pixelSize
@@ -71,8 +72,49 @@ public class RasterConstructors
     }
 
     /**
+     * Convenience function allowing explicitly setting the datatype for all the bands
+     * @param numBand
+     * @param dataType
+     * @param widthInPixel
+     * @param heightInPixel
+     * @param upperLeftX
+     * @param upperLeftY
+     * @param pixelSize
+     * @return
+     * @throws FactoryException
+     */
+    public static GridCoverage2D makeEmptyRaster(int numBand, String dataType, int widthInPixel, int heightInPixel, double upperLeftX, double upperLeftY, double pixelSize)
+            throws FactoryException
+    {
+        return makeEmptyRaster(numBand, dataType, widthInPixel, heightInPixel, upperLeftX, upperLeftY, pixelSize, -pixelSize, 0, 0, 0);
+    }
+
+
+    /**
+     * Convenience function for creating a raster with data type DOUBLE for all the bands
+     * @param numBand
+     * @param widthInPixel
+     * @param heightInPixel
+     * @param upperLeftX
+     * @param upperLeftY
+     * @param scaleX
+     * @param scaleY
+     * @param skewX
+     * @param skewY
+     * @param srid
+     * @return
+     * @throws FactoryException
+     */
+    public static GridCoverage2D makeEmptyRaster(int numBand, int widthInPixel, int heightInPixel, double upperLeftX, double upperLeftY, double scaleX, double scaleY, double skewX, double skewY, int srid)
+            throws FactoryException
+    {
+        return makeEmptyRaster(numBand, "d", widthInPixel, heightInPixel, upperLeftX, upperLeftY, scaleX, scaleY, skewX, skewY, srid);
+    }
+
+    /**
      * Create a new empty raster with the given number of empty bands
      * @param numBand the number of bands
+     * @param bandDataType the data type of the raster, one of D | B | I | F | S | US
      * @param widthInPixel the width of the raster, in pixel
      * @param heightInPixel the height of the raster, in pixel
      * @param upperLeftX the upper left corner of the raster, in the CRS unit. Note that: the minX of the envelope is equal to the upperLeftX
@@ -85,7 +127,7 @@ public class RasterConstructors
      * @return the new empty raster
      * @throws FactoryException
      */
-    public static GridCoverage2D makeEmptyRaster(int numBand, int widthInPixel, int heightInPixel, double upperLeftX, double upperLeftY, double scaleX, double scaleY, double skewX, double skewY, int srid)
+    public static GridCoverage2D makeEmptyRaster(int numBand, String bandDataType, int widthInPixel, int heightInPixel, double upperLeftX, double upperLeftY, double scaleX, double scaleY, double skewX, double skewY, int srid)
             throws FactoryException
     {
         CoordinateReferenceSystem crs;
@@ -96,12 +138,30 @@ public class RasterConstructors
         }
 
         // Create a new empty raster
-        WritableRaster raster = RasterFactory.createBandedRaster(DataBuffer.TYPE_DOUBLE, widthInPixel, heightInPixel, numBand, null);
+        WritableRaster raster = RasterFactory.createBandedRaster(getDataTypeCode(bandDataType), widthInPixel, heightInPixel, numBand, null);
         MathTransform transform = new AffineTransform2D(scaleX, skewY, skewX, scaleY, upperLeftX, upperLeftY);
         GridGeometry2D gridGeometry = new GridGeometry2D(
                 new GridEnvelope2D(0, 0, widthInPixel, heightInPixel),
                 PixelInCell.CELL_CORNER,
                 transform, crs, null);
         return RasterUtils.create(raster, gridGeometry, null);
+    }
+
+    private static int getDataTypeCode(String s) {
+        switch (s.toLowerCase()) {
+            case "d":
+                return 5;
+            case "i":
+                return 3;
+            case "b":
+                return 0;
+            case "f":
+                return 4;
+            case "u":
+                return 2;
+            case "us":
+                return 1;
+        }
+        return 5; // defaulting to double
     }
 }
