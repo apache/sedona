@@ -309,6 +309,38 @@ Output: `3`
 !!!Tip
     For non-skewed rasters, you can provide any value for longitude and the intended value of world latitude, to get the desired answer
 
+## Raster Band Accessors
+
+### RS_BandNoDataValue
+
+Introduction: Returns the no data value of the given band of the given raster. If no band is given, band 1 is assumed. The band parameter is 1-indexed. If there is no no data value associated with the given band, RS_BandNoDataValue returns null.
+
+!!!Note
+    If the given band does not lie in the raster, RS_BandNoDataValue throws an IllegalArgumentException
+
+Format: `RS_BandNoDataValue (raster: Raster, band: Int = 1)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_BandNoDataValue(raster, 1) from rasters;
+```
+
+Output: `0.0`
+
+```sql
+SELECT RS_BandNoDataValue(raster) from rasters_without_nodata;
+```
+
+Output: `null`
+
+```sql
+SELECT RS_BandNoDataValue(raster, 3) from rasters;
+```
+
+Output: `IllegalArgumentException: Provided band index is not present in the raster.`
+
 
 ## Raster based operators
 
