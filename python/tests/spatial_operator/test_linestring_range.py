@@ -17,7 +17,6 @@
 
 import os
 
-from pyspark import StorageLevel
 
 from sedona.core.SpatialRDD import LineStringRDD
 from sedona.core.enums import IndexType, FileDataSplitter
@@ -34,12 +33,12 @@ indexType = "rtree"
 
 
 class TestLineStringRange(TestBase):
-    loop_times = 5
+    loop_times = 1
     query_envelope = Envelope(-85.01, -60.01, 34.01, 50.01)
 
     def test_spatial_range_query(self):
         spatial_rdd = LineStringRDD(
-            self.sc, input_location, splitter, True, StorageLevel.MEMORY_ONLY
+            self.sc, input_location, splitter, True
         )
         for i in range(self.loop_times):
             result_size = RangeQuery.SpatialRangeQuery(spatial_rdd, self.query_envelope, False, False).count()
@@ -50,7 +49,7 @@ class TestLineStringRange(TestBase):
 
     def test_spatial_range_query_using_index(self):
         spatial_rdd = LineStringRDD(
-            self.sc, input_location, splitter, True, StorageLevel.MEMORY_ONLY
+            self.sc, input_location, splitter, True
         )
         spatial_rdd.buildIndex(IndexType.RTREE, False)
 

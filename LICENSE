@@ -247,3 +247,8 @@ core/src/test/resources/primaryroads-polygon.csv
 core/src/test/resources/primaryroads.csv
 core/src/test/resources/zcta510-small.csv
 core/src/test/resources/zcta510.csv
+
+
+MOD11C2 v006 from NASA
+---------------
+core/src/test/resources/raster/test5.TIFF

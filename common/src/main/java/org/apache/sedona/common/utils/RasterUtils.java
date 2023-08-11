@@ -19,6 +19,7 @@
 package org.apache.sedona.common.utils;
 
 import com.sun.media.imageioimpl.common.BogusColorSpace;
+import org.apache.sedona.common.Functions;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoordinates2D;
@@ -132,8 +133,7 @@ public class RasterUtils {
             try {
                 CoordinateReferenceSystem queryWindowCRS = CRS.decode("EPSG:" + geomSRID);
                 if (!CRS.equalsIgnoreMetadata(rasterCRS, queryWindowCRS)) {
-                    MathTransform transform = CRS.findMathTransform(queryWindowCRS, rasterCRS, true);
-                    geometry = JTS.transform(geometry, transform);
+                    geometry = GeomUtils.transform(geometry, queryWindowCRS, rasterCRS, true);
                 }
             } catch (FactoryException | TransformException e) {
                 throw new RuntimeException("Cannot transform CRS of query window", e);

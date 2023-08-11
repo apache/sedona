@@ -19,7 +19,6 @@ import os
 import shutil
 
 import pytest
-from pyspark import StorageLevel
 
 from sedona.core.SpatialRDD import PointRDD
 from sedona.core.enums import FileDataSplitter
@@ -80,8 +79,7 @@ class TestSpatialRDDWriter(TestBase):
             Offset=offset,
             splitter=splitter,
             carryInputData=True,
-            partitions=numPartitions,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=numPartitions
         )
 
         spatial_rdd.saveAsGeoJSON(test_save_as_wkb_with_data)
@@ -91,8 +89,7 @@ class TestSpatialRDDWriter(TestBase):
             InputLocation=test_save_as_wkb_with_data,
             splitter=FileDataSplitter.GEOJSON,
             carryInputData=True,
-            partitions=numPartitions,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=numPartitions
         )
 
         assert result_wkb.rawSpatialRDD.count() == spatial_rdd.rawSpatialRDD.count()

@@ -67,7 +67,7 @@ public class ParallelVisualizationTest
     public void testPointRDDVisualization()
             throws Exception
     {
-        PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
         HeatMap visualizationOperator = new HeatMap(resolutionX, resolutionY, USMainLandBoundary, false, 2, partitionX, partitionY, true, true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
 
@@ -85,7 +85,7 @@ public class ParallelVisualizationTest
     public void testRectangleRDDVisualizationWithTiles()
             throws Exception
     {
-        RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY());
+        RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
         HeatMap visualizationOperator = new HeatMap(resolutionX, resolutionY, USMainLandBoundary, false, 2, partitionX, partitionY, true, true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
 
@@ -103,7 +103,7 @@ public class ParallelVisualizationTest
     public void testRectangleRDDVisualizationNoTiles()
             throws Exception
     {
-        RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY());
+        RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
         HeatMap visualizationOperator = new HeatMap(resolutionX, resolutionY, USMainLandBoundary, false, 5, partitionX, partitionY, true, true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
 
@@ -122,7 +122,7 @@ public class ParallelVisualizationTest
             throws Exception
     {
         //UserSuppliedPolygonMapper userSuppliedPolygonMapper = new UserSuppliedPolygonMapper();
-        PolygonRDD spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY());
+        PolygonRDD spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions);
         HeatMap visualizationOperator = new HeatMap(resolutionX, resolutionY, USMainLandBoundary, false, 2, partitionX, partitionY, true, true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
 
@@ -140,7 +140,7 @@ public class ParallelVisualizationTest
     public void testLineStringRDDVisualization()
             throws Exception
     {
-        LineStringRDD spatialRDD = new LineStringRDD(sparkContext, LineStringInputLocation, LineStringSplitter, false, LineStringNumPartitions, StorageLevel.MEMORY_ONLY());
+        LineStringRDD spatialRDD = new LineStringRDD(sparkContext, LineStringInputLocation, LineStringSplitter, false, LineStringNumPartitions);
         HeatMap visualizationOperator = new HeatMap(resolutionX, resolutionY, USMainLandBoundary, false, 2, partitionX, partitionY, true, true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
 

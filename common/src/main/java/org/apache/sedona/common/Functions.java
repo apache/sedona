@@ -189,14 +189,14 @@ public class Functions {
         return transform(geometry, sourceCRS, targetCRS, false);
     }
 
+
     public static Geometry transform(Geometry geometry, String sourceCRS, String targetCRS, boolean lenient)
         throws FactoryException, TransformException {
-
-        CoordinateReferenceSystem sourceCRScode = parseCRSString(sourceCRS);
+        CoordinateReferenceSystem sourceCRSCode = parseCRSString(sourceCRS);
         CoordinateReferenceSystem targetCRScode = parseCRSString(targetCRS);
-        MathTransform transform = CRS.findMathTransform(sourceCRScode, targetCRScode, lenient);
-        return JTS.transform(geometry, transform);
+        return GeomUtils.transform(geometry, sourceCRSCode, targetCRScode, lenient);
     }
+
 
     private static CoordinateReferenceSystem parseCRSString(String CRSString)
             throws FactoryException

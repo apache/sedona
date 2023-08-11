@@ -19,7 +19,6 @@ import os
 import shutil
 
 import pytest
-from pyspark import StorageLevel
 
 from sedona.core.SpatialRDD import PointRDD, PolygonRDD, LineStringRDD
 from sedona.core.enums import IndexType, GridType
@@ -45,7 +44,7 @@ class TestDiscUtils(TestBase):
         from tests.properties.point_properties import input_location, offset, splitter, num_partitions
 
         point_rdd = PointRDD(
-            self.sc, input_location, offset, splitter, True, num_partitions, StorageLevel.MEMORY_ONLY
+            self.sc, input_location, offset, splitter, True, num_partitions
         )
 
         point_rdd.rawJvmSpatialRDD.saveAsObjectFile(os.path.join(disc_location, "point"))
@@ -57,8 +56,7 @@ class TestDiscUtils(TestBase):
             input_location,
             splitter,
             True,
-            num_partitions,
-            StorageLevel.MEMORY_ONLY
+            num_partitions
         )
         polygon_rdd.rawJvmSpatialRDD.saveAsObjectFile(os.path.join(disc_location, "polygon"))
 
@@ -69,8 +67,7 @@ class TestDiscUtils(TestBase):
             input_location,
             splitter,
             True,
-            num_partitions,
-            StorageLevel.MEMORY_ONLY
+            num_partitions
         )
         linestring_rdd.rawJvmSpatialRDD.saveAsObjectFile(os.path.join(disc_location, "line_string"))
 
@@ -81,8 +78,7 @@ class TestDiscUtils(TestBase):
             input_location,
             splitter,
             True,
-            num_partitions,
-            StorageLevel.MEMORY_ONLY
+            num_partitions
         )
         linestring_rdd.buildIndex(IndexType.RTREE, False)
         linestring_rdd.indexedRawRDD.saveAsObjectFile(os.path.join(disc_location, "line_string_index"))
@@ -94,8 +90,7 @@ class TestDiscUtils(TestBase):
             input_location,
             splitter,
             True,
-            num_partitions,
-            StorageLevel.MEMORY_ONLY
+            num_partitions
         )
         polygon_rdd.buildIndex(IndexType.RTREE, False)
         polygon_rdd.indexedRawRDD.saveAsObjectFile(os.path.join(disc_location, "polygon_index"))
@@ -103,8 +98,7 @@ class TestDiscUtils(TestBase):
     def test_saving_to_disc_index_point(self):
         from tests.properties.point_properties import input_location, offset, splitter, num_partitions
         point_rdd = PointRDD(
-            self.sc, input_location, offset, splitter, True, num_partitions, StorageLevel.MEMORY_ONLY
-        )
+            self.sc, input_location, offset, splitter, True, num_partitions)
         point_rdd.buildIndex(IndexType.RTREE, False)
         point_rdd.indexedRawRDD.saveAsObjectFile(os.path.join(disc_location, "point_index"))
 

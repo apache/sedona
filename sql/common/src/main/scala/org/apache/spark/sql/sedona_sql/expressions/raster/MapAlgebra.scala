@@ -805,7 +805,7 @@ case class RS_Append(inputExpressions: Seq[Expression])
 }
 
 case class RS_AddBandFromArray(inputExpressions: Seq[Expression])
-  extends InferredExpression(inferrableFunction3(MapAlgebra.addBandFromArray)) {
+  extends InferredExpression(inferrableFunction3(MapAlgebra.addBandFromArray), inferrableFunction4(MapAlgebra.addBandFromArray), inferrableFunction2(MapAlgebra.addBandFromArray)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

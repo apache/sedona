@@ -304,8 +304,22 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
     it("Passed RS_SetSRID with raster") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
-      val result = df.selectExpr("RS_SRID(RS_SetSRID(RS_FromGeoTiff(content), 4326))").first().getInt(0)
-      assert(result == 4326)
+      val dfRaster = df.selectExpr("RS_FromGeoTiff(content) as rast", "RS_SetSRID(RS_FromGeoTiff(content), 4326) as rast_4326")
+      val dfResult = dfRaster.selectExpr("RS_SRID(rast_4326) as srid_4326", "RS_Metadata(rast) as metadata", "RS_Metadata(rast_4326) as metadata_4326")
+      val result = dfResult.first()
+      assert(result.getInt(0) == 4326)
+      val metadata = result.getSeq[Double](1)
+      val metadata4326 = result.getSeq[Double](2)
+      assert(metadata4326(8) == 4326)
+      assert(metadata(0) == metadata4326(0))
+      assert(metadata(1) == metadata4326(1))
+      assert(metadata(2) == metadata4326(2))
+      assert(metadata(3) == metadata4326(3))
+      assert(metadata(4) == metadata4326(4))
+      assert(metadata(5) == metadata4326(5))
+      assert(metadata(6) == metadata4326(6))
+      assert(metadata(7) == metadata4326(7))
+      assert(metadata(9) == metadata4326(9))
     }
 
     it("Passed RS_SRID should handle null values") {
@@ -361,7 +375,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_AsGeoTiff") {
-      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/*")
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val resultRaw = df.selectExpr("RS_FromGeoTiff(content) as raster").first().get(0)
       val resultLoaded = df.selectExpr("RS_FromGeoTiff(content) as raster")
         .selectExpr("RS_AsGeoTiff(raster) as geotiff")
@@ -460,7 +474,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(true, resultOutOfBound)
     }
 
-    it("Passed RS_AddBandFromArray") {
+    it("Passed RS_AddBandFromArray - 3 parameters [default no data value]") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster", "RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTiff(content), 1), 2) as band")
       val bandNewExpected:Seq[Double] = df.selectExpr("band").first().getSeq(0)
@@ -473,6 +487,24 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       intercept[Exception] {
         df.selectExpr("RS_BandAsArray(RS_AddBandFromArray(raster, band, 100), 1)").collect()
       }
+    }
+
+    it("Passed RS_AddBandFromArray - adding a new band with 2 parameter convenience function") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster", "RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTiff(content), 1), 2) as band")
+      val bandNewExpected: Seq[Double] = df.selectExpr("band").first().getSeq(0)
+      val bandNewActual: Seq[Double] = df.selectExpr("RS_BandAsArray(RS_AddBandFromArray(raster, band), 2)").first().getSeq(0)
+      for (i <- bandNewExpected.indices) {
+        // The band value needs to be mod 256 because the ColorModel will mod 256.
+        assertEquals(bandNewExpected(i) % 256, bandNewActual(i), 0.001)
+      }
+    }
+
+    it("Passed RS_AddBandFromArray - adding a new band with a custom no data value]") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster", "RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTiff(content), 1), 2) as band")
+      val raster = df.selectExpr("RS_AddBandFromArray(raster, band, 2, 2)").first().getAs[GridCoverage2D](0);
+      assertEquals(2, raster.getSampleDimension(1).getNoDataValues()(0), 1e-9)
     }
 
     it("Passed RS_Intersects") {
