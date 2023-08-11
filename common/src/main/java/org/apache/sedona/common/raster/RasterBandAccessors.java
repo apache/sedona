@@ -24,9 +24,7 @@ import org.geotools.coverage.grid.GridCoverage2D;
 public class RasterBandAccessors {
 
     public static Double getBandNoDataValue(GridCoverage2D raster, int band) {
-        if (band > RasterAccessors.numBands(raster)) {
-            throw new IllegalArgumentException("Provided band index is not present in the raster");
-        }
+        ensureBand(raster, band);
         GridSampleDimension bandSampleDimension = raster.getSampleDimension(band - 1);
         if (bandSampleDimension.getNoDataValues() == null) return null;
         return raster.getSampleDimension(band - 1).getNoDataValues()[0];
@@ -37,14 +35,18 @@ public class RasterBandAccessors {
     }
 
     public static String getBandType(GridCoverage2D raster, int band) {
-        if (band > RasterAccessors.numBands(raster)) {
-            throw new IllegalArgumentException("Provided band index is not present in the raster");
-        }
+        ensureBand(raster, band);
         GridSampleDimension bandSampleDimension = raster.getSampleDimension(band - 1);
         return bandSampleDimension.getSampleDimensionType().name();
     }
 
     public static String getBandType(GridCoverage2D raster){
         return getBandType(raster, 1);
+    }
+
+    private static void ensureBand(GridCoverage2D raster, int band) throws IllegalArgumentException {
+        if (band > RasterAccessors.numBands(raster)) {
+            throw new IllegalArgumentException(String.format("Provided band index %d is not present in the raster", band));
+        }
     }
 }

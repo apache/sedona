@@ -76,20 +76,81 @@ public class RasterBandAccessorsTest extends RasterTestBase {
 
     @Test
     public void testBandPixelType() throws FactoryException {
-        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, "I", 2, 2, 53, 51, 1, 1, 0, 0, 0);
         double[] values = new double[]{1.2, 1.1, 32.2, 43.2};
+
+        //create double raster
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, "D", 2, 2, 53, 51, 1, 1, 0, 0, 0);
         emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values, 1, 0.0);
+        assertEquals("REAL_64BITS", RasterBandAccessors.getBandType(emptyRaster));
+        assertEquals("REAL_64BITS", RasterBandAccessors.getBandType(emptyRaster, 2));
+        double[] bandValues = MapAlgebra.bandAsArray(emptyRaster, 1);
+        double[] expectedBandValuesD = new double[]{1, 1, 32, 43};
+        for (int i = 0; i < bandValues.length; i++) {
+            assertEquals(expectedBandValuesD[i], bandValues[i], 1e-9);
+        }
+        //create float raster
+        emptyRaster = RasterConstructors.makeEmptyRaster(2, "F", 2, 2, 53, 51, 1, 1, 0, 0, 0);
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values, 1, 0.0);
+        assertEquals("REAL_32BITS", RasterBandAccessors.getBandType(emptyRaster));
+        assertEquals("REAL_32BITS", RasterBandAccessors.getBandType(emptyRaster, 2));
+        bandValues = MapAlgebra.bandAsArray(emptyRaster, 1);
+        float[] expectedBandValuesF = new float[]{1, 1, 32, 43};
+        for (int i = 0; i < bandValues.length; i++) {
+            assertEquals(expectedBandValuesF[i], bandValues[i], 1e-9);
+        }
 
+        //create integer raster
+        emptyRaster = RasterConstructors.makeEmptyRaster(2, "I", 2, 2, 53, 51, 1, 1, 0, 0, 0);
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values, 1, 0.0);
+        assertEquals("SIGNED_32BITS", RasterBandAccessors.getBandType(emptyRaster));
+        assertEquals("SIGNED_32BITS", RasterBandAccessors.getBandType(emptyRaster, 2));
+        bandValues = MapAlgebra.bandAsArray(emptyRaster, 1);
+        int[] expectedBandValuesI = new int[]{1, 1, 32, 43};
+        for (int i = 0; i < bandValues.length; i++) {
+            assertEquals(expectedBandValuesI[i], bandValues[i], 1e-9);
+        }
+
+        //create byte raster
+        emptyRaster = RasterConstructors.makeEmptyRaster(2, "B", 2, 2, 53, 51, 1, 1, 0, 0, 0);
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values, 1, 0.0);
+        bandValues = MapAlgebra.bandAsArray(emptyRaster, 1);
+        assertEquals("UNSIGNED_8BITS", RasterBandAccessors.getBandType(emptyRaster));
+        assertEquals("UNSIGNED_8BITS", RasterBandAccessors.getBandType(emptyRaster, 2));
+        byte[] expectedBandValuesB = new byte[]{1, 1, 32, 43};
+        for (int i = 0; i < bandValues.length; i++) {
+            assertEquals(expectedBandValuesB[i], bandValues[i], 1e-9);
+        }
+
+        //create short raster
+        emptyRaster = RasterConstructors.makeEmptyRaster(2, "S", 2, 2, 53, 51, 1, 1, 0, 0, 0);
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values, 1, 0.0);
+        assertEquals("SIGNED_16BITS", RasterBandAccessors.getBandType(emptyRaster));
+        assertEquals("SIGNED_16BITS", RasterBandAccessors.getBandType(emptyRaster, 2));
+        bandValues = MapAlgebra.bandAsArray(emptyRaster, 1);
+        short[] expectedBandValuesS = new short[]{1, 1, 32, 43};
+        for (int i = 0; i < bandValues.length; i++) {
+            assertEquals(expectedBandValuesS[i], bandValues[i], 1e-9);
+        }
+
+        //create unsigned short raster
+        values = new double[]{-1.2, 1.1, -32.2, 43.2};
+        emptyRaster = RasterConstructors.makeEmptyRaster(2, "US", 2, 2, 53, 51, 1, 1, 0, 0, 0);
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values, 1, 0.0);
+        assertEquals("UNSIGNED_16BITS", RasterBandAccessors.getBandType(emptyRaster));
+        assertEquals("UNSIGNED_16BITS", RasterBandAccessors.getBandType(emptyRaster, 2));
+        bandValues = MapAlgebra.bandAsArray(emptyRaster, 1);
+
+        short[] expectedBandValuesUS = new short[]{-1, 1, -32, 43};
+        for (int i = 0; i < bandValues.length; i++) {
+            assertEquals(Short.toUnsignedInt(expectedBandValuesUS[i]), Short.toUnsignedInt((short) bandValues[i]), 1e-9);
+        }
     }
 
     @Test
-    public void testBandPixelTypeDefaultBand() {
-
-    }
-
-    @Test
-    public void testBandPixelTypeIllegalBand() {
-
+    public void testBandPixelTypeIllegalBand() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, "US", 2, 2, 53, 51, 1, 1, 0, 0, 0);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> RasterBandAccessors.getBandType(emptyRaster, 5));
+        assertEquals("Provided band index 5 is not present in the raster", exception.getMessage());
     }
 
 
