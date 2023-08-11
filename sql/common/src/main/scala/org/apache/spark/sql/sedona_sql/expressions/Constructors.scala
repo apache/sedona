@@ -214,6 +214,13 @@ case class ST_PointZ(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_MakePoint(inputExpressions: Seq[Expression])
+  extends InferredExpression(nullTolerantInferrableFunction4(Constructors.makePoint)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
 
 /**
   * Return a polygon given minX,minY,maxX,maxY
