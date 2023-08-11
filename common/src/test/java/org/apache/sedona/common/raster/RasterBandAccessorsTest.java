@@ -71,7 +71,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     public void testBandNoDataValueIllegalBand() throws FactoryException, IOException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> RasterBandAccessors.getBandNoDataValue(raster, 2));
-        assertEquals("Provided band index is not present in the raster", exception.getMessage());
+        assertEquals("Provided band index 2 is not present in the raster", exception.getMessage());
     }
 
     @Test

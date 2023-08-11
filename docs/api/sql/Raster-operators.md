@@ -339,7 +339,7 @@ Output: `null`
 SELECT RS_BandNoDataValue(raster, 3) from rasters;
 ```
 
-Output: `IllegalArgumentException: Provided band index is not present in the raster.`
+Output: `IllegalArgumentException: Provided band index 3 is not present in the raster.`
 
 
 ## Raster based operators
