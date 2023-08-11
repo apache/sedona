@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.spark.sql.connector.catalog.TableChange.ColumnPosition.first
 import org.apache.spark.sql.functions.{collect_list, expr}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.junit.Assert.assertEquals
@@ -447,19 +448,27 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val upperLeftY = 0.0
       val cellSize = 1.0
       val numBands = 2
-      // Test without skewX, skewY, srid
+      // Test without skewX, skewY, srid and datatype
       var result = sparkSession.sql(s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize))").first().getSeq(0)
+      assertEquals(numBands, result(9), 0.001)
+
+      //Test without skewX, skewY, srid
+      result = sparkSession.sql(s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, 'I', $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize))").first().getSeq(0)
       assertEquals(numBands, result(9), 0.001)
 
       // Test with integer type input
       result = sparkSession.sql(s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, ${upperLeftX.toInt}, ${upperLeftY.toInt}, ${cellSize.toInt}))").first().getSeq(0)
       assertEquals(numBands, result(9), 0.001)
 
-      // Test with skewX, skewY, srid
+      // Test with skewX, skewY, srid but WITHOUT datatype
       val skewX = 0.0
       val skewY = 0.0
       val srid = 0
       result = sparkSession.sql(s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize, -$cellSize, $skewX, $skewY, $srid))").first().getSeq(0)
+      assertEquals(numBands, result(9), 0.001)
+
+      //Test with skewX, skewY, srid and datatype
+      result = sparkSession.sql(s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, 'I', $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize, -$cellSize, $skewX, $skewY, $srid))").first().getSeq(0)
       assertEquals(numBands, result(9), 0.001)
     }
 
