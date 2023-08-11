@@ -49,6 +49,28 @@ class constructorTestScala extends TestBaseScala {
       assert(pointDf.count() == 1)
     }
 
+    it("Passed ST_MakePoint") {
+
+      var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
+
+      pointCsvDF.createOrReplaceTempView("pointtable")
+      var pointDf = sparkSession.sql("select ST_MakePoint(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
+      assert(pointDf.count() == 1000)
+
+    }
+
+    it("Passed ST_MakePoint 3D Z and 4D ZM Point") {
+      val pointDf3D = sparkSession.sql("SELECT ST_AsText(ST_MakePoint(1, 2, 3))")
+      assert(pointDf3D.take(1)(0).get(0).asInstanceOf[String] == "POINT Z(1 2 3)")
+      val pointDf4D = sparkSession.sql("SELECT ST_AsText(ST_MakePoint(1, 2, 3, 4))")
+      assert(pointDf4D.take(1)(0).get(0).asInstanceOf[String] == "POINT ZM(1 2 3 4)")
+    }
+
+    it("Passed ST_MakePoint null safety") {
+      val pointDf = sparkSession.sql("SELECT ST_MakePoint(null, null)")
+      assert(pointDf.count() == 1)
+    }
+
     it("Passed ST_PointZ") {
       val pointDf = sparkSession.sql("SELECT ST_PointZ(1.2345, 2.3456, 3.4567)")
       assert(pointDf.count() == 1)
