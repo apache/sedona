@@ -791,6 +791,41 @@ Output:
 +--------------------+
 ```
 
+### RS_MapAlgebra
+
+Introduction: Apply a map algebra script on a raster.
+
+Format: `RS_MapAlgebra (raster: Raster, pixelType: String, script: String)`
+
+Format: `RS_MapAlgebra (raster: Raster, pixelType: String, script: String, noDataValue: Double)`
+
+Since: `v1.5.0`
+
+`RS_MapAlgebra` runs a script on a raster. The script is written in a map algebra language called [Jiffle](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle). The script takes a raster
+as input and returns a raster of the same size as output. The script can be used to apply a map algebra expression on a raster. The input raster is named `rast` in the Jiffle script, and the output raster is named `out`.
+
+SQL example:
+
+Calculate the NDVI of a raster with 4 bands (R, G, B, NIR):
+
+```sql
+-- Assume that the input raster has 4 bands: R, G, B, NIR
+-- rast[0] refers to the R band, rast[3] refers to the NIR band.
+SELECT RS_MapAlgebra(rast, 'D', 'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);') AS ndvi FROM raster_table
+```
+
+Output:
+```
++--------------------+
+|              raster|
++--------------------+
+|GridCoverage2D["g...|
++--------------------+
+```
+
+For more details and examples about `RS_MapAlgebra`, please refer to the [Map Algebra documentation](../Raster-map-algebra/).
+To learn how to write map algebra script, please refer to [Jiffle language summary](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle---language-summary).
+
 ## Map Algebra operators
 
 Map algebra operators work on a single band of a raster. Each band is represented as an array of doubles. The operators return an array of doubles.

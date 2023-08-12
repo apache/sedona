@@ -74,6 +74,10 @@
         <jts.version>1.19.0</jts.version>
         <jts2geojson.version>0.16.1</jts2geojson.version>
 
+        <jt-jiffle.version>1.1.24</jt-jiffle.version>
+        <antlr-runtime.version>4.9.3</antlr-runtime.version>
+        <janino-version>3.1.9</janino-version>
+
         <!-- Actual scala, spark and log4j version will be set by activated profiles.
              Setting a default value helps IDE:s that can't make sense of profiles. -->
         <scala.compat.version>2.12</scala.compat.version>
@@ -233,6 +237,21 @@
                 <artifactId>gt-coverage</artifactId>
                 <version>${geotools.version}</version>
                 <scope>${geotools.scope}</scope>
+            </dependency>
+            <dependency>
+                <groupId>it.geosolutions.jaiext.jiffle</groupId>
+                <artifactId>jt-jiffle-language</artifactId>
+                <version>${jt-jiffle.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.antlr</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.codehaus.janino</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
            <dependency>
                 <groupId>org.apache.hadoop</groupId>
