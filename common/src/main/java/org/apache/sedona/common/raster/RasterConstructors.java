@@ -157,7 +157,7 @@ public class RasterConstructors
                 return 0;
             case "f":
                 return 4;
-            case "u":
+            case "s":
                 return 2;
             case "us":
                 return 1;

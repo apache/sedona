@@ -18,7 +18,6 @@
  */
 package org.apache.sedona.sql
 
-import org.apache.spark.sql.connector.catalog.TableChange.ColumnPosition.first
 import org.apache.spark.sql.functions.{collect_list, expr}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.junit.Assert.{assertEquals, assertNull}
@@ -707,5 +706,18 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(0, result, 1e-9)
     }
 
+    it("Passed RS_BandPixelType from raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_BandPixelType(raster, 1)").first().getString(0)
+      assertEquals("UNSIGNED_8BITS", result)
+    }
+
+    it("Passed RS_BandPixelType from raster - default band value") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_BandPixelType(raster)").first().getString(0)
+      assertEquals("UNSIGNED_8BITS", result)
+    }
   }
 }
