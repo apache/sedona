@@ -676,7 +676,7 @@ Introduction: Add a band to a raster from an array of doubles.
 
 Format: `RS_AddBandFromArray (raster: Raster, band: Array[Double])` | `RS_AddBandFromArray (raster: Raster, band: Array[Double], bandIndex:Int)` | `RS_AddBandFromArray (raster: Raster, band: Array[Double], bandIndex:Int, noDataValue:Double)`
 
-Since: `v1.4.1`
+Since: `v1.5.0`
 
 The bandIndex is 1-based and must be between 1 and RS_NumBands(raster) + 1. It throws an exception if the bandIndex is out of range or the raster is null. If not specified, the noDataValue of the band is assumed to be null.
 
@@ -691,6 +691,9 @@ Modifying or Adding a customNoDataValue is also possible by giving an existing b
 In order to remove an existing noDataValue from an existing band, pass null as the noDataValue in the RS_AddBandFromArray.
 
 Note that: `bandIndex == RS_NumBands(raster) + 1` is an experimental feature and might not lead to the loss of raster metadata and properties such as color models.
+
+!!!Note
+    RS_BandFromArray typecasts the double band values to the given datatype of the raster. This can lead to overflow values if values beyond the range of the raster's datatype are provided.
 
 SQL example:
 
