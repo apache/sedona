@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.sedona.common.utils.RasterUtils
 import org.apache.spark.sql.functions.{collect_list, expr}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.junit.Assert.{assertEquals, assertNull}
@@ -533,11 +534,11 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       }
     }
 
-    it("Passed RS_AddBandFromArray - adding a new band with a custom no data value]") {
+    it("Passed RS_AddBandFromArray - adding a new band with a custom no data value") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster", "RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTiff(content), 1), 2) as band")
       val raster = df.selectExpr("RS_AddBandFromArray(raster, band, 2, 2)").first().getAs[GridCoverage2D](0);
-      assertEquals(2, raster.getSampleDimension(1).getNoDataValues()(0), 1e-9)
+      assertEquals(2, RasterUtils.getNoDataValue(raster.getSampleDimension(1)), 1e-9)
     }
 
     it("Passed RS_Intersects") {

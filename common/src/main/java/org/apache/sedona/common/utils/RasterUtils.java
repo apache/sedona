@@ -187,7 +187,7 @@ public class RasterUtils {
         Category noDataCategory = new Category(
                 Category.NODATA.getName(),
                 new Color(0, 0, 0, 0),
-                noDataValue);
+                new NumberRange<>(java.lang.Double.class, noDataValue, noDataValue));
         Category[] categories = new Category[] {noDataCategory};
         return new GridSampleDimension(description, categories, null);
     }
@@ -309,7 +309,7 @@ public class RasterUtils {
                 return 0;
             case "f":
                 return 4;
-            case "u":
+            case "s":
                 return 2;
             case "us":
                 return 1;

@@ -33,8 +33,10 @@ public class RasterUtilsTest {
         Assert.assertTrue(Double.isNaN(RasterUtils.getNoDataValue(band)));
         band = RasterUtils.createSampleDimensionWithNoDataValue(band, 100);
         Assert.assertEquals(100, RasterUtils.getNoDataValue(band), 1e-9);
+        Assert.assertEquals(100, band.getNoDataValues()[0], 1e-9);
         band = RasterUtils.createSampleDimensionWithNoDataValue("test", 200);
         Assert.assertEquals(200, RasterUtils.getNoDataValue(band), 1e-9);
+        Assert.assertEquals(200, band.getNoDataValues()[0], 1e-9);
         band = RasterUtils.removeNoDataValue(band);
         Assert.assertTrue(Double.isNaN(RasterUtils.getNoDataValue(band)));
     }
