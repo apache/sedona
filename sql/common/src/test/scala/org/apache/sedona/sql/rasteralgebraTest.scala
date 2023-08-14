@@ -431,6 +431,17 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expected, result, 1e-8)
     }
 
+    it("Passed RS_GeoReference") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      var result = df.selectExpr("RS_GeoReference(RS_FromGeoTiff(content))").first().getString(0);
+      var expected: String = "72.328613 \n0.000000 \n0.000000 \n-72.328613 \n-13095817.809482 \n4021262.748793"
+      assertEquals(expected, result)
+
+      result = df.selectExpr("RS_GeoReference(RS_FromGeoTiff(content), 'ESRI')").first().getString(0);
+      expected = "72.328613 \n0.000000 \n0.000000 \n-72.328613 \n-13095781.645176 \n4021226.584486"
+      assertEquals(expected, result)
+    }
+
     it("Passed RS_SkewX") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val result = df.selectExpr("RS_SkewX(RS_FromGeoTiff(content))").first().getDouble(0)
