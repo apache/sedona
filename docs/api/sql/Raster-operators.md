@@ -690,10 +690,10 @@ Modifying or Adding a customNoDataValue is also possible by giving an existing b
 
 In order to remove an existing noDataValue from an existing band, pass null as the noDataValue in the RS_AddBandFromArray.
 
-Note that: `bandIndex == RS_NumBands(raster) + 1` is an experimental feature and might not lead to the loss of raster metadata and properties such as color models.
+Note that: `bandIndex == RS_NumBands(raster) + 1` is an experimental feature and might lead to the loss of raster metadata and properties such as color models.
 
 !!!Note
-    RS_BandFromArray typecasts the double band values to the given datatype of the raster. This can lead to overflow values if values beyond the range of the raster's datatype are provided.
+    RS_AddBandFromArray typecasts the double band values to the given datatype of the raster. This can lead to overflow values if values beyond the range of the raster's datatype are provided.
 
 SQL example:
 
