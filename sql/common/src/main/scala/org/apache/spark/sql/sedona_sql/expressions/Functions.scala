@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.sedona.common.Functions
+import org.apache.sedona.common.{Functions, FunctionsGeoTools}
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
@@ -221,7 +221,7 @@ case class ST_Centroid(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Transform(inputExpressions: Seq[Expression])
-  extends InferredExpression(inferrableFunction4(Functions.transform)) {
+  extends InferredExpression(inferrableFunction4(FunctionsGeoTools.transform)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

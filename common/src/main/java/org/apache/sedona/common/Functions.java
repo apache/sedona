@@ -22,8 +22,6 @@ import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.common.utils.GeometryGeoHashEncoder;
 import org.apache.sedona.common.utils.GeometrySplitter;
 import org.apache.sedona.common.utils.S2Utils;
-import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.CRS;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.hull.ConcaveHull;
 import org.locationtech.jts.geom.*;
@@ -39,11 +37,7 @@ import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.NoSuchAuthorityCodeException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
+
 import org.wololo.jts2geojson.GeoJSONWriter;
 
 import java.util.*;
@@ -182,36 +176,6 @@ public class Functions {
             min = Math.min(points[i].getZ(), min);
         }
         return min == Double.MAX_VALUE ? null : min;
-    }
-
-    public static Geometry transform(Geometry geometry, String sourceCRS, String targetCRS)
-        throws FactoryException, TransformException {
-        return transform(geometry, sourceCRS, targetCRS, false);
-    }
-
-
-    public static Geometry transform(Geometry geometry, String sourceCRS, String targetCRS, boolean lenient)
-        throws FactoryException, TransformException {
-        CoordinateReferenceSystem sourceCRSCode = parseCRSString(sourceCRS);
-        CoordinateReferenceSystem targetCRScode = parseCRSString(targetCRS);
-        return GeomUtils.transform(geometry, sourceCRSCode, targetCRScode, lenient);
-    }
-
-
-    private static CoordinateReferenceSystem parseCRSString(String CRSString)
-            throws FactoryException
-    {
-        try {
-            return CRS.decode(CRSString);
-        }
-        catch (NoSuchAuthorityCodeException e) {
-            try {
-                return CRS.parseWKT(CRSString);
-            }
-            catch (FactoryException ex) {
-                throw new FactoryException("First failed to read as a well-known CRS code: \n" + e.getMessage() + "\nThen failed to read as a WKT CRS string: \n" + ex.getMessage());
-            }
-        }
     }
 
     public static Geometry flipCoordinates(Geometry geometry) {

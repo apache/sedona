@@ -20,6 +20,7 @@
 package org.apache.sedona.sql
 
 import org.apache.commons.codec.binary.Hex
+import org.apache.sedona.common.FunctionsGeoTools
 import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.catalyst.expressions.{GenericRow, GenericRowWithSchema}
 import org.apache.spark.sql.functions._
@@ -245,11 +246,11 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       val polygeom = reader.read(polygon)
 
       intercept[FactoryException]{
-        val d = org.apache.sedona.common.Functions.transform(polygeom, epsgString, epsgFactoryErrorString)
+        val d = FunctionsGeoTools.transform(polygeom, epsgString, epsgFactoryErrorString)
       }
 
       intercept[FactoryException]{
-        val d2 = org.apache.sedona.common.Functions.transform(polygeom, epsgString, epsgNoSuchAuthorityString)
+        val d2 = FunctionsGeoTools.transform(polygeom, epsgString, epsgNoSuchAuthorityString)
       }
 
       }
