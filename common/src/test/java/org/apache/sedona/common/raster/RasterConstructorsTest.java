@@ -13,6 +13,7 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
@@ -36,7 +37,7 @@ public class RasterConstructorsTest
         assertEquals(4072345d + 30, envelope.getCentroid().getY(), 0.1);
         assertEquals(2, gridCoverage2D.getRenderedImage().getTileHeight());
         assertEquals(2, gridCoverage2D.getRenderedImage().getTileWidth());
-        assertEquals(0d, gridCoverage2D.getSampleDimension(0).getNoDataValues()[0], 0.1);
+        assertEquals(0d, RasterUtils.getNoDataValue(gridCoverage2D.getSampleDimension(0)), 0.1);
         assertEquals(3d, gridCoverage2D.getRenderedImage().getData().getPixel(1, 1, (double[])null)[0], 0.1);
     }
 

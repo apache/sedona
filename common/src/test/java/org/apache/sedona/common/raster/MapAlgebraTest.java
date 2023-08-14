@@ -18,14 +18,14 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class MapAlgebraTest extends RasterTestBase
 {
@@ -57,7 +57,7 @@ public class MapAlgebraTest extends RasterTestBase
         assertEquals(raster.getEnvelope(), rasterWithBand1.getEnvelope());
         assertEquals(raster.getCoordinateReferenceSystem2D(), rasterWithBand1.getCoordinateReferenceSystem2D());
         assertEquals(RasterAccessors.srid(raster), RasterAccessors.srid(rasterWithBand1));
-        assertEquals(-999, rasterWithBand1.getSampleDimension(0).getNoDataValues()[0], 1e-9);
+        assertEquals(-999, RasterUtils.getNoDataValue(rasterWithBand1.getSampleDimension(0)), 1e-9);
 
         //replace first band with a different customNoDataValue
         rasterWithBand1 = MapAlgebra.addBandFromArray(rasterWithBand1, band1, 1, -9999d);
@@ -65,7 +65,7 @@ public class MapAlgebraTest extends RasterTestBase
         assertEquals(raster.getEnvelope(), rasterWithBand1.getEnvelope());
         assertEquals(raster.getCoordinateReferenceSystem2D(), rasterWithBand1.getCoordinateReferenceSystem2D());
         assertEquals(RasterAccessors.srid(raster), RasterAccessors.srid(rasterWithBand1));
-        assertEquals(-9999, rasterWithBand1.getSampleDimension(0).getNoDataValues()[0], 1e-9);
+        assertEquals(-9999, RasterUtils.getNoDataValue(rasterWithBand1.getSampleDimension(0)), 1e-9);
 
         //remove noDataValue from the first band
         rasterWithBand1 = MapAlgebra.addBandFromArray(rasterWithBand1, band1, 1, null);
@@ -73,7 +73,7 @@ public class MapAlgebraTest extends RasterTestBase
         assertEquals(raster.getEnvelope(), rasterWithBand1.getEnvelope());
         assertEquals(raster.getCoordinateReferenceSystem2D(), rasterWithBand1.getCoordinateReferenceSystem2D());
         assertEquals(RasterAccessors.srid(raster), RasterAccessors.srid(rasterWithBand1));
-        assertNull(rasterWithBand1.getSampleDimension(0).getNoDataValues());
+        assertTrue(Double.isNaN(RasterUtils.getNoDataValue(rasterWithBand1.getSampleDimension(0))));
 
         // Append a new band with default noDataValue
         GridCoverage2D rasterWithBand2 = MapAlgebra.addBandFromArray(rasterWithBand1, band2);
@@ -81,7 +81,7 @@ public class MapAlgebraTest extends RasterTestBase
         assertEquals(raster.getEnvelope(), rasterWithBand2.getEnvelope());
         assertEquals(raster.getCoordinateReferenceSystem2D(), rasterWithBand2.getCoordinateReferenceSystem2D());
         assertEquals(RasterAccessors.srid(raster), RasterAccessors.srid(rasterWithBand2));
-        assertNull(rasterWithBand2.getSampleDimension(1).getNoDataValues());
+        assertTrue(Double.isNaN(RasterUtils.getNoDataValue(rasterWithBand2.getSampleDimension(1))));
 
         // Append a new band with custom noDataValue
         GridCoverage2D rasterWithBand3 = MapAlgebra.addBandFromArray(rasterWithBand2, band3, 3, 2d);
@@ -89,7 +89,7 @@ public class MapAlgebraTest extends RasterTestBase
         assertEquals(raster.getEnvelope(), rasterWithBand3.getEnvelope());
         assertEquals(raster.getCoordinateReferenceSystem2D(), rasterWithBand3.getCoordinateReferenceSystem2D());
         assertEquals(RasterAccessors.srid(raster), RasterAccessors.srid(rasterWithBand3));
-        assertEquals(2, rasterWithBand3.getSampleDimension(2).getNoDataValues()[0], 1e-9);
+        assertEquals(2, RasterUtils.getNoDataValue(rasterWithBand3.getSampleDimension(2)), 1e-9);
 
         // Check the value of the first band when use the raster with only one band
         double[] firstBand = MapAlgebra.bandAsArray(rasterWithBand1, 1);

@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 
@@ -26,8 +27,12 @@ public class RasterBandAccessors {
     public static Double getBandNoDataValue(GridCoverage2D raster, int band) {
         ensureBand(raster, band);
         GridSampleDimension bandSampleDimension = raster.getSampleDimension(band - 1);
-        if (bandSampleDimension.getNoDataValues() == null) return null;
-        return raster.getSampleDimension(band - 1).getNoDataValues()[0];
+        double noDataValue = RasterUtils.getNoDataValue(bandSampleDimension);
+        if (Double.isNaN(noDataValue)) {
+            return null;
+        } else {
+            return noDataValue;
+        }
     }
 
     public static Double getBandNoDataValue(GridCoverage2D raster) {
