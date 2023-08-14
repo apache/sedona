@@ -437,6 +437,8 @@ For Postgis there is no need to add a query to convert geometry types since it's
 
 Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in a Geometry column. The unit of all related distances in SedonaSQL is same as the unit of all geometries in a Geometry column.
 
+By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order. You can use ==ST_FlipCoordinates== to swap X and Y.
+
 To convert Coordinate Reference System of the Geometry column created before, use the following code:
 
 ```sql

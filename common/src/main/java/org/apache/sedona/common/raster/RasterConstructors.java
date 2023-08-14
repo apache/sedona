@@ -23,6 +23,7 @@ import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.geotools.util.factory.Hints;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.datum.PixelInCell;
@@ -36,12 +37,12 @@ import java.io.IOException;
 public class RasterConstructors
 {
     public static GridCoverage2D fromArcInfoAsciiGrid(byte[] bytes) throws IOException {
-        ArcGridReader reader = new ArcGridReader(new ByteArrayImageInputStream(bytes));
+        ArcGridReader reader = new ArcGridReader(new ByteArrayImageInputStream(bytes), new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE));
         return reader.read(null);
     }
 
     public static GridCoverage2D fromGeoTiff(byte[] bytes) throws IOException {
-        GeoTiffReader geoTiffReader = new GeoTiffReader(new ByteArrayImageInputStream(bytes));
+        GeoTiffReader geoTiffReader = new GeoTiffReader(new ByteArrayImageInputStream(bytes), new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE));
         return geoTiffReader.read(null);
     }
 
@@ -134,7 +135,9 @@ public class RasterConstructors
         if (srid == 0) {
             crs = DefaultEngineeringCRS.GENERIC_2D;
         } else {
-            crs = CRS.decode("EPSG:" + srid);
+            // Create the CRS from the srid
+            // Longitude first, Latitude second
+            crs = CRS.decode("EPSG:" + srid, true);
         }
 
         // Create a new empty raster

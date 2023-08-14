@@ -203,6 +203,8 @@ For WKT/WKB/GeoJSON data, please use ==ST_GeomFromWKT / ST_GeomFromWKB / ST_Geom
 
 Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in an SpatialRDD. The unit of all related distances in Sedona is same as the unit of all geometries in an SpatialRDD.
 
+By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order. You can use ==spatialRDD.flipCoordinates== to swap X and Y.
+
 To convert Coordinate Reference System of an SpatialRDD, use the following code:
 
 === "Scala"

@@ -120,6 +120,9 @@ class SpatialRDD:
         """
         return self._srdd.CRSTransform(sourceEpsgCRSCode, targetEpsgCRSCode)
 
+    def flipCoordinates(self):
+        return self._srdd.flipCoordinates()
+
     def MinimumBoundingRectangle(self):
         raise NotImplementedError()
 

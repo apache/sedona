@@ -225,8 +225,8 @@ public class FunctionTest extends TestBase{
     public void testTransformWKT() throws FactoryException {
         Table pointTable = createPointTable_real(testDataSize);
 
-        CoordinateReferenceSystem CRS_SRC = CRS.decode("epsg:4326");
-        CoordinateReferenceSystem CRS_TGT = CRS.decode("epsg:3857");
+        CoordinateReferenceSystem CRS_SRC = CRS.decode("epsg:4326", true);
+        CoordinateReferenceSystem CRS_TGT = CRS.decode("epsg:3857", true);
 
         String SRC_WKT = CRS_SRC.toWKT();
         String TGT_WKT = CRS_TGT.toWKT();

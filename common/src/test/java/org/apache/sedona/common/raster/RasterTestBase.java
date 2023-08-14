@@ -81,7 +81,7 @@ public class RasterTestBase {
         CoordinateReferenceSystem crs = null;
         if (crsCode != null && !crsCode.isEmpty()) {
             try {
-                crs = CRS.decode(crsCode);
+                crs = CRS.decode(crsCode, true);
             } catch (FactoryException e) {
                 throw new RuntimeException(e);
             }

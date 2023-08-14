@@ -542,8 +542,8 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(!df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(-13057457,4027023), 3857))").first().getBoolean(0))
 
       // query window and raster not in the same CRS
-      assert(df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(33.81798,-117.47993), 4326))").first().getBoolean(0))
-      assert(!df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(33.97896,-117.27868), 4326))").first().getBoolean(0))
+      assert(df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(-117.47993, 33.81798), 4326))").first().getBoolean(0))
+      assert(!df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(-117.27868, 33.97896), 4326))").first().getBoolean(0))
     }
 
     it("Passed RS_AddBandFromArray collect generated raster") {

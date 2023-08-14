@@ -19,13 +19,15 @@
 
 package org.apache.sedona.core.spatialOperator;
 
+import org.apache.sedona.common.Functions;
 import org.apache.sedona.core.knnJudgement.GeometryDistanceComparator;
 import org.apache.sedona.core.knnJudgement.KnnJudgement;
 import org.apache.sedona.core.knnJudgement.KnnJudgementUsingIndex;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
-import org.apache.sedona.core.utils.CRSTransformation;
 import org.apache.spark.api.java.JavaRDD;
 import org.locationtech.jts.geom.Geometry;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 import java.io.Serializable;
 import java.util.List;
@@ -52,7 +54,12 @@ public class KNNQuery
     {
         U queryCenter = originalQueryPoint;
         if (spatialRDD.getCRStransformation()) {
-            queryCenter = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(), spatialRDD.getTargetEpgsgCode(), originalQueryPoint);
+            try {
+                queryCenter = (U) Functions.transform(originalQueryPoint, spatialRDD.getSourceEpsgCode(), spatialRDD.getTargetEpgsgCode());
+            }
+            catch (FactoryException | TransformException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         if (useIndex) {

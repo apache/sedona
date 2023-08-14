@@ -35,6 +35,7 @@ class TestCrsTransformation(TestBase):
             splitter,
             True
         )
+        spatial_rdd.flipCoordinates()
         spatial_rdd.CRSTransform("epsg:4326", "epsg:3005")
 
         for i in range(loop_times):
