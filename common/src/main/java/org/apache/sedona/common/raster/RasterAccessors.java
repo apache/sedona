@@ -101,15 +101,12 @@ public class RasterAccessors
     }
 
     public static String getGeoReference(GridCoverage2D raster, String format) {
-
-        AffineTransform2D affine = RasterUtils.getGDALAffineTransform(raster);
-
-        double scaleX = affine.getScaleX();
-        double skewX = affine.getShearX();
-        double skewY = affine.getShearY();
-        double scaleY = affine.getScaleY();
-        double upperLeftX = affine.getTranslateX();
-        double upperLeftY = affine.getTranslateY();
+        double scaleX = getScaleX(raster);
+        double skewX = getSkewX(raster);
+        double skewY = getSkewY(raster);
+        double scaleY = getScaleY(raster);
+        double upperLeftX = getUpperLeftX(raster);
+        double upperLeftY = getUpperLeftY(raster);
 
         if(format.equalsIgnoreCase("GDAL")) {
             return String.format("%f \n%f \n%f \n%f \n%f \n%f", scaleX, skewY, skewX, scaleY, upperLeftX, upperLeftY);
