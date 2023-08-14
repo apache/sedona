@@ -96,6 +96,31 @@ public class RasterAccessors
         return RasterUtils.getWorldCornerCoordinates(raster, colX, rowY).getY();
     }
 
+    public static String getGeoReference(GridCoverage2D raster) {
+        return getGeoReference(raster, "GDAL");
+    }
+
+    public static String getGeoReference(GridCoverage2D raster, String format) {
+
+        AffineTransform2D affine = RasterUtils.getGDALAffineTransform(raster);
+
+        double scaleX = affine.getScaleX();
+        double skewX = affine.getShearX();
+        double skewY = affine.getShearY();
+        double scaleY = affine.getScaleY();
+        double upperLeftX = affine.getTranslateX();
+        double upperLeftY = affine.getTranslateY();
+
+        if(format.equalsIgnoreCase("GDAL")) {
+            return String.format("%f, %f, %f, %f, %f, %f", scaleX, skewY, skewX, scaleY, upperLeftX, upperLeftY);
+        } else if (format.equalsIgnoreCase("ESRI")){
+            return String.format("%f, %f, %f, %f, %f, %f", scaleX, skewY, skewX, scaleY, (upperLeftX + (scaleX * 0.5)),
+                    (upperLeftY + (scaleY * 0.5)));
+        } else {
+            throw new IllegalArgumentException("Please select between the following formats GDAL and ESRI");
+        }
+    }
+
     public static Geometry getGridCoord(GridCoverage2D raster, double x, double y) throws TransformException {
         int[] coords = RasterUtils.getGridCoordinatesFromWorld(raster, x, y);
         coords = Arrays.stream(coords).map(number -> number + 1).toArray();
