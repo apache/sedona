@@ -21,11 +21,14 @@ package org.apache.sedona.common.raster;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
+import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform2D;
+
+import java.util.Map;
 
 public class RasterEditors
 {
@@ -37,8 +40,11 @@ public class RasterEditors
         } else {
             crs = CRS.decode("EPSG:" + srid);
         }
-        ReferencedEnvelope referencedEnvelope = new ReferencedEnvelope(raster.getEnvelope2D(), crs);
+
         GridCoverageFactory gridCoverageFactory = CoverageFactoryFinder.getGridCoverageFactory(null);
-        return gridCoverageFactory.create(raster.getName().toString(), raster.getRenderedImage(), referencedEnvelope);
+        MathTransform2D transform = raster.getGridGeometry().getGridToCRS2D();
+        Map<?, ?> properties = raster.getProperties();
+        GridCoverage[] sources = raster.getSources().toArray(new GridCoverage[0]);
+        return gridCoverageFactory.create(raster.getName().toString(), raster.getRenderedImage(), crs, transform, raster.getSampleDimensions(), sources, properties);
     }
 }

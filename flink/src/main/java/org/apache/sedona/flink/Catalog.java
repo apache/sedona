@@ -16,8 +16,6 @@ package org.apache.sedona.flink;
 import org.apache.flink.table.functions.UserDefinedFunction;
 import org.apache.sedona.flink.expressions.*;
 
-import scala.Function;
-
 public class Catalog {
     public static UserDefinedFunction[] getFuncs() {
         return new UserDefinedFunction[]{
@@ -27,6 +25,7 @@ public class Catalog {
                 new Constructors.ST_Point(),
                 new Constructors.ST_PointZ(),
                 new Constructors.ST_PointFromText(),
+                new Constructors.ST_MakePoint(),
                 new Constructors.ST_LineStringFromText(),
                 new Constructors.ST_LineFromText(),
                 new Constructors.ST_PolygonFromText(),

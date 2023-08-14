@@ -28,7 +28,6 @@ import org.apache.sedona.core.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
 import org.apache.sedona.sql.utils.Adapter
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
-import org.apache.spark.storage.StorageLevel
 import org.locationtech.jts.geom.Point
 import org.scalatest.GivenWhenThen
 
@@ -195,7 +194,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen{
       val urlPrefix = resourceFolder + "modis/"
       val HDFDataVariableList:Array[String] = Array("LST", "QC", "Error_LST", "Emis_31", "Emis_32")
       val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFincrement, HDFoffset, HDFrootGroupName, HDFDataVariableList, HDFDataVariableName, urlPrefix)
-      val spatialRDD = new PointRDD(sparkSession.sparkContext, InputLocation, numPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)
+      val spatialRDD = new PointRDD(sparkSession.sparkContext, InputLocation, numPartitions, earthdataHDFPoint)
       import scala.jdk.CollectionConverters._
       spatialRDD.fieldNames = HDFDataVariableList.dropRight(4).toList.asJava
       val spatialDf = Adapter.toDf(spatialRDD, sparkSession)
