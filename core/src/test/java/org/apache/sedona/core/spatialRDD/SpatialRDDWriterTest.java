@@ -82,11 +82,11 @@ public class SpatialRDDWriterTest
         File wkb = new File(testSaveAsWKBWithData);
         if (wkb.exists()) { FileUtils.deleteDirectory(wkb);}
 
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions);
         spatialRDD.saveAsWKB(testSaveAsWKBWithData);
 
         // Load the saved rdd and compare them
-        PointRDD resultWKB = new PointRDD(sc, testSaveAsWKBWithData, 0, FileDataSplitter.WKB, true, numPartitions, StorageLevel.MEMORY_ONLY());
+        PointRDD resultWKB = new PointRDD(sc, testSaveAsWKBWithData, 0, FileDataSplitter.WKB, true, numPartitions);
 
         assertEquals(resultWKB.rawSpatialRDD.count(), spatialRDD.rawSpatialRDD.count());
         verifyResult(resultWKB.rawSpatialRDD.takeOrdered(5), spatialRDD.rawSpatialRDD.takeOrdered(5));
@@ -102,11 +102,11 @@ public class SpatialRDDWriterTest
         File wkt = new File(testSaveAsWKTWithData);
         if (wkt.exists()) {FileUtils.deleteDirectory(wkt);}
 
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions);
         spatialRDD.saveAsWKT(testSaveAsWKTWithData);
 
         // Load the saved rdd and compare them
-        PointRDD resultWKT = new PointRDD(sc, testSaveAsWKTWithData, 0, FileDataSplitter.WKT, true, numPartitions, StorageLevel.MEMORY_ONLY());
+        PointRDD resultWKT = new PointRDD(sc, testSaveAsWKTWithData, 0, FileDataSplitter.WKT, true, numPartitions);
 
         assertEquals(resultWKT.rawSpatialRDD.count(), spatialRDD.rawSpatialRDD.count());
         verifyResult(resultWKT.rawSpatialRDD.takeOrdered(5), spatialRDD.rawSpatialRDD.takeOrdered(5));
@@ -122,11 +122,11 @@ public class SpatialRDDWriterTest
         File wkb = new File(testSaveAsWKB);
         if (wkb.exists()) { FileUtils.deleteDirectory(wkb);}
 
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, false, numPartitions, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, false, numPartitions);
         spatialRDD.saveAsWKB(testSaveAsWKB);
 
         // Load the saved rdd and compare them
-        PointRDD resultWKB = new PointRDD(sc, testSaveAsWKB, 0, FileDataSplitter.WKB, false, numPartitions, StorageLevel.MEMORY_ONLY());
+        PointRDD resultWKB = new PointRDD(sc, testSaveAsWKB, 0, FileDataSplitter.WKB, false, numPartitions);
 
         assertEquals(resultWKB.rawSpatialRDD.count(), spatialRDD.rawSpatialRDD.count());
         verifyResult(resultWKB.rawSpatialRDD.takeOrdered(5), spatialRDD.rawSpatialRDD.takeOrdered(5));
@@ -142,11 +142,11 @@ public class SpatialRDDWriterTest
         File wkt = new File(testSaveAsWKT);
         if (wkt.exists()) {FileUtils.deleteDirectory(wkt);}
 
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, false, numPartitions, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, false, numPartitions);
         spatialRDD.saveAsWKT(testSaveAsWKT);
 
         // Load the saved rdd and compare them
-        PointRDD resultWKT = new PointRDD(sc, testSaveAsWKT, 0, FileDataSplitter.WKT, false, numPartitions, StorageLevel.MEMORY_ONLY());
+        PointRDD resultWKT = new PointRDD(sc, testSaveAsWKT, 0, FileDataSplitter.WKT, false, numPartitions);
 
         assertEquals(resultWKT.rawSpatialRDD.count(), spatialRDD.rawSpatialRDD.count());
         verifyResult(resultWKT.rawSpatialRDD.takeOrdered(5), spatialRDD.rawSpatialRDD.takeOrdered(5));

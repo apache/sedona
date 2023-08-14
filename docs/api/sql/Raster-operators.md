@@ -172,6 +172,46 @@ Output:
 -2
 ```
 
+### RS_SkewX
+
+Introduction: Returns the X skew or rotation parameter.
+
+Format: `RS_SkewX(raster: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_SkewX(RS_MakeEmptyRaster(2, 10, 10, 0.0, 0.0, 1.0, -1.0, 0.1, 0.2, 4326))
+```
+
+Output:
+
+```
+0.1
+```
+
+### RS_SkewY
+
+Introduction: Returns the Y skew or rotation parameter.
+
+Format: `RS_SkewY(raster: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_SkewY(RS_MakeEmptyRaster(2, 10, 10, 0.0, 0.0, 1.0, -1.0, 0.1, 0.2, 4326))
+```
+
+Output:
+
+```
+0.2
+```
+
 ### RS_UpperLeftX
 
 Introduction: Returns the X coordinate of the upper-left corner of the raster.
@@ -308,6 +348,77 @@ Output: `3`
 
 !!!Tip
     For non-skewed rasters, you can provide any value for longitude and the intended value of world latitude, to get the desired answer
+
+## Raster Band Accessors
+
+### RS_BandNoDataValue
+
+Introduction: Returns the no data value of the given band of the given raster. If no band is given, band 1 is assumed. The band parameter is 1-indexed. If there is no no data value associated with the given band, RS_BandNoDataValue returns null.
+
+!!!Note
+    If the given band does not lie in the raster, RS_BandNoDataValue throws an IllegalArgumentException
+
+Format: `RS_BandNoDataValue (raster: Raster, band: Int = 1)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_BandNoDataValue(raster, 1) from rasters;
+```
+
+Output: `0.0`
+
+```sql
+SELECT RS_BandNoDataValue(raster) from rasters_without_nodata;
+```
+
+Output: `null`
+
+```sql
+SELECT RS_BandNoDataValue(raster, 3) from rasters;
+```
+
+Output: `IllegalArgumentException: Provided band index 3 is not present in the raster.`
+
+### RS_BandPixelType
+
+Introduction: Returns the datatype of each pixel in the given band of the given raster in string format. The band parameter is 1-indexed. If no band is specified, band 1 is assumed.
+!!!Note
+    If the given band index does not exist in the given raster, RS_BandPixelType throws an IllegalArgumentException.
+Following are the possible values returned by RS_BandPixelType:
+
+
+1. `REAL_64BITS` - For Double values
+2. `REAL_32BITS` - For Float values
+3. `SIGNED_32BITS` - For Integer values
+4. `SIGNED_16BITS` - For Short values
+5. `UNSIGNED_16BITS` - For unsigned Short values
+6. `UNSIGNED_8BITS` - For Byte values
+
+    
+Format: `RS_BandPixelType(rast: Raster, band: Int = 1)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_BandPixelType(RS_MakeEmptyRaster(2, "D", 5, 5, 53, 51, 1, 1, 0, 0, 0), 2);
+```
+
+Output: `REAL_64BITS`
+
+```sql
+SELECT RS_BandPixelType(RS_MakeEmptyRaster(2, "I", 5, 5, 53, 51, 1, 1, 0, 0, 0));
+```
+
+Output: `SIGNED_32BITS`
+
+```sql
+SELECT RS_BandPixelType(RS_MakeEmptyRaster(2, "I", 5, 5, 53, 51, 1, 1, 0, 0, 0), 3);
+```
+
+Output: `IllegalArgumentException: Provided band index 3 is not present in the raster`
 
 
 ## Raster based operators

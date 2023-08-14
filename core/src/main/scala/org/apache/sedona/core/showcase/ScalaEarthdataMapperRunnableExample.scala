@@ -57,7 +57,7 @@ object ScalaEarthdataMapperRunnableExample extends App {
     */
   def testSpatialRangeQuery() {
     val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName, HDFDataVariableList, HDFDataVariableName, urlPrefix)
-    val spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)
+    val spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint)
     var i = 0
     while (i < loopTimes) {
       var resultSize = 0L
@@ -71,7 +71,7 @@ object ScalaEarthdataMapperRunnableExample extends App {
     */
   def testSpatialRangeQueryUsingIndex() {
     val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName, HDFDataVariableList, HDFDataVariableName, urlPrefix)
-    val spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint, StorageLevel.MEMORY_ONLY)
+    val spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint)
     spatialRDD.buildIndex(IndexType.RTREE, false)
     var i = 0
     while (i < loopTimes) {

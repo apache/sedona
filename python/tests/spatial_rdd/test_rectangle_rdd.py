@@ -18,7 +18,6 @@
 import os
 
 import pytest
-from pyspark import StorageLevel
 
 from sedona.core.SpatialRDD import RectangleRDD
 from sedona.core.enums import IndexType, GridType, FileDataSplitter
@@ -50,8 +49,7 @@ class TestRectangleRDD(TestBase):
             Offset=offset,
             splitter=splitter,
             carryInputData=True,
-            partitions=numPartitions,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=numPartitions
         )
 
         spatial_rdd.analyze()
@@ -65,8 +63,7 @@ class TestRectangleRDD(TestBase):
             offset,
             splitter,
             True,
-            numPartitions,
-            StorageLevel.MEMORY_ONLY
+            numPartitions
         )
 
         spatial_rdd.analyze()
@@ -81,8 +78,7 @@ class TestRectangleRDD(TestBase):
             Offset=offset,
             splitter=splitter,
             carryInputData=True,
-            partitions=numPartitions,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=numPartitions
         )
 
         spatial_rdd.analyze()

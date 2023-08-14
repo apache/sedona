@@ -20,7 +20,7 @@ package org.apache.sedona.sql
 
 import org.apache.spark.sql.functions.{collect_list, expr}
 import org.geotools.coverage.grid.GridCoverage2D
-import org.junit.Assert.assertEquals
+import org.junit.Assert.{assertEquals, assertNull}
 import org.locationtech.jts.geom.{Coordinate, Geometry}
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
@@ -431,6 +431,20 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expected, result, 1e-8)
     }
 
+    it("Passed RS_SkewX") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_SkewX(RS_FromGeoTiff(content))").first().getDouble(0)
+      val expected: Double = 0.0
+      assertEquals(expected, result, 0.1)
+    }
+
+    it("Passed RS_SkewY") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_SkewY(RS_FromGeoTiff(content))").first().getDouble(0)
+      val expected: Double = 0.0
+      assertEquals(expected, result, 0.1)
+    }
+
     it("Passed RS_Metadata") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val result = df.selectExpr("RS_Metadata(RS_FromGeoTiff(content))").first().getSeq(0)
@@ -447,19 +461,27 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val upperLeftY = 0.0
       val cellSize = 1.0
       val numBands = 2
-      // Test without skewX, skewY, srid
+      // Test without skewX, skewY, srid and datatype
       var result = sparkSession.sql(s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize))").first().getSeq(0)
+      assertEquals(numBands, result(9), 0.001)
+
+      //Test without skewX, skewY, srid
+      result = sparkSession.sql(s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, 'I', $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize))").first().getSeq(0)
       assertEquals(numBands, result(9), 0.001)
 
       // Test with integer type input
       result = sparkSession.sql(s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, ${upperLeftX.toInt}, ${upperLeftY.toInt}, ${cellSize.toInt}))").first().getSeq(0)
       assertEquals(numBands, result(9), 0.001)
 
-      // Test with skewX, skewY, srid
+      // Test with skewX, skewY, srid but WITHOUT datatype
       val skewX = 0.0
       val skewY = 0.0
       val srid = 0
       result = sparkSession.sql(s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize, -$cellSize, $skewX, $skewY, $srid))").first().getSeq(0)
+      assertEquals(numBands, result(9), 0.001)
+
+      //Test with skewX, skewY, srid and datatype
+      result = sparkSession.sql(s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, 'I', $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize, -$cellSize, $skewX, $skewY, $srid))").first().getSeq(0)
       assertEquals(numBands, result(9), 0.001)
     }
 
@@ -661,6 +683,41 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_Within") {
       assert(sparkSession.sql("SELECT RS_WITHIN(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((0 0, 0 50, 100 50, 100 0, 0 0))'))").first().getBoolean(0))
       assert(!sparkSession.sql("SELECT RS_WITHIN(RS_MakeEmptyRaster(1, 100, 100, 0, 50, 1), ST_GeomFromWKT('POLYGON ((2 2, 2 25, 20 25, 20 2, 2 2))'))").first().getBoolean(0))
+    }
+
+    it("Passed RS_BandNoDataValue - noDataValueFor for raster from geotiff - default band") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_BandNoDataValue(raster)").first().getDouble(0)
+      assertEquals(0, result, 1e-9)
+    }
+
+    it("Passed RS_BandNoDataValue - null noDataValueFor for raster from geotiff") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_BandNoDataValue(raster)").first().get(0)
+      assertNull(result)
+    }
+
+    it("Passed RS_BandNoDataValue - noDataValueFor for raster from geotiff - explicit band") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_BandNoDataValue(raster, 1)").first().getDouble(0)
+      assertEquals(0, result, 1e-9)
+    }
+
+    it("Passed RS_BandPixelType from raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_BandPixelType(raster, 1)").first().getString(0)
+      assertEquals("UNSIGNED_8BITS", result)
+    }
+
+    it("Passed RS_BandPixelType from raster - default band value") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_BandPixelType(raster)").first().getString(0)
+      assertEquals("UNSIGNED_8BITS", result)
     }
   }
 }

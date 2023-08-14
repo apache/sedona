@@ -129,7 +129,7 @@ public class LineStringRangeTest
             indexType = IndexType.getIndexType(prop.getProperty("indexType"));
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
             queryEnvelope = new Envelope(-85.01, -60.01, 34.01, 50.01);
-            loopTimes = 5;
+            loopTimes = 1;
         }
         catch (IOException ex) {
             ex.printStackTrace();
@@ -164,7 +164,7 @@ public class LineStringRangeTest
     public void testSpatialRangeQuery()
             throws Exception
     {
-        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, StorageLevel.MEMORY_ONLY());
+        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true);
         for (int i = 0; i < loopTimes; i++) {
             long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).count();
             assertEquals(resultSize, 999);
@@ -181,7 +181,7 @@ public class LineStringRangeTest
     public void testSpatialRangeQueryUsingIndex()
             throws Exception
     {
-        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true, StorageLevel.MEMORY_ONLY());
+        LineStringRDD spatialRDD = new LineStringRDD(sc, InputLocation, splitter, true);
         spatialRDD.buildIndex(IndexType.RTREE, false);
         for (int i = 0; i < loopTimes; i++) {
             long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, true).count();

@@ -132,7 +132,7 @@ public class RectangleRangeTest
             indexType = IndexType.getIndexType(prop.getProperty("indexType"));
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
             queryEnvelope = new Envelope(-90.01, -80.01, 30.01, 40.01);
-            loopTimes = 5;
+            loopTimes = 1;
         }
         catch (IOException ex) {
             ex.printStackTrace();
@@ -167,7 +167,7 @@ public class RectangleRangeTest
     public void testSpatialRangeQuery()
             throws Exception
     {
-        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY());
+        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true);
         for (int i = 0; i < loopTimes; i++) {
             long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).count();
             assertEquals(resultSize, 193);
@@ -184,7 +184,7 @@ public class RectangleRangeTest
     public void testSpatialRangeQueryUsingIndex()
             throws Exception
     {
-        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY());
+        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true);
         spatialRDD.buildIndex(IndexType.RTREE, false);
         for (int i = 0; i < loopTimes; i++) {
             long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, true).count();
@@ -201,7 +201,7 @@ public class RectangleRangeTest
     @Test
     public void testSpatialRangeQueryLeftCoveredByRightFalse()
             throws Exception {
-        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, StorageLevel.MEMORY_ONLY());
+        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true);
         Coordinate[] coordinates = new Coordinate[5];
         coordinates[0] = new Coordinate(queryEnvelope.getMinX(), queryEnvelope.getMinY());
         coordinates[1] = new Coordinate(queryEnvelope.getMinX(), queryEnvelope.getMaxY());

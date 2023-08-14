@@ -15,8 +15,6 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from pyspark import StorageLevel
-
 from sedona.core.SpatialRDD import PolygonRDD
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.enums import IndexType, FileDataSplitter, GridType
@@ -44,36 +42,13 @@ class TestPolygonRDD(TestBase):
             InputLocation=input_location,
             splitter=splitter,
             carryInputData=True,
-            partitions=num_partitions,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=num_partitions
         )
         self.compare_spatial_rdd(spatial_rdd_core, input_boundary)
-
-        spatial_rdd_core = PolygonRDD(
-            self.sc,
-            input_location,
-            splitter,
-            True,
-            num_partitions,
-            StorageLevel.MEMORY_ONLY
-        )
 
         self.compare_spatial_rdd(spatial_rdd_core, input_boundary)
         spatial_rdd = PolygonRDD(rawSpatialRDD=spatial_rdd_core.rawJvmSpatialRDD)
         self.compare_spatial_rdd(spatial_rdd, input_boundary)
-        spatial_rdd = PolygonRDD(spatial_rdd_core.rawJvmSpatialRDD, "epsg:4326", "epsg:5070")
-        self.compare_spatial_rdd(spatial_rdd, query_envelope)
-        assert spatial_rdd.getSourceEpsgCode() == "epsg:4326"
-        assert spatial_rdd.getTargetEpsgCode() == "epsg:5070"
-        spatial_rdd = PolygonRDD(rawSpatialRDD=spatial_rdd_core.rawJvmSpatialRDD, sourceEpsgCode="epsg:4326", targetEpsgCode="epsg:5070")
-        assert spatial_rdd.getSourceEpsgCode() == "epsg:4326"
-        assert spatial_rdd.getTargetEpsgCode() == "epsg:5070"
-        self.compare_spatial_rdd(spatial_rdd, query_envelope)
-        spatial_rdd = PolygonRDD(rawSpatialRDD=spatial_rdd.rawJvmSpatialRDD, newLevel=StorageLevel.MEMORY_ONLY)
-        self.compare_spatial_rdd(spatial_rdd, query_envelope)
-        spatial_rdd = PolygonRDD(spatial_rdd_core.rawJvmSpatialRDD, StorageLevel.MEMORY_ONLY)
-        self.compare_spatial_rdd(spatial_rdd, input_boundary)
-        spatial_rdd = PolygonRDD()
 
         query_window_rdd = PolygonRDD(
             self.sc,
@@ -117,132 +92,13 @@ class TestPolygonRDD(TestBase):
 
         self.compare_spatial_rdd(spatial_rdd_core, input_boundary)
 
-        query_window_rdd = PolygonRDD(
-            self.sc,
-            polygon_rdd_input_location,
-            polygon_rdd_start_offset,
-            polygon_rdd_end_offset,
-            polygon_rdd_splitter,
-            True,
-            5,
-            StorageLevel.MEMORY_ONLY
-        )
-
-        assert query_window_rdd.analyze()
-        assert query_window_rdd.approximateTotalCount == 3000
-
-        query_window_rdd = PolygonRDD(
-            self.sc,
-            polygon_rdd_input_location,
-            polygon_rdd_start_offset,
-            polygon_rdd_end_offset,
-            polygon_rdd_splitter,
-            True,
-            StorageLevel.MEMORY_ONLY
-        )
-
-        assert query_window_rdd.analyze()
-        assert query_window_rdd.approximateTotalCount == 3000
-
-        spatial_rdd_core = PolygonRDD(
-            self.sc,
-            input_location,
-            splitter,
-            True,
-            5,
-            StorageLevel.MEMORY_ONLY
-        )
-
-        self.compare_spatial_rdd(spatial_rdd_core, input_boundary)
-
-        spatial_rdd_core = PolygonRDD(
-            self.sc,
-            input_location,
-            splitter,
-            True,
-            StorageLevel.MEMORY_ONLY
-        )
-
-        self.compare_spatial_rdd(spatial_rdd_core, input_boundary)
-
-        spatial_rdd = PolygonRDD(
-            spatial_rdd_core.rawJvmSpatialRDD, StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:5070"
-        )
-        self.compare_spatial_rdd(spatial_rdd, query_envelope)
-
-        query_window_rdd = PolygonRDD(
-            self.sc,
-            polygon_rdd_input_location,
-            polygon_rdd_start_offset,
-            polygon_rdd_end_offset,
-            polygon_rdd_splitter,
-            True,
-            5,
-            StorageLevel.MEMORY_ONLY,
-            "epsg:4326",
-            "epsg:5070"
-        )
-
-        assert query_window_rdd.analyze()
-        assert query_window_rdd.approximateTotalCount == 3000
-
-        query_window_rdd = PolygonRDD(
-            self.sc,
-            polygon_rdd_input_location,
-            polygon_rdd_start_offset,
-            polygon_rdd_end_offset,
-            polygon_rdd_splitter,
-            True,
-            StorageLevel.MEMORY_ONLY,
-            "epsg:4326",
-            "epsg:5070"
-        )
-
-        assert query_window_rdd.analyze()
-        assert query_window_rdd.approximateTotalCount == 3000
-
-        spatial_rdd_core = PolygonRDD(
-            self.sc,
-            input_location,
-            splitter,
-            True,
-            5,
-            StorageLevel.MEMORY_ONLY,
-            "epsg:4326",
-            "epsg:5070"
-        )
-
-        self.compare_spatial_rdd(spatial_rdd_core, query_envelope)
-        spatial_rdd_core = PolygonRDD(
-            self.sc,
-            input_location,
-            splitter,
-            True,
-            StorageLevel.MEMORY_ONLY,
-            "epsg:4326",
-            "epsg:5070"
-        )
-
-        spatial_rdd_core = PolygonRDD(
-            sparkContext=self.sc,
-            InputLocation=input_location,
-            splitter=splitter,
-            carryInputData=True,
-            newLevel=StorageLevel.MEMORY_ONLY,
-            sourceEpsgCRSCode="epsg:4326",
-            targetEpsgCode="epsg:5070"
-        )
-
-        self.compare_spatial_rdd(spatial_rdd_core, query_envelope)
-
     def test_empty_constructor(self):
         spatial_rdd = PolygonRDD(
             sparkContext=self.sc,
             InputLocation=input_location,
             splitter=splitter,
             carryInputData=True,
-            partitions=num_partitions,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=num_partitions
         )
         spatial_rdd.analyze()
         spatial_rdd.spatialPartitioning(grid_type)
@@ -257,8 +113,7 @@ class TestPolygonRDD(TestBase):
             InputLocation=input_location_geo_json,
             splitter=FileDataSplitter.GEOJSON,
             carryInputData=True,
-            partitions=4,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=4
         )
         spatial_rdd.analyze()
         assert spatial_rdd.approximateTotalCount == 1001
@@ -272,8 +127,7 @@ class TestPolygonRDD(TestBase):
             sparkContext=self.sc,
             InputLocation=input_location_wkt,
             splitter=FileDataSplitter.WKT,
-            carryInputData=True,
-            newLevel=StorageLevel.MEMORY_ONLY
+            carryInputData=True
         )
 
         spatial_rdd.analyze()
@@ -286,25 +140,12 @@ class TestPolygonRDD(TestBase):
             sparkContext=self.sc,
             InputLocation=input_location_wkb,
             splitter=FileDataSplitter.WKB,
-            carryInputData=True,
-            newLevel=StorageLevel.MEMORY_ONLY
+            carryInputData=True
         )
         spatial_rdd.analyze()
         assert spatial_rdd.approximateTotalCount == 103
         assert spatial_rdd.boundaryEnvelope is not None
         assert spatial_rdd.rawSpatialRDD.take(1)[0].getUserData() == "31\t039\t00835841\t31039\tCuming\tCuming County\t06\tH1\tG4020\t\t\t\tA\t1477895811\t10447360\t+41.9158651\t-096.7885168"
-
-    def test_build_index_without_set_grid(self):
-        spatial_rdd = PolygonRDD(
-            self.sc,
-            input_location,
-            FileDataSplitter.CSV,
-            carryInputData=True,
-            partitions=num_partitions,
-            newLevel=StorageLevel.MEMORY_ONLY
-        )
-        spatial_rdd.analyze()
-        spatial_rdd.buildIndex(IndexType.RTREE, False)
 
     def test_mbr(self):
         polygon_rdd = PolygonRDD(

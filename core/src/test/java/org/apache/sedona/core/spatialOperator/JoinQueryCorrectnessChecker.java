@@ -242,8 +242,8 @@ public class JoinQueryCorrectnessChecker
     public void testInsidePointJoinCorrectness()
             throws Exception
     {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet), StorageLevel.MEMORY_ONLY());
-        PointRDD objectRDD = new PointRDD(sc.parallelize(testInsidePointSet), StorageLevel.MEMORY_ONLY());
+        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+        PointRDD objectRDD = new PointRDD(sc.parallelize(testInsidePointSet));
         prepareRDDs(objectRDD, windowRDD);
 
         List<Tuple2<Polygon, List<Point>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
@@ -262,8 +262,8 @@ public class JoinQueryCorrectnessChecker
     public void testOnBoundaryPointJoinCorrectness()
             throws Exception
     {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet), StorageLevel.MEMORY_ONLY());
-        PointRDD objectRDD = new PointRDD(sc.parallelize(testOnBoundaryPointSet), StorageLevel.MEMORY_ONLY());
+        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+        PointRDD objectRDD = new PointRDD(sc.parallelize(testOnBoundaryPointSet));
         prepareRDDs(objectRDD, windowRDD);
 
         List<Tuple2<Polygon, List<Point>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
@@ -282,8 +282,8 @@ public class JoinQueryCorrectnessChecker
     public void testOutsidePointJoinCorrectness()
             throws Exception
     {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet), StorageLevel.MEMORY_ONLY());
-        PointRDD objectRDD = new PointRDD(sc.parallelize(testOutsidePointSet), StorageLevel.MEMORY_ONLY());
+        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+        PointRDD objectRDD = new PointRDD(sc.parallelize(testOutsidePointSet));
         prepareRDDs(objectRDD, windowRDD);
 
         List<Tuple2<Polygon, List<Point>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
@@ -302,8 +302,8 @@ public class JoinQueryCorrectnessChecker
     public void testInsideLineStringJoinCorrectness()
             throws Exception
     {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet), StorageLevel.MEMORY_ONLY());
-        LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(testInsideLineStringSet), StorageLevel.MEMORY_ONLY());
+        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+        LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(testInsideLineStringSet));
         prepareRDDs(objectRDD, windowRDD);
 
         List<Tuple2<Polygon, List<LineString>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
@@ -322,8 +322,8 @@ public class JoinQueryCorrectnessChecker
     public void testOverlappedLineStringJoinCorrectness()
             throws Exception
     {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet), StorageLevel.MEMORY_ONLY());
-        LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(testOverlappedLineStringSet), StorageLevel.MEMORY_ONLY());
+        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+        LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(testOverlappedLineStringSet));
         prepareRDDs(objectRDD, windowRDD);
 
         List<Tuple2<Polygon, List<LineString>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, true).collect();
@@ -342,8 +342,8 @@ public class JoinQueryCorrectnessChecker
     public void testOutsideLineStringJoinCorrectness()
             throws Exception
     {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet), StorageLevel.MEMORY_ONLY());
-        LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(testOutsideLineStringSet), StorageLevel.MEMORY_ONLY());
+        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+        LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(testOutsideLineStringSet));
         prepareRDDs(objectRDD, windowRDD);
 
         List<Tuple2<Polygon, List<LineString>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
@@ -362,8 +362,8 @@ public class JoinQueryCorrectnessChecker
     public void testInsidePolygonJoinCorrectness()
             throws Exception
     {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet), StorageLevel.MEMORY_ONLY());
-        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testInsidePolygonSet), StorageLevel.MEMORY_ONLY());
+        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testInsidePolygonSet));
         prepareRDDs(objectRDD, windowRDD);
 
         List<Tuple2<Polygon, List<Polygon>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
@@ -382,8 +382,8 @@ public class JoinQueryCorrectnessChecker
     public void testOverlappedPolygonJoinCorrectness()
             throws Exception
     {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet), StorageLevel.MEMORY_ONLY());
-        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testOverlappedPolygonSet), StorageLevel.MEMORY_ONLY());
+        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testOverlappedPolygonSet));
         prepareRDDs(objectRDD, windowRDD);
 
         List<Tuple2<Polygon, List<Polygon>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, true).collect();
@@ -426,8 +426,8 @@ public class JoinQueryCorrectnessChecker
     public void testOutsidePolygonJoinCorrectness()
             throws Exception
     {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet), StorageLevel.MEMORY_ONLY());
-        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testOutsidePolygonSet), StorageLevel.MEMORY_ONLY());
+        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testOutsidePolygonSet));
         prepareRDDs(objectRDD, windowRDD);
 
         List<Tuple2<Polygon, List<Polygon>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
@@ -446,9 +446,9 @@ public class JoinQueryCorrectnessChecker
     public void testInsidePolygonDistanceJoinCorrectness()
             throws Exception
     {
-        PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet), StorageLevel.MEMORY_ONLY());
+        PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
         CircleRDD windowRDD = new CircleRDD(centerGeometryRDD, 0.1);
-        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testInsidePolygonSet), StorageLevel.MEMORY_ONLY());
+        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testInsidePolygonSet));
         prepareRDDs(objectRDD, windowRDD);
 
         List<Tuple2<Geometry, List<Polygon>>> result = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true, false).collect();
@@ -467,9 +467,9 @@ public class JoinQueryCorrectnessChecker
     public void testOverlappedPolygonDistanceJoinCorrectness()
             throws Exception
     {
-        PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet), StorageLevel.MEMORY_ONLY());
+        PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
         CircleRDD windowRDD = new CircleRDD(centerGeometryRDD, 0.1);
-        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testOverlappedPolygonSet), StorageLevel.MEMORY_ONLY());
+        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testOverlappedPolygonSet));
         prepareRDDs(objectRDD, windowRDD);
 
         List<Tuple2<Geometry, List<Polygon>>> result = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true, true).collect();
@@ -488,9 +488,9 @@ public class JoinQueryCorrectnessChecker
     public void testOutsidePolygonDistanceJoinCorrectness()
             throws Exception
     {
-        PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet), StorageLevel.MEMORY_ONLY());
+        PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
         CircleRDD windowRDD = new CircleRDD(centerGeometryRDD, 0.1);
-        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testOutsidePolygonSet), StorageLevel.MEMORY_ONLY());
+        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testOutsidePolygonSet));
         prepareRDDs(objectRDD, windowRDD);
 
         List<Tuple2<Geometry, List<Polygon>>> result = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true, true).collect();
