@@ -112,9 +112,9 @@ public class RasterAccessors
         double upperLeftY = affine.getTranslateY();
 
         if(format.equalsIgnoreCase("GDAL")) {
-            return String.format("%f, %f, %f, %f, %f, %f", scaleX, skewY, skewX, scaleY, upperLeftX, upperLeftY);
+            return String.format("%f \n%f \n%f \n%f \n%f \n%f", scaleX, skewY, skewX, scaleY, upperLeftX, upperLeftY);
         } else if (format.equalsIgnoreCase("ESRI")){
-            return String.format("%f, %f, %f, %f, %f, %f", scaleX, skewY, skewX, scaleY, (upperLeftX + (scaleX * 0.5)),
+            return String.format("%f \n%f \n%f \n%f \n%f \n%f", scaleX, skewY, skewX, scaleY, (upperLeftX + (scaleX * 0.5)),
                     (upperLeftY + (scaleY * 0.5)));
         } else {
             throw new IllegalArgumentException("Please select between the following formats GDAL and ESRI");
