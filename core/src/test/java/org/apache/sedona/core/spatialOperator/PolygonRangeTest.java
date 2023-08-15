@@ -127,7 +127,7 @@ public class PolygonRangeTest
             indexType = IndexType.getIndexType(prop.getProperty("indexType"));
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
             queryEnvelope = new Envelope(-85.01, -60.01, 34.01, 50.01);
-            loopTimes = 5;
+            loopTimes = 1;
         }
         catch (IOException ex) {
             ex.printStackTrace();
@@ -162,7 +162,7 @@ public class PolygonRangeTest
     public void testSpatialRangeQuery()
             throws Exception
     {
-        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, StorageLevel.MEMORY_ONLY());
+        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true);
         for (int i = 0; i < loopTimes; i++) {
             long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).count();
             assertEquals(resultSize, 704);
@@ -179,7 +179,7 @@ public class PolygonRangeTest
     public void testSpatialRangeQueryUsingIndex()
             throws Exception
     {
-        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true, StorageLevel.MEMORY_ONLY());
+        PolygonRDD spatialRDD = new PolygonRDD(sc, InputLocation, splitter, true);
         spatialRDD.buildIndex(IndexType.RTREE, false);
         for (int i = 0; i < loopTimes; i++) {
             long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, true).count();

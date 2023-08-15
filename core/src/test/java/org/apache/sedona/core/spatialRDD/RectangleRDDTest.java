@@ -66,7 +66,8 @@ public class RectangleRDDTest
     public void testConstructor()
             throws Exception
     {
-        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
+        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        spatialRDD.analyze();
         assertEquals(inputCount, spatialRDD.approximateTotalCount);
         assertEquals(inputBoundary, spatialRDD.boundaryEnvelope);
     }
@@ -75,7 +76,7 @@ public class RectangleRDDTest
     public void testEmptyConstructor()
             throws Exception
     {
-        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
+        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
         spatialRDD.buildIndex(IndexType.RTREE, false);
         // Create an empty spatialRDD and manually assemble it
         RectangleRDD spatialRDDcopy = new RectangleRDD();
@@ -106,7 +107,8 @@ public class RectangleRDDTest
     public void testBuildRtreeIndex()
             throws Exception
     {
-        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
+        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        spatialRDD.analyze();
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.RTREE, true);
         if (spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree) {
@@ -126,7 +128,8 @@ public class RectangleRDDTest
     public void testBuildQuadtreeIndex()
             throws Exception
     {
-        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions, StorageLevel.MEMORY_ONLY());
+        RectangleRDD spatialRDD = new RectangleRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+        spatialRDD.analyze();
         spatialRDD.spatialPartitioning(gridType);
         spatialRDD.buildIndex(IndexType.QUADTREE, true);
         if (spatialRDD.indexedRDD.take(1).get(0) instanceof STRtree) {

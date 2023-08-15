@@ -13,6 +13,7 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
@@ -36,7 +37,7 @@ public class RasterConstructorsTest
         assertEquals(4072345d + 30, envelope.getCentroid().getY(), 0.1);
         assertEquals(2, gridCoverage2D.getRenderedImage().getTileHeight());
         assertEquals(2, gridCoverage2D.getRenderedImage().getTileWidth());
-        assertEquals(0d, gridCoverage2D.getSampleDimension(0).getNoDataValues()[0], 0.1);
+        assertEquals(0d, RasterUtils.getNoDataValue(gridCoverage2D.getSampleDimension(0)), 0.1);
         assertEquals(3d, gridCoverage2D.getRenderedImage().getData().getPixel(1, 1, (double[])null)[0], 0.1);
     }
 
@@ -62,6 +63,7 @@ public class RasterConstructorsTest
         int heightInPixel = 2;
         double pixelSize = 2;
         int numBands = 1;
+        String dataType = "I";
 
         GridCoverage2D gridCoverage2D = RasterConstructors.makeEmptyRaster(numBands, widthInPixel, heightInPixel, upperLeftX, upperLeftY, pixelSize);
         Geometry envelope = GeometryFunctions.envelope(gridCoverage2D);
@@ -69,6 +71,15 @@ public class RasterConstructorsTest
         assertEquals(upperLeftX + widthInPixel * pixelSize, envelope.getEnvelopeInternal().getMaxX(), 0.001);
         assertEquals(upperLeftY - heightInPixel * pixelSize, envelope.getEnvelopeInternal().getMinY(), 0.001);
         assertEquals(upperLeftY, envelope.getEnvelopeInternal().getMaxY(), 0.001);
+        assertEquals("REAL_64BITS", gridCoverage2D.getSampleDimension(0).getSampleDimensionType().name());
+
+        gridCoverage2D = RasterConstructors.makeEmptyRaster(numBands, dataType, widthInPixel, heightInPixel, upperLeftX, upperLeftY, pixelSize);
+        envelope = GeometryFunctions.envelope(gridCoverage2D);
+        assertEquals(upperLeftX, envelope.getEnvelopeInternal().getMinX(), 0.001);
+        assertEquals(upperLeftX + widthInPixel * pixelSize, envelope.getEnvelopeInternal().getMaxX(), 0.001);
+        assertEquals(upperLeftY - heightInPixel * pixelSize, envelope.getEnvelopeInternal().getMinY(), 0.001);
+        assertEquals(upperLeftY, envelope.getEnvelopeInternal().getMaxY(), 0.001);
+        assertEquals("SIGNED_32BITS", gridCoverage2D.getSampleDimension(0).getSampleDimensionType().name());
 
         assertEquals("POLYGON ((0 -4, 0 0, 2 0, 2 -4, 0 -4))", envelope.toString());
         double expectedWidthInDegree = pixelSize * widthInPixel;
@@ -86,5 +97,15 @@ public class RasterConstructorsTest
         assertEquals(upperLeftX + widthInPixel * pixelSize, envelope.getEnvelopeInternal().getMaxX(), 0.001);
         assertEquals(upperLeftY - heightInPixel * (pixelSize + 1), envelope.getEnvelopeInternal().getMinY(), 0.001);
         assertEquals(upperLeftY, envelope.getEnvelopeInternal().getMaxY(), 0.001);
+        assertEquals("REAL_64BITS", gridCoverage2D.getSampleDimension(0).getSampleDimensionType().name());
+
+        gridCoverage2D = RasterConstructors.makeEmptyRaster(numBands, dataType, widthInPixel, heightInPixel, upperLeftX, upperLeftY, pixelSize, -pixelSize - 1, 0, 0, 0);
+        envelope = GeometryFunctions.envelope(gridCoverage2D);
+        assertEquals(upperLeftX, envelope.getEnvelopeInternal().getMinX(), 0.001);
+        assertEquals(upperLeftX + widthInPixel * pixelSize, envelope.getEnvelopeInternal().getMaxX(), 0.001);
+        assertEquals(upperLeftY - heightInPixel * (pixelSize + 1), envelope.getEnvelopeInternal().getMinY(), 0.001);
+        assertEquals(upperLeftY, envelope.getEnvelopeInternal().getMaxY(), 0.001);
+        assertEquals("SIGNED_32BITS", gridCoverage2D.getSampleDimension(0).getSampleDimensionType().name());
     }
+
 }

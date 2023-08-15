@@ -15,8 +15,6 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from pyspark import StorageLevel
-
 from sedona.core.SpatialRDD import LineStringRDD
 from sedona.core.enums import IndexType, GridType
 from sedona.core.geom.envelope import Envelope
@@ -40,31 +38,16 @@ class TestLineStringRDD(TestBase):
             InputLocation=input_location,
             splitter=splitter,
             carryInputData=True,
-            partitions=num_partitions,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=num_partitions
         )
 
         self.compare_count(spatial_rdd_core, input_boundary, input_count)
 
-        spatial_rdd = LineStringRDD()
-
-        spatial_rdd_core = LineStringRDD(
-            self.sc,
-            input_location,
-            splitter,
-            True,
-            num_partitions,
-            StorageLevel.MEMORY_ONLY
-        )
         self.compare_count(spatial_rdd_core, input_boundary, input_count)
 
         spatial_rdd = LineStringRDD(spatial_rdd_core.rawJvmSpatialRDD)
 
         self.compare_count(spatial_rdd, input_boundary, input_count)
-
-        spatial_rdd = LineStringRDD(spatial_rdd_core.rawJvmSpatialRDD, "epsg:4326", "epsg:5070")
-
-        self.compare_count(spatial_rdd, transformed_envelope, input_count)
 
         spatial_rdd = LineStringRDD(self.sc, input_location, 0, 3, splitter, True, num_partitions)
 
@@ -82,51 +65,13 @@ class TestLineStringRDD(TestBase):
 
         self.compare_count(spatial_rdd, input_boundary, input_count)
 
-        spatial_rdd = LineStringRDD(spatial_rdd_core.rawJvmSpatialRDD, StorageLevel.MEMORY_ONLY)
+        spatial_rdd = LineStringRDD(spatial_rdd_core.rawJvmSpatialRDD)
 
         self.compare_count(spatial_rdd, input_boundary, input_count)
 
-        spatial_rdd = LineStringRDD(self.sc, input_location, 0, 3, splitter, True, num_partitions, StorageLevel.MEMORY_ONLY)
+        spatial_rdd = LineStringRDD(self.sc, input_location, 0, 3, splitter, True, num_partitions)
 
         self.compare_count(spatial_rdd, input_boundary_2, input_count)
-
-        spatial_rdd = LineStringRDD(self.sc, input_location, 0, 3, splitter, True,
-                                    StorageLevel.MEMORY_ONLY)
-
-        self.compare_count(spatial_rdd, input_boundary_2, input_count)
-
-        spatial_rdd = LineStringRDD(self.sc, input_location, splitter, True, num_partitions,
-                                    StorageLevel.MEMORY_ONLY)
-
-        self.compare_count(spatial_rdd, input_boundary, input_count)
-
-        spatial_rdd = LineStringRDD(self.sc, input_location, splitter, True, StorageLevel.MEMORY_ONLY)
-
-        self.compare_count(spatial_rdd, input_boundary, input_count)
-
-        spatial_rdd = LineStringRDD(spatial_rdd_core.rawJvmSpatialRDD, StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:5070")
-
-        self.compare_count(spatial_rdd, transformed_envelope, input_count)
-
-        spatial_rdd = LineStringRDD(self.sc, input_location, 0, 3, splitter, True, num_partitions,
-                                    StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:5070")
-
-        self.compare_count(spatial_rdd, transformed_envelope_2, input_count)
-
-        spatial_rdd = LineStringRDD(self.sc, input_location, 0, 3, splitter, True,
-                                    StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:5070")
-
-        self.compare_count(spatial_rdd, transformed_envelope_2, input_count)
-
-        spatial_rdd = LineStringRDD(self.sc, input_location, splitter, True, num_partitions,
-                                    StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:5070")
-
-        self.compare_count(spatial_rdd, transformed_envelope, input_count)
-
-        spatial_rdd = LineStringRDD(self.sc, input_location, splitter, True,
-                                    StorageLevel.MEMORY_ONLY, "epsg:4326", "epsg:5070")
-
-        self.compare_count(spatial_rdd, transformed_envelope, input_count)
 
 
     def test_empty_constructor(self):
@@ -135,8 +80,7 @@ class TestLineStringRDD(TestBase):
             InputLocation=input_location,
             splitter=splitter,
             carryInputData=True,
-            partitions=num_partitions,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=num_partitions
         )
 
         spatial_rdd.analyze()
@@ -152,8 +96,7 @@ class TestLineStringRDD(TestBase):
             InputLocation=input_location,
             splitter=splitter,
             carryInputData=True,
-            partitions=num_partitions,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=num_partitions
         )
 
         spatial_rdd.analyze()
@@ -165,8 +108,7 @@ class TestLineStringRDD(TestBase):
             InputLocation=input_location,
             splitter=splitter,
             carryInputData=True,
-            partitions=num_partitions,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=num_partitions
         )
 
         rectangle_rdd = linestring_rdd.MinimumBoundingRectangle()

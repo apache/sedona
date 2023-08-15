@@ -201,6 +201,47 @@ public class RasterAccessorsTest extends RasterTestBase
         assertEquals(expectedX, actualX);
     }
 
+    @Test
+    public void testSkewX() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(10, 2, 4, 6, 4, 1, 1, 2, 7, 0);
+        assertEquals(2, RasterAccessors.getSkewX(emptyRaster), 0.1d);
+
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2,0 );
+        assertEquals(0.1, RasterAccessors.getSkewX(emptyRaster), 0.01d);
+
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -53, 51, 5);
+        assertEquals(0, RasterAccessors.getSkewX(emptyRaster), 0.1d);
+    }
+
+    @Test
+    public void testSkewY() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(10, 2, 4, 6, 4, 1, 1, 2, 7, 0);
+        assertEquals(7, RasterAccessors.getSkewY(emptyRaster), 0.1d);
+
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2,0 );
+        assertEquals(0.2, RasterAccessors.getSkewY(emptyRaster), 0.01d);
+
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -53, 51, 5);
+        assertEquals(0, RasterAccessors.getSkewY(emptyRaster), 0.1d);
+    }
+
+    @Test
+    public void testGeoReference() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 100, 100, -53, 51, 2, -2, 4, 5, 4326);
+        String actual = RasterAccessors.getGeoReference(emptyRaster);
+        String expected = "2.000000 \n5.000000 \n4.000000 \n-2.000000 \n-53.000000 \n51.000000";
+        assertEquals(actual, expected);
+
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2,0 );
+        actual = RasterAccessors.getGeoReference(emptyRaster, "GDAL");
+        expected = "2.000000 \n0.200000 \n0.100000 \n-3.000000 \n100.000000 \n200.000000";
+        assertEquals(expected,actual);
+
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2,0 );
+        actual = RasterAccessors.getGeoReference(emptyRaster, "ESRI");
+        expected = "2.000000 \n0.200000 \n0.100000 \n-3.000000 \n101.000000 \n198.500000";
+        assertEquals(expected,actual);
+    }
 
     @Test
     public void testGridCoordXGeomSameSRID()  throws FactoryException, TransformException {

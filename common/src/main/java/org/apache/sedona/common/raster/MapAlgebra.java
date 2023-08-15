@@ -23,7 +23,7 @@ import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 
 import javax.media.jai.RasterFactory;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
@@ -68,6 +68,21 @@ public class MapAlgebra
      * @param bandIndex starts at 1, and no larger than numBands + 1
      * @return
      */
+    public static GridCoverage2D addBandFromArray(GridCoverage2D rasterGeom, double[] bandValues, int bandIndex, Double noDataValue) {
+        int numBands = rasterGeom.getNumSampleDimensions();
+        // Allow the band index to be one larger than the number of bands, which will append the band to the end
+        if (bandIndex < 1 || bandIndex > numBands + 1) {
+            throw new IllegalArgumentException("Band index is out of bounds. Must be between 1 and " + (numBands + 1) + ")");
+        }
+
+        if (bandIndex == numBands + 1) {
+            return copyRasterAndAppendBand(rasterGeom, bandValues, noDataValue);
+        }
+        else {
+            return copyRasterAndReplaceBand(rasterGeom, bandIndex, bandValues, noDataValue, true);
+        }
+    }
+
     public static GridCoverage2D addBandFromArray(GridCoverage2D rasterGeom, double[] bandValues, int bandIndex) {
         int numBands = rasterGeom.getNumSampleDimensions();
         // Allow the band index to be one larger than the number of bands, which will append the band to the end
@@ -101,7 +116,7 @@ public class MapAlgebra
      * @param bandValues
      * @return
      */
-    private static GridCoverage2D copyRasterAndAppendBand(GridCoverage2D gridCoverage2D, double[] bandValues) {
+    private static GridCoverage2D copyRasterAndAppendBand(GridCoverage2D gridCoverage2D, double[] bandValues, Double noDataValue) {
         // Get the original image and its properties
         RenderedImage originalImage = gridCoverage2D.getRenderedImage();
         Raster raster = originalImage.getData();
@@ -122,12 +137,20 @@ public class MapAlgebra
         GridSampleDimension[] originalSampleDimensions = gridCoverage2D.getSampleDimensions();
         GridSampleDimension[] sampleDimensions = new GridSampleDimension[numBand];
         System.arraycopy(originalSampleDimensions, 0, sampleDimensions, 0, originalSampleDimensions.length);
-        sampleDimensions[numBand - 1] = new GridSampleDimension("band" + numBand);
+        if (noDataValue != null) {
+            sampleDimensions[numBand - 1] = RasterUtils.createSampleDimensionWithNoDataValue("band" + numBand, noDataValue);
+        } else {
+            sampleDimensions[numBand - 1] = new GridSampleDimension("band" + numBand);
+        }
         // Construct a GridCoverage2D with the copied image.
         return RasterUtils.create(wr, gridCoverage2D.getGridGeometry(), sampleDimensions);
     }
 
-    private static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, double[] bandValues) {
+    private static GridCoverage2D copyRasterAndAppendBand(GridCoverage2D gridCoverage2D, double[] bandValues) {
+        return copyRasterAndAppendBand(gridCoverage2D, bandValues, null);
+    }
+
+    private static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, double[] bandValues, Double noDataValue, boolean removeNoDataIfNull) {
         // Do not allow the band index to be out of bounds
         if (bandIndex < 1 || bandIndex > gridCoverage2D.getNumSampleDimensions()) {
             throw new IllegalArgumentException("Band index is out of bounds. Must be between 1 and " + gridCoverage2D.getNumSampleDimensions() + ")");
@@ -144,7 +167,17 @@ public class MapAlgebra
                 wr.setPixel(i, j, bands);
             }
         }
-        // Create a new GridCoverage2D with the copied image
-        return RasterUtils.create(wr, gridCoverage2D.getGridGeometry(), gridCoverage2D.getSampleDimensions());
+        GridSampleDimension[] sampleDimensions = gridCoverage2D.getSampleDimensions();
+        GridSampleDimension sampleDimension = sampleDimensions[bandIndex - 1];
+        if (noDataValue == null && removeNoDataIfNull) {
+            sampleDimensions[bandIndex - 1] = RasterUtils.removeNoDataValue(sampleDimension);
+        } else if (noDataValue != null) {
+            sampleDimensions[bandIndex - 1] = RasterUtils.createSampleDimensionWithNoDataValue(sampleDimension, noDataValue);
+        }
+        return RasterUtils.create(wr, gridCoverage2D.getGridGeometry(), sampleDimensions);
+    }
+
+    private static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, double[] bandValues) {
+        return copyRasterAndReplaceBand(gridCoverage2D, bandIndex, bandValues, null, false);
     }
 }

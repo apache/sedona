@@ -62,7 +62,7 @@ Since: `1.5.0`
 
 Spark SQL example:
 ```sql
-SELECT RS_ConvexHull(SELECT RS_PixelAsPoint(RS_MakeEmptyRaster(1, 5, 10, 156, -132, 5, 10, 3, 5, 0)));
+SELECT RS_ConvexHull(RS_MakeEmptyRaster(1, 5, 10, 156, -132, 5, 10, 3, 5, 0));
 ```
 
 Output:
@@ -70,7 +70,142 @@ Output:
 POLYGON ((156 -132, 181 -107, 211 -7, 186 -32, 156 -132))
 ```
 
+### RS_MinConvexHull
+
+Introduction: Returns the min convex hull geometry of the raster **excluding** the NoDataBandValue band pixels, in the given band.
+If no band is specified, all the bands are considered when creating the min convex hull of the raster
+
+!!!Note
+    If the specified band does not exist in the raster, RS_MinConvexHull throws an IllegalArgumentException
+
+Format: `RS_MinConvexHull(raster: Raster) | RS_MinConvexHull(raster: Raster, band: Int)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+
+
+```scala
+val inputDf = Seq((Seq(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+        Seq(0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0))).toDF("values2", "values1")
+inputDf.selectExpr("ST_AsText(RS_MinConvexHull(RS_AddBandFromArray(" +
+        "RS_AddBandFromArray(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), values1, 1, 0), values2, 2, 0))) as minConvexHullAll").show()
+```
+
+Output:
+```sql
++----------------------------------------+
+|minConvexHullAll                        |
++----------------------------------------+
+|POLYGON ((0 -1, 4 -1, 4 -5, 0 -5, 0 -1))|
++----------------------------------------+
+```
+
+```scala
+val inputDf = Seq((Seq(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+        Seq(0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0))).toDF("values2", "values1")
+inputDf.selectExpr("ST_AsText(RS_MinConvexHull(RS_AddBandFromArray(" +
+  "RS_AddBandFromArray(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), values1, 1, 0), values2, 2, 0), 1)) as minConvexHull1").show()
+```
+
+Output:
+```sql
++----------------------------------------+
+|minConvexHull1                          |
++----------------------------------------+
+|POLYGON ((1 -1, 4 -1, 4 -5, 1 -5, 1 -1))|
++----------------------------------------+
+```
+
+```sql
+SELECT RS_MinConvexHull(raster, 3) from rasters;
+```
+
+Output:
+```sql
+Provided band index 3 does not lie in the raster
+```
+
 ## Raster Accessors
+
+### RS_GeoReference
+
+Introduction: Returns the georeference metadata of raster as a string in GDAL or ESRI format. Default is GDAL if not specified.
+
+Format: `RS_GeoReference(raster: Raster, format:string)`
+
+Difference between format representation is as follows:
+
+`GDAL`
+
+```
+ScaleX 
+SkewY 
+SkewX 
+ScaleY 
+UpperLeftX
+UpperLeftY
+```
+
+`ESRI`
+
+```
+ScaleX 
+SkewY 
+SkewX 
+ScaleY 
+UpperLeftX + ScaleX * 0.5
+UpperLeftY + ScaleY * 0.5
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_GeoReference(ST_MakeEmptyRaster(1, 100, 100, -53, 51, 2, -2, 4, 5, 4326))
+```
+
+Output:
+
+```
+2.000000 
+5.000000 
+4.000000 
+-2.000000 
+-53.000000 
+51.000000
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_GeoReferrence(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2, 0), "GDAL")
+```
+
+Output:
+
+```
+2.000000 
+0.200000 
+0.100000 
+-3.000000 
+100.000000 
+200.000000
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_GeoReferrence(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2, 0), "ERSI")
+```
+
+```
+2.000000 
+0.200000 
+0.100000 
+-3.000000 
+101.000000 
+198.500000
+```
 
 ### RS_Height
 
@@ -170,6 +305,46 @@ SELECT RS_ScaleY(raster) FROM rasters
 Output:
 ```
 -2
+```
+
+### RS_SkewX
+
+Introduction: Returns the X skew or rotation parameter.
+
+Format: `RS_SkewX(raster: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_SkewX(RS_MakeEmptyRaster(2, 10, 10, 0.0, 0.0, 1.0, -1.0, 0.1, 0.2, 4326))
+```
+
+Output:
+
+```
+0.1
+```
+
+### RS_SkewY
+
+Introduction: Returns the Y skew or rotation parameter.
+
+Format: `RS_SkewY(raster: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_SkewY(RS_MakeEmptyRaster(2, 10, 10, 0.0, 0.0, 1.0, -1.0, 0.1, 0.2, 4326))
+```
+
+Output:
+
+```
+0.2
 ```
 
 ### RS_UpperLeftX
@@ -308,6 +483,77 @@ Output: `3`
 
 !!!Tip
     For non-skewed rasters, you can provide any value for longitude and the intended value of world latitude, to get the desired answer
+
+## Raster Band Accessors
+
+### RS_BandNoDataValue
+
+Introduction: Returns the no data value of the given band of the given raster. If no band is given, band 1 is assumed. The band parameter is 1-indexed. If there is no no data value associated with the given band, RS_BandNoDataValue returns null.
+
+!!!Note
+    If the given band does not lie in the raster, RS_BandNoDataValue throws an IllegalArgumentException
+
+Format: `RS_BandNoDataValue (raster: Raster, band: Int = 1)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_BandNoDataValue(raster, 1) from rasters;
+```
+
+Output: `0.0`
+
+```sql
+SELECT RS_BandNoDataValue(raster) from rasters_without_nodata;
+```
+
+Output: `null`
+
+```sql
+SELECT RS_BandNoDataValue(raster, 3) from rasters;
+```
+
+Output: `IllegalArgumentException: Provided band index 3 is not present in the raster.`
+
+### RS_BandPixelType
+
+Introduction: Returns the datatype of each pixel in the given band of the given raster in string format. The band parameter is 1-indexed. If no band is specified, band 1 is assumed.
+!!!Note
+    If the given band index does not exist in the given raster, RS_BandPixelType throws an IllegalArgumentException.
+Following are the possible values returned by RS_BandPixelType:
+
+
+1. `REAL_64BITS` - For Double values
+2. `REAL_32BITS` - For Float values
+3. `SIGNED_32BITS` - For Integer values
+4. `SIGNED_16BITS` - For Short values
+5. `UNSIGNED_16BITS` - For unsigned Short values
+6. `UNSIGNED_8BITS` - For Byte values
+
+    
+Format: `RS_BandPixelType(rast: Raster, band: Int = 1)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+```sql
+SELECT RS_BandPixelType(RS_MakeEmptyRaster(2, "D", 5, 5, 53, 51, 1, 1, 0, 0, 0), 2);
+```
+
+Output: `REAL_64BITS`
+
+```sql
+SELECT RS_BandPixelType(RS_MakeEmptyRaster(2, "I", 5, 5, 53, 51, 1, 1, 0, 0, 0));
+```
+
+Output: `SIGNED_32BITS`
+
+```sql
+SELECT RS_BandPixelType(RS_MakeEmptyRaster(2, "I", 5, 5, 53, 51, 1, 1, 0, 0, 0), 3);
+```
+
+Output: `IllegalArgumentException: Provided band index 3 is not present in the raster`
 
 
 ## Raster based operators
@@ -563,20 +809,33 @@ Output:
 
 Introduction: Add a band to a raster from an array of doubles.
 
-Format: `RS_AddBandFromArray (raster: Raster, band: Array[Double], bandIndex:Int)`.
+Format: `RS_AddBandFromArray (raster: Raster, band: Array[Double])` | `RS_AddBandFromArray (raster: Raster, band: Array[Double], bandIndex:Int)` | `RS_AddBandFromArray (raster: Raster, band: Array[Double], bandIndex:Int, noDataValue:Double)`
 
-Since: `v1.4.1`
+Since: `v1.5.0`
 
-The bandIndex is 1-based and must be between 1 and RS_NumBands(raster) + 1. It throws an exception if the bandIndex is out of range or the raster is null.
+The bandIndex is 1-based and must be between 1 and RS_NumBands(raster) + 1. It throws an exception if the bandIndex is out of range or the raster is null. If not specified, the noDataValue of the band is assumed to be null.
 
 When the bandIndex is RS_NumBands(raster) + 1, it appends the band to the end of the raster. Otherwise, it replaces the existing band at the bandIndex.
 
-Note that: `bandIndex == RS_NumBands(raster) + 1` is an experimental feature and might not lead to the loss of raster metadata and properties such as color models.
+If the bandIndex and noDataValue is not given, a convenience implementation adds a new band with a null noDataValue.
+
+Adding a new band with a custom noDataValue requires bandIndex = RS_NumBands(raster) + 1 and non-null noDataValue to be explicitly specified.
+
+Modifying or Adding a customNoDataValue is also possible by giving an existing band in RS_AddBandFromArray
+
+In order to remove an existing noDataValue from an existing band, pass null as the noDataValue in the RS_AddBandFromArray.
+
+Note that: `bandIndex == RS_NumBands(raster) + 1` is an experimental feature and might lead to the loss of raster metadata and properties such as color models.
+
+!!!Note
+    RS_AddBandFromArray typecasts the double band values to the given datatype of the raster. This can lead to overflow values if values beyond the range of the raster's datatype are provided.
 
 SQL example:
 
 ```sql
+SELECT RS_AddBandFromArray(raster, RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTiff(content), 1), 2)) AS raster FROM raster_table
 SELECT RS_AddBandFromArray(raster, RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTiff(content), 1), 2), 1) AS raster FROM raster_table
+SELECT RS_AddBandFromArray(raster, RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTiff(content), 1), 2), 1, -999) AS raster FROM raster_table
 ```
 
 Output:

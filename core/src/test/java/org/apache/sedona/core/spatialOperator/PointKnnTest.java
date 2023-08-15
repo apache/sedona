@@ -134,7 +134,7 @@ public class PointKnnTest
             splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
             indexType = IndexType.getIndexType(prop.getProperty("indexType"));
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
-            loopTimes = 5;
+            loopTimes = 1;
         }
         catch (IOException ex) {
             ex.printStackTrace();

@@ -50,6 +50,7 @@ object Catalog {
     function[ST_GeomFromKML](),
     function[ST_CoordDim](),
     function[ST_Point](),
+    function[ST_MakePoint](null, null),
     function[ST_PointZ](0),
     function[ST_PolygonFromEnvelope](),
     function[ST_Contains](),
@@ -213,6 +214,9 @@ object Catalog {
     function[RS_UpperLeftY](),
     function[RS_ScaleX](),
     function[RS_ScaleY](),
+    function[RS_SkewX](),
+    function[RS_SkewY](),
+    function[RS_GeoReference](),
     function[RS_PixelAsPoint](),
     function[RS_ConvexHull](),
     function[RS_RasterToWorldCoordX](),
@@ -221,7 +225,10 @@ object Catalog {
     function[RS_Contains](),
     function[RS_WorldToRasterCoord](),
     function[RS_WorldToRasterCoordX](),
-    function[RS_WorldToRasterCoordY]()
+    function[RS_WorldToRasterCoordY](),
+    function[RS_BandNoDataValue](),
+    function[RS_BandPixelType](),
+    function[RS_MinConvexHull]()
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(
