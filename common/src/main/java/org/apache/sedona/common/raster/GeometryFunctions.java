@@ -110,7 +110,11 @@ public class GeometryFunctions {
 
 
     private static Coordinate convertToCoordinate(Point2D point) {
-        return new Coordinate(point.getX(), point.getY());
+        double x = point.getX(), y = point.getY();
+        //Geotools returns 0 as -0 if scale is negative. Change it 0 instead to avoid confusion
+        if (Math.abs(x) == 0) x = 0;
+        if (Math.abs(y) == 0) y = 0;
+        return new Coordinate(x, y);
     }
 
     public static Geometry minConvexHull(GridCoverage2D raster) throws FactoryException, TransformException {

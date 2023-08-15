@@ -95,6 +95,24 @@ public class GeometryFunctionsTest extends RasterTestBase {
     }
 
     @Test
+    public void testMinConvexHullRectange() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 5, 3, 0, 0, 1, -1, 0, 0, 0);
+        double[] values1 = new double[] {0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0};
+        double[] values2 = new double[] {0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0};
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values1, 1, 0d);
+        emptyRaster  = MapAlgebra.addBandFromArray(emptyRaster, values2, 2, 0d);
+        Geometry minConvexHull1 = GeometryFunctions.minConvexHull(emptyRaster, 1);
+        Geometry minConvexHull2 = GeometryFunctions.minConvexHull(emptyRaster, 2);
+        Geometry minConvexHullAll = GeometryFunctions.minConvexHull(emptyRaster);
+        String expected1 = "POLYGON ((1 -1, 4 -1, 4 -3, 1 -3, 1 -1))";
+        String expected2 = "POLYGON ((0 0, 4 0, 4 -3, 0 -3, 0 0))";
+        String expectedAll = "POLYGON ((0 0, 4 0, 4 -3, 0 -3, 0 0))";
+        assertEquals(expected1, Functions.asWKT(minConvexHull1));
+        assertEquals(expected2, Functions.asWKT(minConvexHull2));
+        assertEquals(expectedAll, Functions.asWKT(minConvexHullAll));
+    }
+
+    @Test
     public void envelope() throws FactoryException
     {
         Geometry envelope = GeometryFunctions.envelope(oneBandRaster);
