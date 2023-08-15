@@ -22,6 +22,7 @@ import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.DirectPosition2D;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.opengis.coverage.PointOutsideCoverageException;
 import org.opengis.geometry.DirectPosition;
 import org.opengis.referencing.FactoryException;
@@ -41,6 +42,27 @@ public class PixelFunctions
     public static Double value(GridCoverage2D rasterGeom, Geometry geometry, int band) throws TransformException
     {
         return values(rasterGeom, Collections.singletonList(geometry), band).get(0);
+    }
+
+    public static Geometry getPixelAsPolygon(GridCoverage2D raster, int colX, int rowY) throws TransformException, FactoryException {
+        int srid = RasterAccessors.srid(raster);
+        Point2D point2D1 = RasterUtils.getWorldCornerCoordinates(raster, colX, rowY);
+        Point2D point2D2 = RasterUtils.getWorldCornerCoordinates(raster, colX + 1, rowY);
+        Point2D point2D3 = RasterUtils.getWorldCornerCoordinates(raster, colX, rowY + 1);
+        Point2D point2D4 = RasterUtils.getWorldCornerCoordinates(raster, colX + 1, rowY + 1);
+
+        Coordinate[] coordinateArray = new Coordinate[5];
+        coordinateArray[0] = new Coordinate(point2D1.getX(), point2D1.getY());
+        coordinateArray[1] = new Coordinate(point2D2.getX(), point2D2.getY());
+        coordinateArray[2] = new Coordinate(point2D3.getX(), point2D3.getY());
+        coordinateArray[3] = new Coordinate(point2D4.getX(), point2D4.getY());
+        coordinateArray[4] = new Coordinate(point2D1.getX(), point2D1.getY());
+
+        if(srid != 0) {
+            GeometryFactory factory = new GeometryFactory(new PrecisionModel(), srid);
+            return factory.createPolygon(coordinateArray);
+        }
+        return GEOMETRY_FACTORY.createPolygon(coordinateArray);
     }
 
     public static Geometry getPixelAsPoint(GridCoverage2D raster, int colX, int rowY) throws TransformException, FactoryException {
