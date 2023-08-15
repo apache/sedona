@@ -43,7 +43,7 @@ Since: `v1.5.0`
 Spark SQL Example:
 
 ```sql
-SELECT ST_AsText(RS_PixelAsPolygon(raster, 2, 3)) FROM rasters
+SELECT ST_AsText(RS_PixelAsPolygon(RS_MakeEmptyRaster(1, 5, 10, 123, -230, 8), 2, 3)) FROM rasters
 ```
 
 Output:
