@@ -75,6 +75,9 @@ POLYGON ((156 -132, 181 -107, 211 -7, 186 -32, 156 -132))
 Introduction: Returns the min convex hull geometry of the raster **excluding** the NoDataBandValue band pixels, in the given band.
 If no band is specified, all the bands are considered when creating the min convex hull of the raster
 
+!!!Note
+    If the specified band does not exist in the raster, RS_MinConvexHull throws an IllegalArgumentException
+
 Format: `RS_MinConvexHull(raster: Raster) | RS_MinConvexHull(raster: Raster, band: Int)`
 
 Since: `1.5.0`
@@ -112,6 +115,15 @@ Output:
 +----------------------------------------+
 |POLYGON ((1 -1, 4 -1, 4 -5, 1 -5, 1 -1))|
 +----------------------------------------+
+```
+
+```sql
+SELECT RS_MinConvexHull(raster, 3) from rasters;
+```
+
+Output:
+```sql
+Provided band index 3 does not lie in the raster
 ```
 
 ## Raster Accessors
