@@ -217,6 +217,7 @@ object Catalog {
     function[RS_SkewX](),
     function[RS_SkewY](),
     function[RS_PixelAsPoint](),
+    function[RS_PixelAsPolygon](),
     function[RS_ConvexHull](),
     function[RS_RasterToWorldCoordX](),
     function[RS_RasterToWorldCoordY](),

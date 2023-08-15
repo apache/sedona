@@ -42,6 +42,12 @@ case class RS_PixelAsPoint(inputExpressions: Seq[Expression]) extends InferredEx
   }
 }
 
+case class RS_PixelAsPolygon(inputExpressions: Seq[Expression]) extends InferredExpression(PixelFunctions.getPixelAsPolygon _) {
+  protected def withNewChildrenInternal(newChilren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChilren)
+  }
+}
+
 case class RS_Values(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {
 
   override def nullable: Boolean = true
