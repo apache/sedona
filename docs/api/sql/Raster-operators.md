@@ -34,7 +34,9 @@ IndexOutOfBoundsException: Specified pixel coordinates (6, 2) do not lie in the 
 
 ### RS_PixelAsPolygon
 
-Introduction: Returns a polygon geometry that bounds the specified pixel.The pixel coordinates specified are 1-indexed.
+Introduction: Returns a polygon geometry that bounds the specified pixel.
+The pixel coordinates specified are 1-indexed. 
+If `colX` and `rowY` are out of bounds for the raster, they are interpolated assuming the same skew and translate values.
 
 Format: `RS_PixelAsPolygon(raster: Raster, colX:int, rowY:int)`
 
