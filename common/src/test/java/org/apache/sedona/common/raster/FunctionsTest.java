@@ -83,6 +83,12 @@ public class FunctionsTest extends RasterTestBase {
         String actual = Functions.asWKT(PixelFunctions.getPixelAsPolygon(emptyRaster, 2, 3));
         String expected = "POLYGON ((131 -246, 139 -246, 139 -254, 131 -254, 131 -246))";
         assertEquals(expected, actual);
+
+        // Testing with skewed rasters
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 234, -43, 3, 4, 2,3,0);
+        actual = Functions.asWKT(PixelFunctions.getPixelAsPolygon(emptyRaster, 2, 3));
+        expected = "POLYGON ((241 -32, 244 -29, 246 -25, 243 -28, 241 -32))";
+        assertEquals(expected,actual);
     }
 
     @Test
