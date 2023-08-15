@@ -29,10 +29,9 @@ test_that("crs_transform() works as expected", {
     pt_rdd %>%
       sdf_register() %>%
       head(5) %>%
-      dplyr::transmute(y = ST_X(geometry), x = ST_Y(geometry)) %>%
+      dplyr::transmute(x = ST_X(geometry), y = ST_Y(geometry)) %>%
       # NOTE: the extra `sdf_register()` call is a workaround until SPARK-37202 is
       # fixed
-      # The original data is in lat/lon order. We swap the x/y columns to match lon/lat
       sdf_register(name = random_string()) %>%
       collect(),
     tibble::tribble(
