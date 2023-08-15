@@ -182,12 +182,12 @@ public class MapAlgebraTest extends RasterTestBase
         }
         // Now set the value of the first band and check again
         for (int i = 0; i < band.length; i++) {
-            band[i] = i;
+            band[i] = i * 0.1;
         }
         double[] bandNew = MapAlgebra.bandAsArray(MapAlgebra.addBandFromArray(raster, band, 1), 1);
         assertEquals(band.length, bandNew.length);
         for (int i = 0; i < band.length; i++) {
-            assertEquals(band[i], bandNew[i], 0.1);
+            assertEquals(band[i], bandNew[i], 1e-9);
         }
     }
 }

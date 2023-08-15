@@ -50,15 +50,7 @@ public class MapAlgebra
 
         // Array to hold the band values
         double[] bandValues = new double[width * height];
-
-        // Iterate over each pixel
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                // Get the value and store it in the 1D array
-                bandValues[y * width + x] = raster.getSample(x, y, bandIndex - 1);
-            }
-        }
-        return bandValues;
+        return raster.getSamples(0, 0, width, height, bandIndex - 1, bandValues);
     }
 
     /**
