@@ -201,7 +201,7 @@ public class FunctionTest extends TestBase{
         Table pointTable = createPointTable_real(testDataSize);
         Table flippedTable = pointTable.select(call(Functions.ST_FlipCoordinates.class.getSimpleName(), $(pointColNames[0])));
         Geometry result = (Geometry) first(flippedTable).getField(0);
-        assertEquals("POINT (-117.99 32.01)", result.toString());
+        assertEquals("POINT (32.01 -117.99)", result.toString());
     }
 
     @Test
@@ -383,7 +383,7 @@ public class FunctionTest extends TestBase{
         Table pointTable = createPointTable_real(testDataSize);
         Table surfaceTable = pointTable.select(call(Functions.ST_PointOnSurface.class.getSimpleName(), $(pointColNames[0])));
         Geometry result = (Geometry) first(surfaceTable).getField(0);
-        assertEquals("POINT (32.01 -117.99)", result.toString());
+        assertEquals("POINT (-117.99 32.01)", result.toString());
     }
 
     @Test

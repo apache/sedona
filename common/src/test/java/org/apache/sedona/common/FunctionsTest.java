@@ -1665,6 +1665,8 @@ public class FunctionsTest {
         // The source and target CRS are different, and latitude is out of range
         Point geometryWrong = GEOMETRY_FACTORY.createPoint(new Coordinate(60, 120));
         assertThrows(ProjectionException.class, () -> Functions.transform(geometryWrong, "EPSG:4326", "EPSG:3857"));
+
+
     }
     
     @Test
