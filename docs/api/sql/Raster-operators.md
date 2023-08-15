@@ -49,7 +49,7 @@ SELECT ST_AsText(RS_PixelAsPolygon(raster, 2, 3)) FROM rasters
 Output:
 
 ```
-POLYGON ((131 -246, 139 -246, 131 -254, 139 -254, 131 -246))
+POLYGON ((131 -246, 139 -246, 139 -254, 131 -254, 131 -246))
 ```
 
 ## Geometry Functions

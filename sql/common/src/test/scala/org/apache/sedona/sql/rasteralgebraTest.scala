@@ -621,7 +621,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val cellSize = 4
       val numBands = 2
       val result = sparkSession.sql(s"SELECT ST_AsText(RS_PixelAsPolygon(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 2, 3))").first().getString(0);
-      val expected = "POLYGON ((127.19000244140625 -20, 131.19000244140625 -20, 127.19000244140625 -24, 131.19000244140625 -24, 127.19000244140625 -20))"
+      val expected = "POLYGON ((127.19000244140625 -20, 131.19000244140625 -20, 131.19000244140625 -24, 127.19000244140625 -24, 127.19000244140625 -20))"
       assertEquals(expected, result)
     }
 

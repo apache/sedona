@@ -47,8 +47,8 @@ public class PixelFunctions
         int srid = RasterAccessors.srid(raster);
         Point2D point2D1 = RasterUtils.getWorldCornerCoordinates(raster, colX, rowY);
         Point2D point2D2 = RasterUtils.getWorldCornerCoordinates(raster, colX + 1, rowY);
-        Point2D point2D3 = RasterUtils.getWorldCornerCoordinates(raster, colX, rowY + 1);
-        Point2D point2D4 = RasterUtils.getWorldCornerCoordinates(raster, colX + 1, rowY + 1);
+        Point2D point2D3 = RasterUtils.getWorldCornerCoordinates(raster, colX + 1, rowY + 1);
+        Point2D point2D4 = RasterUtils.getWorldCornerCoordinates(raster, colX, rowY + 1);
 
         Coordinate[] coordinateArray = new Coordinate[5];
         coordinateArray[0] = new Coordinate(point2D1.getX(), point2D1.getY());
