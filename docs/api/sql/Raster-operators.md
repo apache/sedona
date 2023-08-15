@@ -62,12 +62,56 @@ Since: `1.5.0`
 
 Spark SQL example:
 ```sql
-SELECT RS_ConvexHull(SELECT RS_PixelAsPoint(RS_MakeEmptyRaster(1, 5, 10, 156, -132, 5, 10, 3, 5, 0)));
+SELECT RS_ConvexHull(RS_MakeEmptyRaster(1, 5, 10, 156, -132, 5, 10, 3, 5, 0));
 ```
 
 Output:
 ```
 POLYGON ((156 -132, 181 -107, 211 -7, 186 -32, 156 -132))
+```
+
+### RS_MinConvexHull
+
+Introduction: Returns the min convex hull geometry of the raster **excluding** the NoDataBandValue band pixels, in the given band.
+If no band is specified, all the bands are considered when creating the min convex hull of the raster
+
+Format: `RS_MinConvexHull(raster: Raster) | RS_MinConvexHull(raster: Raster, band: Int)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+
+
+```scala
+val inputDf = Seq((Seq(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+        Seq(0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0))).toDF("values2", "values1")
+inputDf.selectExpr("ST_AsText(RS_MinConvexHull(RS_AddBandFromArray(" +
+        "RS_AddBandFromArray(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), values1, 1, 0), values2, 2, 0))) as minConvexHullAll").show()
+```
+
+Output:
+```sql
++----------------------------------------+
+|minConvexHullAll                        |
++----------------------------------------+
+|POLYGON ((0 -1, 4 -1, 4 -5, 0 -5, 0 -1))|
++----------------------------------------+
+```
+
+```scala
+val inputDf = Seq((Seq(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+        Seq(0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0))).toDF("values2", "values1")
+inputDf.selectExpr("ST_AsText(RS_MinConvexHull(RS_AddBandFromArray(" +
+  "RS_AddBandFromArray(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), values1, 1, 0), values2, 2, 0), 1)) as minConvexHull1").show()
+```
+
+Output:
+```sql
++----------------------------------------+
+|minConvexHull1                          |
++----------------------------------------+
+|POLYGON ((1 -1, 4 -1, 4 -5, 1 -5, 1 -1))|
++----------------------------------------+
 ```
 
 ## Raster Accessors
