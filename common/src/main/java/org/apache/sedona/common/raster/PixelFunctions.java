@@ -31,9 +31,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.DoublePredicate;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 public class PixelFunctions
 {
@@ -59,8 +57,7 @@ public class PixelFunctions
             // Invalid band index. Return nulls.
             return geometries.stream().map(geom -> (Double) null).collect(Collectors.toList());
         }
-        double[] noDataValues = rasterGeom.getSampleDimension(band - 1).getNoDataValues();
-        DoublePredicate isNoData = d -> noDataValues != null && DoubleStream.of(noDataValues).anyMatch(noDataValue -> Double.compare(noDataValue, d) == 0);
+        double noDataValue = RasterUtils.getNoDataValue(rasterGeom.getSampleDimension(band - 1));
         double[] pixelBuffer = new double[numBands];
 
         List<Double> result = new ArrayList<>(geometries.size());
@@ -73,7 +70,7 @@ public class PixelFunctions
                 try {
                     rasterGeom.evaluate(directPosition2D, pixelBuffer);
                     double pixel = pixelBuffer[band - 1];
-                    if (isNoData.test(pixel)) {
+                    if (Double.compare(noDataValue, pixel) == 0) {
                         result.add(null);
                     } else {
                         result.add(pixel);

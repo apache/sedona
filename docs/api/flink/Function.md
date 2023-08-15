@@ -2288,7 +2288,31 @@ Output:
 POINT (-70.01 44.37)
 ```
 
+## ST_VoronoiPolygons
 
+Introduction: Returns a two-dimensional Voronoi diagram from the vertices of the supplied geometry. The result is a GeometryCollection of Polygons that covers an envelope larger than the extent of the input vertices. Returns null if input geometry is null. Returns an empty geometry collection if the input geometry contains only one vertex. Returns an empty geometry collection if the extend_to envelope has zero area.
+
+
+Format: `ST_VoronoiPolygons(g1: geometry, tolerance: float , extend_to: geometry)`
+
+Optional parameters:
+'tolerance' : The distance within which vertices will be considered equivalent. Robustness of the algorithm can be improved by supplying a nonzero tolerance distance. (default = 0.0)
+
+'extend_to' : If a geometry is supplied as the "extend_to" parameter, the diagram will be extended to cover the envelope of the "extend_to" geometry, unless that envelope is smaller than the default envelope (default = NULL. By default, we extend the bounding box of the diagram by the max between bounding box's height and bounding box's width).
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT st_astext(ST_VoronoiPolygons(ST_GeomFromText('MULTIPOINT ((0 0), (1 1))')));
+```
+
+Output: 
+
+```
+GEOMETRYCOLLECTION(POLYGON((-1 2,2 -1,-1 -1,-1 2)),POLYGON((-1 2,2 2,2 -1,-1 2)))
+```
 
 ## ST_X
 

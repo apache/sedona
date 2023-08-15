@@ -2030,6 +2030,37 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
   }
 
+  it ("should pass ST_VoronoiPolygons") {
+    val geomTestCases = Map(
+      ("'MULTIPOINT ((0 0), (2 2))'", 0.0) -> ("GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))"),
+      ("'MULTIPOINT ((0 0), (2 2))'", 30) -> ("GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 4, 4 -2, -2 -2)))"),
+      ("'LINESTRING EMPTY'", 0.0) -> ("GEOMETRYCOLLECTION EMPTY")
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val g1 = geom._1
+      val tolerance = geom._2
+      val df = sparkSession.sql(s"SELECT ST_AsText(ST_VoronoiPolygons(ST_GeomFromWKT($g1), ($tolerance)))")
+      val actual = df.take(1)(0).get(0).asInstanceOf[String]
+      assertEquals(expectedResult, actual)
+    }
+  }
+
+  it ("should pass ST_VoronoiPolygons with Extend Geometry") {
+    val geomTestCases = Map(
+      ("'MULTIPOINT ((0 0), (2 2))'", 0.0, "'POINT(1 1)'") -> ("GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 -9, -9 -9)), POLYGON ((-9 11, 11 11, 11 -9, -9 11)))"),
+      ("'MULTIPOINT ((0 0), (2 2))'", 30, "'POINT(1 1)'") -> ("GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 11, 11 -9, -9 -9)))"),
+      ("'LINESTRING EMPTY'", 0.0, "'POINT(1 1)'") -> ("GEOMETRYCOLLECTION EMPTY")
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val g1 = geom._1
+      val tolerance = geom._2
+      val extendTo = geom._3
+      val df = sparkSession.sql(s"SELECT ST_AsText(ST_VoronoiPolygons(ST_GeomFromWKT($g1), $tolerance, ST_Buffer(ST_GeomFromWKT($extendTo), 10.0)))")
+      val actual = df.take(1)(0).get(0).asInstanceOf[String]
+      assertEquals(expectedResult, actual)
+    }
+  }
+
   it ("should pass ST_FrechetDistance") {
     val geomTestCases = Map(
       ("'POINT (1 2)'", "'POINT (10 10)'") -> 12.041594578792296d,
