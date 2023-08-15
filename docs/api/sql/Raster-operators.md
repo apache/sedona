@@ -72,6 +72,85 @@ POLYGON ((156 -132, 181 -107, 211 -7, 186 -32, 156 -132))
 
 ## Raster Accessors
 
+### RS_GeoReference
+
+Introduction: Returns the georeference metadata of raster as a string in GDAL or ESRI format. Default is GDAL if not specified.
+
+Format: `RS_GeoReference(raster: Raster, format:string)`
+
+Difference between format representation is as follows:
+
+`GDAL`
+
+```
+ScaleX 
+SkewY 
+SkewX 
+ScaleY 
+UpperLeftX
+UpperLeftY
+```
+
+`ESRI`
+
+```
+ScaleX 
+SkewY 
+SkewX 
+ScaleY 
+UpperLeftX + ScaleX * 0.5
+UpperLeftY + ScaleY * 0.5
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_GeoReference(ST_MakeEmptyRaster(1, 100, 100, -53, 51, 2, -2, 4, 5, 4326))
+```
+
+Output:
+
+```
+2.000000 
+5.000000 
+4.000000 
+-2.000000 
+-53.000000 
+51.000000
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_GeoReferrence(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2, 0), "GDAL")
+```
+
+Output:
+
+```
+2.000000 
+0.200000 
+0.100000 
+-3.000000 
+100.000000 
+200.000000
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_GeoReferrence(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2, 0), "ERSI")
+```
+
+```
+2.000000 
+0.200000 
+0.100000 
+-3.000000 
+101.000000 
+198.500000
+```
+
 ### RS_Height
 
 Introduction: Returns the height of the raster.
