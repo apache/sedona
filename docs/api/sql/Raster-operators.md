@@ -32,6 +32,26 @@ Output:
 IndexOutOfBoundsException: Specified pixel coordinates (6, 2) do not lie in the raster
 ```
 
+### RS_PixelAsPolygon
+
+Introduction: Returns a polygon geometry that bounds the specified pixel.The pixel coordinates specified are 1-indexed.
+
+Format: `RS_PixelAsPolygon(raster: Raster, colX:int, rowY:int)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT ST_AsText(RS_PixelAsPolygon(raster, 2, 3)) FROM rasters
+```
+
+Output:
+
+```
+POLYGON ((131 -246, 139 -246, 131 -254, 139 -254, 131 -246))
+```
+
 ## Geometry Functions
 
 ### RS_Envelope
