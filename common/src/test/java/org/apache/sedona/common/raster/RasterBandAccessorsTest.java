@@ -84,7 +84,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         assertEquals("REAL_64BITS", RasterBandAccessors.getBandType(emptyRaster));
         assertEquals("REAL_64BITS", RasterBandAccessors.getBandType(emptyRaster, 2));
         double[] bandValues = MapAlgebra.bandAsArray(emptyRaster, 1);
-        double[] expectedBandValuesD = new double[]{1, 1, 32, 43};
+        double[] expectedBandValuesD = new double[]{1.2, 1.1, 32.2, 43.2};
         for (int i = 0; i < bandValues.length; i++) {
             assertEquals(expectedBandValuesD[i], bandValues[i], 1e-9);
         }
@@ -94,7 +94,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         assertEquals("REAL_32BITS", RasterBandAccessors.getBandType(emptyRaster));
         assertEquals("REAL_32BITS", RasterBandAccessors.getBandType(emptyRaster, 2));
         bandValues = MapAlgebra.bandAsArray(emptyRaster, 1);
-        float[] expectedBandValuesF = new float[]{1, 1, 32, 43};
+        float[] expectedBandValuesF = new float[]{1.2f, 1.1f, 32.2f, 43.2f};
         for (int i = 0; i < bandValues.length; i++) {
             assertEquals(expectedBandValuesF[i], bandValues[i], 1e-9);
         }
