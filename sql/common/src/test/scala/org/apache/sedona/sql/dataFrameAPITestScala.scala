@@ -1043,6 +1043,16 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(expectedDefaultValue == actualDefaultValue)
     }
 
+    it("Passed ST_VoronoiPolygons") {
+      val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('MULTIPOINT (0 0, 2 2)') AS geom, ST_Buffer(ST_GeomFromWKT('POINT(1 1)'), 10.0) as buf")
+      val df = polyDf.select(ST_VoronoiPolygons("geom"))
+      val wktWriter3D = new WKTWriter(3);
+      val actualGeom = df.take(1)(0).get(0).asInstanceOf[Geometry]
+      val actual = wktWriter3D.write(actualGeom)
+      val expected = "GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))"
+      assert(expected == actual)
+    }
+
     it("Passed ST_FrechetDistance") {
       val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (1 2)') as g1, ST_GeomFromWKT('POINT (100 230)') as g2")
       val df = polyDf.select(ST_FrechetDistance("g1", "g2"))

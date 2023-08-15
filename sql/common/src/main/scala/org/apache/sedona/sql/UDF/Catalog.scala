@@ -160,6 +160,7 @@ object Catalog {
     function[ST_Force3D](0.0),
     function[ST_NRings](),
     function[ST_Translate](0.0),
+    function[ST_VoronoiPolygons](0.0, null),
     function[ST_FrechetDistance](),
     function[ST_Affine](),
     function[ST_BoundingDiagonal](),
