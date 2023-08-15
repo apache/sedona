@@ -30,6 +30,7 @@ import org.opengis.referencing.operation.TransformException;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 public class GeometryFunctionsTest extends RasterTestBase {
 
@@ -110,6 +111,13 @@ public class GeometryFunctionsTest extends RasterTestBase {
         assertEquals(expected1, Functions.asWKT(minConvexHull1));
         assertEquals(expected2, Functions.asWKT(minConvexHull2));
         assertEquals(expectedAll, Functions.asWKT(minConvexHullAll));
+    }
+
+    @Test
+    public void testMinConvexHullIllegalBand() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 5, 3, 0, 0, 1, -1, 0, 0, 0);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> GeometryFunctions.minConvexHull(emptyRaster, 3));
+        assertEquals("Provided band index 3 does not lie in the raster", exception.getMessage());
     }
 
     @Test
