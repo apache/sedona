@@ -13,6 +13,7 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
@@ -79,7 +80,7 @@ public class FunctionsTest extends RasterTestBase {
     @Test
     public void testPixelAsPolygon() throws FactoryException, TransformException {
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 123, -230, 8);
-        String actual = PixelFunctions.getPixelAsPolygon(emptyRaster, 2, 3).toString();
+        String actual = Functions.asWKT(PixelFunctions.getPixelAsPolygon(emptyRaster, 2, 3));
         String expected = "POLYGON ((131 -246, 139 -246, 139 -254, 131 -254, 131 -246))";
         assertEquals(expected, actual);
     }
