@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.sedona.common.utils.RasterUtils
 import org.apache.spark.sql.functions.{collect_list, expr}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.junit.Assert.{assertEquals, assertNull}
@@ -431,6 +432,17 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expected, result, 1e-8)
     }
 
+    it("Passed RS_GeoReference") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      var result = df.selectExpr("RS_GeoReference(RS_FromGeoTiff(content))").first().getString(0);
+      var expected: String = "72.328613 \n0.000000 \n0.000000 \n-72.328613 \n-13095817.809482 \n4021262.748793"
+      assertEquals(expected, result)
+
+      result = df.selectExpr("RS_GeoReference(RS_FromGeoTiff(content), 'ESRI')").first().getString(0);
+      expected = "72.328613 \n0.000000 \n0.000000 \n-72.328613 \n-13095781.645176 \n4021226.584486"
+      assertEquals(expected, result)
+    }
+
     it("Passed RS_SkewX") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val result = df.selectExpr("RS_SkewX(RS_FromGeoTiff(content))").first().getDouble(0)
@@ -522,11 +534,11 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       }
     }
 
-    it("Passed RS_AddBandFromArray - adding a new band with a custom no data value]") {
+    it("Passed RS_AddBandFromArray - adding a new band with a custom no data value") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster", "RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTiff(content), 1), 2) as band")
       val raster = df.selectExpr("RS_AddBandFromArray(raster, band, 2, 2)").first().getAs[GridCoverage2D](0);
-      assertEquals(2, raster.getSampleDimension(1).getNoDataValues()(0), 1e-9)
+      assertEquals(2, RasterUtils.getNoDataValue(raster.getSampleDimension(1)), 1e-9)
     }
 
     it("Passed RS_Intersects") {

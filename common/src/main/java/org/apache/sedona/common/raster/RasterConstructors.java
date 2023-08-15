@@ -137,30 +137,12 @@ public class RasterConstructors
         }
 
         // Create a new empty raster
-        WritableRaster raster = RasterFactory.createBandedRaster(getDataTypeCode(bandDataType), widthInPixel, heightInPixel, numBand, null);
+        WritableRaster raster = RasterFactory.createBandedRaster(RasterUtils.getDataTypeCode(bandDataType), widthInPixel, heightInPixel, numBand, null);
         MathTransform transform = new AffineTransform2D(scaleX, skewY, skewX, scaleY, upperLeftX, upperLeftY);
         GridGeometry2D gridGeometry = new GridGeometry2D(
                 new GridEnvelope2D(0, 0, widthInPixel, heightInPixel),
                 PixelInCell.CELL_CORNER,
                 transform, crs, null);
         return RasterUtils.create(raster, gridGeometry, null);
-    }
-
-    private static int getDataTypeCode(String s) {
-        switch (s.toLowerCase()) {
-            case "d":
-                return 5;
-            case "i":
-                return 3;
-            case "b":
-                return 0;
-            case "f":
-                return 4;
-            case "s":
-                return 2;
-            case "us":
-                return 1;
-        }
-        return 5; // defaulting to double
     }
 }
