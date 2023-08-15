@@ -47,7 +47,7 @@ public class HeatmapTest
     public void testPointRDDVisualization()
             throws Exception
     {
-        PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
         HeatMap visualizationOperator = new HeatMap(800, 500, USMainLandBoundary, false, 3);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
         ImageGenerator imageGenerator = new ImageGenerator();
@@ -63,7 +63,7 @@ public class HeatmapTest
     public void testRectangleRDDVisualization()
             throws Exception
     {
-        RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY());
+        RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
         HeatMap visualizationOperator = new HeatMap(800, 500, USMainLandBoundary, false, 2, 4, 4, false, true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
 
@@ -82,7 +82,7 @@ public class HeatmapTest
             throws Exception
     {
         //UserSuppliedPolygonMapper userSuppliedPolygonMapper = new UserSuppliedPolygonMapper();
-        PolygonRDD spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY());
+        PolygonRDD spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions);
         HeatMap visualizationOperator = new HeatMap(800, 500, USMainLandBoundary, false, 2);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
 
@@ -99,7 +99,7 @@ public class HeatmapTest
     public void testLineStringRDDVisualization()
             throws Exception
     {
-        LineStringRDD spatialRDD = new LineStringRDD(sparkContext, LineStringInputLocation, LineStringSplitter, false, LineStringNumPartitions, StorageLevel.MEMORY_ONLY());
+        LineStringRDD spatialRDD = new LineStringRDD(sparkContext, LineStringInputLocation, LineStringSplitter, false, LineStringNumPartitions);
         HeatMap visualizationOperator = new HeatMap(800, 500, USMainLandBoundary, false, 2);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
 

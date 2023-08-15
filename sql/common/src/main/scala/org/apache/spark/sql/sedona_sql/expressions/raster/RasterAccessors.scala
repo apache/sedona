@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
-import org.apache.sedona.common.raster.{GeometryFunctions, RasterAccessors}
+import org.apache.sedona.common.raster.RasterAccessors
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
@@ -74,6 +74,18 @@ case class RS_ScaleX(inputExpressions: Seq[Expression]) extends InferredExpressi
 
 case class RS_ScaleY(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.getScaleY _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class RS_SkewX(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.getSkewX _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class RS_SkewY(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.getSkewY _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
     copy(inputExpressions = newChildren)
   }
 }

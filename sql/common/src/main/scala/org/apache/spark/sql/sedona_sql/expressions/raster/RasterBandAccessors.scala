@@ -16,40 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
-import org.apache.sedona.common.raster.RasterConstructors
+import org.apache.sedona.common.raster.RasterBandAccessors
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
-case class RS_FromArcInfoAsciiGrid(inputExpressions: Seq[Expression])
-  extends InferredExpression(RasterConstructors.fromArcInfoAsciiGrid _) {
-  override def foldable: Boolean = false
-
+case class RS_BandNoDataValue(inputExpressions: Seq[Expression]) extends InferredExpression(inferrableFunction2(RasterBandAccessors.getBandNoDataValue), inferrableFunction1(RasterBandAccessors.getBandNoDataValue)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-case class RS_FromGeoTiff(inputExpressions: Seq[Expression])
-  extends InferredExpression(RasterConstructors.fromGeoTiff _) {
-
-  override def foldable: Boolean = false
-
+case class RS_BandPixelType(inputExpressions: Seq[Expression]) extends InferredExpression(inferrableFunction2(RasterBandAccessors.getBandType), inferrableFunction1(RasterBandAccessors.getBandType)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-case class RS_MakeEmptyRaster(inputExpressions: Seq[Expression])
-  extends InferredExpression(
-    inferrableFunction6(RasterConstructors.makeEmptyRaster), inferrableFunction7(RasterConstructors.makeEmptyRaster),
-    inferrableFunction10(RasterConstructors.makeEmptyRaster), inferrableFunction11(RasterConstructors.makeEmptyRaster)) {
-
-  override def foldable: Boolean = false
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}

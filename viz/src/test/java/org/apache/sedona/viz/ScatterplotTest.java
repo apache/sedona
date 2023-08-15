@@ -79,7 +79,7 @@ public class ScatterplotTest
     public void testPointRDDVisualization()
             throws Exception
     {
-        PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
         ScatterPlot visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false);
         visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
@@ -104,7 +104,7 @@ public class ScatterplotTest
     public void testPointRDDVisualizationWithParallelRendering()
             throws Exception
     {
-        PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
         ScatterPlot visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, ColorizeOption.NORMAL,
                 false, 4, 4, true, false);
         visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
@@ -124,7 +124,7 @@ public class ScatterplotTest
     public void testSaveAsDistributedFile()
             throws Exception
     {
-        PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions, StorageLevel.MEMORY_ONLY());
+        PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
         ScatterPlot visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false, 2, 2, true, false);
         visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
@@ -152,7 +152,7 @@ public class ScatterplotTest
     public void testRectangleRDDVisualization()
             throws Exception
     {
-        RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions, StorageLevel.MEMORY_ONLY());
+        RectangleRDD spatialRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
         ScatterPlot visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false);
         visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
@@ -178,7 +178,7 @@ public class ScatterplotTest
             throws Exception
     {
         //UserSuppliedPolygonMapper userSuppliedPolygonMapper = new UserSuppliedPolygonMapper();
-        PolygonRDD spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions, StorageLevel.MEMORY_ONLY());
+        PolygonRDD spatialRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions);
         ScatterPlot visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false);
         visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);
@@ -206,7 +206,7 @@ public class ScatterplotTest
         int resolutionY = 800;
         int resolutionX = RasterizationUtils.GetWidthFromHeight(resolutionY, USMainLandBoundary);
         //UserSuppliedLineStringMapper userSuppliedLineStringMapper = new UserSuppliedLineStringMapper();
-        LineStringRDD spatialRDD = new LineStringRDD(sparkContext, LineStringInputLocation, LineStringSplitter, false, LineStringNumPartitions, StorageLevel.MEMORY_ONLY());
+        LineStringRDD spatialRDD = new LineStringRDD(sparkContext, LineStringInputLocation, LineStringSplitter, false, LineStringNumPartitions);
         ScatterPlot visualizationOperator = new ScatterPlot(resolutionX, resolutionY, USMainLandBoundary, false);
         visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true);
         visualizationOperator.Visualize(sparkContext, spatialRDD);

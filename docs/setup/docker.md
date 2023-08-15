@@ -1,6 +1,8 @@
 # Sedona JupyterLab Docker Image
 
-Dockerfiles for Apache Sedona with JupyterLab and 1 master node and 1 worker node
+Sedona Docker images are available on [Sedona official DockerHub repo](https://hub.docker.com/r/apache/sedona).
+
+We provide a Docker image for Apache Sedona with Python JupyterLab and 1 master node and 1 worker node.
 
 ## How to use
 
@@ -9,19 +11,19 @@ Dockerfiles for Apache Sedona with JupyterLab and 1 master node and 1 worker nod
 Format:
 
 ```bash
-docker pull drjiayu/sedona-jupyterlab:<sedona_version>
+docker pull apache/sedona:<sedona_version>
 ```
 
 Example 1: Pull the latest image of Sedona master branch
 
 ```bash
-docker pull drjiayu/sedona-jupyterlab:latest
+docker pull apache/sedona:latest
 ```
 
 Example 2: Pull the image of a specific Sedona release
 
 ```bash
-docker pull drjiayu/sedona-jupyterlab:1.4.1
+docker pull apache/sedona:1.4.1
 ```
 
 ### Start the container
@@ -29,19 +31,19 @@ docker pull drjiayu/sedona-jupyterlab:1.4.1
 Format:
 
 ```bash
-docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 drjiayu/sedona-jupyterlab:<sedona_version>
+docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 apache/sedona:<sedona_version>
 ```
 
 Example 1:
 
 ```bash
-docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 drjiayu/sedona-jupyterlab:latest
+docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 apache/sedona:latest
 ```
 
 Example 2:
 
 ```bash
-docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 drjiayu/sedona-jupyterlab:1.4.1
+docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 apache/sedona:1.4.1
 ```
 
 This command will bind the container's ports 8888, 8080, 8081, 4040 to the host's ports 8888, 8080, 8081, 4040 respectively.
@@ -52,7 +54,7 @@ Open your browser and go to [http://localhost:8888/](http://localhost:8888/) to 
 
 ### Notes
 
-* This container assumes you have at least 8GB RAM and takes all your CPU cores and 8GM RAM.
+* This container assumes you have at least 8GB RAM and takes all your CPU cores and 8GM RAM. The 1 worker will take 4GB and the Jupyter program will take the remaining 4GB.
 * Sedona in this container runs in the cluster mode. Only 1 notebook can be run at a time. If you want to run another notebook, please shut down the kernel of the current notebook first ([How?](https://jupyterlab.readthedocs.io/en/stable/user/running.html)).
 
 ## How to build
@@ -105,13 +107,14 @@ This docker image can only be built against Sedona 1.4.1+ and Spark 3.0+
 * OS: Ubuntu 22.02
 * JDK: openjdk-19
 * Python: 3.10
+* Spark 3.4.1
 
 ### Web UI
 * JupyterLab: http://localhost:8888/
 * Spark master URL: spark://localhost:7077
 * Spark job UI: http://localhost:4040
 * Spark master web UI: http://localhost:8080/
-* Spark web UI: http://localhost:8081/
+* Spark work web UI: http://localhost:8081/
 
 ## How to push to DockerHub
 
