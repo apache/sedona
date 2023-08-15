@@ -77,6 +77,14 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
+    public void testPixelAsPolygon() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 123, -230, 8);
+        String actual = PixelFunctions.getPixelAsPolygon(emptyRaster, 2, 3).toString();
+        String expected = "POLYGON ((131 -246, 139 -246, 131 -254, 139 -254, 131 -246))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testPixelAsPointUpperLeft() throws FactoryException, TransformException {
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 123, -230, 8);
         Geometry actualPoint = PixelFunctions.getPixelAsPoint(emptyRaster, 1, 1);
