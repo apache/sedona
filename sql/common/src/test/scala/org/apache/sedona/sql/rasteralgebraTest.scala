@@ -627,6 +627,18 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expectedY, actualCoordinates.y, 1e-5)
     }
 
+    it("Passed RS_PixelAsPolygon with raster") {
+      val widthInPixel = 5
+      val heightInPixel = 10
+      val upperLeftX = 123.19
+      val upperLeftY = -12
+      val cellSize = 4
+      val numBands = 2
+      val result = sparkSession.sql(s"SELECT ST_AsText(RS_PixelAsPolygon(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 2, 3))").first().getString(0);
+      val expected = "POLYGON ((127.19000244140625 -20, 131.19000244140625 -20, 131.19000244140625 -24, 127.19000244140625 -24, 127.19000244140625 -20))"
+      assertEquals(expected, result)
+    }
+
     it("Passed RS_RasterToWorldCoordX with raster") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")
