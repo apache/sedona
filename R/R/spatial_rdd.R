@@ -135,7 +135,7 @@ approx_count <- function(x) {
 #' Perform a CRS transformation.
 #'
 #' Transform data within a spatial RDD from one coordinate reference system to
-#' another.
+#' another. This uses the lon/lat order since v1.5.0. Before, it used lat/lon
 #'
 #' @param x The spatial RDD to be processed.
 #' @param src_epsg_crs_code Coordinate reference system to transform from

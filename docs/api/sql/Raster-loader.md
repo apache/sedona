@@ -7,6 +7,8 @@ Sedona provides two types of raster DataFrame loaders. They both use Sedona buil
 
 The raster loader of Sedona leverages Spark built-in binary data source and works with several RS RasterUDT constructors to produce RasterUDT type. Each raster is a row in the resulting DataFrame and stored in a `RasterUDT` format.
 
+By default, these functions uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
+
 ### Load raster to a binary DataFrame
 
 You can load any type of raster data using the code below. Then use the RS constructors below to create RasterUDT.

@@ -19,10 +19,10 @@
 
 package org.apache.sedona.core.spatialOperator;
 
+import org.apache.sedona.common.Functions;
 import org.apache.sedona.core.rangeJudgement.RangeFilter;
 import org.apache.sedona.core.rangeJudgement.RangeFilterUsingIndex;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
-import org.apache.sedona.core.utils.CRSTransformation;
 import org.apache.spark.api.java.JavaRDD;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
@@ -55,7 +55,7 @@ public class RangeQuery
     {
         U queryGeometry = originalQueryGeometry;
         if (spatialRDD.getCRStransformation()) {
-            queryGeometry = CRSTransformation.Transform(spatialRDD.getSourceEpsgCode(), spatialRDD.getTargetEpgsgCode(), originalQueryGeometry);
+            queryGeometry = (U) Functions.transform(originalQueryGeometry, spatialRDD.getSourceEpsgCode(), spatialRDD.getTargetEpgsgCode());
         }
 
         if (useIndex == true) {

@@ -71,7 +71,7 @@ object Catalog {
     function[ST_Length](),
     function[ST_Area](),
     function[ST_Centroid](),
-    function[ST_Transform](false),
+    function[ST_Transform](true),
     function[ST_Intersection](),
     function[ST_Difference](),
     function[ST_SymDifference](),

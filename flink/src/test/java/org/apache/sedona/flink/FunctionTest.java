@@ -201,7 +201,7 @@ public class FunctionTest extends TestBase{
         Table pointTable = createPointTable_real(testDataSize);
         Table flippedTable = pointTable.select(call(Functions.ST_FlipCoordinates.class.getSimpleName(), $(pointColNames[0])));
         Geometry result = (Geometry) first(flippedTable).getField(0);
-        assertEquals("POINT (-117.99 32.01)", result.toString());
+        assertEquals("POINT (32.01 -117.99)", result.toString());
     }
 
     @Test
@@ -225,8 +225,8 @@ public class FunctionTest extends TestBase{
     public void testTransformWKT() throws FactoryException {
         Table pointTable = createPointTable_real(testDataSize);
 
-        CoordinateReferenceSystem CRS_SRC = CRS.decode("epsg:4326");
-        CoordinateReferenceSystem CRS_TGT = CRS.decode("epsg:3857");
+        CoordinateReferenceSystem CRS_SRC = CRS.decode("epsg:4326", true);
+        CoordinateReferenceSystem CRS_TGT = CRS.decode("epsg:3857", true);
 
         String SRC_WKT = CRS_SRC.toWKT();
         String TGT_WKT = CRS_TGT.toWKT();
@@ -383,7 +383,7 @@ public class FunctionTest extends TestBase{
         Table pointTable = createPointTable_real(testDataSize);
         Table surfaceTable = pointTable.select(call(Functions.ST_PointOnSurface.class.getSimpleName(), $(pointColNames[0])));
         Geometry result = (Geometry) first(surfaceTable).getField(0);
-        assertEquals("POINT (32.01 -117.99)", result.toString());
+        assertEquals("POINT (-117.99 32.01)", result.toString());
     }
 
     @Test
