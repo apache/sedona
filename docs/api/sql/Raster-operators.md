@@ -73,7 +73,8 @@ POLYGON ((156 -132, 181 -107, 211 -7, 186 -32, 156 -132))
 ### RS_MinConvexHull
 
 Introduction: Returns the min convex hull geometry of the raster **excluding** the NoDataBandValue band pixels, in the given band.
-If no band is specified, all the bands are considered when creating the min convex hull of the raster
+If no band is specified, all the bands are considered when creating the min convex hull of the raster. 
+The created geometry representing the min convex hull has world coordinates of the raster in its CRS as the corner coordinates. 
 
 !!!Note
     If the specified band does not exist in the raster, RS_MinConvexHull throws an IllegalArgumentException
