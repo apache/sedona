@@ -196,6 +196,7 @@ object Catalog {
     function[RS_Append](),
     function[RS_AddBandFromArray](),
     function[RS_BandAsArray](),
+    function[RS_MapAlgebra](null),
     function[RS_FromArcInfoAsciiGrid](),
     function[RS_FromGeoTiff](),
     function[RS_MakeEmptyRaster](),

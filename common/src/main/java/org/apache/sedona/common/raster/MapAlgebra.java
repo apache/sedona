@@ -18,11 +18,15 @@
  */
 package org.apache.sedona.common.raster;
 
+import it.geosolutions.jaiext.jiffle.JiffleBuilder;
+import it.geosolutions.jaiext.jiffle.runtime.JiffleDirectRuntime;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.jaitools.imageutils.ImageUtils;
 
 import javax.media.jai.RasterFactory;
+import javax.media.jai.TiledImage;
 import java.awt.*;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
@@ -171,5 +175,63 @@ public class MapAlgebra
 
     private static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, double[] bandValues) {
         return copyRasterAndReplaceBand(gridCoverage2D, bandIndex, bandValues, null, false);
+    }
+
+    private static final ThreadLocal<String> previousScript = new ThreadLocal<>();
+    private static final ThreadLocal<JiffleDirectRuntime> previousRuntime = new ThreadLocal<>();
+
+    /**
+     * Applies a map algebra script to the given raster.
+     * @param gridCoverage2D The raster to apply the script to
+     * @param pixelType The pixel type of the output raster. If null, the pixel type of the input raster is used.
+     * @param script The script to apply
+     * @param noDataValue The no data value of the output raster.
+     * @return The result of the map algebra script
+     */
+    public static GridCoverage2D mapAlgebra(GridCoverage2D gridCoverage2D, String pixelType, String script, Double noDataValue) {
+        if (gridCoverage2D == null || script == null) {
+            return null;
+        }
+        RenderedImage renderedImage = gridCoverage2D.getRenderedImage();
+        int rasterDataType = pixelType != null? RasterUtils.getDataTypeCode(pixelType) : renderedImage.getSampleModel().getDataType();
+        int width = renderedImage.getWidth();
+        int height = renderedImage.getHeight();
+        TiledImage resultImage = ImageUtils.createConstantImage(width, height, 0.0);
+        try {
+            String prevScript = previousScript.get();
+            JiffleDirectRuntime prevRuntime = previousRuntime.get();
+            JiffleDirectRuntime runtime;
+            if (prevRuntime != null && script.equals(prevScript)) {
+                // Reuse the runtime to avoid recompiling the script
+                runtime = prevRuntime;
+                runtime.setSourceImage("rast", renderedImage);
+                runtime.setDestinationImage("out", resultImage);
+                runtime.setDefaultBounds();
+            } else {
+                JiffleBuilder builder = new JiffleBuilder();
+                runtime = builder.script(script).source("rast", renderedImage).dest("out", resultImage).getRuntime();
+                previousScript.set(script);
+                previousRuntime.set(runtime);
+            }
+
+            runtime.evaluateAll(null);
+
+            // If pixelType does not match with the data type of the result image (should be double since Jiffle only supports
+            // double destination image), we need to convert the resultImage to the specified pixel type.
+            if (rasterDataType != resultImage.getSampleModel().getDataType()) {
+                // Copy the resultImage to a new raster with the specified pixel type
+                WritableRaster convertedRaster = RasterFactory.createBandedRaster(rasterDataType, width, height, 1, null);
+                double[] samples = resultImage.getData().getSamples(0, 0, width, height, 0, (double[]) null);
+                convertedRaster.setSamples(0, 0, width, height, 0, samples);
+                resultImage.dispose();
+                return RasterUtils.create(convertedRaster, gridCoverage2D.getGridGeometry(), null, noDataValue);
+            } else {
+                // build a new GridCoverage2D from the resultImage
+                return RasterUtils.create(resultImage, gridCoverage2D.getGridGeometry(), null, noDataValue);
+            }
+        } catch (Exception e) {
+            resultImage.dispose();
+            throw new RuntimeException("Failed to run map algebra", e);
+        }
     }
 }
