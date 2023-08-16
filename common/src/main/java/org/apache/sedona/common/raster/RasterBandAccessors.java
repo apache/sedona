@@ -45,13 +45,12 @@ public class RasterBandAccessors {
         if(excludeNoDataValue) {
             ensureBand(raster, band);
             int numberOfPixel = 0;
-
             Double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
+
             for(int j = 0; j < height; j++){
                 for(int i = 0; i < width; i++){
 
                     double[] bandPixelValues = raster.evaluate(new GridCoordinates2D(i, j), (double[]) null);
-
                     double bandValue = bandPixelValues[band - 1];
                     if(bandNoDataValue == null || bandValue != bandNoDataValue){
                         numberOfPixel += 1;
