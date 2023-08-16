@@ -532,7 +532,13 @@ Introduction: Returns the number of pixels in a given band. If band is not speci
 !!!Note
     If the mentioned band index doesn't exist, this will throw an `IllegalArgumentException`.
 
-Format: `RS_Count(raster: Raster, band: int = 1, excludeNoDataValue: boolean = true)`
+Format: 
+
+`RS_Count(raster: Raster, band: int = 1, excludeNoDataValue: boolean = true)`
+
+`RS_Count(raster: Raster, band: int = 1)`
+
+`RS_Count(raster: Raster)`
 
 Since: `v1.5.0`
 
