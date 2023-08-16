@@ -20,6 +20,7 @@ package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
+import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 
 public class RasterBandAccessors {
@@ -37,6 +38,43 @@ public class RasterBandAccessors {
 
     public static Double getBandNoDataValue(GridCoverage2D raster) {
         return getBandNoDataValue(raster, 1);
+    }
+
+    public static int getCount(GridCoverage2D raster, int band, boolean excludeNoDataValue) {
+        int height = RasterAccessors.getHeight(raster), width = RasterAccessors.getWidth(raster);
+        if(excludeNoDataValue) {
+            ensureBand(raster, band);
+            int numberOfPixel = 0;
+
+            Double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
+            for(int j = 0; j < height; j++){
+                for(int i = 0; i < width; i++){
+
+                    double[] bandPixelValues = raster.evaluate(new GridCoordinates2D(i, j), (double[]) null);
+
+                    double bandValue = bandPixelValues[band - 1];
+                    if(bandNoDataValue == null || bandValue != bandNoDataValue){
+                        numberOfPixel += 1;
+                    }
+                }
+            }
+            return numberOfPixel;
+        } else {
+            // code for false
+            return width * height;
+        }
+    }
+
+    public static int getCount(GridCoverage2D raster) {
+        return getCount(raster, 1, true);
+    }
+
+    public static int getCount(GridCoverage2D raster, int band) {
+        return getCount(raster, band, true);
+    }
+
+    public static int getCount(GridCoverage2D raster, boolean excludeNoDataValue) {
+        return getCount(raster, 1, excludeNoDataValue);
     }
 
     public static String getBandType(GridCoverage2D raster, int band) {
