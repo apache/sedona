@@ -62,6 +62,11 @@ public class PixelFunctions
         return GEOMETRY_FACTORY.createPolygon(coordinateArray);
     }
 
+    public static Geometry getPixelAsCentroid(GridCoverage2D raster, int colX, int rowY) throws FactoryException, TransformException {
+        Geometry polygon = PixelFunctions.getPixelAsPolygon(raster, colX, rowY);
+        return  polygon.getCentroid();
+    }
+
     public static Geometry getPixelAsPoint(GridCoverage2D raster, int colX, int rowY) throws TransformException, FactoryException {
         int srid = RasterAccessors.srid(raster);
         Point2D point2D = RasterUtils.getWorldCornerCoordinatesWithRangeCheck(raster, colX, rowY);
