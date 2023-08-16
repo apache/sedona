@@ -615,12 +615,16 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_Count with raster") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")
-      var actual = df.selectExpr("RS_Count(raster, 1, true)").first().getInt(0)
-      var expected = 928192
+      var actual = df.selectExpr("RS_Count(raster, 1, false)").first().getLong(0)
+      var expected = 1036800
       assertEquals(expected, actual)
 
-      actual = df.selectExpr("RS_Count(raster, 1, false)").first().getInt(0)
-      expected = 1036800
+      actual = df.selectExpr("RS_Count(raster, 1)").first().getLong(0)
+      expected = 928192
+      assertEquals(expected, actual)
+
+      actual = df.selectExpr("RS_Count(raster)").first().getLong(0)
+      expected = 928192
       assertEquals(expected, actual)
     }
 

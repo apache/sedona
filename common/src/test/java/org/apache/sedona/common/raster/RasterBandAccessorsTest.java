@@ -82,8 +82,8 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         double[] values2 = new double[] {0, 0, 0, 6, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
         emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values1, 1, 0d);
         emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values2, 2, 0d);
-        int actual = RasterBandAccessors.getCount(emptyRaster, 1, false);
-        int expected = 25;
+        long actual = RasterBandAccessors.getCount(emptyRaster, 1, false);
+        long expected = 25;
         assertEquals(expected,actual);
 
         // with just band parameter
@@ -104,8 +104,8 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         double[] values2 = new double[] {0, 0, 0, 0, 3, 2, 5, 6, 0, 0, 3, 2, 0, 0, 2, 3, 0, 0, 0, 0, 0, 3, 4, 4, 3};
         emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values1, 1, 0d);
         emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values2, 2, 0d);
-        int actual = RasterBandAccessors.getCount(emptyRaster, 2, false);
-        int expected = 25;
+        long actual = RasterBandAccessors.getCount(emptyRaster, 2, false);
+        long expected = 25;
         assertEquals(expected, actual);
 
         // without excludeNoDataValue flag
@@ -122,8 +122,8 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     @Test
     public void testCountWithRaster() throws IOException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
-        int actual = RasterBandAccessors.getCount(raster, 1, false);
-        int expected = 1036800;
+        long actual = RasterBandAccessors.getCount(raster, 1, false);
+        long expected = 1036800;
         assertEquals(expected,actual);
 
         actual = RasterBandAccessors.getCount(raster, 1);

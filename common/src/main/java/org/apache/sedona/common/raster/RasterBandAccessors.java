@@ -40,11 +40,11 @@ public class RasterBandAccessors {
         return getBandNoDataValue(raster, 1);
     }
 
-    public static int getCount(GridCoverage2D raster, int band, boolean excludeNoDataValue) {
+    public static long getCount(GridCoverage2D raster, int band, boolean excludeNoDataValue) {
         int height = RasterAccessors.getHeight(raster), width = RasterAccessors.getWidth(raster);
         if(excludeNoDataValue) {
             ensureBand(raster, band);
-            int numberOfPixel = 0;
+            long numberOfPixel = 0;
             Double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
 
             for(int j = 0; j < height; j++){
@@ -64,17 +64,17 @@ public class RasterBandAccessors {
         }
     }
 
-    public static int getCount(GridCoverage2D raster) {
+    public static long getCount(GridCoverage2D raster) {
         return getCount(raster, 1, true);
     }
 
-    public static int getCount(GridCoverage2D raster, int band) {
+    public static long getCount(GridCoverage2D raster, int band) {
         return getCount(raster, band, true);
     }
 
 //    Removed for now as it InferredExpression doesn't support function with same arity but different argument types
 //    Will be added later once it is supported.
-//    public static int getCount(GridCoverage2D raster, boolean excludeNoDataValue) {
+//    public static Integer getCount(GridCoverage2D raster, boolean excludeNoDataValue) {
 //        return getCount(raster, 1, excludeNoDataValue);
 //    }
 
