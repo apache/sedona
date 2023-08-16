@@ -181,14 +181,12 @@ public class RasterPredicatesTest extends RasterTestBase {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 3857);
         Geometry geometry = geometryFactory.toGeometry(new Envelope(5, 10, 5, 10));
         GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 20, 20, 2, 22, 1, -1, 0, 0, 3857);
-        geometry = JTS.transform(geometry, CRS.findMathTransform(raster.getCoordinateReferenceSystem(), CRS.decode("EPSG:4326")));
-        geometry.setSRID(4326);
         boolean result = RasterPredicates.rsContains(raster, geometry);
         Assert.assertTrue(result);
 
         //geometry protruding out of the raster envelope
         geometry = geometryFactory.toGeometry(new Envelope(2, 20, 2, 25));
-        geometry = JTS.transform(geometry, CRS.findMathTransform(raster.getCoordinateReferenceSystem(), CRS.decode("EPSG:4326")));
+        geometry = JTS.transform(geometry, CRS.findMathTransform(raster.getCoordinateReferenceSystem(), CRS.decode("EPSG:4326", true)));
         geometry.setSRID(4326);
         result = RasterPredicates.rsContains(raster, geometry);
         Assert.assertFalse(result);
@@ -274,7 +272,7 @@ public class RasterPredicatesTest extends RasterTestBase {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
         Geometry geometry = geometryFactory.toGeometry(new Envelope(30, 60, 10, 50));
         GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 20, 20, 32, 35, 1, -1, 0, 0, 4326);
-        geometry = JTS.transform(geometry, CRS.findMathTransform(raster.getCoordinateReferenceSystem(), CRS.decode("EPSG:3857")));
+        geometry = JTS.transform(geometry, CRS.findMathTransform(raster.getCoordinateReferenceSystem(), CRS.decode("EPSG:3857", true)));
         geometry.setSRID(3857);
         boolean result = RasterPredicates.rsWithin(raster, geometry);
         Assert.assertTrue(result);

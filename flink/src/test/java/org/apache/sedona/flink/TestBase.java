@@ -104,8 +104,8 @@ public class TestBase {
     // Simulate some points in the US
     static List<Row> createPointText_real(int size){
         List<Row> data = new ArrayList<>();
-        double x = 32.0;
-        double y = -118.0;
+        double x = -118.0;
+        double y = 32.0;
         double increment = 10.0/size;
         for (int i = 0; i < size; i++) {
             x += increment;

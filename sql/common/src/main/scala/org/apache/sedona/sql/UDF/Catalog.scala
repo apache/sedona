@@ -71,7 +71,7 @@ object Catalog {
     function[ST_Length](),
     function[ST_Area](),
     function[ST_Centroid](),
-    function[ST_Transform](false),
+    function[ST_Transform](true),
     function[ST_Intersection](),
     function[ST_Difference](),
     function[ST_SymDifference](),
@@ -160,6 +160,7 @@ object Catalog {
     function[ST_Force3D](0.0),
     function[ST_NRings](),
     function[ST_Translate](0.0),
+    function[ST_VoronoiPolygons](0.0, null),
     function[ST_FrechetDistance](),
     function[ST_Affine](),
     function[ST_BoundingDiagonal](),
@@ -182,7 +183,7 @@ object Catalog {
     function[RS_Multiply](),
     function[RS_BitwiseAnd](),
     function[RS_BitwiseOr](),
-    function[RS_Count](),
+    function[RS_CountValue](),
     function[RS_Modulo](),
     function[RS_GetBand](),
     function[RS_SquareRoot](),
@@ -195,6 +196,7 @@ object Catalog {
     function[RS_Append](),
     function[RS_AddBandFromArray](),
     function[RS_BandAsArray](),
+    function[RS_MapAlgebra](null),
     function[RS_FromArcInfoAsciiGrid](),
     function[RS_FromGeoTiff](),
     function[RS_MakeEmptyRaster](),
@@ -216,7 +218,9 @@ object Catalog {
     function[RS_ScaleY](),
     function[RS_SkewX](),
     function[RS_SkewY](),
+    function[RS_GeoReference](),
     function[RS_PixelAsPoint](),
+    function[RS_PixelAsPolygon](),
     function[RS_ConvexHull](),
     function[RS_RasterToWorldCoordX](),
     function[RS_RasterToWorldCoordY](),
@@ -226,7 +230,8 @@ object Catalog {
     function[RS_WorldToRasterCoordX](),
     function[RS_WorldToRasterCoordY](),
     function[RS_BandNoDataValue](),
-    function[RS_BandPixelType]()
+    function[RS_BandPixelType](),
+    function[RS_MinConvexHull]()
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(

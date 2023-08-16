@@ -2219,20 +2219,65 @@ MULTIPOLYGON (((-2 -3, -3 -3, -3 3, -2 3, -2 -3)), ((3 -3, 3 3, 4 3, 4 -3, 3 -3)
 
 Introduction:
 
-Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS
-For SourceCRS and TargetCRS, WKT format is also available since v1.3.1.
+Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS. For SourceCRS and TargetCRS, WKT format is also available since v1.3.1.
+
+**Lon/Lat Order in the input geometry**
+
+If the input geometry is in lat/lon order, it might throw an error such as `too close to pole`, `latitude or longitude exceeded limits`, or give unexpected results. 
+You need to make sure that the input geometry is in lon/lat order. If the input geometry is in lat/lon order, you can use ==ST_FlipCoordinates== to swap X and Y.
+
+**Lon/Lat Order in the source and target CRS**
+
+Sedona will force the source and target CRS to be in lon/lat order. If the source CRS or target CRS is in lat/lon order, it will be swapped to lon/lat order.
+
+**CRS code**
+
+The CRS code is the code of the CRS in the official EPSG database (https://epsg.org/) in the format of `EPSG:XXXX`. A community tool [EPSG.io](https://epsg.io/) can help you quick identify a CRS code. For example, the code of WGS84 is `EPSG:4326`.
+
+**WKT format**
+
+You can also use OGC WKT v1 format to specify the source CRS and target CRS. An example OGC WKT v1 CRS of `EPGS:3857` is as follows:
+
+```
+PROJCS["WGS 84 / Pseudo-Mercator",
+    GEOGCS["WGS 84",
+        DATUM["WGS_1984",
+            SPHEROID["WGS 84",6378137,298.257223563,
+                AUTHORITY["EPSG","7030"]],
+            AUTHORITY["EPSG","6326"]],
+        PRIMEM["Greenwich",0,
+            AUTHORITY["EPSG","8901"]],
+        UNIT["degree",0.0174532925199433,
+            AUTHORITY["EPSG","9122"]],
+        AUTHORITY["EPSG","4326"]],
+    PROJECTION["Mercator_1SP"],
+    PARAMETER["central_meridian",0],
+    PARAMETER["scale_factor",1],
+    PARAMETER["false_easting",0],
+    PARAMETER["false_northing",0],
+    UNIT["metre",1,
+        AUTHORITY["EPSG","9001"]],
+    AXIS["Easting",EAST],
+    AXIS["Northing",NORTH],
+    EXTENSION["PROJ4","+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs"],
+    AUTHORITY["EPSG","3857"]]
+```
 
 !!!note
-    By default, this function uses lat/lon order. You can use ==ST_FlipCoordinates== to swap X and Y.
+    By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
 !!!note
-    If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.
+    By default, ==ST_Transform== follows the `lenient` mode which tries to fix issues by itself. You can append a boolean value at the end to enable the `strict` mode. In `strict` mode, ==ST_Transform== will throw an error if it finds any issue.
 
-Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] DisableError)`
+Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] lenientMode:bool)`
 
 Since: `v1.2.0`
 
 Example:
+
+```sql
+SELECT ST_AsText(ST_Transform(ST_GeomFromText('POLYGON((170 50,170 72,-130 72,-130 50,170 50))'),'EPSG:4326', 'EPSG:32649'))
+```
 
 ```sql
 SELECT ST_AsText(ST_Transform(ST_GeomFromText('POLYGON((170 50,170 72,-130 72,-130 50,170 50))'),'EPSG:4326', 'EPSG:32649', false))
@@ -2243,9 +2288,6 @@ Output:
 ```
 POLYGON ((8766047.980342899 17809098.336766362, 5122546.516721856 18580261.912528664, 3240775.0740796793 -13688660.50985159, 4556241.924514083 -12463044.21488129, 8766047.980342899 17809098.336766362))
 ```
-
-!!!note
-    The detailed EPSG information can be searched on [EPSG.io](https://epsg.io/).
 
 ## ST_Translate
 Introduction: Returns the input geometry with its X, Y and Z coordinates (if present in the geometry) translated by deltaX, deltaY and deltaZ (if specified)
@@ -2284,7 +2326,31 @@ Output:
 POINT (-70.01 44.37)
 ```
 
+## ST_VoronoiPolygons
 
+Introduction: Returns a two-dimensional Voronoi diagram from the vertices of the supplied geometry. The result is a GeometryCollection of Polygons that covers an envelope larger than the extent of the input vertices. Returns null if input geometry is null. Returns an empty geometry collection if the input geometry contains only one vertex. Returns an empty geometry collection if the extend_to envelope has zero area.
+
+
+Format: `ST_VoronoiPolygons(g1: geometry, tolerance: float , extend_to: geometry)`
+
+Optional parameters:
+'tolerance' : The distance within which vertices will be considered equivalent. Robustness of the algorithm can be improved by supplying a nonzero tolerance distance. (default = 0.0)
+
+'extend_to' : If a geometry is supplied as the "extend_to" parameter, the diagram will be extended to cover the envelope of the "extend_to" geometry, unless that envelope is smaller than the default envelope (default = NULL. By default, we extend the bounding box of the diagram by the max between bounding box's height and bounding box's width).
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT st_astext(ST_VoronoiPolygons(ST_GeomFromText('MULTIPOINT ((0 0), (1 1))')));
+```
+
+Output: 
+
+```
+GEOMETRYCOLLECTION(POLYGON((-1 2,2 -1,-1 -1,-1 2)),POLYGON((-1 2,2 2,2 -1,-1 2)))
+```
 
 ## ST_X
 

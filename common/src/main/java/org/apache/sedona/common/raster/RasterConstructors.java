@@ -23,25 +23,25 @@ import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.geotools.util.factory.Hints;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.datum.PixelInCell;
 import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.RasterFactory;
-import java.awt.image.DataBuffer;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 
 public class RasterConstructors
 {
     public static GridCoverage2D fromArcInfoAsciiGrid(byte[] bytes) throws IOException {
-        ArcGridReader reader = new ArcGridReader(new ByteArrayImageInputStream(bytes));
+        ArcGridReader reader = new ArcGridReader(new ByteArrayImageInputStream(bytes), new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE));
         return reader.read(null);
     }
 
     public static GridCoverage2D fromGeoTiff(byte[] bytes) throws IOException {
-        GeoTiffReader geoTiffReader = new GeoTiffReader(new ByteArrayImageInputStream(bytes));
+        GeoTiffReader geoTiffReader = new GeoTiffReader(new ByteArrayImageInputStream(bytes), new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE));
         return geoTiffReader.read(null);
     }
 
@@ -134,34 +134,18 @@ public class RasterConstructors
         if (srid == 0) {
             crs = DefaultEngineeringCRS.GENERIC_2D;
         } else {
-            crs = CRS.decode("EPSG:" + srid);
+            // Create the CRS from the srid
+            // Longitude first, Latitude second
+            crs = CRS.decode("EPSG:" + srid, true);
         }
 
         // Create a new empty raster
-        WritableRaster raster = RasterFactory.createBandedRaster(getDataTypeCode(bandDataType), widthInPixel, heightInPixel, numBand, null);
+        WritableRaster raster = RasterFactory.createBandedRaster(RasterUtils.getDataTypeCode(bandDataType), widthInPixel, heightInPixel, numBand, null);
         MathTransform transform = new AffineTransform2D(scaleX, skewY, skewX, scaleY, upperLeftX, upperLeftY);
         GridGeometry2D gridGeometry = new GridGeometry2D(
                 new GridEnvelope2D(0, 0, widthInPixel, heightInPixel),
                 PixelInCell.CELL_CORNER,
                 transform, crs, null);
         return RasterUtils.create(raster, gridGeometry, null);
-    }
-
-    private static int getDataTypeCode(String s) {
-        switch (s.toLowerCase()) {
-            case "d":
-                return 5;
-            case "i":
-                return 3;
-            case "b":
-                return 0;
-            case "f":
-                return 4;
-            case "s":
-                return 2;
-            case "us":
-                return 1;
-        }
-        return 5; // defaulting to double
     }
 }

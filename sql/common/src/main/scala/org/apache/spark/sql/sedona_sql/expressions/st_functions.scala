@@ -343,6 +343,18 @@ object st_functions extends DataFrameAPI {
 
   def ST_Translate(geometry: String, deltaX: Double, deltaY: Double): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, 0.0)
 
+  def ST_VoronoiPolygons(geometry: Column, tolerance : Column, extendTo: Column): Column = wrapExpression[ST_VoronoiPolygons](geometry, tolerance, extendTo)
+
+  def ST_VoronoiPolygons(geometry: String, tolerance : Double, extendTo: String): Column = wrapExpression[ST_VoronoiPolygons](geometry, tolerance, extendTo)
+
+  def ST_VoronoiPolygons(geometry: Column, tolerance : Column): Column = wrapExpression[ST_VoronoiPolygons](geometry, tolerance, null)
+
+  def ST_VoronoiPolygons(geometry: String, tolerance : Double): Column = wrapExpression[ST_VoronoiPolygons](geometry, tolerance, null)
+
+  def ST_VoronoiPolygons(geometry: Column): Column = wrapExpression[ST_VoronoiPolygons](geometry, 0.0, null)
+
+  def ST_VoronoiPolygons(geometry: String): Column = wrapExpression[ST_VoronoiPolygons](geometry, 0.0, null)
+
   def ST_FrechetDistance(g1: Column, g2: Column): Column = wrapExpression[ST_FrechetDistance](g1, g2)
 
   def ST_FrechetDistance(g1: String, g2: String): Column = wrapExpression[ST_FrechetDistance](g1, g2)

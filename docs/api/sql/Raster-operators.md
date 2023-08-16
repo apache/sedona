@@ -32,6 +32,28 @@ Output:
 IndexOutOfBoundsException: Specified pixel coordinates (6, 2) do not lie in the raster
 ```
 
+### RS_PixelAsPolygon
+
+Introduction: Returns a polygon geometry that bounds the specified pixel.
+The pixel coordinates specified are 1-indexed. 
+If `colX` and `rowY` are out of bounds for the raster, they are interpolated assuming the same skew and translate values.
+
+Format: `RS_PixelAsPolygon(raster: Raster, colX:int, rowY:int)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT ST_AsText(RS_PixelAsPolygon(RS_MakeEmptyRaster(1, 5, 10, 123, -230, 8), 2, 3)) FROM rasters
+```
+
+Output:
+
+```
+POLYGON ((131 -246, 139 -246, 139 -254, 131 -254, 131 -246))
+```
+
 ## Geometry Functions
 
 ### RS_Envelope
@@ -62,7 +84,7 @@ Since: `1.5.0`
 
 Spark SQL example:
 ```sql
-SELECT RS_ConvexHull(SELECT RS_PixelAsPoint(RS_MakeEmptyRaster(1, 5, 10, 156, -132, 5, 10, 3, 5, 0)));
+SELECT RS_ConvexHull(RS_MakeEmptyRaster(1, 5, 10, 156, -132, 5, 10, 3, 5, 0));
 ```
 
 Output:
@@ -70,7 +92,143 @@ Output:
 POLYGON ((156 -132, 181 -107, 211 -7, 186 -32, 156 -132))
 ```
 
+### RS_MinConvexHull
+
+Introduction: Returns the min convex hull geometry of the raster **excluding** the NoDataBandValue band pixels, in the given band.
+If no band is specified, all the bands are considered when creating the min convex hull of the raster. 
+The created geometry representing the min convex hull has world coordinates of the raster in its CRS as the corner coordinates. 
+
+!!!Note
+    If the specified band does not exist in the raster, RS_MinConvexHull throws an IllegalArgumentException
+
+Format: `RS_MinConvexHull(raster: Raster) | RS_MinConvexHull(raster: Raster, band: Int)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+
+
+```scala
+val inputDf = Seq((Seq(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+        Seq(0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0))).toDF("values2", "values1")
+inputDf.selectExpr("ST_AsText(RS_MinConvexHull(RS_AddBandFromArray(" +
+        "RS_AddBandFromArray(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), values1, 1, 0), values2, 2, 0))) as minConvexHullAll").show()
+```
+
+Output:
+```sql
++----------------------------------------+
+|minConvexHullAll                        |
++----------------------------------------+
+|POLYGON ((0 -1, 4 -1, 4 -5, 0 -5, 0 -1))|
++----------------------------------------+
+```
+
+```scala
+val inputDf = Seq((Seq(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+        Seq(0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0))).toDF("values2", "values1")
+inputDf.selectExpr("ST_AsText(RS_MinConvexHull(RS_AddBandFromArray(" +
+  "RS_AddBandFromArray(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), values1, 1, 0), values2, 2, 0), 1)) as minConvexHull1").show()
+```
+
+Output:
+```sql
++----------------------------------------+
+|minConvexHull1                          |
++----------------------------------------+
+|POLYGON ((1 -1, 4 -1, 4 -5, 1 -5, 1 -1))|
++----------------------------------------+
+```
+
+```sql
+SELECT RS_MinConvexHull(raster, 3) from rasters;
+```
+
+Output:
+```sql
+Provided band index 3 does not lie in the raster
+```
+
 ## Raster Accessors
+
+### RS_GeoReference
+
+Introduction: Returns the georeference metadata of raster as a string in GDAL or ESRI format. Default is GDAL if not specified.
+
+Format: `RS_GeoReference(raster: Raster, format:string)`
+
+Difference between format representation is as follows:
+
+`GDAL`
+
+```
+ScaleX 
+SkewY 
+SkewX 
+ScaleY 
+UpperLeftX
+UpperLeftY
+```
+
+`ESRI`
+
+```
+ScaleX 
+SkewY 
+SkewX 
+ScaleY 
+UpperLeftX + ScaleX * 0.5
+UpperLeftY + ScaleY * 0.5
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_GeoReference(ST_MakeEmptyRaster(1, 100, 100, -53, 51, 2, -2, 4, 5, 4326))
+```
+
+Output:
+
+```
+2.000000 
+5.000000 
+4.000000 
+-2.000000 
+-53.000000 
+51.000000
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_GeoReferrence(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2, 0), "GDAL")
+```
+
+Output:
+
+```
+2.000000 
+0.200000 
+0.100000 
+-3.000000 
+100.000000 
+200.000000
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_GeoReferrence(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2, 0), "ERSI")
+```
+
+```
+2.000000 
+0.200000 
+0.100000 
+-3.000000 
+101.000000 
+198.500000
+```
 
 ### RS_Height
 
@@ -676,7 +834,7 @@ Introduction: Add a band to a raster from an array of doubles.
 
 Format: `RS_AddBandFromArray (raster: Raster, band: Array[Double])` | `RS_AddBandFromArray (raster: Raster, band: Array[Double], bandIndex:Int)` | `RS_AddBandFromArray (raster: Raster, band: Array[Double], bandIndex:Int, noDataValue:Double)`
 
-Since: `v1.4.1`
+Since: `v1.5.0`
 
 The bandIndex is 1-based and must be between 1 and RS_NumBands(raster) + 1. It throws an exception if the bandIndex is out of range or the raster is null. If not specified, the noDataValue of the band is assumed to be null.
 
@@ -690,7 +848,10 @@ Modifying or Adding a customNoDataValue is also possible by giving an existing b
 
 In order to remove an existing noDataValue from an existing band, pass null as the noDataValue in the RS_AddBandFromArray.
 
-Note that: `bandIndex == RS_NumBands(raster) + 1` is an experimental feature and might not lead to the loss of raster metadata and properties such as color models.
+Note that: `bandIndex == RS_NumBands(raster) + 1` is an experimental feature and might lead to the loss of raster metadata and properties such as color models.
+
+!!!Note
+    RS_AddBandFromArray typecasts the double band values to the given datatype of the raster. This can lead to overflow values if values beyond the range of the raster's datatype are provided.
 
 SQL example:
 
@@ -708,6 +869,41 @@ Output:
 |GridCoverage2D["g...|
 +--------------------+
 ```
+
+### RS_MapAlgebra
+
+Introduction: Apply a map algebra script on a raster.
+
+Format: `RS_MapAlgebra (raster: Raster, pixelType: String, script: String)`
+
+Format: `RS_MapAlgebra (raster: Raster, pixelType: String, script: String, noDataValue: Double)`
+
+Since: `v1.5.0`
+
+`RS_MapAlgebra` runs a script on a raster. The script is written in a map algebra language called [Jiffle](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle). The script takes a raster
+as input and returns a raster of the same size as output. The script can be used to apply a map algebra expression on a raster. The input raster is named `rast` in the Jiffle script, and the output raster is named `out`.
+
+SQL example:
+
+Calculate the NDVI of a raster with 4 bands (R, G, B, NIR):
+
+```sql
+-- Assume that the input raster has 4 bands: R, G, B, NIR
+-- rast[0] refers to the R band, rast[3] refers to the NIR band.
+SELECT RS_MapAlgebra(rast, 'D', 'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);') AS ndvi FROM raster_table
+```
+
+Output:
+```
++--------------------+
+|              raster|
++--------------------+
+|GridCoverage2D["g...|
++--------------------+
+```
+
+For more details and examples about `RS_MapAlgebra`, please refer to the [Map Algebra documentation](../Raster-map-algebra/).
+To learn how to write map algebra script, please refer to [Jiffle language summary](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle---language-summary).
 
 ## Map Algebra operators
 
@@ -775,18 +971,18 @@ val biwiseorDF = spark.sql("select RS_BitwiseOR(band1, band2) as or from datafra
 
 ```
 
-### RS_Count
+### RS_CountValue
 
 Introduction: Returns count of a particular value from a spectral band in a raster image
 
-Format: `RS_Count (Band1: Array[Double], Target: Double)`
+Format: `RS_CountValue (Band1: Array[Double], Target: Double)`
 
 Since: `v1.1.0`
 
 Spark SQL example:
 ```scala
 
-val countDF = spark.sql("select RS_Count(band1, target) as count from dataframe")
+val countDF = spark.sql("select RS_CountValue(band1, target) as count from dataframe")
 
 ```
 

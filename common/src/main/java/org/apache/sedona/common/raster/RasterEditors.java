@@ -36,9 +36,9 @@ public class RasterEditors
     {
         CoordinateReferenceSystem crs;
         if (srid == 0) {
-            crs = DefaultEngineeringCRS.CARTESIAN_2D;
+            crs = DefaultEngineeringCRS.GENERIC_2D;
         } else {
-            crs = CRS.decode("EPSG:" + srid);
+            crs = CRS.decode("EPSG:" + srid, true);
         }
 
         GridCoverageFactory gridCoverageFactory = CoverageFactoryFinder.getGridCoverageFactory(null);

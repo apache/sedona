@@ -144,7 +144,7 @@ Use the following code to create a generic SpatialRDD:
 
 
 !!!note
-	The file extensions of .shp, .shx, .dbf must be in lowercase. Assume you have a shape file called ==myShapefile==, the file structure should be like this:
+	The path to the shapefile is the path to the folder that contains the .shp file, not the path to the .shp file itself. The file extensions of .shp, .shx, .dbf must be in lowercase. Assume you have a shape file called ==myShapefile==, the path should be `XXX/myShapefile`. The file structure should be like this:
 	
 	```
 	- shapefile1
@@ -202,6 +202,8 @@ For WKT/WKB/GeoJSON data, please use ==ST_GeomFromWKT / ST_GeomFromWKB / ST_Geom
 ## Transform the Coordinate Reference System
 
 Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in an SpatialRDD. The unit of all related distances in Sedona is same as the unit of all geometries in an SpatialRDD.
+
+By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order. You can use ==spatialRDD.flipCoordinates== to swap X and Y.
 
 To convert Coordinate Reference System of an SpatialRDD, use the following code:
 

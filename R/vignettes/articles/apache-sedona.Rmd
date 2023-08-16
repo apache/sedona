@@ -190,13 +190,13 @@ The dbplyr interface transparently translates dbplyr workflows into SQL, and giv
 Results are then collected back into R with `collect`.
 
 ```{r}
-## ! ST_FlipCoordinates needs to be called before st_transform as by default, this function uses lat/lon order
+## ! ST_transform uses lon/lat order since v1.5.0. Before, it used lat/lon order.
 data_tbl %>% 
   mutate(
     ALAND = ALAND %>% as.numeric(),
     AWATER = AWATER %>% as.numeric(),
     area = ALAND + AWATER,
-    geometry_proj = st_transform(ST_FlipCoordinates(geometry), "epsg:4326", "epsg:5070", TRUE),
+    geometry_proj = st_transform(geometry, "epsg:4326", "epsg:5070", TRUE),
     area_geom = st_area(geometry_proj)
     ) %>% 
   select(STATEFP, COUNTYFP, area, area_geom) %>% 
@@ -209,7 +209,7 @@ Geometries need to be converted to a serializable (text or binary) format before
 ## Setting the CRS in R post-collect
 data_tbl %>% 
   mutate(
-    area = st_area(st_transform(ST_FlipCoordinates(geometry), "epsg:4326", "epsg:5070", TRUE)),
+    area = st_area(st_transform(geometry, "epsg:4326", "epsg:5070", TRUE)),
     geometry_wkb = geometry %>% st_asBinary()
     ) %>% 
   select(COUNTYFP, geometry_wkb) %>% 
@@ -223,7 +223,7 @@ data_tbl %>%
 ## Setting the CRS in Spark (and using EWKT to keep it)
 data_tbl %>% 
   mutate(
-    area = st_area(st_transform(ST_FlipCoordinates(geometry), "epsg:4326", "epsg:5070", TRUE)),
+    area = st_area(st_transform(geometry, "epsg:4326", "epsg:5070", TRUE)),
     geometry_ewkt = geometry %>% st_setsrid(4326) %>% st_asewkt()
     ) %>% 
   select(COUNTYFP, geometry_ewkt) %>% 
