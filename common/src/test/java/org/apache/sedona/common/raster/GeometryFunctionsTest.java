@@ -21,8 +21,6 @@ package org.apache.sedona.common.raster;
 import org.apache.sedona.common.Functions;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -30,6 +28,9 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 public class GeometryFunctionsTest extends RasterTestBase {
 
@@ -74,6 +75,49 @@ public class GeometryFunctionsTest extends RasterTestBase {
 
         assertEquals(expectedCoordOne.getX(), coordinates[4].getX(), 0.5d);
         assertEquals(expectedCoordOne.getY(), coordinates[4].getY(), 0.5d);
+    }
+
+    @Test
+    public void testMinConvexHull() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0);
+        double[] values1 = new double[] {0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0};
+        double[] values2 = new double[] {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values1, 1, 0d);
+        emptyRaster  = MapAlgebra.addBandFromArray(emptyRaster, values2, 2, 0d);
+        Geometry minConvexHull1 = GeometryFunctions.minConvexHull(emptyRaster, 1);
+        Geometry minConvexHull2 = GeometryFunctions.minConvexHull(emptyRaster, 2);
+        Geometry minConvexHullAll = GeometryFunctions.minConvexHull(emptyRaster);
+        String expected1 = "POLYGON ((1 -1, 4 -1, 4 -5, 1 -5, 1 -1))";
+        String expected2 = "POLYGON ((0 -1, 4 -1, 4 -5, 0 -5, 0 -1))";
+        String expectedAll = "POLYGON ((0 -1, 4 -1, 4 -5, 0 -5, 0 -1))";
+        assertEquals(expected1, Functions.asWKT(minConvexHull1));
+        assertEquals(expected2, Functions.asWKT(minConvexHull2));
+        assertEquals(expectedAll, Functions.asWKT(minConvexHullAll));
+    }
+
+    @Test
+    public void testMinConvexHullRectange() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 5, 3, 0, 0, 1, -1, 0, 0, 0);
+        double[] values1 = new double[] {0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0};
+        double[] values2 = new double[] {0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0};
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values1, 1, 0d);
+        emptyRaster  = MapAlgebra.addBandFromArray(emptyRaster, values2, 2, 0d);
+        Geometry minConvexHull1 = GeometryFunctions.minConvexHull(emptyRaster, 1);
+        Geometry minConvexHull2 = GeometryFunctions.minConvexHull(emptyRaster, 2);
+        Geometry minConvexHullAll = GeometryFunctions.minConvexHull(emptyRaster);
+        String expected1 = "POLYGON ((1 -1, 4 -1, 4 -3, 1 -3, 1 -1))";
+        String expected2 = "POLYGON ((0 0, 4 0, 4 -3, 0 -3, 0 0))";
+        String expectedAll = "POLYGON ((0 0, 4 0, 4 -3, 0 -3, 0 0))";
+        assertEquals(expected1, Functions.asWKT(minConvexHull1));
+        assertEquals(expected2, Functions.asWKT(minConvexHull2));
+        assertEquals(expectedAll, Functions.asWKT(minConvexHullAll));
+    }
+
+    @Test
+    public void testMinConvexHullIllegalBand() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 5, 3, 0, 0, 1, -1, 0, 0, 0);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> GeometryFunctions.minConvexHull(emptyRaster, 3));
+        assertEquals("Provided band index 3 does not lie in the raster", exception.getMessage());
     }
 
     @Test

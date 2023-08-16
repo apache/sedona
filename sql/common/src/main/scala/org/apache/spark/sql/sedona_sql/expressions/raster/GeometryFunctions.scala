@@ -35,3 +35,9 @@ case class RS_Envelope(inputExpressions: Seq[Expression]) extends InferredExpres
   }
 }
 
+case class RS_MinConvexHull(inputExpressions: Seq[Expression]) extends InferredExpression(inferrableFunction2(GeometryFunctions.minConvexHull), inferrableFunction1(GeometryFunctions.minConvexHull)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+

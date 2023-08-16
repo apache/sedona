@@ -230,7 +230,8 @@ object Catalog {
     function[RS_WorldToRasterCoordX](),
     function[RS_WorldToRasterCoordY](),
     function[RS_BandNoDataValue](),
-    function[RS_BandPixelType]()
+    function[RS_BandPixelType](),
+    function[RS_MinConvexHull]()
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(

@@ -20,9 +20,11 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.utils.RasterUtils;
+import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.Envelope2D;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
@@ -59,6 +61,60 @@ public class GeometryFunctions {
         Coordinate coordFour = new Coordinate(point.getX(), point.getY());
 
         return geometryFactory.createPolygon(new Coordinate[] {coordOne, coordTwo, coordThree, coordFour, coordOne});
+    }
+
+    public static Geometry minConvexHull(GridCoverage2D raster, Integer band) throws FactoryException, TransformException {
+        boolean allBands = band == null;
+        if (!allBands) ensureSafeBand(raster, band);
+        int width = RasterAccessors.getWidth(raster), height = RasterAccessors.getHeight(raster), srid = RasterAccessors.srid(raster);
+        int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE, minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
+        for (int j = 0; j < height; j++) {
+            for (int i = 0; i < width; i++) {
+                // get the value of the raster at the coordinates i, j
+                //if value is not no data, update variables to track minX, maxX, minY, maxY
+                GridCoordinates2D currGridCoordinate = new GridCoordinates2D(i, j);
+                double[] bandPixelValues = raster.evaluate(currGridCoordinate, (double[]) null);
+                int start = band == null ? 1 : band;
+                int end = band == null ? RasterAccessors.numBands(raster) : band;
+                for (int currBand = start; currBand <= end; currBand++) {
+                    double currBandValue = bandPixelValues[currBand - 1];
+                    Double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(raster, currBand);
+                    if ((bandNoDataValue == null) || currBandValue != bandNoDataValue) {
+                        // getWorldCoordinates internally takes 1-indexed coordinates, increment and track
+                        minX = Math.min(minX, i + 1);
+                        maxX = Math.max(maxX, i + 1);
+                        minY = Math.min(minY, j + 1);
+                        maxY = Math.max(maxY, j + 1);
+                    }
+                }
+            }
+        }
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        Point2D worldUpperLeft = RasterUtils.getWorldCornerCoordinates(raster, minX, minY);
+        Point2D worldUpperRight = RasterUtils.getWorldCornerCoordinates(raster, maxX + 1, minY); // need upper right coordinate, which is upper left coordinate of x + 1 pixel
+        Point2D worldLowerRight = RasterUtils.getWorldCornerCoordinates(raster, maxX + 1, maxY + 1);
+        Point2D worldLowerLeft = RasterUtils.getWorldCornerCoordinates(raster, minX, maxY + 1); // need bottom left coordinate, which is upper left of y + 1 pixel
+        return geometryFactory.createPolygon(new LinearRing(new CoordinateArraySequence(new Coordinate[]{convertToCoordinate(worldUpperLeft), convertToCoordinate(worldUpperRight),
+                convertToCoordinate(worldLowerRight), convertToCoordinate(worldLowerLeft), convertToCoordinate(worldUpperLeft)}), geometryFactory));
+    }
+
+
+    private static Coordinate convertToCoordinate(Point2D point) {
+        double x = point.getX(), y = point.getY();
+        //Geotools returns 0 as -0 if scale is negative. Change it 0 instead to avoid confusion
+        if (Math.abs(x) == 0) x = 0;
+        if (Math.abs(y) == 0) y = 0;
+        return new Coordinate(x, y);
+    }
+
+    public static Geometry minConvexHull(GridCoverage2D raster) throws FactoryException, TransformException {
+        return minConvexHull(raster, null);
+    }
+
+    public static void ensureSafeBand(GridCoverage2D raster, int band) throws IllegalArgumentException {
+        if (RasterAccessors.numBands(raster) < band) {
+            throw new IllegalArgumentException(String.format("Provided band index %d does not lie in the raster", band));
+        }
     }
 
     public static Geometry envelope(GridCoverage2D raster) throws FactoryException {
