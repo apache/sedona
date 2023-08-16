@@ -20,12 +20,14 @@ package org.apache.spark.sql.sedona_sql.expressions.raster
 
 import org.apache.sedona.common.raster.MapAlgebra
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
+import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.{InferredExpression, UserDataGeneratator}
 import org.apache.spark.sql.types._
+
+import javax.media.jai.RasterFactory
 
 /// Calculate Normalized Difference between two bands
 case class RS_NormalizedDifference(inputExpressions: Seq[Expression])
@@ -315,7 +317,7 @@ case class RS_LessThanEqual(inputExpressions: Seq[Expression])
 }
 
 // Count number of occurrences of a particular value in a band
-case class RS_Count(inputExpressions: Seq[Expression])
+case class RS_CountValue(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
   assert(inputExpressions.length == 2)
 
@@ -812,6 +814,14 @@ case class RS_AddBandFromArray(inputExpressions: Seq[Expression])
 }
 
 case class RS_BandAsArray(inputExpressions: Seq[Expression]) extends InferredExpression(MapAlgebra.bandAsArray _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class RS_MapAlgebra(inputExpressions: Seq[Expression])
+  extends InferredExpression(nullTolerantInferrableFunction4(MapAlgebra.mapAlgebra)) {
+
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

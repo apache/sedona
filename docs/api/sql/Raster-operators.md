@@ -32,6 +32,28 @@ Output:
 IndexOutOfBoundsException: Specified pixel coordinates (6, 2) do not lie in the raster
 ```
 
+### RS_PixelAsPolygon
+
+Introduction: Returns a polygon geometry that bounds the specified pixel.
+The pixel coordinates specified are 1-indexed. 
+If `colX` and `rowY` are out of bounds for the raster, they are interpolated assuming the same skew and translate values.
+
+Format: `RS_PixelAsPolygon(raster: Raster, colX:int, rowY:int)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT ST_AsText(RS_PixelAsPolygon(RS_MakeEmptyRaster(1, 5, 10, 123, -230, 8), 2, 3)) FROM rasters
+```
+
+Output:
+
+```
+POLYGON ((131 -246, 139 -246, 139 -254, 131 -254, 131 -246))
+```
+
 ## Geometry Functions
 
 ### RS_Envelope
@@ -791,6 +813,41 @@ Output:
 +--------------------+
 ```
 
+### RS_MapAlgebra
+
+Introduction: Apply a map algebra script on a raster.
+
+Format: `RS_MapAlgebra (raster: Raster, pixelType: String, script: String)`
+
+Format: `RS_MapAlgebra (raster: Raster, pixelType: String, script: String, noDataValue: Double)`
+
+Since: `v1.5.0`
+
+`RS_MapAlgebra` runs a script on a raster. The script is written in a map algebra language called [Jiffle](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle). The script takes a raster
+as input and returns a raster of the same size as output. The script can be used to apply a map algebra expression on a raster. The input raster is named `rast` in the Jiffle script, and the output raster is named `out`.
+
+SQL example:
+
+Calculate the NDVI of a raster with 4 bands (R, G, B, NIR):
+
+```sql
+-- Assume that the input raster has 4 bands: R, G, B, NIR
+-- rast[0] refers to the R band, rast[3] refers to the NIR band.
+SELECT RS_MapAlgebra(rast, 'D', 'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);') AS ndvi FROM raster_table
+```
+
+Output:
+```
++--------------------+
+|              raster|
++--------------------+
+|GridCoverage2D["g...|
++--------------------+
+```
+
+For more details and examples about `RS_MapAlgebra`, please refer to the [Map Algebra documentation](../Raster-map-algebra/).
+To learn how to write map algebra script, please refer to [Jiffle language summary](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle---language-summary).
+
 ## Map Algebra operators
 
 Map algebra operators work on a single band of a raster. Each band is represented as an array of doubles. The operators return an array of doubles.
@@ -857,18 +914,18 @@ val biwiseorDF = spark.sql("select RS_BitwiseOR(band1, band2) as or from datafra
 
 ```
 
-### RS_Count
+### RS_CountValue
 
 Introduction: Returns count of a particular value from a spectral band in a raster image
 
-Format: `RS_Count (Band1: Array[Double], Target: Double)`
+Format: `RS_CountValue (Band1: Array[Double], Target: Double)`
 
 Since: `v1.1.0`
 
 Spark SQL example:
 ```scala
 
-val countDF = spark.sql("select RS_Count(band1, target) as count from dataframe")
+val countDF = spark.sql("select RS_CountValue(band1, target) as count from dataframe")
 
 ```
 

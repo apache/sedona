@@ -201,7 +201,7 @@ public class FunctionTest extends TestBase{
         Table pointTable = createPointTable_real(testDataSize);
         Table flippedTable = pointTable.select(call(Functions.ST_FlipCoordinates.class.getSimpleName(), $(pointColNames[0])));
         Geometry result = (Geometry) first(flippedTable).getField(0);
-        assertEquals("POINT (-117.99 32.01)", result.toString());
+        assertEquals("POINT (32.01 -117.99)", result.toString());
     }
 
     @Test
@@ -225,8 +225,8 @@ public class FunctionTest extends TestBase{
     public void testTransformWKT() throws FactoryException {
         Table pointTable = createPointTable_real(testDataSize);
 
-        CoordinateReferenceSystem CRS_SRC = CRS.decode("epsg:4326");
-        CoordinateReferenceSystem CRS_TGT = CRS.decode("epsg:3857");
+        CoordinateReferenceSystem CRS_SRC = CRS.decode("epsg:4326", true);
+        CoordinateReferenceSystem CRS_TGT = CRS.decode("epsg:3857", true);
 
         String SRC_WKT = CRS_SRC.toWKT();
         String TGT_WKT = CRS_TGT.toWKT();
@@ -383,7 +383,7 @@ public class FunctionTest extends TestBase{
         Table pointTable = createPointTable_real(testDataSize);
         Table surfaceTable = pointTable.select(call(Functions.ST_PointOnSurface.class.getSimpleName(), $(pointColNames[0])));
         Geometry result = (Geometry) first(surfaceTable).getField(0);
-        assertEquals("POINT (32.01 -117.99)", result.toString());
+        assertEquals("POINT (-117.99 32.01)", result.toString());
     }
 
     @Test
@@ -1008,6 +1008,29 @@ public class FunctionTest extends TestBase{
         String expected = "POLYGON ((3 5, 3 6, 4 6, 4 5, 3 5))";
         String actual = (String) first(polyTable).getField(0);
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testVoronoiPolygons() {
+        Table polyTable1 = tableEnv.sqlQuery("SELECT ST_VoronoiPolygons(ST_GeomFromWKT('MULTIPOINT ((0 0), (2 2))'))");
+        Geometry result = (Geometry) first(polyTable1).getField(0);
+        assertEquals("GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))", result.toString());
+        
+        Table polyTable2 = tableEnv.sqlQuery("SELECT ST_VoronoiPolygons(ST_GeomFromWKT('MULTIPOINT ((0 0), (2 2))'), 0, ST_Buffer(ST_GeomFromWKT('POINT(1 1)'), 10.0) )");
+        result = (Geometry) first(polyTable2).getField(0);
+        assertEquals("GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 -9, -9 -9)), POLYGON ((-9 11, 11 11, 11 -9, -9 11)))", result.toString());
+    
+        Table polyTable3 = tableEnv.sqlQuery("SELECT ST_VoronoiPolygons(ST_GeomFromWKT('MULTIPOINT ((0 0), (2 2))'), 30)");
+        result = (Geometry) first(polyTable3).getField(0);
+        assertEquals("GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 4, 4 -2, -2 -2)))", result.toString());
+
+        Table polyTable4 = tableEnv.sqlQuery("SELECT ST_VoronoiPolygons(ST_GeomFromWKT('MULTIPOINT ((0 0), (2 2))'), 30, ST_Buffer(ST_GeomFromWKT('POINT(1 1)'), 10) )");
+        result = (Geometry) first(polyTable4).getField(0);
+        assertEquals("GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 11, 11 -9, -9 -9)))", result.toString());
+        
+        Table polyTable5 = tableEnv.sqlQuery("SELECT ST_VoronoiPolygons(null, 30, ST_Buffer(ST_GeomFromWKT('POINT(1 1)'), 10))");
+        result = (Geometry) first(polyTable5).getField(0);
+        assertEquals(null, result);
     }
 
     @Test

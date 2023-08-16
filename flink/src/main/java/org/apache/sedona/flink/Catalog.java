@@ -131,6 +131,7 @@ public class Catalog {
                 new Functions.ST_Force3D(),
                 new Functions.ST_NRings(),
                 new Functions.ST_Translate(),
+                new Functions.ST_VoronoiPolygons(),
                 new Functions.ST_FrechetDistance(),
                 new Functions.ST_Affine(),
                 new Functions.ST_BoundingDiagonal(),

@@ -14,6 +14,7 @@
 package org.apache.sedona.common.raster;
 
 import com.sun.media.jai.util.ImageUtil;
+import it.geosolutions.jaiext.range.NoDataContainer;
 
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
@@ -334,17 +335,23 @@ public final class DeepCopiedRenderedImage implements RenderedImage, Serializabl
         boolean propertiesCloned = false;
         Enumeration<String> keys = propertyTable.keys();
         while (keys.hasMoreElements()) {
-            Object key = keys.nextElement();
-            if (!(this.properties.get(key) instanceof Serializable)) {
+            String key = keys.nextElement();
+            Object value = this.properties.get(key);
+            if (!(value instanceof Serializable)) {
                 if (!propertiesCloned) {
                     propertyTable = (Hashtable<String, Object>) this.properties.clone();
                     propertiesCloned = true;
                 }
-                propertyTable.remove(key);
+                // GC_NODATA is a special property used by GeoTools. We need to serialize it.
+                if (value instanceof NoDataContainer) {
+                    NoDataContainer noDataContainer = (NoDataContainer) value;
+                    propertyTable.put(key, new SingleValueNoDataContainer(noDataContainer.getAsSingleValue()));
+                } else {
+                    propertyTable.remove(key);
+                }
             }
         }
 
-        out.writeObject(SerializerFactory.getState(this.sampleModel, null));
         out.writeObject(SerializerFactory.getState(this.colorModel, null));
         out.writeObject(propertyTable);
         if (this.source != null) {
@@ -369,15 +376,40 @@ public final class DeepCopiedRenderedImage implements RenderedImage, Serializabl
     @SuppressWarnings("unchecked")
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         this.source = null;
-        this.colorModel = null;
         in.defaultReadObject();
 
-        SerializableState smState = (SerializableState)in.readObject();
-        this.sampleModel = (SampleModel)smState.getObject();
         SerializableState cmState = (SerializableState)in.readObject();
         this.colorModel = (ColorModel)cmState.getObject();
         this.properties = (Hashtable<String, Object>)in.readObject();
+        for (String key : this.properties.keySet()) {
+            Object value = this.properties.get(key);
+            // Restore the value of GC_NODATA property as a NoDataContainer object.
+            if (value instanceof SingleValueNoDataContainer) {
+                SingleValueNoDataContainer noDataContainer = (SingleValueNoDataContainer) value;
+                this.properties.put(key, new NoDataContainer(noDataContainer.singleValue));
+            }
+        }
         SerializableState rasState = (SerializableState)in.readObject();
         this.imageRaster = (Raster)rasState.getObject();
+
+        // The deserialized rendered image contains only one tile (imageRaster). We need to update
+        // the sample model and tile properties to reflect this.
+        this.sampleModel = this.imageRaster.getSampleModel();
+        this.tileWidth = this.width;
+        this.tileHeight = this.height;
+        this.numXTiles = 1;
+        this.numYTiles = 1;
+    }
+
+    /**
+     * This class is for serializing NoDataContainer objects. It is mainly used to serialize the value of
+     * GC_NODATA property. We only considered the case where the NoDataContainer object contains only one
+     * value. However, it will cover most of the real world cases.
+     */
+    private static class SingleValueNoDataContainer implements Serializable {
+        private final double singleValue;
+        SingleValueNoDataContainer(double value) {
+            singleValue = value;
+        }
     }
 }

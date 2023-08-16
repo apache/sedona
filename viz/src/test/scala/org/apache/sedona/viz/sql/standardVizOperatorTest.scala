@@ -65,10 +65,10 @@ class standardVizOperatorTest extends TestBaseScala {
           |LATERAL VIEW
           | EXPLODE(
           |  ST_Pixelize(
-          |   ST_Transform(ST_FlipCoordinates(shape), 'epsg:4326','epsg:3857'),
+          |   ST_Transform(shape, 'epsg:4326','epsg:3857'),
           |   256,
           |   256,
-          |   (SELECT ST_Transform(ST_FlipCoordinates(bound), 'epsg:4326','epsg:3857') FROM boundtable)
+          |   (SELECT ST_Transform(bound, 'epsg:4326','epsg:3857') FROM boundtable)
           |  )) AS pixel
         """.stripMargin).createOrReplaceTempView("pixels")
       spark.sql(
