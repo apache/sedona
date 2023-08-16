@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -72,6 +73,46 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> RasterBandAccessors.getBandNoDataValue(raster, 2));
         assertEquals("Provided band index 2 is not present in the raster", exception.getMessage());
+    }
+
+    @Test
+    public void testCountWithEmptyRaster() throws FactoryException {
+        // With each parameter and excludeNoDataValue as true
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0);
+        double[] values1 = new double[] {0, 0, 0, 5, 0, 0, 1, 0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0};
+        double[] values2 = new double[] {0, 0, 0, 6, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values1, 1, 0d);
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values2, 2, 0d);
+        int actual = RasterBandAccessors.getCount(emptyRaster, 1, false);
+        int expected = 25;
+        assertEquals(expected,actual);
+
+        // with just band parameter
+        actual = RasterBandAccessors.getCount(emptyRaster, 2);
+        expected = 4;
+        assertEquals(expected, actual);
+
+        // with no parameters except raster
+        actual = RasterBandAccessors.getCount(emptyRaster);
+        expected = 6;
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testCountWithRaster() throws IOException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+        int actual = RasterBandAccessors.getCount(raster, 1, false);
+        int expected = 1036800;
+        assertEquals(expected,actual);
+
+        actual = RasterBandAccessors.getCount(raster, 1);
+        expected = 928192;
+        assertEquals(expected,actual);
+
+        actual = RasterBandAccessors.getCount(raster);
+        expected = 928192;
+        assertEquals(expected, actual);
+
     }
 
     @Test
