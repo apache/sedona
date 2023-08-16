@@ -529,7 +529,10 @@ Introduction: Returns the number of pixels in a given band. If band is not speci
     If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster. 
     Set excludeNoDataValue to `false` to get count of all pixels in raster.
 
-Format: `RS_Count(raster: Raster, band: int, excludeNoDataValue: boolean)`
+!!!Note
+    If the mentioned band index doesn't exist, this will throw an `IllegalArgumentException`.
+
+Format: `RS_Count(raster: Raster, band: int = 1, excludeNoDataValue: boolean = true)`
 
 Since: `v1.5.0`
 
