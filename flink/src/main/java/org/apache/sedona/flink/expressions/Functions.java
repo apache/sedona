@@ -20,8 +20,7 @@ import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.operation.buffer.BufferParameters;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
+
 
 public class Functions {
     public static class GeometryType extends ScalarFunction {
@@ -328,23 +327,6 @@ public class Functions {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.nDims(geom);
         }
-    }
-
-    public static class ST_Transform extends ScalarFunction {
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("String") String sourceCRS, @DataTypeHint("String") String targetCRS)
-            throws FactoryException, TransformException {
-            Geometry geom = (Geometry) o;
-            return FunctionsGeoTools.transform(geom, sourceCRS, targetCRS);
-        }
-
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("String") String sourceCRS, @DataTypeHint("String") String targetCRS, @DataTypeHint("Boolean") Boolean lenient)
-                throws FactoryException, TransformException {
-            Geometry geom = (Geometry) o;
-            return FunctionsGeoTools.transform(geom, sourceCRS, targetCRS, lenient);
-        }
-
     }
 
     public static class ST_FlipCoordinates extends ScalarFunction {
