@@ -925,20 +925,20 @@ public class Functions {
                              @DataTypeHint("Double") Double tolerance, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object extend) {
             Geometry geom= (Geometry) o;
             Geometry extendTo= (Geometry) extend;
-            return org.apache.sedona.common.Functions.voronoiPolygons(geom, tolerance, extendTo);
+            return FunctionsGeoTools.voronoiPolygons(geom, tolerance, extendTo);
         }
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
                              @DataTypeHint("Double") Double tolerance) {
             Geometry geom= (Geometry) o;
-            return org.apache.sedona.common.Functions.voronoiPolygons(geom, tolerance, null);
+            return FunctionsGeoTools.voronoiPolygons(geom, tolerance, null);
         }
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom= (Geometry) o;
-            return org.apache.sedona.common.Functions.voronoiPolygons(geom, 0, null);
+            return FunctionsGeoTools.voronoiPolygons(geom, 0, null);
         }
     }
 

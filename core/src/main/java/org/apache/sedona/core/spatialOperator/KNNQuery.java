@@ -19,7 +19,7 @@
 
 package org.apache.sedona.core.spatialOperator;
 
-import org.apache.sedona.common.Functions;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.core.knnJudgement.GeometryDistanceComparator;
 import org.apache.sedona.core.knnJudgement.KnnJudgement;
 import org.apache.sedona.core.knnJudgement.KnnJudgementUsingIndex;
@@ -55,7 +55,7 @@ public class KNNQuery
         U queryCenter = originalQueryPoint;
         if (spatialRDD.getCRStransformation()) {
             try {
-                queryCenter = (U) Functions.transform(originalQueryPoint, spatialRDD.getSourceEpsgCode(), spatialRDD.getTargetEpgsgCode());
+                queryCenter = (U) FunctionsGeoTools.transform(originalQueryPoint, spatialRDD.getSourceEpsgCode(), spatialRDD.getTargetEpgsgCode());
             }
             catch (FactoryException | TransformException e) {
                 throw new RuntimeException(e);

@@ -19,7 +19,7 @@
 package org.apache.sedona.common.utils;
 
 import com.sun.media.imageioimpl.common.BogusColorSpace;
-import org.apache.sedona.common.Functions;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.geotools.coverage.Category;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
@@ -293,7 +293,7 @@ public class RasterUtils {
         // In Sedona raster, we do implicit CRS transform if the geometry has a SRID and the raster has a CRS
         if (targetCRS != null && !(targetCRS instanceof DefaultEngineeringCRS) && geomSRID > 0) {
             try {
-                geometry = Functions.transformToGivenTarget(geometry, null, targetCRS, true);
+                geometry = FunctionsGeoTools.transformToGivenTarget(geometry, null, targetCRS, true);
             } catch (FactoryException | TransformException e) {
                 throw new RuntimeException("Cannot transform CRS of query window", e);
             }
