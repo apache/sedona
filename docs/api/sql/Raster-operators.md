@@ -521,6 +521,44 @@ SELECT RS_BandPixelType(RS_MakeEmptyRaster(2, "I", 5, 5, 53, 51, 1, 1, 0, 0, 0),
 
 Output: `IllegalArgumentException: Provided band index 3 is not present in the raster`
 
+### RS_Count
+
+Introduction: Returns the number of pixels in a given band. If band is not specified then it defaults to `1`.
+
+!!!Note
+    If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster. 
+    Set excludeNoDataValue to `false` to get count of all pixels in raster.
+
+Format: `RS_Count(raster: Raster, band: int, excludeNoDataValue: boolean)`
+
+Format: `RS_Count(raster: Raster, excludeNoDataValue: boolean)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_Count(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1, false)
+```
+
+Output:
+
+```
+25
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_Count(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1)
+```
+
+Output:
+
+```
+6
+```
+
 
 ## Raster based operators
 
