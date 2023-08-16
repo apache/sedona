@@ -439,6 +439,8 @@ Sedona doesn't control the coordinate unit (degree-based or meter-based) of all 
 
 By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order. You can use ==ST_FlipCoordinates== to swap X and Y.
 
+For more details, please read the `ST_Transform` section in Sedona API References.
+
 To convert Coordinate Reference System of the Geometry column created before, use the following code:
 
 ```sql

@@ -23,6 +23,7 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.projection.ProjectionException;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
 import org.opengis.referencing.FactoryException;
@@ -1690,5 +1691,27 @@ public class FunctionsTest {
 
         Geometry actual5 = Functions.voronoiPolygons(null, 0, null);
         assertEquals(null, actual5);
+    }
+
+    @Test
+    public void testt()
+            throws FactoryException, TransformException
+    {
+        Coordinate[] coordinates = new Coordinate[]{
+                new Coordinate(-88.331492, 32.324142),
+                new Coordinate(-88.175933, 32.360763),
+                new Coordinate(-88.388954, 32.357073),
+                new Coordinate(-88.221102, 32.35078),
+                new Coordinate(-88.323995, 32.950671)
+        };
+
+        CoordinateArraySequence arraySequence = new CoordinateArraySequence(coordinates);
+
+        // Now you can use arraySequence in other JTS operations.
+        for (int i = 0; i < arraySequence.size(); i++) {
+            Coordinate coord = arraySequence.getCoordinate(i);
+            Geometry point = Functions.transform(GEOMETRY_FACTORY.createPoint(coord), "EPSG:4326", "EPSG:3857");
+            System.out.println(point.toText());
+        }
     }
 }
