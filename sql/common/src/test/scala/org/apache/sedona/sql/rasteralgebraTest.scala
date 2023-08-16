@@ -112,10 +112,10 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
     }
 
-    it("Passed RS_Count") {
+    it("Passed RS_CountValue") {
       var inputDf = Seq((Seq(200.0, 400.0, 600.0, 200.0, 600.0, 600.0, 800.0))).toDF("Band")
-      val expectedDF = Seq(3).toDF("Count")
-      inputDf = inputDf.selectExpr("RS_Count(Band, 600.0) as Count")
+      val expectedDF = Seq(3).toDF("CountValue")
+      inputDf = inputDf.selectExpr("RS_CountValue(Band, 600.0) as CountValue")
       assert(inputDf.first().getAs[Int](0) == expectedDF.first().getAs[Int](0))
     }
   }
