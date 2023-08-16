@@ -21,6 +21,7 @@ package org.apache.sedona.core.spatialRDD;
 
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.log4j.Logger;
+import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
@@ -153,29 +154,11 @@ public class SpatialRDD<T extends Geometry>
      */
     public boolean CRSTransform(String sourceEpsgCRSCode, String targetEpsgCRSCode, boolean lenient)
     {
-        try {
-            CoordinateReferenceSystem sourceCRS = CRS.decode(sourceEpsgCRSCode);
-            CoordinateReferenceSystem targetCRS = CRS.decode(targetEpsgCRSCode);
-            final MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, lenient);
-            this.CRStransformation = true;
-            this.sourceEpsgCode = sourceEpsgCRSCode;
-            this.targetEpgsgCode = targetEpsgCRSCode;
-            this.rawSpatialRDD = this.rawSpatialRDD.map(new Function<T, T>()
-            {
-                @Override
-                public T call(T originalObject)
-                        throws Exception
-                {
-                    return (T) JTS.transform(originalObject, transform);
-                }
-            });
-            return true;
-        }
-        catch (FactoryException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return false;
-        }
+        this.CRStransformation = true;
+        this.sourceEpsgCode = sourceEpsgCRSCode;
+        this.targetEpgsgCode = targetEpsgCRSCode;
+        this.rawSpatialRDD = this.rawSpatialRDD.map((geom) -> (T) Functions.transform(geom, sourceEpsgCRSCode, targetEpgsgCode, lenient));
+        return true;
     }
 
     /**

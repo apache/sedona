@@ -184,7 +184,7 @@ class TestPredicateJoin(TestBase):
         polygon_df.createOrReplaceTempView("polygondf")
         polygon_df.show()
         function_df = self.spark.sql(
-            "select ST_Transform(ST_FlipCoordinates(polygondf.countyshape), 'epsg:4326','epsg:3857', false) from polygondf")
+            "select ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857', false) from polygondf")
         function_df.show()
 
     def test_st_intersection_intersects_but_not_contains(self):
@@ -1177,6 +1177,12 @@ class TestPredicateJoin(TestBase):
         expected = "POLYGON ((3 5, 3 6, 4 6, 4 5, 3 5))"
         actual_df = self.spark.sql(
             "SELECT ST_Translate(ST_GeomFromText('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'), 2, 5) AS geom")
+        actual = actual_df.selectExpr("ST_AsText(geom)").take(1)[0][0]
+        assert expected == actual
+
+    def test_voronoiPolygons(self):
+        expected = "GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))"
+        actual_df = self.spark.sql("SELECT ST_VoronoiPolygons(ST_GeomFromText('MULTIPOINT (0 0, 2 2)')) AS geom")
         actual = actual_df.selectExpr("ST_AsText(geom)").take(1)[0][0]
         assert expected == actual
 

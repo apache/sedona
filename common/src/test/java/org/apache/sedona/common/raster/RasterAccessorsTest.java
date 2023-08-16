@@ -174,7 +174,7 @@ public class RasterAccessorsTest extends RasterTestBase
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0, srid);
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
         Geometry point = geometryFactory.createPoint(new Coordinate(longitude, latitude));
-        point = JTS.transform(point, CRS.findMathTransform(emptyRaster.getCoordinateReferenceSystem(), CRS.decode("EPSG:3857")));
+        point = JTS.transform(point, CRS.findMathTransform(emptyRaster.getCoordinateReferenceSystem(), CRS.decode("EPSG:3857", true)));
         point.setSRID(3857);
         Coordinate coords = RasterAccessors.getGridCoord(emptyRaster, point).getCoordinate();
         assertEquals(7, coords.getX(), 1e-9);

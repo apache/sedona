@@ -21,14 +21,13 @@ package org.apache.sedona.sql
 
 import org.apache.commons.codec.binary.Hex
 import org.apache.sedona.sql.implicits._
-import org.apache.spark.sql.catalyst.expressions.{GenericRow, GenericRowWithSchema}
+import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.sedona_sql.expressions.ST_Degrees
 import org.apache.spark.sql.{DataFrame, Row}
 import org.geotools.referencing.CRS
 import org.junit.Assert.assertEquals
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
-import org.locationtech.jts.geom.{Geometry, Polygon}
+import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon}
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.distance3d.Distance3DOp
@@ -189,52 +188,44 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
 
     it("Passed ST_Transform") {
-      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
-      polygonWktDf.createOrReplaceTempView("polygontable")
-      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-      polygonDf.createOrReplaceTempView("polygondf")
-      val polygon = "POLYGON ((110.54671 55.818002, 110.54671 55.143743, 110.940494 55.143743, 110.940494 55.818002, 110.54671 55.818002))"
-      // Floats don't have an exact decimal representation. String format varies across jvm:s. Do an approximate match.
-      val forceXYExpect = "POLYGON \\(\\(471596.69167460\\d* 6185916.95119\\d*, 471107.562364\\d* 6110880.97422\\d*, 496207.10915\\d* 6110788.80471\\d*, 496271.3193704\\d* 6185825.6056\\d*, 471596.6916746\\d* 6185916.95119\\d*\\)\\)"
-
-      sparkSession.createDataset(Seq(polygon))
-        .withColumn("geom", expr("ST_GeomFromWKT(value)"))
-        .createOrReplaceTempView("df")
-
-      val forceXYResult = sparkSession.sql(s"""select ST_Transform(ST_FlipCoordinates(ST_geomFromWKT('$polygon')),'EPSG:4326', 'EPSG:32649', false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
-      forceXYResult should fullyMatch regex(forceXYExpect)
+      val point = "POINT (120 60)"
+      val transformedResult = sparkSession.sql(s"""select ST_Transform(ST_geomFromWKT('$point'),'EPSG:4326', 'EPSG:3857', false)""").rdd.map(row => row.getAs[Geometry](0)).collect()(0)
+      println(transformedResult)
+      assertEquals(1.3358338895192828E7, transformedResult.getCoordinate.x, FP_TOLERANCE)
+      assertEquals(8399737.889818355, transformedResult.getCoordinate.y, FP_TOLERANCE)
     }
 
     it("Passed ST_transform WKT version"){
-      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
-      polygonWktDf.createOrReplaceTempView("polygontable")
-      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-      polygonDf.createOrReplaceTempView("polygondf")
-      val polygon = "POLYGON ((110.54671 55.818002, 110.54671 55.143743, 110.940494 55.143743, 110.940494 55.818002, 110.54671 55.818002))"
-      val forceXYExpect = "POLYGON \\(\\(471596.6916746\\d* 6185916.95119\\d*, 471107.562364\\d* 6110880.97422\\d*, 496207.10915\\d* 6110788.80471\\d*, 496271.319370\\d* 6185825.6056\\d*, 471596.6916746\\d* 6185916.95119\\d*\\)\\)"
-
-      val EPSG_TGT_CRS = CRS.decode("EPSG:32649")
+      val polygon = "POLYGON ((120 60, 121 61, 122 62, 123 63, 124 64, 120 60))"
+      val geometryFactory = new GeometryFactory
+      val coords = new Array[Coordinate](6)
+      coords(0) = new Coordinate(1000961.4042164611, 6685590.893548286)
+      coords(1) = new Coordinate(1039394.2790044537, 6804110.988854166)
+      coords(2) = new Coordinate(1074157.4382441062, 6923060.447921266)
+      coords(3) = new Coordinate(1105199.4259604653, 7042351.1239674715)
+      coords(4) = new Coordinate(1132473.1932022288, 7161889.652860963)
+      coords(5) = coords(0)
+      val polygonExpected = geometryFactory.createPolygon(coords)
+      val EPSG_TGT_CRS = CRS.decode("EPSG:32649", true)
       val EPSG_TGT_WKT = EPSG_TGT_CRS.toWKT()
-      val EPSG_SRC_CRS = CRS.decode("EPSG:4326")
+      val EPSG_SRC_CRS = CRS.decode("EPSG:4326", true)
       val EPSG_SRC_WKT = EPSG_SRC_CRS.toWKT()
 
       sparkSession.createDataset(Seq(polygon))
         .withColumn("geom", expr("ST_GeomFromWKT(value)"))
         .createOrReplaceTempView("df")
+      val result_TGT_WKT = sparkSession.sql(s"""select ST_Transform(ST_geomFromWKT('$polygon'),'EPSG:4326', '$EPSG_TGT_WKT', false)""").rdd.map(row => row.getAs[Geometry](0)).collect()(0)
+      assertEquals(0, result_TGT_WKT.compareTo(polygonExpected, COORDINATE_SEQUENCE_COMPARATOR))
 
-      val forceXYResult_TGT_WKT = sparkSession.sql(s"""select ST_Transform(ST_FlipCoordinates(ST_geomFromWKT('$polygon')),'EPSG:4326', '$EPSG_TGT_WKT', false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
-      forceXYResult_TGT_WKT should fullyMatch regex(forceXYExpect)
+      val result_SRC_WKT = sparkSession.sql(s"""select ST_Transform(ST_geomFromWKT('$polygon'),'$EPSG_SRC_WKT', 'EPSG:32649', false)""").rdd.map(row => row.getAs[Geometry](0)).collect()(0)
+      assertEquals(0, result_SRC_WKT.compareTo(polygonExpected, COORDINATE_SEQUENCE_COMPARATOR))
 
-      val forceXYResult_SRC_WKT = sparkSession.sql(s"""select ST_Transform(ST_FlipCoordinates(ST_geomFromWKT('$polygon')),'$EPSG_SRC_WKT', 'EPSG:32649', false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
-      forceXYResult_SRC_WKT should fullyMatch regex(forceXYExpect)
-
-      val forceXYResult_SRC_TGT_WKT = sparkSession.sql(s"""select ST_Transform(ST_FlipCoordinates(ST_geomFromWKT('$polygon')),'$EPSG_SRC_WKT', '$EPSG_TGT_WKT', false)""").rdd.map(row => row.getAs[Geometry](0).toString).collect()(0)
-      forceXYResult_SRC_TGT_WKT should fullyMatch regex(forceXYExpect)
-
+      val result_SRC_TGT_WKT = sparkSession.sql(s"""select ST_Transform(ST_geomFromWKT('$polygon'),'$EPSG_SRC_WKT', '$EPSG_TGT_WKT', false)""").rdd.map(row => row.getAs[Geometry](0)).collect()(0)
+      assertEquals(0, result_SRC_TGT_WKT.compareTo(polygonExpected, COORDINATE_SEQUENCE_COMPARATOR))
     }
 
     it("Passed Function exception check"){
-      val EPSG_TGT_CRS = CRS.decode("EPSG:32649")
+      val EPSG_TGT_CRS = CRS.decode("EPSG:32649", true)
       val EPSG_TGT_WKT = EPSG_TGT_CRS.toWKT()
       val epsgFactoryErrorString = EPSG_TGT_WKT.substring(0,EPSG_TGT_WKT.length() - 1)
       val epsgString = "EPSG:4326"
@@ -2036,6 +2027,37 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       val expectedDefaultValue = dfDefaultValue.take(1)(0).get(1).asInstanceOf[GenericRowWithSchema].get(1).asInstanceOf[String]
       assertEquals(expected, actual)
       assertEquals(expectedDefaultValue, actualDefaultValue)
+    }
+  }
+
+  it ("should pass ST_VoronoiPolygons") {
+    val geomTestCases = Map(
+      ("'MULTIPOINT ((0 0), (2 2))'", 0.0) -> ("GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))"),
+      ("'MULTIPOINT ((0 0), (2 2))'", 30) -> ("GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 4, 4 -2, -2 -2)))"),
+      ("'LINESTRING EMPTY'", 0.0) -> ("GEOMETRYCOLLECTION EMPTY")
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val g1 = geom._1
+      val tolerance = geom._2
+      val df = sparkSession.sql(s"SELECT ST_AsText(ST_VoronoiPolygons(ST_GeomFromWKT($g1), ($tolerance)))")
+      val actual = df.take(1)(0).get(0).asInstanceOf[String]
+      assertEquals(expectedResult, actual)
+    }
+  }
+
+  it ("should pass ST_VoronoiPolygons with Extend Geometry") {
+    val geomTestCases = Map(
+      ("'MULTIPOINT ((0 0), (2 2))'", 0.0, "'POINT(1 1)'") -> ("GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 -9, -9 -9)), POLYGON ((-9 11, 11 11, 11 -9, -9 11)))"),
+      ("'MULTIPOINT ((0 0), (2 2))'", 30, "'POINT(1 1)'") -> ("GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 11, 11 -9, -9 -9)))"),
+      ("'LINESTRING EMPTY'", 0.0, "'POINT(1 1)'") -> ("GEOMETRYCOLLECTION EMPTY")
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val g1 = geom._1
+      val tolerance = geom._2
+      val extendTo = geom._3
+      val df = sparkSession.sql(s"SELECT ST_AsText(ST_VoronoiPolygons(ST_GeomFromWKT($g1), $tolerance, ST_Buffer(ST_GeomFromWKT($extendTo), 10.0)))")
+      val actual = df.take(1)(0).get(0).asInstanceOf[String]
+      assertEquals(expectedResult, actual)
     }
   }
 

@@ -160,7 +160,7 @@ public class CRSTransformationTest
             gridType = GridType.getGridType(prop.getProperty("gridType"));
             indexType = IndexType.getIndexType(prop.getProperty("indexType"));
             numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
-            queryEnvelope = new Envelope(30.01, 40.01, -90.01, -80.01);
+            queryEnvelope = new Envelope(-90.01, -80.01, 30.01, 40.01);
             loopTimes = 1;
         }
         catch (IOException ex) {
@@ -203,6 +203,7 @@ public class CRSTransformationTest
             throws Exception
     {
         PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true);
+        spatialRDD.flipCoordinates();
         spatialRDD.CRSTransform( "epsg:4326", "epsg:3005");
         long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).count();
         assert resultSize == 3127;

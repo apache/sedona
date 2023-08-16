@@ -19,6 +19,7 @@
 package org.apache.sedona.common.utils;
 
 import com.sun.media.imageioimpl.common.BogusColorSpace;
+import org.apache.sedona.common.Functions;
 import org.geotools.coverage.Category;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
@@ -28,7 +29,6 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.DirectPosition2D;
-import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.util.ClassChanger;
@@ -284,14 +284,16 @@ public class RasterUtils {
         return gridCoords;
     }
 
-    public static Geometry convertCRSIfNeeded(Geometry geometry, CoordinateReferenceSystem rasterCRS) {
+    public static Geometry convertCRSIfNeeded(Geometry geometry, CoordinateReferenceSystem targetCRS) {
         int geomSRID = geometry.getSRID();
-        if (rasterCRS != null && !(rasterCRS instanceof DefaultEngineeringCRS) && geomSRID > 0) {
+        // If the geometry has a SRID and it is not the same as the raster CRS, we need to transform the geometry
+        // to the raster CRS.
+        // Note that:
+        // In Sedona vector, we do not perform implicit CRS transform. Everything must be done explicitly via ST_Transform
+        // In Sedona raster, we do implicit CRS transform if the geometry has a SRID and the raster has a CRS
+        if (targetCRS != null && !(targetCRS instanceof DefaultEngineeringCRS) && geomSRID > 0) {
             try {
-                CoordinateReferenceSystem queryWindowCRS = CRS.decode("EPSG:" + geomSRID);
-                if (!CRS.equalsIgnoreMetadata(rasterCRS, queryWindowCRS)) {
-                    geometry = GeomUtils.transform(geometry, queryWindowCRS, rasterCRS, true);
-                }
+                geometry = Functions.transformToGivenTarget(geometry, null, targetCRS, true);
             } catch (FactoryException | TransformException e) {
                 throw new RuntimeException("Cannot transform CRS of query window", e);
             }

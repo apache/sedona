@@ -74,21 +74,11 @@ public class GeometryFunctions {
                 //if value is not no data, update variables to track minX, maxX, minY, maxY
                 GridCoordinates2D currGridCoordinate = new GridCoordinates2D(i, j);
                 double[] bandPixelValues = raster.evaluate(currGridCoordinate, (double[]) null);
-                if (allBands) {
-                    for (int currBand = 1; currBand <= RasterAccessors.numBands(raster); currBand++) {
-                        double currBandValue = bandPixelValues[currBand - 1];
-                        Double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(raster, currBand);
-                        if ((bandNoDataValue == null) || currBandValue != bandNoDataValue) {
-                            // getWorldCoordinates internally takes 1-indexed coordinates, increment and track
-                            minX = Math.min(minX, i + 1);
-                            maxX = Math.max(maxX, i + 1);
-                            minY = Math.min(minY, j + 1);
-                            maxY = Math.max(maxY, j + 1);
-                        }
-                    }
-                }else {
-                    double currBandValue = bandPixelValues[band - 1];
-                    Double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
+                int start = band == null ? 1 : band;
+                int end = band == null ? RasterAccessors.numBands(raster) : band;
+                for (int currBand = start; currBand <= end; currBand++) {
+                    double currBandValue = bandPixelValues[currBand - 1];
+                    Double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(raster, currBand);
                     if ((bandNoDataValue == null) || currBandValue != bandNoDataValue) {
                         // getWorldCoordinates internally takes 1-indexed coordinates, increment and track
                         minX = Math.min(minX, i + 1);

@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.sedona.common.raster.MapAlgebra
 import org.apache.sedona.common.utils.RasterUtils
 import org.apache.spark.sql.functions.{collect_list, expr}
 import org.geotools.coverage.grid.GridCoverage2D
@@ -25,6 +26,7 @@ import org.junit.Assert.{assertEquals, assertNull}
 import org.locationtech.jts.geom.{Coordinate, Geometry}
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
+import java.awt.image.DataBuffer
 import scala.collection.mutable
 
 
@@ -110,10 +112,10 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
     }
 
-    it("Passed RS_Count") {
+    it("Passed RS_CountValue") {
       var inputDf = Seq((Seq(200.0, 400.0, 600.0, 200.0, 600.0, 600.0, 800.0))).toDF("Band")
-      val expectedDF = Seq(3).toDF("Count")
-      inputDf = inputDf.selectExpr("RS_Count(Band, 600.0) as Count")
+      val expectedDF = Seq(3).toDF("CountValue")
+      inputDf = inputDf.selectExpr("RS_CountValue(Band, 600.0) as CountValue")
       assert(inputDf.first().getAs[Int](0) == expectedDF.first().getAs[Int](0))
     }
   }
@@ -554,8 +556,8 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(!df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(-13057457,4027023), 3857))").first().getBoolean(0))
 
       // query window and raster not in the same CRS
-      assert(df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(33.81798,-117.47993), 4326))").first().getBoolean(0))
-      assert(!df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(33.97896,-117.27868), 4326))").first().getBoolean(0))
+      assert(df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(-117.47993, 33.81798), 4326))").first().getBoolean(0))
+      assert(!df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(-117.27868, 33.97896), 4326))").first().getBoolean(0))
     }
 
     it("Passed RS_AddBandFromArray collect generated raster") {
@@ -637,6 +639,18 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val actualCoordinates = result.getCoordinate;
       assertEquals(expectedX, actualCoordinates.x, 1e-5)
       assertEquals(expectedY, actualCoordinates.y, 1e-5)
+    }
+
+    it("Passed RS_PixelAsPolygon with raster") {
+      val widthInPixel = 5
+      val heightInPixel = 10
+      val upperLeftX = 123.19
+      val upperLeftY = -12
+      val cellSize = 4
+      val numBands = 2
+      val result = sparkSession.sql(s"SELECT ST_AsText(RS_PixelAsPolygon(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 2, 3))").first().getString(0);
+      val expected = "POLYGON ((127.19000244140625 -20, 131.19000244140625 -20, 131.19000244140625 -24, 127.19000244140625 -24, 127.19000244140625 -20))"
+      assertEquals(expected, result)
     }
 
     it("Passed RS_RasterToWorldCoordX with raster") {
@@ -744,6 +758,72 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")
       val result = df.selectExpr("RS_BandPixelType(raster)").first().getString(0)
       assertEquals("UNSIGNED_8BITS", result)
+    }
+
+    it("Passed RS_MapAlgebra") {
+      val df = sparkSession.read.format("binaryFile")
+        .option("recursiveFileLookup", "true")
+        .option("pathGlobFilter", "*.tif*")
+        .load(resourceFolder + "raster")
+        .selectExpr("path", "RS_FromGeoTiff(content) as rast")
+      Seq(null, "b", "s", "i", "f", "d").foreach { pixelType =>
+        val pixelTypeExpr = if (pixelType == null) null else s"'$pixelType'"
+        val dfResult = df.withColumn("rast_2", expr(s"RS_MapAlgebra(rast, $pixelTypeExpr, 'out[0] = rast[0] * 0.5;')"))
+          .select("path", "rast", "rast_2")
+        dfResult.collect().foreach { row =>
+          val rast = row.getAs[GridCoverage2D]("rast")
+          val rast2 = row.getAs[GridCoverage2D]("rast_2")
+          assert(rast.getGridGeometry.getGridToCRS2D == rast2.getGridGeometry.getGridToCRS2D)
+          val dataType = pixelType match {
+            case null => rast.getRenderedImage.getSampleModel.getDataType
+            case _ => RasterUtils.getDataTypeCode(pixelType)
+          }
+          assert(rast2.getRenderedImage.getSampleModel.getDataType == dataType)
+          val noDataValue = RasterUtils.getNoDataValue(rast2.getSampleDimension(0))
+          assert(noDataValue.isNaN)
+          val band = MapAlgebra.bandAsArray(rast, 1)
+          val band2 = MapAlgebra.bandAsArray(rast2, 1)
+          assert(band.size == band2.size)
+          for (i <- band.indices) {
+            pixelType match {
+              case "b" => assert(((band(i) * 0.5).toInt & 0xFF) == band2(i).toInt)
+              case "s" => assert((band(i) * 0.5).toShort == band2(i))
+              case "i" | null => assert((band(i) * 0.5).toInt == band2(i))
+              case "f" | "d" =>
+                if (band(i) != 0) {
+                  assert((band(i) * 0.5) == band2(i))
+                } else {
+                  // If the source image has NoDataContainer.GC_NODATA property, Jiffle may convert nodata values in
+                  // source raster to NaN.
+                  assert(band2(i) == 0 || band2(i).isNaN)
+                }
+            }
+          }
+        }
+      }
+    }
+
+    it("Passed RS_MapAlgebra with nodata value") {
+      val df = sparkSession.read.format("binaryFile")
+        .option("recursiveFileLookup", "true")
+        .option("pathGlobFilter", "*.tif*")
+        .load(resourceFolder + "raster")
+        .selectExpr("RS_FromGeoTiff(content) as rast")
+      val dfResult = df.withColumn("rast_2", expr("RS_MapAlgebra(rast, 'us', 'out[0] = rast[0] * 0.2;', 10)"))
+        .select("rast", "rast_2")
+      dfResult.collect().foreach { row =>
+        val rast = row.getAs[GridCoverage2D]("rast")
+        val rast2 = row.getAs[GridCoverage2D]("rast_2")
+        assert(rast2.getRenderedImage.getSampleModel.getDataType == DataBuffer.TYPE_USHORT)
+        val noDataValue = RasterUtils.getNoDataValue(rast2.getSampleDimension(0))
+        assert(noDataValue == 10)
+        val band = MapAlgebra.bandAsArray(rast, 1)
+        val band2 = MapAlgebra.bandAsArray(rast2, 1)
+        assert(band.size == band2.size)
+        for (i <- band.indices) {
+          assert((band(i) * 0.2).toShort == band2(i))
+        }
+      }
     }
   }
 }

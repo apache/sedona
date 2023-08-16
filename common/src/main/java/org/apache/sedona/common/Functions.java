@@ -14,7 +14,6 @@
 package org.apache.sedona.common;
 
 import com.google.common.geometry.S2CellId;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
@@ -24,9 +23,23 @@ import org.apache.sedona.common.utils.GeometrySplitter;
 import org.apache.sedona.common.utils.S2Utils;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.geotools.referencing.ReferencingFactoryFinder;
+import org.geotools.util.factory.Hints;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.hull.ConcaveHull;
-import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.io.gml2.GMLWriter;
@@ -39,6 +52,7 @@ import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
+import org.locationtech.jts.triangulate.VoronoiDiagramBuilder;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -46,7 +60,10 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.geometry.S2.DBL_EPSILON;
@@ -184,29 +201,70 @@ public class Functions {
         return min == Double.MAX_VALUE ? null : min;
     }
 
+    public static Geometry transform(Geometry geometry, String targetCRS)
+            throws FactoryException, TransformException {
+        return transform(geometry, null, targetCRS, true);
+    }
+
     public static Geometry transform(Geometry geometry, String sourceCRS, String targetCRS)
         throws FactoryException, TransformException {
-        return transform(geometry, sourceCRS, targetCRS, false);
+        return transform(geometry, sourceCRS, targetCRS, true);
     }
 
-
-    public static Geometry transform(Geometry geometry, String sourceCRS, String targetCRS, boolean lenient)
+    public static Geometry transform(Geometry geometry, String sourceCRScode, String targetCRScode, boolean lenient)
         throws FactoryException, TransformException {
-        CoordinateReferenceSystem sourceCRSCode = parseCRSString(sourceCRS);
-        CoordinateReferenceSystem targetCRScode = parseCRSString(targetCRS);
-        return GeomUtils.transform(geometry, sourceCRSCode, targetCRScode, lenient);
+        CoordinateReferenceSystem targetCRS = parseCRSString(targetCRScode);
+        return transformToGivenTarget(geometry, sourceCRScode, targetCRS, lenient);
     }
 
+    /**
+     * Transform a geometry from one CRS to another. If sourceCRS is not specified, it will be
+     * extracted from the geometry. If lenient is true, the transformation will be lenient.
+     * This function is used by the implicit CRS transformation in Sedona rasters.
+     * @param geometry
+     * @param sourceCRScode
+     * @param targetCRS
+     * @param lenient
+     * @return
+     * @throws FactoryException
+     * @throws TransformException
+     */
+    public static Geometry transformToGivenTarget(Geometry geometry, String sourceCRScode, CoordinateReferenceSystem targetCRS, boolean lenient)
+            throws FactoryException, TransformException
+    {
+        // If sourceCRS is not specified, try to get it from the geometry
+        if (sourceCRScode == null) {
+            int srid = geometry.getSRID();
+            if (srid != 0) {
+                sourceCRScode = "epsg:" + srid;
+            }
+            else {
+                // If SRID is not set, throw an exception
+                throw new IllegalArgumentException("Source CRS must be specified. No SRID found on geometry.");
+            }
+        }
+        CoordinateReferenceSystem sourceCRS = parseCRSString(sourceCRScode);
+        // If sourceCRS and targetCRS are equal, return the geometry unchanged
+        if (!CRS.equalsIgnoreMetadata(sourceCRS, targetCRS)) {
+            MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, lenient);
+            return JTS.transform(geometry, transform);
+        }
+        else return geometry;
+    }
 
     private static CoordinateReferenceSystem parseCRSString(String CRSString)
             throws FactoryException
     {
         try {
-            return CRS.decode(CRSString);
+            // Try to parse as a well-known CRS code
+            // Longitude first, then latitude
+            return CRS.decode(CRSString, true);
         }
         catch (NoSuchAuthorityCodeException e) {
             try {
-                return CRS.parseWKT(CRSString);
+                // Try to parse as a WKT CRS string, longitude first
+                Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
+                return ReferencingFactoryFinder.getCRSFactory(hints).createFromWKT(CRSString);
             }
             catch (FactoryException ex) {
                 throw new FactoryException("First failed to read as a well-known CRS code: \n" + e.getMessage() + "\nThen failed to read as a WKT CRS string: \n" + ex.getMessage());
@@ -1094,4 +1152,22 @@ public class Functions {
         return GeomUtils.getHausdorffDistance(g1, g2, -1);
     }
 
+    public static Geometry voronoiPolygons(Geometry geom, double tolerance, Geometry extendTo) {
+        if(geom == null) {
+            return null;
+        }
+        VoronoiDiagramBuilder builder = new VoronoiDiagramBuilder();
+        builder.setSites(geom);
+        builder.setTolerance(tolerance);
+        if (extendTo != null) {
+            builder.setClipEnvelope(extendTo.getEnvelopeInternal());
+        }
+        else{
+            Envelope e = geom.getEnvelopeInternal();
+            e.expandBy(Math.max(e.getWidth(), e.getHeight()));
+            builder.setClipEnvelope(e);
+        }
+        return builder.getDiagram(GEOMETRY_FACTORY);
+    }
+    
 }
