@@ -182,7 +182,7 @@ object Catalog {
     function[RS_Multiply](),
     function[RS_BitwiseAnd](),
     function[RS_BitwiseOr](),
-    function[RS_Count](),
+    function[RS_CountValue](),
     function[RS_Modulo](),
     function[RS_GetBand](),
     function[RS_SquareRoot](),

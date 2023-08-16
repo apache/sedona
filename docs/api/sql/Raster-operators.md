@@ -857,18 +857,18 @@ val biwiseorDF = spark.sql("select RS_BitwiseOR(band1, band2) as or from datafra
 
 ```
 
-### RS_Count
+### RS_CountValue
 
 Introduction: Returns count of a particular value from a spectral band in a raster image
 
-Format: `RS_Count (Band1: Array[Double], Target: Double)`
+Format: `RS_CountValue (Band1: Array[Double], Target: Double)`
 
 Since: `v1.1.0`
 
 Spark SQL example:
 ```scala
 
-val countDF = spark.sql("select RS_Count(band1, target) as count from dataframe")
+val countDF = spark.sql("select RS_CountValue(band1, target) as count from dataframe")
 
 ```
 
