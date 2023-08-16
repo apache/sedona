@@ -98,6 +98,28 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     }
 
     @Test
+    public void testCountWithEmptySkewedRaster() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster( 2, 5, 5, 23, -25, 1, -1, 2, 2, 0);
+        double[] values1 = new double[] {0, 0, 0, 3, 4, 6, 0, 3, 2, 0, 0, 0, 0, 3, 4, 5, 0, 0, 0, 0, 0, 2, 2, 0, 0};
+        double[] values2 = new double[] {0, 0, 0, 0, 3, 2, 5, 6, 0, 0, 3, 2, 0, 0, 2, 3, 0, 0, 0, 0, 0, 3, 4, 4, 3};
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values1, 1, 0d);
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values2, 2, 0d);
+        int actual = RasterBandAccessors.getCount(emptyRaster, 2, false);
+        int expected = 25;
+        assertEquals(expected, actual);
+
+        // without excludeNoDataValue flag
+        actual = RasterBandAccessors.getCount(emptyRaster, 1);
+        expected = 10;
+        assertEquals(expected, actual);
+
+        // just with raster
+        actual = RasterBandAccessors.getCount(emptyRaster);
+        expected = 10;
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testCountWithRaster() throws IOException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
         int actual = RasterBandAccessors.getCount(raster, 1, false);
