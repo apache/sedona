@@ -17,6 +17,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.api.Table;
 import org.apache.sedona.flink.expressions.Functions;
+import org.apache.sedona.flink.expressions.FunctionsGeoTools;
 import org.geotools.referencing.CRS;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -215,7 +216,7 @@ public class FunctionTest extends TestBase{
     @Test
     public void testTransform() {
         Table pointTable = createPointTable_real(testDataSize);
-        Table transformedTable = pointTable.select(call(Functions.ST_Transform.class.getSimpleName(), $(pointColNames[0])
+        Table transformedTable = pointTable.select(call(FunctionsGeoTools.ST_Transform.class.getSimpleName(), $(pointColNames[0])
                 , "epsg:4326", "epsg:3857"));
         String result = first(transformedTable).getField(0).toString();
         assertEquals("POINT (-13134586.718698347 3764623.3541299687)", result);
@@ -231,22 +232,22 @@ public class FunctionTest extends TestBase{
         String SRC_WKT = CRS_SRC.toWKT();
         String TGT_WKT = CRS_TGT.toWKT();
 
-        Table transformedTable_SRC = pointTable.select(call(Functions.ST_Transform.class.getSimpleName(), $(pointColNames[0])
+        Table transformedTable_SRC = pointTable.select(call(FunctionsGeoTools.ST_Transform.class.getSimpleName(), $(pointColNames[0])
                 , SRC_WKT, "epsg:3857"));
         String result_SRC = first(transformedTable_SRC).getField(0).toString();
         assertEquals("POINT (-13134586.718698347 3764623.3541299687)", result_SRC);
 
-        Table transformedTable_TGT = pointTable.select(call(Functions.ST_Transform.class.getSimpleName(), $(pointColNames[0])
+        Table transformedTable_TGT = pointTable.select(call(FunctionsGeoTools.ST_Transform.class.getSimpleName(), $(pointColNames[0])
                 , "epsg:4326", TGT_WKT));
         String result_TGT = first(transformedTable_TGT).getField(0).toString();
         assertEquals("POINT (-13134586.718698347 3764623.3541299687)", result_TGT);
 
-        Table transformedTable_SRC_TGT = pointTable.select(call(Functions.ST_Transform.class.getSimpleName(), $(pointColNames[0])
+        Table transformedTable_SRC_TGT = pointTable.select(call(FunctionsGeoTools.ST_Transform.class.getSimpleName(), $(pointColNames[0])
                 , SRC_WKT, TGT_WKT));
         String result_SRC_TGT = first(transformedTable_SRC_TGT).getField(0).toString();
         assertEquals("POINT (-13134586.718698347 3764623.3541299687)", result_SRC_TGT);
 
-        Table transformedTable_SRC_TGT_lenient = pointTable.select(call(Functions.ST_Transform.class.getSimpleName(), $(pointColNames[0])
+        Table transformedTable_SRC_TGT_lenient = pointTable.select(call(FunctionsGeoTools.ST_Transform.class.getSimpleName(), $(pointColNames[0])
                 , SRC_WKT, TGT_WKT,false));
         String result_SRC_TGT_lenient = first(transformedTable_SRC_TGT_lenient).getField(0).toString();
         assertEquals("POINT (-13134586.718698347 3764623.3541299687)", result_SRC_TGT_lenient);

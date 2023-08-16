@@ -17,10 +17,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.annotation.InputGroup;
 import org.apache.flink.table.functions.ScalarFunction;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.operation.buffer.BufferParameters;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
+
 
 public class Functions {
     public static class GeometryType extends ScalarFunction {
@@ -327,23 +327,6 @@ public class Functions {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.nDims(geom);
         }
-    }
-
-    public static class ST_Transform extends ScalarFunction {
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("String") String sourceCRS, @DataTypeHint("String") String targetCRS)
-            throws FactoryException, TransformException {
-            Geometry geom = (Geometry) o;
-            return org.apache.sedona.common.Functions.transform(geom, sourceCRS, targetCRS);
-        }
-
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("String") String sourceCRS, @DataTypeHint("String") String targetCRS, @DataTypeHint("Boolean") Boolean lenient)
-                throws FactoryException, TransformException {
-            Geometry geom = (Geometry) o;
-            return org.apache.sedona.common.Functions.transform(geom, sourceCRS, targetCRS, lenient);
-        }
-
     }
 
     public static class ST_FlipCoordinates extends ScalarFunction {
@@ -924,20 +907,20 @@ public class Functions {
                              @DataTypeHint("Double") Double tolerance, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object extend) {
             Geometry geom= (Geometry) o;
             Geometry extendTo= (Geometry) extend;
-            return org.apache.sedona.common.Functions.voronoiPolygons(geom, tolerance, extendTo);
+            return FunctionsGeoTools.voronoiPolygons(geom, tolerance, extendTo);
         }
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
                              @DataTypeHint("Double") Double tolerance) {
             Geometry geom= (Geometry) o;
-            return org.apache.sedona.common.Functions.voronoiPolygons(geom, tolerance, null);
+            return FunctionsGeoTools.voronoiPolygons(geom, tolerance, null);
         }
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom= (Geometry) o;
-            return org.apache.sedona.common.Functions.voronoiPolygons(geom, 0, null);
+            return FunctionsGeoTools.voronoiPolygons(geom, 0, null);
         }
     }
 
