@@ -72,9 +72,11 @@ public class RasterBandAccessors {
         return getCount(raster, band, true);
     }
 
-    public static int getCount(GridCoverage2D raster, boolean excludeNoDataValue) {
-        return getCount(raster, 1, excludeNoDataValue);
-    }
+//    Removed for now as it InferredExpression doesn't support function with same arity but different argument types
+//    Will be added later once it is supported.
+//    public static int getCount(GridCoverage2D raster, boolean excludeNoDataValue) {
+//        return getCount(raster, 1, excludeNoDataValue);
+//    }
 
     public static String getBandType(GridCoverage2D raster, int band) {
         ensureBand(raster, band);

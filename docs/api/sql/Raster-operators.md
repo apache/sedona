@@ -531,8 +531,6 @@ Introduction: Returns the number of pixels in a given band. If band is not speci
 
 Format: `RS_Count(raster: Raster, band: int, excludeNoDataValue: boolean)`
 
-Format: `RS_Count(raster: Raster, excludeNoDataValue: boolean)`
-
 Since: `v1.5.0`
 
 Spark SQL Example:
