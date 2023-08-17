@@ -106,12 +106,69 @@ Since: `1.5.0`
 
 Spark SQL example:
 ```sql
-SELECT RS_ConvexHull(SELECT RS_PixelAsPoint(RS_MakeEmptyRaster(1, 5, 10, 156, -132, 5, 10, 3, 5, 0)));
+SELECT RS_ConvexHull(RS_MakeEmptyRaster(1, 5, 10, 156, -132, 5, 10, 3, 5, 0));
 ```
 
 Output:
 ```
 POLYGON ((156 -132, 181 -107, 211 -7, 186 -32, 156 -132))
+```
+
+### RS_MinConvexHull
+
+Introduction: Returns the min convex hull geometry of the raster **excluding** the NoDataBandValue band pixels, in the given band.
+If no band is specified, all the bands are considered when creating the min convex hull of the raster. 
+The created geometry representing the min convex hull has world coordinates of the raster in its CRS as the corner coordinates. 
+
+!!!Note
+    If the specified band does not exist in the raster, RS_MinConvexHull throws an IllegalArgumentException
+
+Format: `RS_MinConvexHull(raster: Raster) | RS_MinConvexHull(raster: Raster, band: Int)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+
+
+```scala
+val inputDf = Seq((Seq(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+        Seq(0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0))).toDF("values2", "values1")
+inputDf.selectExpr("ST_AsText(RS_MinConvexHull(RS_AddBandFromArray(" +
+        "RS_AddBandFromArray(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), values1, 1, 0), values2, 2, 0))) as minConvexHullAll").show()
+```
+
+Output:
+```sql
++----------------------------------------+
+|minConvexHullAll                        |
++----------------------------------------+
+|POLYGON ((0 -1, 4 -1, 4 -5, 0 -5, 0 -1))|
++----------------------------------------+
+```
+
+```scala
+val inputDf = Seq((Seq(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+        Seq(0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0))).toDF("values2", "values1")
+inputDf.selectExpr("ST_AsText(RS_MinConvexHull(RS_AddBandFromArray(" +
+  "RS_AddBandFromArray(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), values1, 1, 0), values2, 2, 0), 1)) as minConvexHull1").show()
+```
+
+Output:
+```sql
++----------------------------------------+
+|minConvexHull1                          |
++----------------------------------------+
+|POLYGON ((1 -1, 4 -1, 4 -5, 1 -5, 1 -1))|
++----------------------------------------+
+```
+
+```sql
+SELECT RS_MinConvexHull(raster, 3) from rasters;
+```
+
+Output:
+```sql
+Provided band index 3 does not lie in the raster
 ```
 
 ## Raster Accessors
@@ -542,6 +599,51 @@ SELECT RS_BandPixelType(RS_MakeEmptyRaster(2, "I", 5, 5, 53, 51, 1, 1, 0, 0, 0),
 ```
 
 Output: `IllegalArgumentException: Provided band index 3 is not present in the raster`
+
+### RS_Count
+
+Introduction: Returns the number of pixels in a given band. If band is not specified then it defaults to `1`.
+
+!!!Note
+    If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster. 
+    Set excludeNoDataValue to `false` to get count of all pixels in raster.
+
+!!!Note
+    If the mentioned band index doesn't exist, this will throw an `IllegalArgumentException`.
+
+Format: 
+
+`RS_Count(raster: Raster, band: int = 1, excludeNoDataValue: boolean = true)`
+
+`RS_Count(raster: Raster, band: int = 1)`
+
+`RS_Count(raster: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_Count(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1, false)
+```
+
+Output:
+
+```
+25
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_Count(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1)
+```
+
+Output:
+
+```
+6
+```
 
 
 ## Raster based operators

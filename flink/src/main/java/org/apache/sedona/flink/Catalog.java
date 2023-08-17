@@ -67,7 +67,7 @@ public class Catalog {
                 new Functions.ST_Length(),
                 new Functions.ST_LengthSpheroid(),
                 new Functions.ST_LineInterpolatePoint(),
-                new Functions.ST_Transform(),
+                new FunctionsGeoTools.ST_Transform(),
                 new Functions.ST_FlipCoordinates(),
                 new Functions.ST_GeoHash(),
                 new Functions.ST_PointOnSurface(),

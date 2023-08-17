@@ -585,6 +585,20 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expected, result, 1e-9)
     }
 
+    it("Passed RS_MinConvexHull") {
+      val inputDf = Seq((Seq(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+        Seq(0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0))).toDF("values2", "values1")
+
+      val minConvexHullAll = inputDf.selectExpr("ST_AsText(RS_MinConvexHull(RS_AddBandFromArray(" +
+        "RS_AddBandFromArray(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), values1, 1, 0), values2, 2, 0))) as minConvexHullAll").first().getString(0)
+      val minConvexHull1 = inputDf.selectExpr("ST_AsText(RS_MinConvexHull(RS_AddBandFromArray(" +
+        "RS_AddBandFromArray(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), values1, 1, 0), values2, 2, 0), 1)) as minConvexHull1").first().getString(0)
+      val expectedMinConvexHullAll = "POLYGON ((0 -1, 4 -1, 4 -5, 0 -5, 0 -1))"
+      val expectedMinConvexHull1 = "POLYGON ((1 -1, 4 -1, 4 -5, 1 -5, 1 -1))"
+      assertEquals(expectedMinConvexHull1, minConvexHull1)
+      assertEquals(expectedMinConvexHullAll, minConvexHullAll)
+    }
+
     it("Passed RS_ConvexHull with raster") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val result = df.selectExpr("RS_ConvexHull(RS_FromGeoTiff(content))").first().getAs[Geometry](0);
@@ -610,6 +624,22 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expectedCoordOne.getX, coordinates(4).getX, 0.5d)
       assertEquals(expectedCoordOne.getY, coordinates(4).getY, 0.5d)
 
+    }
+
+    it("Passed RS_Count with raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      var actual = df.selectExpr("RS_Count(raster, 1, false)").first().getLong(0)
+      var expected = 1036800
+      assertEquals(expected, actual)
+
+      actual = df.selectExpr("RS_Count(raster, 1)").first().getLong(0)
+      expected = 928192
+      assertEquals(expected, actual)
+
+      actual = df.selectExpr("RS_Count(raster)").first().getLong(0)
+      expected = 928192
+      assertEquals(expected, actual)
     }
 
     it("Passed RS_PixelAsPoint with raster") {
