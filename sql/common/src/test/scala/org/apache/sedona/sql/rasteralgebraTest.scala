@@ -642,6 +642,34 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expected, actual)
     }
 
+    it("Passed RS_SummaryStats with raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      var actual = df.selectExpr("RS_SummaryStats(raster, 1, false)").first().getSeq(0)
+      assertEquals(1036800.0, actual.head, 0.1d)
+      assertEquals(2.06233487E8, actual(1), 0.1d)
+      assertEquals(198.91347125771605, actual(2), 1e-6d)
+      assertEquals(95.09054096106192, actual(3), 1e-6d)
+      assertEquals(0.0, actual(4), 0.1d)
+      assertEquals(255.0, actual(5), 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStats(raster, 1)").first().getSeq(0)
+      assertEquals(928192.0, actual.head, 0.1d)
+      assertEquals(2.06233487E8, actual(1), 0.1d)
+      assertEquals(222.18839097945252, actual(2), 1e-6d)
+      assertEquals(70.20559521132097, actual(3), 1e-6d)
+      assertEquals(1.0, actual(4), 0.1d)
+      assertEquals(255.0, actual(5), 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStats(raster)").first().getSeq(0)
+      assertEquals(928192.0, actual.head, 0.1d)
+      assertEquals(2.06233487E8, actual(1), 0.1d)
+      assertEquals(222.18839097945252, actual(2), 1e-6d)
+      assertEquals(70.20559521132097, actual(3), 1e-6d)
+      assertEquals(1.0, actual(4), 0.1d)
+      assertEquals(255.0, actual(5), 0.1d)
+    }
+
     it("Passed RS_PixelAsPoint with raster") {
       val widthInPixel = 5
       val heightInPixel = 10

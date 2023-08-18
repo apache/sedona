@@ -23,6 +23,8 @@ import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 
+import java.awt.image.Raster;
+
 public class RasterBandAccessors {
 
     public static Double getBandNoDataValue(GridCoverage2D raster, int band) {
@@ -76,6 +78,60 @@ public class RasterBandAccessors {
 //    Will be added later once it is supported.
 //    public static Integer getCount(GridCoverage2D raster, boolean excludeNoDataValue) {
 //        return getCount(raster, 1, excludeNoDataValue);
+//    }
+
+    public static double[] getSummaryStats(GridCoverage2D rasterGeom, int band, boolean excludeNoDataValue) {
+        ensureBand(rasterGeom, band);
+        Raster raster = rasterGeom.getRenderedImage().getData();
+        int height = RasterAccessors.getHeight(rasterGeom), width = RasterAccessors.getWidth(rasterGeom);
+        double[] pixels = raster.getSamples(0, 0, width, height, band - 1, (double[]) null);
+        double count = 0, sum = 0, mean = 0, stddev = 0, min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
+        Double noDataValue = RasterBandAccessors.getBandNoDataValue(rasterGeom, band);
+        for (double pixel: pixels) {
+            if(excludeNoDataValue) {
+            // exclude no data values
+                if (noDataValue == null || pixel != noDataValue) {
+                    count++;
+                    sum += pixel;
+                    min = Math.min(min, pixel);
+                    max = Math.max(max, pixel);
+                }
+            } else {
+                // include no data values
+                count = pixels.length;
+                sum += pixel;
+                min = Math.min(min, pixel);
+                max = Math.max(max, pixel);
+            }
+        }
+        if (count == 0) {
+            return new double[] {0, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
+        }
+        mean = sum / count;
+        for(double pixel: pixels){
+            if (excludeNoDataValue){
+                if (noDataValue == null || pixel != noDataValue) {
+                    stddev += Math.pow(pixel - mean, 2);
+                }
+            } else {
+                stddev += Math.pow(pixel - mean, 2);
+            }
+        }
+        stddev = Math.sqrt(stddev/count);
+        return new double[]{count, sum, mean, stddev, min, max};
+    }
+
+    public static double[] getSummaryStats(GridCoverage2D raster, int band) {
+        return getSummaryStats(raster, band, true);
+    }
+
+    public static double[] getSummaryStats(GridCoverage2D raster) {
+        return getSummaryStats(raster, 1, true);
+    }
+
+//  Adding the function signature when InferredExpression supports function with same arity but different argument types
+//    public static double[] getSummaryStats(GridCoverage2D raster, boolean excludeNoDataValue) {
+//        return getSummaryStats(raster, 1, excludeNoDataValue);
 //    }
 
     public static String getBandType(GridCoverage2D raster, int band) {
