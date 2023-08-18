@@ -86,10 +86,10 @@ public class RasterBandAccessors {
         int height = RasterAccessors.getHeight(rasterGeom), width = RasterAccessors.getWidth(rasterGeom);
         double[] pixels = raster.getSamples(0, 0, width, height, band - 1, (double[]) null);
         double count = 0, sum = 0, mean = 0, stddev = 0, min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
-        if(excludeNoDataValue) {
+        Double noDataValue = RasterBandAccessors.getBandNoDataValue(rasterGeom, band);
+        for (double pixel: pixels) {
+            if(excludeNoDataValue) {
             // exclude no data values
-            Double noDataValue = RasterBandAccessors.getBandNoDataValue(rasterGeom, band);
-            for (double pixel: pixels) {
                 if (noDataValue == null || pixel != noDataValue) {
                     count++;
                     sum += pixel;
@@ -100,14 +100,9 @@ public class RasterBandAccessors {
                         max = pixel;
                     }
                 }
-            }
-            if (count == 0) {
-                return new double[] {0, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
-            }
-        } else {
-            // include no data values
-            count = pixels.length;
-            for (double pixel: pixels) {
+            } else {
+                // include no data values
+                count = pixels.length;
                 sum += pixel;
                 if (pixel < min) {
                     min = pixel;
@@ -117,8 +112,20 @@ public class RasterBandAccessors {
                 }
             }
         }
+        if (count == 0) {
+            return new double[] {0, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
+        }
         mean = sum / count;
-        stddev = getStddev(pixels, mean);
+        for(double pixel: pixels){
+            if (excludeNoDataValue){
+                if (noDataValue == null || pixel != noDataValue) {
+                    stddev += Math.pow(pixel - mean, 2);
+                }
+            } else {
+                stddev += Math.pow(pixel - mean, 2);
+            }
+        }
+        stddev = Math.sqrt(stddev/count);
         return new double[]{count, sum, mean, stddev, min, max};
     }
 
@@ -134,14 +141,6 @@ public class RasterBandAccessors {
 //    public static double[] getSummaryStats(GridCoverage2D raster, boolean excludeNoDataValue) {
 //        return getSummaryStats(raster, 1, excludeNoDataValue);
 //    }
-
-    private static double getStddev(double[] pixels, double mean) {
-        double stddev = 0;
-        for(double pixel: pixels){
-             stddev += Math.pow(pixel - mean, 2);
-        }
-        return Math.sqrt(stddev/(pixels.length - 1));
-    }
 
     public static String getBandType(GridCoverage2D raster, int band) {
         ensureBand(raster, band);
