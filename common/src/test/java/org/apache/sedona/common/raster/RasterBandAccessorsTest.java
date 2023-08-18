@@ -24,6 +24,8 @@ import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -72,6 +74,96 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> RasterBandAccessors.getBandNoDataValue(raster, 2));
         assertEquals("Provided band index 2 is not present in the raster", exception.getMessage());
+    }
+
+    @Test
+    public void testSummaryStatsWithEmptyRaster() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0);
+        double[] values1 = new double[] {1,2,0,0,0,0,7,8,0,10,11,0,0,0,0,16,17,0,19,20,21,0,23,24,25};
+        double[] values2 = new double[] {0,0,28,29,0,0,0,33,34,35,36,37,38,0,0,0,0,43,44,45,46,47,48,49,50};
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values1, 1, 0d);
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values2, 2, 0d);
+        double count = 25.0;
+        double sum = 204.0;
+        double mean = 8.16;
+        double stddev = 9.4678403028357;
+        double min = 0.0;
+        double max = 25.0;
+        double[] result = RasterBandAccessors.getSummaryStats(emptyRaster, 1, false);
+        assertEquals(count, result[0], 0.1d);
+        assertEquals(sum, result[1], 0.1d);
+        assertEquals(mean, result[2], 0.1d);
+        assertEquals(stddev, result[3], 0.1d);
+        assertEquals(min, result[4], 0.1d);
+        assertEquals(max, result[5], 0.1d);
+
+        count = 16.0;
+        sum = 642.0;
+        mean = 40.125;
+        stddev = 25.227209702521602;
+        min = 28.0;
+        max = 50.0;
+        result = RasterBandAccessors.getSummaryStats(emptyRaster, 2);
+        assertEquals(count, result[0], 0.1d);
+        assertEquals(sum, result[1], 0.1d);
+        assertEquals(mean, result[2], 0.1d);
+        assertEquals(stddev, result[3], 0.1d);
+        assertEquals(min, result[4], 0.1d);
+        assertEquals(max, result[5], 0.1d);
+
+        count = 14.0;
+        sum = 204.0;
+        mean = 14.571428571428571;
+        stddev = 11.509091348732502;
+        min = 1.0;
+        max = 25.0;
+        result = RasterBandAccessors.getSummaryStats(emptyRaster);
+        assertEquals(count, result[0], 0.1d);
+        assertEquals(sum, result[1], 0.1d);
+        assertEquals(mean, result[2], 0.1d);
+        assertEquals(stddev, result[3], 0.1d);
+        assertEquals(min, result[4], 0.1d);
+        assertEquals(max, result[5], 0.1d);
+    }
+
+    @Test
+    public void testSummaryStatsWithRaster() throws IOException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+        double count = 1036800.0;
+        double sum = 2.06233487E8;
+        double mean = 198.91347125771605;
+        double stddev = 95.09058681880195;
+        double min = 0.0;
+        double max = 255.0;
+        double[] result = RasterBandAccessors.getSummaryStats(raster, 1, false);
+        assertEquals(count, result[0], 0.1d);
+        assertEquals(sum, result[1], 0.1d);
+        assertEquals(mean, result[2], 0.1d);
+        assertEquals(stddev, result[3], 0.1d);
+        assertEquals(min, result[4], 0.1d);
+        assertEquals(max, result[5], 0.1d);
+
+        count = 928192.0;
+        sum = 2.06233487E8;
+        mean = 222.18839097945252;
+        stddev = 97.89761034851576;
+        min = 1.0;
+        max = 255.0;
+        result = RasterBandAccessors.getSummaryStats(raster, 1);
+        assertEquals(count, result[0], 0.1d);
+        assertEquals(sum, result[1], 0.1d);
+        assertEquals(mean, result[2], 0.1d);
+        assertEquals(stddev, result[3], 0.1d);
+        assertEquals(min, result[4], 0.1d);
+        assertEquals(max, result[5], 0.1d);
+
+        result = RasterBandAccessors.getSummaryStats(raster);
+        assertEquals(count, result[0], 0.1d);
+        assertEquals(sum, result[1], 0.1d);
+        assertEquals(mean, result[2], 0.1d);
+        assertEquals(stddev, result[3], 0.1d);
+        assertEquals(min, result[4], 0.1d);
+        assertEquals(max, result[5], 0.1d);
     }
 
     @Test
