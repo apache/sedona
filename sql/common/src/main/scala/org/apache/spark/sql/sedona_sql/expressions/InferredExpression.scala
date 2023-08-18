@@ -102,6 +102,8 @@ object InferrableType {
     new InferrableType[Array[java.lang.Long]] {}
   implicit val doubleArrayInstance: InferrableType[Array[Double]] =
     new InferrableType[Array[Double]] {}
+  implicit val longInstance: InferrableType[Long] =
+    new InferrableType[Long] {}
 }
 
 object InferredTypes {
@@ -185,6 +187,8 @@ object InferredTypes {
       DoubleType
     } else if (t =:= typeOf[Int]) {
       IntegerType
+    } else if (t =:= typeOf[Long]) {
+      LongType
     } else if (t =:= typeOf[String]) {
       StringType
     } else if (t =:= typeOf[Array[Byte]]) {

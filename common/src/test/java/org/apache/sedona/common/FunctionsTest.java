@@ -1633,38 +1633,38 @@ public class FunctionsTest {
     {
         // The source and target CRS are the same
         Point geomExpected = GEOMETRY_FACTORY.createPoint(new Coordinate(120, 60));
-        Geometry geomActual = Functions.transform(geomExpected, "EPSG:4326", "EPSG:4326");
+        Geometry geomActual = FunctionsGeoTools.transform(geomExpected, "EPSG:4326", "EPSG:4326");
         assertEquals(geomExpected.getCoordinate().x, geomActual.getCoordinate().x, FP_TOLERANCE);
         assertEquals(geomExpected.getCoordinate().y, geomActual.getCoordinate().y, FP_TOLERANCE);
 
         // The source and target CRS are different
-        geomActual = Functions.transform(geomExpected, "EPSG:4326", "EPSG:3857");
+        geomActual = FunctionsGeoTools.transform(geomExpected, "EPSG:4326", "EPSG:3857");
         assertEquals(1.3358338895192828E7, geomActual.getCoordinate().x, FP_TOLERANCE);
         assertEquals(8399737.889818355, geomActual.getCoordinate().y, FP_TOLERANCE);
 
         // The source CRS is not specified and the geometry has no SRID
-        Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.transform(geomExpected,"EPSG:3857"));
+        Exception e = assertThrows(IllegalArgumentException.class, () -> FunctionsGeoTools.transform(geomExpected,"EPSG:3857"));
         assertEquals("Source CRS must be specified. No SRID found on geometry.", e.getMessage());
 
         // The source CRS is an invalid SRID
-        e = assertThrows(FactoryException.class, () -> Functions.transform(geomExpected, "abcde", "EPSG:3857"));
+        e = assertThrows(FactoryException.class, () -> FunctionsGeoTools.transform(geomExpected, "abcde", "EPSG:3857"));
         assertTrue(e.getMessage().contains("First failed to read as a well-known CRS code"));
 
         // The source CRS is a WKT CRS string
         String crsWkt = CRS.decode("EPSG:4326", true).toWKT();
-        geomActual = Functions.transform(geomExpected, crsWkt, "EPSG:3857");
+        geomActual = FunctionsGeoTools.transform(geomExpected, crsWkt, "EPSG:3857");
         assertEquals(1.3358338895192828E7, geomActual.getCoordinate().x, FP_TOLERANCE);
         assertEquals(8399737.889818355, geomActual.getCoordinate().y, FP_TOLERANCE);
 
         // The source CRS is not specified but the geometry has a valid SRID
         geomExpected.setSRID(4326);
-        geomActual = Functions.transform(geomExpected, "EPSG:3857");
+        geomActual = FunctionsGeoTools.transform(geomExpected, "EPSG:3857");
         assertEquals(1.3358338895192828E7, geomActual.getCoordinate().x, FP_TOLERANCE);
         assertEquals(8399737.889818355, geomActual.getCoordinate().y, FP_TOLERANCE);
 
         // The source and target CRS are different, and latitude is out of range
         Point geometryWrong = GEOMETRY_FACTORY.createPoint(new Coordinate(60, 120));
-        assertThrows(ProjectionException.class, () -> Functions.transform(geometryWrong, "EPSG:4326", "EPSG:3857"));
+        assertThrows(ProjectionException.class, () -> FunctionsGeoTools.transform(geometryWrong, "EPSG:4326", "EPSG:3857"));
 
 
     }
@@ -1672,23 +1672,23 @@ public class FunctionsTest {
     @Test
     public void voronoiPolygons() {
         MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0, 0, 2, 2));
-        Geometry actual1 = Functions.voronoiPolygons(multiPoint, 0, null);
+        Geometry actual1 = FunctionsGeoTools.voronoiPolygons(multiPoint, 0, null);
         assertEquals("GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))",
                 actual1.toText());
 
-        Geometry actual2 = Functions.voronoiPolygons(multiPoint, 30, null);
+        Geometry actual2 = FunctionsGeoTools.voronoiPolygons(multiPoint, 30, null);
         assertEquals("GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 4, 4 -2, -2 -2)))", actual2.toText());
 
         Geometry buf = Functions.buffer(GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1)), 10);
-        Geometry actual3 = Functions.voronoiPolygons(multiPoint, 0, buf);
+        Geometry actual3 = FunctionsGeoTools.voronoiPolygons(multiPoint, 0, buf);
         assertEquals(
                 "GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 -9, -9 -9)), POLYGON ((-9 11, 11 11, 11 -9, -9 11)))",
                 actual3.toText());
 
-        Geometry actual4 = Functions.voronoiPolygons(multiPoint, 30, buf);
+        Geometry actual4 = FunctionsGeoTools.voronoiPolygons(multiPoint, 30, buf);
         assertEquals("GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 11, 11 -9, -9 -9)))", actual4.toText());
 
-        Geometry actual5 = Functions.voronoiPolygons(null, 0, null);
+        Geometry actual5 = FunctionsGeoTools.voronoiPolygons(null, 0, null);
         assertEquals(null, actual5);
     }
 }

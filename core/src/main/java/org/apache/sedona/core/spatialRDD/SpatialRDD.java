@@ -21,7 +21,7 @@ package org.apache.sedona.core.spatialRDD;
 
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.log4j.Logger;
-import org.apache.sedona.common.Functions;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
@@ -37,8 +37,6 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.storage.StorageLevel;
 import org.apache.spark.util.random.SamplingUtils;
-import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -48,16 +46,12 @@ import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.index.SpatialIndex;
 import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTWriter;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
 import org.wololo.geojson.Feature;
 import org.wololo.jts2geojson.GeoJSONWriter;
 import scala.Tuple2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -157,7 +151,7 @@ public class SpatialRDD<T extends Geometry>
         this.CRStransformation = true;
         this.sourceEpsgCode = sourceEpsgCRSCode;
         this.targetEpgsgCode = targetEpsgCRSCode;
-        this.rawSpatialRDD = this.rawSpatialRDD.map((geom) -> (T) Functions.transform(geom, sourceEpsgCRSCode, targetEpgsgCode, lenient));
+        this.rawSpatialRDD = this.rawSpatialRDD.map((geom) -> (T) FunctionsGeoTools.transform(geom, sourceEpsgCRSCode, targetEpgsgCode, lenient));
         return true;
     }
 

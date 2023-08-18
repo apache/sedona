@@ -92,6 +92,20 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
+    public void testPixelAsCentroid() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 12, 13, 134, -53, 9);
+        String actual = Functions.asWKT(PixelFunctions.getPixelAsCentroid(emptyRaster, 3, 3));
+        String expected = "POINT (156.5 -75.5)";
+        assertEquals(expected, actual);
+
+        // Testing with skewed raster
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 12, 13, 240, -193, 2, 1.5, 3, 2, 0);
+        actual = Functions.asWKT(PixelFunctions.getPixelAsCentroid(emptyRaster, 3, 3));
+        expected = "POINT (252.5 -184.25)";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testPixelAsPointUpperLeft() throws FactoryException, TransformException {
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 123, -230, 8);
         Geometry actualPoint = PixelFunctions.getPixelAsPoint(emptyRaster, 1, 1);

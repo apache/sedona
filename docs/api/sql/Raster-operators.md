@@ -1,5 +1,27 @@
 ## Pixel Functions
 
+### RS_PixelAsCentroid
+
+Introduction: Returns the centroid (point geometry) of the specified pixel's area.
+The pixel coordinates specified are 1-indexed.
+If `colX` and `rowY` are out of bounds for the raster, they are interpolated assuming the same skew and translate values.
+
+Format: `RS_PixelAsCentroid(raster: Raster, colX: int, rowY: int)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT ST_AsText(RS_PixelAsPolygon(RS_MakeEmptyRaster(1, 12, 13, 134, -53, 9), 3, 3))
+```
+
+Output:
+
+```
+POINT (156.5 -75.5)
+```
+
 ### RS_PixelAsPoint
 
 Introduction: Returns a point geometry of the specified pixel's upper-left corner. The pixel coordinates specified are 1-indexed.
@@ -45,7 +67,7 @@ Since: `v1.5.0`
 Spark SQL Example:
 
 ```sql
-SELECT ST_AsText(RS_PixelAsPolygon(RS_MakeEmptyRaster(1, 5, 10, 123, -230, 8), 2, 3)) FROM rasters
+SELECT ST_AsText(RS_PixelAsPolygon(RS_MakeEmptyRaster(1, 5, 10, 123, -230, 8), 2, 3))
 ```
 
 Output:
@@ -577,6 +599,94 @@ SELECT RS_BandPixelType(RS_MakeEmptyRaster(2, "I", 5, 5, 53, 51, 1, 1, 0, 0, 0),
 ```
 
 Output: `IllegalArgumentException: Provided band index 3 is not present in the raster`
+
+### RS_Count
+
+Introduction: Returns the number of pixels in a given band. If band is not specified then it defaults to `1`.
+
+!!!Note
+    If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster. 
+    Set excludeNoDataValue to `false` to get count of all pixels in raster.
+
+!!!Note
+    If the mentioned band index doesn't exist, this will throw an `IllegalArgumentException`.
+
+Format: 
+
+`RS_Count(raster: Raster, band: int = 1, excludeNoDataValue: boolean = true)`
+
+`RS_Count(raster: Raster, band: int = 1)`
+
+`RS_Count(raster: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_Count(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1, false)
+```
+
+Output:
+
+```
+25
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_Count(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1)
+```
+
+Output:
+
+```
+6
+```
+
+### RS_SummaryStats
+
+Introduction: Returns summary stats consisting of count, sum, mean, stddev, min, max for a given band in raster. If band is not specified then it defaults to `1`.
+
+!!!Note
+    If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster.
+    Set excludeNoDataValue to `false` to get count of all pixels in raster.
+
+!!!Note
+    If the mentioned band index doesn't exist, this will throw an `IllegalArgumentException`.
+
+`RS_SummaryStats(raster: Raster, band: int = 1, excludeNoDataValue: boolean = true)`
+
+`RS_SummaryStats(raster: Raster, band: int = 1)`
+
+`RS_SummaryStats(raster: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_SummaryStats(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1, false)
+```
+
+Output:
+
+```
+25.0, 204.0, 8.16, 9.4678403028357, 0.0, 25.0
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_SummaryStats(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1)
+```
+
+Output:
+
+```
+14.0, 204.0, 14.571428571428571, 11.509091348732502, 1.0, 25.0
+```
 
 
 ## Raster based operators
