@@ -24,8 +24,6 @@ import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.Assert.*;
 

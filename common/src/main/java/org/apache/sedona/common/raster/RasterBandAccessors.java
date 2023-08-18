@@ -24,8 +24,6 @@ import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 
 import java.awt.image.Raster;
-import java.util.Arrays;
-import java.util.List;
 
 public class RasterBandAccessors {
 
