@@ -645,6 +645,49 @@ Output:
 6
 ```
 
+### RS_SummaryStats
+
+Introduction: Returns summary stats consisting of count, sum, mean, stddev, min, max for a given band in raster. If band is not specified then it defaults to `1`.
+
+!!!Note
+    If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster.
+    Set excludeNoDataValue to `false` to get count of all pixels in raster.
+
+!!!Note
+    If the mentioned band index doesn't exist, this will throw an `IllegalArgumentException`.
+
+`RS_SummaryStats(raster: Raster, band: int = 1, excludeNoDataValue: boolean = true)`
+
+`RS_SummaryStats(raster: Raster, band: int = 1)`
+
+`RS_SummaryStats(raster: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_SummaryStats(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1, false)
+```
+
+Output:
+
+```
+25.0, 204.0, 8.16, 9.4678403028357, 0.0, 25.0
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_SummaryStats(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1)
+```
+
+Output:
+
+```
+14.0, 204.0, 14.571428571428571, 11.509091348732502, 1.0, 25.0
+```
+
 
 ## Raster based operators
 
