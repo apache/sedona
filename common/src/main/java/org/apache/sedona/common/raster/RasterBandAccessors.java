@@ -104,8 +104,6 @@ public class RasterBandAccessors {
             if (count == 0) {
                 return new double[] {0, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
             }
-            mean = sum / count;
-            stddev = getStddev(pixels, mean);
         } else {
             // include no data values
             count = pixels.length;
@@ -118,9 +116,9 @@ public class RasterBandAccessors {
                     max = pixel;
                 }
             }
-            mean = sum / count;
-            stddev = getStddev(pixels, mean);
         }
+        mean = sum / count;
+        stddev = getStddev(pixels, mean);
         return new double[]{count, sum, mean, stddev, min, max};
     }
 
