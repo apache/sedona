@@ -33,6 +33,9 @@ public enum SpatialPredicate {
     TOUCHES,
     OVERLAPS,
     CROSSES,
+    RS_ST_INTERSECTS, RS_RS_INTERSECTS,
+    RS_ST_CONTAINS, RS_RS_CONTAINS,
+    RS_ST_WITHIN, RS_RS_WITHIN,
     EQUALS;
 
     /**
@@ -50,8 +53,39 @@ public enum SpatialPredicate {
                 return SpatialPredicate.COVERED_BY;
             case COVERED_BY:
                 return SpatialPredicate.COVERS;
+            case RS_ST_CONTAINS:
+                return SpatialPredicate.RS_ST_WITHIN;
+            case RS_ST_WITHIN:
+                return SpatialPredicate.RS_ST_CONTAINS;
+            case RS_RS_CONTAINS:
+                return SpatialPredicate.RS_RS_WITHIN;
+            case RS_RS_WITHIN:
+                return SpatialPredicate.RS_RS_CONTAINS;
             default:
                 return predicate;
+        }
+    }
+
+    public static boolean isLeftRaster(SpatialPredicate predicate) {
+        switch (predicate) {
+            case RS_RS_CONTAINS:
+            case RS_RS_INTERSECTS:
+            case RS_RS_WITHIN:
+            case RS_ST_CONTAINS:
+            case RS_ST_INTERSECTS:
+            case RS_ST_WITHIN:
+                return true;
+            default: return false;
+        }
+    }
+
+    public static boolean isRightRaster(SpatialPredicate predicate) {
+        switch (predicate) {
+            case RS_RS_CONTAINS:
+            case RS_RS_INTERSECTS:
+            case RS_RS_WITHIN:
+                return true;
+            default: return false;
         }
     }
 }

@@ -21,7 +21,7 @@ package org.apache.spark.sql.sedona_sql.strategy.join
 import org.apache.sedona.core.enums.{IndexType, SpatialJoinOptimizationMode}
 import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.sedona.core.utils.SedonaConf
-import org.apache.spark.sql.catalyst.expressions.{And, EqualNullSafe, EqualTo, Expression, LessThan, LessThanOrEqual}
+import org.apache.spark.sql.catalyst.expressions.{And, AttributeReference, EqualNullSafe, EqualTo, Expression, LessThan, LessThanOrEqual}
 import org.apache.spark.sql.catalyst.plans._
 import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.execution.SparkPlan
@@ -79,6 +79,22 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
       }
     }
 
+  private def getRasterJoinDetection(
+    left: LogicalPlan,
+    right: LogicalPlan,
+    predicate: RS_Predicate,
+    extraCondition: Option[Expression] = None): Option[JoinQueryDetection] = {
+    predicate match {
+      case RS_Intersects(Seq(leftShape, rightShape)) =>
+        Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.RS_ST_INTERSECTS, false, extraCondition))
+      case RS_Contains(Seq(leftShape, rightShape)) =>
+        Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.RS_ST_CONTAINS, false, extraCondition))
+      case RS_Within(Seq(leftShape, rightShape)) =>
+        Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.RS_ST_WITHIN, false, extraCondition))
+      case _ => None
+    }
+  }
+
   def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
     case Join(left, right, joinType, condition, JoinHint(leftHint, rightHint)) if optimizationEnabled(left, right, condition) => {
       var broadcastLeft = leftHint.exists(_.strategy.contains(BROADCAST))
@@ -94,7 +110,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
         val canAutoBroadCastLeft = canAutoBroadcastBySize(left)
         val canAutoBroadCastRight = canAutoBroadcastBySize(right)
         if (canAutoBroadCastLeft && canAutoBroadCastRight) {
-          // Both sides can be broadcasted. Choose the smallest side.
+          // Both sides can be broadcast. Choose the smallest side.
           broadcastLeft = left.stats.sizeInBytes <= right.stats.sizeInBytes
           broadcastRight = !broadcastLeft
         } else {
@@ -104,12 +120,20 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
       }
 
       val queryDetection: Option[JoinQueryDetection] = condition match {
+        //For vector only joins
         case Some(predicate: ST_Predicate) =>
           getJoinDetection(left, right, predicate)
         case Some(And(predicate: ST_Predicate, extraCondition)) =>
           getJoinDetection(left, right, predicate, Some(extraCondition))
         case Some(And(extraCondition, predicate: ST_Predicate)) =>
           getJoinDetection(left, right, predicate, Some(extraCondition))
+          //For raster-vector joins
+        case Some(predicate: RS_Predicate) =>
+          getRasterJoinDetection(left, right, predicate)
+        case Some(And(predicate: RS_Predicate, extraCondition)) =>
+          getRasterJoinDetection(left, right, predicate, Some(extraCondition))
+        case Some(And(extraCondition, predicate: RS_Predicate)) =>
+          getRasterJoinDetection(left, right, predicate, Some(extraCondition))
         // For distance joins we execute the actual predicate (condition) and not only extraConditions.
         case Some(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), distance)) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, false, condition, Some(distance)))
@@ -276,8 +300,8 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     val a = children.head
     val b = children.tail.head
 
-    val relationship = s"ST_$spatialPredicate"
-
+    val isRaster = SpatialPredicate.isLeftRaster(spatialPredicate)
+    val relationship = if (isRaster) spatialPredicate else s"ST_$spatialPredicate"
     matchExpressionsToPlans(a, b, left, right) match {
       case Some((_, _, false)) =>
         logInfo(s"Planning spatial join for $relationship relationship")

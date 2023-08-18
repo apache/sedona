@@ -141,10 +141,16 @@ public class SpatialPredicateEvaluators {
     public static SpatialPredicateEvaluator create(SpatialPredicate predicate) {
         switch (predicate) {
             case CONTAINS:
+            case RS_ST_CONTAINS:
+            case RS_RS_CONTAINS:
                 return new ConcreteContainsEvaluator();
             case INTERSECTS:
+            case RS_ST_INTERSECTS:
+            case RS_RS_INTERSECTS:
                 return new ConcreteIntersectsEvaluator();
             case WITHIN:
+            case RS_ST_WITHIN:
+            case RS_RS_WITHIN:
                 return new ConcreteWithinEvaluator();
             case COVERS:
                 return new ConcreteCoversEvaluator();

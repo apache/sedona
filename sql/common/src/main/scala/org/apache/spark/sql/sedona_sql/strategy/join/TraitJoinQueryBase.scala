@@ -18,9 +18,10 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
+import org.apache.sedona.common.raster.GeometryFunctions
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.core.utils.SedonaConf
-import org.apache.sedona.sql.utils.GeometrySerializer
+import org.apache.sedona.sql.utils.{GeometrySerializer, RasterSerializer}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeRow}
 import org.apache.spark.sql.execution.SparkPlan
@@ -32,8 +33,9 @@ trait TraitJoinQueryBase {
   def toSpatialRddPair(leftRdd: RDD[UnsafeRow],
                        leftShapeExpr: Expression,
                        rightRdd: RDD[UnsafeRow],
-                       rightShapeExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
-    (toSpatialRDD(leftRdd, leftShapeExpr), toSpatialRDD(rightRdd, rightShapeExpr))
+                       rightShapeExpr: Expression, isLeftRaster: Boolean, isRightRaster: Boolean): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
+    (if (isLeftRaster) toSpatialRDDRaster(leftRdd, leftShapeExpr) else toSpatialRDD(leftRdd, leftShapeExpr),
+      if (isRightRaster) toSpatialRDDRaster(rightRdd, rightShapeExpr) else toSpatialRDD(rightRdd, rightShapeExpr))
 
   def toSpatialRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression): SpatialRDD[Geometry] = {
     val spatialRdd = new SpatialRDD[Geometry]
@@ -41,6 +43,19 @@ trait TraitJoinQueryBase {
       rdd
         .map { x =>
           val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
+          shape.setUserData(x.copy)
+          shape
+        }
+        .toJavaRDD())
+    spatialRdd
+  }
+
+  def toSpatialRDDRaster(rdd: RDD[UnsafeRow], shapeExpression: Expression): SpatialRDD[Geometry] = {
+    val spatialRdd = new SpatialRDD[Geometry]
+    spatialRdd.setRawSpatialRDD(
+      rdd
+        .map { x =>
+          val shape = GeometryFunctions.convexHull(RasterSerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]]))
           shape.setUserData(x.copy)
           shape
         }

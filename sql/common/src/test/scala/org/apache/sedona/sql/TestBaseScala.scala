@@ -66,6 +66,8 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   val smallPointsLocation: String = resourceFolder + "small/points.csv"
   val spatialJoinLeftInputLocation: String = resourceFolder + "spatial-predicates-test-data.tsv"
   val spatialJoinRightInputLocation: String = resourceFolder + "spatial-join-query-window.tsv"
+  val rasterDataLocation: String = resourceFolder + "raster/raster_with_no_data/test5.tiff"
+  val buildingDataLocation: String = resourceFolder + "813_buildings_test.csv"
 
   override def beforeAll(): Unit = {
     SedonaContext.create(sparkSession)

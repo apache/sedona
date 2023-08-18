@@ -19,14 +19,13 @@
 package org.apache.spark.sql.sedona_sql.strategy.join
 
 import org.apache.sedona.core.enums.JoinSparitionDominantSide
-import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialOperator.JoinQuery.JoinParams
-import org.apache.sedona.core.spatialOperator.SpatialPredicate
+import org.apache.sedona.core.spatialOperator.{JoinQuery, SpatialPredicate}
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, Predicate, UnsafeRow}
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
+import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, Predicate, UnsafeRow}
 import org.apache.spark.sql.execution.SparkPlan
 import org.locationtech.jts.geom.Geometry
 
@@ -50,8 +49,12 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
     val rightResultsRaw = right.execute().asInstanceOf[RDD[UnsafeRow]]
 
     val sedonaConf = SedonaConf.fromActiveSession
+    val isLeftRaster = SpatialPredicate.isLeftRaster(spatialPredicate)
+    val isRightRaster = SpatialPredicate.isRightRaster(spatialPredicate)
+
+
     val (leftShapes, rightShapes) =
-      toSpatialRddPair(leftResultsRaw, boundLeftShape, rightResultsRaw, boundRightShape)
+      toSpatialRddPair(leftResultsRaw, boundLeftShape, rightResultsRaw, boundRightShape, isLeftRaster, isRightRaster)
 
     // Only do SpatialRDD analyze when the user doesn't know approximate total count of the spatial partitioning
     // dominant side rdd
