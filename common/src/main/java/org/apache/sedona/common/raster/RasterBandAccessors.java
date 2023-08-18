@@ -101,6 +101,9 @@ public class RasterBandAccessors {
                     }
                 }
             }
+            if (count == 0) {
+                return new double[] {0, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
+            }
             mean = sum / count;
             stddev = getStddev(pixels, mean);
         } else {

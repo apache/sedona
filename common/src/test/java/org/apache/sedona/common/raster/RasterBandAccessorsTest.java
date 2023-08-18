@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -72,6 +73,26 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> RasterBandAccessors.getBandNoDataValue(raster, 2));
         assertEquals("Provided band index 2 is not present in the raster", exception.getMessage());
+    }
+
+    @Test
+    public void testSummaryStatsWithAllNoData() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0);
+        double[] values = new double[] {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values, 1, 0d);
+        double count = 0.0;
+        double sum = Double.NaN;
+        double mean = Double.NaN;
+        double stddev = Double.NaN;
+        double min = Double.NaN;
+        double max = Double.NaN;
+        double[] result = RasterBandAccessors.getSummaryStats(emptyRaster);
+        assertEquals(count, result[0], 0.1d);
+        assertEquals(sum, result[1], 0.1d);
+        assertEquals(mean, result[2], 0.1d);
+        assertEquals(stddev, result[3], 0.1d);
+        assertEquals(min, result[4], 0.1d);
+        assertEquals(max, result[5], 0.1d);
     }
 
     @Test
