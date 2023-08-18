@@ -93,23 +93,15 @@ public class RasterBandAccessors {
                 if (noDataValue == null || pixel != noDataValue) {
                     count++;
                     sum += pixel;
-                    if (pixel < min) {
-                        min = pixel;
-                    }
-                    if (pixel > max) {
-                        max = pixel;
-                    }
+                    min = Math.min(min, pixel);
+                    max = Math.max(max, pixel);
                 }
             } else {
                 // include no data values
                 count = pixels.length;
                 sum += pixel;
-                if (pixel < min) {
-                    min = pixel;
-                }
-                if (pixel > max) {
-                    max = pixel;
-                }
+                min = Math.min(min, pixel);
+                max = Math.max(max, pixel);
             }
         }
         if (count == 0) {
