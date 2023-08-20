@@ -881,8 +881,8 @@ Array(5.0, 3.0)
 
 Spark SQL example for joining a point dataset with a raster dataset:
 ```scala
-val pointDf = spark.read...
-val rasterDf = spark.read.format("binaryFile").load("/some/path/*.tiff")
+val pointDf = sedona.read...
+val rasterDf = sedona.read.format("binaryFile").load("/some/path/*.tiff")
   .withColumn("raster", expr("RS_FromGeoTiff(content)"))
   .withColumn("envelope", expr("RS_Envelope(raster)"))
 
@@ -1034,21 +1034,18 @@ val sumDF = spark.sql("select RS_Add(band1, band2) as sumOfBands from dataframe"
 
 ```
 
-### RS_Append
+### RS_Array
 
-Introduction: Appends a new band to the end of Geotiff image data and returns the new data. The new band to be appended can be a normalized difference index between two bands (example: NBR, NDBI). Normalized difference index between two bands can be calculated with RS_NormalizedDifference operator described earlier in this page. Specific bands can be retrieved using RS_GetBand operator described [here](../Raster-loader/).
+Introduction: Create an array that is filled by the given value
 
-Format: `RS_Append(data: Array[Double], newBand: Array[Double], nBands: Int)`
+Format: `RS_Array(length:Int, value: Double)`
 
-Since: `v1.2.1`
-
-Deprecated since: `v1.4.1`
+Since: `v1.1.0`
 
 Spark SQL example:
+
 ```scala
-
-val dfAppended = spark.sql("select RS_Append(data, normalizedDifference, nBands) as dataEdited from dataframe")
-
+SELECT RS_Array(height * width, 0.0)
 ```
 
 ### RS_BitwiseAND

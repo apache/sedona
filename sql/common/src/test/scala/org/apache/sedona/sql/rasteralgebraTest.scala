@@ -220,26 +220,6 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
   }
 
-  describe("Should pass all transformation tests") {
-    it("Passed RS_Append for new data length and new band elements") {
-      var df = Seq(Seq(200.0, 400.0, 600.0, 800.0, 100.0, 500.0, 800.0, 600.0)).toDF("data")
-      df = df.selectExpr("data", "2 as nBands")
-      var rowFirst = df.first()
-      val nBands = rowFirst.getAs[Int](1)
-      val lengthInitial = rowFirst.getAs[mutable.WrappedArray[Double]](0).length
-      val lengthBand = lengthInitial / nBands
-
-      df = df.selectExpr("data", "nBands", "RS_GetBand(data, 1, nBands) as band1", "RS_GetBand(data, 2, nBands) as band2")
-      df = df.selectExpr("data", "nBands", "RS_NormalizedDifference(band2, band1) as normalizedDifference")
-      df = df.selectExpr("RS_Append(data, normalizedDifference, nBands) as targetData")
-
-      rowFirst = df.first()
-      assert(rowFirst.getAs[mutable.WrappedArray[Double]](0).length == lengthInitial + lengthBand)
-      assert((rowFirst.getAs[mutable.WrappedArray[Double]](0)(lengthInitial) == 0.33) &&
-        (rowFirst.getAs[mutable.WrappedArray[Double]](0)(lengthInitial + lengthBand - 1) == 0.14))
-    }
-  }
-
   describe("Should pass all raster function tests") {
 
     it("Passed RS_FromGeoTiff should handle null values") {
