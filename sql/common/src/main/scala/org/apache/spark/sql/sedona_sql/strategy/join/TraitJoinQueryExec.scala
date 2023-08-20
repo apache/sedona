@@ -27,6 +27,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
 import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, Predicate, UnsafeRow}
 import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
 import org.locationtech.jts.geom.Geometry
 
 trait TraitJoinQueryExec extends TraitJoinQueryBase {
@@ -49,9 +50,8 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
     val rightResultsRaw = right.execute().asInstanceOf[RDD[UnsafeRow]]
 
     val sedonaConf = SedonaConf.fromActiveSession
-    val isLeftRaster = SpatialPredicate.isLeftRaster(spatialPredicate)
-    val isRightRaster = SpatialPredicate.isRightRaster(spatialPredicate)
-
+    val isLeftRaster = leftShape.dataType.isInstanceOf[RasterUDT]
+    val isRightRaster = rightShape.dataType.isInstanceOf[RasterUDT]
 
     val (leftShapes, rightShapes) =
       toSpatialRddPair(leftResultsRaw, boundLeftShape, rightResultsRaw, boundRightShape, isLeftRaster, isRightRaster)

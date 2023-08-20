@@ -58,7 +58,7 @@ class predicateJoinTestScala extends TestBaseScala {
 
       val rasterDf = sparkSession.read.format("binaryFile").load(rasterDataLocation).selectExpr("RS_FromGeoTiff(content) as raster")
       rasterDf.createOrReplaceTempView("rasterDf")
-      var rangeJoinDf = sparkSession.sql("select * from rasterDf, polygondf where RS_Contains(rasterDf.raster, polygondf.building)")
+      val rangeJoinDf = sparkSession.sql("select * from rasterDf, polygondf where RS_Contains(rasterDf.raster, polygondf.building)")
       assert(rangeJoinDf.count() == 210)
     }
 
@@ -77,7 +77,7 @@ class predicateJoinTestScala extends TestBaseScala {
 
       val rasterDf = sparkSession.read.format("binaryFile").load(rasterDataLocation).selectExpr("RS_ConvexHull(RS_FromGeoTiff(content)) as rasterGeom")
       rasterDf.createOrReplaceTempView("rasterDf")
-      var rangeJoinDf = sparkSession.sql("select * from smallRaster r1, smallRaster r2 where RS_Within(r1.raster, RS_ConvexHull(r2.raster))")
+      val rangeJoinDf = sparkSession.sql("select * from smallRaster r1, smallRaster r2 where RS_Within(r1.raster, RS_ConvexHull(r2.raster))")
       assert(rangeJoinDf.count() == 1)
     }
 

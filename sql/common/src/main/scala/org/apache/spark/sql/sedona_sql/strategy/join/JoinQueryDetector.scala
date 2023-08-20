@@ -25,6 +25,7 @@ import org.apache.spark.sql.catalyst.expressions.{And, AttributeReference, Equal
 import org.apache.spark.sql.catalyst.plans._
 import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
 import org.apache.spark.sql.sedona_sql.expressions._
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
 import org.apache.spark.sql.{SparkSession, Strategy}
@@ -86,11 +87,11 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     extraCondition: Option[Expression] = None): Option[JoinQueryDetection] = {
     predicate match {
       case RS_Intersects(Seq(leftShape, rightShape)) =>
-        Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.RS_ST_INTERSECTS, false, extraCondition))
+        Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, false, extraCondition))
       case RS_Contains(Seq(leftShape, rightShape)) =>
-        Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.RS_ST_CONTAINS, false, extraCondition))
+        Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.CONTAINS, false, extraCondition))
       case RS_Within(Seq(leftShape, rightShape)) =>
-        Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.RS_ST_WITHIN, false, extraCondition))
+        Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.WITHIN, false, extraCondition))
       case _ => None
     }
   }
@@ -300,8 +301,8 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     val a = children.head
     val b = children.tail.head
 
-    val isRaster = SpatialPredicate.isLeftRaster(spatialPredicate)
-    val relationship = if (isRaster) spatialPredicate else s"ST_$spatialPredicate"
+    val isRaster = a.dataType.isInstanceOf[RasterUDT] || b.dataType.isInstanceOf[RasterUDT]
+    val relationship = if (isRaster) s"RS_$spatialPredicate" else s"ST_$spatialPredicate"
     matchExpressionsToPlans(a, b, left, right) match {
       case Some((_, _, false)) =>
         logInfo(s"Planning spatial join for $relationship relationship")
