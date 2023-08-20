@@ -22,7 +22,7 @@ package org.apache.sedona.sql
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions.expr
-import org.apache.spark.sql.sedona_sql.strategy.join.DistanceJoinExec
+import org.apache.spark.sql.sedona_sql.strategy.join.{DistanceJoinExec, RangeJoinExec}
 import org.apache.spark.sql.types._
 import org.locationtech.jts.geom.Geometry
 
@@ -43,7 +43,9 @@ class predicateJoinTestScala extends TestBaseScala {
 
       val rasterDf = sparkSession.read.format("binaryFile").load(rasterDataLocation).selectExpr("RS_FromGeoTiff(content) as raster")
       rasterDf.createOrReplaceTempView("rasterDf")
+      //        assert(distanceDefaultNoIntersectsDF.queryExecution.sparkPlan.collect { case p: DistanceJoinExec => p }.size === 1)
       val rangeJoinDf = sparkSession.sql("select * from polygondf, rasterDf where RS_Intersects(rasterDf.raster, polygondf.building)")
+      assert(rangeJoinDf.queryExecution.sparkPlan.collect{case p: RangeJoinExec => p}.size === 1)
       assert(rangeJoinDf.count() == 999)
     }
 
@@ -59,6 +61,7 @@ class predicateJoinTestScala extends TestBaseScala {
       val rasterDf = sparkSession.read.format("binaryFile").load(rasterDataLocation).selectExpr("RS_FromGeoTiff(content) as raster")
       rasterDf.createOrReplaceTempView("rasterDf")
       val rangeJoinDf = sparkSession.sql("select * from rasterDf, polygondf where RS_Contains(rasterDf.raster, polygondf.building)")
+      assert(rangeJoinDf.queryExecution.sparkPlan.collect{case p: RangeJoinExec => p}.size === 1)
       assert(rangeJoinDf.count() == 210)
     }
 
@@ -78,6 +81,7 @@ class predicateJoinTestScala extends TestBaseScala {
       val rasterDf = sparkSession.read.format("binaryFile").load(rasterDataLocation).selectExpr("RS_ConvexHull(RS_FromGeoTiff(content)) as rasterGeom")
       rasterDf.createOrReplaceTempView("rasterDf")
       val rangeJoinDf = sparkSession.sql("select * from smallRaster r1, smallRaster r2 where RS_Within(r1.raster, RS_ConvexHull(r2.raster))")
+      assert(rangeJoinDf.queryExecution.sparkPlan.collect{case p: RangeJoinExec => p}.size === 1)
       assert(rangeJoinDf.count() == 1)
     }
 
