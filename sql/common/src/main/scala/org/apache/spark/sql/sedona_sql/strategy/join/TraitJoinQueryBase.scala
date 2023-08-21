@@ -25,6 +25,7 @@ import org.apache.sedona.sql.utils.{GeometrySerializer, RasterSerializer}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeRow}
 import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
 import org.locationtech.jts.geom.{Envelope, Geometry}
 
 trait TraitJoinQueryBase {
@@ -65,10 +66,11 @@ trait TraitJoinQueryBase {
 
   def toExpandedEnvelopeRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression, boundRadius: Expression, isGeography: Boolean): SpatialRDD[Geometry] = {
     val spatialRdd = new SpatialRDD[Geometry]
+    val isRaster = shapeExpression.dataType.isInstanceOf[RasterUDT]
     spatialRdd.setRawSpatialRDD(
       rdd
         .map { x =>
-          val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
+          val shape = if (isRaster) GeometryFunctions.convexHull(RasterSerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])) else GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
           val envelope = shape.getEnvelopeInternal.copy()
           expandEnvelope(envelope, boundRadius.eval(x).asInstanceOf[Double], 6357000.0, isGeography)
 

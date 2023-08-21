@@ -405,6 +405,49 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(distanceJoinDF.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
       assert(distanceJoinDF.count() == expected)
     }
+
+    it("Passed RS_Intersects") {
+      val rasterDf = buildRasterDf.repartition(3)
+      val buildingsDf = buildBuildingsDf.repartition(5)
+      val joinDfRightBroadcast = rasterDf.alias("rasterDf").join(broadcast(buildingsDf).alias("buildingsDf"), expr("RS_Intersects(rasterDf.raster, buildingsDf.building)"))
+      assert(joinDfRightBroadcast.queryExecution.sparkPlan.collect{case p: BroadcastIndexJoinExec => p}.size == 1)
+      val resultRightBroadcast = joinDfRightBroadcast.count()
+      assert(buildingsDf.count() == resultRightBroadcast) // raster is of entire world, all buildings should intersect
+
+      //ideally the raster should not be broadcast here, testing it out nevertheless
+      val joinDfLeftBroadcast = broadcast(rasterDf.alias("rasterDf")).join(buildingsDf.alias("buildingsDf"), expr("RS_Intersects(rasterDf.raster, buildingsDf.building)"))
+      assert(joinDfLeftBroadcast.queryExecution.sparkPlan.collect {case p: BroadcastIndexJoinExec => p}.size == 1)
+      val resultLeftBroadcast = joinDfLeftBroadcast.count()
+      assert(buildingsDf.count() == resultLeftBroadcast)
+    }
+
+    it("Passed RS_Contains") {
+      val rasterDf = buildRasterDf.repartition(3)
+      val buildingsDf = buildBuildingsDf.limit(300).repartition(5)
+      val joinDfRightBroadcast = rasterDf.alias("rasterDf").join(broadcast(buildingsDf).alias("buildingsDf"), expr("RS_Contains(rasterDf.raster, buildingsDf.building)"))
+      assert(joinDfRightBroadcast.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
+      val resultRightBroadcast = joinDfRightBroadcast.count()
+      assert(buildingsDf.count() == resultRightBroadcast) // raster is of entire world, should contain all buildings
+
+      //ideally the raster should not be broadcast here, testing it out nevertheless
+      val joinDfLeftBroadcast = broadcast(rasterDf.alias("rasterDf")).join(buildingsDf.alias("buildingsDf"), expr("RS_Contains(rasterDf.raster, buildingsDf.building)"))
+      assert(joinDfLeftBroadcast.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
+      val resultLeftBroadcast = joinDfLeftBroadcast.count()
+      assert(buildingsDf.count() == resultLeftBroadcast)
+    }
+
+    it("Passed RS_Within") {
+      val smallRasterDf1 = buildSmallRasterDf.repartition(3)
+      val smallRasterDf2 = buildSmallRasterDf.selectExpr("RS_ConvexHull(raster) as geom").repartition(5)
+      val joinDfRightBroadcast = smallRasterDf1.alias("rasterDf").join(broadcast(smallRasterDf2.alias("geomDf")), expr("RS_Within(rasterDf.raster, geomDf.geom)"))
+      assert(joinDfRightBroadcast.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
+      assert(1 == joinDfRightBroadcast.count()) // raster within its own convexHull
+
+      val joinDfLeftBroadcast = broadcast(smallRasterDf1.alias("rasterDf")).join(smallRasterDf2.alias("geomDf"), expr("RS_Within(rasterDf.raster, geomDf.geom)"))
+      assert(joinDfLeftBroadcast.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
+      assert(1 == joinDfLeftBroadcast.count()) // raster within its own convexHull
+
+    }
   }
 
   describe("Sedona-SQL Broadcast Index Join Test for left semi joins") {

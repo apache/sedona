@@ -391,13 +391,15 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
 
     val a = children.head
     val b = children.tail.head
+    val isRaster = a.dataType.isInstanceOf[RasterUDT] || b.dataType.isInstanceOf[RasterUDT]
 
-    val relationship = (distance, spatialPredicate, isGeography) match {
-      case (Some(_), SpatialPredicate.INTERSECTS, false) => "ST_Distance <="
-      case (Some(_), _, false) => "ST_Distance <"
-      case (Some(_), SpatialPredicate.INTERSECTS, true) => "ST_Distance (Geography) <="
-      case (Some(_), _, true) => "ST_Distance (Geography) <"
-      case (None, _, false) => s"ST_$spatialPredicate"
+    val relationship = (distance, spatialPredicate, isGeography, isRaster) match {
+      case (Some(_), SpatialPredicate.INTERSECTS, false, false) => "ST_Distance <="
+      case (Some(_), _, false, false) => "ST_Distance <"
+      case (Some(_), SpatialPredicate.INTERSECTS, true, false) => "ST_Distance (Geography) <="
+      case (Some(_), _, true, false) => "ST_Distance (Geography) <"
+      case (None, _, false, false) => s"ST_$spatialPredicate"
+      case (None, _, false, true) => s"RS_$spatialPredicate"
     }
     val (distanceOnIndexSide, distanceOnStreamSide) = distance.map { distanceExpr =>
       matchDistanceExpressionToJoinSide(distanceExpr, left, right) match {

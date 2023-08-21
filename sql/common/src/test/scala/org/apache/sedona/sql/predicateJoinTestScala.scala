@@ -69,17 +69,9 @@ class predicateJoinTestScala extends TestBaseScala {
       val sedonaConf = new SedonaConf(sparkSession.conf)
       println(sedonaConf)
 
-      val polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "true").load(buildingDataLocation)
-      polygonCsvDf.createOrReplaceTempView("polygontable")
-      val polygonDf = sparkSession.sql("SELECT ST_GeomFromWKT(geometry) as building from polygontable where confidence > 0.85")
-      polygonDf.createOrReplaceTempView("polygondf")
-
       val smallRasterDf = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff").selectExpr("RS_FromGeoTiff(content) as raster")
       smallRasterDf.createOrReplaceTempView("smallRaster")
 
-
-      val rasterDf = sparkSession.read.format("binaryFile").load(rasterDataLocation).selectExpr("RS_ConvexHull(RS_FromGeoTiff(content)) as rasterGeom")
-      rasterDf.createOrReplaceTempView("rasterDf")
       val rangeJoinDf = sparkSession.sql("select * from smallRaster r1, smallRaster r2 where RS_Within(r1.raster, RS_ConvexHull(r2.raster))")
       assert(rangeJoinDf.queryExecution.sparkPlan.collect{case p: RangeJoinExec => p}.size === 1)
       assert(rangeJoinDf.count() == 1)

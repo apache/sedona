@@ -68,6 +68,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   val spatialJoinRightInputLocation: String = resourceFolder + "spatial-join-query-window.tsv"
   val rasterDataLocation: String = resourceFolder + "raster/raster_with_no_data/test5.tiff"
   val buildingDataLocation: String = resourceFolder + "813_buildings_test.csv"
+  val smallRasterDataLocation: String = resourceFolder + "raster/test1.tiff"
 
   override def beforeAll(): Unit = {
     SedonaContext.create(sparkSession)
@@ -82,8 +83,19 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(path)
   }
 
+  def loadCsvWithHeader(path: String): DataFrame = {
+    sparkSession.read.format("csv").option("delimiter", ",").option("header", "true").load(path)
+  }
+
+  def loadGeoTiff(path: String): DataFrame = {
+    sparkSession.read.format("binaryFile").load(path)
+  }
+
   lazy val buildPointDf = loadCsv(csvPointInputLocation).selectExpr("ST_Point(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20))) as pointshape")
   lazy val buildPolygonDf = loadCsv(csvPolygonInputLocation).selectExpr("ST_PolygonFromEnvelope(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20)), cast(_c2 as Decimal(24,20)), cast(_c3 as Decimal(24,20))) as polygonshape")
+  lazy val buildRasterDf = loadGeoTiff(rasterDataLocation).selectExpr("RS_FromGeoTiff(content) as raster")
+  lazy val buildBuildingsDf = loadCsvWithHeader(buildingDataLocation).selectExpr("ST_GeomFromWKT(geometry) as building")
+  lazy val buildSmallRasterDf = loadGeoTiff(smallRasterDataLocation).selectExpr("RS_FromGeoTiff(content) as raster")
 
   protected final val FP_TOLERANCE: Double = 1e-12
   protected final val COORDINATE_SEQUENCE_COMPARATOR: CoordinateSequenceComparator = new CoordinateSequenceComparator(2) {
