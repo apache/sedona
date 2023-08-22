@@ -29,6 +29,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
+import org.opengis.geometry.BoundingBox;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
@@ -368,6 +369,24 @@ public class RasterPredicatesTest extends RasterTestBase {
         //raster protruding out of the geometry
         raster = RasterConstructors.makeEmptyRaster(1, 100, 100, 0, 50, 1, -1, 0, 0, 4326);
         result = RasterPredicates.rsWithin(raster, geometry);
+        Assert.assertFalse(result);
+    }
+
+    @Test
+    public void testRasterWithSkew() throws FactoryException {
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "B", 100, 100, 0, 100, 1, -1, 0.1, 0.1, 3857);
+
+        Geometry queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(7.80, 94.82));
+        boolean result = RasterPredicates.rsContains(raster, queryWindow);
+        Assert.assertTrue(result);
+
+        // Within the envelope of the raster, but not the convex hull of the raster
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(9.91, 103.86));
+        Geometry rasterEnvelope = JTS.toGeometry((BoundingBox) raster.getEnvelope2D());
+        Assert.assertTrue(rasterEnvelope.contains(queryWindow));
+        result = RasterPredicates.rsContains(raster, queryWindow);
+        Assert.assertFalse(result);
+        result = RasterPredicates.rsIntersects(raster, queryWindow);
         Assert.assertFalse(result);
     }
 }

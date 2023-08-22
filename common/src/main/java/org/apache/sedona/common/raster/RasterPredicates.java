@@ -71,12 +71,13 @@ public class RasterPredicates {
     }
 
     private static Pair<Geometry, Geometry> convertCRSIfNeeded(GridCoverage2D raster, Geometry queryWindow) {
-        org.opengis.geometry.Envelope rasterEnvelope = raster.getEnvelope();
-        Envelope rasterJtsEnvelope = new Envelope(
-            rasterEnvelope.getMinimum(0), rasterEnvelope.getMaximum(0),
-            rasterEnvelope.getMinimum(1), rasterEnvelope.getMaximum(1));
-        Geometry rasterGeometry = GEOMETRY_FACTORY.toGeometry(rasterJtsEnvelope);
-        CoordinateReferenceSystem rasterCRS = rasterEnvelope.getCoordinateReferenceSystem();
+        Geometry rasterGeometry;
+        try {
+            rasterGeometry = GeometryFunctions.convexHull(raster);
+        } catch (FactoryException | TransformException e) {
+            throw new RuntimeException("Failed to calculate the convex hull of the raster", e);
+        }
+        CoordinateReferenceSystem rasterCRS = raster.getCoordinateReferenceSystem();
         int queryWindowSRID = queryWindow.getSRID();
         if (rasterCRS == null || rasterCRS instanceof DefaultEngineeringCRS || queryWindowSRID <= 0) {
             // Either raster or query window does not have a defined CRS, simply use the original
