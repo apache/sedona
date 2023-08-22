@@ -25,6 +25,7 @@ import org.apache.spark.sql.catalyst.expressions.{And, EqualNullSafe, EqualTo, E
 import org.apache.spark.sql.catalyst.plans._
 import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
 import org.apache.spark.sql.sedona_sql.expressions._
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
 import org.apache.spark.sql.{SparkSession, Strategy}
@@ -79,6 +80,22 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
       }
     }
 
+  private def getRasterJoinDetection(
+    left: LogicalPlan,
+    right: LogicalPlan,
+    predicate: RS_Predicate,
+    extraCondition: Option[Expression] = None): Option[JoinQueryDetection] = {
+    predicate match {
+      case RS_Intersects(Seq(leftShape, rightShape)) =>
+        Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, false, extraCondition))
+      case RS_Contains(Seq(leftShape, rightShape)) =>
+        Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.CONTAINS, false, extraCondition))
+      case RS_Within(Seq(leftShape, rightShape)) =>
+        Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.WITHIN, false, extraCondition))
+      case _ => None
+    }
+  }
+
   def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
     case Join(left, right, joinType, condition, JoinHint(leftHint, rightHint)) if optimizationEnabled(left, right, condition) => {
       var broadcastLeft = leftHint.exists(_.strategy.contains(BROADCAST))
@@ -94,7 +111,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
         val canAutoBroadCastLeft = canAutoBroadcastBySize(left)
         val canAutoBroadCastRight = canAutoBroadcastBySize(right)
         if (canAutoBroadCastLeft && canAutoBroadCastRight) {
-          // Both sides can be broadcasted. Choose the smallest side.
+          // Both sides can be broadcast. Choose the smallest side.
           broadcastLeft = left.stats.sizeInBytes <= right.stats.sizeInBytes
           broadcastRight = !broadcastLeft
         } else {
@@ -104,12 +121,20 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
       }
 
       val queryDetection: Option[JoinQueryDetection] = condition match {
+        //For vector only joins
         case Some(predicate: ST_Predicate) =>
           getJoinDetection(left, right, predicate)
         case Some(And(predicate: ST_Predicate, extraCondition)) =>
           getJoinDetection(left, right, predicate, Some(extraCondition))
         case Some(And(extraCondition, predicate: ST_Predicate)) =>
           getJoinDetection(left, right, predicate, Some(extraCondition))
+          //For raster-vector joins
+        case Some(predicate: RS_Predicate) =>
+          getRasterJoinDetection(left, right, predicate)
+        case Some(And(predicate: RS_Predicate, extraCondition)) =>
+          getRasterJoinDetection(left, right, predicate, Some(extraCondition))
+        case Some(And(extraCondition, predicate: RS_Predicate)) =>
+          getRasterJoinDetection(left, right, predicate, Some(extraCondition))
         // For distance joins we execute the actual predicate (condition) and not only extraConditions.
         case Some(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), distance)) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, false, condition, Some(distance)))
@@ -276,8 +301,8 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     val a = children.head
     val b = children.tail.head
 
-    val relationship = s"ST_$spatialPredicate"
-
+    val isRaster = a.dataType.isInstanceOf[RasterUDT] || b.dataType.isInstanceOf[RasterUDT]
+    val relationship = if (isRaster) s"RS_$spatialPredicate" else s"ST_$spatialPredicate"
     matchExpressionsToPlans(a, b, left, right) match {
       case Some((_, _, false)) =>
         logInfo(s"Planning spatial join for $relationship relationship")
@@ -366,13 +391,15 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
 
     val a = children.head
     val b = children.tail.head
+    val isRaster = a.dataType.isInstanceOf[RasterUDT] || b.dataType.isInstanceOf[RasterUDT]
 
-    val relationship = (distance, spatialPredicate, isGeography) match {
-      case (Some(_), SpatialPredicate.INTERSECTS, false) => "ST_Distance <="
-      case (Some(_), _, false) => "ST_Distance <"
-      case (Some(_), SpatialPredicate.INTERSECTS, true) => "ST_Distance (Geography) <="
-      case (Some(_), _, true) => "ST_Distance (Geography) <"
-      case (None, _, false) => s"ST_$spatialPredicate"
+    val relationship = (distance, spatialPredicate, isGeography, isRaster) match {
+      case (Some(_), SpatialPredicate.INTERSECTS, false, false) => "ST_Distance <="
+      case (Some(_), _, false, false) => "ST_Distance <"
+      case (Some(_), SpatialPredicate.INTERSECTS, true, false) => "ST_Distance (Geography) <="
+      case (Some(_), _, true, false) => "ST_Distance (Geography) <"
+      case (None, _, false, false) => s"ST_$spatialPredicate"
+      case (None, _, false, true) => s"RS_$spatialPredicate"
     }
     val (distanceOnIndexSide, distanceOnStreamSide) = distance.map { distanceExpr =>
       matchDistanceExpressionToJoinSide(distanceExpr, left, right) match {

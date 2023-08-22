@@ -18,9 +18,10 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
+import org.apache.sedona.common.raster.GeometryFunctions
 import org.apache.sedona.core.spatialOperator.{SpatialPredicate, SpatialPredicateEvaluators}
 import org.apache.sedona.core.spatialOperator.SpatialPredicateEvaluators.SpatialPredicateEvaluator
-import org.apache.sedona.sql.utils.GeometrySerializer
+import org.apache.sedona.sql.utils.{GeometrySerializer, RasterSerializer}
 
 import scala.collection.JavaConverters._
 import org.apache.spark.broadcast.Broadcast
@@ -32,6 +33,7 @@ import org.apache.spark.sql.catalyst.plans.physical.Partitioning
 import org.apache.spark.sql.catalyst.plans._
 import org.apache.spark.sql.execution.metric.SQLMetrics
 import org.apache.spark.sql.execution.{RowIterator, SparkPlan}
+import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
 import org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.prep.{PreparedGeometry, PreparedGeometryFactory}
@@ -107,10 +109,13 @@ case class BroadcastIndexJoinExec(
     (streamShape, broadcast.shape)
   }
 
-  private val spatialExpression = (distance, spatialPredicate) match {
-    case (Some(r), SpatialPredicate.INTERSECTS) => s"ST_Distance($windowExpression, $objectExpression) <= $r"
-    case (Some(r), _) => s"ST_Distance($windowExpression, $objectExpression) < $r"
-    case (None, _) => s"ST_$spatialPredicate($windowExpression, $objectExpression)"
+  private val isRaster = windowExpression.dataType.isInstanceOf[RasterUDT] || objectExpression.dataType.isInstanceOf[RasterUDT]
+
+  private val spatialExpression = (distance, spatialPredicate, isRaster) match {
+    case (Some(r), SpatialPredicate.INTERSECTS, false) => s"ST_Distance($windowExpression, $objectExpression) <= $r"
+    case (Some(r), _, false) => s"ST_Distance($windowExpression, $objectExpression) < $r"
+    case (None, _, false) => s"ST_$spatialPredicate($windowExpression, $objectExpression)"
+    case (None, _, true) => s"RS_$spatialPredicate($windowExpression, $objectExpression)"
   }
 
   override def simpleString(maxFields: Int): String = super.simpleString(maxFields) + s" $spatialExpression" // SPARK3 anchor
@@ -260,11 +265,12 @@ case class BroadcastIndexJoinExec(
     distance match {
       case Some(distanceExpression) =>
         streamResultsRaw.map(row => {
+          val isRaster = boundStreamShape.dataType.isInstanceOf[RasterUDT]
           val geom = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
           if (geom == null) {
             (null, row)
           } else {
-            val geometry = GeometrySerializer.deserialize(geom)
+            val geometry = if (isRaster) GeometryFunctions.convexHull(RasterSerializer.deserialize(geom)) else GeometrySerializer.deserialize(geom)
             val radius = BindReferences.bindReference(distanceExpression, streamed.output).eval(row).asInstanceOf[Double]
             val envelope = geometry.getEnvelopeInternal
             envelope.expandBy(radius)
@@ -273,11 +279,12 @@ case class BroadcastIndexJoinExec(
         })
       case _ =>
         streamResultsRaw.map(row => {
+          val isRaster = boundStreamShape.dataType.isInstanceOf[RasterUDT]
           val geom = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
           if (geom == null) {
             (null, row)
           } else {
-            (GeometrySerializer.deserialize(geom), row)
+            (if (isRaster) GeometryFunctions.convexHull(RasterSerializer.deserialize(geom)) else GeometrySerializer.deserialize(geom), row)
           }
         })
     }

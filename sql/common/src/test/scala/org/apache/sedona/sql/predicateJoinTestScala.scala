@@ -22,13 +22,60 @@ package org.apache.sedona.sql
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions.expr
-import org.apache.spark.sql.sedona_sql.strategy.join.DistanceJoinExec
+import org.apache.spark.sql.sedona_sql.strategy.join.{DistanceJoinExec, RangeJoinExec}
 import org.apache.spark.sql.types._
 import org.locationtech.jts.geom.Geometry
 
 class predicateJoinTestScala extends TestBaseScala {
 
   describe("Sedona-SQL Predicate Join Test") {
+
+    //raster-vector predicates
+
+    it("Passed RS_Intersects in a join") {
+      val sedonaConf = new SedonaConf(sparkSession.conf)
+      println(sedonaConf)
+
+      val polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "true").load(buildingDataLocation)
+      polygonCsvDf.createOrReplaceTempView("polygontable")
+      val polygonDf = sparkSession.sql("SELECT ST_GeomFromWKT(geometry) as building from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+
+      val rasterDf = sparkSession.read.format("binaryFile").load(rasterDataLocation).selectExpr("RS_FromGeoTiff(content) as raster")
+      rasterDf.createOrReplaceTempView("rasterDf")
+      //        assert(distanceDefaultNoIntersectsDF.queryExecution.sparkPlan.collect { case p: DistanceJoinExec => p }.size === 1)
+      val rangeJoinDf = sparkSession.sql("select * from polygondf, rasterDf where RS_Intersects(rasterDf.raster, polygondf.building)")
+      assert(rangeJoinDf.queryExecution.sparkPlan.collect{case p: RangeJoinExec => p}.size === 1)
+      assert(rangeJoinDf.count() == 999)
+    }
+
+    it("Passed RS_Contains in a join") {
+      val sedonaConf = new SedonaConf(sparkSession.conf)
+      println(sedonaConf)
+
+      val polygonCsvDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "true").load(buildingDataLocation)
+      polygonCsvDf.createOrReplaceTempView("polygontable")
+      val polygonDf = sparkSession.sql("SELECT ST_GeomFromWKT(geometry) as building from polygontable where confidence > 0.85")
+      polygonDf.createOrReplaceTempView("polygondf")
+
+      val rasterDf = sparkSession.read.format("binaryFile").load(rasterDataLocation).selectExpr("RS_FromGeoTiff(content) as raster")
+      rasterDf.createOrReplaceTempView("rasterDf")
+      val rangeJoinDf = sparkSession.sql("select * from rasterDf, polygondf where RS_Contains(rasterDf.raster, polygondf.building)")
+      assert(rangeJoinDf.queryExecution.sparkPlan.collect{case p: RangeJoinExec => p}.size === 1)
+      assert(rangeJoinDf.count() == 210)
+    }
+
+    it("Passed RS_Within in a join") {
+      val sedonaConf = new SedonaConf(sparkSession.conf)
+      println(sedonaConf)
+
+      val smallRasterDf = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff").selectExpr("RS_FromGeoTiff(content) as raster")
+      smallRasterDf.createOrReplaceTempView("smallRaster")
+
+      val rangeJoinDf = sparkSession.sql("select * from smallRaster r1, smallRaster r2 where RS_Within(r1.raster, RS_ConvexHull(r2.raster))")
+      assert(rangeJoinDf.queryExecution.sparkPlan.collect{case p: RangeJoinExec => p}.size === 1)
+      assert(rangeJoinDf.count() == 1)
+    }
 
     it("Passed ST_Contains in a join") {
       val sedonaConf = new SedonaConf(sparkSession.conf)

@@ -98,7 +98,7 @@ POLYGON ((0 0,20 0,20 60,0 60,0 0))
 ### RS_ConvexHull
 
 Introduction: Return the convex hull geometry of the raster including the NoDataBandValue band pixels. 
-For regular shaped and non-skewed rasters, this gives more or less the same result as RS_ConvexHull and hence is only useful for irregularly shaped or skewed rasters.
+For regular shaped and non-skewed rasters, this gives more or less the same result as RS_Envelope and hence is only useful for irregularly shaped or skewed rasters.
 
 Format: `RS_ConvexHull(raster: Raster)`
 
