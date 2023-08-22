@@ -305,6 +305,42 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(metadata(9) == metadata4326(9))
     }
 
+    it("Passed RS_SetGeoReference should handle null values") {
+      val result = sparkSession.sql("select RS_SetGeoReference(null, null)").first().get(0)
+      assertNull(result)
+    }
+
+    it("Passed RS_SetGeoReference with raster") {
+      val dfFile = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val df = dfFile.selectExpr("RS_FromGeoTiff(content) as raster")
+      var actual = df.selectExpr("RS_GeoReference(RS_SetGeoReference(raster, '56 1 1 -56 23 34'))").first().getString(0)
+      var expected = "56.000000 \n1.000000 \n1.000000 \n-56.000000 \n23.000000 \n34.000000"
+      assertEquals(expected, actual)
+
+      actual = df.selectExpr("RS_GeoReference(RS_SetGeoReference(raster, '80 1 1 -82 -13095810 4021255', 'ESRI'))").first().getString(0)
+      expected = "80.000000 \n1.000000 \n1.000000 \n-82.000000 \n-13095850.000000 \n4021296.000000"
+      assertEquals(expected, actual)
+
+      actual = df.selectExpr("RS_GeoReference(RS_SetGeoReference(raster, -13095810, 4021255, 80, -82, 1, 1))").first().getString(0)
+      expected = "80.000000 \n1.000000 \n1.000000 \n-82.000000 \n-13095810.000000 \n4021255.000000"
+      assertEquals(expected, actual)
+    }
+
+    it("Passed RS_SetGeoReference with empty raster") {
+      var df = sparkSession.sql("Select RS_MakeEmptyRaster(1, 20, 20, 2, 22, 2, 3, 1, 1, 0) as raster")
+      var actual = df.selectExpr("RS_GeoReference(RS_SetGeoReference(raster, '3 1.5 1.5 2 22 3'))").first().getString(0)
+      var expected = "3.000000 \n1.500000 \n1.500000 \n2.000000 \n22.000000 \n3.000000"
+      assertEquals(expected, actual)
+
+      actual = df.selectExpr("RS_GeoReference(RS_SetGeoReference(raster, '3 1.5 2.5 3 22 3', 'ESRI'))").first().getString(0)
+      expected = "3.000000 \n1.500000 \n2.500000 \n3.000000 \n20.500000 \n1.500000"
+      assertEquals(expected, actual)
+
+      actual = df.selectExpr("RS_GeoReference(RS_SetGeoReference(raster, 22, 8, 3, 4, 2, 4))").first().getString(0)
+      expected = "3.000000 \n4.000000 \n2.000000 \n4.000000 \n22.000000 \n8.000000"
+      assertEquals(expected, actual)
+    }
+
     it("Passed RS_SRID should handle null values") {
       val result = sparkSession.sql("select RS_SRID(null)").first().get(0)
       assert(result == null)
