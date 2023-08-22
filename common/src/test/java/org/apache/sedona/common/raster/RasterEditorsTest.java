@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
@@ -16,16 +17,19 @@ public class RasterEditorsTest extends RasterTestBase {
         String actual = RasterAccessors.getGeoReference(actualGrid);
         String expected = "72.000000 \n0.000000 \n0.000000 \n-72.000000 \n-13095817.000000 \n4021262.000000";
         assertEquals(expected, actual);
+        assert(Arrays.equals(MapAlgebra.bandAsArray(raster, 1), MapAlgebra.bandAsArray(actualGrid, 1)));
 
         actualGrid = RasterEditors.setGeoReference(raster, "56 1 1 -56 23 34");
         actual = RasterAccessors.getGeoReference(actualGrid);
         expected = "56.000000 \n1.000000 \n1.000000 \n-56.000000 \n23.000000 \n34.000000";
         assertEquals(expected, actual);
+        assert(Arrays.equals(MapAlgebra.bandAsArray(raster, 1), MapAlgebra.bandAsArray(actualGrid, 1)));
 
         actualGrid = RasterEditors.setGeoReference(raster, "56 1 1 -56 23 34", "esri");
         actual = RasterAccessors.getGeoReference(actualGrid);
         expected = "56.000000 \n1.000000 \n1.000000 \n-56.000000 \n-5.000000 \n62.000000";
         assertEquals(expected, actual);
+        assert(Arrays.equals(MapAlgebra.bandAsArray(raster, 1), MapAlgebra.bandAsArray(actualGrid, 1)));
     }
 
     @Test
