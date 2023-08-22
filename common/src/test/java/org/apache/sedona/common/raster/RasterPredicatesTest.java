@@ -23,6 +23,7 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.junit.Assert;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -98,6 +99,92 @@ public class RasterPredicatesTest extends RasterTestBase {
         Assert.assertTrue(result);
         queryWindow = GEOMETRY_FACTORY.toGeometry(new Envelope(10, 20, 10, 20));
         queryWindow.setSRID(4326);
+        result = RasterPredicates.rsIntersects(raster, queryWindow);
+        Assert.assertFalse(result);
+    }
+
+    @Test
+    public void testIntersectsWithTransformations2() {
+        GridCoverage2D raster = createRandomRaster(DataBuffer.TYPE_BYTE, 7741, 7871, 301485, 4106715, 30, 1, "EPSG:32654");
+
+        Geometry queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(15676311,4350120));
+        queryWindow.setSRID(3857);
+        Assert.assertTrue(RasterPredicates.rsIntersects(raster, queryWindow));
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(15494263,4240252));
+        queryWindow.setSRID(3857);
+        Assert.assertTrue(RasterPredicates.rsIntersects(raster, queryWindow));
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(15388866,4421023));
+        queryWindow.setSRID(3857);
+        Assert.assertFalse(RasterPredicates.rsIntersects(raster, queryWindow));
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(15847500,4263886));
+        queryWindow.setSRID(3857);
+        Assert.assertFalse(RasterPredicates.rsIntersects(raster, queryWindow));
+
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(140.9834, 36.4790));
+        queryWindow.setSRID(4326);
+        Assert.assertTrue(RasterPredicates.rsIntersects(raster, queryWindow));
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(139.1070, 35.6720));
+        queryWindow.setSRID(4326);
+        Assert.assertTrue(RasterPredicates.rsIntersects(raster, queryWindow));
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(36.4790, 140.9834));
+        queryWindow.setSRID(4326);
+        Assert.assertFalse(RasterPredicates.rsIntersects(raster, queryWindow));
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(35.6720, 139.1070));
+        queryWindow.setSRID(4326);
+        Assert.assertFalse(RasterPredicates.rsIntersects(raster, queryWindow));
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(142.0449, 35.3497));
+        queryWindow.setSRID(4326);
+        Assert.assertFalse(RasterPredicates.rsIntersects(raster, queryWindow));
+
+        // NAD83
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(140.9834, 36.4790));
+        queryWindow.setSRID(4269);
+        Assert.assertTrue(RasterPredicates.rsIntersects(raster, queryWindow));
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(139.1070, 35.6720));
+        queryWindow.setSRID(4269);
+        Assert.assertTrue(RasterPredicates.rsIntersects(raster, queryWindow));
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(36.4790, 140.9834));
+        queryWindow.setSRID(4269);
+        Assert.assertFalse(RasterPredicates.rsIntersects(raster, queryWindow));
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(35.6720, 139.1070));
+        queryWindow.setSRID(4269);
+        Assert.assertFalse(RasterPredicates.rsIntersects(raster, queryWindow));
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(142.0449, 35.3497));
+        queryWindow.setSRID(4269);
+        Assert.assertFalse(RasterPredicates.rsIntersects(raster, queryWindow));
+    }
+
+    @Test
+    public void testIntersectsCrossingAntiMeridian() {
+        GridCoverage2D raster = createRandomRaster(DataBuffer.TYPE_BYTE, 4289, 4194, 306240, 7840860, 60, 1, "EPSG:32601");
+
+        // Query using points near -180 lon
+        Geometry queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(-177.8130, 68.5886));
+        queryWindow.setSRID(4326);
+        boolean result = RasterPredicates.rsIntersects(raster, queryWindow);
+        Assert.assertTrue(result);
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(-172.230, 69.830));
+        queryWindow.setSRID(4326);
+        result = RasterPredicates.rsIntersects(raster, queryWindow);
+        Assert.assertFalse(result);
+
+        // Query using points near 180 lon
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(179.7239, 69.5221));
+        queryWindow.setSRID(4326);
+        result = RasterPredicates.rsIntersects(raster, queryWindow);
+        Assert.assertTrue(result);
+        queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(175.7754, 68.4907));
+        queryWindow.setSRID(4326);
+        result = RasterPredicates.rsIntersects(raster, queryWindow);
+        Assert.assertFalse(result);
+
+        // Query using envelopes crossing the anti-meridian in EPSG:3413
+        queryWindow = GEOMETRY_FACTORY.toGeometry(new Envelope(-1787864,-1446256,1381532,1733816));
+        queryWindow.setSRID(3413);
+        result = RasterPredicates.rsIntersects(raster, queryWindow);
+        Assert.assertTrue(result);
+        queryWindow = GEOMETRY_FACTORY.toGeometry(new Envelope(-2041936,-1736623,1782922,2088234));
+        queryWindow.setSRID(3413);
         result = RasterPredicates.rsIntersects(raster, queryWindow);
         Assert.assertFalse(result);
     }

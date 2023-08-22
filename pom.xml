@@ -73,6 +73,7 @@
         <jackson.version>2.13.4</jackson.version>
         <jts.version>1.19.0</jts.version>
         <jts2geojson.version>0.16.1</jts2geojson.version>
+        <spatial4j.version>0.8</spatial4j.version>
 
         <jt-jiffle.version>1.1.24</jt-jiffle.version>
         <antlr-runtime.version>4.9.3</antlr-runtime.version>
@@ -149,6 +150,11 @@
                 <groupId>org.locationtech.jts</groupId>
                 <artifactId>jts-core</artifactId>
                 <version>${jts.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.locationtech.spatial4j</groupId>
+                <artifactId>spatial4j</artifactId>
+                <version>${spatial4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>edu.ucar</groupId>

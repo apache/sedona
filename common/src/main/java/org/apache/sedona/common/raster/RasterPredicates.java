@@ -18,51 +18,129 @@
  */
 package org.apache.sedona.common.raster;
 
-import org.apache.sedona.common.utils.RasterUtils;
+import java.util.Set;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.sedona.common.utils.GeomUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
+import org.geotools.referencing.crs.DefaultEngineeringCRS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.ReferenceIdentifier;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 
 public class RasterPredicates {
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
     /**
      * Test if a raster intersects a query window. If both the raster and the query window have a
-     * CRS, the query window will be transformed to the CRS of the raster before testing for intersection.
-     * Please note that the CRS transformation will be lenient, which means that the transformation may
-     * not be accurate.
+     * CRS, the query window and the envelope of the raster will be transformed to a common CRS
+     * before testing for intersection.
+     * Please note that the CRS transformation will be lenient, which means that the transformation
+     * may not be accurate.
      * @param raster the raster
      * @param queryWindow the query window
      * @return true if the raster intersects the query window
      */
-    public static boolean rsIntersects(GridCoverage2D raster, Geometry queryWindow) {
-        Envelope2D rasterEnvelope2D = raster.getEnvelope2D();
-        CoordinateReferenceSystem rasterCRS = rasterEnvelope2D.getCoordinateReferenceSystem();
-        queryWindow = RasterUtils.convertCRSIfNeeded(queryWindow, rasterCRS);
-        Envelope rasterEnvelope = JTS.toEnvelope(rasterEnvelope2D);
-        Geometry rasterGeometry = GEOMETRY_FACTORY.toGeometry(rasterEnvelope);
+    public static boolean rsIntersects(GridCoverage2D raster, Geometry geometry) {
+        Pair<Geometry, Geometry> geometries = convertCRSIfNeeded(raster, geometry);
+        Geometry rasterGeometry = geometries.getLeft();
+        Geometry queryWindow = geometries.getRight();
         return rasterGeometry.intersects(queryWindow);
     }
 
     public static boolean rsContains(GridCoverage2D raster, Geometry geometry) {
-        Envelope2D rasterEnvelope2D = raster.getEnvelope2D();
-        CoordinateReferenceSystem rasterCRS = rasterEnvelope2D.getCoordinateReferenceSystem();
-        geometry = RasterUtils.convertCRSIfNeeded(geometry, rasterCRS);
-        Envelope rasterEnvelope = JTS.toEnvelope(rasterEnvelope2D);
-        Geometry rasterGeometry = GEOMETRY_FACTORY.toGeometry(rasterEnvelope);
-        return  rasterGeometry.contains(geometry);
+        Pair<Geometry, Geometry> geometries = convertCRSIfNeeded(raster, geometry);
+        Geometry rasterGeometry = geometries.getLeft();
+        Geometry queryWindow = geometries.getRight();
+        return rasterGeometry.contains(queryWindow);
     }
 
     public static boolean rsWithin(GridCoverage2D raster, Geometry geometry) {
-        Envelope2D rasterEnvelope2D = raster.getEnvelope2D();
-        CoordinateReferenceSystem rasterCRS = rasterEnvelope2D.getCoordinateReferenceSystem();
-        geometry = RasterUtils.convertCRSIfNeeded(geometry, rasterCRS);
-        Envelope rasterEnvelope = JTS.toEnvelope(rasterEnvelope2D);
-        Geometry rasterGeometry = GEOMETRY_FACTORY.toGeometry(rasterEnvelope);
-        return  rasterGeometry.within(geometry);
+        Pair<Geometry, Geometry> geometries = convertCRSIfNeeded(raster, geometry);
+        Geometry rasterGeometry = geometries.getLeft();
+        Geometry queryWindow = geometries.getRight();
+        return rasterGeometry.within(queryWindow);
+    }
+
+    private static Pair<Geometry, Geometry> convertCRSIfNeeded(GridCoverage2D raster, Geometry queryWindow) {
+        org.opengis.geometry.Envelope rasterEnvelope = raster.getEnvelope();
+        Envelope rasterJtsEnvelope = new Envelope(
+            rasterEnvelope.getMinimum(0), rasterEnvelope.getMaximum(0),
+            rasterEnvelope.getMinimum(1), rasterEnvelope.getMaximum(1));
+        Geometry rasterGeometry = GEOMETRY_FACTORY.toGeometry(rasterJtsEnvelope);
+        CoordinateReferenceSystem rasterCRS = rasterEnvelope.getCoordinateReferenceSystem();
+        int queryWindowSRID = queryWindow.getSRID();
+        if (rasterCRS == null || rasterCRS instanceof DefaultEngineeringCRS || queryWindowSRID <= 0) {
+            // Either raster or query window does not have a defined CRS, simply use the original
+            // raster envelope and the query window to test for relationship.
+            return Pair.of(rasterGeometry, queryWindow);
+        }
+
+        // Both raster and query window have a defined CRS
+        String queryWindowCRSCode = "EPSG:" + queryWindowSRID;
+        if (isCRSMatchesEPSGCode(rasterCRS, queryWindowCRSCode)) {
+            // The CRS of the query window has the same EPSG code as the raster, so we don't need to
+            // transform it.
+            // Please note that even though the EPSG code is the same, the CRS may not be the same.
+            // The query window and the raster may not have the same axis order. It is user's
+            // responsibility to provide a query window with the same axis order as the raster.
+            return Pair.of(rasterGeometry, queryWindow);
+        }
+
+        // Raster has a non-authoritative CRS, or the CRS of the raster is different from the
+        // CRS of the query window. We'll transform both sides to a common CRS (WGS84) before
+        // testing for relationship.
+        try {
+            CoordinateReferenceSystem queryWindowCRS = CRS.decode(queryWindowCRSCode, true);
+            MathTransform transform = CRS.findMathTransform(queryWindowCRS,
+                DefaultGeographicCRS.WGS84, true);
+            queryWindow = JTS.transform(queryWindow, transform);
+            if (queryWindowSRID != 4326) {
+                queryWindow = GeomUtils.antiMeridianSafeGeom(queryWindow);
+            } else {
+                // The query window is already in WGS84, which is a geographic CRS. We'll assume that
+                // the query window provided by the user is already anti-meridian safe.
+                // If the query window has a width greater than 180, the antiMeridianSafeGeom method
+                // will treat it as crossing the anti-meridian, which may not be what the user wants.
+            }
+
+            // Transform the raster envelope. Here we don't use the envelope transformation method
+            // provided by GeoTools since it performs poorly when the raster envelope crosses the
+            // anti-meridian.
+            transform = CRS.findMathTransform(rasterCRS, DefaultGeographicCRS.WGS84, true);
+            rasterGeometry = JTS.transform(rasterGeometry, transform);
+            rasterGeometry = GeomUtils.antiMeridianSafeGeom(rasterGeometry);
+        } catch (FactoryException | TransformException e) {
+            throw new RuntimeException("Cannot transform CRS of query window", e);
+        }
+
+        return Pair.of(rasterGeometry, queryWindow);
+    }
+
+    private static boolean isCRSMatchesEPSGCode(CoordinateReferenceSystem crs, String epsgCode) {
+        CRS.AxisOrder axisOrder = CRS.getAxisOrder(crs);
+        if (axisOrder == CRS.AxisOrder.NORTH_EAST) {
+            // SRID of geometries will always be decoded as CRS in lon/lat axis order. For projected CRS, the
+            // axis order should be east/north. If the crs is for Antarctic or Arctic, the axis order may be
+            // INAPPLICABLE. In this case, we'll assume that the axis order would match with the query window if
+            // they have the same EPSG code.
+            return false;
+        }
+
+        Set<ReferenceIdentifier> crsIds = crs.getIdentifiers();
+        if (crsIds.isEmpty()) {
+            return false;
+        }
+        ReferenceIdentifier crsId = crsIds.iterator().next();
+        String code = crsId.getCodeSpace() + ":" + crsId.getCode();
+        return code.equals(epsgCode);
     }
 }
