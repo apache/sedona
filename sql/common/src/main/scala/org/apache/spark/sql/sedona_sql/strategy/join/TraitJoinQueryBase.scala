@@ -18,7 +18,6 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
-import org.apache.sedona.common.raster.GeometryFunctions
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.sedona.sql.utils.{GeometrySerializer, RasterSerializer}
@@ -26,7 +25,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeRow}
 import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
-import org.locationtech.jts.geom.{Envelope, Geometry}
+import org.locationtech.jts.geom.Geometry
 
 trait TraitJoinQueryBase {
   self: SparkPlan =>
@@ -34,9 +33,14 @@ trait TraitJoinQueryBase {
   def toSpatialRddPair(leftRdd: RDD[UnsafeRow],
                        leftShapeExpr: Expression,
                        rightRdd: RDD[UnsafeRow],
-                       rightShapeExpr: Expression, isLeftRaster: Boolean, isRightRaster: Boolean): (SpatialRDD[Geometry], SpatialRDD[Geometry]) =
-    (if (isLeftRaster) toSpatialRDDRaster(leftRdd, leftShapeExpr) else toSpatialRDD(leftRdd, leftShapeExpr),
-      if (isRightRaster) toSpatialRDDRaster(rightRdd, rightShapeExpr) else toSpatialRDD(rightRdd, rightShapeExpr))
+                       rightShapeExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) = {
+    if (leftShapeExpr.dataType.acceptsType(RasterUDT) || rightShapeExpr.dataType.acceptsType(RasterUDT)) {
+      (toWGS84EnvelopeRDD(leftRdd, leftShapeExpr),
+        toWGS84EnvelopeRDD(rightRdd, rightShapeExpr))
+    } else {
+      (toSpatialRDD(leftRdd, leftShapeExpr), toSpatialRDD(rightRdd, rightShapeExpr))
+    }
+  }
 
   def toSpatialRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression): SpatialRDD[Geometry] = {
     val spatialRdd = new SpatialRDD[Geometry]
@@ -51,30 +55,38 @@ trait TraitJoinQueryBase {
     spatialRdd
   }
 
-  def toSpatialRDDRaster(rdd: RDD[UnsafeRow], shapeExpression: Expression): SpatialRDD[Geometry] = {
+  def toWGS84EnvelopeRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression): SpatialRDD[Geometry] = {
+    // This RDD is for performing raster-geometry or raster-raster join, where we need to perform implicit CRS
+    // transformation for both sides. We use expanded WGS84 envelope as the joined geometries and perform a
+    // coarse-grained spatial join.
     val spatialRdd = new SpatialRDD[Geometry]
-    spatialRdd.setRawSpatialRDD(
-      rdd
-        .map { x =>
-          val shape = GeometryFunctions.convexHull(RasterSerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]]))
-          shape.setUserData(x.copy)
-          shape
-        }
-        .toJavaRDD())
+    val wgs84EnvelopeRdd = if (shapeExpression.dataType.acceptsType(RasterUDT)) {
+      rdd.map { row =>
+        val raster = RasterSerializer.deserialize(shapeExpression.eval(row).asInstanceOf[Array[Byte]])
+        val shape = JoinedGeometry.rasterToWGS84Envelope(raster)
+        shape.setUserData(row.copy)
+        shape
+      }
+    } else {
+      rdd.map { row =>
+        val geom = GeometrySerializer.deserialize(shapeExpression.eval(row).asInstanceOf[Array[Byte]])
+        val shape = JoinedGeometry.geometryToWGS84Envelope(geom)
+        shape.setUserData(row.copy)
+        shape
+      }
+    }
+    spatialRdd.setRawSpatialRDD(wgs84EnvelopeRdd)
     spatialRdd
   }
 
   def toExpandedEnvelopeRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression, boundRadius: Expression, isGeography: Boolean): SpatialRDD[Geometry] = {
     val spatialRdd = new SpatialRDD[Geometry]
-    val isRaster = shapeExpression.dataType.isInstanceOf[RasterUDT]
     spatialRdd.setRawSpatialRDD(
       rdd
         .map { x =>
-          val shape = if (isRaster) GeometryFunctions.convexHull(RasterSerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])) else GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
-          val envelope = shape.getEnvelopeInternal.copy()
-          expandEnvelope(envelope, boundRadius.eval(x).asInstanceOf[Double], 6357000.0, isGeography)
-
-          val expandedEnvelope = shape.getFactory.toGeometry(envelope)
+          val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
+          val distance = boundRadius.eval(x).asInstanceOf[Double]
+          val expandedEnvelope = JoinedGeometry.geometryToExpandedEnvelope(shape, distance, isGeography)
           expandedEnvelope.setUserData(x.copy)
           expandedEnvelope
         }
@@ -87,29 +99,6 @@ trait TraitJoinQueryBase {
     if (dominantShapes.approximateTotalCount > 0) {
       dominantShapes.spatialPartitioning(sedonaConf.getJoinGridType, numPartitions)
       followerShapes.spatialPartitioning(dominantShapes.getPartitioner)
-    }
-  }
-
-  /**
-    * Expand the given envelope by the given distance in meter.
-    * For geography, we expand the envelope by the given distance in both longitude and latitude.
-    * @param envelope
-    * @param distance in meter
-    * @param radius in meter
-    * @param isGeography
-    */
-  private def expandEnvelope(envelope:Envelope, distance:Double, radius:Double, isGeography:Boolean):Unit = {
-    if (isGeography) {
-      val scaleFactor = 1.1 // 10% buffer to get rid of false negatives
-      val latRadian = Math.toRadians((envelope.getMinX + envelope.getMaxX) / 2.0)
-      val latDeltaRadian = distance / radius;
-      val latDeltaDegree = Math.toDegrees(latDeltaRadian)
-      val lonDeltaRadian = Math.max(Math.abs(distance / (radius * Math.cos(latRadian + latDeltaRadian))),
-        Math.abs(distance / (radius * Math.cos(latRadian - latDeltaRadian))))
-      val lonDeltaDegree = Math.toDegrees(lonDeltaRadian)
-      envelope.expandBy(latDeltaDegree * scaleFactor, lonDeltaDegree * scaleFactor)
-    } else {
-      envelope.expandBy(distance)
     }
   }
 }

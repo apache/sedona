@@ -69,7 +69,7 @@ case class DistanceJoinExec(left: SparkPlan,
   override def toSpatialRddPair(leftRdd: RDD[UnsafeRow],
                                 leftShapeExpr: Expression,
                                 rightRdd: RDD[UnsafeRow],
-                                rightShapeExpr: Expression, isLeftRaster: Boolean, isRightRaster: Boolean): (SpatialRDD[Geometry], SpatialRDD[Geometry]) = {
+                                rightShapeExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) = {
     if (distanceBoundToLeft) {
       (toExpandedEnvelopeRDD(leftRdd, leftShapeExpr, boundRadius, isGeography), toSpatialRDD(rightRdd, rightShapeExpr))
     } else {
