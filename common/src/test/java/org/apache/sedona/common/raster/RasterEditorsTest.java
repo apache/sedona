@@ -50,4 +50,23 @@ public class RasterEditorsTest extends RasterTestBase {
         expected = "10.000000 \n3.000000 \n3.000000 \n-10.000000 \n15.000000 \n-7.000000";
         assertEquals(expected, actual);
     }
+
+    @Test
+    public void testSetGeoReferenceWithEmptyRasterSRID() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 20, 20, 0, 0, 8, 8, 0.1, 0.1, 4326);
+        GridCoverage2D actualGrid = RasterEditors.setGeoReference(emptyRaster, 10, -10, 10, -10, 10, 10);
+        String actual = RasterAccessors.getGeoReference(actualGrid);
+        String expected = "10.000000 \n10.000000 \n10.000000 \n-10.000000 \n10.000000 \n-10.000000";
+        assertEquals(expected, actual);
+
+        actualGrid = RasterEditors.setGeoReference(emptyRaster, "10 3 3 -10 20 -12");
+        actual = RasterAccessors.getGeoReference(actualGrid);
+        expected = "10.000000 \n3.000000 \n3.000000 \n-10.000000 \n20.000000 \n-12.000000";
+        assertEquals(expected, actual);
+
+        actualGrid = RasterEditors.setGeoReference(emptyRaster, "10 3 3 -10 20 -12", "ESRI");
+        actual = RasterAccessors.getGeoReference(actualGrid);
+        expected = "10.000000 \n3.000000 \n3.000000 \n-10.000000 \n15.000000 \n-7.000000";
+        assertEquals(expected, actual);
+    }
 }
