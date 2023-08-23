@@ -179,6 +179,8 @@ Introduction: Returns the georeference metadata of raster as a string in GDAL or
 
 Format: `RS_GeoReference(raster: Raster, format:string)`
 
+Since: `v1.5.0`
+
 Difference between format representation is as follows:
 
 `GDAL`
@@ -801,6 +803,103 @@ Output:
 4
 ```
 
+### RS_SetGeoReference
+
+Introduction: Sets the Georeference information of an object in a single call. Accepts inputs in `GDAL` and `ESRI` format.
+Default format is `GDAL`. If all 6 parameters are not provided then will return null.
+
+Format:
+
+```
+RS_SetGeoReference(raster: Raster, geoRefCoord: String, format: String = "GDAL")
+```
+
+```
+RS_SetGeoReference(raster: Raster, upperLeftX: Double, upperLeftY: Double, scaleX: Double, scaleY: Double, skewX: Double, skewY: Double)
+```
+
+Since: `v1.5.0`
+
+Difference between format representation is as follows:
+
+`GDAL`
+
+```
+ScaleX SkewY SkewX ScaleY UpperLeftX UpperLeftY
+```
+
+`ESRI`
+
+```
+ScaleX SkewY SkewX ScaleY (UpperLeftX + ScaleX * 0.5) (UpperLeftY + ScaleY * 0.5)
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_GeoReference(
+        RS_SetGeoReference(
+            RS_MakeEmptyRaster(1, 20, 20, 2, 22, 2, 3, 1, 1, 0),
+            '3 1.5 1.5 2 22 3'
+        )
+    )
+```
+
+Output:
+
+```
+3.000000 
+1.500000 
+1.500000 
+2.000000 
+22.000000 
+3.000000
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_GeoReference(
+        RS_SetGeoReference(
+            RS_MakeEmptyRaster(1, 20, 20, 2, 22, 2, 3, 1, 1, 0),
+            '3 1.5 1.5 2 22 3', 'ESRI'
+        )
+    )
+```
+
+Output:
+
+```
+3.000000 
+1.500000 
+1.500000 
+2.000000 
+20.500000 
+2.000000
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_GeoReference(
+        RS_SetGeoReference(
+            RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0),
+            8, -3, 4, 5, 0.2, 0.2
+        )
+    )
+```
+
+Output:
+
+```
+4.000000 
+0.200000 
+0.200000 
+5.000000 
+8.000000 
+-3.000000
+```
+
 ### RS_SetSRID
 
 Introduction: Sets the spatial reference system identifier (SRID) of the raster geometry.
@@ -881,8 +980,8 @@ Array(5.0, 3.0)
 
 Spark SQL example for joining a point dataset with a raster dataset:
 ```scala
-val pointDf = spark.read...
-val rasterDf = spark.read.format("binaryFile").load("/some/path/*.tiff")
+val pointDf = sedona.read...
+val rasterDf = sedona.read.format("binaryFile").load("/some/path/*.tiff")
   .withColumn("raster", expr("RS_FromGeoTiff(content)"))
   .withColumn("envelope", expr("RS_Envelope(raster)"))
 
@@ -1034,21 +1133,18 @@ val sumDF = spark.sql("select RS_Add(band1, band2) as sumOfBands from dataframe"
 
 ```
 
-### RS_Append
+### RS_Array
 
-Introduction: Appends a new band to the end of Geotiff image data and returns the new data. The new band to be appended can be a normalized difference index between two bands (example: NBR, NDBI). Normalized difference index between two bands can be calculated with RS_NormalizedDifference operator described earlier in this page. Specific bands can be retrieved using RS_GetBand operator described [here](../Raster-loader/).
+Introduction: Create an array that is filled by the given value
 
-Format: `RS_Append(data: Array[Double], newBand: Array[Double], nBands: Int)`
+Format: `RS_Array(length:Int, value: Double)`
 
-Since: `v1.2.1`
-
-Deprecated since: `v1.4.1`
+Since: `v1.1.0`
 
 Spark SQL example:
+
 ```scala
-
-val dfAppended = spark.sql("select RS_Append(data, normalizedDifference, nBands) as dataEdited from dataframe")
-
+SELECT RS_Array(height * width, 0.0)
 ```
 
 ### RS_BitwiseAND

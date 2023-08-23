@@ -27,8 +27,6 @@ import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.{InferredExpression, UserDataGeneratator}
 import org.apache.spark.sql.types._
 
-import javax.media.jai.RasterFactory
-
 /// Calculate Normalized Difference between two bands
 case class RS_NormalizedDifference(inputExpressions: Seq[Expression])
   extends Expression with CodegenFallback with UserDataGeneratator {
@@ -761,40 +759,6 @@ case class RS_Normalize(inputExpressions: Seq[Expression])
 
     result
 
-  }
-
-  override def dataType: DataType = ArrayType(DoubleType)
-
-  override def children: Seq[Expression] = inputExpressions
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
-
-/// Appends a new band to the image array data
-case class RS_Append(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  // This is an expression which takes three input expressions
-  assert(inputExpressions.length == 3)
-
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    val data = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    val newBand = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    val nBands = inputExpressions(2).eval(inputRow).asInstanceOf[Int]
-
-    val appendedData = append(data, newBand, nBands)
-    new GenericArrayData(appendedData)
-  }
-  private def append(data: Array[Double], newBand: Array[Double], nBands: Int): Array[Double] = {
-    val bandLength = data.length/nBands
-    assert(newBand.length == bandLength)
-
-    // concat newBand to the end of data and return concatenated result
-    data ++ newBand
   }
 
   override def dataType: DataType = ArrayType(DoubleType)
