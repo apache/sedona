@@ -86,7 +86,7 @@ public class RasterEditors
         );
 
         return RasterUtils.create(raster.getRenderedImage(), gridGeometry2D, raster.getSampleDimensions(),
-                RasterUtils.getNoDataValue(raster.getSampleDimension(0)));
+                null);
     }
 
     public static GridCoverage2D setGeoReference(GridCoverage2D raster, String geoRefCoords) {
