@@ -202,6 +202,7 @@ object Catalog {
     function[RS_NumBands](),
     function[RS_Metadata](),
     function[RS_SetSRID](),
+    function[RS_SetGeoReference](),
     function[RS_SRID](),
     function[RS_Value](1),
     function[RS_Values](1),
