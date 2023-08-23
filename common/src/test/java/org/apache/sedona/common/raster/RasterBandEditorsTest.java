@@ -54,7 +54,7 @@ public class RasterBandEditorsTest extends RasterTestBase{
         assertEquals(expected, actual, 0.1d);
 
         grid = RasterBandEditors.setBandNoDataValue(emptyRaster, -444.444);
-        actual = RasterBandAccessors.getBandNoDataValue(emptyRaster);
+        actual = RasterBandAccessors.getBandNoDataValue(grid);
         expected = -444.444;
         assertEquals(expected, actual, 0.0001d);
     }

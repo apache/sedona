@@ -27,7 +27,7 @@ import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.opengis.metadata.spatial.PixelOrientation;
 
 public class RasterBandEditors {
-    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, int bandIndex, double noDataValue, boolean forceChecking) {
+    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, int bandIndex, double noDataValue) {
         ensureBand(raster, bandIndex);
         Double rasterNoData = RasterBandAccessors.getBandNoDataValue(raster, bandIndex);
         if ( !(rasterNoData == null) && rasterNoData == noDataValue) {
@@ -47,12 +47,8 @@ public class RasterBandEditors {
         return RasterUtils.create(raster.getRenderedImage(), gridGeometry2D, bands, null);
     }
 
-    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, int bandIndex, double noDataValue) {
-        return setBandNoDataValue(raster, bandIndex, noDataValue, false);
-    }
-
     public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, double noDataValue) {
-        return setBandNoDataValue(raster, 1, noDataValue, false);
+        return setBandNoDataValue(raster, 1, noDataValue);
     }
 
     private static boolean forceCheckingPixels(GridCoverage2D raster) {
