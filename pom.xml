@@ -250,11 +250,7 @@
                 <version>${jt-jiffle.version}</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>org.antlr</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.codehaus.janino</groupId>
+                        <groupId>*</groupId>
                         <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
