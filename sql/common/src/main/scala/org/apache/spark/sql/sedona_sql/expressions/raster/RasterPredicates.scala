@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.spark.sql.sedona_sql.expressions
+package org.apache.spark.sql.sedona_sql.expressions.raster
 
 import org.apache.sedona.common.raster.RasterPredicates
 import org.apache.sedona.sql.utils.{GeometrySerializer, RasterSerializer}
@@ -25,6 +25,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, NullIntolerant}
 import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
+import org.apache.spark.sql.sedona_sql.expressions.FoldableExpression
 import org.apache.spark.sql.types.{AbstractDataType, BooleanType, DataType}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.locationtech.jts.geom.Geometry
