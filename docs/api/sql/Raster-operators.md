@@ -179,6 +179,8 @@ Introduction: Returns the georeference metadata of raster as a string in GDAL or
 
 Format: `RS_GeoReference(raster: Raster, format:string)`
 
+Since: `v1.5.0`
+
 Difference between format representation is as follows:
 
 `GDAL`
@@ -815,6 +817,8 @@ RS_SetGeoReference(raster: Raster, geoRefCoord: String, format: String = "GDAL")
 ```
 RS_SetGeoReference(raster: Raster, upperLeftX: Double, upperLeftY: Double, scaleX: Double, scaleY: Double, skewX: Double, skewY: Double)
 ```
+
+Since: `v1.5.0`
 
 Difference between format representation is as follows:
 
