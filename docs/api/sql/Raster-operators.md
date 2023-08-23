@@ -834,11 +834,11 @@ Spark SQL Example:
 
 ```sql
 SELECT RS_GeoReference(
-    RS_SetGeoReference(
-        RS_MakeEmptyRaster(1, 20, 20, 2, 22, 2, 3, 1, 1, 0),
-        '3 1.5 1.5 2 22 3'
+        RS_SetGeoReference(
+            RS_MakeEmptyRaster(1, 20, 20, 2, 22, 2, 3, 1, 1, 0),
+            '3 1.5 1.5 2 22 3'
         )
-           )
+    )
 ```
 
 Output:
@@ -856,11 +856,11 @@ Spark SQL Example:
 
 ```sql
 SELECT RS_GeoReference(
-    RS_SetGeoReference(
-        RS_MakeEmptyRaster(1, 20, 20, 2, 22, 2, 3, 1, 1, 0),
-        '3 1.5 1.5 2 22 3', 'ESRI'
+        RS_SetGeoReference(
+            RS_MakeEmptyRaster(1, 20, 20, 2, 22, 2, 3, 1, 1, 0),
+            '3 1.5 1.5 2 22 3', 'ESRI'
         )
-           )
+    )
 ```
 
 Output:
@@ -878,11 +878,11 @@ Spark SQL Example:
 
 ```sql
 SELECT RS_GeoReference(
-    RS_SetGeoReference(
-        RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0),
-        8, -3, 4, 5, 0.2, 0.2
+        RS_SetGeoReference(
+            RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0),
+            8, -3, 4, 5, 0.2, 0.2
         )
-           )
+    )
 ```
 
 Output:
