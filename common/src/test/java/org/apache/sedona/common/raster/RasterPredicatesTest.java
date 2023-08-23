@@ -389,4 +389,31 @@ public class RasterPredicatesTest extends RasterTestBase {
         result = RasterPredicates.rsIntersects(raster, queryWindow);
         Assert.assertFalse(result);
     }
+
+    @Test
+    public void testRasterRasterPredicates() throws FactoryException {
+        GridCoverage2D raster1 = RasterConstructors.makeEmptyRaster(1, "B", 428, 419, 306210, 7840890, 600, -600, 0, 0, 32601);
+        GridCoverage2D raster2 = RasterConstructors.makeEmptyRaster(1, "B", 100, 100, -19999963, 11067747, 1, -1, 0, 0, 3857);
+        GridCoverage2D raster3 = RasterConstructors.makeEmptyRaster(1, "B", 100, 100, -19331028, 10889880, 1, -1, 0, 0, 3857);
+        Assert.assertTrue(RasterPredicates.rsIntersects(raster1, raster2));
+        Assert.assertTrue(RasterPredicates.rsIntersects(raster2, raster1));
+        Assert.assertFalse(RasterPredicates.rsIntersects(raster1, raster3));
+        Assert.assertFalse(RasterPredicates.rsIntersects(raster3, raster1));
+        Assert.assertTrue(RasterPredicates.rsContains(raster1, raster2));
+        Assert.assertFalse(RasterPredicates.rsContains(raster2, raster1));
+    }
+
+    @Test
+    public void testRasterRasterPredicatesNoCrs() throws FactoryException {
+        GridCoverage2D raster1 = RasterConstructors.makeEmptyRaster(1, "B", 428, 419, 306210, 7840890, 600, -600, 0, 0, 32601);
+        GridCoverage2D raster2 = RasterConstructors.makeEmptyRaster(1, "B", 500, 500, 440086, 7739672, 100);
+        GridCoverage2D raster3 = RasterConstructors.makeEmptyRaster(1, "B", 500, 500, 639680, 7670102, 600);
+        Assert.assertTrue(RasterPredicates.rsIntersects(raster1, raster2));
+        Assert.assertTrue(RasterPredicates.rsIntersects(raster2, raster1));
+        Assert.assertFalse(RasterPredicates.rsIntersects(raster1, raster3));
+        Assert.assertFalse(RasterPredicates.rsIntersects(raster3, raster1));
+        Assert.assertTrue(RasterPredicates.rsContains(raster1, raster2));
+        Assert.assertFalse(RasterPredicates.rsContains(raster2, raster1));
+        Assert.assertFalse(RasterPredicates.rsIntersects(raster2, raster3));
+    }
 }

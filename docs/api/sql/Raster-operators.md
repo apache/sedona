@@ -695,61 +695,101 @@ Output:
 
 ### RS_Intersects
 
-Introduction: Returns true if the envelope of the raster intersects the given geometry. If the geometry does not have a
-defined SRID, it is considered to be in the same CRS with the raster. If the geometry has a defined SRID, the geometry
-will be transformed to the CRS of the raster before the intersection test.
+Introduction: Returns true if the convex hull of the raster intersects the given geometry or raster.
 
-Format: `RS_Intersects (raster: Raster, geom: Geometry)`
+Rules for testing raster-geometry relationship:
+
+* If the geometry does not have a defined SRID, perform the relationship test directly.
+* If the geometry has an SRID which is the same with the EPSG code of the raster CRS, then perform the relationshiop test directly.
+* Otherwise, both the geometry and the convex hull of the raster will be transformed to CRS84 before the relationship test.
+
+Rules for testing raster-raster relationship:
+
+* If both rasters have the same CRS, perform the relationship test using the convex hull of rasters directly.
+* Otherwise, transform the convex hull of both rasters to CRS84 then perform the relationship test.
+
+Format: `RS_Intersects(raster: Raster, geom: Geometry)`
+
+Format: `RS_Intersects(geom: Geometry, raster: Raster)`
+
+Format: `RS_Intersects(raster0: Raster, raster1: Raster)`
 
 Since: `v1.5.0`
 
 Spark SQL example:
+
 ```sql
-SELECT RS_Intersects(raster, ST_SetSRID(ST_PolygonFromEnvelope(0, 0, 10, 10), 4326)) FROM raster_table
+SELECT RS_Intersects(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_SetSRID(ST_PolygonFromEnvelope(0, 0, 10, 10), 4326)) rast_geom,
+    RS_Intersects(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 10, 10, 1, 11, 1)) rast_rast
 ```
 Output:
 ```
-true
++---------+---------+
+|rast_geom|rast_rast|
++---------+---------+
+|     true|     true|
++---------+---------+
+
 ```
 
 ### RS_Within
 
-Introduction: Returns true if the envelope of the raster is within the given geometry. If the geometry does not have a
-defined SRID, it is considered to be in the same CRS with the raster. If the geometry has a defined SRID, the geometry
-will be transformed to the CRS of the raster before checking the within relationship.
+Introduction: Returns true if the convex hull of the raster is within the given
+geometry or raster. The rules for testing raster-geometry or raster-raster
+relationship is the same as `RS_Intersects`.
 
 Format: `RS_Within(raster: Raster, geom: Geometry)`
+
+Format: `RS_Within(geom: Geometry, raster: Raster)`
+
+Format: `RS_Within(raster0: Raster, raster1: Raster)`
 
 Since: `1.5.0`
 
 Spark SQL example:
+
 ```sql
-SELECT RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((0 0, 0 50, 100 50, 100 0, 0 0))'));
+SELECT RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((0 0, 0 50, 100 50, 100 0, 0 0))')) rast_geom,
+    RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 30, 30, 2, 22, 1)) rast_rast
 ```
 
 Output:
 ```
-true
++---------+---------+
+|rast_geom|rast_rast|
++---------+---------+
+|     true|     true|
++---------+---------+
 ```
 
 ### RS_Contains
 
-Introduction: Returns true if the envelope of the raster contains the given geometry. If the geometry does not have a
-defined SRID, it is considered to be in the same CRS with the raster. If the geometry has a defined SRID, the geometry
-will be transformed to the CRS of the raster before checking the contains relationship.
+Introduction: Returns true if the convex hull of the raster contains the given
+geometry or raster. The rules for testing raster-geometry or raster-raster
+relationship is the same as `RS_Intersects`.
 
 Format: `RS_Contains(raster: Raster, geom: Geometry)`
+
+Format: `RS_Contains(geom: Geometry, raster: Raster)`
+
+Format: `RS_Contains(raster0: Raster, raster1: Raster)`
 
 Since: `1.5.0`
 
 Spark SQL example:
+
 ```sql
-SELECT RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((5 5, 5 10, 10 10, 10 5, 5 5))'));
+SELECT RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((5 5, 5 10, 10 10, 10 5, 5 5))')) rast_geom,
+    RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 10, 10, 2, 22, 1)) rast_rast
 ```
 
 Output:
 ```
-true
++---------+---------+
+|rast_geom|rast_rast|
++---------+---------+
+|     true|     true|
++---------+---------+
 ```
 
 ### RS_MetaData

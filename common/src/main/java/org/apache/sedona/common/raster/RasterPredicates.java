@@ -27,18 +27,15 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.ReferenceIdentifier;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.crs.GeographicCRS;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 public class RasterPredicates {
-    private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
-
     /**
      * Test if a raster intersects a query window. If both the raster and the query window have a
      * CRS, the query window and the envelope of the raster will be transformed to a common CRS
@@ -46,7 +43,7 @@ public class RasterPredicates {
      * Please note that the CRS transformation will be lenient, which means that the transformation
      * may not be accurate.
      * @param raster the raster
-     * @param queryWindow the query window
+     * @param geometry the query window
      * @return true if the raster intersects the query window
      */
     public static boolean rsIntersects(GridCoverage2D raster, Geometry geometry) {
@@ -68,6 +65,20 @@ public class RasterPredicates {
         Geometry rasterGeometry = geometries.getLeft();
         Geometry queryWindow = geometries.getRight();
         return rasterGeometry.within(queryWindow);
+    }
+
+    public static boolean rsIntersects(GridCoverage2D left, GridCoverage2D right) {
+        Pair<Geometry, Geometry> geometries = convertCRSIfNeeded(left, right);
+        Geometry leftGeometry = geometries.getLeft();
+        Geometry rightGeometry = geometries.getRight();
+        return leftGeometry.intersects(rightGeometry);
+    }
+
+    public static boolean rsContains(GridCoverage2D left, GridCoverage2D right) {
+        Pair<Geometry, Geometry> geometries = convertCRSIfNeeded(left, right);
+        Geometry leftGeometry = geometries.getLeft();
+        Geometry rightGeometry = geometries.getRight();
+        return leftGeometry.contains(rightGeometry);
     }
 
     private static Pair<Geometry, Geometry> convertCRSIfNeeded(GridCoverage2D raster, Geometry queryWindow) {
@@ -99,31 +110,45 @@ public class RasterPredicates {
         // Raster has a non-authoritative CRS, or the CRS of the raster is different from the
         // CRS of the query window. We'll transform both sides to a common CRS (WGS84) before
         // testing for relationship.
+        CoordinateReferenceSystem queryWindowCRS;
         try {
-            CoordinateReferenceSystem queryWindowCRS = CRS.decode(queryWindowCRSCode, true);
-            MathTransform transform = CRS.findMathTransform(queryWindowCRS,
-                DefaultGeographicCRS.WGS84, true);
-            queryWindow = JTS.transform(queryWindow, transform);
-            if (queryWindowSRID != 4326) {
-                queryWindow = GeomUtils.antiMeridianSafeGeom(queryWindow);
-            } else {
-                // The query window is already in WGS84, which is a geographic CRS. We'll assume that
-                // the query window provided by the user is already anti-meridian safe.
-                // If the query window has a width greater than 180, the antiMeridianSafeGeom method
-                // will treat it as crossing the anti-meridian, which may not be what the user wants.
-            }
+            queryWindowCRS = CRS.decode(queryWindowCRSCode, true);
+        } catch (FactoryException e) {
+            throw new RuntimeException("Cannot decode SRID of geometry to CRS. SRID=" + queryWindowSRID, e);
+        }
+        Geometry transformedQueryWindow = transformGeometryToWGS84(queryWindow, queryWindowCRS);
 
-            // Transform the raster envelope. Here we don't use the envelope transformation method
-            // provided by GeoTools since it performs poorly when the raster envelope crosses the
-            // anti-meridian.
-            transform = CRS.findMathTransform(rasterCRS, DefaultGeographicCRS.WGS84, true);
-            rasterGeometry = JTS.transform(rasterGeometry, transform);
-            rasterGeometry = GeomUtils.antiMeridianSafeGeom(rasterGeometry);
+        // Transform the raster envelope. Here we don't use the envelope transformation method
+        // provided by GeoTools since it performs poorly when the raster envelope crosses the
+        // anti-meridian.
+        Geometry transformedRasterGeometry = transformGeometryToWGS84(rasterGeometry, rasterCRS);
+        return Pair.of(transformedRasterGeometry, transformedQueryWindow);
+    }
+
+    private static Pair<Geometry, Geometry> convertCRSIfNeeded(GridCoverage2D left, GridCoverage2D right) {
+        Geometry leftGeometry;
+        Geometry rightGeometry;
+        try {
+            leftGeometry = GeometryFunctions.convexHull(left);
+            rightGeometry = GeometryFunctions.convexHull(right);
         } catch (FactoryException | TransformException e) {
-            throw new RuntimeException("Cannot transform CRS of query window", e);
+            throw new RuntimeException("Failed to calculate the convex hull of the raster", e);
         }
 
-        return Pair.of(rasterGeometry, queryWindow);
+        CoordinateReferenceSystem leftCRS = left.getCoordinateReferenceSystem();
+        CoordinateReferenceSystem rightCRS = right.getCoordinateReferenceSystem();
+        if (leftCRS == null || leftCRS instanceof DefaultEngineeringCRS ||
+                rightCRS == null || rightCRS instanceof DefaultEngineeringCRS) {
+            return Pair.of(leftGeometry, rightGeometry);
+        }
+        if (CRS.equalsIgnoreMetadata(leftCRS, rightCRS)) {
+            return Pair.of(leftGeometry, rightGeometry);
+        }
+
+        // Transform both sides to WGS84, and then return transformed geometries for evaluating predicates.
+        Geometry transformedLeftGeometry = transformGeometryToWGS84(leftGeometry, leftCRS);
+        Geometry transformedRightGeometry = transformGeometryToWGS84(rightGeometry, rightCRS);
+        return Pair.of(transformedLeftGeometry, transformedRightGeometry);
     }
 
     private static boolean isCRSMatchesEPSGCode(CoordinateReferenceSystem crs, String epsgCode) {
@@ -143,5 +168,18 @@ public class RasterPredicates {
         ReferenceIdentifier crsId = crsIds.iterator().next();
         String code = crsId.getCodeSpace() + ":" + crsId.getCode();
         return code.equals(epsgCode);
+    }
+
+    private static Geometry transformGeometryToWGS84(Geometry geometry, CoordinateReferenceSystem crs) {
+        try {
+            MathTransform transform = CRS.findMathTransform(crs, DefaultGeographicCRS.WGS84, true);
+            Geometry transformedGeometry = JTS.transform(geometry, transform);
+            if (!(crs instanceof GeographicCRS)) {
+                transformedGeometry = GeomUtils.antiMeridianSafeGeom(transformedGeometry);
+            }
+            return transformedGeometry;
+        } catch (FactoryException | TransformException e) {
+            throw new RuntimeException("Cannot transform CRS for evaluating predicate", e);
+        }
     }
 }
