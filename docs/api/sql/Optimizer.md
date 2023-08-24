@@ -173,6 +173,30 @@ Note: If the distance is an expression, it is only evaluated on the first argume
 
 When one table involved a spatial join query is smaller than a threadhold, Sedona will automatically choose broadcast index join instead of Sedona optimized join. The current threshold is controlled by [sedona.join.autoBroadcastJoinThreshold](../Parameter) and set to the same as `spark.sql.autoBroadcastJoinThreshold`.
 
+## Raster join
+
+The optimization for spatial join also works for raster predicates, such as `RS_Intersects`, `RS_Contains` and `RS_Within`.
+
+SQL Example:
+
+```sql
+-- Raster-geometry join
+SELECT df1.id, df2.id, RS_Value(df1.rast, df2.geom) FROM df1 JOIN df2 ON RS_Intersects(df1.rast, df2.geom)
+
+-- Raster-raster join
+SELECT df1.id, df2.id FROM df1 JOIN df2 ON RS_Intersects(df1.rast, df2.rast)
+```
+
+These queries could be planned as RangeJoin or BroadcastIndexJoin. Here is an example of the physical plan using RangeJoin:
+
+```
+== Physical Plan ==
+*(1) Project [id#14, id#25]
++- RangeJoin rast#13: raster, geom#24: geometry, INTERSECTS,  **org.apache.spark.sql.sedona_sql.expressions.RS_Intersects**
+   :- LocalTableScan [rast#13, id#14]
+   +- LocalTableScan [geom#24, id#25]
+```
+
 ## Google S2 based approximate equi-join
 
 If the performance of Sedona optimized join is not ideal, which is possibly caused by  complicated and overlapping geometries, you can resort to Sedona built-in Google S2-based approximate equi-join. This equi-join leverages Spark's internal equi-join algorithm and might be performant given that you can opt to skip the refinement step  by sacrificing query accuracy.
