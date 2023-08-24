@@ -803,6 +803,31 @@ Output:
 4
 ```
 
+### RS_SetBandNoDataValue
+
+Introduction: Sets no data value for given band. If band index not specified then band 1 is assumed. 
+
+Format: `RS_SetBandNoDataValue(raster: Raster, bandIndex: int = 1, noDataValue: double)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_BandNoDataValue(
+        RS_SetBandNoDataValue(
+            RS_MakeEmptyRaster(1, 20, 20, 2, 22, 2, 3, 1, 1, 0),
+            -999
+            )
+        )
+```
+
+Output:
+
+```
+-999
+```
+
 ### RS_SetGeoReference
 
 Introduction: Sets the Georeference information of an object in a single call. Accepts inputs in `GDAL` and `ESRI` format.

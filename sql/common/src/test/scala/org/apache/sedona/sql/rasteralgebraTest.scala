@@ -341,6 +341,33 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expected, actual)
     }
 
+    it("Passed RS_SetBandNoDataValue with raster") {
+      val dfFile = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val df = dfFile.selectExpr("RS_FromGeoTiff(content) as raster")
+      val actual = df.selectExpr("RS_BandNoDataValue(RS_SetBandNoDataValue(raster, 1, -999))").first().getDouble(0)
+      val expected = -999
+      assertEquals(expected, actual, 0.001d)
+    }
+
+    it("Passed RS_SetBandNoDataValue with empty raster") {
+      val df = sparkSession.sql("Select RS_MakeEmptyRaster(1, 20, 20, 2, 22, 2, 3, 1, 1, 0) as raster")
+      val actual = df.selectExpr("RS_BandNoDataValue(RS_SetBandNoDataValue(raster, 1, -999.999))").first().getDouble(0)
+      val expected = -999.999
+      assertEquals(expected, actual, 0.001d)
+    }
+
+    it("Passed RS_SetBandNoDataValue with empty multiple band raster") {
+      var df = sparkSession.sql("Select RS_MakeEmptyRaster(2, 20, 20, 0, 0, 8, 8, 0.1, 0.1, 0) as raster")
+      df = df.selectExpr("RS_SetBandNoDataValue(RS_SetBandNoDataValue(raster, -999.99), 2, 444) as raster")
+      var actual = df.selectExpr("RS_BandNoDataValue(raster)").first().getDouble(0)
+      var expected = -999.99
+      assertEquals(expected, actual, 0.001d)
+
+      actual = df.selectExpr("RS_BandNoDataValue(raster, 2)").first().getDouble(0)
+      expected = 444
+      assertEquals(expected, actual, 0.1d)
+    }
+
     it("Passed RS_SRID should handle null values") {
       val result = sparkSession.sql("select RS_SRID(null)").first().get(0)
       assert(result == null)
