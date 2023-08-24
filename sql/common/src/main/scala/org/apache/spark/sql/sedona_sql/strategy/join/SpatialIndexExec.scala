@@ -26,13 +26,13 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, UnsafeRow}
 import org.apache.spark.sql.execution.SparkPlan
-import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
 import org.apache.spark.sql.sedona_sql.execution.SedonaUnaryExecNode
 
 
 case class SpatialIndexExec(child: SparkPlan,
                             shape: Expression,
                             indexType: IndexType,
+                            isRasterPredicate: Boolean,
                             isGeography: Boolean,
                             distance: Option[Expression] = None)
   extends SedonaUnaryExecNode
@@ -48,12 +48,14 @@ case class SpatialIndexExec(child: SparkPlan,
 
   override protected[sql] def doExecuteBroadcast[T](): Broadcast[T] = {
     val boundShape = BindReferences.bindReference(shape, child.output)
-    val isRaster = boundShape.dataType.isInstanceOf[RasterUDT]
     val resultRaw = child.execute().asInstanceOf[RDD[UnsafeRow]].coalesce(1)
-
     val spatialRDD = distance match {
       case Some(distanceExpression) => toExpandedEnvelopeRDD(resultRaw, boundShape, BindReferences.bindReference(distanceExpression, child.output), isGeography)
-      case None => if (isRaster) toSpatialRDDRaster(resultRaw, boundShape) else toSpatialRDD(resultRaw, boundShape)
+      case None => if (isRasterPredicate) {
+        toWGS84EnvelopeRDD(resultRaw, boundShape)
+      } else {
+        toSpatialRDD(resultRaw, boundShape)
+      }
     }
 
     spatialRDD.buildIndex(indexType, false)
