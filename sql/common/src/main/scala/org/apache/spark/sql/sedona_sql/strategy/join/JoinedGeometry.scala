@@ -18,15 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
-import org.apache.sedona.common.utils.GeomUtils
-import org.geotools.coverage.grid.GridCoverage2D
-import org.geotools.geometry.Envelope2D
-import org.geotools.geometry.jts.JTS
-import org.geotools.referencing.CRS
-import org.geotools.referencing.crs.{DefaultEngineeringCRS, DefaultGeographicCRS}
 import org.locationtech.jts.geom.{Envelope, Geometry}
-import org.opengis.geometry.BoundingBox
-import org.opengis.referencing.crs.{CoordinateReferenceSystem, GeographicCRS}
 
 /**
  * Utility functions for generating geometries for spatial join.
@@ -69,53 +61,5 @@ object JoinedGeometry {
     } else {
       envelope.expandBy(distance)
     }
-  }
-
-  /**
-   * Convert the given raster to an envelope in WGS84 CRS.
-   * @param raster the raster to convert
-   * @return the envelope in WGS84 CRS
-   */
-  def rasterToWGS84Envelope(raster: GridCoverage2D): Geometry = {
-    val crs = raster.getCoordinateReferenceSystem
-    val envelope = raster.getEnvelope2D
-    if (crs == null || crs.isInstanceOf[DefaultEngineeringCRS]) {
-      JTS.toGeometry(envelope.asInstanceOf[BoundingBox])
-    } else {
-      transformToWGS84Envelope(envelope, crs)
-    }
-  }
-
-  /**
-   * Convert the given geometry to an envelope in WGS84 CRS.
-   * @param geom the geometry to convert
-   * @return the envelope in WGS84 CRS
-   */
-  def geometryToWGS84Envelope(geom: Geometry): Geometry = {
-    val srid = geom.getSRID
-    if (srid <= 0 || srid == 4326) {
-      geom
-    } else {
-      val env = geom.getEnvelopeInternal
-      val envelope = new Envelope2D(null, env.getMinX, env.getMinY, env.getWidth, env.getHeight)
-      val crs = CRS.decode("EPSG:" + srid)
-      transformToWGS84Envelope(envelope, crs)
-    }
-  }
-
-  private def transformToWGS84Envelope(envelope: org.opengis.geometry.Envelope, crs: CoordinateReferenceSystem): Geometry = {
-    // We use CRS.transform for envelopes to transform envelopes between different CRSs. This transformation function
-    // could handle envelope crossing the anti-meridian and envelope near or covering poles correctly. We won't have
-    // these cases properly handled if we transform the original geometries using JTS.transform.
-    val transform = CRS.findMathTransform(crs, DefaultGeographicCRS.WGS84)
-    val transformedEnvelope = CRS.transform(transform, envelope)
-    val minX = transformedEnvelope.getMinimum(0)
-    val maxX = transformedEnvelope.getMaximum(0)
-    val minY = transformedEnvelope.getMinimum(1)
-    val maxY = transformedEnvelope.getMaximum(1)
-    val jtsEnvelope = new Envelope(minX, maxX, minY, maxY)
-    jtsEnvelope.expandBy(jtsEnvelope.getWidth * 0.1, jtsEnvelope.getHeight * 0.1)
-    val geom = JTS.toGeometry(jtsEnvelope)
-    if (crs.isInstanceOf[GeographicCRS]) geom else GeomUtils.antiMeridianSafeGeom(geom)
   }
 }
