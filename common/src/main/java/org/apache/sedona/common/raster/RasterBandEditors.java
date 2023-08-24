@@ -51,12 +51,6 @@ public class RasterBandEditors {
         return setBandNoDataValue(raster, 1, noDataValue);
     }
 
-    private static boolean forceCheckingPixels(GridCoverage2D raster) {
-        // write code for force checking.
-
-        return false;
-    }
-
     private static void ensureBand(GridCoverage2D raster, int band) throws IllegalArgumentException {
         if (band > RasterAccessors.numBands(raster)) {
             throw new IllegalArgumentException(String.format("Provided band index %d is not present in the raster", band));
