@@ -13,7 +13,6 @@
  */
 package org.apache.sedona.common.utils;
 
-
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.io.ByteOrderValues;
@@ -24,7 +23,8 @@ import org.locationtech.jts.operation.union.UnaryUnionOp;
 import org.locationtech.jts.algorithm.Angle;
 import org.locationtech.jts.algorithm.distance.DiscreteFrechetDistance;
 import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
-
+import org.locationtech.spatial4j.context.jts.JtsSpatialContext;
+import org.locationtech.spatial4j.shape.jts.JtsGeometry;
 
 import java.nio.ByteOrder;
 import java.util.*;
@@ -528,5 +528,21 @@ public class GeomUtils {
     public static Boolean isMeasuredGeometry(Geometry geom) {
         Coordinate coordinate = geom.getCoordinate();
         return !Double.isNaN(coordinate.getM());
+    }
+
+    /**
+     * Returns a geometry that does not cross the anti meridian. If the given geometry crosses the
+     * anti-meridian, it will be split up into multiple geometries.
+     *
+     * @param geom the geometry to convert
+     * @return a geometry that does not cross the anti meridian
+     */
+    public static Geometry antiMeridianSafeGeom(Geometry geom) {
+        try {
+            JtsGeometry jtsGeom = new JtsGeometry(geom, JtsSpatialContext.GEO, true, true);
+            return jtsGeom.getGeom();
+        } catch (TopologyException e) {
+            return geom;
+        }
     }
 }

@@ -590,9 +590,9 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
         .selectExpr("path", "RS_FromGeoTiff(content) as raster")
 
-      // query window without SRID
-      assert(df.selectExpr("RS_Intersects(raster, ST_Point(-13076178,4003651))").first().getBoolean(0))
-      assert(!df.selectExpr("RS_Intersects(raster, ST_Point(-13055247,3979620))").first().getBoolean(0))
+      // query window without SRID, will be assumed to be in WGS84
+      assert(df.selectExpr("RS_Intersects(raster, ST_Point(-117.47993, 33.81798))").first().getBoolean(0))
+      assert(!df.selectExpr("RS_Intersects(raster, ST_Point(-117.27868, 33.97896))").first().getBoolean(0))
 
       // query window and raster are in the same CRS
       assert(df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(-13067806,4009116), 3857))").first().getBoolean(0))
@@ -601,6 +601,15 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       // query window and raster not in the same CRS
       assert(df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(-117.47993, 33.81798), 4326))").first().getBoolean(0))
       assert(!df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(-117.27868, 33.97896), 4326))").first().getBoolean(0))
+
+      // geom-raster
+      assert(df.selectExpr("RS_Intersects(ST_SetSRID(ST_Point(-117.47993, 33.81798), 4326), raster)").first().getBoolean(0))
+      assert(!df.selectExpr("RS_Intersects(ST_SetSRID(ST_Point(-117.27868, 33.97896), 4326), raster)").first().getBoolean(0))
+
+      // raster-raster
+      assert(df.selectExpr("RS_Intersects(raster, raster)").first().getBoolean(0))
+      assert(!df.selectExpr("RS_Intersects(raster, RS_MakeEmptyRaster(1, 10, 10, 0, 0, 1))").first().getBoolean(0))
+      assert(df.selectExpr("RS_Intersects(raster, RS_MakeEmptyRaster(1, 10, 10, -118, 34, 1))").first().getBoolean(0))
     }
 
     it("Passed RS_AddBandFromArray collect generated raster") {
@@ -817,11 +826,19 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_Contains") {
       assert(sparkSession.sql("SELECT RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((5 5, 5 10, 10 10, 10 5, 5 5))'))").first().getBoolean(0))
       assert(!sparkSession.sql("SELECT RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((2 2, 2 25, 20 25, 20 2, 2 2))'))").first().getBoolean(0))
+      assert(sparkSession.sql("SELECT RS_Contains(ST_GeomFromWKT('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), RS_MakeEmptyRaster(1, 5, 5, 0, 5, 1))").first().getBoolean(0))
+      assert(!sparkSession.sql("SELECT RS_Contains(ST_GeomFromWKT('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), RS_MakeEmptyRaster(1, 20, 20, 0, 20, 1))").first().getBoolean(0))
+      assert(sparkSession.sql("SELECT RS_Contains(RS_MakeEmptyRaster(1, 30, 30, 0, 30, 1), RS_MakeEmptyRaster(1, 20, 20, 0, 20, 1))").first().getBoolean(0))
+      assert(!sparkSession.sql("SELECT RS_Contains(RS_MakeEmptyRaster(1, 10, 10, 0, 10, 1), RS_MakeEmptyRaster(1, 20, 20, 0, 20, 1))").first().getBoolean(0))
     }
 
     it("Passed RS_Within") {
       assert(sparkSession.sql("SELECT RS_WITHIN(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((0 0, 0 50, 100 50, 100 0, 0 0))'))").first().getBoolean(0))
       assert(!sparkSession.sql("SELECT RS_WITHIN(RS_MakeEmptyRaster(1, 100, 100, 0, 50, 1), ST_GeomFromWKT('POLYGON ((2 2, 2 25, 20 25, 20 2, 2 2))'))").first().getBoolean(0))
+      assert(sparkSession.sql("SELECT RS_Within(ST_GeomFromWKT('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), RS_MakeEmptyRaster(1, 20, 20, 0, 20, 1))").first().getBoolean(0))
+      assert(!sparkSession.sql("SELECT RS_Within(ST_GeomFromWKT('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), RS_MakeEmptyRaster(1, 5, 5, 0, 5, 1))").first().getBoolean(0))
+      assert(sparkSession.sql("SELECT RS_Within(RS_MakeEmptyRaster(1, 20, 20, 0, 20, 1), RS_MakeEmptyRaster(1, 30, 30, 0, 30, 1))").first().getBoolean(0))
+      assert(!sparkSession.sql("SELECT RS_Within(RS_MakeEmptyRaster(1, 20, 20, 0, 20, 1), RS_MakeEmptyRaster(1, 10, 10, 0, 10, 1))").first().getBoolean(0))
     }
 
     it("Passed RS_BandNoDataValue - noDataValueFor for raster from geotiff - default band") {

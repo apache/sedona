@@ -40,11 +40,41 @@ abstract class RS_Predicate extends Expression
 
   override def nullable: Boolean = children.exists(_.nullable)
 
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, GeometryUDT)
+  override def inputTypes: Seq[AbstractDataType] = if (inputExpressions.length != 2) {
+    throw new IllegalArgumentException(s"Expected exactly 2 inputs, but got ${inputExpressions.length}")
+  } else {
+    val leftType = inputExpressions.head.dataType
+    val rightType = inputExpressions(1).dataType
+    (leftType, rightType) match {
+      case (_: RasterUDT, _: GeometryUDT) => Seq(RasterUDT, GeometryUDT)
+      case (_: GeometryUDT, _: RasterUDT) => Seq(GeometryUDT, RasterUDT)
+      case (_: RasterUDT, _: RasterUDT) => Seq(RasterUDT, RasterUDT)
+      case _ => throw new IllegalArgumentException(s"Unsupported input types: $leftType, $rightType")
+    }
+  }
 
   override def dataType: DataType = BooleanType
 
   override def children: Seq[Expression] = inputExpressions
+
+  lazy val evaluator: (Array[Byte], Array[Byte]) => Boolean = inputTypes match {
+    case Seq(RasterUDT, GeometryUDT) =>
+      (leftArray: Array[Byte], rightArray: Array[Byte]) =>
+        val leftRaster = RasterSerializer.deserialize(leftArray)
+        val rightGeometry = GeometrySerializer.deserialize(rightArray)
+        evalRasterGeom(leftRaster, rightGeometry)
+    case Seq(GeometryUDT, RasterUDT) =>
+      (leftArray: Array[Byte], rightArray: Array[Byte]) =>
+        val leftGeometry = GeometrySerializer.deserialize(leftArray)
+        val rightRaster = RasterSerializer.deserialize(rightArray)
+        evalGeomRaster(leftGeometry, rightRaster)
+    case Seq(RasterUDT, RasterUDT) =>
+      (leftArray: Array[Byte], rightArray: Array[Byte]) =>
+        val leftRaster = RasterSerializer.deserialize(leftArray)
+        val rightRaster = RasterSerializer.deserialize(rightArray)
+        evalRasters(leftRaster, rightRaster)
+    case _ => throw new IllegalArgumentException(s"Unsupported input types: $inputTypes")
+  }
 
   override final def eval(inputRow: InternalRow): Any = {
     val leftArray = inputExpressions.head.eval(inputRow).asInstanceOf[Array[Byte]]
@@ -55,22 +85,30 @@ abstract class RS_Predicate extends Expression
       if (rightArray == null) {
         null
       } else {
-        val leftGeometry = RasterSerializer.deserialize(leftArray)
-        val rightGeometry = GeometrySerializer.deserialize(rightArray)
-        evalGeom(leftGeometry, rightGeometry)
+        evaluator(leftArray, rightArray)
       }
     }
   }
 
-  def evalGeom(leftGeometry: GridCoverage2D, rightGeometry: Geometry): Boolean
+  def evalRasterGeom(leftRaster: GridCoverage2D, rightGeometry: Geometry): Boolean
+
+  def evalGeomRaster(leftGeometry: Geometry, rightRaster: GridCoverage2D): Boolean
+
+  def evalRasters(leftRaster: GridCoverage2D, rightRaster: GridCoverage2D): Boolean
 }
 
 case class RS_Intersects(inputExpressions: Seq[Expression])
   extends RS_Predicate with CodegenFallback {
 
-  override def evalGeom(leftGeometry: GridCoverage2D, rightGeometry: Geometry): Boolean = {
-    RasterPredicates.rsIntersects(leftGeometry, rightGeometry)
+  override def evalRasterGeom(leftRaster: GridCoverage2D, rightGeometry: Geometry): Boolean = {
+    RasterPredicates.rsIntersects(leftRaster, rightGeometry)
   }
+
+  override def evalGeomRaster(leftGeometry: Geometry, rightRaster: GridCoverage2D): Boolean =
+    RasterPredicates.rsIntersects(rightRaster, leftGeometry)
+
+  override def evalRasters(leftRaster: GridCoverage2D, rightRaster: GridCoverage2D): Boolean =
+    RasterPredicates.rsIntersects(leftRaster, rightRaster)
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -80,9 +118,15 @@ case class RS_Intersects(inputExpressions: Seq[Expression])
 case class RS_Contains(inputExpressions: Seq[Expression])
   extends RS_Predicate with CodegenFallback {
 
-  override def evalGeom(leftGeometry: GridCoverage2D, rightGeometry: Geometry): Boolean = {
-    RasterPredicates.rsContains(leftGeometry, rightGeometry)
+  override def evalRasterGeom(leftRaster: GridCoverage2D, rightGeometry: Geometry): Boolean = {
+    RasterPredicates.rsContains(leftRaster, rightGeometry)
   }
+
+  override def evalGeomRaster(leftGeometry: Geometry, rightRaster: GridCoverage2D): Boolean =
+    RasterPredicates.rsWithin(rightRaster, leftGeometry)
+
+  override def evalRasters(leftRaster: GridCoverage2D, rightRaster: GridCoverage2D): Boolean =
+    RasterPredicates.rsContains(leftRaster, rightRaster)
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -92,12 +136,17 @@ case class RS_Contains(inputExpressions: Seq[Expression])
 case class RS_Within(inputExpressions: Seq[Expression])
   extends RS_Predicate with CodegenFallback {
 
-  override def evalGeom(leftGeometry: GridCoverage2D, rightGeometry: Geometry): Boolean = {
-    RasterPredicates.rsWithin(leftGeometry, rightGeometry)
+  override def evalRasterGeom(leftRaster: GridCoverage2D, rightGeometry: Geometry): Boolean = {
+    RasterPredicates.rsWithin(leftRaster, rightGeometry)
   }
+
+  override def evalGeomRaster(leftGeometry: Geometry, rightRaster: GridCoverage2D): Boolean =
+    RasterPredicates.rsContains(rightRaster, leftGeometry)
+
+  override def evalRasters(leftRaster: GridCoverage2D, rightRaster: GridCoverage2D): Boolean =
+    RasterPredicates.rsContains(rightRaster, leftRaster)
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
-
