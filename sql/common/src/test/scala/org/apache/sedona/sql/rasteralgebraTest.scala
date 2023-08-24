@@ -563,9 +563,9 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
         .selectExpr("path", "RS_FromGeoTiff(content) as raster")
 
-      // query window without SRID
-      assert(df.selectExpr("RS_Intersects(raster, ST_Point(-13076178,4003651))").first().getBoolean(0))
-      assert(!df.selectExpr("RS_Intersects(raster, ST_Point(-13055247,3979620))").first().getBoolean(0))
+      // query window without SRID, will be assumed to be in WGS84
+      assert(df.selectExpr("RS_Intersects(raster, ST_Point(-117.47993, 33.81798))").first().getBoolean(0))
+      assert(!df.selectExpr("RS_Intersects(raster, ST_Point(-117.27868, 33.97896))").first().getBoolean(0))
 
       // query window and raster are in the same CRS
       assert(df.selectExpr("RS_Intersects(raster, ST_SetSRID(ST_Point(-13067806,4009116), 3857))").first().getBoolean(0))
@@ -581,7 +581,8 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
       // raster-raster
       assert(df.selectExpr("RS_Intersects(raster, raster)").first().getBoolean(0))
-      assert(!df.selectExpr("RS_Intersects(raster, RS_MakeEmptyRaster(1, 100, 100, 0, 0, 1))").first().getBoolean(0))
+      assert(!df.selectExpr("RS_Intersects(raster, RS_MakeEmptyRaster(1, 10, 10, 0, 0, 1))").first().getBoolean(0))
+      assert(df.selectExpr("RS_Intersects(raster, RS_MakeEmptyRaster(1, 10, 10, -118, 34, 1))").first().getBoolean(0))
     }
 
     it("Passed RS_AddBandFromArray collect generated raster") {

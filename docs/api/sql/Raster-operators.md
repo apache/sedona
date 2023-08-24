@@ -695,18 +695,14 @@ Output:
 
 ### RS_Intersects
 
-Introduction: Returns true if the convex hull of the raster intersects the given geometry or raster.
+Introduction: Returns true if raster or geometry on the left side intersects with the raster or geometry on the right side.
+The convex hull of the raster is considered in the test.
 
-Rules for testing raster-geometry relationship:
+Rules for testing spatial relationship:
 
-* If the geometry does not have a defined SRID, perform the relationship test directly.
-* If the geometry has an SRID which is the same with the EPSG code of the raster CRS, then perform the relationshiop test directly.
-* Otherwise, both the geometry and the convex hull of the raster will be transformed to CRS84 before the relationship test.
-
-Rules for testing raster-raster relationship:
-
-* If both rasters have the same CRS, perform the relationship test using the convex hull of rasters directly.
-* Otherwise, transform the convex hull of both rasters to CRS84 then perform the relationship test.
+* If the raster or geometry does not have a defined SRID, it is assumed to be in WGS84.
+* If both sides are in the same CRS, then perform the relationship test directly.
+* Otherwise, both sides will be transformed to WGS84 before the relationship test.
 
 Format: `RS_Intersects(raster: Raster, geom: Geometry)`
 
@@ -734,9 +730,10 @@ Output:
 
 ### RS_Within
 
-Introduction: Returns true if the convex hull of the raster is within the given
-geometry or raster. The rules for testing raster-geometry or raster-raster
-relationship is the same as `RS_Intersects`.
+Introduction: Returns true if the geometry or raster on the left side is within the geometry or raster on the right side.
+The convex hull of the raster is considered in the test.
+
+The rules for testing spatial relationship is the same as `RS_Intersects`.
 
 Format: `RS_Within(raster: Raster, geom: Geometry)`
 
@@ -764,9 +761,10 @@ Output:
 
 ### RS_Contains
 
-Introduction: Returns true if the convex hull of the raster contains the given
-geometry or raster. The rules for testing raster-geometry or raster-raster
-relationship is the same as `RS_Intersects`.
+Introduction: Returns true if the geometry or raster on the left side contains the geometry or raster on the right side.
+The convex hull of the raster is considered in the test.
+
+The rules for testing spatial relationship is the same as `RS_Intersects`.
 
 Format: `RS_Contains(raster: Raster, geom: Geometry)`
 

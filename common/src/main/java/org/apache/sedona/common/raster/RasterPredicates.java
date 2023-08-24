@@ -88,22 +88,20 @@ public class RasterPredicates {
         } catch (FactoryException | TransformException e) {
             throw new RuntimeException("Failed to calculate the convex hull of the raster", e);
         }
+
         CoordinateReferenceSystem rasterCRS = raster.getCoordinateReferenceSystem();
-        int queryWindowSRID = queryWindow.getSRID();
-        if (rasterCRS == null || rasterCRS instanceof DefaultEngineeringCRS || queryWindowSRID <= 0) {
-            // Either raster or query window does not have a defined CRS, simply use the original
-            // raster envelope and the query window to test for relationship.
-            return Pair.of(rasterGeometry, queryWindow);
+        if (rasterCRS == null || rasterCRS instanceof DefaultEngineeringCRS) {
+            rasterCRS = DefaultGeographicCRS.WGS84;
         }
 
-        // Both raster and query window have a defined CRS
-        String queryWindowCRSCode = "EPSG:" + queryWindowSRID;
-        if (isCRSMatchesEPSGCode(rasterCRS, queryWindowCRSCode)) {
-            // The CRS of the query window has the same EPSG code as the raster, so we don't need to
-            // transform it.
-            // Please note that even though the EPSG code is the same, the CRS may not be the same.
-            // The query window and the raster may not have the same axis order. It is user's
-            // responsibility to provide a query window with the same axis order as the raster.
+        int queryWindowSRID = queryWindow.getSRID();
+        if (queryWindowSRID <= 0) {
+            queryWindowSRID = 4326;
+        }
+
+        if (isCRSMatchesSRID(rasterCRS, queryWindowSRID)) {
+            // Fast path: The CRS of the query window has the same EPSG code as the raster, so we don't
+            // need to decode the CRS of the query window and transform it.
             return Pair.of(rasterGeometry, queryWindow);
         }
 
@@ -112,7 +110,7 @@ public class RasterPredicates {
         // testing for relationship.
         CoordinateReferenceSystem queryWindowCRS;
         try {
-            queryWindowCRS = CRS.decode(queryWindowCRSCode, true);
+            queryWindowCRS = CRS.decode("EPSG:" + queryWindowSRID, true);
         } catch (FactoryException e) {
             throw new RuntimeException("Cannot decode SRID of geometry to CRS. SRID=" + queryWindowSRID, e);
         }
@@ -136,12 +134,15 @@ public class RasterPredicates {
         }
 
         CoordinateReferenceSystem leftCRS = left.getCoordinateReferenceSystem();
-        CoordinateReferenceSystem rightCRS = right.getCoordinateReferenceSystem();
-        if (leftCRS == null || leftCRS instanceof DefaultEngineeringCRS ||
-                rightCRS == null || rightCRS instanceof DefaultEngineeringCRS) {
-            return Pair.of(leftGeometry, rightGeometry);
+        if (leftCRS == null || leftCRS instanceof DefaultEngineeringCRS) {
+            leftCRS = DefaultGeographicCRS.WGS84;
         }
-        if (CRS.equalsIgnoreMetadata(leftCRS, rightCRS)) {
+        CoordinateReferenceSystem rightCRS = right.getCoordinateReferenceSystem();
+        if (rightCRS == null || rightCRS instanceof DefaultEngineeringCRS) {
+            rightCRS = DefaultGeographicCRS.WGS84;
+        }
+
+        if (leftCRS == rightCRS || CRS.equalsIgnoreMetadata(leftCRS, rightCRS)) {
             return Pair.of(leftGeometry, rightGeometry);
         }
 
@@ -151,7 +152,15 @@ public class RasterPredicates {
         return Pair.of(transformedLeftGeometry, transformedRightGeometry);
     }
 
-    private static boolean isCRSMatchesEPSGCode(CoordinateReferenceSystem crs, String epsgCode) {
+    /**
+     * Test if crs matches the EPSG code. This method tries to avoid the expensive CRS.decode and
+     * CRS.equalsIgnoreMetadata calls. If the crs has an identifier matching the EPSG code, we assume
+     * that the crs matches the EPSG code.
+     * @param crs The crs to test
+     * @param srid The SRID to test. The axis-order of the decoded CRS is assumed to be in lon/lat order
+     * @return true if the crs matches the EPSG code, false otherwise
+     */
+    public static boolean isCRSMatchesSRID(CoordinateReferenceSystem crs, int srid) {
         CRS.AxisOrder axisOrder = CRS.getAxisOrder(crs);
         if (axisOrder == CRS.AxisOrder.NORTH_EAST) {
             // SRID of geometries will always be decoded as CRS in lon/lat axis order. For projected CRS, the
@@ -162,15 +171,19 @@ public class RasterPredicates {
         }
 
         Set<ReferenceIdentifier> crsIds = crs.getIdentifiers();
-        if (crsIds.isEmpty()) {
-            return false;
+        String strSrid = String.valueOf(srid);
+        for (ReferenceIdentifier crsId : crsIds) {
+            if ("EPSG".equals(crsId.getCodeSpace()) && strSrid.equals(crsId.getCode())) {
+                return true;
+            }
         }
-        ReferenceIdentifier crsId = crsIds.iterator().next();
-        String code = crsId.getCodeSpace() + ":" + crsId.getCode();
-        return code.equals(epsgCode);
+        return false;
     }
 
     private static Geometry transformGeometryToWGS84(Geometry geometry, CoordinateReferenceSystem crs) {
+        if (crs == DefaultGeographicCRS.WGS84) {
+            return geometry;
+        }
         try {
             MathTransform transform = CRS.findMathTransform(crs, DefaultGeographicCRS.WGS84, true);
             Geometry transformedGeometry = JTS.transform(geometry, transform);
