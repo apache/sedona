@@ -341,6 +341,18 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expected, actual)
     }
 
+    it("Passed RS_SetValues with empty raster") {
+      var inputDf = Seq((Seq(1, 1, 1, 0, 0, 0, 1, 2, 3, 3, 5, 6, 7, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0), Seq(11, 12, 13, 14, 15, 16, 17, 18, 19))).toDF("band","newValues")
+      var df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as raster", "newValues")
+      var actual = df.selectExpr("RS_BandAsArray(RS_SetValues(raster,  1, 2, 2, 3, 3, newValues, true), 1)").first().getSeq(0)
+      var expected = Seq(1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 3.0, 5.0, 6.0, 11.0, 0.0, 0.0, 3.0, 0.0, 0.0, 15.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+      assert(expected.equals(actual))
+
+      actual = df.selectExpr("RS_BandAsArray(RS_SetValues(raster,  1, 2, 2, 3, 3, newValues), 1)").first().getSeq(0)
+      expected = Seq(1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 3.0, 5.0, 6.0, 11.0, 12.0, 13.0, 3.0, 0.0, 14.0, 15.0, 16.0, 0.0, 0.0, 17.0, 18.0, 19.0)
+      assert(expected.equals(actual))
+    }
+
     it("Passed RS_SetBandNoDataValue with raster") {
       val dfFile = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val df = dfFile.selectExpr("RS_FromGeoTiff(content) as raster")
