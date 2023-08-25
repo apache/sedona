@@ -963,6 +963,47 @@ Output:
 -3.000000
 ```
 
+### RS_SetValues
+
+Introduction: Returns raster with new values for specified pixels for designated band.
+
+Format: 
+
+```
+RS_SetValues(raster: Raster, bandIndex: Integer, colX: Integer, rowY: Integer, width: Integer, height: Integer, newValues: Array<Double>, keepNoData: Boolean = false)
+```
+
+Since: `v1.5.0`
+
+The `colX`, `rowY`, and `bandIndex` are 1-indexed. If `keepNoData` is `true`, the pixels with NoData value will not be 
+set corresponding value in `newValues`. The `newValues` should be provided in rows.
+
+!!!note 
+    If the shape of `newValues` doesn't match with provided `width` and `height`, `IllegalArgumentException` is thrown. 
+
+!!!Note
+    If the mentioned `bandIndex` doesn't exist, this will throw an `IllegalArgumentException`.
+
+Spark SQL Example:
+
+```sql
+SELECT RS_BandAsArray(
+        RS_SetValues(
+            RS_AddBandAsArray(
+                RS_MakeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0),
+                [1,1,1,0,0,0,1,2,3,3,5,6,7,0,0,3,0,0,3,0,0,0,0,0,0], 1, 0d
+                ),
+            1, 2, 2, 3, 3, [11,12,13,14,15,16,17,18,19]
+            )
+        )
+```
+
+Output:
+
+```
+[1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 3.0, 5.0, 6.0, 11.0, 12.0, 13.0, 3.0, 0.0, 14.0, 15.0, 16.0, 0.0, 0.0, 17.0, 18.0, 19.0]
+```
+
 ### RS_SetSRID
 
 Introduction: Sets the spatial reference system identifier (SRID) of the raster geometry.
