@@ -414,7 +414,7 @@ class predicateJoinTestScala extends TestBaseScala {
       val sampleCount = 50
       distanceCandidates.foreach(distance => {
         val expected = bruteForceDistanceJoinCountSpheroid(sampleCount, distance)
-        val pointDf1 = buildPointDf.limit(sampleCount).repartition(4)
+        val pointDf1 = buildPointLonLatDf.limit(sampleCount).repartition(4)
         val pointDf2 = pointDf1
         var distanceJoinDf = pointDf1.alias("pointDf1").join(
           pointDf2.alias("pointDf2"), expr(s"ST_DistanceSpheroid(pointDf1.pointshape, pointDf2.pointshape) <= $distance"))
@@ -433,7 +433,7 @@ class predicateJoinTestScala extends TestBaseScala {
       val sampleCount = 50
       distanceCandidates.foreach(distance => {
         val expected = bruteForceDistanceJoinCountSphere(sampleCount, distance)
-        val pointDf1 = buildPointDf.limit(sampleCount).repartition(4)
+        val pointDf1 = buildPointLonLatDf.limit(sampleCount).repartition(4)
         val pointDf2 = pointDf1
         var distanceJoinDf = pointDf1.alias("pointDf1").join(
           pointDf2.alias("pointDf2"), expr(s"ST_DistanceSphere(pointDf1.pointshape, pointDf2.pointshape) <= $distance"))
