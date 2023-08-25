@@ -627,86 +627,94 @@ public class FunctionsTest {
     @Test
     public void haversineDistance() {
         // Basic check
-        Point p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 90));
+        Point p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
         Point p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
         assertEquals(1.00075559643809E7, Haversine.distance(p1, p2), 0.1);
 
-        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(51.3168, -0.56));
-        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(55.9533, -3.1883));
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(-0.56, 51.3168));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-3.1883, 55.9533));
         assertEquals(543796.9506134904, Haversine.distance(p1, p2), 0.1);
 
-        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(48.353889, 11.786111));
-        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(50.033333, 8.570556));
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(11.786111, 48.353889));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(8.570556, 50.033333));
         assertEquals(299073.03416817175, Haversine.distance(p1, p2), 0.1);
 
-        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(48.353889, 11.786111));
-        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(52.559722, 13.287778));
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(11.786111, 48.353889));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(13.287778, 52.559722));
         assertEquals(479569.4558072244, Haversine.distance(p1, p2), 0.1);
 
         LineString l1 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 0, 90));
         LineString l2 = GEOMETRY_FACTORY.createLineString(coordArray(0, 1, 0, 0));
         assertEquals(4948180.449055, Haversine.distance(l1, l2), 0.1);
 
+        l1 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 90, 0));
+        l2 = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 0, 0));
+        assertEquals(4948180.449055, Haversine.distance(l1, l2), 0.1);
+
         // HK to Sydney
-        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(22.308919, 113.914603));
-        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-33.946111, 151.177222));
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(113.914603, 22.308919));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(151.177222, -33.946111));
         assertEquals(7393893.072901942, Haversine.distance(p1, p2), 0.1);
 
         // HK to Toronto
-        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(22.308919, 113.914603));
-        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(43.677223, -79.630556));
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(113.914603, 22.308919));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-79.630556, 43.677223));
         assertEquals(1.2548548944238186E7, Haversine.distance(p1, p2), 0.1);
     }
 
     @Test
     public void spheroidDistance() {
         // Basic check
-        Point p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 90));
+        Point p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
         Point p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
         assertEquals(1.0018754171394622E7, Spheroid.distance(p1, p2), 0.1);
 
-        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(51.3168, -0.56));
-        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(55.9533, -3.1883));
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(-0.56, 51.3168));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-3.1883, 55.9533));
         assertEquals(544430.9411996203, Spheroid.distance(p1, p2), 0.1);
 
-        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(48.353889, 11.786111));
-        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(50.033333, 8.570556));
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(11.786111, 48.353889));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(8.570556, 50.033333));
         assertEquals(299648.07216251583, Spheroid.distance(p1, p2), 0.1);
 
-        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(48.353889, 11.786111));
-        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(52.559722, 13.287778));
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(11.786111, 48.353889));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(13.287778, 52.559722));
         assertEquals(479817.9049528187, Spheroid.distance(p1, p2), 0.1);
 
-        LineString l1 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 0, 90));
-        LineString l2 = GEOMETRY_FACTORY.createLineString(coordArray(0, 1, 0, 0));
+        LineString l1 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 90, 0));
+        LineString l2 = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 0, 0));
         assertEquals(4953717.340300673, Spheroid.distance(l1, l2), 0.1);
 
         // HK to Sydney
-        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(22.308919, 113.914603));
-        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-33.946111, 151.177222));
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(113.914603, 22.308919));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(151.177222, -33.946111));
         assertEquals(7371809.8295041, Spheroid.distance(p1, p2), 0.1);
 
         // HK to Toronto
-        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(22.308919, 113.914603));
-        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(43.677223, -79.630556));
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(113.914603, 22.308919));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-79.630556, 43.677223));
         assertEquals(1.2568775317073349E7, Spheroid.distance(p1, p2), 0.1);
     }
 
     @Test
     public void spheroidArea() {
-        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 90));
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
         assertEquals(0, Spheroid.area(point), 0.1);
 
         LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 0, 90));
         assertEquals(0, Spheroid.area(line), 0.1);
+        line = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 90, 0));
+        assertEquals(0, Spheroid.area(line), 0.1);
 
         Polygon polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 90, 0, 0));
         assertEquals(0, Spheroid.area(polygon1), 0.1);
+        polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 90, 0, 0, 0));
+        assertEquals(0, Spheroid.area(polygon1), 0.1);
 
-        Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray(35, 34, 30, 28, 34, 25, 35, 34));
+        Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray(34, 35, 28, 30, 25, 34, 34, 35));
         assertEquals(2.0182485081176245E11, Spheroid.area(polygon2), 0.1);
 
-        Polygon polygon3 = GEOMETRY_FACTORY.createPolygon(coordArray(35, 34, 34, 25, 30, 28, 35, 34));
+        Polygon polygon3 = GEOMETRY_FACTORY.createPolygon(coordArray(34, 35, 25, 34, 28, 30, 34, 35));
         assertEquals(2.0182485081176245E11, Spheroid.area(polygon3), 0.1);
 
         MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPoint(new Point[] { point, point });
@@ -724,13 +732,13 @@ public class FunctionsTest {
 
     @Test
     public void spheroidLength() {
-        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 90));
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
         assertEquals(0, Spheroid.length(point), 0.1);
 
-        LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 0, 90));
+        LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 90, 0));
         assertEquals(1.0018754171394622E7, Spheroid.length(line), 0.1);
 
-        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 90, 0, 0));
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 90, 0, 0, 0));
         assertEquals(2.0037508342789244E7, Spheroid.length(polygon), 0.1);
 
         MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPoint(new Point[] { point, point });
