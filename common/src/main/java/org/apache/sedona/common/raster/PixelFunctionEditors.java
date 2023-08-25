@@ -30,8 +30,12 @@ import java.awt.image.WritableRaster;
 
 public class PixelFunctionEditors {
 
-    public static GridCoverage2D setValues(GridCoverage2D raster, int band, int colX, int rowY, int width, int height, double value, boolean keepNoData) {
+    public static GridCoverage2D setValues(GridCoverage2D raster, int band, int colX, int rowY, int width, int height, double[] values, boolean keepNoData) {
         ensureBand(raster, band);
+        if (values.length != width * height) {
+            throw new IllegalArgumentException("Shape of 'values' doesn't match provided width and height.");
+        }
+
         RenderedImage originalImage = raster.getRenderedImage();
         Raster rasterTemp = originalImage.getData();
         Point location = raster.getRenderedImage().getData().getBounds().getLocation();
@@ -43,23 +47,24 @@ public class PixelFunctionEditors {
         if (keepNoData) {
             noDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
         }
-
-        for (int i = colX; i < colX + width; i++) {
-            for (int j = rowY; j < rowY + height; j++) {
+        int iterator = 0;
+        for (int j = rowY; j < rowY + height; j++) {
+            for (int i = colX; i < colX + width; i++) {
                 double[] pixel = rasterCopied.getPixel(i, j, (double[]) null);
                 if (keepNoData && noDataValue != pixel[band - 1]) {
-                    pixel[band - 1] = value;
+                    pixel[band - 1] = values[iterator];
                 } else if (!keepNoData) {
-                    pixel[band - 1] = value;
+                    pixel[band - 1] = values[iterator];
                 }
                 rasterCopied.setPixel(i, j, pixel);
+                iterator++;
             }
         }
         return RasterUtils.create(wr, raster.getGridGeometry(), raster.getSampleDimensions());
     }
 
-    public static GridCoverage2D setValues(GridCoverage2D raster, int band, int colX, int rowY, int width, int height, double value) {
-        return setValues(raster, band, colX, rowY, width, height, value, false);
+    public static GridCoverage2D setValues(GridCoverage2D raster, int band, int colX, int rowY, int width, int height, double[] values) {
+        return setValues(raster, band, colX, rowY, width, height, values, false);
     }
 
     private static void ensureBand(GridCoverage2D raster, int band) throws IllegalArgumentException {
