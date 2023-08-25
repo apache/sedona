@@ -32,10 +32,16 @@ public class FunctionEditorsTest extends RasterTestBase {
     public void testSetValueWithEmptyRaster() throws FactoryException {
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0);
         double[] values = new double[] {1,1,1,0,0,0,1,2,3,3,5,6,7,0,0,3,0,0,3,0,0,0,0,0,0};
-        System.out.println(Arrays.toString(values));
         emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values, 1, 0d);
-        GridCoverage2D raster = PixelFunctionEditors.setValues(emptyRaster, 1, 2, 2, 3, 3, 4, true);
-        double[] result = MapAlgebra.bandAsArray(raster, 1);
-        System.out.println(Arrays.toString(result));
+        double[] newValues = new double[] {11,12,13,14,15,16,17,18,19};
+        GridCoverage2D raster = PixelFunctionEditors.setValues(emptyRaster, 1, 2, 2, 3, 3, newValues, true);
+        double[] actual = MapAlgebra.bandAsArray(raster, 1);
+        double[] expected = new double[] {1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 3.0, 5.0, 6.0, 11.0, 0.0, 0.0, 3.0, 0.0, 0.0, 15.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        assertArrayEquals(actual, expected, 0.0);
+
+        raster = PixelFunctionEditors.setValues(emptyRaster, 1, 2, 2, 3, 3, newValues);
+        actual = MapAlgebra.bandAsArray(raster, 1);
+        expected = new double[] {1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 3.0, 5.0, 6.0, 11.0, 12.0, 13.0, 3.0, 0.0, 14.0, 15.0, 16.0, 0.0, 0.0, 17.0, 18.0, 19.0};
+        assertArrayEquals(actual, expected, 0.0);
     }
 }
