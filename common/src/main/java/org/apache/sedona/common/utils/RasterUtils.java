@@ -293,7 +293,7 @@ public class RasterUtils {
      * @throws IllegalArgumentException
      */
     public static void ensureBand(GridCoverage2D raster, int band) throws IllegalArgumentException {
-        if (band > RasterAccessors.numBands(raster)) {
+        if (band < 1 || band > RasterAccessors.numBands(raster)) {
             throw new IllegalArgumentException(String.format("Provided band index %d is not present in the raster", band));
         }
     }
