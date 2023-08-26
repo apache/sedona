@@ -28,7 +28,7 @@ import org.opengis.metadata.spatial.PixelOrientation;
 
 public class RasterBandEditors {
     public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, int bandIndex, double noDataValue) {
-        ensureBand(raster, bandIndex);
+        RasterUtils.ensureBand(raster, bandIndex);
         Double rasterNoData = RasterBandAccessors.getBandNoDataValue(raster, bandIndex);
         if ( !(rasterNoData == null) && rasterNoData == noDataValue) {
             return raster;
@@ -49,11 +49,5 @@ public class RasterBandEditors {
 
     public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, double noDataValue) {
         return setBandNoDataValue(raster, 1, noDataValue);
-    }
-
-    private static void ensureBand(GridCoverage2D raster, int band) throws IllegalArgumentException {
-        if (band > RasterAccessors.numBands(raster)) {
-            throw new IllegalArgumentException(String.format("Provided band index %d is not present in the raster", band));
-        }
     }
 }
