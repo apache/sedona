@@ -989,7 +989,7 @@ Spark SQL Example:
 ```sql
 SELECT RS_BandAsArray(
         RS_SetValues(
-            RS_AddBandAsArray(
+            RS_AddBandFromArray(
                 RS_MakeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0),
                 [1,1,1,0,0,0,1,2,3,3,5,6,7,0,0,3,0,0,3,0,0,0,0,0,0], 1, 0d
                 ),
