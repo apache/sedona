@@ -965,7 +965,8 @@ Output:
 
 ### RS_SetValues
 
-Introduction: Returns raster with new values for specified pixels for designated band.
+Introduction: Returns a raster with new values for specified pixel region determined by `colX`, `rowY` pixel coordinates,
+and shape defined by `width` and `height`.
 
 Format: 
 
