@@ -20,6 +20,7 @@ package org.apache.sedona.common.utils;
 
 import com.sun.media.imageioimpl.common.BogusColorSpace;
 import org.apache.sedona.common.FunctionsGeoTools;
+import org.apache.sedona.common.raster.RasterAccessors;
 import org.geotools.coverage.Category;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
@@ -282,6 +283,19 @@ public class RasterUtils {
         double[] coords = worldCoord.getCoordinate();
         int[] gridCoords = new int[] {(int) coords[0], (int) coords[1]};
         return gridCoords;
+    }
+
+    /***
+     * Throws an exception if band index is greater than the number of bands in a raster
+     * @param raster
+     * @param band
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static void ensureBand(GridCoverage2D raster, int band) throws IllegalArgumentException {
+        if (band > RasterAccessors.numBands(raster)) {
+            throw new IllegalArgumentException(String.format("Provided band index %d is not present in the raster", band));
+        }
     }
 
     public static Geometry convertCRSIfNeeded(Geometry geometry, CoordinateReferenceSystem targetCRS) {

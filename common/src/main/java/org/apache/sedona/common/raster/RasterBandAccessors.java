@@ -28,7 +28,7 @@ import java.awt.image.Raster;
 public class RasterBandAccessors {
 
     public static Double getBandNoDataValue(GridCoverage2D raster, int band) {
-        ensureBand(raster, band);
+        RasterUtils.ensureBand(raster, band);
         GridSampleDimension bandSampleDimension = raster.getSampleDimension(band - 1);
         double noDataValue = RasterUtils.getNoDataValue(bandSampleDimension);
         if (Double.isNaN(noDataValue)) {
@@ -45,7 +45,7 @@ public class RasterBandAccessors {
     public static long getCount(GridCoverage2D raster, int band, boolean excludeNoDataValue) {
         int height = RasterAccessors.getHeight(raster), width = RasterAccessors.getWidth(raster);
         if(excludeNoDataValue) {
-            ensureBand(raster, band);
+            RasterUtils.ensureBand(raster, band);
             long numberOfPixel = 0;
             Double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
 
@@ -81,7 +81,7 @@ public class RasterBandAccessors {
 //    }
 
     public static double[] getSummaryStats(GridCoverage2D rasterGeom, int band, boolean excludeNoDataValue) {
-        ensureBand(rasterGeom, band);
+        RasterUtils.ensureBand(rasterGeom, band);
         Raster raster = rasterGeom.getRenderedImage().getData();
         int height = RasterAccessors.getHeight(rasterGeom), width = RasterAccessors.getWidth(rasterGeom);
         double[] pixels = raster.getSamples(0, 0, width, height, band - 1, (double[]) null);
@@ -135,18 +135,12 @@ public class RasterBandAccessors {
 //    }
 
     public static String getBandType(GridCoverage2D raster, int band) {
-        ensureBand(raster, band);
+        RasterUtils.ensureBand(raster, band);
         GridSampleDimension bandSampleDimension = raster.getSampleDimension(band - 1);
         return bandSampleDimension.getSampleDimensionType().name();
     }
 
     public static String getBandType(GridCoverage2D raster){
         return getBandType(raster, 1);
-    }
-
-    private static void ensureBand(GridCoverage2D raster, int band) throws IllegalArgumentException {
-        if (band > RasterAccessors.numBands(raster)) {
-            throw new IllegalArgumentException(String.format("Provided band index %d is not present in the raster", band));
-        }
     }
 }

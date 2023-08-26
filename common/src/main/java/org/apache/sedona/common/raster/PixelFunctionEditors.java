@@ -19,7 +19,6 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.utils.RasterUtils;
-import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 
 import javax.media.jai.RasterFactory;
@@ -31,7 +30,7 @@ import java.awt.image.WritableRaster;
 public class PixelFunctionEditors {
 
     public static GridCoverage2D setValues(GridCoverage2D raster, int band, int colX, int rowY, int width, int height, double[] values, boolean keepNoData) {
-        ensureBand(raster, band);
+        RasterUtils.ensureBand(raster, band);
         if (values.length != width * height) {
             throw new IllegalArgumentException("Shape of 'values' doesn't match provided width and height.");
         }
@@ -66,11 +65,4 @@ public class PixelFunctionEditors {
     public static GridCoverage2D setValues(GridCoverage2D raster, int band, int colX, int rowY, int width, int height, double[] values) {
         return setValues(raster, band, colX, rowY, width, height, values, false);
     }
-
-    private static void ensureBand(GridCoverage2D raster, int band) throws IllegalArgumentException {
-        if (band > RasterAccessors.numBands(raster)) {
-            throw new IllegalArgumentException(String.format("Provided band index %d is not present in the raster", band));
-        }
-    }
-
 }
