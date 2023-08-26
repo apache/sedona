@@ -965,8 +965,10 @@ Output:
 
 ### RS_SetValues
 
-Introduction: Returns a raster with new values for specified pixel region determined by `colX`, `rowY` pixel coordinates,
-and shape defined by `width` and `height`.
+Introduction: Returns a raster by replacing the values of pixels in a specified rectangular region. The top left 
+corner of the region is defined by the `colX` and `rowY` coordinates. The `width` and `height` parameters specify the dimensions 
+of the rectangular region. The new values to be assigned to the pixels in this region can be specified as an array passed 
+to this function.
 
 Format: 
 
