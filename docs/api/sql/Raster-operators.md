@@ -965,7 +965,8 @@ Output:
 
 ### RS_SetValues
 
-Introduction: Returns raster with new values for specified pixels for designated band.
+Introduction: Returns a raster with new values for specified pixel region determined by `colX`, `rowY` pixel coordinates,
+and shape defined by `width` and `height`.
 
 Format: 
 
@@ -976,7 +977,7 @@ RS_SetValues(raster: Raster, bandIndex: Integer, colX: Integer, rowY: Integer, w
 Since: `v1.5.0`
 
 The `colX`, `rowY`, and `bandIndex` are 1-indexed. If `keepNoData` is `true`, the pixels with NoData value will not be 
-set corresponding value in `newValues`. The `newValues` should be provided in rows.
+set to the corresponding value in `newValues`. The `newValues` should be provided in rows.
 
 !!!note 
     If the shape of `newValues` doesn't match with provided `width` and `height`, `IllegalArgumentException` is thrown. 
