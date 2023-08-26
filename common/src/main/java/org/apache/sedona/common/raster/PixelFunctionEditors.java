@@ -50,9 +50,10 @@ public class PixelFunctionEditors {
         for (int j = rowY; j < rowY + height; j++) {
             for (int i = colX; i < colX + width; i++) {
                 double[] pixel = rasterCopied.getPixel(i, j, (double[]) null);
-                if (keepNoData && noDataValue != pixel[band - 1]) {
-                    pixel[band - 1] = values[iterator];
-                } else if (!keepNoData) {
+                if (keepNoData && noDataValue == pixel[band - 1]) {
+                    iterator++;
+                    continue;
+                } else {
                     pixel[band - 1] = values[iterator];
                 }
                 rasterCopied.setPixel(i, j, pixel);
