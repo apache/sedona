@@ -66,4 +66,12 @@ public class PixelFunctionEditors {
     public static GridCoverage2D setValues(GridCoverage2D raster, int band, int colX, int rowY, int width, int height, double[] values) {
         return setValues(raster, band, colX, rowY, width, height, values, false);
     }
+
+    public static GridCoverage2D setValue(GridCoverage2D raster, int band, int colX, int rowY, double newValue) {
+        return setValues(raster, band, colX, rowY, 1, 1, new double[]{newValue}, false);
+    }
+
+    public static GridCoverage2D setValue(GridCoverage2D raster, int colX, int rowY, double newValue) {
+        return setValues(raster, 1, colX, rowY, 1, 1, new double[]{newValue}, false);
+    }
 }
