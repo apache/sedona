@@ -36,12 +36,12 @@ public class FunctionEditorsTest extends RasterTestBase {
         double[] newValues = new double[] {11,12,13,14,15,16,17,18,19};
         GridCoverage2D raster = PixelFunctionEditors.setValues(emptyRaster, 1, 2, 2, 3, 3, newValues, true);
         double[] actual = MapAlgebra.bandAsArray(raster, 1);
-        double[] expected = new double[] {1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 3.0, 5.0, 6.0, 11.0, 0.0, 0.0, 3.0, 0.0, 0.0, 15.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        double[] expected = new double[] {1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 11.0, 12.0, 13.0, 3.0, 5.0, 14.0, 15.0, 0.0, 0.0, 3.0, 0.0, 0.0, 19.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         assertArrayEquals(actual, expected, 0.0);
 
         raster = PixelFunctionEditors.setValues(emptyRaster, 1, 2, 2, 3, 3, newValues);
         actual = MapAlgebra.bandAsArray(raster, 1);
-        expected = new double[] {1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 3.0, 5.0, 6.0, 11.0, 12.0, 13.0, 3.0, 0.0, 14.0, 15.0, 16.0, 0.0, 0.0, 17.0, 18.0, 19.0};
+        expected = new double[] {1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 11.0, 12.0, 13.0, 3.0, 5.0, 14.0, 15.0, 16.0, 0.0, 3.0, 17.0, 18.0, 19.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         assertArrayEquals(actual, expected, 0.0);
     }
 
@@ -53,13 +53,13 @@ public class FunctionEditorsTest extends RasterTestBase {
         double newValue = 1777;
         GridCoverage2D raster = PixelFunctionEditors.setValue(emptyRaster, 1, 2, 2, newValue);
         double[] actual = MapAlgebra.bandAsArray(raster, 1);
-        double[] expected = new double[]{1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 3.0, 5.0, 6.0, 1777.0, 0.0, 0.0, 3.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        double[] expected = new double[]{1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1777.0, 2.0, 3.0, 3.0, 5.0, 6.0, 7.0, 0.0, 0.0, 3.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         assertArrayEquals(expected, actual, 0.1d);
 
         newValue = 8723;
         raster = PixelFunctionEditors.setValue(emptyRaster, 2, 2, newValue);
         actual = MapAlgebra.bandAsArray(raster, 1);
-        expected = new double[]{1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 3.0, 5.0, 6.0, 8723.0, 0.0, 0.0, 3.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        expected = new double[]{1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 8723.0, 2.0, 3.0, 3.0, 5.0, 6.0, 7.0, 0.0, 0.0, 3.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         assertArrayEquals(expected, actual, 0.1d);
     }
 }

@@ -46,6 +46,10 @@ public class PixelFunctionEditors {
         if (keepNoData) {
             noDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
         }
+
+        // making them 0-indexed
+        colX--; rowY--;
+
         int iterator = 0;
         for (int j = rowY; j < rowY + height; j++) {
             for (int i = colX; i < colX + width; i++) {
