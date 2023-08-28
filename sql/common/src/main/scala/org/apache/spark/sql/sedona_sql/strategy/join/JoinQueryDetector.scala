@@ -147,17 +147,17 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
         case Some(And(_, LessThan(ST_Distance(Seq(leftShape, rightShape)), distance))) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, false, condition, Some(distance)))
         // ST_DistanceSphere
-        case Some(LessThanOrEqual(ST_DistanceSphere(Seq(leftShape, rightShape, radius)), distance)) =>
+        case Some(LessThanOrEqual(ST_DistanceSphere(Seq(leftShape, rightShape)), distance)) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, true, condition, Some(distance)))
-        case Some(And(LessThanOrEqual(ST_DistanceSphere(Seq(leftShape, rightShape, radius)), distance), _)) =>
+        case Some(And(LessThanOrEqual(ST_DistanceSphere(Seq(leftShape, rightShape)), distance), _)) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, true, condition, Some(distance)))
-        case Some(And(_, LessThanOrEqual(ST_DistanceSphere(Seq(leftShape, rightShape, radius)), distance))) =>
+        case Some(And(_, LessThanOrEqual(ST_DistanceSphere(Seq(leftShape, rightShape)), distance))) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, true, condition, Some(distance)))
-        case Some(LessThan(ST_DistanceSphere(Seq(leftShape, rightShape, radius)), distance)) =>
+        case Some(LessThan(ST_DistanceSphere(Seq(leftShape, rightShape)), distance)) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, true, condition, Some(distance)))
-        case Some(And(LessThan(ST_DistanceSphere(Seq(leftShape, rightShape, radius)), distance), _)) =>
+        case Some(And(LessThan(ST_DistanceSphere(Seq(leftShape, rightShape)), distance), _)) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, true, condition, Some(distance)))
-        case Some(And(_, LessThan(ST_DistanceSphere(Seq(leftShape, rightShape, radius)), distance))) =>
+        case Some(And(_, LessThan(ST_DistanceSphere(Seq(leftShape, rightShape)), distance))) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, true, condition, Some(distance)))
         // ST_DistanceSpheroid
         case Some(LessThanOrEqual(ST_DistanceSpheroid(Seq(leftShape, rightShape)), distance)) =>

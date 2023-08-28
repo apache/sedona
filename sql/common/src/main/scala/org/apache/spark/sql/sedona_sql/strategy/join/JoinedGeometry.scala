@@ -54,6 +54,6 @@ object JoinedGeometry {
     // Here we use the polar radius of the spheroid as the radius of the sphere, so that the expanded
     // envelope will work for both spherical and spheroidal distances.
     val sphereRadius = 6357000.0
-    Haversine.expandEnvelopeByDistance(envelope, distance, sphereRadius)
+    Haversine.expandEnvelope(envelope, distance, sphereRadius)
   }
 }

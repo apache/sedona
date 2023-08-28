@@ -70,8 +70,9 @@ public class Haversine
      * @param envelope     the envelope to expand
      * @param distance     in meter
      * @param sphereRadius radius of the sphere in meter
+     * @return expanded envelope
      */
-    public static Envelope expandEnvelopeByDistance(Envelope envelope, double distance, double sphereRadius)
+    public static Envelope expandEnvelope(Envelope envelope, double distance, double sphereRadius)
     {
         // 10% buffer to get rid of false negatives
         double scaleFactor = 1.1;
