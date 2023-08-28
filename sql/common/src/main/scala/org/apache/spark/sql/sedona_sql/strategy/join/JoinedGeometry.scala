@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
+import org.apache.sedona.common.sphere.Haversine
 import org.locationtech.jts.geom.{Envelope, Geometry}
 
 /**
@@ -34,9 +35,7 @@ object JoinedGeometry {
   def geometryToExpandedEnvelope(geom: Geometry, distance: Double, isGeography: Boolean): Geometry = {
     val envelope = geom.getEnvelopeInternal.copy()
     val expandedEnvelope = if (isGeography) {
-      // Here we use the polar radius of the spheroid as the radius of the sphere, so that the expanded
-      // envelope will work for both spherical and spheroidal distances.
-      expandEnvelopeForGeography(envelope, distance, 6357000.0)
+      expandEnvelopeForGeography(envelope, distance)
     } else {
       val newEnvelope = envelope.copy()
       newEnvelope.expandBy(distance)
@@ -50,29 +49,11 @@ object JoinedGeometry {
    *
    * @param envelope     the envelope to expand
    * @param distance     in meter
-   * @param sphereRadius in meter
    */
-  def expandEnvelopeForGeography(envelope: Envelope, distance: Double, sphereRadius: Double): Envelope = {
-    val scaleFactor = 1.1 // 10% buffer to get rid of false negatives
-    val latDeltaRadian = distance / sphereRadius
-    val latDeltaDegree = Math.toDegrees(latDeltaRadian)
-    val newMinY = envelope.getMinY - latDeltaDegree * scaleFactor
-    val newMaxY = envelope.getMaxY + latDeltaDegree * scaleFactor
-    if (newMinY <= -90 || newMaxY >= 90) {
-      new Envelope(-180, 180, Math.max(newMinY, -90), Math.min(newMaxY, 90))
-    } else {
-      val minLatRadian = Math.toRadians(newMinY)
-      val maxLatRadian = Math.toRadians(newMaxY)
-      val lonDeltaRadian = Math.max(Math.abs(distance / (sphereRadius * Math.cos(maxLatRadian))),
-        Math.abs(distance / (sphereRadius * Math.cos(minLatRadian))))
-      val lonDeltaDegree = Math.toDegrees(lonDeltaRadian)
-      val newMinX = envelope.getMinX - lonDeltaDegree * scaleFactor
-      val newMaxX = envelope.getMaxX + lonDeltaDegree * scaleFactor
-      if (newMinX <= -180 || newMaxX >= 180) {
-        new Envelope(-180, 180, newMinY, newMaxY)
-      } else {
-        new Envelope(newMinX, newMaxX, newMinY, newMaxY)
-      }
-    }
+  private def expandEnvelopeForGeography(envelope: Envelope, distance: Double): Envelope = {
+    // Here we use the polar radius of the spheroid as the radius of the sphere, so that the expanded
+    // envelope will work for both spherical and spheroidal distances.
+    val sphereRadius = 6357000.0
+    Haversine.expandEnvelopeByDistance(envelope, distance, sphereRadius)
   }
 }

@@ -19,6 +19,7 @@
 package org.apache.sedona.common.sphere;
 
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 
 import static java.lang.Math.atan2;
@@ -61,5 +62,38 @@ public class Haversine
     public static double distance(Geometry geom1, Geometry geom2)
     {
         return distance(geom1, geom2, 6371008.0);
+    }
+
+    /**
+     * Expand the given envelope on sphere by the given distance in meter.
+     *
+     * @param envelope     the envelope to expand
+     * @param distance     in meter
+     * @param sphereRadius radius of the sphere in meter
+     */
+    public static Envelope expandEnvelopeByDistance(Envelope envelope, double distance, double sphereRadius)
+    {
+        // 10% buffer to get rid of false negatives
+        double scaleFactor = 1.1;
+        double latDeltaRadian = distance / sphereRadius;
+        double latDeltaDegree = Math.toDegrees(latDeltaRadian);
+        double newMinY = envelope.getMinY() - latDeltaDegree * scaleFactor;
+        double newMaxY = envelope.getMaxY() + latDeltaDegree * scaleFactor;
+        if (newMinY <= -90 || newMaxY >= 90) {
+            return new Envelope(-180, 180, Math.max(newMinY, -90), Math.min(newMaxY, 90));
+        }
+
+        double minLatRadian = Math.toRadians(newMinY);
+        double maxLatRadian = Math.toRadians(newMaxY);
+        double lonDeltaRadian = Math.max(Math.abs(distance / (sphereRadius * Math.cos(maxLatRadian))),
+                Math.abs(distance / (sphereRadius * Math.cos(minLatRadian))));
+        double lonDeltaDegree = Math.toDegrees(lonDeltaRadian);
+        double newMinX = envelope.getMinX() - lonDeltaDegree * scaleFactor;
+        double newMaxX = envelope.getMaxX() + lonDeltaDegree * scaleFactor;
+        if (newMinX <= -180 || newMaxX >= 180) {
+            return new Envelope(-180, 180, newMinY, newMaxY);
+        } else {
+            return new Envelope(newMinX, newMaxX, newMinY, newMaxY);
+        }
     }
 }
