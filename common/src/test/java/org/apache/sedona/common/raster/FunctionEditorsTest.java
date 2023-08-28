@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
 public class FunctionEditorsTest extends RasterTestBase {
 
     @Test
-    public void testSetValueWithEmptyRaster() throws FactoryException {
+    public void testSetValuesWithEmptyRaster() throws FactoryException {
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0);
         double[] values = new double[] {1,1,1,0,0,0,1,2,3,3,5,6,7,0,0,3,0,0,3,0,0,0,0,0,0};
         emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values, 1, 0d);
@@ -43,5 +43,23 @@ public class FunctionEditorsTest extends RasterTestBase {
         actual = MapAlgebra.bandAsArray(raster, 1);
         expected = new double[] {1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 3.0, 5.0, 6.0, 11.0, 12.0, 13.0, 3.0, 0.0, 14.0, 15.0, 16.0, 0.0, 0.0, 17.0, 18.0, 19.0};
         assertArrayEquals(actual, expected, 0.0);
+    }
+
+    @Test
+    public void testSetValueWithEmptyRaster() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0);
+        double[] values = new double[] {1,1,1,0,0,0,1,2,3,3,5,6,7,0,0,3,0,0,3,0,0,0,0,0,0};
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values, 1, 0d);
+        double newValue = 1777;
+        GridCoverage2D raster = PixelFunctionEditors.setValue(emptyRaster, 1, 2, 2, newValue);
+        double[] actual = MapAlgebra.bandAsArray(raster, 1);
+        double[] expected = new double[]{1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 3.0, 5.0, 6.0, 1777.0, 0.0, 0.0, 3.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        assertArrayEquals(expected, actual, 0.1d);
+
+        newValue = 8723;
+        raster = PixelFunctionEditors.setValue(emptyRaster, 2, 2, newValue);
+        actual = MapAlgebra.bandAsArray(raster, 1);
+        expected = new double[]{1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 3.0, 5.0, 6.0, 8723.0, 0.0, 0.0, 3.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        assertArrayEquals(expected, actual, 0.1d);
     }
 }
