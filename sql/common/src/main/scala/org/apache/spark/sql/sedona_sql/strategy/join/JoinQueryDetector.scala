@@ -81,20 +81,17 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
       }
     }
 
-  private def getRasterJoinDetection(
-    left: LogicalPlan,
-    right: LogicalPlan,
-    predicate: RS_Predicate,
-    extraCondition: Option[Expression] = None): Option[JoinQueryDetection] = {
-    predicate match {
-      case RS_Intersects(Seq(leftShape, rightShape)) =>
-        Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, false, extraCondition))
-      case RS_Contains(Seq(leftShape, rightShape)) =>
-        Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.CONTAINS, false, extraCondition))
-      case RS_Within(Seq(leftShape, rightShape)) =>
-        Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.WITHIN, false, extraCondition))
-      case _ => None
-    }
+  private def getRasterJoinDetection(left: LogicalPlan,
+                                     right: LogicalPlan,
+                                     predicate: RS_Predicate,
+                                     extraCondition: Option[Expression] = None): Option[JoinQueryDetection] = {
+    // The joined shapes are coarse-grained envelopes of raster or geometry. We can only test for intersections in
+    // the spatial join no matter what the actual RS predicate is. The actual raster predicate is in `condition`
+    // and will be used for refining the join result.
+    val leftShape = predicate.children.head
+    val rightShape = predicate.children(1)
+    val condition = extraCondition.map(And(_, predicate)).getOrElse(predicate)
+    Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, false, Some(condition)))
   }
 
   def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
@@ -131,7 +128,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
           getJoinDetection(left, right, predicate, Some(extraCondition))
           //For raster-vector joins
         case Some(predicate: RS_Predicate) =>
-          getRasterJoinDetection(left, right, predicate)
+          getRasterJoinDetection(left, right, predicate, None)
         case Some(And(predicate: RS_Predicate, extraCondition)) =>
           getRasterJoinDetection(left, right, predicate, Some(extraCondition))
         case Some(And(extraCondition, predicate: RS_Predicate)) =>
@@ -392,9 +389,9 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
 
     val a = children.head
     val b = children.tail.head
-    val isRaster = a.dataType.isInstanceOf[RasterUDT] || b.dataType.isInstanceOf[RasterUDT]
+    val isRasterPredicate = a.dataType.isInstanceOf[RasterUDT] || b.dataType.isInstanceOf[RasterUDT]
 
-    val relationship = (distance, spatialPredicate, isGeography, isRaster) match {
+    val relationship = (distance, spatialPredicate, isGeography, isRasterPredicate) match {
       case (Some(_), SpatialPredicate.INTERSECTS, false, false) => "ST_Distance <="
       case (Some(_), _, false, false) => "ST_Distance <"
       case (Some(_), SpatialPredicate.INTERSECTS, true, false) => "ST_Distance (Geography) <="
@@ -417,13 +414,21 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
         logInfo(s"Planning spatial join for $relationship relationship")
         val (leftPlan, rightPlan, streamShape, windowSide) = (broadcastSide.get, swapped) match {
           case (LeftSide, false) => // Broadcast the left side, windows on the left
-            (SpatialIndexExec(planLater(left), a, indexType, isGeography, distanceOnIndexSide), planLater(right), b, LeftSide)
+            (SpatialIndexExec(planLater(left), a, indexType, isRasterPredicate, isGeography, distanceOnIndexSide),
+              planLater(right),
+              b, LeftSide)
           case (LeftSide, true) => // Broadcast the left side, objects on the left
-            (SpatialIndexExec(planLater(left), b, indexType, isGeography, distanceOnIndexSide), planLater(right), a, RightSide)
+            (SpatialIndexExec(planLater(left), b, indexType, isRasterPredicate, isGeography, distanceOnIndexSide),
+              planLater(right),
+              a, RightSide)
           case (RightSide, false) => // Broadcast the right side, windows on the left
-            (planLater(left), SpatialIndexExec(planLater(right), b, indexType, isGeography, distanceOnIndexSide), a, LeftSide)
+            (planLater(left),
+              SpatialIndexExec(planLater(right), b, indexType, isRasterPredicate, isGeography, distanceOnIndexSide),
+              a, LeftSide)
           case (RightSide, true) => // Broadcast the right side, objects on the left
-            (planLater(left), SpatialIndexExec(planLater(right), a, indexType, isGeography, distanceOnIndexSide), b, RightSide)
+            (planLater(left),
+              SpatialIndexExec(planLater(right), a, indexType, isRasterPredicate, isGeography, distanceOnIndexSide),
+              b, RightSide)
         }
         BroadcastIndexJoinExec(leftPlan, rightPlan, streamShape, broadcastSide.get, windowSide, joinType,
           spatialPredicate, extraCondition, distanceOnStreamSide) :: Nil

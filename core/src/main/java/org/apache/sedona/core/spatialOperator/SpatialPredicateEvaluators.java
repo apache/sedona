@@ -28,8 +28,7 @@ public class SpatialPredicateEvaluators {
     private SpatialPredicateEvaluators() {}
 
     /**
-     * SpatialPredicateEvaluator for evaluating spatial predicates, it also works as a trait which will
-     * be mixed into {@link org.apache.sedona.core.joinJudgement.JoinConditionMatcher}.
+     * SpatialPredicateEvaluator for evaluating spatial predicates.
      */
     public interface SpatialPredicateEvaluator extends Serializable {
         boolean eval(Geometry left, Geometry right);

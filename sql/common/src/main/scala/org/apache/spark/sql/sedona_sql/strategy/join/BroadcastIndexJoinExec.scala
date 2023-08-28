@@ -18,7 +18,6 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
-import org.apache.sedona.common.raster.GeometryFunctions
 import org.apache.sedona.core.spatialOperator.{SpatialPredicate, SpatialPredicateEvaluators}
 import org.apache.sedona.core.spatialOperator.SpatialPredicateEvaluators.SpatialPredicateEvaluator
 import org.apache.sedona.sql.utils.{GeometrySerializer, RasterSerializer}
@@ -68,7 +67,7 @@ case class BroadcastIndexJoinExec(
         left.output :+ j.exists
       case LeftExistence(_) =>
         left.output
-      case x =>
+      case x: Any =>
         throw new IllegalArgumentException(s"BroadcastIndexJoinExec should not take $x as the JoinType")
     }
   }
@@ -109,9 +108,9 @@ case class BroadcastIndexJoinExec(
     (streamShape, broadcast.shape)
   }
 
-  private val isRaster = windowExpression.dataType.isInstanceOf[RasterUDT] || objectExpression.dataType.isInstanceOf[RasterUDT]
+  private val isRasterPredicate = windowExpression.dataType.isInstanceOf[RasterUDT] || objectExpression.dataType.isInstanceOf[RasterUDT]
 
-  private val spatialExpression = (distance, spatialPredicate, isRaster) match {
+  private val spatialExpression = (distance, spatialPredicate, isRasterPredicate) match {
     case (Some(r), SpatialPredicate.INTERSECTS, false) => s"ST_Distance($windowExpression, $objectExpression) <= $r"
     case (Some(r), _, false) => s"ST_Distance($windowExpression, $objectExpression) < $r"
     case (None, _, false) => s"ST_$spatialPredicate($windowExpression, $objectExpression)"
@@ -248,9 +247,8 @@ case class BroadcastIndexJoinExec(
           antiJoin(streamedIter, broadcastIndex)
         case LeftOuter | RightOuter =>
           outerJoin(streamedIter, broadcastIndex)
-        case x =>
+        case x: Any =>
           throw new IllegalArgumentException(s"BroadcastIndexJoinExec should not take $x as the JoinType")
-
       }
 
       val resultProj = createResultProjection()
@@ -265,12 +263,11 @@ case class BroadcastIndexJoinExec(
     distance match {
       case Some(distanceExpression) =>
         streamResultsRaw.map(row => {
-          val isRaster = boundStreamShape.dataType.isInstanceOf[RasterUDT]
           val geom = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
           if (geom == null) {
             (null, row)
           } else {
-            val geometry = if (isRaster) GeometryFunctions.convexHull(RasterSerializer.deserialize(geom)) else GeometrySerializer.deserialize(geom)
+            val geometry = GeometrySerializer.deserialize(geom)
             val radius = BindReferences.bindReference(distanceExpression, streamed.output).eval(row).asInstanceOf[Double]
             val envelope = geometry.getEnvelopeInternal
             envelope.expandBy(radius)
@@ -279,12 +276,22 @@ case class BroadcastIndexJoinExec(
         })
       case _ =>
         streamResultsRaw.map(row => {
-          val isRaster = boundStreamShape.dataType.isInstanceOf[RasterUDT]
-          val geom = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
-          if (geom == null) {
+          val serializedObject = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
+          if (serializedObject == null) {
             (null, row)
           } else {
-            (if (isRaster) GeometryFunctions.convexHull(RasterSerializer.deserialize(geom)) else GeometrySerializer.deserialize(geom), row)
+            val shape = if (isRasterPredicate) {
+              if (boundStreamShape.dataType.isInstanceOf[RasterUDT]) {
+                val raster = RasterSerializer.deserialize(serializedObject)
+                JoinedGeometryRaster.rasterToWGS84Envelope(raster)
+              } else {
+                val geom = GeometrySerializer.deserialize(serializedObject)
+                JoinedGeometryRaster.geometryToWGS84Envelope(geom)
+              }
+            } else {
+              GeometrySerializer.deserialize(serializedObject)
+            }
+            (shape, row)
           }
         })
     }

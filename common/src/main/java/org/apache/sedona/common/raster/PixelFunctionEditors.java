@@ -49,7 +49,7 @@ public class PixelFunctionEditors {
 
         // making them 0-indexed
         colX--; rowY--;
-
+      
         int iterator = 0;
         for (int j = rowY; j < rowY + height; j++) {
             for (int i = colX; i < colX + width; i++) {
@@ -70,7 +70,7 @@ public class PixelFunctionEditors {
     public static GridCoverage2D setValues(GridCoverage2D raster, int band, int colX, int rowY, int width, int height, double[] values) {
         return setValues(raster, band, colX, rowY, width, height, values, false);
     }
-
+  
     public static GridCoverage2D setValue(GridCoverage2D raster, int band, int colX, int rowY, double newValue) {
         return setValues(raster, band, colX, rowY, 1, 1, new double[]{newValue}, false);
     }
