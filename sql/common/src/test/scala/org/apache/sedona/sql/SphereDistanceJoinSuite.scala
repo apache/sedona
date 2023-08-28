@@ -54,7 +54,7 @@ class SphereDistanceJoinSuite extends TestBaseScala with TableDrivenPropertyChec
       "ST_DistanceSphere(df1.geom, df2.geom) < df2.dist",
       "ST_DistanceSphere(df2.geom, df1.geom) < df2.dist",
       "ST_DistanceSpheroid(df1.geom, df2.geom) < df2.dist",
-      "ST_DistanceSpheroid(df2.geom, df1.geom) < df2.dist",
+      "ST_DistanceSpheroid(df2.geom, df1.geom) < df2.dist"
     )
 
     try {
@@ -81,6 +81,13 @@ class SphereDistanceJoinSuite extends TestBaseScala with TableDrivenPropertyChec
       }
     } finally {
       sparkSession.sparkContext.getConf.set(spatialJoinPartitionSideConfKey, spatialJoinPartitionSide)
+    }
+  }
+
+  describe("Sphere distance join with custom sphere radius") {
+    it("do not optimize distance join with custom sphere radius") {
+      val df = sparkSession.sql("SELECT df1.id, df2.id FROM df1 JOIN df2 ON ST_DistanceSphere(df1.geom, df2.geom, 100) > 10")
+      assert(!isUsingOptimizedSpatialJoin(df))
     }
   }
 
