@@ -22,8 +22,6 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 
-import java.util.Arrays;
-
 import static org.junit.Assert.*;
 
 public class FunctionEditorsTest extends RasterTestBase {
