@@ -45,10 +45,10 @@ public class Spheroid
         Coordinate coordinate1 = geom1.getGeometryType().equals("Point")? geom1.getCoordinate():geom1.getCentroid().getCoordinate();
         Coordinate coordinate2 = geom2.getGeometryType().equals("Point")? geom2.getCoordinate():geom2.getCentroid().getCoordinate();
         // Calculate the distance between the two points
-        double lat1 = coordinate1.getX();
-        double lon1 = coordinate1.getY();
-        double lat2 = coordinate2.getX();
-        double lon2 = coordinate2.getY();
+        double lon1 = coordinate1.getX();
+        double lat1 = coordinate1.getY();
+        double lon2 = coordinate2.getX();
+        double lat2 = coordinate2.getY();
         GeodesicData g = Geodesic.WGS84.Inverse(lat1, lon1, lat2, lon2);
         return g.s12;
     }
@@ -61,16 +61,19 @@ public class Spheroid
      * @return
      */
     public static double length(Geometry geom) {
-        if (geom.getGeometryType().equals("Polygon") || geom.getGeometryType().equals("LineString")) {
+        String geomType = geom.getGeometryType();
+        if (geomType.equals("Polygon") || geomType.equals("LineString")) {
             PolygonArea p = new PolygonArea(Geodesic.WGS84, true);
             Coordinate[] coordinates = geom.getCoordinates();
             for (int i = 0; i < coordinates.length; i++) {
-                p.AddPoint(coordinates[i].getX(), coordinates[i].getY());
+                double lon = coordinates[i].getX();
+                double lat = coordinates[i].getY();
+                p.AddPoint(lat, lon);
             }
             PolygonResult compute = p.Compute();
             return compute.perimeter;
         }
-        else if (geom.getGeometryType().equals("MultiPolygon") || geom.getGeometryType().equals("MultiLineString") || geom.getGeometryType().equals("GeometryCollection")) {
+        else if (geomType.equals("MultiPolygon") || geomType.equals("MultiLineString") || geomType.equals("GeometryCollection")) {
             double length = 0.0;
             for (int i = 0; i < geom.getNumGeometries(); i++) {
                 length += length(geom.getGeometryN(i));
@@ -90,18 +93,21 @@ public class Spheroid
      * @return
      */
     public static double area(Geometry geom) {
-        if (geom.getGeometryType().equals("Polygon")) {
+        String geomType = geom.getGeometryType();
+        if (geomType.equals("Polygon")) {
             PolygonArea p = new PolygonArea(Geodesic.WGS84, false);
             Coordinate[] coordinates = geom.getCoordinates();
             for (int i = 0; i < coordinates.length; i++) {
-                p.AddPoint(coordinates[i].getX(), coordinates[i].getY());
+                double lon = coordinates[i].getX();
+                double lat = coordinates[i].getY();
+                p.AddPoint(lat, lon);
             }
             PolygonResult compute = p.Compute();
             // The area is negative if the polygon is oriented clockwise
             // We make sure that all area are positive
             return abs(compute.area);
         }
-        else if (geom.getGeometryType().equals("MultiPolygon") || geom.getGeometryType().equals("GeometryCollection")) {
+        else if (geomType.equals("MultiPolygon") || geomType.equals("GeometryCollection")) {
             double area = 0.0;
             for (int i = 0; i < geom.getNumGeometries(); i++) {
                 area += area(geom.getGeometryN(i));

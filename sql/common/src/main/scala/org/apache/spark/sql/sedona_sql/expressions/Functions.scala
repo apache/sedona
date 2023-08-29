@@ -971,7 +971,7 @@ case class ST_GeometricMedian(inputExpressions: Seq[Expression])
 }
 
 case class ST_DistanceSphere(inputExpressions: Seq[Expression])
-  extends InferredExpression(inferrableFunction3(Haversine.distance)) {
+  extends InferredExpression(inferrableFunction2(Haversine.distance), inferrableFunction3(Haversine.distance)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
