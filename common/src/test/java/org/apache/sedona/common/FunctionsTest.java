@@ -660,6 +660,32 @@ public class FunctionsTest {
         p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(113.914603, 22.308919));
         p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-79.630556, 43.677223));
         assertEquals(1.2548548944238186E7, Haversine.distance(p1, p2), 0.1);
+
+        // Crossing the anti-meridian
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(179.999, 0));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-179.999, 0));
+        assertTrue(Haversine.distance(p1, p2) < 300);
+        assertTrue(Haversine.distance(p2, p1) < 300);
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(179.999, 60));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-179.999, 60));
+        assertTrue(Haversine.distance(p1, p2) < 300);
+        assertTrue(Haversine.distance(p2, p1) < 300);
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(179.999, -60));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-179.999, -60));
+        assertTrue(Haversine.distance(p1, p2) < 300);
+        assertTrue(Haversine.distance(p2, p1) < 300);
+
+        // Crossing the North Pole
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(-60, 89.999));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(120, 89.999));
+        assertTrue(Haversine.distance(p1, p2) < 300);
+        assertTrue(Haversine.distance(p2, p1) < 300);
+
+        // Crossing the South Pole
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(-60, -89.999));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(120, -89.999));
+        assertTrue(Haversine.distance(p1, p2) < 300);
+        assertTrue(Haversine.distance(p2, p1) < 300);
     }
 
     @Test
@@ -694,6 +720,32 @@ public class FunctionsTest {
         p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(113.914603, 22.308919));
         p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-79.630556, 43.677223));
         assertEquals(1.2568775317073349E7, Spheroid.distance(p1, p2), 0.1);
+
+        // Crossing the anti-meridian
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(179.999, 0));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-179.999, 0));
+        assertTrue(Spheroid.distance(p1, p2) < 300);
+        assertTrue(Spheroid.distance(p2, p1) < 300);
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(179.999, 60));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-179.999, 60));
+        assertTrue(Spheroid.distance(p1, p2) < 300);
+        assertTrue(Spheroid.distance(p2, p1) < 300);
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(179.999, -60));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(-179.999, -60));
+        assertTrue(Spheroid.distance(p1, p2) < 300);
+        assertTrue(Spheroid.distance(p2, p1) < 300);
+
+        // Crossing the North Pole
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(-60, 89.999));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(120, 89.999));
+        assertTrue(Spheroid.distance(p1, p2) < 300);
+        assertTrue(Spheroid.distance(p2, p1) < 300);
+
+        // Crossing the South Pole
+        p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(-60, -89.999));
+        p2 = GEOMETRY_FACTORY.createPoint(new Coordinate(120, -89.999));
+        assertTrue(Spheroid.distance(p1, p2) < 300);
+        assertTrue(Spheroid.distance(p2, p1) < 300);
     }
 
     @Test

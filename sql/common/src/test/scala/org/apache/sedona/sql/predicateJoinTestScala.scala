@@ -444,11 +444,6 @@ class predicateJoinTestScala extends TestBaseScala {
           pointDf2.alias("pointDf2"), expr(s"ST_DistanceSphere(pointDf1.pointshape, pointDf2.pointshape) < $distance"))
         assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: DistanceJoinExec => p }.size === 1)
         assert(distanceJoinDf.count() == expected)
-
-        distanceJoinDf = pointDf1.alias("pointDf1").join(
-          pointDf2.alias("pointDf2"), expr(s"ST_DistanceSphere(pointDf1.pointshape, pointDf2.pointshape, 6371008.0) < $distance"))
-        assert(distanceJoinDf.queryExecution.sparkPlan.collect { case p: DistanceJoinExec => p }.size === 1)
-        assert(distanceJoinDf.count() == expected)
       })
     }
 

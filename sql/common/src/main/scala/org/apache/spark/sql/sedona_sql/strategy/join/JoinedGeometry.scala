@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
+import org.apache.sedona.common.sphere.Haversine
 import org.locationtech.jts.geom.{Envelope, Geometry}
 
 /**
@@ -33,33 +34,26 @@ object JoinedGeometry {
    */
   def geometryToExpandedEnvelope(geom: Geometry, distance: Double, isGeography: Boolean): Geometry = {
     val envelope = geom.getEnvelopeInternal.copy()
-    // Here we use the polar radius of the spheroid as the radius of the sphere, so that the expanded
-    // envelope will work for both spherical and spheroidal distances.
-    expandEnvelope(envelope, distance, 6357000.0, isGeography)
-    geom.getFactory.toGeometry(envelope)
+    val expandedEnvelope = if (isGeography) {
+      expandEnvelopeForGeography(envelope, distance)
+    } else {
+      val newEnvelope = envelope.copy()
+      newEnvelope.expandBy(distance)
+      newEnvelope
+    }
+    geom.getFactory.toGeometry(expandedEnvelope)
   }
 
   /**
    * Expand the given envelope by the given distance in meter.
-   * For geography, we expand the envelope by the given distance in both longitude and latitude.
    *
-   * @param envelope the envelope to expand
-   * @param distance in meter
-   * @param sphereRadius in meter
-   * @param isGeography whether the envelope is on a sphere
+   * @param envelope     the envelope to expand
+   * @param distance     in meter
    */
-  private def expandEnvelope(envelope: Envelope, distance: Double, sphereRadius: Double, isGeography: Boolean): Unit = {
-    if (isGeography) {
-      val scaleFactor = 1.1 // 10% buffer to get rid of false negatives
-      val latRadian = Math.toRadians((envelope.getMinY + envelope.getMaxY) / 2.0)
-      val latDeltaRadian = distance / sphereRadius;
-      val latDeltaDegree = Math.toDegrees(latDeltaRadian)
-      val lonDeltaRadian = Math.max(Math.abs(distance / (sphereRadius * Math.cos(latRadian + latDeltaRadian))),
-        Math.abs(distance / (sphereRadius * Math.cos(latRadian - latDeltaRadian))))
-      val lonDeltaDegree = Math.toDegrees(lonDeltaRadian)
-      envelope.expandBy(latDeltaDegree * scaleFactor, lonDeltaDegree * scaleFactor)
-    } else {
-      envelope.expandBy(distance)
-    }
+  private def expandEnvelopeForGeography(envelope: Envelope, distance: Double): Envelope = {
+    // Here we use the polar radius of the spheroid as the radius of the sphere, so that the expanded
+    // envelope will work for both spherical and spheroidal distances.
+    val sphereRadius = 6357000.0
+    Haversine.expandEnvelope(envelope, distance, sphereRadius)
   }
 }
