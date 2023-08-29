@@ -81,6 +81,7 @@ public class Haversine
         double newMinY = envelope.getMinY() - latDeltaDegree * scaleFactor;
         double newMaxY = envelope.getMaxY() + latDeltaDegree * scaleFactor;
         if (newMinY <= -90 || newMaxY >= 90) {
+            // The expanded envelope covers the pole, so its longitude range should be expanded to [-180, 180]
             return new Envelope(-180, 180, Math.max(newMinY, -90), Math.min(newMaxY, 90));
         }
 
@@ -92,6 +93,8 @@ public class Haversine
         double newMinX = envelope.getMinX() - lonDeltaDegree * scaleFactor;
         double newMaxX = envelope.getMaxX() + lonDeltaDegree * scaleFactor;
         if (newMinX <= -180 || newMaxX >= 180) {
+            // The expanded envelope crosses the anti-meridian. Expanding its longitude range to [-180, 180] is
+            // the best thing we can do, since we treat lon-lat as planar coordinates when running spatial join.
             return new Envelope(-180, 180, newMinY, newMaxY);
         } else {
             return new Envelope(newMinX, newMaxX, newMinY, newMaxY);
