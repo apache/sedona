@@ -117,6 +117,9 @@ FROM pointdf1, pointdf2
 WHERE ST_DistanceSpheroid(pointdf1.pointshape1,pointdf2.pointshape2) <= 2
 ```
 
+!!!warning
+	If you use `ST_DistanceSpheroid ` or `ST_DistanceSphere` as the predicate, the unit of the distance is meter. Currently, distance join with geodesic distance calculators work best for point data. For non-point data, it only considers their centroids.
+
 ## Broadcast index join
 
 Introduction: Perform a range join or distance join but broadcast one of the sides of the join. This maintains the partitioning of the non-broadcast side and doesn't require a shuffle.
