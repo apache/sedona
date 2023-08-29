@@ -48,3 +48,8 @@ class SedonaContext:
         """
         return SparkSession.builder.config("spark.serializer", KryoSerializer.getName).\
             config("spark.kryo.registrator", SedonaKryoRegistrator.getName)
+
+
+    @classmethod
+    def getSedonaContext(cls):
+        return SparkSession.getActiveSession()

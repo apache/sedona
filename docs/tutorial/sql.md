@@ -200,6 +200,36 @@ The following method has been deprecated since Sedona 1.4.1. Please use the meth
 
 You can also register everything by passing `--conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions` to `spark-submit` or `spark-shell`.
 
+## Retrieve SedonaContext
+
+Geospatial libraries dependent on Apache Sedona can retrieve registered and currently active SedonaContext with the following method starting from Sedona v1.4.2.
+
+==Sedona >= 1.4.2==
+
+=== "Scala"
+
+	```scala
+	import org.apache.sedona.spark.SedonaContext
+
+	val sedona = SedonaContext.getSedonaContext()
+	```
+
+=== "Java"
+
+	```java
+	import org.apache.sedona.spark.SedonaContext;
+
+	SparkSession sedona = SedonaContext.getSedonaContext();
+	```
+
+=== "Python"
+
+	```python
+	from sedona.spark import *
+	
+	sedona = SedonaContext.getSedonaContext()
+	```
+
 ## Load data from files
 
 Assume we have a WKT file, namely `usa-county.tsv`, at Path `/Download/usa-county.tsv` as follows:

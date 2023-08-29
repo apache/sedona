@@ -215,4 +215,13 @@ public class adapterTestJava
 
         joinResultDf.show(1);
     }
+
+    @Test
+    public void testGetSedonaContext()
+    {
+        SparkSession currentSession = SedonaContext.getSedonaContext();
+        SpatialRDD spatialRDD = ShapefileReader.readToGeometryRDD(JavaSparkContext.fromSparkContext(currentSession.sparkContext()), shapefileInputLocation);
+        spatialRDD.analyze();
+        Adapter.toDf(spatialRDD, currentSession).show(1);
+    }
 }
