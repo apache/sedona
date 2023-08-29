@@ -21,6 +21,7 @@ from sedona.core.SpatialRDD import PolygonRDD
 from sedona.core.enums import FileDataSplitter
 from sedona.utils.adapter import Adapter
 from tests import geojson_input_location
+from sedona.spark import *
 
 class TestSedonaContext(TestBase):
 
