@@ -93,6 +93,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   }
 
   lazy val buildPointDf = loadCsv(csvPointInputLocation).selectExpr("ST_Point(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20))) as pointshape")
+  lazy val buildPointLonLatDf = loadCsv(csvPointInputLocation).selectExpr("ST_Point(cast(_c1 as Decimal(24,20)),cast(_c0 as Decimal(24,20))) as pointshape")
   lazy val buildPolygonDf = loadCsv(csvPolygonInputLocation).selectExpr("ST_PolygonFromEnvelope(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20)), cast(_c2 as Decimal(24,20)), cast(_c3 as Decimal(24,20))) as polygonshape")
   lazy val buildRasterDf = loadGeoTiff(rasterDataLocation).selectExpr("RS_FromGeoTiff(content) as raster")
   lazy val buildBuildingsDf = loadCsvWithHeader(buildingDataLocation).selectExpr("ST_GeomFromWKT(geometry) as building")
@@ -112,7 +113,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   }
 
   protected def bruteForceDistanceJoinCountSpheroid(sampleCount:Int, distance: Double): Int = {
-    val input = buildPointDf.limit(sampleCount).collect()
+    val input = buildPointLonLatDf.limit(sampleCount).collect()
     input.map(row => {
       val point1 = row.getAs[org.locationtech.jts.geom.Point](0)
       input.map(row => {
@@ -123,7 +124,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   }
 
   protected def bruteForceDistanceJoinCountSphere(sampleCount: Int, distance: Double): Int = {
-    val input = buildPointDf.limit(sampleCount).collect()
+    val input = buildPointLonLatDf.limit(sampleCount).collect()
     input.map(row => {
       val point1 = row.getAs[org.locationtech.jts.geom.Point](0)
       input.map(row => {

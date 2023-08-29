@@ -51,7 +51,7 @@ object JoinedGeometry {
   private def expandEnvelope(envelope: Envelope, distance: Double, sphereRadius: Double, isGeography: Boolean): Unit = {
     if (isGeography) {
       val scaleFactor = 1.1 // 10% buffer to get rid of false negatives
-      val latRadian = Math.toRadians((envelope.getMinX + envelope.getMaxX) / 2.0)
+      val latRadian = Math.toRadians((envelope.getMinY + envelope.getMaxY) / 2.0)
       val latDeltaRadian = distance / sphereRadius;
       val latDeltaDegree = Math.toDegrees(latDeltaRadian)
       val lonDeltaRadian = Math.max(Math.abs(distance / (sphereRadius * Math.cos(latRadian + latDeltaRadian))),

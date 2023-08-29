@@ -34,8 +34,8 @@ public class Haversine
      * This is also known as the great-circle distance
      * This will produce almost identical result to PostGIS ST_DistanceSphere and
      * ST_Distance(useSpheroid=false)
-     * @param geom1 The first geometry. Each coordinate is in lat/lon order
-     * @param geom2 The second geometry. Each coordinate is in lat/lon order
+     * @param geom1 The first geometry. Each coordinate is in lon/lat order
+     * @param geom2 The second geometry. Each coordinate is in lon/lat order
      * @return
      */
     public static double distance(Geometry geom1, Geometry geom2, double AVG_EARTH_RADIUS)
@@ -43,10 +43,10 @@ public class Haversine
         Coordinate coordinate1 = geom1.getGeometryType().equals("Point")? geom1.getCoordinate():geom1.getCentroid().getCoordinate();
         Coordinate coordinate2 = geom2.getGeometryType().equals("Point")? geom2.getCoordinate():geom2.getCentroid().getCoordinate();
         // Calculate the distance between the two points
-        double lat1 = coordinate1.getX();
-        double lon1 = coordinate1.getY();
-        double lat2 = coordinate2.getX();
-        double lon2 = coordinate2.getY();
+        double lon1 = coordinate1.getX();
+        double lat1 = coordinate1.getY();
+        double lon2 = coordinate2.getX();
+        double lat2 = coordinate2.getY();
         double latDistance = toRadians(lat2 - lat1);
         double lngDistance = toRadians(lon2 - lon1);
         double a = sin(latDistance / 2) * sin(latDistance / 2)

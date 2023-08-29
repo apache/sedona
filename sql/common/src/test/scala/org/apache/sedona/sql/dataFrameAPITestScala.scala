@@ -963,7 +963,7 @@ class dataFrameAPITestScala extends TestBaseScala {
     }
 
     it("Passed ST_DistanceSphere") {
-      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (0 0)') AS geom1, ST_GeomFromWKT('POINT (0 90)') AS geom2")
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (0 0)') AS geom1, ST_GeomFromWKT('POINT (90 0)') AS geom2")
       var df = baseDf.select(ST_DistanceSphere("geom1", "geom2"))
       var actualResult = df.take(1)(0).getDouble(0)
       var expectedResult = 1.00075559643809E7
@@ -976,7 +976,7 @@ class dataFrameAPITestScala extends TestBaseScala {
     }
 
     it("Passed ST_DistanceSpheroid") {
-      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (0 0)') AS geom1, ST_GeomFromWKT('POINT (0 90)') AS geom2")
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (0 0)') AS geom1, ST_GeomFromWKT('POINT (90 0)') AS geom2")
       val df = baseDf.select(ST_DistanceSpheroid("geom1", "geom2"))
       val actualResult = df.take(1)(0).getDouble(0)
       val expectedResult = 10018754.171394622
@@ -984,7 +984,7 @@ class dataFrameAPITestScala extends TestBaseScala {
     }
 
     it("Passed ST_AreaSpheroid") {
-      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('Polygon ((35 34, 30 28, 34 25, 35 34))') AS geom")
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('Polygon ((34 35, 28 30, 25 34, 34 35))') AS geom")
       val df = baseDf.select(ST_AreaSpheroid("geom"))
       val actualResult = df.take(1)(0).getDouble(0)
       val expectedResult = 201824850811.76245
@@ -992,7 +992,7 @@ class dataFrameAPITestScala extends TestBaseScala {
     }
 
     it("Passed ST_LengthSpheroid") {
-      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LineString (0 0, 0 90)') AS geom")
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LineString (0 0, 90 0)') AS geom")
       val df = baseDf.select(ST_LengthSpheroid("geom"))
       val actualResult = df.take(1)(0).getDouble(0)
       val expectedResult = 10018754.171394622

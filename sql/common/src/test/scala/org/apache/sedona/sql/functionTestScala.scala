@@ -1884,8 +1884,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   it("Should pass ST_DistanceSphere") {
     val geomTestCases = Map(
-      ("'POINT (51.3168 -0.56)'", "'POINT (55.9533 -3.1883)'") -> "543796.9506134904",
-      ("'LineString (0 0, 0 90)'", "'LineString (0 1, 0 0)'") -> "4948180.449055"
+      ("'POINT (-0.56 51.3168)'", "'POINT (-3.1883 55.9533)'") -> "543796.9506134904",
+      ("'LineString (0 0, 90 0)'", "'LineString (1 0, 0 0)'") -> "4948180.449055"
     )
     for (((geom1, geom2), expectedResult) <- geomTestCases) {
       val df = sparkSession.sql(s"SELECT ST_DistanceSphere(ST_GeomFromWKT($geom1), ST_GeomFromWKT($geom2)), " +
@@ -1896,8 +1896,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
 
     val geomTestCases2 = Map(
-      ("'POINT (51.3168 -0.56)'", "'POINT (55.9533 -3.1883)'", "6378137") -> "544405.4459192449",
-      ("'LineString (0 0, 0 90)'", "'LineString (0 1, 0 0)'", "6378137.0") -> "4953717.340300673"
+      ("'POINT (-0.56 51.3168)'", "'POINT (-3.1883 55.9533)'", "6378137") -> "544405.4459192449",
+      ("'LineString (0 0, 90 0)'", "'LineString (1 0, 0 0)'", "6378137.0") -> "4953717.340300673"
     )
     for (((geom1, geom2, radius), expectedResult) <- geomTestCases2) {
       val df = sparkSession.sql(s"SELECT ST_DistanceSphere(ST_GeomFromWKT($geom1), ST_GeomFromWKT($geom2), $radius), " +
@@ -1910,8 +1910,8 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   it("Should pass ST_DistanceSpheroid") {
     val geomTestCases = Map(
-      ("'POINT (51.3168 -0.56)'", "'POINT (55.9533 -3.1883)'") -> "544430.94119962039",
-      ("'LineString (0 0, 0 90)'", "'LineString (0 1, 0 0)'") -> "4953717.340300673"
+      ("'POINT (-0.56 51.3168)'", "'POINT (-3.1883 55.9533)'") -> "544430.94119962039",
+      ("'LineString (0 0, 90 0)'", "'LineString (1 0, 0 0)'") -> "4953717.340300673"
     )
     for (((geom1, geom2), expectedResult) <- geomTestCases) {
       val df = sparkSession.sql(s"SELECT ST_DistanceSpheroid(ST_GeomFromWKT($geom1), ST_GeomFromWKT($geom2)), " +
@@ -1940,9 +1940,9 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   it("Should pass ST_AreaSpheroid") {
     val geomTestCases = Map(
-      ("'POINT (51.3168 -0.56)'") -> "0.0",
-      ("'LineString (0 0, 0 90)'") -> "0.0",
-      ("'Polygon ((35 34, 30 28, 34 25, 35 34))'") -> "201824850811.76245"
+      ("'POINT (-0.56 51.3168)'") -> "0.0",
+      ("'LineString (0 0, 90 0)'") -> "0.0",
+      ("'Polygon ((34 35, 28 30, 25 34, 34 35))'") -> "201824850811.76245"
     )
     for (((geom1), expectedResult) <- geomTestCases) {
       val df = sparkSession.sql(s"SELECT ST_AreaSpheroid(ST_GeomFromWKT($geom1)), " +
@@ -1955,9 +1955,9 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   it("Should pass ST_LengthSpheroid") {
     val geomTestCases = Map(
-      ("'POINT (51.3168 -0.56)'") -> "0.0",
-      ("'LineString (0 0, 0 90)'") -> "10018754.17139462",
-      ("'Polygon ((0 0, 0 90, 0 0))'") -> "20037508.34278924"
+      ("'POINT (-0.56 51.3168)'") -> "0.0",
+      ("'LineString (0 0, 90 0)'") -> "10018754.17139462",
+      ("'Polygon ((0 0, 90 0, 0 0))'") -> "20037508.34278924"
     )
     for (((geom1), expectedResult) <- geomTestCases) {
       val df = sparkSession.sql(s"SELECT ST_LengthSpheroid(ST_GeomFromWKT($geom1)), " +
