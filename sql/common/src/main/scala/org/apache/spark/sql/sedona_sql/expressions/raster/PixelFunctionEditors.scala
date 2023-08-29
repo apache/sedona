@@ -31,3 +31,12 @@ case class RS_SetValues(inputExpressions: Seq[Expression]) extends InferredExpre
     copy(inputExpressions = newChildren)
   }
 }
+
+case class RS_SetValue(inputExpressions: Seq[Expression]) extends InferredExpression(
+  inferrableFunction5(PixelFunctionEditors.setValue),
+  inferrableFunction4(PixelFunctionEditors.setValue)
+) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

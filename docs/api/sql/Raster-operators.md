@@ -963,6 +963,38 @@ Output:
 -3.000000
 ```
 
+### RS_SetValue
+
+Introduction: Returns a raster by replacing the value of pixel specified by `colX` and `rowY`.
+
+Format: 
+
+```
+RS_SetValue(raster: Raster, bandIndex: Integer = 1, colX: Integer, rowY: Integer, newValue: Double)
+```
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_BandAsArray(
+               RS_SetValue(
+                       RS_AddBandFromArray(
+                               RS_MakeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0),
+                           [1,1,1,0,0,0,1,2,3,3,5,6,7,0,0,3,0,0,3,0,0,0,0,0,0], 1, 0d
+                           ),
+                       1, 2, 2, 255
+                   )
+           )
+```
+
+Output:
+
+```
+[1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 255.0, 2.0, 3.0, 3.0, 5.0, 6.0, 7.0, 0.0, 0.0, 3.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+```
+
 ### RS_SetValues
 
 Introduction: Returns a raster by replacing the values of pixels in a specified rectangular region. The top left 
@@ -1004,7 +1036,7 @@ SELECT RS_BandAsArray(
 Output:
 
 ```
-[1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 3.0, 5.0, 6.0, 11.0, 12.0, 13.0, 3.0, 0.0, 14.0, 15.0, 16.0, 0.0, 0.0, 17.0, 18.0, 19.0]
+[1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 11.0, 12.0, 13.0, 3.0, 5.0, 14.0, 15.0, 16.0, 0.0, 3.0, 17.0, 18.0, 19.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 ```
 
 ### RS_SetSRID
