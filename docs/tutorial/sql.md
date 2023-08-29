@@ -202,9 +202,9 @@ You can also register everything by passing `--conf spark.sql.extensions=org.apa
 
 ## Retrieve SedonaContext
 
-Geospatial libraries dependent on Apache Sedona can retrieve registered and currently active SedonaContext with the following method starting from Sedona v1.4.2.
+Geospatial libraries dependent on Apache Sedona can retrieve registered and currently active SedonaContext with the following method starting from Sedona `v1.5.0`.
 
-==Sedona >= 1.4.2==
+Since: `v1.5.0`
 
 === "Scala"
 
