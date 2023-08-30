@@ -38,6 +38,8 @@ class RasterJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     makeRaster(751, 742, 332385,4258815, 300, 32610),
     // China
     makeRaster(1098, 1098, 399960, 4100040, 100, 32649),
+    // Europe
+    makeRaster(100, 100, 5418900, 4440600, 1000, 3035),
     // Crossing the anti-meridian
     makeRaster(428, 419, 306210, 7840890, 600, 32601),
     // Covering the north pole
@@ -78,6 +80,11 @@ class RasterJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
         |460336.44393422664143145 4039658.63395863398909569,
         |365263.47518765379209071 4063668.33383210469037294))
         |""".stripMargin, 32649),
+
+    // Within the raster in Europe. EPSG:3035 is in northing/easting axis order.
+    makeGeometry("POINT (5484765 4366950)", 3035),
+    // The same point in WGS84 lon/lat order
+    makeGeometry("POINT (31.69291306160833 60.778101471493095)", 0),
 
     // Intersects with the raster crossing the anti-meridian
     makeGeometry(

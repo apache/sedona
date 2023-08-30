@@ -84,6 +84,19 @@ public class FunctionsGeoTools {
         else return geometry;
     }
 
+    /**
+     * Decode SRID to CRS, forcing axis order to be lon/lat
+     * @param srid SRID
+     * @return CoordinateReferenceSystem object
+     */
+    public static CoordinateReferenceSystem sridToCRS(int srid) {
+        try {
+            return CRS.decode("EPSG:" + srid, true);
+        } catch (FactoryException e) {
+            throw new IllegalArgumentException("Cannot decode SRID " + srid, e);
+        }
+    }
+
     private static CoordinateReferenceSystem parseCRSString(String CRSString)
             throws FactoryException
     {

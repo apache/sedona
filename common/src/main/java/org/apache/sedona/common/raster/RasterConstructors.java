@@ -13,6 +13,7 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.inputstream.ByteArrayImageInputStream;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -20,7 +21,6 @@ import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.gce.arcgrid.ArcGridReader;
 import org.geotools.gce.geotiff.GeoTiffReader;
-import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.util.factory.Hints;
@@ -136,7 +136,7 @@ public class RasterConstructors
         } else {
             // Create the CRS from the srid
             // Longitude first, Latitude second
-            crs = CRS.decode("EPSG:" + srid, true);
+            crs = FunctionsGeoTools.sridToCRS(srid);
         }
 
         // Create a new empty raster

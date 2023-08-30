@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
+import org.apache.sedona.common.FunctionsGeoTools
 import org.apache.sedona.common.utils.GeomUtils
 import org.geotools.coverage.grid.GridCoverage2D
 import org.geotools.geometry.Envelope2D
@@ -58,7 +59,7 @@ object JoinedGeometryRaster {
     } else {
       val env = geom.getEnvelopeInternal
       val envelope = new Envelope2D(null, env.getMinX, env.getMinY, env.getWidth, env.getHeight)
-      val crs = CRS.decode("EPSG:" + srid)
+      val crs = FunctionsGeoTools.sridToCRS(srid)
       transformToWGS84Envelope(envelope, crs)
     }
   }

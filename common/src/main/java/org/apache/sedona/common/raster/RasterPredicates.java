@@ -21,6 +21,7 @@ package org.apache.sedona.common.raster;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.jts.JTS;
@@ -109,11 +110,7 @@ public class RasterPredicates {
         // CRS of the query window. We'll transform both sides to a common CRS (WGS84) before
         // testing for relationship.
         CoordinateReferenceSystem queryWindowCRS;
-        try {
-            queryWindowCRS = CRS.decode("EPSG:" + queryWindowSRID, true);
-        } catch (FactoryException e) {
-            throw new RuntimeException("Cannot decode SRID of geometry to CRS. SRID=" + queryWindowSRID, e);
-        }
+        queryWindowCRS = FunctionsGeoTools.sridToCRS(queryWindowSRID);
         Geometry transformedQueryWindow = transformGeometryToWGS84(queryWindow, queryWindowCRS);
 
         // Transform the raster envelope. Here we don't use the envelope transformation method
