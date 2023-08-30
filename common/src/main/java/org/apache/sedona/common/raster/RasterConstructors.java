@@ -18,12 +18,21 @@ import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
+import org.geotools.feature.DefaultFeatureCollection;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.gce.arcgrid.ArcGridReader;
 import org.geotools.gce.geotiff.GeoTiffReader;
+import org.geotools.geometry.Envelope2D;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.process.vector.VectorToRasterProcess;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.util.factory.Hints;
+import org.locationtech.jts.geom.Geometry;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.datum.PixelInCell;
@@ -43,6 +52,38 @@ public class RasterConstructors
     public static GridCoverage2D fromGeoTiff(byte[] bytes) throws IOException {
         GeoTiffReader geoTiffReader = new GeoTiffReader(new ByteArrayImageInputStream(bytes), new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE));
         return geoTiffReader.read(null);
+    }
+
+    public static GridCoverage2D asRaster(Geometry geom, GridCoverage2D raster, String pixelType, double value, double noDataValue, boolean touched) {
+
+        DefaultFeatureCollection featureCollection = getFeatureCollection(geom, raster.getCoordinateReferenceSystem());
+        featureCollection.getBounds().getHeight();
+
+        Envelope2D bound = JTS.getEnvelope2D(geom.getEnvelopeInternal(), raster.getCoordinateReferenceSystem2D());
+
+        int width = (int) bound.getWidth(), height = (int) bound.getHeight();
+
+        VectorToRasterProcess rasterProcess = new VectorToRasterProcess();
+        GridCoverage2D rasterized = rasterProcess.execute(featureCollection, width, height, "value", Double.toString(value), bound, null);
+        rasterized = RasterBandEditors.setBandNoDataValue(rasterized, noDataValue);
+
+        return rasterized;
+    }
+
+    public static DefaultFeatureCollection getFeatureCollection(Geometry geom, CoordinateReferenceSystem crs) {
+        SimpleFeatureTypeBuilder simpleFeatureTypeBuilder = new SimpleFeatureTypeBuilder();
+        simpleFeatureTypeBuilder.setName("Raster");
+        simpleFeatureTypeBuilder.setCRS(crs);
+        simpleFeatureTypeBuilder.add("geometry", Geometry.class);
+
+        SimpleFeatureType featureType = simpleFeatureTypeBuilder.buildFeatureType();
+        SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(featureType);
+        featureBuilder.add(geom);
+        SimpleFeature simpleFeature = featureBuilder.buildFeature("1");
+        DefaultFeatureCollection featureCollection = new DefaultFeatureCollection();
+        featureCollection.add(simpleFeature);
+
+        return featureCollection;
     }
 
     /**
