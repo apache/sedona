@@ -15,11 +15,17 @@ package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.io.netcdf.NetCDFReader;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.FactoryException;
+import ucar.nc2.NetcdfFile;
+//import ucar.nc2.NetcdfFiles;
+//import ucar.nc2.NetcdfFiles;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
@@ -106,6 +112,16 @@ public class RasterConstructorsTest
         assertEquals(upperLeftY - heightInPixel * (pixelSize + 1), envelope.getEnvelopeInternal().getMinY(), 0.001);
         assertEquals(upperLeftY, envelope.getEnvelopeInternal().getMaxY(), 0.001);
         assertEquals("SIGNED_32BITS", gridCoverage2D.getSampleDimension(0).getSampleDimensionType().name());
+    }
+
+    @Test
+    public void testNetCdfReader() throws IOException {
+
+        GridCoverage2D raster = RasterConstructors.fromNetCDF(testNc4);
+      //  NetcdfFile netCdfFile = NetcdfFiles.open(resourceFolder + "raster/netcdf/test.nc");
+//        URL resourceURL = new File(ncFile).toURI().toURL();//new URL(resourceFolder + "raster/netcdf/test.nc");
+//        NetCDFReader netCDFReader = new NetCDFReader(resourceURL, null);
+//        netCDFReader.read(null);
     }
 
 }

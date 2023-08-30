@@ -18,6 +18,8 @@ import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
+import org.geotools.coverage.io.netcdf.NetCDFReader;
+import org.geotools.data.DataSourceException;
 import org.geotools.gce.arcgrid.ArcGridReader;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.referencing.CRS;
@@ -28,10 +30,13 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.datum.PixelInCell;
 import org.opengis.referencing.operation.MathTransform;
+import ucar.nc2.*;
 
 import javax.media.jai.RasterFactory;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
+
+import static org.ejml.UtilEjml.assertTrue;
 
 public class RasterConstructors
 {
@@ -43,6 +48,25 @@ public class RasterConstructors
     public static GridCoverage2D fromGeoTiff(byte[] bytes) throws IOException {
         GeoTiffReader geoTiffReader = new GeoTiffReader(new ByteArrayImageInputStream(bytes), new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE));
         return geoTiffReader.read(null);
+    }
+
+    public static GridCoverage2D fromNetCDF(byte[] bytes) throws IOException {
+       NetcdfFile netcdfFile = NetcdfFiles.openInMemory("", bytes);
+        //NetCDFReader netCDFReader = new NetCDFReader(new ByteArrayImageInputStream(bytes), new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE));
+        //String[] names = netCDFReader.getGridCoverageNames();
+       // return netCDFReader.read(names[0], null);
+        return null;
+    }
+
+    private static void readNetCDFClassic(NetcdfFile netcdfFile, String lonDimensionName, String latDimensionName) {
+        //assert(netcdfFile.getFileTypeVersion().equalsIgnoreCase("1")); //CDF - 1
+        Group rootGroup = netcdfFile.getRootGroup();
+        Dimension lonDimension = rootGroup.findDimension(lonDimensionName);
+        Dimension latDimension = rootGroup.findDimension(latDimensionName);
+        Variable lonVar = rootGroup.findVariableLocal(lonDimensionName);
+        Variable latVar = rootGroup.findVariableLocal(latDimensionName);
+
+
     }
 
     /**

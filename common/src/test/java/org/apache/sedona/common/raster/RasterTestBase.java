@@ -13,8 +13,13 @@
  */
 package org.apache.sedona.common.raster;
 
+import com.mchange.io.FileUtils;
+import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
+import it.geosolutions.jaiext.JAIExt;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
+import org.geotools.coverage.io.netcdf.NetCDFFormat;
+import org.geotools.coverage.io.netcdf.NetCDFReader;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.geometry.Envelope2D;
@@ -25,6 +30,7 @@ import org.junit.Before;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import ucar.nc2.NetcdfFileWriter;
 
 import javax.media.jai.RasterFactory;
 import java.awt.Color;
@@ -33,6 +39,7 @@ import java.awt.image.WritableRaster;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class RasterTestBase {
@@ -43,14 +50,33 @@ public class RasterTestBase {
     GridCoverage2D oneBandRaster;
     GridCoverage2D multiBandRaster;
     byte[] geoTiff;
+    byte[] testNc;
+
+    byte[] testNc4;
+
+    String ncFile = resourceFolder + "raster/netcdf/test.nc";
+    String nc4File = resourceFolder + "raster/netcdf/test4.nc";
 
     @Before
     public void setup() throws IOException {
+        JAIExt.initJAIEXT(true, true);
+        System.setProperty("netcdf.coordinates.enablePlugins", "true");
         oneBandRaster = RasterConstructors.fromArcInfoAsciiGrid(arc.getBytes(StandardCharsets.UTF_8));
         multiBandRaster = createMultibandRaster();
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         new GeoTiffWriter(bos).write(multiBandRaster, new GeneralParameterValue[]{});
         geoTiff = bos.toByteArray();
+//        URL resourceURL = new File(resourceFolder + "raster/netcdf/test.nc").toURI().toURL();//new URL(resourceFolder + "raster/netcdf/test.nc");
+//        NetCDFReader testNetCdfReader = new NetCDFReader(resourceURL, null);
+//        String[] names = testNetCdfReader.getGridCoverageNames();
+        File file = new File(ncFile);
+        File file4 = new File(nc4File);
+        testNc = FileUtils.getBytes(file);
+        testNc4  = FileUtils.getBytes(file4);
+//        GridCoverage2D testRaster = testNetCdfReader.read("O3", null);
+//        ByteArrayOutputStream bos2 = new ByteArrayOutputStream();
+//        new GeoTiffWriter(bos2).write(testRaster, new GeneralParameterValue[]{});
+//        byte[] testNc2 = bos2.toByteArray();
     }
 
     GridCoverage2D createEmptyRaster(int numBands)
