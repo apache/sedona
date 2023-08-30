@@ -18,18 +18,17 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
-import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.metadata.spatial.PixelOrientation;
-import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform2D;
 
@@ -37,13 +36,13 @@ import java.util.Map;
 
 public class RasterEditors
 {
-    public static GridCoverage2D setSrid(GridCoverage2D raster, int srid) throws FactoryException
+    public static GridCoverage2D setSrid(GridCoverage2D raster, int srid)
     {
         CoordinateReferenceSystem crs;
         if (srid == 0) {
             crs = DefaultEngineeringCRS.GENERIC_2D;
         } else {
-            crs = CRS.decode("EPSG:" + srid, true);
+            crs = FunctionsGeoTools.sridToCRS(srid);
         }
 
         GridCoverageFactory gridCoverageFactory = CoverageFactoryFinder.getGridCoverageFactory(null);
