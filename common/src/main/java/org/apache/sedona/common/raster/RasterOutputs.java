@@ -109,6 +109,6 @@ public class RasterOutputs
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         RenderedImage renderedImage = raster.getRenderedImage();
         ImageIO.write(renderedImage, "png", out);
-        return Base64.getEncoder().encodeToString(out.toByteArray());
+        return "data:image/png;base64,"+Base64.getEncoder().encodeToString(out.toByteArray());
     }
 }
