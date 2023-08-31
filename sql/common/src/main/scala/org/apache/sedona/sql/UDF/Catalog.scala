@@ -188,7 +188,6 @@ object Catalog {
     function[RS_SquareRoot](),
     function[RS_LogicalDifference](),
     function[RS_LogicalOver](),
-    function[RS_Base64](),
     function[RS_HTML](),
     function[RS_Array](),
     function[RS_Normalize](),
