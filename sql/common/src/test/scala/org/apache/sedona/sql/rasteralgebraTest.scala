@@ -22,7 +22,7 @@ import org.apache.sedona.common.raster.MapAlgebra
 import org.apache.sedona.common.utils.RasterUtils
 import org.apache.spark.sql.functions.{collect_list, expr}
 import org.geotools.coverage.grid.GridCoverage2D
-import org.junit.Assert.{assertEquals, assertNull}
+import org.junit.Assert.{assertEquals, assertNull, assertTrue}
 import org.locationtech.jts.geom.{Coordinate, Geometry}
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
@@ -468,6 +468,12 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val writtenBinary2 = resultLoadedDf.first().getAs[Array[Byte]]("geotiff2")
       assertEquals(resultRaw.asInstanceOf[GridCoverage2D].getEnvelope.toString, resultLoaded.getEnvelope.toString)
       assert(writtenBinary1.length > writtenBinary2.length)
+    }
+
+    it("Passed RS_Base64") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val resultRaw = df.selectExpr("RS_Base64(RS_FromGeoTiff(content)) as raster").first().getString(0)
+      assertTrue(resultRaw.contains("iVBORw0KGgoAAAANSUhEUgAAAgAAAAIFCAAAAACB3hqVAACAAElEQVR42uy9K5fkONil27Bh0oQBAwY1NDQ0NDU0NBQVFBQUFRQUFBQ1NDQ0NTT0PFtR1d/MmR9w1lnrVF8qKysjwtZ72/u9+Z9//v9f/6/96rvB9GPfz8M0jcMS/LJOxm7B2udcXHb5NGGb48rfeDM7s9jZzNO6uiX5aN28zPO62HBE/0Q7LXaa1vh5de/X8PN5r/MW3GSWeZqtd8lmH806O+esNUtI6xiPdfz/wCGZZU12Wv1qbVrn1YRgC3dicsq1zGF/nmePMT5P9ot3LnubSk4peu/K5cKz5BRnO2fr/HDXupdc8l7TlU5X9uPZzqf92mJMewmRbz1PiqkkZ8N9P257/OPXlHnP"))
     }
 
     it("Passed RS_AsArcGrid") {
