@@ -26,7 +26,7 @@ SELECT RS_Base64(raster) from rasters
 Output:
 
 ```
-data:image/png;base64,iVBORw0KGgoAAAA...
+iVBORw0KGgoAAAA...
 ```
 
 #### RS_AsGeoTiff

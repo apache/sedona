@@ -26,13 +26,14 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class RasterOutputTests extends RasterTestBase {
+public class RasterOutputTest
+        extends RasterTestBase {
 
     @Test
     public void testAsBase64() throws IOException {
-        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
         String resultRaw = RasterOutputs.asBase64(raster);
-        assertTrue(resultRaw.contains("iVBORw0KGgoAAAANSUhEUgAAAgAAAAIFCAAAAACB3hqVAACAAElEQVR42uy9K5fkONil27Bh0oQBAwY1NDQ0NDU0NBQVFBQUFRQUFBQ1NDQ0NTT0PFtR1d/MmR9w1lnrVF8qKysjwtZ72/u9+Z9//v9f/6/96rvB9GPfz8M0jcMS/LJOxm7B2udcXHb5NGGb48rfeDM7s9jZzNO6uiX5aN28zPO62HBE/0Q7LXaa1vh5de/X8PN5r/MW3GSWeZqtd8lmH806O+esNUtI6xiPdfz/wCGZZU12Wv1qbVrn1YRgC3dicsq1zGF/nmePMT5P9ot3LnubSk4peu/K5cKz5BRnO2fr/HDXupdc8l7TlU5X9uPZzqf92mJMewmRbz1PiqkkZ8N9P257/OPXlHnP"));
+        assertTrue(resultRaw.startsWith("iVBORw0KGgoAAAANSUhEUgAABaAAAALQCAMAAABR+ye1AAADAFBMVEXE9/W48vOq7PGa5u6L3"));
     }
 
     @Test
