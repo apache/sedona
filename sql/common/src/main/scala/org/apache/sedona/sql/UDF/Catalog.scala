@@ -211,7 +211,7 @@ object Catalog {
     function[RS_Intersects](),
     function[RS_AsGeoTiff](),
     function[RS_AsArcGrid](),
-    function[RS_Base64](),
+    function[RS_AsBase64](),
     function[RS_Width](),
     function[RS_Height](),
     function[RS_UpperLeftX](),
