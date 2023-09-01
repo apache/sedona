@@ -9,24 +9,24 @@ To write a Sedona Raster DataFrame to raster files, you need to (1) first conver
 
 You can use the following RS output functions (`RS_AsXXX`) to convert a Raster DataFrame to a binary DataFrame. Generally the output format of a raster can be different from the original input format. For example, you can use `RS_FromGeoTiff` to create rasters and save them using `RS_AsArcInfoAsciiGrid`.
 
-#### RS_Base64
+#### RS_AsBase64
 
-Introduction: Returns base64 encoded string of given raster.
+Introduction: Returns a base64 encoded string of the given raster. This function internally takes the first 4 bands as RGBA, and converts them to the PNG format, finally produces a base64 string. To visualize other bands, please use it together with `RS_Band`. You can take the resulting base64 string in [an online viewer](https://base64-viewer.onrender.com/) to check how the image looks like.
 
 Since: `v1.5.0`
 
-Format: `RS_Base64(raster: Raster)`
+Format: `RS_AsBase64(raster: Raster)`
 
 Spark SQL Example:
 
 ```sql
-SELECT RS_Base64(raster) from rasters
+SELECT RS_AsBase64(raster) from rasters
 ```
 
 Output:
 
 ```
-data:image/png;base64,iVBORw0KGgoAAAA...
+iVBORw0KGgoAAAA...
 ```
 
 #### RS_AsGeoTiff

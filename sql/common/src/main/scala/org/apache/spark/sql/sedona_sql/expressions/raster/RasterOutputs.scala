@@ -39,7 +39,7 @@ case class RS_AsArcGrid(inputExpressions: Seq[Expression])
   }
 }
 
-case class RS_Base64(inputExpressions: Seq[Expression]) extends InferredExpression(RasterOutputs.asBase64 _) {
+case class RS_AsBase64(inputExpressions: Seq[Expression]) extends InferredExpression(RasterOutputs.asBase64 _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
