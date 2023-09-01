@@ -33,7 +33,6 @@ public class RasterOutputTest
     public void testAsBase64() throws IOException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
         String resultRaw = RasterOutputs.asBase64(raster);
-        System.out.println(resultRaw);
         assertTrue(resultRaw.startsWith("iVBORw0KGgoAAAANSUhEUgAABaAAAALQCAMAAABR+ye1AAADAFBMVEXE9/W48vOq7PGa5u6L3"));
     }
 
