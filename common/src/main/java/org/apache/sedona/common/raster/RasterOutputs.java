@@ -28,10 +28,13 @@ import org.opengis.coverage.grid.GridCoverageWriter;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValueGroup;
 
+import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 
+import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Base64;
 
 public class RasterOutputs
 {
@@ -100,5 +103,12 @@ public class RasterOutputs
 
     public static byte[] asArcGrid(GridCoverage2D raster) {
         return asArcGrid(raster, -1);
+    }
+
+    public static String asBase64(GridCoverage2D raster) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        RenderedImage renderedImage = raster.getRenderedImage();
+        ImageIO.write(renderedImage, "png", out);
+        return Base64.getEncoder().encodeToString(out.toByteArray());
     }
 }
