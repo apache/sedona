@@ -19,23 +19,21 @@
 
 package org.apache.sedona.python.wrapper.translation
 
-import org.apache.sedona.python.wrapper.utils.implicits._
-import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
+import org.apache.sedona.python.wrapper.utils.implicits.{GeometryEnhancer, IntImplicit}
 import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.io.WKBWriter
 
-private[python] case class FlatPairRddConverter(spatialRDD: JavaPairRDD[Geometry, Geometry],
-                                                geometrySerializer: PythonGeometrySerializer
-                                               ) extends RDDToPythonConverter {
-  override def translateToPython: JavaRDD[Array[Byte]] = {
-    spatialRDD.rdd.map[Array[Byte]](pairRDD => {
-      val leftGeometry = pairRDD._1
-      val rightGeometry = pairRDD._2
-      val sizeBuffer = 1.toByteArray()
-      val typeBuffer = 2.toByteArray()
 
-      (typeBuffer ++ geometrySerializer.serialize(leftGeometry) ++ sizeBuffer ++
-        geometrySerializer.serialize(rightGeometry))
-    }
-    ).toJavaRDD()
+case class GeometrySerializer(geometry: Geometry) {
+
+  private val notCircle = Array(0.toByte)
+
+  def serialize: Array[Byte] = {
+    val wkbWriter = new WKBWriter(2, 2)
+    val serializedGeom = wkbWriter.write(geometry)
+    val userDataBinary = geometry.userDataToUtf8ByteArray
+    val userDataLengthArray = userDataBinary.length.toByteArray()
+    val serializedGeomLength = serializedGeom.length.toByteArray()
+    notCircle ++ serializedGeomLength ++ userDataLengthArray ++ serializedGeom ++ userDataBinary
   }
 }

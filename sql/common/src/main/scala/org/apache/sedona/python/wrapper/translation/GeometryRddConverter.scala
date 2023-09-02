@@ -19,7 +19,7 @@
 
 package org.apache.sedona.python.wrapper.translation
 
-import org.apache.sedona.python.wrapper.utils.implicits._
+import org.apache.sedona.python.wrapper.utils.implicits.IntImplicit
 import org.apache.spark.api.java.JavaRDD
 import org.locationtech.jts.geom.Geometry
 

@@ -59,11 +59,6 @@
             <artifactId>sedona-sql-${spark.compat.version}_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.sedona</groupId>
-            <artifactId>sedona-python-adapter-${spark.compat.version}_${scala.compat.version}</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <!-- Define this to be shaded since it is provided in other modules -->
         <dependency>
             <groupId>edu.ucar</groupId>

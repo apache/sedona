@@ -19,12 +19,12 @@
 
 package org.apache.sedona.python.wrapper.translation
 
-import java.io.{ByteArrayInputStream, DataInputStream}
 import org.apache.sedona.common.geometryObjects.Circle
 import org.apache.sedona.python.wrapper.SerializationException
 import org.apache.spark.api.java.JavaRDD
 import org.locationtech.jts.geom.Geometry
 
+import java.io.{ByteArrayInputStream, DataInputStream}
 import java.nio.{ByteBuffer, ByteOrder}
 
 case class PythonRDDToJavaConverter(javaRDD: JavaRDD[Array[Byte]], geometrySerializer: PythonGeometrySerializer) {

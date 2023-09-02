@@ -19,10 +19,10 @@
 
 package org.apache.sedona.python.wrapper.utils
 
+import org.locationtech.jts.geom.Geometry
+
 import java.nio.charset.StandardCharsets
 import java.nio.{ByteBuffer, ByteOrder}
-
-import org.locationtech.jts.geom.Geometry
 
 object implicits {
 

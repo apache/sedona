@@ -19,25 +19,23 @@
 
 package org.apache.sedona.python.wrapper.translation
 
-import org.apache.sedona.python.wrapper.utils.implicits._
+import org.apache.sedona.python.wrapper.utils.implicits.IntImplicit
 import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
 import org.locationtech.jts.geom.Geometry
 
-private[python] case class ListPairRddConverter(spatialRDD: JavaPairRDD[Geometry, java.util.List[Geometry]],
-                                                geometrySerializer: PythonGeometrySerializer) extends RDDToPythonConverter {
+private[python] case class FlatPairRddConverter(spatialRDD: JavaPairRDD[Geometry, Geometry],
+                                                geometrySerializer: PythonGeometrySerializer
+                                               ) extends RDDToPythonConverter {
   override def translateToPython: JavaRDD[Array[Byte]] = {
-    spatialRDD.rdd.map[Array[Byte]](
-      pairRDD => {
+    spatialRDD.rdd.map[Array[Byte]](pairRDD => {
+      val leftGeometry = pairRDD._1
+      val rightGeometry = pairRDD._2
+      val sizeBuffer = 1.toByteArray()
+      val typeBuffer = 2.toByteArray()
 
-        val rightGeometry = pairRDD._2
-        val leftGeometry = pairRDD._1
-        val sizeBuffer = rightGeometry.toArray.length.toByteArray()
-        val typeBuffer = 1.toByteArray()
-
-        typeBuffer ++ geometrySerializer.serialize(leftGeometry) ++
-          sizeBuffer ++
-          rightGeometry.toArray().flatMap(geometry => geometrySerializer.serialize(geometry.asInstanceOf[Geometry]))
-      }
-    )
+      (typeBuffer ++ geometrySerializer.serialize(leftGeometry) ++ sizeBuffer ++
+        geometrySerializer.serialize(rightGeometry))
+    }
+    ).toJavaRDD()
   }
 }
