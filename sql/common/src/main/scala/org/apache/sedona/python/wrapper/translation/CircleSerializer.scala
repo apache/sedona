@@ -20,7 +20,7 @@
 package org.apache.sedona.python.wrapper.translation
 
 import org.apache.sedona.common.geometryObjects.Circle
-import org.apache.sedona.python.wrapper.utils.implicits._
+import org.apache.sedona.python.wrapper.utils.implicits.{DoubleImplicit, GeometryEnhancer, IntImplicit}
 import org.locationtech.jts.io.WKBWriter
 
 

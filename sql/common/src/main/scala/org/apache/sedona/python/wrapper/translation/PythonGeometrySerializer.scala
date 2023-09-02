@@ -19,12 +19,12 @@
 
 package org.apache.sedona.python.wrapper.translation
 
-import java.nio.ByteBuffer
-
 import org.apache.sedona.common.geometryObjects.Circle
 import org.apache.sedona.python.wrapper.SerializationException
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKBReader
+
+import java.nio.ByteBuffer
 
 
 private[python] class PythonGeometrySerializer extends Serializable {

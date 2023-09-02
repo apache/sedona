@@ -19,21 +19,17 @@
 
 package org.apache.sedona.python.wrapper.translation
 
-import org.apache.sedona.python.wrapper.utils.implicits._
+import org.apache.sedona.python.wrapper.utils.implicits.IntImplicit
 import org.locationtech.jts.geom.Geometry
-import org.locationtech.jts.io.WKBWriter
 
+case class GeometrySeqToPythonConverter(spatialData: Seq[Geometry],
+                                        geometrySerializer: PythonGeometrySerializer) {
 
-case class GeometrySerializer(geometry: Geometry) {
+  def translateToPython: Array[Array[Byte]] = {
+    val sizeBuffer = 0.toByteArray()
 
-  private val notCircle = Array(0.toByte)
-
-  def serialize: Array[Byte] = {
-    val wkbWriter = new WKBWriter(2, 2)
-    val serializedGeom = wkbWriter.write(geometry)
-    val userDataBinary = geometry.userDataToUtf8ByteArray
-    val userDataLengthArray = userDataBinary.length.toByteArray()
-    val serializedGeomLength = serializedGeom.length.toByteArray()
-    notCircle ++ serializedGeomLength ++ userDataLengthArray ++ serializedGeom ++ userDataBinary
+    spatialData.toArray.map(
+      geometry => geometrySerializer.serialize(geometry.asInstanceOf[Geometry]) ++ sizeBuffer
+    )
   }
 }

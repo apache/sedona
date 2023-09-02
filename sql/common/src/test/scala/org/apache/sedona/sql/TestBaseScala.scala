@@ -43,6 +43,8 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     .config("spark.kryoserializer.buffer.max", "64m")
     .getOrCreate()
 
+  val sc = sparkSession.sparkContext
+
   val resourceFolder = System.getProperty("user.dir") + "/../../core/src/test/resources/"
   val mixedWkbGeometryInputLocation = resourceFolder + "county_small_wkb.tsv"
   val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"

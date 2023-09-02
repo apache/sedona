@@ -19,13 +19,7 @@
 
 package org.apache.sedona.python.wrapper.adapters
 
-import org.apache.sedona.python.wrapper.translation.{
-  FlatPairRddConverter,
-  GeometryRddConverter,
-  GeometrySeqToPythonConverter,
-  ListPairRddConverter,
-  PythonRDDToJavaConverter
-}
+import org.apache.sedona.python.wrapper.translation._
 import org.apache.spark.api.java.{JavaPairRDD, JavaRDD}
 import org.locationtech.jts.geom.Geometry
 
