@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -244,6 +245,43 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         expected = 928192;
         assertEquals(expected, actual);
 
+    }
+
+    @Test
+    public void testGetBand() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster( 2, 5, 5, 3, -215, 2, -2, 2, 2, 0);
+        double[] values1 = new double[] {16, 0, 24, 33, 43, 49, 64, 0, 76, 77, 79, 89, 0, 116, 118, 125, 135, 0, 157, 190, 215, 229, 241, 248, 249};
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values1, 1, 0d);
+        GridCoverage2D resultRaster = RasterBandAccessors.getBand(emptyRaster);
+        String actualValues = Arrays.toString(MapAlgebra.bandAsArray(resultRaster, 1));
+        String expectedValues = "[16.0, 0.0, 24.0, 33.0, 43.0, 49.0, 64.0, 0.0, 76.0, 77.0, 79.0, 89.0, 0.0, 116.0, 118.0, 125.0, 135.0, 0.0, 157.0, 190.0, 215.0, 229.0, 241.0, 248.0, 249.0]";
+        assertEquals(expectedValues, actualValues);
+
+        double[] actualMetadata = Arrays.stream(RasterAccessors.metadata(resultRaster), 0, 9).toArray();
+        double[] expectedMetadata = Arrays.stream(RasterAccessors.metadata(emptyRaster), 0, 9).toArray();
+        assertArrayEquals(expectedMetadata, actualMetadata, 0.1d);
+
+        resultRaster = RasterBandAccessors.getBand(emptyRaster, "1,1,1", ",");
+        int actual = RasterAccessors.numBands(resultRaster);
+        int expected = 3;
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testGetBandWithRaster() throws IOException, FactoryException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+        GridCoverage2D resultRaster = RasterBandAccessors.getBand(raster, new int[] {1,2,2,2,1});
+        int actual = RasterAccessors.numBands(resultRaster);
+        int expected = 5;
+        assertEquals(actual, expected);
+
+        double[] actualMetadata = Arrays.stream(RasterAccessors.metadata(resultRaster), 0, 9).toArray();
+        double[] expectedMetadata = Arrays.stream(RasterAccessors.metadata(raster), 0, 9).toArray();
+        assertArrayEquals(expectedMetadata, actualMetadata, 0.1d);
+
+        int actualBands = RasterAccessors.numBands(resultRaster);
+        int expectedBands = 5;
+        assertEquals(expectedBands, actualBands);
     }
 
     @Test
