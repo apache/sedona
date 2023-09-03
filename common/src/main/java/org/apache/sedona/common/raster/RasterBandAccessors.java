@@ -22,8 +22,10 @@ import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.opengis.referencing.FactoryException;
 
 import java.awt.image.Raster;
+import java.util.Arrays;
 
 public class RasterBandAccessors {
 
@@ -133,6 +135,34 @@ public class RasterBandAccessors {
 //    public static double[] getSummaryStats(GridCoverage2D raster, boolean excludeNoDataValue) {
 //        return getSummaryStats(raster, 1, excludeNoDataValue);
 //    }
+
+    public static GridCoverage2D getBand(GridCoverage2D rasterGeom, int[] bands) throws FactoryException {
+        double[] metadata = RasterAccessors.metadata(rasterGeom);
+        GridCoverage2D resultRaster = RasterConstructors.makeEmptyRaster(bands.length, (int) metadata[2], (int) metadata[3],
+                metadata[0], metadata[1], metadata[4], metadata[5], metadata[6], metadata[7], (int) metadata[8]);
+        double[] curBandData;
+        Double noDataValue;
+        for (int curBand: bands) {
+            RasterUtils.ensureBand(rasterGeom, curBand);
+            curBandData = MapAlgebra.bandAsArray(rasterGeom, curBand);
+            noDataValue = RasterBandAccessors.getBandNoDataValue(rasterGeom, curBand);
+            if (noDataValue != null) {
+                resultRaster = MapAlgebra.addBandFromArray(resultRaster, curBandData, curBand, noDataValue);
+                continue;
+            }
+            resultRaster = MapAlgebra.addBandFromArray(resultRaster, curBandData, curBand);
+        }
+        return resultRaster;
+    }
+
+    public static GridCoverage2D getBand(GridCoverage2D rasterGeom, String bands, String delimiter) throws FactoryException {
+        int[] bandInt = Arrays.stream(bands.split(delimiter)).mapToInt(Integer::parseInt).toArray();
+        return getBand(rasterGeom, bandInt);
+    }
+
+    public static GridCoverage2D getBand(GridCoverage2D rasterGeom) throws FactoryException {
+        return getBand(rasterGeom, new int[]{1});
+    }
 
     public static String getBandType(GridCoverage2D raster, int band) {
         RasterUtils.ensureBand(raster, band);
