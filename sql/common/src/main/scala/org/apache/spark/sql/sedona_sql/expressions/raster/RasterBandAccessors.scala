@@ -45,6 +45,15 @@ case class RS_SummaryStats(inputExpressions: Seq[Expression]) extends InferredEx
   }
 }
 
+case class RS_Band(inputExpressions: Seq[Expression]) extends InferredExpression(
+  inferrableFunction3(RasterBandAccessors.getBand), inferrableFunction2(RasterBandAccessors.getBand),
+  inferrableFunction1(RasterBandAccessors.getBand)
+) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class RS_BandPixelType(inputExpressions: Seq[Expression]) extends InferredExpression(inferrableFunction2(RasterBandAccessors.getBandType), inferrableFunction1(RasterBandAccessors.getBandType)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

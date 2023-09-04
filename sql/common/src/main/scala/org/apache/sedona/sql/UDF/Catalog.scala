@@ -225,6 +225,7 @@ object Catalog {
     function[RS_PixelAsPolygon](),
     function[RS_PixelAsCentroid](),
     function[RS_Count](),
+    function[RS_Band](),
     function[RS_SummaryStats](),
     function[RS_ConvexHull](),
     function[RS_RasterToWorldCoordX](),
