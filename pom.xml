@@ -655,8 +655,7 @@
             </properties>
             <modules>
                 <module>common</module>
-                <module>core</module>
-                <module>sql</module>
+                <module>spark</module>
                 <module>viz</module>
                 <module>spark-shaded</module>
             </modules>
@@ -677,8 +676,7 @@
             </properties>
             <modules>
                 <module>common</module>
-                <module>core</module>
-                <module>sql</module>
+                <module>spark</module>
                 <module>viz</module>
                 <module>spark-shaded</module>
                 <module>flink</module>

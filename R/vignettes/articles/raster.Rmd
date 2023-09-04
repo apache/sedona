@@ -34,7 +34,7 @@ library(apache.sedona)
 
 sc <- spark_connect(master = "local")
 
-data_tbl <- spark_read_binary(sc, dir = here::here("/../core/src/test/resources/raster/"), name = "data") 
+data_tbl <- spark_read_binary(sc, dir = here::here("/../spark/common/src/test/resources/raster/"), name = "data")
 
 raster <- 
   data_tbl %>% 

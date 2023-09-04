@@ -28,7 +28,6 @@ import org.apache.sedona.viz.extension.visualizationEffect.ScatterPlot;
 import org.apache.sedona.viz.utils.ColorizeOption;
 import org.apache.sedona.viz.utils.ImageType;
 import org.apache.sedona.viz.utils.RasterizationUtils;
-import org.apache.spark.storage.StorageLevel;
 import org.junit.Test;
 import scala.Tuple2;
 

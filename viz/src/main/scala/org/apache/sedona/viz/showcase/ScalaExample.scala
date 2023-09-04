@@ -18,10 +18,6 @@
  */
 package org.apache.sedona.viz.showcase
 
-import java.awt.Color // scalastyle:ignore illegal.imports
-import java.io.FileInputStream
-import java.util.Properties
-
 import org.apache.log4j.{Level, Logger}
 import org.apache.sedona.common.enums.FileDataSplitter
 import org.apache.sedona.core.enums.{GridType, IndexType}
@@ -31,9 +27,12 @@ import org.apache.sedona.core.spatialRDD.{PointRDD, PolygonRDD, RectangleRDD}
 import org.apache.sedona.viz.`extension`.visualizationEffect.{ChoroplethMap, HeatMap, ScatterPlot}
 import org.apache.sedona.viz.core.{ImageGenerator, RasterOverlayOperator}
 import org.apache.sedona.viz.utils.{ColorizeOption, ImageType}
-import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
 import org.locationtech.jts.geom.Envelope
+
+import java.awt.Color
+import java.io.FileInputStream
+import java.util.Properties
 
 
 /**
@@ -45,7 +44,7 @@ object ScalaExample extends App {
   Logger.getLogger("org").setLevel(Level.WARN)
   Logger.getLogger("akka").setLevel(Level.WARN)
   val prop = new Properties()
-  val resourcePath = "src/test/resources/"
+  val resourcePath = "/../spark/common/src/test/resources/"
   val demoOutputPath = "target/demo"
   val scatterPlotOutputPath = System.getProperty("user.dir") + "/" + demoOutputPath + "/scatterplot"
   prop.load(ConfFile)
@@ -76,7 +75,7 @@ object ScalaExample extends App {
   val LineStringSplitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"))
   val LineStringNumPartitions = prop.getProperty("numPartitions").toInt
   val USMainLandBoundary = new Envelope(-126.790180, -64.630926, 24.863836, 50.000)
-  val earthdataInputLocation = System.getProperty("user.dir") + "/src/test/resources/modis/modis.csv"
+  val earthdataInputLocation = System.getProperty("user.dir") + "/../spark/common/src/test/resources/modis/modis.csv"
   val earthdataNumPartitions = 5
   val HDFIncrement = 5
   val HDFOffset = 2
@@ -84,7 +83,7 @@ object ScalaExample extends App {
   val HDFDataVariableName = "LST"
   val HDFDataVariableList = Array("LST", "QC", "Error_LST", "Emis_31", "Emis_32")
   val HDFswitchXY = true
-  val urlPrefix = System.getProperty("user.dir") + "/src/test/resources/modis/"
+  val urlPrefix = System.getProperty("user.dir") + "/../spark/common/src/test/resources/modis/"
   var ConfFile = new FileInputStream(resourcePath + "babylon.point.properties")
 
   if (buildScatterPlot(scatterPlotOutputPath) && buildHeatMap(heatMapOutputPath)
