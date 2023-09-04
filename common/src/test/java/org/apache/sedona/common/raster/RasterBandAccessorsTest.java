@@ -279,9 +279,9 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         double[] expectedMetadata = Arrays.stream(RasterAccessors.metadata(raster), 0, 9).toArray();
         assertArrayEquals(expectedMetadata, actualMetadata, 0.1d);
 
-        int actualBands = RasterAccessors.numBands(resultRaster);
-        int expectedBands = 5;
-        assertEquals(expectedBands, actualBands);
+        double[] actualBandValues = MapAlgebra.bandAsArray(raster, 2);
+        double[] expectedBandValues = MapAlgebra.bandAsArray(resultRaster, 2);
+        assertArrayEquals(expectedBandValues, actualBandValues, 0.1d);
     }
 
     @Test
