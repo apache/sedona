@@ -38,7 +38,7 @@ import java.nio.charset.StandardCharsets;
 public class RasterTestBase {
     String arc = "NCOLS 2\nNROWS 2\nXLLCORNER 378922\nYLLCORNER 4072345\nCELLSIZE 30\nNODATA_VALUE 0\n0 1 2 3\n";
 
-    String resourceFolder = System.getProperty("user.dir") + "/../core/src/test/resources/";
+    String resourceFolder = System.getProperty("user.dir") + "/../spark/common/src/test/resources/";
 
     GridCoverage2D oneBandRaster;
     GridCoverage2D multiBandRaster;

@@ -31,7 +31,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll{
   Logger.getLogger("org.datasyslab").setLevel(Level.WARN)
 
   var spark:SparkSession = _
-  val resourceFolder = System.getProperty("user.dir") + "/../core/src/test/resources/"
+  val resourceFolder = System.getProperty("user.dir") + "/../spark/common/src/test/resources/"
 
   val polygonInputLocationWkt = resourceFolder + "county_small.tsv"
   val polygonInputLocation = resourceFolder + "primaryroads-polygon.csv"

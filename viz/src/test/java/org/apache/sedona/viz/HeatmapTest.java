@@ -26,7 +26,6 @@ import org.apache.sedona.viz.core.ImageGenerator;
 import org.apache.sedona.viz.core.ImageStitcher;
 import org.apache.sedona.viz.extension.visualizationEffect.HeatMap;
 import org.apache.sedona.viz.utils.ImageType;
-import org.apache.spark.storage.StorageLevel;
 import org.junit.Test;
 
 // TODO: Auto-generated Javadoc

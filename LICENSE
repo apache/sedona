@@ -219,36 +219,36 @@ python/src/pygeos/c_api.h (modified based on https://github.com/pygeos/pygeos/bl
 
 Google Buildings License [https://creativecommons.org/licenses/by/4.0/ (CC by 4.0)]
 --------------------------------------
-core/src/test/resources/813_buildings_test.csv
+spark/common/src/test/resources/813_buildings_test.csv
 
 Chicago Crimes License
 --------------------------------------
-core/src/test/resources/Chicago_Crimes.csv
+spark/common/src/test/resources/Chicago_Crimes.csv
 
 No-copyright data used in unit tests
 --------------------------------------
 
 UrbIS-Adm 3D from datastore.brussels (Creative Commons CC-0 licence, No copyright)
 ---------------
-core/src/test/resources/shapefiles/unsupported/UrbAdm3D_142166_Bu_Ground.dbf
-core/src/test/resources/shapefiles/unsupported/UrbAdm3D_142166_Bu_Ground.prj
-core/src/test/resources/shapefiles/unsupported/UrbAdm3D_142166_Bu_Ground.shp
-core/src/test/resources/shapefiles/unsupported/UrbAdm3D_142166_Bu_Ground.shx
+spark/common/src/test/resources/shapefiles/unsupported/UrbAdm3D_142166_Bu_Ground.dbf
+spark/common/src/test/resources/shapefiles/unsupported/UrbAdm3D_142166_Bu_Ground.prj
+spark/common/src/test/resources/shapefiles/unsupported/UrbAdm3D_142166_Bu_Ground.shp
+spark/common/src/test/resources/shapefiles/unsupported/UrbAdm3D_142166_Bu_Ground.shx
 
 
 TIGER/Line from United States Census Bureau
 ---------------
-core/src/test/resources/arealm-small.csv
-core/src/test/resources/arealm.csv
-core/src/test/resources/county_small.tsv
-core/src/test/resources/county_small_wkb.tsv
-core/src/test/resources/primaryroads-linestring.csv
-core/src/test/resources/primaryroads-polygon.csv
-core/src/test/resources/primaryroads.csv
-core/src/test/resources/zcta510-small.csv
-core/src/test/resources/zcta510.csv
+spark/common/src/test/resources/arealm-small.csv
+spark/common/src/test/resources/arealm.csv
+spark/common/src/test/resources/county_small.tsv
+spark/common/src/test/resources/county_small_wkb.tsv
+spark/common/src/test/resources/primaryroads-linestring.csv
+spark/common/src/test/resources/primaryroads-polygon.csv
+spark/common/src/test/resources/primaryroads.csv
+spark/common/src/test/resources/zcta510-small.csv
+spark/common/src/test/resources/zcta510.csv
 
 
 MOD11C2 v006 from NASA
 ---------------
-core/src/test/resources/raster/test5.TIFF
+spark/common/src/test/resources/raster/test5.TIFF
