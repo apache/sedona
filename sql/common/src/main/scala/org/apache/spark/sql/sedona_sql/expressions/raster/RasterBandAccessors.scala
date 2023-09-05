@@ -64,6 +64,7 @@ case class RS_Band(inputExpressions: Seq[Expression]) extends Expression with Se
       RasterBandAccessors.getBand(raster, values.toArray)
     }
   }
+
   override def eval(input: InternalRow): Any = {
     RasterUDT.serialize(evalWithoutSerialization(input).asInstanceOf[GridCoverage2D])
   }

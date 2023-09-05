@@ -25,7 +25,6 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.opengis.referencing.FactoryException;
 
 import java.awt.image.Raster;
-import java.util.Arrays;
 
 public class RasterBandAccessors {
 
