@@ -128,7 +128,7 @@ Available options:
 	* Default value: `.tiff`
 	* Allowed values: any string values such as `.png`, `.jpeg`, `.asc`
 * pathField
-	* No defaulut value. If you use this option, then the column specified in this option must exist in the DataFrame schema. If this option is not used, each produced raster image will have a random UUID file name.
+	* No default value. If you use this option, then the column specified in this option must exist in the DataFrame schema. If this option is not used, each produced raster image will have a random UUID file name.
 	* Allowed values: any column name that indicates the paths of each raster file
 
 The schema of the Raster dataframe to be written can be one of the following two schemas:

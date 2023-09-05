@@ -292,7 +292,7 @@ EWKT is an extended version of WKT which includes the SRID of the geometry.
 The format originated in PostGIS but is supported by many GIS tools.
 If the geometry is lacking SRID a WKT format is produced.
 [See ST_SetSRID](#ST_SetSRID)
-It will support M coodinate if present since v1.5.0.
+It will support M coordinate if present since v1.5.0.
 
 Format: `ST_AsEWKT (A:geometry)`
 
@@ -406,7 +406,7 @@ Output:
 ## ST_AsText
 
 Introduction: Return the Well-Known Text string representation of a geometry.
-It will support M coodinate if present since v1.5.0.
+It will support M coordinate if present since v1.5.0.
 
 Format: `ST_AsText (A:geometry)`
 
@@ -587,7 +587,7 @@ POINT (4.8 4.8)
 Introduction: Returns the 2-dimensional point on geom1 that is closest to geom2. This is the first point of the shortest line between the geometries. If using 3D geometries, the Z coordinates will be ignored. If you have a 3D Geometry, you may prefer to use ST_3DClosestPoint.
 It will throw an exception indicates illegal argument if one of the params is an empty geometry.
 
-Format: `ST_ClosestPoint(g1: geomtry, g2: geometry)`
+Format: `ST_ClosestPoint(g1: geometry, g2: geometry)`
 
 Since: `1.5.0`
 
@@ -1114,7 +1114,7 @@ based on [Computing Discrete Frechet Distance](http://www.kr.tuwien.ac.at/staff/
 
 If any of the geometries is empty, returns 0.0
 
-Format: `ST_FrechetDistance(g1: geomtry, g2: geometry)`
+Format: `ST_FrechetDistance(g1: geometry, g2: geometry)`
 
 Since: `1.5.0`
 
