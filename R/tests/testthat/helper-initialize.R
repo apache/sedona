@@ -38,8 +38,7 @@ testthat_spark_connection <- function(conn_retry_interval_s = 2) {
             method = "shell",
             config = config,
             app_name = paste0("testthat-", uuid::UUIDgenerate()),
-            version = version,
-            hadoop_version = hadoop_version
+            version = version
           )
           assign(conn_key, sc, envir = .GlobalEnv)
           TRUE
