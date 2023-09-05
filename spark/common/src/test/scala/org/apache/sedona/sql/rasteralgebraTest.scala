@@ -341,6 +341,36 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expected, actual)
     }
 
+    it("Passed RS_Band") {
+      val inputDf = Seq((Seq(16, 0, 24, 33, 43, 49, 64, 0, 76, 77, 79, 89, 0, 116, 118, 125, 135, 0, 157, 190, 215, 229, 241, 248, 249))).toDF("band")
+      val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(2, 5, 5, 3, -215, 2, -2, 2, 2, 0), band, 1, 0d) as emptyRaster")
+      val resultDf = df.selectExpr("RS_Band(emptyRaster, array(1,1,1)) as raster")
+      val actual = resultDf.selectExpr("RS_NumBands(raster)").first().get(0)
+      val expected = 3
+      assertEquals(expected, actual)
+
+      val actualMetadata = resultDf.selectExpr("RS_Metadata(raster)").first().getSeq(0).slice(0, 9)
+      val expectedMetadata = df.selectExpr("RS_Metadata(emptyRaster)").first().getSeq(0).slice(0, 9)
+      assertEquals(expectedMetadata.toString(), actualMetadata.toString())
+
+      val actualBandValues = resultDf.selectExpr("RS_BandAsArray(raster, 1)").first().getSeq(0)
+      val expectedBandValues = df.selectExpr("RS_BandAsArray(emptyRaster, 1)").first().getSeq(0)
+      assertEquals(expectedBandValues.toString(), actualBandValues.toString())
+    }
+
+    it("Passed RS_Band with raster") {
+      val dfFile = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+      val df = dfFile.selectExpr("RS_FromGeoTiff(content) as raster")
+      val resultDf = df.selectExpr("RS_Band(raster, array(1,2,2,2,1)) as resultRaster")
+      val actual = resultDf.selectExpr("RS_NumBands(resultRaster)").first().getInt(0)
+      val expected = 5
+      assertEquals(expected, actual)
+
+      val actualMetadata = resultDf.selectExpr("RS_Metadata(resultRaster)").first().getSeq(0).slice(0, 9)
+      val expectedMetadata = df.selectExpr("RS_Metadata(raster)").first().getSeq(0).slice(0, 9)
+      assertEquals(expectedMetadata.toString(), actualMetadata.toString())
+    }
+
     it("Passed RS_SetValues with empty raster") {
       var inputDf = Seq((Seq(1, 1, 1, 0, 0, 0, 1, 2, 3, 3, 5, 6, 7, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0), Seq(11, 12, 13, 14, 15, 16, 17, 18, 19))).toDF("band","newValues")
       var df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as raster", "newValues")
