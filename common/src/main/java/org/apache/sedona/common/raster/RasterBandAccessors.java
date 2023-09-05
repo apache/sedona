@@ -155,15 +155,6 @@ public class RasterBandAccessors {
         return resultRaster;
     }
 
-    public static GridCoverage2D getBand(GridCoverage2D rasterGeom, String bands, String delimiter) throws FactoryException {
-        int[] bandInt = Arrays.stream(bands.split(delimiter)).mapToInt(Integer::parseInt).toArray();
-        return getBand(rasterGeom, bandInt);
-    }
-
-    public static GridCoverage2D getBand(GridCoverage2D rasterGeom) throws FactoryException {
-        return getBand(rasterGeom, new int[]{1});
-    }
-
     public static String getBandType(GridCoverage2D raster, int band) {
         RasterUtils.ensureBand(raster, band);
         GridSampleDimension bandSampleDimension = raster.getSampleDimension(band - 1);
