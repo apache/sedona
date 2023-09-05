@@ -169,9 +169,9 @@ BroadcastIndexJoin pointshape#52: geometry, BuildRight, BuildLeft, true, 2.0 ST_
 
 Note: If the distance is an expression, it is only evaluated on the first argument to ST_Distance (`pointDf1` above).
 
-## Auotmatic broadcast index join
+## Automatic broadcast index join
 
-When one table involved a spatial join query is smaller than a threadhold, Sedona will automatically choose broadcast index join instead of Sedona optimized join. The current threshold is controlled by [sedona.join.autoBroadcastJoinThreshold](../Parameter) and set to the same as `spark.sql.autoBroadcastJoinThreshold`.
+When one table involved a spatial join query is smaller than a threshold, Sedona will automatically choose broadcast index join instead of Sedona optimized join. The current threshold is controlled by [sedona.join.autoBroadcastJoinThreshold](../Parameter) and set to the same as `spark.sql.autoBroadcastJoinThreshold`.
 
 ## Raster join
 
@@ -244,7 +244,7 @@ As you see, compared to the query in Step 2, we added one more filter, which is 
 !!!tip
 	You can skip this step if you don't need 100% accuracy and want faster query speed.
 
-### 4. Optional: De-duplcate
+### 4. Optional: De-duplicate
 
 Due to the explode function used when we generate S2 Cell Ids, the resulting DataFrame may have several duplicate <lcs_geom, rcs_geom> matches. You can remove them by performing a GroupBy query.
 
