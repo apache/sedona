@@ -533,6 +533,37 @@ Output: `3`
 
 ## Raster Band Accessors
 
+### RS_Band
+
+Introduction: Returns a new raster consisting 1 or more bands of an existing raster. It can build new rasters from 
+existing ones, export only selected bands from a multiband raster, or rearrange the order of bands in a raster dataset.
+
+Format:
+
+`RS_Band(raster: Raster, bands: ARRAY[Integer])`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_NumBands(
+        RS_Band(
+            RS_AddBandFromArray(
+                RS_MakeEmptyRaster(2, 5, 5, 3, -215, 2, -2, 2, 2, 0),
+                Array(16, 0, 24, 33, 43, 49, 64, 0, 76, 77, 79, 89, 0, 116, 118, 125, 135, 0, 157, 190, 215, 229, 241, 248, 249),
+                1, 0d
+            ), Array(1,1,1)
+        )
+    )
+```
+
+Output:
+
+```
+3
+```
+
 ### RS_BandNoDataValue
 
 Introduction: Returns the no data value of the given band of the given raster. If no band is given, band 1 is assumed. The band parameter is 1-indexed. If there is no no data value associated with the given band, RS_BandNoDataValue returns null.
