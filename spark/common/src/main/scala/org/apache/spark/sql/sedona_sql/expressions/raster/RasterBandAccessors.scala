@@ -52,7 +52,7 @@ case class RS_SummaryStats(inputExpressions: Seq[Expression]) extends InferredEx
   }
 }
 
-case class RS_Band(inputExpressions: Seq[Expression]) extends InferredExpression(RasterBandAccessors.getBand _) with SerdeAware with CodegenFallback {
+case class RS_Band(inputExpressions: Seq[Expression]) extends InferredExpression(RasterBandAccessors.getBand _) {
 
   override def evalWithoutSerialization(input: InternalRow): Any = {
     val raster = inputExpressions.head.toRaster(input)
