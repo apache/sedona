@@ -252,7 +252,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster( 2, 5, 5, 3, -215, 2, -2, 2, 2, 0);
         double[] values1 = new double[] {16, 0, 24, 33, 43, 49, 64, 0, 76, 77, 79, 89, 0, 116, 118, 125, 135, 0, 157, 190, 215, 229, 241, 248, 249};
         emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values1, 1, 0d);
-        GridCoverage2D resultRaster = RasterBandAccessors.getBand(emptyRaster, new int[]{1,1,1});
+        GridCoverage2D resultRaster = RasterBandAccessors.getBand(emptyRaster, new int[]{3,3,3});
         int actual = RasterAccessors.numBands(resultRaster);
         int expected = 3;
         assertEquals(expected, actual);
