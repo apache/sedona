@@ -25,6 +25,9 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.opengis.referencing.FactoryException;
 
 import java.awt.image.Raster;
+import java.awt.image.RenderedImage;
+import java.awt.image.WritableRaster;
+import java.util.Arrays;
 
 public class RasterBandAccessors {
 
@@ -135,23 +138,37 @@ public class RasterBandAccessors {
 //        return getSummaryStats(raster, 1, excludeNoDataValue);
 //    }
 
-    public static GridCoverage2D getBand(GridCoverage2D rasterGeom, int[] bands) throws FactoryException {
-        double[] metadata = RasterAccessors.metadata(rasterGeom);
-        GridCoverage2D resultRaster = RasterConstructors.makeEmptyRaster(bands.length, (int) metadata[2], (int) metadata[3],
-                metadata[0], metadata[1], metadata[4], metadata[5], metadata[6], metadata[7], (int) metadata[8]);
-        double[] curBandData;
+    public static GridCoverage2D getBand(GridCoverage2D rasterGeom, int[] bandIndexes) throws FactoryException {
         Double noDataValue;
-        for (int curBand: bands) {
+        double[] metadata = RasterAccessors.metadata(rasterGeom);
+        int width = (int) metadata[2], height = (int) metadata[3];
+        GridCoverage2D resultRaster = RasterConstructors.makeEmptyRaster(bandIndexes.length, width, height,
+                metadata[0], metadata[1], metadata[4], metadata[5], metadata[6], metadata[7], (int) metadata[8]);
+
+        // Get band data that's required
+        int[] bandsDistinct = Arrays.stream(bandIndexes).distinct().toArray();
+        double [][] bandData = new double[bandsDistinct.length][height * width];
+        for (int curBand: bandsDistinct) {
             RasterUtils.ensureBand(rasterGeom, curBand);
-            curBandData = MapAlgebra.bandAsArray(rasterGeom, curBand);
-            noDataValue = RasterBandAccessors.getBandNoDataValue(rasterGeom, curBand);
-            if (noDataValue != null) {
-                resultRaster = MapAlgebra.addBandFromArray(resultRaster, curBandData, curBand, noDataValue);
-                continue;
-            }
-            resultRaster = MapAlgebra.addBandFromArray(resultRaster, curBandData, curBand);
+            bandData[curBand - 1] = MapAlgebra.bandAsArray(rasterGeom, curBand);
         }
-        return resultRaster;
+
+        // Get Writable Raster from the resultRaster
+        WritableRaster wr = resultRaster.getRenderedImage().getData().createCompatibleWritableRaster();
+
+        GridSampleDimension[] sampleDimensionsOg = rasterGeom.getSampleDimensions();
+        GridSampleDimension[] sampleDimensionsResult = resultRaster.getSampleDimensions();
+        for (int i = 0; i < bandIndexes.length; i ++) {
+            sampleDimensionsResult[i] = sampleDimensionsOg[bandIndexes[i] - 1];
+            wr.setSamples(0, 0, width, height, i, bandData[bandIndexes[i] - 1]);
+            noDataValue = RasterBandAccessors.getBandNoDataValue(rasterGeom, bandIndexes[i]);
+            GridSampleDimension sampleDimension = sampleDimensionsResult[i];
+            if (noDataValue != null) {
+                sampleDimensionsResult[i] = RasterUtils.createSampleDimensionWithNoDataValue(sampleDimension, noDataValue);
+            }
+        }
+
+        return RasterUtils.create(wr, resultRaster.getGridGeometry(), sampleDimensionsResult);
     }
 
     public static String getBandType(GridCoverage2D raster, int band) {
