@@ -28,10 +28,11 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
+import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_viz.UDT.PixelUDT
 import org.apache.spark.sql.types.{ArrayType, DataType}
-import org.locationtech.jts.geom.{Envelope, Geometry, LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon}
+import org.locationtech.jts.geom._
+
 import scala.jdk.CollectionConverters._
 
 case class ST_Pixelize(inputExpressions: Seq[Expression])
