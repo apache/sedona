@@ -128,7 +128,7 @@ library(dplyr)
 Data loaded in R can be copied to Spark using `copy_to`. Columns containing spatial information can be converted to the geometry type in Spark DataFrames (GeometryUDT) with Spark SQL functions such as `ST_GeomFromText` or `ST_GeomFromText`, see [Vector constructors](../../../api/sql/Constructor/) and [Raster input and output](../../../api/sql/Raster-loader/).
 
 ```{r}
-data <- readr::read_csv(here::here("../core/src/test/resources/arealm.csv"), col_names = FALSE, show_col_types = FALSE)
+data <- readr::read_csv(here::here("../spark/common/src/test/resources/arealm.csv"), col_names = FALSE, show_col_types = FALSE)
 data %>% glimpse()
 
 data_tbl <- copy_to(sc, data)
@@ -142,7 +142,7 @@ data_tbl %>%
 No automatic translation of `{sf}` objects is provided, they need to be converted to text (or binary) format before copying to spark.
 
 ```{r}
-data <- sf::st_read(here::here("../core/src/test/resources/testPolygon.json"))
+data <- sf::st_read(here::here("../spark/common/src/test/resources/testPolygon.json"))
 
 data %>% glimpse()
 
@@ -166,7 +166,7 @@ data_tbl %>%
 Loading data in R and then copying it to Spark will most likely not be the optimal method to prepare data for analysis; loading data directly into Spark will often be best.`spark_read_*` functions are made for this purpose (and extend `spark_read_*` functions in `sparklyr`).
 
 ```{r}
-data_tbl <- spark_read_geojson(sc, path = here::here("../core/src/test/resources/testPolygon.json"), name = "data")
+data_tbl <- spark_read_geojson(sc, path = here::here("../spark/common/src/test/resources/testPolygon.json"), name = "data")
 
 data_tbl %>% 
   glimpse()
@@ -302,7 +302,7 @@ into a `SpatialRDD`:
 ```{r}
 pt_rdd <- sedona_read_dsv_to_typed_rdd(
   sc,
-  location = here::here("../core/src/test/resources/arealm.csv"),
+  location = here::here("../spark/common/src/test/resources/arealm.csv"),
   delimiter = ",",
   type = "point",
   first_spatial_col_index = 1,
@@ -369,12 +369,12 @@ boundary <- c(-126.790180, -64.630926, 24.863836, 50.000)
 
 pt_rdd <- sedona_read_dsv_to_typed_rdd(
   sc,
-  location = here::here("../core/src/test/resources/arealm.csv"),
+  location = here::here("../spark/common/src/test/resources/arealm.csv"),
   type = "point"
 )
 polygon_rdd <- sedona_read_dsv_to_typed_rdd(
   sc,
-  location = here::here("../core/src/test/resources/primaryroads-polygon.csv"),
+  location = here::here("../spark/common/src/test/resources/primaryroads-polygon.csv"),
   type = "polygon"
 )
 pair_rdd <- sedona_spatial_join_count_by_key(

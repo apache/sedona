@@ -9,6 +9,26 @@ To write a Sedona Raster DataFrame to raster files, you need to (1) first conver
 
 You can use the following RS output functions (`RS_AsXXX`) to convert a Raster DataFrame to a binary DataFrame. Generally the output format of a raster can be different from the original input format. For example, you can use `RS_FromGeoTiff` to create rasters and save them using `RS_AsArcInfoAsciiGrid`.
 
+#### RS_AsBase64
+
+Introduction: Returns a base64 encoded string of the given raster. This function internally takes the first 4 bands as RGBA, and converts them to the PNG format, finally produces a base64 string. To visualize other bands, please use it together with `RS_Band`. You can take the resulting base64 string in [an online viewer](https://base64-viewer.onrender.com/) to check how the image looks like.
+
+Since: `v1.5.0`
+
+Format: `RS_AsBase64(raster: Raster)`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_AsBase64(raster) from rasters
+```
+
+Output:
+
+```
+iVBORw0KGgoAAAA...
+```
+
 #### RS_AsGeoTiff
 
 Introduction: Returns a binary DataFrame from a Raster DataFrame. Each raster object in the resulting DataFrame is a GeoTiff image in binary format.
@@ -108,7 +128,7 @@ Available options:
 	* Default value: `.tiff`
 	* Allowed values: any string values such as `.png`, `.jpeg`, `.asc`
 * pathField
-	* No defaulut value. If you use this option, then the column specified in this option must exist in the DataFrame schema. If this option is not used, each produced raster image will have a random UUID file name.
+	* No default value. If you use this option, then the column specified in this option must exist in the DataFrame schema. If this option is not used, each produced raster image will have a random UUID file name.
 	* Allowed values: any column name that indicates the paths of each raster file
 
 The schema of the Raster dataframe to be written can be one of the following two schemas:

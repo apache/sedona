@@ -442,7 +442,7 @@ test_that("spark_read_geoparquet() throws an error with plain parquet files", {
   
   expect_error(
     spark_read_geoparquet(sc, geoparquet("plain.parquet")),
-    regexp = "GeoParquet file does not contain valid geo metadata"
+    regexp = "GeoParquet file does not contain valid geo"
   )
   
 })

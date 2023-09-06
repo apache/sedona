@@ -40,7 +40,6 @@ import org.apache.sedona.viz.utils.ImageType;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.storage.StorageLevel;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Polygon;
 
@@ -377,7 +376,7 @@ public class Example
         Logger.getLogger("akka").setLevel(Level.WARN);
         prop = new Properties();
 
-        String resourcePath = "src/test/resources/";
+        String resourcePath = "/../spark/common/src/test/resources/";
         String demoOutputPath = "target/demo";
         FileInputStream ConfFile = new FileInputStream(resourcePath + "babylon.point.properties");
         prop.load(ConfFile);
@@ -416,14 +415,14 @@ public class Example
 
         USMainLandBoundary = new Envelope(-126.790180, -64.630926, 24.863836, 50.000);
 
-        earthdataInputLocation = System.getProperty("user.dir") + "/src/test/resources/modis/modis.csv";
+        earthdataInputLocation = System.getProperty("user.dir") + "/../spark/common/src/test/resources/modis/modis.csv";
         earthdataNumPartitions = 5;
         HDFIncrement = 5;
         HDFOffset = 2;
         HDFRootGroupName = "MOD_Swath_LST";
         HDFDataVariableName = "LST";
         HDFswitchXY = true;
-        urlPrefix = System.getProperty("user.dir") + "/src/test/resources/modis/";
+        urlPrefix = System.getProperty("user.dir") + "/../spark/common/src/test/resources/modis/";
 
         if (buildScatterPlot(scatterPlotOutputPath) && buildHeatMap(heatMapOutputPath)
                 && buildChoroplethMap(choroplethMapOutputPath) && parallelFilterRenderStitch(parallelFilterRenderStitchOutputPath + "-stitched")

@@ -252,14 +252,14 @@ You need to link your ASF Account with your GitHub account.
 
 Here are the steps
 
-1. Verify you have a Github ID enabled with 2FA
+1. Verify you have a GitHub ID enabled with 2FA
 	* https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/
-2. Enter your Github ID into your Apache ID profile https://id.apache.org/
+2. Enter your GitHub ID into your Apache ID profile https://id.apache.org/
 3. Merge your Apache and GitHub accounts using
 	* GitBox (Apache Account Linking utility) https://gitbox.apache.org/setup/
 	* You should see 3 green checks in GitBox.
 	* Wait at least 30  minutes for an email inviting you to Apache GitHub Organization and accept invitation
-4. After accepting the Github Invitation verify that you are a 
+4. After accepting the GitHub Invitation verify that you are a 
 member of the team https://github.com/orgs/apache/teams/sedona-committers
 
 Optionally, if you want, please follow the instructions to set up your GitHub, SSH, svn password, svn configuration, email forwarding, etc.

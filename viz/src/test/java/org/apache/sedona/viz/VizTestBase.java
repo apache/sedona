@@ -147,7 +147,7 @@ public class VizTestBase
         Logger.getLogger("org").setLevel(Level.WARN);
         Logger.getLogger("akka").setLevel(Level.WARN);
 
-        String resourceFolder = System.getProperty("user.dir") + "/../core/src/test/resources/";
+        String resourceFolder = System.getProperty("user.dir") + "/../spark/common/src/test/resources/";
 
         prop = new Properties();
 

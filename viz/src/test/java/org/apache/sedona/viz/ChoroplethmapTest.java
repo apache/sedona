@@ -30,7 +30,6 @@ import org.apache.sedona.viz.extension.visualizationEffect.ChoroplethMap;
 import org.apache.sedona.viz.extension.visualizationEffect.ScatterPlot;
 import org.apache.sedona.viz.utils.ImageType;
 import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.storage.StorageLevel;
 import org.junit.Test;
 import org.locationtech.jts.geom.Polygon;
 

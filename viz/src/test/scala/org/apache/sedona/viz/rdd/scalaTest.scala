@@ -45,7 +45,7 @@ class scalaTest extends FunSpec with BeforeAndAfterAll{
   Logger.getLogger("org").setLevel(Level.WARN)
   Logger.getLogger("akka").setLevel(Level.WARN)
   val prop = new Properties()
-  val resourceFolder = System.getProperty("user.dir") + "/../core/src/test/resources/"
+  val resourceFolder = System.getProperty("user.dir") + "/../spark/common/src/test/resources/"
   val demoOutputPath = "target/scala/demo"
   var ConfFile = new FileInputStream(resourceFolder + "babylon.point.properties")
   prop.load(ConfFile)
