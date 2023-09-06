@@ -69,15 +69,9 @@ case class RS_Band(inputExpressions: Seq[Expression]) extends InferredExpression
     RasterUDT.serialize(evalWithoutSerialization(input).asInstanceOf[GridCoverage2D])
   }
 
-  override def children: Seq[Expression] = inputExpressions
-
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
-
-  override def nullable: Boolean = true
-
-  override def dataType: DataType = RasterUDT
 }
 
 case class RS_BandPixelType(inputExpressions: Seq[Expression]) extends InferredExpression(inferrableFunction2(RasterBandAccessors.getBandType), inferrableFunction1(RasterBandAccessors.getBandType)) {
