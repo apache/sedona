@@ -25,9 +25,9 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.opengis.referencing.FactoryException;
 
 import java.awt.image.Raster;
-import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class RasterBandAccessors {
 
@@ -147,10 +147,10 @@ public class RasterBandAccessors {
 
         // Get band data that's required
         int[] bandsDistinct = Arrays.stream(bandIndexes).distinct().toArray();
-        double [][] bandData = new double[bandsDistinct.length][height * width];
+        HashMap<Integer, double[]> bandData = new HashMap<>();
         for (int curBand: bandsDistinct) {
             RasterUtils.ensureBand(rasterGeom, curBand);
-            bandData[curBand - 1] = MapAlgebra.bandAsArray(rasterGeom, curBand);
+            bandData.put(curBand - 1, MapAlgebra.bandAsArray(rasterGeom, curBand));
         }
 
         // Get Writable Raster from the resultRaster
@@ -160,7 +160,7 @@ public class RasterBandAccessors {
         GridSampleDimension[] sampleDimensionsResult = resultRaster.getSampleDimensions();
         for (int i = 0; i < bandIndexes.length; i ++) {
             sampleDimensionsResult[i] = sampleDimensionsOg[bandIndexes[i] - 1];
-            wr.setSamples(0, 0, width, height, i, bandData[bandIndexes[i] - 1]);
+            wr.setSamples(0, 0, width, height, i, bandData.get(bandIndexes[i] - 1));
             noDataValue = RasterBandAccessors.getBandNoDataValue(rasterGeom, bandIndexes[i]);
             GridSampleDimension sampleDimension = sampleDimensionsResult[i];
             if (noDataValue != null) {
