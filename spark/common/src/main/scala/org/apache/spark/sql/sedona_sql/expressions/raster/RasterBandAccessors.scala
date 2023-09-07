@@ -78,3 +78,10 @@ case class RS_BandPixelType(inputExpressions: Seq[Expression]) extends InferredE
   }
 }
 
+case class RS_BandIsNoData(inputExpressions: Seq[Expression])
+  extends InferredExpression(inferrableFunction2(RasterBandAccessors.bandIsNoData),
+    inferrableFunction1(RasterBandAccessors.bandIsNoData)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
