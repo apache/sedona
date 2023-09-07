@@ -79,6 +79,7 @@ assemblyMergeStrategy in assembly := {
 }
 
 resolvers ++= Seq(
+  "Maven Central" at "https://repo.maven.apache.org/maven2/",
   "Open Source Geospatial Foundation Repository" at "https://repo.osgeo.org/repository/release/",
   "Apache Software Foundation Snapshots" at "https://repository.apache.org/content/groups/snapshots",
   "Java.net repository" at "https://download.java.net/maven/2"
