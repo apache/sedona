@@ -249,7 +249,7 @@ As you see, compared to the query in Step 2, we added one more filter, which is 
 Due to the explode function used when we generate S2 Cell Ids, the resulting DataFrame may have several duplicate <lcs_geom, rcs_geom> matches. You can remove them by performing a GroupBy query.
 
 ```sql
-SELECT lcs_id, rcs_id , first(lcs_geom), first(lcs_name), first(rcs_geom), first(rcs_name)
+SELECT lcs_id, rcs_id, first(lcs_geom), first(lcs_name), first(rcs_geom), first(rcs_name)
 FROM joinresult
 GROUP BY (lcs_id, rcs_id)
 ```
@@ -276,7 +276,7 @@ Since the coordinates are in the longitude and latitude system, so the unit of `
 In a nutshell, run this query first on the left table before Step 1. Please replace `METER_DISTANCE` with a meter distance. In Step 1, generate S2 IDs based on the `buffered_geom` column. Then run Step 2, 3, 4 on the original `geom` column.
 
 ```sql
-SELECT id, geom , ST_Buffer(geom, METER_DISTANCE/111000.0) as buffered_geom, name
+SELECT id, geom, ST_Buffer(geom, METER_DISTANCE/111000.0) as buffered_geom, name
 FROM lefts
 ```
 

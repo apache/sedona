@@ -742,7 +742,7 @@ Output:
 POLYGON ((20 40, 175 150, 125 100, 20 40))
 ```
 
-##  ST_CoordDim
+## ST_CoordDim
 
 Introduction: Returns the coordinate dimensions of the geometry. It is an alias of `ST_NDims`.
 
@@ -2373,7 +2373,7 @@ PROJCS["WGS 84 / Pseudo-Mercator",
 !!!note
     By default, ==ST_Transform== follows the `lenient` mode which tries to fix issues by itself. You can append a boolean value at the end to enable the `strict` mode. In `strict` mode, ==ST_Transform== will throw an error if it finds any issue.
 
-Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] lenientMode:bool)`
+Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string, [Optional] lenientMode:bool)`
 
 Since: `v1.2.0`
 
@@ -2456,7 +2456,7 @@ POLYGON ((3 -1, 3 -3, -3 -3, -3 3, 3 3, 3 1, 5 0, 3 -1))
 Introduction: Returns a two-dimensional Voronoi diagram from the vertices of the supplied geometry. The result is a GeometryCollection of Polygons that covers an envelope larger than the extent of the input vertices. Returns null if input geometry is null. Returns an empty geometry collection if the input geometry contains only one vertex. Returns an empty geometry collection if the extend_to envelope has zero area.
 
 
-Format: `ST_VoronoiPolygons(g1: geometry, tolerance: float , extend_to: geometry)`
+Format: `ST_VoronoiPolygons(g1: geometry, tolerance: float, extend_to: geometry)`
 
 Optional parameters:
 'tolerance' : The distance within which vertices will be considered equivalent. Robustness of the algorithm can be improved by supplying a nonzero tolerance distance. (default = 0.0)

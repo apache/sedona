@@ -447,7 +447,7 @@ New features:
 * [SEDONA-65](https://issues.apache.org/jira/browse/SEDONA-65): Create ST_Difference function
 * [SEDONA-68](https://issues.apache.org/jira/browse/SEDONA-68) Add St_Collect function.
 * [SEDONA-82](https://issues.apache.org/jira/browse/SEDONA-82): Create ST_SymmDifference function
-* [SEDONA-75](https://issues.apache.org/jira/browse/SEDONA-75): Add support for "3D" geometries: Preserve Z coordinates on geometries when serializing, ST_AsText , ST_Z, ST_3DDistance
+* [SEDONA-75](https://issues.apache.org/jira/browse/SEDONA-75): Add support for "3D" geometries: Preserve Z coordinates on geometries when serializing, ST_AsText, ST_Z, ST_3DDistance
 * [SEDONA-86](https://issues.apache.org/jira/browse/SEDONA-86): Support empty geometries in ST_AsBinary and ST_AsEWKB
 * [SEDONA-90](https://issues.apache.org/jira/browse/SEDONA-90): Add ST_Union
 * [SEDONA-100](https://issues.apache.org/jira/browse/SEDONA-100): Add st_multi function
