@@ -22,6 +22,7 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.gce.arcgrid.ArcGridWriteParams;
 import org.geotools.gce.arcgrid.ArcGridWriter;
+import org.geotools.gce.geotiff.GeoTiffFormat;
 import org.geotools.gce.geotiff.GeoTiffWriteParams;
 import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.opengis.coverage.grid.GridCoverageWriter;
@@ -33,6 +34,7 @@ import javax.imageio.ImageWriteParam;
 
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 
@@ -72,6 +74,26 @@ public class RasterOutputs
 
     public static byte[] asGeoTiff(GridCoverage2D raster) {
         return asGeoTiff(raster, null, -1);
+    }
+
+    /**
+    * Creates a GeoTiff file with the provided raster. Primarily used for testing.
+     * @param raster The raster to be stored as .tiff
+     * @param filePath The path where the .tiff should be stored.
+     *
+     * @return true if file is created, otherwise throws IOException
+     * @throws IOException
+     * */
+    public static boolean toGeoTiff(GridCoverage2D raster, String filePath) {
+        File outputFile = new File(filePath);
+        GeoTiffFormat format = new GeoTiffFormat();
+        GeoTiffWriter writer = (GeoTiffWriter) format.getWriter(outputFile);
+        try {
+            writer.write(raster, null);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return true;
     }
 
     public static byte[] asArcGrid(GridCoverage2D raster, int sourceBand) {

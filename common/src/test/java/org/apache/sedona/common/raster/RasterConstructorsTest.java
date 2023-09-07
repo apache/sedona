@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class RasterConstructorsTest
         extends RasterTestBase {
@@ -59,15 +59,18 @@ public class RasterConstructorsTest
     }
 
     @Test
-    public void testAsRaster() throws FactoryException, ParseException, IOException {
-        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(2, 5, 5, 3, -215, 2, -2, 2, 2, 0);
-        GridCoverage2D raster1 = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
-        Geometry geom = Constructors.geomFromWKT("POLYGON((34 35, 28 30, 25 34, 34 35))", 0);
-        GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster1, "d", 25.5, 3d);
-        System.out.println(Arrays.toString(RasterAccessors.metadata(rasterized)));
-        System.out.println(Arrays.toString(RasterAccessors.metadata(raster1)));
-        String base64 = RasterOutputs.asBase64(rasterized);
-        System.out.println("Base64: " + base64);
+    public void testAsRasterWithEmptyRaster() throws FactoryException, ParseException {
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(2, 255, 255, 3, -215, 2, -2, 0, 0, 4326);
+        Geometry geom = Constructors.geomFromWKT("POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))", 0);
+        GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", 3093151, 3d);
+        byte[] actual = RasterOutputs.asGeoTiff(rasterized);
+        byte[] expected = new byte[] {77, 77, 0, 42, 0, 0, 0, 8, 0, 16, 1, 0, 0, 3, 0, 0, 0, 1, 0, 4, 0, 0, 1, 1, 0, 3, 0, 0, 0, 1, 0, 5, 0, 0, 1, 2, 0, 3, 0, 0, 0, 1, 0, 64, 0, 0, 1, 3, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 1, 6, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 1, 17, 0, 4, 0, 0, 0, 1, 0, 0, 1, -128, 1, 21, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 1, 22, 0, 3, 0, 0, 0, 1, 0, 5, 0, 0, 1, 23, 0, 4, 0, 0, 0, 1, 0, 0, 0, -96, 1, 26, 0, 5, 0, 0, 0, 1, 0, 0, 0, -48, 1, 27, 0, 5, 0, 0, 0, 1, 0, 0, 0, -40, 1, 40, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 1, 83, 0, 3, 0, 0, 0, 1, 0, 3, 0, 0, -123, -40, 0, 12, 0, 0, 0, 16, 0, 0, 0, -32, -121, -81, 0, 3, 0, 0, 0, 16, 0, 0, 1, 96, -92, -127, 0, 2, 0, 0, 0, 4, 51, 46, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, -16, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 2, 0, 3, 4, 0, 0, 0, 0, 1, 0, 2, 4, 1, 0, 0, 0, 1, 0, 1, 8, 0, 0, 0, 0, 1, 16, -26, 65, 71, -103, 79, -128, 0, 0, 0, 65, 71, -103, 79, -128, 0, 0, 0, 65, 71, -103, 79, -128, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 65, 71, -103, 79, -128, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 65, 71, -103, 79, -128, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        assertArrayEquals(expected, actual);
+
+        rasterized = RasterConstructors.asRaster(geom, raster, "d");
+        actual = RasterOutputs.asGeoTiff(rasterized);
+        expected = new byte[]{77, 77, 0, 42, 0, 0, 0, 8, 0, 15, 1, 0, 0, 3, 0, 0, 0, 1, 0, 4, 0, 0, 1, 1, 0, 3, 0, 0, 0, 1, 0, 5, 0, 0, 1, 2, 0, 3, 0, 0, 0, 1, 0, 64, 0, 0, 1, 3, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 1, 6, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 1, 17, 0, 4, 0, 0, 0, 1, 0, 0, 1, 116, 1, 21, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 1, 22, 0, 3, 0, 0, 0, 1, 0, 5, 0, 0, 1, 23, 0, 4, 0, 0, 0, 1, 0, 0, 0, -96, 1, 26, 0, 5, 0, 0, 0, 1, 0, 0, 0, -60, 1, 27, 0, 5, 0, 0, 0, 1, 0, 0, 0, -52, 1, 40, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 1, 83, 0, 3, 0, 0, 0, 1, 0, 3, 0, 0, -123, -40, 0, 12, 0, 0, 0, 16, 0, 0, 0, -44, -121, -81, 0, 3, 0, 0, 0, 16, 0, 0, 1, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, -16, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 2, 0, 3, 4, 0, 0, 0, 0, 1, 0, 2, 4, 1, 0, 0, 0, 1, 0, 1, 8, 0, 0, 0, 0, 1, 16, -26, 63, -16, 0, 0, 0, 0, 0, 0, 63, -16, 0, 0, 0, 0, 0, 0, 63, -16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, -16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, -16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        assertArrayEquals(expected, actual);
     }
 
 

@@ -55,21 +55,76 @@ public class RasterConstructors
         return geoTiffReader.read(null);
     }
 
-    public static GridCoverage2D asRaster(Geometry geom, GridCoverage2D raster, String pixelType, double value, double noDataValue) {
+    /**
+    * Returns a raster that is converted from the geometry provided.
+     * @param geom The geometry to convert
+     * @param raster The reference raster
+     * @param pixelType The data type of pixel/cell of resultant raster
+     * @param value The value of the pixel of the resultant raster
+     * @param noDataValue The noDataValue of the resultant raster
+     *
+     * @return Rasterized Geometry
+     * @throws FactoryException
+    */
+    public static GridCoverage2D asRaster(Geometry geom, GridCoverage2D raster, String pixelType, double value, Double noDataValue) throws FactoryException {
 
         DefaultFeatureCollection featureCollection = getFeatureCollection(geom, raster.getCoordinateReferenceSystem());
 
+
+        double[] metadata = RasterAccessors.metadata(raster);
+        // The current implementation doesn't support rasters with properties below
+        // It is not a problem as most rasters don't have these properties
+        // ScaleX < 0
+        if (metadata[4] < 0) {
+            throw new IllegalArgumentException(String.format("ScaleX %f of the raster is negative, it should be positive", metadata[4]));
+        }
+        // ScaleY > 0
+        if (metadata[5] > 0) {
+            throw new IllegalArgumentException(String.format("ScaleY %f of the raster is positive. It should be negative.", metadata[5]));
+        }
+        // SkewX should be zero
+        if (metadata[6] != 0) {
+            throw new IllegalArgumentException(String.format("SkewX %d of the raster is not zero.", metadata[6]));
+        }
+        // SkewY should be zero
+        if (metadata[7] != 0) {
+            throw new IllegalArgumentException(String.format("SkewY %d of the raster is not zero.", metadata[7]));
+        }
+
         Envelope2D bound = JTS.getEnvelope2D(geom.getEnvelopeInternal(), raster.getCoordinateReferenceSystem2D());
+
+        double scaleX = Math.abs(metadata[4]), scaleY = Math.abs(metadata[5]);
 
         int width = (int) bound.getWidth(), height = (int) bound.getHeight();
 
+        // To preserve scale of reference raster
+        width = (int) (width / scaleX);
+        height = (int) (height / scaleY);
+
         VectorToRasterProcess rasterProcess = new VectorToRasterProcess();
         GridCoverage2D rasterized = rasterProcess.execute(featureCollection, width, height, "value", Double.toString(value), bound, null);
+        if (noDataValue != null) {
+            rasterized = RasterBandEditors.setBandNoDataValue(rasterized, 1, noDataValue);
+        }
         WritableRaster writableRaster = RasterFactory.createBandedRaster(RasterUtils.getDataTypeCode(pixelType), width, height, 1, null);
         double [] samples = rasterized.getRenderedImage().getData().getSamples(0, 0, width, height, 0, (double[]) null);
         writableRaster.setSamples(0, 0, width, height, 0, samples);
 
         return RasterUtils.create(writableRaster, rasterized.getGridGeometry(), rasterized.getSampleDimensions(), noDataValue);
+    }
+
+    /**
+     * Returns a raster that is converted from the geometry provided. A convenience function for asRaster.
+     *
+     * @param geom The geometry to convert
+     * @param raster The reference raster
+     * @param pixelType The data type of pixel/cell of resultant raster.
+     *
+     * @return Rasterized Geometry
+     * @throws FactoryException
+     */
+    public static GridCoverage2D asRaster(Geometry geom, GridCoverage2D raster, String pixelType) throws FactoryException {
+        return asRaster(geom, raster, pixelType, 1, null);
     }
 
     public static DefaultFeatureCollection getFeatureCollection(Geometry geom, CoordinateReferenceSystem crs) {
