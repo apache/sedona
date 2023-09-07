@@ -31,7 +31,7 @@ To get the latest Sedona jars you can:
 * **Compile the Sedona code yourself**, see [Compile the code](https://sedona.apache.org/latest-snapshot/setup/compile/)
 * **Get the latest generated jars** from the [GitHub 'Java build' action](https://github.com/apache/sedona/actions/workflows/java.yml); click on the latest run, the generated jars are at the bottom of the page
 
-The path to the sedona-spark-shaded and sedona-viz jars needs to be put in the `SEDONA_JAR_FILES` environment variables (see below).
+The path to the sedona-spark-shaded jars needs to be put in the `SEDONA_JAR_FILES` environment variables (see below).
 
 
 ## Usage
@@ -45,7 +45,7 @@ library(sparklyr)
 library(apache.sedona)
 
 ## Only if using development version:
-Sys.setenv("SEDONA_JAR_FILES" = "<path to sedona-spark-shaded jar>:<path to sedona-viz jar>")
+Sys.setenv("SEDONA_JAR_FILES" = "<path to sedona-spark-shaded jar>")
 
 sc <- spark_connect(master = "local")
 polygon_sdf <- spark_read_geojson(sc, location = "/tmp/polygon.json")

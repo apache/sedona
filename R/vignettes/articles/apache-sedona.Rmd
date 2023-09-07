@@ -77,7 +77,7 @@ sc <- spark_connect(master = "yarn", spark_home = spark_home)
 
 will create a Sedona-capable Spark connection in YARN client mode, and
 ```{r include=FALSE}
-Sys.setenv("SEDONA_JAR_FILES" = "~/WORK/MISC_CODE/sedona/spark-shaded/target/sedona-spark-shaded-3.0_2.12-1.4.0-SNAPSHOT.jar:~/WORK/MISC_CODE/sedona/viz/target/sedona-viz-3.0_2.12-1.4.0-SNAPSHOT.jar")
+Sys.setenv("SEDONA_JAR_FILES" = "~/WORK/MISC_CODE/sedona/spark-shaded/target/sedona-spark-shaded-3.0_2.12-1.4.0-SNAPSHOT.jar")
 ```
 
 ```{r message=FALSE, warning=FALSE}
