@@ -183,3 +183,59 @@ sparkSession.read.format("binaryFile").load("my_raster_file/*")
 Then you can create Raster type in Sedona like this `RS_FromGeoTiff(content)` (if the written data was in GeoTiff format).
 
 The newly created DataFrame can be written to disk again but must be under a different name such as `my_raster_file_modified`
+
+### Write Geometry to Raster dataframe
+
+#### RS_AsRaster
+
+Introduction: Converts a Geometry to a Raster dataset. Defaults to using `1.0` for cell `value` and `null` for `noDataValue` if not provided. Supports all geometry types. 
+
+Format:
+
+```
+RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, value: Double = 1.0, noDataValue: Double = null)
+```
+
+Since: `v1.5.0`
+
+!!!note
+	The function doesn't support rasters that have any one of the following properties:
+	```
+	ScaleX < 0
+	ScaleY > 0
+	SkewX != 0
+	SkewY != 0
+	```
+	If a raster is provided with anyone of these properties then IllegalArgumentException is thrown.
+
+Spark SQL Example:
+
+```sql
+SELECT RS_AsRaster(
+		ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))'),
+    	RS_MakeEmptyRaster(2, 255, 255, 3, -215, 2, -2, 0, 0, 4326),
+    	'd', 255.0, 0d
+	)
+```
+
+Output:
+
+```
+GridCoverage2D["g...
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_AsRaster(
+		ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))'),
+    	RS_MakeEmptyRaster(2, 255, 255, 3, -215, 2, -2, 0, 0, 4326),
+    	'd'
+	)
+```
+
+Output:
+
+```
+GridCoverage2D["g...
+```
