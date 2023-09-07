@@ -20,8 +20,8 @@ package org.apache.sedona.sql
 
 import com.google.common.math.DoubleMath
 import org.apache.log4j.{Level, Logger}
+import org.apache.sedona.common.Functions.{frechetDistance, hausdorffDistance}
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
-import org.apache.sedona.common.Functions.{hausdorffDistance, frechetDistance}
 import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.sql.DataFrame
 import org.locationtech.jts.geom.{CoordinateSequence, CoordinateSequenceComparator}

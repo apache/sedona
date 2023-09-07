@@ -667,7 +667,6 @@
             <modules>
                 <module>common</module>
                 <module>spark</module>
-                <module>viz</module>
                 <module>spark-shaded</module>
             </modules>
         </profile>
@@ -688,7 +687,6 @@
             <modules>
                 <module>common</module>
                 <module>spark</module>
-                <module>viz</module>
                 <module>spark-shaded</module>
                 <module>flink</module>
                 <module>flink-shaded</module>

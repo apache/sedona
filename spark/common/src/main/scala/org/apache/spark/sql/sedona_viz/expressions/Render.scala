@@ -18,8 +18,7 @@
  */
 package org.apache.spark.sql.sedona_viz.expressions
 
-import java.awt.image.BufferedImage // scalastyle:ignore illegal.imports
-
+import java.awt.image.BufferedImage
 import org.apache.sedona.viz.core.ImageSerializableWrapper
 import org.apache.sedona.viz.utils.Pixel
 import org.apache.spark.internal.Logging
