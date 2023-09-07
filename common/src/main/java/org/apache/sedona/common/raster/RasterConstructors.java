@@ -27,7 +27,6 @@ import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.process.vector.VectorToRasterProcess;
-import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.util.factory.Hints;
@@ -42,6 +41,7 @@ import org.opengis.referencing.operation.MathTransform;
 import javax.media.jai.RasterFactory;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class RasterConstructors
 {
@@ -55,10 +55,9 @@ public class RasterConstructors
         return geoTiffReader.read(null);
     }
 
-    public static GridCoverage2D asRaster(Geometry geom, GridCoverage2D raster, String pixelType, double value, double noDataValue, boolean touched) {
+    public static GridCoverage2D asRaster(Geometry geom, GridCoverage2D raster, String pixelType, double value, double noDataValue) {
 
         DefaultFeatureCollection featureCollection = getFeatureCollection(geom, raster.getCoordinateReferenceSystem());
-        featureCollection.getBounds().getHeight();
 
         Envelope2D bound = JTS.getEnvelope2D(geom.getEnvelopeInternal(), raster.getCoordinateReferenceSystem2D());
 
@@ -66,9 +65,11 @@ public class RasterConstructors
 
         VectorToRasterProcess rasterProcess = new VectorToRasterProcess();
         GridCoverage2D rasterized = rasterProcess.execute(featureCollection, width, height, "value", Double.toString(value), bound, null);
-        rasterized = RasterBandEditors.setBandNoDataValue(rasterized, noDataValue);
+        WritableRaster writableRaster = RasterFactory.createBandedRaster(RasterUtils.getDataTypeCode(pixelType), width, height, 1, null);
+        double [] samples = rasterized.getRenderedImage().getData().getSamples(0, 0, width, height, 0, (double[]) null);
+        writableRaster.setSamples(0, 0, width, height, 0, samples);
 
-        return rasterized;
+        return RasterUtils.create(writableRaster, rasterized.getGridGeometry(), rasterized.getSampleDimensions(), noDataValue);
     }
 
     public static DefaultFeatureCollection getFeatureCollection(Geometry geom, CoordinateReferenceSystem crs) {
