@@ -24,12 +24,12 @@ import org.apache.sedona.viz.sql.utils.{Conf, LineageDecoder}
 import org.apache.spark.sql.functions.lit
 import org.locationtech.jts.geom.Envelope
 
-class optVizOperatorTest extends TestBaseScala {
+class optVizOperatorTest extends VizTestBase {
 
   describe("SedonaViz SQL function Test") {
 
     it("Passed full pipeline using optimized operator") {
-      val table = spark.sql(
+      val table = sparkSession.sql(
        """
          |SELECT pixel, shape FROM pointtable
          |LATERAL VIEW EXPLODE(ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel
@@ -49,7 +49,7 @@ class optVizOperatorTest extends TestBaseScala {
 
       // Test the colorize operator
       result.createOrReplaceTempView("pixelaggregates")
-      val colorTable = spark.sql(
+      val colorTable = sparkSession.sql(
         s"""
           |SELECT pixel, ${Conf.PrimaryPID}, ${Conf.SecondaryPID}, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates))
           |FROM pixelaggregates
@@ -59,7 +59,7 @@ class optVizOperatorTest extends TestBaseScala {
     }
 
     it("Passed full pipeline - aggregate:avg - color:uniform") {
-      var table = spark.sql(
+      var table = sparkSession.sql(
         """
           |SELECT pixel, shape FROM pointtable
           |LATERAL VIEW EXPLODE(ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel
@@ -79,7 +79,7 @@ class optVizOperatorTest extends TestBaseScala {
 
       // Test the colorize operator
       result.createOrReplaceTempView("pixelaggregates")
-      val colorTable = spark.sql(
+      val colorTable = sparkSession.sql(
         s"""
            |SELECT pixel, ${Conf.PrimaryPID}, ${Conf.SecondaryPID}, ST_Colorize(weight, 0, 'red')
            |FROM pixelaggregates

@@ -20,11 +20,10 @@ package org.apache.sedona.sql
 
 import com.google.common.math.DoubleMath
 import org.apache.log4j.{Level, Logger}
-import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.common.Functions.{frechetDistance, hausdorffDistance}
+import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.spark.SedonaContext
-import org.apache.spark.SparkContext
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.DataFrame
 import org.locationtech.jts.geom.{CoordinateSequence, CoordinateSequenceComparator}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
@@ -36,9 +35,15 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   Logger.getLogger("org.apache.sedona.core").setLevel(Level.WARN)
 
   val warehouseLocation = System.getProperty("user.dir") + "/target/"
-  var sparkSession:SparkSession = null
+  val sparkSession = SedonaContext.builder().
+    master("local[*]").appName("sedonasqlScalaTest")
+    .config("spark.sql.warehouse.dir", warehouseLocation)
+    // We need to be explicit about broadcasting in tests.
+    .config("sedona.join.autoBroadcastJoinThreshold", "-1")
+    .config("spark.kryoserializer.buffer.max", "64m")
+    .getOrCreate()
 
-  var sc: SparkContext = null
+  val sc = sparkSession.sparkContext
 
   val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
   val mixedWkbGeometryInputLocation = resourceFolder + "county_small_wkb.tsv"
@@ -69,21 +74,12 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   val smallRasterDataLocation: String = resourceFolder + "raster/test1.tiff"
 
   override def beforeAll(): Unit = {
-    sparkSession = SedonaContext.builder().
-      master("local[*]").appName("sedonasqlScalaTest")
-      .config("spark.sql.warehouse.dir", warehouseLocation)
-      // We need to be explicit about broadcasting in tests.
-      .config("sedona.join.autoBroadcastJoinThreshold", "-1")
-      .config("spark.kryoserializer.buffer.max", "64m")
-      .getOrCreate()
-
-    sc = sparkSession.sparkContext
     SedonaContext.create(sparkSession)
   }
 
   override def afterAll(): Unit = {
     //SedonaSQLRegistrator.dropAll(spark)
-    sparkSession.stop
+//    sparkSession.stop
   }
 
   def loadCsv(path: String): DataFrame = {
