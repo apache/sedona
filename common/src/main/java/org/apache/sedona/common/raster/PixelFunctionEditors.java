@@ -36,8 +36,8 @@ public class PixelFunctionEditors {
         }
 
         RenderedImage originalImage = raster.getRenderedImage();
-        Raster rasterTemp = originalImage.getData();
-        Point location = raster.getRenderedImage().getData().getBounds().getLocation();
+        Raster rasterTemp = RasterUtils.getRaster(originalImage);
+        Point location = rasterTemp.getBounds().getLocation();
         WritableRaster wr = RasterFactory.createBandedRaster(rasterTemp.getDataBuffer().getDataType(), originalImage.getWidth(), originalImage.getHeight(), raster.getNumSampleDimensions(), location);
 
         WritableRaster rasterCopied = raster.getRenderedImage().copyData(wr);

@@ -86,7 +86,7 @@ public class RasterBandAccessors {
 
     public static double[] getSummaryStats(GridCoverage2D rasterGeom, int band, boolean excludeNoDataValue) {
         RasterUtils.ensureBand(rasterGeom, band);
-        Raster raster = rasterGeom.getRenderedImage().getData();
+        Raster raster = RasterUtils.getRaster(rasterGeom.getRenderedImage());
         int height = RasterAccessors.getHeight(rasterGeom), width = RasterAccessors.getWidth(rasterGeom);
         double[] pixels = raster.getSamples(0, 0, width, height, band - 1, (double[]) null);
         double count = 0, sum = 0, mean = 0, stddev = 0, min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
@@ -154,7 +154,7 @@ public class RasterBandAccessors {
         }
 
         // Get Writable Raster from the resultRaster
-        WritableRaster wr = resultRaster.getRenderedImage().getData().createCompatibleWritableRaster();
+        WritableRaster wr = RasterUtils.getRaster(resultRaster.getRenderedImage()).createCompatibleWritableRaster();
 
         GridSampleDimension[] sampleDimensionsOg = rasterGeom.getSampleDimensions();
         GridSampleDimension[] sampleDimensionsResult = resultRaster.getSampleDimensions();
