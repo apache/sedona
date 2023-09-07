@@ -43,6 +43,7 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.InternationalString;
 
+import javax.media.jai.RenderedImageAdapter;
 import java.awt.Color;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
@@ -51,6 +52,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
+import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
@@ -295,6 +297,19 @@ public class RasterUtils {
     public static void ensureBand(GridCoverage2D raster, int band) throws IllegalArgumentException {
         if (band < 1 || band > RasterAccessors.numBands(raster)) {
             throw new IllegalArgumentException(String.format("Provided band index %d is not present in the raster", band));
+        }
+    }
+
+    public static Raster getRaster(RenderedImage renderedImage) {
+        while (renderedImage instanceof RenderedImageAdapter) {
+            renderedImage = ((RenderedImageAdapter) renderedImage).getWrappedImage();
+        }
+        if (renderedImage instanceof BufferedImage) {
+            // This is a fast path for BufferedImage. If we call getData() directly, it will make a
+            // hard copy of the raster. We can avoid this overhead by calling getRaster().
+            return ((BufferedImage) renderedImage).getRaster();
+        } else {
+            return renderedImage.getData();
         }
     }
 

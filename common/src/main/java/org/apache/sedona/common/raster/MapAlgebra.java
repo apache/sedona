@@ -23,14 +23,17 @@ import it.geosolutions.jaiext.jiffle.runtime.JiffleDirectRuntime;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.jaitools.imageutils.ImageUtils;
 
+import javax.media.jai.PlanarImage;
 import javax.media.jai.RasterFactory;
-import javax.media.jai.TiledImage;
-import java.awt.*;
+import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
+import java.awt.image.WritableRenderedImage;
 
 public class MapAlgebra
 {
@@ -47,7 +50,7 @@ public class MapAlgebra
             return null;
         }
 
-        Raster raster = rasterGeom.getRenderedImage().getData();
+        Raster raster = RasterUtils.getRaster(rasterGeom.getRenderedImage());
         // Get the width and height of the raster
         int width = raster.getWidth();
         int height = raster.getHeight();
@@ -115,8 +118,8 @@ public class MapAlgebra
     private static GridCoverage2D copyRasterAndAppendBand(GridCoverage2D gridCoverage2D, double[] bandValues, Double noDataValue) {
         // Get the original image and its properties
         RenderedImage originalImage = gridCoverage2D.getRenderedImage();
-        Raster raster = originalImage.getData();
-        Point location = gridCoverage2D.getRenderedImage().getData().getBounds().getLocation();
+        Raster raster = RasterUtils.getRaster(originalImage);
+        Point location = raster.getBounds().getLocation();
         WritableRaster wr = RasterFactory.createBandedRaster(raster.getDataBuffer().getDataType(), originalImage.getWidth(), originalImage.getHeight(), gridCoverage2D.getNumSampleDimensions() + 1, location);
         // Copy the raster data and append the new band values
         for (int i = 0; i < raster.getWidth(); i++) {
@@ -153,7 +156,7 @@ public class MapAlgebra
         }
         // Get the original image and its properties
         RenderedImage originalImage = gridCoverage2D.getRenderedImage();
-        Raster raster = originalImage.getData();
+        Raster raster = RasterUtils.getRaster(originalImage);
         WritableRaster wr = raster.createCompatibleWritableRaster();
         // Copy the raster data and replace the band values
         for (int i = 0; i < raster.getWidth(); i++) {
@@ -196,7 +199,11 @@ public class MapAlgebra
         int rasterDataType = pixelType != null? RasterUtils.getDataTypeCode(pixelType) : renderedImage.getSampleModel().getDataType();
         int width = renderedImage.getWidth();
         int height = renderedImage.getHeight();
-        TiledImage resultImage = ImageUtils.createConstantImage(width, height, 0.0);
+        // ImageUtils.createConstantImage is slow, manually constructing a buffered image proved to be faster.
+        // It also eliminates the data-copying overhead when converting raster data types after running jiffle script.
+        WritableRaster resultRaster = RasterFactory.createBandedRaster(DataBuffer.TYPE_DOUBLE, width, height, 1, null);
+        ColorModel cm = PlanarImage.createColorModel(resultRaster.getSampleModel());
+        WritableRenderedImage resultImage = new BufferedImage(cm, resultRaster, false, null);
         try {
             String prevScript = previousScript.get();
             JiffleDirectRuntime prevRuntime = previousRuntime.get();
@@ -221,16 +228,14 @@ public class MapAlgebra
             if (rasterDataType != resultImage.getSampleModel().getDataType()) {
                 // Copy the resultImage to a new raster with the specified pixel type
                 WritableRaster convertedRaster = RasterFactory.createBandedRaster(rasterDataType, width, height, 1, null);
-                double[] samples = resultImage.getData().getSamples(0, 0, width, height, 0, (double[]) null);
+                double[] samples = resultRaster.getSamples(0, 0, width, height, 0, (double[]) null);
                 convertedRaster.setSamples(0, 0, width, height, 0, samples);
-                resultImage.dispose();
                 return RasterUtils.create(convertedRaster, gridCoverage2D.getGridGeometry(), null, noDataValue);
             } else {
                 // build a new GridCoverage2D from the resultImage
                 return RasterUtils.create(resultImage, gridCoverage2D.getGridGeometry(), null, noDataValue);
             }
         } catch (Exception e) {
-            resultImage.dispose();
             throw new RuntimeException("Failed to run map algebra", e);
         }
     }
