@@ -13,14 +13,17 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
@@ -54,6 +57,19 @@ public class RasterConstructorsTest
         assertEquals(10d, gridCoverage2D.getRenderedImage().getData().getPixel(5, 5, (double[])null)[0], 0.1);
         assertEquals(4, gridCoverage2D.getNumSampleDimensions());
     }
+
+    @Test
+    public void testAsRaster() throws FactoryException, ParseException, IOException {
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(2, 5, 5, 3, -215, 2, -2, 2, 2, 0);
+        GridCoverage2D raster1 = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+        Geometry geom = Constructors.geomFromWKT("POLYGON((34 35, 28 30, 25 34, 34 35))", 0);
+        GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster1, "d", 25.5, 3d);
+        System.out.println(Arrays.toString(RasterAccessors.metadata(rasterized)));
+        System.out.println(Arrays.toString(RasterAccessors.metadata(raster1)));
+        String base64 = RasterOutputs.asBase64(rasterized);
+        System.out.println("Base64: " + base64);
+    }
+
 
     @Test
     public void makeEmptyRaster() throws FactoryException {
