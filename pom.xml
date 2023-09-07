@@ -91,6 +91,7 @@
         <scalatest.version>3.1.1</scalatest.version>
         <scala-collection-compat.version>2.5.0</scala-collection-compat.version>
         <geoglib.version>1.52</geoglib.version>
+        <caffeine.version>2.9.2</caffeine.version>
 
         <geotools.scope>provided</geotools.scope>
         <!-- Because it's not in Maven central, make it provided by default -->
@@ -332,6 +333,11 @@
                 <groupId>net.sf.geographiclib</groupId>
                 <artifactId>GeographicLib-Java</artifactId>
                 <version>${geoglib.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
