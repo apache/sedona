@@ -280,7 +280,7 @@ As you see, compared to the query in Step 2, we added one more filter, which is 
 Due to the explode function used when we generate S2 Cell Ids, the resulting DataFrame may have several duplicate <lcs_geom, rcs_geom> matches. You can remove them by performing a GroupBy query.
 
 ```sql
-SELECT lcs_id, rcs_id , FIRST_VALUE(lcs_geom), FIRST_VALUE(lcs_name), first(rcs_geom), first(rcs_name)
+SELECT lcs_id, rcs_id, FIRST_VALUE(lcs_geom), FIRST_VALUE(lcs_name), first(rcs_geom), first(rcs_name)
 FROM joinresult
 GROUP BY (lcs_id, rcs_id)
 ```

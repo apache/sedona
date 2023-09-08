@@ -73,7 +73,6 @@ jobs:
         fi
         mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${SKIP_TESTS}
     - run: mkdir staging
-    - run: cp viz/target/sedona-*.jar staging
     - run: cp spark-shaded/target/sedona-*.jar staging
     - run: |
         [ -d "flink-shaded/target/" ] && cp flink-shaded/target/sedona-*.jar staging 2>/dev/null || true

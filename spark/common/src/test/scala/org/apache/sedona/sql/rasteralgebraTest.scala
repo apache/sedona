@@ -783,6 +783,15 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(255.0, actual(5), 0.1d)
     }
 
+    it("Passed RS_BandIsNoData") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+      assert(!df.selectExpr("RS_BandIsNoData(raster, 1)").first().getBoolean(0))
+      val bandDf = Seq(Seq.fill(9)(10.0)).toDF("data")
+      val noDataDf = bandDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 3, 3, 0, 0, 1), data, 1, 10d) as raster")
+      assert(noDataDf.selectExpr("RS_BandIsNoData(raster, 1)").first().getBoolean(0))
+    }
+
     it("Passed RS_PixelAsPoint with raster") {
       val widthInPixel = 5
       val heightInPixel = 10
