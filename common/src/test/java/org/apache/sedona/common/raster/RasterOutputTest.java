@@ -21,10 +21,10 @@ package org.apache.sedona.common.raster;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class RasterOutputTest
         extends RasterTestBase {
@@ -42,6 +42,22 @@ public class RasterOutputTest
         GridCoverage2D rasterTest = RasterConstructors.fromGeoTiff(RasterOutputs.asGeoTiff(rasterFromGeoTiff(resourceFolder + "raster/test1.tiff")));
         assert(rasterTest != null);
         assertEquals(rasterTest.getEnvelope().toString(), rasterOg.getEnvelope().toString());
+    }
+
+    @Test
+    public void testToGeoTiff() throws IOException {
+        GridCoverage2D rasterOg = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+        String filePath = System.getProperty("user.dir") + "/../spark/common/src/test/resources/testToGeoTiffFunction/test1.tiff";
+        boolean successful = RasterOutputs.toGeoTiff(rasterOg, filePath);
+        assertTrue(successful);
+
+        GridCoverage2D rasterConverted = rasterFromGeoTiff(filePath);
+        double[] actual = MapAlgebra.bandAsArray(rasterOg, 1);
+        double[] expected = MapAlgebra.bandAsArray(rasterConverted, 1);
+        assertArrayEquals(expected, actual, 0.1d);
+
+        // Deleting so that no one use it. As it is not static.
+        assertTrue(new File(filePath).delete());
     }
 
     @Test

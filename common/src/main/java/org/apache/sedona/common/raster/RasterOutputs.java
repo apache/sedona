@@ -35,6 +35,7 @@ import javax.imageio.ImageWriteParam;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 
@@ -86,10 +87,9 @@ public class RasterOutputs
      * */
     public static boolean toGeoTiff(GridCoverage2D raster, String filePath) {
         File outputFile = new File(filePath);
-        GeoTiffFormat format = new GeoTiffFormat();
-        GeoTiffWriter writer = (GeoTiffWriter) format.getWriter(outputFile);
-        try {
-            writer.write(raster, null);
+        byte[] bytes = asGeoTiff(raster);
+        try (FileOutputStream outputStream = new FileOutputStream(outputFile)){
+            outputStream.write(bytes);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
