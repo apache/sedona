@@ -180,4 +180,32 @@ public class RasterBandAccessors {
     public static String getBandType(GridCoverage2D raster){
         return getBandType(raster, 1);
     }
+
+    /**
+     * Returns true if the band is filled with only nodata values.
+     * @param raster The raster to check
+     * @param band The 1-based index of band to check
+     * @return true if the band is filled with only nodata values, false otherwise
+     */
+    public static boolean bandIsNoData(GridCoverage2D raster, int band) {
+        RasterUtils.ensureBand(raster, band);
+        Raster rasterData = RasterUtils.getRaster(raster.getRenderedImage());
+        int width = rasterData.getWidth();
+        int height = rasterData.getHeight();
+        double noDataValue = RasterUtils.getNoDataValue(raster.getSampleDimension(band - 1));
+        if (Double.isNaN(noDataValue)) {
+            return false;
+        }
+        double[] pixels = rasterData.getSamples(0, 0, width, height, band - 1, (double[]) null);
+        for (double pixel: pixels) {
+            if (Double.compare(pixel, noDataValue) != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean bandIsNoData(GridCoverage2D raster) {
+        return bandIsNoData(raster, 1);
+    }
 }

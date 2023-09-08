@@ -594,6 +594,27 @@ SELECT RS_BandNoDataValue(raster, 3) from rasters;
 
 Output: `IllegalArgumentException: Provided band index 3 is not present in the raster.`
 
+### RS_BandIsNoData
+
+Returns true if the band is filled with only nodata values. Band 1 is assumed if not specified.
+
+Format: `RS_BandIsNoData(raster: Raster, band: Int = 1)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+
+```sql
+WITH rast_table AS (SELECT RS_AddBandFromArray(RS_MakeEmptyRaster(1, 2, 2, 0, 0, 1), ARRAY(10d, 10d, 10d, 10d), 1, 10d) as rast)
+SELECT RS_BandIsNoData(rast) from rast_table
+```
+
+Output:
+
+```
+true
+```
+
 ### RS_BandPixelType
 
 Introduction: Returns the datatype of each pixel in the given band of the given raster in string format. The band parameter is 1-indexed. If no band is specified, band 1 is assumed.

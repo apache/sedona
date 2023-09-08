@@ -362,6 +362,32 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         assertEquals("Provided band index 5 is not present in the raster", exception.getMessage());
     }
 
+    @Test
+    public void testBandIsNoData() throws FactoryException {
+        String[] dataTypes = new String[]{"B", "S", "US", "I", "F", "D"};
+        int width = 3;
+        int height = 3;
+        double noDataValue = 5.0;
+        double[] band1 = new double[width * height];
+        double[] band2 = new double[width * height];
+        Arrays.fill(band1, noDataValue);
+        for (int k = 0; k < band2.length; k++) {
+            band2[k] = k;
+        }
+        for (String dataType : dataTypes) {
+            GridCoverage2D raster = RasterConstructors.makeEmptyRaster(2, dataType, 3, 3, 0, 0, 1);
+            raster = MapAlgebra.addBandFromArray(raster, band1, 1, null);
+            raster = MapAlgebra.addBandFromArray(raster, band2, 2, null);
 
+            // Currently raster does not have a nodata value, isBandNoData always returns false
+            assertFalse(RasterBandAccessors.bandIsNoData(raster, 1));
+            assertFalse(RasterBandAccessors.bandIsNoData(raster, 2));
 
+            // Set nodata value for both bands, now band 1 is filled with nodata values
+            raster = RasterBandEditors.setBandNoDataValue(raster, 1, noDataValue);
+            raster = RasterBandEditors.setBandNoDataValue(raster, 2, noDataValue);
+            assertTrue(RasterBandAccessors.bandIsNoData(raster, 1));
+            assertFalse(RasterBandAccessors.bandIsNoData(raster, 2));
+        }
+    }
 }
