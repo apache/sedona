@@ -86,7 +86,7 @@ jobs:
     - run: sudo pip3 install -U setuptools
     - run: sudo pip3 install -U wheel
     - run: sudo pip3 install -U virtualenvwrapper
-    - run: python3 -m pip install pipenv
+    - run: python3 -m pip install pipenv==2023.9.1
     - run: cd python; python3 setup.py build_ext --inplace
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
