@@ -189,11 +189,20 @@ The newly created DataFrame can be written to disk again but must be under a dif
 #### RS_AsRaster
 
 Introduction: Converts a Geometry to a Raster dataset. Defaults to using `1.0` for cell `value` and `null` for `noDataValue` if not provided. Supports all geometry types. 
+The `pixelType` argument defines data type of the output raster. This can be one of the following, D (double), F (float), I (integer), S (short), US (unsigned short) or B (byte).
 
 Format:
 
 ```
-RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, value: Double = 1.0, noDataValue: Double = null)
+RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, value: Double, noDataValue: Double)
+```
+
+```
+RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, value: Double)
+```
+
+```
+RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String)
 ```
 
 Since: `v1.5.0`
@@ -214,7 +223,7 @@ Spark SQL Example:
 SELECT RS_AsRaster(
 		ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))'),
     	RS_MakeEmptyRaster(2, 255, 255, 3, -215, 2, -2, 0, 0, 4326),
-    	'd', 255.0, 0d
+    	'D', 255.0, 0d
 	)
 ```
 
@@ -230,7 +239,7 @@ Spark SQL Example:
 SELECT RS_AsRaster(
 		ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))'),
     	RS_MakeEmptyRaster(2, 255, 255, 3, -215, 2, -2, 0, 0, 4326),
-    	'd'
+    	'D'
 	)
 ```
 
