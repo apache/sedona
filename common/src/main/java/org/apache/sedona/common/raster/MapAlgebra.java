@@ -139,7 +139,7 @@ public class MapAlgebra
             sampleDimensions[numBand - 1] = new GridSampleDimension("band" + numBand);
         }
         // Construct a GridCoverage2D with the copied image.
-        return RasterUtils.create(wr, gridCoverage2D.getGridGeometry(), sampleDimensions);
+        return RasterUtils.create(wr, gridCoverage2D.getGridGeometry(), sampleDimensions, null);
     }
 
     private static GridCoverage2D copyRasterAndAppendBand(GridCoverage2D gridCoverage2D, double[] bandValues) {
@@ -170,7 +170,7 @@ public class MapAlgebra
         } else if (noDataValue != null) {
             sampleDimensions[bandIndex - 1] = RasterUtils.createSampleDimensionWithNoDataValue(sampleDimension, noDataValue);
         }
-        return RasterUtils.create(wr, gridCoverage2D.getGridGeometry(), sampleDimensions);
+        return RasterUtils.create(wr, gridCoverage2D.getGridGeometry(), sampleDimensions, null);
     }
 
     private static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, double[] bandValues) {
@@ -224,7 +224,7 @@ public class MapAlgebra
                 double[] samples = resultImage.getData().getSamples(0, 0, width, height, 0, (double[]) null);
                 convertedRaster.setSamples(0, 0, width, height, 0, samples);
                 resultImage.dispose();
-                return RasterUtils.create(convertedRaster, gridCoverage2D.getGridGeometry(), null, noDataValue);
+                return RasterUtils.create(convertedRaster, gridCoverage2D.getGridGeometry(), null, noDataValue, null);
             } else {
                 // build a new GridCoverage2D from the resultImage
                 return RasterUtils.create(resultImage, gridCoverage2D.getGridGeometry(), null, noDataValue);
