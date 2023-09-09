@@ -89,6 +89,19 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
       assertEquals(expected, actual)
     }
 
+    it("Passed RS_AsRaster LineString") {
+      var df = sparkSession.sql("SELECT RS_MakeEmptyRaster(2, 255, 255, 3, -215, 2, -2, 0, 0, 4326) as raster, ST_GeomFromWKT('LINESTRING(1 1, 2 1, 10 1)') as geom")
+      var rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', 255, 0d) as rasterized")
+      var actual = rasterized.selectExpr("RS_BandAsArray(rasterized, 1)").first().getSeq(0).mkString("Array(", ", ", ")")
+      var expected = "Array(255.0, 255.0, 255.0, 255.0, 255.0, 255.0, 0.0, 0.0, 0.0)"
+      assertEquals(expected, actual)
+
+      rasterized = df.selectExpr("RS_AsRaster(ST_GeomFromWKT('LINESTRING(1 1, 1 2, 1 10)'), raster, 'd', 255, 0d) as rasterized")
+      actual = rasterized.selectExpr("RS_BandAsArray(rasterized, 1)").first().getSeq(0).mkString("Array(", ", ", ")")
+      expected = "Array(0.0, 0.0, 0.0, 255.0, 255.0, 255.0, 255.0, 255.0, 255.0)"
+      assertEquals(expected, actual)
+    }
+
     it("Passed RS_AsRaster with raster") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       df = df.selectExpr("ST_GeomFromWKT('POINT(5 5)') as geom","RS_FromGeoTiff(content) as raster")
