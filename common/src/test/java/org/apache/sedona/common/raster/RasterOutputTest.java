@@ -46,6 +46,7 @@ public class RasterOutputTest
 
     @Test
     public void testToGeoTiff() throws IOException {
+        new File(System.getProperty("user.dir") + "/target/estToGeoTiffFunction/").mkdirs();
         GridCoverage2D rasterOg = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
         String filePath = System.getProperty("user.dir") + "/target/estToGeoTiffFunction/test1.tiff";
         boolean successful = RasterOutputs.toGeoTiff(rasterOg, filePath);
