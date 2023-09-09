@@ -45,11 +45,12 @@ public class RasterOutputTest
     }
 
     @Test
-    public void testToGeoTiff() throws IOException {
+    public void testWriteToDiskFile() throws IOException {
         new File(System.getProperty("user.dir") + "/target/estToGeoTiffFunction/").mkdirs();
         GridCoverage2D rasterOg = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+        byte[] bytes = RasterOutputs.asGeoTiff(rasterOg);
         String filePath = System.getProperty("user.dir") + "/target/estToGeoTiffFunction/test1.tiff";
-        boolean successful = RasterOutputs.toGeoTiff(rasterOg, filePath);
+        boolean successful = RasterOutputs.writeToDiskFile(bytes, filePath);
         assertTrue(successful);
 
         GridCoverage2D rasterConverted = rasterFromGeoTiff(filePath);

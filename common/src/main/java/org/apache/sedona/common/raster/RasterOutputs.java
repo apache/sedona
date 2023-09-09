@@ -79,15 +79,14 @@ public class RasterOutputs
 
     /**
     * Creates a GeoTiff file with the provided raster. Primarily used for testing.
-     * @param raster The raster to be stored as .tiff
+     * @param bytes The bytes to be stored on a disk file
      * @param filePath The path where the .tiff should be stored.
      *
      * @return true if file is created, otherwise throws IOException
      * @throws IOException
      * */
-    public static boolean toGeoTiff(GridCoverage2D raster, String filePath) {
+    public static boolean writeToDiskFile(byte[] bytes, String filePath) {
         File outputFile = new File(filePath);
-        byte[] bytes = asGeoTiff(raster);
         try (FileOutputStream outputStream = new FileOutputStream(outputFile)){
             outputStream.write(bytes);
         } catch (IOException e) {
