@@ -70,7 +70,6 @@ public class RasterConstructors
 
         DefaultFeatureCollection featureCollection = getFeatureCollection(geom, raster.getCoordinateReferenceSystem());
 
-
         double[] metadata = RasterAccessors.metadata(raster);
         // The current implementation doesn't support rasters with properties below
         // It is not a problem as most rasters don't have these properties
@@ -94,12 +93,20 @@ public class RasterConstructors
         Envelope2D bound = JTS.getEnvelope2D(geom.getEnvelopeInternal(), raster.getCoordinateReferenceSystem2D());
 
         double scaleX = Math.abs(metadata[4]), scaleY = Math.abs(metadata[5]);
+        if (geom.getGeometryType().equalsIgnoreCase(Geometry.TYPENAME_POINT)) {
+            bound = new Envelope2D(bound.getCoordinateReferenceSystem(), bound.getCenterX() - scaleX * 0.5, bound.getCenterY() - scaleY * 0.5, scaleX, scaleY);
+        }
 
         int width = (int) bound.getWidth(), height = (int) bound.getHeight();
 
-        // To preserve scale of reference raster
-        width = (int) (width / scaleX);
-        height = (int) (height / scaleY);
+        if (geom.getGeometryType().equalsIgnoreCase(Geometry.TYPENAME_POINT)) {
+            width = 1;
+            height = 1;
+        } else {
+            // To preserve scale of reference raster
+            width = (int) (width / scaleX);
+            height = (int) (height / scaleY);
+        }
 
         VectorToRasterProcess rasterProcess = new VectorToRasterProcess();
         GridCoverage2D rasterized = rasterProcess.execute(featureCollection, width, height, "value", Double.toString(value), bound, null);
@@ -107,7 +114,7 @@ public class RasterConstructors
             rasterized = RasterBandEditors.setBandNoDataValue(rasterized, 1, noDataValue);
         }
         WritableRaster writableRaster = RasterFactory.createBandedRaster(RasterUtils.getDataTypeCode(pixelType), width, height, 1, null);
-        double [] samples = rasterized.getRenderedImage().getData().getSamples(0, 0, width, height, 0, (double[]) null);
+        double [] samples = RasterUtils.getRaster(rasterized.getRenderedImage()).getSamples(0, 0, width, height, 0, (double[]) null);
         writableRaster.setSamples(0, 0, width, height, 0, samples);
 
         return RasterUtils.create(writableRaster, rasterized.getGridGeometry(), rasterized.getSampleDimensions(), noDataValue);
@@ -125,6 +132,21 @@ public class RasterConstructors
      */
     public static GridCoverage2D asRaster(Geometry geom, GridCoverage2D raster, String pixelType) throws FactoryException {
         return asRaster(geom, raster, pixelType, 1, null);
+    }
+
+    /**
+     * Returns a raster that is converted from the geometry provided. A convenience function for asRaster.
+     *
+     * @param geom The geometry to convert
+     * @param raster The reference raster
+     * @param pixelType The data type of pixel/cell of resultant raster.
+     * @param value The value of the pixel of the resultant raster
+     *
+     * @return Rasterized Geometry
+     * @throws FactoryException
+     */
+    public static GridCoverage2D asRaster(Geometry geom, GridCoverage2D raster, String pixelType, double value) throws FactoryException {
+        return asRaster(geom, raster, pixelType, value, null);
     }
 
     public static DefaultFeatureCollection getFeatureCollection(Geometry geom, CoordinateReferenceSystem crs) {
