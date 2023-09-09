@@ -55,9 +55,6 @@ public class RasterOutputTest
         double[] actual = MapAlgebra.bandAsArray(rasterOg, 1);
         double[] expected = MapAlgebra.bandAsArray(rasterConverted, 1);
         assertArrayEquals(expected, actual, 0.1d);
-
-        // Deleting so that no one use it. As it is not static.
-        assertTrue(new File(filePath).delete());
     }
 
     @Test
