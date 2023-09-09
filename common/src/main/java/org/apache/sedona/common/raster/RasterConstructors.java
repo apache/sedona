@@ -93,15 +93,17 @@ public class RasterConstructors
         Envelope2D bound = JTS.getEnvelope2D(geom.getEnvelopeInternal(), raster.getCoordinateReferenceSystem2D());
 
         double scaleX = Math.abs(metadata[4]), scaleY = Math.abs(metadata[5]);
+        int width = (int) bound.getWidth(), height = (int) bound.getHeight();
         if (geom.getGeometryType().equalsIgnoreCase(Geometry.TYPENAME_POINT)) {
             bound = new Envelope2D(bound.getCoordinateReferenceSystem(), bound.getCenterX() - scaleX * 0.5, bound.getCenterY() - scaleY * 0.5, scaleX, scaleY);
-        }
-
-        int width = (int) bound.getWidth(), height = (int) bound.getHeight();
-
-        if (geom.getGeometryType().equalsIgnoreCase(Geometry.TYPENAME_POINT)) {
             width = 1;
             height = 1;
+        } else if (geom.getGeometryType().equalsIgnoreCase(Geometry.TYPENAME_LINESTRING) && height == 0) {
+            bound = new Envelope2D(bound.getCoordinateReferenceSystem(), bound.getCenterX() - scaleX * 0.5, bound.getCenterY() - scaleY * 0.5, width, scaleY);
+            height = 1;
+        } else if (geom.getGeometryType().equalsIgnoreCase(Geometry.TYPENAME_LINESTRING) && width == 0) {
+            bound = new Envelope2D(bound.getCoordinateReferenceSystem(), bound.getCenterX() - scaleX * 0.5, bound.getCenterY() - scaleY * 0.5, scaleX, height);
+            width = 1;
         } else {
             // To preserve scale of reference raster
             width = (int) (width / scaleX);
