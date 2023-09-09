@@ -74,13 +74,37 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
     it("Passed RS_AsRaster with empty raster"){
       var df = sparkSession.sql("SELECT RS_MakeEmptyRaster(2, 255, 255, 3, -215, 2, -2, 0, 0, 4326) as raster, ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))') as geom")
       var rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', 255, 0d) as rasterized")
-      var actual = rasterized.selectExpr("RS_AsGeoTiff(rasterized)").first().get(0).asInstanceOf[Array[Byte]].mkString("Array(", ", ", ")")
-      var expected = "Array(77, 77, 0, 42, 0, 0, 0, 8, 0, 16, 1, 0, 0, 3, 0, 0, 0, 1, 0, 4, 0, 0, 1, 1, 0, 3, 0, 0, 0, 1, 0, 5, 0, 0, 1, 2, 0, 3, 0, 0, 0, 1, 0, 64, 0, 0, 1, 3, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 1, 6, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 1, 17, 0, 4, 0, 0, 0, 1, 0, 0, 1, -128, 1, 21, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 1, 22, 0, 3, 0, 0, 0, 1, 0, 5, 0, 0, 1, 23, 0, 4, 0, 0, 0, 1, 0, 0, 0, -96, 1, 26, 0, 5, 0, 0, 0, 1, 0, 0, 0, -48, 1, 27, 0, 5, 0, 0, 0, 1, 0, 0, 0, -40, 1, 40, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 1, 83, 0, 3, 0, 0, 0, 1, 0, 3, 0, 0, -123, -40, 0, 12, 0, 0, 0, 16, 0, 0, 0, -32, -121, -81, 0, 3, 0, 0, 0, 16, 0, 0, 1, 96, -92, -127, 0, 2, 0, 0, 0, 4, 48, 46, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, -16, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 2, 0, 3, 4, 0, 0, 0, 0, 1, 0, 2, 4, 1, 0, 0, 0, 1, 0, 1, 8, 0, 0, 0, 0, 1, 16, -26, 64, 111, -32, 0, 0, 0, 0, 0, 64, 111, -32, 0, 0, 0, 0, 0, 64, 111, -32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 111, -32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 111, -32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)"
+      var actual = rasterized.selectExpr("RS_BandAsArray(rasterized, 1)").first().getSeq(0).mkString("Array(", ", ", ")")
+      var expected = "Array(255.0, 255.0, 255.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)"
+      assertEquals(expected, actual)
+
+      rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', 3093151) as rasterized")
+      actual = rasterized.selectExpr("RS_BandAsArray(rasterized, 1)").first().getSeq(0).mkString("Array(", ", ", ")")
+      expected = "Array(3093151.0, 3093151.0, 3093151.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)"
       assertEquals(expected, actual)
 
       rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd') as rasterized")
-      actual = rasterized.selectExpr("RS_AsGeoTiff(rasterized)").first().get(0).asInstanceOf[Array[Byte]].mkString("Array(", ", ", ")")
-      expected = "Array(77, 77, 0, 42, 0, 0, 0, 8, 0, 15, 1, 0, 0, 3, 0, 0, 0, 1, 0, 4, 0, 0, 1, 1, 0, 3, 0, 0, 0, 1, 0, 5, 0, 0, 1, 2, 0, 3, 0, 0, 0, 1, 0, 64, 0, 0, 1, 3, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 1, 6, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 1, 17, 0, 4, 0, 0, 0, 1, 0, 0, 1, 116, 1, 21, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 1, 22, 0, 3, 0, 0, 0, 1, 0, 5, 0, 0, 1, 23, 0, 4, 0, 0, 0, 1, 0, 0, 0, -96, 1, 26, 0, 5, 0, 0, 0, 1, 0, 0, 0, -60, 1, 27, 0, 5, 0, 0, 0, 1, 0, 0, 0, -52, 1, 40, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 1, 83, 0, 3, 0, 0, 0, 1, 0, 3, 0, 0, -123, -40, 0, 12, 0, 0, 0, 16, 0, 0, 0, -44, -121, -81, 0, 3, 0, 0, 0, 16, 0, 0, 1, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, -16, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 2, 0, 3, 4, 0, 0, 0, 0, 1, 0, 2, 4, 1, 0, 0, 0, 1, 0, 1, 8, 0, 0, 0, 0, 1, 16, -26, 63, -16, 0, 0, 0, 0, 0, 0, 63, -16, 0, 0, 0, 0, 0, 0, 63, -16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, -16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, -16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)"
+      actual = rasterized.selectExpr("RS_BandAsArray(rasterized, 1)").first().getSeq(0).mkString("Array(", ", ", ")")
+      expected = "Array(1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)"
+      assertEquals(expected, actual)
+    }
+
+    it("Passed RS_AsRaster with raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("ST_GeomFromWKT('POINT(5 5)') as geom","RS_FromGeoTiff(content) as raster")
+      var rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', 61784, 0d) as rasterized")
+      var actual = rasterized.selectExpr("RS_BandAsArray(rasterized, 1)").first().getSeq(0).mkString("Array(", ", ", ")")
+      var expected = "Array(61784.0)"
+      assertEquals(expected, actual)
+
+      rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', 255) as rasterized")
+      actual = rasterized.selectExpr("RS_BandAsArray(rasterized, 1)").first().getSeq(0).mkString("Array(", ", ", ")")
+      expected = "Array(255.0)"
+      assertEquals(expected, actual)
+
+      rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd') as rasterized")
+      actual = rasterized.selectExpr("RS_BandAsArray(rasterized, 1)").first().getSeq(0).mkString("Array(", ", ", ")")
+      expected = "Array(1.0)"
       assertEquals(expected, actual)
     }
 
