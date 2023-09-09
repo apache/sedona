@@ -47,7 +47,7 @@ public class RasterOutputTest
     @Test
     public void testToGeoTiff() throws IOException {
         GridCoverage2D rasterOg = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
-        String filePath = System.getProperty("user.dir") + "/../spark/common/src/test/resources/testToGeoTiffFunction/test1.tiff";
+        String filePath = System.getProperty("user.dir") + "/target/estToGeoTiffFunction/test1.tiff";
         boolean successful = RasterOutputs.toGeoTiff(rasterOg, filePath);
         assertTrue(successful);
 
