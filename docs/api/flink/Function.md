@@ -1100,7 +1100,7 @@ LINESTRING EMPTY
 
 ## ST_FrechetDistance
 
-Introduction: Computes and returns discrete [Frechet Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_distance) between the given two geometrie,
+Introduction: Computes and returns discrete [Frechet Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_distance) between the given two geometries,
 based on [Computing Discrete Frechet Distance](http://www.kr.tuwien.ac.at/staff/eiter/et-archive/cdtr9464.pdf)
 
 If any of the geometries is empty, returns 0.0
