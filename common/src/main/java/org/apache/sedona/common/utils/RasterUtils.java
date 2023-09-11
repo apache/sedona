@@ -19,6 +19,7 @@
 package org.apache.sedona.common.utils;
 
 import com.sun.media.imageioimpl.common.BogusColorSpace;
+import org.apache.sedona.common.Constants.RasterConstants;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.RasterAccessors;
 import org.geotools.coverage.Category;
@@ -296,7 +297,7 @@ public class RasterUtils {
      */
     public static void ensureBand(GridCoverage2D raster, int band) throws IllegalArgumentException {
         if (band < 1 || band > RasterAccessors.numBands(raster)) {
-            throw new IllegalArgumentException(String.format("Provided band index %d is not present in the raster", band));
+            throw new IllegalArgumentException(String.format(RasterConstants.INVALID_BAND, band));
         }
     }
 
@@ -346,5 +347,20 @@ public class RasterUtils {
                 return 1;
         }
         return 5; // defaulting to double
+    }
+
+    public static boolean isDataTypeIntegral(int dataTypeCode) {
+        //returns true if the datatype code refers to an int-like datatype (int, short, etc)
+        switch (dataTypeCode) {
+            case 3: //int
+            case 0: //byte
+            case 2: //short
+            case 1: //unsigned short
+                return true;
+            case 5: //double
+            case 4: //float
+            default:
+                return false;
+        }
     }
 }

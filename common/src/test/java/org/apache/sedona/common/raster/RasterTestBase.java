@@ -33,6 +33,7 @@ import java.awt.image.WritableRaster;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
 public class RasterTestBase {
@@ -44,6 +45,9 @@ public class RasterTestBase {
     GridCoverage2D multiBandRaster;
     byte[] geoTiff;
 
+    private final PrintStream standardOut = System.out;
+    private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+
     @Before
     public void setup() throws IOException {
         oneBandRaster = RasterConstructors.fromArcInfoAsciiGrid(arc.getBytes(StandardCharsets.UTF_8));
@@ -51,6 +55,7 @@ public class RasterTestBase {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         new GeoTiffWriter(bos).write(multiBandRaster, new GeneralParameterValue[]{});
         geoTiff = bos.toByteArray();
+        //System.setOut(new PrintStream(outputStreamCaptor));
     }
 
     GridCoverage2D createEmptyRaster(int numBands)

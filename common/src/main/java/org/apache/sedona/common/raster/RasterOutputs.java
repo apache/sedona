@@ -18,11 +18,11 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.gce.arcgrid.ArcGridWriteParams;
 import org.geotools.gce.arcgrid.ArcGridWriter;
-import org.geotools.gce.geotiff.GeoTiffFormat;
 import org.geotools.gce.geotiff.GeoTiffWriteParams;
 import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.opengis.coverage.grid.GridCoverageWriter;
@@ -31,7 +31,7 @@ import org.opengis.parameter.ParameterValueGroup;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
-
+import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -131,5 +131,71 @@ public class RasterOutputs
         RenderedImage renderedImage = raster.getRenderedImage();
         ImageIO.write(renderedImage, "png", out);
         return Base64.getEncoder().encodeToString(out.toByteArray());
+    }
+
+    public static String asMatrix(GridCoverage2D raster, int band, int postDecimalPrecision) {
+        RasterUtils.ensureBand(raster, band);
+        Raster rasterData = RasterUtils.getRaster(raster.getRenderedImage());
+        int dataTypeCode = rasterData.getDataBuffer().getDataType();
+        int width = rasterData.getWidth(), height = rasterData.getHeight();
+        if (RasterUtils.isDataTypeIntegral(dataTypeCode)) {
+            int[] bandValues = rasterData.getSamples(0, 0, width, height, band - 1, (int[]) null);
+            return createPaddedMatrixStringFromInt(bandValues, width, height, postDecimalPrecision);
+        }else {
+            double[] bandValues = rasterData.getSamples(0, 0, width, height, band - 1, (double[]) null);
+            return createPaddedMatrixStringFromDouble(bandValues, width, height, postDecimalPrecision);
+        }
+    }
+
+    public static String asMatrix(GridCoverage2D raster, int band) {
+        return asMatrix(raster, band, 6);
+    }
+
+
+    public static String asMatrix(GridCoverage2D raster) {
+        return asMatrix(raster, 1);
+    }
+
+    private static String createPaddedMatrixStringFromDouble(double[] values, int width, int height, int decimalPrecision) {
+        StringBuilder res = new StringBuilder();
+        int maxColWidth = 0;
+        int maxDecimalPrecision = 0;
+        for (double value : values) {
+            String[] splitByDecimal = String.valueOf(value).split("\\.");
+            int preDecimal = splitByDecimal[0].length(), postDecimal = Math.min(decimalPrecision, splitByDecimal[1].length());
+            maxDecimalPrecision = Math.max(maxDecimalPrecision, postDecimal);
+            int currWidth = preDecimal + postDecimal + 1; //add 1 for space occupied for decimal point
+            maxColWidth = Math.max(maxColWidth, currWidth);
+        }
+        for (int i = 0; i < values.length; i++) {
+            int row= i / width, col = i % width;
+            String fmt = String.format("%s%%%d.%df%s",
+                    col == 0 ? "|" : "  ",
+                    maxColWidth,
+                    maxDecimalPrecision,
+                    col < width - 1 ? "" : "|%n");
+            res.append(String.format(fmt, values[i]));
+        }
+
+        return res.toString();
+    }
+
+    private static String createPaddedMatrixStringFromInt(int[] values, int width, int height, int decimalPrecision) {
+        StringBuilder res = new StringBuilder();
+        int maxColWidth = 0;
+        for (int value : values) {
+            int currWidth = String.valueOf(value).length();
+            maxColWidth = Math.max(maxColWidth, currWidth);
+        }
+        for (int i = 0; i < values.length; i++) {
+            int row= i / width, col = i % width;
+            String fmt = String.format("%s%%%dd%s",
+                    col == 0 ? "|" : "  ",
+                    maxColWidth,
+                    col < width - 1 ? "" : "|%n");
+            res.append(String.format(fmt, values[i]));
+        }
+
+        return res.toString();
     }
 }
