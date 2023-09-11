@@ -691,7 +691,7 @@ A map rendered by accessing the map object created by SedonaKepler includes a co
 
 #### Saving and setting config
 
-A map object's current config can be accessed by accessing its 'config' attribute like `map.config`. This config can be saved for future use or use across notebooks if the exact same map is to be rendered everytime.
+A map object's current config can be accessed by accessing its 'config' attribute like `map.config`. This config can be saved for future use or use across notebooks if the exact same map is to be rendered every time.
 
 !!!Note
 	The map config references each applied customization with the name given to the dataframe and hence will work only on maps with the same name of dataframe supplied.
