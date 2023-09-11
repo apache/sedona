@@ -21,10 +21,10 @@ package org.apache.sedona.common.raster;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class RasterOutputTest
         extends RasterTestBase {
@@ -42,6 +42,21 @@ public class RasterOutputTest
         GridCoverage2D rasterTest = RasterConstructors.fromGeoTiff(RasterOutputs.asGeoTiff(rasterFromGeoTiff(resourceFolder + "raster/test1.tiff")));
         assert(rasterTest != null);
         assertEquals(rasterTest.getEnvelope().toString(), rasterOg.getEnvelope().toString());
+    }
+
+    @Test
+    public void testWriteToDiskFile() throws IOException {
+        new File(System.getProperty("user.dir") + "/target/estToGeoTiffFunction/").mkdirs();
+        GridCoverage2D rasterOg = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+        byte[] bytes = RasterOutputs.asGeoTiff(rasterOg);
+        String filePath = System.getProperty("user.dir") + "/target/estToGeoTiffFunction/test1.tiff";
+        boolean successful = RasterOutputs.writeToDiskFile(bytes, filePath);
+        assertTrue(successful);
+
+        GridCoverage2D rasterConverted = rasterFromGeoTiff(filePath);
+        double[] actual = MapAlgebra.bandAsArray(rasterOg, 1);
+        double[] expected = MapAlgebra.bandAsArray(rasterConverted, 1);
+        assertArrayEquals(expected, actual, 0.1d);
     }
 
     @Test

@@ -210,6 +210,7 @@ object Catalog {
     function[RS_Values](1),
     function[RS_Intersects](),
     function[RS_AsGeoTiff](),
+    function[RS_AsRaster](),
     function[RS_AsArcGrid](),
     function[RS_AsBase64](),
     function[RS_Width](),
