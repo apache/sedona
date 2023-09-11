@@ -19,7 +19,7 @@
 package org.apache.spark.sql.sedona_sql.strategy.join
 
 import org.apache.sedona.common.FunctionsGeoTools
-import org.apache.sedona.common.utils.GeomUtils
+import org.apache.sedona.common.utils.{CachedCRSTransformFinder, GeomUtils}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.geotools.geometry.Envelope2D
 import org.geotools.geometry.jts.JTS
@@ -68,7 +68,7 @@ object JoinedGeometryRaster {
     // We use CRS.transform for envelopes to transform envelopes between different CRSs. This transformation function
     // could handle envelope crossing the anti-meridian and envelope near or covering poles correctly. We won't have
     // these cases properly handled if we transform the original geometries using JTS.transform.
-    val transform = CRS.findMathTransform(crs, DefaultGeographicCRS.WGS84)
+    val transform = CachedCRSTransformFinder.findTransform(crs, DefaultGeographicCRS.WGS84)
     val transformedEnvelope = CRS.transform(transform, envelope)
     val minX = transformedEnvelope.getMinimum(0)
     val maxX = transformedEnvelope.getMaximum(0)

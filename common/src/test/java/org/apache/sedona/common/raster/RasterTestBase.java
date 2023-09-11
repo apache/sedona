@@ -13,18 +13,24 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.gce.geotiff.GeoTiffWriter;
+import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.junit.Assert;
 import org.junit.Before;
+import org.opengis.geometry.DirectPosition;
+import org.opengis.geometry.Envelope;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.RasterFactory;
 import java.awt.Color;
@@ -38,7 +44,7 @@ import java.nio.charset.StandardCharsets;
 public class RasterTestBase {
     String arc = "NCOLS 2\nNROWS 2\nXLLCORNER 378922\nYLLCORNER 4072345\nCELLSIZE 30\nNODATA_VALUE 0\n0 1 2 3\n";
 
-    String resourceFolder = System.getProperty("user.dir") + "/../spark/common/src/test/resources/";
+    protected static final String resourceFolder = System.getProperty("user.dir") + "/../spark/common/src/test/resources/";
 
     GridCoverage2D oneBandRaster;
     GridCoverage2D multiBandRaster;
@@ -105,6 +111,59 @@ public class RasterTestBase {
             }
         }
         return factory.create("test", image, new Envelope2D(DefaultGeographicCRS.WGS84, 0, 0, 10, 10));
+    }
+
+    protected void assertSameCoverage(GridCoverage2D expected, GridCoverage2D actual, int density) {
+        Assert.assertEquals(expected.getNumSampleDimensions(), actual.getNumSampleDimensions());
+        Envelope expectedEnvelope = expected.getEnvelope();
+        Envelope actualEnvelope = actual.getEnvelope();
+        assertSameEnvelope(expectedEnvelope, actualEnvelope, 1e-6);
+        CoordinateReferenceSystem expectedCrs = expected.getCoordinateReferenceSystem();
+        CoordinateReferenceSystem actualCrs = actual.getCoordinateReferenceSystem();
+        Assert.assertTrue(CRS.equalsIgnoreMetadata(expectedCrs, actualCrs));
+        assertSameValues(expected, actual, density);
+    }
+
+    protected void assertSameEnvelope(Envelope expected, Envelope actual, double epsilon) {
+        Assert.assertEquals(expected.getMinimum(0), actual.getMinimum(0), epsilon);
+        Assert.assertEquals(expected.getMinimum(1), actual.getMinimum(1), epsilon);
+        Assert.assertEquals(expected.getMaximum(0), actual.getMaximum(0), epsilon);
+        Assert.assertEquals(expected.getMaximum(1), actual.getMaximum(1), epsilon);
+    }
+
+    protected void assertSameValues(GridCoverage2D expected, GridCoverage2D actual, int density) {
+        Envelope expectedEnvelope = expected.getEnvelope();
+        double x0 = expectedEnvelope.getMinimum(0);
+        double y0 = expectedEnvelope.getMinimum(1);
+        double xStep = (expectedEnvelope.getMaximum(0) - x0) / density;
+        double yStep = (expectedEnvelope.getMaximum(1) - y0) / density;
+        double[] expectedValues = new double[expected.getNumSampleDimensions()];
+        double[] actualValues = new double[expected.getNumSampleDimensions()];
+        int sampledPoints = 0;
+        for (int i = 0; i < density; i++) {
+            for (int j = 0; j < density; j++) {
+                double x = x0 + j * xStep;
+                double y = y0 + i * yStep;
+                DirectPosition position = new DirectPosition2D(x, y);
+                try {
+                    GridCoordinates2D gridPosition = expected.getGridGeometry().worldToGrid(position);
+                    if (Double.isNaN(gridPosition.getX()) || Double.isNaN(gridPosition.getY())) {
+                        // This position is outside the coverage
+                        continue;
+                    }
+                    expected.evaluate(position, expectedValues);
+                    actual.evaluate(position, actualValues);
+                    Assert.assertEquals(expectedValues.length, actualValues.length);
+                    for (int k = 0; k < expectedValues.length; k++) {
+                        Assert.assertEquals(expectedValues[k], actualValues[k], 1e-6);
+                    }
+                    sampledPoints += 1;
+                } catch (TransformException e) {
+                    throw new RuntimeException("Failed to convert world coordinate to grid coordinate", e);
+                }
+            }
+        }
+        Assert.assertTrue(sampledPoints > density * density / 2);
     }
 
     GridCoverage2D rasterFromGeoTiff(String filePath) throws IOException {
