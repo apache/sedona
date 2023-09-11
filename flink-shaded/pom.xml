@@ -53,7 +53,7 @@
         <plugins>
             <plugin>
                 <!-- Skip running resolved-pom-maven-plugin since shade will
-                     generate dependency reduced pom which substitudes property
+                     generate dependency reduced pom which substitutes property
                      values. resolved-pom-maven-plugin will break pom
                      installation when working with maven-shade-plugin.  -->
                 <groupId>io.paradoxical</groupId>

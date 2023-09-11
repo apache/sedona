@@ -823,7 +823,7 @@ def ST_MakeLine(geom1: ColumnOrName, geom2: Optional[ColumnOrName] = None) -> Co
     :type geometry: ColumnOrName
     :param geom2: Geometry column to convert. If geoms is empty, then geom1 is an array of geometries.
     :type geometry: Optional[ColumnOrName], optional
-    :return: LineString geometry column created from the input geomtries.
+    :return: LineString geometry column created from the input geometries.
     :rtype: Column
     """
     args = (geom1,) if geom2 is None else (geom1, geom2)
@@ -1387,7 +1387,7 @@ def ST_Affine(geometry: ColumnOrName, a: Union[ColumnOrName, float], b: Union[Co
                 g: Optional[Union[ColumnOrName, float]] = None, h: Optional[Union[ColumnOrName, float]] = None,
                 i: Optional[Union[ColumnOrName, float]] = None,  zOff: Optional[Union[ColumnOrName, float]] = None) -> Column:
     """
-    Apply a 3D/2D affine tranformation to the given geometry
+    Apply a 3D/2D affine transformation to the given geometry
     x = a * x + b * y + c * z + xOff | x = a * x + b * y + xOff
     y = d * x + e * y + f * z + yOff | y = d * x + e * y + yOff
     z = g * x + h * y + i * z + zOff
@@ -1476,7 +1476,7 @@ def ST_CoordDim(geometry: ColumnOrName) -> Column:
 
     :param geometry: Geometry column to return for.
     :type geometry: ColumnOrName
-    :return: Number of dimensinos in a coordinate column as an integer column.
+    :return: Number of dimensions in a coordinate column as an integer column.
     :rtype: Column
     """
     return _call_st_function("ST_CoordDim", geometry)

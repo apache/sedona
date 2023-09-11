@@ -85,7 +85,7 @@ public class StandardQuadTree<T> extends PartitioningUtils
                 this.split();
             }
 
-            // can be null if not splitted
+            // can be null if not split
             if (regions != null) {
                 for (int i = 0; i < regions.length; i++) {
                     if (regions[i].getZone().contains(r)) {
@@ -102,7 +102,7 @@ public class StandardQuadTree<T> extends PartitioningUtils
     private int findRegion(int x, int y)
     {
         int region = REGION_SELF;
-        // can be null if not splitted
+        // can be null if not split
         if (regions != null) {
             for (int i = 0; i < regions.length; i++) {
                 if (regions[i].getZone().contains(x, y)) {
