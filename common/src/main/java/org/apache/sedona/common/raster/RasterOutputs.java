@@ -22,24 +22,20 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.gce.arcgrid.ArcGridWriteParams;
 import org.geotools.gce.arcgrid.ArcGridWriter;
-import org.geotools.gce.geotiff.GeoTiffFormat;
 import org.geotools.gce.geotiff.GeoTiffWriteParams;
 import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.opengis.coverage.grid.GridCoverageWriter;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValueGroup;
 
-import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
 
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Base64;
 
 public class RasterOutputs
@@ -139,7 +135,7 @@ public class RasterOutputs
     public static String asBase64(GridCoverage2D raster) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         RenderedImage renderedImage = raster.getRenderedImage();
-        ImageIO.write(renderedImage, "jpg", out);
+        ImageIO.write(renderedImage, "png", out);
         return Base64.getEncoder().encodeToString(out.toByteArray());
     }
 }
