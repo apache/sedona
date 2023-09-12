@@ -18,3 +18,17 @@ repos:
         description: Check spelling with codespell
         entry: codespell --ignore-words=codespell.txt
         exclude: ^docs/image|^spark/common/src/test/resources
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-case-conflict
+      # - id: check-docstring-first
+      # - id: check-executables-have-shebangs
+      # - id: check-json
+      - id: check-merge-conflict
+      # - id: check-shebang-scripts-are-executable
+      - id: check-toml
+      # - id: check-vcs-permalinks
+      - id: check-xml
+      # - id: check-yaml
+      - id: detect-private-key
