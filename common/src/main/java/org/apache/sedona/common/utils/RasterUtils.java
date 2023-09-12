@@ -347,4 +347,19 @@ public class RasterUtils {
         }
         return 5; // defaulting to double
     }
+
+    public static boolean isDataTypeIntegral(int dataTypeCode) {
+        //returns true if the datatype code refers to an int-like datatype (int, short, etc)
+        switch (dataTypeCode) {
+            case 3: //int
+            case 0: //byte
+            case 2: //short
+            case 1: //unsigned short
+                return true;
+            case 5: //double
+            case 4: //float
+            default:
+                return false;
+        }
+    }
 }

@@ -44,3 +44,10 @@ case class RS_AsBase64(inputExpressions: Seq[Expression]) extends InferredExpres
     copy(inputExpressions = newChildren)
   }
 }
+
+case class RS_AsMatrix(inputExpressions: Seq[Expression]) extends InferredExpression(inferrableFunction3(RasterOutputs.asMatrix), inferrableFunction2(RasterOutputs.asMatrix),
+  inferrableFunction1(RasterOutputs.asMatrix)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

@@ -29,6 +29,8 @@ import static org.junit.Assert.*;
 public class RasterOutputTest
         extends RasterTestBase {
 
+
+
     @Test
     public void testAsBase64() throws IOException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
@@ -67,5 +69,82 @@ public class RasterOutputTest
         GridCoverage2D rasterNew = RasterConstructors.fromGeoTiff(rasterBytes1);
         assertEquals(rasterOg.getEnvelope().toString(), rasterNew.getEnvelope().toString());
         assert(rasterBytes1.length > rasterBytes2.length);
+    }
+
+    @Test
+    public void testAsMatrixBand() {
+        double[][] rasterValues = {{1, 3, 4, 0, 2, 9, 10, 11, 3, 4, 5, 6}};
+        GridCoverage2D raster = RasterConstructors.makeNonEmptyRaster(1, "s", 4, 3, 0, 0, 1, -1, 0, 0, 0, rasterValues);
+        String expectedValue = "| 1   3   4   0|\n" +
+                "| 2   9  10  11|\n" +
+                "| 3   4   5   6|\n";
+        String actual = RasterOutputs.asMatrix(raster, 1);
+        assertEquals(expectedValue, actual);
+    }
+
+    @Test
+    public void testAsMatrixBandShort() {
+        double[][] rasterValues = {{1, 3, 4, 0, 2, 9, 10, 11, 3, 4, 5, 6}};
+        GridCoverage2D raster = RasterConstructors.makeNonEmptyRaster(1, "s", 4, 3, 0, 0, 1, -1, 0, 0, 0, rasterValues);
+        String expectedValue = "| 1   3   4   0|\n" +
+                "| 2   9  10  11|\n" +
+                "| 3   4   5   6|\n";
+        String actual = RasterOutputs.asMatrix(raster, 1);
+        assertEquals(expectedValue, actual);
+    }
+
+    @Test
+    public void testAsMatrixBandUShort() {
+        double[][] rasterValues = {{1, 3, 4, 0, 2, 9, 10, 11, 3, 4, 5, 6}};
+        GridCoverage2D raster = RasterConstructors.makeNonEmptyRaster(1, "us", 4, 3, 0, 0, 1, -1, 0, 0, 0, rasterValues);
+        String expectedValue = "| 1   3   4   0|\n" +
+                "| 2   9  10  11|\n" +
+                "| 3   4   5   6|\n";
+        String actual = RasterOutputs.asMatrix(raster, 1);
+        assertEquals(expectedValue, actual);
+    }
+
+    @Test
+    public void testAsMatrixBandBytePrecision() {
+        double[][] rasterValues = {{1, 3, 4, 0, 2, 9, 10, 11, 3, 4, 5, 6}};
+        GridCoverage2D raster = RasterConstructors.makeNonEmptyRaster(1, "b", 4, 3, 0, 0, 1, -1, 0, 0, 0, rasterValues);
+        String expectedValue = "| 1   3   4   0|\n" +
+                "| 2   9  10  11|\n" +
+                "| 3   4   5   6|\n";
+        String actual = RasterOutputs.asMatrix(raster, 1, 2);
+        assertEquals(expectedValue, actual);
+    }
+
+    @Test
+    public void testAsMatrixBandPrecision() {
+        double[][] rasterValues = {{1, 3.333333, 4, 0.0001, 2.2222, 9, 10, 11.11111111, 3, 4, 5, 6}};
+        GridCoverage2D raster = RasterConstructors.makeNonEmptyRaster(1, "d", 4, 3, 0, 0, 1, -1, 0, 0, 0, rasterValues);
+        String expectedValue = "| 1.00000   3.33333   4.00000   0.00010|\n" +
+                "| 2.22220   9.00000  10.00000  11.11111|\n" +
+                "| 3.00000   4.00000   5.00000   6.00000|\n";
+        String actual = RasterOutputs.asMatrix(raster, 1, 5);
+        assertEquals(expectedValue, actual);
+    }
+
+    @Test
+    public void testAsMatrixDefault() {
+        double[][] rasterValues = {{1, 3.333333, 4, 0.0001, 2.2222, 9, 10, 11.11111111, 3, 4, 5, 6}};
+        GridCoverage2D raster = RasterConstructors.makeNonEmptyRaster(1, "d", 4, 3, 0, 0, 1, -1, 0, 0, 0, rasterValues);
+        String expectedValue = "| 1.000000   3.333333   4.000000   0.000100|\n" +
+                "| 2.222200   9.000000  10.000000  11.111111|\n" +
+                "| 3.000000   4.000000   5.000000   6.000000|\n";
+        String actual = RasterOutputs.asMatrix(raster);
+        assertEquals(expectedValue, actual);
+    }
+
+    @Test
+    public void testAsMatrixMultipleBands() {
+        double[][] rasterValues = {{1, 3.333333, 4, 0.0001, 2.2222, 9, 10, 11.11111111, 3, 4, 5, 6}, {3.22, 1, 5.321, 4, 5.33333112334, 10000, 0.0, 1.93, 1190.12121, 9.8, 23, 1}};
+        GridCoverage2D raster = RasterConstructors.makeNonEmptyRaster(2, "f", 4, 3, 0, 0, 1, -1, 0, 0, 0, rasterValues);
+        String expectedValue = "|    3.22      1.00      5.32      4.00|\n" +
+                "|    5.33  10000.00      0.00      1.93|\n" +
+                "| 1190.12      9.80     23.00      1.00|\n";
+        String actual = RasterOutputs.asMatrix(raster, 2, 2);
+        assertEquals(expectedValue, actual);
     }
 }

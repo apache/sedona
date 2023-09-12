@@ -50,26 +50,6 @@ root
  |-- arcgrid: binary (nullable = true)
 ```
 
-#### RS_AsBase64
-
-Introduction: Returns a base64 encoded string of the given raster. This function internally takes the first 4 bands as RGBA, and converts them to the PNG format, finally produces a base64 string. To visualize other bands, please use it together with `RS_Band`. You can take the resulting base64 string in [an online viewer](https://base64-viewer.onrender.com/) to check how the image looks like.
-
-Since: `v1.5.0`
-
-Format: `RS_AsBase64(raster: Raster)`
-
-Spark SQL Example:
-
-```sql
-SELECT RS_AsBase64(raster) from rasters
-```
-
-Output:
-
-```
-iVBORw0KGgoAAAA...
-```
-
 #### RS_AsGeoTiff
 
 Introduction: Returns a binary DataFrame from a Raster DataFrame. Each raster object in the resulting DataFrame is a GeoTiff image in binary format.
