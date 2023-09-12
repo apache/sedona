@@ -82,9 +82,7 @@ public class RasterOutputs
      * @param bytes The bytes to be stored on a disk file
      * @param filePath The path where the .tiff should be stored.
      *
-     * @return true if file is created, otherwise throws IOException
-     * @throws IOException
-     * */
+     * @return true if file is created, otherwise throws IOException */
     public static boolean writeToDiskFile(byte[] bytes, String filePath) {
         File outputFile = new File(filePath);
         try (FileOutputStream outputStream = new FileOutputStream(outputFile)){
@@ -140,10 +138,10 @@ public class RasterOutputs
         int width = rasterData.getWidth(), height = rasterData.getHeight();
         if (RasterUtils.isDataTypeIntegral(dataTypeCode)) {
             int[] bandValues = rasterData.getSamples(0, 0, width, height, band - 1, (int[]) null);
-            return createPaddedMatrixStringFromInt(bandValues, width, height, postDecimalPrecision);
+            return createPaddedMatrixStringFromInt(bandValues, width);
         }else {
             double[] bandValues = rasterData.getSamples(0, 0, width, height, band - 1, (double[]) null);
-            return createPaddedMatrixStringFromDouble(bandValues, width, height, postDecimalPrecision);
+            return createPaddedMatrixStringFromDouble(bandValues, width, postDecimalPrecision);
         }
     }
 
@@ -156,17 +154,18 @@ public class RasterOutputs
         return asMatrix(raster, 1);
     }
 
-    private static String createPaddedMatrixStringFromDouble(double[] values, int width, int height, int decimalPrecision) {
+    private static String createPaddedMatrixStringFromDouble(double[] values, int width, int decimalPrecision) {
         StringBuilder res = new StringBuilder();
-        int maxColWidth = 0;
+        int maxPreDecimal = 0;
         int maxDecimalPrecision = 0;
         for (double value : values) {
             String[] splitByDecimal = String.valueOf(value).split("\\.");
             int preDecimal = splitByDecimal[0].length(), postDecimal = Math.min(decimalPrecision, splitByDecimal[1].length());
             maxDecimalPrecision = Math.max(maxDecimalPrecision, postDecimal);
-            int currWidth = preDecimal + postDecimal + 1; //add 1 for space occupied for decimal point
-            maxColWidth = Math.max(maxColWidth, currWidth);
+            int currWidth = preDecimal + 1; //add 1 for space occupied for decimal point
+            maxPreDecimal = Math.max(maxPreDecimal, currWidth);
         }
+        int maxColWidth = maxDecimalPrecision + maxPreDecimal;
         for (int i = 0; i < values.length; i++) {
             int row= i / width, col = i % width;
             String fmt = String.format("%s%%%d.%df%s",
@@ -180,7 +179,7 @@ public class RasterOutputs
         return res.toString();
     }
 
-    private static String createPaddedMatrixStringFromInt(int[] values, int width, int height, int decimalPrecision) {
+    private static String createPaddedMatrixStringFromInt(int[] values, int width) {
         StringBuilder res = new StringBuilder();
         int maxColWidth = 0;
         for (int value : values) {
