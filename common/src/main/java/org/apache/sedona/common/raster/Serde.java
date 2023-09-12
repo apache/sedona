@@ -13,23 +13,27 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
+import org.geotools.coverage.grid.GridEnvelope2D;
+import org.geotools.coverage.grid.GridGeometry2D;
+import org.opengis.referencing.operation.MathTransform;
 
-import javax.media.jai.PlanarImage;
 import javax.media.jai.RenderedImageAdapter;
-import javax.media.jai.remote.SerializableRenderedImage;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 
 public class Serde {
 
     static final Field field;
+
     static {
         try {
             field = GridCoverage2D.class.getDeclaredField("serializedImage");
@@ -39,39 +43,50 @@ public class Serde {
         }
     }
 
+    private static class SerializableState implements Serializable {
+        public CharSequence name;
+
+        // The following three components are used to construct a GridGeometry2D object.
+        // We serialize CRS separately because the default serializer is pretty slow, we use a
+        // cached serializer to speed up the serialization and reuse CRS on deserialization.
+        public GridEnvelope2D gridEnvelope2D;
+        public MathTransform gridToCRS;
+        public byte[] serializedCRS;
+
+        public GridSampleDimension[] bands;
+        public DeepCopiedRenderedImage image;
+
+        public GridCoverage2D restore() {
+            GridGeometry2D gridGeometry = new GridGeometry2D(gridEnvelope2D, gridToCRS, CRSSerializer.deserialize(serializedCRS));
+            return new GridCoverageFactory().create(name, image, gridGeometry, bands, null, null);
+        }
+    }
+
     public static byte[] serialize(GridCoverage2D raster) throws IOException {
         // GridCoverage2D created by GridCoverage2DReaders contain references that are not serializable.
         // Wrap the RenderedImage in DeepCopiedRenderedImage to make it serializable.
-        RenderedImage deepCopiedRenderedImage = null;
+        DeepCopiedRenderedImage deepCopiedRenderedImage = null;
         RenderedImage renderedImage = raster.getRenderedImage();
         while (renderedImage instanceof RenderedImageAdapter) {
             renderedImage = ((RenderedImageAdapter) renderedImage).getWrappedImage();
         }
         if (renderedImage instanceof DeepCopiedRenderedImage) {
-            deepCopiedRenderedImage = renderedImage;
+            deepCopiedRenderedImage = (DeepCopiedRenderedImage) renderedImage;
         } else {
             deepCopiedRenderedImage = new DeepCopiedRenderedImage(renderedImage);
         }
-        raster = new GridCoverageFactory().create(
-                raster.getName(),
-                deepCopiedRenderedImage,
-                raster.getGridGeometry(),
-                raster.getSampleDimensions(),
-                null,
-                raster.getProperties());
 
-        // Set the serializedImage so that GridCoverage2D will serialize the DeepCopiedRenderedImage object
-        // we created above, rather than creating a SerializedRenderedImage and serialize it. The whole point
-        // of DeepCopiedRenderedImage of getting rid of SerializedRenderedImage, which is problematic.
-        try {
-            field.set(raster, deepCopiedRenderedImage);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-
+        SerializableState state = new SerializableState();
+        GridGeometry2D gridGeometry = raster.getGridGeometry();
+        state.name = raster.getName();
+        state.gridEnvelope2D = gridGeometry.getGridRange2D();
+        state.gridToCRS = gridGeometry.getGridToCRS2D();
+        state.serializedCRS = CRSSerializer.serialize(gridGeometry.getCoordinateReferenceSystem());
+        state.bands = raster.getSampleDimensions();
+        state.image = deepCopiedRenderedImage;
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-                oos.writeObject(raster);
+                oos.writeObject(state);
                 return bos.toByteArray();
             }
         }
@@ -80,7 +95,8 @@ public class Serde {
     public static GridCoverage2D deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes)) {
             try (ObjectInputStream ois = new ObjectInputStream(bis)) {
-                return (GridCoverage2D) ois.readObject();
+                SerializableState state = (SerializableState) ois.readObject();
+                return state.restore();
             }
         }
     }

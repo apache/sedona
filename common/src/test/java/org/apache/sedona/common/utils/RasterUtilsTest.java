@@ -80,7 +80,7 @@ public class RasterUtilsTest {
         Assert.assertNull(band5.getCategory(10));
         Assert.assertEquals("GrayScale", band5.getCategory(100).getName().toString());
 
-        // If the new no data value falls within the range of an existing quantitative category, the category is splitted
+        // If the new no data value falls within the range of an existing quantitative category, the category is split
         // into two categories.
         GridSampleDimension band6 = RasterUtils.createSampleDimensionWithNoDataValue(band, 150);
         Assert.assertEquals(150, RasterUtils.getNoDataValue(band6), 1e-9);

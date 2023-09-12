@@ -345,7 +345,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_Band") {
-      val inputDf = Seq((Seq(16, 0, 24, 33, 43, 49, 64, 0, 76, 77, 79, 89, 0, 116, 118, 125, 135, 0, 157, 190, 215, 229, 241, 248, 249))).toDF("band")
+      val inputDf = Seq(Seq(16, 0, 24, 33, 43, 49, 64, 0, 76, 77, 79, 89, 0, 116, 118, 125, 135, 0, 157, 190, 215, 229, 241, 248, 249)).toDF("band")
       val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(2, 5, 5, 3, -215, 2, -2, 2, 2, 0), band, 1, 0d) as emptyRaster")
       val resultDf = df.selectExpr("RS_Band(emptyRaster, array(1,1,1)) as raster")
       val actual = resultDf.selectExpr("RS_NumBands(raster)").first().get(0)
@@ -1024,6 +1024,33 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           assert((band(i) * 0.2).toShort == band2(i))
         }
       }
+    }
+
+    it("Passed RS_AsMatrix with given band and precision") {
+      val inputDf = Seq(Seq(1, 3.333333, 4, 0.0001, 2.2222, 9, 10, 11.11111111, 3, 4, 5, 6)).toDF("band")
+      val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 4, 3, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as emptyRaster")
+      val resultDf = df.selectExpr("RS_AsMatrix(emptyRaster, 1, 5) as matrix")
+      val actual = resultDf.first().getString(0);
+      val expected = "| 1.00000   3.33333   4.00000   0.00010|\n" + "| 2.22220   9.00000  10.00000  11.11111|\n" + "| 3.00000   4.00000   5.00000   6.00000|\n"
+      assertEquals(expected, actual)
+    }
+
+    it("Passed RS_AsMatrix with given band") {
+      val inputDf = Seq(Seq(1, 3.333333, 4, 0.0001, 2.2222, 9, 10, 11.11111111, 3, 4, 5, 6)).toDF("band")
+      val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 4, 3, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as emptyRaster")
+      val resultDf = df.selectExpr("RS_AsMatrix(emptyRaster, 1) as matrix")
+      val actual = resultDf.first().getString(0);
+      val expected = "| 1.000000   3.333333   4.000000   0.000100|\n| 2.222200   9.000000  10.000000  11.111111|\n| 3.000000   4.000000   5.000000   6.000000|\n".format()
+      assertEquals(expected, actual)
+    }
+
+    it("Passed RS_AsMatrix with default band") {
+      val inputDf = Seq(Seq(1, 3.333333, 4, 0.0001, 2.2222, 9, 10, 11.11111111, 3, 4, 5, 6)).toDF("band")
+      val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 4, 3, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as emptyRaster")
+      val resultDf = df.selectExpr("RS_AsMatrix(emptyRaster) as matrix")
+      val actual = resultDf.first().getString(0);
+      val expected = "| 1.000000   3.333333   4.000000   0.000100|\n| 2.222200   9.000000  10.000000  11.111111|\n| 3.000000   4.000000   5.000000   6.000000|\n".format()
+      assertEquals(expected, actual)
     }
   }
 }

@@ -18,95 +18,55 @@
  */
 package org.apache.sedona.common.raster;
 
-import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.geometry.DirectPosition2D;
-import org.geotools.referencing.CRS;
-import org.junit.Assert;
+import org.geotools.gce.geotiff.GeoTiffReader;
 import org.junit.Test;
-import org.opengis.geometry.DirectPosition;
-import org.opengis.geometry.Envelope;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.TransformException;
 
+import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.assertNotNull;
 
 public class SerdeTest extends RasterTestBase {
 
+    private static final String[] testFilePaths = {
+            resourceFolder + "/raster/test1.tiff",
+            resourceFolder + "/raster/test2.tiff",
+            resourceFolder + "/raster/test3.tif",
+            resourceFolder + "/raster_geotiff_color/FAA_UTM18N_NAD83.tif"
+    };
+
     @Test
     public void testRoundtripSerdeSingelbandRaster() throws IOException, ClassNotFoundException {
-        byte[] bytes = Serde.serialize(oneBandRaster);
-        GridCoverage2D raster = Serde.deserialize(bytes);
-        assertNotNull(raster);
-        assertSameCoverage(oneBandRaster, raster);
-        bytes = Serde.serialize(raster);
-        raster = Serde.deserialize(bytes);
-        assertSameCoverage(oneBandRaster, raster);
+        testRoundTrip(oneBandRaster);
     }
 
     @Test
     public void testRoundtripSerdeMultibandRaster() throws IOException, ClassNotFoundException {
-        byte[] bytes = Serde.serialize(this.multiBandRaster);
-        GridCoverage2D raster = Serde.deserialize(bytes);
-        assertNotNull(raster);
-        assertSameCoverage(multiBandRaster, raster);
-        bytes = Serde.serialize(raster);
-        raster = Serde.deserialize(bytes);
-        assertSameCoverage(multiBandRaster, raster);
+        testRoundTrip(multiBandRaster);
     }
 
-    private void assertSameCoverage(GridCoverage2D expected, GridCoverage2D actual) {
-        Assert.assertEquals(expected.getNumSampleDimensions(), actual.getNumSampleDimensions());
-        Envelope expectedEnvelope = expected.getEnvelope();
-        Envelope actualEnvelope = actual.getEnvelope();
-        assertSameEnvelope(expectedEnvelope, actualEnvelope, 1e-6);
-        CoordinateReferenceSystem expectedCrs = expected.getCoordinateReferenceSystem();
-        CoordinateReferenceSystem actualCrs = actual.getCoordinateReferenceSystem();
-        Assert.assertTrue(CRS.equalsIgnoreMetadata(expectedCrs, actualCrs));
-        assertSameValues(expected, actual, 10);
-    }
-
-    private void assertSameEnvelope(Envelope expected, Envelope actual, double epsilon) {
-        Assert.assertEquals(expected.getMinimum(0), actual.getMinimum(0), epsilon);
-        Assert.assertEquals(expected.getMinimum(1), actual.getMinimum(1), epsilon);
-        Assert.assertEquals(expected.getMaximum(0), actual.getMaximum(0), epsilon);
-        Assert.assertEquals(expected.getMaximum(1), actual.getMaximum(1), epsilon);
-    }
-
-    private void assertSameValues(GridCoverage2D expected, GridCoverage2D actual, int density) {
-        Envelope expectedEnvelope = expected.getEnvelope();
-        double x0 = expectedEnvelope.getMinimum(0);
-        double y0 = expectedEnvelope.getMinimum(1);
-        double xStep = (expectedEnvelope.getMaximum(0) - x0) / density;
-        double yStep = (expectedEnvelope.getMaximum(1) - y0) / density;
-        double[] expectedValues = new double[expected.getNumSampleDimensions()];
-        double[] actualValues = new double[expected.getNumSampleDimensions()];
-        int sampledPoints = 0;
-        for (int i = 0; i < density; i++) {
-            for (int j = 0; j < density; j++) {
-                double x = x0 + j * xStep;
-                double y = y0 + i * yStep;
-                DirectPosition position = new DirectPosition2D(x, y);
-                try {
-                    GridCoordinates2D gridPosition = expected.getGridGeometry().worldToGrid(position);
-                    if (Double.isNaN(gridPosition.getX()) || Double.isNaN(gridPosition.getY())) {
-                        // This position is outside the coverage
-                        continue;
-                    }
-                    expected.evaluate(position, expectedValues);
-                    actual.evaluate(position, actualValues);
-                    Assert.assertEquals(expectedValues.length, actualValues.length);
-                    for (int k = 0; k < expectedValues.length; k++) {
-                        Assert.assertEquals(expectedValues[k], actualValues[k], 1e-6);
-                    }
-                    sampledPoints += 1;
-                } catch (TransformException e) {
-                    throw new RuntimeException("Failed to convert world coordinate to grid coordinate", e);
-                }
-            }
+    @Test
+    public void testInDbRaster() throws IOException, ClassNotFoundException {
+        for (String testFilePath : testFilePaths) {
+            GeoTiffReader reader = new GeoTiffReader(new File(testFilePath));
+            GridCoverage2D raster = reader.read(null);
+            testRoundTrip(raster);
         }
-        Assert.assertTrue(sampledPoints > density * density / 2);
+    }
+
+    private GridCoverage2D testRoundTrip(GridCoverage2D raster) throws IOException, ClassNotFoundException {
+        return testRoundTrip(raster, 10);
+    }
+
+    private GridCoverage2D testRoundTrip(GridCoverage2D raster, int density) throws IOException, ClassNotFoundException {
+        byte[] bytes = Serde.serialize(raster);
+        GridCoverage2D roundTripRaster = Serde.deserialize(bytes);
+        assertNotNull(roundTripRaster);
+        assertSameCoverage(raster, roundTripRaster, density);
+        bytes = Serde.serialize(roundTripRaster);
+        roundTripRaster = Serde.deserialize(bytes);
+        assertSameCoverage(raster, roundTripRaster, density);
+        return roundTripRaster;
     }
 }

@@ -90,6 +90,10 @@
             <artifactId>GeographicLib-Java</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+        <dependency>
             <groupId>it.geosolutions.jaiext.jiffle</groupId>
             <artifactId>jt-jiffle-language</artifactId>
         </dependency>

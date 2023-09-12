@@ -19,7 +19,7 @@ Sedona 1.4.1 is compiled against, Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 * [X] **Sedona Spark & Flink** Introduced `SedonaContext` to unify Sedona entry points.
 * [X] **Sedona Spark** Support Spark 3.4.
 * [X] **Sedona Spark** Added a number of new ST functions.
-* [X] **Zeppelin** Zeppelin helium plugin supports ploting geometries like linestring, polygon.
+* [X] **Zeppelin** Zeppelin helium plugin supports plotting geometries like linestring, polygon.
 
 ### API change
 
@@ -74,7 +74,7 @@ Sedona 1.4.1 is compiled against, Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-239'>SEDONA-239</a>] -         Implement ST_NumPoints
 </li>
-<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-264'>SEDONA-264</a>] -         zeppelin helium plugin supports ploting geometry like linestring, polygon
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-264'>SEDONA-264</a>] -         zeppelin helium plugin supports plotting geometry like linestring, polygon
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-280'>SEDONA-280</a>] -         Add ST_GeometricMedian
 </li>
@@ -335,7 +335,7 @@ GEOGCS["WGS 84",
   * [SEDONA-143](https://issues.apache.org/jira/browse/SEDONA-143) - Add missing unit tests for the Flink predicates
   * [SEDONA-144](https://issues.apache.org/jira/browse/SEDONA-144) - Add ST_AsGeoJSON to the Flink API
   * [SEDONA-145](https://issues.apache.org/jira/browse/SEDONA-145) - Fix ST_AsEWKT to reserve the Z coordinate
-  * [SEDONA-146](https://issues.apache.org/jira/browse/SEDONA-146) - Add missing output funtions to the Flink API
+  * [SEDONA-146](https://issues.apache.org/jira/browse/SEDONA-146) - Add missing output functions to the Flink API
   * [SEDONA-147](https://issues.apache.org/jira/browse/SEDONA-147) - Add SRID functions to the Flink API
   * [SEDONA-148](https://issues.apache.org/jira/browse/SEDONA-148) - Add boolean functions to the Flink API
   * [SEDONA-149](https://issues.apache.org/jira/browse/SEDONA-149) - Add Python 3.10 support

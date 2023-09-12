@@ -270,4 +270,25 @@ public class RasterConstructors
                 transform, crs, null);
         return RasterUtils.create(raster, gridGeometry, null);
     }
+
+    public static GridCoverage2D makeNonEmptyRaster(int numBands, String bandDataType, int widthInPixel, int heightInPixel, double upperLeftX, double upperLeftY, double scaleX, double scaleY, double skewX, double skewY, int srid, double[][] rasterValues) {
+        CoordinateReferenceSystem crs;
+        if (srid == 0) {
+            crs = DefaultEngineeringCRS.GENERIC_2D;
+        } else {
+            // Create the CRS from the srid
+            // Longitude first, Latitude second
+            crs = FunctionsGeoTools.sridToCRS(srid);
+        }
+
+        // Create a new empty raster
+        WritableRaster raster = RasterFactory.createBandedRaster(RasterUtils.getDataTypeCode(bandDataType), widthInPixel, heightInPixel, numBands, null);
+        for (int i = 0; i < numBands; i++) raster.setSamples(0, 0, widthInPixel, heightInPixel, i, rasterValues[i]);
+        MathTransform transform = new AffineTransform2D(scaleX, skewY, skewX, scaleY, upperLeftX, upperLeftY);
+        GridGeometry2D gridGeometry = new GridGeometry2D(
+                new GridEnvelope2D(0, 0, widthInPixel, heightInPixel),
+                PixelInCell.CELL_CORNER,
+                transform, crs, null);
+        return RasterUtils.create(raster, gridGeometry, null);
+    }
 }

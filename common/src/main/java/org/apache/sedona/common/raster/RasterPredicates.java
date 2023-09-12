@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.FunctionsGeoTools;
+import org.apache.sedona.common.utils.CachedCRSTransformFinder;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.jts.JTS;
@@ -182,13 +183,13 @@ public class RasterPredicates {
             return geometry;
         }
         try {
-            MathTransform transform = CRS.findMathTransform(crs, DefaultGeographicCRS.WGS84, true);
+            MathTransform transform = CachedCRSTransformFinder.findTransform(crs, DefaultGeographicCRS.WGS84);
             Geometry transformedGeometry = JTS.transform(geometry, transform);
             if (!(crs instanceof GeographicCRS)) {
                 transformedGeometry = GeomUtils.antiMeridianSafeGeom(transformedGeometry);
             }
             return transformedGeometry;
-        } catch (FactoryException | TransformException e) {
+        } catch (TransformException e) {
             throw new RuntimeException("Cannot transform CRS for evaluating predicate", e);
         }
     }

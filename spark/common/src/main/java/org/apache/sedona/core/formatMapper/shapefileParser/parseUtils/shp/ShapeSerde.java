@@ -46,12 +46,12 @@ import java.nio.ByteOrder;
  * Point: 8 bytes for X coordinate, followed by 8 bytes for Y coordinate.
  * LineString is serialized as MultiLineString.
  * MultiLineString: 16 bytes for envelope, 4 bytes for the number of line strings,
- * 4 bytes for total number of vertexes, 16 * num-vertexes for
- * XY coordinates of all the vertexes.
+ * 4 bytes for total number of vertices, 16 * num-vertices for
+ * XY coordinates of all the vertices.
  * Polygons is serialized as MultiPolygon.
  * MultiPolygon: 16 bytes for envelope, 4 bytes for the total number of exterior and
- * interior rings of all polygons, 4 bytes for total number of vertexes,
- * 16 * num-vertexes for XY coordinates of all the vertexes. The vertexes
+ * interior rings of all polygons, 4 bytes for total number of vertices,
+ * 16 * num-vertices for XY coordinates of all the vertices. The vertices
  * are written one polygon at a time, exterior ring first, followed by
  * interior rings.
  */
