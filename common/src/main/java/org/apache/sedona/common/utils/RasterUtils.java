@@ -19,7 +19,6 @@
 package org.apache.sedona.common.utils;
 
 import com.sun.media.imageioimpl.common.BogusColorSpace;
-import org.apache.sedona.common.Constants.RasterConstants;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.RasterAccessors;
 import org.geotools.coverage.Category;
@@ -297,7 +296,7 @@ public class RasterUtils {
      */
     public static void ensureBand(GridCoverage2D raster, int band) throws IllegalArgumentException {
         if (band < 1 || band > RasterAccessors.numBands(raster)) {
-            throw new IllegalArgumentException(String.format(RasterConstants.INVALID_BAND, band));
+            throw new IllegalArgumentException(String.format("Provided band index %d is not present in the raster", band));
         }
     }
 
