@@ -20,9 +20,11 @@ package org.apache.sedona.common.raster;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
+import org.opengis.referencing.FactoryException;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLConnection;
 
 import static org.junit.Assert.*;
 
@@ -36,6 +38,18 @@ public class RasterOutputTest
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
         String resultRaw = RasterOutputs.asBase64(raster);
         assertTrue(resultRaw.startsWith("iVBORw0KGgoAAAANSUhEUgAABaAAAALQCAMAAABR+ye1AAADAFBMVEXE9/W48vOq7PGa5u6L3"));
+    }
+
+    @Test
+    public void testAsPNG() throws IOException, FactoryException {
+        String dirPath = System.getProperty("user.dir") + "/target/testAsPNGFunction/";
+        new File(dirPath).mkdirs();
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+        byte[] pngData = RasterOutputs.asPNG(raster);
+        RasterOutputs.writeToDiskFile(pngData, dirPath + "test1.png");
+        File f = new File(dirPath + "test1.png");
+        String mimeType = URLConnection.guessContentTypeFromName(f.getName());
+        assertEquals("image/png", mimeType);
     }
 
     @Test

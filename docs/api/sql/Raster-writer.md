@@ -93,6 +93,32 @@ root
  |-- geotiff: binary (nullable = true)
 ```
 
+#### RS_AsPNG
+
+Introduction: Returns a PNG byte array, that can be written to raster files as PNGs using the [sedona function](#write-a-binary-dataframe-to-raster-files). This function can only accept pixel data type of unsigned integer.
+
+!!!Note
+	Raster having `UNSIGNED_8BITS` pixel data type will have range of `0 - 255`, whereas rasters having `UNSIGNED_16BITS` pixel data type will have range of `0 - 65535`. If provided pixel value is greater than either `255` for `UNSIGNED_8BITS` or `65535` for `UNSIGNED_16BITS`, then the extra bit will be truncated.
+
+!!!Note
+	Raster that have float or double values will result in an empty byte array. PNG only accepts Integer values, if you want to write your raster to an image file, please refer to [RS_AsGeoTiff](#rs_asgeotiff).
+
+Since: `v1.5.0`
+
+Format: `RS_AsPNG(raster: Raster)`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_AsPNG(raster) FROM Rasters
+```
+
+Output:
+
+```
+[-119, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73...]
+```
+
 ### Write a binary DataFrame to raster files
 
 Introduction: You can write a Sedona binary DataFrame to external storage using Sedona's built-in `raster` data source. Note that: `raster` data source does not support reading rasters. Please use Spark built-in `binaryFile` and Sedona RS constructors together to read rasters.
