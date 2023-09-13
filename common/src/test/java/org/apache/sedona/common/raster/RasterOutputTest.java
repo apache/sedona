@@ -25,6 +25,7 @@ import org.opengis.referencing.FactoryException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLConnection;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -48,6 +49,18 @@ public class RasterOutputTest
         byte[] pngData = RasterOutputs.asPNG(raster);
         RasterOutputs.writeToDiskFile(pngData, dirPath + "test1.png");
         File f = new File(dirPath + "test1.png");
+        String mimeType = URLConnection.guessContentTypeFromName(f.getName());
+        assertEquals("image/png", mimeType);
+    }
+
+    @Test
+    public void testAsPNGWithBand() throws IOException, FactoryException {
+        String dirPath = System.getProperty("user.dir") + "/target/testAsPNGFunction/";
+        new File(dirPath).mkdirs();
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+        byte[] pngData = RasterOutputs.asPNG(RasterBandAccessors.getBand(raster, new int[] {3, 1, 2}));
+        RasterOutputs.writeToDiskFile(pngData, dirPath + "test2.png");
+        File f = new File(dirPath + "test2.png");
         String mimeType = URLConnection.guessContentTypeFromName(f.getName());
         assertEquals("image/png", mimeType);
     }
