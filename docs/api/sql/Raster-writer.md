@@ -95,7 +95,7 @@ root
 
 #### RS_AsPNG
 
-Introduction: Returns a PNG byte array, that can be written to raster files as PNGs using the [sedona function](#write-a-binary-dataframe-to-raster-files). This function can only accept pixel data type of unsigned integer.
+Introduction: Returns a PNG byte array, that can be written to raster files as PNGs using the [sedona function](#write-a-binary-dataframe-to-raster-files). This function can only accept pixel data type of unsigned integer. PNG can accept 1 or 3 bands of data from the raster, refer to [RS_Band](../Raster-operators/#rs_band) for more details.
 
 !!!Note
 	Raster having `UNSIGNED_8BITS` pixel data type will have range of `0 - 255`, whereas rasters having `UNSIGNED_16BITS` pixel data type will have range of `0 - 65535`. If provided pixel value is greater than either `255` for `UNSIGNED_8BITS` or `65535` for `UNSIGNED_16BITS`, then the extra bit will be truncated.
@@ -117,6 +117,18 @@ Output:
 
 ```
 [-119, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73...]
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_AsPNG(RS_Band(raster, Array(3, 1, 2)))
+```
+
+Output:
+
+```
+[-103, 78, 94, -26, 61, -16, -91, -103, -65, -116...]
 ```
 
 ### Write a binary DataFrame to raster files

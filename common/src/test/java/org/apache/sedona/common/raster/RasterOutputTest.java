@@ -25,7 +25,6 @@ import org.opengis.referencing.FactoryException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLConnection;
-import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
