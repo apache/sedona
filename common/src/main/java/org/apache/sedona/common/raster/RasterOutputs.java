@@ -93,6 +93,13 @@ public class RasterOutputs
         return true;
     }
 
+    public static byte[] asPNG(GridCoverage2D raster) throws IOException {
+        RenderedImage renderedImage = raster.getRenderedImage();
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ImageIO.write(renderedImage, "png", os);
+        return os.toByteArray();
+    }
+
     public static byte[] asArcGrid(GridCoverage2D raster, int sourceBand) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         GridCoverageWriter writer;
