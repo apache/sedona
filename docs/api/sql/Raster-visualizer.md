@@ -63,3 +63,23 @@ Output:
 | 3   4   5   6|
 ```
 
+
+## Visualize a raster as PNG
+
+Introduction: Returns a PNG byte array that can be stored as PNG using the [sedona function](../Raster-writer/#write-a-binary-dataframe-to-raster-files). This function can only accept pixel data type of unsigned integer.
+
+Since: `v1.5.0`
+
+Format: `RS_AsPNG(raster: Raster)`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_AsPNG(raster) FROM Rasters
+```
+
+Output:
+
+```
+[-119, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73...]
+```
