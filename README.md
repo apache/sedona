@@ -128,7 +128,7 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
 
 * [Spatial SQL in Sedona](https://sedona.apache.org/latest-snapshot/tutorial/sql/)
 * [Integrate with GeoPandas and Shapely](https://sedona.apache.org/latest-snapshot/tutorial/geopandas-shapely/)
-* [Working with Satial R in Sedona](https://sedona.apache.org/latest-snapshot/api/rdocs/)
+* [Working with Spatial R in Sedona](https://sedona.apache.org/latest-snapshot/api/rdocs/)
 
 Please visit [Apache Sedona website](http://sedona.apache.org/) for detailed information
 
