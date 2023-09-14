@@ -82,7 +82,6 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
           numPartitions = sedonaConf.getFallbackPartitionNum
         }
         else {
-          numPartitions = rightShapes.rawSpatialRDD.partitions.size()
           numPartitions = joinPartitionNumOptimizer(rightShapes.rawSpatialRDD.partitions.size(), leftShapes.rawSpatialRDD.partitions.size(),
             rightShapes.approximateTotalCount)
         }
