@@ -18,7 +18,7 @@
 from IPython.display import display, HTML
 
 @classmethod
-class SedonaVisualization:
+class SedonaUtils:
 
     def display_image(cls, df):
         display(HTML(df.toPandas().to_html(escape=False)))
