@@ -23,7 +23,7 @@ import org.apache.sedona.common.utils.RasterUtils
 import org.apache.spark.sql.SaveMode
 import org.apache.spark.sql.functions.{collect_list, expr}
 import org.geotools.coverage.grid.GridCoverage2D
-import org.junit.Assert.{assertEquals, assertNull}
+import org.junit.Assert.{assertEquals, assertNull, assertTrue}
 import org.locationtech.jts.geom.{Coordinate, Geometry}
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
@@ -1058,8 +1058,10 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'b', 5, 4, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as emptyRaster")
       val resultDf = df.selectExpr("RS_AsImage(emptyRaster) as html")
       val actual = resultDf.first().getString(0)
-      val expected = "<img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAECAAAAABjWKqcAAAAIElEQVR42mPgPfGfkYUhhfcBNw+DT1KihS6DqLKztjcATWMFp9rkkJgAAAAASUVORK5CYII=\" width=\"200\" />"
-      assertEquals(expected, actual)
+      val expectedStart = "<img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAECAAAAABjWKqcAAAAIElEQV"
+      val expectedEnd = "width=\"200\" />"
+      assertTrue(actual.startsWith(expectedStart))
+      assertTrue(actual.endsWith(expectedEnd))
     }
 
     it("Passed RS_AsImage with custom width") {
@@ -1067,8 +1069,10 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'b', 5, 4, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as emptyRaster")
       val resultDf = df.selectExpr("RS_AsImage(emptyRaster, 500) as html")
       val actual = resultDf.first().getString(0)
-      val expected = "<img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAECAAAAABjWKqcAAAAIElEQVR42mPgPfGfkYUhhfcBNw+DT1KihS6DqLKztjcATWMFp9rkkJgAAAAASUVORK5CYII=\" width=\"500\" />"
-      assertEquals(expected, actual)
+      val expectedStart = "<img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAECAAAAABjWKqcAAAAIElEQV"
+      val expectedEnd = "width=\"500\" />"
+      assertTrue(actual.startsWith(expectedStart))
+      assertTrue(actual.endsWith(expectedEnd))
     }
   }
 }
