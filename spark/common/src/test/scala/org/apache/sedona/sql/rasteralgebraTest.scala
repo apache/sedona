@@ -1052,5 +1052,23 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val expected = "| 1.000000   3.333333   4.000000   0.000100|\n| 2.222200   9.000000  10.000000  11.111111|\n| 3.000000   4.000000   5.000000   6.000000|\n".format()
       assertEquals(expected, actual)
     }
+
+    it("Passed RS_AsImage with default width") {
+      val inputDf = Seq(Seq(13, 200, 255, 1, 4, 100, 13, 224, 11, 12, 76, 98, 97, 56, 45, 21, 35, 67, 43, 75)).toDF("band")
+      val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'b', 5, 4, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as emptyRaster")
+      val resultDf = df.selectExpr("RS_AsImage(emptyRaster) as html")
+      val actual = resultDf.first().getString(0)
+      val expected = "<img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAECAAAAABjWKqcAAAAIElEQVR42mPgPfGfkYUhhfcBNw+DT1KihS6DqLKztjcATWMFp9rkkJgAAAAASUVORK5CYII=\" width=\"200\" />"
+      assertEquals(expected, actual)
+    }
+
+    it("Passed RS_AsImage with custom width") {
+      val inputDf = Seq(Seq(13, 200, 255, 1, 4, 100, 13, 224, 11, 12, 76, 98, 97, 56, 45, 21, 35, 67, 43, 75)).toDF("band")
+      val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'b', 5, 4, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as emptyRaster")
+      val resultDf = df.selectExpr("RS_AsImage(emptyRaster, 500) as html")
+      val actual = resultDf.first().getString(0)
+      val expected = "<img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAECAAAAABjWKqcAAAAIElEQVR42mPgPfGfkYUhhfcBNw+DT1KihS6DqLKztjcATWMFp9rkkJgAAAAASUVORK5CYII=\" width=\"500\" />"
+      assertEquals(expected, actual)
+    }
   }
 }
