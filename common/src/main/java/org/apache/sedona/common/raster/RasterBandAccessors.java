@@ -24,6 +24,7 @@ import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.opengis.referencing.FactoryException;
 
+import javax.media.jai.RasterFactory;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.Arrays;
@@ -138,6 +139,12 @@ public class RasterBandAccessors {
 //        return getSummaryStats(raster, 1, excludeNoDataValue);
 //    }
 
+    /**
+     * @param rasterGeom The raster where the bands will be extracted from.
+     * @param bandIndexes The bands to be added to new raster.
+     *
+     * @return Raster with the specified bands.
+     **/
     public static GridCoverage2D getBand(GridCoverage2D rasterGeom, int[] bandIndexes) throws FactoryException {
         Double noDataValue;
         double[] metadata = RasterAccessors.metadata(rasterGeom);
@@ -145,22 +152,35 @@ public class RasterBandAccessors {
         GridCoverage2D resultRaster = RasterConstructors.makeEmptyRaster(bandIndexes.length, width, height,
                 metadata[0], metadata[1], metadata[4], metadata[5], metadata[6], metadata[7], (int) metadata[8]);
 
+        // Get raster data type
+        Raster raster = RasterUtils.getRaster(rasterGeom.getRenderedImage());
+        int dataTypeCode = raster.getDataBuffer().getDataType();
+        boolean isDataTypeIntegral = RasterUtils.isDataTypeIntegral(dataTypeCode);
+
         // Get band data that's required
         int[] bandsDistinct = Arrays.stream(bandIndexes).distinct().toArray();
-        HashMap<Integer, double[]> bandData = new HashMap<>();
+        HashMap<Integer, Object> bandData = new HashMap<>();
         for (int curBand: bandsDistinct) {
             RasterUtils.ensureBand(rasterGeom, curBand);
-            bandData.put(curBand - 1, MapAlgebra.bandAsArray(rasterGeom, curBand));
+            if (isDataTypeIntegral) {
+                bandData.put(curBand - 1, raster.getSamples(0, 0, width, height, curBand - 1, (int[]) null));
+            } else {
+                bandData.put(curBand - 1, raster.getSamples(0, 0, width, height, curBand - 1, (double[]) null));
+            }
         }
 
-        // Get Writable Raster from the resultRaster
-        WritableRaster wr = RasterUtils.getRaster(resultRaster.getRenderedImage()).createCompatibleWritableRaster();
+        // Create Writable Raster with the datatype of given raster
+        WritableRaster wr = RasterFactory.createBandedRaster(dataTypeCode, width, height, bandIndexes.length, null);
 
         GridSampleDimension[] sampleDimensionsOg = rasterGeom.getSampleDimensions();
         GridSampleDimension[] sampleDimensionsResult = resultRaster.getSampleDimensions();
         for (int i = 0; i < bandIndexes.length; i ++) {
             sampleDimensionsResult[i] = sampleDimensionsOg[bandIndexes[i] - 1];
-            wr.setSamples(0, 0, width, height, i, bandData.get(bandIndexes[i] - 1));
+            if (isDataTypeIntegral) {
+                wr.setSamples(0, 0, width, height, i, (int[]) bandData.get(bandIndexes[i] - 1));
+            } else {
+                wr.setSamples(0, 0, width, height, i, (double[]) bandData.get(bandIndexes[i] - 1));
+            }
             noDataValue = RasterBandAccessors.getBandNoDataValue(rasterGeom, bandIndexes[i]);
             GridSampleDimension sampleDimension = sampleDimensionsResult[i];
             if (noDataValue != null) {

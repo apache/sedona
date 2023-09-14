@@ -424,7 +424,6 @@ public class SpatialRDD<T extends Geometry>
     public void setRawSpatialRDD(JavaRDD<T> rawSpatialRDD)
     {
         this.rawSpatialRDD = rawSpatialRDD;
-        this.analyze();
     }
 
     /**
