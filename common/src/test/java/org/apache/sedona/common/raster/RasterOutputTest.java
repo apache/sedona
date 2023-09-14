@@ -53,6 +53,18 @@ public class RasterOutputTest
     }
 
     @Test
+    public void testAsPNGWithBand() throws IOException, FactoryException {
+        String dirPath = System.getProperty("user.dir") + "/target/testAsPNGFunction/";
+        new File(dirPath).mkdirs();
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+        byte[] pngData = RasterOutputs.asPNG(RasterBandAccessors.getBand(raster, new int[] {3, 1, 2}));
+        RasterOutputs.writeToDiskFile(pngData, dirPath + "test2.png");
+        File f = new File(dirPath + "test2.png");
+        String mimeType = URLConnection.guessContentTypeFromName(f.getName());
+        assertEquals("image/png", mimeType);
+    }
+
+    @Test
     public void testAsGeoTiff() throws IOException {
         GridCoverage2D rasterOg = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
         GridCoverage2D rasterTest = RasterConstructors.fromGeoTiff(RasterOutputs.asGeoTiff(rasterFromGeoTiff(resourceFolder + "raster/test1.tiff")));
