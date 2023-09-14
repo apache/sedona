@@ -28,29 +28,18 @@ class TestJoinBase(TestBase):
     use_legacy_apis = False
 
     def create_point_rdd(self, location, splitter, num_partitions):
-        rdd = PointRDD(
-            self.sc, location, 1, splitter, False, num_partitions
-        )
-        return PointRDD(rdd.rawJvmSpatialRDD)
+        return PointRDD(self.sc, location, 1, splitter, False, num_partitions)
 
     def create_linestring_rdd(self, location, splitter, num_partitions):
-        rdd = LineStringRDD(
-            self.sc, location, splitter, True, num_partitions
-        )
-        return LineStringRDD(rdd.rawJvmSpatialRDD)
+        return LineStringRDD(self.sc, location, splitter, True, num_partitions)
 
     def create_polygon_rdd(self, location, splitter, num_partitions):
-        rdd = PolygonRDD(
-            self.sc, location, splitter, True, num_partitions
-        )
-        return PolygonRDD(rdd.rawJvmSpatialRDD)
+        return PolygonRDD(self.sc, location, splitter, True, num_partitions)
 
     def create_rectangle_rdd(self, location, splitter, num_partitions):
-        rdd = RectangleRDD(
-            self.sc, location, splitter, True, num_partitions)
-        return RectangleRDD(
-            rdd.rawJvmSpatialRDD
-        )
+        rectangle_rdd = RectangleRDD(self.sc, location, splitter, True, num_partitions)
+        rectangle_rdd.analyze()
+        return rectangle_rdd
 
     def partition_rdds(self, query_rdd: SpatialRDD, spatial_rdd: SpatialRDD, grid_type):
         spatial_rdd.spatialPartitioning(grid_type)
