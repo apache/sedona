@@ -1,7 +1,7 @@
-Sedona offers some APIs to aid in easy visualization of a raster object. Some of these APIs might be specifically for Jupyter users and will not work in SQL. Such APIs will have a note explicitly mentioning compatibility.
+Sedona offers some APIs to aid in easy visualization of a raster object.
 
 ## Image-based visualization
-Sedona offers APIs to visualize a raster in an image form. This API only works for rasters with data in a byte range (0 - 255), and bands <= 4 (Grayscale - RGBA)
+Sedona offers APIs to visualize a raster in an image form. This API only works for rasters with byte data, and bands <= 4 (Grayscale - RGBA). You can check the data type of an existing raster by using [RS_BandDataType](../Raster-operators/#rs_bandpixeltype) or create your own raster by passing 'B' while using [RS_MakeEmptyRaster](../Raster-loader/#rs_makeemptyraster).
 
 ### RS_AsBase64
 Introduction: Returns a base64 encoded string of the given raster. This function internally takes the first 4 bands as RGBA, and converts them to the PNG format, finally produces a base64 string. To visualize other bands, please use it together with `RS_Band`. You can take the resulting base64 string in [an online viewer](https://base64-viewer.onrender.com/) to check how the image looks like.
@@ -23,16 +23,17 @@ iVBORw0KGgoAAAA...
 ```
 
 ### RS_AsImage
-Introduction: Returns a HTML that when rendered using an HTML viewer or via a Jupyter Notebook, displays the raster as an image.
+Introduction: Returns a HTML that when rendered using an HTML viewer or via a Jupyter Notebook, displays the raster as an image. Optionally, an imageSize parameter can be passed to RS_AsImage in order to increase the size of the rendered image (default: 200).
 
 Since: `1.5.0`
 
-Format: `RS_AsImage(raster: Raster, imageWidth: int = 200)`
+Format: `RS_AsImage(raster: Raster, imageSize: int = 200)`
 
 Spark SQL Example:
 
 ```sql
 SELECT RS_AsImage(raster, 500) from rasters
+SELECT RS_AsImage(raster) from rasters
 ```
 
 !!!Tip
