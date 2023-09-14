@@ -1,7 +1,9 @@
 Sedona offers some APIs to aid in easy visualization of a raster object. Some of these APIs might be specifically for Jupyter users and will not work in SQL. Such APIs will have a note explicitly mentioning compatibility.
 
-## Visualize raster using base64 viewers
+## Image-based visualization
+Sedona offers APIs to visualize a raster in an image form. This API only works for rasters with data in a byte range (0 - 255), and bands <= 4 (Grayscale - RGBA)
 
+### RS_AsBase64
 Introduction: Returns a base64 encoded string of the given raster. This function internally takes the first 4 bands as RGBA, and converts them to the PNG format, finally produces a base64 string. To visualize other bands, please use it together with `RS_Band`. You can take the resulting base64 string in [an online viewer](https://base64-viewer.onrender.com/) to check how the image looks like.
 
 Since: `v1.5.0`
@@ -20,7 +22,26 @@ Output:
 iVBORw0KGgoAAAA...
 ```
 
-## Visualize a Raster band as a 2D matrix
+### RS_AsImage
+Introduction: Returns a HTML that when rendered using an HTML viewer or via a Jupyter Notebook, displays the raster as an image.
+
+Since: `1.5.0`
+
+Format: `RS_AsImage(raster: Raster, imageWidth: int = 200)`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_AsImage(raster, 500) from rasters
+```
+
+!!!Tip
+    RS_AsImage can be paired with SedonaVisualization.display_image(df) wrapper inside a Jupyter notebook to directly print the raster as an image in the output, where the 'df' parameter is the dataframe containing the HTML data provided by RS_AsImage
+
+
+
+## Text-based visualization
+### RS_AsMatrix
 
 Introduction: Returns a string, that when printed, outputs the raster band as a pretty printed 2D matrix. All the values of the raster are cast to double for the string. RS_AsMatrix allows specifying the number of digits to be considered after the decimal point.
 RS_AsMatrix expects a raster, and optionally a band (default: 1) and postDecimalPrecision (default: 6). The band parameter is 1-indexed.

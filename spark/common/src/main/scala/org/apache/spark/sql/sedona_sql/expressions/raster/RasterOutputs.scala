@@ -57,3 +57,9 @@ case class RS_AsMatrix(inputExpressions: Seq[Expression]) extends InferredExpres
     copy(inputExpressions = newChildren)
   }
 }
+
+case class RS_AsImage(inputExpressions: Seq[Expression]) extends InferredExpression(inferrableFunction2(RasterOutputs.createHTMLString), inferrableFunction1(RasterOutputs.createHTMLString)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
