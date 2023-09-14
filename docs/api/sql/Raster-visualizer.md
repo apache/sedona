@@ -23,11 +23,11 @@ iVBORw0KGgoAAAA...
 ```
 
 ### RS_AsImage
-Introduction: Returns a HTML that when rendered using an HTML viewer or via a Jupyter Notebook, displays the raster as an image. Optionally, an imageSize parameter can be passed to RS_AsImage in order to increase the size of the rendered image (default: 200).
+Introduction: Returns a HTML that when rendered using an HTML viewer or via a Jupyter Notebook, displays the raster as a square image of side length `imageWidth`. Optionally, an imageWidth parameter can be passed to RS_AsImage in order to increase the size of the rendered image (default: 200).
 
 Since: `1.5.0`
 
-Format: `RS_AsImage(raster: Raster, imageSize: int = 200)`
+Format: `RS_AsImage(raster: Raster, imageWidth: int = 200)`
 
 Spark SQL Example:
 
