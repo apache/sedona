@@ -1060,10 +1060,16 @@ Format:
 RS_SetValues(raster: Raster, bandIndex: Integer, colX: Integer, rowY: Integer, width: Integer, height: Integer, newValues: Array<Double>, keepNoData: Boolean = false)
 ```
 
+```
+RS_SetValues(raster: Raster, bandIndex: Integer, geom: Geometry, newValue: Double, keepNoData: Boolean = false)
+```
+
 Since: `v1.5.0`
 
 The `colX`, `rowY`, and `bandIndex` are 1-indexed. If `keepNoData` is `true`, the pixels with NoData value will not be 
 set to the corresponding value in `newValues`. The `newValues` should be provided in rows.
+
+The geometry variant of this function accepts all types of Geometries and it sets the `newValue` in the specified region under the `geom`.
 
 !!!note 
     If the shape of `newValues` doesn't match with provided `width` and `height`, `IllegalArgumentException` is thrown. 
@@ -1078,7 +1084,7 @@ SELECT RS_BandAsArray(
         RS_SetValues(
             RS_AddBandFromArray(
                 RS_MakeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0),
-                [1,1,1,0,0,0,1,2,3,3,5,6,7,0,0,3,0,0,3,0,0,0,0,0,0], 1, 0d
+                Array(1,1,1,0,0,0,1,2,3,3,5,6,7,0,0,3,0,0,3,0,0,0,0,0,0), 1, 0d
                 ),
             1, 2, 2, 3, 3, [11,12,13,14,15,16,17,18,19]
             )
@@ -1088,7 +1094,27 @@ SELECT RS_BandAsArray(
 Output:
 
 ```
-[1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 11.0, 12.0, 13.0, 3.0, 5.0, 14.0, 15.0, 16.0, 0.0, 3.0, 17.0, 18.0, 19.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+Array(1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 11.0, 12.0, 13.0, 3.0, 5.0, 14.0, 15.0, 16.0, 0.0, 3.0, 17.0, 18.0, 19.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_BandAsArray(
+        RS_SetValues(
+            RS_AddBandFromArray(
+                RS_MakeEmptyRaster(1, 5, 5, 1, -1, 1, -1, 0, 0, 0),
+                Array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), 1
+                ),
+            1, ST_GeomFromWKT('POLYGON((1 -1, 3 -3, 6 -6, 4 -1, 1 -1))'), 255, false
+            )
+           )
+```
+
+Output:
+
+```
+Array(255.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 ```
 
 ### RS_SetSRID
