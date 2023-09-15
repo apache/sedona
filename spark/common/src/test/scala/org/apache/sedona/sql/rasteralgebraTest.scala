@@ -386,6 +386,26 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(expected.equals(actual))
     }
 
+    it("Passed RS_SetValues with empty raster geom variant") {
+      var inputDf = Seq((Seq(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0))).toDF("band")
+      inputDf = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 5, 5, 1, -1, 1, -1, 0, 0, 0), band, 1) as raster")
+      var actual = inputDf.selectExpr("RS_BandAsArray(RS_SetValues(raster, 1, ST_GeomFromWKT('LINESTRING(1 -1, 1 -4)'), 255), 1)").first().getSeq(0)
+      var expected = Seq(0.0, 0.0, 0.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+      assert(expected.equals(actual))
+
+      actual = inputDf.selectExpr("RS_BandAsArray(RS_SetValues(raster, 1, ST_GeomFromWKT('POINT(2 -2)'), 25), 1)").first().getSeq(0)
+      expected = Seq(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 25.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+      assert(expected.equals(actual))
+
+      actual = inputDf.selectExpr("RS_BandAsArray(RS_SetValues(raster, 1, ST_GeomFromWKT('MULTIPOINT((2 -2), (2 -1), (3 -3))'), 400), 1)").first().getSeq(0)
+      expected = Seq(0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+      assert(expected.equals(actual))
+
+      actual = inputDf.selectExpr("RS_BandAsArray(RS_SetValues(raster, 1, ST_GeomFromWKT('POLYGON((1 -1, 3 -3, 6 -6, 4 -1, 1 -1))'), 150), 1)").first().getSeq(0)
+      expected = Seq(150.0, 150.0, 150.0, 0.0, 0.0, 0.0, 150.0, 150.0, 150.0, 0.0, 0.0, 0.0, 150.0, 150.0, 0.0, 0.0, 0.0, 0.0, 150.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+      assert(expected.equals(actual))
+    }
+
     it("Passed RS_SetValue with empty raster") {
       var inputDF = Seq((Seq(1, 1, 1, 0, 0, 0, 1, 2, 3, 3, 5, 6, 7, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0))).toDF("band")
       var df = inputDF.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0), " +
