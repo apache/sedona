@@ -15,17 +15,12 @@ package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.utils.RasterUtils;
-import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.geometry.DirectPosition2D;
-import org.geotools.geometry.Envelope2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
-import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -61,38 +56,6 @@ public class RasterConstructorsTest
         assertEquals(10, gridCoverage2D.getRenderedImage().getTileWidth());
         assertEquals(10d, gridCoverage2D.getRenderedImage().getData().getPixel(5, 5, (double[])null)[0], 0.1);
         assertEquals(4, gridCoverage2D.getNumSampleDimensions());
-    }
-
-    @Test
-    public void test() throws ParseException, FactoryException, TransformException {
-        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(2, 255, 255, 1, -1, 2, -2, 0, 0, 4326);
-        Geometry geom = Constructors.geomFromWKT("POLYGON((12 12, 18 20, 15 24, 24 25, 12 12))", 0);
-        GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", 3093151, 3d);
-        System.out.println("+ve x and y");
-        System.out.println("OG:         " + Arrays.toString(RasterAccessors.metadata(raster)));
-        System.out.println("Rasterized: " + Arrays.toString(RasterAccessors.metadata(rasterized)));
-        double colX = RasterAccessors.getUpperLeftX(rasterized), rowY = RasterAccessors.getUpperLeftY(rasterized);
-        System.out.println(Arrays.toString(MapAlgebra.bandAsArray(rasterized, 1)));
-
-        GridCoordinates2D pixelL = raster.getGridGeometry().worldToGrid(new DirectPosition2D(colX, rowY));
-        int[] pixelLocation = RasterUtils.getGridCoordinatesFromWorld(raster, colX, rowY);
-        Point2D pointLast = RasterUtils.getWorldCornerCoordinatesWithRangeCheck(rasterized, 6, 6);
-
-        Point2D pointFirst = RasterUtils.getWorldCornerCoordinatesWithRangeCheck(rasterized, 1, 1);
-
-        System.out.println("last pixel coordinate: " + pointLast.getX() + " " + pointLast.getY());
-        System.out.println("firt pixel coordinate: " + pointFirst.getX() + " " + pointFirst.getY());
-
-        System.out.println(Arrays.toString(pixelLocation));
-
-        System.out.println("pixelL: " + Arrays.toString(pixelL.getCoordinateValues()));
-
-        System.out.println("UpperleftX " + colX + " UpperleftY " + rowY);
-
-//        System.out.println("MinX: " +rasterized.getEnvelope2D().getMinX() + " MinY:  " + rasterized.getEnvelope2D().getMinY());
-//        System.out.println("MaxX: " +rasterized.getEnvelope2D().getMaxX() + " MaxY:  " + rasterized.getEnvelope2D().getMaxY());
-        System.out.println(Arrays.toString(rasterized.getEnvelope2D().getUpperCorner().getCoordinate()));
-//        System.out.println(Arrays.toString(rasterized.getEnvelope2D().getLowerCorner().getCoordinate()));
     }
 
     @Test
