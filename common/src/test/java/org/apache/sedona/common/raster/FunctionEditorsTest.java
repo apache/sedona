@@ -18,9 +18,16 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.Constructors;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.geometry.DirectPosition2D;
 import org.junit.Test;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -41,6 +48,39 @@ public class FunctionEditorsTest extends RasterTestBase {
         actual = MapAlgebra.bandAsArray(raster, 1);
         expected = new double[] {1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 11.0, 12.0, 13.0, 3.0, 5.0, 14.0, 15.0, 16.0, 0.0, 3.0, 17.0, 18.0, 19.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         assertArrayEquals(actual, expected, 0.0);
+    }
+
+    @Test
+    public void testSetValuesGeomVariant() throws FactoryException, ParseException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, 1, -1, 1, -1, 0, 0, 0);
+        double[] values = new double[] {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values, 1);
+        Geometry geom = Constructors.geomFromWKT("LINESTRING(1 -1, 1 -4)", 0);
+        GridCoverage2D raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 4235, false);
+        double[] actual = MapAlgebra.bandAsArray(raster, 1);
+        double[] expected = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 4235.0, 0.0, 0.0, 0.0, 0.0, 4235.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        assertArrayEquals(expected, actual, 0.1d);
+
+        // Point
+        geom = Constructors.geomFromWKT("POINT(2 -2)", 0);
+        raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 35);
+        actual = MapAlgebra.bandAsArray(raster, 1);
+        expected = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 35.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        assertArrayEquals(expected, actual, 0.1d);
+
+        // MultiPoint
+        geom = Constructors.geomFromWKT("MULTIPOINT((2 -2), (2 -1), (3 -3))", 0);
+        raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 400, false);
+        actual = MapAlgebra.bandAsArray(raster, 1);
+        expected = new double[] {0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        assertArrayEquals(expected, actual, 0.1d);
+
+        // Polygon
+        geom = Constructors.geomFromWKT("POLYGON((1 -1, 3 -3, 6 -6, 4 -1, 1 -1))", 0);
+        raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 255, false);
+        actual = MapAlgebra.bandAsArray(raster, 1);
+        expected = new double[] {255.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        assertArrayEquals(expected, actual, 0.1d);
     }
 
     @Test
