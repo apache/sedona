@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.opengis.referencing.FactoryException;
@@ -25,6 +26,7 @@ import org.opengis.referencing.FactoryException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLConnection;
+
 
 import static org.junit.Assert.*;
 
@@ -173,4 +175,30 @@ public class RasterOutputTest
         String actual = RasterOutputs.asMatrix(raster, 2, 2);
         assertEquals(expectedValue, actual);
     }
+
+    @Test
+    public void testAsImage() throws IOException, FactoryException {
+        GridCoverage2D testRaster = RasterConstructors.makeEmptyRaster(1, "b", 5, 4, 0, 0, 1, -1, 0, 0, 0);
+        double[] bandValues = {13, 200, 255, 1, 4, 100, 13, 224, 11, 12, 76, 98, 97, 56, 45, 21, 35, 67, 43, 75};
+        testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues, 1);
+        String htmlString = RasterOutputs.createHTMLString(testRaster);
+        String expectedStart = "<img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAECAAAAABjWKqcAAAAIElEQV";
+        String expectedEnd = "width=\"200\" />";
+        assertTrue(htmlString.startsWith(expectedStart));
+        assertTrue(htmlString.endsWith(expectedEnd));
+    }
+
+    @Test
+    public void testAsImageCustomWidth() throws IOException, FactoryException {
+        GridCoverage2D testRaster = RasterConstructors.makeEmptyRaster(1, "b", 5, 4, 0, 0, 1, -1, 0, 0, 0);
+        double[] bandValues = {13, 200, 255, 1, 4, 100, 13, 224, 11, 12, 76, 98, 97, 56, 45, 21, 35, 67, 43, 75};
+        testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues, 1);
+        String htmlString = RasterOutputs.createHTMLString(testRaster, 500);
+        String expectedStart = "<img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAECAAAAABjWKqcAAAAIElEQV";
+        String expectedEnd = "width=\"500\" />";
+        assertTrue(htmlString.startsWith(expectedStart));
+        assertTrue(htmlString.endsWith(expectedEnd));
+    }
+
+
 }

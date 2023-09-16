@@ -188,7 +188,6 @@ object Catalog {
     function[RS_SquareRoot](),
     function[RS_LogicalDifference](),
     function[RS_LogicalOver](),
-    function[RS_HTML](),
     function[RS_Array](),
     function[RS_Normalize](),
     function[RS_AddBandFromArray](),
@@ -241,7 +240,8 @@ object Catalog {
     function[RS_BandNoDataValue](),
     function[RS_BandPixelType](),
     function[RS_MinConvexHull](),
-    function[RS_AsMatrix]()
+    function[RS_AsMatrix](),
+    function[RS_AsImage]()
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(

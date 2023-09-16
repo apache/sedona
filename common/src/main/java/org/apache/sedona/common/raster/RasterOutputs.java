@@ -37,6 +37,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 public class RasterOutputs
@@ -204,4 +205,16 @@ public class RasterOutputs
 
         return res.toString();
     }
+
+    public static String createHTMLString(GridCoverage2D raster, int imageWidth) throws IOException {
+        String rasterAsBase64 = asBase64(raster);
+        String imageString = String.format("data:image/png;base64,%s", rasterAsBase64);
+        String htmlString =  "<img src=\"" + imageString + "\" width=\"" + imageWidth + "\" />";
+        return new String(htmlString.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+    }
+
+    public static String createHTMLString(GridCoverage2D raster) throws IOException {
+        return createHTMLString(raster, 200);
+    }
+
 }

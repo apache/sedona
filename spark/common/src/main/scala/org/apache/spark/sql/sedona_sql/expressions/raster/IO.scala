@@ -67,36 +67,4 @@ case class RS_Array(inputExpressions: Seq[Expression])
   }
 }
 
-case class RS_HTML(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    // This is an expression which takes one input expressions
-    val encodedstring =inputExpressions(0).eval(inputRow).asInstanceOf[UTF8String].toString
-    // Add image width if needed
-    var imageWidth = "200"
-    if (inputExpressions.length == 2) imageWidth = inputExpressions(1).eval(inputRow).asInstanceOf[UTF8String].toString
-    val result = htmlstring(encodedstring, imageWidth)
-    UTF8String.fromString(result)
-  }
-
-  // create HTML string from Base64 string
-  private def htmlstring(encodestring: String, imageWidth: String): String = {
-    "<img src=\"" + createmainstring(encodestring) + "\" width=\"" + imageWidth + "\" />"
-  }
-
-  private def createmainstring(encodestring:String): String = {
-
-    val result = s"data:image/png;base64,$encodestring"
-    result
-  }
-  override def dataType: DataType = StringType
-
-  override def children: Seq[Expression] = inputExpressions
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
 
