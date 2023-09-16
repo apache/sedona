@@ -35,15 +35,22 @@ Spark SQL Example:
 SELECT RS_AsImage(raster, 500) from rasters
 SELECT RS_AsImage(raster) from rasters
 ```
-
-!!!Tip
-    RS_AsImage can be paired with SedonaVisualization.display_image(df) wrapper inside a Jupyter notebook to directly print the raster as an image in the output, where the 'df' parameter is the dataframe containing the HTML data provided by RS_AsImage
-
 Output:
 ```html
 "<img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAECAAAAABjWKqcAAAAIElEQVR42mPgPfGfkYUhhfcBNw+DT1KihS6DqLKztjcATWMFp9rkkJgAAAAASUVORK5CYII=\" width=\"200\" />";
 ```
 
+!!!Tip
+    RS_AsImage can be paired with SedonaUtils.display_image(df) wrapper inside a Jupyter notebook to directly print the raster as an image in the output, where the 'df' parameter is the dataframe containing the HTML data provided by RS_AsImage
+
+Example:
+```python
+df = sedona.read.format('binaryFile').load(DATA_DIR + 'raster.tiff').selectExpr(\"RS_FromGeoTiff(content) as raster\")
+htmlDF = df.selectExpr(\"RS_AsImage(raster, 500) as raster_image\")
+SedonaUtils.display_image(htmlDF)
+```
+
+![Output](../../image/DisplayImage.png)
 
 ## Text-based visualization
 ### RS_AsMatrix
