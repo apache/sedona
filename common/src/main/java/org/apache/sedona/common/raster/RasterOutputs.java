@@ -209,7 +209,7 @@ public class RasterOutputs
     public static String createHTMLString(GridCoverage2D raster, int imageWidth) throws IOException {
         String rasterAsBase64 = asBase64(raster);
         String imageString = String.format("data:image/png;base64,%s", rasterAsBase64);
-        String htmlString =  "<img src=\"" + imageString + "\" width=\"" + imageWidth + "\" />";//String.format("<img src=\\\"%s\\\" width=\\\"%d\\\" />", imageString, imageWidth);
+        String htmlString =  "<img src=\"" + imageString + "\" width=\"" + imageWidth + "\" />";
         return new String(htmlString.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
     }
 
