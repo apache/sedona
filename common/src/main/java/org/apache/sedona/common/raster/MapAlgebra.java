@@ -246,9 +246,7 @@ public class MapAlgebra
      * @return a sum of the provided band values
      */
     public static double[] add(double[] band1, double[] band2) {
-        if (band1.length != band2.length) {
-            throw new IllegalArgumentException("The shape of the provided bands is not same. Please check your inputs, it should be same.");
-        }
+        ensureBandShape(band1.length, band2.length);
 
         double[] result = new double[band1.length];
         for(int i = 0; i < band1.length; i++) {
@@ -264,9 +262,7 @@ public class MapAlgebra
      * @return result of subtraction of the two bands, (band2 - band1).
      */
     public static double[] subtract(double[] band1, double[] band2) {
-        if (band1.length != band2.length) {
-            throw new IllegalArgumentException("The shape of the provided bands is not same. Please check your inputs, it should be same.");
-        }
+        ensureBandShape(band1.length, band2.length);
 
         double[] result = new double[band1.length];
         for(int i = 0; i < band1.length; i++) {
@@ -274,5 +270,32 @@ public class MapAlgebra
         }
 
         return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return result of multiplication of the two bands.
+     */
+    public static double[] multiply(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            result[i] = band1[i] * band2[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * Throws an IllegalArgumentException if the lengths of the bands are not the same.
+     * @param band1 length of band values
+     * @param band2 length of band values
+     */
+    private static void ensureBandShape(int band1, int band2) {
+        if (band1 != band2) {
+            throw new IllegalArgumentException("The shape of the provided bands is not same. Please check your inputs, it should be same.");
+        }
     }
 }
