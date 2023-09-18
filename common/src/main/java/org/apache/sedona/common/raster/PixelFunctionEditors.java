@@ -124,7 +124,7 @@ public class PixelFunctionEditors {
         Raster rasterizedGeomData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
         double colX = RasterAccessors.getUpperLeftX(rasterizedGeom), rowY = RasterAccessors.getUpperLeftY(rasterizedGeom);
         int height = RasterAccessors.getHeight(rasterizedGeom), width = RasterAccessors.getWidth(rasterizedGeom);
-
+        int heightOriginalRaster = RasterAccessors.getHeight(raster), widthOriginalRaster = RasterAccessors.getWidth(raster);
         WritableRaster rasterCopied = makeCopiedRaster(raster);
 
         String geometryType = geom.getGeometryType();
@@ -146,8 +146,9 @@ public class PixelFunctionEditors {
             int x = pixelLocation.x, y = pixelLocation.y;
             // i & j is for main raster
             // k & l is for rasterized geom
-            for (int j = y, l = 0; j < height + y; j++, l++) {
-                for (int i = x, k = 0; i < width + x; i++, k++) {
+            // added an upperbound if the rasterized geometry is bigger than provided raster
+            for (int j = y, l = 0; j < height + y && l < heightOriginalRaster; j++, l++) {
+                for (int i = x, k = 0; i < width + x && k < widthOriginalRaster; i++, k++) {
                     double[] pixel = rasterCopied.getPixel(i, j, (double[]) null);
                     // [0] as only one band in the rasterized Geometry
                     double pixelNew = rasterizedGeomData.getPixel(k, l, (double[]) null)[0];

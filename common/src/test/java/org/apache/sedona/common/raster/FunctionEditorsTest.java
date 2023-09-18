@@ -58,7 +58,7 @@ public class FunctionEditorsTest extends RasterTestBase {
         Geometry geom = Constructors.geomFromWKT("LINESTRING(1 -1, 1 -4, 2 -2, 3 -3, 4 -4, 5 -4, 6 -6)", 0);
         GridCoverage2D raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 4235, false);
         double[] actual = MapAlgebra.bandAsArray(raster, 1);
-        double[] expected = new double[] {4235.0, 0.0, 0.0, 0.0, 4235.0, 4235.0, 0.0, 0.0, 4235.0, 4235.0, 4235.0, 0.0, 4235.0, 0.0, 0.0, 4235.0, 4235.0, 0.0, 0.0, 0.0, 4235.0, 0.0, 0.0, 0.0};
+        double[] expected = new double[] {4235.0, 0.0, 0.0, 0.0, 4235.0, 4235.0, 0.0, 0.0, 4235.0, 4235.0, 4235.0, 0.0, 4235.0, 0.0, 0.0, 4235.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         assertArrayEquals(expected, actual, 0.1d);
 
         // Point
@@ -80,6 +80,13 @@ public class FunctionEditorsTest extends RasterTestBase {
         raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 255, false);
         actual = MapAlgebra.bandAsArray(raster, 1);
         expected = new double[] {255.0, 255.0, 255.0, 0.0, 0.0, 255.0, 255.0, 255.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        assertArrayEquals(expected, actual, 0.1d);
+
+        // Polygon bigger than raster
+        geom = Constructors.geomFromWKT("POLYGON((-1 1, 3 4, 4 -4, 5 -5, 9 -9, -1 1))", 0);
+        raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 56);
+        actual = MapAlgebra.bandAsArray(raster, 1);
+        expected = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 56.0, 0.0, 56.0, 56.0, 56.0, 56.0, 56.0, 56.0, 56.0, 0.0, 56.0, 56.0, 56.0, 0.0, 0.0, 56.0, 56.0};
         assertArrayEquals(expected, actual, 0.1d);
     }
 
