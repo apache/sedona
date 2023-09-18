@@ -389,8 +389,8 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_SetValues with empty raster geom variant") {
       var inputDf = Seq((Seq(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0))).toDF("band")
       inputDf = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 5, 5, 1, -1, 1, -1, 0, 0, 0), band, 1) as raster")
-      var actual = inputDf.selectExpr("RS_BandAsArray(RS_SetValues(raster, 1, ST_GeomFromWKT('LINESTRING(1 -1, 1 -4)'), 255), 1)").first().getSeq(0)
-      var expected = Seq(0.0, 0.0, 0.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+      var actual = inputDf.selectExpr("RS_BandAsArray(RS_SetValues(raster, 1, ST_GeomFromWKT('LINESTRING(1 -1, 1 -4, 2 -2, 3 -3, 4 -4, 5 -4, 6 -6)'), 255), 1)").first().getSeq(0)
+      var expected = Seq(255.0, 0.0, 0.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 255.0, 255.0, 0.0, 0.0, 255.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 0.0, 255.0)
       assert(expected.equals(actual))
 
       actual = inputDf.selectExpr("RS_BandAsArray(RS_SetValues(raster, 1, ST_GeomFromWKT('POINT(2 -2)'), 25), 1)").first().getSeq(0)
