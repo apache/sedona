@@ -52,34 +52,34 @@ public class FunctionEditorsTest extends RasterTestBase {
 
     @Test
     public void testSetValuesGeomVariant() throws FactoryException, ParseException, TransformException {
-        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, 1, -1, 1, -1, 0, 0, 0);
-        double[] values = new double[] {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 4, 6, 1, -1, 1, -1, 0, 0, 0);
+        double[] values = new double[] {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
         emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values, 1);
-        Geometry geom = Constructors.geomFromWKT("LINESTRING(1 -1, 1 -4)", 0);
+        Geometry geom = Constructors.geomFromWKT("LINESTRING(1 -1, 1 -4, 2 -2, 3 -3, 4 -4, 5 -4, 6 -6)", 0);
         GridCoverage2D raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 4235, false);
         double[] actual = MapAlgebra.bandAsArray(raster, 1);
-        double[] expected = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 4235.0, 0.0, 0.0, 0.0, 0.0, 4235.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        double[] expected = new double[] {4235.0, 0.0, 0.0, 0.0, 4235.0, 4235.0, 0.0, 0.0, 4235.0, 4235.0, 4235.0, 0.0, 4235.0, 0.0, 0.0, 4235.0, 4235.0, 0.0, 0.0, 0.0, 4235.0, 0.0, 0.0, 0.0};
         assertArrayEquals(expected, actual, 0.1d);
 
         // Point
-        geom = Constructors.geomFromWKT("POINT(2 -2)", 0);
+        geom = Constructors.geomFromWKT("POINT(5 -5)", 0);
         raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 35);
         actual = MapAlgebra.bandAsArray(raster, 1);
-        expected = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 35.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        expected = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 35.0, 0.0, 0.0, 0.0, 0.0};
         assertArrayEquals(expected, actual, 0.1d);
 
         // MultiPoint
-        geom = Constructors.geomFromWKT("MULTIPOINT((2 -2), (2 -1), (3 -3))", 0);
+        geom = Constructors.geomFromWKT("MULTIPOINT((2 -2), (2 -1), (3 -3), (4 -7))", 0);
         raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 400, false);
         actual = MapAlgebra.bandAsArray(raster, 1);
-        expected = new double[] {0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        expected = new double[] {0.0, 400.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 400.0};
         assertArrayEquals(expected, actual, 0.1d);
 
         // Polygon
         geom = Constructors.geomFromWKT("POLYGON((1 -1, 3 -3, 6 -6, 4 -1, 1 -1))", 0);
         raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 255, false);
         actual = MapAlgebra.bandAsArray(raster, 1);
-        expected = new double[] {255.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        expected = new double[] {255.0, 255.0, 255.0, 0.0, 0.0, 255.0, 255.0, 255.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         assertArrayEquals(expected, actual, 0.1d);
     }
 
