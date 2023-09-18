@@ -86,7 +86,7 @@ public class FunctionEditorsTest extends RasterTestBase {
         geom = Constructors.geomFromWKT("POLYGON((-1 1, 3 4, 4 -4, 5 -5, 9 -9, -1 1))", 0);
         raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 56);
         actual = MapAlgebra.bandAsArray(raster, 1);
-        expected = new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 56.0, 0.0, 56.0, 56.0, 56.0, 56.0, 56.0, 56.0, 56.0, 0.0, 56.0, 56.0, 56.0, 0.0, 0.0, 56.0, 56.0};
+        expected = new double[] {56.0, 56.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         assertArrayEquals(expected, actual, 0.1d);
     }
 
