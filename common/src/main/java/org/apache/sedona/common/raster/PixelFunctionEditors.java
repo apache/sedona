@@ -146,8 +146,8 @@ public class PixelFunctionEditors {
             int x = pixelLocation.x, y = pixelLocation.y;
             // i & j is for main raster
             // k & l is for rasterized geom
-            for (int j = x, l = 0; j < height + x; j++, l++) {
-                for (int i = y, k = 0; i < width + y; i++, k++) {
+            for (int j = y, l = 0; j < height + y; j++, l++) {
+                for (int i = x, k = 0; i < width + x; i++, k++) {
                     double[] pixel = rasterCopied.getPixel(i, j, (double[]) null);
                     // [0] as only one band in the rasterized Geometry
                     double pixelNew = rasterizedGeomData.getPixel(k, l, (double[]) null)[0];
