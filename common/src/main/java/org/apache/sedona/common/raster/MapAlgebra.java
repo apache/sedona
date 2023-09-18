@@ -289,6 +289,22 @@ public class MapAlgebra
     }
 
     /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return result of subtraction of the two bands, (band1 / band2).
+     */
+    public static double[] divide(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            result[i] = (double) Math.round(band1[i] / band2[i] * 100) /100;
+        }
+
+        return result;
+    }
+
+    /**
      * Throws an IllegalArgumentException if the lengths of the bands are not the same.
      * @param band1 length of band values
      * @param band2 length of band values
