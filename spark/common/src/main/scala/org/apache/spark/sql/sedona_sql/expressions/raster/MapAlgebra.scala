@@ -385,34 +385,7 @@ case class RS_MultiplyFactor(inputExpressions: Seq[Expression])
 }
 
 // Add two bands
-case class RS_Add(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    assert(band1.length == band2.length)
-
-    new GenericArrayData(addBands(band1, band2))
-  }
-
-  private def addBands(band1: Array[Double], band2: Array[Double]):Array[Double] = {
-
-    val result = new Array[Double](band1.length)
-    for(i<-0 until band1.length) {
-      result(i) = band1(i) + band2(i)
-    }
-    result
-
-  }
-
-  override def dataType: DataType = ArrayType(DoubleType)
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_Add(inputExpressions: Seq[Expression]) extends InferredExpression(MapAlgebra.add _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

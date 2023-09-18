@@ -239,4 +239,22 @@ public class MapAlgebra
             throw new RuntimeException("Failed to run map algebra", e);
         }
     }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return a sum of the provided band values
+     */
+    public static double[] add(double[] band1, double[] band2) {
+        if (band1.length != band2.length) {
+            throw new IllegalArgumentException("The shape of the provided bands is not same. Please check your inputs, it should be same.");
+        }
+
+        double[] result = new double[band1.length];
+        for(int i = 0; i < band1.length; i++) {
+            result[i] = band1[i] + band2[i];
+        }
+
+        return result;
+    }
 }
