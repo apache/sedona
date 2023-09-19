@@ -256,6 +256,20 @@ public class MapAlgebraTest extends RasterTestBase
     }
 
     @Test
+    public void testModulo() {
+        double[] band = new double[] {100.0, 260.0, 189.0, 106.0, 230.0, 169.0, 196.0};
+        double dividend = 90;
+        double[] actual = MapAlgebra.modulo(band, dividend);
+        double[] expected = new double[] {10.0, 80.0, 9.0, 16.0, 50.0, 79.0, 16.0};
+        assertArrayEquals(expected, actual, 0.1d);
+
+        band = new double[] {230.0, 345.0, 136.0, 106.0, 134.0, 105.0};
+        actual = MapAlgebra.modulo(band, dividend);
+        expected = new double[] {50.0, 75.0, 46.0, 16.0, 44.0, 15.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
     public void testMapAlgebra() throws FactoryException {
         Random random = new Random();
         String[] pixelTypes = {null, "b", "i", "s", "us", "f", "d"};

@@ -319,6 +319,20 @@ public class MapAlgebra
     }
 
     /**
+     * @param band band values
+     * @param dividend dividend for modulo
+     * @return an array with modular remainders calculated from the given dividend
+     */
+    public static double[] modulo(double[] band, double dividend) {
+        double[] result = new double[band.length];
+        for (int i = 0; i < band.length; i++) {
+            result[i] = band[i] % dividend;
+        }
+
+        return result;
+    }
+
+    /**
      * Throws an IllegalArgumentException if the lengths of the bands are not the same.
      * @param band1 length of band values
      * @param band2 length of band values

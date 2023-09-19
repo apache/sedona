@@ -384,33 +384,7 @@ case class RS_Divide(inputExpressions: Seq[Expression]) extends InferredExpressi
 }
 
 // Modulo of a band
-case class RS_Modulo(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    val band = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    val dividend = inputExpressions(1).eval(inputRow).asInstanceOf[Decimal].toDouble
-
-    new GenericArrayData(modulo(band, dividend))
-  }
-
-  private def modulo(band: Array[Double], dividend:Double):Array[Double] = {
-
-    val result = new Array[Double](band.length)
-    for(i<-0 until band.length) {
-      result(i) = band(i) % dividend
-    }
-    result
-
-  }
-
-  override def dataType: DataType = ArrayType(DoubleType)
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_Modulo(inputExpressions: Seq[Expression]) extends InferredExpression(MapAlgebra.modulo _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
