@@ -287,6 +287,15 @@ public class MapAlgebraTest extends RasterTestBase
     }
 
     @Test
+    public void testBitwiseOr() {
+        double[] band1 = new double[] {15.0, 25.0, 35.0};
+        double[] band2 = new double[] {5.0, 15.0, 25.0};
+        double[] actual = MapAlgebra.bitwiseOr(band1, band2);
+        double[] expected = new double[]{15.0, 31.0, 59.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
     public void testMapAlgebra() throws FactoryException {
         Random random = new Random();
         String[] pixelTypes = {null, "b", "i", "s", "us", "f", "d"};
