@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 
 import java.awt.image.DataBuffer;
+import java.util.Arrays;
 import java.util.Random;
 
 import static org.junit.Assert.*;
@@ -222,6 +223,21 @@ public class MapAlgebraTest extends RasterTestBase
         double[] band2 = new double[] {255.0, 255.0, 255.0, 255.0};
         double[] actual = MapAlgebra.subtract(band1, band2);
         double[] expected = new double[] {200, 100, 145, 245};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testMultiply() {
+        double[] band1 = new double[] {20.43, 40.67, 60.91};
+        double[] band2 = new double[] {2.84, 5.26, 8.97};
+        double[] actual = MapAlgebra.multiply(band1, band2);
+        double[] expected = new double[] {58.02119999999999, 213.9242, 546.3627};
+        assertArrayEquals(expected, actual, 0.00001d);
+
+        band1 = new double[] {200, 400, 500};
+        band2 = new double[] {2, 2.5, 3};
+        actual = MapAlgebra.multiply(band1, band2);
+        expected = new double[] {400.0, 1000.0, 1500.0};
         assertArrayEquals(expected, actual, 0.1d);
     }
 
