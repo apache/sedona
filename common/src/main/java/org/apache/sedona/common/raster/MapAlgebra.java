@@ -333,6 +333,19 @@ public class MapAlgebra
     }
 
     /**
+     * @param band band values
+     * @return an array, where each pixel has been applied square root operation.
+     */
+    public static double[] squareRoot(double[] band) {
+        double[] result = new double[band.length];
+        for (int i = 0; i < band.length; i++) {
+            result[i] = (double) Math.round(Math.sqrt(band[i]) * 100) / 100;
+        }
+
+        return result;
+    }
+
+    /**
      * Throws an IllegalArgumentException if the lengths of the bands are not the same.
      * @param band1 length of band values
      * @param band2 length of band values

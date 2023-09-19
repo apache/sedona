@@ -391,32 +391,7 @@ case class RS_Modulo(inputExpressions: Seq[Expression]) extends InferredExpressi
 }
 
 // Square root of values in a band
-case class RS_SquareRoot(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  assert(inputExpressions.length == 1)
-
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    val band = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    new GenericArrayData(squareRoot(band))
-
-  }
-
-  private def squareRoot(band: Array[Double]):Array[Double] = {
-
-    val result = new Array[Double](band.length)
-    for(i<-0 until band.length) {
-      result(i) = (Math.sqrt(band(i))*100).round/100.toDouble
-    }
-    result
-
-  }
-
-  override def dataType: DataType = ArrayType(DoubleType)
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_SquareRoot(inputExpressions: Seq[Expression]) extends InferredExpression(MapAlgebra.squareRoot _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

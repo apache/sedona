@@ -270,6 +270,14 @@ public class MapAlgebraTest extends RasterTestBase
     }
 
     @Test
+    public void testSquareRoot() {
+        double[] band = new double[] {8.0, 16.0, 24.0};
+        double[] actual = MapAlgebra.squareRoot(band);
+        double[] expected = new double[] {2.83, 4.0, 4.9};
+        assertArrayEquals(expected, actual, 0.01d);
+    }
+
+    @Test
     public void testMapAlgebra() throws FactoryException {
         Random random = new Random();
         String[] pixelTypes = {null, "b", "i", "s", "us", "f", "d"};
