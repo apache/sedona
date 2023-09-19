@@ -346,6 +346,22 @@ public class MapAlgebra
     }
 
     /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return an array, where each pixel is result of bitwise AND operator from provided 2 bands.
+     */
+    public static double[] bitwiseAnd(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            result[i] = (int) band1[i] & (int) band2[i];
+        }
+
+        return result;
+    }
+
+    /**
      * Throws an IllegalArgumentException if the lengths of the bands are not the same.
      * @param band1 length of band values
      * @param band2 length of band values
