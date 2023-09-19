@@ -349,36 +349,7 @@ case class RS_CountValue(inputExpressions: Seq[Expression])
 }
 
 // Multiply a factor to all values of a band
-case class RS_MultiplyFactor(inputExpressions: Seq[Expression])
-  extends Expression with ImplicitCastInputTypes with CodegenFallback with UserDataGeneratator {
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    val band = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    val factor = inputExpressions(1).eval(inputRow).asInstanceOf[Double]
-    new GenericArrayData(multiply(band, factor))
-
-  }
-
-  private def multiply(band: Array[Double], factor: Double):Array[Double] = {
-
-    var result = new Array[Double](band.length)
-    for(i<-0 until band.length) {
-
-      result(i) = band(i) * factor
-
-    }
-    result
-  }
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(ArrayType(DoubleType), DoubleType)
-
-  override def dataType: DataType = ArrayType(DoubleType)
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_MultiplyFactor(inputExpressions: Seq[Expression]) extends InferredExpression(MapAlgebra.multiplyFactor _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

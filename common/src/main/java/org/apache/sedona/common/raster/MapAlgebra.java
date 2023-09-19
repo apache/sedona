@@ -305,6 +305,20 @@ public class MapAlgebra
     }
 
     /**
+     * @param band band values
+     * @param factor multiplying factor
+     * @return an array where all the elements has been multiplied with the factor given.
+     */
+    public static double[] multiplyFactor(double[] band, double factor) {
+        double[] result = new double[band.length];
+        for (int i = 0; i < band.length; i++) {
+            result[i] = band[i] * factor;
+        }
+
+        return result;
+    }
+
+    /**
      * Throws an IllegalArgumentException if the lengths of the bands are not the same.
      * @param band1 length of band values
      * @param band2 length of band values
