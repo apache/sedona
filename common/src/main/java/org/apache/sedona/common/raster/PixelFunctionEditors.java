@@ -141,9 +141,11 @@ public class PixelFunctionEditors {
         }
         // Converting geometry to raster and then iterating through them
         else {
-            // Starting pixel location on the raster
-            GridCoordinates2D pixelLocation = raster.getGridGeometry().worldToGrid(new DirectPosition2D(colX, rowY));
-            int x = pixelLocation.x, y = pixelLocation.y;
+            // Starting pixel location on the given raster
+            int[] pixelLocation = RasterUtils.getGridCoordinatesFromWorld(raster, colX, rowY);
+            int x = pixelLocation[0], y = pixelLocation[1];
+
+            // lower-bound if the rasterized geometry starts at more north or west from the given raster than move rasterized geometry starting pixel accordingly.
             if (x < 0) {
                 x = Math.abs(x);
             }
@@ -153,8 +155,8 @@ public class PixelFunctionEditors {
             // i & j is for main raster
             // k & l is for rasterized geom
             // added an upperbound if the rasterized geometry is bigger than provided raster
-            for (int j = 0, l = y; j < height + y && l < heightOriginalRaster; j++, l++) {
-                for (int i = 0, k = x; i < width + x && k < widthOriginalRaster; i++, k++) {
+            for (int j = 0, l = y; j < heightOriginalRaster && l < height; j++, l++) {
+                for (int i = 0, k = x; i < widthOriginalRaster && k < width; i++, k++) {
                     double[] pixel = rasterCopied.getPixel(i, j, (double[]) null);
                     // [0] as only one band in the rasterized Geometry
                     double pixelNew = rasterizedGeomData.getPixel(k, l, (double[]) null)[0];
