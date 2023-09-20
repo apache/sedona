@@ -29,8 +29,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
-import java.util.zip.DeflaterInputStream;
 import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
 
 /**
  * There won't be too many distinct CRSes in a typical application, so we can cache the serialized form
@@ -99,11 +99,17 @@ public class CRSSerializer {
     private static CoordinateReferenceSystem doDeserializeCRS(ByteBuffer byteBuffer) throws IOException, ClassNotFoundException {
         byte[] bytes = byteBuffer.array();
         try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-             DeflaterInputStream dis = new DeflaterInputStream(bis);
+             InflaterInputStream dis = new InflaterInputStream(bis);
              ObjectInputStream ois = new ObjectInputStream(dis)) {
             CoordinateReferenceSystem crs = (CoordinateReferenceSystem) ois.readObject();
             crsSerializationCache.put(new CRSKey(crs), bytes);
             return crs;
         }
+    }
+
+    // This method is only used in tests
+    public static void invalidateCache() {
+        crsSerializationCache.invalidateAll();
+        crsDeserializationCache.invalidateAll();
     }
 }
