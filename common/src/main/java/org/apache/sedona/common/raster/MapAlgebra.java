@@ -378,6 +378,26 @@ public class MapAlgebra
     }
 
     /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return an array; if a value at an index in band1 is different in band2 then band1 value is taken otherwise 0.
+     */
+    public static double[] logicalDifference(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            if (band1[i] != band2[i]) {
+                result[i] = band1[i];
+            } else {
+                result[i] = 0d;
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Throws an IllegalArgumentException if the lengths of the bands are not the same.
      * @param band1 length of band values
      * @param band2 length of band values

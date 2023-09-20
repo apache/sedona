@@ -296,6 +296,15 @@ public class MapAlgebraTest extends RasterTestBase
     }
 
     @Test
+    public void testLogicalDifference() {
+        double[] band1 = new double[] {10.0, 20.0, 30.0};
+        double[] band2 = new double[] {40.0, 20.0, 50.0};
+        double[] actual = MapAlgebra.logicalDifference(band1, band2);
+        double[] expected = new double[] {10.0, 0.0, 30.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
     public void testMapAlgebra() throws FactoryException {
         Random random = new Random();
         String[] pixelTypes = {null, "b", "i", "s", "us", "f", "d"};

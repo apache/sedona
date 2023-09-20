@@ -412,41 +412,7 @@ case class RS_BitwiseOr(inputExpressions: Seq[Expression]) extends InferredExpre
 }
 
 // if a value in band1 and band2 are different,value from band1 ins returned else return 0
-case class RS_LogicalDifference(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    assert(band1.length == band2.length)
-
-    new GenericArrayData(logicalDifference(band1, band2))
-  }
-
-  private def logicalDifference(band1: Array[Double], band2: Array[Double]):Array[Double] = {
-
-    val result = new Array[Double](band1.length)
-    for(i<-0 until band1.length) {
-      if(band1(i) != band2(i))
-      {
-        result(i) = band1(i)
-      }
-      else
-      {
-        result(i) = 0.0
-      }
-    }
-    result
-
-  }
-
-  override def dataType: DataType = ArrayType(DoubleType)
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_LogicalDifference(inputExpressions: Seq[Expression]) extends InferredExpression(MapAlgebra.logicalDifference _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
