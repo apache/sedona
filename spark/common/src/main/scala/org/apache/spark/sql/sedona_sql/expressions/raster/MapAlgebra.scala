@@ -86,37 +86,7 @@ case class RS_FetchRegion(inputExpressions: Seq[Expression]) extends InferredExp
 }
 
 // Mark all the band values with 1 which are greater than a particular threshold
-case class RS_GreaterThan(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    val band = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    val target = inputExpressions(1).eval(inputRow).asInstanceOf[Decimal].toDouble
-    new GenericArrayData(findGreaterThan(band, target))
-
-  }
-
-  private def findGreaterThan(band: Array[Double], target: Double):Array[Double] = {
-
-    val result = new Array[Double](band.length)
-    for(i<-0 until band.length) {
-      if(band(i)>target) {
-        result(i) = 1
-      }
-      else {
-        result(i) = 0
-      }
-    }
-    result
-  }
-
-  override def dataType: DataType = ArrayType(DoubleType)
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_GreaterThan(inputExpressions: Seq[Expression]) extends InferredExpression(MapAlgebra.greaterThan _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
