@@ -398,6 +398,26 @@ public class MapAlgebra
     }
 
     /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return an array; if a value at an index in band1 is not equal to 0 then band1 value will be taken otherwise band2's value
+     */
+    public static double[] logicalOver(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            if (band1[i] != 0d) {
+                result[i] = band1[i];
+            } else {
+                result[i] = band2[i];
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Throws an IllegalArgumentException if the lengths of the bands are not the same.
      * @param band1 length of band values
      * @param band2 length of band values

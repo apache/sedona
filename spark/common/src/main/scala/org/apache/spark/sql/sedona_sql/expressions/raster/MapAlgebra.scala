@@ -419,42 +419,8 @@ case class RS_LogicalDifference(inputExpressions: Seq[Expression]) extends Infer
 }
 
 // If a value in band 1 is not equal to 0, band1 is returned else value from band2 is returned
-case class RS_LogicalOver(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    assert(band1.length == band2.length)
-
-    new GenericArrayData(logicalOver(band1, band2))
-  }
-
-  private def logicalOver(band1: Array[Double], band2: Array[Double]):Array[Double] = {
-
-    val result = new Array[Double](band1.length)
-    for(i<-0 until band1.length) {
-      if(band1(i) != 0.0)
-      {
-        result(i) = band1(i)
-      }
-      else
-      {
-        result(i) = band2(i)
-      }
-    }
-    result
-
-  }
-
-  override def dataType: DataType = ArrayType(DoubleType)
-
-  override def children: Seq[Expression] = inputExpressions
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+case class RS_LogicalOver(inputExpressions: Seq[Expression]) extends InferredExpression(MapAlgebra.logicalOver _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) ={
     copy(inputExpressions = newChildren)
   }
 }
