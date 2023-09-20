@@ -503,6 +503,25 @@ public class MapAlgebra
     }
 
     /**
+     * @param band band values
+     * @param target target to compare
+     * @return an array; mark all band values 1 that are greater than or equal to target, otherwise 0
+     */
+    public static double[] greaterThanEqual(double[] band, double target) {
+        double[] result = new double[band.length];
+
+        for (int i = 0; i < band.length; i++) {
+            if (band[i] >= target) {
+                result[i] = 1;
+            } else {
+                result[i] = 0;
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Throws an IllegalArgumentException if the lengths of the bands are not the same.
      * @param band1 length of band values
      * @param band2 length of band values
