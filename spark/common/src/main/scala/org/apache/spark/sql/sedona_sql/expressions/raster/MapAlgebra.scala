@@ -425,36 +425,7 @@ case class RS_LogicalOver(inputExpressions: Seq[Expression]) extends InferredExp
   }
 }
 
-case class RS_Normalize(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  assert(inputExpressions.length == 1)
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    // This is an expression which takes one input expressions
-    val band = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    val result = normalize(band)
-    new GenericArrayData(result)
-  }
-
-  // Normalize between 0 and 255
-  private def normalize(band: Array[Double]): Array[Double] = {
-
-    val result = new Array[Double](band.length)
-    val maxVal = band.toList.max
-
-    for(i<-0 until band.length) {
-      result(i) = (band(i)/(maxVal/255.0)).toInt
-    }
-
-    result
-
-  }
-
-  override def dataType: DataType = ArrayType(DoubleType)
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_Normalize(inputExpressions: Seq[Expression]) extends InferredExpression(MapAlgebra.normalize _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

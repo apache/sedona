@@ -34,6 +34,7 @@ import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.awt.image.WritableRenderedImage;
+import java.util.Arrays;
 
 public class MapAlgebra
 {
@@ -412,6 +413,21 @@ public class MapAlgebra
             } else {
                 result[i] = band2[i];
             }
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @return an array with normalized band values to be within [0 - 255] range
+     */
+    public static double[] normalize(double[] band) {
+        double[] result = new double[band.length];
+        double normalizer = Arrays.stream(band).max().getAsDouble() / 255d;
+
+        for (int i = 0; i < band.length; i++) {
+            result[i] = (int) (band[i] / normalizer);
         }
 
         return result;
