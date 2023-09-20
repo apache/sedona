@@ -35,29 +35,7 @@ case class RS_NormalizedDifference(inputExpressions: Seq[Expression]) extends In
 }
 
 // Calculate mean value for a particular band
-case class RS_Mean(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  // This is an expression which takes one input expressions
-  assert(inputExpressions.length == 1)
-
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    val band = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    val mean = calculateMean(band)
-    mean
-  }
-
-  private def calculateMean(band:Array[Double]):Double = {
-
-    ((band.toList.sum/band.length)*100).round/100.toDouble
-  }
-
-
-  override def dataType: DataType = DoubleType
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_Mean(inputExpressions: Seq[Expression]) extends InferredExpression(MapAlgebra.mean _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

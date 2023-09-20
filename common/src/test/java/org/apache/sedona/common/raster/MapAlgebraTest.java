@@ -331,6 +331,24 @@ public class MapAlgebraTest extends RasterTestBase
     }
 
     @Test
+    public void testMean() {
+        double[] band = new double[] {200.0, 400.0, 600.0, 200.0};
+        double actual = MapAlgebra.mean(band);
+        double expected = 350.0;
+        assertEquals(expected, actual, 0.1d);
+
+        band = new double[] {200.0, 400.0, 600.0, 700.0};
+        actual = MapAlgebra.mean(band);
+        expected = 475.0;
+        assertEquals(expected, actual, 0.1d);
+
+        band = new double[] {0.43, 0.36, 0.73, 0.56};
+        actual = MapAlgebra.mean(band);
+        expected = 0.52;
+        assertEquals(expected, actual, 0.001d);
+    }
+
+    @Test
     public void testMapAlgebra() throws FactoryException {
         Random random = new Random();
         String[] pixelTypes = {null, "b", "i", "s", "us", "f", "d"};

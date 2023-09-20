@@ -457,6 +457,14 @@ public class MapAlgebra
     }
 
     /**
+     * @param band band values
+     * @return mean of the band values
+     */
+    public static double mean(double[] band) {
+        return (Arrays.stream(band).sum() / band.length) * 100 / 100;
+    }
+
+    /**
      * Throws an IllegalArgumentException if the lengths of the bands are not the same.
      * @param band1 length of band values
      * @param band2 length of band values
