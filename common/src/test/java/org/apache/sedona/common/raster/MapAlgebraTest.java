@@ -349,6 +349,16 @@ public class MapAlgebraTest extends RasterTestBase
     }
 
     @Test
+    public void testFetchRegion() {
+        double[] band = new double[] {100.0, 260.0, 189.0, 106.0, 230.0, 169.0, 196.0, 200.0, 460.0};
+        int[] coordinates = new int[] {0, 0, 1, 2};
+        int[] dimension = new int[] {3, 3};
+        double[] actual = MapAlgebra.fetchRegion(band, coordinates, dimension);
+        double[] expected = new double[] {100.0, 260.0, 189.0, 106.0, 230.0, 169.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
     public void testMapAlgebra() throws FactoryException {
         Random random = new Random();
         String[] pixelTypes = {null, "b", "i", "s", "us", "f", "d"};

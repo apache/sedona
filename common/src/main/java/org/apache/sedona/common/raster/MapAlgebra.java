@@ -465,6 +465,25 @@ public class MapAlgebra
     }
 
     /**
+     * @param band band values
+     * @param coordinates defines the region by minX, maxX, minY, and maxY respectively
+     * @param dimension dimensions
+     * @return an array of the specified region
+     */
+    public static double[] fetchRegion(double[] band, int[] coordinates, int[] dimension) {
+        double[] result = new double[(coordinates[2] - coordinates[0] + 1) * (coordinates[3] - coordinates[1] + 1)];
+        int k = 0;
+        for (int i = coordinates[0]; i < coordinates[2] + 1; i++) {
+            for (int j = coordinates[1]; j < coordinates[3] + 1; j++) {
+                result[k] = band[(i * dimension[0]) + j];
+                k++;
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Throws an IllegalArgumentException if the lengths of the bands are not the same.
      * @param band1 length of band values
      * @param band2 length of band values

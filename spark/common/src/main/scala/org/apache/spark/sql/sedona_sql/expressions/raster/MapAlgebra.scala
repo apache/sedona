@@ -71,39 +71,15 @@ case class RS_Mode(inputExpressions: Seq[Expression])
 }
 
 // fetch a particular region from a raster image given particular indexes(Array[minx...maxX][minY...maxY])
-case class RS_FetchRegion(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  assert(inputExpressions.length == 3)
-
-  override def nullable: Boolean = false
+case class RS_FetchRegion(inputExpressions: Seq[Expression]) extends InferredExpression(MapAlgebra.fetchRegion _) {
 
   override def eval(inputRow: InternalRow): Any = {
     val band = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
     val coordinates =  inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData].toIntArray()
     val dim = inputExpressions(2).eval(inputRow).asInstanceOf[ArrayData].toIntArray()
-    new GenericArrayData(regionEnclosed(band, coordinates,dim))
+    new GenericArrayData(MapAlgebra.fetchRegion(band, coordinates, dim))
 
   }
-
-  private def regionEnclosed(Band: Array[Double], coordinates: Array[Int], dim: Array[Int]):Array[Double] = {
-
-    val result1D = new Array[Double]((coordinates(2) - coordinates(0) + 1) * (coordinates(3) - coordinates(1) + 1))
-
-    var k = 0
-    for(i<-coordinates(0) until coordinates(2) + 1) {
-      for(j<-coordinates(1) until coordinates(3) + 1) {
-        result1D(k) = Band(((i - 0) * dim(0)) + j)
-        k+=1
-      }
-    }
-    result1D
-
-  }
-
-  override def dataType: DataType = ArrayType(DoubleType)
-
-  override def children: Seq[Expression] = inputExpressions
-
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
