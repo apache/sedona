@@ -434,6 +434,29 @@ public class MapAlgebra
     }
 
     /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return an array with the normalized difference of the provided bands
+     */
+    public static double[] normalizedDifference(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            if (band1[i] == 0) {
+                band1[i] = -1;
+            }
+            if (band2[i] == 0) {
+                band2[i] = -1;
+            }
+
+            result[i] = (double) Math.round(((band2[i] - band1[i]) / (band2[i] + band1[i])) * 100) / 100;
+        }
+
+        return result;
+    }
+
+    /**
      * Throws an IllegalArgumentException if the lengths of the bands are not the same.
      * @param band1 length of band values
      * @param band2 length of band values

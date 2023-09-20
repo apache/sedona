@@ -28,42 +28,7 @@ import org.apache.spark.sql.sedona_sql.expressions.{InferredExpression, UserData
 import org.apache.spark.sql.types._
 
 /// Calculate Normalized Difference between two bands
-case class RS_NormalizedDifference(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  // This is an expression which takes one input expressions
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    val band1 = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    val band2 = inputExpressions(1).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    val ndvi = normalizeddifference(band1, band2)
-
-    new GenericArrayData(ndvi)
-  }
-  private def normalizeddifference(band1: Array[Double], band2: Array[Double]): Array[Double] = {
-
-    val result = new Array[Double](band1.length)
-    for (i <- 0 until band1.length) {
-      if (band1(i) == 0) {
-        band1(i) = -1
-      }
-      if (band2(i) == 0) {
-        band2(i) = -1
-      }
-
-      result(i) = ((band2(i) - band1(i)) / (band2(i) + band1(i))*100).round/100.toDouble
-    }
-
-    result
-
-  }
-
-  override def dataType: DataType = ArrayType(DoubleType)
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_NormalizedDifference(inputExpressions: Seq[Expression]) extends InferredExpression(MapAlgebra.normalizedDifference _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -420,7 +385,7 @@ case class RS_LogicalDifference(inputExpressions: Seq[Expression]) extends Infer
 
 // If a value in band 1 is not equal to 0, band1 is returned else value from band2 is returned
 case class RS_LogicalOver(inputExpressions: Seq[Expression]) extends InferredExpression(MapAlgebra.logicalOver _) {
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) ={
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }

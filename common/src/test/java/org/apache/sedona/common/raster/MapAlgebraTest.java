@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 
 import java.awt.image.DataBuffer;
-import java.util.Arrays;
 import java.util.Random;
 
 import static org.junit.Assert.*;
@@ -320,6 +319,15 @@ public class MapAlgebraTest extends RasterTestBase
         double[] actual = MapAlgebra.normalize(band);
         double[] expected = new double[] {226.0, 255.0, 0.0, 72.0};
         assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testNormalizedDifference() {
+        double[] band1 = new double[] {960, 1067, 107, 20, 1868};
+        double[] band2 = new double[] {1967, 951, 622, 223, 152};
+        double[] actual = MapAlgebra.normalizedDifference(band1, band2);
+        double[] expected = new double[] {0.34, -0.06, 0.71, 0.84, -0.85};
+        assertArrayEquals(expected, actual, 0.001d);
     }
 
     @Test
