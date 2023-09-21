@@ -401,6 +401,20 @@ public class MapAlgebraTest extends RasterTestBase
     }
 
     @Test
+    public void testLessThanEqual() {
+        double[] band = new double[] {0.42, 0.36, 0.18, 0.20, 0.21, 0.2001, 0.19};
+        double target = 0.2;
+        double[] actual = MapAlgebra.lessThanEqual(band, target);
+        double[] expected = new double[] {0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0};
+        assertArrayEquals(expected, actual, 0.1d);
+
+        band = new double[] {0.14, 0.13, 0.10, 0.86, 0.01};
+        actual = MapAlgebra.lessThanEqual(band, target);
+        expected = new double[] {1.0, 1.0, 1.0, 0.0, 1.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
     public void testMapAlgebra() throws FactoryException {
         Random random = new Random();
         String[] pixelTypes = {null, "b", "i", "s", "us", "f", "d"};
