@@ -415,6 +415,15 @@ public class MapAlgebraTest extends RasterTestBase
     }
 
     @Test
+    public void testCountValue() {
+        double[] band = new double[] {200.0, 400.0, 600.0, 200.0, 600.0, 600.0, 800.0};
+        double target = 600d;
+        int actual = MapAlgebra.countValue(band, target);
+        int expected = 3;
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testMapAlgebra() throws FactoryException {
         Random random = new Random();
         String[] pixelTypes = {null, "b", "i", "s", "us", "f", "d"};

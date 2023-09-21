@@ -114,34 +114,7 @@ case class RS_LessThanEqual(inputExpressions: Seq[Expression]) extends InferredE
 }
 
 // Count number of occurrences of a particular value in a band
-case class RS_CountValue(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  assert(inputExpressions.length == 2)
-
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    val band = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    val target = inputExpressions(1).eval(inputRow).asInstanceOf[Decimal].toDouble
-    findCount(band, target)
-  }
-
-  private def findCount(band: Array[Double], target: Double):Int = {
-
-    var result = 0
-    for(i<-0 until band.length) {
-      if(band(i)==target) {
-        result+=1
-      }
-
-    }
-    result
-  }
-
-  override def dataType: DataType = IntegerType
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_CountValue(inputExpressions: Seq[Expression]) extends InferredExpression(MapAlgebra.countValue _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

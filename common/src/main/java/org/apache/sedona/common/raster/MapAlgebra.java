@@ -560,6 +560,15 @@ public class MapAlgebra
     }
 
     /**
+     * @param band band values
+     * @param target target to count
+     * @return count of the target in the band values
+     */
+    public static int countValue(double[] band, double target) {
+        return (int) Arrays.stream(band).filter(x -> x == target).count();
+    }
+
+    /**
      * Throws an IllegalArgumentException if the lengths of the bands are not the same.
      * @param band1 length of band values
      * @param band2 length of band values
