@@ -20,12 +20,10 @@ package org.apache.spark.sql.sedona_sql.expressions.raster
 
 import org.apache.sedona.common.raster.MapAlgebra
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
+import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
-import org.apache.spark.sql.sedona_sql.expressions.{InferredExpression, UserDataGeneratator}
-import org.apache.spark.sql.types._
+import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
 /// Calculate Normalized Difference between two bands
 case class RS_NormalizedDifference(inputExpressions: Seq[Expression]) extends InferredExpression(MapAlgebra.normalizedDifference _) {
