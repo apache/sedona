@@ -42,29 +42,7 @@ case class RS_Mean(inputExpressions: Seq[Expression]) extends InferredExpression
 }
 
 // Calculate mode of a particular band
-case class RS_Mode(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with UserDataGeneratator {
-  // This is an expression which takes one input expressions
-  assert(inputExpressions.length == 1)
-
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    var band = inputExpressions(0).eval(inputRow).asInstanceOf[ArrayData].toDoubleArray()
-    val mode = calculateMode(band)
-    new GenericArrayData(mode)
-  }
-
-  private def calculateMode(band:Array[Double]):Array[Double] = {
-    val grouped = band.toList.groupBy(x => x).mapValues(_.size)
-    val modeValue = grouped.maxBy(_._2)._2
-    val modes = grouped.filter(_._2 == modeValue).map(_._1)
-    modes.toArray
-  }
-  override def dataType: DataType = ArrayType(DoubleType)
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_Mode(inputExpressions: Seq[Expression]) extends InferredExpression(MapAlgebra.mode _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

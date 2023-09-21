@@ -349,6 +349,19 @@ public class MapAlgebraTest extends RasterTestBase
     }
 
     @Test
+    public void testMode() {
+        double[] band = new double[] {200.0, 400.0, 600.0, 200.0};
+        double[] actual = MapAlgebra.mode(band);
+        double[] expected = new double[] {200d};
+        assertArrayEquals(expected, actual, 0.1d);
+
+        band = new double[] {200.0, 400.0, 600.0, 700.0};
+        actual = MapAlgebra.mode(band);
+        expected = new double[] {200.0, 400.0, 600.0, 700.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
     public void testFetchRegion() {
         double[] band = new double[] {100.0, 260.0, 189.0, 106.0, 230.0, 169.0, 196.0, 200.0, 460.0};
         int[] coordinates = new int[] {0, 0, 1, 2};

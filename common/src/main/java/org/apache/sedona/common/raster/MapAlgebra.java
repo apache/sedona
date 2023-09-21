@@ -35,6 +35,9 @@ import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.awt.image.WritableRenderedImage;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class MapAlgebra
 {
@@ -481,6 +484,29 @@ public class MapAlgebra
         }
 
         return result;
+    }
+
+    /**
+     * @param band band values
+     * @return an array with the most reoccurring value or if every value occurs once then return the provided array
+     */
+    public static double[] mode(double[] band) {
+        Map<Double, Long> frequency = Arrays.stream(band)
+                .boxed()
+                .collect(
+                        Collectors.groupingBy(Function.identity(), Collectors.counting())
+                );
+        if (frequency.values().stream().max(Long::compare).orElse(0L) == 1L) {
+            return band;
+        } else {
+            return new double[] {
+                    frequency.entrySet()
+                            .stream()
+                            .max(Map.Entry.comparingByValue())
+                            .map(Map.Entry::getKey)
+                            .orElse(null)
+            };
+        }
     }
 
     /**
