@@ -34,6 +34,11 @@ import java.awt.image.WritableRaster;
 import java.awt.image.WritableRenderedImage;
 import java.util.Arrays;
 
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+
 public class MapAlgebra
 {
     /**
@@ -166,6 +171,367 @@ public class MapAlgebra
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to run map algebra", e);
+        }
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return a sum of the provided band values
+     */
+    public static double[] add(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for(int i = 0; i < band1.length; i++) {
+            result[i] = band1[i] + band2[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return result of subtraction of the two bands, (band2 - band1).
+     */
+    public static double[] subtract(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for(int i = 0; i < band1.length; i++) {
+            result[i] = band2[i] - band1[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return result of multiplication of the two bands.
+     */
+    public static double[] multiply(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            result[i] = band1[i] * band2[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return result of subtraction of the two bands, (band1 / band2).
+     */
+    public static double[] divide(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            result[i] = (double) Math.round(band1[i] / band2[i] * 100) /100;
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @param factor multiplying factor
+     * @return an array where all the elements has been multiplied with the factor given.
+     */
+    public static double[] multiplyFactor(double[] band, double factor) {
+        double[] result = new double[band.length];
+        for (int i = 0; i < band.length; i++) {
+            result[i] = band[i] * factor;
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @param dividend dividend for modulo
+     * @return an array with modular remainders calculated from the given dividend
+     */
+    public static double[] modulo(double[] band, double dividend) {
+        double[] result = new double[band.length];
+        for (int i = 0; i < band.length; i++) {
+            result[i] = band[i] % dividend;
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @return an array, where each pixel has been applied square root operation.
+     */
+    public static double[] squareRoot(double[] band) {
+        double[] result = new double[band.length];
+        for (int i = 0; i < band.length; i++) {
+            result[i] = (double) Math.round(Math.sqrt(band[i]) * 100) / 100;
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return an array, where each pixel is result of bitwise AND operator from provided 2 bands.
+     */
+    public static double[] bitwiseAnd(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            result[i] = (int) band1[i] & (int) band2[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return an array, where each pixel is result of bitwise OR operator from provided 2 bands.
+     */
+    public static double[] bitwiseOr(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            result[i] = (int) band1[i] | (int) band2[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return an array; if a value at an index in band1 is different in band2 then band1 value is taken otherwise 0.
+     */
+    public static double[] logicalDifference(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            if (band1[i] != band2[i]) {
+                result[i] = band1[i];
+            } else {
+                result[i] = 0d;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return an array; if a value at an index in band1 is not equal to 0 then band1 value will be taken otherwise band2's value
+     */
+    public static double[] logicalOver(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            if (band1[i] != 0d) {
+                result[i] = band1[i];
+            } else {
+                result[i] = band2[i];
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @return an array with normalized band values to be within [0 - 255] range
+     */
+    public static double[] normalize(double[] band) {
+        double[] result = new double[band.length];
+        double normalizer = Arrays.stream(band).max().getAsDouble() / 255d;
+
+        for (int i = 0; i < band.length; i++) {
+            result[i] = (int) (band[i] / normalizer);
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return an array with the normalized difference of the provided bands
+     */
+    public static double[] normalizedDifference(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            if (band1[i] == 0) {
+                band1[i] = -1;
+            }
+            if (band2[i] == 0) {
+                band2[i] = -1;
+            }
+
+            result[i] = (double) Math.round(((band2[i] - band1[i]) / (band2[i] + band1[i])) * 100) / 100;
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @return mean of the band values
+     */
+    public static double mean(double[] band) {
+        return (Arrays.stream(band).sum() / band.length) * 100 / 100;
+    }
+
+    /**
+     * @param band band values
+     * @param coordinates defines the region by minX, maxX, minY, and maxY respectively
+     * @param dimension dimensions
+     * @return an array of the specified region
+     */
+    public static double[] fetchRegion(double[] band, int[] coordinates, int[] dimension) {
+        double[] result = new double[(coordinates[2] - coordinates[0] + 1) * (coordinates[3] - coordinates[1] + 1)];
+        int k = 0;
+        for (int i = coordinates[0]; i < coordinates[2] + 1; i++) {
+            for (int j = coordinates[1]; j < coordinates[3] + 1; j++) {
+                result[k] = band[(i * dimension[0]) + j];
+                k++;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @return an array with the most reoccurring value or if every value occurs once then return the provided array
+     */
+    public static double[] mode(double[] band) {
+        Map<Double, Long> frequency = Arrays.stream(band)
+                .boxed()
+                .collect(
+                        Collectors.groupingBy(Function.identity(), Collectors.counting())
+                );
+        if (frequency.values().stream().max(Long::compare).orElse(0L) == 1L) {
+            return band;
+        } else {
+            return new double[] {
+                    frequency.entrySet()
+                            .stream()
+                            .max(Map.Entry.comparingByValue())
+                            .map(Map.Entry::getKey)
+                            .orElse(null)
+            };
+        }
+    }
+
+    /**
+     * @param band band values
+     * @param target target to compare
+     * @return an array; mark all band values 1 that are greater than target, otherwise 0
+     */
+    public static double[] greaterThan(double[] band, double target) {
+        double[] result = new double[band.length];
+
+        for (int i = 0; i < band.length; i++) {
+            if (band[i] > target) {
+                result[i] = 1;
+            } else {
+                result[i] = 0;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @param target target to compare
+     * @return an array; mark all band values 1 that are greater than or equal to target, otherwise 0
+     */
+    public static double[] greaterThanEqual(double[] band, double target) {
+        double[] result = new double[band.length];
+
+        for (int i = 0; i < band.length; i++) {
+            if (band[i] >= target) {
+                result[i] = 1;
+            } else {
+                result[i] = 0;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @param target target to compare
+     * @return an array; mark all band values 1 that are less than target, otherwise 0
+     */
+    public static double[] lessThan(double[] band, double target) {
+        double[] result = new double[band.length];
+
+        for (int i = 0; i < band.length; i++) {
+            if (band[i] < target) {
+                result[i] = 1;
+            } else {
+                result[i] = 0;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @param target target to compare
+     * @return an array; mark all band values 1 that are less than or equal to target, otherwise 0
+     */
+    public static double[] lessThanEqual(double[] band, double target) {
+        double[] result = new double[band.length];
+
+        for (int i = 0; i < band.length; i++) {
+            if (band[i] <= target) {
+                result[i] = 1;
+            } else {
+                result[i] = 0;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @param target target to count
+     * @return count of the target in the band values
+     */
+    public static int countValue(double[] band, double target) {
+        return (int) Arrays.stream(band).filter(x -> x == target).count();
+    }
+
+    /**
+     * Throws an IllegalArgumentException if the lengths of the bands are not the same.
+     * @param band1 length of band values
+     * @param band2 length of band values
+     */
+    private static void ensureBandShape(int band1, int band2) {
+        if (band1 != band2) {
+            throw new IllegalArgumentException("The shape of the provided bands is not same. Please check your inputs, it should be same.");
         }
     }
 }
