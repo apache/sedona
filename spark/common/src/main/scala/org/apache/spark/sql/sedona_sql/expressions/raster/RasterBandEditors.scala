@@ -31,3 +31,13 @@ case class RS_SetBandNoDataValue(inputExpressions: Seq[Expression]) extends Infe
     copy(inputExpressions = newChildren)
   }
 }
+
+case class RS_AddBand(inputExpressions: Seq[Expression]) extends InferredExpression(
+  inferrableFunction4(RasterBandEditors.addBand),
+  inferrableFunction3(RasterBandEditors.addBand),
+  inferrableFunction2(RasterBandEditors.addBand)
+) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

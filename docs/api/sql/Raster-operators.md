@@ -745,6 +745,77 @@ Output:
 
 ## Raster based operators
 
+### RS_AddBand
+
+Introduction: Adds a new band to a raster `toRaster` at a specified index `toRasterIndex`. The new band's values are copied from `fromRaster` at a specified band index `fromBand`. 
+If no `toRasterIndex` is provided, the new band is appended to the end of `toRaster`. If no `fromBand` is specified, band `1` from `fromRaster` is copied by default.
+
+!!!Note
+    IllegalArgumentException will be thrown in these cases:
+
+    - The provided Rasters, `toRaster` & `fromRaster` don't have same shape.
+    - The provided `fromBand` is not in `fromRaster`.
+    - The provided `toRasterIndex` is not in or at end of `toRaster`. 
+
+Format: 
+
+```
+RS_AddBand(toRaster: Raster, fromRaster: Raster, fromBand: Integer = 1, toRasterIndex: Integer = at_end)
+```
+
+```
+RS_AddBand(toRaster: Raster, fromRaster: Raster, fromBand: Integer = 1)
+```
+
+```
+RS_AddBand(toRaster: Raster, fromRaster: Raster)
+```
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_AddBand(raster1, raster2, 2, 1) FROM rasters
+```
+
+Output:
+
+```
+GridCoverage2D["g...
+```
+
+### RS_Contains
+
+Introduction: Returns true if the geometry or raster on the left side contains the geometry or raster on the right side.
+The convex hull of the raster is considered in the test.
+
+The rules for testing spatial relationship is the same as `RS_Intersects`.
+
+Format: `RS_Contains(raster: Raster, geom: Geometry)`
+
+Format: `RS_Contains(geom: Geometry, raster: Raster)`
+
+Format: `RS_Contains(raster0: Raster, raster1: Raster)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+
+```sql
+SELECT RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((5 5, 5 10, 10 10, 10 5, 5 5))')) rast_geom,
+    RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 10, 10, 2, 22, 1)) rast_rast
+```
+
+Output:
+```
++---------+---------+
+|rast_geom|rast_rast|
++---------+---------+
+|     true|     true|
++---------+---------+
+```
+
 ### RS_Intersects
 
 Introduction: Returns true if raster or geometry on the left side intersects with the raster or geometry on the right side.
@@ -778,68 +849,6 @@ Output:
 |     true|     true|
 +---------+---------+
 
-```
-
-### RS_Within
-
-Introduction: Returns true if the geometry or raster on the left side is within the geometry or raster on the right side.
-The convex hull of the raster is considered in the test.
-
-The rules for testing spatial relationship is the same as `RS_Intersects`.
-
-Format: `RS_Within(raster: Raster, geom: Geometry)`
-
-Format: `RS_Within(geom: Geometry, raster: Raster)`
-
-Format: `RS_Within(raster0: Raster, raster1: Raster)`
-
-Since: `1.5.0`
-
-Spark SQL example:
-
-```sql
-SELECT RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((0 0, 0 50, 100 50, 100 0, 0 0))')) rast_geom,
-    RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 30, 30, 2, 22, 1)) rast_rast
-```
-
-Output:
-```
-+---------+---------+
-|rast_geom|rast_rast|
-+---------+---------+
-|     true|     true|
-+---------+---------+
-```
-
-### RS_Contains
-
-Introduction: Returns true if the geometry or raster on the left side contains the geometry or raster on the right side.
-The convex hull of the raster is considered in the test.
-
-The rules for testing spatial relationship is the same as `RS_Intersects`.
-
-Format: `RS_Contains(raster: Raster, geom: Geometry)`
-
-Format: `RS_Contains(geom: Geometry, raster: Raster)`
-
-Format: `RS_Contains(raster0: Raster, raster1: Raster)`
-
-Since: `1.5.0`
-
-Spark SQL example:
-
-```sql
-SELECT RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((5 5, 5 10, 10 10, 10 5, 5 5))')) rast_geom,
-    RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 10, 10, 2, 22, 1)) rast_rast
-```
-
-Output:
-```
-+---------+---------+
-|rast_geom|rast_rast|
-+---------+---------+
-|     true|     true|
-+---------+---------+
 ```
 
 ### RS_MetaData
@@ -1224,6 +1233,36 @@ Output:
 +----+------------+-------+
 ```
 
+### RS_Within
+
+Introduction: Returns true if the geometry or raster on the left side is within the geometry or raster on the right side.
+The convex hull of the raster is considered in the test.
+
+The rules for testing spatial relationship is the same as `RS_Intersects`.
+
+Format: `RS_Within(raster: Raster, geom: Geometry)`
+
+Format: `RS_Within(geom: Geometry, raster: Raster)`
+
+Format: `RS_Within(raster0: Raster, raster1: Raster)`
+
+Since: `1.5.0`
+
+Spark SQL example:
+
+```sql
+SELECT RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((0 0, 0 50, 100 50, 100 0, 0 0))')) rast_geom,
+    RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 30, 30, 2, 22, 1)) rast_rast
+```
+
+Output:
+```
++---------+---------+
+|rast_geom|rast_rast|
++---------+---------+
+|     true|     true|
++---------+---------+
+```
 
 ## Raster to Map Algebra operators
 
