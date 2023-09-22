@@ -14,12 +14,15 @@
 package org.apache.sedona.common;
 
 import com.google.common.geometry.S2CellId;
+import com.uber.h3core.exceptions.H3Exception;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.common.utils.GeometryGeoHashEncoder;
 import org.apache.sedona.common.utils.GeometrySplitter;
+import org.apache.sedona.common.utils.H3Utils;
 import org.apache.sedona.common.utils.S2Utils;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.hull.ConcaveHull;
@@ -52,6 +55,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.LinkedHashSet;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 import static com.google.common.geometry.S2.DBL_EPSILON;
@@ -580,6 +586,99 @@ public class Functions {
         return S2Utils.roundCellsToSameLevel(new ArrayList<>(cellIds), level).stream().map(S2CellId::id).collect(Collectors.toList()).toArray(new Long[cellIds.size()]);
     }
 
+    /**
+     * cover the geometry with H3 cells
+     * @param input the input geometry
+     * @param level the resolution of h3 cells
+     * @param fullCover whether enforce full cover or not.
+     * @return
+     */
+    public static Long[] h3CellIDs(Geometry input, int level, boolean fullCover) {
+        if (level < 0 || level > 15) {
+            throw new IllegalArgumentException("level must be between 0 and 15");
+        }
+        HashSet<Long> cellIds = new HashSet<>();
+        // first flat all GeometryCollection implementations into single Geometry types (Polygon, LineString, Point)
+        List<Geometry> geoms = GeomUtils.extractGeometryCollection(input);
+        for (Geometry geom : geoms) {
+            if (geom instanceof Polygon) {
+                cellIds.addAll(H3Utils.polygonToCells((Polygon) geom, level, fullCover));
+            } else if (geom instanceof LineString) {
+                cellIds.addAll(H3Utils.lineStringToCells((LineString) geom, level, fullCover));
+            } else if (geom instanceof Point){
+                cellIds.add(H3Utils.coordinateToCell(geom.getCoordinate(), level));
+            } else {
+                // if not type of polygon, point or lienSting, we cover its MBR
+                cellIds.addAll(H3Utils.polygonToCells((Polygon)geom.getEnvelope(), level, fullCover));
+            }
+        }
+        return cellIds.toArray(new Long[0]);
+    }
+
+    /**
+     * return the distance between 2 cells, if the native h3 function doesn't work, use our approximation function for shortest path and use the size - 1 as distance
+     * @param cell1 source cell
+     * @param cell2 destination cell
+     * @return
+     */
+    public static long h3CellDistance(long cell1, long cell2) {
+        int resolution = H3Utils.h3.getResolution(cell1);
+        if (resolution != H3Utils.h3.getResolution(cell2)) {
+            throw new IllegalArgumentException("The argument cells should be of the same resolution");
+        }
+        try {
+            return H3Utils.h3.gridDistance(cell1, cell2);
+        } catch (H3Exception e) {
+            // approximate if the original function hit error
+            return H3Utils.approxPathCells(
+                    H3Utils.cellToCoordinate(cell1),
+                    H3Utils.cellToCoordinate(cell2),
+                    resolution,
+                    true
+            ).size() - 1;
+        }
+    }
+
+    /**
+     * get the neighbor cells of the input cell by h3.gridDisk function
+     * @param cell: original cell
+     * @param k: the k number of rings spread from the original cell
+     * @param exactDistance: if exactDistance is true, it will only return the cells on the exact kth ring, else will return all 0 - kth neighbors
+     * @return
+     */
+    public static Long[] h3KRing(long cell, int k, boolean exactDistance) {
+        Set<Long> cells = new LinkedHashSet<>(H3Utils.h3.gridDisk(cell, k));
+        if (exactDistance && k > 0) {
+            List<Long> tbdCells = H3Utils.h3.gridDisk(cell, k - 1);
+            tbdCells.forEach(cells::remove);
+        }
+        return cells.toArray(new Long[0]);
+    }
+
+    /**
+     * get the neighbor cells of the input cell by h3.gridDisk function
+     * @param cells: the set of cells
+     * @return Multiple Polygons reversed
+     */
+    public static Geometry h3ToGeom(long[] cells) {
+        GeometryFactory geomFactory = new GeometryFactory();
+        Collection<Long> h3 = Arrays.stream(cells).boxed().collect(Collectors.toList());
+        return geomFactory.createMultiPolygon(
+                H3Utils.h3.cellsToMultiPolygon(h3, true).stream().map(
+                        shellHoles -> {
+                            List<LinearRing> rings = shellHoles.stream().map(
+                                    shell -> geomFactory.createLinearRing(shell.stream().map(latLng -> new Coordinate(latLng.lng, latLng.lat)).toArray(Coordinate[]::new))
+                            ).collect(Collectors.toList());
+                            LinearRing shell = rings.remove(0);
+                            if (rings.isEmpty()) {
+                                return geomFactory.createPolygon(shell);
+                            } else {
+                                return geomFactory.createPolygon(shell, rings.toArray(new LinearRing[0]));
+                            }
+                        }
+                ).toArray(Polygon[]::new)
+        );
+    }
 
     // create static function named simplifyPreserveTopology
     public static Geometry simplifyPreserveTopology(Geometry geometry, double distanceTolerance) {
@@ -660,12 +759,12 @@ public class Functions {
     }
 
     public static Geometry makeLine(Geometry geom1, Geometry geom2) {
-       Geometry[] geoms = new Geometry[]{geom1, geom2};
-       return makeLine(geoms);
+        Geometry[] geoms = new Geometry[]{geom1, geom2};
+        return makeLine(geoms);
     }
 
     public static Geometry makeLine(Geometry[] geoms) {
-        ArrayList<Coordinate> coordinates = new ArrayList<>();      
+        ArrayList<Coordinate> coordinates = new ArrayList<>();
         for (Geometry geom : geoms) {
             if (geom instanceof Point || geom instanceof MultiPoint || geom instanceof LineString) {
                 for (Coordinate coord : geom.getCoordinates()) {
@@ -676,7 +775,7 @@ public class Functions {
                 throw new IllegalArgumentException("ST_MakeLine only supports Point, MultiPoint and LineString geometries");
             }
         }
-        
+
         Coordinate[] coords = coordinates.toArray(new Coordinate[0]);
         return GEOMETRY_FACTORY.createLineString(coords);
     }
@@ -715,7 +814,7 @@ public class Functions {
         }
         return geom;
     }
-    
+
     public static Geometry createMultiGeometry(Geometry[] geometries) {
         if (geometries.length > 1){
             return GEOMETRY_FACTORY.buildGeometry(Arrays.asList(geometries));
@@ -902,7 +1001,7 @@ public class Functions {
     }
 
     public static Geometry force3D(Geometry geometry) {
-       return GeomUtils.get3DGeom(geometry, 0.0);
+        return GeomUtils.get3DGeom(geometry, 0.0);
     }
 
     public static Integer nRings(Geometry geometry) throws Exception {
@@ -940,7 +1039,7 @@ public class Functions {
     }
 
     public static Geometry affine(Geometry geometry, double a, double b, double c, double d, double e, double f, double g, double h, double i, double xOff, double yOff,
-                                  double zOff) {
+            double zOff) {
         if (!geometry.isEmpty()) {
             GeomUtils.affineGeom(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff);
         }

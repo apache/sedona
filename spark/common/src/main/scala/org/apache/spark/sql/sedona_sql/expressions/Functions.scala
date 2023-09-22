@@ -31,8 +31,6 @@ import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom._
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 
-import java.lang
-
 /**
   * Return the distance between two geometries.
   *
@@ -67,7 +65,7 @@ case class ST_YMin(inputExpressions: Seq[Expression])
   * Return the Z maxima of the geometry.
   *
   * @param inputExpressions This function takes a geometry and returns the maximum of all Z-coordinate values.
-*/
+  */
 case class ST_ZMax(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.zMax _) {
 
@@ -77,10 +75,10 @@ case class ST_ZMax(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return the Z minima of the geometry.
- *
- * @param inputExpressions This function takes a geometry and returns the minimum of all Z-coordinate values.
-*/
+  * Return the Z minima of the geometry.
+  *
+  * @param inputExpressions This function takes a geometry and returns the minimum of all Z-coordinate values.
+  */
 case class ST_ZMin(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.zMin _) {
 
@@ -98,10 +96,10 @@ case class ST_3DDistance(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return the concave hull of a Geometry.
- *
- * @param inputExpressions
- */
+  * Return the concave hull of a Geometry.
+  *
+  * @param inputExpressions
+  */
 case class ST_ConcaveHull(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.concaveHull _) {
 
@@ -483,11 +481,11 @@ case class ST_MinimumBoundingCircle(inputExpressions: Seq[Expression])
 
 
 /**
- * Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length.
- * Second and third arguments are Double values between 0 and 1. This only works with LINESTRINGs.
- *
- * @param inputExpressions
- */
+  * Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length.
+  * Second and third arguments are Double values between 0 and 1. This only works with LINESTRINGs.
+  *
+  * @param inputExpressions
+  */
 case class ST_LineSubstring(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.lineSubString _) {
 
@@ -497,12 +495,12 @@ case class ST_LineSubstring(inputExpressions: Seq[Expression])
 }
 
 /**
- * Returns a point interpolated along a line. First argument must be a LINESTRING.
- * Second argument is a Double between 0 and 1 representing fraction of
- * total linestring length the point has to be located.
- *
- * @param inputExpressions
- */
+  * Returns a point interpolated along a line. First argument must be a LINESTRING.
+  * Second argument is a Double between 0 and 1 representing fraction of
+  * total linestring length the point has to be located.
+  *
+  * @param inputExpressions
+  */
 case class ST_LineInterpolatePoint(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.lineInterpolatePoint _) {
 
@@ -721,10 +719,10 @@ case class ST_GeoHash(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return the difference between geometry A and B
- *
- * @param inputExpressions
- */
+  * Return the difference between geometry A and B
+  *
+  * @param inputExpressions
+  */
 case class ST_Difference(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.difference _) {
 
@@ -734,10 +732,10 @@ case class ST_Difference(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return the symmetrical difference between geometry A and B
- *
- * @param inputExpressions
- */
+  * Return the symmetrical difference between geometry A and B
+  *
+  * @param inputExpressions
+  */
 case class ST_SymDifference(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.symDifference _) {
 
@@ -747,10 +745,10 @@ case class ST_SymDifference(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return the union of geometry A and B
- *
- * @param inputExpressions
- */
+  * Return the union of geometry A and B
+  *
+  * @param inputExpressions
+  */
 case class ST_Union(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.union _) {
 
@@ -768,10 +766,10 @@ case class ST_Multi(inputExpressions: Seq[Expression])
 }
 
 /**
- * Returns a POINT guaranteed to lie on the surface.
- *
- * @param inputExpressions Geometry
- */
+  * Returns a POINT guaranteed to lie on the surface.
+  *
+  * @param inputExpressions Geometry
+  */
 case class ST_PointOnSurface(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.pointOnSurface _) {
 
@@ -781,10 +779,10 @@ case class ST_PointOnSurface(inputExpressions: Seq[Expression])
 }
 
 /**
- * Returns the geometry with vertex order reversed
- *
- * @param inputExpressions
- */
+  * Returns the geometry with vertex order reversed
+  *
+  * @param inputExpressions
+  */
 case class ST_Reverse(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.reverse _) {
 
@@ -794,23 +792,23 @@ case class ST_Reverse(inputExpressions: Seq[Expression])
 }
 
 /**
- * Returns the nth point in the geometry, provided it is a linestring
- *
- * @param inputExpressions sequence of 2 input arguments, a geometry and a value 'n'
- */
+  * Returns the nth point in the geometry, provided it is a linestring
+  *
+  * @param inputExpressions sequence of 2 input arguments, a geometry and a value 'n'
+  */
 case class ST_PointN(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.pointN _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-      copy(inputExpressions = newChildren)
+    copy(inputExpressions = newChildren)
   }
 }
 
- /*
- * Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates.
- *
- * @param inputExpressions
- */
+/*
+* Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates.
+*
+* @param inputExpressions
+*/
 case class ST_Force_2D(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.force2D _) {
 
@@ -820,10 +818,10 @@ case class ST_Force_2D(inputExpressions: Seq[Expression])
 }
 
 /**
- * Returns the geometry in EWKT format
- *
- * @param inputExpressions
- */
+  * Returns the geometry in EWKT format
+  *
+  * @param inputExpressions
+  */
 case class ST_AsEWKT(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.asEWKT _) {
 
@@ -849,10 +847,10 @@ case class ST_AsKML(inputExpressions: Seq[Expression])
 }
 
 /**
- * Test if Geometry is empty geometry.
- *
- * @param inputExpressions
- */
+  * Test if Geometry is empty geometry.
+  *
+  * @param inputExpressions
+  */
 case class ST_IsEmpty(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.isEmpty _) {
 
@@ -862,10 +860,10 @@ case class ST_IsEmpty(inputExpressions: Seq[Expression])
 }
 
 /**
- * Test if returning Max X coordinate value.
- *
- * @param inputExpressions
- */
+  * Test if returning Max X coordinate value.
+  *
+  * @param inputExpressions
+  */
 case class ST_XMax(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.xMax _) {
 
@@ -875,10 +873,10 @@ case class ST_XMax(inputExpressions: Seq[Expression])
 }
 
 /**
- * Test if returning Min X coordinate value.
- *
- * @param inputExpressions
- */
+  * Test if returning Min X coordinate value.
+  *
+  * @param inputExpressions
+  */
 case class ST_XMin(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.xMin _) {
 
@@ -889,10 +887,10 @@ case class ST_XMin(inputExpressions: Seq[Expression])
 
 
 /**
- * Returns the areal geometry formed by the constituent linework of the input geometry assuming all inner geometries represent holes
- *
- * @param inputExpressions
- */
+  * Returns the areal geometry formed by the constituent linework of the input geometry assuming all inner geometries represent holes
+  *
+  * @param inputExpressions
+  */
 case class ST_BuildArea(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.buildArea _) {
 
@@ -902,10 +900,10 @@ case class ST_BuildArea(inputExpressions: Seq[Expression])
 }
 
 /**
- * Returns the input geometry in its normalized form.
- *
- * @param inputExpressions
- */
+  * Returns the input geometry in its normalized form.
+  *
+  * @param inputExpressions
+  */
 case class ST_Normalize(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.normalize _) {
 
@@ -915,10 +913,10 @@ case class ST_Normalize(inputExpressions: Seq[Expression])
 }
 
 /**
- * Returns the LineString geometry given a MultiPoint geometry
- *
- * @param inputExpressions
- */
+  * Returns the LineString geometry given a MultiPoint geometry
+  *
+  * @param inputExpressions
+  */
 case class ST_LineFromMultiPoint(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.lineFromMultiPoint _) {
 
@@ -928,10 +926,10 @@ case class ST_LineFromMultiPoint(inputExpressions: Seq[Expression])
 }
 
 /**
- * Returns a multi-geometry that is the result of splitting the input geometry by the blade geometry
- *
- * @param inputExpressions
- */
+  * Returns a multi-geometry that is the result of splitting the input geometry by the blade geometry
+  *
+  * @param inputExpressions
+  */
 case class ST_Split(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.split _) {
 
@@ -948,6 +946,38 @@ case class ST_S2CellIDs(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_H3CellIDs(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.h3CellIDs _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_H3CellDistance(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.h3CellDistance _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_H3KRing(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.h3KRing _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_H3ToGeom(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.h3ToGeom _) with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_CollectionExtract(inputExpressions: Seq[Expression])
   extends InferredExpression(InferrableFunction.allowRightNull(Functions.collectionExtract)) {
 
@@ -956,12 +986,13 @@ case class ST_CollectionExtract(inputExpressions: Seq[Expression])
   }
 }
 
+
 /**
- * Returns a POINT Computes the approximate geometric median of a MultiPoint geometry using the Weiszfeld algorithm.
- * The geometric median provides a centrality measure that is less sensitive to outlier points than the centroid.
- *
- * @param inputExpressions Geometry
- */
+  * Returns a POINT Computes the approximate geometric median of a MultiPoint geometry using the Weiszfeld algorithm.
+  * The geometric median provides a centrality measure that is less sensitive to outlier points than the centroid.
+  *
+  * @param inputExpressions Geometry
+  */
 case class ST_GeometricMedian(inputExpressions: Seq[Expression])
   extends InferredExpression(inferrableFunction4(Functions.geometricMedian)) with FoldableExpression {
 
@@ -1095,10 +1126,10 @@ case class ST_Degrees(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return the number of ddimensions in geometry.
- *
- * @param inputExpressions
- * */
+  * Return the number of ddimensions in geometry.
+  *
+  * @param inputExpressions
+  * */
 case class ST_CoordDim(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.nDims _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
@@ -1107,10 +1138,10 @@ case class ST_CoordDim(inputExpressions: Seq[Expression])
 }
 
 /**
- * Returns True if geometry is a collection of geometries
- *
- * @param inputExpressions
- */
+  * Returns True if geometry is a collection of geometries
+  *
+  * @param inputExpressions
+  */
 case class ST_IsCollection(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.isCollection _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
