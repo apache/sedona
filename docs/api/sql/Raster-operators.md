@@ -745,6 +745,46 @@ Output:
 
 ## Raster based operators
 
+### RS_AddBand
+
+Introduction: Adds a new band to a raster `toRaster` at a specified index `toRasterIndex`. The new band's values are copied from `fromRaster` at a specified band index `fromBand`. 
+If no `toRasterIndex` is provided, the new band is appended to the end of `toRaster`. If no `fromBand` is specified, band `1` from `fromRaster` is copied by default.
+
+!!!Note
+    IllegalArgumentException will be thrown in these cases:
+
+    - The provided Rasters, `toRaster` & `fromRaster` don't have same shape.
+    - The provided `fromBand` is not in `fromRaster`.
+    - The provided `toRasterIndex` is not in or at end of `toRaster`. 
+
+Format: 
+
+```
+RS_AddBand(toRaster: Raster, fromRaster: Raster, fromBand: Integer = 1, toRasterIndex: Integer = at_end)
+```
+
+```
+RS_AddBand(toRaster: Raster, fromRaster: Raster, fromBand: Integer = 1)
+```
+
+```
+RS_AddBand(toRaster: Raster, fromRaster: Raster)
+```
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_AddBand(raster1, raster2, 2, 1) FROM rasters
+```
+
+Output:
+
+```
+GridCoverage2D["g...
+```
+
 ### RS_Contains
 
 Introduction: Returns true if the geometry or raster on the left side contains the geometry or raster on the right side.
