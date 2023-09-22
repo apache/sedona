@@ -1609,6 +1609,8 @@ This function only accepts integer as factor before `v1.5.0`.
 
 Introduction: Normalize the value in the array to [0, 255]
 
+Format: `RS_Normalize (Band: Array[Double])`
+
 Since: `v1.1.0`
 
 Spark SQL example
