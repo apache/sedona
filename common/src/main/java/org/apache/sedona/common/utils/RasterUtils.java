@@ -45,7 +45,9 @@ import org.opengis.util.InternationalString;
 
 import javax.media.jai.RasterFactory;
 import javax.media.jai.RenderedImageAdapter;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
