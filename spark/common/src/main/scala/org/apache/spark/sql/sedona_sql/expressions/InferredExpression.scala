@@ -80,12 +80,16 @@ object InferrableType {
     new InferrableType[Geometry] {}
   implicit val gridCoverage2DInstance: InferrableType[GridCoverage2D] =
     new InferrableType[GridCoverage2D] {}
+  implicit val gridCoverage2DArrayInstance: InferrableType[Array[GridCoverage2D]] =
+    new InferrableType[Array[GridCoverage2D]] {}
   implicit val geometryArrayInstance: InferrableType[Array[Geometry]] =
     new InferrableType[Array[Geometry]] {}
   implicit val javaDoubleInstance: InferrableType[java.lang.Double] =
     new InferrableType[java.lang.Double] {}
   implicit val javaIntegerInstance: InferrableType[java.lang.Integer] =
     new InferrableType[java.lang.Integer] {}
+  implicit val javaLongInstance: InferrableType[java.lang.Long] =
+    new InferrableType[java.lang.Long] {}
   implicit val doubleInstance: InferrableType[Double] =
     new InferrableType[Double] {}
   implicit val booleanInstance: InferrableType[Boolean] =
@@ -94,20 +98,22 @@ object InferrableType {
     new InferrableType[Option[Boolean]] {}
   implicit val intInstance: InferrableType[Int] =
     new InferrableType[Int] {}
+  implicit val longInstance: InferrableType[Long] =
+    new InferrableType[Long] {}
   implicit val stringInstance: InferrableType[String] =
     new InferrableType[String] {}
   implicit val binaryInstance: InferrableType[Array[Byte]] =
     new InferrableType[Array[Byte]] {}
-  implicit val longArrayInstance: InferrableType[Array[java.lang.Long]] =
-    new InferrableType[Array[java.lang.Long]] {}
   implicit val intArrayInstance: InferrableType[Array[Int]] =
     new InferrableType[Array[Int]] {}
   implicit val javaIntArrayInstance: InferrableType[Array[java.lang.Integer]] =
     new InferrableType[Array[java.lang.Integer]]
+  implicit val longArrayInstance: InferrableType[Array[Long]] =
+    new InferrableType[Array[Long]] {}
+  implicit val javaLongArrayInstance: InferrableType[Array[java.lang.Long]] =
+    new InferrableType[Array[java.lang.Long]] {}
   implicit val doubleArrayInstance: InferrableType[Array[Double]] =
     new InferrableType[Array[Double]] {}
-  implicit val longInstance: InferrableType[Long] =
-    new InferrableType[Long] {}
 }
 
 object InferredTypes {
@@ -122,11 +128,17 @@ object InferredTypes {
       expr => input => expr.eval(input).asInstanceOf[ArrayData].toDoubleArray()
     } else if (t =:= typeOf[String]) {
       expr => input => expr.asString(input)
+    } else if (t =:= typeOf[Array[Long]]) {
+      expr => input => expr.eval(input).asInstanceOf[ArrayData].toLongArray()
+    } else if (t =:= typeOf[Array[Int]]) {
+      expr => input => expr.eval(input).asInstanceOf[ArrayData] match {
+        case null => null
+        case arrayData: ArrayData => arrayData.toIntArray()
+      }
     } else {
       expr => input => expr.eval(input)
     }
   }
-
   def buildSerializer(t: Type): Any => Any = {
     if (t =:= typeOf[Geometry]) {
       output =>
@@ -150,7 +162,7 @@ object InferredTypes {
         } else {
           null
         }
-    } else if (t =:= typeOf[Array[java.lang.Long]] || t =:= typeOf[Array[Double]]) {
+    } else if (t =:= typeOf[Array[java.lang.Long]] || t =:= typeOf[Array[Long]] || t =:= typeOf[Array[Double]]) {
       output =>
         if (output != null) {
           ArrayData.toArrayData(output)
@@ -183,6 +195,8 @@ object InferredTypes {
       DataTypes.createArrayType(GeometryUDT)
     } else if (t =:= typeOf[GridCoverage2D]) {
       RasterUDT
+    } else if (t =:= typeOf[Array[GridCoverage2D]]) {
+      DataTypes.createArrayType(RasterUDT)
     } else if (t =:= typeOf[java.lang.Double]) {
       DoubleType
     } else if (t =:= typeOf[java.lang.Integer]) {
@@ -191,24 +205,24 @@ object InferredTypes {
       DoubleType
     } else if (t =:= typeOf[Int]) {
       IntegerType
-    } else if (t =:= typeOf[Long]) {
+    } else if (t =:= typeOf[Long] || t =:= typeOf[java.lang.Long]) {
       LongType
     } else if (t =:= typeOf[String]) {
       StringType
     } else if (t =:= typeOf[Array[Byte]]) {
       BinaryType
-    } else if (t =:= typeOf[Array[Int]]) {
+    } else if (t =:= typeOf[Array[Int]] || t =:= typeOf[Array[java.lang.Integer]]) {
       DataTypes.createArrayType(IntegerType)
-    } else if (t =:= typeOf[Array[java.lang.Integer]]) {
-      DataTypes.createArrayType(IntegerType)
-    } else if (t =:= typeOf[Array[java.lang.Long]]) {
+    } else if (t =:= typeOf[Array[Long]] || t =:= typeOf[Array[java.lang.Long]]) {
       DataTypes.createArrayType(LongType)
     } else if (t =:= typeOf[Array[Double]]) {
       DataTypes.createArrayType(DoubleType)
     } else if (t =:= typeOf[Option[Boolean]]) {
       BooleanType
-    } else {
+    } else if (t =:= typeOf[Boolean]) {
       BooleanType
+    } else {
+      throw new IllegalArgumentException(s"Cannot infer spark type for $t")
     }
   }
 }

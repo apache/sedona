@@ -1211,6 +1211,127 @@ Output:
 ST_LINESTRING
 ```
 
+## ST_H3CellDistance
+
+Introduction: return result of h3 function [gridDistance(cel1, cell2)](https://h3geo.org/docs/api/traversal#griddistance).
+As described by H3 documentation
+> Finding the distance can fail because the two indexes are not comparable (different resolutions), too far apart, or are separated by pentagonal distortion. This is the same set of limitations as the local IJ coordinate space functions.
+
+In this case, Sedona use in-house implementation of estimation the shortest path and return the size as distance.
+
+Format: `ST_H3CellDistance(cell1: Long, cell2: Long)`
+
+Since: `v1.5.0`
+
+Example:
+```SQL
+select ST_H3CellDistance(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[1], ST_H3CellIDs(ST_GeomFromWKT('POINT(1.23 1.59)'), 8, true)[1])
+```
+
+Output:
+```
++----+----------------------+
+| op |               EXPR$0 |
++----+----------------------+
+| +I |                   78 |
++----+----------------------+
+```
+
+## ST_H3CellIDs
+
+Introduction: Cover the geometry by H3 cell IDs with the given resolution(level).
+To understand the cell statistics please refer to [H3 Doc](https://h3geo.org/docs/core-library/restable)
+H3 native fill functions doesn't guarantee full coverage on the shapes.
+
+### Cover Polygon
+When fullCover = false, for polygon sedona will use [polygonToCells](https://h3geo.org/docs/api/regions#polygontocells).
+This can't guarantee full coverage but will guarantee no false positive.
+
+When fullCover = true, sedona will add on extra traversal logic to guarantee full coverage on shapes.
+This will lead to redundancy but can guarantee full coverage.
+
+Choose the option according to your use case.
+
+### Cover LineString
+For the lineString, sedona will call gridPathCells(https://h3geo.org/docs/api/traversal#gridpathcells) per segment.
+From H3's documentation
+> This function may fail to find the line between two indexes, for example if they are very far apart. It may also fail when finding distances for indexes on opposite sides of a pentagon.
+
+When the `gridPathCells` function throw error, Sedona implemented in-house approximate implementation to generate the shortest path, which can cover the corner cases.
+
+Both functions can't guarantee full coverage. When the `fullCover = true`, we'll do extra cell traversal to guarantee full cover.
+In worst case, sedona will use MBR to guarantee the full coverage.
+
+If you seek to get the shortest path between cells, you can call this function with `fullCover = false`
+
+Format: `ST_H3CellIDs(geom: geometry, level: Int, fullCover: true)`
+
+Since: `v1.5.0`
+
+Example:
+```SQL
+SELECT ST_H3CellIDs(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'), 6, true)
+```
+
+Output:
+```
++----+--------------------------------+
+| op |                         EXPR$0 |
++----+--------------------------------+
+| +I | [605547539457900543, 605547... |
++----+--------------------------------+
+```
+
+## ST_H3KRing
+
+Introduction: return the result of H3 function [gridDisk(cell, k)](https://h3geo.org/docs/api/traversal#griddisk).
+
+K means `the distance of the origin index`, `gridDisk(cell, k)` return cells with distance `<=k` from the original cell.
+
+`exactRing : Boolean`, when set to `true`, sedona will remove the result of `gridDisk(cell, k-1)` from the original results,
+means only keep the cells with distance exactly `k` from the original cell
+
+Format: `ST_H3KRing(cell: Long, k: Int, exactRing: Boolean)`
+
+Since: `v1.5.0`
+
+Example:
+```SQL
+select ST_H3KRing(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[1], 1, false), ST_H3KRing(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[1], 1, true)
+```
+
+Output:
+```
++----+--------------------------------+--------------------------------+
+| op |                         EXPR$0 |                         EXPR$1 |
++----+--------------------------------+--------------------------------+
+| +I | [614552609325318143, 614552... | [614552597293957119, 614552... |
++----+--------------------------------+--------------------------------+
+```
+
+## ST_H3ToGeom
+
+Introduction: return the result of H3 function [cellsToMultiPolygon(cells)](https://h3geo.org/docs/api/regions#cellstolinkedmultipolygon--cellstomultipolygon).
+
+Reverse the uber h3 cells to MultiPolygon object composed by the geometry hexagons.
+
+Format: `ST_H3ToGeom(cells: Array[Long])`
+
+Since: `v1.5.0`
+
+Example:
+```SQL
+SELECT ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], 1, true))
+```
+
+Output:
+```
+|st_h3togeom(st_h3cellids(st_geomfromwkt(POINT(1 2), 0), 8, true))                                                                                                                                                                                                                              |
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|MULTIPOLYGON (((1.0057629565404935 1.9984665139177658, 1.0037116327309032 2.001832524914011, 0.9997277993570498 2.0011632704656668, 0.9977951427833285 1.99712822839324, 0.9998461908217768 1.9937621529331915, 1.0038301712104252 1.9944311839965554, 1.0057629565404935 1.9984665139177658)))|
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+```
+
 ## ST_HausdorffDistance
 
 Introduction: Returns a discretized (and hence approximate) [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance) between the given 2 geometries. 

@@ -132,6 +132,22 @@ object st_functions extends DataFrameAPI {
   def ST_GeometryType(geometry: Column): Column = wrapExpression[ST_GeometryType](geometry)
   def ST_GeometryType(geometry: String): Column = wrapExpression[ST_GeometryType](geometry)
 
+  def ST_H3CellDistance(cell1: Column, cell2: Column): Column = wrapExpression[ST_H3CellDistance](cell1, cell2)
+
+  def ST_H3CellDistance(cell1: Long, cell2: Long): Column = wrapExpression[ST_H3CellDistance](cell1, cell2)
+  def ST_H3CellIDs(geometry: Column, level: Column, fullCover: Column): Column = wrapExpression[ST_H3CellIDs](geometry, level, fullCover)
+
+  def ST_H3CellIDs(geometry: String, level: Int, fullCover: Boolean): Column = wrapExpression[ST_H3CellIDs](geometry, level, fullCover)
+
+  def ST_H3KRing(cell: Column, k: Column, exactRing: Column): Column = wrapExpression[ST_H3KRing](cell, k, exactRing)
+  def ST_H3KRing(cell: Column, k: Integer, exactRing: Boolean): Column = wrapExpression[ST_H3KRing](cell, k, exactRing)
+
+  def ST_H3KRing(cell: Long, k: Integer, exactRing: Boolean): Column = wrapExpression[ST_H3KRing](cell, k, exactRing)
+
+  def ST_H3ToGeom(cellIds: Column): Column = wrapExpression[ST_H3ToGeom](cellIds)
+
+  def ST_H3ToGeom(cellIds: Array[Long]): Column = wrapExpression[ST_H3ToGeom](cellIds)
+
   def ST_InteriorRingN(polygon: Column, n: Column): Column = wrapExpression[ST_InteriorRingN](polygon, n)
   def ST_InteriorRingN(polygon: String, n: Int): Column = wrapExpression[ST_InteriorRingN](polygon, n)
 

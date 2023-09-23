@@ -82,6 +82,10 @@
             <artifactId>s2-geometry</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.uber</groupId>
+            <artifactId>h3</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
         </dependency>
