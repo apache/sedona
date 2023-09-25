@@ -13,21 +13,23 @@ You can use the following RS output functions (`RS_AsXXX`) to convert a Raster D
 
 Introduction: Returns a binary DataFrame from a Raster DataFrame. Each raster object in the resulting DataFrame is an ArcGrid image in binary format. ArcGrid only takes 1 source band. If your raster has multiple bands, you need to specify which band you want to use as the source.
 
+Possible values for `sourceBand`: any non-negative value (>=0). If not given, it will use Band 0.
+
+Format:
+
+`RS_AsArcGrid(raster: Raster)`
+
+`RS_AsArcGrid(raster: Raster, sourceBand: Integer)`
+
 Since: `v1.4.1`
 
-Format 1: `RS_AsArcGrid(raster: Raster)`
-
-Format 2: `RS_AsArcGrid(raster: Raster, sourceBand:Integer)`
-
-Possible values for `sourceBand `: any non-negative value (>=0). If not given, it will use Band 0.
-
-SQL example 1:
+Spark SQL Example:
 
 ```sql
 SELECT RS_AsArcGrid(raster) FROM my_raster_table
 ```
 
-SQL example 2:
+Spark SQL Example:
 
 ```sql
 SELECT RS_AsArcGrid(raster, 1) FROM my_raster_table
@@ -54,23 +56,25 @@ root
 
 Introduction: Returns a binary DataFrame from a Raster DataFrame. Each raster object in the resulting DataFrame is a GeoTiff image in binary format.
 
-Since: `v1.4.1`
-
-Format 1: `RS_AsGeoTiff(raster: Raster)`
-
-Format 2: `RS_AsGeoTiff(raster: Raster, compressionType:String, imageQuality:Integer/Decimal)`
-
 Possible values for `compressionType`: `None`, `PackBits`, `Deflate`, `Huffman`, `LZW` and `JPEG`
 
 Possible values for `imageQuality`: any decimal number between 0 and 1. 0 means the lowest quality and 1 means the highest quality.
 
-SQL example 1:
+Format:
+
+`RS_AsGeoTiff(raster: Raster)`
+
+`RS_AsGeoTiff(raster: Raster, compressionType: String, imageQuality: Double)`
+
+Since: `v1.4.1`
+
+Spark SQL Example:
 
 ```sql
 SELECT RS_AsGeoTiff(raster) FROM my_raster_table
 ```
 
-SQL example 2:
+Spark SQL Example:
 
 ```sql
 SELECT RS_AsGeoTiff(raster, 'LZW', '0.75') FROM my_raster_table
@@ -103,9 +107,9 @@ Introduction: Returns a PNG byte array, that can be written to raster files as P
 !!!Note
 	Raster that have float or double values will result in an empty byte array. PNG only accepts Integer values, if you want to write your raster to an image file, please refer to [RS_AsGeoTiff](#rs_asgeotiff).
 
-Since: `v1.5.0`
-
 Format: `RS_AsPNG(raster: Raster)`
+
+Since: `v1.5.0`
 
 Spark SQL Example:
 

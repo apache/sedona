@@ -2,7 +2,7 @@
 
 Introduction: Returns the type of the geometry as a string. Eg: 'LINESTRING', 'POLYGON', 'MULTIPOINT', etc. This function also indicates if the geometry is measured, by returning a string of the form 'POINTM'.
 
-Format: `GeometryType (A:geometry)`
+Format: `GeometryType (A: Geometry)`
 
 Since: `v1.5.0`
 
@@ -36,7 +36,7 @@ Result:
 
 Introduction: Return the 3-dimensional minimum cartesian distance between A and B
 
-Format: `ST_3DDistance (A:geometry, B:geometry)`
+Format: `ST_3DDistance (A: Geometry, B: Geometry)`
 
 Since: `v1.3.0`
 
@@ -56,9 +56,11 @@ Output:
 
 Introduction: Return Linestring with additional point at the given index, if position is not available the point will be added at the end of line.
 
-Format: `ST_AddPoint(geom: geometry, point: geometry, position: integer)`
+Format: 
 
-Format: `ST_AddPoint(geom: geometry, point: geometry)`
+`ST_AddPoint(geom: Geometry, point: Geometry, position: Integer)`
+
+`ST_AddPoint(geom: Geometry, point: Geometry)`
 
 Since: `v1.3.0`
 
@@ -96,10 +98,13 @@ Based on the invoked function, the following transformation is applied:
 
 If the given geometry is empty, the result is also empty. 
 
-Format: `ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)`  
-Format: `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
+Format: 
 
-Since: `1.5.0`
+`ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)`  
+
+`ST_Affine(geometry, a, b, d, e, xOff, yOff)`
+
+Since: `v1.5.0`
 
 Examples:
 
@@ -142,13 +147,16 @@ Introduction: Compute and return the angle between two vectors represented by th
 
 There are three variants possible for ST_Angle:
 
-`ST_Angle(Geometry point1, Geometry point2, Geometry point3, Geometry point4)`
+`ST_Angle(point1: Geometry, point2: Geometry, point3: Geometry, point4: Geometry)`
+
 Computes the angle formed by vectors represented by point1 - point2 and point3 - point4
 
-`ST_Angle(Geometry point1, Geometry point2, Geometry point3)`
+`ST_Angle(point1: Geometry, point2: Geometry, point3: Geometry)`
+
 Computes the angle formed by vectors represented by point2 - point1 and point2 - point3
 
-`ST_Angle(Geometry line1, Geometry line2)`
+`ST_Angle(line1: Geometry, line2: Geometry)`
+
 Computes the angle formed by vectors S1 - E1 and S2 - E2, where S and E denote start and end points respectively
 
 !!!Note
@@ -164,7 +172,7 @@ Computes the angle formed by vectors S1 - E1 and S2 - E2, where S and E denote s
 
 Format: `ST_Angle(p1, p2, p3, p4) | ST_Angle(p1, p2, p3) | ST_Angle(line1, line2)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
 Example:
 
@@ -206,7 +214,7 @@ Output:
 
 Introduction: Return the area of A
 
-Format: `ST_Area (A:geometry)`
+Format: `ST_Area (A: Geometry)`
 
 Since: `v1.3.0`
 
@@ -230,7 +238,7 @@ Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lon/lat== orde
 !!!note
     By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
-Format: `ST_AreaSpheroid (A:geometry)`
+Format: `ST_AreaSpheroid (A: Geometry)`
 
 Since: `v1.4.1`
 
@@ -250,7 +258,7 @@ Output:
 
 Introduction: Return the Well-Known Binary representation of a geometry
 
-Format: `ST_AsBinary (A:geometry)`
+Format: `ST_AsBinary (A: Geometry)`
 
 Since: `v1.3.0`
 
@@ -274,7 +282,7 @@ The format originated in PostGIS but is supported by many GIS tools.
 If the geometry is lacking SRID a WKB format is produced.
 It will ignore the M coordinate if present.
 
-Format: `ST_AsEWKB (A:geometry)`
+Format: `ST_AsEWKB (A: Geometry)`
 
 Since: `v1.3.0`
 
@@ -299,11 +307,11 @@ If the geometry is lacking SRID a WKT format is produced.
 [See ST_SetSRID](#ST_SetSRID)
 It will support M coordinate if present since v1.5.0.
 
-Format: `ST_AsEWKT (A:geometry)`
+Format: `ST_AsEWKT (A: Geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL example:
+Example:
 ```sql
 SELECT ST_AsEWKT(ST_SetSrid(ST_GeomFromWKT('POLYGON((0 0,0 1,1 1,1 0,0 0))'), 4326))
 ```
@@ -342,11 +350,11 @@ POINT ZM(1 1 1 1)
 
 Introduction: Return the [GeoJSON](https://geojson.org/) string representation of a geometry
 
-Format: `ST_AsGeoJSON (A:geometry)`
+Format: `ST_AsGeoJSON (A: Geometry)`
 
 Since: `v1.3.0`
 
-Spark SQL example:
+Example:
 ```sql
 SELECT ST_AsGeoJSON(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
 ```
@@ -370,11 +378,11 @@ Output:
 
 Introduction: Return the [GML](https://www.ogc.org/standards/gml) string representation of a geometry
 
-Format: `ST_AsGML (A:geometry)`
+Format: `ST_AsGML (A: Geometry)`
 
 Since: `v1.3.0`
 
-Spark SQL example:
+Example:
 
 ```sql
 SELECT ST_AsGML(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
@@ -390,7 +398,7 @@ Output:
 
 Introduction: Return the [KML](https://www.ogc.org/standards/kml) string representation of a geometry
 
-Format: `ST_AsKML (A:geometry)`
+Format: `ST_AsKML (A: Geometry)`
 
 Since: `v1.3.0`
 
@@ -411,7 +419,7 @@ Output:
 Introduction: Return the Well-Known Text string representation of a geometry.
 It will support M coordinate if present since v1.5.0.
 
-Format: `ST_AsText (A:geometry)`
+Format: `ST_AsText (A: Geometry)`
 
 Since: `v1.3.0`
 
@@ -475,7 +483,7 @@ Output:
 
 Introduction: Returns the closure of the combinatorial boundary of this Geometry.
 
-Format: `ST_Boundary(geom: geometry)`
+Format: `ST_Boundary(geom: Geometry)`
 
 Since: `v1.3.0`
 
@@ -497,7 +505,7 @@ Introduction: Returns a linestring spanning minimum and maximum values of each d
 If an empty geometry is provided, the returned LineString is also empty.
 If a single vertex (POINT) is provided, the returned LineString has both the start and end points same as the points coordinates
 
-Format: `ST_BoundingDiagonal(geom: geometry)`
+Format: `ST_BoundingDiagonal(geom: Geometry)`
 
 Since: `v1.5.0`
 
@@ -522,7 +530,7 @@ Output: `LINESTRING Z(-1 -1 0, 10 5 5)`
 
 Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.
 
-Format: `ST_Buffer (A:geometry, buffer: Double)`
+Format: `ST_Buffer (A: Geometry, buffer: Double)`
 
 Since: `v1.2.0`
 
@@ -542,7 +550,7 @@ POLYGON ((1 0, 0.9807852804032304 -0.1950903220161282, 0.9238795325112867 -0.382
 
 Introduction: Returns the areal geometry formed by the constituent linework of the input geometry.
 
-Format: `ST_BuildArea (A:geometry)`
+Format: `ST_BuildArea (A: Geometry)`
 
 Since: `v1.2.1`
 
@@ -561,7 +569,7 @@ Output: `MULTIPOLYGON(((0 0,0 10,10 10,10 0,0 0)),((10 10,10 20,20 20,20 10,10 1
 
 Introduction: Return the centroid point of A
 
-Format: `ST_Centroid (A:geometry)`
+Format: `ST_Centroid (A: Geometry)`
 
 Since: `v1.5.0`
 
@@ -581,11 +589,11 @@ POINT (4.8 4.8)
 Introduction: Returns the 2-dimensional point on geom1 that is closest to geom2. This is the first point of the shortest line between the geometries. If using 3D geometries, the Z coordinates will be ignored. If you have a 3D Geometry, you may prefer to use ST_3DClosestPoint.
 It will throw an exception indicates illegal argument if one of the params is an empty geometry.
 
-Format: `ST_ClosestPoint(g1: geometry, g2: geometry)`
+Format: `ST_ClosestPoint(g1: Geometry, g2: Geometry)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
-Example1:
+Example:
 ```sql
 SELECT ST_AsText( ST_ClosestPoint(g1, g2)) As ptwkt;
 ```
@@ -606,11 +614,11 @@ Output: `POINT(131.59149149528952 101.89887534906197)`
 
 Introduction: Returns MultiGeometry object based on geometry column/s or array with geometries
 
-Format
+Format:
 
-`ST_Collect(*geom: geometry)`
+`ST_Collect(*geom: Geometry)`
 
-`ST_Collect(geom: array<geometry>)`
+`ST_Collect(geom: ARRAY[Geometry])`
 
 Since: `v1.5.0`
 
@@ -665,9 +673,11 @@ The type numbers are:
 
 If the type parameter is omitted a multi-geometry of the highest dimension is returned.
 
-Format: `ST_CollectionExtract (A:geometry)`
+Format: 
 
-Format: `ST_CollectionExtract (A:geometry, type:Int)`
+`ST_CollectionExtract (A: Geometry)`
+
+`ST_CollectionExtract (A: Geometry, type: Integer)`
 
 Since: `v1.5.0`
 
@@ -698,9 +708,11 @@ Result:
 
 Introduction: Return the Concave Hull of polgyon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
 
-Format: `ST_ConcaveHull (A:geometry, pctConvex:float)`
+Format: 
 
-Format: `ST_ConcaveHull (A:geometry, pctConvex:float, allowHoles:Boolean)`
+`ST_ConcaveHull (A: Geometry, pctConvex: Double)`
+
+`ST_ConcaveHull (A: Geometry, pctConvex: Double, allowHoles: Boolean)`
 
 Since: `v1.4.0`
 
@@ -719,7 +731,7 @@ POLYGON ((125 100, 20 40, 50 60, 175 150, 125 100))
 
 Introduction: Return the Convex Hull of polygon A
 
-Format: `ST_ConvexHull (A:geometry)`
+Format: `ST_ConvexHull (A: Geometry)`
 
 Since: `v1.5.0`
 
@@ -739,7 +751,7 @@ POLYGON ((20 40, 175 150, 125 100, 20 40))
 
 Introduction: Returns the coordinate dimensions of the geometry. It is an alias of `ST_NDims`.
 
-Format: `ST_CoordDim(geom: geometry)`
+Format: `ST_CoordDim(geom: Geometry)`
 
 Since: `v1.5.0`
 
@@ -771,7 +783,7 @@ Output:
 
 Introduction: Return the topological dimension of this Geometry object, which must be less than or equal to the coordinate dimension. OGC SPEC s2.1.1.1 - returns 0 for POINT, 1 for LINESTRING, 2 for POLYGON, and the largest dimension of the components of a GEOMETRYCOLLECTION. If the dimension is unknown (e.g. for an empty GEOMETRYCOLLECTION) 0 is returned.
 
-Format: `ST_Dimension (A:geometry), ST_Dimension (C:geometrycollection), `
+Format: `ST_Dimension (A: Geometry) | ST_Dimension (C: Geometrycollection)`
 
 Since: `v1.5.0`
 
@@ -791,7 +803,7 @@ Result:
 
 Introduction: Return the Euclidean distance between A and B
 
-Format: `ST_Distance (A:geometry, B:geometry)`
+Format: `ST_Distance (A: Geometry, B: Geometry)`
 
 Since: `v1.2.0`
 
@@ -816,7 +828,7 @@ Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lon/lat== orde
 !!!note
     By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
-Format: `ST_DistanceSphere (A:geometry)`
+Format: `ST_DistanceSphere (A: Geometry)`
 
 Since: `v1.4.1`
 
@@ -853,7 +865,7 @@ Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lon/lat== orde
 !!!note
     By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
-Format: `ST_DistanceSpheroid (A:geometry)`
+Format: `ST_DistanceSpheroid (A: Geometry)`
 
 Since: `v1.4.1`
 
@@ -875,7 +887,7 @@ Introduction: Convert an angle in radian to degrees.
 
 Format: `ST_Degrees(angleInRadian)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
 Example:
 
@@ -893,7 +905,7 @@ Output:
 
 Introduction: Return the difference between geometry A and B (return part of geometry A that does not intersect geometry B)
 
-Format: `ST_Difference (A:geometry, B:geometry)`
+Format: `ST_Difference (A: Geometry, B: Geometry)`
 
 Since: `v1.5.0`
 
@@ -914,11 +926,11 @@ POLYGON ((0 -3, -3 -3, -3 3, 0 3, 0 -3))
 Introduction: It expands the geometries. If the geometry is simple (Point, Polygon Linestring etc.) it returns the geometry
 itself, if the geometry is collection or multi it returns record for each of collection components.
 
-Format: `ST_Dump(geom: geometry)`
+Format: `ST_Dump(geom: Geometry)`
 
 Since: `v1.5.0`
 
-SQL example:
+Example:
 ```sql
 SELECT ST_Dump(ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))'))
 ```
@@ -933,7 +945,7 @@ Output:
 
 Introduction: Returns list of Points which geometry consists of.
 
-Format: `ST_DumpPoints(geom: geometry)`
+Format: `ST_DumpPoints(geom: Geometry)`
 
 Since: `v1.5.0`
 
@@ -953,7 +965,7 @@ Output:
 
 Introduction: Returns last point of given linestring.
 
-Format: `ST_EndPoint(geom: geometry)`
+Format: `ST_EndPoint(geom: Geometry)`
 
 Since: `v1.5.0`
 
@@ -973,7 +985,7 @@ POINT(160 170)
 
 Introduction: Return the envelop boundary of A
 
-Format: `ST_Envelope (A:geometry)`
+Format: `ST_Envelope (A: Geometry)`
 
 Since: `v1.3.0`
 
@@ -993,11 +1005,11 @@ POLYGON ((0 0, 0 3, 1 3, 1 0, 0 0))
 
 Introduction: Returns a LINESTRING representing the exterior ring (shell) of a POLYGON. Returns NULL if the geometry is not a polygon.
 
-Format: `ST_ExteriorRing(A:geometry)`
+Format: `ST_ExteriorRing(A: Geometry)`
 
 Since: `v1.2.1`
 
-Examples:
+Example:
 
 ```sql
 SELECT ST_ExteriorRing(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
@@ -1013,7 +1025,7 @@ LINESTRING (0 0, 1 1, 1 2, 1 1, 0 0)
 
 Introduction: Returns a version of the given geometry with X and Y axis flipped.
 
-Format: `ST_FlipCoordinates(A:geometry)`
+Format: `ST_FlipCoordinates(A: Geometry)`
 
 Since: `v1.2.0`
 
@@ -1033,7 +1045,7 @@ POINT (2 1)
 
 Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates
 
-Format: `ST_Force_2D (A:geometry)`
+Format: `ST_Force_2D (A: Geometry)`
 
 Since: `v1.2.1`
 
@@ -1058,9 +1070,9 @@ If the given geometry is empty, no change is performed on it.
 !!!Note
     Example output is after calling ST_AsText() on returned geometry, which adds Z for in the WKT for 3D geometries
 
-Format: `ST_Force3D(geometry, zValue)`
+Format: `ST_Force3D(geometry: Geometry, zValue: Double)`
 
-Since: `1.4.1`
+Since: `v1.4.1`
 
 Example: 
 
@@ -1105,9 +1117,9 @@ based on [Computing Discrete Frechet Distance](http://www.kr.tuwien.ac.at/staff/
 
 If any of the geometries is empty, returns 0.0
 
-Format: `ST_FrechetDistance(g1: geometry, g2: geometry)`
+Format: `ST_FrechetDistance(g1: Geometry, g2: Geometry)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
 Example:
 
@@ -1125,7 +1137,7 @@ Output:
 
 Introduction: Returns GeoHash of the geometry with given precision
 
-Format: `ST_GeoHash(geom: geometry, precision: int)`
+Format: `ST_GeoHash(geom: Geometry, precision: Integer)`
 
 Since: `v1.2.0`
 
@@ -1149,13 +1161,23 @@ The algorithm will iterate until the distance change between successive iteratio
 
 If a `tolerance` value is not provided, a default `tolerance` value is `1e-6`.
 
-Format: `ST_GeometricMedian(geom: geometry, tolerance: float, maxIter: integer, failIfNotConverged: boolean)`
+Format: 
 
-Format: `ST_GeometricMedian(geom: geometry, tolerance: float, maxIter: integer)`
+```
+ST_GeometricMedian(geom: Geometry, tolerance: Double, maxIter: Integer, failIfNotConverged: Boolean)
+```
 
-Format: `ST_GeometricMedian(geom: geometry, tolerance: float)`
+```
+ST_GeometricMedian(geom: Geometry, tolerance: Double, maxIter: Integer)
+```
 
-Format: `ST_GeometricMedian(geom: geometry)`
+```
+ST_GeometricMedian(geom: Geometry, tolerance: Double)
+```
+
+```
+ST_GeometricMedian(geom: Geometry)
+```
 
 Default parameters: `tolerance: 1e-6, maxIter: 1000, failIfNotConverged: false`
 
@@ -1175,7 +1197,7 @@ POINT (1.9761550281255005 1.9761550281255005)
 
 Introduction: Return the 0-based Nth geometry if the geometry is a GEOMETRYCOLLECTION, (MULTI)POINT, (MULTI)LINESTRING, MULTICURVE or (MULTI)POLYGON. Otherwise, return null
 
-Format: `ST_GeometryN(geom: geometry, n: Int)`
+Format: `ST_GeometryN(geom: Geometry, n: Integer)`
 
 Since: `v1.3.0`
 
@@ -1195,7 +1217,7 @@ POINT (3 4)
 
 Introduction: Returns the type of the geometry as a string. EG: 'ST_Linestring', 'ST_Polygon' etc.
 
-Format: `ST_GeometryType (A:geometry)`
+Format: `ST_GeometryType (A: Geometry)`
 
 Since: `v1.5.0`
 
@@ -1350,7 +1372,7 @@ If any of the geometry is empty, 0.0 is returned.
 !!!Note
     Even though the function accepts 3D geometry, the z ordinate is ignored and the computed hausdorff distance is equivalent to the geometries not having the z ordinate.
 
-Format: `ST_HausdorffDistance(g1: geometry, g2: geometry, densityFrac)`
+Format: `ST_HausdorffDistance(g1: Geometry, g2: Geometry, densityFrac: Double)`
 
 Since: `v1.5.0`
 
@@ -1383,7 +1405,7 @@ Output:
 
 Introduction: Returns the Nth interior linestring ring of the polygon geometry. Returns NULL if the geometry is not a polygon or the given N is out of range
 
-Format: `ST_InteriorRingN(geom: geometry, n: Int)`
+Format: `ST_InteriorRingN(geom: Geometry, n: Integer)`
 
 Since: `v1.3.0`
 
@@ -1403,7 +1425,7 @@ LINEARRING (1 1, 2 1, 2 2, 1 2, 1 1)
 
 Introduction: Return the intersection geometry of A and B
 
-Format: `ST_Intersection (A:geometry, B:geometry)`
+Format: `ST_Intersection (A: Geometry, B: Geometry)`
 
 Since: `v1.5.0`
 
@@ -1426,7 +1448,7 @@ POLYGON ((2 8, 8 8, 8 2, 2 2, 2 8))
 
 Introduction: RETURNS true if the LINESTRING start and end point are the same.
 
-Format: `ST_IsClosed(geom: geometry)`
+Format: `ST_IsClosed(geom: Geometry)`
 
 Since: `v1.3.0`
 
@@ -1450,7 +1472,7 @@ Collection types are the following:
 - GEOMETRYCOLLECTION
 - MULTI{POINT, POLYGON, LINESTRING}
 
-Format: `ST_IsCollection(geom: geometry)`
+Format: `ST_IsCollection(geom: Geometry)`
 
 Since: `v1.5.0`
 
@@ -1482,7 +1504,7 @@ false
 
 Introduction: Test if a geometry is empty geometry
 
-Format: `ST_IsEmpty (A:geometry)`
+Format: `ST_IsEmpty (A: Geometry)`
 
 Since: `v1.2.1`
 
@@ -1502,7 +1524,7 @@ false
 
 Introduction: RETURN true if LINESTRING is ST_IsClosed and ST_IsSimple.
 
-Format: `ST_IsRing(geom: geometry)`
+Format: `ST_IsRing(geom: Geometry)`
 
 Since: `v1.3.0`
 
@@ -1522,7 +1544,7 @@ true
 
 Introduction: Test if geometry's only self-intersections are at boundary points.
 
-Format: `ST_IsSimple (A:geometry)`
+Format: `ST_IsSimple (A: Geometry)`
 
 Since: `v1.3.0`
 
@@ -1542,7 +1564,7 @@ true
 
 Introduction: Test if a geometry is well formed
 
-Format: `ST_IsValid (A:geometry)`
+Format: `ST_IsValid (A: Geometry)`
 
 Since: `v1.3.0`
 
@@ -1562,7 +1584,7 @@ false
 
 Introduction: Return the perimeter of A
 
-Format: ST_Length (A:geometry)
+Format: `ST_Length (A: Geometry)`
 
 Since: `v1.3.0`
 
@@ -1587,7 +1609,7 @@ Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lon/lat== orde
 !!!note
     By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
-Format: `ST_LengthSpheroid (A:geometry)`
+Format: `ST_LengthSpheroid (A: Geometry)`
 
 Since: `v1.4.1`
 
@@ -1607,7 +1629,7 @@ Output:
 
 Introduction: Creates a LineString from a MultiPoint geometry.
 
-Format: `ST_LineFromMultiPoint (A:geometry)`
+Format: `ST_LineFromMultiPoint (A: Geometry)`
 
 Since: `v1.3.0`
 
@@ -1627,7 +1649,7 @@ LINESTRING (10 40, 40 30, 20 20, 30 10)
 
 Introduction: Returns a point interpolated along a line. First argument must be a LINESTRING. Second argument is a Double between 0 and 1 representing fraction of total linestring length the point has to be located.
 
-Format: `ST_LineInterpolatePoint (geom: geometry, fraction: Double)`
+Format: `ST_LineInterpolatePoint (geom: Geometry, fraction: Double)`
 
 Since: `v1.5.0`
 
@@ -1649,7 +1671,7 @@ Introduction: Returns a LineString formed by sewing together the constituent lin
 !!!note
     Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
 
-Format: `ST_LineMerge (A:geometry)`
+Format: `ST_LineMerge (A: Geometry)`
 
 Since: `v1.5.0`
 
@@ -1668,7 +1690,7 @@ LINESTRING (-29 -27, -30 -29.7, -45 -33, -46 -32)
 
 Introduction: Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length. Second and third arguments are Double values between 0 and 1. This only works with LINESTRINGs.
 
-Format: `ST_LineSubstring (geom: geometry, startfraction: Double, endfraction: Double)`
+Format: `ST_LineSubstring (geom: Geometry, startfraction: Double, endfraction: Double)`
 
 Since: `v1.5.0`
 
@@ -1688,9 +1710,11 @@ LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140
 
 Introduction: Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error.
 
-Format: `ST_MakeLine(geom1: geometry, geom2: geometry)`
+Format: 
 
-Format: `ST_MakeLine(geoms: array<geometry>)`
+`ST_MakeLine(geom1: Geometry, geom2: Geometry)`
+
+`ST_MakeLine(geoms: ARRAY[Geometry])`
 
 Since: `v1.5.0`
 
@@ -1722,7 +1746,7 @@ Output:
 
 Introduction: Function to convert closed linestring to polygon including holes
 
-Format: `ST_MakePolygon(geom: geometry, holes: array<geometry>)`
+Format: `ST_MakePolygon(geom: Geometry, holes: ARRAY[Geometry])`
 
 Since: `v1.5.0`
 
@@ -1748,9 +1772,11 @@ Introduction: Given an invalid geometry, create a valid representation of the ge
 Collapsed geometries are either converted to empty (keepCollapsed=true) or a valid geometry of lower dimension (keepCollapsed=false).
 Default is keepCollapsed=false.
 
-Format: `ST_MakeValid (A:geometry)`
+Format: 
 
-Format: `ST_MakeValid (A:geometry, keepCollapsed:Boolean)`
+`ST_MakeValid (A: Geometry)`
+
+`ST_MakeValid (A: Geometry, keepCollapsed: Boolean)`
 
 Since: `v1.5.0`
 
@@ -1775,7 +1801,9 @@ Result:
 
 Introduction: Returns the smallest circle polygon that contains a geometry. The optional quadrantSegments parameter determines how many segments to use per quadrant and the default number of segments is 48. 
 
-Format: `ST_MinimumBoundingCircle(geom: geometry, [Optional] quadrantSegments:int)`
+Format: 
+
+`ST_MinimumBoundingCircle(geom: Geometry, [Optional] quadrantSegments: Integer)`
 
 Since: `v1.5.0`
 
@@ -1795,7 +1823,7 @@ POLYGON ((0.5 0.5, 0.4997322937381828 0.4836404585891119, 0.4989294616193017 0.4
 
 Introduction: Returns a struct containing the center point and radius of the smallest circle that contains a geometry.
 
-Format: `ST_MinimumBoundingRadius(geom: geometry)`
+Format: `ST_MinimumBoundingRadius(geom: Geometry)`
 
 Since: `v1.5.0`
 
@@ -1816,9 +1844,7 @@ Output:
 Introduction: Returns a MultiGeometry object based on the geometry input.
 ST_Multi is basically an alias for ST_Collect with one geometry.
 
-Format
-
-`ST_Multi(geom: geometry)`
+Format: `ST_Multi(geom: Geometry)`
 
 Since: `v1.5.0`
 
@@ -1839,9 +1865,7 @@ MULTIPOINT (1 1)
 
 Introduction: Returns the input geometry in its normalized form.
 
-Format
-
-`ST_Normalize(geom: geometry)`
+Format: `ST_Normalize(geom: Geometry)`
 
 Since: `v1.3.0`
 
@@ -1861,7 +1885,7 @@ POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))
 
 Introduction: Returns the number of points of the geometry
 
-Format: `ST_NPoints (A:geometry)`
+Format: `ST_NPoints (A: Geometry)`
 
 Since: `v1.3.0`
 
@@ -1881,7 +1905,7 @@ Output:
 
 Introduction: Returns the coordinate dimension of the geometry.
 
-Format: `ST_NDims(geom: geometry)`
+Format: `ST_NDims(geom: Geometry)`
 
 Since: `v1.3.1`
 
@@ -1917,9 +1941,9 @@ this function also takes into account the number of  exterior rings.
 This function returns 0 for an empty Polygon or MultiPolygon.
 If the geometry is not a Polygon or MultiPolygon, an IllegalArgument Exception is thrown.
 
-Format: `ST_NRings(geom: geometry)`
+Format: `ST_NRings(geom: Geometry)`
 
-Since: `1.4.1`
+Since: `v1.4.1`
 
 
 Examples:
@@ -1946,7 +1970,7 @@ Output: `Unsupported geometry type: LineString, only Polygon or MultiPolygon geo
 
 Introduction: Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the number of geometries, for single geometries will return 1.
 
-Format: `ST_NumGeometries (A:geometry)`
+Format: `ST_NumGeometries (A: Geometry)`
 
 Since: `v1.3.0`
 
@@ -1966,7 +1990,7 @@ Output:
 
 Introduction: Returns number of interior rings of polygon geometries.
 
-Format: `ST_NumInteriorRings(geom: geometry)`
+Format: `ST_NumInteriorRings(geom: Geometry)`
 
 Since: `v1.3.0`
 
@@ -1993,7 +2017,7 @@ Introduction: Returns number of points in a LineString.
 
     Output: `IllegalArgumentException: Unsupported geometry type: MultiPoint, only LineString geometry is supported.`
 
-Format: `ST_NumPoints(geom: geometry)`
+Format: `ST_NumPoints(geom: Geometry)`
 
 Since: `v1.4.1`
 
@@ -2013,7 +2037,7 @@ Output:
 
 Introduction: Return the Nth point in a single linestring or circular linestring in the geometry. Negative values are counted backwards from the end of the LineString, so that -1 is the last point. Returns NULL if there is no linestring in the geometry.
 
-Format: `ST_PointN(A:geometry, B:integer)`
+Format: `ST_PointN(A: Geometry, B: Integer)`
 
 Since: `v1.2.1`
 
@@ -2040,7 +2064,7 @@ Output: `POINT (1 1)`
 
 Introduction: Returns a POINT guaranteed to lie on the surface.
 
-Format: `ST_PointOnSurface(A:geometry)`
+Format: `ST_PointOnSurface(A: Geometry)`
 
 Since: `v1.2.1`
 
@@ -2071,7 +2095,7 @@ FROM df
 
 Introduction: Function to create a polygon built from the given LineString and sets the spatial reference system from the srid
 
-Format: `ST_Polygon(geom: geometry, srid: integer)`
+Format: `ST_Polygon(geom: Geometry, srid: Integer)`
 
 Since: `v1.5.0`
 
@@ -2091,7 +2115,7 @@ POLYGON((75 29 1, 77 29 2, 77 29 3, 75 29 1))
 
 Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded. 
 
-Format: `ST_ReducePrecision (A:geometry, B:int)`
+Format: `ST_ReducePrecision (A: Geometry, B: Integer)`
 
 Since: `v1.5.0`
 
@@ -2113,7 +2137,7 @@ POINT (0.123456789 0.123456789)
 
 Introduction: Return the geometry with vertex order reversed
 
-Format: `ST_Reverse (A:geometry)`
+Format: `ST_Reverse (A: Geometry)`
 
 Since: `v1.2.1`
 
@@ -2133,9 +2157,11 @@ LINESTRING (3 6, 2 4, 1 2, 0 0)
 
 Introduction: Return Linestring with removed point at given index, position can be omitted and then last one will be removed.
 
-Format: `ST_RemovePoint(geom: geometry, position: integer)`
+Format: 
 
-Format: `ST_RemovePoint(geom: geometry)`
+`ST_RemovePoint(geom: Geometry, position: Integer)`
+
+`ST_RemovePoint(geom: Geometry)`
 
 Since: `v1.3.0`
 
@@ -2157,7 +2183,7 @@ Introduction: Cover the geometry with Google S2 Cells, return the corresponding 
 The level indicates the [size of cells](https://s2geometry.io/resources/s2cell_statistics.html). With a bigger level,
 the cells will be smaller, the coverage will be more accurate, but the result size will be exponentially increasing.
 
-Format: `ST_S2CellIDs(geom: geometry, level: Int)`
+Format: `ST_S2CellIDs(geom: Geometry, level: Integer)`
 
 Since: `v1.4.0`
 
@@ -2177,7 +2203,7 @@ Output:
 
 Introduction: Replace Nth point of linestring with given point. Index is 0-based. Negative index are counted backwards, e.g., -1 is last point.
 
-Format: `ST_SetPoint (linestring: geometry, index: integer, point: geometry)`
+Format: `ST_SetPoint (linestring: Geometry, index: Integer, point: Geometry)`
 
 Since: `v1.3.0`
 
@@ -2197,7 +2223,7 @@ LINESTRING (0 0, 0 1, 1 0)
 
 Introduction: Sets the spatial reference system identifier (SRID) of the geometry.
 
-Format: `ST_SetSRID (A:geometry, srid: integer)`
+Format: `ST_SetSRID (A: Geometry, srid: Integer)`
 
 Since: `v1.3.0`
 
@@ -2217,7 +2243,7 @@ SRID=3021;POLYGON ((1 1, 8 1, 8 8, 1 8, 1 1))
 
 Introduction: Return the spatial reference system identifier (SRID) of the geometry.
 
-Format: `ST_SRID (A:geometry)`
+Format: `ST_SRID (A: Geometry)`
 
 Since: `v1.3.0`
 
@@ -2240,7 +2266,7 @@ and with the components having the same topological relationship.
 
 Since: `v1.5.0`
 
-Format: `ST_SimplifyPreserveTopology (A:geometry, distanceTolerance: Double)`
+Format: `ST_SimplifyPreserveTopology (A: Geometry, distanceTolerance: Double)`
 
 Example:
 
@@ -2258,7 +2284,7 @@ POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))
 
 Introduction: Returns first point of given linestring.
 
-Format: `ST_StartPoint(geom: geometry)`
+Format: `ST_StartPoint(geom: Geometry)`
 
 Since: `v1.5.0`
 
@@ -2278,7 +2304,7 @@ POINT(100 150)
 
 Introduction: Returns list of geometries divided based of given maximum number of vertices.
 
-Format: `ST_SubDivide(geom: geometry, maxVertices: int)`
+Format: `ST_SubDivide(geom: Geometry, maxVertices: Integer)`
 
 Since: `v1.5.0`
 
@@ -2332,7 +2358,7 @@ Output:
 Introduction: Return the symmetrical difference between geometry A and B (return parts of geometries which are in either of the sets, but not in their intersection)
 
 
-Format: `ST_SymDifference (A:geometry, B:geometry)`
+Format: `ST_SymDifference (A: Geometry, B: Geometry)`
 
 Since: `v1.5.0`
 
@@ -2402,7 +2428,11 @@ PROJCS["WGS 84 / Pseudo-Mercator",
 !!!note
     By default, ==ST_Transform== follows the `lenient` mode which tries to fix issues by itself. You can append a boolean value at the end to enable the `strict` mode. In `strict` mode, ==ST_Transform== will throw an error if it finds any issue.
 
-Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string, [Optional] lenientMode:bool)`
+Format: 
+
+```
+ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String, [Optional] lenientMode: Boolean)
+```
 
 Since: `v1.2.0`
 
@@ -2431,9 +2461,11 @@ If the geometry is empty, no change is done to it.
 
 If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGON/LINE/POINT), all underlying geometries are individually translated.
 
-Format: `ST_Translate(geometry: geometry, deltaX: deltaX, deltaY: deltaY, deltaZ: deltaZ)`
+Format: 
 
-Since: `1.4.1`
+`ST_Translate(geometry: Geometry, deltaX: Double, deltaY: Double, deltaZ: Double)`
+
+Since: `v1.4.1`
 
 Example:
 
@@ -2464,12 +2496,13 @@ POINT (-70.01 44.37)
 Introduction: Returns a two-dimensional Voronoi diagram from the vertices of the supplied geometry. The result is a GeometryCollection of Polygons that covers an envelope larger than the extent of the input vertices. Returns null if input geometry is null. Returns an empty geometry collection if the input geometry contains only one vertex. Returns an empty geometry collection if the extend_to envelope has zero area.
 
 
-Format: `ST_VoronoiPolygons(g1: geometry, tolerance: float, extend_to: geometry)`
+Format: `ST_VoronoiPolygons(g1: Geometry, tolerance: Double, extend_to: Geometry)`
 
 Optional parameters:
-'tolerance' : The distance within which vertices will be considered equivalent. Robustness of the algorithm can be improved by supplying a nonzero tolerance distance. (default = 0.0)
 
-'extend_to' : If a geometry is supplied as the "extend_to" parameter, the diagram will be extended to cover the envelope of the "extend_to" geometry, unless that envelope is smaller than the default envelope (default = NULL. By default, we extend the bounding box of the diagram by the max between bounding box's height and bounding box's width).
+`tolerance` : The distance within which vertices will be considered equivalent. Robustness of the algorithm can be improved by supplying a nonzero tolerance distance. (default = 0.0)
+
+`extend_to` : If a geometry is supplied as the "extend_to" parameter, the diagram will be extended to cover the envelope of the "extend_to" geometry, unless that envelope is smaller than the default envelope (default = NULL. By default, we extend the bounding box of the diagram by the max between bounding box's height and bounding box's width).
 
 Since: `v1.5.0`
 
@@ -2509,7 +2542,7 @@ Output:
 
 Introduction: Returns the maximum X coordinate of a geometry
 
-Format: `ST_XMax (A:geometry)`
+Format: `ST_XMax (A: Geometry)`
 
 Since: `v1.2.1`
 
@@ -2529,7 +2562,7 @@ Output:
 
 Introduction: Returns the minimum X coordinate of a geometry
 
-Format: `ST_XMin (A:geometry)`
+Format: `ST_XMin (A: Geometry)`
 
 Since: `v1.2.1`
 
@@ -2569,7 +2602,7 @@ Output:
 
 Introduction: Return the minimum Y coordinate of A
 
-Format: `ST_YMax (A:geometry)`
+Format: `ST_YMax (A: Geometry)`
 
 Since: `v1.2.1`
 
@@ -2589,7 +2622,7 @@ Output :
 
 Introduction: Return the minimum Y coordinate of A
 
-Format: `ST_Y_Min (A:geometry)`
+Format: `ST_Y_Min (A: Geometry)`
 
 Since: `v1.2.1`
 
@@ -2629,11 +2662,11 @@ Output:
 
 Introduction: Returns Z maxima of the given geometry or null if there is no Z coordinate.
 
-Format: `ST_ZMax(geom: geometry)`
+Format: `ST_ZMax(geom: Geometry)`
 
 Since: `v1.3.1`
 
-Spark SQL example:
+Example:
 ```sql
 SELECT ST_ZMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
@@ -2648,7 +2681,7 @@ Output:
 
 Introduction: Returns Z minima of the given geometry or null if there is no Z coordinate.
 
-Format: `ST_ZMin(geom: geometry)`
+Format: `ST_ZMin(geom: Geometry)`
 
 Since: `v1.3.1`
 
