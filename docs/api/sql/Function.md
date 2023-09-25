@@ -101,8 +101,11 @@ Based on the invoked function, the following transformation is applied:
 
 If the given geometry is empty, the result is also empty.
 
-Format: `ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)`  
-Format: `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
+Format: 
+
+`ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)`  
+
+`ST_Affine(geometry, a, b, d, e, xOff, yOff)`
 
 ```sql
 ST_Affine(geometry, 1, 2, 4, 1, 1, 2, 3, 2, 5, 4, 8, 3)
@@ -619,7 +622,7 @@ Output: `POINT(131.59149149528952 101.89887534906197)`
 
 Introduction: Returns MultiGeometry object based on geometry column/s or array with geometries
 
-Format
+Format:
 
 `ST_Collect(*geom: Geometry)`
 
@@ -678,9 +681,11 @@ The type numbers are:
 
 If the type parameter is omitted a multi-geometry of the highest dimension is returned.
 
-Format: `ST_CollectionExtract (A: Geometry)`
+Format: 
 
-Format: `ST_CollectionExtract (A: Geometry, type: Integer)`
+`ST_CollectionExtract (A: Geometry)`
+
+`ST_CollectionExtract (A: Geometry, type: Integer)`
 
 Since: `v1.2.1`
 
@@ -711,9 +716,11 @@ Result:
 
 Introduction: Return the Concave Hull of polgyon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
 
-Format: `ST_ConcaveHull (A: Geometry, pctConvex: Double)`
+Format: 
 
-Format: `ST_ConcaveHull (A: Geometry, pctConvex: Double, allowHoles: Boolean)`
+`ST_ConcaveHull (A: Geometry, pctConvex: Double)`
+
+`ST_ConcaveHull (A: Geometry, pctConvex: Double, allowHoles: Boolean)`
 
 Since: `v1.4.0`
 
@@ -1594,9 +1601,11 @@ LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140
 
 Introduction: Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error.
 
-Format: `ST_MakeLine(geom1: Geometry, geom2: Geometry)`
+Format: 
 
-Format: `ST_MakeLine(geoms: ARRAY[Geometry])`
+`ST_MakeLine(geom1: Geometry, geom2: Geometry)`
+
+`ST_MakeLine(geoms: ARRAY[Geometry])`
 
 Since: `v1.5.0`
 
@@ -1654,9 +1663,11 @@ Introduction: Given an invalid geometry, create a valid representation of the ge
 Collapsed geometries are either converted to empty (keepCollaped=true) or a valid geometry of lower dimension (keepCollapsed=false).
 Default is keepCollapsed=false.
 
-Format: `ST_MakeValid (A: Geometry)`
+Format: 
 
-Format: `ST_MakeValid (A: Geometry, keepCollapsed: Boolean)`
+`ST_MakeValid (A: Geometry)`
+
+`ST_MakeValid (A: Geometry, keepCollapsed: Boolean)`
 
 Since: `v1.0.0`
 
@@ -1781,7 +1792,7 @@ Output:
 
 Introduction: Returns the input geometry in its normalized form.
 
-Format
+Format:
 
 `ST_Normalize(geom: Geometry)`
 
@@ -2486,9 +2497,10 @@ Introduction: Returns a two-dimensional Voronoi diagram from the vertices of the
 Format: `ST_VoronoiPolygons(g1: Geometry, tolerance: Double, extend_to: Geometry)`
 
 Optional parameters:
-'tolerance' : The distance within which vertices will be considered equivalent. Robustness of the algorithm can be improved by supplying a nonzero tolerance distance. (default = 0.0)
 
-'extend_to' : If a geometry is supplied as the "extend_to" parameter, the diagram will be extended to cover the envelope of the "extend_to" geometry, unless that envelope is smaller than the default envelope (default = NULL. By default, we extend the bounding box of the diagram by the max between bounding box's height and bounding box's width).
+`tolerance` : The distance within which vertices will be considered equivalent. Robustness of the algorithm can be improved by supplying a nonzero tolerance distance. (default = 0.0)
+
+`extend_to` : If a geometry is supplied as the "extend_to" parameter, the diagram will be extended to cover the envelope of the "extend_to" geometry, unless that envelope is smaller than the default envelope (default = NULL. By default, we extend the bounding box of the diagram by the max between bounding box's height and bounding box's width).
 
 Since: `v1.5.0`
 
