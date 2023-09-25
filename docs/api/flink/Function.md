@@ -614,7 +614,7 @@ Output: `POINT(131.59149149528952 101.89887534906197)`
 
 Introduction: Returns MultiGeometry object based on geometry column/s or array with geometries
 
-Format
+Format:
 
 `ST_Collect(*geom: Geometry)`
 
@@ -1723,9 +1723,7 @@ Output:
 Introduction: Returns a MultiGeometry object based on the geometry input.
 ST_Multi is basically an alias for ST_Collect with one geometry.
 
-Format
-
-`ST_Multi(geom: Geometry)`
+Format: `ST_Multi(geom: Geometry)`
 
 Since: `v1.5.0`
 
@@ -1746,9 +1744,7 @@ MULTIPOINT (1 1)
 
 Introduction: Returns the input geometry in its normalized form.
 
-Format
-
-`ST_Normalize(geom: Geometry)`
+Format: `ST_Normalize(geom: Geometry)`
 
 Since: `v1.3.0`
 
@@ -2382,6 +2378,7 @@ Introduction: Returns a two-dimensional Voronoi diagram from the vertices of the
 Format: `ST_VoronoiPolygons(g1: Geometry, tolerance: Double, extend_to: Geometry)`
 
 Optional parameters:
+
 `tolerance` : The distance within which vertices will be considered equivalent. Robustness of the algorithm can be improved by supplying a nonzero tolerance distance. (default = 0.0)
 
 `extend_to` : If a geometry is supplied as the "extend_to" parameter, the diagram will be extended to cover the envelope of the "extend_to" geometry, unless that envelope is smaller than the default envelope (default = NULL. By default, we extend the bounding box of the diagram by the max between bounding box's height and bounding box's width).
