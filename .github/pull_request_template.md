@@ -21,6 +21,6 @@
 
 ## Did this PR include necessary documentation updates?
 
-- Yes, I am adding a new API. I am using the [current SNAPSHOT version number](https://github.com/apache/sedona/blob/master/pom.xml#L29) in since `vX.Y.Z` format.
+- Yes, I am adding a new API. I am using the [current SNAPSHOT version number](https://github.com/apache/sedona/blob/99239524f17389fc4ae9548ea88756f8ea538bb9/pom.xml#L29) in since `vX.Y.Z` format.
 - Yes, I have updated the documentation update.
 - No, this PR does not affect any public API so no need to change the docs.
