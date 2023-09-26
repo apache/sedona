@@ -1,5 +1,6 @@
-<img src="https://www.apache.org/logos/res/sedona/sedona.png" width="200">
-
+<a href="https://sedona.apache.org/">
+  <img alt="Apache Sedona" src="https://www.apache.org/logos/res/sedona/sedona.png" width="200">
+</a>
 -----
 
 [![Scala and Java build](https://github.com/apache/sedona/actions/workflows/java.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/java.yml) [![Python build](https://github.com/apache/sedona/actions/workflows/python.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/python.yml) [![R build](https://github.com/apache/sedona/actions/workflows/r.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/r.yml)[![Docker image build](https://github.com/apache/sedona/actions/workflows/docker-build.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docker-build.yml) [![Example project build](https://github.com/apache/sedona/actions/workflows/example.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/example.yml) [![Docs build](https://github.com/apache/sedona/actions/workflows/docs.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docs.yml)
@@ -22,7 +23,7 @@
 ## What is Apache Sedona?
 Apache Sedona™ is a spatial computing engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as Apache Spark and Apache Flink. Sedona developers can express their spatial data processing tasks in Spatial SQL, Spatial Python or Spatial R. Internally, Sedona provides spatial data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
 
-<img src="docs/image/sedona-ecosystem.png" width="800" class="center">
+<img alt="Sedona Ecosystem" src="docs/image/sedona-ecosystem.png" width="800" class="center">
 
 
 ### Features
@@ -147,4 +148,6 @@ Join the Sedona Discord community: [![](https://dcbadge.vercel.app/api/server/9A
 
 ## Powered by
 
-<img src="https://www.apache.org/foundation/press/kit/asf_logo_wide.png" width="500" class="center">
+<a href="https://www.apache.org/">
+  <img alt="The Apache Software Foundation" src="https://www.apache.org/foundation/press/kit/asf_logo_wide.png" width="500" class="center">
+</a>
