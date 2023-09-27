@@ -1,10 +1,6 @@
 Starting from `v1.1.0`, Sedona SQL supports raster data sources and raster operators in DataFrame and SQL. Raster support is available in all Sedona language bindings including ==Scala, Java, Python and R==.
 
-Starting from `v1.5.0`, Sedona SQL has added many functions that support raster manipulation in DataFrame and SQL. These functions availability extends in all Sedona Language bindings,  ==Scala, Java, Python and R==.
-
 This page outlines the steps to manage raster data using SedonaSQL.
-
-SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:
 
 === "Scala"
 
@@ -27,7 +23,7 @@ SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of 
 	myDataFrame.createOrReplaceTempView("rasterDf")
 	```
 
-Detailed SedonaSQL APIs are available here: [SedonaSQL API](../../api/sql/Overview.md). You can find example raster data in [Sedona GitHub repo](https://github.com/apache/sedona/blob/0eae42576c2588fe278f75cef3b17fee600eac90/spark/common/src/test/resources/raster/raster_with_no_data/test5.tiff).
+Detailed SedonaSQL APIs are available here: [SedonaSQL API](../../api/sql/Overview). You can find example raster data in [Sedona GitHub repo](https://github.com/apache/sedona/blob/0eae42576c2588fe278f75cef3b17fee600eac90/spark/common/src/test/resources/raster/raster_with_no_data/test5.tiff).
 
 ## Set up dependencies
 
@@ -205,27 +201,27 @@ You can also register everything by passing `--conf spark.sql.extensions=org.apa
 
 ## Load data from files
 
-Assume we have a single raster data file called rasterData.tiff, at Path `/Download/raster/rasterData.tiff`.
+Assume we have a single raster data file called rasterData.tiff, [at Path](https://github.com/apache/sedona/blob/0eae42576c2588fe278f75cef3b17fee600eac90/spark/common/src/test/resources/raster/raster_with_no_data/test5.tiff).
 
 Use the following code to load the data and create a raw Dataframe.
 
 === "Scala"
     ```scala
-    var rawDf = sedona.read.format("binaryFile").load("/Download/raster/rasterData.tiff")
+    var rawDf = sedona.read.format("binaryFile").load(path_to_raster_data)
     rawDf.createOrReplaceTempView("rawdf")
     rawDf.show()
     ```
 
 === "Java"
     ```java
-    Dataset<Row> rawDf = sedona.read.format("binaryFile").load("/Download/raster/rasterData.tiff")
+    Dataset<Row> rawDf = sedona.read.format("binaryFile").load(path_to_raster_data)
     rawDf.createOrReplaceTempView("rawdf")
     rawDf.show()
     ```
 
 === "Python"
     ```python
-    rawDf = sedona.read.format("binaryFile").load("/Download/raster/rasterData.tiff")
+    rawDf = sedona.read.format("binaryFile").load(path_to_raster_data)
     rawDf.createOrReplaceTempView("rawdf")
     rawDf.show()
     ```
@@ -238,28 +234,28 @@ The output will look like this:
 |file:/Download/ra...|2023-09-06 16:24:...|174803|[49 49 2A 00 08 0...|
 ```
 
-For multiple raster data files use the following code to load the data and create raw DataFrame.
+For multiple raster data files use the following code to load the data [from path](https://github.com/apache/sedona/blob/0eae42576c2588fe278f75cef3b17fee600eac90/spark/common/src/test/resources/raster/) and create raw DataFrame.
 
 !!!note
     The above code works too for loading multiple raster data files.  if the raster files are in separate directories and the option also makes sure that only `.tif` or `.tiff` files are being loaded.
 
 === "Scala"
     ```scala
-    var rawDf = sedona.read.format("binaryFile").option("recursiveFileLookup", "true").option("pathGlobFilter", "*.tif*").load("/Download/raster/")
+    var rawDf = sedona.read.format("binaryFile").option("recursiveFileLookup", "true").option("pathGlobFilter", "*.tif*").load(path_to_raster_data_folder)
     rawDf.createOrReplaceTempView("rawdf")
     rawDf.show()
     ```
 
 === "Java"
     ```java
-    Dataset<Row> rawDf = sedona.read.format("binaryFile").option("recursiveFileLookup", "true").option("pathGlobFilter", "*.tif*").load("/Download/raster/");
+    Dataset<Row> rawDf = sedona.read.format("binaryFile").option("recursiveFileLookup", "true").option("pathGlobFilter", "*.tif*").load(path_to_raster_data_folder);
     rawDf.createOrReplaceTempView("rawdf");
     rawDf.show();
     ```
 
 === "Python"
     ```python
-    rawDf = sedona.read.format("binaryFile").option("recursiveFileLookup", "true").option("pathGlobFilter", "*.tif*").load("/Download/raster/")
+    rawDf = sedona.read.format("binaryFile").option("recursiveFileLookup", "true").option("pathGlobFilter", "*.tif*").load(path_to_raster_data_folder)
     rawDf.createOrReplaceTempView("rawdf")
     rawDf.show()
     ```
@@ -323,12 +319,29 @@ This function will return an array of metadata, it will have all the necessary i
 SELECT RS_MetaData(rast) FROM rasterDf
 ```
 
+Output for the following function will be:
+
+```
+[-1.3095817809482181E7, 4021262.7487925636, 512.0, 517.0, 72.32861272132695, -72.32861272132695, 0.0, 0.0, 3857.0, 1.0]
+```
+
 ### World File
 
 There are two kinds of georeferences, GDAL and ESRI seen in world files. For more information please refer to [RS_GeoReference](../../api/sql/Raster-operators/#rs_georeference).
 
 ```sql
 SELECT RS_GeoReference(rast, "ESRI") FROM rasterDf
+```
+
+The Output will be as follows:
+
+```
+72.328613 
+0.000000 
+0.000000 
+-72.328613 
+-13095781.645176 
+4021226.584486
 ```
 
 ## Raster Manipulation
@@ -344,18 +357,30 @@ Sedona allows you to translate coordinates as per your needs. It can translate p
 
 #### PixelAsPoint
 
-Use [RS_PixelAsPoint](../../api/sql/Raster-operators#rs_pixelaspoint) to get the world coordinates from the specified pixel location.
+Use [RS_PixelAsPoint](../../api/sql/Raster-operators#rs_pixelaspoint) to translate pixel location to world coordinates.
 
 ```sql
 SELECT RS_PixelAsPoint(rast, 450, 400) FROM rasterDf
 ```
 
+Output:
+
+```
+POINT (-13063342 3992403.75)
+```
+
 #### World to Raster Coordinate
 
-Use [RS_WorldToRasterCoord](../../api/sql/Raster-operators#rs_worldtorastercoord) to get the pixel location from world coordinates. To just get X coordinate use [RS_WorldToRasterCoordX](../../api/sql/Raster-operators#rs_worldtorastercoordX) and for just Y coordinate use [RS_WorldToRasterCoordY](../../api/sql/Raster-operators#rs_worldtorastercoordy).
+Use [RS_WorldToRasterCoord](../../api/sql/Raster-operators#rs_worldtorastercoord) to translate world coordinates to pixel location. To just get X coordinate use [RS_WorldToRasterCoordX](../../api/sql/Raster-operators#rs_worldtorastercoordX) and for just Y coordinate use [RS_WorldToRasterCoordY](../../api/sql/Raster-operators#rs_worldtorastercoordy).
 
 ```sql
 SELECT RS_WorldToRasterCoord(rast, -1.3063342E7, 3992403.75)
+```
+
+Output:
+
+```
+POINT (450 400)
 ```
 
 ### Pixel Manipulation
@@ -363,7 +388,13 @@ SELECT RS_WorldToRasterCoord(rast, -1.3063342E7, 3992403.75)
 Use [RS_Values](../../api/sql/Raster-operators#rs_values) to fetch values for specified Point Geometries. You join a point dataset to the raster dataset to fetch values for the points in the dataset, for more details please click on the link.
 
 ```sql
-SELECT RS_Values(rast, Array(ST_Point(-13063342 3992403.75), ST_Point(-13074192 3996020)))
+SELECT RS_Values(rast, Array(ST_Point(-13063342, 3992403.75), ST_Point(-13074192, 3996020)))
+```
+
+Output:
+
+```
+[132.0, 148.0]
 ```
 
 To change values over a grid or area defined by a geometry, we will use [RS_SetValues](../../api/sql/Raster-operators#rs_setvalues).
@@ -379,7 +410,21 @@ Follow the links to get more information on how to use the functions appropriate
 
 ### Band Manipulation
 
-#### AddBand / Band
+Sedona has APIs to alter the bands of the raster. Let's assume you want to delete a band from raster, you may use [RS_Band](../../api/sql/Raster-operators#rs_band) to get desired raster.
+
+Let's use a [multi-band raster](https://github.com/apache/sedona/blob/2a0b36989aa895c0781f9a10c907dd726506d0b7/spark/common/src/test/resources/raster_geotiff_color/FAA_UTM18N_NAD83.tif) for this example. The process of loading and converting it to raster type is the same.
+
+```sql
+SELECT RS_Band(colorRaster, Array(1, 2))
+```
+
+Let's say you have many one band rasters and want to add a band to the raster to perform [map algebra operations](#execute-map-algebra-operations). You can do so using [RS_AddBand](../../api/sql/Raster-operators#rs_addband) Sedona function.
+
+```sql
+SELECT RS_AddBand(raster1, raster2, 1, 2)
+```
+
+This will result in `raster1` having `raster2`'s specified band.
 
 ### Resample
 
@@ -399,15 +444,36 @@ where NIR is the near-infrared band and Red is the red band.
 SELECT RS_MapAlgebra(raster, 'D', 'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);') as ndvi FROM raster_table
 ```
 
-For more information please refer to [Map Algebra API](../../api/Raster-map-algebra).
+For more information please refer to [Map Algebra API](../../api/sql/Raster-map-algebra).
 
 ## Interoperability between raster and vector data
 
-### AsRaster
+### Geometry As Raster
+
+Sedona allows you to rasterize a geometry by using [RS_AsRaster](../../api/sql/Raster-writer/#rs_asraster). The example below will provide a 5x5 square of raster with value 255.
+
+```sql
+SELECT RS_AsRaster(
+        ST_GeomFromWTK('POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0))'), rast,
+        "d", 255
+        )
+```
 
 ### Spatial range query
 
+Sedona provides an API to do a range query using a geometry window, using [RS_Intersects](../../api/sql/Raster-operators#rs_intersects)
+
+```sql
+SELECT rast FROM rasterDf WHERE RS_Intersect(rast, ST_GeomFromWKT('POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))'))
+```
+
 ### Spatial join query
+
+Sedona also has the capability to do a spatial join using raster column and geometry column, using the same function as above.
+
+```sql
+SELECT r.rast, g.geom FROM rasterDf r, geomDf g WHERE RS_Interest(r.rast, g.geom)
+```
 
 ## Visualize raster images
 
@@ -449,7 +515,7 @@ Output will as follows:
 | 3   4   5   6|
 ```
 
-Please refer to [Raster visualizer doc](../../api/sql/Raster-visualizer) to learn how to make most of the visualizing APIs.
+Please refer to [Raster visualizer docs](../../api/sql/Raster-visualizer) to learn how to make most of the visualizing APIs.
 
 ## Save to permanent storage
 
@@ -463,7 +529,7 @@ Sedona has a few writer functions that create the binary DataFrame necessary for
 
 ### As Arc Grid
 
-Use [RS_AsArcGrid](../../api/sql/Raster-writer#rs_arcgrid) to get binary Dataframe of raster in Arc Grid format.
+Use [RS_AsArcGrid](../../api/sql/Raster-writer#rs_asarcgrid) to get binary Dataframe of raster in Arc Grid format.
 
 ```sql
 SELECT RS_AsArcGrid(raster)
@@ -471,7 +537,7 @@ SELECT RS_AsArcGrid(raster)
 
 ### As GeoTiff
 
-Use [RS_AsGeoTiff](../../api/sql/Raster-writer#rs_geotiff) to get binary Dataframe of raster in GeoTiff format.
+Use [RS_AsGeoTiff](../../api/sql/Raster-writer#rs_asgeotiff) to get binary Dataframe of raster in GeoTiff format.
 
 ```sql
 SELECT RS_AsGeoTiff(raster)
@@ -479,10 +545,10 @@ SELECT RS_AsGeoTiff(raster)
 
 ### As PNG
 
-Use [RS_AsPNG](../../api/sql/Raster-writer#rs_png) to get binary Dataframe of raster in PNG format.
+Use [RS_AsPNG](../../api/sql/Raster-writer#rs_aspng) to get binary Dataframe of raster in PNG format.
 
 ```sql
 SELECT RS_AsPNG(raster)
 ```
 
-Please refer to [Raster writer docs](../../api/sql/Raster-writer) for more detials.
+Please refer to [Raster writer docs](../../api/sql/Raster-writer) for more details.
