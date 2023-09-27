@@ -1,23 +1,488 @@
 Starting from `v1.1.0`, Sedona SQL supports raster data sources and raster operators in DataFrame and SQL. Raster support is available in all Sedona language bindings including ==Scala, Java, Python and R==.
 
-## Initial setup
+Starting from `v1.5.0`, Sedona SQL has added many functions that support raster manipulation in DataFrame and SQL. These functions availability extends in all Sedona Language bindings,  ==Scala, Java, Python and R==.
 
-1. [Set up dependencies](../sql/#set-up-dependencies)
-2. [Create Sedona config](../sql/#create-sedona-config)
-3. [Initiate SedonaContext](../sql/#initiate-sedonacontext)
+This page outlines the steps to manage raster data using SedonaSQL.
 
-## API docs
+SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:
 
-[Read raster data in DataFrame](../../api/sql/Raster-loader/)
+=== "Scala"
 
-[Write raster data in DataFrame](../../api/sql/Raster-writer/)
+	```scala
+	var myDataFrame = sedona.sql("YOUR_SQL")
+	myDataFrame.createOrReplaceTempView("rasterDf")
+	```
 
-[Raster operators in DataFrame](../../api/sql/Raster-operators/)
+=== "Java"
 
-## Tutorials
+	```java
+	Dataset<Row> myDataFrame = sedona.sql("YOUR_SQL")
+	myDataFrame.createOrReplaceTempView("rasterDf")
+	```
 
-[Python Jupyter Notebook](https://github.com/apache/sedona/blob/master/binder/ApacheSedonaRaster.ipynb)
+=== "Python"
 
-## Performance
+	```python
+	myDataFrame = sedona.sql("YOUR_SQL")
+	myDataFrame.createOrReplaceTempView("rasterDf")
+	```
 
-[Storing large raster geometries in Parquet files](../storing-blobs-in-parquet)
+Detailed SedonaSQL APIs are available here: [SedonaSQL API](../../api/sql/Overview.md). You can find example raster data in [Sedona GitHub repo](https://github.com/apache/sedona/blob/0eae42576c2588fe278f75cef3b17fee600eac90/spark/common/src/test/resources/raster/raster_with_no_data/test5.tiff).
+
+## Set up dependencies
+
+=== "Scala/Java"
+
+	1. Read [Sedona Maven Central coordinates](../setup/maven-coordinates.md) and add Sedona dependencies in build.sbt or pom.xml.
+	2. Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql) in build.sbt or pom.xml.
+	3. Please see [SQL example project](../demo/)
+
+=== "Python"
+
+	1. Please read [Quick start](../../setup/install-python) to install Sedona Python.
+	2. This tutorial is based on [Sedona SQL Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) to interact with Sedona Python Jupyter notebook immediately on Binder.
+
+## Create Sedona config
+
+Use the following code to create your Sedona config at the beginning. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please skip this step and can use `spark` directly.
+
+
+==Sedona >= 1.4.1==
+
+You can add additional Spark runtime config to the config builder. For example, `SedonaContext.builder().config("spark.sql.autoBroadcastJoinThreshold", "10485760")`
+
+=== "Scala"
+
+	```scala
+	import org.apache.sedona.spark.SedonaContext
+
+	val config = SedonaContext.builder()
+	.master("local[*]") // Delete this if run in cluster mode
+	.appName("readTestScala") // Change this to a proper name
+	.getOrCreate()
+	```
+	If you use SedonaViz together with SedonaSQL, please add the following line after `SedonaContext.builder()` to enable Sedona Kryo serializer:
+	```scala
+	.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+	```
+
+=== "Java"
+
+	```java
+	import org.apache.sedona.spark.SedonaContext;
+
+	SparkSession config = SedonaContext.builder()
+	.master("local[*]") // Delete this if run in cluster mode
+	.appName("readTestScala") // Change this to a proper name
+	.getOrCreate()
+	```
+	If you use SedonaViz together with SedonaSQL, please add the following line after `SedonaContext.builder()` to enable Sedona Kryo serializer:
+	```scala
+	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+	```
+
+=== "Python"
+
+	```python
+	from sedona.spark import *
+
+	config = SedonaContext.builder() .\
+	    config('spark.jars.packages',
+	           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
+	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
+	    getOrCreate()
+	```
+    If you are using Spark versions >= 3.4, please replace the `3.0` in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
+
+==Sedona < 1.4.1==
+
+The following method has been deprecated since Sedona 1.4.1. Please use the method above to create your Sedona config.
+
+=== "Scala"
+
+	```scala
+	var sparkSession = SparkSession.builder()
+	.master("local[*]") // Delete this if run in cluster mode
+	.appName("readTestScala") // Change this to a proper name
+	// Enable Sedona custom Kryo serializer
+	.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
+	.config("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName)
+	.getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
+	```
+	If you use SedonaViz together with SedonaSQL, please use the following two lines to enable Sedona Kryo serializer instead:
+	```scala
+	.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
+	.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+	```
+
+=== "Java"
+
+	```java
+	SparkSession sparkSession = SparkSession.builder()
+	.master("local[*]") // Delete this if run in cluster mode
+	.appName("readTestScala") // Change this to a proper name
+	// Enable Sedona custom Kryo serializer
+	.config("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
+	.config("spark.kryo.registrator", SedonaKryoRegistrator.class.getName)
+	.getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
+	```
+	If you use SedonaViz together with SedonaSQL, please use the following two lines to enable Sedona Kryo serializer instead:
+	```scala
+	.config("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
+	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+	```
+
+=== "Python"
+
+	```python
+	sparkSession = SparkSession. \
+	    builder. \
+	    appName('appName'). \
+	    config("spark.serializer", KryoSerializer.getName). \
+	    config("spark.kryo.registrator", SedonaKryoRegistrator.getName). \
+	    config('spark.jars.packages',
+	           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
+	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
+	    getOrCreate()
+	```
+    If you are using Spark versions >= 3.4, please replace the `3.0` in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
+
+## Initiate SedonaContext
+
+Add the following line after creating Sedona config. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please call `SedonaContext.create(spark)` instead.
+
+==Sedona >= 1.4.1==
+
+=== "Scala"
+
+	```scala
+	import org.apache.sedona.spark.SedonaContext
+
+	val sedona = SedonaContext.create(config)
+	```
+
+=== "Java"
+
+	```java
+	import org.apache.sedona.spark.SedonaContext;
+
+	SparkSession sedona = SedonaContext.create(config)
+	```
+
+=== "Python"
+
+	```python
+	from sedona.spark import *
+	
+	sedona = SedonaContext.create(config)
+	```
+
+==Sedona < 1.4.1==
+
+The following method has been deprecated since Sedona 1.4.1. Please use the method above to create your SedonaContext.
+
+=== "Scala"
+
+	```scala
+	SedonaSQLRegistrator.registerAll(sparkSession)
+	```
+
+=== "Java"
+
+	```java
+	SedonaSQLRegistrator.registerAll(sparkSession)
+	```
+
+=== "Python"
+
+	```python
+	from sedona.register import SedonaRegistrator
+	
+	SedonaRegistrator.registerAll(spark)
+	```
+
+You can also register everything by passing `--conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions` to `spark-submit` or `spark-shell`.
+
+## Load data from files
+
+Assume we have a single raster data file called rasterData.tiff, at Path `/Download/raster/rasterData.tiff`.
+
+Use the following code to load the data and create a raw Dataframe.
+
+=== "Scala"
+    ```scala
+    var rawDf = sedona.read.format("binaryFile").load("/Download/raster/rasterData.tiff")
+    rawDf.createOrReplaceTempView("rawdf")
+    rawDf.show()
+    ```
+
+=== "Java"
+    ```java
+    Dataset<Row> rawDf = sedona.read.format("binaryFile").load("/Download/raster/rasterData.tiff")
+    rawDf.createOrReplaceTempView("rawdf")
+    rawDf.show()
+    ```
+
+=== "Python"
+    ```python
+    rawDf = sedona.read.format("binaryFile").load("/Download/raster/rasterData.tiff")
+    rawDf.createOrReplaceTempView("rawdf")
+    rawDf.show()
+    ```
+
+The output will look like this:
+
+```
+|                path|    modificationTime|length|             content|
++--------------------+--------------------+------+--------------------+
+|file:/Download/ra...|2023-09-06 16:24:...|174803|[49 49 2A 00 08 0...|
+```
+
+For multiple raster data files use the following code to load the data and create raw DataFrame.
+
+!!!note
+    The above code works too for loading multiple raster data files.  if the raster files are in separate directories and the option also makes sure that only `.tif` or `.tiff` files are being loaded.
+
+=== "Scala"
+    ```scala
+    var rawDf = sedona.read.format("binaryFile").option("recursiveFileLookup", "true").option("pathGlobFilter", "*.tif*").load("/Download/raster/")
+    rawDf.createOrReplaceTempView("rawdf")
+    rawDf.show()
+    ```
+
+=== "Java"
+    ```java
+    Dataset<Row> rawDf = sedona.read.format("binaryFile").option("recursiveFileLookup", "true").option("pathGlobFilter", "*.tif*").load("/Download/raster/");
+    rawDf.createOrReplaceTempView("rawdf");
+    rawDf.show();
+    ```
+
+=== "Python"
+    ```python
+    rawDf = sedona.read.format("binaryFile").option("recursiveFileLookup", "true").option("pathGlobFilter", "*.tif*").load("/Download/raster/")
+    rawDf.createOrReplaceTempView("rawdf")
+    rawDf.show()
+    ```
+
+The output will look like this:
+
+```
+|                path|    modificationTime|length|             content|
++--------------------+--------------------+------+--------------------+
+|file:/Download/ra...|2023-09-06 16:24:...|209199|[4D 4D 00 2A 00 0...|
+|file:/Download/ra...|2023-09-06 16:24:...|174803|[49 49 2A 00 08 0...|
+|file:/Download/ra...|2023-09-06 16:24:...|174803|[49 49 2A 00 08 0...|
+|file:/Download/ra...|2023-09-06 16:24:...|  6619|[49 49 2A 00 08 0...|
+```
+
+The content column in the raster table is still in the raw form, binary form.
+
+## Create a Raster type column
+
+All raster operations in SedonaSQL require Raster type objects. Therefore, this should be the next step after loading the data.
+
+### From Geotiff
+
+```sql
+SELECT RS_FromGeoTiff(content) AS rast, modificationTime, length, path FROM rawdf
+```
+
+To verify this, use the following code to print the schema of the DataFrame:
+
+```sql
+rasterDf.printSchema()
+```
+
+The output will be like this:
+
+```
+root
+ |-- rast: raster (nullable = true)
+ |-- modificationTime: timestamp (nullable = true)
+ |-- length: long (nullable = true)
+ |-- path: string (nullable = true)
+```
+
+### From Arc Grid
+
+The raster data is loaded the same way as `tiff` file, but the raster data is stored with the extension `.asc`, ASCII format. The following code creates a Raster type objects from binary data:
+
+```sql
+SELECT RS_FromArcInfoAsciiGrid(content) AS rast, modificationTime, length, path FROM rawdf
+```
+
+## Raster's metadata
+
+Sedona has a function to get the metadata for the raster, and also a function to get the [world file](https://en.wikipedia.org/wiki/World_file) of the raster.
+
+### Metadata
+
+This function will return an array of metadata, it will have all the necessary information about the raster, Please refer to [RS_MetaData](../../api/sql/Raster-operators/#rs_metadata).
+
+```sql
+SELECT RS_MetaData(rast) FROM rasterDf
+```
+
+### World File
+
+There are two kinds of georeferences, GDAL and ESRI seen in world files. For more information please refer to [RS_GeoReference](../../api/sql/Raster-operators/#rs_georeference).
+
+```sql
+SELECT RS_GeoReference(rast, "ESRI") FROM rasterDf
+```
+
+## Raster Manipulation
+
+Since `v1.5.0` there have been many additions to manipulate raster data, we will show you a few example queries.
+
+!!!note
+    Read [SedonaSQL Raster operators](../../api/sql/Raster-operators) to learn how you can use Sedona for raster manipulation.
+
+### Coordinate translation
+
+Sedona allows you to translate coordinates as per your needs. It can translate pixel locations to world coordinates and vice versa.
+
+#### PixelAsPoint
+
+Use [RS_PixelAsPoint](../../api/sql/Raster-operators#rs_pixelaspoint) to get the world coordinates from the specified pixel location.
+
+```sql
+SELECT RS_PixelAsPoint(rast, 450, 400) FROM rasterDf
+```
+
+#### World to Raster Coordinate
+
+Use [RS_WorldToRasterCoord](../../api/sql/Raster-operators#rs_worldtorastercoord) to get the pixel location from world coordinates. To just get X coordinate use [RS_WorldToRasterCoordX](../../api/sql/Raster-operators#rs_worldtorastercoordX) and for just Y coordinate use [RS_WorldToRasterCoordY](../../api/sql/Raster-operators#rs_worldtorastercoordy).
+
+```sql
+SELECT RS_WorldToRasterCoord(rast, -1.3063342E7, 3992403.75)
+```
+
+### Pixel Manipulation
+
+Use [RS_Values](../../api/sql/Raster-operators#rs_values) to fetch values for specified Point Geometries. You join a point dataset to the raster dataset to fetch values for the points in the dataset, for more details please click on the link.
+
+```sql
+SELECT RS_Values(rast, Array(ST_Point(-13063342 3992403.75), ST_Point(-13074192 3996020)))
+```
+
+To change values over a grid or area defined by a geometry, we will use [RS_SetValues](../../api/sql/Raster-operators#rs_setvalues).
+
+```sql
+SELECT RS_SetValues(
+        rast, 1, 250, 260, 3, 3,
+        Array(10, 12, 17, 26, 28, 37, 43, 64, 66)
+    )
+```
+
+Follow the links to get more information on how to use the functions appropriately.
+
+### Band Manipulation
+
+#### AddBand / Band
+
+### Resample
+
+## Execute map algebra operations
+
+Map algebra is a way to perform raster calculations using mathematical expressions. The expression can be a simple arithmetic operations or a complex combination of multiple operations.
+
+The Normalized Difference Vegetation Index (NDVI) is a simple graphical indicator that can be used to analyze remote sensing measurements from a space platform, and assess whether the target being observed contains live green vegetation or not.
+
+```
+NDVI = (NIR - Red) / (NIR + Red)
+```
+
+where NIR is the near-infrared band and Red is the red band.
+
+```sql
+SELECT RS_MapAlgebra(raster, 'D', 'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);') as ndvi FROM raster_table
+```
+
+For more information please refer to [Map Algebra API](../../api/Raster-map-algebra).
+
+## Interoperability between raster and vector data
+
+### AsRaster
+
+### Spatial range query
+
+### Spatial join query
+
+## Visualize raster images
+
+Sedona provides APIs to visualize raster data in an image form. 
+
+### Base64 String
+
+The [RS_AsBase64](../../api/sql/Raster-visualizer#rs_asbase64) encodes the raster data as a Base64 string and can be visualized using online decoder.
+
+```sql
+SELECT RS_AsBase64(rast) FROM rasterDf
+```
+
+### HTML Image
+
+The [RS_AsImage](../../api/sql/Raster-visualizer#rs_asimage) returns an HTML img tag, that can be visualized using an HTML viewer or in Jupyter Notebook. For more information please click at the link.
+
+```sql
+SELECT RS_AsImage(rast, 500) FROM rasterDf
+```
+
+The output looks like:
+
+![Output](../../image/DisplayImage.png)
+
+### 2-D Matrix
+
+Sedona offers an API to visualize raster data that is not sufficient for the other APIs mentioned above.
+
+```sql
+SELECT RS_AsMatrix(rast) FROM rasterDf
+```
+
+Output will as follows:
+
+```sql
+| 1   3   4   0|
+| 2   9  10  11|
+| 3   4   5   6|
+```
+
+Please refer to [Raster visualizer doc](../../api/sql/Raster-visualizer) to learn how to make most of the visualizing APIs.
+
+## Save to permanent storage
+
+Sedona provides APIs that can store the whole raster column to specified location. The API takes binary DataFrame as input and saves it to path defined.
+
+```sparksql
+rasterDf.write.format("raster").option("rasterField", "raster").option("fileExtension", ".tiff").mode(SaveMode.Overwrite).save(dirPath)
+```
+
+Sedona has a few writer functions that create the binary DataFrame necessary for saving the raster images.
+
+### As Arc Grid
+
+Use [RS_AsArcGrid](../../api/sql/Raster-writer#rs_arcgrid) to get binary Dataframe of raster in Arc Grid format.
+
+```sql
+SELECT RS_AsArcGrid(raster)
+```
+
+### As GeoTiff
+
+Use [RS_AsGeoTiff](../../api/sql/Raster-writer#rs_geotiff) to get binary Dataframe of raster in GeoTiff format.
+
+```sql
+SELECT RS_AsGeoTiff(raster)
+```
+
+### As PNG
+
+Use [RS_AsPNG](../../api/sql/Raster-writer#rs_png) to get binary Dataframe of raster in PNG format.
+
+```sql
+SELECT RS_AsPNG(raster)
+```
+
+Please refer to [Raster writer docs](../../api/sql/Raster-writer) for more detials.
