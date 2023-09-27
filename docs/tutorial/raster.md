@@ -450,14 +450,22 @@ For more information please refer to [Map Algebra API](../../api/sql/Raster-map-
 
 ### Geometry As Raster
 
-Sedona allows you to rasterize a geometry by using [RS_AsRaster](../../api/sql/Raster-writer/#rs_asraster). The example below will provide a 5x5 square of raster with value 255.
+Sedona allows you to rasterize a geometry by using [RS_AsRaster](../../api/sql/Raster-writer/#rs_asraster).
 
 ```sql
 SELECT RS_AsRaster(
-        ST_GeomFromWTK('POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0))'), rast,
-        "d", 255
-        )
+        ST_GeomFromWKT('POLYGON((150 150, 220 260, 190 300, 300 220, 150 150))'),
+        RS_MakeEmptyRaster(1, 'b', 4, 6, 1, -1, 1),
+        'b', 230
+    )
 ```
+
+The image create is as below for the vector is:
+
+![Rasterized vector](../../image/rasterized-image.png)
+
+!!!note
+    The vector coordinates are buffed up to showcase the output, real use case, may or may not match the example.
 
 ### Spatial range query
 
@@ -475,13 +483,16 @@ Sedona also has the capability to do a spatial join using raster column and geom
 SELECT r.rast, g.geom FROM rasterDf r, geomDf g WHERE RS_Interest(r.rast, g.geom)
 ```
 
+!!!note
+    Sedona offers more raster predicates to do spatial range query and spatial join query. Please refer to [raster perdicates docs !!add link after changing docs!!]().
+
 ## Visualize raster images
 
 Sedona provides APIs to visualize raster data in an image form. 
 
 ### Base64 String
 
-The [RS_AsBase64](../../api/sql/Raster-visualizer#rs_asbase64) encodes the raster data as a Base64 string and can be visualized using online decoder.
+The [RS_AsBase64](../../api/sql/Raster-visualizer#rs_asbase64) encodes the raster data as a Base64 string and can be visualized using [online decoder](https://base64-viewer.onrender.com/).
 
 ```sql
 SELECT RS_AsBase64(rast) FROM rasterDf
