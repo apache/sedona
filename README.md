@@ -41,7 +41,6 @@ These are some of the key features of Apache Sedona, but it may offer additional
 
 Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
 
-[![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://sedona.apache.org/latest/community/discord-invite-form.html)
 
 
 ## When to use Sedona?
