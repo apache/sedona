@@ -1077,6 +1077,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 4, 3, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as emptyRaster")
       val resultDf = df.selectExpr("RS_AsMatrix(emptyRaster, 1, 5) as matrix")
       val actual = resultDf.first().getString(0);
+      resultDf.show()
       val expected = "| 1.00000   3.33333   4.00000   0.00010|\n" + "| 2.22220   9.00000  10.00000  11.11111|\n" + "| 3.00000   4.00000   5.00000   6.00000|\n"
       assertEquals(expected, actual)
     }
@@ -1122,13 +1123,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_Resample full version") {
-      val inputDf = Seq(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9)).toDF("band")
-      val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 3, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, 0d) as raster")
-      val rasterDf = df.selectExpr("RS_Resample(raster, 5, 5, 0, 0, false, null) as raster")
+      val inputDf = Seq(Seq(1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10)).toDF("band")
+      val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, null) as raster")
+      val rasterDf = df.selectExpr("RS_Resample(raster, 6, 5, 1, -1, false, null) as raster")
       val rasterOutput = rasterDf.selectExpr("RS_AsMatrix(raster)").first().getString(0)
       val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getSeq[Double](0)
-      val expectedOutput = "|1.0  1.0  2.0  3.0  3.0|\n" + "|1.0  1.0  2.0  3.0  3.0|\n" + "|4.0  4.0  5.0  6.0  6.0|\n" + "|7.0  7.0  8.0  9.0  9.0|\n" + "|7.0  7.0  8.0  9.0  9.0|\n";
-      val expectedMetadata: Seq[Double] = Seq(0, 0, 5, 5, 1.2, -1.2, 0, 0, 0, 1)
+      val expectedOutput = "| 1.0   1.0   2.0   3.0   3.0   5.0|\n" + "| 1.0   1.0   2.0   3.0   3.0   5.0|\n" + "| 4.0   4.0   5.0   6.0   6.0   9.0|\n" + "| 7.0   7.0   8.0   9.0   9.0  10.0|\n" + "| 7.0   7.0   8.0   9.0   9.0  10.0|\n"
+      val expectedMetadata: Seq[Double] = Seq(-0.33333333333333326, 0.19999999999999996, 6, 5, 1.388888888888889, -1.24, 0, 0, 0, 1)
       assertEquals(expectedOutput, rasterOutput)
       for (i <- expectedMetadata.indices) {
         assertEquals(expectedMetadata(i), rasterMetadata(i), 1e-6)
@@ -1136,13 +1137,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_Resample resize flavor") {
-      val inputDf = Seq(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9)).toDF("band")
-      val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 3, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, 0d) as raster")
-      val rasterDf = df.selectExpr("RS_Resample(raster, 1.2, -1.2, true, null) as raster")
+      val inputDf = Seq(Seq(1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10)).toDF("band")
+      val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, null) as raster")
+      val rasterDf = df.selectExpr("RS_Resample(raster, 1.2, -1.4, true, null) as raster")
       val rasterOutput = rasterDf.selectExpr("RS_AsMatrix(raster)").first().getString(0)
       val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getSeq[Double](0)
-      val expectedOutput = "|1.0  1.0  2.0  3.0  3.0|\n" + "|1.0  1.0  2.0  3.0  3.0|\n" + "|4.0  4.0  5.0  6.0  6.0|\n" + "|7.0  7.0  8.0  9.0  9.0|\n" + "|7.0  7.0  8.0  9.0  9.0|\n"
-      val expectedMetadata: Seq[Double] = Seq(0, 0, 5, 5, 1.2, -1.2, 0, 0, 0, 1)
+      val expectedOutput = "|  1.0    1.0    2.0    3.0    3.0    5.0    5.0|\n" + "|  4.0    4.0    5.0    6.0    6.0    9.0    9.0|\n" + "|  4.0    4.0    5.0    6.0    6.0    9.0    9.0|\n" + "|  7.0    7.0    8.0    9.0    9.0   10.0   10.0|\n" + "|  NaN    NaN    NaN    NaN    NaN    NaN    NaN|\n"
+      val expectedMetadata: Seq[Double] = Seq(0, 0, 7, 5, 1.2, -1.4, 0, 0, 0, 1)
       assertEquals(expectedOutput, rasterOutput)
       for (i <- expectedMetadata.indices) {
         assertEquals(expectedMetadata(i), rasterMetadata(i), 1e-6)
@@ -1150,13 +1151,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_Resample with ref raster") {
-      val inputDf = Seq(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9)).toDF("band")
-      val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 3, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, null) as raster", "RS_MakeEmptyRaster(2, 'd', 5, 5, 1, -1, 1.2, -1.2, 0, 0, 0) as refRaster")
+      val inputDf = Seq(Seq(1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10)).toDF("band")
+      val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, null) as raster", "RS_MakeEmptyRaster(2, 'd', 6, 5, 1, -1, 1.2, -1.4, 0, 0, 0) as refRaster")
       val rasterDf = df.selectExpr("RS_Resample(raster, refRaster, true, null) as raster")
       val rasterOutput = rasterDf.selectExpr("RS_AsMatrix(raster)").first().getString(0)
       val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getSeq[Double](0)
-      val expectedOutput = "|  1.0    1.0    2.0    3.0    3.0    NaN|\n" + "|  1.0    1.0    2.0    3.0    3.0    NaN|\n" + "|  4.0    4.0    5.0    6.0    6.0    NaN|\n" + "|  7.0    7.0    8.0    9.0    9.0    NaN|\n" + "|  7.0    7.0    8.0    9.0    9.0    NaN|\n" + "|  NaN    NaN    NaN    NaN    NaN    NaN|\n"
-      val expectedMetadata: Seq[Double] = Seq(-0.2, 0.2, 6, 6, 1.2, -1.2, 0, 0, 0, 1)
+      val expectedOutput = "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n" + "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n" + "| 4.0   4.0   5.0   6.0   6.0   9.0   9.0|\n" + "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n" + "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n"
+      val expectedMetadata: Seq[Double] = Seq(-0.20000000298023224, 0.4000000059604645, 7.0, 5.0, 1.2, -1.4, 0.0, 0.0, 0.0, 1.0)
       assertEquals(expectedOutput, rasterOutput)
       for (i <- expectedMetadata.indices) {
         assertEquals(expectedMetadata(i), rasterMetadata(i), 1e-6)

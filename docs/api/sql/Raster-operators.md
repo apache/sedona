@@ -1047,55 +1047,47 @@ Since: `v1.5.0`
 Spark SQL Example: 
 
 ```scala
-val inputDf = Seq(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9)).toDF("band")
-val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 3, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, 0d) as raster")
-val rasterDf = df.selectExpr("RS_Resample(raster, 5, 5, 1, -1, false, null) as raster")
+val inputDf = Seq(Seq(1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10)).toDF("band")
+val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, 0d) as raster")
+val rasterDf = df.selectExpr("RS_Resample(raster, 6, 5, 1, -1, false, null) as raster")
 val rasterOutput = rasterDf.selectExpr("RS_AsMatrix(raster)").first().getString(0)
 val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getSeq[Double](0)
 ```
 
 `Output`:
 ```sql
-|1.0  1.0  2.0  3.0  3.0|
+| 1.0   1.0   2.0   3.0   3.0   5.0|
+| 1.0   1.0   2.0   3.0   3.0   5.0|
+| 4.0   4.0   5.0   6.0   6.0   9.0|
+| 7.0   7.0   8.0   9.0   9.0  10.0|
+| 7.0   7.0   8.0   9.0   9.0  10.0|
 
-|1.0  1.0  2.0  3.0  3.0|
-
-|4.0  4.0  5.0  6.0  6.0|
-
-|7.0  7.0  8.0  9.0  9.0|
-
-|7.0  7.0  8.0  9.0  9.0|
-
-(-0.2, 0.2, 5, 5, 1.24, -1.24, 0, 0, 0, 1)
+(-0.33333333333333326,0.19999999999999996,6,5,1.388888888888889,-1.24,0,0,0,1)
 ```
 
 ```scala
-val inputDf = Seq(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9)).toDF("band")
-val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 3, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, 0d) as raster")
-val rasterDf = df.selectExpr("RS_Resample(raster, 1.2, -1.2, false, 'bilinear') as raster")
+val inputDf = Seq(Seq(1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10)).toDF("band")
+val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, null) as raster")
+val rasterDf = df.selectExpr("RS_Resample(raster, 1.2, -1.4, true, 'bilinear') as raster")
 val rasterOutput = rasterDf.selectExpr("RS_AsMatrix(raster)").first().getString(0)
 val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getSeq[Double](0)
 ```
 
 `Output`:
 ```sql
-|       NaN         NaN         NaN         NaN         NaN|
+|       NaN         NaN         NaN         NaN         NaN         NaN         NaN|
+|       NaN    3.050000    3.650000    4.250000    5.160000    6.690000    7.200000|
+|       NaN    5.150000    5.750000    6.350000    7.250000    8.750000    9.250000|
+|       NaN    7.250000    7.850000    8.450000    9.070000    9.730000    9.950000|
+|       NaN    7.400000    8.000000    8.600000    9.200000    9.800000   10.000000|
 
-|       NaN    2.600000    3.200000    3.800000    4.200000|
-
-|       NaN    4.400000    5.000000    5.600000    6.000000|
-
-|       NaN    6.200000    6.800000    7.400000    7.800000|
-
-|       NaN    7.400000    8.000000    8.600000    9.000000|
-
-(0, 0, 5, 5, 1.2, -1.2, 0, 0, 0, 1)
+(0.0, 0.0, 7.0, 5.0, 1.2, -1.4, 0.0, 0.0, 0.0, 1.0)
 ```
 
 
 ```scala
-  val inputDf = Seq(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9)).toDF("band")
-  val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 3, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, null) as raster", "RS_MakeEmptyRaster(2, 'd', 5, 5, 1, -1, 1.2, -1.2, 0, 0, 0) as refRaster")
+  val inputDf = Seq(Seq(1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10)).toDF("band")
+  val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, null) as raster", "RS_MakeEmptyRaster(2, 'd', 5, 5, 1, -1, 1.2, -1.4, 0, 0, 0) as refRaster")
   val rasterDf = df.selectExpr("RS_Resample(raster, refRaster, true, null) as raster")
   val rasterOutput = rasterDf.selectExpr("RS_AsMatrix(raster)").first().getString(0)
   val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getSeq[Double](0)
@@ -1103,17 +1095,13 @@ val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getSeq[D
 
 `Output`:
 ```sql
-|1.0  1.0  2.0  3.0  3.0|
+| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|
+| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|
+| 4.0   4.0   5.0   6.0   6.0   9.0   9.0|
+| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|
+| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|
 
-|1.0  1.0  2.0  3.0  3.0|
-
-|4.0  4.0  5.0  6.0  6.0|
-
-|7.0  7.0  8.0  9.0  9.0|
-
-|7.0  7.0  8.0  9.0  9.0|
-
-(0, 0, 5, 5, 1.2, -1.2, 0, 0, 0, 1)
+(-0.20000000298023224, 0.4000000059604645, 7.0, 5.0, 1.2, -1.4, 0.0, 0.0, 0.0, 1.0)
 ```
 
 ### RS_SetBandNoDataValue

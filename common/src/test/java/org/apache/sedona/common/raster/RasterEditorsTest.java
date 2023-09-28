@@ -93,40 +93,39 @@ public class RasterEditorsTest extends RasterTestBase {
 
     @Test
     public void testResample() throws FactoryException, TransformException {
-        double[] values = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 3, 3, 0, 0, 2, -2, 0, 0, 0);
+        double[] values = {1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10};
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
         raster = MapAlgebra.addBandFromArray(raster, values, 1, null);
 
         //test with height and width
-        GridCoverage2D newRaster = RasterEditors.resample(raster, 5, 5, 0, 0, false, "nearestneighbor");
+        GridCoverage2D newRaster = RasterEditors.resample(raster, 6, 5, 1, -1, false, "nearestneighbor");
         String res = RasterOutputs.asMatrix(newRaster);
-        String expectedRes = "|1.0  1.0  2.0  3.0  3.0|\n" +
-                "|1.0  1.0  2.0  3.0  3.0|\n" +
-                "|4.0  4.0  5.0  6.0  6.0|\n" +
-                "|7.0  7.0  8.0  9.0  9.0|\n" +
-                "|7.0  7.0  8.0  9.0  9.0|\n";
+        String expectedRes = "| 1.0   1.0   2.0   3.0   3.0   5.0|\n" +
+                "| 1.0   1.0   2.0   3.0   3.0   5.0|\n" +
+                "| 4.0   4.0   5.0   6.0   6.0   9.0|\n" +
+                "| 7.0   7.0   8.0   9.0   9.0  10.0|\n" +
+                "| 7.0   7.0   8.0   9.0   9.0  10.0|\n";
         //verify correct interpolation
         assertEquals(expectedRes, res);
         double[] metadata = RasterAccessors.metadata(newRaster);
-        double[] expectedMetadata = {0, 0, 5, 5, 1.2, -1.2, 0, 0, 0, 1};
+        double[] expectedMetadata = {-0.33333333333333326,0.19999999999999996,6,5,1.388888888888889,-1.24,0,0,0,1};
         //verify correct raster geometry
         for (int i = 0; i < metadata.length; i++) {
             assertEquals(expectedMetadata[i], metadata[i], 1e-6);
         }
 
         //test with scaleX and scaleY
-        newRaster = RasterEditors.resample(raster, 1.2, -1.2, 1, -1, true, null);
+        newRaster = RasterEditors.resample(raster, 1.2, -1.4, 1, -1, true, null);
         res = RasterOutputs.asMatrix(newRaster);
-        expectedRes = "|  1.0    1.0    2.0    3.0    3.0    NaN|\n" +
-                "|  1.0    1.0    2.0    3.0    3.0    NaN|\n" +
-                "|  4.0    4.0    5.0    6.0    6.0    NaN|\n" +
-                "|  7.0    7.0    8.0    9.0    9.0    NaN|\n" +
-                "|  7.0    7.0    8.0    9.0    9.0    NaN|\n" +
-                "|  NaN    NaN    NaN    NaN    NaN    NaN|\n";
+        expectedRes = "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n" +
+                "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n" +
+                "| 4.0   4.0   5.0   6.0   6.0   9.0   9.0|\n" +
+                "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n" +
+                "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n";
         //verify correct interpolation
         assertEquals(expectedRes, res);
         metadata = RasterAccessors.metadata(newRaster);
-        expectedMetadata = new double[]{-0.2, 0.2, 6, 6, 1.2, -1.2, 0, 0, 0, 1};
+        expectedMetadata = new double[]{-0.20000000298023224, 0.4000000059604645, 7.0, 5.0, 1.2, -1.4, 0.0, 0.0, 0.0, 1.0};
         //verify correct raster geometry
         for (int i = 0; i < metadata.length; i++) {
             assertEquals(expectedMetadata[i], metadata[i], 1e-6);
@@ -135,37 +134,37 @@ public class RasterEditorsTest extends RasterTestBase {
 
     @Test
     public void testResampleResizeFlavor() throws FactoryException, TransformException {
-        double[] values = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 3, 3, 0, 0, 2, -2, 0, 0, 0);
+        double[] values = {1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10};
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
         raster = MapAlgebra.addBandFromArray(raster, values, 1, null);
-        GridCoverage2D newRaster = RasterEditors.resample(raster, 5, 5, false, "nearestneighbor");
+        GridCoverage2D newRaster = RasterEditors.resample(raster, 6, 5, false, "nearestneighbor");
         String res = RasterOutputs.asMatrix(newRaster);
-        String expectedRes = "|1.0  1.0  2.0  3.0  3.0|\n" +
-                "|1.0  1.0  2.0  3.0  3.0|\n" +
-                "|4.0  4.0  5.0  6.0  6.0|\n" +
-                "|7.0  7.0  8.0  9.0  9.0|\n" +
-                "|7.0  7.0  8.0  9.0  9.0|\n";
+        String expectedRes = "| 1.0   2.0   2.0   3.0   5.0   5.0|\n" +
+                "| 1.0   2.0   2.0   3.0   5.0   5.0|\n" +
+                "| 4.0   5.0   5.0   6.0   9.0   9.0|\n" +
+                "| 7.0   8.0   8.0   9.0  10.0  10.0|\n" +
+                "| 7.0   8.0   8.0   9.0  10.0  10.0|\n";
         //verify correct interpolation
         assertEquals(expectedRes, res);
         double[] metadata = RasterAccessors.metadata(newRaster);
-        double[] expectedMetadata = {0, 0, 5, 5, 1.2, -1.2, 0, 0, 0, 1};
+        double[] expectedMetadata = {0,0,6,5,1.3333333333333333,-1.2,0,0,0,1};
         //verify correct raster geometry
         for (int i = 0; i < metadata.length; i++) {
             assertEquals(expectedMetadata[i], metadata[i], 1e-6);
         }
 
         //check with scaleX and scaleY
-        newRaster = RasterEditors.resample(raster, 1.2, -1.2, true, null);
+        newRaster = RasterEditors.resample(raster, 1.2, -1.4, true, null);
         res = RasterOutputs.asMatrix(newRaster);
-        expectedRes = "|1.0  1.0  2.0  3.0  3.0|\n" +
-                "|1.0  1.0  2.0  3.0  3.0|\n" +
-                "|4.0  4.0  5.0  6.0  6.0|\n" +
-                "|7.0  7.0  8.0  9.0  9.0|\n" +
-                "|7.0  7.0  8.0  9.0  9.0|\n";
+        expectedRes = "|  1.0    1.0    2.0    3.0    3.0    5.0    5.0|\n" +
+                "|  4.0    4.0    5.0    6.0    6.0    9.0    9.0|\n" +
+                "|  4.0    4.0    5.0    6.0    6.0    9.0    9.0|\n" +
+                "|  7.0    7.0    8.0    9.0    9.0   10.0   10.0|\n" +
+                "|  NaN    NaN    NaN    NaN    NaN    NaN    NaN|\n";
         //verify correct interpolation
         assertEquals(expectedRes, res);
         metadata = RasterAccessors.metadata(newRaster);
-        expectedMetadata = new double[]{0, 0, 5, 5, 1.2, -1.2, 0, 0, 0, 1};
+        expectedMetadata = new double[]{0,0,7,5,1.2,-1.4,0,0,0,1};
         //verify correct raster geometry
         for (int i = 0; i < metadata.length; i++) {
             assertEquals(expectedMetadata[i], metadata[i], 1e-6);
@@ -175,23 +174,23 @@ public class RasterEditorsTest extends RasterTestBase {
 
     @Test
     public void testResampleRefRaster() throws FactoryException, TransformException {
-        double[] values = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 3, 3, 0, 0, 2, -2, 0, 0, 0);
-        GridCoverage2D refRaster = RasterConstructors.makeEmptyRaster(2, "d", 5, 5, 1, -1, 1.2, -1.2, 0, 0, 0);
+        double[] values = {1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10};
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
+        GridCoverage2D refRaster = RasterConstructors.makeEmptyRaster(2, "d", 6, 5, 1, -1, 1.2, -1.4, 0, 0, 0);
         raster = MapAlgebra.addBandFromArray(raster, values, 1, null);
 
         //test with height and width
         GridCoverage2D newRaster = RasterEditors.resample(raster, refRaster, false, null);
         String res = RasterOutputs.asMatrix(newRaster);
-        String expectedRes = "|1.0  1.0  2.0  3.0  3.0|\n" +
-                "|1.0  1.0  2.0  3.0  3.0|\n" +
-                "|4.0  4.0  5.0  6.0  6.0|\n" +
-                "|7.0  7.0  8.0  9.0  9.0|\n" +
-                "|7.0  7.0  8.0  9.0  9.0|\n";
+        String expectedRes = "| 1.0   1.0   2.0   3.0   3.0   5.0|\n" +
+                "| 1.0   1.0   2.0   3.0   3.0   5.0|\n" +
+                "| 4.0   4.0   5.0   6.0   6.0   9.0|\n" +
+                "| 7.0   7.0   8.0   9.0   9.0  10.0|\n" +
+                "| 7.0   7.0   8.0   9.0   9.0  10.0|\n";
         //verify correct interpolation
         assertEquals(expectedRes, res);
         double[] metadata = RasterAccessors.metadata(newRaster);
-        double[] expectedMetadata = {-0.2, 0.2, 5, 5, 1.24, -1.24, 0, 0, 0, 1};
+        double[] expectedMetadata = {-0.33333333333333326,0.19999999999999996,6,5,1.388888888888889,-1.24,0,0,0,1};
         //verify correct raster geometry
         for (int i = 0; i < metadata.length; i++) {
             assertEquals(expectedMetadata[i], metadata[i], 1e-6);
@@ -200,16 +199,15 @@ public class RasterEditorsTest extends RasterTestBase {
         //test with scaleX and scaleY
         newRaster = RasterEditors.resample(raster, refRaster, true, null);
         res = RasterOutputs.asMatrix(newRaster);
-        expectedRes = "|  1.0    1.0    2.0    3.0    3.0    NaN|\n" +
-                "|  1.0    1.0    2.0    3.0    3.0    NaN|\n" +
-                "|  4.0    4.0    5.0    6.0    6.0    NaN|\n" +
-                "|  7.0    7.0    8.0    9.0    9.0    NaN|\n" +
-                "|  7.0    7.0    8.0    9.0    9.0    NaN|\n" +
-                "|  NaN    NaN    NaN    NaN    NaN    NaN|\n";
+        expectedRes = "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n" +
+                "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n" +
+                "| 4.0   4.0   5.0   6.0   6.0   9.0   9.0|\n" +
+                "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n" +
+                "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n";
         //verify correct interpolation
         assertEquals(expectedRes, res);
         metadata = RasterAccessors.metadata(newRaster);
-        expectedMetadata = new double[]{-0.2, 0.2, 6, 6, 1.2, -1.2, 0, 0, 0, 1};
+        expectedMetadata = new double[]{-0.20000000298023224, 0.4000000059604645, 7.0, 5.0, 1.2, -1.4, 0.0, 0.0, 0.0, 1.0};
         //verify correct raster geometry
         for (int i = 0; i < metadata.length; i++) {
             assertEquals(expectedMetadata[i], metadata[i], 1e-6);
