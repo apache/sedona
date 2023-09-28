@@ -155,7 +155,7 @@ public class RasterEditorsTest extends RasterTestBase {
         }
 
         //check with scaleX and scaleY
-        newRaster = RasterEditors.resample(raster, 1.2, -1.2, true, "bilinear");
+        newRaster = RasterEditors.resample(raster, 1.2, -1.2, true, null);
         res = RasterOutputs.asMatrix(newRaster);
         expectedRes = "|1.0  1.0  2.0  3.0  3.0|\n" +
                 "|1.0  1.0  2.0  3.0  3.0|\n" +
