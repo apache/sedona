@@ -103,7 +103,7 @@ Spark SQL Example:
 
 ```scala
 val inputDf = Seq(Seq(1, 3.333333, 4, 0.0001, 2.2222, 9, 10, 11.11111111, 3, 4, 5, 6)).toDF("band")
-inputDf.selectExpr("RS_AsMatrix(RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 1, -1, 0, 0, 0), band, 1, 0))").show()
+print(inputDf.selectExpr("RS_AsMatrix(RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 1, -1, 0, 0, 0), band, 1, 0))").sample(0.5).collect()(0))
 ```
 
 Output:
@@ -118,7 +118,7 @@ Spark SQL Example:
 
 ```scala
 val inputDf = Seq(Seq(1, 3, 4, 0, 2, 9, 10, 11, 3, 4, 5, 6)).toDF("band")
-inputDf.selectExpr("RS_AsMatrix(RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'i', 4, 3, 0, 0, 1, -1, 0, 0, 0), band, 1, 0))").show()
+print(inputDf.selectExpr("RS_AsMatrix(RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'i', 4, 3, 0, 0, 1, -1, 0, 0, 0), band, 1, 0))").sample(0.5).collect()(0))
 ```
 
 Output:
