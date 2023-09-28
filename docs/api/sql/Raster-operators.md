@@ -198,22 +198,22 @@ Introduction: Returns the georeference metadata of raster as a string in GDAL or
     === "Scala"
 
         ```scala
-        println(df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect()(0))
+        println(df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect().mkString("\n"))
         ```
     
     === "Java"
     
         ```java
-        System.out.println(df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect()[0])
+        System.out.println(String.join("\n", df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect()))
         ```
     
     === "Python"
     
         ```python
-        print(df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect()[0])
+        print("\n".join(df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect()))
         ```
 
-    The `sample()` function is only there to reduce the data sent to `collect()`. As `RS_GeoReference` function only returns one row, please select the 0th index to get the output in the expected behavior.
+    The `sample()` function is only there to reduce the data sent to `collect()`, you may also use `filter()` if that's appropriate.
 
 Format: `RS_GeoReference(raster: Raster, format: String)`
 
