@@ -192,6 +192,14 @@ Provided band index 3 does not lie in the raster
 
 Introduction: Returns the georeference metadata of raster as a string in GDAL or ESRI format. Default is GDAL if not specified.
 
+!!!note
+    If you are using `show()` to display the output, it will show special characters as escape sequences. To get the expected behavior use the following code:
+
+    ```sql
+    print(df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect().mkString(""))
+    ```
+    Use `sample` and `collect` to print the georeference.
+
 Format: `RS_GeoReference(raster: Raster, format: String)`
 
 Since: `v1.5.0`

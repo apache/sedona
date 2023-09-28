@@ -68,6 +68,14 @@ RS_AsMatrix expects a raster, and optionally a band (default: 1) and postDecimal
 !!!Note
     If the provided raster has integral values, postDecimalPrecision (if any) is simply ignored and integers are printed in the resultant string
 
+!!!note
+    If you are using `show()` to display the output, it will show special characters as escape sequences. To get the expected behavior use the following code:
+
+    ```sql
+    print(df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect().mkString(""))
+    ```
+    Use `sample` and `collect` to print the matrix.
+
 Format: 
 
 ```
