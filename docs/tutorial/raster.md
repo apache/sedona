@@ -1,3 +1,9 @@
+!!!note
+    Sedona uses 1-based indexing for all raster functions except [map algebra function](../../api/sql/Raster-map-algebra), which uses 0-based indexing.
+
+!!!note
+    Sedona by default enforces geographic coordinates to be in longitude/latitude order.
+
 Starting from `v1.1.0`, Sedona SQL supports raster data sources and raster operators in DataFrame and SQL. Raster support is available in all Sedona language bindings including ==Scala, Java, Python and R==.
 
 This page outlines the steps to manage raster data using SedonaSQL.
@@ -309,7 +315,7 @@ SELECT RS_FromArcInfoAsciiGrid(content) AS rast, modificationTime, length, path 
 
 ## Raster's metadata
 
-Sedona has a function to get the metadata for the raster, and also a function to get the [world file](https://en.wikipedia.org/wiki/World_file) of the raster.
+Sedona has a function to get the metadata for the raster, and also a function to get the world file of the raster.
 
 ### Metadata
 
@@ -325,9 +331,11 @@ Output for the following function will be:
 [-1.3095817809482181E7, 4021262.7487925636, 512.0, 517.0, 72.32861272132695, -72.32861272132695, 0.0, 0.0, 3857.0, 1.0]
 ```
 
+The first two elements of the array represent the real world geographic coordinates (like longitude/latitude) of the raster image's top left pixel, while the next two elements represent the pixel dimensions of the raster.
+
 ### World File
 
-There are two kinds of georeferences, GDAL and ESRI seen in world files. For more information please refer to [RS_GeoReference](../../api/sql/Raster-operators/#rs_georeference).
+There are two kinds of georeferences, GDAL and ESRI seen in [world files](https://en.wikipedia.org/wiki/World_file). For more information please refer to [RS_GeoReference](../../api/sql/Raster-operators/#rs_georeference).
 
 ```sql
 SELECT RS_GeoReference(rast, "ESRI") FROM rasterDf
@@ -344,6 +352,8 @@ The Output will be as follows:
 4021226.584486
 ```
 
+World files are used to georeference and geo-locate images by establishing an image-to-world coordinate transformation that assigns real-world geographic coordinates to the pixels of the image.
+
 ## Raster Manipulation
 
 Since `v1.5.0` there have been many additions to manipulate raster data, we will show you a few example queries.
@@ -357,7 +367,7 @@ Sedona allows you to translate coordinates as per your needs. It can translate p
 
 #### PixelAsPoint
 
-Use [RS_PixelAsPoint](../../api/sql/Raster-operators#rs_pixelaspoint) to translate pixel location to world coordinates.
+Use [RS_PixelAsPoint](../../api/sql/Raster-operators#rs_pixelaspoint) to translate pixel coordinates to world location.
 
 ```sql
 SELECT RS_PixelAsPoint(rast, 450, 400) FROM rasterDf
@@ -371,7 +381,7 @@ POINT (-13063342 3992403.75)
 
 #### World to Raster Coordinate
 
-Use [RS_WorldToRasterCoord](../../api/sql/Raster-operators#rs_worldtorastercoord) to translate world coordinates to pixel location. To just get X coordinate use [RS_WorldToRasterCoordX](../../api/sql/Raster-operators#rs_worldtorastercoordX) and for just Y coordinate use [RS_WorldToRasterCoordY](../../api/sql/Raster-operators#rs_worldtorastercoordy).
+Use [RS_WorldToRasterCoord](../../api/sql/Raster-operators#rs_worldtorastercoord) to translate world location to pixel coordinates. To just get X coordinate use [RS_WorldToRasterCoordX](../../api/sql/Raster-operators#rs_worldtorastercoordx) and for just Y coordinate use [RS_WorldToRasterCoordY](../../api/sql/Raster-operators#rs_worldtorastercoordy).
 
 ```sql
 SELECT RS_WorldToRasterCoord(rast, -1.3063342E7, 3992403.75)
@@ -385,7 +395,7 @@ POINT (450 400)
 
 ### Pixel Manipulation
 
-Use [RS_Values](../../api/sql/Raster-operators#rs_values) to fetch values for specified Point Geometries. You join a point dataset to the raster dataset to fetch values for the points in the dataset, for more details please click on the link.
+Use [RS_Values](../../api/sql/Raster-operators#rs_values) to fetch values for specified array of Point Geometries. The coordinates in the point geometry are indicative to real world location.
 
 ```sql
 SELECT RS_Values(rast, Array(ST_Point(-13063342, 3992403.75), ST_Point(-13074192, 3996020)))
@@ -410,7 +420,7 @@ Follow the links to get more information on how to use the functions appropriate
 
 ### Band Manipulation
 
-Sedona has APIs to alter the bands of the raster. Let's assume you want to delete a band from raster, you may use [RS_Band](../../api/sql/Raster-operators#rs_band) to get desired raster.
+Sedona provides APIs to select specific bands from a raster image and create a new raster. For example, to select 2 bands from a raster, you can use the [RS_Band](../../api/sql/Raster-operators#rs_band) API to retrieve the desired multi-band raster.
 
 Let's use a [multi-band raster](https://github.com/apache/sedona/blob/2a0b36989aa895c0781f9a10c907dd726506d0b7/spark/common/src/test/resources/raster_geotiff_color/FAA_UTM18N_NAD83.tif) for this example. The process of loading and converting it to raster type is the same.
 
@@ -469,7 +479,7 @@ The image create is as below for the vector is:
 
 ### Spatial range query
 
-Sedona provides an API to do a range query using a geometry window, using [RS_Intersects](../../api/sql/Raster-operators#rs_intersects)
+Sedona provides raster predicates to do a range query using a geometry window, for example let's use [RS_Intersects](../../api/sql/Raster-operators#rs_intersects).
 
 ```sql
 SELECT rast FROM rasterDf WHERE RS_Intersect(rast, ST_GeomFromWKT('POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))'))
@@ -477,13 +487,15 @@ SELECT rast FROM rasterDf WHERE RS_Intersect(rast, ST_GeomFromWKT('POLYGON((0 0,
 
 ### Spatial join query
 
-Sedona also has the capability to do a spatial join using raster column and geometry column, using the same function as above.
+Sedona's raster predicates also have the capability to do a spatial join using the raster column and geometry column, using the same function as above.
 
 ```sql
 SELECT r.rast, g.geom FROM rasterDf r, geomDf g WHERE RS_Interest(r.rast, g.geom)
 ```
 
 !!!note
+    These range and join queries will filter rasters using the provided geometric boundary and the spatial boundary of the raster.
+
     Sedona offers more raster predicates to do spatial range query and spatial join query. Please refer to [raster perdicates docs !!add link after changing docs!!]().
 
 ## Visualize raster images
@@ -530,7 +542,7 @@ Please refer to [Raster visualizer docs](../../api/sql/Raster-visualizer) to lea
 
 ## Save to permanent storage
 
-Sedona provides APIs that can store the whole raster column to specified location. The API takes binary DataFrame as input and saves it to path defined.
+Sedona has APIs that can save an entire raster column to files in a specified location. Before saving, the raster type column needs to be converted to a binary format. Sedona provides several functions to convert a raster column into a binary column suitable for file storage. Once in binary format, the raster data can then be written to files on disk using the Sedona file storage APIs.
 
 ```sparksql
 rasterDf.write.format("raster").option("rasterField", "raster").option("fileExtension", ".tiff").mode(SaveMode.Overwrite).save(dirPath)
@@ -563,3 +575,7 @@ SELECT RS_AsPNG(raster)
 ```
 
 Please refer to [Raster writer docs](../../api/sql/Raster-writer) for more details.
+
+## Performance optimization
+
+When working with large raster datasets, refer to the [documentation on storing raster geometries in Parquet format](../storing-blobs-in-parquet) for recommendations to optimize performance.
