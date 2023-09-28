@@ -168,7 +168,7 @@ public class RasterOutputs
         int maxDecimalPrecision = 0;
         for (double value : values) {
             String[] splitByDecimal = String.valueOf(value).split("\\.");
-            int preDecimal = splitByDecimal[0].length(), postDecimal = Math.min(decimalPrecision, splitByDecimal[1].length());
+            int preDecimal = splitByDecimal[0].length(), postDecimal = Math.min(decimalPrecision, splitByDecimal.length > 1 ? splitByDecimal[1].length() : 0);
             maxDecimalPrecision = Math.max(maxDecimalPrecision, postDecimal);
             int currWidth = preDecimal + 1; //add 1 for space occupied for decimal point
             maxPreDecimal = Math.max(maxPreDecimal, currWidth);
