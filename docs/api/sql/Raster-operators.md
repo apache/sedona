@@ -892,6 +892,111 @@ Output:
 ```
 4
 ```
+### RS_Resample
+
+Introduction:
+Resamples a raster using a given resampling algorithm and new dimensions (width and height), a new grid corner to pivot the raster at (gridX and gridY) and a set of 
+georeferencing attributes (scaleX and scaleY).
+
+RS_Resample also provides an option to pass a reference raster to draw the georeferencing attributes out of. However, the SRIDs of the input and reference raster must be same, otherwise RS_Resample throws an IllegalArgumentException.
+
+For the purpose of resampling, width-height pair and scaleX-scaleY pair are mutually exclusive, meaning any one of them can be used at a time. 
+
+The `useScale` parameter controls whether to use width-height or scaleX-scaleY. If `useScale` is false, the provided `widthOrScale` and `heightOrScale` values will be floored to integers and considered as width and height respectively (floating point width and height are not allowed). Otherwise, they are considered as scaleX and scaleY respectively.
+
+Currently, RS_Resample does not support skewed rasters, and hence even if a skewed reference raster is provided, its skew values are ignored. If the input raster is skewed, the output raster geometry and interpolation may be incorrect. 
+
+The default algorithm used for resampling is `NearestNeighbor`, and hence if a null, empty or invalid value of algorithm is provided, RS_Resample defaults to using `NearestNeighbor`. However, the algorithm parameter is non-optional.
+
+Following are valid values for the algorithm parameter (Case-insensitive):
+
+1. NearestNeighbor
+2. Bilinear
+3. Bicubic
+
+!!!Tip
+    If you just want to resize or rescale an input raster, you can use RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, useScale: Boolean, algorithm: String)
+Format: 
+
+`RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, gridX: Double, gridY: Double, useScale: Boolean, algorithm: String)`
+
+`RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, useScale: Boolean, algorithm: String)`
+
+`RS_Resample(raster: Raster, referenceRaster: Raster, useScale: Boolean, algorithm: String)`
+
+Since: `v1.5.0`
+
+Spark SQL Example: 
+
+```scala
+val inputDf = Seq(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9)).toDF("band")
+val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 3, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, 0d) as raster")
+val rasterDf = df.selectExpr("RS_Resample(raster, 5, 5, 1, -1, false, null) as raster")
+val rasterOutput = rasterDf.selectExpr("RS_AsMatrix(raster)").first().getString(0)
+val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getSeq[Double](0)
+```
+
+`Output`:
+```sql
+|1.0  1.0  2.0  3.0  3.0|
+
+|1.0  1.0  2.0  3.0  3.0|
+
+|4.0  4.0  5.0  6.0  6.0|
+
+|7.0  7.0  8.0  9.0  9.0|
+
+|7.0  7.0  8.0  9.0  9.0|
+
+(-0.2, 0.2, 5, 5, 1.24, -1.24, 0, 0, 0, 1)
+```
+
+```scala
+val inputDf = Seq(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9)).toDF("band")
+val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 3, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, 0d) as raster")
+val rasterDf = df.selectExpr("RS_Resample(raster, 1.2, -1.2, false, 'bilinear') as raster")
+val rasterOutput = rasterDf.selectExpr("RS_AsMatrix(raster)").first().getString(0)
+val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getSeq[Double](0)
+```
+
+`Output`:
+```sql
+|       NaN         NaN         NaN         NaN         NaN|
+
+|       NaN    2.600000    3.200000    3.800000    4.200000|
+
+|       NaN    4.400000    5.000000    5.600000    6.000000|
+
+|       NaN    6.200000    6.800000    7.400000    7.800000|
+
+|       NaN    7.400000    8.000000    8.600000    9.000000|
+
+(0, 0, 5, 5, 1.2, -1.2, 0, 0, 0, 1)
+```
+
+
+```scala
+  val inputDf = Seq(Seq(1, 2, 3, 4, 5, 6, 7, 8, 9)).toDF("band")
+  val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 3, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, null) as raster", "RS_MakeEmptyRaster(2, 'd', 5, 5, 1, -1, 1.2, -1.2, 0, 0, 0) as refRaster")
+  val rasterDf = df.selectExpr("RS_Resample(raster, refRaster, true, null) as raster")
+  val rasterOutput = rasterDf.selectExpr("RS_AsMatrix(raster)").first().getString(0)
+  val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getSeq[Double](0)
+```
+
+`Output`:
+```sql
+|1.0  1.0  2.0  3.0  3.0|
+
+|1.0  1.0  2.0  3.0  3.0|
+
+|4.0  4.0  5.0  6.0  6.0|
+
+|7.0  7.0  8.0  9.0  9.0|
+
+|7.0  7.0  8.0  9.0  9.0|
+
+(0, 0, 5, 5, 1.2, -1.2, 0, 0, 0, 1)
+```
 
 ### RS_SetBandNoDataValue
 
