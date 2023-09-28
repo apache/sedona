@@ -68,6 +68,29 @@ RS_AsMatrix expects a raster, and optionally a band (default: 1) and postDecimal
 !!!Note
     If the provided raster has integral values, postDecimalPrecision (if any) is simply ignored and integers are printed in the resultant string
 
+!!!note
+    If you are using `show()` to display the output, it will show special characters as escape sequences. To get the expected behavior use the following code:
+
+    === "Scala"
+
+        ```scala
+        println(df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect().mkString("\n"))
+        ```
+    
+    === "Java"
+    
+        ```java
+        System.out.println(String.join("\n", df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect()))
+        ```
+    
+    === "Python"
+    
+        ```python
+        print("\n".join(df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect()))
+        ```
+
+    The `sample()` function is only there to reduce the data sent to `collect()`, you may also use `filter()` if that's appropriate.
+
 Format: 
 
 ```
@@ -80,7 +103,7 @@ Spark SQL Example:
 
 ```scala
 val inputDf = Seq(Seq(1, 3.333333, 4, 0.0001, 2.2222, 9, 10, 11.11111111, 3, 4, 5, 6)).toDF("band")
-inputDf.selectExpr("RS_AsMatrix(RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 1, -1, 0, 0, 0), band, 1, 0))").show()
+print(inputDf.selectExpr("RS_AsMatrix(RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 1, -1, 0, 0, 0), band, 1, 0))").sample(0.5).collect()(0))
 ```
 
 Output:
@@ -95,7 +118,7 @@ Spark SQL Example:
 
 ```scala
 val inputDf = Seq(Seq(1, 3, 4, 0, 2, 9, 10, 11, 3, 4, 5, 6)).toDF("band")
-inputDf.selectExpr("RS_AsMatrix(RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'i', 4, 3, 0, 0, 1, -1, 0, 0, 0), band, 1, 0))").show()
+print(inputDf.selectExpr("RS_AsMatrix(RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'i', 4, 3, 0, 0, 1, -1, 0, 0, 0), band, 1, 0))").sample(0.5).collect()(0))
 ```
 
 Output:

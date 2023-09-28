@@ -192,7 +192,30 @@ Provided band index 3 does not lie in the raster
 
 Introduction: Returns the georeference metadata of raster as a string in GDAL or ESRI format. Default is GDAL if not specified.
 
-Format: `RS_GeoReference(raster: Raster, format: String)`
+!!!note
+    If you are using `show()` to display the output, it will show special characters as escape sequences. To get the expected behavior use the following code:
+    
+    === "Scala"
+
+        ```scala
+        println(df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect().mkString("\n"))
+        ```
+    
+    === "Java"
+    
+        ```java
+        System.out.println(String.join("\n", df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect()))
+        ```
+    
+    === "Python"
+    
+        ```python
+        print("\n".join(df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect()))
+        ```
+
+    The `sample()` function is only there to reduce the data sent to `collect()`, you may also use `filter()` if that's appropriate.
+
+Format: `RS_GeoReference(raster: Raster, format: String = "GDAL")`
 
 Since: `v1.5.0`
 
