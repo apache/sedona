@@ -1030,11 +1030,17 @@ Following are valid values for the algorithm parameter (Case-insensitive):
     If you just want to resize or rescale an input raster, you can use RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, useScale: Boolean, algorithm: String)
 Format: 
 
-`RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, gridX: Double, gridY: Double, useScale: Boolean, algorithm: String)`
+```sql 
+RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, gridX: Double, gridY: Double, useScale: Boolean, algorithm: String)
+```
 
-`RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, useScale: Boolean, algorithm: String)`
+```sql
+RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, useScale: Boolean, algorithm: String)
+```
 
-`RS_Resample(raster: Raster, referenceRaster: Raster, useScale: Boolean, algorithm: String)`
+```sql
+RS_Resample(raster: Raster, referenceRaster: Raster, useScale: Boolean, algorithm: String)
+```
 
 Since: `v1.5.0`
 

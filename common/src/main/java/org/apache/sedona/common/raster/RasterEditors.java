@@ -138,15 +138,9 @@ public class RasterEditors
         if (!useScale) {
             newScaleX = (Math.abs(envelope2D.getMaxX() - envelope2D.getMinX())) / newWidth;
             newScaleY = Math.signum(originalScaleY) * Math.abs(envelope2D.getMaxY() - envelope2D.getMinY()) / newHeight;
-//            newScaleX *= ((double) originalWidth / );
-//            newScaleY *= ((double) originalHeight / Math.floor(heightOrScale));
         }else {
             newWidth = (int) Math.abs(((envelope2D.getMaxX() - envelope2D.getMinX())) / newScaleX);
             newHeight = (int) Math.abs(((envelope2D.getMaxY() - envelope2D.getMinY())) / newScaleY);
-//            double maxX = RasterUtils.getWorldCornerCoordinates(raster, originalWidth + 1, 1).getX();
-//            double minY = RasterUtils.getWorldCornerCoordinates(raster, 1, originalHeight + 1).getY();
-//            newWidth = Math.max((int)Math.abs((maxX - upperLeftX) + (newScaleX / 2) / newScaleX), 1);
-//            newHeight = Math.max((int)Math.abs((upperLeftY - minY) + (newScaleY / 2) / newScaleY), 1);
         }
 
         if (!approximateEquals(upperLeftX, gridX) || !approximateEquals(upperLeftY, gridY)) {
