@@ -71,10 +71,25 @@ RS_AsMatrix expects a raster, and optionally a band (default: 1) and postDecimal
 !!!note
     If you are using `show()` to display the output, it will show special characters as escape sequences. To get the expected behavior use the following code:
 
-    ```sql
-    print(df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect().mkString(""))
-    ```
-    Use `sample` and `collect` to print the matrix.
+    === "Scala"
+
+        ```scala
+        println(df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect()(0))
+        ```
+    
+    === "Java"
+    
+        ```java
+        System.out.println(df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect()[0])
+        ```
+    
+    === "Python"
+    
+        ```python
+        print(df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect()[0])
+        ```
+
+    The `sample()` function is only there to reduce the data sent to `collect()`. As `RS_AsMatrix` function only returns one row, please select the 0th index to get the output in the expected behavior.
 
 Format: 
 

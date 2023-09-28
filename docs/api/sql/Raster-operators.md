@@ -194,11 +194,26 @@ Introduction: Returns the georeference metadata of raster as a string in GDAL or
 
 !!!note
     If you are using `show()` to display the output, it will show special characters as escape sequences. To get the expected behavior use the following code:
+    
+    === "Scala"
 
-    ```sql
-    print(df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect().mkString(""))
-    ```
-    Use `sample` and `collect` to print the georeference.
+        ```scala
+        println(df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect()(0))
+        ```
+    
+    === "Java"
+    
+        ```java
+        System.out.println(df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect()[0])
+        ```
+    
+    === "Python"
+    
+        ```python
+        print(df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect()[0])
+        ```
+
+    The `sample()` function is only there to reduce the data sent to `collect()`. As `RS_GeoReference` function only returns one row, please select the 0th index to get the output in the expected behavior.
 
 Format: `RS_GeoReference(raster: Raster, format: String)`
 
