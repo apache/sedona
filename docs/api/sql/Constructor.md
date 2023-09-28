@@ -47,7 +47,7 @@ System.setProperty("sedona.global.charset", "utf8")
 
 Introduction: Create Geometry from geohash string and optional precision
 
-Format: `ST_GeomFromGeoHash(geohash: string, precision: int)`
+Format: `ST_GeomFromGeoHash(geohash: String, precision: Integer)`
 
 Since: `v1.1.1`
 
@@ -67,7 +67,7 @@ POLYGON ((0.703125 0.87890625, 0.703125 1.0546875, 1.0546875 1.0546875, 1.054687
 
 Introduction: Construct a Geometry from GeoJson
 
-Format: `ST_GeomFromGeoJSON (GeoJson:string)`
+Format: `ST_GeomFromGeoJSON (GeoJson: String)`
 
 Since: `v1.0.0`
 
@@ -140,7 +140,7 @@ POLYGON ((-87.621765 34.873444, -87.617535 34.873369, -87.62119 34.85053, -87.62
 Introduction: Construct a Geometry from GML.
 
 Format:
-`ST_GeomFromGML (gml:string)`
+`ST_GeomFromGML (gml: String)`
 
 Since: `v1.3.0`
 
@@ -169,7 +169,7 @@ LINESTRING (-71.16028 42.258729, -71.160837 42.259112, -71.161143 42.25932)
 Introduction: Construct a Geometry from KML.
 
 Format:
-`ST_GeomFromKML (kml:string)`
+`ST_GeomFromKML (kml: String)`
 
 Since: `v1.3.0`
 
@@ -197,8 +197,10 @@ LINESTRING (-71.1663 42.2614, -71.1667 42.2616)
 Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown). Alias of [ST_GeomFromWKT](#ST_GeomFromWKT)
 
 Format:
-`ST_GeomFromText (Wkt:string)`
-`ST_GeomFromText (Wkt:string, srid:integer)`
+
+`ST_GeomFromText (Wkt: String)`
+
+`ST_GeomFromText (Wkt: String, srid: Integer)`
 
 Since: `v1.0.0`
 
@@ -221,8 +223,10 @@ POINT(40.7128 -74.006)
 Introduction: Construct a Geometry from WKB string or Binary. This function also supports EWKB format.
 
 Format:
-`ST_GeomFromWKB (Wkb:string)`
-`ST_GeomFromWKB (Wkb:binary)`
+
+`ST_GeomFromWKB (Wkb: String)`
+
+`ST_GeomFromWKB (Wkb: Binary)`
 
 Since: `v1.0.0`
 
@@ -255,8 +259,10 @@ SRID=4326;POINT Z(1 1 1)
 Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown).
 
 Format:
-`ST_GeomFromWKT (Wkt:string)`
-`ST_GeomFromWKT (Wkt:string, srid:integer)`
+
+`ST_GeomFromWKT (Wkt: String)`
+
+`ST_GeomFromWKT (Wkt: String, srid: Integer)`
 
 Since: `v1.0.0`
 
@@ -279,7 +285,7 @@ POINT(40.7128 -74.006)
 Introduction: Construct a Geometry from OGC Extended WKT
 
 Format:
-`ST_GeomFromEWKT (EWkt:string)`
+`ST_GeomFromEWKT (EWkt: String)`
 
 Since: `v1.5.0`
 
@@ -299,7 +305,7 @@ POINT(40.7128 -74.006)
 Introduction: Construct a Line from Wkt text
 
 Format:
-`ST_LineFromText (Wkt:string)`
+`ST_LineFromText (Wkt: String)`
 
 Since: `v1.2.1`
 
@@ -319,7 +325,7 @@ LINESTRING (1 2, 3 4)
 
 Introduction: Construct a LineString from Text, delimited by Delimiter
 
-Format: `ST_LineStringFromText (Text:string, Delimiter:char)`
+Format: `ST_LineStringFromText (Text: String, Delimiter: Char)`
 
 Since: `v1.0.0`
 
@@ -339,7 +345,7 @@ LINESTRING (-74.0428197 40.6867969, -74.0421975 40.6921336, -74.050802 40.691279
 
 Introduction: Creates a 2D, 3D Z or 4D ZM Point geometry. Use ST_MakePointM to make points with XYM coordinates. Z and M values are optional.
 
-Format: `ST_MakePoint (X:decimal, Y:decimal, Z:decimal, M:decimal)`
+Format: `ST_MakePoint (X: Double, Y: Double, Z: Double, M: Double)`
 
 Since: `v1.5.0`
 
@@ -384,8 +390,10 @@ POINT ZM (1.2345 2.3456 3.4567 4)
 Introduction: Construct a MultiLineString from Wkt. If srid is not set, it defaults to 0 (unknown).
 
 Format:
-`ST_MLineFromText (Wkt:string)`
-`ST_MLineFromText (Wkt:string, srid:integer)`
+
+`ST_MLineFromText (Wkt: String)`
+
+`ST_MLineFromText (Wkt: String, srid: Integer)`
 
 Since: `v1.3.1`
 
@@ -406,8 +414,10 @@ MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))
 Introduction: Construct a MultiPolygon from Wkt. If srid is not set, it defaults to 0 (unknown).
 
 Format:
-`ST_MPolyFromText (Wkt:string)`
-`ST_MPolyFromText (Wkt:string, srid:integer)`
+
+`ST_MPolyFromText (Wkt: String)`
+
+`ST_MPolyFromText (Wkt: String, srid: Integer)`
 
 Since: `v1.3.1`
 
@@ -427,7 +437,7 @@ MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))
 
 Introduction: Construct a Point from X and Y
 
-Format: `ST_Point (X:decimal, Y:decimal)`
+Format: `ST_Point (X: Double, Y: Double)`
 
 Since: `v1.0.0`
 
@@ -451,9 +461,11 @@ POINT (1.2345 2.3456)
 Introduction: Construct a Point from X, Y and Z and an optional srid. If srid is not set, it defaults to 0 (unknown).
 Must use ST_AsEWKT function to print the Z coordinate.
 
-Format: `ST_PointZ (X:decimal, Y:decimal, Z:decimal)`
+Format: 
 
-Format: `ST_PointZ (X:decimal, Y:decimal, Z:decimal, srid:integer)`
+`ST_PointZ (X: Double, Y: Double, Z: Double)`
+
+`ST_PointZ (X: Double, Y: Double, Z: Double, srid: Integer)`
 
 Since: `v1.4.0`
 
@@ -473,7 +485,7 @@ POINT Z(1.2345 2.3456 3.4567)
 
 Introduction: Construct a Point from Text, delimited by Delimiter
 
-Format: `ST_PointFromText (Text:string, Delimiter:char)`
+Format: `ST_PointFromText (Text: String, Delimiter: Char)`
 
 Since: `v1.0.0`
 
@@ -493,7 +505,9 @@ POINT (40.7128 -74.006)
 
 Introduction: Construct a Polygon from MinX, MinY, MaxX, MaxY.
 
-Format: `ST_PolygonFromEnvelope (MinX:decimal, MinY:decimal, MaxX:decimal, MaxY:decimal)`
+Format: 
+
+`ST_PolygonFromEnvelope (MinX: Double, MinY: Double, MaxX: Double, MaxY: Double)`
 
 Since: `v1.0.0`
 
@@ -513,7 +527,7 @@ POLYGON ((1.234 2.234, 1.234 3.345, 3.345 3.345, 3.345 2.234, 1.234 2.234))
 
 Introduction: Construct a Polygon from Text, delimited by Delimiter. Path must be closed
 
-Format: `ST_PolygonFromText (Text:string, Delimiter:char)`
+Format: `ST_PolygonFromText (Text: String, Delimiter: Char)`
 
 Since: `v1.0.0`
 

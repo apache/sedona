@@ -374,6 +374,32 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expectedMetadata.toString(), actualMetadata.toString())
     }
 
+    it("Passed RS_AddBand with empty raster") {
+      val inputDf = Seq((
+        Seq(13, 80, 49, 15, 4, 46, 47, 94, 58, 37, 6, 22, 98, 26, 78, 66, 86, 79, 5, 65, 7, 12, 89, 67),
+        Seq(37, 4, 5, 15, 60, 83, 24, 19, 23, 87, 98, 89, 59, 71, 42, 46, 0, 80, 27, 73, 66, 100, 78, 64),
+        Seq(35, 68, 56, 87, 49, 20, 73, 90, 45, 96, 52, 98, 2, 82, 88, 74, 77, 60, 5, 61, 81, 32, 9, 15)
+      )).toDF("band1", "band2", "band3")
+      val df = inputDf.selectExpr(
+        "RS_AddBandFromArray(RS_AddBandFromArray(RS_MakeEmptyRaster(2, 4, 6, 1, -1, 1, 1, 0, 0, 0), band1, 1), band2, 2) as toRaster",
+        "RS_AddBandFromArray(RS_MakeEmptyRaster(1, 4, 6, 1, -1, 1, 1, 0, 0, 0), band3, 1) as fromRaster"
+      )
+
+      val actualDf = df.selectExpr("RS_AddBand(toRaster, fromRaster, 1, 3) as actualRaster")
+
+      val actualNumBands = actualDf.selectExpr("RS_NumBands(actualRaster)").first().getInt(0)
+      val expectedNumBands = 3
+      assertEquals(expectedNumBands, actualNumBands)
+
+      val actualBandValues = actualDf.selectExpr("RS_BandAsArray(actualRaster,3)").first().getSeq(0)
+      val expectedBandValues = df.selectExpr("RS_BandAsArray(fromRaster, 1)").first().getSeq(0)
+      assertTrue(expectedBandValues.equals(actualBandValues))
+
+      val actualMetadata = actualDf.selectExpr("RS_Metadata(actualRaster)").first().getSeq(0).slice(0, 9)
+      val expectedMetadata = df.selectExpr("RS_Metadata(toRaster)").first().getSeq(0).slice(0, 9)
+      assertTrue(expectedMetadata.equals(actualMetadata))
+    }
+
     it("Passed RS_SetValues with empty raster") {
       var inputDf = Seq((Seq(1, 1, 1, 0, 0, 0, 1, 2, 3, 3, 5, 6, 7, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0), Seq(11, 12, 13, 14, 15, 16, 17, 18, 19))).toDF("band","newValues")
       var df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as raster", "newValues")
@@ -383,6 +409,26 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
       actual = df.selectExpr("RS_BandAsArray(RS_SetValues(raster,  1, 2, 2, 3, 3, newValues), 1)").first().getSeq(0)
       expected = Seq(1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 11.0, 12.0, 13.0, 3.0, 5.0, 14.0, 15.0, 16.0, 0.0, 3.0, 17.0, 18.0, 19.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+      assert(expected.equals(actual))
+    }
+
+    it("Passed RS_SetValues with empty raster geom variant") {
+      var inputDf = Seq((Seq(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0))).toDF("band")
+      inputDf = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 5, 5, 1, -1, 1, -1, 0, 0, 0), band, 1) as raster")
+      var actual = inputDf.selectExpr("RS_BandAsArray(RS_SetValues(raster, 1, ST_GeomFromWKT('LINESTRING(1 -1, 1 -4, 2 -2, 3 -3, 4 -4, 5 -4, 6 -6)'), 255), 1)").first().getSeq(0)
+      var expected = Seq(255.0, 0.0, 0.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 255.0, 255.0, 0.0, 0.0, 255.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 0.0, 255.0)
+      assert(expected.equals(actual))
+
+      actual = inputDf.selectExpr("RS_BandAsArray(RS_SetValues(raster, 1, ST_GeomFromWKT('POINT(2 -2)'), 25), 1)").first().getSeq(0)
+      expected = Seq(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 25.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+      assert(expected.equals(actual))
+
+      actual = inputDf.selectExpr("RS_BandAsArray(RS_SetValues(raster, 1, ST_GeomFromWKT('MULTIPOINT((2 -2), (2 -1), (3 -3))'), 400), 1)").first().getSeq(0)
+      expected = Seq(0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+      assert(expected.equals(actual))
+
+      actual = inputDf.selectExpr("RS_BandAsArray(RS_SetValues(raster, 1, ST_GeomFromWKT('POLYGON((1 -1, 3 -3, 6 -6, 4 -1, 1 -1))'), 150), 1)").first().getSeq(0)
+      expected = Seq(150.0, 150.0, 150.0, 0.0, 0.0, 0.0, 150.0, 150.0, 150.0, 0.0, 0.0, 0.0, 150.0, 150.0, 0.0, 0.0, 0.0, 0.0, 150.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
       assert(expected.equals(actual))
     }
 

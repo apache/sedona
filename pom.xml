@@ -88,6 +88,7 @@
 
         <slf4j.version>1.7.36</slf4j.version>
         <googles2.version>2.0.0</googles2.version>
+        <uberh3.version>4.1.1</uberh3.version>
         <scalatest.version>3.1.1</scalatest.version>
         <scala-collection-compat.version>2.5.0</scala-collection-compat.version>
         <geoglib.version>1.52</geoglib.version>
@@ -328,6 +329,11 @@
                 <groupId>com.google.geometry</groupId>
                 <artifactId>s2-geometry</artifactId>
                 <version>${googles2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.uber</groupId>
+                <artifactId>h3</artifactId>
+                <version>${uberh3.version}</version>
             </dependency>
             <dependency>
                 <groupId>net.sf.geographiclib</groupId>

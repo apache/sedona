@@ -6,7 +6,7 @@ Introduction: Returns the centroid (point geometry) of the specified pixel's are
 The pixel coordinates specified are 1-indexed.
 If `colX` and `rowY` are out of bounds for the raster, they are interpolated assuming the same skew and translate values.
 
-Format: `RS_PixelAsCentroid(raster: Raster, colX: int, rowY: int)`
+Format: `RS_PixelAsCentroid(raster: Raster, colX: Integer, rowY: Integer)`
 
 Since: `v1.5.0`
 
@@ -30,11 +30,11 @@ Introduction: Returns a point geometry of the specified pixel's upper-left corne
     If the pixel coordinates specified do not exist in the raster (out of bounds), RS_PixelAsPoint throws an IndexOutOfBoundsException.
 
 
-Format: `RS_PixelAsPoint(raster: Raster, colX: int, rowY: int)`
+Format: `RS_PixelAsPoint(raster: Raster, colX: Integer, rowY: Integer)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
-Spark SQL examples:
+Spark SQL Example:
 
 ```sql
 SELECT ST_AsText(RS_PixelAsPoint(raster, 2, 1)) from rasters
@@ -44,6 +44,8 @@ Output:
 ```
 POINT (123.19, -12)
 ```
+
+Spark SQL Example:
 
 ```sql
 SELECT ST_AsText(RS_PixelAsPoint(raster, 6, 2)) from rasters
@@ -60,7 +62,7 @@ Introduction: Returns a polygon geometry that bounds the specified pixel.
 The pixel coordinates specified are 1-indexed. 
 If `colX` and `rowY` are out of bounds for the raster, they are interpolated assuming the same skew and translate values.
 
-Format: `RS_PixelAsPolygon(raster: Raster, colX:int, rowY:int)`
+Format: `RS_PixelAsPolygon(raster: Raster, colX: Integer, rowY: Integer)`
 
 Since: `v1.5.0`
 
@@ -86,11 +88,14 @@ Format: `RS_Envelope (raster: Raster)`
 
 Since: `v1.4.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_Envelope(raster) FROM raster_table
 ```
+
 Output:
+
 ```
 POLYGON ((0 0,20 0,20 60,0 60,0 0))
 ```
@@ -102,14 +107,16 @@ For regular shaped and non-skewed rasters, this gives more or less the same resu
 
 Format: `RS_ConvexHull(raster: Raster)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_ConvexHull(RS_MakeEmptyRaster(1, 5, 10, 156, -132, 5, 10, 3, 5, 0));
 ```
 
 Output:
+
 ```
 POLYGON ((156 -132, 181 -107, 211 -7, 186 -32, 156 -132))
 ```
@@ -123,12 +130,15 @@ The created geometry representing the min convex hull has world coordinates of t
 !!!Note
     If the specified band does not exist in the raster, RS_MinConvexHull throws an IllegalArgumentException
 
-Format: `RS_MinConvexHull(raster: Raster) | RS_MinConvexHull(raster: Raster, band: Int)`
+Format: 
 
-Since: `1.5.0`
+`RS_MinConvexHull(raster: Raster)` 
 
-Spark SQL example:
+`RS_MinConvexHull(raster: Raster, band: Integer)`
 
+Since: `v1.5.0`
+
+Spark SQL Example:
 
 ```scala
 val inputDf = Seq((Seq(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
@@ -146,6 +156,8 @@ Output:
 +----------------------------------------+
 ```
 
+Spark SQL Example:
+
 ```scala
 val inputDf = Seq((Seq(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
         Seq(0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0))).toDF("values2", "values1")
@@ -162,11 +174,14 @@ Output:
 +----------------------------------------+
 ```
 
+Spark SQL Example:
+
 ```sql
 SELECT RS_MinConvexHull(raster, 3) from rasters;
 ```
 
 Output:
+
 ```sql
 Provided band index 3 does not lie in the raster
 ```
@@ -177,7 +192,7 @@ Provided band index 3 does not lie in the raster
 
 Introduction: Returns the georeference metadata of raster as a string in GDAL or ESRI format. Default is GDAL if not specified.
 
-Format: `RS_GeoReference(raster: Raster, format:string)`
+Format: `RS_GeoReference(raster: Raster, format: String)`
 
 Since: `v1.5.0`
 
@@ -260,14 +275,16 @@ Introduction: Returns the height of the raster.
 
 Format: `RS_Height(raster: Raster)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_Height(raster) FROM rasters
 ```
 
 Output:
+
 ```
 512
 ```
@@ -276,16 +293,18 @@ Output:
 
 Introduction: Returns the upper left X coordinate of the given row and column of the given raster geometric units of the geo-referenced raster. If any out of bounds values are given, the X coordinate of the assumed point considering existing raster pixel size and skew values will be returned.
 
-Format: `RS_RasterToWorldCoordX(raster: Raster, colX: int, rowY: int)`
+Format: `RS_RasterToWorldCoordX(raster: Raster, colX: Integer, rowY: Integer)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_RasterToWorldCoordX(ST_MakeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, 4326), 1, 1) from rasters
 ```
 
 Output:
+
 ```
 -123
 ```
@@ -294,16 +313,18 @@ Output:
 
 Introduction: Returns the upper left Y coordinate of the given row and column of the given raster geometric units of the geo-referenced raster. If any out of bounds values are given, the Y coordinate of the assumed point considering existing raster pixel size and skew values will be returned.
 
-Format: `RS_RasterToWorldCoordY(raster: Raster, colX: int, rowY: int)`
+Format: `RS_RasterToWorldCoordY(raster: Raster, colX: Integer, rowY: Integer)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_RasterToWorldCoordY(ST_MakeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, 4326), 1, 1) from rasters
 ```
 
 Output:
+
 ```
 54
 ```
@@ -319,14 +340,16 @@ Introduction: Returns the pixel width of the raster in CRS units.
 
 Format: `RS_ScaleX(raster: Raster)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_ScaleX(raster) FROM rasters
 ```
 
 Output:
+
 ```
 1
 ```
@@ -342,9 +365,10 @@ Introduction: Returns the pixel height of the raster in CRS units.
 
 Format: `RS_ScaleY(raster: Raster)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_ScaleY(raster) FROM rasters
 ```
@@ -440,9 +464,10 @@ Introduction: Returns the width of the raster.
 
 Format: `RS_Width(raster: Raster)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_Width(raster) FROM rasters
 ```
@@ -456,20 +481,37 @@ Output:
 
 Introduction: Returns the grid coordinate of the given world coordinates as a Point.
 
-Format: `RS_WorldToRasterCoord(raster: Raster, point: Geometry)`
-        `RS_WorldToRasterCoord(raster: Raster, x: double, y: point)`
+Format: 
 
-Since: `1.5.0`
+`RS_WorldToRasterCoord(raster: Raster, point: Geometry)`
+ 
+`RS_WorldToRasterCoord(raster: Raster, x: Double, y: Point)`
 
-Spark SQL example:
+Since: `v1.5.0`
+
+Spark SQL Example:
+
 ```sql
 SELECT RS_WorldToRasterCoord(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0, 4326), -53, 51) from rasters;
+```
+
+Output:
+
+```
+POINT (1 1)
+```
+
+Spark SQL Example:
+
+```sql
 SELECT RS_WorldToRasterCoord(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0, 4326), ST_GeomFromText('POINT (-52 51)')) from rasters;
 ```
 
 Output:
-`POINT (1 1)`
-`POINT (2 1)`
+
+```
+POINT (2 1)
+```
 
 !!!Note
     If the given geometry point is not in the same CRS as the given raster, the given geometry will be transformed to the given raster's CRS. You can use [ST_Transform](../Function/#st_transform) to transform the geometry beforehand.
@@ -480,25 +522,38 @@ Output:
 
 Introduction: Returns the X coordinate of the grid coordinate of the given world coordinates as an integer.
 
-Format: `RS_WorldToRasterCoord(raster: Raster, point: Geometry)`
-        `RS_WorldToRasterCoord(raster: Raster, x: double, y: double)`
+Format: 
+
+`RS_WorldToRasterCoord(raster: Raster, point: Geometry)`
+        
+`RS_WorldToRasterCoord(raster: Raster, x: Double, y: Double)`
 
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
-Spark SQL example:
+Spark SQL Example:
 
 ```sql
 SELECT RS_WorldToRasterCoordX(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0), -53, 51) from rasters;
 ```
 
-Output: `1`
+Output: 
+
+```
+1
+```
+
+Spark SQL Example:
 
 ```sql
 SELECT RS_WorldToRasterCoordX(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0), ST_GeomFromText('POINT (-53 51)')) from rasters;
 ```
 
-Output: `1`
+Output: 
+
+```
+1
+```
 
 !!!Tip
     For non-skewed rasters, you can provide any value for latitude and the intended value of world longitude, to get the desired answer
@@ -508,24 +563,37 @@ Output: `1`
 
 Introduction: Returns the Y coordinate of the grid coordinate of the given world coordinates as an integer.
 
-Format: `RS_WorldToRasterCoordY(raster: Raster, point: Geometry)`
-        `RS_WorldToRasterCoordY(raster: Raster, x: double, y: double)`
+Format: 
 
-Since: `1.5.0`
+`RS_WorldToRasterCoordY(raster: Raster, point: Geometry)`
+        
+`RS_WorldToRasterCoordY(raster: Raster, x: Double, y: Double)`
 
-Spark SQL example:
+Since: `v1.5.0`
+
+Spark SQL Example:
 
 ```sql
 SELECT RS_WorldToRasterCoordY(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0), ST_GeomFromText('POINT (-50 50)'));
 ```
 
-Output: `2`
+Output: 
+
+```
+2
+```
+
+Spark SQL Example:
 
 ```sql
 SELECT RS_WorldToRasterCoordY(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0), -50, 49);
 ```
 
-Output: `3`
+Output: 
+
+```
+3
+```
 
 
 !!!Tip
@@ -571,38 +639,55 @@ Introduction: Returns the no data value of the given band of the given raster. I
 !!!Note
     If the given band does not lie in the raster, RS_BandNoDataValue throws an IllegalArgumentException
 
-Format: `RS_BandNoDataValue (raster: Raster, band: Int = 1)`
+Format: `RS_BandNoDataValue (raster: Raster, band: Integer = 1)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_BandNoDataValue(raster, 1) from rasters;
 ```
 
-Output: `0.0`
+Output:
+
+```
+0.0
+```
+
+Spark SQL Example:
 
 ```sql
 SELECT RS_BandNoDataValue(raster) from rasters_without_nodata;
 ```
 
-Output: `null`
+Output: 
+
+```
+null
+```
+
+Spark SQL Example:
 
 ```sql
 SELECT RS_BandNoDataValue(raster, 3) from rasters;
 ```
 
-Output: `IllegalArgumentException: Provided band index 3 is not present in the raster.`
+Output: 
+
+```
+IllegalArgumentException: Provided band index 3 is not present in the raster.
+```
 
 ### RS_BandIsNoData
 
 Returns true if the band is filled with only nodata values. Band 1 is assumed if not specified.
 
-Format: `RS_BandIsNoData(raster: Raster, band: Int = 1)`
+Format: `RS_BandIsNoData(raster: Raster, band: Integer = 1)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
-Spark SQL example:
+Spark SQL Example:
 
 ```sql
 WITH rast_table AS (SELECT RS_AddBandFromArray(RS_MakeEmptyRaster(1, 2, 2, 0, 0, 1), ARRAY(10d, 10d, 10d, 10d), 1, 10d) as rast)
@@ -631,28 +716,41 @@ Following are the possible values returned by RS_BandPixelType:
 6. `UNSIGNED_8BITS` - For Byte values
 
     
-Format: `RS_BandPixelType(rast: Raster, band: Int = 1)`
+Format: `RS_BandPixelType(rast: Raster, band: Integer = 1)`
 
-Since: `1.5.0`
+Since: `v1.5.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_BandPixelType(RS_MakeEmptyRaster(2, "D", 5, 5, 53, 51, 1, 1, 0, 0, 0), 2);
 ```
 
-Output: `REAL_64BITS`
+Output: 
+
+```
+REAL_64BITS
+```
 
 ```sql
 SELECT RS_BandPixelType(RS_MakeEmptyRaster(2, "I", 5, 5, 53, 51, 1, 1, 0, 0, 0));
 ```
 
-Output: `SIGNED_32BITS`
+Output: 
+
+```
+SIGNED_32BITS
+```
 
 ```sql
 SELECT RS_BandPixelType(RS_MakeEmptyRaster(2, "I", 5, 5, 53, 51, 1, 1, 0, 0, 0), 3);
 ```
 
-Output: `IllegalArgumentException: Provided band index 3 is not present in the raster`
+Output: 
+
+```
+IllegalArgumentException: Provided band index 3 is not present in the raster
+```
 
 ### RS_Count
 
@@ -667,9 +765,9 @@ Introduction: Returns the number of pixels in a given band. If band is not speci
 
 Format: 
 
-`RS_Count(raster: Raster, band: int = 1, excludeNoDataValue: boolean = true)`
+`RS_Count(raster: Raster, band: Integer = 1, excludeNoDataValue: Boolean = true)`
 
-`RS_Count(raster: Raster, band: int = 1)`
+`RS_Count(raster: Raster, band: Integer = 1)`
 
 `RS_Count(raster: Raster)`
 
@@ -710,9 +808,9 @@ Introduction: Returns summary stats consisting of count, sum, mean, stddev, min,
 !!!Note
     If the mentioned band index doesn't exist, this will throw an `IllegalArgumentException`.
 
-`RS_SummaryStats(raster: Raster, band: int = 1, excludeNoDataValue: boolean = true)`
+`RS_SummaryStats(raster: Raster, band: Integer = 1, excludeNoDataValue: Boolean = true)`
 
-`RS_SummaryStats(raster: Raster, band: int = 1)`
+`RS_SummaryStats(raster: Raster, band: Integer = 1)`
 
 `RS_SummaryStats(raster: Raster)`
 
@@ -745,6 +843,79 @@ Output:
 
 ## Raster based operators
 
+### RS_AddBand
+
+Introduction: Adds a new band to a raster `toRaster` at a specified index `toRasterIndex`. The new band's values are copied from `fromRaster` at a specified band index `fromBand`. 
+If no `toRasterIndex` is provided, the new band is appended to the end of `toRaster`. If no `fromBand` is specified, band `1` from `fromRaster` is copied by default.
+
+!!!Note
+    IllegalArgumentException will be thrown in these cases:
+
+    - The provided Rasters, `toRaster` & `fromRaster` don't have same shape.
+    - The provided `fromBand` is not in `fromRaster`.
+    - The provided `toRasterIndex` is not in or at end of `toRaster`. 
+
+Format: 
+
+```
+RS_AddBand(toRaster: Raster, fromRaster: Raster, fromBand: Integer = 1, toRasterIndex: Integer = at_end)
+```
+
+```
+RS_AddBand(toRaster: Raster, fromRaster: Raster, fromBand: Integer = 1)
+```
+
+```
+RS_AddBand(toRaster: Raster, fromRaster: Raster)
+```
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_AddBand(raster1, raster2, 2, 1) FROM rasters
+```
+
+Output:
+
+```
+GridCoverage2D["g...
+```
+
+### RS_Contains
+
+Introduction: Returns true if the geometry or raster on the left side contains the geometry or raster on the right side.
+The convex hull of the raster is considered in the test.
+
+The rules for testing spatial relationship is the same as `RS_Intersects`.
+
+Format: 
+
+`RS_Contains(raster: Raster, geom: Geometry)`
+
+`RS_Contains(geom: Geometry, raster: Raster)`
+
+`RS_Contains(raster0: Raster, raster1: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((5 5, 5 10, 10 10, 10 5, 5 5))')) rast_geom,
+    RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 10, 10, 2, 22, 1)) rast_rast
+```
+
+Output:
+```
++---------+---------+
+|rast_geom|rast_rast|
++---------+---------+
+|     true|     true|
++---------+---------+
+```
+
 ### RS_Intersects
 
 Introduction: Returns true if raster or geometry on the left side intersects with the raster or geometry on the right side.
@@ -756,84 +927,25 @@ Rules for testing spatial relationship:
 * If both sides are in the same CRS, then perform the relationship test directly.
 * Otherwise, both sides will be transformed to WGS84 before the relationship test.
 
-Format: `RS_Intersects(raster: Raster, geom: Geometry)`
+Format: 
 
-Format: `RS_Intersects(geom: Geometry, raster: Raster)`
+`RS_Intersects(raster: Raster, geom: Geometry)`
 
-Format: `RS_Intersects(raster0: Raster, raster1: Raster)`
+`RS_Intersects(geom: Geometry, raster: Raster)`
+
+`RS_Intersects(raster0: Raster, raster1: Raster)`
 
 Since: `v1.5.0`
 
-Spark SQL example:
+Spark SQL Example:
 
 ```sql
 SELECT RS_Intersects(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_SetSRID(ST_PolygonFromEnvelope(0, 0, 10, 10), 4326)) rast_geom,
     RS_Intersects(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 10, 10, 1, 11, 1)) rast_rast
 ```
-Output:
-```
-+---------+---------+
-|rast_geom|rast_rast|
-+---------+---------+
-|     true|     true|
-+---------+---------+
-
-```
-
-### RS_Within
-
-Introduction: Returns true if the geometry or raster on the left side is within the geometry or raster on the right side.
-The convex hull of the raster is considered in the test.
-
-The rules for testing spatial relationship is the same as `RS_Intersects`.
-
-Format: `RS_Within(raster: Raster, geom: Geometry)`
-
-Format: `RS_Within(geom: Geometry, raster: Raster)`
-
-Format: `RS_Within(raster0: Raster, raster1: Raster)`
-
-Since: `1.5.0`
-
-Spark SQL example:
-
-```sql
-SELECT RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((0 0, 0 50, 100 50, 100 0, 0 0))')) rast_geom,
-    RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 30, 30, 2, 22, 1)) rast_rast
-```
 
 Output:
-```
-+---------+---------+
-|rast_geom|rast_rast|
-+---------+---------+
-|     true|     true|
-+---------+---------+
-```
 
-### RS_Contains
-
-Introduction: Returns true if the geometry or raster on the left side contains the geometry or raster on the right side.
-The convex hull of the raster is considered in the test.
-
-The rules for testing spatial relationship is the same as `RS_Intersects`.
-
-Format: `RS_Contains(raster: Raster, geom: Geometry)`
-
-Format: `RS_Contains(geom: Geometry, raster: Raster)`
-
-Format: `RS_Contains(raster0: Raster, raster1: Raster)`
-
-Since: `1.5.0`
-
-Spark SQL example:
-
-```sql
-SELECT RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((5 5, 5 10, 10 10, 10 5, 5 5))')) rast_geom,
-    RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 10, 10, 2, 22, 1)) rast_rast
-```
-
-Output:
 ```
 +---------+---------+
 |rast_geom|rast_rast|
@@ -861,18 +973,16 @@ Format: `RS_MetaData (raster: Raster)`
 
 Since: `v1.4.1`
 
-SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_MetaData(raster) FROM raster_table
 ```
 
 Output:
+
 ```
-+-----------------------------------------------------------------------------------------------------------------------+
-|rs_metadata(raster)                                                                                                    |
-+-----------------------------------------------------------------------------------------------------------------------+
-|[-1.3095817809482181E7, 4021262.7487925636, 512.0, 517.0, 72.32861272132695, -72.32861272132695, 0.0, 0.0, 3857.0, 1.0]|
-+-----------------------------------------------------------------------------------------------------------------------+
+[-1.3095817809482181E7, 4021262.7487925636, 512.0, 517.0, 72.32861272132695, -72.32861272132695, 0.0, 0.0, 3857.0, 1.0]
 ```
 
 ### RS_NumBands
@@ -883,12 +993,14 @@ Format: `RS_NumBands (raster: Raster)`
 
 Since: `v1.4.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_NumBands(raster) FROM raster_table
 ```
 
 Output:
+
 ```
 4
 ```
@@ -1002,7 +1114,7 @@ val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getSeq[D
 
 Introduction: Sets no data value for given band. If band index not specified then band 1 is assumed. 
 
-Format: `RS_SetBandNoDataValue(raster: Raster, bandIndex: int = 1, noDataValue: double)`
+Format: `RS_SetBandNoDataValue(raster: Raster, bandIndex: Integer = 1, noDataValue: Double)`
 
 Since: `v1.5.0`
 
@@ -1162,13 +1274,19 @@ to this function.
 Format: 
 
 ```
-RS_SetValues(raster: Raster, bandIndex: Integer, colX: Integer, rowY: Integer, width: Integer, height: Integer, newValues: Array<Double>, keepNoData: Boolean = false)
+RS_SetValues(raster: Raster, bandIndex: Integer, colX: Integer, rowY: Integer, width: Integer, height: Integer, newValues: ARRAY[Double], keepNoData: Boolean = false)
+```
+
+```
+RS_SetValues(raster: Raster, bandIndex: Integer, geom: Geometry, newValue: Double, keepNoData: Boolean = false)
 ```
 
 Since: `v1.5.0`
 
 The `colX`, `rowY`, and `bandIndex` are 1-indexed. If `keepNoData` is `true`, the pixels with NoData value will not be 
 set to the corresponding value in `newValues`. The `newValues` should be provided in rows.
+
+The geometry variant of this function accepts all types of Geometries and it sets the `newValue` in the specified region under the `geom`.
 
 !!!note 
     If the shape of `newValues` doesn't match with provided `width` and `height`, `IllegalArgumentException` is thrown. 
@@ -1183,7 +1301,7 @@ SELECT RS_BandAsArray(
         RS_SetValues(
             RS_AddBandFromArray(
                 RS_MakeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0),
-                [1,1,1,0,0,0,1,2,3,3,5,6,7,0,0,3,0,0,3,0,0,0,0,0,0], 1, 0d
+                Array(1,1,1,0,0,0,1,2,3,3,5,6,7,0,0,3,0,0,3,0,0,0,0,0,0), 1, 0d
                 ),
             1, 2, 2, 3, 3, [11,12,13,14,15,16,17,18,19]
             )
@@ -1193,7 +1311,27 @@ SELECT RS_BandAsArray(
 Output:
 
 ```
-[1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 11.0, 12.0, 13.0, 3.0, 5.0, 14.0, 15.0, 16.0, 0.0, 3.0, 17.0, 18.0, 19.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+Array(1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 11.0, 12.0, 13.0, 3.0, 5.0, 14.0, 15.0, 16.0, 0.0, 3.0, 17.0, 18.0, 19.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_BandAsArray(
+        RS_SetValues(
+            RS_AddBandFromArray(
+                RS_MakeEmptyRaster(1, 5, 5, 1, -1, 1, -1, 0, 0, 0),
+                Array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), 1
+                ),
+            1, ST_GeomFromWKT('POLYGON((1 -1, 3 -3, 6 -6, 4 -1, 1 -1))'), 255, false
+            )
+           )
+```
+
+Output:
+
+```
+Array(255.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 ```
 
 ### RS_SetSRID
@@ -1204,7 +1342,8 @@ Format: `RS_SetSRID (raster: Raster, srid: Integer)`
 
 Since: `v1.4.1`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_SetSRID(raster, 4326)
 FROM raster_table
@@ -1218,12 +1357,14 @@ Format: `RS_SRID (raster: Raster)`
 
 Since: `v1.4.1`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_SRID(raster) FROM raster_table
 ```
 
 Output:
+
 ```
 3857
 ```
@@ -1233,18 +1374,22 @@ Output:
 Introduction: Returns the value at the given point in the raster.
 If no band number is specified it defaults to 1. 
 
-Format: `RS_Value (raster: Raster, point: Geometry)`
+Format: 
 
-Format: `RS_Value (raster: Raster, point: Geometry, band: Int)`
+`RS_Value (raster: Raster, point: Geometry)`
+
+`RS_Value (raster: Raster, point: Geometry, band: Integer)`
 
 Since: `v1.4.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_Value(raster, ST_Point(-13077301.685, 4002565.802)) FROM raster_table
 ```
 
 Output:
+
 ```
 5.0
 ```
@@ -1257,24 +1402,29 @@ If no band number is specified it defaults to 1.
 RS_Values is similar to RS_Value but operates on an array of points.
 RS_Values can be significantly faster since a raster only has to be loaded once for several points.
 
-Format: `RS_Values (raster: Raster, points: Array[Geometry])`
+Format: 
 
-Format: `RS_Values (raster: Raster, points: Array[Geometry], band: Int)`
+`RS_Values (raster: Raster, points: ARRAY[Geometry])`
+
+`RS_Values (raster: Raster, points: ARRAY[Geometry], band: Integer)`
 
 Since: `v1.4.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_Values(raster, Array(ST_Point(-1307.5, 400.8), ST_Point(-1403.3, 399.1)))
 FROM raster_table
 ```
 
 Output:
+
 ```
 Array(5.0, 3.0)
 ```
 
 Spark SQL example for joining a point dataset with a raster dataset:
+
 ```scala
 val pointDf = sedona.read...
 val rasterDf = sedona.read.format("binaryFile").load("/some/path/*.tiff")
@@ -1294,6 +1444,7 @@ df.join(rasterDf, "path")
 ```
 
 Output:
+
 ```
 +----+------------+-------+
 | id | point      | value |
@@ -1303,6 +1454,36 @@ Output:
 +----+------------+-------+
 ```
 
+### RS_Within
+
+Introduction: Returns true if the geometry or raster on the left side is within the geometry or raster on the right side.
+The convex hull of the raster is considered in the test.
+
+The rules for testing spatial relationship is the same as `RS_Intersects`.
+
+Format: `RS_Within(raster: Raster, geom: Geometry)`
+
+Format: `RS_Within(geom: Geometry, raster: Raster)`
+
+Format: `RS_Within(raster0: Raster, raster1: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((0 0, 0 50, 100 50, 100 0, 0 0))')) rast_geom,
+    RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 30, 30, 2, 22, 1)) rast_rast
+```
+
+Output:
+```
++---------+---------+
+|rast_geom|rast_rast|
++---------+---------+
+|     true|     true|
++---------+---------+
+```
 
 ## Raster to Map Algebra operators
 
@@ -1312,13 +1493,14 @@ To bridge the gap between the raster and map algebra worlds, the following opera
 
 Introduction: Extract a band from a raster as an array of doubles.
 
-Format: `RS_BandAsArray (raster: Raster, bandIndex: Int)`.
+Format: `RS_BandAsArray (raster: Raster, bandIndex: Integer)`.
 
 Since: `v1.4.1`
 
 BandIndex is 1-based and must be between 1 and RS_NumBands(raster). It returns null if the bandIndex is out of range or the raster is null.
 
-SQL example:
+Spark SQL Example:
+
 ```sql
 SELECT RS_BandAsArray(raster, 1) FROM raster_table
 ```
@@ -1337,7 +1519,13 @@ Output:
 
 Introduction: Add a band to a raster from an array of doubles.
 
-Format: `RS_AddBandFromArray (raster: Raster, band: Array[Double])` | `RS_AddBandFromArray (raster: Raster, band: Array[Double], bandIndex:Int)` | `RS_AddBandFromArray (raster: Raster, band: Array[Double], bandIndex:Int, noDataValue:Double)`
+Format: 
+
+`RS_AddBandFromArray (raster: Raster, band: ARRAY[Double])` 
+
+`RS_AddBandFromArray (raster: Raster, band: ARRAY[Double], bandIndex: Integer)` 
+
+`RS_AddBandFromArray (raster: Raster, band: ARRAY[Double], bandIndex: Integer, noDataValue: Double)`
 
 Since: `v1.5.0`
 
@@ -1358,7 +1546,7 @@ Note that: `bandIndex == RS_NumBands(raster) + 1` is an experimental feature and
 !!!Note
     RS_AddBandFromArray typecasts the double band values to the given datatype of the raster. This can lead to overflow values if values beyond the range of the raster's datatype are provided.
 
-SQL example:
+Spark SQL Example:
 
 ```sql
 SELECT RS_AddBandFromArray(raster, RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTiff(content), 1), 2)) AS raster FROM raster_table
@@ -1379,16 +1567,20 @@ Output:
 
 Introduction: Apply a map algebra script on a raster.
 
-Format: `RS_MapAlgebra (raster: Raster, pixelType: String, script: String)`
+Format: 
 
-Format: `RS_MapAlgebra (raster: Raster, pixelType: String, script: String, noDataValue: Double)`
+`RS_MapAlgebra (raster: Raster, pixelType: String, script: String)`
+
+```
+RS_MapAlgebra (raster: Raster, pixelType: String, script: String, noDataValue: Double)
+```
 
 Since: `v1.5.0`
 
 `RS_MapAlgebra` runs a script on a raster. The script is written in a map algebra language called [Jiffle](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle). The script takes a raster
 as input and returns a raster of the same size as output. The script can be used to apply a map algebra expression on a raster. The input raster is named `rast` in the Jiffle script, and the output raster is named `out`.
 
-SQL example:
+Spark SQL Example:
 
 Calculate the NDVI of a raster with 4 bands (R, G, B, NIR):
 
@@ -1418,26 +1610,25 @@ Map algebra operators work on a single band of a raster. Each band is represente
 
 Introduction: Add two spectral bands in a Geotiff image 
 
-Format: `RS_Add (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_Add (Band1: ARRAY[Double], Band2: ARRAY[Double])`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val sumDF = spark.sql("select RS_Add(band1, band2) as sumOfBands from dataframe")
-
 ```
 
 ### RS_Array
 
 Introduction: Create an array that is filled by the given value
 
-Format: `RS_Array(length:Int, value: Double)`
+Format: `RS_Array(length: Integer, value: Double)`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
 
 ```scala
 SELECT RS_Array(height * width, 0.0)
@@ -1447,73 +1638,73 @@ SELECT RS_Array(height * width, 0.0)
 
 Introduction: Find Bitwise AND between two bands of Geotiff image
 
-Format: `RS_BitwiseAND (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_BitwiseAND (Band1: ARRAY[Double], Band2: ARRAY[Double])`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val biwiseandDF = spark.sql("select RS_BitwiseAND(band1, band2) as andvalue from dataframe")
-
 ```
 
 ### RS_BitwiseOR
 
 Introduction: Find Bitwise OR between two bands of Geotiff image
 
-Format: `RS_BitwiseOR (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_BitwiseOR (Band1: ARRAY[Double], Band2: ARRAY[Double])`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val biwiseorDF = spark.sql("select RS_BitwiseOR(band1, band2) as or from dataframe")
-
 ```
 
 ### RS_CountValue
 
 Introduction: Returns count of a particular value from a spectral band in a raster image
 
-Format: `RS_CountValue (Band1: Array[Double], Target: Double)`
+Format: `RS_CountValue (Band1: ARRAY[Double], Target: Double)`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val countDF = spark.sql("select RS_CountValue(band1, target) as count from dataframe")
-
 ```
 
 ### RS_Divide
 
 Introduction: Divide band1 with band2 from a geotiff image
 
-Format: `RS_Divide (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_Divide (Band1: ARRAY[Double], Band2: ARRAY[Double])`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val multiplyDF = spark.sql("select RS_Divide(band1, band2) as divideBands from dataframe")
-
 ```
 
 ### RS_FetchRegion
 
 Introduction: Fetch a subset of region from given Geotiff image based on minimumX, minimumY, maximumX and maximumY index as well original height and width of image
 
-Format: `RS_FetchRegion (Band: Array[Double], coordinates: Array[Int], dimensions: Array[Int])`
+Format: 
+
+```
+RS_FetchRegion (Band: ARRAY[Double], coordinates: ARRAY[Integer], dimensions: ARRAY[Integer])
+```
 
 Since: `v1.1.0`
 
-Spark SQL example:
-```scala
+Spark SQL Example:
 
+```scala
 val region = spark.sql("select RS_FetchRegion(Band,Array(0, 0, 1, 2),Array(3, 3)) as Region from dataframe")
 ```
 
@@ -1521,165 +1712,154 @@ val region = spark.sql("select RS_FetchRegion(Band,Array(0, 0, 1, 2),Array(3, 3)
 
 Introduction: Mask all the values with 1 which are greater than a particular target value
 
-Format: `RS_GreaterThan (Band: Array[Double], Target: Double)`
+Format: `RS_GreaterThan (Band: ARRAY[Double], Target: Double)`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val greaterDF = spark.sql("select RS_GreaterThan(band, target) as maskedvalues from dataframe")
-
 ```
 
 ### RS_GreaterThanEqual
 
 Introduction: Mask all the values with 1 which are greater than equal to a particular target value
 
-Format: `RS_GreaterThanEqual (Band: Array[Double], Target: Double)`
+Format: `RS_GreaterThanEqual (Band: ARRAY[Double], Target: Double)`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val greaterEqualDF = spark.sql("select RS_GreaterThanEqual(band, target) as maskedvalues from dataframe")
-
 ```
 
 ### RS_LessThan
 
 Introduction: Mask all the values with 1 which are less than a particular target value
 
-Format: `RS_LessThan (Band: Array[Double], Target: Double)`
+Format: `RS_LessThan (Band: ARRAY[Double], Target: Double)`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val lessDF = spark.sql("select RS_LessThan(band, target) as maskedvalues from dataframe")
-
 ```
 
 ### RS_LessThanEqual
 
 Introduction: Mask all the values with 1 which are less than equal to a particular target value
 
-Format: `RS_LessThanEqual (Band: Array[Double], Target: Double)`
+Format: `RS_LessThanEqual (Band: ARRAY[Double], Target: Double)`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val lessEqualDF = spark.sql("select RS_LessThanEqual(band, target) as maskedvalues from dataframe")
-
 ```
 
 ### RS_LogicalDifference
 
 Introduction: Return value from band 1 if a value in band1 and band2 are different, else return 0
 
-Format: `RS_LogicalDifference (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_LogicalDifference (Band1: ARRAY[Double], Band2: ARRAY[Double])`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val logicalDifference = spark.sql("select RS_LogicalDifference(band1, band2) as logdifference from dataframe")
-
 ```
 
 ### RS_LogicalOver
 
 Introduction: Return value from band1 if it's not equal to 0, else return band2 value
 
-Format: `RS_LogicalOver (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_LogicalOver (Band1: ARRAY[Double], Band2: ARRAY[Double])`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val logicalOver = spark.sql("select RS_LogicalOver(band1, band2) as logover from dataframe")
-
 ```
 
 ### RS_Mean
 
 Introduction: Returns Mean value for a spectral band in a Geotiff image
 
-Format: `RS_Mean (Band: Array[Double])`
+Format: `RS_Mean (Band: ARRAY[Double])`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val meanDF = spark.sql("select RS_Mean(band) as mean from dataframe")
-
 ```
 
 ### RS_Mode
 
 Introduction: Returns Mode from a spectral band in a Geotiff image in form of an array
 
-Format: `RS_Mode (Band: Array[Double])`
+Format: `RS_Mode (Band: ARRAY[Double])`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val modeDF = spark.sql("select RS_Mode(band) as mode from dataframe")
-
 ```
 
 ### RS_Modulo
 
 Introduction: Find modulo of pixels with respect to a particular value
 
-Format: `RS_Modulo (Band: Array[Double], Target: Double)`
+Format: `RS_Modulo (Band: ARRAY[Double], Target: Double)`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val moduloDF = spark.sql("select RS_Modulo(band, target) as modulo from dataframe")
-
 ```
 
 ### RS_Multiply
 
 Introduction: Multiply two spectral bands in a Geotiff image
 
-Format: `RS_Multiply (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_Multiply (Band1: ARRAY[Double], Band2: ARRAY[Double])`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val multiplyDF = spark.sql("select RS_Multiply(band1, band2) as multiplyBands from dataframe")
-
 ```
 
 ### RS_MultiplyFactor
 
 Introduction: Multiply a factor to a spectral band in a geotiff image
 
-Format: `RS_MultiplyFactor (Band1: Array[Double], Factor: Double)`
+Format: `RS_MultiplyFactor (Band1: ARRAY[Double], Factor: Double)`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val multiplyFactorDF = spark.sql("select RS_MultiplyFactor(band1, 2) as multiplyfactor from dataframe")
-
 ```
 
 This function only accepts integer as factor before `v1.5.0`.
@@ -1688,9 +1868,12 @@ This function only accepts integer as factor before `v1.5.0`.
 
 Introduction: Normalize the value in the array to [0, 255]
 
+Format: `RS_Normalize (Band: ARRAY[Double])`
+
 Since: `v1.1.0`
 
-Spark SQL example
+Spark SQL Example:
+
 ```sql
 SELECT RS_Normalize(band)
 ```
@@ -1699,43 +1882,40 @@ SELECT RS_Normalize(band)
 
 Introduction: Returns Normalized Difference between two bands(band2 and band1) in a Geotiff image(example: NDVI, NDBI)
 
-Format: `RS_NormalizedDifference (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_NormalizedDifference (Band1: ARRAY[Double], Band2: ARRAY[Double])`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val normalizedDF = spark.sql("select RS_NormalizedDifference(band1, band2) as normdifference from dataframe")
-
 ```
 
 ### RS_SquareRoot
 
 Introduction: Find Square root of band values in a geotiff image 
 
-Format: `RS_SquareRoot (Band: Array[Double])`
+Format: `RS_SquareRoot (Band: ARRAY[Double])`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val rootDF = spark.sql("select RS_SquareRoot(band) as squareroot from dataframe")
-
 ```
 
 ### RS_Subtract
 
 Introduction: Subtract two spectral bands in a Geotiff image(band2 - band1)
 
-Format: `RS_Subtract (Band1: Array[Double], Band2: Array[Double])`
+Format: `RS_Subtract (Band1: ARRAY[Double], Band2: ARRAY[Double])`
 
 Since: `v1.1.0`
 
-Spark SQL example:
+Spark SQL Example:
+
 ```scala
-
 val subtractDF = spark.sql("select RS_Subtract(band1, band2) as differenceOfOfBands from dataframe")
-
 ```

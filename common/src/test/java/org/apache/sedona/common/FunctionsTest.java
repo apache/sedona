@@ -14,6 +14,7 @@
 package org.apache.sedona.common;
 
 import com.google.common.geometry.S2CellId;
+import org.apache.sedona.common.utils.H3Utils;
 import com.google.common.math.DoubleMath;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
@@ -28,9 +29,7 @@ import org.locationtech.jts.io.WKTWriter;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -86,7 +85,7 @@ public class FunctionsTest {
         actual = Constructors.geomFromEWKT(expectedResult);
         assertEquals(geometry, actual);
         assertEquals(expectedResult, actualResult);
-        
+
         geometry = geometryFactory.createPoint(new CoordinateXYM(1.0, 2.0, 3.0));
         actualResult = Functions.asEWKT(geometry);
         expectedResult = "SRID=4236;POINT M(1 2 3)";
@@ -117,14 +116,14 @@ public class FunctionsTest {
         actual = Constructors.geomFromEWKT(expectedResult);
         assertEquals(geometry, actual);
         assertEquals(expectedResult, actualResult);
-        
+
         geometry = GEOMETRY_FACTORY.createPoint(new CoordinateXYM(1.0, 2.0, 3.0));
         actualResult = Functions.asWKT(geometry);
         expectedResult = "POINT M(1 2 3)";
         actual = Constructors.geomFromEWKT(expectedResult);
         assertEquals(geometry, actual);
         assertEquals(expectedResult, actualResult);
-        
+
         geometry = GEOMETRY_FACTORY.createPoint(new CoordinateXYZM(1.0, 2.0, 3.0, 4.0));
         actualResult = Functions.asWKT(geometry);
         expectedResult = "POINT ZM(1 2 3 4)";
@@ -145,7 +144,7 @@ public class FunctionsTest {
         expected = Constructors.geomFromWKB(actualResult);
         assertEquals(expected, geometry);
     }
-    
+
     @Test
     public void splitLineStringByMultipoint() {
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5, 2.0, 2.0));
@@ -160,8 +159,8 @@ public class FunctionsTest {
     @Test
     public void splitMultiLineStringByMultiPoint() {
         LineString[] lineStrings = new LineString[]{
-            GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5, 2.0, 2.0)),
-            GEOMETRY_FACTORY.createLineString(coordArray(3.0, 3.0, 4.5, 4.5, 5.0, 5.0))
+                GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5, 2.0, 2.0)),
+                GEOMETRY_FACTORY.createLineString(coordArray(3.0, 3.0, 4.5, 4.5, 5.0, 5.0))
         };
         MultiLineString multiLineString = GEOMETRY_FACTORY.createMultiLineString(lineStrings);
         MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0.5, 0.5, 1.0, 1.0, 3.5, 3.5, 4.0, 4.0));
@@ -242,8 +241,8 @@ public class FunctionsTest {
     @Test
     public void splitOverlappingMultiPolygonByLineString() {
         Polygon[] polygons = new Polygon[]{
-            GEOMETRY_FACTORY.createPolygon(coordArray(1.0, 1.0, 5.0, 1.0, 5.0, 5.0, 1.0, 5.0, 1.0, 1.0)),
-            GEOMETRY_FACTORY.createPolygon(coordArray(2.0, 1.0, 6.0, 1.0, 6.0, 5.0, 2.0, 5.0, 2.0, 1.0))
+                GEOMETRY_FACTORY.createPolygon(coordArray(1.0, 1.0, 5.0, 1.0, 5.0, 5.0, 1.0, 5.0, 1.0, 1.0)),
+                GEOMETRY_FACTORY.createPolygon(coordArray(2.0, 1.0, 6.0, 1.0, 6.0, 5.0, 2.0, 5.0, 2.0, 1.0))
         };
         MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(polygons);
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(3.0, 0.0, 3.0, 6.0));
@@ -291,7 +290,7 @@ public class FunctionsTest {
     public void splitPolygonWithHoleByLineStringThroughHole() {
         LinearRing shell = GEOMETRY_FACTORY.createLinearRing(coordArray(0.0, 0.0, 4.0, 0.0, 4.0, 4.0, 0.0, 4.0, 0.0, 0.0));
         LinearRing[] holes = new LinearRing[]{
-            GEOMETRY_FACTORY.createLinearRing(coordArray(1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0))
+                GEOMETRY_FACTORY.createLinearRing(coordArray(1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0))
         };
         Polygon polygon = GEOMETRY_FACTORY.createPolygon(shell, holes);
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1.5, -1.0, 1.5, 5.0));
@@ -306,7 +305,7 @@ public class FunctionsTest {
     public void splitPolygonWithHoleByLineStringNotThroughHole() {
         LinearRing shell = GEOMETRY_FACTORY.createLinearRing(coordArray(0.0, 0.0, 4.0, 0.0, 4.0, 4.0, 0.0, 4.0, 0.0, 0.0));
         LinearRing[] holes = new LinearRing[]{
-            GEOMETRY_FACTORY.createLinearRing(coordArray(1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0))
+                GEOMETRY_FACTORY.createLinearRing(coordArray(1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0, 1.0, 1.0, 1.0))
         };
         Polygon polygon = GEOMETRY_FACTORY.createPolygon(shell, holes);
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(3.0, -1.0, 3.0, 5.0));
@@ -320,8 +319,8 @@ public class FunctionsTest {
     @Test
     public void splitHomogeneousLinealGeometryCollectionByMultiPoint() {
         LineString[] lineStrings = new LineString[]{
-            GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5, 2.0, 2.0)),
-            GEOMETRY_FACTORY.createLineString(coordArray(3.0, 3.0, 4.5, 4.5, 5.0, 5.0))
+                GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5, 2.0, 2.0)),
+                GEOMETRY_FACTORY.createLineString(coordArray(3.0, 3.0, 4.5, 4.5, 5.0, 5.0))
         };
         GeometryCollection geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(lineStrings);
         MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0.5, 0.5, 1.0, 1.0, 3.5, 3.5, 4.0, 4.0));
@@ -335,8 +334,8 @@ public class FunctionsTest {
     @Test
     public void splitHeterogeneousGeometryCollection() {
         Geometry[] geometry = new Geometry[]{
-            GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5)),
-            GEOMETRY_FACTORY.createPolygon(coordArray(0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0))
+                GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5)),
+                GEOMETRY_FACTORY.createPolygon(coordArray(0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0))
         };
         GeometryCollection geometryCollection = GEOMETRY_FACTORY.createGeometryCollection(geometry);
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0.5, 0.0, 0.5, 5.0));
@@ -445,7 +444,7 @@ public class FunctionsTest {
                 new LinearRing[] {
                         GEOMETRY_FACTORY.createLinearRing(coordArray(0.2, 0.2, 0.5, 0.2, 0.6, 0.7, 0.2, 0.6, 0.2, 0.2))
                 }
-                );
+        );
         // polygon inside the hole, shouldn't intersect with the polygon
         Polygon polygonInHole = GEOMETRY_FACTORY.createPolygon(coordArray(0.3, 0.3, 0.4, 0.3, 0.3, 0.4, 0.3, 0.3));
         // mbr of the polygon that cover all
@@ -572,6 +571,113 @@ public class FunctionsTest {
         HashSet<Integer> expects = new HashSet<>();
         expects.add(10);
         assertEquals(expects, levels);
+    }
+
+    /**
+     * Test H3CellIds: pass in all the types of geometry, test if the function cover
+     */
+    @Test
+    public void h3CellIDs() {
+        Geometry[] combinedGeoms = new Geometry[] {
+                GEOMETRY_FACTORY.createPoint(new Coordinate(0.1, 0.1)),
+                GEOMETRY_FACTORY.createPoint(new Coordinate(0.2, 0.1)),
+                GEOMETRY_FACTORY.createLineString(coordArray(0.1, 0.1, 0.2, 0.1, 0.3, 0.4, 0.5, 0.9)),
+                GEOMETRY_FACTORY.createLineString(coordArray(0.5, 0.1, 0.1, 0.5, 0.3, 0.1)),
+                GEOMETRY_FACTORY.createPolygon(coordArray(0.1, 0.1, 0.5, 0.1, 0.1, 0.6, 0.1, 0.1)),
+                GEOMETRY_FACTORY.createPolygon(coordArray(0.2, 0.1, 0.6, 0.3, 0.7, 0.6, 0.2, 0.5, 0.2, 0.1))
+        };
+        // The test geometries, cover all 7 geometry types targeted
+        Geometry[] targets = new Geometry[] {
+                GEOMETRY_FACTORY.createPoint(new Coordinate(1, 2)),
+                GEOMETRY_FACTORY.createPolygon(
+                        GEOMETRY_FACTORY.createLinearRing(coordArray(0.1, 0.1, 0.5, 0.1, 1.0, 0.3, 1.0, 1.0, 0.1, 1.0, 0.1, 0.1)),
+                        new LinearRing[] {
+                                GEOMETRY_FACTORY.createLinearRing(coordArray(0.2, 0.2, 0.5, 0.2, 0.6, 0.7, 0.2, 0.6, 0.2, 0.2))
+                        }
+                ),
+                GEOMETRY_FACTORY.createLineString(coordArray(0.2, 0.2, 0.3, 0.4, 0.4, 0.6)),
+                GEOMETRY_FACTORY.createGeometryCollection(
+                        new Geometry[] {
+                                GEOMETRY_FACTORY.createMultiPoint(new Point[] {(Point) combinedGeoms[0], (Point) combinedGeoms[1]}),
+                                GEOMETRY_FACTORY.createMultiLineString(new LineString[] {(LineString) combinedGeoms[2], (LineString) combinedGeoms[3]}),
+                                GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {(Polygon) combinedGeoms[4], (Polygon) combinedGeoms[5]})
+                        }
+                )
+        };
+        int resolution = 7;
+        // the expected results
+        Set<Long> expects = new HashSet<>();
+        expects.addAll(new HashSet<>(Collections.singletonList(H3Utils.coordinateToCell(targets[0].getCoordinate(), resolution))));
+        expects.addAll(new HashSet<>(H3Utils.polygonToCells((Polygon) targets[1], resolution, true)));
+        expects.addAll(new HashSet<>(H3Utils.lineStringToCells((LineString) targets[2], resolution, true)));
+        // for GeometryCollection, generate separately for the underlying geoms
+        expects.add(H3Utils.coordinateToCell(combinedGeoms[0].getCoordinate(), resolution));
+        expects.add(H3Utils.coordinateToCell(combinedGeoms[1].getCoordinate(), resolution));
+        expects.addAll(H3Utils.lineStringToCells((LineString) combinedGeoms[2], resolution, true));
+        expects.addAll(H3Utils.lineStringToCells((LineString) combinedGeoms[3], resolution, true));
+        expects.addAll(H3Utils.polygonToCells((Polygon) combinedGeoms[4], resolution, true));
+        expects.addAll(H3Utils.polygonToCells((Polygon) combinedGeoms[5], resolution, true));
+        // generate exact
+        Set<Long> exacts = new HashSet<>(Arrays.asList(Functions.h3CellIDs(GEOMETRY_FACTORY.createGeometryCollection(targets), resolution, true)));
+        assert exacts.equals(expects);
+    }
+
+    /**
+     * Test H3CellDistance
+     */
+    @Test
+    public void h3CellDistance() {
+        LineString pentagonLine = GEOMETRY_FACTORY.createLineString(coordArray(58.174758948493505, 10.427371502467615, 58.1388817207103, 10.469490838693966));
+        // normal line
+        LineString line = GEOMETRY_FACTORY.createLineString(coordArray(-4.414062499999996, 19.790494005157534,5.781250000000004, 13.734595619093557));
+        long pentagonDist = Functions.h3CellDistance(
+                H3Utils.coordinateToCell(pentagonLine.getCoordinateN(0), 11),
+                H3Utils.coordinateToCell(pentagonLine.getCoordinateN(1), 11)
+        );
+        long lineDist = Functions.h3CellDistance(
+                H3Utils.coordinateToCell(line.getCoordinateN(0), 10),
+                H3Utils.coordinateToCell(line.getCoordinateN(1), 10)
+        );
+        assertEquals(
+                H3Utils.approxPathCells(
+                        pentagonLine.getCoordinateN(0),
+                        pentagonLine.getCoordinateN(1),
+                        11,
+                        true
+                ).size() - 1,
+                pentagonDist
+        );
+
+        assertEquals(
+                H3Utils.h3.gridDistance(
+                        H3Utils.coordinateToCell(line.getCoordinateN(0), 10),
+                        H3Utils.coordinateToCell(line.getCoordinateN(1), 10)
+                ),
+                lineDist
+        );
+    }
+
+    /**
+     * Test h3kRing
+     */
+    @Test
+    public void h3KRing() {
+        Point[] points = new Point[] {
+                // pentagon
+                GEOMETRY_FACTORY.createPoint(new Coordinate(10.53619907546767, 64.70000012793487)),
+                // 7th neighbor of pentagon
+                GEOMETRY_FACTORY.createPoint(new Coordinate(10.536630883471666, 64.69944253201858)),
+                // normal point
+                GEOMETRY_FACTORY.createPoint(new Coordinate(-166.093005914,61.61964122848931)),
+        };
+        for (Point point : points) {
+            long cell = H3Utils.coordinateToCell(point.getCoordinate(), 12);
+            Set<Long> allNeighbors = new HashSet<>(Arrays.asList(Functions.h3KRing(cell, 10, false)));
+            Set<Long> kthNeighbors = new HashSet<>(Arrays.asList(Functions.h3KRing(cell, 10, true)));
+            assert allNeighbors.containsAll(kthNeighbors);
+            kthNeighbors.addAll(Arrays.asList(Functions.h3KRing(cell, 9, false)));
+            assert allNeighbors.equals(kthNeighbors);
+        }
     }
 
     @Test
@@ -945,7 +1051,7 @@ public class FunctionsTest {
         LineString actualLinestring = (LineString) Functions.makeLine(point1, point2);
         LineString expectedLineString = GEOMETRY_FACTORY.createLineString(coordArray3d( 1, 1, 1, 2, 2, 2));
         assertEquals(wktWriter3D.write(actualLinestring), wktWriter3D.write(expectedLineString));
-        
+
         MultiPoint multiPoint1 = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray3d(0.5, 0.5, 1, 1, 1, 1));
         MultiPoint multiPoint2 = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray3d(0.5, 0.5, 2, 2, 2, 2));
         actualLinestring = (LineString) Functions.makeLine(multiPoint1, multiPoint2);
@@ -996,7 +1102,7 @@ public class FunctionsTest {
     public void nRingsPolygonWithHoles() throws Exception {
         LinearRing shell = GEOMETRY_FACTORY.createLinearRing(coordArray(1, 0, 1, 6, 6, 6, 6, 0, 1, 0));
         LinearRing[] holes = new LinearRing[] {GEOMETRY_FACTORY.createLinearRing(coordArray(2, 1, 2, 2, 3, 2, 3, 1, 2, 1)),
-                                                GEOMETRY_FACTORY.createLinearRing(coordArray(4, 1, 4, 2, 5, 2, 5, 1, 4, 1))};
+                GEOMETRY_FACTORY.createLinearRing(coordArray(4, 1, 4, 2, 5, 2, 5, 1, 4, 1))};
         Polygon polygonWithHoles = GEOMETRY_FACTORY.createPolygon(shell, holes);
         Integer expected = 3;
         Integer actual = Functions.nRings(polygonWithHoles);
@@ -1013,7 +1119,7 @@ public class FunctionsTest {
     @Test
     public void nRingsMultiPolygonOnlyExternal() throws Exception {
         MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0)),
-                                                                                        GEOMETRY_FACTORY.createPolygon(coordArray(5, 0, 5, 1, 7, 1, 7, 0, 5, 0))});
+                GEOMETRY_FACTORY.createPolygon(coordArray(5, 0, 5, 1, 7, 1, 7, 0, 5, 0))});
         Integer expected = 2;
         Integer actual = Functions.nRings(multiPolygon);
         assertEquals(expected, actual);
@@ -1396,7 +1502,7 @@ public class FunctionsTest {
         assertEquals(expected, actual);
     }
 
-   @Test
+    @Test
     public void affine3DGeom2D() {
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
         String expected = GEOMETRY_FACTORY.createLineString(coordArray(4, 5, 5, 7, 6, 9)).toText();
@@ -1469,7 +1575,7 @@ public class FunctionsTest {
         String expected1 = "POINT";
         String actual1 = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createPoint(new Coordinate(10, 5)));
         assertEquals(expected1, actual1);
-        
+
         // Create a point with measure value
         CoordinateXYM coords = new CoordinateXYM(2, 3, 4);
         Point measuredPoint = GEOMETRY_FACTORY.createPoint(coords);
@@ -1497,7 +1603,7 @@ public class FunctionsTest {
         String expected1 = "POINT";
         String actual1 = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createPoint(new Coordinate(10, 5, 1)));
         assertEquals(expected1, actual1);
-        
+
         // Create a point with measure value
         CoordinateXYZM coordsPoint = new CoordinateXYZM(2, 3, 4, 0);
         Point measuredPoint = GEOMETRY_FACTORY.createPoint(coordsPoint);
@@ -1525,7 +1631,7 @@ public class FunctionsTest {
         String expected1 = "GEOMETRYCOLLECTION";
         String actual1 = Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {GEOMETRY_FACTORY.createPoint(new Coordinate(10, 5))}));
         assertEquals(expected1, actual1);
-        
+
         // Create a geometrycollection with measure value
         CoordinateXYM coords = new CoordinateXYM(2, 3, 4);
         Point measuredPoint = GEOMETRY_FACTORY.createPoint(coords);
@@ -1610,7 +1716,7 @@ public class FunctionsTest {
         String expected = "ST_ClosestPoint doesn't support empty geometry object.";
         Exception e1 = assertThrows(IllegalArgumentException.class, () -> Functions.closestPoint(point, emptyLineString));
         assertEquals(expected, e1.getMessage());
-        
+
         // Both objects are empty
         Polygon emptyPolygon = GEOMETRY_FACTORY.createPolygon();
         Exception e2 = assertThrows(IllegalArgumentException.class, () -> Functions.closestPoint(emptyPolygon, emptyLineString));
@@ -1728,7 +1834,7 @@ public class FunctionsTest {
 
 
     }
-    
+
     @Test
     public void voronoiPolygons() {
         MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0, 0, 2, 2));

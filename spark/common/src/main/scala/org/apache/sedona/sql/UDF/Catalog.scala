@@ -109,6 +109,10 @@ object Catalog {
     function[ST_EndPoint](),
     function[ST_ExteriorRing](),
     function[ST_GeometryN](),
+    function[ST_H3CellDistance](),
+    function[ST_H3CellIDs](),
+    function[ST_H3ToGeom](),
+    function[ST_H3KRing](),
     function[ST_InteriorRingN](),
     function[ST_Dump](),
     function[ST_DumpPoints](),
@@ -227,6 +231,7 @@ object Catalog {
     function[RS_PixelAsCentroid](),
     function[RS_Count](),
     function[RS_Band](),
+    function[RS_AddBand](),
     function[RS_SummaryStats](),
     function[RS_BandIsNoData](),
     function[RS_ConvexHull](),
@@ -242,7 +247,7 @@ object Catalog {
     function[RS_MinConvexHull](),
     function[RS_AsMatrix](),
     function[RS_AsImage](),
-    function[RS_Resample](),
+    function[RS_Resample]()
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(

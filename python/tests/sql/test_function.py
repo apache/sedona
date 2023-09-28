@@ -266,10 +266,10 @@ class TestPredicateJoin(TestBase):
             ("Linestring(0 0 1, 1 1 2, 1 0 3)",),
             ("MULTIPOINT ((10 40 66), (40 30 77), (20 20 88), (30 10 99))",),
             (
-            "MULTIPOLYGON (((30 20 11, 45 40 11, 10 40 11, 30 20 11)), ((15 5 11, 40 10 11, 10 20 11, 5 10 11, 15 5 11)))",),
+                "MULTIPOLYGON (((30 20 11, 45 40 11, 10 40 11, 30 20 11)), ((15 5 11, 40 10 11, 10 20 11, 5 10 11, 15 5 11)))",),
             ("MULTILINESTRING ((10 10 11, 20 20 11, 10 40 11), (40 40 11, 30 30 11, 40 20 11, 30 10 11))",),
             (
-            "MULTIPOLYGON (((40 40 11, 20 45 11, 45 30 11, 40 40 11)), ((20 35 11, 10 30 11, 10 10 11, 30 5 11, 45 20 11, 20 35 11), (30 20 11, 20 15 11, 20 25 11, 30 20 11)))",),
+                "MULTIPOLYGON (((40 40 11, 20 45 11, 45 30 11, 40 40 11)), ((20 35 11, 10 30 11, 10 10 11, 30 5 11, 45 20 11, 20 35 11), (30 20 11, 20 15 11, 20 25 11, 30 20 11)))",),
             ("POLYGON((0 0 11, 0 5 11, 5 5 11, 5 0 11, 0 0 11), (1 1 11, 2 1 11, 2 2 11, 1 2 11, 1 1 11))",),
         ], ["wkt"])
 
@@ -715,8 +715,8 @@ class TestPredicateJoin(TestBase):
             ("MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10))", "Point(21 52)"),
             ("MULTILINESTRING ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))", "Point(21 52)"),
             (
-            "GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40), POLYGON ((40 40, 20 45, 45 30, 40 40)))",
-            "Point(21 52)"),
+                "GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40), POLYGON ((40 40, 20 45, 45 30, 40 40)))",
+                "Point(21 52)"),
             ("POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))", "Point(21 52)")
         ]
         geometry_df = self.__wkt_pairs_to_data_frame(geometry)
@@ -1155,6 +1155,53 @@ class TestPredicateJoin(TestBase):
         # test null case
         cell_ids = self.spark.sql("select ST_S2CellIDs(null, 6)").take(1)[0][0]
         assert cell_ids is None
+
+    def test_st_h3_cell_ids(self):
+        test_cases = [
+            "'POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'",
+            "'LINESTRING(0 0, 1 2, 2 4, 3 6)'",
+            "'POINT(1 2)'"
+        ]
+        for input_geom in test_cases:
+            cell_ids = self.spark.sql("select ST_H3CellIDs(ST_GeomFromText({}), 6, true)".format(input_geom)).take(1)[0][0]
+            assert isinstance(cell_ids, list)
+            assert isinstance(cell_ids[0], int)
+        # test null case
+        cell_ids = self.spark.sql("select ST_H3CellIDs(null, 6, true)").take(1)[0][0]
+        assert cell_ids is None
+
+    def test_st_h3_cell_distance(self):
+        df = self.spark.sql("select ST_H3CellDistance(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], ST_H3CellIDs(ST_GeomFromWKT('POINT(1.23 1.59)'), 8, true)[0])")
+        assert df.take(1)[0][0] == 78
+
+    def test_st_h3_kring(self):
+        df = self.spark.sql("""
+        SELECT 
+            ST_H3KRing(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], 1, true) exactRings,
+            ST_H3KRing(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], 1, false) allRings,
+            ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true) original_cells
+        """)
+        exact_rings, all_rings, original_cells = df.take(1)[0]
+        assert set(exact_rings + original_cells) == set(all_rings)
+
+    def test_st_h3_togeom(self):
+        df = self.spark.sql("""
+        SELECT
+            ST_Contains(
+                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, true)),
+                ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))')
+            ),
+            ST_Contains(
+                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, false)),
+                ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))')
+            ),
+            ST_Intersects(
+                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, false)),
+                ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))')
+            )
+        """)
+        res1, res2, res3 = df.take(1)[0]
+        assert res1 and not res2 and res3
 
     def test_st_numPoints(self):
         actual = self.spark.sql("SELECT ST_NumPoints(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'))").take(1)[0][0]
