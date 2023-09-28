@@ -80,16 +80,16 @@ RS_AsMatrix expects a raster, and optionally a band (default: 1) and postDecimal
     === "Java"
     
         ```java
-        System.out.println(Arrays.toString(df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect()))
+        System.out.println(String.join("\n", df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect()))
         ```
     
     === "Python"
     
         ```python
-        print(df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect())
+        print("\n".join(df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect()))
         ```
 
-    The `sample()` function is only there to reduce the data sent to `collect()`, you may also use `filter()` if that's appropriate. As `RS_AsMatrix` function only returns one row, please select the 0th index to get the output in the expected behavior.
+    The `sample()` function is only there to reduce the data sent to `collect()`, you may also use `filter()` if that's appropriate.
 
 Format: 
 

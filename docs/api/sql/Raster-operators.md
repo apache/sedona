@@ -215,7 +215,7 @@ Introduction: Returns the georeference metadata of raster as a string in GDAL or
 
     The `sample()` function is only there to reduce the data sent to `collect()`, you may also use `filter()` if that's appropriate.
 
-Format: `RS_GeoReference(raster: Raster, format: String)`
+Format: `RS_GeoReference(raster: Raster, format: String = "GDAL")`
 
 Since: `v1.5.0`
 
