@@ -1077,7 +1077,6 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 4, 3, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as emptyRaster")
       val resultDf = df.selectExpr("RS_AsMatrix(emptyRaster, 1, 5) as matrix")
       val actual = resultDf.first().getString(0);
-      resultDf.show()
       val expected = "| 1.00000   3.33333   4.00000   0.00010|\n" + "| 2.22220   9.00000  10.00000  11.11111|\n" + "| 3.00000   4.00000   5.00000   6.00000|\n"
       assertEquals(expected, actual)
     }
