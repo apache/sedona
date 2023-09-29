@@ -20,10 +20,11 @@
 package org.apache.sedona.core.monitoring
 
 import org.apache.spark.SparkContext
+import org.apache.spark.util.LongAccumulator
 
 object Metrics {
-  def createMetric(sc: SparkContext, name: String): Metric = {
-    val acc = new Metric()
+  def createMetric(sc: SparkContext, name: String): LongAccumulator = {
+    val acc = new LongAccumulator()
     sc.register(acc, "sedona.spatialjoin." + name)
     acc
   }
