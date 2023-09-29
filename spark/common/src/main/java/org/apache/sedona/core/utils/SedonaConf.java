@@ -59,7 +59,6 @@ public class SedonaConf
     private long autoBroadcastJoinThreshold;
 
     private SpatialJoinOptimizationMode spatialJoinOptimizationMode;
-    private boolean debug;
 
     public static SedonaConf fromActiveSession() {
         return new SedonaConf(SparkSession.active().conf());
@@ -84,7 +83,6 @@ public class SedonaConf
         );
         this.spatialJoinOptimizationMode = SpatialJoinOptimizationMode.getSpatialJoinOptimizationMode(
                 runtimeConfig.get("sedona.join.optimizationmode", "nonequi"));
-        this.debug = Boolean.parseBoolean(runtimeConfig.get("sedona.debug", "false"));
     }
 
     public boolean getUseIndex()
@@ -163,9 +161,5 @@ public class SedonaConf
 
     public SpatialJoinOptimizationMode getSpatialJoinOptimizationMode() {
         return spatialJoinOptimizationMode;
-    }
-
-    public boolean getDebug() {
-        return debug;
     }
 }

@@ -40,7 +40,6 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     .config("spark.sql.warehouse.dir", warehouseLocation)
     // We need to be explicit about broadcasting in tests.
     .config("sedona.join.autoBroadcastJoinThreshold", "-1")
-    .config("sedona.debug", "true")
     .config("spark.kryoserializer.buffer.max", "64m")
     .getOrCreate()
 
