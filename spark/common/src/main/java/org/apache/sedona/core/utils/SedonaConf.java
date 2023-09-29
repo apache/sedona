@@ -24,10 +24,15 @@ import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.enums.JoinBuildSide;
 import org.apache.sedona.core.enums.JoinSparitionDominantSide;
 import org.apache.sedona.core.enums.SpatialJoinOptimizationMode;
+import org.apache.spark.SparkConf;
+import org.apache.spark.SparkContext;
 import org.apache.spark.sql.RuntimeConfig;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.internal.SQLConf;
 import org.apache.spark.util.Utils;
 import org.locationtech.jts.geom.Envelope;
+import scala.Option;
+import scala.Tuple2;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -62,7 +67,32 @@ public class SedonaConf
     private boolean debug;
 
     public static SedonaConf fromActiveSession() {
-        return new SedonaConf(SparkSession.active().conf());
+        try {
+            return new SedonaConf(SparkSession.active().conf());
+        } catch (IllegalStateException e) {
+            // SparkSession is not active most likely because we are in a RDD-only context
+            // In this case, we need to create the SparkSQL RuntimeConfig from SparkContext but these parameters cannot be set in runtime.
+            Option<SparkContext> sc = SparkContext.getActive();
+            if (sc.isEmpty()) {
+                throw new IllegalStateException("SparkSession is not active and no SparkContext is available");
+            }
+            return new SedonaConf(getSedonaRuntimeConfig(sc.get().getConf()));
+        }
+    }
+
+    /**
+     * Get the Sedona RuntimeConfig from SparkConf
+     * If we are in a RDD-only context, we need to get the RuntimeConfig from SparkContext.
+     * However, if this method is called, it means that we are in a SparkRDD only environment, and these parameters cannot be set in runtime.
+     * @param sparkConf
+     * @return
+     */
+    private static RuntimeConfig getSedonaRuntimeConfig(SparkConf sparkConf) {
+        SQLConf sqlConf = new SQLConf();
+        for (Tuple2<String, String> sedona : sparkConf.getAllWithPrefix("sedona")) {
+            sqlConf.setConfString(sedona._1, sedona._2);
+        }
+        return new RuntimeConfig(new SQLConf());
     }
 
     public SedonaConf(RuntimeConfig runtimeConfig)
