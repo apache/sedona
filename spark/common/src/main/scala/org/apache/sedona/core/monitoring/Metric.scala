@@ -28,19 +28,21 @@ import scala.collection.mutable
   * An accumulator to collect custom per-task metrics into a map
   * keyed by partition ID processed by the task.
   */
-case class Metric(initialValue: Map[Int, Long] = Map()) extends AccumulatorV2[Long, Map[Int, Long]] {
+case class Metric(initialValue: Map[Int, Long] = Map(), debug: Boolean) extends AccumulatorV2[Long, Map[Int, Long]] {
   private var _counts: mutable.Map[Int, Long] = mutable.Map[Int, Long]() ++ initialValue
 
   override def isZero: Boolean = _counts.isEmpty
 
-  override def copy(): AccumulatorV2[Long, Map[Int, Long]] = new Metric(_counts.toMap)
+  override def copy(): AccumulatorV2[Long, Map[Int, Long]] = new Metric(_counts.toMap, debug)
 
   override def reset(): Unit = _counts.clear()
 
   override def add(v: Long): Unit = add(TaskContext.getPartitionId, v)
 
   private def add(partitionId: Int, value: Long) = {
-    _counts(partitionId) = value + _counts.getOrElse(partitionId, 0L)
+    if (debug) {
+      _counts(partitionId) = value + _counts.getOrElse(partitionId, 0L)
+    }
   }
 
   override def merge(other: AccumulatorV2[Long, Map[Int, Long]]): Unit = {

@@ -29,7 +29,7 @@ class MetricSuite extends TestBaseScala {
     val data = 1 to 100
     val rdd = sc.parallelize(data, 5)
 
-    val metric = Metrics.createMetric(sc, "count")
+    val metric = Metrics.createMetric(sc, "count", debug = true)
 
     // Count elements in each partition. For partitions with even IDs count each element twice.
     rdd.map { x =>

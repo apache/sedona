@@ -56,3 +56,7 @@ sparkSession.conf.set("sedona.global.index","false")
 		* all: Always optimize spatial join queries, even for equi-joins.
 		* none: Disable optimization for spatial joins.
 		* nonequi: Optimize spatial join queries that are not equi-joins.
+* sedona.debug **(Advanced users only!)**
+	* Enable debug mode. Currently only used for debugging spatial join query. If enabled, Sedona will incur extra memory overhead to collect debug information.
+	* Default: false
+	* Possible values: true, false

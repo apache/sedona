@@ -22,8 +22,8 @@ package org.apache.sedona.core.monitoring
 import org.apache.spark.SparkContext
 
 object Metrics {
-  def createMetric(sc: SparkContext, name: String): Metric = {
-    val acc = new Metric()
+  def createMetric(sc: SparkContext, name: String, debug: Boolean): Metric = {
+    val acc = new Metric(Map(), debug)
     sc.register(acc, "sedona.spatialjoin." + name)
     acc
   }

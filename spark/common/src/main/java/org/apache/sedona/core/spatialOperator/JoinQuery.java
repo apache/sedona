@@ -32,6 +32,7 @@ import org.apache.sedona.core.monitoring.Metrics;
 import org.apache.sedona.core.spatialPartitioning.SpatialPartitioner;
 import org.apache.sedona.core.spatialRDD.CircleRDD;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
+import org.apache.sedona.core.utils.SedonaConf;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -535,10 +536,11 @@ public class JoinQuery
         verifyPartitioningMatch(leftRDD, rightRDD);
 
         SparkContext sparkContext = leftRDD.spatialPartitionedRDD.context();
-        Metric buildCount = Metrics.createMetric(sparkContext, "buildCount");
-        Metric streamCount = Metrics.createMetric(sparkContext, "streamCount");
-        Metric resultCount = Metrics.createMetric(sparkContext, "resultCount");
-        Metric candidateCount = Metrics.createMetric(sparkContext, "candidateCount");
+        SedonaConf sedonaConf = SedonaConf.fromActiveSession();
+        Metric buildCount = Metrics.createMetric(sparkContext, "buildCount", sedonaConf.getDebug());
+        Metric streamCount = Metrics.createMetric(sparkContext, "streamCount", sedonaConf.getDebug());
+        Metric resultCount = Metrics.createMetric(sparkContext, "resultCount", sedonaConf.getDebug());
+        Metric candidateCount = Metrics.createMetric(sparkContext, "candidateCount", sedonaConf.getDebug());
 
         final SpatialPartitioner partitioner =
                 (SpatialPartitioner) rightRDD.spatialPartitionedRDD.partitioner().get();
