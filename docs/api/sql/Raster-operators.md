@@ -1081,7 +1081,8 @@ RESAMPLED_RASTER AS (
 SELECT RS_AsMatrix(resample_rast) as rast_matrix, RS_Metadata(resample_rast) as rast_metadata from RESAMPLED_RASTER
 ```
 
-`Output`:
+Output:
+
 ```sql
 | 1.0   1.0   2.0   3.0   3.0   5.0|
 | 1.0   1.0   2.0   3.0   3.0   5.0|
@@ -1091,6 +1092,8 @@ SELECT RS_AsMatrix(resample_rast) as rast_matrix, RS_Metadata(resample_rast) as 
 
 (-0.33333333333333326,0.19999999999999996,6,5,1.388888888888889,-1.24,0,0,0,1)
 ```
+
+Spark SQL Example:
 
 ```sql
  WITH INPUT_RASTER AS (
@@ -1104,7 +1107,8 @@ SELECT RS_AsMatrix(resample_rast) as rast_matrix, RS_Metadata(resample_rast) as 
 SELECT RS_AsMatrix(resample_rast) as rast_matrix, RS_Metadata(resample_rast) as rast_metadata from RESAMPLED_RASTER
 ```
 
-`Output`:
+Output:
+
 ```sql
 |       NaN         NaN         NaN         NaN         NaN         NaN         NaN|
 |       NaN    3.050000    3.650000    4.250000    5.160000    6.690000    7.200000|
@@ -1115,6 +1119,7 @@ SELECT RS_AsMatrix(resample_rast) as rast_matrix, RS_Metadata(resample_rast) as 
 (0.0, 0.0, 7.0, 5.0, 1.2, -1.4, 0.0, 0.0, 0.0, 1.0)
 ```
 
+Spark SQL Example:
 
 ```sql
 WITH INPUT_RASTER AS (
@@ -1129,7 +1134,8 @@ RESAMPLED_RASTER AS (
 SELECT RS_AsMatrix(resample_rast) as rast_matrix, RS_Metadata(resample_rast) as rast_metadata from RESAMPLED_RASTER
 ```
 
-`Output`:
+Output:
+
 ```sql
 | 1.0   1.0   2.0   3.0   3.0   5.0   5.0|
 | 1.0   1.0   2.0   3.0   3.0   5.0   5.0|
