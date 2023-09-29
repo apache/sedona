@@ -180,7 +180,7 @@ case class RS_Normalize(inputExpressions: Seq[Expression]) extends InferredExpre
 }
 
 case class RS_AddBandFromArray(inputExpressions: Seq[Expression])
-  extends InferredExpression(inferrableFunction3(MapAlgebra.addBandFromArray), inferrableFunction4(MapAlgebra.addBandFromArray), inferrableFunction2(MapAlgebra.addBandFromArray)) {
+  extends InferredExpression(nullTolerantInferrableFunction3(MapAlgebra.addBandFromArray), nullTolerantInferrableFunction4(MapAlgebra.addBandFromArray), inferrableFunction2(MapAlgebra.addBandFromArray)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
