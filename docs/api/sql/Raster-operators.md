@@ -1046,12 +1046,16 @@ Since: `v1.5.0`
 
 Spark SQL Example: 
 
-```scala
-val inputDf = Seq(Seq(1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10)).toDF("band")
-val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, 0d) as raster")
-val rasterDf = df.selectExpr("RS_Resample(raster, 6, 5, 1, -1, false, null) as raster")
-val rasterOutput = rasterDf.selectExpr("RS_AsMatrix(raster)").first().getString(0)
-val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getSeq[Double](0)
+```sql
+WITH INPUT_RASTER AS (
+ SELECT RS_AddBandFromArray(
+    RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 2, -2, 0, 0, 0),
+    ARRAY(1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10), 1, null) as rast
+),
+RESAMPLED_RASTER AS (
+ SELECT RS_Resample(rast, 6, 5, 1, -1, false, null) as resample_rast from INPUT_RASTER
+)
+SELECT RS_AsMatrix(resample_rast) as rast_matrix, RS_Metadata(resample_rast) as rast_metadata from RESAMPLED_RASTER
 ```
 
 `Output`:
@@ -1065,12 +1069,16 @@ val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getSeq[D
 (-0.33333333333333326,0.19999999999999996,6,5,1.388888888888889,-1.24,0,0,0,1)
 ```
 
-```scala
-val inputDf = Seq(Seq(1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10)).toDF("band")
-val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, null) as raster")
-val rasterDf = df.selectExpr("RS_Resample(raster, 1.2, -1.4, true, 'bilinear') as raster")
-val rasterOutput = rasterDf.selectExpr("RS_AsMatrix(raster)").first().getString(0)
-val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getSeq[Double](0)
+```sql
+ WITH INPUT_RASTER AS (
+   SELECT RS_AddBandFromArray(
+    RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 2, -2, 0, 0, 0), 
+    ARRAY(1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10), 1, null) as rast
+   ),
+   RESAMPLED_RASTER AS (
+    SELECT RS_Resample(rast, 1.2, -1.4, true, null) as resample_rast from INPUT_RASTER
+   )
+SELECT RS_AsMatrix(resample_rast) as rast_matrix, RS_Metadata(resample_rast) as rast_metadata from RESAMPLED_RASTER
 ```
 
 `Output`:
@@ -1085,12 +1093,17 @@ val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getSeq[D
 ```
 
 
-```scala
-  val inputDf = Seq(Seq(1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10)).toDF("band")
-  val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, null) as raster", "RS_MakeEmptyRaster(2, 'd', 5, 5, 1, -1, 1.2, -1.4, 0, 0, 0) as refRaster")
-  val rasterDf = df.selectExpr("RS_Resample(raster, refRaster, true, null) as raster")
-  val rasterOutput = rasterDf.selectExpr("RS_AsMatrix(raster)").first().getString(0)
-  val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getSeq[Double](0)
+```sql
+WITH INPUT_RASTER AS (
+    SELECT RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 2, -2, 0, 0, 0), ARRAY(1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10), 1, null) as rast
+),
+REF_RASTER AS (
+    SELECT RS_MakeEmptyRaster(2, 'd', 6, 5, 1, -1, 1.2, -1.4, 0, 0, 0) as ref_rast
+),
+RESAMPLED_RASTER AS (
+    SELECT RS_Resample(rast, ref_rast, true, null) as resample_rast from INPUT_RASTER, REF_RASTER
+)
+SELECT RS_AsMatrix(resample_rast) as rast_matrix, RS_Metadata(resample_rast) as rast_metadata from RESAMPLED_RASTER
 ```
 
 `Output`:
