@@ -285,7 +285,7 @@ public class RasterUtils {
         DirectPosition2D directPosition2D = new DirectPosition2D(raster.getCoordinateReferenceSystem2D(), longitude, latitude);
         DirectPosition worldCoord = raster.getGridGeometry().getCRSToGrid2D(PixelOrientation.UPPER_LEFT).transform((DirectPosition) directPosition2D, null);
         double[] coords = worldCoord.getCoordinate();
-        int[] gridCoords = new int[] {(int) coords[0], (int) coords[1]};
+        int[] gridCoords = new int[] {(int) Math.floor(coords[0]), (int) Math.floor(coords[1])};
         return gridCoords;
     }
 

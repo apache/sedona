@@ -28,7 +28,7 @@ repos:
       - id: check-merge-conflict
       # - id: check-shebang-scripts-are-executable
       - id: check-toml
-      # - id: check-vcs-permalinks
+      - id: check-vcs-permalinks
       - id: check-xml
       # - id: check-yaml
       - id: detect-private-key

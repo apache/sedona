@@ -36,3 +36,11 @@ case class RS_SetGeoReference(inputExpressions: Seq[Expression]) extends Inferre
     copy(inputExpressions = newChildren)
   }
 }
+
+case class RS_Resample(inputExpressions: Seq[Expression]) extends InferredExpression(
+  nullTolerantInferrableFunction4(RasterEditors.resample), nullTolerantInferrableFunction5(RasterEditors.resample),
+  nullTolerantInferrableFunction7(RasterEditors.resample)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

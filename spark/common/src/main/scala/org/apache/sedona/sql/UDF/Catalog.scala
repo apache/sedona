@@ -246,7 +246,8 @@ object Catalog {
     function[RS_BandPixelType](),
     function[RS_MinConvexHull](),
     function[RS_AsMatrix](),
-    function[RS_AsImage]()
+    function[RS_AsImage](),
+    function[RS_Resample]()
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(

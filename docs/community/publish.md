@@ -42,7 +42,7 @@ Make sure the Sedona version in the following files are {{ sedona_create_release
 
 1. https://github.com/apache/sedona/blob/master/python/sedona/version.py
 2. https://github.com/apache/sedona/blob/master/R/DESCRIPTION
-3. https://github.com/apache/sedona/blob/master/R/R/dependencies.R#L42
+3. https://github.com/apache/sedona/blob/99239524f17389fc4ae9548ea88756f8ea538bb9/R/R/dependencies.R#L42
 4. https://github.com/apache/sedona/blob/master/zeppelin/package.json
 
 

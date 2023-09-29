@@ -22,10 +22,10 @@ package org.apache.sedona.core.joinJudgement;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.enums.JoinBuildSide;
-import org.apache.sedona.core.monitoring.Metric;
 import org.apache.sedona.core.spatialOperator.SpatialPredicate;
 import org.apache.sedona.core.utils.TimeUtils;
 import org.apache.spark.api.java.function.FlatMapFunction2;
+import org.apache.spark.util.LongAccumulator;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.index.SpatialIndex;
@@ -50,10 +50,10 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
             SpatialPredicate spatialPredicate,
             IndexType indexType,
             JoinBuildSide joinBuildSide,
-            Metric buildCount,
-            Metric streamCount,
-            Metric resultCount,
-            Metric candidateCount)
+            LongAccumulator buildCount,
+            LongAccumulator streamCount,
+            LongAccumulator resultCount,
+            LongAccumulator candidateCount)
     {
         super(spatialPredicate, buildCount, streamCount, resultCount, candidateCount);
         this.indexType = indexType;
