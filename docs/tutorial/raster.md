@@ -436,7 +436,15 @@ SELECT RS_AddBand(raster1, raster2, 1, 2)
 
 This will result in `raster1` having `raster2`'s specified band.
 
-### Resample
+### Resample raster data
+
+Sedona allows you to resample raster data using different interpolation methods like nearest neighbor, bilinear, and bicubic to change the cell size or align raster grids, using [RS_Resample](../../api/sql/Raster-operators/#rs_resample).
+
+```sql
+SELECT RS_Resample(rast, 50, -50, -13063342, 3992403.75, true, "bicubic")
+```
+
+For more information please follow the link.
 
 ## Execute map algebra operations
 
@@ -496,7 +504,7 @@ SELECT r.rast, g.geom FROM rasterDf r, geomDf g WHERE RS_Interest(r.rast, g.geom
 !!!note
     These range and join queries will filter rasters using the provided geometric boundary and the spatial boundary of the raster.
 
-    Sedona offers more raster predicates to do spatial range query and spatial join query. Please refer to [raster perdicates docs !!add link after changing docs!!]().
+    Sedona offers more raster predicates to do spatial range query and spatial join query. Please refer to [raster perdicates docs](../../api/sql/Raster-operators/#raster-predicates).
 
 ## Visualize raster images
 
