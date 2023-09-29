@@ -23,10 +23,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.apache.sedona.core.monitoring.Metric;
 import org.apache.sedona.core.spatialOperator.SpatialPredicate;
 import org.apache.sedona.core.spatialOperator.SpatialPredicateEvaluators;
 import org.apache.spark.TaskContext;
+import org.apache.spark.util.LongAccumulator;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.index.SpatialIndex;
 
@@ -49,10 +49,10 @@ abstract class JudgementBase<T extends Geometry, U extends Geometry>
 
     private final SpatialPredicate spatialPredicate;
     private transient SpatialPredicateEvaluators.SpatialPredicateEvaluator evaluator;
-    protected final Metric buildCount;
-    protected final Metric streamCount;
-    protected final Metric resultCount;
-    protected final Metric candidateCount;
+    protected final LongAccumulator buildCount;
+    protected final LongAccumulator streamCount;
+    protected final LongAccumulator resultCount;
+    protected final LongAccumulator candidateCount;
 
     private int shapeCnt;
 
@@ -69,7 +69,7 @@ abstract class JudgementBase<T extends Geometry, U extends Geometry>
      * @param resultCount num of join results
      * @param candidateCount num of candidate pairs to be refined by their real geometries
      */
-    protected JudgementBase(SpatialPredicate spatialPredicate, Metric buildCount, Metric streamCount, Metric resultCount, Metric candidateCount)
+    protected JudgementBase(SpatialPredicate spatialPredicate, LongAccumulator buildCount, LongAccumulator streamCount, LongAccumulator resultCount, LongAccumulator candidateCount)
     {
         this.spatialPredicate = spatialPredicate;
         this.buildCount = buildCount;

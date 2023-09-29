@@ -27,7 +27,6 @@ import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.enums.JoinBuildSide;
 import org.apache.sedona.core.joinJudgement.*;
-import org.apache.sedona.core.monitoring.Metric;
 import org.apache.sedona.core.monitoring.Metrics;
 import org.apache.sedona.core.spatialPartitioning.SpatialPartitioner;
 import org.apache.sedona.core.spatialRDD.CircleRDD;
@@ -38,6 +37,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
+import org.apache.spark.util.LongAccumulator;
 import org.locationtech.jts.geom.Geometry;
 import scala.Tuple2;
 
@@ -535,10 +535,10 @@ public class JoinQuery
         verifyPartitioningMatch(leftRDD, rightRDD);
 
         SparkContext sparkContext = leftRDD.spatialPartitionedRDD.context();
-        Metric buildCount = Metrics.createMetric(sparkContext, "buildCount");
-        Metric streamCount = Metrics.createMetric(sparkContext, "streamCount");
-        Metric resultCount = Metrics.createMetric(sparkContext, "resultCount");
-        Metric candidateCount = Metrics.createMetric(sparkContext, "candidateCount");
+        LongAccumulator buildCount = Metrics.createMetric(sparkContext, "buildCount");
+        LongAccumulator streamCount = Metrics.createMetric(sparkContext, "streamCount");
+        LongAccumulator resultCount = Metrics.createMetric(sparkContext, "resultCount");
+        LongAccumulator candidateCount = Metrics.createMetric(sparkContext, "candidateCount");
 
         final SpatialPartitioner partitioner =
                 (SpatialPartitioner) rightRDD.spatialPartitionedRDD.partitioner().get();
