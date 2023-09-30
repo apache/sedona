@@ -863,8 +863,111 @@ Output:
 14.0, 204.0, 14.571428571428571, 11.509091348732502, 1.0, 25.0
 ```
 
+## Raster Predicates
 
-## Raster based operators
+### RS_Contains
+
+Introduction: Returns true if the geometry or raster on the left side contains the geometry or raster on the right side.
+The convex hull of the raster is considered in the test.
+
+The rules for testing spatial relationship is the same as `RS_Intersects`.
+
+Format:
+
+`RS_Contains(raster: Raster, geom: Geometry)`
+
+`RS_Contains(geom: Geometry, raster: Raster)`
+
+`RS_Contains(raster0: Raster, raster1: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((5 5, 5 10, 10 10, 10 5, 5 5))')) rast_geom,
+    RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 10, 10, 2, 22, 1)) rast_rast
+```
+
+Output:
+```
++---------+---------+
+|rast_geom|rast_rast|
++---------+---------+
+|     true|     true|
++---------+---------+
+```
+
+### RS_Intersects
+
+Introduction: Returns true if raster or geometry on the left side intersects with the raster or geometry on the right side.
+The convex hull of the raster is considered in the test.
+
+Rules for testing spatial relationship:
+
+* If the raster or geometry does not have a defined SRID, it is assumed to be in WGS84.
+* If both sides are in the same CRS, then perform the relationship test directly.
+* Otherwise, both sides will be transformed to WGS84 before the relationship test.
+
+Format:
+
+`RS_Intersects(raster: Raster, geom: Geometry)`
+
+`RS_Intersects(geom: Geometry, raster: Raster)`
+
+`RS_Intersects(raster0: Raster, raster1: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_Intersects(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_SetSRID(ST_PolygonFromEnvelope(0, 0, 10, 10), 4326)) rast_geom,
+    RS_Intersects(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 10, 10, 1, 11, 1)) rast_rast
+```
+
+Output:
+
+```
++---------+---------+
+|rast_geom|rast_rast|
++---------+---------+
+|     true|     true|
++---------+---------+
+```
+
+### RS_Within
+
+Introduction: Returns true if the geometry or raster on the left side is within the geometry or raster on the right side.
+The convex hull of the raster is considered in the test.
+
+The rules for testing spatial relationship is the same as `RS_Intersects`.
+
+Format: `RS_Within(raster: Raster, geom: Geometry)`
+
+Format: `RS_Within(geom: Geometry, raster: Raster)`
+
+Format: `RS_Within(raster0: Raster, raster1: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((0 0, 0 50, 100 50, 100 0, 0 0))')) rast_geom,
+    RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 30, 30, 2, 22, 1)) rast_rast
+```
+
+Output:
+```
++---------+---------+
+|rast_geom|rast_rast|
++---------+---------+
+|     true|     true|
++---------+---------+
+```
+
+## Raster Based Operators
 
 ### RS_AddBand
 
@@ -904,77 +1007,6 @@ Output:
 
 ```
 GridCoverage2D["g...
-```
-
-### RS_Contains
-
-Introduction: Returns true if the geometry or raster on the left side contains the geometry or raster on the right side.
-The convex hull of the raster is considered in the test.
-
-The rules for testing spatial relationship is the same as `RS_Intersects`.
-
-Format: 
-
-`RS_Contains(raster: Raster, geom: Geometry)`
-
-`RS_Contains(geom: Geometry, raster: Raster)`
-
-`RS_Contains(raster0: Raster, raster1: Raster)`
-
-Since: `v1.5.0`
-
-Spark SQL Example:
-
-```sql
-SELECT RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((5 5, 5 10, 10 10, 10 5, 5 5))')) rast_geom,
-    RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 10, 10, 2, 22, 1)) rast_rast
-```
-
-Output:
-```
-+---------+---------+
-|rast_geom|rast_rast|
-+---------+---------+
-|     true|     true|
-+---------+---------+
-```
-
-### RS_Intersects
-
-Introduction: Returns true if raster or geometry on the left side intersects with the raster or geometry on the right side.
-The convex hull of the raster is considered in the test.
-
-Rules for testing spatial relationship:
-
-* If the raster or geometry does not have a defined SRID, it is assumed to be in WGS84.
-* If both sides are in the same CRS, then perform the relationship test directly.
-* Otherwise, both sides will be transformed to WGS84 before the relationship test.
-
-Format: 
-
-`RS_Intersects(raster: Raster, geom: Geometry)`
-
-`RS_Intersects(geom: Geometry, raster: Raster)`
-
-`RS_Intersects(raster0: Raster, raster1: Raster)`
-
-Since: `v1.5.0`
-
-Spark SQL Example:
-
-```sql
-SELECT RS_Intersects(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_SetSRID(ST_PolygonFromEnvelope(0, 0, 10, 10), 4326)) rast_geom,
-    RS_Intersects(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 10, 10, 1, 11, 1)) rast_rast
-```
-
-Output:
-
-```
-+---------+---------+
-|rast_geom|rast_rast|
-+---------+---------+
-|     true|     true|
-+---------+---------+
 ```
 
 ### RS_MetaData
@@ -1081,7 +1113,8 @@ RESAMPLED_RASTER AS (
 SELECT RS_AsMatrix(resample_rast) as rast_matrix, RS_Metadata(resample_rast) as rast_metadata from RESAMPLED_RASTER
 ```
 
-`Output`:
+Output:
+
 ```sql
 | 1.0   1.0   2.0   3.0   3.0   5.0|
 | 1.0   1.0   2.0   3.0   3.0   5.0|
@@ -1091,6 +1124,8 @@ SELECT RS_AsMatrix(resample_rast) as rast_matrix, RS_Metadata(resample_rast) as 
 
 (-0.33333333333333326,0.19999999999999996,6,5,1.388888888888889,-1.24,0,0,0,1)
 ```
+
+Spark SQL Example:
 
 ```sql
  WITH INPUT_RASTER AS (
@@ -1104,7 +1139,8 @@ SELECT RS_AsMatrix(resample_rast) as rast_matrix, RS_Metadata(resample_rast) as 
 SELECT RS_AsMatrix(resample_rast) as rast_matrix, RS_Metadata(resample_rast) as rast_metadata from RESAMPLED_RASTER
 ```
 
-`Output`:
+Output:
+
 ```sql
 |       NaN         NaN         NaN         NaN         NaN         NaN         NaN|
 |       NaN    3.050000    3.650000    4.250000    5.160000    6.690000    7.200000|
@@ -1115,6 +1151,7 @@ SELECT RS_AsMatrix(resample_rast) as rast_matrix, RS_Metadata(resample_rast) as 
 (0.0, 0.0, 7.0, 5.0, 1.2, -1.4, 0.0, 0.0, 0.0, 1.0)
 ```
 
+Spark SQL Example:
 
 ```sql
 WITH INPUT_RASTER AS (
@@ -1129,7 +1166,8 @@ RESAMPLED_RASTER AS (
 SELECT RS_AsMatrix(resample_rast) as rast_matrix, RS_Metadata(resample_rast) as rast_metadata from RESAMPLED_RASTER
 ```
 
-`Output`:
+Output:
+
 ```sql
 | 1.0   1.0   2.0   3.0   3.0   5.0   5.0|
 | 1.0   1.0   2.0   3.0   3.0   5.0   5.0|
@@ -1484,38 +1522,7 @@ Output:
 +----+------------+-------+
 ```
 
-### RS_Within
-
-Introduction: Returns true if the geometry or raster on the left side is within the geometry or raster on the right side.
-The convex hull of the raster is considered in the test.
-
-The rules for testing spatial relationship is the same as `RS_Intersects`.
-
-Format: `RS_Within(raster: Raster, geom: Geometry)`
-
-Format: `RS_Within(geom: Geometry, raster: Raster)`
-
-Format: `RS_Within(raster0: Raster, raster1: Raster)`
-
-Since: `v1.5.0`
-
-Spark SQL Example:
-
-```sql
-SELECT RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGON ((0 0, 0 50, 100 50, 100 0, 0 0))')) rast_geom,
-    RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 30, 30, 2, 22, 1)) rast_rast
-```
-
-Output:
-```
-+---------+---------+
-|rast_geom|rast_rast|
-+---------+---------+
-|     true|     true|
-+---------+---------+
-```
-
-## Raster to Map Algebra operators
+## Raster to Map Algebra Operators
 
 To bridge the gap between the raster and map algebra worlds, the following operators are provided. These operators convert a raster to a map algebra object. The map algebra object can then be used with the map algebra operators described in the next section.
 
@@ -1632,7 +1639,7 @@ Output:
 For more details and examples about `RS_MapAlgebra`, please refer to the [Map Algebra documentation](../Raster-map-algebra/).
 To learn how to write map algebra script, please refer to [Jiffle language summary](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle---language-summary).
 
-## Map Algebra operators
+## Map Algebra Operators
 
 Map algebra operators work on a single band of a raster. Each band is represented as an array of doubles. The operators return an array of doubles.
 
