@@ -48,26 +48,23 @@ public class RasterBandAccessors {
     }
 
     public static long getCount(GridCoverage2D raster, int band, boolean excludeNoDataValue) {
-        int height = RasterAccessors.getHeight(raster), width = RasterAccessors.getWidth(raster);
-        if(excludeNoDataValue) {
+        Double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
+        int width = RasterAccessors.getWidth(raster);
+        int height = RasterAccessors.getHeight(raster);
+        if (excludeNoDataValue && bandNoDataValue != null) {
             RasterUtils.ensureBand(raster, band);
+            Raster r = RasterUtils.getRaster(raster.getRenderedImage());
+            double[] pixels = r.getSamples(0, 0, width, height, band - 1, (double[]) null);
             long numberOfPixel = 0;
-            Double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
-
-            for(int j = 0; j < height; j++){
-                for(int i = 0; i < width; i++){
-
-                    double[] bandPixelValues = raster.evaluate(new GridCoordinates2D(i, j), (double[]) null);
-                    double bandValue = bandPixelValues[band - 1];
-                    if(bandNoDataValue == null || bandValue != bandNoDataValue){
-                        numberOfPixel += 1;
-                    }
+            for (double bandValue : pixels) {
+                if (Double.compare(bandValue, bandNoDataValue) != 0) {
+                    numberOfPixel += 1;
                 }
             }
             return numberOfPixel;
         } else {
             // code for false
-            return width * height;
+            return (long) width * (long) height;
         }
     }
 
