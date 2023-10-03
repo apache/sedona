@@ -26,6 +26,8 @@ import org.geotools.coverage.grid.GridCoverage2D
 class RasterUDT extends UserDefinedType[GridCoverage2D] {
   override def sqlType: DataType = BinaryType
 
+  override def pyUDT: String = "sedona.sql.types.RasterType"
+
   override def serialize(raster: GridCoverage2D): Array[Byte] = Serde.serialize(raster)
 
   override def deserialize(datum: Any): GridCoverage2D = {
