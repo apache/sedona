@@ -34,6 +34,7 @@ from sedona.core.enums import IndexType
 from sedona.core.enums import GridType
 from sedona.core.enums import FileDataSplitter
 from sedona.sql.types import GeometryType
+from sedona.sql.types import RasterType
 from sedona.utils.adapter import Adapter
 from sedona.utils import KryoSerializer
 from sedona.utils import SedonaKryoRegistrator
