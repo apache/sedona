@@ -504,7 +504,7 @@ SELECT r.rast, g.geom FROM rasterDf r, geomDf g WHERE RS_Interest(r.rast, g.geom
 !!!note
     These range and join queries will filter rasters using the provided geometric boundary and the spatial boundary of the raster.
 
-    Sedona offers more raster predicates to do spatial range query and spatial join query. Please refer to [raster perdicates docs](../../api/sql/Raster-operators/#raster-predicates).
+    Sedona offers more raster predicates to do spatial range query and spatial join query. Please refer to [raster predicates docs](../../api/sql/Raster-operators/#raster-predicates).
 
 ## Visualize raster images
 
