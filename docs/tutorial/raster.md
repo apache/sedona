@@ -4,7 +4,7 @@
 !!!note
     Sedona by default enforces geographic coordinates to be in longitude/latitude order.
 
-Starting from `v1.1.0`, Sedona SQL supports raster data sources and raster operators in DataFrame and SQL. Raster support is available in all Sedona language bindings including ==Scala, Java, Python and R==.
+Starting from `v1.1.0`, Sedona SQL supports raster data sources and raster operators in DataFrame and SQL. Raster support is available in all Sedona language bindings including ==Scala, Java, Python, and R==.
 
 This page outlines the steps to manage raster data using SedonaSQL.
 
@@ -42,11 +42,11 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../../api/sql/Overvi
 === "Python"
 
 	1. Please read [Quick start](../../setup/install-python) to install Sedona Python.
-	2. This tutorial is based on [Sedona SQL Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) to interact with Sedona Python Jupyter notebook immediately on Binder.
+	2. This tutorial is based on [Sedona SQL Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter Notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) to interact with Sedona Python Jupyter notebook immediately on Binder.
 
 ## Create Sedona config
 
-Use the following code to create your Sedona config at the beginning. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please skip this step and can use `spark` directly.
+Use the following code to create your Sedona config at the beginning. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please skip this step and use `spark` directly.
 
 
 ==Sedona >= 1.4.1==
@@ -94,7 +94,7 @@ You can add additional Spark runtime config to the config builder. For example, 
 	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
 	    getOrCreate()
 	```
-    If you are using Spark versions >= 3.4, please replace the `3.0` in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
+    If you are using Spark versions >= 3.4, please replace the `3.0` in the package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
 
 ==Sedona < 1.4.1==
 
@@ -147,11 +147,11 @@ The following method has been deprecated since Sedona 1.4.1. Please use the meth
 	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
 	    getOrCreate()
 	```
-    If you are using Spark versions >= 3.4, please replace the `3.0` in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
+    If you are using Spark versions >= 3.4, please replace the `3.0` in the package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
 
 ## Initiate SedonaContext
 
-Add the following line after creating Sedona config. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please call `SedonaContext.create(spark)` instead.
+Add the following line after creating the Sedona config. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please call `SedonaContext.create(spark)` instead.
 
 ==Sedona >= 1.4.1==
 
@@ -331,7 +331,7 @@ Output for the following function will be:
 [-1.3095817809482181E7, 4021262.7487925636, 512.0, 517.0, 72.32861272132695, -72.32861272132695, 0.0, 0.0, 3857.0, 1.0]
 ```
 
-The first two elements of the array represent the real world geographic coordinates (like longitude/latitude) of the raster image's top left pixel, while the next two elements represent the pixel dimensions of the raster.
+The first two elements of the array represent the real-world geographic coordinates (like longitude/latitude) of the raster image's top left pixel, while the next two elements represent the pixel dimensions of the raster.
 
 ### World File
 
@@ -395,7 +395,7 @@ POINT (450 400)
 
 ### Pixel Manipulation
 
-Use [RS_Values](../../api/sql/Raster-operators#rs_values) to fetch values for specified array of Point Geometries. The coordinates in the point geometry are indicative to real world location.
+Use [RS_Values](../../api/sql/Raster-operators#rs_values) to fetch values for a specified array of Point Geometries. The coordinates in the point geometry are indicative of real-world location.
 
 ```sql
 SELECT RS_Values(rast, Array(ST_Point(-13063342, 3992403.75), ST_Point(-13074192, 3996020)))
@@ -407,7 +407,7 @@ Output:
 [132.0, 148.0]
 ```
 
-To change values over a grid or area defined by a geometry, we will use [RS_SetValues](../../api/sql/Raster-operators#rs_setvalues).
+To change values over a grid or area defined by geometry, we will use [RS_SetValues](../../api/sql/Raster-operators#rs_setvalues).
 
 ```sql
 SELECT RS_SetValues(
@@ -428,7 +428,7 @@ Let's use a [multi-band raster](https://github.com/apache/sedona/blob/2a0b36989a
 SELECT RS_Band(colorRaster, Array(1, 2))
 ```
 
-Let's say you have many one band rasters and want to add a band to the raster to perform [map algebra operations](#execute-map-algebra-operations). You can do so using [RS_AddBand](../../api/sql/Raster-operators#rs_addband) Sedona function.
+Let's say you have many single-banded rasters and want to add a band to the raster to perform [map algebra operations](#execute-map-algebra-operations). You can do so using [RS_AddBand](../../api/sql/Raster-operators#rs_addband) Sedona function.
 
 ```sql
 SELECT RS_AddBand(raster1, raster2, 1, 2)
@@ -438,7 +438,7 @@ This will result in `raster1` having `raster2`'s specified band.
 
 ### Resample raster data
 
-Sedona allows you to resample raster data using different interpolation methods like nearest neighbor, bilinear, and bicubic to change the cell size or align raster grids, using [RS_Resample](../../api/sql/Raster-operators/#rs_resample).
+Sedona allows you to resample raster data using different interpolation methods like the nearest neighbor, bilinear, and bicubic to change the cell size or align raster grids, using [RS_Resample](../../api/sql/Raster-operators/#rs_resample).
 
 ```sql
 SELECT RS_Resample(rast, 50, -50, -13063342, 3992403.75, true, "bicubic")
@@ -448,9 +448,9 @@ For more information please follow the link.
 
 ## Execute map algebra operations
 
-Map algebra is a way to perform raster calculations using mathematical expressions. The expression can be a simple arithmetic operations or a complex combination of multiple operations.
+Map algebra is a way to perform raster calculations using mathematical expressions. The expression can be a simple arithmetic operation or a complex combination of multiple operations.
 
-The Normalized Difference Vegetation Index (NDVI) is a simple graphical indicator that can be used to analyze remote sensing measurements from a space platform, and assess whether the target being observed contains live green vegetation or not.
+The Normalized Difference Vegetation Index (NDVI) is a simple graphical indicator that can be used to analyze remote sensing measurements from a space platform and assess whether the target being observed contains live green vegetation or not.
 
 ```
 NDVI = (NIR - Red) / (NIR + Red)
@@ -478,16 +478,16 @@ SELECT RS_AsRaster(
     )
 ```
 
-The image create is as below for the vector is:
+The image created is as below for the vector:
 
 ![Rasterized vector](../../image/rasterized-image.png)
 
 !!!note
-    The vector coordinates are buffed up to showcase the output, real use case, may or may not match the example.
+    The vector coordinates are buffed up to showcase the output, the real use case, may or may not match the example.
 
 ### Spatial range query
 
-Sedona provides raster predicates to do a range query using a geometry window, for example let's use [RS_Intersects](../../api/sql/Raster-operators#rs_intersects).
+Sedona provides raster predicates to do a range query using a geometry window, for example, let's use [RS_Intersects](../../api/sql/Raster-operators#rs_intersects).
 
 ```sql
 SELECT rast FROM rasterDf WHERE RS_Intersect(rast, ST_GeomFromWKT('POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))'))
@@ -495,7 +495,7 @@ SELECT rast FROM rasterDf WHERE RS_Intersect(rast, ST_GeomFromWKT('POLYGON((0 0,
 
 ### Spatial join query
 
-Sedona's raster predicates also have the capability to do a spatial join using the raster column and geometry column, using the same function as above.
+Sedona's raster predicates also can do a spatial join using the raster column and geometry column, using the same function as above.
 
 ```sql
 SELECT r.rast, g.geom FROM rasterDf r, geomDf g WHERE RS_Interest(r.rast, g.geom)
@@ -504,7 +504,7 @@ SELECT r.rast, g.geom FROM rasterDf r, geomDf g WHERE RS_Interest(r.rast, g.geom
 !!!note
     These range and join queries will filter rasters using the provided geometric boundary and the spatial boundary of the raster.
 
-    Sedona offers more raster predicates to do spatial range query and spatial join query. Please refer to [raster predicates docs](../../api/sql/Raster-operators/#raster-predicates).
+    Sedona offers more raster predicates to do spatial range queries and spatial join queries. Please refer to [raster predicates docs](../../api/sql/Raster-operators/#raster-predicates).
 
 ## Visualize raster images
 
@@ -520,13 +520,13 @@ SELECT RS_AsBase64(rast) FROM rasterDf
 
 ### HTML Image
 
-The [RS_AsImage](../../api/sql/Raster-visualizer#rs_asimage) returns an HTML img tag, that can be visualized using an HTML viewer or in Jupyter Notebook. For more information please click at the link.
+The [RS_AsImage](../../api/sql/Raster-visualizer#rs_asimage) returns an HTML image tag, that can be visualized using an HTML viewer or in Jupyter Notebook. For more information please click on the link.
 
 ```sql
 SELECT RS_AsImage(rast, 500) FROM rasterDf
 ```
 
-The output looks like:
+The output looks like this:
 
 ![Output](../../image/DisplayImage.png)
 
@@ -538,7 +538,7 @@ Sedona offers an API to visualize raster data that is not sufficient for the oth
 SELECT RS_AsMatrix(rast) FROM rasterDf
 ```
 
-Output will as follows:
+Output will be as follows:
 
 ```sql
 | 1   3   4   0|
@@ -546,7 +546,7 @@ Output will as follows:
 | 3   4   5   6|
 ```
 
-Please refer to [Raster visualizer docs](../../api/sql/Raster-visualizer) to learn how to make most of the visualizing APIs.
+Please refer to [Raster visualizer docs](../../api/sql/Raster-visualizer) to learn how to make the most of the visualizing APIs.
 
 ## Save to permanent storage
 
@@ -560,7 +560,7 @@ Sedona has a few writer functions that create the binary DataFrame necessary for
 
 ### As Arc Grid
 
-Use [RS_AsArcGrid](../../api/sql/Raster-writer#rs_asarcgrid) to get binary Dataframe of raster in Arc Grid format.
+Use [RS_AsArcGrid](../../api/sql/Raster-writer#rs_asarcgrid) to get the binary Dataframe of the raster in Arc Grid format.
 
 ```sql
 SELECT RS_AsArcGrid(raster)
@@ -568,7 +568,7 @@ SELECT RS_AsArcGrid(raster)
 
 ### As GeoTiff
 
-Use [RS_AsGeoTiff](../../api/sql/Raster-writer#rs_asgeotiff) to get binary Dataframe of raster in GeoTiff format.
+Use [RS_AsGeoTiff](../../api/sql/Raster-writer#rs_asgeotiff) to get the binary Dataframe of the raster in GeoTiff format.
 
 ```sql
 SELECT RS_AsGeoTiff(raster)
@@ -576,7 +576,7 @@ SELECT RS_AsGeoTiff(raster)
 
 ### As PNG
 
-Use [RS_AsPNG](../../api/sql/Raster-writer#rs_aspng) to get binary Dataframe of raster in PNG format.
+Use [RS_AsPNG](../../api/sql/Raster-writer#rs_aspng) to get the binary Dataframe of the raster in PNG format.
 
 ```sql
 SELECT RS_AsPNG(raster)
