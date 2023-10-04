@@ -28,6 +28,10 @@ class RasterUDT extends UserDefinedType[GridCoverage2D] {
 
   override def pyUDT: String = "sedona.sql.types.RasterType"
 
+  // A reasonable size for small in-db rasters. This is used by the optimizer to decide whether to
+  // broadcast the dataframe or not.
+  override def defaultSize: Int = 512 * 1024
+
   override def serialize(raster: GridCoverage2D): Array[Byte] = Serde.serialize(raster)
 
   override def deserialize(datum: Any): GridCoverage2D = {
