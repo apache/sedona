@@ -18,6 +18,7 @@ Current Sedona PMC members are as follows:
 | Paweł Kociński    |  Imbruced   |   imbruced@apache.org  |
 |      Yitao Li     |  yitao-li   |   yitaoli@apache.org   |
 |   Netanel Malka   | netanel246  |    malka@apache.org    |
+| Kristin Cowalcijk | Kontinuation| kontinuation@apache.org|
 |   Mohamed Sarwat  |   Sarwat    |   mosarwat@apache.org  |
 | Kengo Seki        |   sekikn    | sekikn@apache.org      |
 |    Sachio Wakai   |  SW186000   |    swakai@apache.org   |
@@ -43,7 +44,11 @@ The PMC regularly adds new committers from the active contributors, based on the
 
 The PMC also adds new PMC members. PMC members are expected to carry out PMC responsibilities as described in Apache Guidance, including helping vote on releases, enforce Apache project trademarks, take responsibility for legal and license issues, and ensure the project follows Apache project mechanics. The PMC periodically adds committers to the PMC who have shown they understand and can help with these activities.
 
-Currently, Sedona makes committers PMC members automatically.
+Current Sedona Committers are as follows:
+
+|        Name       |  GitHub ID  |        Apache ID       |
+|:-----------------:|:-----------:|:----------------------:|
+|  Nilesh Gajwani   | 	iGN5117  	 |  nilesh@apache.org     |
 
 ## Nominate a committer or PMC member
 
