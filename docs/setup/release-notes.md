@@ -12,7 +12,7 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 
 **API breaking changes**:
 
-* The following funcions in Sedona requires the input data must be in longitude/latitude order otherwise they might throw errors. You can use `FlipCoordinates` to swap X and Y.
+* The following functions in Sedona requires the input data must be in longitude/latitude order otherwise they might throw errors. You can use `FlipCoordinates` to swap X and Y.
 	* ST_Transform
 	* ST_DistanceSphere
 	* ST_DistanceSpheroid
@@ -58,7 +58,7 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-338'>SEDONA-338</a>] -         Refactor Raster construction in sedona to use AffineTransform instead of envelope
 </li>
-<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-358'>SEDONA-358</a>] -         Refactor Functions to remove geotools dependecy for most vector functions
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-358'>SEDONA-358</a>] -         Refactor Functions to remove geotools dependency for most vector functions
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-362'>SEDONA-362</a>] -         RS_BandAsArray truncates the decimal part of float/double pixel values.
 </li>
