@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Query the k nearest spatial objects.</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body><div class="container">
+
+<table width="100%" summary="page for sedona_knn_query {apache.sedona}"><tr><td>sedona_knn_query {apache.sedona}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Query the k nearest spatial objects.</h2>
+
+<h3>Description</h3>
+
+<p>Given a spatial RDD, a query object <code>x</code>, and an integer k, find the k
+nearest spatial objects within the RDD from <code>x</code> (distance between
+<code>x</code> and another geometrical object will be measured by the minimum
+possible length of any line segment connecting those 2 objects).
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+sedona_knn_query(
+  rdd,
+  x,
+  k,
+  index_type = c("quadtree", "rtree"),
+  result_type = c("rdd", "sdf", "raw")
+)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>rdd</code></td>
+<td>
+<p>A Sedona spatial RDD.</p>
+</td></tr>
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>The query object.</p>
+</td></tr>
+<tr valign="top"><td><code>k</code></td>
+<td>
+<p>Number of nearest spatail objects to return.</p>
+</td></tr>
+<tr valign="top"><td><code>index_type</code></td>
+<td>
+<p>Index to use to facilitate the KNN query. If NULL, then
+do not build any additional spatial index on top of <code>x</code>. Supported
+index types are &quot;quadtree&quot; and &quot;rtree&quot;.</p>
+</td></tr>
+<tr valign="top"><td><code>result_type</code></td>
+<td>
+<p>Type of result to return.
+If &quot;rdd&quot; (default), then the k nearest objects will be returned in a Sedona
+spatial RDD.
+If &quot;sdf&quot;, then a Spark dataframe containing the k nearest objects will be
+returned.
+If &quot;raw&quot;, then a list of k nearest objects will be returned. Each element
+within this list will be a JVM object of type
+<code>org.locationtech.jts.geom.Geometry</code>.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>The KNN query result.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Sedona spatial query: 
+<code>sedona_range_query()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+library(sparklyr)
+library(apache.sedona)
+
+sc &lt;- spark_connect(master = "spark://HOST:PORT")
+
+if (!inherits(sc, "test_connection")) {
+  knn_query_pt_x &lt;- -84.01
+  knn_query_pt_y &lt;- 34.01
+  knn_query_pt_tbl &lt;- sdf_sql(
+    sc,
+    sprintf(
+      "SELECT ST_GeomFromText(\"POINT(%f %f)\") AS `pt`",
+      knn_query_pt_x,
+      knn_query_pt_y
+    )
+  ) %&gt;%
+      collect()
+  knn_query_pt &lt;- knn_query_pt_tbl$pt[[1]]
+  input_location &lt;- "/dev/null" # replace it with the path to your input file
+  rdd &lt;- sedona_read_geojson_to_typed_rdd(
+    sc,
+    location = input_location,
+    type = "polygon"
+  )
+  knn_result_sdf &lt;- sedona_knn_query(
+    rdd,
+    x = knn_query_pt, k = 3, index_type = "rtree", result_type = "sdf"
+  )
+}
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>apache.sedona</em> version 1.3.1 ]</div>
+</div></body></html>

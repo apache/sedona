@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Write SpatialRDD into a GeoJSON file.</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body><div class="container">
+
+<table width="100%" summary="page for sedona_write_geojson {apache.sedona}"><tr><td>sedona_write_geojson {apache.sedona}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Write SpatialRDD into a GeoJSON file.</h2>
+
+<h3>Description</h3>
+
+<p>Export serialized data from a Sedona SpatialRDD into a GeoJSON file.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+sedona_write_geojson(x, output_location)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>The SpatialRDD object.</p>
+</td></tr>
+<tr valign="top"><td><code>output_location</code></td>
+<td>
+<p>Location of the output file.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>No return value.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Sedona data inferface functions: 
+<code>sedona_read_dsv_to_typed_rdd()</code>,
+<code>sedona_read_geojson_to_typed_rdd()</code>,
+<code>sedona_read_geojson()</code>,
+<code>sedona_read_shapefile_to_typed_rdd()</code>,
+<code>sedona_read_shapefile()</code>,
+<code>sedona_read_wkb()</code>,
+<code>sedona_read_wkt()</code>,
+<code>sedona_save_spatial_rdd()</code>,
+<code>sedona_write_wkb()</code>,
+<code>sedona_write_wkt()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+library(sparklyr)
+library(apache.sedona)
+
+sc &lt;- spark_connect(master = "spark://HOST:PORT")
+
+if (!inherits(sc, "test_connection")) {
+  input_location &lt;- "/dev/null" # replace it with the path to your input file
+  rdd &lt;- sedona_read_geojson_to_typed_rdd(
+    sc,
+    location = input_location, type = "polygon"
+  )
+  sedona_write_geojson(rdd, "/tmp/example.json")
+}
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>apache.sedona</em> version 1.3.0 ]</div>
+</div></body></html>

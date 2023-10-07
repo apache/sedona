@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Export a Spark SQL query with a spatial column into a Sedona...</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body><div class="container">
+
+<table width="100%" summary="page for to_spatial_rdd {apache.sedona}"><tr><td>to_spatial_rdd {apache.sedona}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Export a Spark SQL query with a spatial column into a Sedona spatial RDD.</h2>
+
+<h3>Description</h3>
+
+<p>Given a Spark dataframe object or a dplyr expression encapsulating a Spark
+SQL query, build a Sedona spatial RDD that will encapsulate the same query or
+data source. The input should contain exactly one spatial column and all
+other non-spatial columns will be treated as custom user-defined attributes
+in the resulting spatial RDD.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+to_spatial_rdd(x, spatial_col)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>A Spark dataframe object in sparklyr or a dplyr expression
+representing a Spark SQL query.</p>
+</td></tr>
+<tr valign="top"><td><code>spatial_col</code></td>
+<td>
+<p>The name of the spatial column.</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>A SpatialRDD encapsulating the query.
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+library(sparklyr)
+library(apache.sedona)
+
+sc &lt;- spark_connect(master = "spark://HOST:PORT")
+
+if (!inherits(sc, "test_connection")) {
+  tbl &lt;- dplyr::tbl(
+    sc,
+    dplyr::sql("SELECT ST_GeomFromText('POINT(-71.064544 42.28787)') AS `pt`")
+  )
+  rdd &lt;- to_spatial_rdd(tbl, "pt")
+}
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>apache.sedona</em> version 1.3.1 ]</div>
+</div></body></html>

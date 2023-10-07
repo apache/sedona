@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Spatial join operator</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body><div class="container">
+
+<table width="100%" summary="page for spatial_join_op {apache.sedona}"><tr><td>spatial_join_op {apache.sedona}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Spatial join operator</h2>
+
+<h3>Description</h3>
+
+<p>R interface for a Sedona spatial join operator
+</p>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>spatial_rdd</code></td>
+<td>
+<p>Spatial RDD containing geometries to be queried.</p>
+</td></tr>
+<tr valign="top"><td><code>query_window_rdd</code></td>
+<td>
+<p>Spatial RDD containing the query window(s).</p>
+</td></tr>
+<tr valign="top"><td><code>join_type</code></td>
+<td>
+<p>Type of the join query (must be either &quot;contain&quot; or
+&quot;intersect&quot;).
+If 'join_type' is &quot;contain&quot;, then a geometry from 'spatial_rdd' will match
+a geometry from the 'query_window_rdd' if and only if the former is fully
+contained in the latter.
+If 'join_type' is &quot;intersect&quot;, then a geometry from 'spatial_rdd' will
+match a geometry from the 'query_window_rdd' if and only if the former
+intersects the latter.</p>
+</td></tr>
+<tr valign="top"><td><code>partitioner</code></td>
+<td>
+<p>Spatial partitioning to apply to both 'spatial_rdd' and
+'query_window_rdd' to facilitate the join query. Can be either a grid type
+(currently &quot;quadtree&quot; and &quot;kdbtree&quot; are supported) or a custom spatial
+partitioner object. If 'partitioner' is NULL, then assume the same spatial
+partitioner has been applied to both 'spatial_rdd' and 'query_window_rdd'
+already and skip the partitioning step.</p>
+</td></tr>
+<tr valign="top"><td><code>index_type</code></td>
+<td>
+<p>Controls how 'spatial_rdd' and 'query_window_rdd' will be
+indexed (unless they are indexed already). If &quot;NONE&quot;, then no index will be
+constructed and matching geometries will be identified in a doubly nested-
+loop iterating through all possible pairs of elements from 'spatial_rdd'
+and 'query_window_rdd', which will be inefficient for large data sets.</p>
+</td></tr>
+</table>
+
+<hr /><div style="text-align: center;">[Package <em>apache.sedona</em> version 1.3.1 ]</div>
+</div></body></html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Create a SpatialRDD from a Well-Known Binary (WKB) data...</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body><div class="container">
+
+<table width="100%" summary="page for sedona_read_wkb {apache.sedona}"><tr><td>sedona_read_wkb {apache.sedona}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Create a SpatialRDD from a Well-Known Binary (WKB) data source.</h2>
+
+<h3>Description</h3>
+
+<p>Create a generic SpatialRDD from a hex-encoded Well-Known Binary (WKB) data
+source.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+sedona_read_wkb(
+  sc,
+  location,
+  wkb_col_idx = 0L,
+  allow_invalid_geometries = TRUE,
+  skip_syntactically_invalid_geometries = TRUE,
+  storage_level = "MEMORY_ONLY",
+  repartition = 1L
+)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>sc</code></td>
+<td>
+<p>A <code>spark_connection</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>location</code></td>
+<td>
+<p>Location of the data source.</p>
+</td></tr>
+<tr valign="top"><td><code>wkb_col_idx</code></td>
+<td>
+<p>Zero-based index of column containing hex-encoded WKB data
+(default: 0).</p>
+</td></tr>
+<tr valign="top"><td><code>allow_invalid_geometries</code></td>
+<td>
+<p>Whether to allow topology-invalid
+geometries to exist in the resulting RDD.</p>
+</td></tr>
+<tr valign="top"><td><code>skip_syntactically_invalid_geometries</code></td>
+<td>
+<p>Whether to allows Sedona to
+automatically skip syntax-invalid geometries, rather than throwing
+errorings.</p>
+</td></tr>
+<tr valign="top"><td><code>storage_level</code></td>
+<td>
+<p>Storage level of the RDD (default: MEMORY_ONLY).</p>
+</td></tr>
+<tr valign="top"><td><code>repartition</code></td>
+<td>
+<p>The minimum number of partitions to have in the resulting
+RDD (default: 1).</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>A SpatialRDD.
+</p>
+
+
+<h3>See Also</h3>
+
+<p>Other Sedona data inferface functions: 
+<code>sedona_read_dsv_to_typed_rdd()</code>,
+<code>sedona_read_geojson_to_typed_rdd()</code>,
+<code>sedona_read_geojson()</code>,
+<code>sedona_read_shapefile_to_typed_rdd()</code>,
+<code>sedona_read_shapefile()</code>,
+<code>sedona_read_wkt()</code>,
+<code>sedona_save_spatial_rdd()</code>,
+<code>sedona_write_geojson()</code>,
+<code>sedona_write_wkb()</code>,
+<code>sedona_write_wkt()</code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+library(sparklyr)
+library(apache.sedona)
+
+sc &lt;- spark_connect(master = "spark://HOST:PORT")
+
+if (!inherits(sc, "test_connection")) {
+  input_location &lt;- "/dev/null" # replace it with the path to your input file
+  rdd &lt;- sedona_read_wkb(
+    sc,
+    location = input_location, wkb_col_idx = 0L
+  )
+}
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>apache.sedona</em> version 1.3.1 ]</div>
+</div></body></html>

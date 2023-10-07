@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Visualization routine for Sedona spatial RDD.</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body><div class="container">
+
+<table width="100%" summary="page for sedona_visualization_routines {apache.sedona}"><tr><td>sedona_visualization_routines {apache.sedona}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Visualization routine for Sedona spatial RDD.</h2>
+
+<h3>Description</h3>
+
+<p>Generate a visual representation of geometrical object(s) within a Sedona
+spatial RDD.
+</p>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>rdd</code></td>
+<td>
+<p>A Sedona spatial RDD.</p>
+</td></tr>
+<tr valign="top"><td><code>resolution_x</code></td>
+<td>
+<p>Resolution on the x-axis.</p>
+</td></tr>
+<tr valign="top"><td><code>resolution_y</code></td>
+<td>
+<p>Resolution on the y-axis.</p>
+</td></tr>
+<tr valign="top"><td><code>output_location</code></td>
+<td>
+<p>Location of the output image. This should be the
+desired path of the image file excluding extension in its file name.</p>
+</td></tr>
+<tr valign="top"><td><code>output_format</code></td>
+<td>
+<p>File format of the output image. Currently &quot;png&quot;,
+&quot;gif&quot;, and &quot;svg&quot; formats are supported (default: &quot;png&quot;).</p>
+</td></tr>
+<tr valign="top"><td><code>boundary</code></td>
+<td>
+<p>Only render data within the given rectangular boundary.
+The 'boundary' parameter can be set to either a numeric vector of
+c(min_x, max_y, min_y, max_y) values, or with a bounding box object
+e.g., new_bounding_box(sc, min_x, max_y, min_y, max_y), or NULL
+(the default). If 'boundary' is NULL, then the minimum bounding box of the
+input spatial RDD will be computed and used as boundary for rendering.</p>
+</td></tr>
+<tr valign="top"><td><code>color_of_variation</code></td>
+<td>
+<p>Which color channel will vary depending on values
+of data points. Must be one of &quot;red&quot;, &quot;green&quot;, or &quot;blue&quot;. Default: red.</p>
+</td></tr>
+<tr valign="top"><td><code>base_color</code></td>
+<td>
+<p>Color of any data point with value 0. Must be a numeric
+vector of length 3 specifying values for red, green, and blue channels.
+Default: c(0, 0, 0).</p>
+</td></tr>
+<tr valign="top"><td><code>shade</code></td>
+<td>
+<p>Whether data point with larger magnitude will be displayed with
+darker color. Default: TRUE.</p>
+</td></tr>
+<tr valign="top"><td><code>overlay</code></td>
+<td>
+<p>A <code>viz_op</code> object containing a raster image to be
+displayed on top of the resulting image.</p>
+</td></tr>
+<tr valign="top"><td><code>browse</code></td>
+<td>
+<p>Whether to open the rendered image in a browser (default:
+interactive()).</p>
+</td></tr>
+</table>
+
+<hr /><div style="text-align: center;">[Package <em>apache.sedona</em> version 1.3.1 ]</div>
+</div></body></html>
