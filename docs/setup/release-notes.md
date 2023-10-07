@@ -1,12 +1,269 @@
-!!!warning
+!!!note
 	Support of Spark 2.X and Scala 2.11 was removed in Sedona 1.3.0+ although some parts of the source code might still be compatible. Sedona 1.3.0+ releases binary for both Scala 2.12 and 2.13.
 
-!!!danger
+!!! note
 	Sedona Python currently only works with Shapely 1.x. If you use GeoPandas, please use <= GeoPandas `0.11.1`. GeoPandas > 0.11.1 will automatically install Shapely 2.0. If you use Shapely, please use <= `1.8.4`.
+
+## Sedona 1.5.0
+
+Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
+
+### Highlights
+
+**API breaking changes**:
+
+* The following functions in Sedona requires the input data must be in longitude/latitude order otherwise they might throw errors. You can use `FlipCoordinates` to swap X and Y.
+	* ST_Transform
+	* ST_DistanceSphere
+	* ST_DistanceSpheroid
+	* ST_GeoHash
+	* All ST_H3 functions
+	* All ST_S2 functions
+	* All RS constructors
+	* All RS predicates
+	* Spark RDD: CRStransform
+* Rename `RS_Count` to `RS_CountValue`
+* Drop `RS_HTML`
+* Unshaded Sedona Spark code are all merged to a single jar `sedona-spark`
+
+**New features**
+
+* Add 18 more ST functions for vector data processing in Sedona Spark and Sedona Flink
+* Add 36 more RS functions in Sedona Spark to support [comprehensive raster data ETL and analytics](../../tutorial/raster/)
+	* You can now directly join vector and raster datasets together
+	* Flexible map algebra equations: `SELECT RS_MapAlgebra(rast, 'D', 'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);') as ndvi FROM raster_table
+`
+* Add native support of [Uber H3 functions](../../api/sql/Function/#st_h3celldistance) in Sedona Spark and Sedona Flink.
+* Add SedonaKepler and SedonaPyDeck for [interactive map visualization](../../tutorial/sql/#visualize-query-results) on Sedona Spark.
+
+
+<h2>        Bug
+</h2>
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-318'>SEDONA-318</a>] -         SerDe for RasterUDT performs poorly
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-319'>SEDONA-319</a>] -         RS_AddBandFromArray does not always produce serializable rasters
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-322'>SEDONA-322</a>] -         The &quot;Scala and Java build&quot; CI job occasionally fail
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-325'>SEDONA-325</a>] -         RS_FromGeoTiff is leaking file descriptors
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-329'>SEDONA-329</a>] -         Remove geometry_col parameter from SedonaKepler APIs
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-330'>SEDONA-330</a>] -         Fix bugs in SedonaPyDeck
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-332'>SEDONA-332</a>] -         RS_Value and RS_Values don&#39;t need to fetch all the pixel data
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-337'>SEDONA-337</a>] -         Failure falling back to pure python implementation when geomserde_speedup is unavailable
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-338'>SEDONA-338</a>] -         Refactor Raster construction in sedona to use AffineTransform instead of envelope
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-358'>SEDONA-358</a>] -         Refactor Functions to remove geotools dependency for most vector functions
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-362'>SEDONA-362</a>] -         RS_BandAsArray truncates the decimal part of float/double pixel values.
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-373'>SEDONA-373</a>] -         Move RasterPredicates to correct raster package to prevent redundant imports
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-394'>SEDONA-394</a>] -         fix RS_Band data type bug
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-401'>SEDONA-401</a>] -         Handle null values in RS_AsMatrix
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-402'>SEDONA-402</a>] -         Floor grid coordinates received from geotools
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-403'>SEDONA-403</a>] -         Add Null tolerance to RS_AddBandFromArray
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-405'>SEDONA-405</a>] -         Sedona driver Out of Memory on 1.4.1
+</li>
+</ul>
+        
+<h2>        New Feature
+</h2>
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-200'>SEDONA-200</a>] -         Add ST_CoordDim to Sedona
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-213'>SEDONA-213</a>] -         Add ST_BoundingDiagonal to Sedona
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-237'>SEDONA-237</a>] -         Implement ST_Dimension
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-238'>SEDONA-238</a>] -         Implement OGC GeometryType
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-293'>SEDONA-293</a>] -         Implement ST_IsCollection
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-294'>SEDONA-294</a>] -         Implement ST_Angle
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-295'>SEDONA-295</a>] -         Implement ST_LineInterpolatePoint in Flink
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-296'>SEDONA-296</a>] -         Implement ST_Multi in Sedona Flink
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-298'>SEDONA-298</a>] -         Implement ST_ClosestPoint
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-299'>SEDONA-299</a>] -         Implement ST_FrechetDistance
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-300'>SEDONA-300</a>] -         Implement ST_HausdorffDistance
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-301'>SEDONA-301</a>] -         Implement ST_Affine
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-303'>SEDONA-303</a>] -         Port all Sedona Spark functions to Sedona Flink
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-310'>SEDONA-310</a>] -         Add ST_Degrees to sedona
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-314'>SEDONA-314</a>] -         Support Optimized join on ST_HausdorffDistance
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-315'>SEDONA-315</a>] -         Support Optimized join on ST_FrechetDistance
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-321'>SEDONA-321</a>] -         Implement RS_Intersects(raster, geom)
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-323'>SEDONA-323</a>] -         Add wrapper for KeplerGl visualization in sedona
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-328'>SEDONA-328</a>] -         Add wrapper for pydeck visualizations in sedona
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-331'>SEDONA-331</a>] -         Add RS_Height and RS_Width 
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-334'>SEDONA-334</a>] -         Add ScaleX and ScaleY 
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-335'>SEDONA-335</a>] -         Add RS_PixelAsPoint
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-336'>SEDONA-336</a>] -         Add RS_UpperLeftX and RS_UpperLeftY 
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-340'>SEDONA-340</a>] -         Add RS_ConvexHull
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-343'>SEDONA-343</a>] -         Add raster predicates: Contains and Within
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-344'>SEDONA-344</a>] -         Add RS_RasterToWorldCoordX, RS_RasterToWorldCoordY
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-346'>SEDONA-346</a>] -         Add RS_WorldToRaster APIs
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-353'>SEDONA-353</a>] -         Add RS_BandNoDataValue
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-354'>SEDONA-354</a>] -         Add RS_SkewX and RS_SkewY
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-355'>SEDONA-355</a>] -         Add RS_BandPixelType
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-357'>SEDONA-357</a>] -         Implement ST_VoronoiPolygons
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-359'>SEDONA-359</a>] -         Add RS_GeoReference
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-361'>SEDONA-361</a>] -         Add RS_MapAlgebra for performing map algebra operations using simple expressions
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-363'>SEDONA-363</a>] -         Add RS_PixelAsPolygon
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-364'>SEDONA-364</a>] -         Add RS_MinConvexHull
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-366'>SEDONA-366</a>] -         Add RS_Count
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-367'>SEDONA-367</a>] -         Add RS_PixelAsCentroid
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-368'>SEDONA-368</a>] -         Add RS_SummaryStats
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-371'>SEDONA-371</a>] -         Add optimized join support for raster-vector and raster-raster(if any) joins
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-372'>SEDONA-372</a>] -         Add RS_SetGeoReference
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-375'>SEDONA-375</a>] -         Add RS_SetBandNoDataValue
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-376'>SEDONA-376</a>] -         Add RS_SetValues
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-378'>SEDONA-378</a>] -         Add RS_SetValue
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-379'>SEDONA-379</a>] -         Add RS_AsBase64
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-383'>SEDONA-383</a>] -         Add RS_Band
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-387'>SEDONA-387</a>] -         Add RS_BandIsNoData
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-388'>SEDONA-388</a>] -         Add RS_AsRaster
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-391'>SEDONA-391</a>] -         Add RS_AsMatrix
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-393'>SEDONA-393</a>] -         Add RS_AsPNG
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-395'>SEDONA-395</a>] -         Add RS_AsImage
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-396'>SEDONA-396</a>] -         Add RS_SetValues Geometry variant
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-398'>SEDONA-398</a>] -         Add RS_AddBand
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-404'>SEDONA-404</a>] -         Add RS_Resample
+</li>
+</ul>
+        
+<h2>        Improvement
+</h2>
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-39'>SEDONA-39</a>] -         Fix the Lon/lat order issue in Sedona
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-114'>SEDONA-114</a>] -         Add ST_MakeLine to Apache Sedona
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-142'>SEDONA-142</a>] -         Add ST_Collect to Flink Catalog
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-311'>SEDONA-311</a>] -         Refactor InferredExpression to handle functions with arbitrary arity
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-313'>SEDONA-313</a>] -         Refactor ST_Affine to support signature like PostGIS
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-324'>SEDONA-324</a>] -         R – Fix failing tests
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-326'>SEDONA-326</a>] -         Improve raster band algebra functions for easier preprocessing of raster data
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-327'>SEDONA-327</a>] -         Refactor InferredExpression to handle GridCoverage2D
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-333'>SEDONA-333</a>] -         Support EWKT parser in ST_GeomFromWKT
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-347'>SEDONA-347</a>] -         Centralize usages of transform()
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-350'>SEDONA-350</a>] -         Refactor RS_AddBandFromArray to allow adding a custom noDataValue
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-352'>SEDONA-352</a>] -         Refactor MakeEmptyRaster to allow setting custom datatype for the raster
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-360'>SEDONA-360</a>] -         Handle nodata values of raster bands in a more concise way
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-365'>SEDONA-365</a>] -         Refactor RS_Count to RS_CountValue
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-374'>SEDONA-374</a>] -         RS predicates should support (geom, rast) and (rast, rast) as arguments, and use the convex hull of rasters for spatial relationship testing
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-385'>SEDONA-385</a>] -         Set the Maven Central to be the first repository to check
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-386'>SEDONA-386</a>] -         Speed up GridCoverage2D serialization
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-392'>SEDONA-392</a>] -         Add five more pre-commit hooks
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-399'>SEDONA-399</a>] -         Support Uber H3 cells
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-400'>SEDONA-400</a>] -         pre-commit add hook to ensure that links to vcs websites are permalinks
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-408'>SEDONA-408</a>] -         Set a reasonable default size for RasterUDT
+</li>
+</ul>
+            
+<h2>        Task
+</h2>
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-316'>SEDONA-316</a>] -         Refactor Sedona Jupyter notebook examples with unified SedonaContext entrypoint
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-317'>SEDONA-317</a>] -         Change map visualization in Jupyter notebooks with KeplerGL
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-341'>SEDONA-341</a>] -         Move RS_Envelope to GeometryFunctions
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-356'>SEDONA-356</a>] -         Change CRS transformation from lat/lon to lon/lat order
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-370'>SEDONA-370</a>] -         Completely drop the old GeoTiff reader and writer
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-377'>SEDONA-377</a>] -         Change sphere/spheroid functions to work with coordinates in lon/lat order
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-380'>SEDONA-380</a>] -         Merge all Sedona Spark module to a single module
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-381'>SEDONA-381</a>] -         Merge python-adapter to sql module
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-382'>SEDONA-382</a>] -         Merge SQL and Core module to a single Spark module
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-384'>SEDONA-384</a>] -         Merge viz module to the spark module
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-397'>SEDONA-397</a>] -         Move Map Algebra functions
+</li>
+</ul>
 
 ## Sedona 1.4.1
 
-Sedona 1.4.1 is compiled against, Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
+Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 
 ### Highlights
 

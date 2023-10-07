@@ -2,7 +2,7 @@
     Sedona uses 1-based indexing for all raster functions except [map algebra function](../../api/sql/Raster-map-algebra), which uses 0-based indexing.
 
 !!!note
-    Sedona by default enforces geographic coordinates to be in longitude/latitude order.
+    Since v`1.5.0`, Sedona assumes geographic coordinates to be in longitude/latitude order. If your data is lat/lon order, please use `ST_FlipCoordinates` to swap X and Y.
 
 Starting from `v1.1.0`, Sedona SQL supports raster data sources and raster operators in DataFrame and SQL. Raster support is available in all Sedona language bindings including ==Scala, Java, Python, and R==.
 

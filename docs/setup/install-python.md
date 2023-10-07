@@ -40,10 +40,8 @@ Sedona Python needs one additional jar file called `sedona-spark-shaded` to work
 
 You can get it using one of the following methods:
 
-1. Compile from the source within main project directory and copy it (in `spark-shaded/target` folder) to SPARK_HOME/jars/ folder ([more details](../compile))
-
-2. Download from [GitHub release](https://github.com/apache/sedona/releases) and copy it to SPARK_HOME/jars/ folder
-3. Call the [Maven Central coordinate](../maven-coordinates) in your python program. For example,
+1. Download [sedona-spark-shaded jar](https://repo.maven.apache.org/maven2/org/apache/sedona/) and [geotools-wrapper jar](https://repo.maven.apache.org/maven2/org/datasyslab/geotools-wrapper/) from Maven Central, and put them in SPARK_HOME/jars/ folder.
+2. Call the [Maven Central coordinate](../maven-coordinates) in your python program. For example,
 ==Sedona >= 1.4.1==
 
 ```python
@@ -75,9 +73,6 @@ spark = SparkSession. \
     getOrCreate()
 SedonaRegistrator.registerAll(spark)
 ```
-
-!!!warning
-	If you are going to use Sedona CRS transformation and ShapefileReader functions, you have to use Method 1 or 3. Because these functions internally use GeoTools libraries which are under LGPL license, Apache Sedona binary release cannot include them.
 
 ### Setup environment variables
 

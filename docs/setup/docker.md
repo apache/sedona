@@ -23,7 +23,7 @@ docker pull apache/sedona:latest
 Example 2: Pull the image of a specific Sedona release
 
 ```bash
-docker pull apache/sedona:1.4.1
+docker pull apache/sedona:{{ sedona.current_version }}
 ```
 
 ### Start the container
@@ -43,7 +43,7 @@ docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 apache/sedona:lat
 Example 2:
 
 ```bash
-docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 apache/sedona:1.4.1
+docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 apache/sedona:{{ sedona.current_version }}
 ```
 
 This command will bind the container's ports 8888, 8080, 8081, 4040 to the host's ports 8888, 8080, 8081, 4040 respectively.
@@ -74,7 +74,7 @@ Format:
 Example:
 
 ```bash
-./docker/sedona-spark-jupyterlab/build.sh 3.4.1 1.4.1
+./docker/sedona-spark-jupyterlab/build.sh 3.4.1 {{ sedona.current_version }}
 ```
 
 `build_mode` is optional. If its value is not given or is `local`, the script will build the image locally. Otherwise, it will start a cross-platform compilation and push images directly to DockerHub.
@@ -129,5 +129,5 @@ Example:
 
 ```bash
 docker login
-./docker/sedona-spark-jupyterlab/build.sh 3.4.1 1.4.1 release
+./docker/sedona-spark-jupyterlab/build.sh 3.4.1 {{ sedona.current_version }} release
 ```
