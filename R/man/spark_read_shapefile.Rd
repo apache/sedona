@@ -36,7 +36,7 @@ spark_read_geoparquet(
 \item{path}{The path to the file. Needs to be accessible from the cluster.
 Supports the \samp{"hdfs://"}, \samp{"s3a://"} and \samp{"file://"} protocols.}
 
-\item{options}{A list of strings with additional options. See \url{http://spark.apache.org/docs/latest/sql-programming-guide.html#configuration}.}
+\item{options}{A list of strings with additional options. See \url{https://spark.apache.org/docs/latest/sql-programming-guide.html}.}
 
 \item{...}{Optional arguments; currently unused.}
 

@@ -6,10 +6,9 @@
 \alias{apache.sedona-package}
 \title{apache.sedona: R Interface for Apache Sedona}
 \description{
-\if{html}{\figure{logo.png}{options: align='right' alt='logo' width='120'}}
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-R interface for 'Apache Sedona' based on 'sparklyr'
-    (<https://sedona.apache.org>).
+R interface for 'Apache Sedona' based on 'sparklyr' (\url{https://sedona.apache.org}).
 }
 \seealso{
 Useful links:
