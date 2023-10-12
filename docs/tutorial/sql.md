@@ -762,7 +762,7 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 
 ### DataFrame to SpatialRDD
 
-Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html)
+Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](../../api/scaladoc/spark/org/apache/sedona/sql/utils/index.html)
 
 === "Scala"
 

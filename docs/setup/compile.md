@@ -130,8 +130,7 @@ After installing MkDocs and MkDocs-Material, run the command in Sedona root fold
 
 ```
 mkdocs build
-mike deploy --update-aliases latest-snapshot latest
-mike set-default latest
+mike deploy --update-aliases latest-snapshot -b website -p
 mike serve
 ```
 

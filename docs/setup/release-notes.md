@@ -6,7 +6,7 @@
 
 ## Sedona 1.5.0
 
-Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
+Sedona 1.5.0 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 
 ### Highlights
 
@@ -37,8 +37,8 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 * Add SedonaKepler and SedonaPyDeck for [interactive map visualization](../../tutorial/sql/#visualize-query-results) on Sedona Spark.
 
 
-<h2>        Bug
-</h2>
+### Bug
+
 <ul>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-318'>SEDONA-318</a>] -         SerDe for RasterUDT performs poorly
 </li>
@@ -76,8 +76,8 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 </li>
 </ul>
         
-<h2>        New Feature
-</h2>
+###        New Feature
+
 <ul>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-200'>SEDONA-200</a>] -         Add ST_CoordDim to Sedona
 </li>
@@ -187,8 +187,8 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 </li>
 </ul>
         
-<h2>        Improvement
-</h2>
+### Improvement
+
 <ul>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-39'>SEDONA-39</a>] -         Fix the Lon/lat order issue in Sedona
 </li>
@@ -234,8 +234,8 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 </li>
 </ul>
             
-<h2>        Task
-</h2>
+### Task
+
 <ul>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-316'>SEDONA-316</a>] -         Refactor Sedona Jupyter notebook examples with unified SedonaContext entrypoint
 </li>
