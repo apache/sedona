@@ -23,7 +23,7 @@ The transformed SpatialRDD.
 }
 \description{
 Transform data within a spatial RDD from one coordinate reference system to
-another.
+another. This uses the lon/lat order since v1.5.0. Before, it used lat/lon
 }
 \examples{
 library(sparklyr)
