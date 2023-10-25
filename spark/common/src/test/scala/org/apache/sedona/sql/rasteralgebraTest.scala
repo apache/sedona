@@ -609,6 +609,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expected, result)
     }
 
+    it("Passed RS_Rotation") {
+      val df = sparkSession.sql("SELECT RS_MakeEmptyRaster(2, 10, 15, 1, 2, 1, -2, 1, 2, 0) as raster")
+      val actual = df.selectExpr("RS_Rotation(raster)").first().get(0)
+      val expected = -1.1071487177940904
+      assertEquals(expected, actual)
+    }
+
     it("Passed RS_SkewX") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val result = df.selectExpr("RS_SkewX(RS_FromGeoTiff(content))").first().getDouble(0)

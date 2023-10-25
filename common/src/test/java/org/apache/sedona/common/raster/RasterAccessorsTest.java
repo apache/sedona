@@ -28,10 +28,8 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import java.io.IOException;
-import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.*;
 
 public class RasterAccessorsTest extends RasterTestBase
 {
@@ -74,7 +72,7 @@ public class RasterAccessorsTest extends RasterTestBase
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 10, 15, 1, 2, 1, -1, 10, 10, 0);
         double[] actual = RasterAccessors.getGeoTransform(emptyRaster);
         double[] expected = new double[] {10.04987562112089, 10.04987562112089, -1.4711276743037347, 1.5707963267948966, 0.0, 0.0};
-        assertEquals(expected, actual);
+        assertArrayEquals(expected, actual, 1e-9);
     }
 
     @Test
