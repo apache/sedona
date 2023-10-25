@@ -127,6 +127,64 @@ public class RasterAccessors
         }
     }
 
+
+    public static double[] getGeoTransform(GridCoverage2D raster) throws FactoryException {
+        // size of a pixel along the transformed i axis
+        double magnitudeI;
+
+        // size of a pixel along the transformed j axis
+        double magnitudeJ;
+
+        // angle by which the raster is rotated (Radians positive clockwise)
+        double thetaI;
+
+        // angle from transformed i axis to transformed j axis (Radians positive counter-clockwise)
+        double thetaIJ;
+
+        double[] metadata = metadata(raster);
+
+        // x ordinate of the upper-left corner of the upper-left pixel
+        double offsetX = metadata[0];
+
+        // y ordinate of the upper-left corner of the upper-left pixel
+        double offsetY = metadata[1];
+
+        double scaleX = metadata[4];
+        double scaleY =  metadata[5];
+        double skewX = metadata[6];
+        double skewY = metadata[7];
+
+        // pixel size in i direction
+        magnitudeI = Math.sqrt(scaleX * scaleX + skewY * skewY);
+
+        // pixel size in j direction
+        magnitudeJ = Math.sqrt(scaleY * scaleY + skewX * skewX);
+
+        // Rotation
+        thetaI = Math.acos(scaleX / magnitudeI);
+        double thetaTest = Math.acos(skewY / magnitudeI);
+        if (thetaTest < Math.PI / 2) {
+            thetaI = -thetaI;
+        }
+
+        // Angular separation
+        thetaIJ = Math.acos(((scaleX * skewX) + (skewY * scaleY) / (magnitudeI * magnitudeI)));
+        thetaTest = Math.acos((-skewY * skewX) + (scaleX * scaleY) / (magnitudeI * magnitudeJ));
+        if (thetaTest < Math.PI / 2) {
+            thetaIJ = -thetaIJ;
+        }
+
+        double[] result = new double[6];
+        result[0] = magnitudeI;
+        result[1] = magnitudeJ;
+        result[2] = thetaI;
+        result[3] = thetaIJ;
+        result[4] = offsetX;
+        result[5] = offsetY;
+
+        return result;
+    }
+
     public static Geometry getGridCoord(GridCoverage2D raster, double x, double y) throws TransformException {
         int[] coords = RasterUtils.getGridCoordinatesFromWorld(raster, x, y);
         coords = Arrays.stream(coords).map(number -> number + 1).toArray();
