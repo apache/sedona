@@ -352,6 +352,28 @@ Output:
 54
 ```
 
+### RS_Rotation
+
+Introduction: Returns the uniform rotation of the raster in radian.
+
+Format: `RS_Rotation(raster: Raster)`
+
+Since: `v1.5.1`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_Rotation(
+        RS_MakeEmptyRaster(2, 10, 15, 1, 2, 1, -2, 1, 2, 0)
+        )
+```
+
+Output:
+
+```
+-1.1071487177940904
+```
+
 ### RS_ScaleX
 
 Introduction: Returns the pixel width of the raster in CRS units.
