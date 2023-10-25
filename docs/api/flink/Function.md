@@ -1246,7 +1246,7 @@ Format: `ST_H3CellDistance(cell1: Long, cell2: Long)`
 Since: `v1.5.0`
 
 Example:
-```SQL
+```sql
 select ST_H3CellDistance(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[1], ST_H3CellIDs(ST_GeomFromWKT('POINT(1.23 1.59)'), 8, true)[1])
 ```
 
@@ -1291,7 +1291,7 @@ Format: `ST_H3CellIDs(geom: geometry, level: Int, fullCover: true)`
 Since: `v1.5.0`
 
 Example:
-```SQL
+```sql
 SELECT ST_H3CellIDs(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'), 6, true)
 ```
 
@@ -1318,7 +1318,7 @@ Format: `ST_H3KRing(cell: Long, k: Int, exactRing: Boolean)`
 Since: `v1.5.0`
 
 Example:
-```SQL
+```sql
 select ST_H3KRing(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[1], 1, false), ST_H3KRing(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[1], 1, true)
 ```
 
@@ -1342,7 +1342,7 @@ Format: `ST_H3ToGeom(cells: Array[Long])`
 Since: `v1.5.0`
 
 Example:
-```SQL
+```sql
 SELECT ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], 1, true))
 ```
 
@@ -2189,7 +2189,7 @@ Since: `v1.4.0`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_S2CellIDs(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'), 6)
 ```
 
