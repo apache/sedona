@@ -185,6 +185,11 @@ public class RasterAccessors
         return result;
     }
 
+    public static double getRotation(GridCoverage2D raster) throws FactoryException {
+        double rotation = getGeoTransform(raster)[2];
+        return rotation;
+    }
+
     public static Geometry getGridCoord(GridCoverage2D raster, double x, double y) throws TransformException {
         int[] coords = RasterUtils.getGridCoordinatesFromWorld(raster, x, y);
         coords = Arrays.stream(coords).map(number -> number + 1).toArray();
