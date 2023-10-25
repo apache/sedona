@@ -70,6 +70,14 @@ public class RasterAccessorsTest extends RasterTestBase
     }
 
     @Test
+    public void testGeoTransform() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 10, 15, 1, 2, 1, -1, 10, 10, 0);
+        double[] actual = RasterAccessors.getGeoTransform(emptyRaster);
+        double[] expected = new double[] {10.04987562112089, 10.04987562112089, -1.4711276743037347, 1.5707963267948966, 0.0, 0.0};
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testUpperLeftX() throws FactoryException {
         GridCoverage2D gridCoverage2D = RasterConstructors.makeEmptyRaster(1, 3, 4, 1,2, 5);
         double upperLeftX = RasterAccessors.getUpperLeftX(gridCoverage2D);
