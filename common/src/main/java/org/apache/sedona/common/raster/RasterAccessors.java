@@ -144,10 +144,10 @@ public class RasterAccessors
         double[] metadata = metadata(raster);
 
         // x ordinate of the upper-left corner of the upper-left pixel
-        double offsetX = metadata[0];
+        double offsetX = raster.getSampleDimension(0).getOffset();
 
         // y ordinate of the upper-left corner of the upper-left pixel
-        double offsetY = metadata[1];
+        double offsetY = raster.getSampleDimension(0).getOffset();
 
         double scaleX = metadata[4];
         double scaleY =  metadata[5];
@@ -168,8 +168,8 @@ public class RasterAccessors
         }
 
         // Angular separation
-        thetaIJ = Math.acos(((scaleX * skewX) + (skewY * scaleY) / (magnitudeI * magnitudeI)));
-        thetaTest = Math.acos((-skewY * skewX) + (scaleX * scaleY) / (magnitudeI * magnitudeJ));
+        thetaIJ = Math.acos((((scaleX * skewX) + (skewY * scaleY)) / (magnitudeI * magnitudeI)));
+        thetaTest = Math.acos(((-skewY * skewX) + (scaleX * scaleY)) / (magnitudeI * magnitudeJ));
         if (thetaTest < Math.PI / 2) {
             thetaIJ = -thetaIJ;
         }
