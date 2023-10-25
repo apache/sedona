@@ -28,6 +28,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -58,6 +59,14 @@ public class RasterAccessorsTest extends RasterTestBase
     public void testSrid() throws FactoryException {
         assertEquals(0, RasterAccessors.srid(oneBandRaster));
         assertEquals(4326, RasterAccessors.srid(multiBandRaster));
+    }
+
+    @Test
+    public void testRotation() throws IOException, FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 10, 15, 1, 2, 1, -2, 10, 10, 0);
+        double actual = RasterAccessors.getRotation(emptyRaster);
+        double expected = -1.4711276743037347;
+        assertEquals(expected, actual, 1e-9);
     }
 
     @Test
