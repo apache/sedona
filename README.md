@@ -62,11 +62,11 @@ Apache Sedona is a widely used framework for working with spatial data, and it h
 This example loads NYC taxi trip records and taxi zone information stored as .CSV files on AWS S3 into Sedona spatial dataframes. It then performs spatial SQL query on the taxi trip datasets to filter out all records except those within the Manhattan area of New York. The example also shows a spatial join operation that matches taxi trip records to zones based on whether the taxi trip lies within the geographical extents of the zone. Finally, the last code snippet integrates the output of Sedona with GeoPandas and plots the spatial distribution of both datasets.
 
 #### Load NYC taxi trips and taxi zones data from CSV Files Stored on AWS S3
-``` python
+```python
 taxidf = sedona.read.format('csv').option("header","true").option("delimiter", ",").load("s3a://your-directory/data/nyc-taxi-data.csv")
 taxidf = taxidf.selectExpr('ST_Point(CAST(Start_Lon AS Decimal(24,20)), CAST(Start_Lat AS Decimal(24,20))) AS pickup', 'Trip_Pickup_DateTime', 'Payment_Type', 'Fare_Amt')
 ```
-``` python
+```python
 zoneDf = sedona.read.format('csv').option("delimiter", ",").load("s3a://your-directory/data/TIGER2018_ZCTA5.csv")
 zoneDf = zoneDf.selectExpr('ST_GeomFromWKT(_c0) as zone', '_c1 as zipcode')
 ```
@@ -105,7 +105,7 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
 
 * To install the Python package: 
 
-  ``` 
+  ```
   pip install apache-sedona
   ```
 * To Compile the source code, please refer to [Sedona website](https://sedona.apache.org/latest-snapshot/setup/compile/)
