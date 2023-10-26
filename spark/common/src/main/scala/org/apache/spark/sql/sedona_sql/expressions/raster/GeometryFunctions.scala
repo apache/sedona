@@ -40,4 +40,3 @@ case class RS_MinConvexHull(inputExpressions: Seq[Expression]) extends InferredE
     copy(inputExpressions = newChildren)
   }
 }
-

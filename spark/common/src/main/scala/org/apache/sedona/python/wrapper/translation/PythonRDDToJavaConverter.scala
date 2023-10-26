@@ -63,4 +63,3 @@ case class PythonRDDToJavaConverter(javaRDD: JavaRDD[Array[Byte]], geometrySeria
     finalGeom
   }
 }
-

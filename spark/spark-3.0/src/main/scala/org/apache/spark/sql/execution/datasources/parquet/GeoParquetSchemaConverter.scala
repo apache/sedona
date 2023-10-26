@@ -574,4 +574,3 @@ private[sql] object GeoParquetSchemaConverter {
        """.stripMargin.split("\n").mkString(" ").trim)
   }
 }
-

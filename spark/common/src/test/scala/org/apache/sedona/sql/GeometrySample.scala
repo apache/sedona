@@ -73,4 +73,3 @@ trait GeometrySample {
     lines.toList
   }
 }
-

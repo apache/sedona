@@ -70,4 +70,3 @@ class NYCTripPointMapper
         return result.iterator();
     }
 }
-
