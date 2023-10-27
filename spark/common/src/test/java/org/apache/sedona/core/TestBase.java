@@ -55,4 +55,3 @@ public class TestBase
         fileSystem.delete(new Path(path), true);
     }
 }
-

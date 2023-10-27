@@ -1148,4 +1148,3 @@ case class ST_IsCollection(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
-
