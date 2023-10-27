@@ -32,6 +32,7 @@ import org.opengis.referencing.ReferenceIdentifier;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
+import java.awt.image.RenderedImage;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -141,14 +142,15 @@ public class RasterAccessors
         // angle from transformed i axis to transformed j axis (Radians positive counter-clockwise)
         double thetaIJ;
 
-        double[] metadata = metadata(raster);
+        RenderedImage renderedImage = raster.getRenderedImage();
 
         // x ordinate of the upper-left corner of the upper-left pixel
-        double offsetX = raster.getSampleDimension(0).getOffset();
+        double offsetX = renderedImage.getTileGridXOffset();
 
         // y ordinate of the upper-left corner of the upper-left pixel
-        double offsetY = raster.getSampleDimension(0).getOffset();
+        double offsetY = renderedImage.getTileGridYOffset();
 
+        double[] metadata = metadata(raster);
         double scaleX = metadata[4];
         double scaleY =  metadata[5];
         double skewX = metadata[6];
