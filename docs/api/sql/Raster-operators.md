@@ -292,6 +292,38 @@ SELECT RS_GeoReferrence(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1,
 198.500000
 ```
 
+### RS_GeoTransform
+
+Introduction: Returns an array of parameters that represent the GeoTranformation of the raster. The array contains the following values:
+
+- 0: pixel width along west-east axis (x axis)
+- 1: pixel height along north-south axis (y axis)
+- 2: Rotation of the raster
+- 3: Angular separation between x axis and y axis
+- 4: Grid offset X for upper-left X coordinate
+- 5: Grid offset Y for upper-left Y coordinate
+
+!!!note
+    Refer to [this image](https://www.researchgate.net/figure/Relation-between-the-cartesian-axes-x-y-and-i-j-axes-of-the-pixels_fig3_313860913) for a clear understanding between i & j axis and x & y axis.
+
+Format: `RS_GeoTransform(raster: Raster)`
+
+Since: `v1.5.1`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_GeoTransform(
+        RS_MakeEmptyRaster(2, 10, 15, 1, 2, 1, -2, 1, 2, 0)
+       )
+```
+
+Output:
+
+```
+[2.23606797749979, 2.23606797749979, -1.1071487177940904, -2.214297435588181, 0.0, 0.0]
+```
+
 ### RS_Height
 
 Introduction: Returns the height of the raster.
