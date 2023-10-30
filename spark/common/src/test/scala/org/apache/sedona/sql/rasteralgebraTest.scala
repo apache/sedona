@@ -619,8 +619,10 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_GeoTransform") {
       val df = sparkSession.sql("SELECT RS_MakeEmptyRaster(2, 10, 15, 1, 2, 1, -2, 1, 2, 0) as raster")
       val actual = df.selectExpr("RS_GeoTransform(raster)").first().getSeq(0)
-      val expected = mutable.ArraySeq(2.23606797749979, 2.23606797749979, -1.1071487177940904, 2.214297435588181, 0.0, 0.0)
+      val expected = mutable.ArraySeq(2.23606797749979, 2.23606797749979, -1.1071487177940904, -2.214297435588181, 0.0, 0.0)
       assertTrue(expected.equals(actual))
+      val test = sparkSession.sql("SELECT RS_GeoTransform(RS_MakeEmptyRaster(2, 1, 2, 10, 15, 1, 2, 1, -1, 0))").first().get(0)
+      println(test)
     }
 
     it("Passed RS_SkewX") {

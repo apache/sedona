@@ -156,10 +156,10 @@ public class RasterAccessors
         double skewX = metadata[6];
         double skewY = metadata[7];
 
-        // pixel size in i direction
+        // pixel size in i direction - west-east
         magnitudeI = Math.sqrt(scaleX * scaleX + skewY * skewY);
 
-        // pixel size in j direction
+        // pixel size in j direction - north-south
         magnitudeJ = Math.sqrt(scaleY * scaleY + skewX * skewX);
 
         // Rotation
@@ -170,9 +170,9 @@ public class RasterAccessors
         }
 
         // Angular separation
-        thetaIJ = Math.acos((((scaleX * skewX) + (skewY * scaleY)) / (magnitudeI * magnitudeI)));
+        thetaIJ = Math.acos((((scaleX * skewX) + (skewY * scaleY)) / (magnitudeI * magnitudeJ)));
         thetaTest = Math.acos(((-skewY * skewX) + (scaleX * scaleY)) / (magnitudeI * magnitudeJ));
-        if (thetaTest < Math.PI / 2) {
+        if (thetaTest > Math.PI / 2) {
             thetaIJ = -thetaIJ;
         }
 
