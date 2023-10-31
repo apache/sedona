@@ -142,15 +142,14 @@ public class RasterAccessors
         // angle from transformed i axis to transformed j axis (Radians positive counter-clockwise)
         double thetaIJ;
 
-        RenderedImage renderedImage = raster.getRenderedImage();
+        double[] metadata = metadata(raster);
 
         // x ordinate of the upper-left corner of the upper-left pixel
-        double offsetX = renderedImage.getTileGridXOffset();
+        double offsetX = metadata[0];
 
         // y ordinate of the upper-left corner of the upper-left pixel
-        double offsetY = renderedImage.getTileGridYOffset();
+        double offsetY = metadata[1];
 
-        double[] metadata = metadata(raster);
         double scaleX = metadata[4];
         double scaleY =  metadata[5];
         double skewX = metadata[6];

@@ -300,8 +300,8 @@ Introduction: Returns an array of parameters that represent the GeoTranformation
 - 1: pixel height along north-south axis (y axis)
 - 2: Rotation of the raster
 - 3: Angular separation between x axis and y axis
-- 4: Grid offset X for upper-left X coordinate
-- 5: Grid offset Y for upper-left Y coordinate
+- 4: X ordinate of upper-left coordinate
+- 5: Y ordinate of upper-left coordinate
 
 !!!note
     Refer to [this image](https://www.researchgate.net/figure/Relation-between-the-cartesian-axes-x-y-and-i-j-axes-of-the-pixels_fig3_313860913) for a clear understanding between i & j axis and x & y axis.
@@ -321,7 +321,7 @@ SELECT RS_GeoTransform(
 Output:
 
 ```
-[2.23606797749979, 2.23606797749979, -1.1071487177940904, -2.214297435588181, 0.0, 0.0]
+[2.23606797749979, 2.23606797749979, -1.1071487177940904, -2.214297435588181, 1.0, 2.0]
 ```
 
 ### RS_Height

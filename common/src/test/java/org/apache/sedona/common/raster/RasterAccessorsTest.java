@@ -71,7 +71,7 @@ public class RasterAccessorsTest extends RasterTestBase
     public void testGeoTransform() throws FactoryException {
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 10, 15, 1, 2, 1, -1, 10, 10, 0);
         double[] actual = RasterAccessors.getGeoTransform(emptyRaster);
-        double[] expected = new double[] {10.04987562112089, 10.04987562112089, -1.4711276743037347, -1.5707963267948966, 0.0, 0.0};
+        double[] expected = new double[] {10.04987562112089, 10.04987562112089, -1.4711276743037347, -1.5707963267948966, 1.0, 2.0};
         assertArrayEquals(expected, actual, 1e-9);
     }
 
