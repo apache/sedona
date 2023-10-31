@@ -39,14 +39,14 @@ val SparkCompatibleVersion = "3.0"
 
 val HadoopVersion = "2.7.2"
 
-val SedonaVersion = "1.5.0"
+val SedonaVersion = "1.4.0"
 
 val ScalaCompatibleVersion = "2.12"
 
 // Change the dependency scope to "provided" when you run "sbt assembly"
 val dependencyScope = "compile"
 
-val geotoolsVersion = "1.4.0-28.2"
+val geotoolsVersion = "1.5.0-28.2"
 
 //val jacksonVersion = "2.10.0"
 
