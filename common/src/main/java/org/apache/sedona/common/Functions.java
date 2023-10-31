@@ -100,8 +100,7 @@ public class Functions {
 
     public static Geometry buffer(Geometry geometry, double radius, String params) {
         if (params.isEmpty()) {
-            BufferParameters defaultParameters = new BufferParameters(BufferParameters.DEFAULT_QUADRANT_SEGMENTS, BufferParameters.CAP_ROUND, BufferParameters.JOIN_ROUND, BufferParameters.DEFAULT_MITRE_LIMIT);
-            return BufferOp.bufferOp(geometry, radius, defaultParameters);
+            return BufferOp.bufferOp(geometry, radius);
         }
 
         BufferParameters bufferParameters = parseBufferParams(params);
