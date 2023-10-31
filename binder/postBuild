@@ -1,9 +1,6 @@
 #Download Apache Spark
-wget https://archive.apache.org/dist/spark/spark-3.4.0/spark-3.4.0-bin-hadoop3.tgz
+wget https://archive.apache.org/dist/spark/spark-3.3.2/spark-3.4.0-bin-hadoop3.tgz
 tar -xzf spark-3.4.0-bin-hadoop3.tgz
-
-curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar -o ${SPARK_HOME}/jars/hadoop-aws-3.3.4.jar
-curl https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.402/aws-java-sdk-bundle-1.12.402.jar -o ${SPARK_HOME}/jars/aws-java-sdk-bundle-1.12.402.jar
 
 #Tidy up
 rm spark-3.4.0-bin-hadoop3.tgz
