@@ -106,10 +106,23 @@ public class Functions {
 
         BufferParameters bufferParameters = parseBufferParams(params);
 
+        // convert the sign to the appropriate direction
+        // left - radius should be positive
+        // right - radius should be negative
+        if (bufferParameters.isSingleSided() &&
+                (params.toLowerCase().contains("left") && radius < 0 || params.toLowerCase().contains("right") && radius > 0)) {
+                radius = -radius;
+        }
+
         return BufferOp.bufferOp(geometry, radius, bufferParameters);
     }
 
     private static BufferParameters parseBufferParams(String params) {
+
+        String[] listBufferParameters = {"quad_segs", "endcap", "join", "mitre_limit", "miter_limit", "side"};
+        String[] endcapOptions = {"round", "flat", "butt", "square"};
+        String[] joinOptions = {"round", "mitre", "miter", "bevel"};
+        String[] sideOptions = {"both", "left", "right"};
 
         BufferParameters bufferParameters = new BufferParameters();
         String[] listParams = params.split(" ");
@@ -117,55 +130,59 @@ public class Functions {
             String[] singleParam = param.split("=");
 
             // Set quadrant segment
-            if (singleParam[0].equalsIgnoreCase("quad_segs")) {
+            if (singleParam[0].equalsIgnoreCase(listBufferParameters[0])) {
                 try {
                     bufferParameters.setQuadrantSegments(Integer.parseInt(singleParam[1]));
                 } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException(String.format("Quadrant segment should be an integer. %1$s is not an integer.", singleParam[1]));
+                    throw new IllegalArgumentException(String.format("%1$s is not an integer. Quadrant segment should be an integer.", singleParam[1]));
                 }
             }
             // Set end cap style
-             else if (singleParam[0].equalsIgnoreCase("endcap")) {
-                if (singleParam[1].equalsIgnoreCase("round")) {
-                    bufferParameters.setJoinStyle(BufferParameters.CAP_ROUND);
-                } else if (singleParam[1].equalsIgnoreCase("flat") || singleParam[1].equalsIgnoreCase("butt")) {
-                    bufferParameters.setJoinStyle(BufferParameters.CAP_FLAT);
-                } else if (singleParam[1].equalsIgnoreCase("square")) {
-                    bufferParameters.setJoinStyle(BufferParameters.CAP_SQUARE);
+             else if (singleParam[0].equalsIgnoreCase(listBufferParameters[1])) {
+                if (singleParam[1].equalsIgnoreCase(endcapOptions[0])) {
+                    bufferParameters.setEndCapStyle(BufferParameters.CAP_ROUND);
+                } else if (singleParam[1].equalsIgnoreCase(endcapOptions[1]) || singleParam[1].equalsIgnoreCase(endcapOptions[2])) {
+                    bufferParameters.setEndCapStyle(BufferParameters.CAP_FLAT);
+                } else if (singleParam[1].equalsIgnoreCase(endcapOptions[3])) {
+                    bufferParameters.setEndCapStyle(BufferParameters.CAP_SQUARE);
                 } else {
-                    throw new IllegalArgumentException(String.format("Please select value for Endcap Style from the given options. %1$s is not a valid option.", singleParam[1]));
+                    throw new IllegalArgumentException(String.format("%s is not a valid option. Accepted options are %s.", singleParam[1], Arrays.toString(endcapOptions)));
                 }
-                continue;
             }
             // Set join style
-            else if (singleParam[0].equalsIgnoreCase("join")) {
-                if (singleParam[1].equalsIgnoreCase("round")) {
+            else if (singleParam[0].equalsIgnoreCase(listBufferParameters[2])) {
+                if (singleParam[1].equalsIgnoreCase(joinOptions[0])) {
                     bufferParameters.setJoinStyle(BufferParameters.JOIN_ROUND);
-                } else if (singleParam[1].equalsIgnoreCase("mitre") || singleParam[1].equalsIgnoreCase("miter")) {
+                } else if (singleParam[1].equalsIgnoreCase(joinOptions[1]) || singleParam[1].equalsIgnoreCase(joinOptions[2])) {
                     bufferParameters.setJoinStyle(BufferParameters.JOIN_MITRE);
-                } else if (singleParam[1].equalsIgnoreCase("bevel")) {
+                } else if (singleParam[1].equalsIgnoreCase(joinOptions[3])) {
                     bufferParameters.setJoinStyle(BufferParameters.JOIN_BEVEL);
                 } else {
-                    throw new IllegalArgumentException(String.format("Please select value for Join Style from the given options. %1$s is not a valid option.", singleParam[1]));
+                    throw new IllegalArgumentException(String.format("%s is not a valid option. Accepted options are %s", singleParam[1], Arrays.toString(joinOptions)));
                 }
-                continue;
             }
             // Set mitre ratio limit
-            else if (singleParam[0].equalsIgnoreCase("mitre_limit") || singleParam[0].equalsIgnoreCase("miter_limit")) {
+            else if (singleParam[0].equalsIgnoreCase(listBufferParameters[3]) || singleParam[0].equalsIgnoreCase(listBufferParameters[4])) {
                 try {
                     bufferParameters.setMitreLimit(Double.parseDouble(singleParam[1]));
                 } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException(String.format("Mitre limit should be a double. %1$s is not a double.", singleParam[1]));
+                    throw new IllegalArgumentException(String.format("%1$s is not a double. Mitre limit should be a double.", singleParam[1]));
                 }
                 continue;
             }
             // Set side to add buffer
-            if (singleParam[0].equalsIgnoreCase("side")) {
-                if (singleParam[1].equalsIgnoreCase("false") || singleParam[0].equalsIgnoreCase("f")) {
+            else if (singleParam[0].equalsIgnoreCase(listBufferParameters[5])) {
+                if (singleParam[1].equalsIgnoreCase(sideOptions[0])) {
                     continue;
-                } else if (singleParam[0].equalsIgnoreCase("true") || singleParam[0].equalsIgnoreCase("t")) {
+                } else if (singleParam[1].equalsIgnoreCase(sideOptions[1]) || singleParam[1].equalsIgnoreCase(sideOptions[2])) {
                     bufferParameters.setSingleSided(true);
+                } else {
+                    throw new IllegalArgumentException(String.format("%s is not a valid option. Accepted options are %s ", singleParam[1], Arrays.toString(sideOptions)));
                 }
+            }
+            // everything else
+            else {
+                throw new IllegalArgumentException(String.format("%s is not a valid style parameter. Accepted style parameters are %s.", singleParam[0], Arrays.toString(listBufferParameters)));
             }
         }
         return bufferParameters;
