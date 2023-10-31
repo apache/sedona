@@ -16,7 +16,6 @@ package org.apache.sedona.common;
 import com.google.common.geometry.S2CellId;
 import com.uber.h3core.exceptions.H3Exception;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
