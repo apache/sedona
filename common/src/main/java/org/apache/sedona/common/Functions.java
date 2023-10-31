@@ -16,6 +16,7 @@ package org.apache.sedona.common;
 import com.google.common.geometry.S2CellId;
 import com.uber.h3core.exceptions.H3Exception;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
@@ -43,6 +44,8 @@ import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.io.gml2.GMLWriter;
 import org.locationtech.jts.io.kml.KMLWriter;
 import org.locationtech.jts.linearref.LengthIndexedLine;
+import org.locationtech.jts.operation.buffer.BufferOp;
+import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.locationtech.jts.operation.distance.DistanceOp;
 import org.locationtech.jts.operation.distance3d.Distance3DOp;
 import org.locationtech.jts.operation.linemerge.LineMerger;
@@ -92,7 +95,80 @@ public class Functions {
     }
 
     public static Geometry buffer(Geometry geometry, double radius) {
-        return geometry.buffer(radius);
+        return buffer(geometry, radius, "");
+    }
+
+    public static Geometry buffer(Geometry geometry, double radius, String params) {
+        if (params.isEmpty()) {
+            BufferParameters defaultParameters = new BufferParameters(BufferParameters.DEFAULT_QUADRANT_SEGMENTS, BufferParameters.CAP_ROUND, BufferParameters.JOIN_ROUND, BufferParameters.DEFAULT_MITRE_LIMIT);
+            return BufferOp.bufferOp(geometry, radius, defaultParameters);
+        }
+
+        BufferParameters bufferParameters = parseBufferParams(params);
+
+        return BufferOp.bufferOp(geometry, radius, bufferParameters);
+    }
+
+    private static BufferParameters parseBufferParams(String params) {
+
+        BufferParameters bufferParameters = new BufferParameters();
+        String[] listParams = params.split(" ");
+        for (String param: listParams) {
+            String[] singleParam = param.split("=");
+
+            // Set quadrant segment
+            if (singleParam[0].equalsIgnoreCase("quad_segs")) {
+                try {
+                    bufferParameters.setQuadrantSegments(Integer.parseInt(singleParam[1]));
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException(String.format("Quadrant segment should be an integer. %1$s is not an integer.", singleParam[1]));
+                }
+            }
+            // Set end cap style
+             else if (singleParam[0].equalsIgnoreCase("endcap")) {
+                if (singleParam[1].equalsIgnoreCase("round")) {
+                    bufferParameters.setJoinStyle(BufferParameters.CAP_ROUND);
+                } else if (singleParam[1].equalsIgnoreCase("flat") || singleParam[1].equalsIgnoreCase("butt")) {
+                    bufferParameters.setJoinStyle(BufferParameters.CAP_FLAT);
+                } else if (singleParam[1].equalsIgnoreCase("square")) {
+                    bufferParameters.setJoinStyle(BufferParameters.CAP_SQUARE);
+                } else {
+                    throw new IllegalArgumentException(String.format("Please select value for Endcap Style from the given options. %1$s is not a valid option.", singleParam[1]));
+                }
+                continue;
+            }
+            // Set join style
+            else if (singleParam[0].equalsIgnoreCase("join")) {
+                if (singleParam[1].equalsIgnoreCase("round")) {
+                    bufferParameters.setJoinStyle(BufferParameters.JOIN_ROUND);
+                } else if (singleParam[1].equalsIgnoreCase("mitre") || singleParam[1].equalsIgnoreCase("miter")) {
+                    bufferParameters.setJoinStyle(BufferParameters.JOIN_MITRE);
+                } else if (singleParam[1].equalsIgnoreCase("bevel")) {
+                    bufferParameters.setJoinStyle(BufferParameters.JOIN_BEVEL);
+                } else {
+                    throw new IllegalArgumentException(String.format("Please select value for Join Style from the given options. %1$s is not a valid option.", singleParam[1]));
+                }
+                continue;
+            }
+            // Set mitre ratio limit
+            else if (singleParam[0].equalsIgnoreCase("mitre_limit") || singleParam[0].equalsIgnoreCase("miter_limit")) {
+                try {
+                    bufferParameters.setMitreLimit(Double.parseDouble(singleParam[1]));
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException(String.format("Mitre limit should be a double. %1$s is not a double.", singleParam[1]));
+                }
+                continue;
+            }
+            // Set side to add buffer
+            if (singleParam[0].equalsIgnoreCase("side")) {
+                if (singleParam[1].equalsIgnoreCase("false") || singleParam[0].equalsIgnoreCase("f")) {
+                    continue;
+                } else if (singleParam[0].equalsIgnoreCase("true") || singleParam[0].equalsIgnoreCase("t")) {
+                    bufferParameters.setSingleSided(true);
+                }
+            }
+        }
+        return bufferParameters;
     }
 
     public static Geometry envelope(Geometry geometry) {

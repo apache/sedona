@@ -196,6 +196,8 @@ class dataFrameAPITestScala extends TestBaseScala {
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POLYGON ((1.98 0.8, 1.92 0.62, 1.83 0.44, 1.71 0.29, 1.56 0.17, 1.38 0.08, 1.2 0.02, 1 0, 0.8 0.02, 0.62 0.08, 0.44 0.17, 0.29 0.29, 0.17 0.44, 0.08 0.62, 0.02 0.8, 0 1, 0.02 1.2, 0.08 1.38, 0.17 1.56, 0.29 1.71, 0.44 1.83, 0.62 1.92, 0.8 1.98, 1 2, 1.2 1.98, 1.38 1.92, 1.56 1.83, 1.71 1.71, 1.83 1.56, 1.92 1.38, 1.98 1.2, 2 1, 1.98 0.8))"
       assert(actualResult == expectedResult)
+      val test = sparkSession.sql("select ST_AsText(ST_Buffer(ST_GeomFromWKT('POLYGON((50 50, 50 150, 150 150, 150 50, 50 50))'), -5))").first().get(0)
+      println(test)
     }
 
     it("Passed ST_Envelope") {

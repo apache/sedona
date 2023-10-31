@@ -1165,6 +1165,21 @@ public class FunctionsTest {
     }
 
     @Test
+    public void testBuffer() {
+        Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(50, 50, 50, 150, 150, 150, 150, 50, 50, 50));
+        String text = Functions.asWKT(Functions.buffer(polygon, -10, "side=t"));
+        System.out.println(text);
+
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 50, 70, 100, 100));
+        text = Functions.asWKT(Functions.buffer(lineString, -1, "side=t"));
+        System.out.println(text);
+
+        Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(100, 90));
+        text = Functions.asWKT(Functions.buffer(point, 10, "endcap=flat"));
+        System.out.println(text);
+    }
+
+    @Test
     public void nRingsUnsupported() {
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray3d(0, 1, 1, 1, 2, 1, 1, 2, 2));
         String expected = "Unsupported geometry type: " + "LineString" + ", only Polygon or MultiPolygon geometries are supported.";
