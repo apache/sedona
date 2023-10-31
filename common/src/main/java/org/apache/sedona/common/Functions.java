@@ -125,8 +125,13 @@ public class Functions {
 
         BufferParameters bufferParameters = new BufferParameters();
         String[] listParams = params.split(" ");
+
         for (String param: listParams) {
             String[] singleParam = param.split("=");
+
+            if (singleParam.length != 2) {
+                throw new IllegalArgumentException(String.format("%s is not the valid format. The valid format is key=value, for example `endcap=butt quad_segs=4`.", param));
+            }
 
             // Set quadrant segment
             if (singleParam[0].equalsIgnoreCase(listBufferParameters[0])) {
