@@ -177,6 +177,8 @@ public class Functions {
             // Set side to add buffer
             else if (singleParam[0].equalsIgnoreCase(listBufferParameters[5])) {
                 if (singleParam[1].equalsIgnoreCase(sideOptions[0])) {
+                    // It defaults to square end cap style when side is specified
+                    bufferParameters.setEndCapStyle(BufferParameters.CAP_SQUARE);
                     continue;
                 } else if (singleParam[1].equalsIgnoreCase(sideOptions[1]) || singleParam[1].equalsIgnoreCase(sideOptions[2])) {
                     bufferParameters.setSingleSided(true);
