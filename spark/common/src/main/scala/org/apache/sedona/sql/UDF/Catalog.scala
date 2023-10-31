@@ -226,6 +226,8 @@ object Catalog {
     function[RS_SkewX](),
     function[RS_SkewY](),
     function[RS_GeoReference](),
+    function[RS_Rotation](),
+    function[RS_GeoTransform](),
     function[RS_PixelAsPoint](),
     function[RS_PixelAsPolygon](),
     function[RS_PixelAsCentroid](),
