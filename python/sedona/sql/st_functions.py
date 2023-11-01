@@ -315,7 +315,7 @@ def ST_Boundary(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_Buffer(geometry: ColumnOrName, buffer: ColumnOrNameOrNumber) -> Column:
+def ST_Buffer(geometry: ColumnOrName, buffer: ColumnOrNameOrNumber, parameters: ColumnOrName) -> Column:
     """Calculate a geometry that represents all points whose distance from the
     input geometry column is equal to or less than a given amount.
 
@@ -326,7 +326,12 @@ def ST_Buffer(geometry: ColumnOrName, buffer: ColumnOrNameOrNumber) -> Column:
     :return: Buffered geometry as a geometry column.
     :rtype: Column
     """
-    return _call_st_function("ST_Buffer", (geometry, buffer))
+    if parameters is None:
+        args = (geometry, buffer)
+    else:
+        args = (geometry, buffer, parameters)
+
+    return _call_st_function("ST_Buffer", args)
 
 
 @validate_argument_types
