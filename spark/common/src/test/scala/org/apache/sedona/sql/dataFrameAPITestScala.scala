@@ -197,19 +197,22 @@ class dataFrameAPITestScala extends TestBaseScala {
       var expected = "POLYGON ((1.98 0.8, 1.92 0.62, 1.83 0.44, 1.71 0.29, 1.56 0.17, 1.38 0.08, 1.2 0.02, 1 0, 0.8 0.02, 0.62 0.08, 0.44 0.17, 0.29 0.29, 0.17 0.44, 0.08 0.62, 0.02 0.8, 0 1, 0.02 1.2, 0.08 1.38, 0.17 1.56, 0.29 1.71, 0.44 1.83, 0.62 1.92, 0.8 1.98, 1 2, 1.2 1.98, 1.38 1.92, 1.56 1.83, 1.71 1.71, 1.83 1.56, 1.92 1.38, 1.98 1.2, 2 1, 1.98 0.8))"
       assertEquals(expected, actual)
 
-      var linestringDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(0 0, 50 70, 100 100)') AS geom")
-      actual = linestringDf.selectExpr("ST_AsText(ST_Buffer(geom, 10, 'side=left'))").first().getString(0)
-      expected = "POLYGON ((100 100, 50 70, 0 0, -8.137334712067348 5.812381937190963, 41.86266528793265 75.81238193719096, 43.21673095875923 77.34760240582902, 44.855042445724735 78.57492925712545, 94.85504244572473 108.57492925712545, 100 100))"
+      var linestringDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(0 0, 50 70, 100 100)') AS geom, 'side=left' as params")
+      var dfLine = linestringDf.select(ST_Buffer("geom", 10, "params").as("geom")).selectExpr("ST_ReducePrecision(geom, 2)")
+      actual = dfLine.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      expected = "POLYGON ((50 70, 0 0, -8.14 5.81, 41.86 75.81, 43.22 77.35, 44.86 78.57, 94.86 108.57, 100 100, 50 70))"
       assertEquals(expected, actual)
 
-      linestringDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(0 0, 50 70, 70 -3)') AS geom")
-      actual = linestringDf.selectExpr("ST_AsText(ST_Buffer(geom, 10, 'endcap=square'))").first().getString(0)
-      expected = "POLYGON ((41.86266528793265 75.81238193719096, 43.21555008457904 77.3465120530184, 44.85228625762473 78.57327494173381, 46.70439518001618 79.44134465372912, 48.69438734657371 79.914402432785, 50.73900442057982 79.9726562392556, 52.75270263976913 79.6136688198111, 54.65123184115194 78.8524596785218, 56.355160363552315 77.72087668296376, 57.79319835113832 76.26626359641972, 58.90518041582699 74.54947928466231, 59.64458286836891 72.642351470786, 79.64458286836891 -0.3576485292139977, 82.28693433915491 -10.002231397582907, 62.997768602417096 -15.28693433915491, 45.912786454208465 47.07325050180659, 8.137334712067348 -5.812381937190963, 2.324952774876386 -13.949716649258315, -13.94971664925831 -2.3249527748763885, 41.86266528793265 75.81238193719096))"
+      linestringDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(0 0, 50 70, 70 -3)') AS geom, 'endcap=square' AS params")
+      dfLine = linestringDf.select(ST_Buffer("geom", 10, "params").as("geom")).selectExpr("ST_ReducePrecision(geom, 2)")
+      actual = dfLine.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      expected = "POLYGON ((43.22 77.35, 44.85 78.57, 46.7 79.44, 48.69 79.91, 50.74 79.97, 52.75 79.61, 54.65 78.85, 56.36 77.72, 57.79 76.27, 58.91 74.55, 59.64 72.64, 79.64 -0.36, 82.29 -10, 63 -15.29, 45.91 47.07, 8.14 -5.81, 2.32 -13.95, -13.95 -2.32, 41.86 75.81, 43.22 77.35))"
       assertEquals(expected, actual)
 
-      val pointDf = sparkSession.sql("SELECT ST_Point(100, 90) AS geom")
-      actual = pointDf.selectExpr("ST_AsText(ST_Buffer(geom, 200, 'quad_segs=4'))").first().getString(0)
-      expected = "POLYGON ((300 90, 284.7759065022574 13.463313526982049, 241.4213562373095 -51.42135623730948, 176.53668647301797 -94.77590650225736, 100.00000000000001 -110, 23.46331352698205 -94.77590650225736, -41.42135623730948 -51.42135623730951, -84.77590650225736 13.46331352698202, -100 89.99999999999997, -84.77590650225736 166.53668647301794, -41.42135623730954 231.42135623730948, 23.463313526981935 274.77590650225727, 99.99999999999996 290, 176.536686473018 274.7759065022573, 241.42135623730948 231.42135623730954, 284.77590650225727 166.53668647301808, 300 90))"
+      val pointDf = sparkSession.sql("SELECT ST_Point(100, 90) AS geom, 'quad_segs=4' as params")
+      val dfPoint = pointDf.select(ST_Buffer("geom", 200, "params").as("geom")).selectExpr("ST_ReducePrecision(geom, 2)")
+      actual = dfPoint.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      expected = "POLYGON ((284.78 13.46, 241.42 -51.42, 176.54 -94.78, 100 -110, 23.46 -94.78, -41.42 -51.42, -84.78 13.46, -100 90, -84.78 166.54, -41.42 231.42, 23.46 274.78, 100 290, 176.54 274.78, 241.42 231.42, 284.78 166.54, 300 90, 284.78 13.46))"
       assertEquals(expected, actual)
     }
 
