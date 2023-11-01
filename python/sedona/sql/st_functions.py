@@ -1250,7 +1250,12 @@ def ST_Transform(geometry: ColumnOrName, source_crs: ColumnOrName, target_crs: C
     :return: Geometry converted to the target coordinate system as an
     :rtype: Column
     """
-    args = (geometry, source_crs, target_crs) if disable_error is None else (geometry, source_crs, target_crs, disable_error)
+    if disable_error is None:
+        args = (geometry, source_crs, target_crs)
+        if source_crs is None:
+            args = (geometry, target_crs)
+    else:
+        args = (geometry, source_crs, target_crs, disable_error)
     return _call_st_function("ST_Transform", args)
 
 
