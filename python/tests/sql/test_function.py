@@ -96,6 +96,9 @@ class TestPredicateJoin(TestBase):
         function_df = self.spark.sql("select ST_Buffer(polygondf.countyshape, 1) from polygondf")
         function_df.show()
 
+        function_df = self.spark.sql("select ST_Buffer(polygondf.countyshape, 10, 'endcap=square') from polygondf")
+        function_df.show()
+
     def test_st_envelope(self):
         polygon_from_wkt = self.spark.read.format("csv"). \
             option("delimiter", "\t"). \
