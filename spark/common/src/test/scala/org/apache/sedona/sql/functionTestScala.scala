@@ -189,11 +189,16 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
 
     it("Passed ST_Transform") {
-      val point = "POINT (120 60)"
+      var point = "POINT (120 60)"
       val transformedResult = sparkSession.sql(s"""select ST_Transform(ST_geomFromWKT('$point'),'EPSG:4326', 'EPSG:3857', false)""").rdd.map(row => row.getAs[Geometry](0)).collect()(0)
-      println(transformedResult)
       assertEquals(1.3358338895192828E7, transformedResult.getCoordinate.x, FP_TOLERANCE)
       assertEquals(8399737.889818355, transformedResult.getCoordinate.y, FP_TOLERANCE)
+
+      point = "POINT (100 40)"
+      val result = sparkSession.sql(
+        s"""SELECT
+           |ST_AsText(ST_ReducePrecision(ST_Transform(ST_SetSRID(ST_GeomFromWKT('$point'), 4326), 'EPSG:3857'), 2))""".stripMargin).first().get(0)
+      assertEquals("POINT (11131949.08 4865942.28)", result)
     }
 
     it("Passed ST_transform WKT version"){

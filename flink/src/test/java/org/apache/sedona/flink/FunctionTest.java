@@ -221,6 +221,12 @@ public class FunctionTest extends TestBase{
                 , "epsg:4326", "epsg:3857"));
         String result = first(transformedTable).getField(0).toString();
         assertEquals("POINT (-13134586.718698347 3764623.3541299687)", result);
+
+        pointTable = pointTable.select(call(Functions.ST_SetSRID.class.getSimpleName(), $(pointColNames[0]), 4326)).as(pointColNames[0]);
+        transformedTable = pointTable.select(call(FunctionsGeoTools.ST_Transform.class.getSimpleName(), $(pointColNames[0]), "epsg:3857"))
+                .as(pointColNames[0]).select(call(Functions.ST_ReducePrecision.class.getSimpleName(), $(pointColNames[0]), 2));
+        result = first(transformedTable).getField(0).toString();
+        assertEquals("POINT (-13134586.72 3764623.35)", result);
     }
 
     @Test

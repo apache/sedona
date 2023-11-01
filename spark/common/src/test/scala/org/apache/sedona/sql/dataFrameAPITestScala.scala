@@ -271,11 +271,19 @@ class dataFrameAPITestScala extends TestBaseScala {
     }
 
     it("Passed ST_Transform") {
-      val pointDf = sparkSession.sql("SELECT ST_Point(1.0, 1.0) AS geom")
-      val df = pointDf.select(ST_Transform($"geom", lit("EPSG:4326"), lit("EPSG:32649")).as("geom")).selectExpr("ST_ReducePrecision(geom, 2)")
+      var pointDf = sparkSession.sql("SELECT ST_Point(1.0, 1.0) AS geom")
+      var df = pointDf.select(ST_Transform($"geom", lit("EPSG:4326"), lit("EPSG:32649")).as("geom")).selectExpr("ST_ReducePrecision(geom, 2)")
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POINT (-33741810.95 1823994.03)"
-      assert(actualResult == expectedResult)
+      assertEquals(expectedResult, actualResult)
+
+      pointDf = sparkSession.sql("SELECT ST_Point(40.0, 100.0) AS geom")
+                            .select(ST_SetSRID("geom", 4326).as("geom"))
+      df = pointDf.select(ST_Transform($"geom", lit("EPSG:32649")).as("geom"))
+                  .selectExpr("ST_ReducePrecision(geom, 2)")
+      val actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expected = "POINT (1560393.11 10364606.84)"
+      assertEquals(expected, actual)
     }
 
     it("Passed ST_Intersection") {
