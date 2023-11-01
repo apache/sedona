@@ -2530,7 +2530,15 @@ PROJCS["WGS 84 / Pseudo-Mercator",
 Format: 
 
 ```
-ST_Transform (A: Geometry, [Optional] SourceCRS: String, TargetCRS: String, [Optional] lenientMode: Boolean)
+ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String, lenientMode: Boolean)
+```
+
+```
+ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String)
+```
+
+```
+ST_Transform (A: Geometry, TargetCRS: String)
 ```
 
 Since: `v1.2.0`
