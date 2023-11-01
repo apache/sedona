@@ -22,6 +22,13 @@ import org.opengis.referencing.operation.TransformException;
 public class FunctionsGeoTools {
     public static class ST_Transform extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object o, @DataTypeHint("String") String targetCRS)
+                throws FactoryException, TransformException {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.FunctionsGeoTools.transform(geom, targetCRS);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object o, @DataTypeHint("String") String sourceCRS, @DataTypeHint("String") String targetCRS)
             throws FactoryException, TransformException {
             Geometry geom = (Geometry) o;
