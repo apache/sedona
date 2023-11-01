@@ -794,6 +794,10 @@ public class FunctionTest extends TestBase{
         table = table.select(call(Functions.ST_MakeLine.class.getSimpleName(), $("point1"), $("point2")));
         Geometry result = (Geometry) first(table).getField(0);
         assertEquals("LINESTRING (0 0, 1 1)", result.toString());
+
+        table = tableEnv.sqlQuery("SELECT ST_MakeLine(ARRAY[ST_Point(2, 2), ST_Point(3, 3)]) AS line");
+        result = (Geometry) first(table).getField(0);
+        assertEquals("LINESTRING (2 2, 3 3)", result.toString());
     }
 
     @Test
