@@ -1236,7 +1236,7 @@ def ST_SymDifference(a: ColumnOrName, b: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_Transform(geometry: ColumnOrName, source_crs: ColumnOrName, target_crs: ColumnOrName, disable_error: Optional[Union[ColumnOrName, bool]] = None) -> Column:
+def ST_Transform(geometry: ColumnOrName, source_crs: Optional[Union[ColumnOrName, str]] = None, target_crs: ColumnOrName, disable_error: Optional[Union[ColumnOrName, bool]] = None) -> Column:
     """Convert a geometry from one coordinate system to another coordinate system.
 
     :param geometry: Geometry column to convert.
