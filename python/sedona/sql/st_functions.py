@@ -1236,7 +1236,7 @@ def ST_SymDifference(a: ColumnOrName, b: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_Transform(geometry: ColumnOrName, source_crs: Optional[Union[ColumnOrName, str]] = None, target_crs: ColumnOrName, disable_error: Optional[Union[ColumnOrName, bool]] = None) -> Column:
+def ST_Transform(geometry: ColumnOrName, source_crs: ColumnOrName, target_crs: Optional[Union[ColumnOrName, str]] = None, disable_error: Optional[Union[ColumnOrName, bool]] = None) -> Column:
     """Convert a geometry from one coordinate system to another coordinate system.
 
     :param geometry: Geometry column to convert.
@@ -1250,10 +1250,16 @@ def ST_Transform(geometry: ColumnOrName, source_crs: Optional[Union[ColumnOrName
     :return: Geometry converted to the target coordinate system as an
     :rtype: Column
     """
+
     if disable_error is None:
         args = (geometry, source_crs, target_crs)
-        if source_crs is None:
-            args = (geometry, target_crs)
+
+        # When 2 arguments are passed to the function.
+        # From python's perspective ST_Transform(geometry, source_crs) is provided
+        # that's why have to check if the target_crs is empty.
+        # the source_crs acts as target_crs when calling the function
+        if target_crs is None:
+            args = (geometry, source_crs)
     else:
         args = (geometry, source_crs, target_crs, disable_error)
     return _call_st_function("ST_Transform", args)
