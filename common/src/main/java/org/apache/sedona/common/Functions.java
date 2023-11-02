@@ -43,6 +43,8 @@ import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.io.gml2.GMLWriter;
 import org.locationtech.jts.io.kml.KMLWriter;
 import org.locationtech.jts.linearref.LengthIndexedLine;
+import org.locationtech.jts.operation.buffer.BufferOp;
+import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.locationtech.jts.operation.distance.DistanceOp;
 import org.locationtech.jts.operation.distance3d.Distance3DOp;
 import org.locationtech.jts.operation.linemerge.LineMerger;
@@ -92,7 +94,103 @@ public class Functions {
     }
 
     public static Geometry buffer(Geometry geometry, double radius) {
-        return geometry.buffer(radius);
+        return buffer(geometry, radius, "");
+    }
+
+    public static Geometry buffer(Geometry geometry, double radius, String params) {
+        if (params.isEmpty()) {
+            return BufferOp.bufferOp(geometry, radius);
+        }
+
+        BufferParameters bufferParameters = parseBufferParams(params);
+
+        // convert the sign to the appropriate direction
+        // left - radius should be positive
+        // right - radius should be negative
+        if (bufferParameters.isSingleSided() &&
+                (params.toLowerCase().contains("left") && radius < 0 || params.toLowerCase().contains("right") && radius > 0)) {
+                radius = -radius;
+        }
+
+        return BufferOp.bufferOp(geometry, radius, bufferParameters);
+    }
+
+    private static BufferParameters parseBufferParams(String params) {
+
+        String[] listBufferParameters = {"quad_segs", "endcap", "join", "mitre_limit", "miter_limit", "side"};
+        String[] endcapOptions = {"round", "flat", "butt", "square"};
+        String[] joinOptions = {"round", "mitre", "miter", "bevel"};
+        String[] sideOptions = {"both", "left", "right"};
+
+        BufferParameters bufferParameters = new BufferParameters();
+        String[] listParams = params.split(" ");
+
+        for (String param: listParams) {
+            String[] singleParam = param.split("=");
+
+            if (singleParam.length != 2) {
+                throw new IllegalArgumentException(String.format("%s is not the valid format. The valid format is key=value, for example `endcap=butt quad_segs=4`.", param));
+            }
+
+            // Set quadrant segment
+            if (singleParam[0].equalsIgnoreCase(listBufferParameters[0])) {
+                try {
+                    bufferParameters.setQuadrantSegments(Integer.parseInt(singleParam[1]));
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException(String.format("%1$s is not an integer. Quadrant segment should be an integer.", singleParam[1]));
+                }
+            }
+            // Set end cap style
+             else if (singleParam[0].equalsIgnoreCase(listBufferParameters[1])) {
+                if (singleParam[1].equalsIgnoreCase(endcapOptions[0])) {
+                    bufferParameters.setEndCapStyle(BufferParameters.CAP_ROUND);
+                } else if (singleParam[1].equalsIgnoreCase(endcapOptions[1]) || singleParam[1].equalsIgnoreCase(endcapOptions[2])) {
+                    bufferParameters.setEndCapStyle(BufferParameters.CAP_FLAT);
+                } else if (singleParam[1].equalsIgnoreCase(endcapOptions[3])) {
+                    bufferParameters.setEndCapStyle(BufferParameters.CAP_SQUARE);
+                } else {
+                    throw new IllegalArgumentException(String.format("%s is not a valid option. Accepted options are %s.", singleParam[1], Arrays.toString(endcapOptions)));
+                }
+            }
+            // Set join style
+            else if (singleParam[0].equalsIgnoreCase(listBufferParameters[2])) {
+                if (singleParam[1].equalsIgnoreCase(joinOptions[0])) {
+                    bufferParameters.setJoinStyle(BufferParameters.JOIN_ROUND);
+                } else if (singleParam[1].equalsIgnoreCase(joinOptions[1]) || singleParam[1].equalsIgnoreCase(joinOptions[2])) {
+                    bufferParameters.setJoinStyle(BufferParameters.JOIN_MITRE);
+                } else if (singleParam[1].equalsIgnoreCase(joinOptions[3])) {
+                    bufferParameters.setJoinStyle(BufferParameters.JOIN_BEVEL);
+                } else {
+                    throw new IllegalArgumentException(String.format("%s is not a valid option. Accepted options are %s", singleParam[1], Arrays.toString(joinOptions)));
+                }
+            }
+            // Set mitre ratio limit
+            else if (singleParam[0].equalsIgnoreCase(listBufferParameters[3]) || singleParam[0].equalsIgnoreCase(listBufferParameters[4])) {
+                try {
+                    bufferParameters.setMitreLimit(Double.parseDouble(singleParam[1]));
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException(String.format("%1$s is not a double. Mitre limit should be a double.", singleParam[1]));
+                }
+                continue;
+            }
+            // Set side to add buffer
+            else if (singleParam[0].equalsIgnoreCase(listBufferParameters[5])) {
+                if (singleParam[1].equalsIgnoreCase(sideOptions[0])) {
+                    // It defaults to square end cap style when side is specified
+                    bufferParameters.setEndCapStyle(BufferParameters.CAP_SQUARE);
+                    continue;
+                } else if (singleParam[1].equalsIgnoreCase(sideOptions[1]) || singleParam[1].equalsIgnoreCase(sideOptions[2])) {
+                    bufferParameters.setSingleSided(true);
+                } else {
+                    throw new IllegalArgumentException(String.format("%s is not a valid option. Accepted options are %s ", singleParam[1], Arrays.toString(sideOptions)));
+                }
+            }
+            // everything else
+            else {
+                throw new IllegalArgumentException(String.format("%s is not a valid style parameter. Accepted style parameters are %s.", singleParam[0], Arrays.toString(listBufferParameters)));
+            }
+        }
+        return bufferParameters;
     }
 
     public static Geometry envelope(Geometry geometry) {

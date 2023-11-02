@@ -529,21 +529,51 @@ Output: `LINESTRING Z(-1 -1 0, 10 5 5)`
 
 Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.
 
-Format: `ST_Buffer (A: Geometry, buffer: Double)`
+The optional third parameter controls the buffer accuracy and style. Buffer accuracy is specified by the number of line segments approximating a quarter circle, with a default of 8 segments. Buffer style can be set by providing blank-separated key=value pairs in a list format.
 
-Since: `v1.0.0`
+- `quad_segs=#` : Number of line segments utilized to approximate a quarter circle (default is 8).
+- `endcap=round|flat|square` : End cap style (default is `round`). `butt` is an accepted synonym for `flat`.
+- `join=round|mitre|bevel` : Join style (default is `round`). `miter` is an accepted synonym for `mitre`.
+- `mitre_limit=#.#` : mitre ratio limit and it only affects mitred join style. `miter_limit` is an accepted synonym for `mitre_limit`.
+- `side=both|left|right` : The option `left` or `right` enables a single-sided buffer operation on the geometry, with the buffered side aligned according to the direction of the line. This functionality is specific to LINESTRING geometry and has no impact on POINT or POLYGON geometries. By default, square end caps are applied.
+
+!!!note
+    `ST_Buffer` throws an `IllegalArgumentException` if the correct format, parameters, or options are not provided.
+
+Format:
+
+```
+ST_Buffer (A: Geometry, buffer: Double, bufferStyleParameters: String [Optional])
+```
+
+Since: `v1.5.1`
 
 Spark SQL Example:
 
 ```sql
-SELECT ST_Buffer(ST_GeomFromWKT("POINT(0 0)"), 1)
+SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10)
+SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10, 'quad_segs=2')
 ```
 
 Output:
 
+<img alt="Point buffer with 8 quadrant segments" src="../../../image/point-buffer-quad-8.png" width="100" height=""/>
+<img alt="Point buffer with 2 quadrant segments" src="../../../image/point-buffer-quad-2.png" width="100" height=""/>
+
+8 Segments &ensp; 2 Segments
+
+Spark SQL Example:
+
+```sql
+SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(0 0, 50 70, 100 100)'), 10, 'side=left')
 ```
-POLYGON ((1 0, 0.9807852804032304 -0.1950903220161282, 0.9238795325112867 -0.3826834323650898, 0.8314696123025452 -0.5555702330196022, 0.7071067811865476 -0.7071067811865475, 0.5555702330196023 -0.8314696123025452, 0.3826834323650898 -0.9238795325112867, 0.1950903220161283 -0.9807852804032304, 0.0000000000000001 -1, -0.1950903220161282 -0.9807852804032304, -0.3826834323650897 -0.9238795325112867, -0.555570233019602 -0.8314696123025453, -0.7071067811865475 -0.7071067811865476, -0.8314696123025453 -0.5555702330196022, -0.9238795325112867 -0.3826834323650899, -0.9807852804032304 -0.1950903220161286, -1 -0.0000000000000001, -0.9807852804032304 0.1950903220161284, -0.9238795325112868 0.3826834323650897, -0.8314696123025455 0.555570233019602, -0.7071067811865477 0.7071067811865475, -0.5555702330196022 0.8314696123025452, -0.3826834323650903 0.9238795325112865, -0.1950903220161287 0.9807852804032303, -0.0000000000000002 1, 0.1950903220161283 0.9807852804032304, 0.38268343236509 0.9238795325112866, 0.5555702330196018 0.8314696123025455, 0.7071067811865474 0.7071067811865477, 0.8314696123025452 0.5555702330196022, 0.9238795325112865 0.3826834323650904, 0.9807852804032303 0.1950903220161287, 1 0))
-```
+
+Output:
+
+<img alt="Original Linestring" src="../../../image/linestring-og.png" width="150"/>
+<img alt="Original Linestring with buffer on the left side" src="../../../image/linestring-left-side.png" width="150"/>
+
+Original Linestring &emsp; Left side buffed Linestring
 
 ## ST_BuildArea
 
