@@ -314,6 +314,10 @@ class dataFrameAPITestScala extends TestBaseScala {
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "LINESTRING (0 0, 1 1)"
       assert(actualResult == expectedResult)
+
+      val df2 = sparkSession.sql("SELECT ST_MakeLine(ARRAY(ST_Point(0, 0), ST_Point(1, 1), ST_Point(2, 2)))")
+      val actualResult2 = df2.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      assert(actualResult2 == "LINESTRING (0 0, 1 1, 2 2)")
     }
 
     it("Passed ST_MakeValid On Invalid Polygon") {

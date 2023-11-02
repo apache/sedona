@@ -167,4 +167,3 @@ class ST_Intersection_Aggr extends Aggregator[Geometry, Geometry, Geometry] with
     else buffer1.intersection(buffer2)
   }
 }
-

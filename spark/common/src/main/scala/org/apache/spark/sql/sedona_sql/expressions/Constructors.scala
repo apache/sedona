@@ -291,4 +291,3 @@ case class ST_MLineFromText(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
-

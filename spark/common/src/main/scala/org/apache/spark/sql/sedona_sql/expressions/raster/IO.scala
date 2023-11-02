@@ -66,5 +66,3 @@ case class RS_Array(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
-
-

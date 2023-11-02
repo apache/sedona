@@ -322,11 +322,15 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
 
     it("Passed ST_MakeLine") {
-
-      var testtable = sparkSession.sql(
-        "SELECT ST_MakeLine(ST_GeomFromText('POINT(1 2)'), ST_GeomFromText('POINT(3 4)'))"
+      val testtable = sparkSession.sql(
+        """SELECT
+          |ST_MakeLine(ST_GeomFromText('POINT(1 2)'), ST_GeomFromText('POINT(3 4)')),
+          |ST_MakeLine(ARRAY(ST_Point(5, 6), ST_Point(7, 8), ST_Point(9, 10)))
+          |""".stripMargin
       )
-      assert(testtable.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("LINESTRING (1 2, 3 4)"))
+      val row = testtable.take(1)(0)
+      assert(row.get(0).asInstanceOf[Geometry].toText.equals("LINESTRING (1 2, 3 4)"))
+      assert(row.get(1).asInstanceOf[Geometry].toText.equals("LINESTRING (5 6, 7 8, 9 10)"))
     }
 
     it("Passed ST_Polygon") {

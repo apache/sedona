@@ -187,4 +187,3 @@ public class PolygonRDD
         return result;
     }
 }
-

@@ -24,7 +24,7 @@ sudo curl -o /jars/geotools-wrapper-{{ sedona.current_geotools }}.jar "https://r
 # Install necessary python libraries
 sudo python3 -m pip install pandas shapely==1.8.5
 sudo python3 -m pip install pandas geopandas==0.10.2
-sudo python3 -m pip install attrs matplotlib descartes apache-sedona==1.4.0
+sudo python3 -m pip install attrs matplotlib descartes apache-sedona=={{ sedona.current_version }}
 ```
 
 When you create a EMR cluster, in the `bootstrap action`, specify the location of this script.

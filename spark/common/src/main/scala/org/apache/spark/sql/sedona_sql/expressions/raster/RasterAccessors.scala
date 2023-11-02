@@ -86,6 +86,18 @@ case class RS_GeoReference(inputExpressions: Seq[Expression]) extends InferredEx
   }
 }
 
+case class RS_Rotation(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.getRotation _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class RS_GeoTransform(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.getGeoTransform _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class RS_SkewX(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.getSkewX _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
     copy(inputExpressions = newChildren)

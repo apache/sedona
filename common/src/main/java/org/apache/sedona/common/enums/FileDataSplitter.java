@@ -129,4 +129,3 @@ public enum FileDataSplitter
         return this.splitter;
     }
 }
-

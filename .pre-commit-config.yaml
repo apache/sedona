@@ -11,7 +11,7 @@ repos:
       - id: identity
       - id: check-hooks-apply
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.5
+    rev: v2.2.6
     hooks:
       - id: codespell
         name: Run codespell
@@ -19,16 +19,18 @@ repos:
         entry: codespell --ignore-words=codespell.txt
         exclude: ^docs/image|^spark/common/src/test/resources
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: check-case-conflict
       # - id: check-docstring-first
       # - id: check-executables-have-shebangs
       # - id: check-json
       - id: check-merge-conflict
-      # - id: check-shebang-scripts-are-executable
+      - id: check-shebang-scripts-are-executable
       - id: check-toml
       - id: check-vcs-permalinks
       - id: check-xml
       # - id: check-yaml
       - id: detect-private-key
+      - id: end-of-file-fixer
+        files: \.java$|\.scala$

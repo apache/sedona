@@ -69,7 +69,7 @@ object VizPartitioner {
         val primaryIdPos = cursorRow.fieldIndex(Conf.PrimaryPID)
         val secondIdPos = cursorRow.fieldIndex(Conf.SecondaryPID)
         val geometry = cursorRow.getAs[Geometry](spatialColName).getEnvelopeInternal
-        // This is to find all seconary ids
+        // This is to find all secondary ids
         val matchedZones = secondaryPartitionTree.findZones(new QuadRectangle(geometry)).asScala
         matchedZones.foreach(secondaryZone => {
           var currentValues = cursorRow.toSeq.toBuffer
