@@ -73,6 +73,13 @@ public class Functions {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.buffer(geom, radius);
         }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+                             Object o, @DataTypeHint("Double") Double radius, @DataTypeHint("String") String params) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.buffer(geom, radius, params);
+        }
     }
 
     public static class ST_ClosestPoint extends ScalarFunction {

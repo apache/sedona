@@ -193,9 +193,27 @@ class dataFrameAPITestScala extends TestBaseScala {
     it("Passed ST_Buffer") {
       val polygonDf = sparkSession.sql("SELECT ST_Point(1.0, 1.0) AS geom")
       val df = polygonDf.select(ST_Buffer("geom", 1.0).as("geom")).selectExpr("ST_ReducePrecision(geom, 2)")
-      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
-      val expectedResult = "POLYGON ((1.98 0.8, 1.92 0.62, 1.83 0.44, 1.71 0.29, 1.56 0.17, 1.38 0.08, 1.2 0.02, 1 0, 0.8 0.02, 0.62 0.08, 0.44 0.17, 0.29 0.29, 0.17 0.44, 0.08 0.62, 0.02 0.8, 0 1, 0.02 1.2, 0.08 1.38, 0.17 1.56, 0.29 1.71, 0.44 1.83, 0.62 1.92, 0.8 1.98, 1 2, 1.2 1.98, 1.38 1.92, 1.56 1.83, 1.71 1.71, 1.83 1.56, 1.92 1.38, 1.98 1.2, 2 1, 1.98 0.8))"
-      assert(actualResult == expectedResult)
+      var actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      var expected = "POLYGON ((1.98 0.8, 1.92 0.62, 1.83 0.44, 1.71 0.29, 1.56 0.17, 1.38 0.08, 1.2 0.02, 1 0, 0.8 0.02, 0.62 0.08, 0.44 0.17, 0.29 0.29, 0.17 0.44, 0.08 0.62, 0.02 0.8, 0 1, 0.02 1.2, 0.08 1.38, 0.17 1.56, 0.29 1.71, 0.44 1.83, 0.62 1.92, 0.8 1.98, 1 2, 1.2 1.98, 1.38 1.92, 1.56 1.83, 1.71 1.71, 1.83 1.56, 1.92 1.38, 1.98 1.2, 2 1, 1.98 0.8))"
+      assertEquals(expected, actual)
+
+      var linestringDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(0 0, 50 70, 100 100)') AS geom, 'side=left' as params")
+      var dfLine = linestringDf.select(ST_Buffer("geom", 10, "params").as("geom")).selectExpr("ST_ReducePrecision(geom, 2)")
+      actual = dfLine.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      expected = "POLYGON ((50 70, 0 0, -8.14 5.81, 41.86 75.81, 43.22 77.35, 44.86 78.57, 94.86 108.57, 100 100, 50 70))"
+      assertEquals(expected, actual)
+
+      linestringDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(0 0, 50 70, 70 -3)') AS geom, 'endcap=square' AS params")
+      dfLine = linestringDf.select(ST_Buffer("geom", 10, "params").as("geom")).selectExpr("ST_ReducePrecision(geom, 2)")
+      actual = dfLine.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      expected = "POLYGON ((43.22 77.35, 44.85 78.57, 46.7 79.44, 48.69 79.91, 50.74 79.97, 52.75 79.61, 54.65 78.85, 56.36 77.72, 57.79 76.27, 58.91 74.55, 59.64 72.64, 79.64 -0.36, 82.29 -10, 63 -15.29, 45.91 47.07, 8.14 -5.81, 2.32 -13.95, -13.95 -2.32, 41.86 75.81, 43.22 77.35))"
+      assertEquals(expected, actual)
+
+      val pointDf = sparkSession.sql("SELECT ST_Point(100, 90) AS geom, 'quad_segs=4' as params")
+      val dfPoint = pointDf.select(ST_Buffer("geom", 200, "params").as("geom")).selectExpr("ST_ReducePrecision(geom, 2)")
+      actual = dfPoint.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      expected = "POLYGON ((284.78 13.46, 241.42 -51.42, 176.54 -94.78, 100 -110, 23.46 -94.78, -41.42 -51.42, -84.78 13.46, -100 90, -84.78 166.54, -41.42 231.42, 23.46 274.78, 100 290, 176.54 274.78, 241.42 231.42, 284.78 166.54, 300 90, 284.78 13.46))"
+      assertEquals(expected, actual)
     }
 
     it("Passed ST_Envelope") {
