@@ -41,3 +41,4 @@ geoparquet_input_location = os.path.join(tests_resource, "geoparquet/example1.pa
 plain_parquet_input_location = os.path.join(tests_resource, "geoparquet/plain.parquet")
 google_buildings_input_location = os.path.join(tests_resource, "813_buildings_test.csv")
 chicago_crimes_input_location = os.path.join(tests_resource, "Chicago_Crimes.csv")
+world_map_raster_input_location = os.path.join(tests_resource, "raster/raster_with_no_data/test5.tiff")
