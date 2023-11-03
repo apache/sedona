@@ -18,13 +18,13 @@
 FROM ubuntu:22.04
 
 ARG shared_workspace=/opt/workspace
-ARG spark_version=3.3.2
+ARG spark_version=3.4.1
 ARG hadoop_version=3
 ARG hadoop_s3_version=3.3.4
 ARG aws_sdk_version=1.12.402
 ARG spark_xml_version=0.16.0
-ARG sedona_version=1.4.1
-ARG geotools_wrapper_version=1.4.0-28.2
+ARG sedona_version=1.5.0
+ARG geotools_wrapper_version=1.5.0-28.2
 
 # Set up envs
 ENV SHARED_WORKSPACE=${shared_workspace}
