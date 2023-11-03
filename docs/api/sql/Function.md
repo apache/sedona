@@ -2507,7 +2507,7 @@ MULTIPOLYGON (((-2 -3, -3 -3, -3 3, -2 3, -2 -3)), ((3 -3, 3 3, 4 3, 4 -3, 3 -3)
 
 Introduction:
 
-Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS. For SourceCRS and TargetCRS, WKT format is also available since v1.3.1.
+Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS. For SourceCRS and TargetCRS, WKT format is also available since `v1.3.1`. Since `v1.5.1`, if the `SourceCRS` is not specified, CRS will be fetched from the geometry using [ST_SRID](#st_srid).
 
 **Lon/Lat Order in the input geometry**
 
@@ -2560,7 +2560,15 @@ PROJCS["WGS 84 / Pseudo-Mercator",
 Format: 
 
 ```
-ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String, [Optional] lenientMode: Boolean)
+ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String, lenientMode: Boolean)
+```
+
+```
+ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String)
+```
+
+```
+ST_Transform (A: Geometry, TargetCRS: String)
 ```
 
 Since: `v1.2.0`
