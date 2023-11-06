@@ -18,7 +18,6 @@
  */
 package org.apache.sedona.common.raster;
 
-import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.opengis.referencing.FactoryException;
@@ -59,7 +58,7 @@ public class RasterOutputTest
         String dirPath = System.getProperty("user.dir") + "/target/testAsPNGFunction/";
         new File(dirPath).mkdirs();
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
-        byte[] pngData = RasterOutputs.asPNG(RasterBandAccessors.getBand(raster, new int[] {3, 1, 2}));
+        byte[] pngData = RasterOutputs.asPNG(RasterBandAccessors.getBandCreate(raster, new int[] {3, 1, 2}));
         RasterOutputs.writeToDiskFile(pngData, dirPath + "test2.png");
         File f = new File(dirPath + "test2.png");
         String mimeType = URLConnection.guessContentTypeFromName(f.getName());

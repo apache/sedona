@@ -50,7 +50,7 @@ case class RS_SummaryStats(inputExpressions: Seq[Expression]) extends InferredEx
   }
 }
 
-case class RS_Band(inputExpressions: Seq[Expression]) extends InferredExpression(RasterBandAccessors.getBand _) {
+case class RS_Band(inputExpressions: Seq[Expression]) extends InferredExpression(RasterBandAccessors.getBandCreate _) {
 
   override def evalWithoutSerialization(input: InternalRow): Any = {
     val raster = inputExpressions.head.toRaster(input)
@@ -59,7 +59,7 @@ case class RS_Band(inputExpressions: Seq[Expression]) extends InferredExpression
       null
     } else {
       val values = (0 until intArray.numElements()).map(i => intArray.getInt(i))
-      RasterBandAccessors.getBand(raster, values.toArray)
+      RasterBandAccessors.getBandCreate(raster, values.toArray)
     }
   }
 

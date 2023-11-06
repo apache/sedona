@@ -252,7 +252,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster( 4, 5, 5, 3, -215, 2, -2, 2, 2, 0);
         double[] values1 = new double[] {16, 0, 24, 33, 43, 49, 64, 0, 76, 77, 79, 89, 0, 116, 118, 125, 135, 0, 157, 190, 215, 229, 241, 248, 249};
         emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values1, 3, 0d);
-        GridCoverage2D resultRaster = RasterBandAccessors.getBand(emptyRaster, new int[]{3,3,3});
+        GridCoverage2D resultRaster = RasterBandAccessors.getBandCreate(emptyRaster, new int[]{3,3,3});
         int actual = RasterAccessors.numBands(resultRaster);
         int expected = 3;
         assertEquals(expected, actual);
@@ -276,7 +276,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         assertEquals(expected, actual);
 
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
-        raster = RasterBandAccessors.getBand(raster, new int[] {2,1,3});
+        raster = RasterBandAccessors.getBandCreate(raster, new int[] {2,1,3});
         for (int i = 1; i <= RasterAccessors.numBands(raster); i++) {
             actual = RasterBandAccessors.getBandType(raster, i);
             expected = "UNSIGNED_8BITS";
@@ -287,7 +287,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     @Test
     public void testGetBandWithRaster() throws IOException, FactoryException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
-        GridCoverage2D resultRaster = RasterBandAccessors.getBand(raster, new int[] {1,2,2,2,1});
+        GridCoverage2D resultRaster = RasterBandAccessors.getBandCreate(raster, new int[] {1,2,2,2,1});
         int actual = RasterAccessors.numBands(resultRaster);
         int expected = 5;
         assertEquals(actual, expected);
