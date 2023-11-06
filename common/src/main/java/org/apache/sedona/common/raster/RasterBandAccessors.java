@@ -20,17 +20,15 @@ package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
+import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.GridGeometry2D;
 import org.opengis.referencing.FactoryException;
 
 import javax.media.jai.RasterFactory;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 public class RasterBandAccessors {
 
@@ -144,14 +142,7 @@ public class RasterBandAccessors {
      *
      * @return Raster with the specified bands.
      **/
-    public static GridCoverage2D getBandCreate(GridCoverage2D rasterGeom, int[] bandIndexes) throws FactoryException {
-
-        List<Object> bandData = getBand(rasterGeom, bandIndexes);
-
-        return RasterUtils.create((WritableRaster) bandData.get(0), (GridGeometry2D) bandData.get(1), (GridSampleDimension[]) bandData.get(2));
-    }
-
-    public static List<Object> getBand(GridCoverage2D rasterGeom, int[] bandIndexes) throws FactoryException {
+    public static GridCoverage2D getBand(GridCoverage2D rasterGeom, int[] bandIndexes) throws FactoryException {
         Double noDataValue;
         double[] metadata = RasterAccessors.metadata(rasterGeom);
         int width = (int) metadata[2], height = (int) metadata[3];
@@ -194,7 +185,7 @@ public class RasterBandAccessors {
             }
         }
 
-        return Arrays.asList(wr, resultRaster.getGridGeometry(), sampleDimensionsResult);
+        return RasterUtils.create(wr, resultRaster.getGridGeometry(), sampleDimensionsResult);
     }
 
     public static String getBandType(GridCoverage2D raster, int band) {
