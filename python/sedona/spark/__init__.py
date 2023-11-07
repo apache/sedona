@@ -40,6 +40,4 @@ from sedona.utils import KryoSerializer
 from sedona.utils import SedonaKryoRegistrator
 from sedona.register import SedonaRegistrator
 from sedona.spark.SedonaContext import SedonaContext
-from sedona.maps.SedonaKepler import SedonaKepler
-from sedona.maps.SedonaPyDeck import SedonaPyDeck
 from sedona.raster_utils.SedonaUtils import SedonaUtils
