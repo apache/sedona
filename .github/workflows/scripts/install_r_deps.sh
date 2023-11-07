@@ -32,5 +32,5 @@ R_REMOTES_NO_ERRORS_FROM_WARNINGS=true Rscript - <<_RSCRIPT_EOF_
     if (!require(pkg, character.only = TRUE))
       install.packages(pkg)
 
-  remotes::install_github("sparklyr/sparklyr@v1.8.3", upgrade = TRUE)
+  remotes::install_github("sparklyr/sparklyr@v1.8.4", upgrade = TRUE)
 _RSCRIPT_EOF_
