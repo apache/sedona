@@ -59,6 +59,9 @@ nav:
               - Aggregate function: api/sql/AggregateFunction.md
               - DataFrame Style functions: api/sql/DataFrameAPI.md
               - Query optimization: api/sql/Optimizer.md
+              - Visualization:
+                  - SedonaPyDeck: api/sql/Visualization_SedonaPyDeck.md
+                  - SedonaKepler: api/sql/Visualization_SedonaKepler.md
           - Raster data:
               - Raster loader: api/sql/Raster-loader.md
               - Raster writer: api/sql/Raster-writer.md
