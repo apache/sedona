@@ -24,9 +24,7 @@ import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
-import org.geotools.coverage.processing.Operations;
 import org.geotools.coverage.processing.operation.Crop;
-import org.geotools.image.ImageWorker;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.locationtech.jts.geom.Geometry;
 import org.opengis.metadata.spatial.PixelOrientation;
@@ -36,10 +34,8 @@ import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.RasterFactory;
 import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 

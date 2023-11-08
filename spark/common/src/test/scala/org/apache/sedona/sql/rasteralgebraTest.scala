@@ -23,7 +23,7 @@ import org.apache.sedona.common.utils.RasterUtils
 import org.apache.spark.sql.SaveMode
 import org.apache.spark.sql.functions.{collect_list, expr}
 import org.geotools.coverage.grid.GridCoverage2D
-import org.junit.Assert.{assertArrayEquals, assertEquals, assertNull, assertTrue}
+import org.junit.Assert.{assertEquals, assertNull, assertTrue}
 import org.locationtech.jts.geom.{Coordinate, Geometry}
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 

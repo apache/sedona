@@ -1117,7 +1117,6 @@ Output:
 
 <img alt="Clipped raster" src="../../../image/clipped-raster.png" width="400"/>
 
-
 ### RS_MetaData
 
 Introduction: Returns the metadata of the raster as an array of double. The array contains the following values:
