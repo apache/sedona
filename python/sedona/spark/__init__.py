@@ -39,3 +39,12 @@ from sedona.utils import KryoSerializer
 from sedona.utils import SedonaKryoRegistrator
 from sedona.register import SedonaRegistrator
 from sedona.spark.SedonaContext import SedonaContext
+from sedona.raster_utils.SedonaUtils import SedonaUtils
+try:
+    from sedona.maps.SedonaKepler import SedonaKepler
+except (ModuleNotFoundError, ImportError) as error:
+    print('Skipping SedonaKepler import since keplergl is not installed, please install keplergl if you intend to use SedonaKepler')
+try:
+    from sedona.maps.SedonaPyDeck import SedonaPyDeck
+except (ModuleNotFoundError, ImportError) as error:
+    print('Skipping SedonaPyDeck import since pydeck is not installed, please install pydeck if you intend to use SedonaPyDeck')
