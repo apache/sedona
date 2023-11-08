@@ -23,7 +23,7 @@ import org.apache.sedona.common.utils.RasterUtils
 import org.apache.spark.sql.SaveMode
 import org.apache.spark.sql.functions.{collect_list, expr}
 import org.geotools.coverage.grid.GridCoverage2D
-import org.junit.Assert.{assertEquals, assertNull, assertTrue}
+import org.junit.Assert.{assertArrayEquals, assertEquals, assertNull, assertTrue}
 import org.locationtech.jts.geom.{Coordinate, Geometry}
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
@@ -522,6 +522,17 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(result.size() == 2)
       assert(result.get(0) == 255d)
       assert(result.get(1) == null)
+    }
+
+    it("Passed RS_Clip with raster") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+        .selectExpr("RS_FromGeoTiff(content) as raster",
+                    "ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))') as geom")
+      val clippedDf = df.selectExpr("RS_Clip(raster, 1, geom, 200, false) as clipped")
+
+      val clippedMetadata = df.selectExpr("RS_Metadata(raster)").first().getSeq(0).slice(0, 9)
+      val originalMetadata = clippedDf.selectExpr("RS_Metadata(clipped)").first().getSeq(0).slice(0, 9)
+      assertTrue(originalMetadata.equals(clippedMetadata))
     }
 
     it("Passed RS_AsGeoTiff") {
