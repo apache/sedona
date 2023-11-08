@@ -43,9 +43,9 @@ from sedona.spark.SedonaContext import SedonaContext
 from sedona.raster_utils.SedonaUtils import SedonaUtils
 try:
     from sedona.maps.SedonaKepler import SedonaKepler
-except (ModuleNotFoundError, ImportError) as error:
-    print('Skipping SedonaKepler import since keplergl is not installed, please install keplergl if you intend to use SedonaKepler')
+except:
+    print('Skipping SedonaKepler import, verify if keplergl is installed')
 try:
     from sedona.maps.SedonaPyDeck import SedonaPyDeck
-except (ModuleNotFoundError, ImportError) as error:
-    print('Skipping SedonaPyDeck import since pydeck is not installed, please install pydeck if you intend to use SedonaPyDeck')
+except:
+    print('Skipping SedonaPyDeck import, verify if pydeck is installed')
