@@ -1063,6 +1063,61 @@ Output:
 GridCoverage2D["g...
 ```
 
+### RS_Clip
+
+Introduction: Returns a raster that is clipped by the given geometry. 
+
+If `crop` is not specified then it will default to `true`, meaning it will make the resulting raster shrink to the geometry's extent and if `noDataValue` is not specified then the resulting raster will have the minimum possible value for the band pixel data type.
+
+Format:
+
+```
+RS_Clip(raster: Raster, band: Integer, geom: Geometry, noDataValue: Double, crop: Boolean)
+```
+
+```
+RS_Clip(raster: Raster, band: Integer, geom: Geometry, noDataValue: Double)
+```
+
+```
+RS_Clip(raster: Raster, band: Integer, geom: Geometry)
+```
+
+Since: `v1.5.1`
+
+Original Raster:
+
+<img alt="Original raster" src="../../../image/original-raster-clip.png" width="400"/>
+
+Spark SQL Example:
+
+```sql
+SELECT RS_Clip(
+        RS_FromGeoTiff(content), 1,
+        ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))'),
+        200, true
+    )
+```
+
+Output:
+
+<img alt="Cropped raster" src="../../../image/cropped-raster.png" width="400"/>
+
+Spark SQL Example:
+
+```sql
+SELECT RS_Clip(
+        RS_FromGeoTiff(content), 1,
+        ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))'),
+        200, false
+    )
+```
+
+Output:
+
+<img alt="Clipped raster" src="../../../image/clipped-raster.png" width="400"/>
+
+
 ### RS_MetaData
 
 Introduction: Returns the metadata of the raster as an array of double. The array contains the following values:
