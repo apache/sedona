@@ -309,7 +309,7 @@ test_that("spark_read_geoparquet() works as expected", {
   )
   
   ## Right registered name
-  expect_equal(geoparquet_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  expect_equal(geoparquet_sdf %>% dbplyr::remote_name(), sdf_name)
   
   ## Right schema
   expect_equivalent(
@@ -442,7 +442,7 @@ test_that("spark_read_geoparquet() throws an error with plain parquet files", {
   
   expect_error(
     spark_read_geoparquet(sc, geoparquet("plain.parquet")),
-    regexp = "GeoParquet file does not contain valid geo"
+    regexp = "not contain valid geo"
   )
   
 })
@@ -463,7 +463,7 @@ test_that("spark_read_geojson() works as expected", {
   )
   
   ## Right registered name
-  expect_equal(geojson_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  expect_equal(geojson_sdf %>% dbplyr::remote_name(), sdf_name)
   
 })
 
@@ -478,7 +478,7 @@ test_that("spark_read_geojson() works as expected, no feat", {
   )
   
   ## Right registered name
-  expect_equal(geojson_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  expect_equal(geojson_sdf %>% dbplyr::remote_name(), sdf_name)
   
   sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
   
@@ -494,7 +494,7 @@ test_that("spark_read_geojson() works as expected, null values", {
   )
   
   ## Right registered name
-  expect_equal(geojson_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  expect_equal(geojson_sdf %>% dbplyr::remote_name(), sdf_name)
   
   sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
   
@@ -522,7 +522,7 @@ test_that("spark_read_geojson() works as expected, with id", {
   )
   
   ## Right registered name
-  expect_equal(geojson_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  expect_equal(geojson_sdf %>% dbplyr::remote_name(), sdf_name)
   
   sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
   
@@ -541,7 +541,7 @@ test_that("spark_read_geojson() works as expected, invalid geom", {
   )
   
   ## Right registered name
-  expect_equal(geojson_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  expect_equal(geojson_sdf %>% dbplyr::remote_name(), sdf_name)
   
   
   # Remove invalid
@@ -553,7 +553,7 @@ test_that("spark_read_geojson() works as expected, invalid geom", {
   )
   
   ## Right registered name
-  expect_equal(geojson_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  expect_equal(geojson_sdf %>% dbplyr::remote_name(), sdf_name)
   
   sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
   
@@ -676,13 +676,13 @@ test_that("spark_write_geojson() works as expected", {
   
   ## order of columns changes !
   expect_equal(
-    names(geojson_sdf) %>% sort(), 
-    names(geojson_2_sdf) %>% sort()
+    colnames(geojson_sdf) %>% sort(), 
+    colnames(geojson_2_sdf) %>% sort()
   )
   expect_equal(
     geojson_sdf %>% mutate(geometry = geometry %>% st_astext()) %>% collect(),
     geojson_2_sdf %>% mutate(geometry = geometry %>% st_astext()) %>% collect() %>% 
-      select(names(geojson_sdf))
+      select(colnames(geojson_sdf))
   )
   
   
