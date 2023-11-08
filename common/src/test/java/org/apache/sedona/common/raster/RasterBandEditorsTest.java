@@ -19,6 +19,7 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.Constructors;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
@@ -26,8 +27,11 @@ import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
+import java.awt.geom.Point2D;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -80,14 +84,34 @@ public class RasterBandEditorsTest extends RasterTestBase{
         Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
 
         GridCoverage2D clippedRaster = RasterBandEditors.clip(raster, 1, geom, 200, false);
-        double[] clippedMetadata = Arrays.stream(RasterAccessors.metadata(clippedRaster), 0, 9).toArray();;
-        double[] originalMetadata = Arrays.stream(RasterAccessors.metadata(raster), 0, 9).toArray();;
+        double[] clippedMetadata = Arrays.stream(RasterAccessors.metadata(clippedRaster), 0, 9).toArray();
+        double[] originalMetadata = Arrays.stream(RasterAccessors.metadata(raster), 0, 9).toArray();
         assertArrayEquals(originalMetadata, clippedMetadata, 0.01d);
-
 
         String actual = String.valueOf(clippedRaster.getSampleDimensions()[0]);
         String expected = String.valueOf(raster.getSampleDimensions()[0]);
         assertEquals(expected, actual);
+
+        List<Geometry> points = new ArrayList<>();
+        points.add(Constructors.geomFromWKT("POINT(223802 4.21769e+06)", 26918));
+        points.add(Constructors.geomFromWKT("POINT(224759 4.20453e+06)", 26918));
+        points.add(Constructors.geomFromWKT("POINT(237201 4.20429e+06)", 26918));
+        points.add(Constructors.geomFromWKT("POINT(237919 4.20357e+06)", 26918));
+        points.add(Constructors.geomFromWKT("POINT(254668 4.21769e+06)", 26918));
+        double[] actualValues = PixelFunctions.values(clippedRaster, points, 1).stream().mapToDouble(d -> d).toArray();
+        double[] expectedValues = new double[] {200.0, 200.0, 0.0, 0.0, 200.0};
+        assertArrayEquals(expectedValues, actualValues, 0.001d);
+
+        GridCoverage2D croppedRaster = RasterBandEditors.clip(raster, 1, geom, 200, true);
+        points = new ArrayList<>();
+        points.add(Constructors.geomFromWKT("POINT(236842 4.20465e+06)", 26918));
+        points.add(Constructors.geomFromWKT("POINT(236961 4.20453e+06)", 26918));
+        points.add(Constructors.geomFromWKT("POINT(237201 4.20429e+06)", 26918));
+        points.add(Constructors.geomFromWKT("POINT(237919 4.20357e+06)", 26918));
+        points.add(Constructors.geomFromWKT("POINT(223802 4.20465e+06)", 26918));
+        actualValues = PixelFunctions.values(croppedRaster, points, 1).stream().mapToDouble(d -> d).toArray();
+        expectedValues = new double[] {0.0, 0.0, 0.0, 0.0, 200.0};
+        assertArrayEquals(expectedValues, actualValues, 0.001d);
     }
 
     @Test
