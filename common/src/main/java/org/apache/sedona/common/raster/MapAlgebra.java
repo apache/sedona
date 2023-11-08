@@ -18,16 +18,26 @@
  */
 package org.apache.sedona.common.raster;
 
-import org.geotools.coverage.CoverageFactoryFinder;
+import it.geosolutions.jaiext.jiffle.JiffleBuilder;
+import it.geosolutions.jaiext.jiffle.runtime.JiffleDirectRuntime;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.GridCoverageFactory;
 
+import javax.media.jai.PlanarImage;
 import javax.media.jai.RasterFactory;
-
-import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
+import java.awt.image.WritableRenderedImage;
+import java.util.Arrays;
+
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 
 public class MapAlgebra
 {
@@ -44,22 +54,14 @@ public class MapAlgebra
             return null;
         }
 
-        Raster raster = rasterGeom.getRenderedImage().getData();
+        Raster raster = RasterUtils.getRaster(rasterGeom.getRenderedImage());
         // Get the width and height of the raster
         int width = raster.getWidth();
         int height = raster.getHeight();
 
         // Array to hold the band values
         double[] bandValues = new double[width * height];
-
-        // Iterate over each pixel
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                // Get the value and store it in the 1D array
-                bandValues[y * width + x] = raster.getSample(x, y, bandIndex - 1);
-            }
-        }
-        return bandValues;
+        return raster.getSamples(0, 0, width, height, bandIndex - 1, bandValues);
     }
 
     /**
@@ -69,6 +71,22 @@ public class MapAlgebra
      * @param bandIndex starts at 1, and no larger than numBands + 1
      * @return
      */
+    public static GridCoverage2D addBandFromArray(GridCoverage2D rasterGeom, double[] bandValues, int bandIndex, Double noDataValue) {
+        int numBands = rasterGeom.getNumSampleDimensions();
+        // Allow the band index to be one larger than the number of bands, which will append the band to the end
+        if (bandIndex < 1 || bandIndex > numBands + 1) {
+            throw new IllegalArgumentException("Band index is out of bounds. Must be between 1 and " + (numBands + 1) + ")");
+        }
+
+        Double[] bandValuesClass = Arrays.stream(bandValues).boxed().toArray(Double[]::new);
+        if (bandIndex == numBands + 1) {
+            return RasterUtils.copyRasterAndAppendBand(rasterGeom, bandValuesClass, noDataValue);
+        }
+        else {
+            return RasterUtils.copyRasterAndReplaceBand(rasterGeom, bandIndex, bandValuesClass, noDataValue, true);
+        }
+    }
+
     public static GridCoverage2D addBandFromArray(GridCoverage2D rasterGeom, double[] bandValues, int bandIndex) {
         int numBands = rasterGeom.getNumSampleDimensions();
         // Allow the band index to be one larger than the number of bands, which will append the band to the end
@@ -76,11 +94,12 @@ public class MapAlgebra
             throw new IllegalArgumentException("Band index is out of bounds. Must be between 1 and " + (numBands + 1) + ")");
         }
 
+        Double[] bandValuesClass = Arrays.stream(bandValues).boxed().toArray(Double[]::new);
         if (bandIndex == numBands + 1) {
-            return copyRasterAndAppendBand(rasterGeom, bandValues);
+            return RasterUtils.copyRasterAndAppendBand(rasterGeom, bandValuesClass);
         }
         else {
-            return copyRasterAndReplaceBand(rasterGeom, bandIndex, bandValues);
+            return RasterUtils.copyRasterAndReplaceBand(rasterGeom, bandIndex, bandValuesClass);
         }
     }
 
@@ -95,53 +114,424 @@ public class MapAlgebra
         return addBandFromArray(rasterGeom, bandValues, rasterGeom.getNumSampleDimensions() + 1);
     }
 
+    private static final ThreadLocal<String> previousScript = new ThreadLocal<>();
+    private static final ThreadLocal<JiffleDirectRuntime> previousRuntime = new ThreadLocal<>();
+
     /**
-     * This is an experimental method as it does not copy the original raster properties (e.g. color model, sample model, etc.)
-     * TODO: Copy the original raster properties
-     * @param gridCoverage2D
-     * @param bandValues
-     * @return
+     * Applies a map algebra script to the given raster.
+     * @param gridCoverage2D The raster to apply the script to
+     * @param pixelType The pixel type of the output raster. If null, the pixel type of the input raster is used.
+     * @param script The script to apply
+     * @param noDataValue The no data value of the output raster.
+     * @return The result of the map algebra script
      */
-    private static GridCoverage2D copyRasterAndAppendBand(GridCoverage2D gridCoverage2D, double[] bandValues) {
-        // Get the original image and its properties
-        RenderedImage originalImage = gridCoverage2D.getRenderedImage();
-        Raster raster = originalImage.getData();
-        Point location = gridCoverage2D.getRenderedImage().getData().getBounds().getLocation();
-        WritableRaster wr = RasterFactory.createBandedRaster(raster.getDataBuffer().getDataType(), originalImage.getWidth(), originalImage.getHeight(), gridCoverage2D.getNumSampleDimensions() + 1, location);
-        // Copy the raster data and append the new band values
-        for (int i = 0; i < raster.getWidth(); i++) {
-            for (int j = 0; j < raster.getHeight(); j++) {
-                double[] pixels = raster.getPixel(i, j, (double[]) null);
-                double[] copiedPixels = new double[pixels.length + 1];
-                System.arraycopy(pixels, 0, copiedPixels, 0, pixels.length);
-                copiedPixels[pixels.length] = bandValues[j * raster.getWidth() + i];
-                wr.setPixel(i, j, copiedPixels);
-            }
+    public static GridCoverage2D mapAlgebra(GridCoverage2D gridCoverage2D, String pixelType, String script, Double noDataValue) {
+        if (gridCoverage2D == null || script == null) {
+            return null;
         }
-        // Create a new GridCoverage2D with the copied image
-        GridCoverageFactory gridCoverageFactory = CoverageFactoryFinder.getGridCoverageFactory(null);
-        return gridCoverageFactory.create(gridCoverage2D.getName(), wr, gridCoverage2D.getEnvelope());
+        RenderedImage renderedImage = gridCoverage2D.getRenderedImage();
+        int rasterDataType = pixelType != null? RasterUtils.getDataTypeCode(pixelType) : renderedImage.getSampleModel().getDataType();
+        int width = renderedImage.getWidth();
+        int height = renderedImage.getHeight();
+        // ImageUtils.createConstantImage is slow, manually constructing a buffered image proved to be faster.
+        // It also eliminates the data-copying overhead when converting raster data types after running jiffle script.
+        WritableRaster resultRaster = RasterFactory.createBandedRaster(DataBuffer.TYPE_DOUBLE, width, height, 1, null);
+        ColorModel cm = PlanarImage.createColorModel(resultRaster.getSampleModel());
+        WritableRenderedImage resultImage = new BufferedImage(cm, resultRaster, false, null);
+        try {
+            String prevScript = previousScript.get();
+            JiffleDirectRuntime prevRuntime = previousRuntime.get();
+            JiffleDirectRuntime runtime;
+            if (prevRuntime != null && script.equals(prevScript)) {
+                // Reuse the runtime to avoid recompiling the script
+                runtime = prevRuntime;
+                runtime.setSourceImage("rast", renderedImage);
+                runtime.setDestinationImage("out", resultImage);
+                runtime.setDefaultBounds();
+            } else {
+                JiffleBuilder builder = new JiffleBuilder();
+                runtime = builder.script(script).source("rast", renderedImage).dest("out", resultImage).getRuntime();
+                previousScript.set(script);
+                previousRuntime.set(runtime);
+            }
+
+            runtime.evaluateAll(null);
+
+            // If pixelType does not match with the data type of the result image (should be double since Jiffle only supports
+            // double destination image), we need to convert the resultImage to the specified pixel type.
+            if (rasterDataType != resultImage.getSampleModel().getDataType()) {
+                // Copy the resultImage to a new raster with the specified pixel type
+                WritableRaster convertedRaster = RasterFactory.createBandedRaster(rasterDataType, width, height, 1, null);
+                double[] samples = resultRaster.getSamples(0, 0, width, height, 0, (double[]) null);
+                convertedRaster.setSamples(0, 0, width, height, 0, samples);
+                return RasterUtils.create(convertedRaster, gridCoverage2D.getGridGeometry(), null, noDataValue);
+            } else {
+                // build a new GridCoverage2D from the resultImage
+                return RasterUtils.create(resultImage, gridCoverage2D.getGridGeometry(), null, noDataValue);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to run map algebra", e);
+        }
     }
 
-    private static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, double[] bandValues) {
-        // Do not allow the band index to be out of bounds
-        if (bandIndex < 1 || bandIndex > gridCoverage2D.getNumSampleDimensions()) {
-            throw new IllegalArgumentException("Band index is out of bounds. Must be between 1 and " + gridCoverage2D.getNumSampleDimensions() + ")");
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return a sum of the provided band values
+     */
+    public static double[] add(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for(int i = 0; i < band1.length; i++) {
+            result[i] = band1[i] + band2[i];
         }
-        // Get the original image and its properties
-        RenderedImage originalImage = gridCoverage2D.getRenderedImage();
-        Raster raster = originalImage.getData();
-        WritableRaster wr = raster.createCompatibleWritableRaster();
-        // Copy the raster data and replace the band values
-        for (int i = 0; i < raster.getWidth(); i++) {
-            for (int j = 0; j < raster.getHeight(); j++) {
-                double[] bands = raster.getPixel(i, j, (double[]) null);
-                bands[bandIndex - 1] = bandValues[j * raster.getWidth() + i];
-                wr.setPixel(i, j, bands);
+
+        return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return result of subtraction of the two bands, (band2 - band1).
+     */
+    public static double[] subtract(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for(int i = 0; i < band1.length; i++) {
+            result[i] = band2[i] - band1[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return result of multiplication of the two bands.
+     */
+    public static double[] multiply(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            result[i] = band1[i] * band2[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return result of subtraction of the two bands, (band1 / band2).
+     */
+    public static double[] divide(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            result[i] = (double) Math.round(band1[i] / band2[i] * 100) /100;
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @param factor multiplying factor
+     * @return an array where all the elements has been multiplied with the factor given.
+     */
+    public static double[] multiplyFactor(double[] band, double factor) {
+        double[] result = new double[band.length];
+        for (int i = 0; i < band.length; i++) {
+            result[i] = band[i] * factor;
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @param dividend dividend for modulo
+     * @return an array with modular remainders calculated from the given dividend
+     */
+    public static double[] modulo(double[] band, double dividend) {
+        double[] result = new double[band.length];
+        for (int i = 0; i < band.length; i++) {
+            result[i] = band[i] % dividend;
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @return an array, where each pixel has been applied square root operation.
+     */
+    public static double[] squareRoot(double[] band) {
+        double[] result = new double[band.length];
+        for (int i = 0; i < band.length; i++) {
+            result[i] = (double) Math.round(Math.sqrt(band[i]) * 100) / 100;
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return an array, where each pixel is result of bitwise AND operator from provided 2 bands.
+     */
+    public static double[] bitwiseAnd(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            result[i] = (int) band1[i] & (int) band2[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return an array, where each pixel is result of bitwise OR operator from provided 2 bands.
+     */
+    public static double[] bitwiseOr(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            result[i] = (int) band1[i] | (int) band2[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return an array; if a value at an index in band1 is different in band2 then band1 value is taken otherwise 0.
+     */
+    public static double[] logicalDifference(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            if (band1[i] != band2[i]) {
+                result[i] = band1[i];
+            } else {
+                result[i] = 0d;
             }
         }
-        // Create a new GridCoverage2D with the copied image
-        GridCoverageFactory gridCoverageFactory = CoverageFactoryFinder.getGridCoverageFactory(null);
-        return gridCoverageFactory.create(gridCoverage2D.getName(), wr, gridCoverage2D.getEnvelope());
+
+        return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return an array; if a value at an index in band1 is not equal to 0 then band1 value will be taken otherwise band2's value
+     */
+    public static double[] logicalOver(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            if (band1[i] != 0d) {
+                result[i] = band1[i];
+            } else {
+                result[i] = band2[i];
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @return an array with normalized band values to be within [0 - 255] range
+     */
+    public static double[] normalize(double[] band) {
+        double[] result = new double[band.length];
+        double normalizer = Arrays.stream(band).max().getAsDouble() / 255d;
+
+        for (int i = 0; i < band.length; i++) {
+            result[i] = (int) (band[i] / normalizer);
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band1 band values
+     * @param band2 band values
+     * @return an array with the normalized difference of the provided bands
+     */
+    public static double[] normalizedDifference(double[] band1, double[] band2) {
+        ensureBandShape(band1.length, band2.length);
+
+        double[] result = new double[band1.length];
+        for (int i = 0; i < band1.length; i++) {
+            if (band1[i] == 0) {
+                band1[i] = -1;
+            }
+            if (band2[i] == 0) {
+                band2[i] = -1;
+            }
+
+            result[i] = (double) Math.round(((band2[i] - band1[i]) / (band2[i] + band1[i])) * 100) / 100;
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @return mean of the band values
+     */
+    public static double mean(double[] band) {
+        return (Arrays.stream(band).sum() / band.length) * 100 / 100;
+    }
+
+    /**
+     * @param band band values
+     * @param coordinates defines the region by minX, maxX, minY, and maxY respectively
+     * @param dimension dimensions
+     * @return an array of the specified region
+     */
+    public static double[] fetchRegion(double[] band, int[] coordinates, int[] dimension) {
+        double[] result = new double[(coordinates[2] - coordinates[0] + 1) * (coordinates[3] - coordinates[1] + 1)];
+        int k = 0;
+        for (int i = coordinates[0]; i < coordinates[2] + 1; i++) {
+            for (int j = coordinates[1]; j < coordinates[3] + 1; j++) {
+                result[k] = band[(i * dimension[0]) + j];
+                k++;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @return an array with the most reoccurring value or if every value occurs once then return the provided array
+     */
+    public static double[] mode(double[] band) {
+        Map<Double, Long> frequency = Arrays.stream(band)
+                .boxed()
+                .collect(
+                        Collectors.groupingBy(Function.identity(), Collectors.counting())
+                );
+        if (frequency.values().stream().max(Long::compare).orElse(0L) == 1L) {
+            return band;
+        } else {
+            return new double[] {
+                    frequency.entrySet()
+                            .stream()
+                            .max(Map.Entry.comparingByValue())
+                            .map(Map.Entry::getKey)
+                            .orElse(null)
+            };
+        }
+    }
+
+    /**
+     * @param band band values
+     * @param target target to compare
+     * @return an array; mark all band values 1 that are greater than target, otherwise 0
+     */
+    public static double[] greaterThan(double[] band, double target) {
+        double[] result = new double[band.length];
+
+        for (int i = 0; i < band.length; i++) {
+            if (band[i] > target) {
+                result[i] = 1;
+            } else {
+                result[i] = 0;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @param target target to compare
+     * @return an array; mark all band values 1 that are greater than or equal to target, otherwise 0
+     */
+    public static double[] greaterThanEqual(double[] band, double target) {
+        double[] result = new double[band.length];
+
+        for (int i = 0; i < band.length; i++) {
+            if (band[i] >= target) {
+                result[i] = 1;
+            } else {
+                result[i] = 0;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @param target target to compare
+     * @return an array; mark all band values 1 that are less than target, otherwise 0
+     */
+    public static double[] lessThan(double[] band, double target) {
+        double[] result = new double[band.length];
+
+        for (int i = 0; i < band.length; i++) {
+            if (band[i] < target) {
+                result[i] = 1;
+            } else {
+                result[i] = 0;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @param target target to compare
+     * @return an array; mark all band values 1 that are less than or equal to target, otherwise 0
+     */
+    public static double[] lessThanEqual(double[] band, double target) {
+        double[] result = new double[band.length];
+
+        for (int i = 0; i < band.length; i++) {
+            if (band[i] <= target) {
+                result[i] = 1;
+            } else {
+                result[i] = 0;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * @param band band values
+     * @param target target to count
+     * @return count of the target in the band values
+     */
+    public static int countValue(double[] band, double target) {
+        return (int) Arrays.stream(band).filter(x -> x == target).count();
+    }
+
+    /**
+     * Throws an IllegalArgumentException if the lengths of the bands are not the same.
+     * @param band1 length of band values
+     * @param band2 length of band values
+     */
+    private static void ensureBandShape(int band1, int band2) {
+        if (band1 != band2) {
+            throw new IllegalArgumentException("The shape of the provided bands is not same. Please check your inputs, it should be same.");
+        }
     }
 }

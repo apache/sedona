@@ -14,23 +14,20 @@
 package org.apache.sedona.common.utils;
 
 import org.locationtech.jts.geom.*;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
-
-import org.locationtech.jts.geom.CoordinateSequence;
-import org.locationtech.jts.geom.CoordinateSequenceFilter;
-import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTWriter;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
+import org.locationtech.jts.algorithm.Angle;
+import org.locationtech.jts.algorithm.distance.DiscreteFrechetDistance;
+import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
+import org.locationtech.spatial4j.context.jts.JtsSpatialContext;
+import org.locationtech.spatial4j.shape.jts.JtsGeometry;
 
-import java.awt.*;
 import java.nio.ByteOrder;
 import java.util.*;
-import java.util.List;
 
 import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 
@@ -170,15 +167,14 @@ public class GeomUtils {
         if (srid != 0) {
             sridString = "SRID=" + String.valueOf(srid) + ";";
         }
-
-        return sridString + new WKTWriter(GeomUtils.getDimension(geometry)).write(geometry);
+        return sridString + new WKTWriter(4).write(geometry);
     }
 
     public static String getWKT(Geometry geometry) {
         if (geometry == null) {
             return null;
         }
-        return new WKTWriter(GeomUtils.getDimension(geometry)).write(geometry);
+        return new WKTWriter(4).write(geometry);
     }
 
     public static byte[] getEWKB(Geometry geometry) {
@@ -424,7 +420,6 @@ public class GeomUtils {
         return geometries;
     }
 
-
     public static Geometry get3DGeom(Geometry geometry, double zValue) {
         Coordinate[] coordinates = geometry.getCoordinates();
         if (coordinates.length == 0) return geometry;
@@ -459,6 +454,95 @@ public class GeomUtils {
         }
         if (deltaX != 0 || deltaY != 0 || deltaZ != 0) {
             geometry.geometryChanged();
+        }
+    }
+
+    public static boolean isAnyGeomEmpty(Geometry... geometries) {
+        for (Geometry geometry: geometries) {
+            if (geometry != null)
+                if (geometry.isEmpty())
+                    return true;
+        }
+        return false;
+    }
+
+    public static Coordinate[] getStartEndCoordinates(Geometry line) {
+        if (line.getNumPoints() < 2) return null;
+        Coordinate[] coordinates = line.getCoordinates();
+        return new Coordinate[] {coordinates[0], coordinates[coordinates.length - 1]};
+    }
+
+    public static double calcAngle(Coordinate start1, Coordinate end1, Coordinate start2, Coordinate end2) {
+        double angle1 = normalizeAngle(Angle.angle(start1, end1));
+        double angle2 = normalizeAngle(Angle.angle(start2, end2));
+        return normalizeAngle(angle1 - angle2);
+    }
+
+    private static double normalizeAngle(double angle) {
+        if (angle < 0) {
+            return 2 * Math.PI - Math.abs(angle);
+        }
+        return angle;
+    }
+
+    public static double toDegrees(double angleInRadian) {
+        return Angle.toDegrees(angleInRadian);
+    }
+
+
+    public static void affineGeom(Geometry geometry, Double a, Double b, Double c, Double d, Double e, Double f, Double g, Double h, Double i, Double xOff, Double yOff,
+                                  Double zOff) {
+
+        Coordinate[] coordinates = geometry.getCoordinates();
+        for (Coordinate currCoordinate : coordinates) {
+            double x = currCoordinate.getX(), y = currCoordinate.getY(), z = Double.isNaN(currCoordinate.getZ()) ? 0 : currCoordinate.getZ();
+            double newX = a * x + b * y + xOff;
+            if (c != null) newX += c * z;
+            double newY = d * x + e * y + yOff;
+            if (f != null) newY += f * z;
+            currCoordinate.setX(newX);
+            currCoordinate.setY(newY);
+
+            if (g != null && h != null && i != null && !Double.isNaN(currCoordinate.getZ())) {
+                double newZ = g * x + h * y + i * z + zOff;
+                currCoordinate.setZ(newZ);
+            }
+        }
+        geometry.geometryChanged();
+    }
+
+    public static double getFrechetDistance(Geometry g1, Geometry g2) {
+        if (g1.isEmpty() || g2.isEmpty()) return 0.0;
+        return DiscreteFrechetDistance.distance(g1, g2);
+    }
+
+    public static Double getHausdorffDistance(Geometry g1, Geometry g2, double densityFrac) throws Exception {
+        if (g1.isEmpty() || g2.isEmpty()) return 0.0;
+        DiscreteHausdorffDistance hausdorffDistanceObj = new DiscreteHausdorffDistance(g1, g2);
+        if (densityFrac != -1) {
+            hausdorffDistanceObj.setDensifyFraction(densityFrac);
+        }
+        return hausdorffDistanceObj.distance();
+    }
+
+    public static Boolean isMeasuredGeometry(Geometry geom) {
+        Coordinate coordinate = geom.getCoordinate();
+        return !Double.isNaN(coordinate.getM());
+    }
+
+    /**
+     * Returns a geometry that does not cross the anti meridian. If the given geometry crosses the
+     * anti-meridian, it will be split up into multiple geometries.
+     *
+     * @param geom the geometry to convert
+     * @return a geometry that does not cross the anti meridian
+     */
+    public static Geometry antiMeridianSafeGeom(Geometry geom) {
+        try {
+            JtsGeometry jtsGeom = new JtsGeometry(geom, JtsSpatialContext.GEO, true, true);
+            return jtsGeom.getGeom();
+        } catch (TopologyException e) {
+            return geom;
         }
     }
 }

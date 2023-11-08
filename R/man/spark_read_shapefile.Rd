@@ -4,7 +4,6 @@
 \alias{spark_read_shapefile}
 \alias{spark_read_geojson}
 \alias{spark_read_geoparquet}
-\alias{spark_read_geotiff}
 \title{Read geospatial data into a Spark DataFrame.}
 \usage{
 spark_read_shapefile(sc, name = NULL, path = name, options = list(), ...)
@@ -28,16 +27,6 @@ spark_read_geoparquet(
   memory = TRUE,
   overwrite = TRUE
 )
-
-spark_read_geotiff(
-  sc,
-  name = NULL,
-  path = name,
-  options = list(),
-  repartition = 0,
-  memory = TRUE,
-  overwrite = TRUE
-)
 }
 \arguments{
 \item{sc}{A \code{spark_connection}.}
@@ -47,7 +36,7 @@ spark_read_geotiff(
 \item{path}{The path to the file. Needs to be accessible from the cluster.
 Supports the \samp{"hdfs://"}, \samp{"s3a://"} and \samp{"file://"} protocols.}
 
-\item{options}{A list of strings with additional options. See \url{https://spark.apache.org/docs/latest/sql-programming-guide.html#configuration}.}
+\item{options}{A list of strings with additional options. See \url{https://spark.apache.org/docs/latest/sql-programming-guide.html}.}
 
 \item{...}{Optional arguments; currently unused.}
 
@@ -69,7 +58,6 @@ Functions to read geospatial data from a variety of formats into Spark DataFrame
 \item \code{spark_read_shapefile}: from a shapefile
 \item \code{spark_read_geojson}: from a geojson file
 \item \code{spark_read_geoparquet}: from a geoparquet file
-\item \code{spark_read_geotiff}: from a GeoTiff file, or a folder containing GeoTiff files
 }
 }
 \examples{

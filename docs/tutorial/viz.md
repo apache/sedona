@@ -1,6 +1,6 @@
 The page outlines the steps to visualize spatial data using SedonaViz. ==The example code is written in Scala but also works for Java==.
 
-SedonaViz provides native support for general cartographic design by extending Sedona to process large-scale spatial data. It can visulize Spatial RDD and Spatial Queries and render super high resolution image in parallel.
+SedonaViz provides native support for general cartographic design by extending Sedona to process large-scale spatial data. It can visualize Spatial RDD and Spatial Queries and render super high resolution image in parallel.
 
 SedonaViz offers Map Visualization SQL. This gives users a more flexible way to design beautiful map visualization effects including scatter plots and heat maps. SedonaViz RDD API is also available.
 

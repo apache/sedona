@@ -18,39 +18,72 @@
  */
 package org.apache.sedona.common.raster;
 
-import org.geotools.coverage.grid.GridCoordinates2D;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.DirectPosition2D;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.*;
+import org.opengis.coverage.PointOutsideCoverageException;
+import org.opengis.geometry.DirectPosition;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
-import java.awt.image.Raster;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.DoublePredicate;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 public class PixelFunctions
 {
+    private static GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
     public static Double value(GridCoverage2D rasterGeom, Geometry geometry, int band) throws TransformException
     {
         return values(rasterGeom, Collections.singletonList(geometry), band).get(0);
     }
 
+    public static Geometry getPixelAsPolygon(GridCoverage2D raster, int colX, int rowY) throws TransformException, FactoryException {
+        int srid = RasterAccessors.srid(raster);
+        Point2D point2D1 = RasterUtils.getWorldCornerCoordinates(raster, colX, rowY);
+        Point2D point2D2 = RasterUtils.getWorldCornerCoordinates(raster, colX + 1, rowY);
+        Point2D point2D3 = RasterUtils.getWorldCornerCoordinates(raster, colX + 1, rowY + 1);
+        Point2D point2D4 = RasterUtils.getWorldCornerCoordinates(raster, colX, rowY + 1);
+
+        Coordinate[] coordinateArray = new Coordinate[5];
+        coordinateArray[0] = new Coordinate(point2D1.getX(), point2D1.getY());
+        coordinateArray[1] = new Coordinate(point2D2.getX(), point2D2.getY());
+        coordinateArray[2] = new Coordinate(point2D3.getX(), point2D3.getY());
+        coordinateArray[3] = new Coordinate(point2D4.getX(), point2D4.getY());
+        coordinateArray[4] = new Coordinate(point2D1.getX(), point2D1.getY());
+
+        if(srid != 0) {
+            GeometryFactory factory = new GeometryFactory(new PrecisionModel(), srid);
+            return factory.createPolygon(coordinateArray);
+        }
+        return GEOMETRY_FACTORY.createPolygon(coordinateArray);
+    }
+
+    public static Geometry getPixelAsCentroid(GridCoverage2D raster, int colX, int rowY) throws FactoryException, TransformException {
+        Geometry polygon = PixelFunctions.getPixelAsPolygon(raster, colX, rowY);
+        return  polygon.getCentroid();
+    }
+
+    public static Geometry getPixelAsPoint(GridCoverage2D raster, int colX, int rowY) throws TransformException, FactoryException {
+        int srid = RasterAccessors.srid(raster);
+        Point2D point2D = RasterUtils.getWorldCornerCoordinatesWithRangeCheck(raster, colX, rowY);
+        Coordinate pointCoord = new Coordinate(point2D.getX(), point2D.getY());
+        if (srid != 0) {
+            GeometryFactory factory = new GeometryFactory(new PrecisionModel(), srid);
+            return factory.createPoint(pointCoord);
+        }
+        return GEOMETRY_FACTORY.createPoint(pointCoord);
+    }
     public static List<Double> values(GridCoverage2D rasterGeom, List<Geometry> geometries, int band) throws TransformException {
         int numBands = rasterGeom.getNumSampleDimensions();
         if (band < 1 || band > numBands) {
             // Invalid band index. Return nulls.
             return geometries.stream().map(geom -> (Double) null).collect(Collectors.toList());
         }
-        Raster raster = rasterGeom.getRenderedImage().getData();
-        GridGeometry2D gridGeometry = rasterGeom.getGridGeometry();
-        double[] noDataValues = rasterGeom.getSampleDimension(band - 1).getNoDataValues();
-        DoublePredicate isNoData = d -> noDataValues != null && DoubleStream.of(noDataValues).anyMatch(noDataValue -> Double.compare(noDataValue, d) == 0);
+        double noDataValue = RasterUtils.getNoDataValue(rasterGeom.getSampleDimension(band - 1));
         double[] pixelBuffer = new double[numBands];
 
         List<Double> result = new ArrayList<>(geometries.size());
@@ -59,16 +92,16 @@ public class PixelFunctions
                 result.add(null);
             } else {
                 Point point = ensurePoint(geom);
-                DirectPosition2D directPosition2D = new DirectPosition2D(point.getX(), point.getY());
-                GridCoordinates2D gridCoordinates2D = gridGeometry.worldToGrid(directPosition2D);
+                DirectPosition directPosition2D = new DirectPosition2D(point.getX(), point.getY());
                 try {
-                    double pixel = raster.getPixel(gridCoordinates2D.x, gridCoordinates2D.y, pixelBuffer)[band - 1];
-                    if (isNoData.test(pixel)) {
+                    rasterGeom.evaluate(directPosition2D, pixelBuffer);
+                    double pixel = pixelBuffer[band - 1];
+                    if (Double.compare(noDataValue, pixel) == 0) {
                         result.add(null);
                     } else {
                         result.add(pixel);
                     }
-                } catch (ArrayIndexOutOfBoundsException exc) {
+                } catch (PointOutsideCoverageException | ArrayIndexOutOfBoundsException exc) {
                     // Points outside the extent should return null
                     result.add(null);
                 }

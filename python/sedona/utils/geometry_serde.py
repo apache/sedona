@@ -125,8 +125,8 @@ try:
 
     else:
         # fallback to our general pure python implementation
-        from .geomserde_general import serialize, deserialize
+        from .geometry_serde_general import serialize, deserialize
 
 except Exception as e:
     warn(f'Cannot load geomserde_speedup, fallback to general python implementation. Reason: {e}')
-    from .geomserde_general import serialize, deserialize
+    from .geometry_serde_general import serialize, deserialize

@@ -17,6 +17,8 @@ geopandas="<=0.10.2"
 pyspark=">=2.3.0"
 attrs="*"
 pyarrow="*"
+keplergl = "==0.3.2"
+pydeck = "===0.8.0"
 
 [requires]
 python_version = "3.7"

@@ -394,7 +394,6 @@ sedona_read_shapefile <- function(sc,
 #' * `spark_read_shapefile`: from a shapefile 
 #' * `spark_read_geojson`: from a geojson file 
 #' * `spark_read_geoparquet`: from a geoparquet file 
-#' * `spark_read_geotiff`: from a GeoTiff file, or a folder containing GeoTiff files
 #'
 #' @inheritParams sparklyr::spark_read_source
 #'
@@ -485,29 +484,6 @@ spark_read_geoparquet <- function(sc,
                     name = name,
                     path = path,
                     source = "geoparquet",
-                    options = options,
-                    repartition = repartition,
-                    memory = memory,
-                    overwrite = overwrite,
-                    columns = NULL)
-}
-
-
-#' @export
-#' @rdname spark_read_shapefile
-#' @importFrom sparklyr spark_read_source
-spark_read_geotiff <- function(sc,
-                               name = NULL,
-                               path = name,
-                               options = list(),
-                               repartition = 0,
-                               memory = TRUE,
-                               overwrite = TRUE) {
-  
-  spark_read_source(sc, 
-                    name = name,
-                    path = path,
-                    source = "geotiff",
                     options = options,
                     repartition = repartition,
                     memory = memory,
@@ -630,8 +606,7 @@ sedona_save_spatial_rdd <- function(x,
 #' 
 #' * `spark_write_geojson`: to GeoJSON
 #' * `spark_write_geoparquet`: to GeoParquet
-#' * `spark_write_geotiff`: to GeoTiff from Array\[Double\] rasters 
-#' * `spark_write_raster`: to raster tiles after using RS output functions (`RS_AsXXX`) 
+#' * `spark_write_raster`: to raster tiles after using RS output functions (`RS_AsXXX`)
 #'
 #'
 #' @param path The path to the file. Needs to be accessible from the cluster.
@@ -707,28 +682,6 @@ spark_write_geoparquet <- function(x,
   spark_write_source(
     x = x,
     source = "geoparquet",
-    mode = mode,
-    options = options,
-    partition_by = partition_by,
-    save_args = list(path),
-    ...
-  )
-  
-}
-
-#' @export
-#' @rdname spark_write_geojson
-#' @importFrom sparklyr spark_write_source
-spark_write_geotiff <- function(x,
-                                   path,
-                                   mode = NULL,
-                                   options = list(),
-                                   partition_by = NULL,
-                                   ...) {
-  
-  spark_write_source(
-    x = x,
-    source = "geotiff",
     mode = mode,
     options = options,
     partition_by = partition_by,

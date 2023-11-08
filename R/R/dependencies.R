@@ -38,8 +38,8 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
     packages <- c(
       paste0(
         "org.apache.sedona:sedona-",
-        c("spark-shaded", "viz"),
-        sprintf("-%s_%s:1.4.1", spark_version, scala_version)
+        c("spark-shaded"),
+        sprintf("-%s_%s:1.5.0", spark_version, scala_version)
       ),
       packages
     )
@@ -139,9 +139,9 @@ sedona_dbplyr_sql_variant <- function() {
           "ST_Buffer(", geometry, ", CAST(", buffer, " AS DOUBLE))"
         )
       },
-      ST_PrecisionReduce = function(geometry, precision) {
+      ST_ReducePrecision = function(geometry, precision) {
         dbplyr::build_sql(
-          "ST_PrecisionReduce(", geometry, ", CAST(", precision, " AS INTEGER))"
+          "ST_ReducePrecision(", geometry, ", CAST(", precision, " AS INTEGER))"
         )
       },
       ST_SimplifyPreserveTopology = function(geometry, distance_tolerance) {

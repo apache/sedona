@@ -35,8 +35,7 @@ test_rdd_with_non_spatial_attrs <- invoke_new(
   1L, # offset
   sc$state$enums$delimiter$csv,
   TRUE,
-  1L, # numPartitions
-  sc$state$object_cache$storage_levels$memory_only
+  1L # numPartitions
 ) %>%
   apache.sedona:::new_spatial_rdd("point")
 
@@ -443,7 +442,7 @@ test_that("spark_read_geoparquet() throws an error with plain parquet files", {
   
   expect_error(
     spark_read_geoparquet(sc, geoparquet("plain.parquet")),
-    regexp = "GeoParquet file does not contain valid geo metadata"
+    regexp = "GeoParquet file does not contain valid geo"
   )
   
 })
@@ -575,8 +574,7 @@ test_that("sedona_write_wkb() works as expected", {
     0L, # offset
     sc$state$enums$delimiter$wkb,
     TRUE,
-    1L, # numPartitions
-    sc$state$object_cache$storage_levels$memory_only
+    1L # numPartitions
   )
   
   expect_result_matches_original(pt_rdd)
@@ -593,8 +591,7 @@ test_that("sedona_write_wkt() works as expected", {
     0L, # offset
     sc$state$enums$delimiter$wkt,
     TRUE,
-    1L, # numPartitions
-    sc$state$object_cache$storage_levels$memory_only
+    1L # numPartitions
   )
   
   expect_result_matches_original(pt_rdd)
@@ -611,8 +608,7 @@ test_that("sedona_write_geojson() works as expected", {
     0L, # offset
     sc$state$enums$delimiter$geojson,
     TRUE,
-    1L, # numPartitions
-    sc$state$object_cache$storage_levels$memory_only
+    1L # numPartitions
   )
   
   expect_result_matches_original_geojson(pt_rdd)

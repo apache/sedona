@@ -38,9 +38,19 @@ public class Constructors {
     public static class ST_Point extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y) throws ParseException {
-            Coordinate coordinates = new Coordinate(x, y);
-            GeometryFactory geometryFactory = new GeometryFactory();
-            return geometryFactory.createPoint(coordinates);
+            return org.apache.sedona.common.Constructors.point(x, y);
+        }
+    }
+
+    public static class ST_PointZ extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y, @DataTypeHint("Double") Double z) throws ParseException {
+            return eval(x, y, z, 0);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y, @DataTypeHint("Double") Double z, @DataTypeHint("Integer") Integer srid) throws ParseException {
+            return org.apache.sedona.common.Constructors.pointZ(x, y, z, srid);
         }
     }
 
@@ -53,6 +63,23 @@ public class Constructors {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String s) throws ParseException {
             return eval(s, null);
+        }
+    }
+
+    public static class ST_MakePoint extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y) throws ParseException {
+            return org.apache.sedona.common.Constructors.makePoint(x, y, null, null);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y, @DataTypeHint("Double") Double z) throws ParseException {
+            return org.apache.sedona.common.Constructors.makePoint(x, y, z, null);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y, @DataTypeHint("Double") Double z, @DataTypeHint("Double") Double m) throws ParseException {
+            return org.apache.sedona.common.Constructors.makePoint(x, y, z, m);
         }
     }
 
@@ -121,6 +148,13 @@ public class Constructors {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String wktString) throws ParseException {
             return org.apache.sedona.common.Constructors.geomFromWKT(wktString, 0);
+        }
+    }
+
+    public static class ST_GeomFromEWKT extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String wktString) throws ParseException {
+            return org.apache.sedona.common.Constructors.geomFromEWKT(wktString);
         }
     }
 

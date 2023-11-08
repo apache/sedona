@@ -19,7 +19,7 @@ import os
 
 import pyspark
 import pytest
-from pyspark import StorageLevel, RDD
+from pyspark import RDD
 from shapely.geometry import Point
 
 from sedona.core.SpatialRDD import PointRDD
@@ -49,29 +49,13 @@ class TestSpatialRDD(TestBase):
             Offset=offset,
             splitter=splitter,
             carryInputData=True,
-            partitions=numPartitions,
-            newLevel=StorageLevel.MEMORY_ONLY
+            partitions=numPartitions
         )
         return spatial_rdd
 
     def test_analyze(self):
         spatial_rdd = self.create_spatial_rdd()
         assert spatial_rdd.analyze()
-
-    def test_crs_transform(self):
-        spatial_rdd = PointRDD(
-            sparkContext=self.sc,
-            InputLocation=crs_test_point,
-            Offset=0,
-            splitter=splitter,
-            carryInputData=True,
-            partitions=numPartitions,
-            newLevel=StorageLevel.MEMORY_ONLY
-        )
-
-        spatial_rdd.CRSTransform("epsg:4326", "epsg:3857")
-
-        assert spatial_rdd.rawSpatialRDD.collect()[0].geom.wkt == "POINT (-9833016.710450118 3805934.914254189)"
 
     def test_minimum_bounding_rectangle(self):
         spatial_rdd = self.create_spatial_rdd()
@@ -127,22 +111,6 @@ class TestSpatialRDD(TestBase):
         except AssertionError:
             assert geo_json_rdd.fieldNames == ['id', 'zipcode', 'name']
 
-    def test_get_crs_transformation(self):
-        spatial_rdd = PointRDD(
-            sparkContext=self.sc,
-            InputLocation=crs_test_point,
-            Offset=0,
-            splitter=splitter,
-            carryInputData=True,
-            partitions=numPartitions,
-            newLevel=StorageLevel.MEMORY_ONLY
-        )
-
-        assert not spatial_rdd.getCRStransformation()
-        spatial_rdd.CRSTransform("epsg:4326", "epsg:3857")
-
-        assert spatial_rdd.getCRStransformation()
-
     def test_get_partitioner(self):
         spatial_rdd = self.create_spatial_rdd()
 
@@ -170,40 +138,6 @@ class TestSpatialRDD(TestBase):
         assert spatial_rdd.getSampleNumber() == -1
         spatial_rdd.setSampleNumber(10)
         assert spatial_rdd.getSampleNumber() == 10
-
-    def test_get_source_epsg_code(self):
-        spatial_rdd = PointRDD(
-            sparkContext=self.sc,
-            InputLocation=crs_test_point,
-            Offset=0,
-            splitter=splitter,
-            carryInputData=True,
-            partitions=numPartitions,
-            newLevel=StorageLevel.MEMORY_ONLY
-        )
-
-        assert spatial_rdd.getSourceEpsgCode() == ""
-
-        spatial_rdd.CRSTransform("epsg:4326", "epsg:3857")
-
-        assert spatial_rdd.getSourceEpsgCode() == "epsg:4326"
-
-    def test_get_target_epsg_code(self):
-        spatial_rdd = PointRDD(
-            sparkContext=self.sc,
-            InputLocation=crs_test_point,
-            Offset=0,
-            splitter=splitter,
-            carryInputData=True,
-            partitions=numPartitions,
-            newLevel=StorageLevel.MEMORY_ONLY
-        )
-
-        assert spatial_rdd.getTargetEpsgCode() == ""
-
-        spatial_rdd.CRSTransform("epsg:4326", "epsg:3857")
-
-        assert spatial_rdd.getTargetEpsgCode() == "epsg:3857"
 
     def test_grids(self):
 

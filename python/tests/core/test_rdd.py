@@ -17,7 +17,6 @@
 
 import logging
 
-from pyspark import StorageLevel
 from shapely.geometry import Point
 
 from sedona.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
@@ -316,41 +315,5 @@ class TestSpatialRDD(TestBase):
                 object_rdd,
                 query_window_rdd,
                 True,
-                True
-            ).count
-
-    def test_crs_transformed_spatial_range_query(self):
-        object_rdd = PointRDD(
-            sparkContext=self.sc,
-            InputLocation=point_rdd_input_location,
-            Offset=point_rdd_offset,
-            splitter=point_rdd_splitter,
-            carryInputData=False,
-            newLevel=StorageLevel.DISK_ONLY,
-            sourceEpsgCRSCode="epsg:4326",
-            targetEpsgCode="epsg:3005"
-        )
-        for i in range(each_query_loop_times):
-            result_size = RangeQuery.SpatialRangeQuery(
-                object_rdd, range_query_window, False, False
-            )
-
-    def test_crs_transformed_spatial_range_query_using_index(self):
-        object_rdd = PointRDD(
-            sparkContext=self.sc,
-            InputLocation=point_rdd_input_location,
-            Offset=point_rdd_offset,
-            splitter=point_rdd_splitter,
-            carryInputData=False,
-            newLevel=StorageLevel.DISK_ONLY,
-            sourceEpsgCRSCode="epsg:4326",
-            targetEpsgCode="epsg:3005"
-        )
-        object_rdd.buildIndex(point_rdd_index_type, False)
-        for i in range(each_query_loop_times):
-            result_size = RangeQuery.SpatialRangeQuery(
-                object_rdd,
-                range_query_window,
-                False,
                 True
             ).count

@@ -129,8 +129,8 @@ pip install mike
 After installing MkDocs and MkDocs-Material, run the command in Sedona root folder:
 
 ```
-mike deploy --update-aliases latest-snapshot latest
-mike set-default latest
+mkdocs build
+mike deploy --update-aliases latest-snapshot -b website -p
 mike serve
 ```
 

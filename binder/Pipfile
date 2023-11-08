@@ -6,20 +6,25 @@ verify_ssl = true
 [dev-packages]
 pytest="*"
 notebook="==6.0.0"
-jupyter="*"
+jupyter = "*"
 mkdocs="*"
 pytest-cov = "*"
 
 [packages]
-pandas="*"
+pandas="1.3.5"
 shapely="==1.8.4"
 geopandas="==0.11.1"
-pyspark="==3.3.2"
+pyspark="==3.4.0"
 attrs="*"
-ipykernel = "*"
-apache-sedona="==1.4.0"
+apache-sedona="==1.5.0"
 matplotlib = "*"
 descartes = "*"
+keplergl = "==0.3.2"
+pydeck = "==0.8.0"
+ipywidgets = "*"
+jupyterlab-widgets = "==1.1.7"
+ipykernel = "*"
+jupyterlab = "==3.6.4"
 
 [requires]
 python_version = "3.9"

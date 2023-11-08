@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.sedona</groupId>
         <artifactId>sedona-parent</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.5.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>sedona-common</artifactId>
@@ -62,6 +62,10 @@
             <artifactId>gt-arcgrid</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-process-feature</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.locationtech.jts</groupId>
             <artifactId>jts-core</artifactId>
         </dependency>
@@ -70,8 +74,16 @@
             <artifactId>jts2geojson</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.locationtech.spatial4j</groupId>
+            <artifactId>spatial4j</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.geometry</groupId>
             <artifactId>s2-geometry</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.uber</groupId>
+            <artifactId>h3</artifactId>
         </dependency>
         <dependency>
             <groupId>com.esotericsoftware</groupId>
@@ -80,6 +92,27 @@
         <dependency>
             <groupId>net.sf.geographiclib</groupId>
             <artifactId>GeographicLib-Java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.geosolutions.jaiext.jiffle</groupId>
+            <artifactId>jt-jiffle-language</artifactId>
+        </dependency>
+        <!-- These test dependencies are for running map algebra tests -->
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>${antlr-runtime.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>${janino-version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>

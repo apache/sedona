@@ -82,6 +82,61 @@ public class Aggregators {
         }
     }
 
+
+    // Compute the Union boundary of numbers of geometries
+    //
+    @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+    public static class ST_Intersection_Aggr extends AggregateFunction<Geometry, Accumulators.AccGeometry> {
+
+        @Override
+        public Accumulators.AccGeometry createAccumulator() {
+            return new Accumulators.AccGeometry();
+        }
+
+        @Override
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+        public Geometry getValue(Accumulators.AccGeometry acc) {
+            return acc.geom;
+        }
+
+        public void accumulate(Accumulators.AccGeometry acc,
+                               @DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object o) {
+            if (acc.geom == null){
+                acc.geom = (Geometry) o;
+            } else {
+                acc.geom = acc.geom.intersection((Geometry) o);
+            }
+        }
+
+        /**
+         * TODO: find an efficient algorithm to incrementally and decrementally update the accumulator
+         *
+         * @param acc
+         * @param o
+         */
+        public void retract(Accumulators.AccGeometry acc,
+                            @DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            assert (false);
+        }
+
+        public void merge (Accumulators.AccGeometry acc, Iterable < Accumulators.AccGeometry > it){
+            for (Accumulators.AccGeometry a : it) {
+                    if (acc.geom == null){
+    //      make accumulate equal to acc
+                        acc.geom = a.geom;
+                    } else {
+                        acc.geom = acc.geom.intersection(a.geom);
+                    }
+                }
+        }
+
+        public void resetAccumulator (Accumulators.AccGeometry acc){
+            acc.geom = null;
+        }
+    }
+
+
     // Compute the Union boundary of numbers of geometries
     //
     @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
@@ -135,5 +190,3 @@ public class Aggregators {
         }
     }
 }
-
-

@@ -31,10 +31,12 @@ __all__ = [
     "ST_GeomFromText",
     "ST_GeomFromWKB",
     "ST_GeomFromWKT",
+    "ST_GeomFromEWKT",
     "ST_LineFromText",
     "ST_LineStringFromText",
     "ST_Point",
     "ST_PointFromText",
+    "ST_MakePoint"
     "ST_PolygonFromEnvelope",
     "ST_PolygonFromText",
     "ST_MLineFromText",
@@ -132,6 +134,17 @@ def ST_GeomFromWKT(wkt: ColumnOrName) -> Column:
     """
     return _call_constructor_function("ST_GeomFromWKT", wkt)
 
+@validate_argument_types
+def ST_GeomFromEWKT(ewkt: ColumnOrName) -> Column:
+    """Generate a geometry column from a OGC Extended Well-Known Text (WKT) string column.
+
+    :param ewkt: OGC Extended WKT string column to generate from.
+    :type ewkt: ColumnOrName
+    :return: Geometry column representing the EWKT string.
+    :rtype: Column
+    """
+    return _call_constructor_function("ST_GeomFromEWKT", ewkt)
+
 
 @validate_argument_types
 def ST_LineFromText(wkt: ColumnOrName) -> Column:
@@ -204,6 +217,29 @@ def ST_PointFromText(coords: ColumnOrName, delimiter: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_constructor_function("ST_PointFromText", (coords, delimiter))
+
+@validate_argument_types
+def ST_MakePoint(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, z: Optional[ColumnOrNameOrNumber] = None, m: Optional[ColumnOrNameOrNumber] = None) -> Column:
+    """Generate a 2D, 3D Z or 4D ZM Point geometry. If z is None then a 2D point is generated.
+    This function doesn't support M coordinates for creating a 4D ZM Point in Dataframe API.
+
+    :param x: Either a number or numeric column representing the X coordinate of a point.
+    :type x: ColumnOrNameOrNumber
+    :param y: Either a number or numeric column representing the Y coordinate of a point.
+    :type y: ColumnOrNameOrNumber
+    :param z: Either a number or numeric column representing the Z coordinate of a point, if None then a 2D point is generated, defaults to None
+    :type z: ColumnOrNameOrNumber
+    :param m: Either a number or numeric column representing the M coordinate of a point, if None then a point without M coordinate is generated, defaults to None
+    :type m: ColumnOrNameOrNumber
+    :return: Point geometry column generated from the coordinate values.
+    :rtype: Column
+    """
+    args = (x, y)
+    if z is not None:
+        args = args + (z,)
+    if m is not None:
+        args = args + (m,)
+    return _call_constructor_function("ST_MakePoint", (args))
 
 
 @validate_argument_types

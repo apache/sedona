@@ -17,6 +17,8 @@ nav:
         - Install Sedona Python: setup/install-python.md
         - Install Sedona R: api/rdocs
         - Install Sedona-Zeppelin: setup/zeppelin.md
+        - Play Sedona in Docker: setup/docker.md
+        - Install on Wherobots: setup/wherobots.md
         - Install on Databricks: setup/databricks.md
         - Install on AWS EMR: setup/emr.md
         - Set up Spark cluster: setup/cluster.md
@@ -61,6 +63,8 @@ nav:
               - Raster loader: api/sql/Raster-loader.md
               - Raster writer: api/sql/Raster-writer.md
               - Raster operators: api/sql/Raster-operators.md
+              - Raster map algebra: api/sql/Raster-map-algebra.md
+              - Raster visualization: api/sql/Raster-visualizer.md
           - Parameter: api/sql/Parameter.md
         - RDD (core):
           - Scala/Java doc: api/java-api.md
@@ -108,7 +112,7 @@ theme:
   palette:
     primary: 'deep orange'
     accent: 'green'
-  favicon: https://www.apache.org/logos/res/sedona/sedona.png
+  favicon: image/sedona_logo_symbol.png
   icon:
     logo: fontawesome/solid/earth-americas
     repo: fontawesome/brands/github
@@ -128,14 +132,14 @@ extra:
     - icon: fontawesome/brands/twitter
       link: 'https://twitter.com/ApacheSedona'
   sedona:
-    current_version: 1.4.0
-    current_geotools: 1.4.0-28.2
+    current_version: 1.5.0
+    current_geotools: 1.5.0-28.2
   sedona_create_release:
-    current_version: 1.4.1
-    current_git_tag: sedona-1.4.1-rc1
-    current_rc: 1.4.1-rc1
-    current_snapshot: 1.5.0-SNAPSHOT
-    next_version: 1.5.0
+    current_version: 1.5.0
+    current_git_tag: sedona-1.5.0-rc1
+    current_rc: 1.5.0-rc1
+    current_snapshot: 1.5.1-SNAPSHOT
+    next_version: 1.5.1
 copyright: Copyright © 2023 The Apache Software Foundation
 markdown_extensions:
   - admonition

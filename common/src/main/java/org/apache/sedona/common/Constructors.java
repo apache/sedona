@@ -18,6 +18,7 @@ import org.apache.sedona.common.enums.GeometryType;
 import org.apache.sedona.common.utils.FormatUtils;
 import org.apache.sedona.common.utils.GeoHashDecoder;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateXYZM;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
@@ -40,6 +41,28 @@ public class Constructors {
             return null;
         }
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        return new WKTReader(geometryFactory).read(wkt);
+    }
+
+    public static Geometry geomFromEWKT(String ewkt) throws ParseException {
+        if (ewkt == null) {
+            return null;
+        }
+        int SRID = 0;
+        String wkt = ewkt;
+        
+        int index = ewkt.indexOf("SRID=");
+        if (index != -1) {
+            int semicolonIndex = ewkt.indexOf(';', index);
+            if (semicolonIndex != -1) {
+                SRID = Integer.parseInt(ewkt.substring(index + 5, semicolonIndex));
+                wkt = ewkt.substring(semicolonIndex + 1);
+            }
+            else {
+                throw new ParseException("Invalid EWKT string");
+            }
+        }
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), SRID);
         return new WKTReader(geometryFactory).read(wkt);
     }
 
@@ -80,6 +103,23 @@ public class Constructors {
         // See srid parameter discussion in https://issues.apache.org/jira/browse/SEDONA-234
         GeometryFactory geometryFactory = new GeometryFactory();
         return geometryFactory.createPoint(new Coordinate(x, y));
+    }
+
+    public static Geometry makePoint(Double x, Double y, Double z, Double m){
+        GeometryFactory geometryFactory = new GeometryFactory();
+        if (x == null || y == null) {
+            return null;
+        }
+        if (z == null && m == null) {
+            return geometryFactory.createPoint(new Coordinate(x, y));
+        }
+        if (z != null && m == null) {
+            return geometryFactory.createPoint(new Coordinate(x, y, z));
+        }
+        if (z == null) {
+            return geometryFactory.createPoint(new CoordinateXYZM(x, y, 0, m));
+        }
+        return geometryFactory.createPoint(new CoordinateXYZM(x, y, z, m));
     }
 
     /**
@@ -148,8 +188,6 @@ public class Constructors {
     }
 
     public static Geometry geomFromGeoHash(String geoHash, Integer precision) {
-        System.out.println(geoHash);
-        System.out.println(precision);
         try {
             return GeoHashDecoder.decode(geoHash, precision);
         } catch (GeoHashDecoder.InvalidGeoHashException e) {

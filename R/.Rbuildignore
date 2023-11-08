@@ -30,3 +30,4 @@
 ^LICENSE$
 ^pkgdown$
 ^vignettes/articles$
+^demo

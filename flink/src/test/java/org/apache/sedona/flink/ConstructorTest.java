@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.wololo.jts2geojson.GeoJSONReader;
 
@@ -62,6 +63,58 @@ public class ConstructorTest extends TestBase{
 
         Table geomTable = pointTable
                 .select(call(Constructors.ST_Point.class.getSimpleName(), $(colNames[0]), $(colNames[1]))
+                        .as(colNames[2]));
+
+        String result = first(geomTable)
+                .getFieldAs(colNames[2])
+                .toString();
+
+        String expected = "POINT (1 2)";
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testPointZ() {
+        List<Row> data = new ArrayList<>();
+        data.add(Row.of(2.0, 2.0, 5.0, "point"));
+        String[] colNames = new String[]{"x", "y", "z", "name_point"};
+
+        TypeInformation<?>[] colTypes = {
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.STRING_TYPE_INFO};
+        RowTypeInfo typeInfo = new RowTypeInfo(colTypes, colNames);
+        DataStream<Row> ds = env.fromCollection(data).returns(typeInfo);
+        Table pointTable = tableEnv.fromDataStream(ds);
+
+        Table geomTable = pointTable
+                .select(call(Constructors.ST_PointZ.class.getSimpleName(), $(colNames[0]), $(colNames[1]), $(colNames[2]))
+                        .as(colNames[3]));
+
+        Point result = first(geomTable)
+                .getFieldAs(colNames[3]);
+
+        assertEquals(5.0, result.getCoordinate().getZ(), 1e-6);
+    }
+
+    @Test
+    public void testMakePoint() {
+        List<Row> data = new ArrayList<>();
+        data.add(Row.of(1.0, 2.0, "point"));
+        String[] colNames = new String[]{"x", "y", "name_point"};
+
+        TypeInformation<?>[] colTypes = {
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.STRING_TYPE_INFO};
+        RowTypeInfo typeInfo = new RowTypeInfo(colTypes, colNames);
+        DataStream<Row> ds = env.fromCollection(data).returns(typeInfo);
+        Table pointTable = tableEnv.fromDataStream(ds);
+
+        Table geomTable = pointTable
+                .select(call(Constructors.ST_MakePoint.class.getSimpleName(), $(colNames[0]), $(colNames[1]))
                         .as(colNames[2]));
 
         String result = first(geomTable)
@@ -120,6 +173,23 @@ public class ConstructorTest extends TestBase{
                 $(polygonColNames[1]));
         Row result = last(geomTable);
         assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
+    }
+
+    @Test
+    public void testGeomFromEWKT() {
+        List<Row> data = new ArrayList<>();
+        data.add(Row.of("SRID=123;MULTILINESTRING((1 2, 3 4), (4 5, 6 7))", "multiline", 0L));
+
+        Table geomTable = createTextTable(data, multilinestringColNames);
+        geomTable = geomTable
+                .select(call(Constructors.ST_GeomFromEWKT.class.getSimpleName(),
+                        $(multilinestringColNames[0]))
+                        .as(multilinestringColNames[0]), $(multilinestringColNames[1]));
+        String result = first(geomTable)
+                .getFieldAs(0)
+                .toString();
+        String expectedGeom = "MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))";
+        assertEquals(expectedGeom, result);
     }
 
     @Test

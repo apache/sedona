@@ -47,7 +47,7 @@ polygonMatchWithOriginalDuplicatesCount = 562
 
 
 class TestPointRange(TestBase):
-    loop_times = 5
+    loop_times = 1
     query_envelope = Envelope(-90.01, -80.01, 30.01, 40.01)
 
     def test_spatial_range_query(self):

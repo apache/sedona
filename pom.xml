@@ -26,7 +26,7 @@
     </parent>
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-parent</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <version>1.5.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>sedona-parent</name>
     <url>http://sedona.apache.org/</url>
@@ -73,6 +73,11 @@
         <jackson.version>2.13.4</jackson.version>
         <jts.version>1.19.0</jts.version>
         <jts2geojson.version>0.16.1</jts2geojson.version>
+        <spatial4j.version>0.8</spatial4j.version>
+
+        <jt-jiffle.version>1.1.24</jt-jiffle.version>
+        <antlr-runtime.version>4.9.3</antlr-runtime.version>
+        <janino-version>3.1.9</janino-version>
 
         <!-- Actual scala, spark and log4j version will be set by activated profiles.
              Setting a default value helps IDE:s that can't make sense of profiles. -->
@@ -83,9 +88,11 @@
 
         <slf4j.version>1.7.36</slf4j.version>
         <googles2.version>2.0.0</googles2.version>
+        <uberh3.version>4.1.1</uberh3.version>
         <scalatest.version>3.1.1</scalatest.version>
         <scala-collection-compat.version>2.5.0</scala-collection-compat.version>
         <geoglib.version>1.52</geoglib.version>
+        <caffeine.version>2.9.2</caffeine.version>
 
         <geotools.scope>provided</geotools.scope>
         <!-- Because it's not in Maven central, make it provided by default -->
@@ -145,6 +152,11 @@
                 <groupId>org.locationtech.jts</groupId>
                 <artifactId>jts-core</artifactId>
                 <version>${jts.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.locationtech.spatial4j</groupId>
+                <artifactId>spatial4j</artifactId>
+                <version>${spatial4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>edu.ucar</groupId>
@@ -224,6 +236,12 @@
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
+                <artifactId>gt-process-feature</artifactId>
+                <version>${geotools.version}</version>
+                <scope>${geotools.scope}</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.geotools</groupId>
                 <artifactId>gt-arcgrid</artifactId>
                 <version>${geotools.version}</version>
                 <scope>${geotools.scope}</scope>
@@ -233,6 +251,17 @@
                 <artifactId>gt-coverage</artifactId>
                 <version>${geotools.version}</version>
                 <scope>${geotools.scope}</scope>
+            </dependency>
+            <dependency>
+                <groupId>it.geosolutions.jaiext.jiffle</groupId>
+                <artifactId>jt-jiffle-language</artifactId>
+                <version>${jt-jiffle.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
            <dependency>
                 <groupId>org.apache.hadoop</groupId>
@@ -302,9 +331,19 @@
                 <version>${googles2.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.uber</groupId>
+                <artifactId>h3</artifactId>
+                <version>${uberh3.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>net.sf.geographiclib</groupId>
                 <artifactId>GeographicLib-Java</artifactId>
                 <version>${geoglib.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -315,6 +354,17 @@
         </dependencies>
     </dependencyManagement>
     <repositories>
+        <repository>
+            <id>maven-central</id>
+            <name>Maven Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
         <repository>
             <id>osgeo</id>
             <name>OSGeo Release Repository</name>
@@ -634,10 +684,7 @@
             </properties>
             <modules>
                 <module>common</module>
-                <module>core</module>
-                <module>sql</module>
-                <module>viz</module>
-                <module>python-adapter</module>
+                <module>spark</module>
                 <module>spark-shaded</module>
             </modules>
         </profile>
@@ -657,10 +704,7 @@
             </properties>
             <modules>
                 <module>common</module>
-                <module>core</module>
-                <module>sql</module>
-                <module>viz</module>
-                <module>python-adapter</module>
+                <module>spark</module>
                 <module>spark-shaded</module>
                 <module>flink</module>
                 <module>flink-shaded</module>

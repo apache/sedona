@@ -9,68 +9,27 @@ To write a Sedona Raster DataFrame to raster files, you need to (1) first conver
 
 You can use the following RS output functions (`RS_AsXXX`) to convert a Raster DataFrame to a binary DataFrame. Generally the output format of a raster can be different from the original input format. For example, you can use `RS_FromGeoTiff` to create rasters and save them using `RS_AsArcInfoAsciiGrid`.
 
-#### RS_AsGeoTiff
-
-Introduction: Returns a binary DataFrame from a Raster DataFrame. Each raster object in the resulting DataFrame is a GeoTiff image in binary format.
-
-Since: `v1.4.1`
-
-Format 1: `RS_AsGeoTiff(raster: Raster)`
-
-Format 2: `RS_AsGeoTiff(raster: Raster, compressionType:String, imageQuality:Integer/Decimal)`
-
-Possible values for `compressionType`: `None`, `PackBits`, `Deflate`, `Huffman`, `LZW` and `JPEG`
-
-Possible values for `imageQuality`: any decimal number between 0 and 1. 0 means the lowest quality and 1 means the highest quality.
-
-SQL example 1:
-
-```sql
-SELECT RS_AsGeoTiff(raster) FROM my_raster_table
-```
-
-SQL example 2:
-
-```sql
-SELECT RS_AsGeoTiff(raster, 'LZW', '0.75') FROM my_raster_table
-```
-
-Output:
-
-```html
-+--------------------+
-|             geotiff|
-+--------------------+
-|[4D 4D 00 2A 00 0...|
-+--------------------+
-```
-
-Output schema:
-
-```sql
-root
- |-- geotiff: binary (nullable = true)
-```
-
 #### RS_AsArcGrid
 
 Introduction: Returns a binary DataFrame from a Raster DataFrame. Each raster object in the resulting DataFrame is an ArcGrid image in binary format. ArcGrid only takes 1 source band. If your raster has multiple bands, you need to specify which band you want to use as the source.
 
+Possible values for `sourceBand`: any non-negative value (>=0). If not given, it will use Band 0.
+
+Format:
+
+`RS_AsArcGrid(raster: Raster)`
+
+`RS_AsArcGrid(raster: Raster, sourceBand: Integer)`
+
 Since: `v1.4.1`
 
-Format 1: `RS_AsArcGrid(raster: Raster)`
-
-Format 2: `RS_AsArcGrid(raster: Raster, sourceBand:Integer)`
-
-Possible values for `sourceBand `: any non-negative value (>=0). If not given, it will use Band 0.
-
-SQL example 1:
+Spark SQL Example:
 
 ```sql
 SELECT RS_AsArcGrid(raster) FROM my_raster_table
 ```
 
-SQL example 2:
+Spark SQL Example:
 
 ```sql
 SELECT RS_AsArcGrid(raster, 1) FROM my_raster_table
@@ -93,6 +52,89 @@ root
  |-- arcgrid: binary (nullable = true)
 ```
 
+#### RS_AsGeoTiff
+
+Introduction: Returns a binary DataFrame from a Raster DataFrame. Each raster object in the resulting DataFrame is a GeoTiff image in binary format.
+
+Possible values for `compressionType`: `None`, `PackBits`, `Deflate`, `Huffman`, `LZW` and `JPEG`
+
+Possible values for `imageQuality`: any decimal number between 0 and 1. 0 means the lowest quality and 1 means the highest quality.
+
+Format:
+
+`RS_AsGeoTiff(raster: Raster)`
+
+`RS_AsGeoTiff(raster: Raster, compressionType: String, imageQuality: Double)`
+
+Since: `v1.4.1`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_AsGeoTiff(raster) FROM my_raster_table
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_AsGeoTiff(raster, 'LZW', '0.75') FROM my_raster_table
+```
+
+Output:
+
+```html
++--------------------+
+|             geotiff|
++--------------------+
+|[4D 4D 00 2A 00 0...|
++--------------------+
+```
+
+Output schema:
+
+```sql
+root
+ |-- geotiff: binary (nullable = true)
+```
+
+#### RS_AsPNG
+
+Introduction: Returns a PNG byte array, that can be written to raster files as PNGs using the [sedona function](#write-a-binary-dataframe-to-raster-files). This function can only accept pixel data type of unsigned integer. PNG can accept 1 or 3 bands of data from the raster, refer to [RS_Band](../Raster-operators/#rs_band) for more details.
+
+!!!Note
+	Raster having `UNSIGNED_8BITS` pixel data type will have range of `0 - 255`, whereas rasters having `UNSIGNED_16BITS` pixel data type will have range of `0 - 65535`. If provided pixel value is greater than either `255` for `UNSIGNED_8BITS` or `65535` for `UNSIGNED_16BITS`, then the extra bit will be truncated.
+
+!!!Note
+	Raster that have float or double values will result in an empty byte array. PNG only accepts Integer values, if you want to write your raster to an image file, please refer to [RS_AsGeoTiff](#rs_asgeotiff).
+
+Format: `RS_AsPNG(raster: Raster)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_AsPNG(raster) FROM Rasters
+```
+
+Output:
+
+```
+[-119, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73...]
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_AsPNG(RS_Band(raster, Array(3, 1, 2)))
+```
+
+Output:
+
+```
+[-103, 78, 94, -26, 61, -16, -91, -103, -65, -116...]
+```
+
 ### Write a binary DataFrame to raster files
 
 Introduction: You can write a Sedona binary DataFrame to external storage using Sedona's built-in `raster` data source. Note that: `raster` data source does not support reading rasters. Please use Spark built-in `binaryFile` and Sedona RS constructors together to read rasters.
@@ -108,7 +150,7 @@ Available options:
 	* Default value: `.tiff`
 	* Allowed values: any string values such as `.png`, `.jpeg`, `.asc`
 * pathField
-	* No defaulut value. If you use this option, then the column specified in this option must exist in the DataFrame schema. If this option is not used, each produced raster image will have a random UUID file name.
+	* No default value. If you use this option, then the column specified in this option must exist in the DataFrame schema. If this option is not used, each produced raster image will have a random UUID file name.
 	* Allowed values: any column name that indicates the paths of each raster file
 
 The schema of the Raster dataframe to be written can be one of the following two schemas:
@@ -164,141 +206,67 @@ Then you can create Raster type in Sedona like this `RS_FromGeoTiff(content)` (i
 
 The newly created DataFrame can be written to disk again but must be under a different name such as `my_raster_file_modified`
 
+### Write Geometry to Raster dataframe
 
-## Write Array[Double] to GeoTiff files
+#### RS_AsRaster
 
-!!!warning
-	This function has been deprecated since v1.4.1. Please use `RS_AsGeoTiff` instead and `raster` data source to write GeoTiff files.
+Introduction: Converts a Geometry to a Raster dataset. Defaults to using `1.0` for cell `value` and `null` for `noDataValue` if not provided. Supports all geometry types. 
+The `pixelType` argument defines data type of the output raster. This can be one of the following, D (double), F (float), I (integer), S (short), US (unsigned short) or B (byte).
 
-Introduction: You can write a GeoTiff dataframe as GeoTiff images using the spark `write` feature with the format `geotiff`. The geotiff raster column needs to be an array of double type data.
+Format:
 
-Since: `v1.2.1`
-
-Spark SQL example:
-
-The schema of the GeoTiff dataframe to be written can be one of the following two schemas:
-
-```html
- |-- image: struct (nullable = true)
- |    |-- origin: string (nullable = true)
- |    |-- Geometry: geometry (nullable = true)
- |    |-- height: integer (nullable = true)
- |    |-- width: integer (nullable = true)
- |    |-- nBands: integer (nullable = true)
- |    |-- data: array (nullable = true)
- |    |    |-- element: double (containsNull = true)
+```
+RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, value: Double, noDataValue: Double)
 ```
 
-or
-
-```html
- |-- origin: string (nullable = true)
- |-- Geometry: geometry (nullable = true)
- |-- height: integer (nullable = true)
- |-- width: integer (nullable = true)
- |-- nBands: integer (nullable = true)
- |-- data: array (nullable = true)
- |    |-- element: double (containsNull = true)
+```
+RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, value: Double)
 ```
 
-Field names can be renamed, but schema should exactly match with one of the above two schemas. The output path could be a path to a directory where GeoTiff images will be saved. If the directory already exists, `write` should be called in `overwrite` mode.
-
-```scala
-var dfToWrite = sparkSession.read.format("geotiff").option("dropInvalid", true).option("readToCRS", "EPSG:4326").load("PATH_TO_INPUT_GEOTIFF_IMAGES")
-dfToWrite.write.format("geotiff").save("DESTINATION_PATH")
+```
+RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String)
 ```
 
-You can override an existing path with the following approach:
-
-```scala
-dfToWrite.write.mode("overwrite").format("geotiff").save("DESTINATION_PATH")
-```
-
-You can also extract the columns nested within `image` column and write the dataframe as GeoTiff image.
-
-```scala
-dfToWrite = dfToWrite.selectExpr("image.origin as origin","image.geometry as geometry", "image.height as height", "image.width as width", "image.data as data", "image.nBands as nBands")
-dfToWrite.write.mode("overwrite").format("geotiff").save("DESTINATION_PATH")
-```
-
-If you want the saved GeoTiff images not to be distributed into multiple partitions, you can call coalesce to merge all files in a single partition.
-
-```scala
-dfToWrite.coalesce(1).write.mode("overwrite").format("geotiff").save("DESTINATION_PATH")
-```
-
-In case, you rename the columns of GeoTiff dataframe, you can set the corresponding column names with the `option` parameter. All available optional parameters are listed below:
-
-```html
- |-- writeToCRS: (Default value "EPSG:4326") => Coordinate reference system of the geometry coordinates representing the location of the Geotiff.
- |-- fieldImage: (Default value "image") => Indicates the image column of GeoTiff DataFrame.
- |-- fieldOrigin: (Default value "origin") => Indicates the origin column of GeoTiff DataFrame.
- |-- fieldNBands: (Default value "nBands") => Indicates the nBands column of GeoTiff DataFrame.
- |-- fieldWidth: (Default value "width") => Indicates the width column of GeoTiff DataFrame.
- |-- fieldHeight: (Default value "height") => Indicates the height column of GeoTiff DataFrame.
- |-- fieldGeometry: (Default value "geometry") => Indicates the geometry column of GeoTiff DataFrame.
- |-- fieldData: (Default value "data") => Indicates the data column of GeoTiff DataFrame.
-```
-
-An example:
-
-```scala
-dfToWrite = sparkSession.read.format("geotiff").option("dropInvalid", true).option("readToCRS", "EPSG:4326").load("PATH_TO_INPUT_GEOTIFF_IMAGES")
-dfToWrite = dfToWrite.selectExpr("image.origin as source","ST_GeomFromWkt(image.geometry) as geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands")
-dfToWrite.write.mode("overwrite").format("geotiff").option("writeToCRS", "EPSG:4326").option("fieldOrigin", "source").option("fieldGeometry", "geom").option("fieldNBands", "bands").save("DESTINATION_PATH")
-```
-
-## Write Array[Double] to other formats
-
-### RS_Base64
-
-Introduction: Return a Base64 String from a geotiff image
-
-Format: `RS_Base64 (height:Int, width:Int, redBand: Array[Double], greenBand: Array[Double], blackBand: Array[Double],
-optional: alphaBand: Array[Double])`
-
-Since: `v1.1.0`
-
-Spark SQL example:
-```scala
-val BandDF = spark.sql("select RS_Base64(h, w, band1, band2, RS_Array(h*w, 0)) as baseString from dataframe")
-BandDF.show()
-```
-
-Output:
-
-```html
-+--------------------+
-|          baseString|
-+--------------------+
-|QJCIAAAAAABAkDwAA...|
-|QJOoAAAAAABAlEgAA...|
-+--------------------+
-```
+Since: `v1.5.0`
 
 !!!note
-    Although the 3 RGB bands are mandatory, you can use [RS_Array(h*w, 0.0)](#rs_array) to create an array (zeroed out, size = h * w) as input.
+	The function doesn't support rasters that have any one of the following properties:
+	```
+	ScaleX < 0
+	ScaleY > 0
+	SkewX != 0
+	SkewY != 0
+	```
+	If a raster is provided with anyone of these properties then IllegalArgumentException is thrown.
 
+Spark SQL Example:
 
-### RS_HTML
-
-Introduction: Return a html img tag with the base64 string embedded
-
-Format: `RS_HTML(base64:String, optional: width_in_px:String)`
-
-Spark SQL example:
-
-```scala
-df.selectExpr("RS_HTML(encodedstring, '300') as htmlstring" ).show()
+```sql
+SELECT RS_AsRaster(
+		ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))'),
+    	RS_MakeEmptyRaster(2, 255, 255, 3, -215, 2, -2, 0, 0, 4326),
+    	'D', 255.0, 0d
+	)
 ```
 
 Output:
 
-```html
-+--------------------+
-|          htmlstring|
-+--------------------+
-|<img src="data:im...|
-|<img src="data:im...|
-+--------------------+
+```
+GridCoverage2D["g...
+```
+
+Spark SQL Example:
+
+```sql
+SELECT RS_AsRaster(
+		ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))'),
+    	RS_MakeEmptyRaster(2, 255, 255, 3, -215, 2, -2, 0, 0, 4326),
+    	'D'
+	)
+```
+
+Output:
+
+```
+GridCoverage2D["g...
 ```

@@ -1,0 +1,54 @@
+name: Docker build
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'docker/**'
+  pull_request:
+    branches:
+      - '*'
+    paths:
+      - 'docker/**'
+env:
+  MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
+      
+jobs:
+  build:
+    strategy:
+      fail-fast: true
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest']
+        include:
+          - spark: 3.4.1
+            sedona: 1.4.1
+          - spark: 3.4.1
+            sedona: latest
+          - spark: 3.3.2
+            sedona: latest
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    - name: Setup docker (missing on MacOS)
+      if: runner.os == 'macos'
+      run: |
+        brew install docker
+        colima start
+    - env:
+        SPARK_VERSION: ${{ matrix.spark }}
+        SEDONA_VERSION: ${{ matrix.sedona }}
+      run: ./docker/sedona-spark-jupyterlab/build.sh ${SPARK_VERSION} ${SEDONA_VERSION}

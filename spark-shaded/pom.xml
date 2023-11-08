@@ -22,7 +22,7 @@
     <parent>
         <artifactId>sedona-parent</artifactId>
         <groupId>org.apache.sedona</groupId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.5.1-SNAPSHOT</version>
     </parent>
     <artifactId>sedona-spark-shaded-${spark.compat.version}_${scala.compat.version}</artifactId>
 
@@ -51,17 +51,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.sedona</groupId>
-            <artifactId>sedona-core-${spark.compat.version}_${scala.compat.version}</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sedona</groupId>
-            <artifactId>sedona-sql-${spark.compat.version}_${scala.compat.version}</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sedona</groupId>
-            <artifactId>sedona-python-adapter-${spark.compat.version}_${scala.compat.version}</artifactId>
+            <artifactId>sedona-spark-${spark.compat.version}_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!-- Define this to be shaded since it is provided in other modules -->
@@ -88,6 +78,10 @@
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
+            <artifactId>gt-process-feature</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
             <artifactId>gt-arcgrid</artifactId>
         </dependency>
         <dependency>
@@ -100,7 +94,7 @@
         <plugins>
             <plugin>
                 <!-- Skip running resolved-pom-maven-plugin since shade will
-                     generate dependency reduced pom which substitudes property
+                     generate dependency reduced pom which substitutes property
                      values. resolved-pom-maven-plugin will break pom
                      installation when working with maven-shade-plugin.  -->
                 <groupId>io.paradoxical</groupId>

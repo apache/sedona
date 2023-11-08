@@ -43,3 +43,27 @@ class GeometryType(UserDefinedType):
     @classmethod
     def scalaUDT(cls):
         return "org.apache.spark.sql.sedona_sql.UDT.GeometryUDT"
+
+
+class RasterType(UserDefinedType):
+
+    @classmethod
+    def sqlType(cls):
+        return BinaryType()
+
+    def serialize(self, obj):
+        raise NotImplementedError("RasterType.serialize is not implemented yet")
+
+    def deserialize(self, datum):
+        raise NotImplementedError("RasterType.deserialize is not implemented yet")
+
+    @classmethod
+    def module(cls):
+        return "sedona.sql.types"
+
+    def needConversion(self):
+        return True
+
+    @classmethod
+    def scalaUDT(cls):
+        return "org.apache.spark.sql.sedona_sql.UDT.RasterUDT"
