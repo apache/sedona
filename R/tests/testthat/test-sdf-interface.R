@@ -36,7 +36,7 @@ test_that("sdf_register() works as expected for Spatial RDDs", {
       
     )
   )
-  expect_equal(pt_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  expect_equal(pt_sdf %>% dbplyr::remote_name(), sdf_name)
   
   pt_sdf %>% collect()
   succeed()
@@ -68,7 +68,7 @@ test_that("sdf_register() works as expected for Spatial RDDs with fieldNames", {
     )
   )
   
-  expect_equal(polygon_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  expect_equal(polygon_sdf %>% dbplyr::remote_name(), sdf_name)
   
   polygon_sdf %>% collect()
   succeed()
@@ -91,7 +91,7 @@ test_that("as.spark.dataframe() works as expected for Spatial RDDs with non-spat
       attr_3 = list(name = "attr_3", type = "StringType")
     )
   )
-  expect_equal(pt_sdf %>% dbplyr::remote_name(), dbplyr::ident(sdf_name))
+  expect_equal(pt_sdf %>% dbplyr::remote_name(), sdf_name)
 
   pt_sdf %>% collect()
   succeed()
