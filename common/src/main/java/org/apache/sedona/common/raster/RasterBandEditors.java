@@ -215,11 +215,11 @@ public class RasterBandEditors {
                     if (isDataTypeIntegral) {
                         int[] pixelValue = rasterData.getPixel(x, y, (int[]) null);
 
-                        resultRaster.setPixel(x, y, pixelValue);
+                        resultRaster.setPixel(x, y, new int[]{pixelValue[band - 1]});
                     } else {
                         double[] pixelValue = rasterData.getPixel(x, y, (double[]) null);
 
-                        resultRaster.setPixel(x, y, pixelValue);
+                        resultRaster.setPixel(x, y, new double[]{pixelValue[band - 1]});
                     }
                 }
             }
