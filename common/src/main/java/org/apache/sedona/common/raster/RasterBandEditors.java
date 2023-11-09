@@ -24,6 +24,7 @@ import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
+import org.geotools.coverage.processing.CoverageProcessor;
 import org.geotools.coverage.processing.operation.Crop;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.locationtech.jts.geom.Geometry;
@@ -40,10 +41,25 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public class RasterBandEditors {
-    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, int bandIndex, double noDataValue) {
+    /**
+     * Adds no-data value to the raster.
+     * @param raster Source raster to add no-data value
+     * @param bandIndex
+     * @param noDataValue
+     * @return
+     */
+    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, int bandIndex, Double noDataValue) {
         RasterUtils.ensureBand(raster, bandIndex);
         Double rasterNoData = RasterBandAccessors.getBandNoDataValue(raster, bandIndex);
-        if ( !(rasterNoData == null) && rasterNoData == noDataValue) {
+
+        // Remove no-Data if it is null
+        if (noDataValue == null) {
+            GridSampleDimension[] sampleDimensions = raster.getSampleDimensions();
+            sampleDimensions [bandIndex - 1] = RasterUtils.removeNoDataValue(sampleDimensions[bandIndex - 1]);
+            return RasterUtils.create(raster.getRenderedImage(), raster.getGridGeometry(), sampleDimensions, null);
+        }
+
+        if ( !(rasterNoData == null) && rasterNoData.equals(noDataValue)) {
             return raster;
         }
         GridSampleDimension[] bands = raster.getSampleDimensions();
@@ -60,7 +76,7 @@ public class RasterBandEditors {
         return RasterUtils.create(raster.getRenderedImage(), gridGeometry2D, bands, null);
     }
 
-    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, double noDataValue) {
+    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, Double noDataValue) {
         return setBandNoDataValue(raster, 1, noDataValue);
     }
 

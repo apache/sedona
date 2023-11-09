@@ -41,13 +41,13 @@ public class RasterBandEditorsTest extends RasterTestBase{
     @Test
     public void testSetBandNoDataValueWithRaster() throws IOException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
-        GridCoverage2D grid = RasterBandEditors.setBandNoDataValue(raster, 1,3);
+        GridCoverage2D grid = RasterBandEditors.setBandNoDataValue(raster, 1,3d);
         double actual = RasterBandAccessors.getBandNoDataValue(grid);
         double expected = 3;
         assertEquals(expected, actual, 0.1d);
         assert(Arrays.equals(MapAlgebra.bandAsArray(raster, 1), MapAlgebra.bandAsArray(grid, 1)));
 
-        grid = RasterBandEditors.setBandNoDataValue(raster, -999);
+        grid = RasterBandEditors.setBandNoDataValue(raster, -999d);
         actual = RasterBandAccessors.getBandNoDataValue(grid);
         expected = -999;
         assertEquals(expected, actual, 0.1d);
@@ -55,9 +55,18 @@ public class RasterBandEditorsTest extends RasterTestBase{
     }
 
     @Test
+    public void testSetBandNoDataValueWithNull() throws IOException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+        GridCoverage2D grid = RasterBandEditors.setBandNoDataValue(raster, 1,null);
+        String actual = Arrays.toString(grid.getSampleDimensions());
+        String expected = "[RenderedSampleDimension[\"PALETTE_INDEX\"]]";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testSetBandNoDataValueWithEmptyRaster() throws FactoryException {
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 20, 20, 0, 0, 8, 8, 0.1, 0.1, 4326);
-        GridCoverage2D grid = RasterBandEditors.setBandNoDataValue(emptyRaster, 1, 999);
+        GridCoverage2D grid = RasterBandEditors.setBandNoDataValue(emptyRaster, 1, 999d);
         double actual = RasterBandAccessors.getBandNoDataValue(grid);
         double expected = 999;
         assertEquals(expected, actual, 0.1d);
@@ -71,8 +80,8 @@ public class RasterBandEditorsTest extends RasterTestBase{
     @Test
     public void testSetBandNoDataValueWithEmptyRasterMultipleBand() throws FactoryException {
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 20, 20, 0, 0, 8, 8, 0.1, 0.1, 0);
-        GridCoverage2D grid = RasterBandEditors.setBandNoDataValue(emptyRaster, -9999);
-        grid = RasterBandEditors.setBandNoDataValue(grid, 2, 444);
+        GridCoverage2D grid = RasterBandEditors.setBandNoDataValue(emptyRaster, -9999d);
+        grid = RasterBandEditors.setBandNoDataValue(grid, 2, 444d);
         assertEquals(-9999, (double) RasterBandAccessors.getBandNoDataValue(grid), 0.1d);
         assertEquals(444, (double) RasterBandAccessors.getBandNoDataValue(grid, 2), 0.1d);
     }
