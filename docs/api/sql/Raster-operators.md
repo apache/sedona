@@ -1291,7 +1291,7 @@ Output:
 
 ### RS_SetBandNoDataValue
 
-Introduction: Sets no data value for given band. If band index not specified then band 1 is assumed. 
+Introduction: This sets the no data value for a specified band in the raster. If the band index is not provided, band 1 is assumed by default. Passing a `null` value for `noDataValue` will remove the no data value and that will ensure all pixels are included in functions rather than excluded as no data.
 
 Format: `RS_SetBandNoDataValue(raster: Raster, bandIndex: Integer = 1, noDataValue: Double)`
 
