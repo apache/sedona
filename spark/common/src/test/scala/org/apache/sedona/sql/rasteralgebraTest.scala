@@ -451,6 +451,9 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val actual = df.selectExpr("RS_BandNoDataValue(RS_SetBandNoDataValue(raster, 1, -999))").first().getDouble(0)
       val expected = -999
       assertEquals(expected, actual, 0.001d)
+
+      val actualNull = df.selectExpr("RS_BandNoDataValue(RS_SetBandNoDataValue(raster, 1, null))").first().get(0)
+      assertNull(actualNull)
     }
 
     it("Passed RS_SetBandNoDataValue with empty raster") {
