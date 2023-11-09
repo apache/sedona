@@ -53,6 +53,9 @@ public class RasterBandEditors {
 
         // Remove no-Data if it is null
         if (noDataValue == null) {
+            if (RasterBandAccessors.getBandNoDataValue(raster) == null) {
+                return raster;
+            }
             GridSampleDimension[] sampleDimensions = raster.getSampleDimensions();
             sampleDimensions [bandIndex - 1] = RasterUtils.removeNoDataValue(sampleDimensions[bandIndex - 1]);
             return RasterUtils.create(raster.getRenderedImage(), raster.getGridGeometry(), sampleDimensions, null);
