@@ -21,6 +21,7 @@ package org.apache.sedona.common.utils;
 import com.sun.media.imageioimpl.common.BogusColorSpace;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.RasterAccessors;
+import org.apache.sedona.common.raster.RasterBandAccessors;
 import org.geotools.coverage.Category;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
@@ -60,6 +61,7 @@ import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Utility functions for working with GridCoverage2D objects.
@@ -78,6 +80,63 @@ public class RasterUtils {
      */
     public static GridCoverage2D create(WritableRaster raster, GridGeometry2D gridGeometry, GridSampleDimension[] bands) {
         return create(raster, gridGeometry, bands, null);
+    }
+
+    public static GridCoverage2D create(WritableRaster raster, GridCoverage2D referenceRaster) {
+        GridSampleDimension[] bands = referenceRaster.getSampleDimensions();
+        Double noDataValue = RasterBandAccessors.getBandNoDataValue(referenceRaster, 1);
+        Map propertyMap = referenceRaster.getProperties();
+        ColorModel originalColorModel = referenceRaster.getRenderedImage().getColorModel();
+        GridGeometry2D gridGeometry = referenceRaster.getGridGeometry();
+        int numBand = raster.getNumBands();
+        int rasterDataType = raster.getDataBuffer().getDataType();
+
+        final ColorSpace cs = new BogusColorSpace(numBand);
+        final int[] nBits = new int[numBand];
+        Arrays.fill(nBits, DataBuffer.getDataTypeSize(rasterDataType));
+        ColorModel colorModel =
+                new ComponentColorModel(cs, nBits, false, true, Transparency.OPAQUE, rasterDataType);
+        if (originalColorModel.isCompatibleRaster(raster)) {
+            colorModel = originalColorModel;
+        }
+        if (noDataValue != null) {
+            GridSampleDimension[] newBands = new GridSampleDimension[numBand];
+            for (int k = 0; k < numBand; k++) {
+                if (bands != null) {
+                    newBands[k] = createSampleDimensionWithNoDataValue(bands[k], noDataValue);
+                } else {
+                    newBands[k] = createSampleDimensionWithNoDataValue("band_" + k, noDataValue);
+                }
+            }
+            bands = newBands;
+        }
+
+        GridCoverage2D[] referenceRasterSources = referenceRaster.getSources().toArray(new GridCoverage2D[0]);
+
+        final RenderedImage image = new BufferedImage(colorModel, raster, false, null);
+        return gridCoverageFactory.create(referenceRaster.getName(), image, gridGeometry, bands, referenceRasterSources, propertyMap);
+
+    }
+
+    public static GridCoverage2D create(RenderedImage image, GridCoverage2D referenceRaster) {
+        int numBand = image.getSampleModel().getNumBands();
+        Double noDataValue = RasterBandAccessors.getBandNoDataValue(referenceRaster, 1);
+        GridSampleDimension[] bands = referenceRaster.getSampleDimensions();
+        GridGeometry2D gridGeometry = referenceRaster.getGridGeometry();
+        if (noDataValue != null) {
+            GridSampleDimension[] newBands = new GridSampleDimension[numBand];
+            for (int k = 0; k < numBand; k++) {
+                if (bands != null) {
+                    newBands[k] = createSampleDimensionWithNoDataValue(bands[k], noDataValue);
+                } else {
+                    newBands[k] = createSampleDimensionWithNoDataValue("band_" + k, noDataValue);
+                }
+            }
+            bands = newBands;
+        }
+        GridCoverage2D[] referenceRasterSources = referenceRaster.getSources().toArray(new GridCoverage2D[0]);
+        Map propertyMap = referenceRaster.getProperties();
+        return gridCoverageFactory.create(referenceRaster.getName(), image, gridGeometry, bands, referenceRasterSources, propertyMap);
     }
 
     /**
