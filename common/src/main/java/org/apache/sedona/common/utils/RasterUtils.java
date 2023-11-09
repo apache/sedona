@@ -58,10 +58,7 @@ import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Utility functions for working with GridCoverage2D objects.
@@ -91,7 +88,7 @@ public class RasterUtils {
      */
     public static GridCoverage2D create(WritableRaster raster, GridCoverage2D referenceRaster, Double noDataValue) {
         GridSampleDimension[] bands = referenceRaster.getSampleDimensions();
-        if (Double.isNaN(noDataValue)) {
+        if (Objects.isNull(noDataValue)) {
             noDataValue = RasterBandAccessors.getBandNoDataValue(referenceRaster, 1); //resort to using noDataValue of the original raster.
         }
         Map propertyMap = referenceRaster.getProperties();
@@ -136,7 +133,7 @@ public class RasterUtils {
      */
     public static GridCoverage2D create(RenderedImage image, GridCoverage2D referenceRaster, Double noDataValue) {
         int numBand = image.getSampleModel().getNumBands();
-        if (Double.isNaN(noDataValue)) {
+        if (Objects.isNull(noDataValue)) {
             noDataValue = RasterBandAccessors.getBandNoDataValue(referenceRaster, 1); //resort to using noDataValue of the original raster.
         }
         GridSampleDimension[] bands = referenceRaster.getSampleDimensions();
