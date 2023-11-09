@@ -82,9 +82,18 @@ public class RasterUtils {
         return create(raster, gridGeometry, bands, null);
     }
 
-    public static GridCoverage2D create(WritableRaster raster, GridCoverage2D referenceRaster) {
+    /**
+     * Create a new raster, cloning all metadata from the passed reference raster.
+     * @param raster The raster object to be wrapped as an image.
+     * @param referenceRaster The reference raster to clone, all metadata is cloned
+     * @param noDataValue Optionally, a new noDataValue, if passed null, noDataVal of the reference raster is used.
+     * @return cloned raster
+     */
+    public static GridCoverage2D create(WritableRaster raster, GridCoverage2D referenceRaster, Double noDataValue) {
         GridSampleDimension[] bands = referenceRaster.getSampleDimensions();
-        Double noDataValue = RasterBandAccessors.getBandNoDataValue(referenceRaster, 1);
+        if (Double.isNaN(noDataValue)) {
+            noDataValue = RasterBandAccessors.getBandNoDataValue(referenceRaster, 1); //resort to using noDataValue of the original raster.
+        }
         Map propertyMap = referenceRaster.getProperties();
         ColorModel originalColorModel = referenceRaster.getRenderedImage().getColorModel();
         GridGeometry2D gridGeometry = referenceRaster.getGridGeometry();
@@ -118,9 +127,18 @@ public class RasterUtils {
 
     }
 
-    public static GridCoverage2D create(RenderedImage image, GridCoverage2D referenceRaster) {
+    /**
+     * Create a new raster, cloning all metadata from the passed reference raster.
+     * @param image The RenderedImage to be used as data for the created GridCoverage2D
+     * @param referenceRaster The reference raster to clone, all metadata is cloned
+     * @param noDataValue Optionally, a new noDataValue, if passed null, noDataVal of the reference raster is used.
+     * @return cloned raster
+     */
+    public static GridCoverage2D create(RenderedImage image, GridCoverage2D referenceRaster, Double noDataValue) {
         int numBand = image.getSampleModel().getNumBands();
-        Double noDataValue = RasterBandAccessors.getBandNoDataValue(referenceRaster, 1);
+        if (Double.isNaN(noDataValue)) {
+            noDataValue = RasterBandAccessors.getBandNoDataValue(referenceRaster, 1); //resort to using noDataValue of the original raster.
+        }
         GridSampleDimension[] bands = referenceRaster.getSampleDimensions();
         GridGeometry2D gridGeometry = referenceRaster.getGridGeometry();
         if (noDataValue != null) {
