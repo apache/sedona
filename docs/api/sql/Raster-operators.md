@@ -1069,8 +1069,6 @@ Introduction: Returns a raster that is clipped by the given geometry.
 
 If `crop` is not specified then it will default to `true`, meaning it will make the resulting raster shrink to the geometry's extent and if `noDataValue` is not specified then the resulting raster will have the minimum possible value for the band pixel data type.
 
-!!!note
-    When `crop` is `true`, no new raster is created - instead a viewpoint to the source raster is returned, and when `false`, a new raster is generated.
 
 Format:
 

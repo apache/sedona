@@ -244,7 +244,10 @@ public class RasterBandEditors {
                     }
                 }
             }
-            newRaster = RasterUtils.create(resultRaster, raster.getGridGeometry(), newRaster.getSampleDimensions());
+            newRaster = RasterUtils.create(resultRaster, raster.getGridGeometry(), newRaster.getSampleDimensions(), noDataValue);
+        } else {
+            // to add no-data value
+            newRaster = RasterUtils.create(newRaster.getRenderedImage(), newRaster.getGridGeometry(), newRaster.getSampleDimensions(), noDataValue);
         }
 
         return newRaster;

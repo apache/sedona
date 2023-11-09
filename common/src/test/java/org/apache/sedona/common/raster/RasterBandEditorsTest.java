@@ -33,8 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class RasterBandEditorsTest extends RasterTestBase{
 
@@ -98,7 +97,7 @@ public class RasterBandEditorsTest extends RasterTestBase{
         assertArrayEquals(originalMetadata, clippedMetadata, 0.01d);
 
         String actual = String.valueOf(clippedRaster.getSampleDimensions()[0]);
-        String expected = String.valueOf(raster.getSampleDimensions()[0]);
+        String expected = "RenderedSampleDimension(\"RED_BAND\":[200.0 ... 200.0])\n  ‣ Category(\"No data\":[200...200])\n";
         assertEquals(expected, actual);
 
         List<Geometry> points = new ArrayList<>();
@@ -107,9 +106,9 @@ public class RasterBandEditorsTest extends RasterTestBase{
         points.add(Constructors.geomFromWKT("POINT(237201 4.20429e+06)", 26918));
         points.add(Constructors.geomFromWKT("POINT(237919 4.20357e+06)", 26918));
         points.add(Constructors.geomFromWKT("POINT(254668 4.21769e+06)", 26918));
-        double[] actualValues = PixelFunctions.values(clippedRaster, points, 1).stream().mapToDouble(d -> d).toArray();
-        double[] expectedValues = new double[] {200.0, 200.0, 0.0, 0.0, 200.0};
-        assertArrayEquals(expectedValues, actualValues, 0.001d);
+        Double[] actualValues = PixelFunctions.values(clippedRaster, points, 1).toArray(new Double[0]);
+        Double[] expectedValues = new Double[] {null, null, 0.0, 0.0, null};
+        assertTrue(Arrays.equals(expectedValues, actualValues));
 
         GridCoverage2D croppedRaster = RasterBandEditors.clip(raster, 1, geom, 200, true);
         points = new ArrayList<>();
@@ -118,9 +117,9 @@ public class RasterBandEditorsTest extends RasterTestBase{
         points.add(Constructors.geomFromWKT("POINT(237201 4.20429e+06)", 26918));
         points.add(Constructors.geomFromWKT("POINT(237919 4.20357e+06)", 26918));
         points.add(Constructors.geomFromWKT("POINT(223802 4.20465e+06)", 26918));
-        actualValues = PixelFunctions.values(croppedRaster, points, 1).stream().mapToDouble(d -> d).toArray();
-        expectedValues = new double[] {0.0, 0.0, 0.0, 0.0, 200.0};
-        assertArrayEquals(expectedValues, actualValues, 0.001d);
+        actualValues = PixelFunctions.values(croppedRaster, points, 1).toArray(new Double[0]);
+        expectedValues = new Double[] {0.0, 0.0, 0.0, 0.0, null};
+        assertTrue(Arrays.equals(expectedValues, actualValues));
     }
 
     @Test

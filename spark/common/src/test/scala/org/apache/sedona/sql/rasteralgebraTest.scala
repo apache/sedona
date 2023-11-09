@@ -543,7 +543,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           "ST_GeomFromWKT('POINT(237201 4.20429e+06)'),ST_GeomFromWKT('POINT(237919 4.20357e+06)')," +
           "ST_GeomFromWKT('POINT(254668 4.21769e+06)')), 1)"
       ).first().get(0)
-      var expectedValues = Seq(200.0, 200.0, 0.0, 0.0, 200.0)
+      var expectedValues = Seq(null, null, 0.0, 0.0, null)
       assertTrue(expectedValues.equals(actualValues))
 
       val croppedDf = df.selectExpr("RS_Clip(raster, 1, geom, 200, false) as cropped")
@@ -553,7 +553,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       "ST_GeomFromWKT('POINT(237201 4.20429e+06)'),ST_GeomFromWKT('POINT(237919 4.20357e+06)')," +
       "ST_GeomFromWKT('POINT(223802 4.20465e+06)')), 1)"
       ).first().get(0)
-      expectedValues = Seq(0.0, 0.0, 0.0, 0.0, 200.0)
+      expectedValues = Seq(0.0, 0.0, 0.0, 0.0, null)
       assertTrue(expectedValues.equals(actualValues))
 
     }
