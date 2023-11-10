@@ -1,5 +1,5 @@
 pandas==1.3.5
-fiona==1.8.22
+fiona==1.9.5
 geopandas==0.11.1
 keplergl==0.3.2
 pydeck==0.8.0
