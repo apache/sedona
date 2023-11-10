@@ -7,6 +7,6 @@ attrs
 matplotlib
 descartes
 ipywidgets
-jupyterlab-widgets==1.1.7
+jupyterlab-widgets==3.0.9
 ipykernel
 jupyterlab==3.6.4
