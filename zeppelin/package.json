@@ -17,7 +17,7 @@
   "license": "BSD-2-Clause",
   "dependencies": {
     "jsts": "^1.6.2",
-    "leaflet": "~1.4.0",
+    "leaflet": "~1.9.4",
     "zeppelin-tabledata": "*",
     "zeppelin-vis": "*"
   },
