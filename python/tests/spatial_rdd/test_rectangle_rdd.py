@@ -101,4 +101,3 @@ class TestRectangleRDD(TestBase):
         spatial_rdd.analyze()
 
         spatial_rdd.buildIndex(IndexType.RTREE, False)
-
