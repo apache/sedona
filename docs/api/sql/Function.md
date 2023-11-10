@@ -744,7 +744,7 @@ Result:
 
 ## ST_ConcaveHull
 
-Introduction: Return the Concave Hull of polgyon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
+Introduction: Return the Concave Hull of polygon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
 
 Format: 
 
@@ -768,7 +768,7 @@ POLYGON ((125 100, 20 40, 50 60, 175 150, 125 100))
 
 ## ST_ConvexHull
 
-Introduction: Return the Convex Hull of polgyon A
+Introduction: Return the Convex Hull of polygon A
 
 Format: `ST_ConvexHull (A: Geometry)`
 
@@ -1024,7 +1024,7 @@ POINT(160 170)
 
 ## ST_Envelope
 
-Introduction: Return the envelop boundary of A
+Introduction: Return the envelope boundary of A
 
 Format: `ST_Envelope (A: Geometry)`
 
@@ -1812,7 +1812,7 @@ POLYGON ((7 -1, 7 6, 9 6, 9 1, 7 -1), (6 2, 8 2, 8 1, 6 1, 6 2))
 
 Introduction: Given an invalid geometry, create a valid representation of the geometry.
 
-Collapsed geometries are either converted to empty (keepCollaped=true) or a valid geometry of lower dimension (keepCollapsed=false).
+Collapsed geometries are either converted to empty (keepCollapsed=true) or a valid geometry of lower dimension (keepCollapsed=false).
 Default is keepCollapsed=false.
 
 Format: 
