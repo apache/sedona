@@ -1069,8 +1069,6 @@ Introduction: Returns a raster that is clipped by the given geometry.
 
 If `crop` is not specified then it will default to `true`, meaning it will make the resulting raster shrink to the geometry's extent and if `noDataValue` is not specified then the resulting raster will have the minimum possible value for the band pixel data type.
 
-!!!note
-    When `crop` is `true`, no new raster is created - instead a viewpoint to the source raster is returned, and when `false`, a new raster is generated.
 
 Format:
 
@@ -1291,7 +1289,7 @@ Output:
 
 ### RS_SetBandNoDataValue
 
-Introduction: Sets no data value for given band. If band index not specified then band 1 is assumed. 
+Introduction: This sets the no data value for a specified band in the raster. If the band index is not provided, band 1 is assumed by default. Passing a `null` value for `noDataValue` will remove the no data value and that will ensure all pixels are included in functions rather than excluded as no data.
 
 Format: `RS_SetBandNoDataValue(raster: Raster, bandIndex: Integer = 1, noDataValue: Double)`
 
