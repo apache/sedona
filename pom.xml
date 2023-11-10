@@ -676,7 +676,7 @@
                 <activeByDefault>false</activeByDefault>
             </activation>
             <properties>
-                <scala.version>2.13.8</scala.version>
+                <scala.version>2.13.12</scala.version>
                 <scala.compat.version>2.13</scala.compat.version>
                 <scaladoc.arg>-no-java-comments</scaladoc.arg>
                 <!-- Skip deploying parent module for Scala 2.13 profile, it will be deployed with 2.12 -->
