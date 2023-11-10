@@ -46,7 +46,7 @@ jobs:
     - run: mike deploy --update-aliases current-snapshot
     - run: mkdir staging
     - run: cp -r site/* staging/
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: generated-docs
         path: staging
