@@ -91,4 +91,3 @@ class TestSpatialRDDToDataFrame(TestBase):
         spatial_rdd_with_schema.show()
 
         assert spatial_rdd_with_schema.take(1)[0][0].wkt == "POINT (32.324142 -88.331492)"
-

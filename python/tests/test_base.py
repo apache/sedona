@@ -33,4 +33,3 @@ class TestBase:
         if not hasattr(self, "__spark"):
             setattr(self, "__sc", self.spark._sc)
         return getattr(self, "__sc")
-

@@ -55,4 +55,3 @@ class TestDirectSerialization(TestBase):
         linestring = loads(wkt)
         jvm_geom = GeometryAdapter.create_jvm_geometry_from_base_geometry(self.sc._jvm, linestring)
         assert jvm_geom.toString() == wkt
-
