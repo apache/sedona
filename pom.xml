@@ -67,7 +67,7 @@
         <maven.deploy.skip>${skip.deploy.common.modules}</maven.deploy.skip>
         <maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version>
 
-        <cdm.version>5.4.2</cdm.version>
+        <cdm.version>5.5.3</cdm.version>
         <geotools.version>28.2</geotools.version>
         <hadoop.version>3.2.4</hadoop.version>
         <jackson.version>2.13.4</jackson.version>
