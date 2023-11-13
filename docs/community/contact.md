@@ -15,7 +15,7 @@ You can participate in the community as follows:
 
 ## Discord Server
 
-[Join Apache Sedona community server](discord-invite-form.html)!
+[Join Apache Sedona community server](./discord-invite-form.html)!
 
 ## Mailing list
 
