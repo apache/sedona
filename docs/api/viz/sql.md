@@ -2,7 +2,7 @@
 
 The detailed explanation is here: [Visualize Spatial DataFrame/RDD](../../tutorial/viz.md).
 
-1. Add Sedona-core, Sedona-SQL,Sedona-Viz into your project POM.xml or build.sbt
+1. Add Sedona-core, Sedona-SQL, Sedona-Viz into your project pom.xml or build.sbt
 2. Declare your Spark Session
 ```scala
 sparkSession = SparkSession.builder().
