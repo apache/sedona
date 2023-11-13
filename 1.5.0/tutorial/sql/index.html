@@ -81,9 +81,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-  You're not viewing the latest snapshot version.
+  You're not viewing the latest stable version.
   <a href="../../.."> 
-    <strong>Click here to go to the latest snapshot.</strong>
+    <strong>Click here to go to the latest stable version.</strong>
   </a>
 
             </div>
@@ -1173,151 +1173,121 @@
       </a>
       
         
-<nav class="md-nav md-nav--secondary" aria-label="toc.title">
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
   
   
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      
-        toc.title
-      
+      Table of contents
     </label>
-    <ul class="md-nav__list" data-md-scrollfix>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  
   <a href="#set-up-dependencies" class="md-nav__link">
     Set up dependencies
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#create-sedona-config" class="md-nav__link">
     Create Sedona config
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#initiate-sedonacontext" class="md-nav__link">
     Initiate SedonaContext
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#load-data-from-files" class="md-nav__link">
     Load data from files
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#create-a-geometry-type-column" class="md-nav__link">
     Create a Geometry type column
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#load-geojson-using-spark-json-data-source" class="md-nav__link">
     Load GeoJSON using Spark JSON Data Source
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#load-shapefile-and-geojson-using-spatialrdd" class="md-nav__link">
     Load Shapefile and GeoJSON using SpatialRDD
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#load-geoparquet" class="md-nav__link">
     Load GeoParquet
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#load-data-from-jdbc-data-sources" class="md-nav__link">
     Load data from JDBC data sources
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#transform-the-coordinate-reference-system" class="md-nav__link">
     Transform the Coordinate Reference System
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#run-spatial-queries" class="md-nav__link">
     Run spatial queries
-  </a>  
-  
+  </a>
   
     <nav class="md-nav" aria-label="Run spatial queries">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  
   <a href="#range-query" class="md-nav__link">
     Range query
-  </a>  
-  
+  </a>
   
 </li>
         
           <li class="md-nav__item">
-  
   <a href="#knn-query" class="md-nav__link">
     KNN query
-  </a>  
-  
+  </a>
   
 </li>
         
           <li class="md-nav__item">
-  
   <a href="#join-query" class="md-nav__link">
     Join query
-  </a>  
-  
+  </a>
   
 </li>
         
           <li class="md-nav__item">
-  
   <a href="#other-queries" class="md-nav__link">
     Other queries
-  </a>  
-  
+  </a>
   
 </li>
         
@@ -1327,30 +1297,24 @@
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#visualize-query-results" class="md-nav__link">
     Visualize query results
-  </a>  
-  
+  </a>
   
     <nav class="md-nav" aria-label="Visualize query results">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  
   <a href="#sedonapydeck" class="md-nav__link">
     SedonaPyDeck
-  </a>  
-  
+  </a>
   
 </li>
         
           <li class="md-nav__item">
-  
   <a href="#sedonakepler" class="md-nav__link">
     SedonaKepler
-  </a>  
-  
+  </a>
   
 </li>
         
@@ -1360,75 +1324,59 @@
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#save-to-permanent-storage" class="md-nav__link">
     Save to permanent storage
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#save-geoparquet" class="md-nav__link">
     Save GeoParquet
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#sort-then-save-geoparquet" class="md-nav__link">
     Sort then Save GeoParquet
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#save-to-postgis" class="md-nav__link">
     Save to Postgis
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#convert-between-dataframe-and-spatialrdd" class="md-nav__link">
     Convert between DataFrame and SpatialRDD
-  </a>  
-  
+  </a>
   
     <nav class="md-nav" aria-label="Convert between DataFrame and SpatialRDD">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  
   <a href="#dataframe-to-spatialrdd" class="md-nav__link">
     DataFrame to SpatialRDD
-  </a>  
-  
+  </a>
   
 </li>
         
           <li class="md-nav__item">
-  
   <a href="#spatialrdd-to-dataframe" class="md-nav__link">
     SpatialRDD to DataFrame
-  </a>  
-  
+  </a>
   
 </li>
         
           <li class="md-nav__item">
-  
   <a href="#spatialpairrdd-to-dataframe" class="md-nav__link">
     SpatialPairRDD to DataFrame
-  </a>  
-  
+  </a>
   
 </li>
         
@@ -2180,6 +2128,88 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1_1_2_7" >
+        
+          <label class="md-nav__link" for="__nav_5_1_1_2_7" id="__nav_5_1_1_2_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Visualization
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_5_1_1_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_1_1_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            Visualization
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Visualization_SedonaPyDeck/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SedonaPyDeck
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Visualization_SedonaKepler/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SedonaKepler
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -3325,151 +3355,121 @@
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
-<nav class="md-nav md-nav--secondary" aria-label="toc.title">
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
   
   
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      
-        toc.title
-      
+      Table of contents
     </label>
-    <ul class="md-nav__list" data-md-scrollfix>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  
   <a href="#set-up-dependencies" class="md-nav__link">
     Set up dependencies
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#create-sedona-config" class="md-nav__link">
     Create Sedona config
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#initiate-sedonacontext" class="md-nav__link">
     Initiate SedonaContext
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#load-data-from-files" class="md-nav__link">
     Load data from files
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#create-a-geometry-type-column" class="md-nav__link">
     Create a Geometry type column
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#load-geojson-using-spark-json-data-source" class="md-nav__link">
     Load GeoJSON using Spark JSON Data Source
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#load-shapefile-and-geojson-using-spatialrdd" class="md-nav__link">
     Load Shapefile and GeoJSON using SpatialRDD
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#load-geoparquet" class="md-nav__link">
     Load GeoParquet
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#load-data-from-jdbc-data-sources" class="md-nav__link">
     Load data from JDBC data sources
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#transform-the-coordinate-reference-system" class="md-nav__link">
     Transform the Coordinate Reference System
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#run-spatial-queries" class="md-nav__link">
     Run spatial queries
-  </a>  
-  
+  </a>
   
     <nav class="md-nav" aria-label="Run spatial queries">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  
   <a href="#range-query" class="md-nav__link">
     Range query
-  </a>  
-  
+  </a>
   
 </li>
         
           <li class="md-nav__item">
-  
   <a href="#knn-query" class="md-nav__link">
     KNN query
-  </a>  
-  
+  </a>
   
 </li>
         
           <li class="md-nav__item">
-  
   <a href="#join-query" class="md-nav__link">
     Join query
-  </a>  
-  
+  </a>
   
 </li>
         
           <li class="md-nav__item">
-  
   <a href="#other-queries" class="md-nav__link">
     Other queries
-  </a>  
-  
+  </a>
   
 </li>
         
@@ -3479,30 +3479,24 @@
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#visualize-query-results" class="md-nav__link">
     Visualize query results
-  </a>  
-  
+  </a>
   
     <nav class="md-nav" aria-label="Visualize query results">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  
   <a href="#sedonapydeck" class="md-nav__link">
     SedonaPyDeck
-  </a>  
-  
+  </a>
   
 </li>
         
           <li class="md-nav__item">
-  
   <a href="#sedonakepler" class="md-nav__link">
     SedonaKepler
-  </a>  
-  
+  </a>
   
 </li>
         
@@ -3512,75 +3506,59 @@
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#save-to-permanent-storage" class="md-nav__link">
     Save to permanent storage
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#save-geoparquet" class="md-nav__link">
     Save GeoParquet
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#sort-then-save-geoparquet" class="md-nav__link">
     Sort then Save GeoParquet
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#save-to-postgis" class="md-nav__link">
     Save to Postgis
-  </a>  
-  
+  </a>
   
 </li>
       
         <li class="md-nav__item">
-  
   <a href="#convert-between-dataframe-and-spatialrdd" class="md-nav__link">
     Convert between DataFrame and SpatialRDD
-  </a>  
-  
+  </a>
   
     <nav class="md-nav" aria-label="Convert between DataFrame and SpatialRDD">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  
   <a href="#dataframe-to-spatialrdd" class="md-nav__link">
     DataFrame to SpatialRDD
-  </a>  
-  
+  </a>
   
 </li>
         
           <li class="md-nav__item">
-  
   <a href="#spatialrdd-to-dataframe" class="md-nav__link">
     SpatialRDD to DataFrame
-  </a>  
-  
+  </a>
   
 </li>
         
           <li class="md-nav__item">
-  
   <a href="#spatialpairrdd-to-dataframe" class="md-nav__link">
     SpatialPairRDD to DataFrame
-  </a>  
-  
+  </a>
   
 </li>
         
@@ -4041,7 +4019,7 @@ For Postgis there is no need to add a query to convert geometry types since it's
 <p>Both SedonaPyDeck and SedonaKepler are designed to work with SedonaDataFrames containing only 1 geometry column. Passing dataframes with multiple geometry columns will cause errors.</p>
 </div>
 <h3 id="sedonapydeck">SedonaPyDeck<a class="headerlink" href="#sedonapydeck" title="Permanent link">&para;</a></h3>
-<p>Spatial query results can be visualized in Jupyter lab/notebook using SedonaPyDeck.</p>
+<p>Spatial query results can be visualized in a Jupyter lab/notebook environment using SedonaPyDeck.</p>
 <p>SedonaPyDeck exposes APIs to create interactive map visualizations using <a href="https://pydeck.gl/index.html#">pydeck</a> based on <a href="https://deck.gl/">deck.gl</a></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -4051,59 +4029,46 @@ pip install &#39;geopandas&lt;=0.10.2&#39;
 pip install pydeck==0.8.0
 </code></pre></div></p>
 </div>
+<p>The following tutorial showcases the various maps that can be created using SedonaPyDeck, the datasets used to create these maps are publicly available.</p>
+<p>Each API exposed by SedonaPyDeck offers customization via optional arguments, details on all possible arguments can be found in the <a href="../../api/sql/Visualization_SedonaPyDeck">API docs of SedonaPyDeck</a>.</p>
 <h4 id="creating-a-choropleth-map-using-sedonapydeck">Creating a Choropleth map using SedonaPyDeck<a class="headerlink" href="#creating-a-choropleth-map-using-sedonapydeck" title="Permanent link">&para;</a></h4>
-<p>SedonaPyDeck exposes a create_choropleth_map API which can be used to visualize a choropleth map out of the passed SedonaDataFrame containing polygons with an observation:</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_choropleth_map</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                          <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">elevation_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<p>SedonaPyDeck exposes a <code>create_choropleth_map</code> API which can be used to visualize a choropleth map out of the passed SedonaDataFrame containing polygons with an observation:</p>
+<p>Example (referenced from example notebook available via binder):</p>
+<div class="highlight"><pre><span></span><code><span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">create_choropleth_map</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">groupedresult</span><span class="p">,</span> <span class="n">plot_col</span><span class="o">=</span><span class="s1">&#39;AirportCount&#39;</span><span class="p">)</span>
 </code></pre></div>
-<p>The parameter <code>fill_color</code> can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.</p>
-<p>For example, all these are valid values of fill_color:
-<div class="highlight"><pre><span></span><code><span class="n">fill_color</span><span class="o">=</span><span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">250</span><span class="p">]</span>
-<span class="n">fill_color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">255</span><span class="p">]</span>
-<span class="n">fill_color</span><span class="o">=</span><span class="s1">&#39;[0, 12, 240, AirportCount * 10]&#39;</span> <span class="c1">## AirportCount is a column in the passed df</span>
-</code></pre></div></p>
-<p>Instead of giving a <code>fill_color</code> parameter, a 'plot_col' can be passed which specifies the column to decide the choropleth. 
-SedonaPyDeck then creates a default color scheme based on the values of the column passed.</p>
-<p>The parameter <code>elevation_col</code> can be given a numeric or a string value (containing the column with/without operations on it) to set a 3D elevation to the plotted polygons if any.</p>
-<p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code> can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the pydeck website.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>plot_col</code> is a required argument informing SedonaPyDeck of the column name used to render the choropleth effect.</p>
+</div>
+<p><img src="../../image/choropleth.gif" width="1000"></p>
+<p>The dataset used is available <a href="https://github.com/apache/sedona/tree/4c5fa8333b2c61850d5664b878df9493c7915066/binder/data/ne_50m_airports">here</a> and
+can also be found in the example notebook available <a href="https://github.com/apache/sedona/blob/4c5fa8333b2c61850d5664b878df9493c7915066/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb">here</a></p>
 <h4 id="creating-a-geometry-map-using-sedonapydeck">Creating a Geometry map using SedonaPyDeck<a class="headerlink" href="#creating-a-geometry-map-using-sedonapydeck" title="Permanent link">&para;</a></h4>
 <p>SedonaPyDeck exposes a create_geometry_map API which can be used to visualize a passed SedonaDataFrame containing any type of geometries:</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_geometry_map</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[85, 183, 177, 255]&quot;</span><span class="p">,</span> <span class="n">line_color</span><span class="o">=</span><span class="s2">&quot;[85, 183, 177, 255]&quot;</span><span class="p">,</span>
-                        <span class="n">elevation_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<p>Example (referenced from overture notebook available via binder):</p>
+<div class="highlight"><pre><span></span><code><span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">create_geometry_map</span><span class="p">(</span><span class="n">df_building</span><span class="p">,</span> <span class="n">elevation_col</span><span class="o">=</span><span class="s1">&#39;height&#39;</span><span class="p">)</span>
 </code></pre></div>
-<p>The parameter <code>fill_color</code> can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color polygons or point geometries in the map</p>
-<p>The parameter <code>line_color</code> can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color the line geometries in the map.</p>
-<p>The parameter <code>elevation_col</code> can be given a static elevation or elevation based on column values like <code>fill_color</code>, this only works for the polygon geometries in the map.</p>
-<p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code> can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the pydeck website as well by deck.gl <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/geojson-layer.md">here</a></p>
+<p><img src="../../image/buildings.gif" width="1000"></p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><code>elevation_col</code> is an optional argument which can be used to render a 3D map. Pass the column with 'elevation' values for the geometries here.</p>
+</div>
 <h4 id="creating-a-scatterplot-map-using-sedonapydeck">Creating a Scatterplot map using SedonaPyDeck<a class="headerlink" href="#creating-a-scatterplot-map-using-sedonapydeck" title="Permanent link">&para;</a></h4>
 <p>SedonaPyDeck exposes a create_scatterplot_map API which can be used to visualize a scatterplot out of the passed SedonaDataFrame containing points:</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_scatterplot_map</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[255, 140, 0]&quot;</span><span class="p">,</span> <span class="n">radius_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">radius_min_pixels</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">radius_max_pixels</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">radius_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">create_scatterplot_map</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">crimes_df</span><span class="p">)</span>
 </code></pre></div>
-<p>The parameter <code>fill_color</code> can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.</p>
-<p>The parameter <code>radius_col</code> can be given a numeric value or a string value consisting of any operations on the column, in order to specify the radius of the plotted point.</p>
-<p>The parameter <code>radius_min_pixels</code> can be given a numeric value that would set the minimum radius in pixels. This can be used to prevent the plotted circle from getting too small when zoomed out.</p>
-<p>The parameter <code>radius_max_pixels</code> can be given a numeric value that would set the maximum radius in pixels. This can be used to prevent the circle from getting too big when zoomed in.</p>
-<p>The parameter <code>radius_scale</code> can be given a numeric value that sets a global radius multiplier for all points. </p>
-<p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code> can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the pydeck website as well by deck.gl <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/scatterplot-layer.md">here</a></p>
+<p><img src="../../image/points.gif" width="1000"></p>
+<p>The dataset used here is the Chicago crimes dataset, available <a href="https://github.com/apache/sedona/blob/sedona-1.5.0/spark/common/src/test/resources/Chicago_Crimes.csv">here</a></p>
 <h4 id="creating-a-heatmap-using-sedonapydeck">Creating a heatmap using SedonaPyDeck<a class="headerlink" href="#creating-a-heatmap-using-sedonapydeck" title="Permanent link">&para;</a></h4>
-<p>SedonaPyDeck exposes a create_heatmap API which can be used to visualize a heatmap out of the passed SedonaDataFrame containing points:
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_heatmap</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">color_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">aggregation</span><span class="o">=</span><span class="s2">&quot;SUM&quot;</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                   <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<p>SedonaPyDeck exposes a create_heatmap API which can be used to visualize a heatmap out of the passed SedonaDataFrame containing points:</p>
+<p>Example:
+<div class="highlight"><pre><span></span><code><span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">create_heatmap</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">crimes_df</span><span class="p">)</span>
 </code></pre></div></p>
-<p>The parameter <code>color_range</code> can be optionally given a list of RGB values, SedonaPyDeck by default uses <code>6-class YlOrRd</code> as color_range.
-More examples can be found on <a href="https://colorbrewer2.org/#type=sequential&amp;scheme=YlOrRd&amp;n=6">colorbrewer</a></p>
-<p>The parameter <code>weight</code> can be given a numeric value or a string with column and operations on it to determine weight of each point while plotting a heatmap.
-By default, SedonaPyDeck assigns a weight of 1 to each point</p>
-<p>The parameter <code>aggregation</code> can be used to define aggregation strategy to use when aggregating heatmap to a lower resolution (zooming out). 
-One of "MEAN" or "SUM" can be provided. By default, SedonaPyDeck uses "MEAN" as the aggregation strategy.</p>
-<p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code> can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the pydeck website as well by deck.gl <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/aggregation-layers/heatmap-layer.md">here</a></p>
+<p><img src="../../image/heatmap.gif" width="1000"></p>
+<p>The dataset used here is the Chicago crimes dataset, available <a href="https://github.com/apache/sedona/blob/sedona-1.5.0/spark/common/src/test/resources/Chicago_Crimes.csv">here</a></p>
 <h3 id="sedonakepler">SedonaKepler<a class="headerlink" href="#sedonakepler" title="Permanent link">&para;</a></h3>
-<p>Spatial query results can be visualized in Jupyter lab/notebook using SedonaKepler. </p>
+<p>Spatial query results can be visualized in a Jupyter lab/notebook environment using SedonaKepler. </p>
 <p>SedonaKepler exposes APIs to create interactive and customizable map visualizations using <a href="https://kepler.gl/">KeplerGl</a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -4113,62 +4078,14 @@ pip install &#39;geopandas&lt;=0.10.2&#39;
 pip install keplergl==0.3.2
 </code></pre></div></p>
 </div>
-<h4 id="creating-a-map-object-using-sedonakeplercreate_map">Creating a map object using SedonaKepler.create_map<a class="headerlink" href="#creating-a-map-object-using-sedonakeplercreate_map" title="Permanent link">&para;</a></h4>
-<p>SedonaKepler exposes a create_map API with the following signature:</p>
-<div class="highlight"><pre><span></span><code><span class="n">create_map</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">SedonaDataFrame</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;unnamed&#39;</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">map</span>
+<p>This tutorial showcases how simple it is to instantly visualize geospatial data using SedonaKepler.</p>
+<p>Example (referenced from an example notebook via the binder):</p>
+<div class="highlight"><pre><span></span><code><span class="n">SedonaKepler</span><span class="o">.</span><span class="n">create_map</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">groupedresult</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;AirportCount&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>The parameter 'name' is used to associate the passed SedonaDataFrame in the map object and any config applied to the map is linked to this name. It is recommended you pass a unique identifier to the dataframe here.</p>
-<p>If no SedonaDataFrame object is passed, an empty map (with config applied if passed) is returned. A SedonaDataFrame can be added later using the method <code>add_df</code></p>
-<p>A map config can be passed optionally to apply pre-apply customizations to the map.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The map config references every customization with the name assigned to the SedonaDataFrame being displayed, if there is a mismatch in the name, the config will not be applied to the map object.</p>
-</div>
-<div class="admonition abstract">
-<p class="admonition-title">Example usage (Referenced from Sedona Jupyter examples)</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:1"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Python</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nb">map</span> <span class="o">=</span> <span class="n">SedonaKepler</span><span class="o">.</span><span class="n">create_map</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">groupedresult</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;AirportCount&quot;</span><span class="p">)</span>
-<span class="nb">map</span>
-</code></pre></div>
-</div>
-</div>
-</div>
-</div>
-<h4 id="adding-sedonadataframe-to-a-map-object-using-sedonakepleradd_df">Adding SedonaDataFrame to a map object using SedonaKepler.add_df<a class="headerlink" href="#adding-sedonadataframe-to-a-map-object-using-sedonakepleradd_df" title="Permanent link">&para;</a></h4>
-<p>SedonaKepler exposes a add_df API with the following signature:</p>
-<div class="highlight"><pre><span></span><code><span class="n">add_df</span><span class="p">(</span><span class="nb">map</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">SedonaDataFrame</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;unnamed&#39;</span><span class="p">)</span>
-</code></pre></div>
-<p>This API can be used to add a SedonaDataFrame to an already created map object. The map object passed is directly mutated and nothing is returned.</p>
-<p>The parameters name has the same conditions as 'create_map'</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>This method can be used to add multiple dataframes to a map object to be able to visualize them together.</p>
-</div>
-<div class="admonition abstract">
-<p class="admonition-title">Example usage (Referenced from Sedona Jupyter examples)</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:1"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Python</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nb">map</span> <span class="o">=</span> <span class="n">SedonaKepler</span><span class="o">.</span><span class="n">create_map</span><span class="p">()</span>
-<span class="n">SedonaKepler</span><span class="o">.</span><span class="n">add_df</span><span class="p">(</span><span class="nb">map</span><span class="p">,</span> <span class="n">groupedresult</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;AirportCount&quot;</span><span class="p">)</span>
-<span class="nb">map</span>
-</code></pre></div>
-</div>
-</div>
-</div>
-</div>
-<h4 id="setting-a-config-via-the-map">Setting a config via the map<a class="headerlink" href="#setting-a-config-via-the-map" title="Permanent link">&para;</a></h4>
-<p>A map rendered by accessing the map object created by SedonaKepler includes a config panel which can be used to customize the map</p>
 <p><img src="../../image/sedona_customization.gif" width="1000"></p>
-<h4 id="saving-and-setting-config">Saving and setting config<a class="headerlink" href="#saving-and-setting-config" title="Permanent link">&para;</a></h4>
-<p>A map object's current config can be accessed by accessing its 'config' attribute like <code>map.config</code>. This config can be saved for future use or use across notebooks if the exact same map is to be rendered every time.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The map config references each applied customization with the name given to the dataframe and hence will work only on maps with the same name of dataframe supplied.
-For more details refer to keplerGl documentation <a href="https://docs.kepler.gl/docs/keplergl-jupyter#6.-match-config-with-data">here</a></p>
-</div>
+<p>The dataset used is available <a href="https://github.com/apache/sedona/tree/4c5fa8333b2c61850d5664b878df9493c7915066/binder/data/ne_50m_airports">here</a> and
+can also be found in the example notebook available <a href="https://github.com/apache/sedona/blob/4c5fa8333b2c61850d5664b878df9493c7915066/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb">here</a></p>
+<p>Details on all the APIs available by SedonaKepler are listed in the <a href="../../api/sql/Visualization_SedonaKepler">SedonaKepler API docs</a></p>
 <h2 id="save-to-permanent-storage">Save to permanent storage<a class="headerlink" href="#save-to-permanent-storage" title="Permanent link">&para;</a></h2>
 <p>To save a Spatial DataFrame to some permanent storage such as Hive tables and HDFS, you can simply convert each geometry in the Geometry type column back to a plain String and save the plain DataFrame to wherever you want.</p>
 <p>Use the following code to convert the Geometry column in a DataFrame back to a WKT string column:</p>
@@ -4211,7 +4128,7 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 <h2 id="convert-between-dataframe-and-spatialrdd">Convert between DataFrame and SpatialRDD<a class="headerlink" href="#convert-between-dataframe-and-spatialrdd" title="Permanent link">&para;</a></h2>
 <h3 id="dataframe-to-spatialrdd">DataFrame to SpatialRDD<a class="headerlink" href="#dataframe-to-spatialrdd" title="Permanent link">&para;</a></h3>
 <p>Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read <a href="../../api/scaladoc/spark/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a></p>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:3"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><input id="__tabbed_13_3" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Scala</label><label for="__tabbed_13_2">Java</label><label for="__tabbed_13_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Scala</label><label for="__tabbed_11_2">Java</label><label for="__tabbed_11_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">spatialRDD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Adapter</span><span class="p">.</span><span class="n">toSpatialRdd</span><span class="p">(</span><span class="n">spatialDf</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;usacounty&quot;</span><span class="p">)</span>
@@ -4236,7 +4153,7 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 </div>
 <h3 id="spatialrdd-to-dataframe">SpatialRDD to DataFrame<a class="headerlink" href="#spatialrdd-to-dataframe" title="Permanent link">&para;</a></h3>
 <p>Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read <a href="../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a></p>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:3"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Scala</label><label for="__tabbed_14_2">Java</label><label for="__tabbed_14_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:3"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Scala</label><label for="__tabbed_12_2">Java</label><label for="__tabbed_12_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">spatialDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Adapter</span><span class="p">.</span><span class="n">toDf</span><span class="p">(</span><span class="n">spatialRDD</span><span class="p">,</span><span class="w"> </span><span class="n">sedona</span><span class="p">)</span>
@@ -4259,7 +4176,7 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 types. Note that string schemas and not all data types are supported&mdash;please check the
 <a href="../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a> to confirm what is supported for your use
 case. At least one column for the user data must be provided.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:1"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Scala</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:1"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Scala</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">schema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">StructType</span><span class="p">(</span><span class="nc">Array</span><span class="p">(</span>
@@ -4275,7 +4192,7 @@ case. At least one column for the user data must be provided.</p>
 </div>
 <h3 id="spatialpairrdd-to-dataframe">SpatialPairRDD to DataFrame<a class="headerlink" href="#spatialpairrdd-to-dataframe" title="Permanent link">&para;</a></h3>
 <p>PairRDD is the result of a spatial join query or distance join query. SedonaSQL DataFrame-RDD Adapter can convert the result to a DataFrame. But you need to provide the name of other attributes.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:3"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Scala</label><label for="__tabbed_16_2">Java</label><label for="__tabbed_16_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:3"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Scala</label><label for="__tabbed_14_2">Java</label><label for="__tabbed_14_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">joinResultDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Adapter</span><span class="p">.</span><span class="n">toDf</span><span class="p">(</span><span class="n">joinResultPairRDD</span><span class="p">,</span><span class="w"> </span><span class="nc">Seq</span><span class="p">(</span><span class="s">&quot;left_attribute1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;left_attribute2&quot;</span><span class="p">),</span><span class="w"> </span><span class="nc">Seq</span><span class="p">(</span><span class="s">&quot;right_attribute1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;right_attribute2&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">sedona</span><span class="p">)</span>
@@ -4298,7 +4215,7 @@ case. At least one column for the user data must be provided.</p>
 </div>
 </div>
 <p>or you can use the attribute names directly from the input RDD</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:3"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Scala</label><label for="__tabbed_17_2">Java</label><label for="__tabbed_17_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Scala</label><label for="__tabbed_15_2">Java</label><label for="__tabbed_15_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">scala</span><span class="p">.</span><span class="nn">collection</span><span class="p">.</span><span class="nc">JavaConversions</span><span class="p">.</span><span class="n">_</span>
@@ -4323,7 +4240,7 @@ case. At least one column for the user data must be provided.</p>
 types. Note that string schemas and not all data types are supported&mdash;please check the
 <a href="../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a> to confirm what is supported for your use
 case. Columns for the left and right user data must be provided.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:1"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Scala</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:1"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Scala</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">schema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">StructType</span><span class="p">(</span><span class="nc">Array</span><span class="p">(</span>
@@ -4345,7 +4262,7 @@ case. Columns for the left and right user data must be provided.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">October 7, 2023 00:35:04</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">November 8, 2023 05:57:21</span>
       
     
   </small>
@@ -4372,51 +4289,65 @@ case. Columns for the left and right user data must be provided.</p>
         
       </main>
       
-        
-<footer class="md-footer">
+        <footer class="md-footer">
   
-    <div class="md-footer-nav">
-      <nav class="md-footer-nav__inner md-grid" aria-label="footer.title">
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
-          <a href="../../download/" title="Download" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
-            <div class="md-footer-nav__button md-icon">
+          
+          <a href="../../download/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Download" rel="prev">
+            <div class="md-footer__button md-icon">
+              
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
             </div>
-            <div class="md-footer-nav__title">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
               <div class="md-ellipsis">
-                <span class="md-footer-nav__direction">
-                  Previous
-                </span>
                 Download
               </div>
             </div>
           </a>
         
         
-          <a href="../raster/" title="Raster SQL app" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
-            <div class="md-footer-nav__title">
+          
+          <a href="../raster/" class="md-footer__link md-footer__link--next" aria-label="Next: Raster SQL app" rel="next">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
               <div class="md-ellipsis">
-                <span class="md-footer-nav__direction">
-                  Next
-                </span>
                 Raster SQL app
               </div>
             </div>
-            <div class="md-footer-nav__button md-icon">
+            <div class="md-footer__button md-icon">
+              
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
             </div>
           </a>
         
       </nav>
-    </div>
+    
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
-      <div class="md-footer-copyright">
-        
-          <div class="md-footer-copyright__highlight">
-            Copyright © 2023 The Apache Software Foundation
-            <div class="md-social">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright © 2023 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="http://www.apache.org/">Apache Software Foundation</a> for more details.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
   
     
     
@@ -4440,13 +4371,16 @@ case. Columns for the left and right user data must be provided.</p>
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
     </a>
   
+    
+    
+    
+    
+    <a href="./community/discord-invite-form.html" target="_blank" rel="noopener" title="" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M524.531 69.836a1.5 1.5 0 0 0-.764-.7A485.065 485.065 0 0 0 404.081 32.03a1.816 1.816 0 0 0-1.923.91 337.461 337.461 0 0 0-14.9 30.6 447.848 447.848 0 0 0-134.426 0 309.541 309.541 0 0 0-15.135-30.6 1.89 1.89 0 0 0-1.924-.91 483.689 483.689 0 0 0-119.688 37.107 1.712 1.712 0 0 0-.788.676C39.068 183.651 18.186 294.69 28.43 404.354a2.016 2.016 0 0 0 .765 1.375 487.666 487.666 0 0 0 146.825 74.189 1.9 1.9 0 0 0 2.063-.676A348.2 348.2 0 0 0 208.12 430.4a1.86 1.86 0 0 0-1.019-2.588 321.173 321.173 0 0 1-45.868-21.853 1.885 1.885 0 0 1-.185-3.126 251.047 251.047 0 0 0 9.109-7.137 1.819 1.819 0 0 1 1.9-.256c96.229 43.917 200.41 43.917 295.5 0a1.812 1.812 0 0 1 1.924.233 234.533 234.533 0 0 0 9.132 7.16 1.884 1.884 0 0 1-.162 3.126 301.407 301.407 0 0 1-45.89 21.83 1.875 1.875 0 0 0-1 2.611 391.055 391.055 0 0 0 30.014 48.815 1.864 1.864 0 0 0 2.063.7A486.048 486.048 0 0 0 610.7 405.729a1.882 1.882 0 0 0 .765-1.352c12.264-126.783-20.532-236.912-86.934-334.541ZM222.491 337.58c-28.972 0-52.844-26.587-52.844-59.239s23.409-59.241 52.844-59.241c29.665 0 53.306 26.82 52.843 59.239 0 32.654-23.41 59.241-52.843 59.241Zm195.38 0c-28.971 0-52.843-26.587-52.843-59.239s23.409-59.241 52.843-59.241c29.667 0 53.307 26.82 52.844 59.239 0 32.654-23.177 59.241-52.844 59.241Z"/></svg>
+    </a>
+  
 </div>
-          </div>
-        
-Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="http://www.apache.org/">Apache Software Foundation</a> for more details.
-<br>
-<img src="https://www.apache.org/foundation/press/kit/asf_logo_wide.png" width="500">
-      </div>
+      
     </div>
   </div>
 </footer>
@@ -4456,7 +4390,7 @@ Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona pr
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tabs", "navigation.top", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.dfff1995.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tabs", "navigation.top", "search.suggest", "search.highlight", "search.share", "navigation.footer"], "search": "../../assets/javascripts/workers/search.dfff1995.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.78eede0e.min.js"></script>
