@@ -72,7 +72,7 @@
         <hadoop.version>3.2.4</hadoop.version>
         <jackson.version>2.13.4</jackson.version>
         <jts.version>1.19.0</jts.version>
-        <jts2geojson.version>0.16.1</jts2geojson.version>
+        <jts2geojson.version>0.18.1</jts2geojson.version>
         <spatial4j.version>0.8</spatial4j.version>
 
         <jt-jiffle.version>1.1.24</jt-jiffle.version>
