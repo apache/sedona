@@ -9,10 +9,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <geotools.version>1.4.0-28.2</geotools.version>
+        <geotools.version>1.5.0-28.2</geotools.version>
         <geotools.scope>compile</geotools.scope>
         <scala.compat.version>2.12</scala.compat.version>
-        <sedona.version>1.4.0</sedona.version>
+        <sedona.version>1.5.0</sedona.version>
         <flink.version>1.14.3</flink.version>
         <flink.scope>compile</flink.scope>
     </properties>

@@ -17,21 +17,20 @@
  * under the License.
  */
 
-import java.awt.Color
 import org.apache.log4j.{Level, Logger}
 import org.apache.sedona.core.enums.{GridType, IndexType}
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
 import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialRDD.{CircleRDD, SpatialRDD}
-import org.apache.sedona.sql.utils.{Adapter, SedonaSQLRegistrator}
-import org.apache.sedona.viz.core.{ImageGenerator, RasterOverlayOperator}
+import org.apache.sedona.spark.SedonaContext
+import org.apache.sedona.sql.utils.Adapter
 import org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+import org.apache.sedona.viz.core.{ImageGenerator, RasterOverlayOperator}
 import org.apache.sedona.viz.extension.visualizationEffect.{HeatMap, ScatterPlot}
-import org.apache.sedona.viz.sql.utils.SedonaVizRegistrator
 import org.apache.sedona.viz.utils.ImageType
-import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.sql.SparkSession
 import org.locationtech.jts.geom.Geometry
+
+import java.awt.Color
 
 
 object ScalaExample extends App{
@@ -49,6 +48,13 @@ object ScalaExample extends App{
   Logger.getLogger("org").setLevel(Level.WARN)
   Logger.getLogger("akka").setLevel(Level.WARN)
 
+  val config = SedonaContext.builder()
+    .config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+    .master("local[*]") // Delete this if run in cluster mode
+    .appName("sedona-analysis") // Change this to a proper name
+    .getOrCreate()
+  val sedona = SedonaContext.create(config)
+
   visualizeSpatialColocation()
   calculateSpatialColocation()
 
@@ -57,21 +63,14 @@ object ScalaExample extends App{
 
   def visualizeSpatialColocation(): Unit =
   {
-    val sparkSession:SparkSession = SparkSession.builder().config("spark.serializer",classOf[KryoSerializer].getName).
-      config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName)
-        .master("local[*]").appName("Sedona-Analysis").getOrCreate()
-
-    SedonaSQLRegistrator.registerAll(sparkSession)
-    SedonaVizRegistrator.registerAll(sparkSession)
-
     // Prepare NYC area landmarks which includes airports, museums, colleges, hospitals
-    var arealmRDD = ShapefileReader.readToPolygonRDD(sparkSession.sparkContext, nycArealandmarkShapefileLocation)
+    var arealmRDD = ShapefileReader.readToPolygonRDD(sedona.sparkContext, nycArealandmarkShapefileLocation)
 
     // Prepare NYC taxi trips. Only use the taxi trips' pickup points
-    var tripDf = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(nyctripCSVLocation)
+    var tripDf = sedona.read.format("csv").option("delimiter",",").option("header","false").load(nyctripCSVLocation)
     // Convert from DataFrame to RDD. This can also be done directly through Sedona RDD API.
     tripDf.createOrReplaceTempView("tripdf")
-    var tripRDD = Adapter.toSpatialRdd(sparkSession.sql("select ST_Point(cast(tripdf._c0 as Decimal(24, 14)), cast(tripdf._c1 as Decimal(24, 14))) as point from tripdf")
+    var tripRDD = Adapter.toSpatialRdd(sedona.sql("select ST_Point(cast(tripdf._c0 as Decimal(24, 14)), cast(tripdf._c1 as Decimal(24, 14))) as point from tripdf")
       , "point")
 
     // Convert the Coordinate Reference System from degree-based to meter-based. This returns the accurate distance calculate.
@@ -87,32 +86,24 @@ object ScalaExample extends App{
 
     val frontImage = new ScatterPlot(imageResolutionX, imageResolutionY, arealmRDD.boundaryEnvelope, true)
     frontImage.CustomizeColor(0, 0, 0, 255, Color.GREEN, true)
-    frontImage.Visualize(sparkSession.sparkContext, arealmRDD)
+    frontImage.Visualize(sedona.sparkContext, arealmRDD)
 
     val backImage = new HeatMap(imageResolutionX, imageResolutionY, arealmRDD.boundaryEnvelope, true, 1)
-    backImage.Visualize(sparkSession.sparkContext, tripRDD)
+    backImage.Visualize(sedona.sparkContext, tripRDD)
 
     val overlayOperator = new RasterOverlayOperator(backImage.rasterImage)
     overlayOperator.JoinImage(frontImage.rasterImage)
 
     val imageGenerator = new ImageGenerator
     imageGenerator.SaveRasterImageAsLocalFile(overlayOperator.backRasterImage, colocationMapLocation, ImageType.PNG)
-
-    sparkSession.stop()
   }
 
   def calculateSpatialColocation(): Unit =
   {
-    val sparkSession:SparkSession = SparkSession.builder().config("spark.serializer",classOf[KryoSerializer].getName).
-      config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName).
-      master("local[*]").appName("Sedona-Analysis").getOrCreate()
-
-    SedonaSQLRegistrator.registerAll(sparkSession)
-    SedonaVizRegistrator.registerAll(sparkSession)
 
     // Prepare NYC area landmarks which includes airports, museums, colleges, hospitals
     var arealmRDD = new SpatialRDD[Geometry]()
-    arealmRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, nycArealandmarkShapefileLocation)
+    arealmRDD = ShapefileReader.readToGeometryRDD(sedona.sparkContext, nycArealandmarkShapefileLocation)
     // Use the center point of area landmarks to check co-location. This is required by Ripley's K function.
     arealmRDD.rawSpatialRDD = arealmRDD.rawSpatialRDD.rdd.map[Geometry](f=>
     {
@@ -123,15 +114,15 @@ object ScalaExample extends App{
     })
 
     // The following two lines are optional. The purpose is to show the structure of the shapefile.
-    var arealmDf = Adapter.toDf(arealmRDD, sparkSession)
+    var arealmDf = Adapter.toDf(arealmRDD, sedona)
     arealmDf.show()
 
     // Prepare NYC taxi trips. Only use the taxi trips' pickup points
-    var tripDf = sparkSession.read.format("csv").option("delimiter",",").option("header","false").load(nyctripCSVLocation)
+    var tripDf = sedona.read.format("csv").option("delimiter",",").option("header","false").load(nyctripCSVLocation)
     tripDf.show() // Optional
     // Convert from DataFrame to RDD. This can also be done directly through Sedona RDD API.
     tripDf.createOrReplaceTempView("tripdf")
-    var tripRDD = Adapter.toSpatialRdd(sparkSession.sql("select ST_Point(cast(tripdf._c0 as Decimal(24, 14)), cast(tripdf._c1 as Decimal(24, 14))) as point, 'def' as trip_attr from tripdf")
+    var tripRDD = Adapter.toSpatialRdd(sedona.sql("select ST_Point(cast(tripdf._c0 as Decimal(24, 14)), cast(tripdf._c1 as Decimal(24, 14))) as point, 'def' as trip_attr from tripdf")
       , "point")
 
     // Convert the Coordinate Reference System from degree-based to meter-based. This returns the accurate distance calculate.
@@ -179,7 +170,6 @@ object ScalaExample extends App{
 
       println(s"""$currentDistance,$observedL,$colocationDifference,$colocationStatus""")
     }
-    sparkSession.stop()
   }
 
 }

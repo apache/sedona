@@ -659,7 +659,7 @@
                 </property>
             </activation>
             <properties>
-                <spark.version>3.4.0</spark.version>
+                <spark.version>3.5.0</spark.version>
                 <spark.compat.version>3.4</spark.compat.version>
                 <log4j.version>2.19.0</log4j.version>
                 <!-- Skip deploying parent module for sedona-spark-3.0 profile, it will be deployed with sedona-spark-3.0 -->
