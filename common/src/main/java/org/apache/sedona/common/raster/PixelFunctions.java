@@ -19,6 +19,7 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.utils.RasterUtils;
+import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.DirectPosition2D;
 import org.locationtech.jts.geom.*;
@@ -77,6 +78,41 @@ public class PixelFunctions
         }
         return GEOMETRY_FACTORY.createPoint(pointCoord);
     }
+
+    public static List<Double> values(GridCoverage2D rasterGeom, int[] xCoordinates, int[] yCoordinates, int band) throws TransformException {
+        int numBands = rasterGeom.getNumSampleDimensions();
+        if (band < 1 || band > numBands) {
+            // Invalid band index. Return nulls.
+            return new ArrayList<>(Collections.nCopies(xCoordinates.length, null));
+        }
+
+        double noDataValue = RasterUtils.getNoDataValue(rasterGeom.getSampleDimension(band - 1));
+        List<Double> result = new ArrayList<>(xCoordinates.length);
+        double[] pixelBuffer = new double[numBands];
+
+        for (int i = 0; i < xCoordinates.length; i++) {
+            double x = xCoordinates[i];
+            double y = yCoordinates[i];
+
+            GridCoordinates2D gridCoord = new GridCoordinates2D((int) x, (int) y);
+
+            try {
+                pixelBuffer = rasterGeom.evaluate(gridCoord, pixelBuffer);
+                double pixelValue = pixelBuffer[band - 1];
+                if (Double.compare(noDataValue, pixelValue) == 0) {
+                    result.add(null);
+                } else {
+                    result.add(pixelValue);
+                }
+            } catch (PointOutsideCoverageException e) {
+                // Points outside the extent should return null
+                result.add(null);
+            }
+        }
+
+        return result;
+    }
+
     public static List<Double> values(GridCoverage2D rasterGeom, List<Geometry> geometries, int band) throws TransformException {
         int numBands = rasterGeom.getNumSampleDimensions();
         if (band < 1 || band > numBands) {
