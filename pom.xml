@@ -69,7 +69,7 @@
 
         <cdm.version>5.4.2</cdm.version>
         <geotools.version>28.2</geotools.version>
-        <hadoop.version>3.2.4</hadoop.version>
+        <hadoop.version>3.3.6</hadoop.version>
         <jackson.version>2.13.4</jackson.version>
         <jts.version>1.19.0</jts.version>
         <jts2geojson.version>0.16.1</jts2geojson.version>
