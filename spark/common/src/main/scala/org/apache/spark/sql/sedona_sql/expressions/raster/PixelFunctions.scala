@@ -31,7 +31,7 @@ import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
 case class RS_Value(inputExpressions: Seq[Expression]) extends InferredExpression(
-  inferrableFunction3(PixelFunctions.value), inferrableFunction4(PixelFunctions.value)
+  inferrableFunction4(PixelFunctions.value), inferrableFunction3(PixelFunctions.value)
 ) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
