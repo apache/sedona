@@ -19,6 +19,7 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.utils.RasterUtils;
+import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.DirectPosition2D;
 import org.locationtech.jts.geom.*;
@@ -39,6 +40,32 @@ public class PixelFunctions
     public static Double value(GridCoverage2D rasterGeom, Geometry geometry, int band) throws TransformException
     {
         return values(rasterGeom, Collections.singletonList(geometry), band).get(0);
+    }
+
+    public static Double value(GridCoverage2D rasterGeom, int colX, int rowY, int band) throws TransformException {
+        int numBands = rasterGeom.getNumSampleDimensions();
+        if (band < 1 || band > numBands) {
+            // Invalid band index. Return nulls.
+            return null;
+        }
+
+        double noDataValue = RasterUtils.getNoDataValue(rasterGeom.getSampleDimension(band - 1));
+        double[] pixelBuffer = new double[numBands];
+
+        GridCoordinates2D gridCoord = new GridCoordinates2D((int) colX, (int) rowY);
+
+        try {
+            pixelBuffer = rasterGeom.evaluate(gridCoord, pixelBuffer);
+            double pixelValue = pixelBuffer[band - 1];
+            if (Double.compare(noDataValue, pixelValue) == 0) {
+                return null;
+            } else {
+                return pixelValue;
+            }
+        } catch (PointOutsideCoverageException e) {
+            // Points outside the extent should return null
+            return null;
+        }
     }
 
     public static Geometry getPixelAsPolygon(GridCoverage2D raster, int colX, int rowY) throws TransformException, FactoryException {
