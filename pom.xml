@@ -611,7 +611,7 @@
             <plugin>
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
-                <version>0.14</version>
+                <version>0.15</version>
             </plugin>
         </plugins>
     </build>
