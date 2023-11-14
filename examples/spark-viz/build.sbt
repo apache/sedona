@@ -39,7 +39,7 @@ val SparkCompatibleVersion = "3.0"
 
 val HadoopVersion = "2.7.2"
 
-val SedonaVersion = "1.5.0"
+val SedonaVersion = "1.4.0"
 
 val ScalaCompatibleVersion = "2.12"
 
