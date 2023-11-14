@@ -137,9 +137,11 @@ public class MapAlgebra
         // ImageUtils.createConstantImage is slow, manually constructing a buffered image proved to be faster.
         // It also eliminates the data-copying overhead when converting raster data types after running jiffle script.
         WritableRaster resultRaster = RasterFactory.createBandedRaster(DataBuffer.TYPE_DOUBLE, width, height, 1, null);
-        ColorModel cm = PlanarImage.createColorModel(resultRaster.getSampleModel());
+        ColorModel cm;
         if (originalColorModel.isCompatibleRaster(resultRaster)) {
             cm = originalColorModel;
+        }else {
+            cm = PlanarImage.createColorModel(resultRaster.getSampleModel());
         }
         WritableRenderedImage resultImage = new BufferedImage(cm, resultRaster, false, null);
         try {

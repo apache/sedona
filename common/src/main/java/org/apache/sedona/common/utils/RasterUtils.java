@@ -103,10 +103,11 @@ public class RasterUtils {
         final ColorSpace cs = new BogusColorSpace(numBand);
         final int[] nBits = new int[numBand];
         Arrays.fill(nBits, DataBuffer.getDataTypeSize(rasterDataType));
-        ColorModel colorModel =
-                new ComponentColorModel(cs, nBits, false, true, Transparency.OPAQUE, rasterDataType);
+        ColorModel colorModel;
         if (originalColorModel.isCompatibleRaster(raster)) {
             colorModel = originalColorModel;
+        }else {
+            colorModel = new ComponentColorModel(cs, nBits, false, true, Transparency.OPAQUE, rasterDataType);
         }
         if (noDataValue != null) {
             GridSampleDimension[] newBands = new GridSampleDimension[numBand];
