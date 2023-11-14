@@ -71,10 +71,36 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
-    public void valueWithMultibandRaster() throws TransformException {
+    public void valueWithGridCoords() throws TransformException {
+        int insideX = 1;
+        int insideY = 0;
+        int outsideX = 4;
+        int outsideY = 4;
+
+        Double insideValue = PixelFunctions.value(oneBandRaster, insideX, insideY, 1);
+        assertNotNull("Value should not be null for points inside the envelope.", insideValue);
+        assertNull("Points outside of the envelope should return null.", PixelFunctions.value(oneBandRaster, outsideX, outsideY, 1));
+        assertNull("Invalid band should return null.", PixelFunctions.value(oneBandRaster, insideX, insideY, 0));
+        assertNull("Invalid band should return null.", PixelFunctions.value(oneBandRaster, insideX, insideY, 2));
+
+        int noDataX = 0;
+        int noDataY = 0;
+
+        assertNull("Null should be returned for no data values.", PixelFunctions.value(oneBandRaster, noDataX, noDataY, 1));
+    }
+
+    @Test
+    public void valueWithMultibandRaster1() throws TransformException {
         // Multiband raster
         assertEquals(9d, PixelFunctions.value(multiBandRaster, point(4.5d,4.5d), 3), 0.1d);
         assertEquals(255d, PixelFunctions.value(multiBandRaster, point(4.5d,4.5d), 4), 0.1d);
+    }
+
+    @Test
+    public void valueWithMultibandRaster2() throws TransformException {
+        // Multiband raster
+        assertEquals(2d, PixelFunctions.value(multiBandRaster, 1,1, 3), 0.1d);
+        assertEquals(255d, PixelFunctions.value(multiBandRaster, 2,1, 4), 0.1d);
     }
 
     @Test
