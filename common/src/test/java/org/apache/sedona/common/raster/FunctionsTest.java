@@ -188,6 +188,24 @@ public class FunctionsTest extends RasterTestBase {
         assertNull("Null geometries should return null values.", values.get(1));
     }
 
+    @Test
+    public void valuesWithCoordinates() throws TransformException {
+        int[] xCoordinates = {1, 0};
+        int[] yCoordinates = {0, 1};
+
+        List<Double> values = PixelFunctions.values(oneBandRaster, xCoordinates, yCoordinates, 1);
+        assertEquals(2, values.size());
+        assertTrue(values.stream().allMatch(Objects::nonNull));
+
+        values = PixelFunctions.values(oneBandRaster, xCoordinates, yCoordinates, 0);
+        assertEquals(2, values.size());
+        assertTrue("All values should be null for invalid band index.", values.stream().allMatch(Objects::isNull));
+
+        values = PixelFunctions.values(oneBandRaster, xCoordinates, yCoordinates, 2);
+        assertEquals(2, values.size());
+        assertTrue("All values should be null for invalid band index.", values.stream().allMatch(Objects::isNull));
+    }
+
     private Point point(double x, double y) {
         return new GeometryFactory().createPoint(new Coordinate(x, y));
     }
