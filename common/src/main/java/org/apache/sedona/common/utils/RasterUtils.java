@@ -99,14 +99,13 @@ public class RasterUtils {
         GridGeometry2D gridGeometry = referenceRaster.getGridGeometry();
         int numBand = raster.getNumBands();
         int rasterDataType = raster.getDataBuffer().getDataType();
-
-        final ColorSpace cs = new BogusColorSpace(numBand);
-        final int[] nBits = new int[numBand];
-        Arrays.fill(nBits, DataBuffer.getDataTypeSize(rasterDataType));
         ColorModel colorModel;
         if (originalColorModel.isCompatibleRaster(raster)) {
             colorModel = originalColorModel;
         }else {
+            final ColorSpace cs = new BogusColorSpace(numBand);
+            final int[] nBits = new int[numBand];
+            Arrays.fill(nBits, DataBuffer.getDataTypeSize(rasterDataType));
             colorModel = new ComponentColorModel(cs, nBits, false, true, Transparency.OPAQUE, rasterDataType);
         }
         if (noDataValue != null) {
