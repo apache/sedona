@@ -27,6 +27,8 @@ import org.apache.spark.sql.types.{ByteType, DataTypes}
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.{Geometry, GeometryFactory, Point}
 
+import java.util
+
 object implicits {
 
   implicit class InputExpressionEnhancer(inputExpression: Expression) {
@@ -55,6 +57,42 @@ object implicits {
               }
               geometries
             case _ => null
+          }
+      }
+    }
+
+    def toDoubleList(input: InternalRow): java.util.List[java.lang.Double] = {
+      inputExpression match {
+        case aware: SerdeAware =>
+          aware.evalWithoutSerialization(input).asInstanceOf[java.util.List[java.lang.Double]]
+        case _ =>
+          inputExpression.eval(input).asInstanceOf[ArrayData] match {
+            case arrayData: ArrayData =>
+              val length = arrayData.numElements()
+              val doubleList = new java.util.ArrayList[java.lang.Double]()
+              for (i <- 0 until length) {
+                doubleList.add(arrayData.getDouble(i))
+              }
+              doubleList.asInstanceOf[java.util.List[java.lang.Double]]
+            case _ => null
+          }
+      }
+    }
+
+    def toGeometryList(input: InternalRow): java.util.List[Geometry] = {
+      inputExpression match {
+        case aware: SerdeAware =>
+          aware.evalWithoutSerialization(input).asInstanceOf[java.util.List[Geometry]]
+        case _ =>
+          inputExpression.eval(input).asInstanceOf[ArrayData] match {
+            case arrayData: ArrayData =>
+              val length = arrayData.numElements()
+              val geometries = new java.util.ArrayList[Geometry]()
+              for (i <- 0 until length) {
+                geometries.add(arrayData.getBinary(i).toGeometry)
+              }
+              geometries.asInstanceOf[java.util.List[Geometry]]
+              case _ => null
           }
       }
     }

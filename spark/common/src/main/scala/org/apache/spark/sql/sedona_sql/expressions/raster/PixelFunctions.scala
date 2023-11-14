@@ -18,15 +18,8 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
-import org.apache.sedona.common.geometrySerde.GeometrySerializer
 import org.apache.sedona.common.raster.PixelFunctions
-import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression}
-import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
-import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
-import org.apache.spark.sql.sedona_sql.expressions.raster.implicits.RasterInputExpressionEnhancer
-import org.apache.spark.sql.types.{AbstractDataType, ArrayType, DataType, DoubleType, IntegerType}
+import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
@@ -54,31 +47,8 @@ case class RS_PixelAsCentroid(inputExpressions: Seq[Expression]) extends Inferre
   }
 }
 
-case class RS_Values(inputExpressions: Seq[Expression]) extends Expression with CodegenFallback with ExpectsInputTypes {
-
-  override def nullable: Boolean = true
-
-  override def dataType: DataType = ArrayType(DoubleType)
-
-  override def eval(input: InternalRow): Any = {
-    val raster = inputExpressions(0).toRaster(input)
-    val serializedGeometries = inputExpressions(1).eval(input).asInstanceOf[ArrayData]
-    val band = inputExpressions(2).eval(input).asInstanceOf[Int]
-    if (raster == null || serializedGeometries == null) {
-      null
-    } else {
-      val geometries = (0 until serializedGeometries.numElements()).map {
-        i => Option(serializedGeometries.getBinary(i)).map(GeometrySerializer.deserialize).orNull
-      }
-      new GenericArrayData(PixelFunctions.values(raster, java.util.Arrays.asList(geometries:_*), band).toArray)
-    }
-  }
-
-  override def children: Seq[Expression] = inputExpressions
-
+case class RS_Values(inputExpressions: Seq[Expression]) extends InferredExpression(inferrableFunction3(PixelFunctions.values)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
-
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, ArrayType(GeometryUDT), IntegerType)
 }
