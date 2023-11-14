@@ -527,6 +527,23 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(result.get(1) == null)
     }
 
+    it("Passed RS_Values with raster and Grid Coordinates") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val xCoordinates = Array(0.0, 1.0)
+      val yCoordinates = Array(1.0, 0.0)
+
+      val coordDF = sparkSession.createDataFrame(Seq((xCoordinates, 1), (yCoordinates, 2)))
+        .toDF("coordinates", "id").alias("coords")
+
+      val result = df.crossJoin(coordDF)
+        .selectExpr("RS_Values(RS_FromGeoTiff(content), (0,1), 1)")
+        .first().getList[Double](0)
+
+      assert(result.size() == 2)
+      assert(result.get(0) == 1.0)
+      assert(result.get(1) == 2.0)
+    }
+
     it("Passed RS_Clip with raster") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
         .selectExpr("RS_FromGeoTiff(content) as raster",
