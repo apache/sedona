@@ -86,12 +86,15 @@ public class RasterUtils {
      * @param noDataValue Optionally, a new noDataValue, if passed null, noDataVal of the reference raster is used.
      * @return cloned raster
      */
-    public static GridCoverage2D create(WritableRaster raster, GridCoverage2D referenceRaster, Double noDataValue) {
-        GridSampleDimension[] bands = referenceRaster.getSampleDimensions();
+    public static GridCoverage2D create(WritableRaster raster, GridCoverage2D referenceRaster, Double noDataValue, boolean keepMetadata) {
+        GridSampleDimension[] bands = keepMetadata ? referenceRaster.getSampleDimensions() : null;
         if (Objects.isNull(noDataValue)) {
             noDataValue = RasterBandAccessors.getBandNoDataValue(referenceRaster, 1); //resort to using noDataValue of the original raster.
         }
-        Map propertyMap = referenceRaster.getProperties();
+        Map propertyMap = null;
+        if (keepMetadata) {
+            propertyMap = referenceRaster.getProperties();
+        }
         ColorModel originalColorModel = referenceRaster.getRenderedImage().getColorModel();
         GridGeometry2D gridGeometry = referenceRaster.getGridGeometry();
         int numBand = raster.getNumBands();
@@ -117,10 +120,11 @@ public class RasterUtils {
             bands = newBands;
         }
 
-        GridCoverage2D[] referenceRasterSources = referenceRaster.getSources().toArray(new GridCoverage2D[0]);
+        GridCoverage2D[] referenceRasterSources = keepMetadata ? referenceRaster.getSources().toArray(new GridCoverage2D[0]) : null;
+        CharSequence rasterName = keepMetadata ? referenceRaster.getName() : "genericCoverage";
 
         final RenderedImage image = new BufferedImage(colorModel, raster, false, null);
-        return gridCoverageFactory.create(referenceRaster.getName(), image, gridGeometry, bands, referenceRasterSources, propertyMap);
+        return gridCoverageFactory.create(rasterName, image, gridGeometry, bands, referenceRasterSources, propertyMap);
 
     }
 
@@ -131,12 +135,12 @@ public class RasterUtils {
      * @param noDataValue Optionally, a new noDataValue, if passed null, noDataVal of the reference raster is used.
      * @return cloned raster
      */
-    public static GridCoverage2D create(RenderedImage image, GridCoverage2D referenceRaster, Double noDataValue) {
+    public static GridCoverage2D create(RenderedImage image, GridCoverage2D referenceRaster, Double noDataValue, boolean keepMetadata) {
         int numBand = image.getSampleModel().getNumBands();
         if (Objects.isNull(noDataValue)) {
             noDataValue = RasterBandAccessors.getBandNoDataValue(referenceRaster, 1); //resort to using noDataValue of the original raster.
         }
-        GridSampleDimension[] bands = referenceRaster.getSampleDimensions();
+        GridSampleDimension[] bands = keepMetadata ? referenceRaster.getSampleDimensions() : null;
         GridGeometry2D gridGeometry = referenceRaster.getGridGeometry();
         if (noDataValue != null) {
             GridSampleDimension[] newBands = new GridSampleDimension[numBand];
@@ -149,9 +153,12 @@ public class RasterUtils {
             }
             bands = newBands;
         }
-        GridCoverage2D[] referenceRasterSources = referenceRaster.getSources().toArray(new GridCoverage2D[0]);
-        Map propertyMap = referenceRaster.getProperties();
-        return gridCoverageFactory.create(referenceRaster.getName(), image, gridGeometry, bands, referenceRasterSources, propertyMap);
+        GridCoverage2D[] referenceRasterSources = keepMetadata ? referenceRaster.getSources().toArray(new GridCoverage2D[0]) : null;
+        Map propertyMap = null;
+        if (keepMetadata) {
+            propertyMap = referenceRaster.getProperties();
+        }        CharSequence rasterName = keepMetadata ? referenceRaster.getName() : "genericCoverage";
+        return gridCoverageFactory.create(rasterName, image, gridGeometry, bands, referenceRasterSources, propertyMap);
     }
 
     /**
