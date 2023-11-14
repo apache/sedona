@@ -75,7 +75,7 @@
         <jts2geojson.version>0.16.1</jts2geojson.version>
         <spatial4j.version>0.8</spatial4j.version>
 
-        <jt-jiffle.version>1.1.24</jt-jiffle.version>
+        <jt-jiffle.version>1.1.25</jt-jiffle.version>
         <antlr-runtime.version>4.9.3</antlr-runtime.version>
         <janino-version>3.1.9</janino-version>
 
