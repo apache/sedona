@@ -497,6 +497,12 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(result == 255d)
     }
 
+    it("Passed RS_Value with raster and coordinates") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_Value(RS_FromGeoTiff(content), 1, 1)").first().getDouble(0)
+      assert(result == 255d)
+    }
+
     it("Passed RS_Values should handle null values") {
       val result = sparkSession.sql("select RS_Values(null, null)").first().get(0)
       assert(result == null)
