@@ -487,13 +487,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_Value should handle null values") {
-      val result = sparkSession.sql("select RS_Value(null, null, 1)").first().get(0)
+      val result = sparkSession.sql("select RS_Value(null, null)").first().get(0)
       assert(result == null)
     }
 
     it("Passed RS_Value with raster") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
-      val result = df.selectExpr("RS_Value(RS_FromGeoTiff(content), ST_Point(-13077301.685, 4002565.802), 1)").first().getDouble(0)
+      val result = df.selectExpr("RS_Value(RS_FromGeoTiff(content), ST_Point(-13077301.685, 4002565.802))").first().getDouble(0)
       assert(result == 255d)
     }
 
@@ -504,13 +504,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_Values should handle null values") {
-      val result = sparkSession.sql("select RS_Values(null, null, 1)").first().get(0)
+      val result = sparkSession.sql("select RS_Values(null, null)").first().get(0)
       assert(result == null)
     }
 
     it("Passed RS_Values with raster") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
-      val result = df.selectExpr("RS_Values(RS_FromGeoTiff(content), array(ST_Point(-13077301.685, 4002565.802), null), 1)").first().getList[Any](0)
+      val result = df.selectExpr("RS_Values(RS_FromGeoTiff(content), array(ST_Point(-13077301.685, 4002565.802), null))").first().getList[Any](0)
       assert(result.size() == 2)
       assert(result.get(0) == 255d)
       assert(result.get(1) == null)
