@@ -42,6 +42,11 @@ public class PixelFunctions
         return values(rasterGeom, Collections.singletonList(geometry), band).get(0);
     }
 
+    public static Double value(GridCoverage2D rasterGeom, Geometry geometry) throws TransformException
+    {
+        return values(rasterGeom, Collections.singletonList(geometry), 1).get(0);
+    }
+
     public static Double value(GridCoverage2D rasterGeom, int colX, int rowY, int band) throws TransformException
     {
         int[] xCoordinates = {colX};
@@ -146,6 +151,10 @@ public class PixelFunctions
             }
         }
         return result;
+    }
+
+    public static List<Double> values(GridCoverage2D rasterGeom, List<Geometry> geometries) throws TransformException {
+        return values(rasterGeom, geometries, 1);
     }
 
     private static Point ensurePoint(Geometry geometry) {
