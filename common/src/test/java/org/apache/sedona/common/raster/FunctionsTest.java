@@ -60,8 +60,6 @@ public class FunctionsTest extends RasterTestBase {
     @Test
     public void value() throws TransformException {
         assertNull("Points outside of the envelope should return null.", PixelFunctions.value(oneBandRaster, point(1, 1), 1));
-        assertNull("Invalid band should return null.", PixelFunctions.value(oneBandRaster, point(378923, 4072346), 0));
-        assertNull("Invalid band should return null.", PixelFunctions.value(oneBandRaster, point(378923, 4072346), 2));
 
         Double value = PixelFunctions.value(oneBandRaster, point(378923, 4072346), 1);
         assertNotNull(value);
@@ -71,10 +69,29 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
+    public void valueWithGridCoords() throws TransformException {
+        int insideX = 1;
+        int insideY = 0;
+        int outsideX = 4;
+        int outsideY = 4;
+
+        Double insideValue = PixelFunctions.value(oneBandRaster, insideX, insideY, 1);
+        assertNotNull("Value should not be null for points inside the envelope.", insideValue);
+        assertNull("Points outside of the envelope should return null.", PixelFunctions.value(oneBandRaster, outsideX, outsideY, 1));
+
+        int noDataX = 0;
+        int noDataY = 0;
+
+        assertNull("Null should be returned for no data values.", PixelFunctions.value(oneBandRaster, noDataX, noDataY, 1));
+    }
+
+    @Test
     public void valueWithMultibandRaster() throws TransformException {
         // Multiband raster
         assertEquals(9d, PixelFunctions.value(multiBandRaster, point(4.5d,4.5d), 3), 0.1d);
         assertEquals(255d, PixelFunctions.value(multiBandRaster, point(4.5d,4.5d), 4), 0.1d);
+        assertEquals(4d, PixelFunctions.value(multiBandRaster, 2,2, 3), 0.1d);
+        assertEquals(255d, PixelFunctions.value(multiBandRaster, 3,4, 4), 0.1d);
     }
 
     @Test
@@ -175,35 +192,19 @@ public class FunctionsTest extends RasterTestBase {
         assertEquals(2, values.size());
         assertTrue(values.stream().allMatch(Objects::nonNull));
 
-        values = PixelFunctions.values(oneBandRaster, points, 0);
-        assertEquals(2, values.size());
-        assertTrue("All values should be null for invalid band index.", values.stream().allMatch(Objects::isNull));
-
-        values = PixelFunctions.values(oneBandRaster, points, 2);
-        assertEquals(2, values.size());
-        assertTrue("All values should be null for invalid band index.", values.stream().allMatch(Objects::isNull));
-
         values = PixelFunctions.values(oneBandRaster, Arrays.asList(new Geometry[]{point(378923, 4072346), null}), 1);
         assertEquals(2, values.size());
         assertNull("Null geometries should return null values.", values.get(1));
     }
 
     @Test
-    public void valuesWithCoordinates() throws TransformException {
+    public void valuesWithGridCoords() throws TransformException {
         int[] xCoordinates = {1, 0};
         int[] yCoordinates = {0, 1};
 
         List<Double> values = PixelFunctions.values(oneBandRaster, xCoordinates, yCoordinates, 1);
         assertEquals(2, values.size());
         assertTrue(values.stream().allMatch(Objects::nonNull));
-
-        values = PixelFunctions.values(oneBandRaster, xCoordinates, yCoordinates, 0);
-        assertEquals(2, values.size());
-        assertTrue("All values should be null for invalid band index.", values.stream().allMatch(Objects::isNull));
-
-        values = PixelFunctions.values(oneBandRaster, xCoordinates, yCoordinates, 2);
-        assertEquals(2, values.size());
-        assertTrue("All values should be null for invalid band index.", values.stream().allMatch(Objects::isNull));
     }
 
     private Point point(double x, double y) {
