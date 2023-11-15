@@ -135,6 +135,10 @@
             <artifactId>gt-arcgrid</artifactId>
         </dependency>
         <dependency>
+            <groupId>it.geosolutions.jaiext.jiffle</groupId>
+            <artifactId>jt-jiffle-language</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.locationtech.jts</groupId>
             <artifactId>jts-core</artifactId>
         </dependency>

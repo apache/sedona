@@ -256,6 +256,7 @@
                 <groupId>it.geosolutions.jaiext.jiffle</groupId>
                 <artifactId>jt-jiffle-language</artifactId>
                 <version>${jt-jiffle.version}</version>
+                <scope>${geotools.scope}</scope>
                 <exclusions>
                     <exclusion>
                         <groupId>*</groupId>
