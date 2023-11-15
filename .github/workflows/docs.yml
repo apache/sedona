@@ -11,10 +11,10 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v4
       with:
         python-version: 3.x
     - run: pip install mkdocs-material
@@ -34,7 +34,7 @@ jobs:
           any::pkgdown
         working-directory : './R'
     - run: Rscript -e 'pkgdown::build_site(pkg = "./R", preview = FALSE, override = list(destination = "../docs/api/rdocs"))'
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -46,7 +46,7 @@ jobs:
     - run: mike deploy --update-aliases current-snapshot
     - run: mkdir staging
     - run: cp -r site/* staging/
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: generated-docs
         path: staging

@@ -744,7 +744,7 @@ Result:
 
 ## ST_ConcaveHull
 
-Introduction: Return the Concave Hull of polgyon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
+Introduction: Return the Concave Hull of polygon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
 
 Format: 
 
@@ -768,7 +768,7 @@ POLYGON ((125 100, 20 40, 50 60, 175 150, 125 100))
 
 ## ST_ConvexHull
 
-Introduction: Return the Convex Hull of polgyon A
+Introduction: Return the Convex Hull of polygon A
 
 Format: `ST_ConvexHull (A: Geometry)`
 
@@ -1024,7 +1024,7 @@ POINT(160 170)
 
 ## ST_Envelope
 
-Introduction: Return the envelop boundary of A
+Introduction: Return the envelope boundary of A
 
 Format: `ST_Envelope (A: Geometry)`
 
@@ -1812,7 +1812,7 @@ POLYGON ((7 -1, 7 6, 9 6, 9 1, 7 -1), (6 2, 8 2, 8 1, 6 1, 6 2))
 
 Introduction: Given an invalid geometry, create a valid representation of the geometry.
 
-Collapsed geometries are either converted to empty (keepCollaped=true) or a valid geometry of lower dimension (keepCollapsed=false).
+Collapsed geometries are either converted to empty (keepCollapsed=true) or a valid geometry of lower dimension (keepCollapsed=false).
 Default is keepCollapsed=false.
 
 Format: 
@@ -2507,7 +2507,7 @@ MULTIPOLYGON (((-2 -3, -3 -3, -3 3, -2 3, -2 -3)), ((3 -3, 3 3, 4 3, 4 -3, 3 -3)
 
 Introduction:
 
-Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS. For SourceCRS and TargetCRS, WKT format is also available since v1.3.1.
+Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS. For SourceCRS and TargetCRS, WKT format is also available since `v1.3.1`. Since `v1.5.1`, if the `SourceCRS` is not specified, CRS will be fetched from the geometry using [ST_SRID](#st_srid).
 
 **Lon/Lat Order in the input geometry**
 
@@ -2560,7 +2560,15 @@ PROJCS["WGS 84 / Pseudo-Mercator",
 Format: 
 
 ```
-ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String, [Optional] lenientMode: Boolean)
+ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String, lenientMode: Boolean)
+```
+
+```
+ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String)
+```
+
+```
+ST_Transform (A: Geometry, TargetCRS: String)
 ```
 
 Since: `v1.2.0`
@@ -2846,4 +2854,3 @@ Output:
 ```
 4.0
 ```
-

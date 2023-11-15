@@ -133,4 +133,3 @@ mkdocs build
 mike deploy --update-aliases latest-snapshot -b website -p
 mike serve
 ```
-

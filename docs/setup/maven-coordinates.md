@@ -118,7 +118,7 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 
 	=== "Sedona 1.3.1+"
 
-		Add unidata repo to your POM.xml
+		Add unidata repo to your pom.xml
 
 		```
 		<repositories>
@@ -253,7 +253,7 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 
 	=== "Sedona 1.3.1+"
 
-		Add unidata repo to your POM.xml
+		Add unidata repo to your pom.xml
 
 		```
 		<repositories>
@@ -289,11 +289,11 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 ## SNAPSHOT versions
 Sometimes Sedona has a SNAPSHOT version for the upcoming release. It follows the same naming conversion but has "SNAPSHOT" as suffix in the version. For example, `{{ sedona_create_release.current_snapshot }}`
 
-In order to download SNAPSHOTs, you need to add the following repositories in your POM.XML or build.sbt
+In order to download SNAPSHOTs, you need to add the following repositories in your pom.xml or build.sbt
 ### build.sbt
 resolvers +=
   "Apache Software Foundation Snapshots" at "https://repository.apache.org/content/groups/snapshots"
-### POM.XML
+### pom.xml
 
 ```xml
 <repositories>

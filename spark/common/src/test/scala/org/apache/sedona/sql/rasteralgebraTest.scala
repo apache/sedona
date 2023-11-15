@@ -451,6 +451,9 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val actual = df.selectExpr("RS_BandNoDataValue(RS_SetBandNoDataValue(raster, 1, -999))").first().getDouble(0)
       val expected = -999
       assertEquals(expected, actual, 0.001d)
+
+      val actualNull = df.selectExpr("RS_BandNoDataValue(RS_SetBandNoDataValue(raster, 1, null))").first().get(0)
+      assertNull(actualNull)
     }
 
     it("Passed RS_SetBandNoDataValue with empty raster") {
@@ -522,6 +525,37 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(result.size() == 2)
       assert(result.get(0) == 255d)
       assert(result.get(1) == null)
+    }
+
+    it("Passed RS_Clip with raster") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+        .selectExpr("RS_FromGeoTiff(content) as raster",
+                    "ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))') as geom")
+      val clippedDf = df.selectExpr("RS_Clip(raster, 1, geom, 200, false) as clipped")
+
+      val clippedMetadata = df.selectExpr("RS_Metadata(raster)").first().getSeq(0).slice(0, 9)
+      val originalMetadata = clippedDf.selectExpr("RS_Metadata(clipped)").first().getSeq(0).slice(0, 9)
+      assertTrue(originalMetadata.equals(clippedMetadata))
+
+      var actualValues = clippedDf.selectExpr(
+        "RS_Values(clipped, " +
+          "Array(ST_GeomFromWKT('POINT(223802 4.21769e+06)'),ST_GeomFromWKT('POINT(224759 4.20453e+06)')," +
+          "ST_GeomFromWKT('POINT(237201 4.20429e+06)'),ST_GeomFromWKT('POINT(237919 4.20357e+06)')," +
+          "ST_GeomFromWKT('POINT(254668 4.21769e+06)')), 1)"
+      ).first().get(0)
+      var expectedValues = Seq(null, null, 0.0, 0.0, null)
+      assertTrue(expectedValues.equals(actualValues))
+
+      val croppedDf = df.selectExpr("RS_Clip(raster, 1, geom, 200, false) as cropped")
+      actualValues = croppedDf.selectExpr(
+      "RS_Values(cropped, " +
+      "Array(ST_GeomFromWKT('POINT(236842 4.20465e+06)'),ST_GeomFromWKT('POINT(236961 4.20453e+06)')," +
+      "ST_GeomFromWKT('POINT(237201 4.20429e+06)'),ST_GeomFromWKT('POINT(237919 4.20357e+06)')," +
+      "ST_GeomFromWKT('POINT(223802 4.20465e+06)')), 1)"
+      ).first().get(0)
+      expectedValues = Seq(0.0, 0.0, 0.0, 0.0, null)
+      assertTrue(expectedValues.equals(actualValues))
+
     }
 
     it("Passed RS_AsGeoTiff") {

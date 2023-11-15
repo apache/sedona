@@ -413,19 +413,32 @@ public class RasterUtils {
         return geometry;
     }
 
+    /**
+     * Converts data types to data type codes
+     * @param s pixel data type possible values {D, I, B, F, S, US} <br><br>
+     *          Update: add support to convert RS_BandPixelType data type string to data type code possible values: <br>
+     *          {REAL_64BITS, SIGNED_32BITS, UNSIGNED_8BITS, REAL_32BITS, SIGNED_16BITS, UNSIGNED_16BITS}
+     * @return Data type code
+     */
     public static int getDataTypeCode(String s) {
-        switch (s.toLowerCase()) {
-            case "d":
+        switch (s.toUpperCase()) {
+            case "D":
+            case "REAL_64BITS":
                 return 5;
-            case "i":
+            case "I":
+            case "SIGNED_32BITS":
                 return 3;
-            case "b":
+            case "B":
+            case "UNSIGNED_8BITS":
                 return 0;
-            case "f":
+            case "F":
+            case "REAL_32BITS":
                 return 4;
-            case "s":
+            case "S":
+            case "SIGNED_16BITS":
                 return 2;
-            case "us":
+            case "US":
+            case "UNSIGNED_16BITS":
                 return 1;
         }
         return 5; // defaulting to double

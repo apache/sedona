@@ -232,6 +232,7 @@ object Catalog {
     function[RS_PixelAsPolygon](),
     function[RS_PixelAsCentroid](),
     function[RS_Count](),
+    function[RS_Clip](),
     function[RS_Band](),
     function[RS_AddBand](),
     function[RS_SummaryStats](),

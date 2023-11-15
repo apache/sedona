@@ -18,22 +18,50 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
+import org.geotools.coverage.processing.operation.Crop;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.metadata.spatial.PixelOrientation;
+import org.opengis.parameter.ParameterValueGroup;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
+import javax.media.jai.RasterFactory;
+import java.awt.geom.Point2D;
 import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import java.util.Arrays;
+import java.util.Collections;
 
 public class RasterBandEditors {
-    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, int bandIndex, double noDataValue) {
+    /**
+     * Adds no-data value to the raster.
+     * @param raster Source raster to add no-data value
+     * @param bandIndex Band index to add no-data value
+     * @param noDataValue Value to set as no-data value, if null then remove existing no-data value
+     * @return Raster with no-data value
+     */
+    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, int bandIndex, Double noDataValue) {
         RasterUtils.ensureBand(raster, bandIndex);
         Double rasterNoData = RasterBandAccessors.getBandNoDataValue(raster, bandIndex);
-        if ( !(rasterNoData == null) && rasterNoData == noDataValue) {
+
+        // Remove no-Data if it is null
+        if (noDataValue == null) {
+            if (RasterBandAccessors.getBandNoDataValue(raster) == null) {
+                return raster;
+            }
+            GridSampleDimension[] sampleDimensions = raster.getSampleDimensions();
+            sampleDimensions [bandIndex - 1] = RasterUtils.removeNoDataValue(sampleDimensions[bandIndex - 1]);
+            return RasterUtils.create(raster.getRenderedImage(), raster.getGridGeometry(), sampleDimensions, null);
+        }
+
+        if ( !(rasterNoData == null) && rasterNoData.equals(noDataValue)) {
             return raster;
         }
         GridSampleDimension[] bands = raster.getSampleDimensions();
@@ -50,7 +78,13 @@ public class RasterBandEditors {
         return RasterUtils.create(raster.getRenderedImage(), gridGeometry2D, bands, null);
     }
 
-    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, double noDataValue) {
+    /**
+     * Adds no-data value to the raster.
+     * @param raster Source raster to add no-data value
+     * @param noDataValue Value to set as no-data value, if null then remove existing no-data value
+     * @return Raster with no-data value
+     */
+    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, Double noDataValue) {
         return setBandNoDataValue(raster, 1, noDataValue);
     }
 
@@ -140,4 +174,136 @@ public class RasterBandEditors {
                     "Second raster having width of %d and height of %d", width1, height1, width2, height2));
         }
     }
+
+    /**
+     * Return a clipped raster with the specified ROI by the geometry
+     * @param raster Raster to clip
+     * @param band Band number to perform clipping
+     * @param geometry Specify ROI
+     * @param noDataValue no-Data value for empty cells
+     * @param crop Specifies to keep the original extent or not
+     * @return A clip Raster with defined ROI by the geometry
+     */
+    public static GridCoverage2D clip(GridCoverage2D raster, int band, Geometry geometry, double noDataValue, boolean crop) throws FactoryException, TransformException {
+
+        // Selecting the band from original raster
+        RasterUtils.ensureBand(raster, band);
+        GridCoverage2D singleBandRaster = RasterBandAccessors.getBand(raster, new int[]{band});
+
+        // Crop the raster
+        // this will shrink the extent of the raster to the geometry
+        Crop cropObject = new Crop();
+        ParameterValueGroup parameters = cropObject.getParameters();
+        parameters.parameter("Source").setValue(singleBandRaster);
+        parameters.parameter(Crop.PARAMNAME_DEST_NODATA).setValue(new double[]{noDataValue});
+        parameters.parameter(Crop.PARAMNAME_ROI).setValue(geometry);
+
+        GridCoverage2D newRaster = (GridCoverage2D) cropObject.doOperation(parameters, null);
+
+        if (!crop) {
+            double[] metadataOriginal = RasterAccessors.metadata(raster);
+            int widthOriginalRaster = (int) metadataOriginal[2], heightOriginalRaster = (int) metadataOriginal[3];
+            Raster rasterData = RasterUtils.getRaster(raster.getRenderedImage());
+
+
+            // create a new raster and set a default value that's the no-data value
+            String bandType = RasterBandAccessors.getBandType(raster, 1);
+            int dataTypeCode = RasterUtils.getDataTypeCode(RasterBandAccessors.getBandType(raster, 1));
+            boolean isDataTypeIntegral = RasterUtils.isDataTypeIntegral(dataTypeCode);
+            WritableRaster resultRaster = RasterFactory.createBandedRaster(dataTypeCode, widthOriginalRaster, heightOriginalRaster, 1, null);
+            int sizeOfArray = widthOriginalRaster * heightOriginalRaster;
+            if (isDataTypeIntegral) {
+                int[] array = ArrayUtils.toPrimitive(Collections.nCopies(sizeOfArray, (int) noDataValue).toArray(new Integer[sizeOfArray]));
+                resultRaster.setSamples(0, 0, widthOriginalRaster, heightOriginalRaster, 0, array);
+            } else {
+                double[] array = ArrayUtils.toPrimitive(Collections.nCopies(sizeOfArray, noDataValue).toArray(new Double[sizeOfArray]));
+                resultRaster.setSamples(0, 0, widthOriginalRaster, heightOriginalRaster, 0, array);
+            }
+
+            // rasterize the geometry to iterate over the clipped raster
+            GridCoverage2D rasterized = RasterConstructors.asRaster(geometry, raster, bandType, 150);
+            Raster rasterizedData = RasterUtils.getRaster(rasterized.getRenderedImage());
+            double[] metadataRasterized = RasterAccessors.metadata(rasterized);
+            int widthRasterized = (int) metadataRasterized[2], heightRasterized = (int) metadataRasterized[3];
+
+            for (int j = 0; j < heightRasterized; j++) {
+                for(int i = 0; i < widthRasterized; i++) {
+                    Point2D point = RasterUtils.getWorldCornerCoordinates(rasterized, i, j);
+                    int[] rasterCoord = RasterUtils.getGridCoordinatesFromWorld(raster, point.getX(), point.getY());
+                    int x = Math.abs(rasterCoord[0]), y = Math.abs(rasterCoord[1]);
+
+                    if (rasterizedData.getPixel(i, j, (int[]) null)[0] == 0) {
+                        continue;
+                    }
+
+                    if (isDataTypeIntegral) {
+                        int[] pixelValue = rasterData.getPixel(x, y, (int[]) null);
+
+                        resultRaster.setPixel(x, y, new int[]{pixelValue[band - 1]});
+                    } else {
+                        double[] pixelValue = rasterData.getPixel(x, y, (double[]) null);
+
+                        resultRaster.setPixel(x, y, new double[]{pixelValue[band - 1]});
+                    }
+                }
+            }
+            newRaster = RasterUtils.create(resultRaster, raster.getGridGeometry(), newRaster.getSampleDimensions(), noDataValue);
+        } else {
+            // to add no-data value
+            newRaster = RasterUtils.create(newRaster.getRenderedImage(), newRaster.getGridGeometry(), newRaster.getSampleDimensions(), noDataValue);
+        }
+
+        return newRaster;
+    }
+
+    /**
+     * Return a clipped raster with the specified ROI by the geometry.
+     * @param raster Raster to clip
+     * @param band Band number to perform clipping
+     * @param geometry Specify ROI
+     * @param noDataValue no-Data value for empty cells
+     * @return A clip Raster with defined ROI by the geometry
+     */
+    public static GridCoverage2D clip(GridCoverage2D raster, int band, Geometry geometry, double noDataValue) throws FactoryException, TransformException {
+        return clip(raster, band, geometry, noDataValue, true);
+    }
+
+    /**
+     * Return a clipped raster with the specified ROI by the geometry. No-data value will be taken as the lowest possible value for the data type and crop will be `true`.
+     * @param raster Raster to clip
+     * @param band Band number to perform clipping
+     * @param geometry Specify ROI
+     * @return A clip Raster with defined ROI by the geometry
+     */
+    public static GridCoverage2D clip(GridCoverage2D raster, int band, Geometry geometry) throws FactoryException, TransformException {
+        boolean isDataTypeIntegral = RasterUtils.isDataTypeIntegral(RasterUtils.getDataTypeCode(RasterBandAccessors.getBandType(raster, band)));
+
+        if (isDataTypeIntegral) {
+            double noDataValue = Integer.MIN_VALUE;
+            return clip(raster, band, geometry, noDataValue, true);
+        } else {
+            double noDataValue = Double.MIN_VALUE;
+            return clip(raster, band, geometry, noDataValue, true);
+        }
+    }
+
+//    /**
+//     * Return a clipped raster with the specified ROI by the geometry.
+//     * @param raster Raster to clip
+//     * @param band Band number to perform clipping
+//     * @param geometry Specify ROI
+//     * @param crop Specifies to keep the original extent or not
+//     * @return A clip Raster with defined ROI by the geometry
+//     */
+//    public static GridCoverage2D clip(GridCoverage2D raster, int band, Geometry geometry, boolean crop) {
+//        boolean isDataTypeIntegral = RasterUtils.isDataTypeIntegral(RasterUtils.getDataTypeCode(RasterBandAccessors.getBandType(raster, band)));
+//
+//        if (isDataTypeIntegral) {
+//            double noDataValue = Integer.MIN_VALUE;
+//            return clip(raster, band, geometry, noDataValue, crop);
+//        } else {
+//            double noDataValue = Double.MIN_VALUE;
+//            return clip(raster, band, geometry, noDataValue, crop);
+//        }
+//    }
 }

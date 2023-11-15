@@ -280,6 +280,8 @@ object st_functions extends DataFrameAPI {
   def ST_Transform(geometry: String, sourceCRS: String, targetCRS: String): Column = wrapExpression[ST_Transform](geometry, sourceCRS, targetCRS, false)
   def ST_Transform(geometry: Column, sourceCRS: Column, targetCRS: Column, disableError: Column): Column = wrapExpression[ST_Transform](geometry, sourceCRS, targetCRS, disableError)
   def ST_Transform(geometry: String, sourceCRS: String, targetCRS: String, disableError: Boolean): Column = wrapExpression[ST_Transform](geometry, sourceCRS, targetCRS, disableError)
+  def ST_Transform(geometry: String, targetCRS: String): Column = wrapExpression[ST_Transform](geometry, targetCRS)
+  def ST_Transform(geometry: Column, targetCRS: Column): Column = wrapExpression[ST_Transform](geometry, targetCRS)
 
   def ST_Union(a: Column, b: Column): Column = wrapExpression[ST_Union](a, b)
   def ST_Union(a: String, b: String): Column = wrapExpression[ST_Union](a, b)

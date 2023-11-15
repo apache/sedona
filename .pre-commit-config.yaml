@@ -33,4 +33,5 @@ repos:
       # - id: check-yaml
       - id: detect-private-key
       - id: end-of-file-fixer
-        files: \.java$|\.scala$
+        files: \.(java|md|py|scala)$
+        exclude: ^docs/image|^spark/common/src/test/resources
