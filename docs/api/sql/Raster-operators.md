@@ -1560,6 +1560,9 @@ Format:
 
 Since: `v1.4.0`
 
+!!!Note
+    The input geometry points must be in the same CRS as the raster. Ensure that all points' CRS matches the raster's CRS to get accurate values.
+
 Spark SQL Examples:
 
 - For Point Geometry:
@@ -1596,6 +1599,9 @@ Format:
 `RS_Values (raster: Raster, xCoordinates: ARRAY[Integer], yCoordinates: ARRAY[Integer], band: Integer)`
 
 Since: `v1.4.0`
+
+!!!Note
+    The input geometry points must be in the same CRS as the raster. Ensure that all points' CRS matches the raster's CRS to get accurate values.
 
 Spark SQL Example:
 
