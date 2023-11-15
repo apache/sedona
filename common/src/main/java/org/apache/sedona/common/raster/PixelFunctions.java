@@ -42,6 +42,13 @@ public class PixelFunctions
         return values(rasterGeom, Collections.singletonList(geometry), band).get(0);
     }
 
+    public static Double value(GridCoverage2D rasterGeom, int colX, int rowY, int band) throws TransformException
+    {
+        int[] xCoordinates = {colX};
+        int[] yCoordinates = {rowY};
+        return values(rasterGeom, xCoordinates, yCoordinates, band).get(0);
+    }
+
     public static Geometry getPixelAsPolygon(GridCoverage2D raster, int colX, int rowY) throws TransformException, FactoryException {
         int srid = RasterAccessors.srid(raster);
         Point2D point2D1 = RasterUtils.getWorldCornerCoordinates(raster, colX, rowY);
@@ -80,11 +87,8 @@ public class PixelFunctions
     }
 
     public static List<Double> values(GridCoverage2D rasterGeom, int[] xCoordinates, int[] yCoordinates, int band) throws TransformException {
+        RasterUtils.ensureBand(rasterGeom, band); // Check for invalid band index
         int numBands = rasterGeom.getNumSampleDimensions();
-        if (band < 1 || band > numBands) {
-            // Invalid band index. Return nulls.
-            return new ArrayList<>(Collections.nCopies(xCoordinates.length, null));
-        }
 
         double noDataValue = RasterUtils.getNoDataValue(rasterGeom.getSampleDimension(band - 1));
         List<Double> result = new ArrayList<>(xCoordinates.length);
@@ -114,11 +118,9 @@ public class PixelFunctions
     }
 
     public static List<Double> values(GridCoverage2D rasterGeom, List<Geometry> geometries, int band) throws TransformException {
+        RasterUtils.ensureBand(rasterGeom, band); // Check for invalid band index
         int numBands = rasterGeom.getNumSampleDimensions();
-        if (band < 1 || band > numBands) {
-            // Invalid band index. Return nulls.
-            return geometries.stream().map(geom -> (Double) null).collect(Collectors.toList());
-        }
+
         double noDataValue = RasterUtils.getNoDataValue(rasterGeom.getSampleDimension(band - 1));
         double[] pixelBuffer = new double[numBands];
 
