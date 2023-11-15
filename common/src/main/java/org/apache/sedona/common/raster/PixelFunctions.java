@@ -95,10 +95,10 @@ public class PixelFunctions
         double[] pixelBuffer = new double[numBands];
 
         for (int i = 0; i < xCoordinates.length; i++) {
-            double x = xCoordinates[i];
-            double y = yCoordinates[i];
+            int x = xCoordinates[i];
+            int y = yCoordinates[i];
 
-            GridCoordinates2D gridCoord = new GridCoordinates2D((int) x, (int) y);
+            GridCoordinates2D gridCoord = new GridCoordinates2D(x, y);
 
             try {
                 pixelBuffer = rasterGeom.evaluate(gridCoord, pixelBuffer);
