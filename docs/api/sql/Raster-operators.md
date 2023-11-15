@@ -1548,21 +1548,28 @@ Output:
 
 ### RS_Value
 
-Introduction: Returns the value at the given point in the raster.
-If no band number is specified it defaults to 1. 
+Introduction: Returns the value at the given point in the raster. 
 
 Format: 
 
-`RS_Value (raster: Raster, point: Geometry)`
-
 `RS_Value (raster: Raster, point: Geometry, band: Integer)`
+
+`RS_Value (raster: Raster, colX: Integer, colY: Integer, band: Integer)`
 
 Since: `v1.4.0`
 
-Spark SQL Example:
+Spark SQL Examples:
+
+- For Point Geometry:
 
 ```sql
-SELECT RS_Value(raster, ST_Point(-13077301.685, 4002565.802)) FROM raster_table
+SELECT RS_Value(raster, ST_Point(-13077301.685, 4002565.802), 1) FROM raster_table
+```
+
+- For Grid Coordinates:
+
+```sql
+SELECT RS_Value(raster, 3, 4, 1) FROM raster_table
 ```
 
 Output:
@@ -1573,25 +1580,32 @@ Output:
 
 ### RS_Values
 
-Introduction: Returns the values at the given points in the raster.
-If no band number is specified it defaults to 1.
+Introduction: Returns the values at the given points or grid coordinates in the raster.
 
-RS_Values is similar to RS_Value but operates on an array of points.
+RS_Values is similar to RS_Value but operates on an array of points or grid coordinates.
 RS_Values can be significantly faster since a raster only has to be loaded once for several points.
 
 Format: 
 
-`RS_Values (raster: Raster, points: ARRAY[Geometry])`
-
 `RS_Values (raster: Raster, points: ARRAY[Geometry], band: Integer)`
+
+`RS_Values (raster: Raster, xCoordinates: ARRAY[Integer], yCoordinates: ARRAY[Integer], band: Integer)`
 
 Since: `v1.4.0`
 
 Spark SQL Example:
 
+- For Array of Point geometries:
+
 ```sql
-SELECT RS_Values(raster, Array(ST_Point(-1307.5, 400.8), ST_Point(-1403.3, 399.1)))
+SELECT RS_Values(raster, Array(ST_Point(-1307.5, 400.8), ST_Point(-1403.3, 399.1)), 1)
 FROM raster_table
+```
+
+- For Array of row and column grid coordinates:
+
+```sql
+SELECT RS_Values(raster, Array(4, 5), Array(3, 2), 1) FROM raster_table
 ```
 
 Output:
