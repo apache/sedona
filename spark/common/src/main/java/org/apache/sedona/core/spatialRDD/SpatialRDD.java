@@ -53,6 +53,7 @@ import scala.Tuple2;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -568,7 +569,7 @@ public class SpatialRDD<T extends Geometry>
                 Geometry spatialObject = iterator.next();
                 Feature jsonFeature;
                 if (spatialObject.getUserData() != null) {
-                    Map<String, Object> fields = new HashMap<String, Object>();
+                    Map<String, Object> fields = new LinkedHashMap<String, Object>();
                     String[] fieldValues = spatialObject.getUserData().toString().split("\t");
                     if (fieldNames != null && fieldValues.length == fieldNames.size()) {
                         for (int i = 0 ; i < fieldValues.length ; i++) {
