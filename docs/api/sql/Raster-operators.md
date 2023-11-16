@@ -384,6 +384,26 @@ Output:
 54
 ```
 
+### RS_RasterToWorldCoord
+
+Introduction: Returns the upper left X and Y coordinates of the given row and column of the given raster geometric units of the geo-referenced raster. If any out of bounds values are given, the X and Y coordinates of the assumed point considering existing raster pixel size and skew values will be returned.
+
+Format: `RS_RasterToWorldCoord(raster: Raster, colX: Integer, rowY: Integer)`
+
+Since: `v1.5.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_RasterToWorldCoord(ST_MakeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, 4326), 1, 1) from rasters
+```
+
+Output:
+
+```
+[-123, 54]
+```
+
 ### RS_Rotation
 
 Introduction: Returns the uniform rotation of the raster in radian.
