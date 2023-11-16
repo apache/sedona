@@ -184,8 +184,7 @@ public class RasterBandAccessors {
                 sampleDimensionsResult[i] = RasterUtils.createSampleDimensionWithNoDataValue(sampleDimension, noDataValue);
             }
         }
-
-        return RasterUtils.create(wr, resultRaster.getGridGeometry(), sampleDimensionsResult);
+        return RasterUtils.create(wr, sampleDimensionsResult, rasterGeom, null, false); //do not keep meta-data since this will most probably be a new raster
     }
 
     public static String getBandType(GridCoverage2D raster, int band) {

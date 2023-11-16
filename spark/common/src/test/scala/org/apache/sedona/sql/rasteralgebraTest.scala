@@ -1075,7 +1075,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           assert(rast2.getRenderedImage.getSampleModel.getDataType == dataType)
           val noDataValue = RasterUtils.getNoDataValue(rast2.getSampleDimension(0))
           val originalNoDataValue = RasterUtils.getNoDataValue(rast.getSampleDimension(0))
-          assert(noDataValue.equals(originalNoDataValue))
+          assert(noDataValue.isNaN())
           val band = MapAlgebra.bandAsArray(rast, 1)
           val band2 = MapAlgebra.bandAsArray(rast2, 1)
           assert(band.size == band2.size)

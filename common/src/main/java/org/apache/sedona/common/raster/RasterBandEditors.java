@@ -58,7 +58,9 @@ public class RasterBandEditors {
             }
             GridSampleDimension[] sampleDimensions = raster.getSampleDimensions();
             sampleDimensions [bandIndex - 1] = RasterUtils.removeNoDataValue(sampleDimensions[bandIndex - 1]);
-            return RasterUtils.create(raster.getRenderedImage(), raster.getGridGeometry(), sampleDimensions, null);
+            //return RasterUtils.create(raster.getRenderedImage(), raster)
+            return RasterUtils.create(raster.getRenderedImage(), null, sampleDimensions, raster, null, true);
+            //return RasterUtils.create(raster.getRenderedImage(), raster.getGridGeometry(), sampleDimensions, null);
         }
 
         if ( !(rasterNoData == null) && rasterNoData.equals(noDataValue)) {
@@ -74,8 +76,8 @@ public class RasterBandEditors {
                 PixelOrientation.UPPER_LEFT,
                 affine, raster.getCoordinateReferenceSystem2D(), null
         );
-
-        return RasterUtils.create(raster.getRenderedImage(), gridGeometry2D, bands, null);
+        return RasterUtils.create(raster.getRenderedImage(), null, bands, raster, null, true);
+        //return RasterUtils.create(raster.getRenderedImage(), gridGeometry2D, bands, null);
     }
 
     /**
@@ -247,10 +249,12 @@ public class RasterBandEditors {
                     }
                 }
             }
-            newRaster = RasterUtils.create(resultRaster, raster.getGridGeometry(), newRaster.getSampleDimensions(), noDataValue);
+            newRaster = RasterUtils.create(resultRaster, raster.getGridGeometry(), newRaster.getSampleDimensions(), newRaster, noDataValue, true);
+           // newRaster = RasterUtils.create(resultRaster, raster.getGridGeometry(), newRaster.getSampleDimensions(), noDataValue);
         } else {
             // to add no-data value
-            newRaster = RasterUtils.create(newRaster.getRenderedImage(), newRaster.getGridGeometry(), newRaster.getSampleDimensions(), noDataValue);
+            newRaster = RasterUtils.create(newRaster.getRenderedImage(), newRaster.getGridGeometry(), newRaster.getSampleDimensions(), newRaster, noDataValue, true);
+            //newRaster = RasterUtils.create(newRaster.getRenderedImage(), newRaster.getGridGeometry(), newRaster.getSampleDimensions(), noDataValue);
         }
 
         return newRaster;

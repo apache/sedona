@@ -67,7 +67,7 @@ public class PixelFunctionEditors {
         for (int j = rowY; j < rowY + height; j++) {
             for (int i = colX; i < colX + width; i++) {
                 double[] pixel = rasterCopied.getPixel(i, j, (double[]) null);
-                if (keepNoData && noDataValue == pixel[band - 1]) {
+                if (keepNoData && noDataValue != null && noDataValue == pixel[band - 1]) {
                     iterator++;
                     continue;
                 } else {
@@ -77,7 +77,7 @@ public class PixelFunctionEditors {
                 iterator++;
             }
         }
-        return RasterUtils.create(rasterCopied, raster.getGridGeometry(), raster.getSampleDimensions());
+        return RasterUtils.create(rasterCopied, raster.getSampleDimensions(), raster, null, true); //Keep metadata since this is essentially the same raster
     }
 
     /**
@@ -160,7 +160,7 @@ public class PixelFunctionEditors {
                     double[] pixel = rasterCopied.getPixel(i, j, (double[]) null);
                     // [0] as only one band in the rasterized Geometry
                     double pixelNew = rasterizedGeomData.getPixel(k, l, (double[]) null)[0];
-                    if (pixelNew == 0 || keepNoData && noDataValue == pixel[band - 1]) {
+                    if (keepNoData && noDataValue != null && noDataValue == pixel[band - 1]) {
                         continue;
                     } else {
                         pixel[band - 1] = pixelNew;
@@ -169,8 +169,7 @@ public class PixelFunctionEditors {
                 }
             }
         }
-
-        return RasterUtils.create(rasterCopied, raster.getGridGeometry(), raster.getSampleDimensions());
+        return RasterUtils.create(rasterCopied, raster.getSampleDimensions(), raster, null, true); // keep metadata since this is essentially the same raster
     }
 
     /**
