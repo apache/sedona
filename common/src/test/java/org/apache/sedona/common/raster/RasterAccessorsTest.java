@@ -156,6 +156,35 @@ public class RasterAccessorsTest extends RasterTestBase
     }
 
     @Test
+    public void testWorldCoord() throws FactoryException, TransformException {
+        int colX = 1, rowY = 1;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, 4326);
+
+        double[] actual = RasterAccessors.getWorldCoord(emptyRaster, colX, rowY);
+        double[] expected = new double[] {-123, 54};
+
+        assertArrayEquals(expected, actual, 0.1d);
+
+        rowY = 2;
+        actual = RasterAccessors.getWorldCoord(emptyRaster, colX, rowY);
+        expected = new double[] {-123, 44};
+
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testWorldCoordOutOfBounds() throws FactoryException, TransformException{
+        int colX = 4;
+        int rowY = 11;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, 4326);
+
+        double[] expected = new double[] {-108, -46};
+        double[] actual = RasterAccessors.getWorldCoord(emptyRaster, colX, rowY);
+
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
     public void testGridCoordLatLon() throws TransformException, FactoryException {
         double longitude = -123, latitude = 54;
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -123, 54, 1, -1, 0, 0, 4326);
