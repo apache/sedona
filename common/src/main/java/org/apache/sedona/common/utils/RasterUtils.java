@@ -144,6 +144,7 @@ public class RasterUtils {
      * @param referenceRaster referenceRaster to clone from
      * @param noDataValue noDataValue (if any) to be applied to the bands. If provided null. bands are unchanged.
      * @param keepMetadata if passed true, clone all possible metadata from the referenceRaster.
+        keepMetaData controls the presence/absence of the following metadata of the referenceRasterObject
      * @return A cloned raster
      */
     public static GridCoverage2D clone(RenderedImage image, GridGeometry2D gridGeometry2D, GridSampleDimension[] bands, GridCoverage2D referenceRaster, Double noDataValue, boolean keepMetadata) {
@@ -514,7 +515,6 @@ public class RasterUtils {
         }
         // Construct a GridCoverage2D with the copied image.
         return clone(wr, gridCoverage2D.getGridGeometry(), sampleDimensions, gridCoverage2D, null, true);
-        //return create(wr, gridCoverage2D.getGridGeometry(), sampleDimensions);
     }
 
     public static GridCoverage2D copyRasterAndAppendBand(GridCoverage2D gridCoverage2D, Number[] bandValues) {
@@ -550,7 +550,6 @@ public class RasterUtils {
             sampleDimensions[bandIndex - 1] = createSampleDimensionWithNoDataValue(sampleDimension, noDataValue);
         }
         return clone(wr, gridCoverage2D.getGridGeometry(), sampleDimensions, gridCoverage2D, null, true);
-        //return create(wr, gridCoverage2D.getGridGeometry(), sampleDimensions);
     }
 
     public static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, Number[] bandValues) {
