@@ -86,6 +86,10 @@ public class RasterUtils {
      * @param referenceRaster referenceRaster to clone from
      * @param noDataValue noDataValue (if any) to be applied to the bands. If provided null. bands are unchanged.
      * @param keepMetadata if passed true, clone all possible metadata from the referenceRaster.
+                keepMetaData controls the presence/absence of the following metadata of the referenceRasterObject:
+                    raster name: Name of the raster (GridCoverage2D level)
+                    raster properties: A Map of raster and image properties combined.
+                    raster sources
      * @return A cloned raster
      */
     public static GridCoverage2D clone(WritableRaster raster, GridGeometry2D gridGeometry2D, GridSampleDimension[] bands, GridCoverage2D referenceRaster, Double noDataValue, boolean keepMetadata) {
@@ -144,7 +148,10 @@ public class RasterUtils {
      * @param referenceRaster referenceRaster to clone from
      * @param noDataValue noDataValue (if any) to be applied to the bands. If provided null. bands are unchanged.
      * @param keepMetadata if passed true, clone all possible metadata from the referenceRaster.
-        keepMetaData controls the presence/absence of the following metadata of the referenceRasterObject
+        keepMetaData controls the presence/absence of the following metadata of the referenceRasterObject:
+            raster name: Name of the raster (GridCoverage2D level)
+            raster properties: A Map of raster and image properties combined.
+            raster sources
      * @return A cloned raster
      */
     public static GridCoverage2D clone(RenderedImage image, GridGeometry2D gridGeometry2D, GridSampleDimension[] bands, GridCoverage2D referenceRaster, Double noDataValue, boolean keepMetadata) {
@@ -178,6 +185,10 @@ public class RasterUtils {
      * @param gridGeometry The grid geometry of the raster.
      * @param bands The bands of the raster.
      * @param noDataValue the noDataValue (if any) to be applied to all bands. If provided null, bands are unchanged.
+     *                     keepMetaData controls the presence/absence of the following metadata of the referenceRasterObject:
+     *             raster name: Name of the raster (GridCoverage2D level)
+     *             raster properties: A Map of raster and image properties combined.
+     *             raster sources
      * @return A new GridCoverage2D object.
      */
     public static GridCoverage2D create(WritableRaster raster, GridGeometry2D gridGeometry, GridSampleDimension[] bands, Double noDataValue) {
