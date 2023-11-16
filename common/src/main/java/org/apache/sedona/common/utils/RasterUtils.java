@@ -79,11 +79,14 @@ public class RasterUtils {
     }
 
     /**
-     * Create a new raster, cloning all metadata from the passed reference raster.
-     * @param raster The raster object to be wrapped as an image.
-     * @param referenceRaster The reference raster to clone, all metadata is cloned
-     * @param noDataValue new noDataValue
-     * @return cloned raster
+     *
+     * @param raster WriteableRaster to be used while creating the new raster.
+     * @param gridGeometry2D gridGeometry2D to be used while cloning
+     * @param bands bands to be used while cloning
+     * @param referenceRaster referenceRaster to clone from
+     * @param noDataValue noDataValue (if any) to be applied to the bands. If provided null. bands are unchanged.
+     * @param keepMetadata if passed true, clone all possible metadata from the referenceRaster.
+     * @return A cloned raster
      */
     public static GridCoverage2D clone(WritableRaster raster, GridGeometry2D gridGeometry2D, GridSampleDimension[] bands, GridCoverage2D referenceRaster, Double noDataValue, boolean keepMetadata) {
         Map propertyMap = null;
@@ -129,19 +132,20 @@ public class RasterUtils {
         return RasterUtils.clone(raster, null, bands, referenceRaster, noDataValue, keepMetadata);
     }
 
-    /**
-     * Create a new raster, cloning all metadata from the passed reference raster.
-     * @param image The RenderedImage to be used as data for the created GridCoverage2D
-     * @param referenceRaster The reference raster to clone, all metadata is cloned
-     * @param noDataValue new noDataValue
-     * @return cloned raster
-     */
-
-
     public static GridCoverage2D clone(RenderedImage image, GridSampleDimension[] bands, GridCoverage2D referenceRaster, Double noDataValue, boolean keepMetadata) {
         return RasterUtils.clone(image, null, bands, referenceRaster, noDataValue, keepMetadata);
     }
 
+    /**
+     *
+     * @param image Rendered image to create the raster from
+     * @param gridGeometry2D gridGeometry2D to be used while cloning
+     * @param bands bands to be used while cloning
+     * @param referenceRaster referenceRaster to clone from
+     * @param noDataValue noDataValue (if any) to be applied to the bands. If provided null. bands are unchanged.
+     * @param keepMetadata if passed true, clone all possible metadata from the referenceRaster.
+     * @return A cloned raster
+     */
     public static GridCoverage2D clone(RenderedImage image, GridGeometry2D gridGeometry2D, GridSampleDimension[] bands, GridCoverage2D referenceRaster, Double noDataValue, boolean keepMetadata) {
         int numBand = image.getSampleModel().getNumBands();
         if (Objects.isNull(gridGeometry2D)) {
@@ -162,17 +166,19 @@ public class RasterUtils {
         Map propertyMap = null;
         if (keepMetadata) {
             propertyMap = referenceRaster.getProperties();
-        }        CharSequence rasterName = keepMetadata ? referenceRaster.getName() : "genericCoverage";
+        }
+        CharSequence rasterName = keepMetadata ? referenceRaster.getName() : "genericCoverage";
         return gridCoverageFactory.create(rasterName, image, gridGeometry2D, bands, referenceRasterSources, propertyMap);
     }
 
-        /**
-         * Create a new empty raster from the given WritableRaster object.
-         * @param raster The raster object to be wrapped as an image.
-         * @param gridGeometry The grid geometry of the raster.
-         * @param bands The bands of the raster.
-         * @return A new GridCoverage2D object.
-         */
+    /**
+     * Create a new empty raster from the given WritableRaster object.
+     * @param raster The raster object to be wrapped as an image.
+     * @param gridGeometry The grid geometry of the raster.
+     * @param bands The bands of the raster.
+     * @param noDataValue the noDataValue (if any) to be applied to all bands. If provided null, bands are unchanged.
+     * @return A new GridCoverage2D object.
+     */
     public static GridCoverage2D create(WritableRaster raster, GridGeometry2D gridGeometry, GridSampleDimension[] bands, Double noDataValue) {
         int numBand = raster.getNumBands();
         int rasterDataType = raster.getDataBuffer().getDataType();
