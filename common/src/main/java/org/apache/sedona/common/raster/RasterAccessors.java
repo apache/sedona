@@ -32,7 +32,7 @@ import org.opengis.referencing.ReferenceIdentifier;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
-import java.awt.image.RenderedImage;
+import java.awt.geom.Point2D;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -104,6 +104,12 @@ public class RasterAccessors
 
     public static double getWorldCoordY(GridCoverage2D raster, int colX, int rowY) throws TransformException {
         return RasterUtils.getWorldCornerCoordinates(raster, colX, rowY).getY();
+    }
+
+    public static double[] getWorldCoord(GridCoverage2D raster, int colX, int rowY) throws TransformException {
+        Point2D worldCoords = RasterUtils.getWorldCornerCoordinates(raster, colX, rowY);
+        double[] result = {worldCoords.getX(), worldCoords.getY()};
+        return result;
     }
 
     public static String getGeoReference(GridCoverage2D raster) {
