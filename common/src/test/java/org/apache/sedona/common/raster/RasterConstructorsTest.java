@@ -168,11 +168,6 @@ public class RasterConstructorsTest
         assertArrayEquals(expected, actual, 0.1d);
     }
 
-//    @Test
-//    public void test() {
-//        GridCoverage2D testRaster = rasterFromGeoTiff(resourceFolder + "raster/raster")
-//    }
-
 
     @Test
     public void makeEmptyRaster() throws FactoryException {
