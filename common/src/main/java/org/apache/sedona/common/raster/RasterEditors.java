@@ -92,7 +92,7 @@ public class RasterEditors
                 PixelOrientation.UPPER_LEFT,
                 affine, raster.getCoordinateReferenceSystem(), null
         );
-        return RasterUtils.create(raster.getRenderedImage(), gridGeometry2D, raster.getSampleDimensions(), raster, null, true);
+        return RasterUtils.clone(raster.getRenderedImage(), gridGeometry2D, raster.getSampleDimensions(), raster, null, true);
     }
 
     public static GridCoverage2D setGeoReference(GridCoverage2D raster, String geoRefCoords) {

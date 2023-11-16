@@ -170,10 +170,10 @@ public class MapAlgebra
                 WritableRaster convertedRaster = RasterFactory.createBandedRaster(rasterDataType, width, height, 1, null);
                 double[] samples = resultRaster.getSamples(0, 0, width, height, 0, (double[]) null);
                 convertedRaster.setSamples(0, 0, width, height, 0, samples);
-                return RasterUtils.create(convertedRaster,null, gridCoverage2D, noDataValue, false);
+                return RasterUtils.clone(convertedRaster,null, gridCoverage2D, noDataValue, false);
             } else {
                 // build a new GridCoverage2D from the resultImage
-                return RasterUtils.create(resultImage, null, gridCoverage2D, noDataValue, false);
+                return RasterUtils.clone(resultImage, null, gridCoverage2D, noDataValue, false);
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to run map algebra", e);

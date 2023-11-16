@@ -21,7 +21,6 @@ package org.apache.sedona.common.utils;
 import com.sun.media.imageioimpl.common.BogusColorSpace;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.RasterAccessors;
-import org.apache.sedona.common.raster.RasterBandAccessors;
 import org.geotools.coverage.Category;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
@@ -86,7 +85,7 @@ public class RasterUtils {
      * @param noDataValue new noDataValue
      * @return cloned raster
      */
-    public static GridCoverage2D create(WritableRaster raster, GridGeometry2D gridGeometry2D, GridSampleDimension[] bands, GridCoverage2D referenceRaster, Double noDataValue, boolean keepMetadata) {
+    public static GridCoverage2D clone(WritableRaster raster, GridGeometry2D gridGeometry2D, GridSampleDimension[] bands, GridCoverage2D referenceRaster, Double noDataValue, boolean keepMetadata) {
         Map propertyMap = null;
         if (keepMetadata) {
             propertyMap = referenceRaster.getProperties();
@@ -126,8 +125,8 @@ public class RasterUtils {
 
     }
 
-    public static GridCoverage2D create(WritableRaster raster, GridSampleDimension[] bands, GridCoverage2D referenceRaster, Double noDataValue, boolean keepMetadata) {
-        return RasterUtils.create(raster, null, bands, referenceRaster, noDataValue, keepMetadata);
+    public static GridCoverage2D clone(WritableRaster raster, GridSampleDimension[] bands, GridCoverage2D referenceRaster, Double noDataValue, boolean keepMetadata) {
+        return RasterUtils.clone(raster, null, bands, referenceRaster, noDataValue, keepMetadata);
     }
 
     /**
@@ -139,11 +138,11 @@ public class RasterUtils {
      */
 
 
-    public static GridCoverage2D create(RenderedImage image, GridSampleDimension[] bands, GridCoverage2D referenceRaster, Double noDataValue, boolean keepMetadata) {
-        return RasterUtils.create(image, null, bands, referenceRaster, noDataValue, keepMetadata);
+    public static GridCoverage2D clone(RenderedImage image, GridSampleDimension[] bands, GridCoverage2D referenceRaster, Double noDataValue, boolean keepMetadata) {
+        return RasterUtils.clone(image, null, bands, referenceRaster, noDataValue, keepMetadata);
     }
 
-    public static GridCoverage2D create(RenderedImage image, GridGeometry2D gridGeometry2D, GridSampleDimension[] bands, GridCoverage2D referenceRaster, Double noDataValue, boolean keepMetadata) {
+    public static GridCoverage2D clone(RenderedImage image, GridGeometry2D gridGeometry2D, GridSampleDimension[] bands, GridCoverage2D referenceRaster, Double noDataValue, boolean keepMetadata) {
         int numBand = image.getSampleModel().getNumBands();
         if (Objects.isNull(gridGeometry2D)) {
             gridGeometry2D = referenceRaster.getGridGeometry();
@@ -508,7 +507,7 @@ public class RasterUtils {
             sampleDimensions[numBand - 1] = new GridSampleDimension("band" + numBand);
         }
         // Construct a GridCoverage2D with the copied image.
-        return create(wr, gridCoverage2D.getGridGeometry(), sampleDimensions, gridCoverage2D, null, true);
+        return clone(wr, gridCoverage2D.getGridGeometry(), sampleDimensions, gridCoverage2D, null, true);
         //return create(wr, gridCoverage2D.getGridGeometry(), sampleDimensions);
     }
 
@@ -544,7 +543,7 @@ public class RasterUtils {
         } else if (noDataValue != null) {
             sampleDimensions[bandIndex - 1] = createSampleDimensionWithNoDataValue(sampleDimension, noDataValue);
         }
-        return create(wr, gridCoverage2D.getGridGeometry(), sampleDimensions, gridCoverage2D, null, true);
+        return clone(wr, gridCoverage2D.getGridGeometry(), sampleDimensions, gridCoverage2D, null, true);
         //return create(wr, gridCoverage2D.getGridGeometry(), sampleDimensions);
     }
 

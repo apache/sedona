@@ -19,7 +19,6 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.utils.RasterUtils;
-import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.DirectPosition2D;
 import org.locationtech.jts.geom.Coordinate;
@@ -77,7 +76,7 @@ public class PixelFunctionEditors {
                 iterator++;
             }
         }
-        return RasterUtils.create(rasterCopied, raster.getSampleDimensions(), raster, null, true); //Keep metadata since this is essentially the same raster
+        return RasterUtils.clone(rasterCopied, raster.getSampleDimensions(), raster, null, true); //Keep metadata since this is essentially the same raster
     }
 
     /**
@@ -169,7 +168,7 @@ public class PixelFunctionEditors {
                 }
             }
         }
-        return RasterUtils.create(rasterCopied, raster.getSampleDimensions(), raster, null, true); // keep metadata since this is essentially the same raster
+        return RasterUtils.clone(rasterCopied, raster.getSampleDimensions(), raster, null, true); // keep metadata since this is essentially the same raster
     }
 
     /**
