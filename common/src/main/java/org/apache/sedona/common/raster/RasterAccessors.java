@@ -106,10 +106,10 @@ public class RasterAccessors
         return RasterUtils.getWorldCornerCoordinates(raster, colX, rowY).getY();
     }
 
-    public static double[] getWorldCoord(GridCoverage2D raster, int colX, int rowY) throws TransformException {
+    public static Geometry getWorldCoord(GridCoverage2D raster, int colX, int rowY) throws TransformException {
         Point2D worldCoords = RasterUtils.getWorldCornerCoordinates(raster, colX, rowY);
-        double[] result = {worldCoords.getX(), worldCoords.getY()};
-        return result;
+        Geometry point = new GeometryFactory().createPoint(new Coordinate(worldCoords.getX(), worldCoords.getY()));
+        return point;
     }
 
     public static String getGeoReference(GridCoverage2D raster) {

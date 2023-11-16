@@ -160,16 +160,18 @@ public class RasterAccessorsTest extends RasterTestBase
         int colX = 1, rowY = 1;
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, 4326);
 
-        double[] actual = RasterAccessors.getWorldCoord(emptyRaster, colX, rowY);
-        double[] expected = new double[] {-123, 54};
+        Coordinate actual = RasterAccessors.getWorldCoord(emptyRaster, colX, rowY).getCoordinate();
+        double expectedX = -123, expectedY = 54;
 
-        assertArrayEquals(expected, actual, 0.1d);
+        assertEquals(expectedX, actual.getX(), 0.1d);
+        assertEquals(expectedY, actual.getY(), 0.1d);
 
         rowY = 2;
-        actual = RasterAccessors.getWorldCoord(emptyRaster, colX, rowY);
-        expected = new double[] {-123, 44};
+        actual = RasterAccessors.getWorldCoord(emptyRaster, colX, rowY).getCoordinate();
+        expectedY = 44;
 
-        assertArrayEquals(expected, actual, 0.1d);
+        assertEquals(expectedX, actual.getX(), 0.1d);
+        assertEquals(expectedY, actual.getY(), 0.1d);
     }
 
     @Test
@@ -178,10 +180,11 @@ public class RasterAccessorsTest extends RasterTestBase
         int rowY = 11;
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, 4326);
 
-        double[] expected = new double[] {-108, -46};
-        double[] actual = RasterAccessors.getWorldCoord(emptyRaster, colX, rowY);
+        double expectedX = -108, expectedY = -46;
+        Coordinate actual = RasterAccessors.getWorldCoord(emptyRaster, colX, rowY).getCoordinate();
 
-        assertArrayEquals(expected, actual, 0.1d);
+        assertEquals(expectedX, actual.getX(), 0.1d);
+        assertEquals(expectedY, actual.getY(), 0.1d);
     }
 
     @Test

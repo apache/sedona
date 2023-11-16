@@ -972,9 +972,9 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_RasterToWorldCoord with raster") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")
-      val result = df.selectExpr("RS_RasterToWorldCoord(raster, 1, 1)").first().getSeq(0)
-      val expected = mutable.ArraySeq(-1.3095818E7, 4021262.75)
-      assertTrue(expected.equals(result))
+      val result = df.selectExpr("RS_RasterToWorldCoord(raster, 1, 1)").first().get(0).toString
+      val expected = "POINT (-13095818 4021262.75)"
+      assertEquals(expected, result)
     }
 
     it("Passed RS_WorldToRasterCoord with raster") {

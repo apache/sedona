@@ -386,7 +386,7 @@ Output:
 
 ### RS_RasterToWorldCoord
 
-Introduction: Returns the upper left X and Y coordinates of the given row and column of the given raster geometric units of the geo-referenced raster. If any out of bounds values are given, the X and Y coordinates of the assumed point considering existing raster pixel size and skew values will be returned.
+Introduction: Returns the upper left X and Y coordinates of the given row and column of the given raster geometric units of the geo-referenced raster as a Point geometry. If any out of bounds values are given, the X and Y coordinates of the assumed point considering existing raster pixel size and skew values will be returned.
 
 Format: `RS_RasterToWorldCoord(raster: Raster, colX: Integer, rowY: Integer)`
 
@@ -401,7 +401,7 @@ SELECT RS_RasterToWorldCoord(ST_MakeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0
 Output:
 
 ```
-[-123, 54]
+POINT (-123 54)
 ```
 
 ### RS_Rotation
