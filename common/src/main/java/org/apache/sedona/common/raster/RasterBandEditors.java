@@ -58,7 +58,7 @@ public class RasterBandEditors {
             }
             GridSampleDimension[] sampleDimensions = raster.getSampleDimensions();
             sampleDimensions [bandIndex - 1] = RasterUtils.removeNoDataValue(sampleDimensions[bandIndex - 1]);
-            return RasterUtils.create(raster.getRenderedImage(), raster.getGridGeometry(), sampleDimensions, null);
+            return RasterUtils.clone(raster.getRenderedImage(), null, sampleDimensions, raster, null, true);
         }
 
         if ( !(rasterNoData == null) && rasterNoData.equals(noDataValue)) {
@@ -74,8 +74,7 @@ public class RasterBandEditors {
                 PixelOrientation.UPPER_LEFT,
                 affine, raster.getCoordinateReferenceSystem2D(), null
         );
-
-        return RasterUtils.create(raster.getRenderedImage(), gridGeometry2D, bands, null);
+        return RasterUtils.clone(raster.getRenderedImage(), null, bands, raster, null, true);
     }
 
     /**
@@ -247,10 +246,9 @@ public class RasterBandEditors {
                     }
                 }
             }
-            newRaster = RasterUtils.create(resultRaster, raster.getGridGeometry(), newRaster.getSampleDimensions(), noDataValue);
+            newRaster = RasterUtils.clone(resultRaster, raster.getGridGeometry(), newRaster.getSampleDimensions(), newRaster, noDataValue, true);
         } else {
-            // to add no-data value
-            newRaster = RasterUtils.create(newRaster.getRenderedImage(), newRaster.getGridGeometry(), newRaster.getSampleDimensions(), noDataValue);
+            newRaster = RasterUtils.clone(newRaster.getRenderedImage(), newRaster.getGridGeometry(), newRaster.getSampleDimensions(), newRaster, noDataValue, true);
         }
 
         return newRaster;

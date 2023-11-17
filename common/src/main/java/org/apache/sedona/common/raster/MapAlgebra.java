@@ -133,10 +133,16 @@ public class MapAlgebra
         int rasterDataType = pixelType != null? RasterUtils.getDataTypeCode(pixelType) : renderedImage.getSampleModel().getDataType();
         int width = renderedImage.getWidth();
         int height = renderedImage.getHeight();
+        ColorModel originalColorModel = renderedImage.getColorModel();
         // ImageUtils.createConstantImage is slow, manually constructing a buffered image proved to be faster.
         // It also eliminates the data-copying overhead when converting raster data types after running jiffle script.
         WritableRaster resultRaster = RasterFactory.createBandedRaster(DataBuffer.TYPE_DOUBLE, width, height, 1, null);
-        ColorModel cm = PlanarImage.createColorModel(resultRaster.getSampleModel());
+        ColorModel cm;
+        if (originalColorModel.isCompatibleRaster(resultRaster)) {
+            cm = originalColorModel;
+        }else {
+            cm = PlanarImage.createColorModel(resultRaster.getSampleModel());
+        }
         WritableRenderedImage resultImage = new BufferedImage(cm, resultRaster, false, null);
         try {
             String prevScript = previousScript.get();
@@ -164,10 +170,10 @@ public class MapAlgebra
                 WritableRaster convertedRaster = RasterFactory.createBandedRaster(rasterDataType, width, height, 1, null);
                 double[] samples = resultRaster.getSamples(0, 0, width, height, 0, (double[]) null);
                 convertedRaster.setSamples(0, 0, width, height, 0, samples);
-                return RasterUtils.create(convertedRaster, gridCoverage2D.getGridGeometry(), null, noDataValue);
+                return RasterUtils.clone(convertedRaster,null, gridCoverage2D, noDataValue, false);
             } else {
                 // build a new GridCoverage2D from the resultImage
-                return RasterUtils.create(resultImage, gridCoverage2D.getGridGeometry(), null, noDataValue);
+                return RasterUtils.clone(resultImage, null, gridCoverage2D, noDataValue, false);
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to run map algebra", e);
