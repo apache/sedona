@@ -18,17 +18,21 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.commons.math3.stat.StatUtils;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
-import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.FactoryException;
 
 import javax.media.jai.RasterFactory;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 public class RasterBandAccessors {
 
@@ -81,6 +85,182 @@ public class RasterBandAccessors {
 //    public static Integer getCount(GridCoverage2D raster, boolean excludeNoDataValue) {
 //        return getCount(raster, 1, excludeNoDataValue);
 //    }
+
+    /**
+     * @param raster Raster to use for computing stats
+     * @param roi Geometry to define the region of interest
+     * @param band Band to be used for computation
+     * @param excludeNoData Specifies whether to exclude no-data value or not
+     * @return An array with all the stats for the region
+     * @throws FactoryException
+     */
+    public static double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi, int band, boolean excludeNoData) throws FactoryException {
+        List<Object> objects = getStatObjects(raster, roi, band, excludeNoData);
+        DescriptiveStatistics stats = (DescriptiveStatistics) objects.get(0);
+        double[] pixelData = (double[]) objects.get(1);
+
+        // order of stats
+        // count, sum, mean, median, mode, stddev, variance, min, max
+        double[] result = new double[9];
+        result[0] = stats.getN();
+        result[1] = stats.getSum();
+        result[2] = stats.getMean();
+        result[3] = stats.getPercentile(50);
+        result[4] = zonalMode(pixelData);
+        result[5] = stats.getStandardDeviation();
+        result[6] = stats.getVariance();
+        result[7] = stats.getMin();
+        result[8] = stats.getMax();
+
+        return result;
+    }
+
+    /**
+     * @param raster Raster to use for computing stats
+     * @param roi Geometry to define the region of interest
+     * @param band Band to be used for computation
+     * @return An array with all the stats for the region, excludeNoData is set to true
+     * @throws FactoryException
+     */
+    public static double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi, int band) throws FactoryException {
+        return getZonalStatsAll(raster, roi, band, true);
+    }
+
+    /**
+     * @param raster Raster to use for computing stats
+     * @param roi Geometry to define the region of interest
+     * @return An array with all the stats for the region, excludeNoData is set to true and band is set to 1
+     * @throws FactoryException
+     */
+    public static double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi) throws FactoryException {
+        return getZonalStatsAll(raster, roi, 1, true);
+    }
+
+    /**
+     * @param raster Raster to use for computing stats
+     * @param roi Geometry to define the region of interest
+     * @param band Band to be used for computation
+     * @param statType Define the statistic to be computed
+     * @param excludeNoData Specifies whether to exclude no-data value or not
+     * @return A double precision floating point number representing the requested statistic calculated over the specified region.
+     * @throws FactoryException
+     */
+    public static double getZonalStats(GridCoverage2D raster, Geometry roi, int band, String statType, boolean excludeNoData) throws FactoryException {
+
+        List<Object> objects = getStatObjects(raster, roi, band, excludeNoData);
+        DescriptiveStatistics stats = (DescriptiveStatistics) objects.get(0);
+        double[] pixelData = (double[]) objects.get(1);
+
+        switch (statType.toLowerCase()) {
+            case "sum":
+                return stats.getSum();
+            case "average":
+            case "avg":
+            case "mean":
+                return stats.getMean();
+            case "count":
+                return stats.getN();
+            case "max":
+                return stats.getMax();
+            case "min":
+                return stats.getMin();
+            case "stddev":
+            case "sd":
+                return stats.getStandardDeviation();
+            case "median":
+                return stats.getPercentile(50);
+            case "mode":
+                return zonalMode(pixelData);
+            case "variance":
+                return stats.getVariance();
+            default:
+                throw new IllegalArgumentException("Please select from the accepted options. Some of the valid options are sum, mean, stddev, etc.");
+        }
+    }
+
+    /**
+     * @param raster Raster to use for computing stats
+     * @param roi Geometry to define the region of interest
+     * @param band Band to be used for computation
+     * @param statType Define the statistic to be computed
+     * @return A double precision floating point number representing the requested statistic calculated over the specified region. The excludeNoData is set to true.
+     * @throws FactoryException
+     */
+    public static double getZonalStats(GridCoverage2D raster, Geometry roi, int band, String statType) throws FactoryException {
+        return getZonalStats(raster, roi, band, statType, true);
+    }
+
+    /**
+     * @param raster Raster to use for computing stats
+     * @param roi Geometry to define the region of interest
+     * @param statType Define the statistic to be computed
+     * @return A double precision floating point number representing the requested statistic calculated over the specified region. The excludeNoData is set to true and band is set to 1.
+     * @throws FactoryException
+     */
+    public static double getZonalStats(GridCoverage2D raster, Geometry roi, String statType) throws FactoryException {
+        return getZonalStats(raster, roi, 1, statType, true);
+    }
+
+    /**
+     * @param pixelData An array of double with pixel values
+     * @return Mode of the pixel values. If there is multiple with same occurrence, then the largest value will be returned.
+     */
+    private static double zonalMode(double[] pixelData) {
+        double[] modes = StatUtils.mode(pixelData);
+        return modes[modes.length - 1];
+    }
+
+    /**
+     * An intermediate function to compute zonal statistics
+     * @param raster Raster to use for computing stats
+     * @param roi Geometry to define the region of interest
+     * @param band Band to be used for computation
+     * @param excludeNoData Specifies whether to exclude no-data value or not
+     * @return an object of DescriptiveStatistics and an array of double with pixel data.
+     * @throws FactoryException
+     */
+    private static List<Object> getStatObjects(GridCoverage2D raster, Geometry roi, int band, boolean excludeNoData) throws FactoryException {
+        RasterUtils.ensureBand(raster, band);
+
+        if(RasterAccessors.srid(raster) != roi.getSRID()) {
+            throw new IllegalArgumentException("The raster and geometry don't have the same SRID. They should be in the same Coordinate Reference System.");
+        }
+
+        // checking if the raster contains the geometry
+        if (!RasterPredicates.rsIntersects(raster, roi)) {
+            throw new IllegalArgumentException("The provided geometry is not intersecting the raster. Please provide a geometry that is in the raster's extent.");
+        }
+
+        Raster rasterData = RasterUtils.getRaster(raster.getRenderedImage());
+        String datatype = RasterBandAccessors.getBandType(raster, band);
+        Double noDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
+        GridCoverage2D rasterizedGeom = RasterConstructors.asRasterWithRasterExtent(roi, raster, datatype, 150, null);
+        Raster rasterziedData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
+        int width = RasterAccessors.getWidth(rasterizedGeom), height = RasterAccessors.getHeight(rasterizedGeom);
+        double[] rasterizedPixelData = rasterziedData.getSamples(0, 0, width, height, 0, (double[]) null);
+        double[] rasterPixelData = rasterData.getSamples(0, 0, width, height, band - 1, (double[]) null);
+
+        List<Double> pixelData = new ArrayList<>();
+
+        for (int k = 0; k < rasterPixelData.length; k++) {
+
+            if (rasterizedPixelData[k] == 0 || excludeNoData && noDataValue != null && rasterPixelData[k] == noDataValue) {
+                continue;
+            } else {
+                pixelData.add(rasterPixelData[k]);
+            }
+        }
+
+        double[] pixelsArray = pixelData.stream().mapToDouble(d -> d).toArray();
+
+        DescriptiveStatistics stats = new DescriptiveStatistics(pixelsArray);
+
+        List<Object> statObjects = new ArrayList<>();
+
+        statObjects.add(stats);
+        statObjects.add(pixelsArray);
+        return statObjects;
+    }
 
     public static double[] getSummaryStats(GridCoverage2D rasterGeom, int band, boolean excludeNoDataValue) {
         RasterUtils.ensureBand(rasterGeom, band);

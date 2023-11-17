@@ -917,6 +917,129 @@ Output:
 14.0, 204.0, 14.571428571428571, 11.509091348732502, 1.0, 25.0
 ```
 
+### RS_ZonalStats
+
+Introduction: This returns a statistic value specified by `statType` over the region of interest defined by `zone`. It computes the statistic from the pixel values within the ROI geometry and returns the result. If the `excludeNoData` parameter is not specified, it will default to `true`. This excludes NoData values from the statistic calculation. Additionally, if the `band` parameter is not provided, band 1 will be used by default for the statistic computation. The valid options for `statType` are:
+
+- `count`: Number of pixels in the region.
+- `sum`: Sum of pixel values
+- `mean|average|avg`: Arithmetic mean.
+- `median`: Middle value in the region.
+- `mode`: Most occurring value, if there are multiple values with same occurrence then will return the largest number.
+- `stddev|sd`: Standard deviation.
+- `variance`: Variance.
+- `min`: Minimum value in the region.
+- `max`: Maximum value in the region.
+
+!!!note
+    The following conditions will throw an `IllegalArgumentException` if they are not met:
+    
+    - The `raster` and `zone` geometry should be in the same CRS, refer to [RS_SRID](#rs_srid) for raster, and [ST_SRID](../Function/#st_srid) for geometry to get the spatial reference identifier.
+    - The provided `raster` and `zone` geometry should intersect.
+    - The option provided to `statType` should be valid.
+
+Format:
+
+```
+RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, excludeNoData: Boolean)
+```
+
+```
+RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String)
+```
+
+```
+RS_ZonalStats(raster: Raster, zone: Geometry, statType: String)
+```
+
+Since: `v1.5.1`
+
+Spark SQL Example:
+
+```sql
+RS_ZonalStats(rast1, geom1, 1, 'sum', false)
+```
+
+Output:
+
+```
+10690406
+```
+
+Spark SQL Example:
+
+```sql
+RS_ZonalStats(rast2, geom2, 1, 'mean', true)
+```
+
+Output:
+
+```
+226.55992667794473
+```
+
+### RS_ZonalStatsAll
+
+Introduction: Returns an array of statistic values, where each statistic is computed over a region defined by the `zone` geometry. The array contains the following values:
+
+- 0: Count of the pixels.
+- 1: Sum of the pixel values.
+- 2: Arithmetic mean.
+- 3: Median.
+- 4: Mode.
+- 5: Standard deviation.
+- 6: Variance.
+- 7: Minimum value of the zone.
+- 8: Maximum value of the zone.
+
+!!!note
+    The following conditions will throw an `IllegalArgumentException` if they are not met:
+
+    - The `raster` and `zone` geometry should be in the same CRS, refer to [RS_SRID](#rs_srid) for raster, and [ST_SRID](../Function/#st_srid) for geometry to get the spatial reference identifier.
+    - The provided `raster` and `zone` geometry should intersect.
+    - The option provided to `statType` should be valid.
+
+
+Format:
+
+```
+RS_ZonalStatsAll(raster: Raster, zone: Geometry, band: Integer, excludeNodata: Boolean)
+```
+
+```
+RS_ZonalStatsAll(raster: Raster, zone: Geometry, band: Integer)
+```
+
+```
+RS_ZonalStatsAll(raster: Raster, zone: Geometry)
+```
+
+Since: `v1.5.1`
+
+Spark SQL Example:
+
+```sql
+RS_ZonalStatsAll(rast1, geom1, 1, false)
+```
+
+Output:
+
+```
+[184792.0, 1.0690406E7, 57.851021689230684, 0.0, 0.0, 92.13277429243035, 8488.448098819916, 0.0, 255.0]
+```
+
+Spark SQL Example:
+
+```sql
+RS_ZonalStatsAll(rast2, geom2, 1, true)
+```
+
+Output:
+
+```
+[14184.0, 3213526.0, 226.55992667794473, 255.0, 255.0, 74.87605357255357, 5606.423398599913, 1.0, 255.0]
+```
+
 ## Raster Predicates
 
 ### RS_Contains

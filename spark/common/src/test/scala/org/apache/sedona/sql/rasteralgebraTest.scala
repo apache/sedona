@@ -860,6 +860,60 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expected, actual)
     }
 
+    it("Passed RS_ZonalStats") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster", "ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))', 26918) as geom")
+      var actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'sum', true)").first().get(0)
+      assertEquals(1.0690406E7, actual)
+
+      actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'count', false)").first().get(0)
+      assertEquals(184792.0, actual)
+
+      actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mean', false)").first().get(0)
+      assertEquals(57.851021689230684, actual)
+
+      actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'variance')").first().get(0)
+      assertEquals(8488.448098819916, actual)
+
+      actual = df.selectExpr("RS_ZonalStats(raster, geom, 'sd')").first().get(0)
+      assertEquals(92.13277429243035, actual)
+    }
+
+    it("Passed RS_ZonalStats - Raster with no data") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster", "ST_GeomFromWKT('POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000, -180.250000 40.250000, -167.750000 87.750000))', 4326) as geom")
+      var actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'sum', true)").first().get(0)
+      assertEquals(3213526.0, actual)
+
+      actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'count', true)").first().get(0)
+      assertEquals(14184.0, actual)
+
+      actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mean', false)").first().get(0)
+      assertEquals(226.49605300253515, actual)
+
+      actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'variance')").first().get(0)
+      assertEquals(5606.423398599913, actual)
+
+      actual = df.selectExpr("RS_ZonalStats(raster, geom, 'sd')").first().get(0)
+      assertEquals(74.87605357255357, actual)
+    }
+
+    it("Passed RS_ZonalStatsAll") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster", "ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))', 26918) as geom")
+      val actual = df.selectExpr("RS_ZonalStatsAll(raster, geom, 1, true)").first().get(0)
+      val expected = Seq(184792.0, 1.0690406E7, 57.851021689230684, 0.0, 0.0, 92.13277429243035, 8488.448098819916, 0.0, 255.0)
+      assertTrue(expected.equals(actual))
+    }
+
+    it("Passed RS_ZonalStatsAll - Raster with no data") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster", "ST_GeomFromWKT('POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000, -180.250000 40.250000, -167.750000 87.750000))', 4326) as geom")
+      val actual = df.selectExpr("RS_ZonalStatsAll(raster, geom, 1, true)").first().get(0)
+      val expected = Seq(14184.0, 3213526.0, 226.55992667794473, 255.0, 255.0, 74.87605357255357, 5606.423398599913, 1.0, 255.0)
+      assertTrue(expected.equals(actual))
+    }
+
     it("Passed RS_SummaryStats with raster") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")
