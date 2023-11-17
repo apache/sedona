@@ -175,7 +175,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 6, 6, 1, -1, 1, -1, 0, 0, 4326);
         double[] bandValue = new double[]{0, 0, 0, 0, 0, 0, 0, 1, 0, 3, 9, 0, 0, 5, 6, 0, 8, 0, 0, 4, 11, 11, 12, 0, 0, 13, 0, 15, 16, 0, 0, 0, 0, 0, 0, 0};
         raster = MapAlgebra.addBandFromArray(raster, bandValue, 1);
-        raster = RasterBandEditors.setBandNoDataValue(raster, 1, 0);
+        raster = RasterBandEditors.setBandNoDataValue(raster, 1, 0d);
         Geometry geom = Constructors.geomFromWKT("POLYGON((2 -2, 2 -6, 6 -6, 6 -2, 2 -2))", 4326);
 
         double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, true);
