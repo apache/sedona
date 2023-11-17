@@ -240,6 +240,7 @@ object Catalog {
     function[RS_ConvexHull](),
     function[RS_RasterToWorldCoordX](),
     function[RS_RasterToWorldCoordY](),
+    function[RS_RasterToWorldCoord](),
     function[RS_Within](),
     function[RS_Contains](),
     function[RS_WorldToRasterCoord](),
