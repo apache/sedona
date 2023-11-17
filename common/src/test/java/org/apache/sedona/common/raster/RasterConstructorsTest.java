@@ -168,6 +168,20 @@ public class RasterConstructorsTest
         assertArrayEquals(expected, actual, 0.1d);
     }
 
+    @Test
+    public void testAsRasterWithRasterExtent() throws IOException, ParseException, FactoryException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+        Geometry geom = Constructors.geomFromWKT("POLYGON((1.5 1.5, 3.8 3.0, 4.5 4.4, 3.4 3.5, 1.5 1.5))", RasterAccessors.srid(raster));
+        GridCoverage2D rasterized = RasterConstructors.asRasterWithRasterExtent(geom, raster, "d", 612028, 5d);
+
+        int widthActual = RasterAccessors.getWidth(rasterized);
+        int widthExpected = RasterAccessors.getWidth(raster);
+        assertEquals(widthExpected, widthActual);
+
+        int heightActual = RasterAccessors.getHeight(rasterized);
+        int heightExpected = RasterAccessors.getHeight(raster);
+        assertEquals(heightExpected, heightActual);
+    }
 
     @Test
     public void makeEmptyRaster() throws FactoryException {
