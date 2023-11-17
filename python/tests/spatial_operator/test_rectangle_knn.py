@@ -105,4 +105,3 @@ class TestRectangleKNN(TestBase):
         result_no_index = KNNQuery.SpatialKnnQuery(rectangle_rdd, self.query_line, self.top_k, False)
 
         print(result_no_index)
-

@@ -32,7 +32,7 @@ SedonaSQL supports SparkSQL query optimizer, documentation is [Here](../Optimize
 
 The detailed explanation is here [Write a SQL/DataFrame application](../../tutorial/sql.md).
 
-1. Add Sedona-core and Sedona-SQL into your project POM.xml or build.sbt
+1. Add Sedona-core and Sedona-SQL into your project pom.xml or build.sbt
 2. Create your Sedona config if you want to customize your SparkSession.
 ```scala
 import org.apache.sedona.spark.SedonaContext

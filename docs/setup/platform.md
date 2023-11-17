@@ -26,4 +26,3 @@ Sedona binary releases are compiled by Java 1.8 and Scala 2.11/2.12 and tested i
 	|:-----------:| :---------:|:---------:|:---------:|:---------:|:---------:|:---------:|
 	| Scala 2.11  |  not tested  |  not tested  | not tested  | not tested  | not tested  |not tested  |
 	| Scala 2.12 | not tested  |  ✅  | ✅ |  ✅ | ✅ | ✅ | ✅ |
-

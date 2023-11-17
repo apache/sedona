@@ -384,6 +384,26 @@ Output:
 54
 ```
 
+### RS_RasterToWorldCoord
+
+Introduction: Returns the upper left X and Y coordinates of the given row and column of the given raster geometric units of the geo-referenced raster as a Point geometry. If any out of bounds values are given, the X and Y coordinates of the assumed point considering existing raster pixel size and skew values will be returned.
+
+Format: `RS_RasterToWorldCoord(raster: Raster, colX: Integer, rowY: Integer)`
+
+Since: `v1.5.1`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_RasterToWorldCoord(ST_MakeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, 4326), 1, 1) from rasters
+```
+
+Output:
+
+```
+POINT (-123 54)
+```
+
 ### RS_Rotation
 
 Introduction: Returns the uniform rotation of the raster in radian.
@@ -1192,8 +1212,6 @@ Introduction: Returns a raster that is clipped by the given geometry.
 
 If `crop` is not specified then it will default to `true`, meaning it will make the resulting raster shrink to the geometry's extent and if `noDataValue` is not specified then the resulting raster will have the minimum possible value for the band pixel data type.
 
-!!!note
-    When `crop` is `true`, no new raster is created - instead a viewpoint to the source raster is returned, and when `false`, a new raster is generated.
 
 Format:
 
@@ -1414,7 +1432,7 @@ Output:
 
 ### RS_SetBandNoDataValue
 
-Introduction: Sets no data value for given band. If band index not specified then band 1 is assumed. 
+Introduction: This sets the no data value for a specified band in the raster. If the band index is not provided, band 1 is assumed by default. Passing a `null` value for `noDataValue` will remove the no data value and that will ensure all pixels are included in functions rather than excluded as no data.
 
 Format: `RS_SetBandNoDataValue(raster: Raster, bandIndex: Integer = 1, noDataValue: Double)`
 
@@ -1673,8 +1691,7 @@ Output:
 
 ### RS_Value
 
-Introduction: Returns the value at the given point in the raster.
-If no band number is specified it defaults to 1. 
+Introduction: Returns the value at the given point in the raster. If no band number is specified it defaults to 1.
 
 Format: 
 
@@ -1682,12 +1699,25 @@ Format:
 
 `RS_Value (raster: Raster, point: Geometry, band: Integer)`
 
+`RS_Value (raster: Raster, colX: Integer, colY: Integer, band: Integer)`
+
 Since: `v1.4.0`
 
-Spark SQL Example:
+!!!Note
+    The input geometry points must be in the same CRS as the raster. Ensure that all points' CRS matches the raster's CRS to get accurate values.
+
+Spark SQL Examples:
+
+- For Point Geometry:
 
 ```sql
 SELECT RS_Value(raster, ST_Point(-13077301.685, 4002565.802)) FROM raster_table
+```
+
+- For Grid Coordinates:
+
+```sql
+SELECT RS_Value(raster, 3, 4, 1) FROM raster_table
 ```
 
 Output:
@@ -1698,10 +1728,9 @@ Output:
 
 ### RS_Values
 
-Introduction: Returns the values at the given points in the raster.
-If no band number is specified it defaults to 1.
+Introduction: Returns the values at the given points or grid coordinates in the raster. If no band number is specified it defaults to 1.
 
-RS_Values is similar to RS_Value but operates on an array of points.
+RS_Values is similar to RS_Value but operates on an array of points or grid coordinates.
 RS_Values can be significantly faster since a raster only has to be loaded once for several points.
 
 Format: 
@@ -1710,13 +1739,26 @@ Format:
 
 `RS_Values (raster: Raster, points: ARRAY[Geometry], band: Integer)`
 
+`RS_Values (raster: Raster, xCoordinates: ARRAY[Integer], yCoordinates: ARRAY[Integer], band: Integer)`
+
 Since: `v1.4.0`
 
+!!!Note
+    The input geometry points must be in the same CRS as the raster. Ensure that all points' CRS matches the raster's CRS to get accurate values.
+
 Spark SQL Example:
+
+- For Array of Point geometries:
 
 ```sql
 SELECT RS_Values(raster, Array(ST_Point(-1307.5, 400.8), ST_Point(-1403.3, 399.1)))
 FROM raster_table
+```
+
+- For Arrays of grid coordinates:
+
+```sql
+SELECT RS_Values(raster, Array(4, 5), Array(3, 2), 1) FROM raster_table
 ```
 
 Output:

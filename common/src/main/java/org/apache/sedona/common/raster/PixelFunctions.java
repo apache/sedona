@@ -19,6 +19,7 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.utils.RasterUtils;
+import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.DirectPosition2D;
 import org.locationtech.jts.geom.*;
@@ -39,6 +40,18 @@ public class PixelFunctions
     public static Double value(GridCoverage2D rasterGeom, Geometry geometry, int band) throws TransformException
     {
         return values(rasterGeom, Collections.singletonList(geometry), band).get(0);
+    }
+
+    public static Double value(GridCoverage2D rasterGeom, Geometry geometry) throws TransformException
+    {
+        return values(rasterGeom, Collections.singletonList(geometry), 1).get(0);
+    }
+
+    public static Double value(GridCoverage2D rasterGeom, int colX, int rowY, int band) throws TransformException
+    {
+        int[] xCoordinates = {colX};
+        int[] yCoordinates = {rowY};
+        return values(rasterGeom, xCoordinates, yCoordinates, band).get(0);
     }
 
     public static Geometry getPixelAsPolygon(GridCoverage2D raster, int colX, int rowY) throws TransformException, FactoryException {
@@ -77,12 +90,42 @@ public class PixelFunctions
         }
         return GEOMETRY_FACTORY.createPoint(pointCoord);
     }
-    public static List<Double> values(GridCoverage2D rasterGeom, List<Geometry> geometries, int band) throws TransformException {
+
+    public static List<Double> values(GridCoverage2D rasterGeom, int[] xCoordinates, int[] yCoordinates, int band) throws TransformException {
+        RasterUtils.ensureBand(rasterGeom, band); // Check for invalid band index
         int numBands = rasterGeom.getNumSampleDimensions();
-        if (band < 1 || band > numBands) {
-            // Invalid band index. Return nulls.
-            return geometries.stream().map(geom -> (Double) null).collect(Collectors.toList());
+
+        double noDataValue = RasterUtils.getNoDataValue(rasterGeom.getSampleDimension(band - 1));
+        List<Double> result = new ArrayList<>(xCoordinates.length);
+        double[] pixelBuffer = new double[numBands];
+
+        for (int i = 0; i < xCoordinates.length; i++) {
+            int x = xCoordinates[i];
+            int y = yCoordinates[i];
+
+            GridCoordinates2D gridCoord = new GridCoordinates2D(x, y);
+
+            try {
+                pixelBuffer = rasterGeom.evaluate(gridCoord, pixelBuffer);
+                double pixelValue = pixelBuffer[band - 1];
+                if (Double.compare(noDataValue, pixelValue) == 0) {
+                    result.add(null);
+                } else {
+                    result.add(pixelValue);
+                }
+            } catch (PointOutsideCoverageException e) {
+                // Points outside the extent should return null
+                result.add(null);
+            }
         }
+
+        return result;
+    }
+
+    public static List<Double> values(GridCoverage2D rasterGeom, List<Geometry> geometries, int band) throws TransformException {
+        RasterUtils.ensureBand(rasterGeom, band); // Check for invalid band index
+        int numBands = rasterGeom.getNumSampleDimensions();
+
         double noDataValue = RasterUtils.getNoDataValue(rasterGeom.getSampleDimension(band - 1));
         double[] pixelBuffer = new double[numBands];
 
@@ -108,6 +151,10 @@ public class PixelFunctions
             }
         }
         return result;
+    }
+
+    public static List<Double> values(GridCoverage2D rasterGeom, List<Geometry> geometries) throws TransformException {
+        return values(rasterGeom, geometries, 1);
     }
 
     private static Point ensurePoint(Geometry geometry) {

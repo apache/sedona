@@ -736,7 +736,7 @@ Result:
 
 ## ST_ConcaveHull
 
-Introduction: Return the Concave Hull of polgyon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
+Introduction: Return the Concave Hull of polygon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
 
 Format: 
 
@@ -1013,7 +1013,7 @@ POINT(160 170)
 
 ## ST_Envelope
 
-Introduction: Return the envelop boundary of A
+Introduction: Return the envelope boundary of A
 
 Format: `ST_Envelope (A: Geometry)`
 
@@ -2726,5 +2726,3 @@ Output:
 ```
 4.0
 ```
-
-

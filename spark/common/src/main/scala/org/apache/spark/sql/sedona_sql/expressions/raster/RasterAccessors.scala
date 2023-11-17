@@ -121,6 +121,13 @@ case class RS_RasterToWorldCoordY(inputExpressions: Seq[Expression]) extends Inf
     copy(inputExpressions = newChildren)
   }
 }
+
+case class RS_RasterToWorldCoord(inputExpressions: Seq[Expression]) extends InferredExpression(RasterAccessors.getWorldCoord _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class RS_WorldToRasterCoord(inputExpressions: Seq[Expression]) extends InferredExpression(inferrableFunction3(RasterAccessors.getGridCoord), inferrableFunction2(RasterAccessors.getGridCoord)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

@@ -38,7 +38,7 @@ To get started contributing to Sedona, learn [how to contribute](../rule) – an
 
 The PMC regularly adds new committers from the active contributors, based on their contributions to Sedona. The qualifications for new committers include:
 
-* Sustained contributions to Spark: Committers should have a history of major contributions to Sedona.
+* Sustained contributions to Sedona: Committers should have a history of major contributions to Sedona.
 * Quality of contributions: Committers more than any other community member should submit simple, well-tested, and well-designed patches. In addition, they should show sufficient expertise to be able to review patches.
 * Community involvement: Committers should have a constructive and friendly attitude in all community interactions. They should also be active on the dev mailing list & Gitter, and help mentor newer contributors and users.
 

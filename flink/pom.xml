@@ -34,7 +34,7 @@
 
     <properties>
         <maven.deploy.skip>${skip.deploy.common.modules}</maven.deploy.skip>
-        <flink.version>1.14.3</flink.version>
+        <flink.version>1.14.6</flink.version>
         <flink.scope>provided</flink.scope>
     </properties>
 

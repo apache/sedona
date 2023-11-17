@@ -55,7 +55,7 @@ Please see [Use Sedona in a pure SQL environment](../../tutorial/sql-pure-sql/)
 
 ## Self-contained Spark projects
 
-A self-contained project allows you to create multiple Scala / Java files and write complex logics in one place. To use Sedona in your self-contained Spark project, you just need to add Sedona as a dependency in your POM.xml or build.sbt.
+A self-contained project allows you to create multiple Scala / Java files and write complex logics in one place. To use Sedona in your self-contained Spark project, you just need to add Sedona as a dependency in your pom.xml or build.sbt.
 
 1. To add Sedona as dependencies, please read [Sedona Maven Central coordinates](maven-coordinates.md)
 2. Use Sedona Template project to start: [Sedona Template Project](../../tutorial/demo/)
