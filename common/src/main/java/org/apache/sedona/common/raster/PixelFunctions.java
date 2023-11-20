@@ -19,6 +19,8 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.utils.RasterUtils;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.RowFactory;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.DirectPosition2D;
@@ -28,7 +30,9 @@ import org.opengis.geometry.DirectPosition;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
+import javax.lang.model.type.ArrayType;
 import java.awt.geom.Point2D;
+import java.awt.image.Raster;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -89,6 +93,28 @@ public class PixelFunctions
             return factory.createPoint(pointCoord);
         }
         return GEOMETRY_FACTORY.createPoint(pointCoord);
+    }
+
+    public static List<Row> getPixelAsPoints(GridCoverage2D rasterGeom, int band) throws TransformException, FactoryException {
+        RasterUtils.ensureBand(rasterGeom, band);
+
+        int width = RasterAccessors.getWidth(rasterGeom);
+        int height = RasterAccessors.getHeight(rasterGeom);
+
+        Raster r = RasterUtils.getRaster(rasterGeom.getRenderedImage());
+        double[] pixels = r.getSamples(0, 0, width, height, band - 1, (double[]) null);
+
+        List<Row> pointRecords = new ArrayList<>();
+
+        for (int y = 1; y <= height; y++) {
+            for (int x = 1; x <= width; x++) {
+                double pixelValue = pixels[(y - 1) * width + (x - 1)];
+                Geometry pointGeom = getPixelAsPoint(rasterGeom, x, y);
+                pointRecords.add(RowFactory.create(pointGeom, pixelValue, x, y));
+            }
+        }
+
+        return pointRecords;
     }
 
     public static List<Double> values(GridCoverage2D rasterGeom, int[] xCoordinates, int[] yCoordinates, int band) throws TransformException {
