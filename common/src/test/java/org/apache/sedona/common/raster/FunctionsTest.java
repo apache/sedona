@@ -15,6 +15,7 @@ package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
+import org.apache.spark.sql.Row;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.junit.Assert;
@@ -181,6 +182,46 @@ public class FunctionsTest extends RasterTestBase {
         double expectedY = 4021262.7487925636;
         assertEquals(expectedX, coordinate.getX(), 0.2d);
         assertEquals(expectedY, coordinate.getY(), 0.2d);
+    }
+
+    @Test
+    public void testPixelAsPointsOutputSize() throws FactoryException, TransformException {
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 5, 10, 123, -230, 8);
+        List<Row> points = PixelFunctions.getPixelAsPoints(raster, 1);
+        assertEquals(50, points.size());
+    }
+
+    @Test
+    public void testPixelAsPointsValues() throws FactoryException, TransformException {
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 2, 2, 0, 0, 1);
+        List<Row> points = PixelFunctions.getPixelAsPoints(raster, 1);
+        Row point1 = points.get(0);
+        Geometry geom1 = (Geometry) point1.get(0);
+        assertEquals(0, geom1.getCoordinate().x, 1e-9);
+        assertEquals(0, geom1.getCoordinate().y, 1e-9);
+        assertEquals(0.0, point1.getDouble(1), 1e-9);
+
+        Row point2 = points.get(1);
+        Geometry geom2 = (Geometry) point2.get(0);
+        assertEquals(1, geom2.getCoordinate().x, 1e-9);
+        assertEquals(0, geom2.getCoordinate().y, 1e-9);
+        assertEquals(0.0, point2.getDouble(1), 1e-9);
+    }
+
+    @Test
+    public void testPixelAsPointsFromRasterFile() throws IOException, TransformException, FactoryException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+        List<Row> points = PixelFunctions.getPixelAsPoints(raster, 1);
+        // Perform various checks on the points list...
+        // For example, check the first point's coordinates and value
+        Row firstPoint = points.get(0);
+        Geometry firstGeom = (Geometry) firstPoint.get(0);
+        double expectedX = -1.3095818E7; // Expected X coordinate of the first point
+        double expectedY = 4021262.75; // Expected Y coordinate of the first point
+        double val = 0.0;
+        assertEquals(expectedX, firstGeom.getCoordinate().x, 1e-6);
+        assertEquals(expectedY, firstGeom.getCoordinate().y, 1e-6);
+        assertEquals(val, firstPoint.getDouble(1), 1e-9); // Expected pixel value
     }
 
     @Test
