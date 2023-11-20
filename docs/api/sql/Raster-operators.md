@@ -56,6 +56,26 @@ Output:
 IndexOutOfBoundsException: Specified pixel coordinates (6, 2) do not lie in the raster
 ```
 
+### RS_PixelAsPoints
+Introduction: Returns an array of Row objects for a given raster band. 
+Each Row object encapsulates the geometry of the pixel's upper-left corner, the pixel value, and its x and y coordinates within the raster. 
+This function provides a detailed pixel-level analysis of the raster data.
+
+Format: `RS_PixelAsPoints(raster: Raster, band: Integer)`
+
+Since: `v1.5.1`
+
+Spark SQL Example:
+```sql
+SELECT ST_AsText(RS_PixelAsPoints(raster, 1)) from rasters
+```
+
+Output:
+```
+[[POINT (-13065223 4021262.75),148.0,0,0], [POINT (-13065150 4021262.75),123.0,0,1], [POINT (-13065078 4021262.75),99.0,1,0], [POINT (-13065006 4021262.75),140.0,1,1]]
+```
+
+
 ### RS_PixelAsPolygon
 
 Introduction: Returns a polygon geometry that bounds the specified pixel.
