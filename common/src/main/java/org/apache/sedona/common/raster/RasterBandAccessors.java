@@ -18,8 +18,10 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -223,7 +225,13 @@ public class RasterBandAccessors {
         RasterUtils.ensureBand(raster, band);
 
         if(RasterAccessors.srid(raster) != roi.getSRID()) {
-            throw new IllegalArgumentException("The raster and geometry don't have the same SRID. They should be in the same Coordinate Reference System.");
+            Pair<Geometry, Geometry> geometries = RasterUtils.convertCRSIfNeeded(raster, roi);
+            Geometry geom = geometries.getLeft();
+            roi = geometries.getRight();
+            System.out.println(Functions.getSRID(geometries.getLeft()));
+            System.out.println(Functions.getSRID(geometries.getRight()));
+            System.out.println(Functions.asWKT(geom));
+            System.out.println(Functions.asWKT(geometries.getRight()));
         }
 
         // checking if the raster contains the geometry
@@ -234,6 +242,7 @@ public class RasterBandAccessors {
         Raster rasterData = RasterUtils.getRaster(raster.getRenderedImage());
         String datatype = RasterBandAccessors.getBandType(raster, band);
         Double noDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
+        // Adding an arbitrary value '150' for the pixels that are under the geometry.
         GridCoverage2D rasterizedGeom = RasterConstructors.asRasterWithRasterExtent(roi, raster, datatype, 150, null);
         Raster rasterziedData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
         int width = RasterAccessors.getWidth(rasterizedGeom), height = RasterAccessors.getHeight(rasterizedGeom);
@@ -244,6 +253,10 @@ public class RasterBandAccessors {
 
         for (int k = 0; k < rasterPixelData.length; k++) {
 
+            // Pixels with a value of 0 in the rasterizedPixelData are skipped during computation,
+            // as they fall outside the geometry specified by 'roi'.
+            // The region of interest defined by 'roi' contains pixel values of 150,
+            // as initialized when constructing the raster via RasterConstructors.asRasterWithRasterExtent.
             if (rasterizedPixelData[k] == 0 || excludeNoData && noDataValue != null && rasterPixelData[k] == noDataValue) {
                 continue;
             } else {

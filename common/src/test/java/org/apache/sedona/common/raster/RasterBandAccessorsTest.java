@@ -20,11 +20,14 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.Constructors;
+import org.apache.sedona.common.Functions;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -117,7 +120,8 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     public void testZonalStatsWithNoData() throws IOException, FactoryException, ParseException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
         String polygon = "POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000, -180.250000 40.250000, -167.750000 87.750000))";
-        Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
+        // Testing implicit CRS transformation
+        Geometry geom = Constructors.geomFromWKT(polygon, 0);
 
         double actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sum", true);
         double expected = 3213526.0;
@@ -149,10 +153,14 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     }
 
     @Test
-    public void testZonalStatsAll() throws IOException, FactoryException, ParseException {
+    public void testZonalStatsAll() throws IOException, FactoryException, ParseException, TransformException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
         String polygon = "POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))";
-        Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
+        Geometry geom = Constructors.geomFromWKT(polygon, 26918);
+        geom = FunctionsGeoTools.transform(geom, "EPSG:3857");
+        geom.setSRID(3857);
+        System.out.println(Functions.asWKT(geom));
+        System.out.println(geom.getSRID());
 
         double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false);
         double[] expected = new double[] {184792.0, 1.0690406E7, 57.8510, 0.0, 0.0, 92.1327, 8488.4480, 0.0, 255.0};
@@ -176,7 +184,8 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         double[] bandValue = new double[]{0, 0, 0, 0, 0, 0, 0, 1, 0, 3, 9, 0, 0, 5, 6, 0, 8, 0, 0, 4, 11, 11, 12, 0, 0, 13, 0, 15, 16, 0, 0, 0, 0, 0, 0, 0};
         raster = MapAlgebra.addBandFromArray(raster, bandValue, 1);
         raster = RasterBandEditors.setBandNoDataValue(raster, 1, 0d);
-        Geometry geom = Constructors.geomFromWKT("POLYGON((2 -2, 2 -6, 6 -6, 6 -2, 2 -2))", 4326);
+        // Testing implicit CRS transformation
+        Geometry geom = Constructors.geomFromWKT("POLYGON((2 -2, 2 -6, 6 -6, 6 -2, 2 -2))", 0);
 
         double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, true);
         double[] expected = new double[] {13.0, 114.0, 8.7692, 9.0, 11.0, 4.7285, 22.3589, 1.0, 16.0};
