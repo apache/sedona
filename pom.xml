@@ -202,6 +202,12 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-catalyst_${scala.compat.version}</artifactId>
+                <version>${spark.version}</version>
+                <scope>compile</scope>
+            </dependency>
             <!--for CRS transformation-->
             <dependency>
                 <groupId>org.geotools</groupId>
