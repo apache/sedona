@@ -225,13 +225,10 @@ public class RasterBandAccessors {
         RasterUtils.ensureBand(raster, band);
 
         if(RasterAccessors.srid(raster) != roi.getSRID()) {
-            Pair<Geometry, Geometry> geometries = RasterUtils.convertCRSIfNeeded(raster, roi);
-            Geometry geom = geometries.getLeft();
-            roi = geometries.getRight();
-            System.out.println(Functions.getSRID(geometries.getLeft()));
-            System.out.println(Functions.getSRID(geometries.getRight()));
-            System.out.println(Functions.asWKT(geom));
-            System.out.println(Functions.asWKT(geometries.getRight()));
+            // implicitly converting roi geometry CRS to raster CRS
+            roi = RasterUtils.convertCRSIfNeeded(roi, raster.getCoordinateReferenceSystem());
+            // have to set the SRID as RasterUtils.convertCRSIfNeeded doesn't set it even though the geometry is in raster's CRS
+            roi = Functions.setSRID(roi, RasterAccessors.srid(raster));
         }
 
         // checking if the raster contains the geometry

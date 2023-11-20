@@ -155,12 +155,8 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     @Test
     public void testZonalStatsAll() throws IOException, FactoryException, ParseException, TransformException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
-        String polygon = "POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))";
-        Geometry geom = Constructors.geomFromWKT(polygon, 26918);
-        geom = FunctionsGeoTools.transform(geom, "EPSG:3857");
-        geom.setSRID(3857);
-        System.out.println(Functions.asWKT(geom));
-        System.out.println(geom.getSRID());
+        String polygon = "POLYGON ((-8673439.6642 4572993.5327, -8673155.5737 4563873.2099, -8701890.3259 4562931.7093, -8682522.8735 4572703.8908, -8673439.6642 4572993.5327))";
+        Geometry geom = Constructors.geomFromWKT(polygon, 3857);
 
         double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false);
         double[] expected = new double[] {184792.0, 1.0690406E7, 57.8510, 0.0, 0.0, 92.1327, 8488.4480, 0.0, 255.0};
