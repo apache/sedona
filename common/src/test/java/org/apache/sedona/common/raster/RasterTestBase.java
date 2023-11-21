@@ -47,6 +47,8 @@ public class RasterTestBase {
 
     protected static final String resourceFolder = System.getProperty("user.dir") + "/../spark/common/src/test/resources/";
 
+    protected static final double FP_TOLERANCE2 = 1E-7;
+
     GridCoverage2D oneBandRaster;
     GridCoverage2D multiBandRaster;
     byte[] geoTiff;
