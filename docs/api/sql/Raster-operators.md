@@ -57,9 +57,7 @@ IndexOutOfBoundsException: Specified pixel coordinates (6, 2) do not lie in the 
 ```
 
 ### RS_PixelAsPoints
-Introduction: Returns an array of Row objects for a given raster band. 
-Each Row object encapsulates the geometry of the pixel's upper-left corner, the pixel value, and its x and y coordinates within the raster. 
-This function provides a detailed pixel-level analysis of the raster data.
+Introduction: Returns a list of the pixel's upper-left corner point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band.
 
 Format: `RS_PixelAsPoints(raster: Raster, band: Integer)`
 
