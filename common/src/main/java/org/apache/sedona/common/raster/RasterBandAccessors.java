@@ -21,6 +21,7 @@ package org.apache.sedona.common.raster;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
@@ -277,39 +278,37 @@ public class RasterBandAccessors {
         Raster raster = RasterUtils.getRaster(rasterGeom.getRenderedImage());
         int height = RasterAccessors.getHeight(rasterGeom), width = RasterAccessors.getWidth(rasterGeom);
         double[] pixels = raster.getSamples(0, 0, width, height, band - 1, (double[]) null);
-        double count = 0, sum = 0, mean = 0, stddev = 0, min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
-        Double noDataValue = RasterBandAccessors.getBandNoDataValue(rasterGeom, band);
-        for (double pixel: pixels) {
-            if(excludeNoDataValue) {
-            // exclude no data values
+
+        List<Double> pixelData = null;
+
+        if (excludeNoDataValue) {
+            pixelData = new ArrayList<>();
+            Double noDataValue = RasterBandAccessors.getBandNoDataValue(rasterGeom, band);
+            for (double pixel: pixels) {
                 if (noDataValue == null || pixel != noDataValue) {
-                    count++;
-                    sum += pixel;
-                    min = Math.min(min, pixel);
-                    max = Math.max(max, pixel);
+                    pixelData.add(pixel);
                 }
-            } else {
-                // include no data values
-                count = pixels.length;
-                sum += pixel;
-                min = Math.min(min, pixel);
-                max = Math.max(max, pixel);
             }
         }
-        if (count == 0) {
-            return new double[] {0, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
+
+        DescriptiveStatistics stats = null;
+
+        if (pixelData == null) {
+            stats = new DescriptiveStatistics(pixels);
+        } else {
+            pixels = pixelData.stream().mapToDouble(d -> d).toArray();
+            stats = new DescriptiveStatistics(pixels);
         }
-        mean = sum / count;
-        for(double pixel: pixels){
-            if (excludeNoDataValue){
-                if (noDataValue == null || pixel != noDataValue) {
-                    stddev += Math.pow(pixel - mean, 2);
-                }
-            } else {
-                stddev += Math.pow(pixel - mean, 2);
-            }
-        }
-        stddev = Math.sqrt(stddev/count);
+
+        StandardDeviation sd = new StandardDeviation(false);
+
+        double count = stats.getN();
+        double sum = stats.getSum();
+        double mean = stats.getMean();
+        double stddev = sd.evaluate(pixels, mean);
+        double min = stats.getMin();
+        double max = stats.getMax();
+
         return new double[]{count, sum, mean, stddev, min, max};
     }
 
