@@ -18,22 +18,18 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
-import org.apache.sedona.common.raster.PixelFunctions
+import org.apache.sedona.common.raster.{PixelFunctions}
 import org.apache.sedona.sql.utils.GeometrySerializer
-import org.apache.spark.sql.Row
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, GenericRowWithSchema}
+import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 import org.apache.spark.sql.sedona_sql.expressions.raster.implicits.RasterInputExpressionEnhancer
-import org.apache.spark.sql.types.{AbstractDataType, ArrayType, BooleanType, DataType, DoubleType, IntegerType, StructField, StructType}
-import org.geotools.coverage.grid.GridCoverage2D
-import org.locationtech.jts.geom.Geometry
+import org.apache.spark.sql.types.{AbstractDataType, ArrayType, DataType, DoubleType, IntegerType, StructType}
 
-import scala.collection.JavaConverters._
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 
 case class RS_Value(inputExpressions: Seq[Expression]) extends InferredExpression(
@@ -68,13 +64,13 @@ case class RS_PixelAsPoints(inputExpressions: Seq[Expression])
     if (rasterGeom == null) {
       null
     } else {
-      val pixelPoints = PixelFunctions.getPixelAsPoints(rasterGeom, band)
-      val rows = pixelPoints.map { case Row(geom, value, x, y) =>
-        val serializedGeom = GeometrySerializer.serialize(geom.asInstanceOf[Geometry])
-        val rowArray = Array[Any](serializedGeom, value, x, y)
+      val pixelRecords = PixelFunctions.getPixelAsPoints(rasterGeom, band)
+      val rows = pixelRecords.map { pixelRecord =>
+        val serializedGeom = GeometrySerializer.serialize(pixelRecord.geom)
+        val rowArray = Array[Any](serializedGeom, pixelRecord.value, pixelRecord.colX, pixelRecord.rowY)
         InternalRow.fromSeq(rowArray)
       }
-      new GenericArrayData(rows)
+      new GenericArrayData(rows.toArray)
     }
   }
 
