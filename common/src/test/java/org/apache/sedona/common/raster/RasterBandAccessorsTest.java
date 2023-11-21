@@ -195,7 +195,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values, 1, 0d);
         double[] actual = RasterBandAccessors.getSummaryStats(emptyRaster);
         double[] expected = {0.0, 0.0, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
-        assertArrayEquals(expected, actual, 1e-4d);
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
     }
 
     @Test
@@ -207,15 +207,15 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values2, 2, 0d);
         double[] actual = RasterBandAccessors.getSummaryStats(emptyRaster, 1, false);
         double[] expected = {25.0, 204.0, 8.1600, 9.2765, 0.0, 25.0};
-        assertArrayEquals(expected, actual, 1e-4d);
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
 
         actual = RasterBandAccessors.getSummaryStats(emptyRaster, 2);
         expected = new double[]{16.0, 642.0, 40.125, 6.9988838395847095, 28.0, 50.0};
-        assertArrayEquals(expected, actual, 1e-4d);
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
 
         actual = RasterBandAccessors.getSummaryStats(emptyRaster);
         expected = new double[] {14.0, 204.0, 14.5714, 7.7617, 1.0, 25.0};
-        assertArrayEquals(expected, actual, 1e-4d);
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
     }
 
     @Test
@@ -223,14 +223,14 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
         double[] actual = RasterBandAccessors.getSummaryStats(raster, 1, false);
         double[] expected = {1036800.0, 2.06233487E8, 198.9134, 95.0905, 0.0, 255.0};
-        assertArrayEquals(expected, actual, 1e-4d);
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
 
         actual = RasterBandAccessors.getSummaryStats(raster, 1);
         expected = new double[]{928192.0, 2.06233487E8, 222.1883, 70.2055, 1.0, 255.0};
-        assertArrayEquals(expected, actual, 1e-4d);
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
 
         actual = RasterBandAccessors.getSummaryStats(raster);
-        assertArrayEquals(expected, actual, 1E-4d);
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
     }
 
     @Test
