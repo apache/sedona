@@ -103,7 +103,9 @@ public class PixelFunctions
 
         AffineTransform2D gridToCRS = RasterUtils.getGDALAffineTransform(rasterGeom);
         double cellSizeX = gridToCRS.getScaleX();
-        double cellSizeY = -gridToCRS.getScaleY();
+        double cellSizeY = gridToCRS.getScaleY();
+        double shearX = gridToCRS.getShearX();
+        double shearY = gridToCRS.getShearY();
 
         int srid = RasterAccessors.srid(rasterGeom);
         GeometryFactory geometryFactory = srid != 0 ? new GeometryFactory(new PrecisionModel(), srid) : GEOMETRY_FACTORY;
@@ -115,8 +117,8 @@ public class PixelFunctions
             for (int x = 1; x <= width; x++) {
                 double pixelValue = pixels[(y - 1) * width + (x - 1)];
 
-                double worldX = upperLeft.getX() + (x - 1) * cellSizeX;
-                double worldY = upperLeft.getY() + (y - 1) * cellSizeY;
+                double worldX = upperLeft.getX() + (x - 1) * cellSizeX + (y - 1) * shearX;
+                double worldY = upperLeft.getY() + (y - 1) * cellSizeY + (x - 1) * shearY;
 
                 Coordinate pointCoord = new Coordinate(worldX, worldY);
                 Geometry pointGeom = geometryFactory.createPoint(pointCoord);
@@ -126,6 +128,7 @@ public class PixelFunctions
 
         return pointRecords;
     }
+
 
 
     public static List<Double> values(GridCoverage2D rasterGeom, int[] xCoordinates, int[] yCoordinates, int band) throws TransformException {
