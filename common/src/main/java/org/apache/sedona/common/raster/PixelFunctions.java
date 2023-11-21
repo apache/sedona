@@ -22,6 +22,7 @@ import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.DirectPosition2D;
+import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.locationtech.jts.geom.*;
 import org.opengis.coverage.PointOutsideCoverageException;
 import org.opengis.geometry.DirectPosition;
@@ -29,6 +30,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import java.awt.geom.Point2D;
+import java.awt.image.Raster;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -79,6 +81,43 @@ public class PixelFunctions
         Geometry polygon = PixelFunctions.getPixelAsPolygon(raster, colX, rowY);
         return  polygon.getCentroid();
     }
+
+    public static List<PixelRecord> getPixelAsCentroids(GridCoverage2D rasterGeom, int band) throws TransformException, FactoryException {
+        RasterUtils.ensureBand(rasterGeom, band);
+
+        int width = RasterAccessors.getWidth(rasterGeom);
+        int height = RasterAccessors.getHeight(rasterGeom);
+
+        Raster r = RasterUtils.getRaster(rasterGeom.getRenderedImage());
+        double[] pixels = r.getSamples(0, 0, width, height, band - 1, (double[]) null);
+
+        AffineTransform2D gridToCRS = RasterUtils.getGDALAffineTransform(rasterGeom);
+        double cellSizeX = gridToCRS.getScaleX();
+        double cellSizeY = gridToCRS.getScaleY();
+        double shearX = gridToCRS.getShearX();
+        double shearY = gridToCRS.getShearY();
+
+        int srid = RasterAccessors.srid(rasterGeom);
+        GeometryFactory geometryFactory = srid != 0 ? new GeometryFactory(new PrecisionModel(), srid) : GEOMETRY_FACTORY;
+
+        Point2D upperLeft = RasterUtils.getWorldCornerCoordinates(rasterGeom, 1, 1);
+        List<PixelRecord> centroidRecords = new ArrayList<>();
+
+        for (int y = 1; y <= height; y++) {
+            for (int x = 1; x <= width; x++) {
+                double pixelValue = pixels[(y - 1) * width + (x - 1)];
+                double worldX = upperLeft.getX() + (x - 0.5) * cellSizeX + (y - 0.5) * shearX;
+                double worldY = upperLeft.getY() + (y - 0.5) * cellSizeY + (x - 0.5) * shearY;
+
+                Coordinate centroidCoord = new Coordinate(worldX, worldY);
+                Geometry centroidGeom = geometryFactory.createPoint(centroidCoord);
+                centroidRecords.add(new PixelRecord(centroidGeom, pixelValue, x, y));
+            }
+        }
+
+        return centroidRecords;
+    }
+
 
     public static Geometry getPixelAsPoint(GridCoverage2D raster, int colX, int rowY) throws TransformException, FactoryException {
         int srid = RasterAccessors.srid(raster);
@@ -164,3 +203,5 @@ public class PixelFunctions
         throw new IllegalArgumentException("Attempting to get the value of a pixel with a non-point geometry.");
     }
 }
+
+
