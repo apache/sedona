@@ -93,7 +93,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
 
         actual = RasterBandAccessors.getZonalStats(raster, geom, 2, "mean", false);
         expected = 220.6062;
-        assertEquals(expected, actual, 1E-4);
+        assertEquals(expected, actual, FP_TOLERANCE);
 
         actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "count");
         expected = 184792.0;
@@ -101,7 +101,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
 
         actual = RasterBandAccessors.getZonalStats(raster, geom, 3, "variance", false);
         expected = 13554.5057;
-        assertEquals(expected, actual, 1E-4);
+        assertEquals(expected, actual, FP_TOLERANCE);
 
         actual = RasterBandAccessors.getZonalStats(raster, geom, "max");
         expected = 255.0;
@@ -113,7 +113,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
 
         actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sd", false);
         expected = 92.1327;
-        assertEquals(expected, actual, 1E-4);
+        assertEquals(expected, actual, FP_TOLERANCE);
     }
 
     @Test
@@ -129,7 +129,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
 
         actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "mean", true);
         expected = 226.5599;
-        assertEquals(expected, actual, 1E-4);
+        assertEquals(expected, actual, FP_TOLERANCE);
 
         actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "count");
         expected = 14184.0;
@@ -137,7 +137,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
 
         actual = RasterBandAccessors.getZonalStats(raster, geom, "variance");
         expected = 5606.4233;
-        assertEquals(expected, actual, 1E-4);
+        assertEquals(expected, actual, FP_TOLERANCE);
 
         actual = RasterBandAccessors.getZonalStats(raster, geom, "max");
         expected = 255.0;
@@ -149,7 +149,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
 
         actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sd", true);
         expected = 74.8760;
-        assertEquals(expected, actual, 1E-4);
+        assertEquals(expected, actual, FP_TOLERANCE);
     }
 
     @Test
@@ -160,7 +160,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
 
         double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false);
         double[] expected = new double[] {184792.0, 1.0690406E7, 57.8510, 0.0, 0.0, 92.1327, 8488.4480, 0.0, 255.0};
-        assertArrayEquals(expected, actual, 1E-4d);
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
     }
 
     @Test
@@ -171,7 +171,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
 
         double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, true);
         double[] expected = new double[] {14184.0, 3213526.0, 226.5599, 255.0, 255.0, 74.8760, 5606.4233, 1.0, 255.0};
-        assertArrayEquals(expected, actual, 1E-4d);
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
     }
 
     @Test
@@ -185,7 +185,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
 
         double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, true);
         double[] expected = new double[] {13.0, 114.0, 8.7692, 9.0, 11.0, 4.7285, 22.3589, 1.0, 16.0};
-        assertArrayEquals(expected, actual, 1E-4d);
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
     }
 
     @Test
