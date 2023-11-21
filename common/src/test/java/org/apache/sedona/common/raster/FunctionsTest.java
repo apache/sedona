@@ -123,6 +123,27 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
+    public void testPixelAsCentroids() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 12, 13, 134, -53, 9);
+        List<PixelRecord> actual = PixelFunctions.getPixelAsCentroids(emptyRaster, 1);
+        String expected = "POINT (156.5 -75.5)";
+//        System.out.println(actual);
+//        for (PixelRecord record : actual){
+//            System.out.println(record.geom+"  "+record.value+"   "+record.colX+"   "+record.rowY);
+//        }
+//        assertEquals(expected, actual);
+
+        // Testing with skewed raster
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 12, 13, 240, -193, 2, 1.5, 3, 2, 0);
+        actual = PixelFunctions.getPixelAsCentroids(emptyRaster, 1);
+        expected = "POINT (252.5 -184.25)";
+        for (PixelRecord record : actual){
+            System.out.println(record.geom+"  "+record.value+"   "+record.colX+"   "+record.rowY);
+        }
+//        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testPixelAsPointUpperLeft() throws FactoryException, TransformException {
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 123, -230, 8);
         Geometry actualPoint = PixelFunctions.getPixelAsPoint(emptyRaster, 1, 1);
