@@ -101,21 +101,22 @@ public class PixelFunctions
         GeometryFactory geometryFactory = srid != 0 ? new GeometryFactory(new PrecisionModel(), srid) : GEOMETRY_FACTORY;
 
         Point2D upperLeft = RasterUtils.getWorldCornerCoordinates(rasterGeom, 1, 1);
-        List<PixelRecord> centroidRecords = new ArrayList<>();
+        List<PixelRecord> pixelRecords = new ArrayList<>();
 
         for (int y = 1; y <= height; y++) {
             for (int x = 1; x <= width; x++) {
                 double pixelValue = pixels[(y - 1) * width + (x - 1)];
+
                 double worldX = upperLeft.getX() + (x - 0.5) * cellSizeX + (y - 0.5) * shearX;
                 double worldY = upperLeft.getY() + (y - 0.5) * cellSizeY + (x - 0.5) * shearY;
 
                 Coordinate centroidCoord = new Coordinate(worldX, worldY);
                 Geometry centroidGeom = geometryFactory.createPoint(centroidCoord);
-                centroidRecords.add(new PixelRecord(centroidGeom, pixelValue, x, y));
+                pixelRecords.add(new PixelRecord(centroidGeom, pixelValue, x, y));
             }
         }
 
-        return centroidRecords;
+        return pixelRecords;
     }
 
 
