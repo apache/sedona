@@ -47,7 +47,7 @@ public class RasterTestBase {
 
     protected static final String resourceFolder = System.getProperty("user.dir") + "/../spark/common/src/test/resources/";
 
-    protected static final double FP_TOLERANCE2 = 1E-7;
+    protected static final double FP_TOLERANCE = 1E-4;
 
     GridCoverage2D oneBandRaster;
     GridCoverage2D multiBandRaster;

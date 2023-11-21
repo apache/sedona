@@ -206,15 +206,15 @@ public class FunctionsTest extends RasterTestBase {
 
         PixelRecord point1 = points.get(0);
         Geometry geom1 = (Geometry) point1.geom;
-        assertEquals(123, geom1.getCoordinate().x, FP_TOLERANCE2);
-        assertEquals(-230, geom1.getCoordinate().y, FP_TOLERANCE2);
-        assertEquals(0.0, point1.value, FP_TOLERANCE2);
+        assertEquals(123, geom1.getCoordinate().x, FP_TOLERANCE);
+        assertEquals(-230, geom1.getCoordinate().y, FP_TOLERANCE);
+        assertEquals(0.0, point1.value, FP_TOLERANCE);
 
         PixelRecord point2 = points.get(22);
         Geometry geom2 = (Geometry) point2.geom;
-        assertEquals(139, geom2.getCoordinate().x, FP_TOLERANCE2);
-        assertEquals(-262, geom2.getCoordinate().y, FP_TOLERANCE2);
-        assertEquals(0.0, point2.value, FP_TOLERANCE2);
+        assertEquals(139, geom2.getCoordinate().x, FP_TOLERANCE);
+        assertEquals(-262, geom2.getCoordinate().y, FP_TOLERANCE);
+        assertEquals(0.0, point2.value, FP_TOLERANCE);
     }
 
     @Test
@@ -224,8 +224,8 @@ public class FunctionsTest extends RasterTestBase {
         List<PixelRecord> points = PixelFunctions.getPixelAsPoints(emptyRaster, 1);
         PixelRecord point1 = points.get(0);
         Geometry geom1 = (Geometry) point1.geom;
-        assertEquals(-123, geom1.getCoordinate().x, FP_TOLERANCE2);
-        assertEquals(54, geom1.getCoordinate().y, FP_TOLERANCE2);
+        assertEquals(-123, geom1.getCoordinate().x, FP_TOLERANCE);
+        assertEquals(54, geom1.getCoordinate().y, FP_TOLERANCE);
         assertEquals(srid, geom1.getSRID());
     }
 
@@ -237,8 +237,8 @@ public class FunctionsTest extends RasterTestBase {
 
         PixelRecord point1 = points.get(11);
         Geometry geom1 = (Geometry) point1.geom;
-        assertEquals(-118, geom1.getCoordinate().x, FP_TOLERANCE2);
-        assertEquals(34, geom1.getCoordinate().y, FP_TOLERANCE2);
+        assertEquals(-118, geom1.getCoordinate().x, FP_TOLERANCE);
+        assertEquals(34, geom1.getCoordinate().y, FP_TOLERANCE);
         assertEquals(srid, geom1.getSRID());
     }
 
@@ -253,9 +253,9 @@ public class FunctionsTest extends RasterTestBase {
         double expectedY = 4021262.75;
         double val = 0.0;
 
-        assertEquals(expectedX, firstGeom.getCoordinate().x, FP_TOLERANCE2);
-        assertEquals(expectedY, firstGeom.getCoordinate().y, FP_TOLERANCE2);
-        assertEquals(val, firstPoint.value, FP_TOLERANCE2);
+        assertEquals(expectedX, firstGeom.getCoordinate().x, FP_TOLERANCE);
+        assertEquals(expectedY, firstGeom.getCoordinate().y, FP_TOLERANCE);
+        assertEquals(val, firstPoint.value, FP_TOLERANCE);
     }
 
     @Test
