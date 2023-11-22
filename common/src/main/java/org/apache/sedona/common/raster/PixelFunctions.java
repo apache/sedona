@@ -119,7 +119,6 @@ public class PixelFunctions
         return pixelRecords;
     }
 
-
     public static Geometry getPixelAsPoint(GridCoverage2D raster, int colX, int rowY) throws TransformException, FactoryException {
         int srid = RasterAccessors.srid(raster);
         Point2D point2D = RasterUtils.getWorldCornerCoordinatesWithRangeCheck(raster, colX, rowY);
