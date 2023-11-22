@@ -13,7 +13,7 @@ Since: `v1.5.0`
 Spark SQL Example:
 
 ```sql
-SELECT ST_AsText(RS_PixelAsPolygon(RS_MakeEmptyRaster(1, 12, 13, 134, -53, 9), 3, 3))
+SELECT ST_AsText(RS_PixelAsCentroid(RS_MakeEmptyRaster(1, 12, 13, 134, -53, 9), 3, 3))
 ```
 
 Output:
