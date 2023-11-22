@@ -20,11 +20,11 @@ package org.apache.sedona.sql
 
 import org.apache.sedona.common.raster.MapAlgebra
 import org.apache.sedona.common.utils.RasterUtils
-import org.apache.spark.sql.SaveMode
-import org.apache.spark.sql.functions.{collect_list, expr}
+import org.apache.spark.sql.{Row, SaveMode}
+import org.apache.spark.sql.functions.{col, collect_list, expr}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.junit.Assert.{assertEquals, assertNull, assertTrue}
-import org.locationtech.jts.geom.{Coordinate, Geometry}
+import org.locationtech.jts.geom.{Coordinate, Geometry, Point}
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
 import java.awt.image.DataBuffer
@@ -983,6 +983,34 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val actualCoordinates = result.getCoordinate;
       assertEquals(expectedX, actualCoordinates.x, 1e-5)
       assertEquals(expectedY, actualCoordinates.y, 1e-5)
+    }
+
+    it("Passed RS_PixelAsPoints with empty raster") {
+      val widthInPixel = 5
+      val heightInPixel = 10
+      val upperLeftX = 123.19
+      val upperLeftY = -12
+      val cellSize = 4
+      val numBands = 2
+      val result = sparkSession.sql(s"SELECT RS_PixelAsPoints(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 1)").first().getList(0);
+      val expected = "[POINT (127.19000244140625 -12),0.0,2,1]"
+      assertEquals(expected, result.get(1).toString)
+    }
+
+    it("Passed RS_PixelAsPoints with raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+
+      var result = df.selectExpr(
+        "explode(RS_PixelAsPoints(raster, 1)) as exploded"
+      ).selectExpr(
+        "exploded.geom as geom",
+        "exploded.value as value",
+        "exploded.x as x",
+        "exploded.y as y"
+      )
+
+      assert(result.count() == 264704)
     }
 
     it("Passed RS_PixelAsPolygon with raster") {

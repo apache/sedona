@@ -184,6 +184,93 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
+    public void testPixelAsPointSkewedRaster() throws FactoryException, TransformException {
+        // Testing with skewed raster
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 12, 13, 240, -193, 2, 1.5, 3, 2, 0);
+        String actual = Functions.asWKT(PixelFunctions.getPixelAsPoint(emptyRaster, 3, 3));
+        String expected = "POINT (250 -186)";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testPixelAsPointsOutputSize() throws FactoryException, TransformException {
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 5, 10, 123, -230, 8);
+        List<PixelRecord> points = PixelFunctions.getPixelAsPoints(raster, 1);
+        assertEquals(50, points.size());
+    }
+
+    @Test
+    public void testPixelAsPointsValues() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 123, -230, 8);
+        List<PixelRecord> points = PixelFunctions.getPixelAsPoints(emptyRaster, 1);
+
+        PixelRecord point1 = points.get(0);
+        Geometry geom1 = (Geometry) point1.geom;
+        assertEquals(123, geom1.getCoordinate().x, FP_TOLERANCE);
+        assertEquals(-230, geom1.getCoordinate().y, FP_TOLERANCE);
+        assertEquals(0.0, point1.value, FP_TOLERANCE);
+
+        PixelRecord point2 = points.get(22);
+        Geometry geom2 = (Geometry) point2.geom;
+        assertEquals(139, geom2.getCoordinate().x, FP_TOLERANCE);
+        assertEquals(-262, geom2.getCoordinate().y, FP_TOLERANCE);
+        assertEquals(0.0, point2.value, FP_TOLERANCE);
+    }
+
+    @Test
+    public void testPixelAsPointsCustomSRIDPlanar() throws FactoryException, TransformException {
+        int srid = 3857;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -123, 54, 5, 5, 0, 0, srid);
+        List<PixelRecord> points = PixelFunctions.getPixelAsPoints(emptyRaster, 1);
+        PixelRecord point1 = points.get(0);
+        Geometry geom1 = (Geometry) point1.geom;
+        assertEquals(-123, geom1.getCoordinate().x, FP_TOLERANCE);
+        assertEquals(54, geom1.getCoordinate().y, FP_TOLERANCE);
+        assertEquals(srid, geom1.getSRID());
+    }
+
+    @Test
+    public void testPixelAsPointsSRIDSpherical() throws FactoryException, TransformException {
+        int srid = 4326;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, srid);
+        List<PixelRecord> points = PixelFunctions.getPixelAsPoints(emptyRaster, 1);
+
+        PixelRecord point1 = points.get(11);
+        Geometry geom1 = (Geometry) point1.geom;
+        assertEquals(-118, geom1.getCoordinate().x, FP_TOLERANCE);
+        assertEquals(34, geom1.getCoordinate().y, FP_TOLERANCE);
+        assertEquals(srid, geom1.getSRID());
+    }
+
+    @Test
+    public void testPixelAsPointsFromRasterFile() throws IOException, TransformException, FactoryException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+        List<PixelRecord> points = PixelFunctions.getPixelAsPoints(raster, 1);
+        PixelRecord firstPoint = points.get(0);
+        Geometry firstGeom = (Geometry) firstPoint.geom;
+
+        double expectedX = -1.3095818E7;
+        double expectedY = 4021262.75;
+        double val = 0.0;
+
+        assertEquals(expectedX, firstGeom.getCoordinate().x, FP_TOLERANCE);
+        assertEquals(expectedY, firstGeom.getCoordinate().y, FP_TOLERANCE);
+        assertEquals(val, firstPoint.value, FP_TOLERANCE);
+    }
+
+    @Test
+    public void testPixelAsPointsSkewedRaster() throws FactoryException, TransformException {
+        // Testing with skewed raster
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 12, 13, 240, -193, 2, 1.5, 3, 2, 0);
+        List<PixelRecord> points = PixelFunctions.getPixelAsPoints(emptyRaster, 1);
+
+        PixelRecord point1 = points.get(26);
+        Geometry geom1 = (Geometry) point1.geom;
+        String expected = "POINT (250 -186)";
+        assertEquals(expected, geom1.toString());
+    }
+
+    @Test
     public void values() throws TransformException {
         // The function 'value' is implemented using 'values'.
         // These test only cover bits not already covered by tests for 'value'

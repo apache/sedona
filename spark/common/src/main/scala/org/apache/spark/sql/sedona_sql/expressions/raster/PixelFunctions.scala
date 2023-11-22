@@ -18,10 +18,19 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
-import org.apache.sedona.common.raster.PixelFunctions
-import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.sedona.common.raster.{PixelFunctions}
+import org.apache.sedona.sql.utils.GeometrySerializer
+import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression}
+import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
+import org.apache.spark.sql.catalyst.util.GenericArrayData
+import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
+import org.apache.spark.sql.sedona_sql.expressions.raster.implicits.RasterInputExpressionEnhancer
+import org.apache.spark.sql.types.{AbstractDataType, ArrayType, DataType, DoubleType, IntegerType, StructType}
+
+import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 
 case class RS_Value(inputExpressions: Seq[Expression]) extends InferredExpression(
   inferrableFunction2(PixelFunctions.value), inferrableFunction3(PixelFunctions.value), inferrableFunction4(PixelFunctions.value)
@@ -36,6 +45,45 @@ case class RS_PixelAsPoint(inputExpressions: Seq[Expression]) extends InferredEx
     copy(inputExpressions = newChildren)
   }
 }
+
+case class RS_PixelAsPoints(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with ExpectsInputTypes {
+
+  override def nullable: Boolean = true
+
+  override def dataType: DataType = ArrayType(new StructType()
+    .add("geom", GeometryUDT)
+    .add("value", DoubleType)
+    .add("x", IntegerType)
+    .add("y", IntegerType))
+
+  override def eval(input: InternalRow): Any = {
+    val rasterGeom = inputExpressions(0).toRaster(input)
+    val band = inputExpressions(1).eval(input).asInstanceOf[Int]
+
+    if (rasterGeom == null) {
+      null
+    } else {
+      val pixelRecords = PixelFunctions.getPixelAsPoints(rasterGeom, band)
+      val rows = pixelRecords.map { pixelRecord =>
+        val serializedGeom = GeometrySerializer.serialize(pixelRecord.geom)
+        val rowArray = Array[Any](serializedGeom, pixelRecord.value, pixelRecord.colX, pixelRecord.rowY)
+        InternalRow.fromSeq(rowArray)
+      }
+      new GenericArrayData(rows.toArray)
+    }
+  }
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): RS_PixelAsPoints = {
+    copy(inputExpressions = newChildren)
+  }
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, IntegerType)
+}
+
+
 
 case class RS_PixelAsPolygon(inputExpressions: Seq[Expression]) extends InferredExpression(PixelFunctions.getPixelAsPolygon _) {
   protected def withNewChildrenInternal(newChilren: IndexedSeq[Expression]) = {
