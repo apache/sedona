@@ -19,9 +19,15 @@
 
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.Constructors;
+import org.apache.sedona.common.Functions;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -73,6 +79,113 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> RasterBandAccessors.getBandNoDataValue(raster, 2));
         assertEquals("Provided band index 2 is not present in the raster", exception.getMessage());
+    }
+
+    @Test
+    public void testZonalStats() throws FactoryException, ParseException, IOException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+        String polygon = "POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))";
+        Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
+
+        double actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sum", false);
+        double expected = 1.0690406E7;
+        assertEquals(expected, actual, 0d);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 2, "mean", false);
+        expected = 220.6062;
+        assertEquals(expected, actual, FP_TOLERANCE);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "count");
+        expected = 184792.0;
+        assertEquals(expected, actual, 0.1d);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 3, "variance", false);
+        expected = 13554.5057;
+        assertEquals(expected, actual, FP_TOLERANCE);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, "max");
+        expected = 255.0;
+        assertEquals(expected, actual, 1E-1);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "min", false);
+        expected = 0.0;
+        assertEquals(expected, actual, 1E-1);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sd", false);
+        expected = 92.1327;
+        assertEquals(expected, actual, FP_TOLERANCE);
+    }
+
+    @Test
+    public void testZonalStatsWithNoData() throws IOException, FactoryException, ParseException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+        String polygon = "POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000, -180.250000 40.250000, -167.750000 87.750000))";
+        // Testing implicit CRS transformation
+        Geometry geom = Constructors.geomFromWKT(polygon, 0);
+
+        double actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sum", true);
+        double expected = 3213526.0;
+        assertEquals(expected, actual, 0d);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "mean", true);
+        expected = 226.5599;
+        assertEquals(expected, actual, FP_TOLERANCE);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "count");
+        expected = 14184.0;
+        assertEquals(expected, actual, 0.1d);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, "variance");
+        expected = 5606.4233;
+        assertEquals(expected, actual, FP_TOLERANCE);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, "max");
+        expected = 255.0;
+        assertEquals(expected, actual, 1E-1);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "min", true);
+        expected = 1.0;
+        assertEquals(expected, actual, 1E-1);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sd", true);
+        expected = 74.8760;
+        assertEquals(expected, actual, FP_TOLERANCE);
+    }
+
+    @Test
+    public void testZonalStatsAll() throws IOException, FactoryException, ParseException, TransformException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+        String polygon = "POLYGON ((-8673439.6642 4572993.5327, -8673155.5737 4563873.2099, -8701890.3259 4562931.7093, -8682522.8735 4572703.8908, -8673439.6642 4572993.5327))";
+        Geometry geom = Constructors.geomFromWKT(polygon, 3857);
+
+        double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false);
+        double[] expected = new double[] {184792.0, 1.0690406E7, 57.8510, 0.0, 0.0, 92.1327, 8488.4480, 0.0, 255.0};
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
+    }
+
+    @Test
+    public void testZonalStatsAllWithNoData() throws IOException, FactoryException, ParseException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+        String polygon = "POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000, -180.250000 40.250000, -167.750000 87.750000))";
+        Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
+
+        double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, true);
+        double[] expected = new double[] {14184.0, 3213526.0, 226.5599, 255.0, 255.0, 74.8760, 5606.4233, 1.0, 255.0};
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
+    }
+
+    @Test
+    public void testZonalStatsAllWithEmptyRaster() throws FactoryException, ParseException {
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 6, 6, 1, -1, 1, -1, 0, 0, 4326);
+        double[] bandValue = new double[]{0, 0, 0, 0, 0, 0, 0, 1, 0, 3, 9, 0, 0, 5, 6, 0, 8, 0, 0, 4, 11, 11, 12, 0, 0, 13, 0, 15, 16, 0, 0, 0, 0, 0, 0, 0};
+        raster = MapAlgebra.addBandFromArray(raster, bandValue, 1);
+        raster = RasterBandEditors.setBandNoDataValue(raster, 1, 0d);
+        // Testing implicit CRS transformation
+        Geometry geom = Constructors.geomFromWKT("POLYGON((2 -2, 2 -6, 6 -6, 6 -2, 2 -2))", 0);
+
+        double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, true);
+        double[] expected = new double[] {13.0, 114.0, 8.7692, 9.0, 11.0, 4.7285, 22.3589, 1.0, 16.0};
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
     }
 
     @Test

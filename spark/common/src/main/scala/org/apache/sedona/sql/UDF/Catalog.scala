@@ -251,6 +251,8 @@ object Catalog {
     function[RS_MinConvexHull](),
     function[RS_AsMatrix](),
     function[RS_AsImage](),
+    function[RS_ZonalStats](),
+    function[RS_ZonalStatsAll](),
     function[RS_Resample]()
   )
 
