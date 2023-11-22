@@ -105,12 +105,15 @@ public class PixelFunctions
                 // Calculate the world coordinates of the pixel's four corners
                 double worldX1 = upperLeft.getX() + (x - 1) * cellSizeX + (y - 1) * shearX;
                 double worldY1 = upperLeft.getY() + (y - 1) * cellSizeY + (x - 1) * shearY;
+
                 double worldX2 = worldX1 + cellSizeX;
-                double worldY2 = worldY1;
-                double worldX3 = worldX2;
-                double worldY3 = worldY1 + cellSizeY;
-                double worldX4 = worldX1;
-                double worldY4 = worldY3;
+                double worldY2 = worldY1 + shearY;
+
+                double worldX3 = worldX2 + shearX;
+                double worldY3 = worldY2 + cellSizeY;
+
+                double worldX4 = worldX1 + shearX;
+                double worldY4 = worldY1 + cellSizeY;
 
                 Coordinate[] coordinates = new Coordinate[] {
                         new Coordinate(worldX1, worldY1),
