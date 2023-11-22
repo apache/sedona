@@ -230,6 +230,7 @@ object Catalog {
     function[RS_GeoTransform](),
     function[RS_PixelAsPoint](),
     function[RS_PixelAsPolygon](),
+    function[RS_PixelAsPolygons](),
     function[RS_PixelAsCentroid](),
     function[RS_Count](),
     function[RS_Clip](),
