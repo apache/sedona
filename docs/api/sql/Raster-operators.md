@@ -74,6 +74,36 @@ Output:
 ```
 
 
+Spark SQL example for extracting Point, value, raster x and y coordinates:
+
+```scala
+val pointDf = sedona.read...
+val rasterDf = sedona.read.format("binaryFile").load("/some/path/*.tiff")
+var df = sedona.read.format("binaryFile").load("/some/path/*.tiff")
+df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+
+df.selectExpr(
+  "explode(RS_PixelAsPoints(raster, 1)) as exploded"
+).selectExpr(
+  "exploded.geom as geom",
+  "exploded.value as value",
+  "exploded.x as x",
+  "exploded.y as y"
+).show(3)
+```
+
+Output:
+
+```
++--------------------------------------+-----+---+---+
+|geom                                  |value|x  |y  |
++--------------------------------------+-----+---+---+
+|POINT (-13095818 4021262.75)          |0.0  |1  |1  |
+|POINT (-13095745.67138728 4021262.75) |0.0  |2  |1  |
+|POINT (-13095673.342774557 4021262.75)|0.0  |3  |1  |
++--------------------------------------+-----+---+---+
+```
+
 ### RS_PixelAsPolygon
 
 Introduction: Returns a polygon geometry that bounds the specified pixel.
