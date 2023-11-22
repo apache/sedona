@@ -204,5 +204,3 @@ public class PixelFunctions
         throw new IllegalArgumentException("Attempting to get the value of a pixel with a non-point geometry.");
     }
 }
-
-
