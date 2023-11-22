@@ -113,21 +113,18 @@ public class FunctionsTest extends RasterTestBase {
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 123, -230, 8);
         List<PixelRecord> points = PixelFunctions.getPixelAsPolygons(emptyRaster, 1);
 
-//        for (PixelRecord record : points){
-//            System.out.println(record.geom+"   "+record.value+"   "+record.colX+"   "+record.rowY);
-//        }
+        PixelRecord point = points.get(11);
+        Geometry geom = (Geometry) point.geom;
+        String expected = "POLYGON ((131 -246, 139 -246, 139 -254, 131 -254, 131 -246))";
+        assertEquals(expected,geom.toString());
 
-//        PixelRecord point1 = points.get(0);
-//        Geometry geom1 = (Geometry) point1.geom;
-//        assertEquals(0, geom1.getCoordinate().x, 1e-9);
-//        assertEquals(0, geom1.getCoordinate().y, 1e-9);
-//        assertEquals(0.0, point1.value, 1e-9);
-//
-//        PixelRecord point2 = points.get(1);
-//        Geometry geom2 = (Geometry) point2.geom;
-//        assertEquals(1, geom2.getCoordinate().x, 1e-9);
-//        assertEquals(0, geom2.getCoordinate().y, 1e-9);
-//        assertEquals(0.0, point2.value, 1e-9);
+        // Testing with skewed raster
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 234, -43, 3, 4, 2,3,0);
+        points = PixelFunctions.getPixelAsPolygons(emptyRaster, 1);
+        point = points.get(11);
+        geom = (Geometry) point.geom;
+        expected = "POLYGON ((241 -32, 244 -29, 246 -25, 243 -28, 241 -32))";
+        assertEquals(expected,geom.toString());
     }
 
     @Test
