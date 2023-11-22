@@ -109,6 +109,28 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
+    public void testPixelAsPointsPolygons() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 123, -230, 8);
+        List<PixelRecord> points = PixelFunctions.getPixelAsPolygons(emptyRaster, 1);
+
+//        for (PixelRecord record : points){
+//            System.out.println(record.geom+"   "+record.value+"   "+record.colX+"   "+record.rowY);
+//        }
+
+//        PixelRecord point1 = points.get(0);
+//        Geometry geom1 = (Geometry) point1.geom;
+//        assertEquals(0, geom1.getCoordinate().x, 1e-9);
+//        assertEquals(0, geom1.getCoordinate().y, 1e-9);
+//        assertEquals(0.0, point1.value, 1e-9);
+//
+//        PixelRecord point2 = points.get(1);
+//        Geometry geom2 = (Geometry) point2.geom;
+//        assertEquals(1, geom2.getCoordinate().x, 1e-9);
+//        assertEquals(0, geom2.getCoordinate().y, 1e-9);
+//        assertEquals(0.0, point2.value, 1e-9);
+    }
+
+    @Test
     public void testPixelAsCentroid() throws FactoryException, TransformException {
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 12, 13, 134, -53, 9);
         String actual = Functions.asWKT(PixelFunctions.getPixelAsCentroid(emptyRaster, 3, 3));
