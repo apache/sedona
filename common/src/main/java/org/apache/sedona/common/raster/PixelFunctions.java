@@ -129,8 +129,6 @@ public class PixelFunctions
         return pointRecords;
     }
 
-
-
     public static List<Double> values(GridCoverage2D rasterGeom, int[] xCoordinates, int[] yCoordinates, int band) throws TransformException {
         RasterUtils.ensureBand(rasterGeom, band); // Check for invalid band index
         int numBands = rasterGeom.getNumSampleDimensions();
@@ -204,4 +202,3 @@ public class PixelFunctions
         throw new IllegalArgumentException("Attempting to get the value of a pixel with a non-point geometry.");
     }
 }
-
