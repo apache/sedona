@@ -942,7 +942,7 @@ Output:
 Introduction: This returns a statistic value specified by `statType` over the region of interest defined by `zone`. It computes the statistic from the pixel values within the ROI geometry and returns the result. If the `excludeNoData` parameter is not specified, it will default to `true`. This excludes NoData values from the statistic calculation. Additionally, if the `band` parameter is not provided, band 1 will be used by default for the statistic computation. The valid options for `statType` are:
 
 - `count`: Number of pixels in the region.
-- `sum`: Sum of pixel values
+- `sum`: Sum of pixel values.
 - `mean|average|avg`: Arithmetic mean.
 - `median`: Middle value in the region.
 - `mode`: Most occurring value, if there are multiple values with same occurrence then will return the largest number.
@@ -952,9 +952,10 @@ Introduction: This returns a statistic value specified by `statType` over the re
 - `max`: Maximum value in the region.
 
 !!!note
+    If the coordinate reference system (CRS) of the input `zone` geometry differs from that of the `raster`, then `zone` will be transformed to match the CRS of the `raster` before computation.    
+
     The following conditions will throw an `IllegalArgumentException` if they are not met:
     
-    - The `raster` and `zone` geometry should be in the same CRS, refer to [RS_SRID](#rs_srid) for raster, and [ST_SRID](../Function/#st_srid) for geometry to get the spatial reference identifier.
     - The provided `raster` and `zone` geometry should intersect.
     - The option provided to `statType` should be valid.
 
@@ -1013,9 +1014,10 @@ Introduction: Returns an array of statistic values, where each statistic is comp
 - 8: Maximum value of the zone.
 
 !!!note
-    The following conditions will throw an `IllegalArgumentException` if they are not met:
+    If the coordinate reference system (CRS) of the input `zone` geometry differs from that of the `raster`, then `zone` will be transformed to match the CRS of the `raster` before computation.
 
-    - The `raster` and `zone` geometry should be in the same CRS, refer to [RS_SRID](#rs_srid) for raster, and [ST_SRID](../Function/#st_srid) for geometry to get the spatial reference identifier.
+    The following conditions will throw an `IllegalArgumentException` if they are not met:
+    
     - The provided `raster` and `zone` geometry should intersect.
     - The option provided to `statType` should be valid.
 
