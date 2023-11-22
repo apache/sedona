@@ -78,6 +78,55 @@ Output:
 POLYGON ((131 -246, 139 -246, 139 -254, 131 -254, 131 -246))
 ```
 
+### RS_PixelAsPolygons
+Introduction: Returns a list of the polygon geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band.
+
+Format: `RS_PixelAsPolygons(raster: Raster, band: Integer)`
+
+Since: `v1.5.1`
+
+Spark SQL Example:
+```sql
+SELECT ST_AsText(RS_PixelAsPolygons(raster, 1)) from rasters
+```
+
+Output:
+```
+[[POLYGON ((123.19000244140625 -12, 127.19000244140625 -12, 127.19000244140625 -16, 123.19000244140625 -16, 123.19000244140625 -12)),0.0,1,1], 
+[POLYGON ((127.19000244140625 -12, 131.19000244140625 -12, 131.19000244140625 -16, 127.19000244140625 -16, 127.19000244140625 -12)),0.0,2,1], 
+[POLYGON ((131.19000244140625 -12, 135.19000244140625 -12, 135.19000244140625 -16, 131.19000244140625 -16, 131.19000244140625 -12)),0.0,3,1]]
+```
+
+Spark SQL example for extracting Point, value, raster x and y coordinates:
+
+```scala
+val pointDf = sedona.read...
+val rasterDf = sedona.read.format("binaryFile").load("/some/path/*.tiff")
+var df = sedona.read.format("binaryFile").load("/some/path/*.tiff")
+df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+
+df.selectExpr(
+  "explode(RS_PixelAsPolygons(raster, 1)) as exploded"
+).selectExpr(
+  "exploded.geom as geom",
+  "exploded.value as value",
+  "exploded.x as x",
+  "exploded.y as y"
+).show(3)
+```
+
+Output:
+
+```
++--------------------+-----+---+---+
+|                geom|value|  x|  y|
++--------------------+-----+---+---+
+|POLYGON ((-130958...|  0.0|  1|  1|
+|POLYGON ((-130957...|  0.0|  2|  1|
+|POLYGON ((-130956...|  0.0|  3|  1|
++--------------------+-----+---+---+
+```
+
 ## Geometry Functions
 
 ### RS_Envelope
