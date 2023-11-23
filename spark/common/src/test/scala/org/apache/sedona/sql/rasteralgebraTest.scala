@@ -1025,6 +1025,35 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expected, result)
     }
 
+    it("Passed RS_PixelAsPolygons with empty raster") {
+      val widthInPixel = 5
+      val heightInPixel = 10
+      val upperLeftX = 123.19
+      val upperLeftY = -12
+      val cellSize = 4
+      val numBands = 2
+      val result = sparkSession.sql(s"SELECT RS_PixelAsPolygons(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 1)").first().getList(0);
+      val expected = "[POLYGON ((127.19000244140625 -20, 131.19000244140625 -20, 131.19000244140625 -24, 127.19000244140625 -24, 127.19000244140625 -20)),0.0,2,3]"
+      assertEquals(expected, result.get(11).toString)
+    }
+
+
+    it("Passed RS_PixelAsPolygons with raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+
+      var result = df.selectExpr(
+        "explode(RS_PixelAsPolygons(raster, 1)) as exploded"
+      ).selectExpr(
+        "exploded.geom as geom",
+        "exploded.value as value",
+        "exploded.x as x",
+        "exploded.y as y"
+      )
+
+      assert(result.count() == 264704)
+    }
+
     it("Passed RS_PixelAsCentroid with raster") {
       val widthInPixel = 12
       val heightInPixel = 13

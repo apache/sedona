@@ -91,6 +91,43 @@ case class RS_PixelAsPolygon(inputExpressions: Seq[Expression]) extends Inferred
   }
 }
 
+case class RS_PixelAsPolygons(inputExpressions: Seq[Expression])
+  extends Expression with CodegenFallback with ExpectsInputTypes {
+
+  override def nullable: Boolean = true
+
+  override def dataType: DataType = ArrayType(new StructType()
+    .add("geom", GeometryUDT)
+    .add("value", DoubleType)
+    .add("x", IntegerType)
+    .add("y", IntegerType))
+
+  override def eval(input: InternalRow): Any = {
+    val rasterGeom = inputExpressions(0).toRaster(input)
+    val band = inputExpressions(1).eval(input).asInstanceOf[Int]
+
+    if (rasterGeom == null) {
+      null
+    } else {
+      val pixelRecords = PixelFunctions.getPixelAsPolygons(rasterGeom, band)
+      val rows = pixelRecords.map { pixelRecord =>
+        val serializedGeom = GeometrySerializer.serialize(pixelRecord.geom)
+        val rowArray = Array[Any](serializedGeom, pixelRecord.value, pixelRecord.colX, pixelRecord.rowY)
+        InternalRow.fromSeq(rowArray)
+      }
+      new GenericArrayData(rows.toArray)
+    }
+  }
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): RS_PixelAsPolygons = {
+    copy(inputExpressions = newChildren)
+  }
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, IntegerType)
+}
+
 case class RS_PixelAsCentroid(inputExpressions: Seq[Expression]) extends InferredExpression(PixelFunctions.getPixelAsCentroid _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

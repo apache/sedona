@@ -76,6 +76,56 @@ public class PixelFunctions
         return GEOMETRY_FACTORY.createPolygon(coordinateArray);
     }
 
+    public static List<PixelRecord> getPixelAsPolygons(GridCoverage2D rasterGeom, int band) throws TransformException, FactoryException {
+        RasterUtils.ensureBand(rasterGeom, band);
+
+        int width = RasterAccessors.getWidth(rasterGeom);
+        int height = RasterAccessors.getHeight(rasterGeom);
+
+        Raster r = RasterUtils.getRaster(rasterGeom.getRenderedImage());
+        double[] pixels = r.getSamples(0, 0, width, height, band - 1, (double[]) null);
+
+        AffineTransform2D gridToCRS = RasterUtils.getGDALAffineTransform(rasterGeom);
+        double cellSizeX = gridToCRS.getScaleX();
+        double cellSizeY = gridToCRS.getScaleY();
+        double shearX = gridToCRS.getShearX();
+        double shearY = gridToCRS.getShearY();
+
+        int srid = RasterAccessors.srid(rasterGeom);
+        GeometryFactory geometryFactory = srid != 0 ? new GeometryFactory(new PrecisionModel(), srid) : GEOMETRY_FACTORY;
+
+        Point2D upperLeft = RasterUtils.getWorldCornerCoordinates(rasterGeom, 1, 1);
+        List<PixelRecord> pixelRecords = new ArrayList<>();
+
+        for (int y = 1; y <= height; y++) {
+            for (int x = 1; x <= width; x++) {
+                double pixelValue = pixels[(y - 1) * width + (x - 1)];
+
+                double worldX1 = upperLeft.getX() + (x - 1) * cellSizeX + (y - 1) * shearX;
+                double worldY1 = upperLeft.getY() + (y - 1) * cellSizeY + (x - 1) * shearY;
+                double worldX2 = worldX1 + cellSizeX;
+                double worldY2 = worldY1 + shearY;
+                double worldX3 = worldX2 + shearX;
+                double worldY3 = worldY2 + cellSizeY;
+                double worldX4 = worldX1 + shearX;
+                double worldY4 = worldY1 + cellSizeY;
+
+                Coordinate[] coordinates = new Coordinate[] {
+                        new Coordinate(worldX1, worldY1),
+                        new Coordinate(worldX2, worldY2),
+                        new Coordinate(worldX3, worldY3),
+                        new Coordinate(worldX4, worldY4),
+                        new Coordinate(worldX1, worldY1)
+                };
+
+                Geometry polygon = geometryFactory.createPolygon(coordinates);
+                pixelRecords.add(new PixelRecord(polygon, pixelValue, x, y));
+            }
+        }
+
+        return pixelRecords;
+    }
+
     public static Geometry getPixelAsCentroid(GridCoverage2D raster, int colX, int rowY) throws FactoryException, TransformException {
         Geometry polygon = PixelFunctions.getPixelAsPolygon(raster, colX, rowY);
         return  polygon.getCentroid();

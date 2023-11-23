@@ -109,6 +109,25 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
+    public void testPixelAsPointsPolygons() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 123, -230, 8);
+        List<PixelRecord> points = PixelFunctions.getPixelAsPolygons(emptyRaster, 1);
+
+        PixelRecord point = points.get(11);
+        Geometry geom = (Geometry) point.geom;
+        String expected = "POLYGON ((131 -246, 139 -246, 139 -254, 131 -254, 131 -246))";
+        assertEquals(expected,geom.toString());
+
+        // Testing with skewed raster
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 234, -43, 3, 4, 2,3,0);
+        points = PixelFunctions.getPixelAsPolygons(emptyRaster, 1);
+        point = points.get(11);
+        geom = (Geometry) point.geom;
+        expected = "POLYGON ((241 -32, 244 -29, 246 -25, 243 -28, 241 -32))";
+        assertEquals(expected,geom.toString());
+    }
+
+    @Test
     public void testPixelAsCentroid() throws FactoryException, TransformException {
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 12, 13, 134, -53, 9);
         String actual = Functions.asWKT(PixelFunctions.getPixelAsCentroid(emptyRaster, 3, 3));
