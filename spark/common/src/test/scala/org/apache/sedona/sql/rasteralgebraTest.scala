@@ -1066,6 +1066,34 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expected, result)
     }
 
+    it("Passed RS_PixelAsCentroids with empty raster") {
+      val widthInPixel = 12
+      val heightInPixel = 13
+      val upperLeftX = 240
+      val upperLeftY = -193
+      val cellSize = 9
+      val numBands = 2
+      val result = sparkSession.sql(s"SELECT RS_PixelAsCentroids(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 1)").first().getList(0);
+      val expected = "[POINT (253.5 -215.5),0.0,2,3]"
+      assertEquals(expected, result.get(25).toString)
+    }
+
+    it("Passed RS_PixelAsCentroids with raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+
+      var result = df.selectExpr(
+        "explode(RS_PixelAsCentroids(raster, 1)) as exploded"
+      ).selectExpr(
+        "exploded.geom as geom",
+        "exploded.value as value",
+        "exploded.x as x",
+        "exploded.y as y"
+      )
+
+      assert(result.count() == 264704)
+    }
+
     it("Passed RS_RasterToWorldCoordX with raster") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")

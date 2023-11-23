@@ -131,6 +131,43 @@ public class PixelFunctions
         return  polygon.getCentroid();
     }
 
+    public static List<PixelRecord> getPixelAsCentroids(GridCoverage2D rasterGeom, int band) throws TransformException, FactoryException {
+        RasterUtils.ensureBand(rasterGeom, band);
+
+        int width = RasterAccessors.getWidth(rasterGeom);
+        int height = RasterAccessors.getHeight(rasterGeom);
+
+        Raster r = RasterUtils.getRaster(rasterGeom.getRenderedImage());
+        double[] pixels = r.getSamples(0, 0, width, height, band - 1, (double[]) null);
+
+        AffineTransform2D gridToCRS = RasterUtils.getGDALAffineTransform(rasterGeom);
+        double cellSizeX = gridToCRS.getScaleX();
+        double cellSizeY = gridToCRS.getScaleY();
+        double shearX = gridToCRS.getShearX();
+        double shearY = gridToCRS.getShearY();
+
+        int srid = RasterAccessors.srid(rasterGeom);
+        GeometryFactory geometryFactory = srid != 0 ? new GeometryFactory(new PrecisionModel(), srid) : GEOMETRY_FACTORY;
+
+        Point2D upperLeft = RasterUtils.getWorldCornerCoordinates(rasterGeom, 1, 1);
+        List<PixelRecord> pixelRecords = new ArrayList<>();
+
+        for (int y = 1; y <= height; y++) {
+            for (int x = 1; x <= width; x++) {
+                double pixelValue = pixels[(y - 1) * width + (x - 1)];
+
+                double worldX = upperLeft.getX() + (x - 0.5) * cellSizeX + (y - 0.5) * shearX;
+                double worldY = upperLeft.getY() + (y - 0.5) * cellSizeY + (x - 0.5) * shearY;
+
+                Coordinate centroidCoord = new Coordinate(worldX, worldY);
+                Geometry centroidGeom = geometryFactory.createPoint(centroidCoord);
+                pixelRecords.add(new PixelRecord(centroidGeom, pixelValue, x, y));
+            }
+        }
+
+        return pixelRecords;
+    }
+
     public static Geometry getPixelAsPoint(GridCoverage2D raster, int colX, int rowY) throws TransformException, FactoryException {
         int srid = RasterAccessors.srid(raster);
         Point2D point2D = RasterUtils.getWorldCornerCoordinatesWithRangeCheck(raster, colX, rowY);
