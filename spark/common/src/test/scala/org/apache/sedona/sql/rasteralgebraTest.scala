@@ -543,6 +543,26 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(result.get(1) == 132.0)
     }
 
+    it("Passed RS_Clip with implicit geometry transformation") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+        .selectExpr("RS_FromGeoTiff(content) as raster",
+          "ST_GeomFromWKT('POLYGON ((-8682522.873537656 4572703.890837922, -8673439.664183248 4572993.532747675, -8673155.57366801 4563873.2099182755, -8701890.325907696 4562931.7093397, -8682522.873537656 4572703.890837922))', 3857) as geom")
+      val clippedDf = df.selectExpr("RS_Clip(raster, 1, geom, 200, false) as clipped")
+
+      val clippedMetadata = df.selectExpr("RS_Metadata(raster)").first().getSeq(0).slice(0, 9)
+      val originalMetadata = clippedDf.selectExpr("RS_Metadata(clipped)").first().getSeq(0).slice(0, 9)
+      assertTrue(originalMetadata.equals(clippedMetadata))
+
+      var actualValues = clippedDf.selectExpr(
+        "RS_Values(clipped, " +
+          "Array(ST_GeomFromWKT('POINT(223802 4.21769e+06)'),ST_GeomFromWKT('POINT(224759 4.20453e+06)')," +
+          "ST_GeomFromWKT('POINT(237201 4.20429e+06)'),ST_GeomFromWKT('POINT(237919 4.20357e+06)')," +
+          "ST_GeomFromWKT('POINT(254668 4.21769e+06)')), 1)"
+      ).first().get(0)
+      var expectedValues = Seq(null, null, 0.0, 0.0, null)
+      assertTrue(expectedValues.equals(actualValues))
+    }
+
     it("Passed RS_Clip with raster") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
         .selectExpr("RS_FromGeoTiff(content) as raster",

@@ -19,6 +19,7 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -188,6 +189,13 @@ public class RasterBandEditors {
         // Selecting the band from original raster
         RasterUtils.ensureBand(raster, band);
         GridCoverage2D singleBandRaster = RasterBandAccessors.getBand(raster, new int[]{band});
+
+        if(RasterAccessors.srid(raster) != geometry.getSRID()) {
+            // implicitly converting geometry CRS to raster CRS
+            geometry = RasterUtils.convertCRSIfNeeded(geometry, raster.getCoordinateReferenceSystem());
+            // have to set the SRID as RasterUtils.convertCRSIfNeeded doesn't set it even though the geometry is in raster's CRS
+            geometry = Functions.setSRID(geometry, RasterAccessors.srid(raster));
+        }
 
         // Crop the raster
         // this will shrink the extent of the raster to the geometry
