@@ -27,6 +27,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -58,7 +59,7 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
-    public void value() throws TransformException {
+    public void value() throws TransformException, FactoryException {
         assertNull("Points outside of the envelope should return null.", PixelFunctions.value(oneBandRaster, point(1, 1), 1));
 
         Double value = PixelFunctions.value(oneBandRaster, point(378923, 4072346), 1);
@@ -86,7 +87,7 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
-    public void valueWithMultibandRaster() throws TransformException {
+    public void valueWithMultibandRaster() throws TransformException, FactoryException {
         // Multiband raster
         assertEquals(9d, PixelFunctions.value(multiBandRaster, point(4.5d,4.5d), 3), 0.1d);
         assertEquals(255d, PixelFunctions.value(multiBandRaster, point(4.5d,4.5d), 4), 0.1d);
@@ -308,7 +309,7 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
-    public void values() throws TransformException {
+    public void values() throws TransformException, FactoryException {
         // The function 'value' is implemented using 'values'.
         // These test only cover bits not already covered by tests for 'value'
         List<Geometry> points = Arrays.asList(new Geometry[]{point(378923, 4072346), point(378924, 4072346)});
