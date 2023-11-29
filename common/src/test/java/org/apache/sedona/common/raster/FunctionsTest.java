@@ -13,7 +13,9 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.Functions;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
@@ -23,6 +25,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
@@ -67,6 +70,19 @@ public class FunctionsTest extends RasterTestBase {
         assertEquals(2.0d, value, 0.1d);
 
         assertNull("Null should be returned for no data values.", PixelFunctions.value(oneBandRaster, point(378923, 4072376), 1));
+    }
+
+    @Test
+    public void valueImplicitTransform() throws TransformException, FactoryException, IOException, ParseException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+
+        Geometry point = Constructors.geomFromWKT("POINT (-100 100)", 4326);
+        assertNull("Points outside of the envelope should return null.", PixelFunctions.value(raster, point, 1));
+
+        point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 4326);
+        Double value = PixelFunctions.value(raster, point, 1);
+        assertNotNull(value);
+        assertEquals(99.0d, value, 0.1d);
     }
 
     @Test
