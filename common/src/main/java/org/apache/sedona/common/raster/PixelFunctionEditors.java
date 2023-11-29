@@ -122,7 +122,7 @@ public class PixelFunctionEditors {
 
         Raster rasterizedGeomData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
         double colX = RasterAccessors.getUpperLeftX(rasterizedGeom), rowY = RasterAccessors.getUpperLeftY(rasterizedGeom);
-        int height = RasterAccessors.getHeight(rasterizedGeom), width = RasterAccessors.getWidth(rasterizedGeom);
+        int heightGeometryRaster = RasterAccessors.getHeight(rasterizedGeom), widthGeometryRaster = RasterAccessors.getWidth(rasterizedGeom);
         int heightOriginalRaster = RasterAccessors.getHeight(raster), widthOriginalRaster = RasterAccessors.getWidth(raster);
         WritableRaster rasterCopied = makeCopiedRaster(raster);
 
@@ -144,27 +144,28 @@ public class PixelFunctionEditors {
             int[] pixelLocation = RasterUtils.getGridCoordinatesFromWorld(raster, colX, rowY);
             int x = pixelLocation[0], y = pixelLocation[1];
 
-            // lower-bound if the rasterized geometry starts at more north or west from the given raster than move rasterized geometry starting pixel accordingly.
-            if (x < 0) {
-                x = Math.abs(x);
-            }
-            if (y < 0) {
-                y = Math.abs(y);
-            }
-            // i & j is for main raster
-            // k & l is for rasterized geom
-            // added an upperbound if the rasterized geometry is bigger than provided raster
-            for (int j = 0, l = y; j < heightOriginalRaster && l < height; j++, l++) {
-                for (int i = 0, k = x; i < widthOriginalRaster && k < width; i++, k++) {
-                    double[] pixel = rasterCopied.getPixel(i, j, (double[]) null);
+            // rasterX & rasterY are the starting pixels for the target raster
+            int rasterX = Math.max(x, 0);
+            int rasterY = Math.max(y, 0);
+            // geometryX & geometryY are the starting pixels for the geometry raster
+            int geometryX = rasterX - x;
+            int geometryY = rasterY - y;
+            // widthRegion & heightRegion are the size of the region to update
+            int widthRegion = Math.min(widthGeometryRaster - geometryX, widthOriginalRaster - rasterX);
+            int heightRegion = Math.min(heightGeometryRaster - geometryY, heightOriginalRaster - rasterY);
+
+            for (int j = 0; j < heightRegion; j++) {
+                for (int i = 0; i < widthRegion; i++) {
+                    double[] pixel = rasterCopied.getPixel(rasterX + i, rasterY + j, (double[]) null);
                     // [0] as only one band in the rasterized Geometry
-                    double pixelNew = rasterizedGeomData.getPixel(k, l, (double[]) null)[0];
-                    if (keepNoData && noDataValue != null && noDataValue == pixel[band - 1]) {
+                    double pixelNew = rasterizedGeomData.getPixel(geometryX + i, geometryY + j, (double[]) null)[0];
+                    // skipping 0 from the rasterized geometry as
+                    if (pixelNew == 0 || keepNoData && noDataValue != null && noDataValue == pixel[band - 1]) {
                         continue;
                     } else {
                         pixel[band - 1] = pixelNew;
                     }
-                    rasterCopied.setPixel(i, j, pixel);
+                    rasterCopied.setPixel(rasterX + i, rasterY + j, pixel);
                 }
             }
         }
