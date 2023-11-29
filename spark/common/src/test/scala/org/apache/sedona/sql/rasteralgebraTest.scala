@@ -400,6 +400,19 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertTrue(expectedMetadata.equals(actualMetadata))
     }
 
+    it("Passed RS_SetValues with raster and implicit CRS transformation") {
+      val dfFile = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+      val df = dfFile.selectExpr("RS_FromGeoTiff(content) as raster", "ST_GeomFromWKT('POLYGON ((-8682522.873537656 4572703.890837922, -8673439.664183248 4572993.532747675, -8673155.57366801 4563873.2099182755, -8701890.325907696 4562931.7093397, -8682522.873537656 4572703.890837922))', 3857) as geom")
+      val resultDf = df.selectExpr("RS_SetValues(raster, 1, geom, 10, false) as result")
+
+      var actual = resultDf.selectExpr("RS_Value(result, ST_GeomFromWKT('POINT (243700 4197797)', 26918))").first().get(0)
+      val expected = 10.0
+      assertEquals(expected, actual)
+
+      actual = resultDf.selectExpr("RS_Value(result, ST_GeomFromWKT('POINT (235749.0869 4200557.7397)', 26918))").first().get(0)
+      assertEquals(expected, actual)
+    }
+
     it("Passed RS_SetValues with empty raster") {
       var inputDf = Seq((Seq(1, 1, 1, 0, 0, 0, 1, 2, 3, 3, 5, 6, 7, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0), Seq(11, 12, 13, 14, 15, 16, 17, 18, 19))).toDF("band","newValues")
       var df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as raster", "newValues")
