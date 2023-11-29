@@ -19,6 +19,8 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.Constructors;
+import org.apache.sedona.common.Functions;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
@@ -26,6 +28,7 @@ import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
@@ -47,6 +50,58 @@ public class FunctionEditorsTest extends RasterTestBase {
         actual = MapAlgebra.bandAsArray(raster, 1);
         expected = new double[] {1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 11.0, 12.0, 13.0, 3.0, 5.0, 14.0, 15.0, 16.0, 0.0, 3.0, 17.0, 18.0, 19.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         assertArrayEquals(actual, expected, 0.0);
+    }
+
+    @Test
+    public void testSetValuesWithGeomInRaster() throws IOException, ParseException, FactoryException, TransformException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+        String polygon = "POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 236722 4197590, 236722 4204770))";
+        Geometry geom = Constructors.geomFromWKT(polygon, 26918);
+
+        GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
+
+        Geometry point = Constructors.geomFromWKT("POINT (243700 4197797)", 26918);
+        double actual = PixelFunctions.value(result, point, 1);
+        double expected = 10.0;
+        assertEquals(expected, actual, 0d);
+
+        point = Constructors.geomFromWKT("POINT (240311 4202806)", 26918);
+        actual = PixelFunctions.value(result, point, 1);
+        assertEquals(expected, actual, 0d);
+
+        point = Constructors.geomFromWKT("POINT (241800 4199660)", 26918);
+        actual = PixelFunctions.value(result, point, 1);
+        assertEquals(expected, actual, 0d);
+    }
+
+    @Test
+    public void testSetValuesWithRaster() throws IOException, FactoryException, ParseException, TransformException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+        String polygon = "POLYGON ((-8682522.873537656 4572703.890837922, -8673439.664183248 4572993.532747675, -8673155.57366801 4563873.2099182755, -8701890.325907696 4562931.7093397, -8682522.873537656 4572703.890837922))";
+        Geometry geom = Constructors.geomFromWKT(polygon, 3857);
+
+        GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
+
+        Geometry point = Constructors.geomFromWKT("POINT (243700 4197797)", 26918);
+        double actual = PixelFunctions.value(result, point, 1);
+        double expected = 10.0;
+        assertEquals(expected, actual, 0d);
+
+        point = Constructors.geomFromWKT("POINT (235749.0869 4200557.7397)", 26918);
+        actual = PixelFunctions.value(result, point, 1);
+        assertEquals(expected, actual, 0d);
+
+        point = Constructors.geomFromWKT("POINT (240311 4202806)", 26918);
+        actual = PixelFunctions.value(result, point, 1);
+        assertEquals(expected, actual, 0d);
+
+        point = Constructors.geomFromWKT("POINT (223670 4197650)", 26918);
+        actual = PixelFunctions.value(result, point, 1);
+        assertEquals(expected, actual, 0d);
+
+        point = Constructors.geomFromWKT("POINT (243850 4197640)", 26918);
+        actual = PixelFunctions.value(result, point, 1);
+        assertEquals(expected, actual, 0d);
     }
 
     @Test
