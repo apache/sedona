@@ -497,6 +497,12 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(result == 255d)
     }
 
+    it("Passed RS_Value with raster and implicit CRS transformation") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+      val result = df.selectExpr("RS_Value(RS_FromGeoTiff(content), ST_GeomFromWKT('POINT (-77.9146 37.8916)', 4326))").first().get(0)
+      assert(result == 99d)
+    }
+
     it("Passed RS_Value with raster and coordinates") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val result = df.selectExpr("RS_Value(RS_FromGeoTiff(content), 4, 4, 1)").first().getDouble(0)
