@@ -533,6 +533,23 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(result.get(1) == null)
     }
 
+    it("Passed RS_Values with raster, serialized point array and implicit CRS transformation") {
+      // https://issues.apache.org/jira/browse/SEDONA-266
+      // A shuffle changes the internal type for the geometry array (point in this case) from GenericArrayData to UnsafeArrayData.
+      // UnsafeArrayData.array() throws UnsupportedOperationException.
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+      val points = sparkSession.createDataFrame(Seq(("POINT (-77.9146 37.8916)", 1), ("POINT (-100 100)", 2)))
+        .toDF("point", "id")
+        .withColumn("point", expr("ST_GeomFromText(point, 4326)"))
+        .groupBy().agg(collect_list("point").alias("point"))
+
+      val result = df.crossJoin(points).selectExpr("RS_Values(RS_FromGeoTiff(content), point, 1)").first().getList[Any](0)
+
+      assert(result.size() == 2)
+      assert(result.get(0) == 99d)
+      assert(result.get(1) == null)
+    }
+
     it("Passed RS_Values with raster and Grid Coordinates") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val result = df.selectExpr("RS_Values(RS_FromGeoTiff(content), array(1,2), array(3,2), 1)")
