@@ -339,6 +339,23 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
+    public void valuesImplicitTransform() throws TransformException, FactoryException, IOException, ParseException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+
+        List<Geometry> points = Arrays.asList(Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 4326),
+                Constructors.geomFromWKT("POINT (-78.0059 37.9142)", 4326));
+
+        List<Double> values = PixelFunctions.values(raster, points, 1);
+        assertEquals(2, values.size());
+        assertTrue(values.stream().allMatch(Objects::nonNull));
+
+        values = PixelFunctions.values(raster, Arrays.asList(Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 4326),
+                null), 1);
+        assertEquals(2, values.size());
+        assertNull("Null geometries should return null values.", values.get(1));
+    }
+
+    @Test
     public void valuesWithGridCoords() throws TransformException {
         int[] xCoordinates = {1, 0};
         int[] yCoordinates = {0, 1};
