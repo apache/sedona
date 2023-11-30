@@ -242,20 +242,20 @@ public class RasterConstructorsTest
         assertEquals(upperLeftY, envelope.getEnvelopeInternal().getMaxY(), 0.001);
         assertEquals("SIGNED_32BITS", gridCoverage2D.getSampleDimension(0).getSampleDimensionType().name());
     }
-
-    @Test
-    public void testNetCdfReader() throws IOException, FactoryException {
-
-        //GridCoverage2D raster = RasterConstructors.fromNetCDF(testModis, "Along_swath_lines_1km", "Cross_swath_pixels_1km", "LST", true);
-       // GridCoverage2D raster2 = RasterConstructors.fromNetCDF(testNc, "lon", "lat", "O3", true);
-        //GridCoverage2D rasterBig = RasterConstructors.fromNetCDF(testBig, "lon", "lat", "abso4", true);
-        //GridCoverage2D rasterAura = RasterConstructors.fromNetCDF(testAura, "", "", "", true);
-        //GridCoverage2D rasterRose = RasterConstructors.fromNetCDF(testRose, "longitude", "latitude", "ROSE", true);
-        GridCoverage2D rasterHrdl = RasterConstructors.fromNetCDF(testHrdl, "", "", "", true);
-      //  NetcdfFile netCdfFile = NetcdfFiles.open(resourceFolder + "raster/netcdf/test.nc");
-//        URL resourceURL = new File(ncFile).toURI().toURL();//new URL(resourceFolder + "raster/netcdf/test.nc");
-//        NetCDFReader netCDFReader = new NetCDFReader(resourceURL, null);
-//        netCDFReader.read(null);
-    }
+//
+//    @Test
+//    public void testNetCdfReader() throws IOException, FactoryException {
+//
+//        //GridCoverage2D raster = RasterConstructors.fromNetCDF(testModis, "Along_swath_lines_1km", "Cross_swath_pixels_1km", "LST", true);
+//       // GridCoverage2D raster2 = RasterConstructors.fromNetCDF(testNc, "lon", "lat", "O3", true);
+//        //GridCoverage2D rasterBig = RasterConstructors.fromNetCDF(testBig, "lon", "lat", "abso4", true);
+//        //GridCoverage2D rasterAura = RasterConstructors.fromNetCDF(testAura, "", "", "", true);
+//        //GridCoverage2D rasterRose = RasterConstructors.fromNetCDF(testRose, "longitude", "latitude", "ROSE", true);
+//        GridCoverage2D rasterHrdl = RasterConstructors.fromNetCDF(testHrdl, "", "", "", true);
+//      //  NetcdfFile netCdfFile = NetcdfFiles.open(resourceFolder + "raster/netcdf/test.nc");
+////        URL resourceURL = new File(ncFile).toURI().toURL();//new URL(resourceFolder + "raster/netcdf/test.nc");
+////        NetCDFReader netCDFReader = new NetCDFReader(resourceURL, null);
+////        netCDFReader.read(null);
+//    }
 
 }
