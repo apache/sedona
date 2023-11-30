@@ -192,6 +192,10 @@ public class RasterUtils {
      * @return A new GridCoverage2D object.
      */
     public static GridCoverage2D create(WritableRaster raster, GridGeometry2D gridGeometry, GridSampleDimension[] bands, Double noDataValue) {
+      return create(raster, gridGeometry, bands, noDataValue, null);
+    }
+
+    public static GridCoverage2D create(WritableRaster raster, GridGeometry2D gridGeometry, GridSampleDimension[] bands, Double noDataValue, Map properties) {
         int numBand = raster.getNumBands();
         int rasterDataType = raster.getDataBuffer().getDataType();
 
@@ -217,7 +221,7 @@ public class RasterUtils {
         }
 
         final RenderedImage image = new BufferedImage(colorModel, raster, false, null);
-        return gridCoverageFactory.create("genericCoverage", image, gridGeometry, bands, null, null);
+        return gridCoverageFactory.create("genericCoverage", image, gridGeometry, bands, null, properties);
     }
 
     public static GridCoverage2D create(RenderedImage image, GridGeometry2D gridGeometry, GridSampleDimension[] bands, Double noDataValue) {
