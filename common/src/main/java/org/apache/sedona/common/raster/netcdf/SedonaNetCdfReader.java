@@ -113,7 +113,7 @@ public class SedonaNetCdfReader {
         List<Variable> recordVariables = null;
         for (Variable variable: variables) {
             ImmutableList<Dimension> variableDimensions = variable.getDimensions();
-            if (variableDimensions.size() < 2) continue; //record variables have atleast 2 dimensions (lat and lon)
+            if (variableDimensions.size() < 2) continue; //record variables have least 2 dimensions (lat and lon)
             if (Objects.isNull(recordVariables)) recordVariables = new ArrayList<>();
             //ASSUMPTION: A record is not restricted to having an unlimited dimension
             recordVariables.add(variable);
