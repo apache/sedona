@@ -75,6 +75,28 @@ public class FunctionEditorsTest extends RasterTestBase {
     }
 
     @Test
+    public void testSetValuesWithRasterNoSRID() throws IOException, ParseException, FactoryException, TransformException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+        String polygon = "POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 236722 4197590, 236722 4204770))";
+        Geometry geom = Constructors.geomFromWKT(polygon, 0);
+        raster = RasterEditors.setSrid(raster, 0);
+
+        int rasterSRID = RasterAccessors.srid(raster);
+        assertEquals(0, rasterSRID);
+
+        GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
+
+        Geometry point = Constructors.geomFromWKT("POINT (243700 4197797)", 0);
+        double actual = PixelFunctions.value(result, point, 1);
+        double expected = 10.0;
+        assertEquals(expected, actual, 0d);
+
+        point = Constructors.geomFromWKT("POINT (240311 4202806)", 0);
+        actual = PixelFunctions.value(result, point, 1);
+        assertEquals(expected, actual, 0d);
+    }
+
+    @Test
     public void testSetValuesWithRaster() throws IOException, FactoryException, ParseException, TransformException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
         String polygon = "POLYGON ((-8682522.873537656 4572703.890837922, -8673439.664183248 4572993.532747675, -8673155.57366801 4563873.2099182755, -8701890.325907696 4562931.7093397, -8682522.873537656 4572703.890837922))";
