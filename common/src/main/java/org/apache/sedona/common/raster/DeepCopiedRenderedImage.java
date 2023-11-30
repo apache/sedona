@@ -15,20 +15,19 @@ package org.apache.sedona.common.raster;
 
 import com.sun.media.jai.util.ImageUtil;
 import it.geosolutions.jaiext.range.NoDataContainer;
+import org.apache.sedona.common.utils.RasterUtils;
 
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.RasterAccessor;
 import javax.media.jai.RasterFormatTag;
 import javax.media.jai.RemoteImage;
-import javax.media.jai.RenderedImageAdapter;
 import javax.media.jai.TileCache;
 import javax.media.jai.remote.SerializableState;
 import javax.media.jai.remote.SerializerFactory;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
@@ -355,18 +354,7 @@ public final class DeepCopiedRenderedImage implements RenderedImage, Serializabl
         out.writeObject(SerializerFactory.getState(this.colorModel, null));
         out.writeObject(propertyTable);
         if (this.source != null) {
-            Raster serializedRaster = null;
-            RenderedImage serializedImage = this.source;
-            while (serializedImage instanceof RenderedImageAdapter) {
-                serializedImage = ((RenderedImageAdapter) serializedImage).getWrappedImage();
-            }
-            if (serializedImage instanceof BufferedImage) {
-                // This is a fast path for BufferedImage. If we call getData() directly, it will make a
-                // hard copy of the raster. We can avoid this overhead by calling getRaster().
-                serializedRaster = ((BufferedImage) serializedImage).getRaster();
-            } else {
-                serializedRaster = serializedImage.getData();
-            }
+            Raster serializedRaster = RasterUtils.getRaster(this.source);
             out.writeObject(SerializerFactory.getState(serializedRaster, null));
         } else {
             out.writeObject(SerializerFactory.getState(imageRaster, null));

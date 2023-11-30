@@ -364,7 +364,7 @@ Assume you now have an SpatialRDD (typed or generic). You can use the following 
 
 Besides the rectangle (Envelope) type range query window, Sedona range query window can be Point/Polygon/LineString.
 
-The code to create a point, linestring (4 vertexes) and polygon (4 vertexes) is as follows:
+The code to create a point, linestring (4 vertices) and polygon (4 vertices) is as follows:
 
 === "Scala"
 

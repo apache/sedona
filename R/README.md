@@ -11,7 +11,7 @@ enabling higher-level access through a `{dplyr}` backend and familiar R function
 ## Installation
 To use Apache Sedona from R, you just need to install the apache.sedona package; Spark dependencies are managed directly by the package.
 
-``` r
+```r
 # Install released version from CRAN
 install.packages("apache.sedona")
 ```
@@ -21,7 +21,7 @@ To use the development version, you will need both the latest version of the pac
 
 To get the latest R package from GtiHub:
 
-``` r
+```r
 # Install development version from GitHub
 devtools::install_github("apache/sedona/R")
 ```
@@ -31,7 +31,7 @@ To get the latest Sedona jars you can:
 * **Compile the Sedona code yourself**, see [Compile the code](https://sedona.apache.org/latest-snapshot/setup/compile/)
 * **Get the latest generated jars** from the [GitHub 'Java build' action](https://github.com/apache/sedona/actions/workflows/java.yml); click on the latest run, the generated jars are at the bottom of the page
 
-The path to the sedona-spark-shaded and sedona-viz jars needs to be put in the `SEDONA_JAR_FILES` environment variables (see below).
+The path to the sedona-spark-shaded jars needs to be put in the `SEDONA_JAR_FILES` environment variables (see below).
 
 
 ## Usage
@@ -40,18 +40,18 @@ The path to the sedona-spark-shaded and sedona-viz jars needs to be put in the `
 
 The first time you load Sedona, Spark will download all the dependent jars, which can take a few minutes and cause the connection to timeout. You can either retry (some jars will already be downloaded and cached) or increase the `"sparklyr.connect.timeout"` parameter in the sparklyr config.
 
-``` r
+```r
 library(sparklyr)
 library(apache.sedona)
 
 ## Only if using development version:
-Sys.setenv("SEDONA_JAR_FILES" = "<path to sedona-spark-shaded jar>:<path to sedona-viz jar>")
+Sys.setenv("SEDONA_JAR_FILES" = "<path to sedona-spark-shaded jar>")
 
 sc <- spark_connect(master = "local")
 polygon_sdf <- spark_read_geojson(sc, location = "/tmp/polygon.json")
 ```
 
-``` r
+```r
 mean_area_sdf <- polygon_sdf %>%
   dplyr::summarize(mean_area = mean(ST_Area(geometry)))
 print(mean_area_sdf)

@@ -18,6 +18,7 @@ nav:
         - Install Sedona R: api/rdocs
         - Install Sedona-Zeppelin: setup/zeppelin.md
         - Play Sedona in Docker: setup/docker.md
+        - Install on Wherobots: setup/wherobots.md
         - Install on Databricks: setup/databricks.md
         - Install on AWS EMR: setup/emr.md
         - Set up Spark cluster: setup/cluster.md
@@ -58,11 +59,15 @@ nav:
               - Aggregate function: api/sql/AggregateFunction.md
               - DataFrame Style functions: api/sql/DataFrameAPI.md
               - Query optimization: api/sql/Optimizer.md
+              - Visualization:
+                  - SedonaPyDeck: api/sql/Visualization_SedonaPyDeck.md
+                  - SedonaKepler: api/sql/Visualization_SedonaKepler.md
           - Raster data:
               - Raster loader: api/sql/Raster-loader.md
               - Raster writer: api/sql/Raster-writer.md
               - Raster operators: api/sql/Raster-operators.md
               - Raster map algebra: api/sql/Raster-map-algebra.md
+              - Raster visualization: api/sql/Raster-visualizer.md
           - Parameter: api/sql/Parameter.md
         - RDD (core):
           - Scala/Java doc: api/java-api.md
@@ -110,7 +115,7 @@ theme:
   palette:
     primary: 'deep orange'
     accent: 'green'
-  favicon: https://www.apache.org/logos/res/sedona/sedona.png
+  favicon: image/sedona_logo_symbol.png
   icon:
     logo: fontawesome/solid/earth-americas
     repo: fontawesome/brands/github
@@ -121,6 +126,7 @@ theme:
     - search.suggest
     - search.highlight
     - search.share
+    - navigation.footer
 extra:
   version:
     provider: mike
@@ -129,16 +135,19 @@ extra:
       link: 'https://github.com/apache/sedona'
     - icon: fontawesome/brands/twitter
       link: 'https://twitter.com/ApacheSedona'
+    - icon: fontawesome/brands/discord
+      link: './community/discord-invite-form.html'
   sedona:
-    current_version: 1.4.1
-    current_geotools: 1.4.0-28.2
+    current_version: 1.5.0
+    current_geotools: 1.5.0-28.2
   sedona_create_release:
-    current_version: 1.4.1
-    current_git_tag: sedona-1.4.1-rc1
-    current_rc: 1.4.1-rc1
-    current_snapshot: 1.5.0-SNAPSHOT
-    next_version: 1.5.0
-copyright: Copyright © 2023 The Apache Software Foundation
+    current_version: 1.5.0
+    current_git_tag: sedona-1.5.0-rc1
+    current_rc: 1.5.0-rc1
+    current_snapshot: 1.5.1-SNAPSHOT
+    next_version: 1.5.1
+copyright: Copyright © 2023 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="http://www.apache.org/">Apache Software Foundation</a> for more details.
+
 markdown_extensions:
   - admonition
   - attr_list

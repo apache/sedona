@@ -31,8 +31,7 @@ import org.opengis.referencing.operation.TransformException;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.*;
 
 public class RasterAccessorsTest extends RasterTestBase
 {
@@ -60,6 +59,22 @@ public class RasterAccessorsTest extends RasterTestBase
     public void testSrid() throws FactoryException {
         assertEquals(0, RasterAccessors.srid(oneBandRaster));
         assertEquals(4326, RasterAccessors.srid(multiBandRaster));
+    }
+
+    @Test
+    public void testRotation() throws IOException, FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 10, 15, 1, 2, 1, -2, 10, 10, 0);
+        double actual = RasterAccessors.getRotation(emptyRaster);
+        double expected = -1.4711276743037347;
+        assertEquals(expected, actual, 1e-9);
+    }
+
+    @Test
+    public void testGeoTransform() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 10, 15, 1, 2, 1, -1, 10, 10, 0);
+        double[] actual = RasterAccessors.getGeoTransform(emptyRaster);
+        double[] expected = new double[] {10.04987562112089, 10.04987562112089, -1.4711276743037347, -1.5707963267948966, 1.0, 2.0};
+        assertArrayEquals(expected, actual, 1e-9);
     }
 
     @Test
@@ -140,6 +155,38 @@ public class RasterAccessorsTest extends RasterTestBase
         double actualY = RasterAccessors.getWorldCoordY(emptyRaster, colX, rowY);
         double expectedY = -46;
         assertEquals(expectedY, actualY, 0.1d);
+    }
+
+    @Test
+    public void testWorldCoord() throws FactoryException, TransformException {
+        int colX = 1, rowY = 1;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, 4326);
+
+        Coordinate actual = RasterAccessors.getWorldCoord(emptyRaster, colX, rowY).getCoordinate();
+        double expectedX = -123, expectedY = 54;
+
+        assertEquals(expectedX, actual.getX(), 0.1d);
+        assertEquals(expectedY, actual.getY(), 0.1d);
+
+        rowY = 2;
+        actual = RasterAccessors.getWorldCoord(emptyRaster, colX, rowY).getCoordinate();
+        expectedY = 44;
+
+        assertEquals(expectedX, actual.getX(), 0.1d);
+        assertEquals(expectedY, actual.getY(), 0.1d);
+    }
+
+    @Test
+    public void testWorldCoordOutOfBounds() throws FactoryException, TransformException{
+        int colX = 4;
+        int rowY = 11;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, 4326);
+
+        double expectedX = -108, expectedY = -46;
+        Coordinate actual = RasterAccessors.getWorldCoord(emptyRaster, colX, rowY).getCoordinate();
+
+        assertEquals(expectedX, actual.getX(), 0.1d);
+        assertEquals(expectedY, actual.getY(), 0.1d);
     }
 
     @Test

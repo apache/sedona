@@ -305,7 +305,6 @@ wrong_type_configurations = [
     (stf.ST_SymDifference, ("", None)),
     (stf.ST_Transform, (None, "", "")),
     (stf.ST_Transform, ("", None, "")),
-    (stf.ST_Transform, ("", "", None)),
     (stf.ST_Union, (None, "")),
     (stf.ST_Union, ("", None)),
     (stf.ST_X, (None,)),

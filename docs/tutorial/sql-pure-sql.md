@@ -77,4 +77,3 @@ WHERE ST_Contains(polygondata.polygonshape, pointdata.pointshape)
       AND ST_Contains(ST_PolygonFromEnvelope(1.0,101.0,501.0,601.0), polygondata.polygonshape)
 LIMIT 5;
 ```
-

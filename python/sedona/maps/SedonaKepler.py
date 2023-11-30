@@ -50,5 +50,3 @@ class SedonaKepler:
         """
         geo_df = SedonaMapUtils.__convert_to_gdf__(df)
         kepler_map.add_data(geo_df, name=name)
-
-

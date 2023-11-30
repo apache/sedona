@@ -34,10 +34,18 @@ from sedona.core.enums import IndexType
 from sedona.core.enums import GridType
 from sedona.core.enums import FileDataSplitter
 from sedona.sql.types import GeometryType
+from sedona.sql.types import RasterType
 from sedona.utils.adapter import Adapter
 from sedona.utils import KryoSerializer
 from sedona.utils import SedonaKryoRegistrator
 from sedona.register import SedonaRegistrator
 from sedona.spark.SedonaContext import SedonaContext
-from sedona.maps.SedonaKepler import SedonaKepler
-from sedona.maps.SedonaPyDeck import SedonaPyDeck
+from sedona.raster_utils.SedonaUtils import SedonaUtils
+try:
+    from sedona.maps.SedonaKepler import SedonaKepler
+except:
+    print('Skipping SedonaKepler import, verify if keplergl is installed')
+try:
+    from sedona.maps.SedonaPyDeck import SedonaPyDeck
+except:
+    print('Skipping SedonaPyDeck import, verify if pydeck is installed')

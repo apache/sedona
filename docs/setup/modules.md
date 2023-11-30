@@ -2,9 +2,9 @@
 
 | Name  |  API |  Introduction|
 |---|---|---|
-|Core  | RDD  | SpatialRDDs and Query Operators. |
-|SQL  | SQL/DataFrame  |SQL interfaces for Sedona core.|
-|Viz |  RDD, SQL/DataFrame | Visualization for Spatial RDD and DataFrame|
+|spark  | RDD / SQL / DataFrame  | SpatialRDD and Spatial DataFrame |
+|spark-shaded  |   |Shaded version|
+|python| | Python interface for SpatialRDD and Spatial DataFrame|
 |Zeppelin |  Apache Zeppelin | Plugin for Apache Zeppelin 0.8.1+|
 
 ## API availability

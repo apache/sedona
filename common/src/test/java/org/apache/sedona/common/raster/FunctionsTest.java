@@ -60,8 +60,6 @@ public class FunctionsTest extends RasterTestBase {
     @Test
     public void value() throws TransformException {
         assertNull("Points outside of the envelope should return null.", PixelFunctions.value(oneBandRaster, point(1, 1), 1));
-        assertNull("Invalid band should return null.", PixelFunctions.value(oneBandRaster, point(378923, 4072346), 0));
-        assertNull("Invalid band should return null.", PixelFunctions.value(oneBandRaster, point(378923, 4072346), 2));
 
         Double value = PixelFunctions.value(oneBandRaster, point(378923, 4072346), 1);
         assertNotNull(value);
@@ -71,10 +69,29 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
+    public void valueWithGridCoords() throws TransformException {
+        int insideX = 1;
+        int insideY = 0;
+        int outsideX = 4;
+        int outsideY = 4;
+
+        Double insideValue = PixelFunctions.value(oneBandRaster, insideX, insideY, 1);
+        assertNotNull("Value should not be null for points inside the envelope.", insideValue);
+        assertNull("Points outside of the envelope should return null.", PixelFunctions.value(oneBandRaster, outsideX, outsideY, 1));
+
+        int noDataX = 0;
+        int noDataY = 0;
+
+        assertNull("Null should be returned for no data values.", PixelFunctions.value(oneBandRaster, noDataX, noDataY, 1));
+    }
+
+    @Test
     public void valueWithMultibandRaster() throws TransformException {
         // Multiband raster
         assertEquals(9d, PixelFunctions.value(multiBandRaster, point(4.5d,4.5d), 3), 0.1d);
         assertEquals(255d, PixelFunctions.value(multiBandRaster, point(4.5d,4.5d), 4), 0.1d);
+        assertEquals(4d, PixelFunctions.value(multiBandRaster, 2,2, 3), 0.1d);
+        assertEquals(255d, PixelFunctions.value(multiBandRaster, 3,4, 4), 0.1d);
     }
 
     @Test
@@ -92,6 +109,25 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
+    public void testPixelAsPointsPolygons() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 123, -230, 8);
+        List<PixelRecord> points = PixelFunctions.getPixelAsPolygons(emptyRaster, 1);
+
+        PixelRecord point = points.get(11);
+        Geometry geom = (Geometry) point.geom;
+        String expected = "POLYGON ((131 -246, 139 -246, 139 -254, 131 -254, 131 -246))";
+        assertEquals(expected,geom.toString());
+
+        // Testing with skewed raster
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 234, -43, 3, 4, 2,3,0);
+        points = PixelFunctions.getPixelAsPolygons(emptyRaster, 1);
+        point = points.get(11);
+        geom = (Geometry) point.geom;
+        expected = "POLYGON ((241 -32, 244 -29, 246 -25, 243 -28, 241 -32))";
+        assertEquals(expected,geom.toString());
+    }
+
+    @Test
     public void testPixelAsCentroid() throws FactoryException, TransformException {
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 12, 13, 134, -53, 9);
         String actual = Functions.asWKT(PixelFunctions.getPixelAsCentroid(emptyRaster, 3, 3));
@@ -103,6 +139,24 @@ public class FunctionsTest extends RasterTestBase {
         actual = Functions.asWKT(PixelFunctions.getPixelAsCentroid(emptyRaster, 3, 3));
         expected = "POINT (252.5 -184.25)";
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testPixelAsCentroids() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 12, 13, 134, -53, 9);
+        List<PixelRecord> points = PixelFunctions.getPixelAsCentroids(emptyRaster, 1);
+        String expected = "POINT (156.5 -75.5)";
+        PixelRecord point = points.get(26);
+        Geometry geom = point.geom;
+        assertEquals(expected, geom.toString());
+
+        // Testing with skewed raster
+        emptyRaster = RasterConstructors.makeEmptyRaster(1, 12, 13, 240, -193, 2, 1.5, 3, 2, 0);
+        points = PixelFunctions.getPixelAsCentroids(emptyRaster, 1);
+        expected = "POINT (252.5 -184.25)";
+        point = points.get(26);
+        geom = point.geom;
+        assertEquals(expected, geom.toString());
     }
 
     @Test
@@ -167,6 +221,93 @@ public class FunctionsTest extends RasterTestBase {
     }
 
     @Test
+    public void testPixelAsPointSkewedRaster() throws FactoryException, TransformException {
+        // Testing with skewed raster
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 12, 13, 240, -193, 2, 1.5, 3, 2, 0);
+        String actual = Functions.asWKT(PixelFunctions.getPixelAsPoint(emptyRaster, 3, 3));
+        String expected = "POINT (250 -186)";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testPixelAsPointsOutputSize() throws FactoryException, TransformException {
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 5, 10, 123, -230, 8);
+        List<PixelRecord> points = PixelFunctions.getPixelAsPoints(raster, 1);
+        assertEquals(50, points.size());
+    }
+
+    @Test
+    public void testPixelAsPointsValues() throws FactoryException, TransformException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 123, -230, 8);
+        List<PixelRecord> points = PixelFunctions.getPixelAsPoints(emptyRaster, 1);
+
+        PixelRecord point1 = points.get(0);
+        Geometry geom1 = (Geometry) point1.geom;
+        assertEquals(123, geom1.getCoordinate().x, FP_TOLERANCE);
+        assertEquals(-230, geom1.getCoordinate().y, FP_TOLERANCE);
+        assertEquals(0.0, point1.value, FP_TOLERANCE);
+
+        PixelRecord point2 = points.get(22);
+        Geometry geom2 = (Geometry) point2.geom;
+        assertEquals(139, geom2.getCoordinate().x, FP_TOLERANCE);
+        assertEquals(-262, geom2.getCoordinate().y, FP_TOLERANCE);
+        assertEquals(0.0, point2.value, FP_TOLERANCE);
+    }
+
+    @Test
+    public void testPixelAsPointsCustomSRIDPlanar() throws FactoryException, TransformException {
+        int srid = 3857;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, -123, 54, 5, 5, 0, 0, srid);
+        List<PixelRecord> points = PixelFunctions.getPixelAsPoints(emptyRaster, 1);
+        PixelRecord point1 = points.get(0);
+        Geometry geom1 = (Geometry) point1.geom;
+        assertEquals(-123, geom1.getCoordinate().x, FP_TOLERANCE);
+        assertEquals(54, geom1.getCoordinate().y, FP_TOLERANCE);
+        assertEquals(srid, geom1.getSRID());
+    }
+
+    @Test
+    public void testPixelAsPointsSRIDSpherical() throws FactoryException, TransformException {
+        int srid = 4326;
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, -123, 54, 5, -10, 0, 0, srid);
+        List<PixelRecord> points = PixelFunctions.getPixelAsPoints(emptyRaster, 1);
+
+        PixelRecord point1 = points.get(11);
+        Geometry geom1 = (Geometry) point1.geom;
+        assertEquals(-118, geom1.getCoordinate().x, FP_TOLERANCE);
+        assertEquals(34, geom1.getCoordinate().y, FP_TOLERANCE);
+        assertEquals(srid, geom1.getSRID());
+    }
+
+    @Test
+    public void testPixelAsPointsFromRasterFile() throws IOException, TransformException, FactoryException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+        List<PixelRecord> points = PixelFunctions.getPixelAsPoints(raster, 1);
+        PixelRecord firstPoint = points.get(0);
+        Geometry firstGeom = (Geometry) firstPoint.geom;
+
+        double expectedX = -1.3095818E7;
+        double expectedY = 4021262.75;
+        double val = 0.0;
+
+        assertEquals(expectedX, firstGeom.getCoordinate().x, FP_TOLERANCE);
+        assertEquals(expectedY, firstGeom.getCoordinate().y, FP_TOLERANCE);
+        assertEquals(val, firstPoint.value, FP_TOLERANCE);
+    }
+
+    @Test
+    public void testPixelAsPointsSkewedRaster() throws FactoryException, TransformException {
+        // Testing with skewed raster
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 12, 13, 240, -193, 2, 1.5, 3, 2, 0);
+        List<PixelRecord> points = PixelFunctions.getPixelAsPoints(emptyRaster, 1);
+
+        PixelRecord point1 = points.get(26);
+        Geometry geom1 = (Geometry) point1.geom;
+        String expected = "POINT (250 -186)";
+        assertEquals(expected, geom1.toString());
+    }
+
+    @Test
     public void values() throws TransformException {
         // The function 'value' is implemented using 'values'.
         // These test only cover bits not already covered by tests for 'value'
@@ -175,17 +316,19 @@ public class FunctionsTest extends RasterTestBase {
         assertEquals(2, values.size());
         assertTrue(values.stream().allMatch(Objects::nonNull));
 
-        values = PixelFunctions.values(oneBandRaster, points, 0);
-        assertEquals(2, values.size());
-        assertTrue("All values should be null for invalid band index.", values.stream().allMatch(Objects::isNull));
-
-        values = PixelFunctions.values(oneBandRaster, points, 2);
-        assertEquals(2, values.size());
-        assertTrue("All values should be null for invalid band index.", values.stream().allMatch(Objects::isNull));
-
         values = PixelFunctions.values(oneBandRaster, Arrays.asList(new Geometry[]{point(378923, 4072346), null}), 1);
         assertEquals(2, values.size());
         assertNull("Null geometries should return null values.", values.get(1));
+    }
+
+    @Test
+    public void valuesWithGridCoords() throws TransformException {
+        int[] xCoordinates = {1, 0};
+        int[] yCoordinates = {0, 1};
+
+        List<Double> values = PixelFunctions.values(oneBandRaster, xCoordinates, yCoordinates, 1);
+        assertEquals(2, values.size());
+        assertTrue(values.stream().allMatch(Objects::nonNull));
     }
 
     private Point point(double x, double y) {

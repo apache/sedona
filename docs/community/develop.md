@@ -22,7 +22,7 @@ The IDE usually has trouble understanding the complex project structure in Sedon
 
 <img src="../../image/ide-java-4.png"/>
 
-#### Fix errors by changing POM.xml
+#### Fix errors by changing pom.xml
 
 You need to comment out the following lines in `pom.xml` at the root folder, as follows. ==Remember that you should NOT submit this change to Sedona.==
 
@@ -35,9 +35,9 @@ You need to comment out the following lines in `pom.xml` at the root folder, as 
 <!--    </parent>-->
 ```
 
-#### Reload POM.xml
+#### Reload pom.xml
 
-Make sure you reload the POM.xml or reload the maven project. The IDE will ask you to remove some modules. Please select `yes`.
+Make sure you reload the pom.xml or reload the maven project. The IDE will ask you to remove some modules. Please select `yes`.
 
 <img src="../../image/ide-java-5.png"/>
 

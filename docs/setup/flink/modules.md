@@ -2,9 +2,8 @@
 
 | Name |  Introduction|
 |---|---|
-|Core|Spatial query algorithms, data readers/writers|
-|SQL|Spatial SQL function implementation|
-|Flink|Spatial Table and DataStream implementation|
+|flink|Spatial Table and DataStream implementation|
+|flink-shaded| shaded version |
 
 ## API availability
 

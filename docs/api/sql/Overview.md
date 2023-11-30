@@ -24,7 +24,7 @@ myDataFrame.withColumn("geometry", expr("ST_*")).selectExpr("ST_*")
 	* Example: ST_Contains (A, B). Check if A fully contains B. Return "True" if yes, else return "False".
 	* Documentation: [Here](../Predicate)
 
-Sedona also provides an Adapter to convert SpatialRDD <-> DataFrame. Please read [Adapter Scaladoc](../../javadoc/sql/org/apache/sedona/sql/utils/index.html)
+Sedona also provides an Adapter to convert SpatialRDD <-> DataFrame. Please read [Adapter Scaladoc](../../scaladoc/spark/org/apache/sedona/sql/utils/index.html)
 
 SedonaSQL supports SparkSQL query optimizer, documentation is [Here](../Optimizer)
 
@@ -32,7 +32,7 @@ SedonaSQL supports SparkSQL query optimizer, documentation is [Here](../Optimize
 
 The detailed explanation is here [Write a SQL/DataFrame application](../../tutorial/sql.md).
 
-1. Add Sedona-core and Sedona-SQL into your project POM.xml or build.sbt
+1. Add Sedona-core and Sedona-SQL into your project pom.xml or build.sbt
 2. Create your Sedona config if you want to customize your SparkSession.
 ```scala
 import org.apache.sedona.spark.SedonaContext

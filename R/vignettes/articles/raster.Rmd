@@ -24,7 +24,7 @@ Raster data in GeoTiff and ArcInfoAsciiGrid formats can be read into and written
 Raster data in GeoTiff and ArcInfo Grid format can be loaded directly into Spark using the `sparklyr::spark_read_binary` and Sedona constructors `RS_FromGeoTiff` and `RS_FromArcInfoAsciiGrid`.
 
 ```{r include=FALSE}
-Sys.setenv("SEDONA_JAR_FILES" = "~/WORK/MISC_CODE/sedona/spark-shaded/target/sedona-spark-shaded-3.0_2.12-1.4.0-SNAPSHOT.jar:~/WORK/MISC_CODE/sedona/viz/target/sedona-viz-3.0_2.12-1.4.0-SNAPSHOT.jar")
+Sys.setenv("SEDONA_JAR_FILES" = "~/WORK/MISC_CODE/sedona/spark-shaded/target/sedona-spark-shaded-3.0_2.12-1.4.0-SNAPSHOT.jar")
 ```
 
 ```{r message=FALSE, warning=FALSE}
@@ -34,7 +34,7 @@ library(apache.sedona)
 
 sc <- spark_connect(master = "local")
 
-data_tbl <- spark_read_binary(sc, dir = here::here("/../core/src/test/resources/raster/"), name = "data") 
+data_tbl <- spark_read_binary(sc, dir = here::here("/../spark/common/src/test/resources/raster/"), name = "data")
 
 raster <- 
   data_tbl %>% 

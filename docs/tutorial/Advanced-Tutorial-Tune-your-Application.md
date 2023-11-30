@@ -57,5 +57,3 @@ Therefore, if you use one of the queries above many times, you'd better cache th
 Sometimes users complain that the execution time is slow in some cases. As the first step, you should always consider increasing the number of your SpatialRDD partitions (2 - 8 times more than the original number). You can do this when you initialize a SpatialRDD. This may significantly improve your performance.
 
 After that, you may consider tuning some other parameters in Apache Spark. For example, you may use Kyro serializer or change the RDD fraction that is cached into memory.
-
-

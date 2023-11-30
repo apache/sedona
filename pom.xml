@@ -26,7 +26,7 @@
     </parent>
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-parent</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <version>1.5.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>sedona-parent</name>
     <url>http://sedona.apache.org/</url>
@@ -88,9 +88,11 @@
 
         <slf4j.version>1.7.36</slf4j.version>
         <googles2.version>2.0.0</googles2.version>
+        <uberh3.version>4.1.1</uberh3.version>
         <scalatest.version>3.1.1</scalatest.version>
         <scala-collection-compat.version>2.5.0</scala-collection-compat.version>
         <geoglib.version>1.52</geoglib.version>
+        <caffeine.version>2.9.2</caffeine.version>
 
         <geotools.scope>provided</geotools.scope>
         <!-- Because it's not in Maven central, make it provided by default -->
@@ -242,6 +244,12 @@
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
+                <artifactId>gt-process-feature</artifactId>
+                <version>${geotools.version}</version>
+                <scope>${geotools.scope}</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.geotools</groupId>
                 <artifactId>gt-arcgrid</artifactId>
                 <version>${geotools.version}</version>
                 <scope>${geotools.scope}</scope>
@@ -262,6 +270,7 @@
                 <groupId>it.geosolutions.jaiext.jiffle</groupId>
                 <artifactId>jt-jiffle-language</artifactId>
                 <version>${jt-jiffle.version}</version>
+                <scope>${geotools.scope}</scope>
                 <exclusions>
                     <exclusion>
                         <groupId>*</groupId>
@@ -320,6 +329,11 @@
                 <version>2.6</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-math3</artifactId>
+                <version>3.6.1</version>
+            </dependency>
+            <dependency>
                 <groupId>com.esotericsoftware</groupId>
                 <artifactId>kryo</artifactId>
                 <version>4.0.2</version>
@@ -337,9 +351,19 @@
                 <version>${googles2.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.uber</groupId>
+                <artifactId>h3</artifactId>
+                <version>${uberh3.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>net.sf.geographiclib</groupId>
                 <artifactId>GeographicLib-Java</artifactId>
                 <version>${geoglib.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -350,6 +374,17 @@
         </dependencies>
     </dependencyManagement>
     <repositories>
+        <repository>
+            <id>maven-central</id>
+            <name>Maven Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
         <repository>
             <id>osgeo</id>
             <name>OSGeo Release Repository</name>
@@ -661,7 +696,7 @@
                 <activeByDefault>false</activeByDefault>
             </activation>
             <properties>
-                <scala.version>2.13.8</scala.version>
+                <scala.version>2.13.12</scala.version>
                 <scala.compat.version>2.13</scala.compat.version>
                 <scaladoc.arg>-no-java-comments</scaladoc.arg>
                 <!-- Skip deploying parent module for Scala 2.13 profile, it will be deployed with 2.12 -->
@@ -669,10 +704,7 @@
             </properties>
             <modules>
                 <module>common</module>
-                <module>core</module>
-                <module>sql</module>
-                <module>viz</module>
-                <module>python-adapter</module>
+                <module>spark</module>
                 <module>spark-shaded</module>
             </modules>
         </profile>
@@ -692,10 +724,7 @@
             </properties>
             <modules>
                 <module>common</module>
-                <module>core</module>
-                <module>sql</module>
-                <module>viz</module>
-                <module>python-adapter</module>
+                <module>spark</module>
                 <module>spark-shaded</module>
                 <module>flink</module>
                 <module>flink-shaded</module>

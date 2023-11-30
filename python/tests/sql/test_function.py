@@ -93,8 +93,13 @@ class TestPredicateJoin(TestBase):
         polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
         polygon_df.createOrReplaceTempView("polygondf")
         polygon_df.show()
-        function_df = self.spark.sql("select ST_Buffer(polygondf.countyshape, 1) from polygondf")
-        function_df.show()
+        function_df = self.spark.sql("select ST_ReducePrecision(ST_Buffer(polygondf.countyshape, 1), 2) from polygondf")
+        actual = function_df.take(1)[0][0].wkt
+        assert actual == "POLYGON ((-98.02 41.77, -98.02 41.78, -98.02 41.8, -98.02 41.81, -98.02 41.82, -98.02 41.83, -98.02 41.84, -98.02 41.85, -98.02 41.86, -98.02 41.87, -98.02 41.89, -98.02 41.9, -98.02 41.91, -98.02 41.92, -98.02 41.93, -98.02 41.95, -98.02 41.98, -98.02 42, -98.02 42.01, -98.02 42.02, -98.02 42.04, -98.02 42.05, -98.02 42.07, -98.02 42.09, -98.02 42.11, -98.02 42.12, -97.99 42.31, -97.93 42.5, -97.84 42.66, -97.72 42.81, -97.57 42.93, -97.4 43.02, -97.21 43.07, -97.02 43.09, -97 43.09, -96.98 43.09, -96.97 43.09, -96.96 43.09, -96.95 43.09, -96.94 43.09, -96.92 43.09, -96.91 43.09, -96.89 43.09, -96.88 43.09, -96.86 43.09, -96.84 43.09, -96.83 43.09, -96.82 43.09, -96.81 43.09, -96.8 43.09, -96.79 43.09, -96.78 43.09, -96.76 43.09, -96.74 43.09, -96.73 43.09, -96.71 43.09, -96.7 43.09, -96.69 43.09, -96.68 43.09, -96.66 43.09, -96.65 43.09, -96.64 43.09, -96.63 43.09, -96.62 43.09, -96.61 43.09, -96.6 43.09, -96.59 43.09, -96.58 43.09, -96.57 43.09, -96.56 43.09, -96.55 43.09, -96.36 43.07, -96.17 43.01, -96 42.92, -95.86 42.8, -95.73 42.66, -95.64 42.49, -95.58 42.31, -95.56 42.12, -95.56 42.1, -95.56 42.09, -95.56 42.08, -95.56 42.07, -95.56 42.06, -95.56 42.04, -95.56 42, -95.56 41.99, -95.56 41.98, -95.56 41.97, -95.56 41.96, -95.56 41.95, -95.56 41.94, -95.56 41.93, -95.56 41.92, -95.56 41.91, -95.56 41.9, -95.56 41.89, -95.56 41.88, -95.56 41.87, -95.56 41.86, -95.56 41.85, -95.56 41.83, -95.56 41.82, -95.56 41.81, -95.56 41.8, -95.56 41.79, -95.56 41.78, -95.56 41.77, -95.56 41.76, -95.56 41.75, -95.56 41.74, -95.58 41.54, -95.63 41.36, -95.72 41.19, -95.85 41.03, -96 40.91, -96.17 40.82, -96.36 40.76, -96.55 40.74, -96.56 40.74, -96.57 40.74, -96.58 40.74, -96.59 40.74, -96.6 40.74, -96.62 40.74, -96.63 40.74, -96.64 40.74, -96.65 40.74, -96.67 40.74, -96.68 40.74, -96.69 40.74, -96.7 40.74, -96.71 40.74, -96.72 40.74, -96.73 40.74, -96.74 40.74, -96.75 40.74, -96.76 40.74, -96.77 40.74, -96.78 40.74, -96.79 40.74, -96.8 40.74, -96.81 40.74, -96.82 40.74, -96.83 40.74, -96.85 40.74, -96.86 40.74, -96.88 40.74, -96.9 40.74, -96.91 40.74, -96.92 40.74, -96.93 40.74, -96.94 40.74, -96.95 40.74, -96.97 40.74, -96.98 40.74, -96.99 40.74, -97.01 40.74, -97.02 40.74, -97.22 40.76, -97.4 40.82, -97.57 40.91, -97.72 41.03, -97.85 41.18, -97.94 41.35, -98 41.54, -98.02 41.73, -98.02 41.75, -98.02 41.76, -98.02 41.77))"
+
+        function_df = self.spark.sql("select ST_ReducePrecision(ST_Buffer(polygondf.countyshape, 10, 'endcap=square'), 2) from polygondf")
+        actual = function_df.take(1)[0][0].wkt
+        assert actual == "POLYGON ((-107.02 42.06, -107.02 42.07, -107.02 42.09, -107.02 42.11, -107.02 42.32, -107.02 42.33, -107.01 42.42, -107.01 42.43, -106.77 44.33, -106.16 46.15, -105.22 47.82, -103.98 49.27, -102.48 50.47, -100.78 51.36, -98.94 51.9, -97.04 52.09, -97.03 52.09, -97.01 52.09, -96.95 52.09, -96.9 52.09, -96.81 52.09, -96.7 52.09, -96.68 52.09, -96.65 52.09, -96.55 52.09, -96.54 52.09, -96.49 52.09, -96.48 52.09, -94.58 51.89, -92.74 51.33, -91.04 50.43, -89.55 49.23, -88.32 47.76, -87.39 46.08, -86.79 44.25, -86.56 42.35, -86.56 42.18, -86.56 42.17, -86.56 42.1, -86.55 41.99, -86.56 41.9, -86.56 41.78, -86.56 41.77, -86.56 41.75, -86.56 41.73, -86.56 41.7, -86.75 39.76, -87.33 37.89, -88.25 36.17, -89.49 34.66, -91 33.43, -92.72 32.51, -94.59 31.94, -96.53 31.74, -96.55 31.74, -96.56 31.74, -96.57 31.74, -96.58 31.74, -96.6 31.74, -96.69 31.74, -96.72 31.74, -96.75 31.74, -96.94 31.74, -97.02 31.74, -97.04 31.74, -97.06 31.74, -98.99 31.94, -100.85 32.5, -102.56 33.42, -104.07 34.65, -105.31 36.14, -106.23 37.85, -106.81 39.71, -107.02 41.64, -107.02 41.75, -107.02 41.94, -107.02 41.96, -107.02 41.99, -107.02 42.01, -107.02 42.02, -107.02 42.03, -107.02 42.06))"
 
     def test_st_envelope(self):
         polygon_from_wkt = self.spark.read.format("csv"). \
@@ -184,8 +189,15 @@ class TestPredicateJoin(TestBase):
         polygon_df.createOrReplaceTempView("polygondf")
         polygon_df.show()
         function_df = self.spark.sql(
-            "select ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857', false) from polygondf")
-        function_df.show()
+            "select ST_ReducePrecision(ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857', false), 2) from polygondf")
+        actual = function_df.take(1)[0][0].wkt
+        assert actual[:300] == "POLYGON ((-10800163.45 5161718.41, -10800164.34 5162103.12, -10800164.57 5162440.81, -10800164.57 5162443.95, -10800164.57 5162468.37, -10800164.57 5162501.93, -10800165.57 5163066.47, -10800166.9 5163158.61, -10800166.9 5163161.46, -10800167.01 5163167.9, -10800167.01 5163171.5, -10800170.24 516340"
+
+        function_df = self.spark.sql(
+            "select ST_ReducePrecision(ST_Transform(ST_SetSRID(polygondf.countyshape, 4326), 'epsg:3857'), 2) from polygondf"
+        )
+        actual = function_df.take(1)[0][0].wkt
+        assert actual[:300] == "POLYGON ((-10800163.45 5161718.41, -10800164.34 5162103.12, -10800164.57 5162440.81, -10800164.57 5162443.95, -10800164.57 5162468.37, -10800164.57 5162501.93, -10800165.57 5163066.47, -10800166.9 5163158.61, -10800166.9 5163161.46, -10800167.01 5163167.9, -10800167.01 5163171.5, -10800170.24 516340"
 
     def test_st_intersection_intersects_but_not_contains(self):
         test_table = self.spark.sql(
@@ -266,10 +278,10 @@ class TestPredicateJoin(TestBase):
             ("Linestring(0 0 1, 1 1 2, 1 0 3)",),
             ("MULTIPOINT ((10 40 66), (40 30 77), (20 20 88), (30 10 99))",),
             (
-            "MULTIPOLYGON (((30 20 11, 45 40 11, 10 40 11, 30 20 11)), ((15 5 11, 40 10 11, 10 20 11, 5 10 11, 15 5 11)))",),
+                "MULTIPOLYGON (((30 20 11, 45 40 11, 10 40 11, 30 20 11)), ((15 5 11, 40 10 11, 10 20 11, 5 10 11, 15 5 11)))",),
             ("MULTILINESTRING ((10 10 11, 20 20 11, 10 40 11), (40 40 11, 30 30 11, 40 20 11, 30 10 11))",),
             (
-            "MULTIPOLYGON (((40 40 11, 20 45 11, 45 30 11, 40 40 11)), ((20 35 11, 10 30 11, 10 10 11, 30 5 11, 45 20 11, 20 35 11), (30 20 11, 20 15 11, 20 25 11, 30 20 11)))",),
+                "MULTIPOLYGON (((40 40 11, 20 45 11, 45 30 11, 40 40 11)), ((20 35 11, 10 30 11, 10 10 11, 30 5 11, 45 20 11, 20 35 11), (30 20 11, 20 15 11, 20 25 11, 30 20 11)))",),
             ("POLYGON((0 0 11, 0 5 11, 5 5 11, 5 0 11, 0 0 11), (1 1 11, 2 1 11, 2 2 11, 1 2 11, 1 1 11))",),
         ], ["wkt"])
 
@@ -715,8 +727,8 @@ class TestPredicateJoin(TestBase):
             ("MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10))", "Point(21 52)"),
             ("MULTILINESTRING ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))", "Point(21 52)"),
             (
-            "GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40), POLYGON ((40 40, 20 45, 45 30, 40 40)))",
-            "Point(21 52)"),
+                "GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40), POLYGON ((40 40, 20 45, 45 30, 40 40)))",
+                "Point(21 52)"),
             ("POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))", "Point(21 52)")
         ]
         geometry_df = self.__wkt_pairs_to_data_frame(geometry)
@@ -1155,6 +1167,53 @@ class TestPredicateJoin(TestBase):
         # test null case
         cell_ids = self.spark.sql("select ST_S2CellIDs(null, 6)").take(1)[0][0]
         assert cell_ids is None
+
+    def test_st_h3_cell_ids(self):
+        test_cases = [
+            "'POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'",
+            "'LINESTRING(0 0, 1 2, 2 4, 3 6)'",
+            "'POINT(1 2)'"
+        ]
+        for input_geom in test_cases:
+            cell_ids = self.spark.sql("select ST_H3CellIDs(ST_GeomFromText({}), 6, true)".format(input_geom)).take(1)[0][0]
+            assert isinstance(cell_ids, list)
+            assert isinstance(cell_ids[0], int)
+        # test null case
+        cell_ids = self.spark.sql("select ST_H3CellIDs(null, 6, true)").take(1)[0][0]
+        assert cell_ids is None
+
+    def test_st_h3_cell_distance(self):
+        df = self.spark.sql("select ST_H3CellDistance(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], ST_H3CellIDs(ST_GeomFromWKT('POINT(1.23 1.59)'), 8, true)[0])")
+        assert df.take(1)[0][0] == 78
+
+    def test_st_h3_kring(self):
+        df = self.spark.sql("""
+        SELECT 
+            ST_H3KRing(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], 1, true) exactRings,
+            ST_H3KRing(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], 1, false) allRings,
+            ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true) original_cells
+        """)
+        exact_rings, all_rings, original_cells = df.take(1)[0]
+        assert set(exact_rings + original_cells) == set(all_rings)
+
+    def test_st_h3_togeom(self):
+        df = self.spark.sql("""
+        SELECT
+            ST_Contains(
+                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, true)),
+                ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))')
+            ),
+            ST_Contains(
+                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, false)),
+                ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))')
+            ),
+            ST_Intersects(
+                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, false)),
+                ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))')
+            )
+        """)
+        res1, res2, res3 = df.take(1)[0]
+        assert res1 and not res2 and res3
 
     def test_st_numPoints(self):
         actual = self.spark.sql("SELECT ST_NumPoints(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'))").take(1)[0][0]

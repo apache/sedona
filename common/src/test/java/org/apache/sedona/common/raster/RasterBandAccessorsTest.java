@@ -19,11 +19,18 @@
 
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.Constructors;
+import org.apache.sedona.common.Functions;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -75,23 +82,120 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     }
 
     @Test
+    public void testZonalStats() throws FactoryException, ParseException, IOException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+        String polygon = "POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))";
+        Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
+
+        double actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sum", false);
+        double expected = 1.0690406E7;
+        assertEquals(expected, actual, 0d);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 2, "mean", false);
+        expected = 220.6062;
+        assertEquals(expected, actual, FP_TOLERANCE);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "count");
+        expected = 184792.0;
+        assertEquals(expected, actual, 0.1d);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 3, "variance", false);
+        expected = 13554.5057;
+        assertEquals(expected, actual, FP_TOLERANCE);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, "max");
+        expected = 255.0;
+        assertEquals(expected, actual, 1E-1);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "min", false);
+        expected = 0.0;
+        assertEquals(expected, actual, 1E-1);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sd", false);
+        expected = 92.1327;
+        assertEquals(expected, actual, FP_TOLERANCE);
+    }
+
+    @Test
+    public void testZonalStatsWithNoData() throws IOException, FactoryException, ParseException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+        String polygon = "POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000, -180.250000 40.250000, -167.750000 87.750000))";
+        // Testing implicit CRS transformation
+        Geometry geom = Constructors.geomFromWKT(polygon, 0);
+
+        double actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sum", true);
+        double expected = 3213526.0;
+        assertEquals(expected, actual, 0d);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "mean", true);
+        expected = 226.5599;
+        assertEquals(expected, actual, FP_TOLERANCE);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "count");
+        expected = 14184.0;
+        assertEquals(expected, actual, 0.1d);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, "variance");
+        expected = 5606.4233;
+        assertEquals(expected, actual, FP_TOLERANCE);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, "max");
+        expected = 255.0;
+        assertEquals(expected, actual, 1E-1);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "min", true);
+        expected = 1.0;
+        assertEquals(expected, actual, 1E-1);
+
+        actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sd", true);
+        expected = 74.8760;
+        assertEquals(expected, actual, FP_TOLERANCE);
+    }
+
+    @Test
+    public void testZonalStatsAll() throws IOException, FactoryException, ParseException, TransformException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+        String polygon = "POLYGON ((-8673439.6642 4572993.5327, -8673155.5737 4563873.2099, -8701890.3259 4562931.7093, -8682522.8735 4572703.8908, -8673439.6642 4572993.5327))";
+        Geometry geom = Constructors.geomFromWKT(polygon, 3857);
+
+        double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false);
+        double[] expected = new double[] {184792.0, 1.0690406E7, 57.8510, 0.0, 0.0, 92.1327, 8488.4480, 0.0, 255.0};
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
+    }
+
+    @Test
+    public void testZonalStatsAllWithNoData() throws IOException, FactoryException, ParseException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+        String polygon = "POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000, -180.250000 40.250000, -167.750000 87.750000))";
+        Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
+
+        double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, true);
+        double[] expected = new double[] {14184.0, 3213526.0, 226.5599, 255.0, 255.0, 74.8760, 5606.4233, 1.0, 255.0};
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
+    }
+
+    @Test
+    public void testZonalStatsAllWithEmptyRaster() throws FactoryException, ParseException {
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 6, 6, 1, -1, 1, -1, 0, 0, 4326);
+        double[] bandValue = new double[]{0, 0, 0, 0, 0, 0, 0, 1, 0, 3, 9, 0, 0, 5, 6, 0, 8, 0, 0, 4, 11, 11, 12, 0, 0, 13, 0, 15, 16, 0, 0, 0, 0, 0, 0, 0};
+        raster = MapAlgebra.addBandFromArray(raster, bandValue, 1);
+        raster = RasterBandEditors.setBandNoDataValue(raster, 1, 0d);
+        // Testing implicit CRS transformation
+        Geometry geom = Constructors.geomFromWKT("POLYGON((2 -2, 2 -6, 6 -6, 6 -2, 2 -2))", 0);
+
+        double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, true);
+        double[] expected = new double[] {13.0, 114.0, 8.7692, 9.0, 11.0, 4.7285, 22.3589, 1.0, 16.0};
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
+    }
+
+    @Test
     public void testSummaryStatsWithAllNoData() throws FactoryException {
         GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0);
         double[] values = new double[] {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
         emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values, 1, 0d);
-        double count = 0.0;
-        double sum = Double.NaN;
-        double mean = Double.NaN;
-        double stddev = Double.NaN;
-        double min = Double.NaN;
-        double max = Double.NaN;
-        double[] result = RasterBandAccessors.getSummaryStats(emptyRaster);
-        assertEquals(count, result[0], 0.1d);
-        assertEquals(sum, result[1], 0.1d);
-        assertEquals(mean, result[2], 0.1d);
-        assertEquals(stddev, result[3], 0.1d);
-        assertEquals(min, result[4], 0.1d);
-        assertEquals(max, result[5], 0.1d);
+        double[] actual = RasterBandAccessors.getSummaryStats(emptyRaster);
+        double[] expected = {0.0, 0.0, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
     }
 
     @Test
@@ -101,87 +205,32 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         double[] values2 = new double[] {0,0,28,29,0,0,0,33,34,35,36,37,38,0,0,0,0,43,44,45,46,47,48,49,50};
         emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values1, 1, 0d);
         emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values2, 2, 0d);
-        double count = 25.0;
-        double sum = 204.0;
-        double mean = 8.16;
-        double stddev = 9.27655108324209;
-        double min = 0.0;
-        double max = 25.0;
-        double[] result = RasterBandAccessors.getSummaryStats(emptyRaster, 1, false);
-        assertEquals(count, result[0], 0.1d);
-        assertEquals(sum, result[1], 0.1d);
-        assertEquals(mean, result[2], 1e-2d);
-        assertEquals(stddev, result[3], 1e-6);
-        assertEquals(min, result[4], 0.1d);
-        assertEquals(max, result[5], 0.1d);
+        double[] actual = RasterBandAccessors.getSummaryStats(emptyRaster, 1, false);
+        double[] expected = {25.0, 204.0, 8.1600, 9.2765, 0.0, 25.0};
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
 
-        count = 16.0;
-        sum = 642.0;
-        mean = 40.125;
-        stddev = 6.9988838395847095;
-        min = 28.0;
-        max = 50.0;
-        result = RasterBandAccessors.getSummaryStats(emptyRaster, 2);
-        assertEquals(count, result[0], 0.1d);
-        assertEquals(sum, result[1], 0.1d);
-        assertEquals(mean, result[2], 1e-3d);
-        assertEquals(stddev, result[3], 1e-6d);
-        assertEquals(min, result[4], 0.1d);
-        assertEquals(max, result[5], 0.1d);
+        actual = RasterBandAccessors.getSummaryStats(emptyRaster, 2);
+        expected = new double[]{16.0, 642.0, 40.125, 6.9988838395847095, 28.0, 50.0};
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
 
-        count = 14.0;
-        sum = 204.0;
-        mean = 14.571428571428571;
-        stddev = 7.761758689832072;
-        min = 1.0;
-        max = 25.0;
-        result = RasterBandAccessors.getSummaryStats(emptyRaster);
-        assertEquals(count, result[0], 0.1d);
-        assertEquals(sum, result[1], 0.1d);
-        assertEquals(mean, result[2], 1e-6d);
-        assertEquals(stddev, result[3], 1e-6d);
-        assertEquals(min, result[4], 0.1d);
-        assertEquals(max, result[5], 0.1d);
+        actual = RasterBandAccessors.getSummaryStats(emptyRaster);
+        expected = new double[] {14.0, 204.0, 14.5714, 7.7617, 1.0, 25.0};
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
     }
 
     @Test
     public void testSummaryStatsWithRaster() throws IOException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
-        double count = 1036800.0;
-        double sum = 2.06233487E8;
-        double mean = 198.91347125771605;
-        double stddev = 95.09054096106192;
-        double min = 0.0;
-        double max = 255.0;
-        double[] result = RasterBandAccessors.getSummaryStats(raster, 1, false);
-        assertEquals(count, result[0], 0.1d);
-        assertEquals(sum, result[1], 0.1d);
-        assertEquals(mean, result[2], 1e-6d);
-        assertEquals(stddev, result[3], 1e-6d);
-        assertEquals(min, result[4], 0.1d);
-        assertEquals(max, result[5], 0.1d);
+        double[] actual = RasterBandAccessors.getSummaryStats(raster, 1, false);
+        double[] expected = {1036800.0, 2.06233487E8, 198.9134, 95.0905, 0.0, 255.0};
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
 
-        count = 928192.0;
-        sum = 2.06233487E8;
-        mean = 222.18839097945252;
-        stddev = 70.20559521132097;
-        min = 1.0;
-        max = 255.0;
-        result = RasterBandAccessors.getSummaryStats(raster, 1);
-        assertEquals(count, result[0], 0.1d);
-        assertEquals(sum, result[1], 0.1d);
-        assertEquals(mean, result[2], 1e-6d);
-        assertEquals(stddev, result[3], 1e-6d);
-        assertEquals(min, result[4], 0.1d);
-        assertEquals(max, result[5], 0.1d);
+        actual = RasterBandAccessors.getSummaryStats(raster, 1);
+        expected = new double[]{928192.0, 2.06233487E8, 222.1883, 70.2055, 1.0, 255.0};
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
 
-        result = RasterBandAccessors.getSummaryStats(raster);
-        assertEquals(count, result[0], 0.1d);
-        assertEquals(sum, result[1], 0.1d);
-        assertEquals(mean, result[2], 1e-6d);
-        assertEquals(stddev, result[3], 1e-6d);
-        assertEquals(min, result[4], 0.1d);
-        assertEquals(max, result[5], 0.1d);
+        actual = RasterBandAccessors.getSummaryStats(raster);
+        assertArrayEquals(expected, actual, FP_TOLERANCE);
     }
 
     @Test
@@ -244,6 +293,60 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         expected = 928192;
         assertEquals(expected, actual);
 
+    }
+
+    @Test
+    public void testGetBand() throws FactoryException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster( 4, 5, 5, 3, -215, 2, -2, 2, 2, 0);
+        double[] values1 = new double[] {16, 0, 24, 33, 43, 49, 64, 0, 76, 77, 79, 89, 0, 116, 118, 125, 135, 0, 157, 190, 215, 229, 241, 248, 249};
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values1, 3, 0d);
+        GridCoverage2D resultRaster = RasterBandAccessors.getBand(emptyRaster, new int[]{3,3,3});
+        int actual = RasterAccessors.numBands(resultRaster);
+        int expected = 3;
+        assertEquals(expected, actual);
+
+        double[] actualMetadata = Arrays.stream(RasterAccessors.metadata(resultRaster), 0, 9).toArray();
+        double[] expectedMetadata = Arrays.stream(RasterAccessors.metadata(emptyRaster), 0, 9).toArray();
+        assertArrayEquals(expectedMetadata, actualMetadata, 0.1d);
+
+        double[] actualBandValues = MapAlgebra.bandAsArray(resultRaster, 3);
+        double[] expectedBandValues = MapAlgebra.bandAsArray(emptyRaster, 3);
+        assertArrayEquals(expectedBandValues, actualBandValues, 0.1d);
+    }
+
+    @Test
+    public void testGetBandWithDataTypes() throws FactoryException, IOException {
+        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster( 4, "d", 5, 5, 3, -215, 2, -2, 2, 2, 0);
+        double[] values1 = new double[] {16, 0, 24, 33, 43, 49, 64, 0, 76, 77, 79, 89, 0, 116, 118, 125, 135, 0, 157, 190, 215, 229, 241, 248, 249};
+        emptyRaster = MapAlgebra.addBandFromArray(emptyRaster, values1, 1, 0d);
+        String actual = RasterBandAccessors.getBandType(emptyRaster, 1);
+        String expected = "REAL_64BITS";
+        assertEquals(expected, actual);
+
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+        raster = RasterBandAccessors.getBand(raster, new int[] {2,1,3});
+        for (int i = 1; i <= RasterAccessors.numBands(raster); i++) {
+            actual = RasterBandAccessors.getBandType(raster, i);
+            expected = "UNSIGNED_8BITS";
+            assertEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void testGetBandWithRaster() throws IOException, FactoryException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+        GridCoverage2D resultRaster = RasterBandAccessors.getBand(raster, new int[] {1,2,2,2,1});
+        int actual = RasterAccessors.numBands(resultRaster);
+        int expected = 5;
+        assertEquals(actual, expected);
+
+        double[] actualMetadata = Arrays.stream(RasterAccessors.metadata(resultRaster), 0, 9).toArray();
+        double[] expectedMetadata = Arrays.stream(RasterAccessors.metadata(raster), 0, 9).toArray();
+        assertArrayEquals(expectedMetadata, actualMetadata, 0.1d);
+
+        double[] actualBandValues = MapAlgebra.bandAsArray(raster, 2);
+        double[] expectedBandValues = MapAlgebra.bandAsArray(resultRaster, 2);
+        assertArrayEquals(expectedBandValues, actualBandValues, 0.1d);
     }
 
     @Test
@@ -325,6 +428,32 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         assertEquals("Provided band index 5 is not present in the raster", exception.getMessage());
     }
 
+    @Test
+    public void testBandIsNoData() throws FactoryException {
+        String[] dataTypes = new String[]{"B", "S", "US", "I", "F", "D"};
+        int width = 3;
+        int height = 3;
+        double noDataValue = 5.0;
+        double[] band1 = new double[width * height];
+        double[] band2 = new double[width * height];
+        Arrays.fill(band1, noDataValue);
+        for (int k = 0; k < band2.length; k++) {
+            band2[k] = k;
+        }
+        for (String dataType : dataTypes) {
+            GridCoverage2D raster = RasterConstructors.makeEmptyRaster(2, dataType, 3, 3, 0, 0, 1);
+            raster = MapAlgebra.addBandFromArray(raster, band1, 1, null);
+            raster = MapAlgebra.addBandFromArray(raster, band2, 2, null);
 
+            // Currently raster does not have a nodata value, isBandNoData always returns false
+            assertFalse(RasterBandAccessors.bandIsNoData(raster, 1));
+            assertFalse(RasterBandAccessors.bandIsNoData(raster, 2));
 
+            // Set nodata value for both bands, now band 1 is filled with nodata values
+            raster = RasterBandEditors.setBandNoDataValue(raster, 1, noDataValue);
+            raster = RasterBandEditors.setBandNoDataValue(raster, 2, noDataValue);
+            assertTrue(RasterBandAccessors.bandIsNoData(raster, 1));
+            assertFalse(RasterBandAccessors.bandIsNoData(raster, 2));
+        }
+    }
 }

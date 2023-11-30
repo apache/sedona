@@ -3,7 +3,6 @@
 \name{spark_write_geojson}
 \alias{spark_write_geojson}
 \alias{spark_write_geoparquet}
-\alias{spark_write_geotiff}
 \alias{spark_write_raster}
 \title{Write geospatial data from a Spark DataFrame.}
 \usage{
@@ -17,15 +16,6 @@ spark_write_geojson(
 )
 
 spark_write_geoparquet(
-  x,
-  path,
-  mode = NULL,
-  options = list(),
-  partition_by = NULL,
-  ...
-)
-
-spark_write_geotiff(
   x,
   path,
   mode = NULL,
@@ -53,7 +43,7 @@ Supports the \samp{"hdfs://"}, \samp{"s3a://"} and \samp{"file://"} protocols.}
   table already exists. Supported values include: 'error', 'append', 'overwrite' and
   ignore. Notice that 'overwrite' will also change the column structure.
 
-  For more details see also \url{https://spark.apache.org/docs/latest/sql-programming-guide.html#save-modes}
+  For more details see also \url{https://spark.apache.org/docs/latest/sql-programming-guide.html}
   for your version of Spark.}
 
 \item{options}{A list of strings with additional options.}
@@ -67,7 +57,6 @@ Functions to write geospatial data into a variety of formats from Spark DataFram
 \itemize{
 \item \code{spark_write_geojson}: to GeoJSON
 \item \code{spark_write_geoparquet}: to GeoParquet
-\item \code{spark_write_geotiff}: to GeoTiff from Array[Double] rasters
 \item \code{spark_write_raster}: to raster tiles after using RS output functions (\code{RS_AsXXX})
 }
 }

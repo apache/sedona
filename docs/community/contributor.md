@@ -18,6 +18,7 @@ Current Sedona PMC members are as follows:
 | Paweł Kociński    |  Imbruced   |   imbruced@apache.org  |
 |      Yitao Li     |  yitao-li   |   yitaoli@apache.org   |
 |   Netanel Malka   | netanel246  |    malka@apache.org    |
+| Kristin Cowalcijk | Kontinuation| kontinuation@apache.org|
 |   Mohamed Sarwat  |   Sarwat    |   mosarwat@apache.org  |
 | Kengo Seki        |   sekikn    | sekikn@apache.org      |
 |    Sachio Wakai   |  SW186000   |    swakai@apache.org   |
@@ -37,13 +38,17 @@ To get started contributing to Sedona, learn [how to contribute](../rule) – an
 
 The PMC regularly adds new committers from the active contributors, based on their contributions to Sedona. The qualifications for new committers include:
 
-* Sustained contributions to Spark: Committers should have a history of major contributions to Sedona.
+* Sustained contributions to Sedona: Committers should have a history of major contributions to Sedona.
 * Quality of contributions: Committers more than any other community member should submit simple, well-tested, and well-designed patches. In addition, they should show sufficient expertise to be able to review patches.
 * Community involvement: Committers should have a constructive and friendly attitude in all community interactions. They should also be active on the dev mailing list & Gitter, and help mentor newer contributors and users.
 
 The PMC also adds new PMC members. PMC members are expected to carry out PMC responsibilities as described in Apache Guidance, including helping vote on releases, enforce Apache project trademarks, take responsibility for legal and license issues, and ensure the project follows Apache project mechanics. The PMC periodically adds committers to the PMC who have shown they understand and can help with these activities.
 
-Currently, Sedona makes committers PMC members automatically.
+Current Sedona Committers are as follows:
+
+|        Name       |  GitHub ID  |        Apache ID       |
+|:-----------------:|:-----------:|:----------------------:|
+|  Nilesh Gajwani   | 	iGN5117  	 |  nilesh@apache.org     |
 
 ## Nominate a committer or PMC member
 
@@ -252,14 +257,14 @@ You need to link your ASF Account with your GitHub account.
 
 Here are the steps
 
-1. Verify you have a Github ID enabled with 2FA
+1. Verify you have a GitHub ID enabled with 2FA
 	* https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/
-2. Enter your Github ID into your Apache ID profile https://id.apache.org/
+2. Enter your GitHub ID into your Apache ID profile https://id.apache.org/
 3. Merge your Apache and GitHub accounts using
 	* GitBox (Apache Account Linking utility) https://gitbox.apache.org/setup/
 	* You should see 3 green checks in GitBox.
 	* Wait at least 30  minutes for an email inviting you to Apache GitHub Organization and accept invitation
-4. After accepting the Github Invitation verify that you are a 
+4. After accepting the GitHub Invitation verify that you are a 
 member of the team https://github.com/orgs/apache/teams/sedona-committers
 
 Optionally, if you want, please follow the instructions to set up your GitHub, SSH, svn password, svn configuration, email forwarding, etc.

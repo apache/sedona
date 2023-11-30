@@ -27,9 +27,7 @@ import org.opengis.referencing.FactoryException;
 import java.awt.image.DataBuffer;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class MapAlgebraTest extends RasterTestBase
 {
@@ -193,6 +191,249 @@ public class MapAlgebraTest extends RasterTestBase
         for (int i = 0; i < band.length; i++) {
             assertEquals(band[i], bandNew[i], 1e-9);
         }
+    }
+
+    @Test
+    public void testMultiplyFactor() {
+        double[] input = new double[] {200, 100, 145, 255};
+        double factor = 1.5;
+        double[] actual = MapAlgebra.multiplyFactor(input, factor);
+        double[] expected = new double[] {300.0, 150.0, 217.5, 382.5};
+        assertArrayEquals(expected, actual, 0.01d);
+
+        factor = 2;
+        actual = MapAlgebra.multiplyFactor(input, factor);
+        expected = new double[]{400.0, 200.0, 290.0, 510.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testAdd() {
+        double[] band1 = new double[] {200, 100, 145, 245};
+        double[] band2 = new double[] {55, 155, 110, 10};
+        double[] actual = MapAlgebra.add(band1, band2);
+        double[] expected = new double[] {255.0, 255.0, 255.0, 255.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testSubtract() {
+        double[] band1 = new double[] {55, 155, 110, 10};
+        double[] band2 = new double[] {255.0, 255.0, 255.0, 255.0};
+        double[] actual = MapAlgebra.subtract(band1, band2);
+        double[] expected = new double[] {200, 100, 145, 245};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testMultiply() {
+        double[] band1 = new double[] {20.43, 40.67, 60.91};
+        double[] band2 = new double[] {2.84, 5.26, 8.97};
+        double[] actual = MapAlgebra.multiply(band1, band2);
+        double[] expected = new double[] {58.02119999999999, 213.9242, 546.3627};
+        assertArrayEquals(expected, actual, 0.00001d);
+
+        band1 = new double[] {200, 400, 500};
+        band2 = new double[] {2, 2.5, 3};
+        actual = MapAlgebra.multiply(band1, band2);
+        expected = new double[] {400.0, 1000.0, 1500.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testDivide() {
+        double[] band1 = new double[] {20.43, 40.67, 60.91};
+        double[] band2 = new double[] {2.84, 5.26, 8.97};
+        double[] actual = MapAlgebra.divide(band1, band2);
+        double[] expected = new double[] {7.19, 7.73, 6.79};
+        assertArrayEquals(expected, actual, 0.001d);
+
+        band1 = new double[] {200, 400, 500};
+        band2 = new double[] {2, 2.5, 3};
+        actual = MapAlgebra.divide(band1, band2);
+        expected = new double[] {100.0, 160.0, 166.67};
+        assertArrayEquals(expected, actual, 0.01d);
+    }
+
+    @Test
+    public void testModulo() {
+        double[] band = new double[] {100.0, 260.0, 189.0, 106.0, 230.0, 169.0, 196.0};
+        double dividend = 90;
+        double[] actual = MapAlgebra.modulo(band, dividend);
+        double[] expected = new double[] {10.0, 80.0, 9.0, 16.0, 50.0, 79.0, 16.0};
+        assertArrayEquals(expected, actual, 0.1d);
+
+        band = new double[] {230.0, 345.0, 136.0, 106.0, 134.0, 105.0};
+        actual = MapAlgebra.modulo(band, dividend);
+        expected = new double[] {50.0, 75.0, 46.0, 16.0, 44.0, 15.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testSquareRoot() {
+        double[] band = new double[] {8.0, 16.0, 24.0};
+        double[] actual = MapAlgebra.squareRoot(band);
+        double[] expected = new double[] {2.83, 4.0, 4.9};
+        assertArrayEquals(expected, actual, 0.01d);
+    }
+
+    @Test
+    public void testBitwiseAnd() {
+        double[] band1 = new double[] {15.0, 25.0, 35.0};
+        double[] band2 = new double[] {5.0, 15.0, 25.0};
+        double[] actual = MapAlgebra.bitwiseAnd(band1, band2);
+        double[] expected = new double[]{5.0, 9.0, 1.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testBitwiseOr() {
+        double[] band1 = new double[] {15.0, 25.0, 35.0};
+        double[] band2 = new double[] {5.0, 15.0, 25.0};
+        double[] actual = MapAlgebra.bitwiseOr(band1, band2);
+        double[] expected = new double[]{15.0, 31.0, 59.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testLogicalDifference() {
+        double[] band1 = new double[] {10.0, 20.0, 30.0};
+        double[] band2 = new double[] {40.0, 20.0, 50.0};
+        double[] actual = MapAlgebra.logicalDifference(band1, band2);
+        double[] expected = new double[] {10.0, 0.0, 30.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testLogicalOver() {
+        double[] band1 = new double[] {0.0, 0.0, 30.0};
+        double[] band2 = new double[] {40.0, 20.0, 50.0};
+        double[] actual = MapAlgebra.logicalOver(band1, band2);
+        double[] expected = new double[] {40.0, 20.0, 30.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testNormalize() {
+        double[] band = new double[] {800.0, 900.0, 0.0, 255.0};
+        double[] actual = MapAlgebra.normalize(band);
+        double[] expected = new double[] {226.0, 255.0, 0.0, 72.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testNormalizedDifference() {
+        double[] band1 = new double[] {960, 1067, 107, 20, 1868};
+        double[] band2 = new double[] {1967, 951, 622, 223, 152};
+        double[] actual = MapAlgebra.normalizedDifference(band1, band2);
+        double[] expected = new double[] {0.34, -0.06, 0.71, 0.84, -0.85};
+        assertArrayEquals(expected, actual, 0.001d);
+    }
+
+    @Test
+    public void testMean() {
+        double[] band = new double[] {200.0, 400.0, 600.0, 200.0};
+        double actual = MapAlgebra.mean(band);
+        double expected = 350.0;
+        assertEquals(expected, actual, 0.1d);
+
+        band = new double[] {200.0, 400.0, 600.0, 700.0};
+        actual = MapAlgebra.mean(band);
+        expected = 475.0;
+        assertEquals(expected, actual, 0.1d);
+
+        band = new double[] {0.43, 0.36, 0.73, 0.56};
+        actual = MapAlgebra.mean(band);
+        expected = 0.52;
+        assertEquals(expected, actual, 0.001d);
+    }
+
+    @Test
+    public void testMode() {
+        double[] band = new double[] {200.0, 400.0, 600.0, 200.0};
+        double[] actual = MapAlgebra.mode(band);
+        double[] expected = new double[] {200d};
+        assertArrayEquals(expected, actual, 0.1d);
+
+        band = new double[] {200.0, 400.0, 600.0, 700.0};
+        actual = MapAlgebra.mode(band);
+        expected = new double[] {200.0, 400.0, 600.0, 700.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testFetchRegion() {
+        double[] band = new double[] {100.0, 260.0, 189.0, 106.0, 230.0, 169.0, 196.0, 200.0, 460.0};
+        int[] coordinates = new int[] {0, 0, 1, 2};
+        int[] dimension = new int[] {3, 3};
+        double[] actual = MapAlgebra.fetchRegion(band, coordinates, dimension);
+        double[] expected = new double[] {100.0, 260.0, 189.0, 106.0, 230.0, 169.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testGreaterThan() {
+        double[] band = new double[] {0.42, 0.36, 0.18, 0.20, 0.21, 0.2001, 0.19};
+        double target = 0.2;
+        double[] actual = MapAlgebra.greaterThan(band, target);
+        double[] expected = new double[] {1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0};
+        assertArrayEquals(expected, actual, 0.1d);
+
+        band = new double[] {0.14, 0.13, 0.10, 0.86, 0.01};
+        actual = MapAlgebra.greaterThan(band, target);
+        expected = new double[] {0.0, 0.0, 0.0, 1.0, 0.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testGreaterThanEqual() {
+        double[] band = new double[] {0.42, 0.36, 0.18, 0.20, 0.21, 0.2001, 0.19};
+        double target = 0.2;
+        double[] actual = MapAlgebra.greaterThanEqual(band, target);
+        double[] expected = new double[] {1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0};
+        assertArrayEquals(expected, actual, 0.1d);
+
+        band = new double[] {0.14, 0.13, 0.10, 0.86, 0.01};
+        actual = MapAlgebra.greaterThanEqual(band, target);
+        expected = new double[] {0.0, 0.0, 0.0, 1.0, 0.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testLessThan() {
+        double[] band = new double[] {0.42, 0.36, 0.18, 0.20, 0.21, 0.2001, 0.19};
+        double target = 0.2;
+        double[] actual = MapAlgebra.lessThan(band, target);
+        double[] expected = new double[] {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+        assertArrayEquals(expected, actual, 0.1d);
+
+        band = new double[] {0.14, 0.13, 0.10, 0.86, 0.01};
+        actual = MapAlgebra.lessThan(band, target);
+        expected = new double[] {1.0, 1.0, 1.0, 0.0, 1.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testLessThanEqual() {
+        double[] band = new double[] {0.42, 0.36, 0.18, 0.20, 0.21, 0.2001, 0.19};
+        double target = 0.2;
+        double[] actual = MapAlgebra.lessThanEqual(band, target);
+        double[] expected = new double[] {0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0};
+        assertArrayEquals(expected, actual, 0.1d);
+
+        band = new double[] {0.14, 0.13, 0.10, 0.86, 0.01};
+        actual = MapAlgebra.lessThanEqual(band, target);
+        expected = new double[] {1.0, 1.0, 1.0, 0.0, 1.0};
+        assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testCountValue() {
+        double[] band = new double[] {200.0, 400.0, 600.0, 200.0, 600.0, 600.0, 800.0};
+        double target = 600d;
+        int actual = MapAlgebra.countValue(band, target);
+        int expected = 3;
+        assertEquals(expected, actual);
     }
 
     @Test

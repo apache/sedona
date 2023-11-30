@@ -1,6 +1,12 @@
 We recommend Sedona-1.3.1-incuabting and above for EMR. In the tutorial, we use AWS Elastic MapReduce (EMR) 6.9.0. It has the following applications installed: Hadoop 3.3.3, JupyterEnterpriseGateway 2.6.0, Livy 0.7.1, Spark 3.3.0.
 
+!!!tip
+	Wherobots Cloud provides a free tool to deploy Apache Sedona to AWS EMR. Please sign up [here](https://www.wherobots.services/).
+
 This tutorial is tested on EMR on EC2 with EMR Studio (notebooks). EMR on EC2 uses YARN to manage resources.
+
+!!!note
+	If you are using Spark 3.4+ and Scala 2.12, please use `sedona-spark-shaded-3.4_2.12`. Please pay attention to the Spark version postfix and Scala version postfix.
 
 ## Prepare initialization script
 
@@ -19,9 +25,12 @@ sudo curl -o /jars/sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar
 sudo curl -o /jars/geotools-wrapper-{{ sedona.current_geotools }}.jar "https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_geotools }}/geotools-wrapper-{{ sedona.current_geotools }}.jar"
 
 # Install necessary python libraries
-sudo python3 -m pip install pandas shapely==1.8.5
-sudo python3 -m pip install pandas geopandas==0.10.2
-sudo python3 -m pip install attrs matplotlib descartes apache-sedona==1.4.0
+sudo python3 -m pip install pandas==1.3.5
+sudo python3 -m pip install shapely==1.8.5
+sudo python3 -m pip install geopandas==0.11.1
+sudo python3 -m pip install keplergl==0.3.2
+sudo python3 -m pip install pydeck==0.8.0
+sudo python3 -m pip install attrs matplotlib descartes apache-sedona=={{ sedona.current_version }}
 ```
 
 When you create a EMR cluster, in the `bootstrap action`, specify the location of this script.

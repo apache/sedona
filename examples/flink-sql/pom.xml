@@ -103,6 +103,17 @@
     </dependencies>
     <repositories>
         <repository>
+            <id>maven-central</id>
+            <name>Maven Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+        <repository>
             <id>maven2-repository.dev.java.net</id>
             <name>Java.net repository</name>
             <url>https://download.java.net/maven/2</url>
