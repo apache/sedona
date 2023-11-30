@@ -1739,7 +1739,7 @@ of the rectangular region. The new values to be assigned to the pixels in this r
 to this function.
 
 !!!Note
-    If the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`.
+    Since `v1.5.1`, if the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`.
 
 Format: 
 
@@ -1844,7 +1844,7 @@ Output:
 Introduction: Returns the value at the given point in the raster. If no band number is specified it defaults to 1.
 
 !!!Note
-    If the coordinate reference system (CRS) of the input `point` geometry differs from that of the `raster`, then `point` will be transformed to match the CRS of the `raster`.
+    Since `v1.5.1`, if the coordinate reference system (CRS) of the input `point` geometry differs from that of the `raster`, then `point` will be transformed to match the CRS of the `raster`.
 
 Format: 
 
@@ -1884,7 +1884,7 @@ RS_Values is similar to RS_Value but operates on an array of points or grid coor
 RS_Values can be significantly faster since a raster only has to be loaded once for several points.
 
 !!!Note
-    If the coordinate reference system (CRS) of the input `points` geometries differs from that of the `raster`, then `points` will be transformed to match the CRS of the `raster`.
+    Since `v1.5.1`, if the coordinate reference system (CRS) of the input `points` geometries differs from that of the `raster`, then `points` will be transformed to match the CRS of the `raster`.
 
 Format: 
 
