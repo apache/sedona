@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -109,12 +110,9 @@ public class PixelFunctionEditors {
     public static GridCoverage2D setValues(GridCoverage2D raster, int band, Geometry geom, double value, boolean keepNoData) throws FactoryException, TransformException {
         RasterUtils.ensureBand(raster, band);
 
-        if(RasterAccessors.srid(raster) != geom.getSRID()) {
-            // implicitly converting geometry CRS to raster CRS
-            geom = RasterUtils.convertCRSIfNeeded(geom, raster.getCoordinateReferenceSystem());
-            // have to set the SRID as RasterUtils.convertCRSIfNeeded doesn't set it even though the geometry is in raster's CRS
-            geom = Functions.setSRID(geom, RasterAccessors.srid(raster));
-        }
+        Pair<GridCoverage2D, Geometry> pair = RasterUtils.setDefaultCRSAndTransform(raster, geom);
+        raster = pair.getLeft();
+        geom = pair.getRight();
 
         // checking if the raster contains the geometry
         if (!RasterPredicates.rsIntersects(raster, geom)) {

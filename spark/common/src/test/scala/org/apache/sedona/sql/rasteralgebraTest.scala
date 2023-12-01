@@ -405,7 +405,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val df = dfFile.selectExpr("RS_FromGeoTiff(content) as raster", "ST_GeomFromWKT('POLYGON ((-8682522.873537656 4572703.890837922, -8673439.664183248 4572993.532747675, -8673155.57366801 4563873.2099182755, -8701890.325907696 4562931.7093397, -8682522.873537656 4572703.890837922))', 3857) as geom")
       val resultDf = df.selectExpr("RS_SetValues(raster, 1, geom, 10, false) as result")
 
-      var actual = resultDf.selectExpr("RS_Value(result, ST_GeomFromWKT('POINT (243700 4197797)', 26918))").first().get(0)
+      var actual = resultDf.selectExpr("RS_Value(result, ST_GeomFromWKT('POINT (-77.9146 37.8916)'))").first().get(0)
       val expected = 10.0
       assertEquals(expected, actual)
 
@@ -506,7 +506,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
     it("Passed RS_Value with raster") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
-      val result = df.selectExpr("RS_Value(RS_FromGeoTiff(content), ST_Point(-13077301.685, 4002565.802))").first().getDouble(0)
+      val result = df.selectExpr("RS_Value(RS_FromGeoTiff(content), ST_SetSRID(ST_Point(-13077301.685, 4002565.802), 3857))").first().getDouble(0)
       assert(result == 255d)
     }
 
@@ -529,7 +529,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
     it("Passed RS_Values with raster") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
-      val result = df.selectExpr("RS_Values(RS_FromGeoTiff(content), array(ST_Point(-13077301.685, 4002565.802), null))").first().getList[Any](0)
+      val result = df.selectExpr("RS_Values(RS_FromGeoTiff(content), array(ST_SetSRID(ST_Point(-13077301.685, 4002565.802), 3857), null))").first().getList[Any](0)
       assert(result.size() == 2)
       assert(result.get(0) == 255d)
       assert(result.get(1) == null)
@@ -542,7 +542,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val points = sparkSession.createDataFrame(Seq(("POINT (-13077301.685 4002565.802)",1), ("POINT (0 0)",2)))
         .toDF("point", "id")
-        .withColumn("point", expr("ST_GeomFromText(point)"))
+        .withColumn("point", expr("ST_GeomFromText(point, 3857)"))
         .groupBy().agg(collect_list("point").alias("point"))
 
       val result = df.crossJoin(points).selectExpr("RS_Values(RS_FromGeoTiff(content), point, 1)").first().getList[Any](0)
@@ -591,9 +591,9 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
       var actualValues = clippedDf.selectExpr(
         "RS_Values(clipped, " +
-          "Array(ST_GeomFromWKT('POINT(223802 4.21769e+06)'),ST_GeomFromWKT('POINT(224759 4.20453e+06)')," +
-          "ST_GeomFromWKT('POINT(237201 4.20429e+06)'),ST_GeomFromWKT('POINT(237919 4.20357e+06)')," +
-          "ST_GeomFromWKT('POINT(254668 4.21769e+06)')), 1)"
+          "Array(ST_GeomFromWKT('POINT(223802 4.21769e+06)', 26918),ST_GeomFromWKT('POINT(224759 4.20453e+06)', 26918)," +
+          "ST_GeomFromWKT('POINT(237201 4.20429e+06)', 26918),ST_GeomFromWKT('POINT(237919 4.20357e+06)', 26918)," +
+          "ST_GeomFromWKT('POINT(254668 4.21769e+06)', 26918)), 1)"
       ).first().get(0)
       var expectedValues = Seq(null, null, 0.0, 0.0, null)
       assertTrue(expectedValues.equals(actualValues))
@@ -602,7 +602,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_Clip with raster") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
         .selectExpr("RS_FromGeoTiff(content) as raster",
-                    "ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))') as geom")
+                    "ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))', 26918) as geom")
       val clippedDf = df.selectExpr("RS_Clip(raster, 1, geom, 200, false) as clipped")
 
       val clippedMetadata = df.selectExpr("RS_Metadata(raster)").first().getSeq(0).slice(0, 9)
@@ -611,9 +611,9 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
       var actualValues = clippedDf.selectExpr(
         "RS_Values(clipped, " +
-          "Array(ST_GeomFromWKT('POINT(223802 4.21769e+06)'),ST_GeomFromWKT('POINT(224759 4.20453e+06)')," +
-          "ST_GeomFromWKT('POINT(237201 4.20429e+06)'),ST_GeomFromWKT('POINT(237919 4.20357e+06)')," +
-          "ST_GeomFromWKT('POINT(254668 4.21769e+06)')), 1)"
+          "Array(ST_GeomFromWKT('POINT(223802 4.21769e+06)', 26918),ST_GeomFromWKT('POINT(224759 4.20453e+06)', 26918)," +
+          "ST_GeomFromWKT('POINT(237201 4.20429e+06)', 26918),ST_GeomFromWKT('POINT(237919 4.20357e+06)', 26918)," +
+          "ST_GeomFromWKT('POINT(254668 4.21769e+06)', 26918)), 1)"
       ).first().get(0)
       var expectedValues = Seq(null, null, 0.0, 0.0, null)
       assertTrue(expectedValues.equals(actualValues))
@@ -621,9 +621,9 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val croppedDf = df.selectExpr("RS_Clip(raster, 1, geom, 200, false) as cropped")
       actualValues = croppedDf.selectExpr(
       "RS_Values(cropped, " +
-      "Array(ST_GeomFromWKT('POINT(236842 4.20465e+06)'),ST_GeomFromWKT('POINT(236961 4.20453e+06)')," +
-      "ST_GeomFromWKT('POINT(237201 4.20429e+06)'),ST_GeomFromWKT('POINT(237919 4.20357e+06)')," +
-      "ST_GeomFromWKT('POINT(223802 4.20465e+06)')), 1)"
+      "Array(ST_GeomFromWKT('POINT(236842 4.20465e+06)', 26918),ST_GeomFromWKT('POINT(236961 4.20453e+06)', 26918)," +
+      "ST_GeomFromWKT('POINT(237201 4.20429e+06)', 26918),ST_GeomFromWKT('POINT(237919 4.20357e+06)', 26918)," +
+      "ST_GeomFromWKT('POINT(223802 4.20465e+06)', 26918)), 1)"
       ).first().get(0)
       expectedValues = Seq(0.0, 0.0, 0.0, 0.0, null)
       assertTrue(expectedValues.equals(actualValues))

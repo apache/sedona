@@ -20,6 +20,7 @@ package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.Functions;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
@@ -77,21 +78,17 @@ public class FunctionEditorsTest extends RasterTestBase {
     @Test
     public void testSetValuesWithRasterNoSRID() throws IOException, ParseException, FactoryException, TransformException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
-        String polygon = "POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 236722 4197590, 236722 4204770))";
+        String polygon = "POLYGON ((-77.9148 37.9545, -77.9123 37.8898, -77.9938 37.8878, -77.9964 37.9524, -77.9148 37.9545))";
         Geometry geom = Constructors.geomFromWKT(polygon, 0);
-        raster = RasterEditors.setSrid(raster, 0);
-
-        int rasterSRID = RasterAccessors.srid(raster);
-        assertEquals(0, rasterSRID);
 
         GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
 
-        Geometry point = Constructors.geomFromWKT("POINT (243700 4197797)", 0);
+        Geometry point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 0);
         double actual = PixelFunctions.value(result, point, 1);
         double expected = 10.0;
         assertEquals(expected, actual, 0d);
 
-        point = Constructors.geomFromWKT("POINT (240311 4202806)", 0);
+        point = Constructors.geomFromWKT("POINT (-77.9549 37.9357)", 0);
         actual = PixelFunctions.value(result, point, 1);
         assertEquals(expected, actual, 0d);
     }

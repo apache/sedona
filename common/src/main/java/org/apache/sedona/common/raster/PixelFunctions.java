@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoordinates2D;
@@ -251,12 +252,18 @@ public class PixelFunctions
         RasterUtils.ensureBand(rasterGeom, band); // Check for invalid band index
 
         for (int i = 0; i < geometries.size(); i++) {
-            if (geometries.get(i) != null && RasterAccessors.srid(rasterGeom) != geometries.get(i).getSRID()) {
-                // implicitly converting roi geometry CRS to raster CRS
-                Geometry point = RasterUtils.convertCRSIfNeeded(geometries.get(i), rasterGeom.getCoordinateReferenceSystem());
-                // have to set the SRID as RasterUtils.convertCRSIfNeeded doesn't set it even though the geometry is in raster's CRS
-                point = Functions.setSRID(point, RasterAccessors.srid(rasterGeom));
-                geometries.set(i, point);
+
+            if (geometries.get(i) == null) {
+                continue;
+            }
+
+
+            Pair<GridCoverage2D, Geometry> pair = RasterUtils.setDefaultCRSAndTransform(rasterGeom, geometries.get(i));
+
+            geometries.set(i, pair.getRight());
+
+            if (i == 0) {
+                rasterGeom = pair.getLeft();
             }
         }
         

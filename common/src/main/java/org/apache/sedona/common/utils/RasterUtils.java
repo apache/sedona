@@ -19,8 +19,11 @@
 package org.apache.sedona.common.utils;
 
 import com.sun.media.imageioimpl.common.BogusColorSpace;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.RasterAccessors;
+import org.apache.sedona.common.raster.RasterEditors;
 import org.geotools.coverage.Category;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
@@ -434,6 +437,38 @@ public class RasterUtils {
             }
         }
         return geometry;
+    }
+
+    /**
+     * If the raster has a CRS, then it transforms the geom to the raster's CRS. 
+     * If any of the inputs, raster or geom doesn't have a CRS, it defaults to 4326.
+     * @param raster
+     * @param geom
+     * @return
+     * @throws FactoryException
+     */
+    public static Pair<GridCoverage2D, Geometry> setDefaultCRSAndTransform(GridCoverage2D raster, Geometry geom) throws FactoryException {
+        int rasterSRID = RasterAccessors.srid(raster);
+        int geomSRID = Functions.getSRID(geom);
+
+        if (rasterSRID == 0) {
+            raster = RasterEditors.setSrid(raster, 4326);
+            rasterSRID = RasterAccessors.srid(raster);
+        }
+
+        if (geomSRID == 0) {
+            geom = Functions.setSRID(geom, 4326);
+            geomSRID = Functions.getSRID(geom);
+        }
+
+
+        if (rasterSRID != geomSRID) {
+            // implicitly converting roi geometry CRS to raster CRS
+            geom = convertCRSIfNeeded(geom, raster.getCoordinateReferenceSystem());
+            // have to set the SRID as RasterUtils.convertCRSIfNeeded doesn't set it even though the geometry is in raster's CRS
+            geom = Functions.setSRID(geom, RasterAccessors.srid(raster));
+        }
+        return Pair.of(raster, geom);
     }
 
     /**

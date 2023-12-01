@@ -76,10 +76,10 @@ public class FunctionsTest extends RasterTestBase {
     public void valueImplicitTransform() throws TransformException, FactoryException, IOException, ParseException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
 
-        Geometry point = Constructors.geomFromWKT("POINT (-100 100)", 4326);
+        Geometry point = Constructors.geomFromWKT("POINT (-100 100)", 0);
         assertNull("Points outside of the envelope should return null.", PixelFunctions.value(raster, point, 1));
 
-        point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 4326);
+        point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 0);
         Double value = PixelFunctions.value(raster, point, 1);
         assertNotNull(value);
         assertEquals(99.0d, value, 0.1d);
@@ -343,7 +343,7 @@ public class FunctionsTest extends RasterTestBase {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
 
         List<Geometry> points = Arrays.asList(Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 4326),
-                Constructors.geomFromWKT("POINT (-78.0059 37.9142)", 4326));
+                Constructors.geomFromWKT("POINT (-78.0059 37.9142)", 0));
 
         List<Double> values = PixelFunctions.values(raster, points, 1);
         assertEquals(2, values.size());
