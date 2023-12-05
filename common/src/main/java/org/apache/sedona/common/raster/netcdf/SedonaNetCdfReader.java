@@ -129,6 +129,7 @@ public class SedonaNetCdfReader {
         Array lonData, latData;
         double minX = 0, maxY = 0, translateX, translateY, skewX = 0, skewY = 0;
         int width, height;
+        boolean isIncreasing = false;
         HashMap<String, List<String>> varMetadata = new HashMap<>();
 
 
@@ -138,12 +139,16 @@ public class SedonaNetCdfReader {
         double firstVal, lastVal;
         firstVal = getElement(lonData, 0);
         lastVal = getElement(lonData, width - 1);
+        isIncreasing = firstVal < lastVal;
+        minX = isIncreasing ? firstVal : lastVal;
         translateX = Math.abs(lastVal - firstVal) / (width - 1);
 
         latData = latVariable.read();
         height = latData.getShape()[0];
         firstVal = getElement(latData, 0);
         lastVal = getElement(latData, height - 1);
+        isIncreasing = firstVal < lastVal;
+        maxY = isIncreasing ? lastVal : firstVal;
         translateY = Math.abs(lastVal - firstVal) / (height - 1);
         //======================================================================================================
 
@@ -319,7 +324,7 @@ public class SedonaNetCdfReader {
     private static Double getAttrDoubleValue(Attribute attr) {
         Number numericValue = attr.getNumericValue();
         if (!Objects.isNull(numericValue)) {
-            return (double) numericValue;
+            return numericValue.doubleValue();
         }else {
             throw new IllegalArgumentException(SedonaNetCdfConstants.NON_NUMERIC_VALUE);
         }
