@@ -62,7 +62,7 @@ public class RasterConstructors
         return geoTiffReader.read(null);
     }
 
-    public static GridCoverage2D fromNetCDF(byte[] bytes, String lonDimensionName, String latDimensionName, String variableName) throws IOException, FactoryException {
+    public static GridCoverage2D fromNetCDF(byte[] bytes, String variableName, String lonDimensionName, String latDimensionName) throws IOException, FactoryException {
        NetcdfFile netcdfFile = openNetCdfBytes(bytes);
        return SedonaNetCdfReader.getRaster(netcdfFile, variableName, latDimensionName, lonDimensionName);
     }
