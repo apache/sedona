@@ -165,7 +165,7 @@ test_that("Passed RS_Value with raster", {
     binary_sdf %>% 
     mutate(
       raster = RS_FromGeoTiff(content),
-      val = RS_Value(raster, ST_Point(-13077301.685, 4002565.802))
+      val = RS_Value(raster, ST_SetSRID(ST_Point(-13077301.685, 4002565.802), RS_SRID(raster)))
     ) %>% 
     select(val) %>% 
     collect()
@@ -191,7 +191,7 @@ test_that("Passed RS_Values with raster", {
     binary_sdf %>% 
     mutate(
       raster = RS_FromGeoTiff(content),
-      val = RS_Values(raster, array(ST_Point(-13077301.685, 4002565.802), NULL))
+      val = RS_Values(raster, array(ST_SetSRID(ST_Point(-13077301.685, 4002565.802), RS_SRID(raster)), NULL))
     ) %>% 
     select(val) %>%
     collect()
