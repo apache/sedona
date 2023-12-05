@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 import ucar.nc2.NetcdfFile;
 //import ucar.nc2.NetcdfFiles;
 //import ucar.nc2.NetcdfFiles;
@@ -242,20 +243,44 @@ public class RasterConstructorsTest
         assertEquals(upperLeftY, envelope.getEnvelopeInternal().getMaxY(), 0.001);
         assertEquals("SIGNED_32BITS", gridCoverage2D.getSampleDimension(0).getSampleDimensionType().name());
     }
-//
-//    @Test
-//    public void testNetCdfReader() throws IOException, FactoryException {
-//
-//        //GridCoverage2D raster = RasterConstructors.fromNetCDF(testModis, "Along_swath_lines_1km", "Cross_swath_pixels_1km", "LST", true);
-//       // GridCoverage2D raster2 = RasterConstructors.fromNetCDF(testNc, "lon", "lat", "O3", true);
-//        //GridCoverage2D rasterBig = RasterConstructors.fromNetCDF(testBig, "lon", "lat", "abso4", true);
-//        //GridCoverage2D rasterAura = RasterConstructors.fromNetCDF(testAura, "", "", "", true);
-//        //GridCoverage2D rasterRose = RasterConstructors.fromNetCDF(testRose, "longitude", "latitude", "ROSE", true);
-//        GridCoverage2D rasterHrdl = RasterConstructors.fromNetCDF(testHrdl, "", "", "", true);
-//      //  NetcdfFile netCdfFile = NetcdfFiles.open(resourceFolder + "raster/netcdf/test.nc");
-////        URL resourceURL = new File(ncFile).toURI().toURL();//new URL(resourceFolder + "raster/netcdf/test.nc");
-////        NetCDFReader netCDFReader = new NetCDFReader(resourceURL, null);
-////        netCDFReader.read(null);
-//    }
+
+    @Test
+    public void testNetCdfClassic() throws FactoryException, IOException, TransformException {
+        GridCoverage2D testRaster = RasterConstructors.fromNetCDF(testNc, "O3");
+        double[] expectedMetadata = {4.9375, 50.9375, 80, 48, 0.125, -0.125, 0, 0, 0, 4};
+        double[] actualMetadata = RasterAccessors.metadata(testRaster);
+        for (int i = 0; i < expectedMetadata.length; i++) {
+            assertEquals(expectedMetadata[i], actualMetadata[i], 1e-5);
+        }
+
+        double actualFirstGridVal = PixelFunctions.value(testRaster, 0, 0, 1);
+        double expectedFirstGridVal = 60.95357131958008;
+        assertEquals(expectedFirstGridVal, actualFirstGridVal, 1e-6);
+    }
+
+    @Test
+    public void testNetCdf4() throws FactoryException, IOException, TransformException {
+        GridCoverage2D testRaster = RasterConstructors.fromNetCDF(testBig, "abso4");
+        double[] expectedMetadata = {-0.9375, 89.5045, 192, 96, 1.875, -1.86467, 0, 0, 0, 8};
+        double[] actualMetadata = RasterAccessors.metadata(testRaster);
+        for (int i = 0; i < expectedMetadata.length; i++) {
+            assertEquals(expectedMetadata[i], actualMetadata[i], 1e-5);
+        }
+
+        double actualFirstGridVal = PixelFunctions.value(testRaster, 0, 0, 1);
+        double expectedFirstGridVal = 0;
+        assertEquals(expectedFirstGridVal, actualFirstGridVal, 1e-6);
+    }
+
+    @Test
+    public void testRecordInfo() throws IOException {
+        String actualRecordInfo = RasterConstructors.getRecordInfo(testNc);
+        String expectedRecordInfo = "O3(time=2, z=2, lat=48, lon=80)\n" +
+                "\n" +
+                "NO2(time=2, z=2, lat=48, lon=80)";
+        assertEquals(expectedRecordInfo, actualRecordInfo);
+    }
+
+
 
 }
