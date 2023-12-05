@@ -19,6 +19,8 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.Constructors;
+import org.apache.sedona.common.Functions;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
@@ -83,6 +85,28 @@ public class RasterBandEditorsTest extends RasterTestBase{
         grid = RasterBandEditors.setBandNoDataValue(grid, 2, 444d);
         assertEquals(-9999, (double) RasterBandAccessors.getBandNoDataValue(grid), 0.1d);
         assertEquals(444, (double) RasterBandAccessors.getBandNoDataValue(grid, 2), 0.1d);
+    }
+
+    @Test
+    public void testClipWithGeometryTransform() throws FactoryException, IOException, ParseException, TransformException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+        String polygon = "POLYGON ((-8682522.873537656 4572703.890837922, -8673439.664183248 4572993.532747675, -8673155.57366801 4563873.2099182755, -8701890.325907696 4562931.7093397, -8682522.873537656 4572703.890837922))";
+        Geometry geom = Constructors.geomFromWKT(polygon, 3857);
+
+        GridCoverage2D clippedRaster = RasterBandEditors.clip(raster, 1, geom, 200, false);
+        double[] clippedMetadata = Arrays.stream(RasterAccessors.metadata(clippedRaster), 0, 9).toArray();
+        double[] originalMetadata = Arrays.stream(RasterAccessors.metadata(raster), 0, 9).toArray();
+        assertArrayEquals(originalMetadata, clippedMetadata, 0.01d);
+
+        List<Geometry> points = new ArrayList<>();
+        points.add(Constructors.geomFromWKT("POINT(223802 4.21769e+06)", 26918));
+        points.add(Constructors.geomFromWKT("POINT(224759 4.20453e+06)", 26918));
+        points.add(Constructors.geomFromWKT("POINT(237201 4.20429e+06)", 26918));
+        points.add(Constructors.geomFromWKT("POINT(237919 4.20357e+06)", 26918));
+        points.add(Constructors.geomFromWKT("POINT(254668 4.21769e+06)", 26918));
+        Double[] actualValues = PixelFunctions.values(clippedRaster, points, 1).toArray(new Double[0]);
+        Double[] expectedValues = new Double[] {null, null, 0.0, 0.0, null};
+        assertTrue(Arrays.equals(expectedValues, actualValues));
     }
 
     @Test
