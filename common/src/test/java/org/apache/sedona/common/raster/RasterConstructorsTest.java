@@ -258,6 +258,20 @@ public class RasterConstructorsTest
         assertEquals(expectedFirstGridVal, actualFirstGridVal, 1e-6);
     }
 
+    @Test
+    public void testNetCdfClassicLongForm() throws FactoryException, IOException, TransformException {
+        GridCoverage2D testRaster = RasterConstructors.fromNetCDF(testNc, "O3", "lon", "lat");
+        double[] expectedMetadata = {4.9375, 50.9375, 80, 48, 0.125, -0.125, 0, 0, 0, 4};
+        double[] actualMetadata = RasterAccessors.metadata(testRaster);
+        for (int i = 0; i < expectedMetadata.length; i++) {
+            assertEquals(expectedMetadata[i], actualMetadata[i], 1e-5);
+        }
+
+        double actualFirstGridVal = PixelFunctions.value(testRaster, 0, 0, 1);
+        double expectedFirstGridVal = 60.95357131958008;
+        assertEquals(expectedFirstGridVal, actualFirstGridVal, 1e-6);
+    }
+
 //    @Test
 //    public void testNetCdf4() throws FactoryException, IOException, TransformException {
 //        GridCoverage2D testRaster = RasterConstructors.fromNetCDF(testBig, "abso4");
