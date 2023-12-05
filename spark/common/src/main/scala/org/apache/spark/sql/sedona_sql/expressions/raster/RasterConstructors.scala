@@ -62,3 +62,23 @@ case class RS_MakeEmptyRaster(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+
+case class RS_FromNetCDF(inputExpressions: Seq[Expression])
+  extends InferredExpression(
+    inferrableFunction2(RasterConstructors.fromNetCDF), inferrableFunction4(RasterConstructors.fromNetCDF)) {
+
+  override def foldable: Boolean = false
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class RS_NetCDFInfo(inputExpressions: Seq[Expression])
+  extends InferredExpression(RasterConstructors.getRecordInfo _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
