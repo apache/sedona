@@ -9,7 +9,7 @@ public class SedonaNetCdfConstants {
     public static final String ADD_OFFSET = "add_offset";
     public static final String LONG_NAME = "long_name";
     public static final String UNITS = "units";
-    public static final String GLOBAL_ATTR_PREFIX = "GLOBAL_";
+    public static final String GLOBAL_ATTR_PREFIX = "GLOBAL_ATTRIBUTES";
     public static final String VAR_ATTR_PREFIX = "VAR_";
     public static final String BAND_ATTR_PREFIX = "BAND_";
 
