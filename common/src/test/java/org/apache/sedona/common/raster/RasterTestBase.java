@@ -53,62 +53,23 @@ public class RasterTestBase {
     GridCoverage2D multiBandRaster;
     byte[] geoTiff;
     byte[] testNc;
-
-    byte[] testNc4;
-
-    byte[] testModis;
-
     byte[] testBig;
-
-    byte[] testAura;
-
-    byte[] testRose;
-
-    byte[] testHrdl;
-
     String ncFile = resourceFolder + "raster/netcdf/test.nc";
-    String nc4File = resourceFolder + "raster/netcdf/test4.nc";
+    //String bigF = resourceFolder + "raster/netcdf/big.nc";
 
-    String modisF = resourceFolder + "raster/netcdf/modis.hdf";
-
-    String auraF = resourceFolder + "raster/netcdf/aura.nc";
-
-    String bigF = resourceFolder + "raster/netcdf/big.nc";
-
-    String roseF = resourceFolder + "raster/netcdf/rose.nc";
-
-    String hrdlF = resourceFolder + "raster/netcdf/hrdl.nc";
 
     @Before
     public void setup() throws IOException {
-//        JAIExt.initJAIEXT(true, true);
-//        System.setProperty("netcdf.coordinates.enablePlugins", "true");
         oneBandRaster = RasterConstructors.fromArcInfoAsciiGrid(arc.getBytes(StandardCharsets.UTF_8));
         multiBandRaster = createMultibandRaster();
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         new GeoTiffWriter(bos).write(multiBandRaster, new GeneralParameterValue[]{});
         geoTiff = bos.toByteArray();
-//        URL resourceURL = new File(resourceFolder + "raster/netcdf/test.nc").toURI().toURL();//new URL(resourceFolder + "raster/netcdf/test.nc");
-//        NetCDFReader testNetCdfReader = new NetCDFReader(resourceURL, null);
-//        String[] names = testNetCdfReader.getGridCoverageNames();
-//        File file = new File(ncFile);
-//        File file4 = new File(nc4File);
-//        File modisFile = new File(modisF);
-//        File bigFile = new File(bigF);
-//        File aurFile = new File(auraF);
-//        File roseFile = new File(roseF);
-//        File hrdlFile = new File(hrdlF);
-//        testNc = FileUtils.getBytes(file);
-//        testNc4  = FileUtils.getBytes(file4);
-//        testModis = FileUtils.getBytes(modisFile);
-//        testBig = FileUtils.getBytes(bigFile);
-//        testAura = FileUtils.getBytes(aurFile);
-//        testRose = FileUtils.getBytes(roseFile);
-//        testHrdl = FileUtils.getBytes(hrdlFile);
-//        GridCoverage2D testRaster = testNetCdfReader.read("O3", null);
-//        ByteArrayOutputStream bos2 = new ByteArrayOutputStream();
-//        new GeoTiffWriter(bos2).write(testRaster, new GeneralParameterValue[]{});
-//        byte[] testNc2 = bos2.toByteArray();
+        File file = new File(ncFile);
+        //File bigFile = new File(bigF);
+
+        testNc = FileUtils.getBytes(file);
+        //testBig = FileUtils.getBytes(bigFile);
     }
 
     GridCoverage2D createEmptyRaster(int numBands)

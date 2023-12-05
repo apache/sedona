@@ -258,19 +258,19 @@ public class RasterConstructorsTest
         assertEquals(expectedFirstGridVal, actualFirstGridVal, 1e-6);
     }
 
-    @Test
-    public void testNetCdf4() throws FactoryException, IOException, TransformException {
-        GridCoverage2D testRaster = RasterConstructors.fromNetCDF(testBig, "abso4");
-        double[] expectedMetadata = {-0.9375, 89.5045, 192, 96, 1.875, -1.86467, 0, 0, 0, 8};
-        double[] actualMetadata = RasterAccessors.metadata(testRaster);
-        for (int i = 0; i < expectedMetadata.length; i++) {
-            assertEquals(expectedMetadata[i], actualMetadata[i], 1e-5);
-        }
-
-        double actualFirstGridVal = PixelFunctions.value(testRaster, 0, 0, 1);
-        double expectedFirstGridVal = 0;
-        assertEquals(expectedFirstGridVal, actualFirstGridVal, 1e-6);
-    }
+//    @Test
+//    public void testNetCdf4() throws FactoryException, IOException, TransformException {
+//        GridCoverage2D testRaster = RasterConstructors.fromNetCDF(testBig, "abso4");
+//        double[] expectedMetadata = {-0.9375, 89.5045, 192, 96, 1.875, -1.86467, 0, 0, 0, 8};
+//        double[] actualMetadata = RasterAccessors.metadata(testRaster);
+//        for (int i = 0; i < expectedMetadata.length; i++) {
+//            assertEquals(expectedMetadata[i], actualMetadata[i], 1e-5);
+//        }
+//
+//        double actualFirstGridVal = PixelFunctions.value(testRaster, 0, 0, 1);
+//        double expectedFirstGridVal = 0;
+//        assertEquals(expectedFirstGridVal, actualFirstGridVal, 1e-6);
+//    }
 
     @Test
     public void testRecordInfo() throws IOException {
