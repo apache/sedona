@@ -183,19 +183,25 @@ This API requires the name of the record variable. It is assumed that a variable
 
 If this assumption does not hold true for your case, you can choose to pass the lonDimensionName and latDimensionName explicitly. 
 
-You can use [ST_NetCDFInfo](./#rs_netcdfinfo) to get the details of the passed netCDF file (variables and its dimensions).
+You can use [RS_NetCDFInfo](./#rs_netcdfinfo) to get the details of the passed netCDF file (variables and its dimensions).
 
 Format 1: `RS_FromNetCDF(netCDF: ARRAY[Byte], recordVariableName: String)`
 
 Format 2: `RS_FromNetCDF(netCDF: ARRAY[Byte], recordVariableName: String, lonDimensionName: String, latDimensionName: String)`
 
-Since: `v1.5.1`
+Since: `v1.5.1` 
 
 Spark Example:
 
 ```scala
 val df = sedona.read.format("binaryFile").load("/some/path/test.nc")
-df = df.withColumn("raster", f.expr("RS_FromNetCDF(content)"))
+df = df.withColumn("raster", f.expr("RS_FromNetCDF(content, 'O3')"))
+```
+
+
+```scala
+val df = sedona.read.format("binaryFile").load("/some/path/test.nc")
+df = df.withColumn("raster", f.expr("RS_FromNetCDF(content, 'O3', 'lon', 'lat')"))
 ```
 
 
@@ -203,7 +209,7 @@ df = df.withColumn("raster", f.expr("RS_FromNetCDF(content)"))
 
 Introduction: Returns a string containing names of the variables in a given netCDF file along with its dimensions.
 
-Format: `ST_NetCDFInfo(netCDF: ARRAY[Byte])`
+Format: `RS_NetCDFInfo(netCDF: ARRAY[Byte])`
 
 Since: `1.5.1`
 
