@@ -18,6 +18,8 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -32,20 +34,19 @@ import org.opengis.referencing.operation.TransformException;
 import java.awt.geom.Point2D;
 import java.awt.image.Raster;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class PixelFunctions
 {
     private static GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
-    public static Double value(GridCoverage2D rasterGeom, Geometry geometry, int band) throws TransformException
-    {
-        return values(rasterGeom, Collections.singletonList(geometry), band).get(0);
+    public static Double value(GridCoverage2D rasterGeom, Geometry geometry, int band) throws TransformException, FactoryException {
+        return values(rasterGeom, Arrays.asList(geometry), band).get(0);
     }
 
-    public static Double value(GridCoverage2D rasterGeom, Geometry geometry) throws TransformException
-    {
-        return values(rasterGeom, Collections.singletonList(geometry), 1).get(0);
+    public static Double value(GridCoverage2D rasterGeom, Geometry geometry) throws TransformException, FactoryException {
+        return values(rasterGeom, Arrays.asList(geometry), 1).get(0);
     }
 
     public static Double value(GridCoverage2D rasterGeom, int colX, int rowY, int band) throws TransformException
@@ -247,10 +248,26 @@ public class PixelFunctions
         return result;
     }
 
-    public static List<Double> values(GridCoverage2D rasterGeom, List<Geometry> geometries, int band) throws TransformException {
+    public static List<Double> values(GridCoverage2D rasterGeom, List<Geometry> geometries, int band) throws TransformException, FactoryException {
         RasterUtils.ensureBand(rasterGeom, band); // Check for invalid band index
-        int numBands = rasterGeom.getNumSampleDimensions();
 
+        for (int i = 0; i < geometries.size(); i++) {
+
+            if (geometries.get(i) == null) {
+                continue;
+            }
+
+
+            Pair<GridCoverage2D, Geometry> pair = RasterUtils.setDefaultCRSAndTransform(rasterGeom, geometries.get(i));
+
+            geometries.set(i, pair.getRight());
+
+            if (i == 0) {
+                rasterGeom = pair.getLeft();
+            }
+        }
+        
+        int numBands = rasterGeom.getNumSampleDimensions();
         double noDataValue = RasterUtils.getNoDataValue(rasterGeom.getSampleDimension(band - 1));
         double[] pixelBuffer = new double[numBands];
 
@@ -278,7 +295,7 @@ public class PixelFunctions
         return result;
     }
 
-    public static List<Double> values(GridCoverage2D rasterGeom, List<Geometry> geometries) throws TransformException {
+    public static List<Double> values(GridCoverage2D rasterGeom, List<Geometry> geometries) throws TransformException, FactoryException {
         return values(rasterGeom, geometries, 1);
     }
 

@@ -1359,6 +1359,8 @@ Introduction: Returns a raster that is clipped by the given geometry.
 
 If `crop` is not specified then it will default to `true`, meaning it will make the resulting raster shrink to the geometry's extent and if `noDataValue` is not specified then the resulting raster will have the minimum possible value for the band pixel data type.
 
+!!!Note
+    Since `v1.5.1`, if the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`. If the `raster` or `geom` doesn't have a CRS then it will default to `4326/WGS84`.
 
 Format:
 
@@ -1738,6 +1740,9 @@ corner of the region is defined by the `colX` and `rowY` coordinates. The `width
 of the rectangular region. The new values to be assigned to the pixels in this region can be specified as an array passed 
 to this function.
 
+!!!Note
+    Since `v1.5.1`, if the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`. If the `raster` or `geom` doesn't have a CRS then it will default to `4326/WGS84`.
+
 Format: 
 
 ```
@@ -1840,6 +1845,9 @@ Output:
 
 Introduction: Returns the value at the given point in the raster. If no band number is specified it defaults to 1.
 
+!!!Note
+    Since `v1.5.1`, if the coordinate reference system (CRS) of the input `point` geometry differs from that of the `raster`, then `point` will be transformed to match the CRS of the `raster`. If the `raster` or `point` doesn't have a CRS then it will default to `4326/WGS84`.
+
 Format: 
 
 `RS_Value (raster: Raster, point: Geometry)`
@@ -1849,9 +1857,6 @@ Format:
 `RS_Value (raster: Raster, colX: Integer, colY: Integer, band: Integer)`
 
 Since: `v1.4.0`
-
-!!!Note
-    The input geometry points must be in the same CRS as the raster. Ensure that all points' CRS matches the raster's CRS to get accurate values.
 
 Spark SQL Examples:
 
@@ -1880,18 +1885,20 @@ Introduction: Returns the values at the given points or grid coordinates in the 
 RS_Values is similar to RS_Value but operates on an array of points or grid coordinates.
 RS_Values can be significantly faster since a raster only has to be loaded once for several points.
 
+!!!Note
+    Since `v1.5.1`, if the coordinate reference system (CRS) of the input `points` geometries differs from that of the `raster`, then `points` will be transformed to match the CRS of the `raster`. If the `raster` or `points` doesn't have a CRS then it will default to `4326/WGS84`.
+
 Format: 
 
 `RS_Values (raster: Raster, points: ARRAY[Geometry])`
 
 `RS_Values (raster: Raster, points: ARRAY[Geometry], band: Integer)`
 
-`RS_Values (raster: Raster, xCoordinates: ARRAY[Integer], yCoordinates: ARRAY[Integer], band: Integer)`
+```
+RS_Values (raster: Raster, xCoordinates: ARRAY[Integer], yCoordinates: ARRAY[Integer], band: Integer)
+```
 
 Since: `v1.4.0`
-
-!!!Note
-    The input geometry points must be in the same CRS as the raster. Ensure that all points' CRS matches the raster's CRS to get accurate values.
 
 Spark SQL Example:
 
