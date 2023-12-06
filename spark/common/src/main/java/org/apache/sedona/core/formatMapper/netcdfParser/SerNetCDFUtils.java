@@ -31,10 +31,7 @@
  */
 package org.apache.sedona.core.formatMapper.netcdfParser;
 
-import org.geotools.coverage.grid.GridCoverage2D;
-import org.opengis.coverage.grid.GridCoverage;
 import ucar.ma2.Array;
-import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
