@@ -1404,21 +1404,6 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(expectedFirstVal, actualFirstVal, 1e-6)
     }
 
-//    it ("Passed RS_FromNetCDF with NetCDF 4") {
-//      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/netcdf/big.nc")
-//      val rasterDf = df.selectExpr("RS_FromNetCDF(content, 'abso4') as raster")
-//      val expectedMetadata = Seq(-0.9375, 89.5045071, 192, 96, 1.875, -1.86467, 0, 0, 0, 8)
-//      val actualMetadata = rasterDf.selectExpr("RS_Metadata(raster) as metadata").first().getSeq[Double](0)
-//
-//      for (i <- expectedMetadata.indices) {
-//        assertEquals(expectedMetadata(i), actualMetadata(i), 1e-5)
-//      }
-//
-//      val expectedFirstVal = 0
-//      val actualFirstVal = rasterDf.selectExpr("RS_Value(raster, 0, 0, 1) as raster").first().getDouble(0)
-//      assertEquals(expectedFirstVal, actualFirstVal, 1e-6)
-//    }
-
     it("Passed RS_NetCDFInfo") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/netcdf/test.nc")
       val recordInfo = df.selectExpr("RS_NetCDFInfo(content) as record_info").first().getString(0)

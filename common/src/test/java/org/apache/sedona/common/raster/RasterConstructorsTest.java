@@ -16,24 +16,18 @@ package org.apache.sedona.common.raster;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.io.netcdf.NetCDFReader;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
-import ucar.nc2.NetcdfFile;
-//import ucar.nc2.NetcdfFiles;
-//import ucar.nc2.NetcdfFiles;
 
-import java.awt.image.Raster;
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 public class RasterConstructorsTest
         extends RasterTestBase {
@@ -272,19 +266,6 @@ public class RasterConstructorsTest
         assertEquals(expectedFirstGridVal, actualFirstGridVal, 1e-6);
     }
 
-//    @Test
-//    public void testNetCdf4() throws FactoryException, IOException, TransformException {
-//        GridCoverage2D testRaster = RasterConstructors.fromNetCDF(testBig, "abso4");
-//        double[] expectedMetadata = {-0.9375, 89.5045, 192, 96, 1.875, -1.86467, 0, 0, 0, 8};
-//        double[] actualMetadata = RasterAccessors.metadata(testRaster);
-//        for (int i = 0; i < expectedMetadata.length; i++) {
-//            assertEquals(expectedMetadata[i], actualMetadata[i], 1e-5);
-//        }
-//
-//        double actualFirstGridVal = PixelFunctions.value(testRaster, 0, 0, 1);
-//        double expectedFirstGridVal = 0;
-//        assertEquals(expectedFirstGridVal, actualFirstGridVal, 1e-6);
-//    }
 
     @Test
     public void testRecordInfo() throws IOException {
