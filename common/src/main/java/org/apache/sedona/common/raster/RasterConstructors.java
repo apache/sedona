@@ -15,7 +15,7 @@ package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.inputstream.ByteArrayImageInputStream;
-import org.apache.sedona.common.raster.netcdf.SedonaNetCdfReader;
+import org.apache.sedona.common.raster.netcdf.NetCdfReader;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridEnvelope2D;
@@ -64,17 +64,17 @@ public class RasterConstructors
 
     public static GridCoverage2D fromNetCDF(byte[] bytes, String variableName, String lonDimensionName, String latDimensionName) throws IOException, FactoryException {
        NetcdfFile netcdfFile = openNetCdfBytes(bytes);
-       return SedonaNetCdfReader.getRaster(netcdfFile, variableName, latDimensionName, lonDimensionName);
+       return NetCdfReader.getRaster(netcdfFile, variableName, latDimensionName, lonDimensionName);
     }
 
     public static GridCoverage2D fromNetCDF(byte[] bytes, String recordVariableName) throws IOException, FactoryException {
         NetcdfFile netcdfFile = openNetCdfBytes(bytes);
-        return SedonaNetCdfReader.getRaster(netcdfFile, recordVariableName);
+        return NetCdfReader.getRaster(netcdfFile, recordVariableName);
     }
 
     public static String getRecordInfo(byte[] bytes) throws IOException {
         NetcdfFile netcdfFile = openNetCdfBytes(bytes);
-        return SedonaNetCdfReader.getRecordInfo(netcdfFile);
+        return NetCdfReader.getRecordInfo(netcdfFile);
     }
 
     private static NetcdfFile openNetCdfBytes(byte[] bytes) throws IOException {
