@@ -1,6 +1,6 @@
 package org.apache.sedona.common.raster.netcdf;
 
-public class SedonaNetCdfConstants {
+public class NetCdfConstants {
     public static final String VALID_MIN = "valid_min";
     public static final String VALID_MAX = "valid_max";
     public static final String MISSING_VALUE = "missing_value";

@@ -1,7 +1,6 @@
 package org.apache.sedona.common.raster.netcdf;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.sedona.common.raster.RasterConstructors;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.opengis.referencing.FactoryException;
@@ -12,7 +11,7 @@ import ucar.nc2.*;
 import java.io.IOException;
 import java.util.*;
 
-public class SedonaNetCdfReader {
+public class NetCdfReader {
     /*
     ==================================== Sedona NetCDF Public APIS ====================================
      */
@@ -48,16 +47,16 @@ public class SedonaNetCdfReader {
         ImmutableList<Dimension> variableDimensions = recordVariable.getDimensions();
         int numDimensions = variableDimensions.size();
         if (numDimensions < 2) {
-            throw new IllegalArgumentException(SedonaNetCdfConstants.INSUFFICIENT_DIMENSIONS_VARIABLE);
+            throw new IllegalArgumentException(NetCdfConstants.INSUFFICIENT_DIMENSIONS_VARIABLE);
         }
         //Assume ... Y, X dimension list in the variable
         String latDimensionShortName = variableDimensions.get(numDimensions - 2).getShortName();
         String lonDimensionShortName = variableDimensions.get(numDimensions - 1).getShortName();
 
-        ImmutablePair<Variable, Variable> coordVariablePair = getCoordVariables(netcdfFile, latDimensionShortName, lonDimensionShortName);
-        Variable latVariable = coordVariablePair.right;
-        Variable lonVariable = coordVariablePair.left;
-        return SedonaNetCdfReader.getRasterHelper(netcdfFile, recordVariable, lonVariable, latVariable, false);
+        Variable[] coordVariablePair = getCoordVariables(netcdfFile, latDimensionShortName, lonDimensionShortName);
+        Variable latVariable = coordVariablePair[1];
+        Variable lonVariable = coordVariablePair[0];
+        return NetCdfReader.getRasterHelper(netcdfFile, recordVariable, lonVariable, latVariable, false);
     }
 
     /**
@@ -73,10 +72,10 @@ public class SedonaNetCdfReader {
     public static GridCoverage2D getRaster(NetcdfFile netcdfFile, String variableShortName, String latDimShortName, String lonDimShortName) throws FactoryException, IOException {
         Variable recordVariable = getRecordVariableFromShortName(netcdfFile, variableShortName);
 
-        ImmutablePair<Variable, Variable> coordVariablePair = getCoordVariables(netcdfFile, latDimShortName, lonDimShortName);
-        Variable latVariable = coordVariablePair.right;
-        Variable lonVariable = coordVariablePair.left;
-        return SedonaNetCdfReader.getRasterHelper(netcdfFile, recordVariable, lonVariable, latVariable, true);
+        Variable[] coordVariablePair = getCoordVariables(netcdfFile, latDimShortName, lonDimShortName);
+        Variable latVariable = coordVariablePair[1];
+        Variable lonVariable = coordVariablePair[0];
+        return NetCdfReader.getRasterHelper(netcdfFile, recordVariable, lonVariable, latVariable, true);
     }
 
     /**
@@ -98,14 +97,14 @@ public class SedonaNetCdfReader {
         return recordVariable;
     }
 
-    private static ImmutablePair<Variable, Variable> getCoordVariables(NetcdfFile netcdfFile, String latVariableShortName, String lonVariableShortName) {
+    private static Variable[] getCoordVariables(NetcdfFile netcdfFile, String latVariableShortName, String lonVariableShortName) {
         Group rootGroup = netcdfFile.getRootGroup();
 
         //TODO: optimize to get all variables in 1 tree traversal?
         Variable lonVariable = findVariableRecursive(lonVariableShortName, rootGroup);
         Variable latVariable = findVariableRecursive(latVariableShortName, rootGroup);
         ensureCoordVar(lonVariable, latVariable);
-        return new ImmutablePair<>(lonVariable, latVariable);
+        return new Variable[]{lonVariable, latVariable};
     }
 
     private static ImmutableList<Variable> getRecordVariables(NetcdfFile netcdfFile) {
@@ -165,7 +164,7 @@ public class SedonaNetCdfReader {
             lonIndex = recordVariable.findDimensionIndex(lonVariableName);
             latIndex = recordVariable.findDimensionIndex(latVariableName);
             if (latIndex == -1 || lonIndex == -1) {
-                throw new IllegalArgumentException(SedonaNetCdfConstants.COORD_IDX_NOT_FOUND);
+                throw new IllegalArgumentException(NetCdfConstants.COORD_IDX_NOT_FOUND);
             }
         }
 
@@ -174,8 +173,8 @@ public class SedonaNetCdfReader {
 
         // Set noDataValue if available, null otherwise
         Double noDataValue = null;
-        if (recordVariable.attributes().hasAttribute(SedonaNetCdfConstants.MISSING_VALUE)) {
-            Attribute noDataAttribute = recordVariable.findAttribute(SedonaNetCdfConstants.MISSING_VALUE);
+        if (recordVariable.attributes().hasAttribute(NetCdfConstants.MISSING_VALUE)) {
+            Attribute noDataAttribute = recordVariable.findAttribute(NetCdfConstants.MISSING_VALUE);
             if (!Objects.isNull(noDataAttribute))
                 noDataValue = getAttrDoubleValue(noDataAttribute);
         }
@@ -203,17 +202,17 @@ public class SedonaNetCdfReader {
                 String dimensionShortName = recordDimension.getShortName();
                 //TODO: This leads to tree traversal for dimensions, can we do this in one go?
                 Variable recordDimVar = findVariableRecursive(dimensionShortName, rootGroup);//rootGroup.findVariableLocal(dimensionShortName);
-                if (Objects.isNull(recordDimVar)) throw new IllegalArgumentException(String.format(SedonaNetCdfConstants.COORD_VARIABLE_NOT_FOUND, dimensionShortName));
+                if (Objects.isNull(recordDimVar)) throw new IllegalArgumentException(String.format(NetCdfConstants.COORD_VARIABLE_NOT_FOUND, dimensionShortName));
                 AttributeContainer recordDimAttrs = recordDimVar.attributes();
                 varMetadata.computeIfAbsent(dimensionShortName, k -> new ArrayList<>());
                 for (Attribute attr: recordDimAttrs) {
                     varMetadata.get(dimensionShortName).add(attr.getStringValue());
-                    if (attr.getShortName().equalsIgnoreCase(SedonaNetCdfConstants.SCALE_FACTOR)) {
+                    if (attr.getShortName().equalsIgnoreCase(NetCdfConstants.SCALE_FACTOR)) {
                         Array values = attr.getValues();
                         if (!Objects.isNull(values))
                             scaleFactor = getElement(attr.getValues(), 0);
                     }
-                    if (attr.getShortName().equalsIgnoreCase(SedonaNetCdfConstants.ADD_OFFSET)) {
+                    if (attr.getShortName().equalsIgnoreCase(NetCdfConstants.ADD_OFFSET)) {
                         Array values = attr.getValues();
                         if (!Objects.isNull(values))
                             offset = getElement(attr.getValues(), 0);
@@ -284,11 +283,11 @@ public class SedonaNetCdfReader {
             for (Attribute globalAttr: globalAttrs) {
                 globalAttrString.add(globalAttr.getStringValue());
             }
-            res.put(SedonaNetCdfConstants.GLOBAL_ATTR_PREFIX, globalAttrString);
+            res.put(NetCdfConstants.GLOBAL_ATTR_PREFIX, globalAttrString);
         }
         for(int band = 0; band < bandAttrs.size(); band++) {
             int currBandNum = band + 1;
-            res.put(SedonaNetCdfConstants.BAND_ATTR_PREFIX + currBandNum, bandAttrs.get(band));
+            res.put(NetCdfConstants.BAND_ATTR_PREFIX + currBandNum, bandAttrs.get(band));
         }
         return res;
     }
@@ -326,32 +325,32 @@ public class SedonaNetCdfReader {
         if (!Objects.isNull(numericValue)) {
             return numericValue.doubleValue();
         }else {
-            throw new IllegalArgumentException(SedonaNetCdfConstants.NON_NUMERIC_VALUE);
+            throw new IllegalArgumentException(NetCdfConstants.NON_NUMERIC_VALUE);
         }
     }
 
 
     private static void ensureCoordVar(Variable lonVar, Variable latVar) throws NullPointerException, IllegalArgumentException {
         if (latVar == null) {
-            throw new NullPointerException(SedonaNetCdfConstants.INVALID_LAT_NAME);
+            throw new NullPointerException(NetCdfConstants.INVALID_LAT_NAME);
         }
 
         if (lonVar == null) {
-            throw new NullPointerException(SedonaNetCdfConstants.INVALID_LON_NAME);
+            throw new NullPointerException(NetCdfConstants.INVALID_LON_NAME);
         }
 
         if (latVar.getShape().length > 1) {
-            throw new IllegalArgumentException(SedonaNetCdfConstants.INVALID_LAT_SHAPE);
+            throw new IllegalArgumentException(NetCdfConstants.INVALID_LAT_SHAPE);
         }
 
         if (lonVar.getShape().length > 1) {
-            throw new IllegalArgumentException(SedonaNetCdfConstants.INVALID_LON_SHAPE);
+            throw new IllegalArgumentException(NetCdfConstants.INVALID_LON_SHAPE);
         }
     }
 
     private static void ensureRecordVar(Variable recordVar) throws NullPointerException {
         if (recordVar == null) {
-            throw new IllegalArgumentException(SedonaNetCdfConstants.INVALID_RECORD_NAME);
+            throw new IllegalArgumentException(NetCdfConstants.INVALID_RECORD_NAME);
         }
     }
 
