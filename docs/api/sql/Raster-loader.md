@@ -229,6 +229,3 @@ O3(time=2, z=2, lat=48, lon=80)
 
 NO2(time=2, z=2, lat=48, lon=80)
 ```
-
-
-

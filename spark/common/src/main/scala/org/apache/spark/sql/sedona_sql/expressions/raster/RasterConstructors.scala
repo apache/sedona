@@ -81,4 +81,3 @@ case class RS_NetCDFInfo(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
-
