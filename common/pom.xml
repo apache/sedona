@@ -121,7 +121,6 @@
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>cdm-core</artifactId>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
     <build>
