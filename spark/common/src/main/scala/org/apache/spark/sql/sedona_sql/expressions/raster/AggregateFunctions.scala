@@ -19,42 +19,30 @@
 
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
-import org.apache.sedona.common.raster.RasterAccessors
+import org.apache.sedona.common.raster.{RasterAccessors, RasterBandAccessors}
 import org.apache.sedona.common.utils.RasterUtils
-import org.apache.spark.sql.Encoder
+import org.apache.spark.sql.{Encoder, Encoders}
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.expressions.Aggregator
 import org.geotools.coverage.GridSampleDimension
 import org.geotools.coverage.grid.GridCoverage2D
 
+import java.awt.image.WritableRaster
+import javax.media.jai.RasterFactory
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-
-//trait TraitRSAggregateExec{
-//
-//  val initialRaster: GridCoverage2D = {
-//    GridCoverage2D
-//  }
-//
-//  val serde = ExpressionEncoder[GridCoverage2D]
-//
-////  def zero: GridCoverage2D = initialRaster
-//
-////  def bufferEncoder: ExpressionEncoder[GridCoverage2D] = serde
-//
-//  def outputEncoder: ExpressionEncoder[GridCoverage2D] = serde
-//
-//  def finish(out: GridCoverage2D): GridCoverage2D = out
-//}
-
-class BandData(var band: Either[Array[Double], Array[Int]], var index: Int, var gridSampleDimension: GridSampleDimension, var isIntegral: Boolean)
+case class BandData(var bandInt: Array[Int], var bandDouble: Array[Double], var index: Int, var isIntegral: Boolean)
 
 class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandData], GridCoverage2D]  {
 
   var width: Int = -1
 
   var height: Int = -1
+
+  var referenceRaster: GridCoverage2D = _
+
+  var gridSampleDimension: mutable.Map[Int, GridSampleDimension] = new mutable.HashMap()
 
   def zero: ArrayBuffer[BandData] = ArrayBuffer[BandData]()
 
@@ -63,6 +51,7 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
     if (width == -1 && height == -1) {
       width = RasterAccessors.getWidth(raster)
       height = RasterAccessors.getHeight(raster)
+      referenceRaster = raster
       true
     }
 
@@ -84,14 +73,17 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
 
     val rasterData = RasterUtils.getRaster(raster.getRenderedImage)
     val isIntegral = RasterUtils.isDataTypeIntegral(rasterData.getDataBuffer.getDataType)
-    var band: Either[Array[Double], Array[Int]] = null
+    var bandData = null.asInstanceOf[BandData]
 
-    if (isIntegral)
-      band = Right(rasterData.getSamples(0, 0, width, height, 0, null.asInstanceOf[Array[Int]]))
-    else
-      band = Left(rasterData.getSamples(0, 0, width, height, 0, null.asInstanceOf[Array[Double]]))
+    if (isIntegral) {
+      val band = rasterData.getSamples(0, 0, width, height, 0, null.asInstanceOf[Array[Int]])
+      bandData = BandData(band, null, input._2, isIntegral)
+    } else {
+      val band = rasterData.getSamples(0, 0, width, height, 0, null.asInstanceOf[Array[Double]])
+      bandData = BandData(null, band, input._2, isIntegral)
+    }
+    gridSampleDimension = gridSampleDimension + (input._2 -> raster.getSampleDimension(0))
 
-    val bandData = new BandData(band, input._2, raster.getSampleDimension(0), isIntegral)
     buffer += bandData
   }
 
@@ -102,8 +94,28 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
   def finish(merged: ArrayBuffer[BandData]): GridCoverage2D = {
     // create a raster
     val sortedMerged = merged.sortBy(_.index)
+    val numBands = sortedMerged.length
+    val rasterData = RasterUtils.getRaster(referenceRaster.getRenderedImage)
+    val dataTypeCode = rasterData.getDataBuffer.getDataType
+    val resultRaster: WritableRaster = RasterFactory.createBandedRaster(dataTypeCode, width, height, numBands, null)
+    val gridSampleDimensions: Array[GridSampleDimension] = new Array[GridSampleDimension](numBands)
+    var indexCheck = 1
 
+    for (bandData: BandData <- sortedMerged) {
+      if (bandData.index != indexCheck) {
+        // TODO make error messages better
+        throw new IllegalArgumentException("There's a mismatch in the index you provided.")
+      }
+      indexCheck += 1
+      gridSampleDimensions(bandData.index - 1) = gridSampleDimension(bandData.index)
+      if(RasterUtils.isDataTypeIntegral(dataTypeCode))
+        resultRaster.setSamples(0, 0, width, height, (bandData.index - 1), bandData.bandInt)
+      else
+        resultRaster.setSamples(0, 0, width, height, bandData.index - 1, bandData.bandDouble)
 
+    }
+    val noDataValue = RasterBandAccessors.getBandNoDataValue(referenceRaster)
+    RasterUtils.clone(resultRaster, referenceRaster.getGridGeometry, gridSampleDimensions, referenceRaster, noDataValue, true)
   }
 
   val serde = ExpressionEncoder[GridCoverage2D]

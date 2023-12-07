@@ -20,8 +20,11 @@ package org.apache.sedona.sql
 
 import org.apache.sedona.common.raster.MapAlgebra
 import org.apache.sedona.common.utils.RasterUtils
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.{Row, SaveMode}
-import org.apache.spark.sql.functions.{col, collect_list, expr}
+import org.apache.spark.sql.functions.{col, collect_list, expr, row_number}
+import org.apache.spark.sql.sedona_sql.expressions.raster.{BandData}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.junit.Assert.{assertEquals, assertNull, assertTrue}
 import org.locationtech.jts.geom.{Coordinate, Geometry, Point}
@@ -31,6 +34,7 @@ import java.awt.image.DataBuffer
 import java.io.File
 import java.net.URLConnection
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 
 class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen{
@@ -877,6 +881,27 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       actual = df.selectExpr("RS_Count(raster)").first().getLong(0)
       expected = 928192
       assertEquals(expected, actual)
+    }
+
+    it("Passed RS_Union_Aggr") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+        .union(sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+        .union(sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")))
+        .withColumn("raster", expr("RS_FromGeoTiff(content) as raster"))
+        .coalesce(1).withColumn("index", row_number().over(Window.orderBy("raster")))
+        .selectExpr("raster", "index")
+
+      val result = df.selectExpr("RS_Union_Aggr(raster, index) as rasters")
+
+      println(result.selectExpr("RS_Metadata(rasters)").first().get(0))
+
+      println(result.show)
+
+//      println(sc.parallelize(points).toDF())
+
+//      val enc = ExpressionEncoder[scala.collection.mutable.ArrayBuffer[Int]]
+      val enc = ExpressionEncoder[ArrayBuffer[BandData]]
+      println(enc)
     }
 
     it("Passed RS_ZonalStats") {
