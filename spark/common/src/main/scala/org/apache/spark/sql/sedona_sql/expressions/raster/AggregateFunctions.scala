@@ -34,6 +34,9 @@ import scala.collection.mutable.ArrayBuffer
 
 case class BandData(var bandInt: Array[Int], var bandDouble: Array[Double], var index: Int, var isIntegral: Boolean)
 
+/**
+ * Return a raster containing bands at given indexes from all rasters in a given column
+ */
 class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandData], GridCoverage2D]  {
 
   var width: Int = -1
@@ -46,6 +49,9 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
 
   def zero: ArrayBuffer[BandData] = ArrayBuffer[BandData]()
 
+  /**
+   * Valid raster shape to be the same in the given column
+   */
   def checkRasterShape(raster: GridCoverage2D): Boolean = {
     // first iteration
     if (width == -1 && height == -1) {
@@ -53,34 +59,35 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
       height = RasterAccessors.getHeight(raster)
       referenceRaster = raster
       true
+    } else {
+      val widthNewRaster = RasterAccessors.getWidth(raster)
+      val heightNewRaster = RasterAccessors.getHeight(raster)
+
+      if (width == widthNewRaster && height == heightNewRaster)
+        true
+      else
+        false
     }
-
-    val widthNewRaster = RasterAccessors.getWidth(raster)
-    val heightNewRaster = RasterAccessors.getHeight(raster)
-
-    if (width == widthNewRaster && height == heightNewRaster)
-      true
-    else
-      false
   }
 
   def reduce(buffer: ArrayBuffer[BandData], input: (GridCoverage2D, Int)): ArrayBuffer[BandData] = {
     val raster = input._1
     if (!checkRasterShape(raster)) {
-      // TODO figure out a better error message
-      throw new IllegalArgumentException(("Please provide rasters of same shape."))
+      throw new IllegalArgumentException("Rasters provides should be of the same shape.")
+    }
+    if (gridSampleDimension.contains(input._2)) {
+      throw new IllegalArgumentException("Indexes shouldn't be repeated. Index should be in an arithmetic sequence.")
     }
 
     val rasterData = RasterUtils.getRaster(raster.getRenderedImage)
     val isIntegral = RasterUtils.isDataTypeIntegral(rasterData.getDataBuffer.getDataType)
-    var bandData = null.asInstanceOf[BandData]
 
-    if (isIntegral) {
+    val bandData = if (isIntegral) {
       val band = rasterData.getSamples(0, 0, width, height, 0, null.asInstanceOf[Array[Int]])
-      bandData = BandData(band, null, input._2, isIntegral)
+      BandData(band, null, input._2, isIntegral)
     } else {
       val band = rasterData.getSamples(0, 0, width, height, 0, null.asInstanceOf[Array[Double]])
-      bandData = BandData(null, band, input._2, isIntegral)
+      BandData(null, band, input._2, isIntegral)
     }
     gridSampleDimension = gridSampleDimension + (input._2 -> raster.getSampleDimension(0))
 
@@ -103,8 +110,7 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
 
     for (bandData: BandData <- sortedMerged) {
       if (bandData.index != indexCheck) {
-        // TODO make error messages better
-        throw new IllegalArgumentException("There's a mismatch in the index you provided.")
+        throw new IllegalArgumentException("Indexes should be in a valid arithmetic sequence.")
       }
       indexCheck += 1
       gridSampleDimensions(bandData.index - 1) = gridSampleDimension(bandData.index)
