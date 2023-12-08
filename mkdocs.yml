@@ -64,6 +64,7 @@ nav:
                   - SedonaKepler: api/sql/Visualization_SedonaKepler.md
           - Raster data:
               - Raster loader: api/sql/Raster-loader.md
+              - Raster aggregates: api/sql/Raster-aggregate-function.md
               - Raster writer: api/sql/Raster-writer.md
               - Raster operators: api/sql/Raster-operators.md
               - Raster map algebra: api/sql/Raster-map-algebra.md
