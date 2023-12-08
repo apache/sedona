@@ -20,11 +20,12 @@ package org.apache.sedona.sql
 
 import org.apache.sedona.common.raster.MapAlgebra
 import org.apache.sedona.common.utils.RasterUtils
+import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.{Row, SaveMode}
-import org.apache.spark.sql.functions.{col, collect_list, expr}
+import org.apache.spark.sql.functions.{col, collect_list, expr, row_number}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.junit.Assert.{assertEquals, assertNull, assertTrue}
-import org.locationtech.jts.geom.{Coordinate, Geometry, Point}
+import org.locationtech.jts.geom.{Coordinate, Geometry}
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
 import java.awt.image.DataBuffer
@@ -933,6 +934,28 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       actual = df.selectExpr("RS_Count(raster)").first().getLong(0)
       expected = 928192
       assertEquals(expected, actual)
+    }
+
+    it("Passed RS_Union_Aggr") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+        .union(sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+          .union(sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")))
+        .withColumn("raster", expr("RS_FromGeoTiff(content) as raster"))
+        .withColumn("index", row_number().over(Window.orderBy("raster")))
+        .selectExpr("raster", "index")
+
+      val dfTest = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+
+      df = df.selectExpr("RS_Union_aggr(raster, index) as rasters")
+
+      val actualBands = df.selectExpr("RS_NumBands(rasters)").first().get(0)
+      val expectedBands = 3
+      assertEquals(expectedBands, actualBands)
+
+      val actualMetadata = df.selectExpr("RS_Metadata(rasters)").first().getSeq(0).slice(0, 9)
+      val expectedMetadata = dfTest.selectExpr("RS_Metadata(raster)").first().getSeq(0).slice(0, 9)
+      assertTrue(expectedMetadata.equals(actualMetadata))
     }
 
     it("Passed RS_ZonalStats") {
