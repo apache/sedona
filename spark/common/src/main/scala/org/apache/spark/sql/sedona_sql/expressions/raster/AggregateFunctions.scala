@@ -21,7 +21,7 @@ package org.apache.spark.sql.sedona_sql.expressions.raster
 
 import org.apache.sedona.common.raster.{RasterAccessors, RasterBandAccessors}
 import org.apache.sedona.common.utils.RasterUtils
-import org.apache.spark.sql.{Encoder, Encoders}
+import org.apache.spark.sql.Encoder
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.expressions.Aggregator
 import org.geotools.coverage.GridSampleDimension
@@ -99,7 +99,6 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
   }
 
   def finish(merged: ArrayBuffer[BandData]): GridCoverage2D = {
-    // create a raster
     val sortedMerged = merged.sortBy(_.index)
     val numBands = sortedMerged.length
     val rasterData = RasterUtils.getRaster(referenceRaster.getRenderedImage)

@@ -20,21 +20,18 @@ package org.apache.sedona.sql
 
 import org.apache.sedona.common.raster.MapAlgebra
 import org.apache.sedona.common.utils.RasterUtils
-import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.{Row, SaveMode}
 import org.apache.spark.sql.functions.{col, collect_list, expr, row_number}
-import org.apache.spark.sql.sedona_sql.expressions.raster.{BandData}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.junit.Assert.{assertEquals, assertNull, assertTrue}
-import org.locationtech.jts.geom.{Coordinate, Geometry, Point}
+import org.locationtech.jts.geom.{Coordinate, Geometry}
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
 import java.awt.image.DataBuffer
 import java.io.File
 import java.net.URLConnection
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 
 class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen{
