@@ -1429,5 +1429,44 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         assertEquals(expectedMetadata(i), rasterMetadata(i), 1e-6)
       }
     }
+
+    it("Passed RS_FromNetCDF with NetCDF classic") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/netcdf/test.nc")
+      val rasterDf = df.selectExpr("RS_FromNetCDF(content, 'O3') as raster")
+      val expectedMetadata = Seq(4.9375, 50.9375, 80, 48, 0.125, -0.125, 0, 0, 0, 4)
+      val actualMetadata = rasterDf.selectExpr("RS_Metadata(raster) as metadata").first().getSeq[Double](0)
+
+      for (i <- expectedMetadata.indices) {
+        assertEquals(expectedMetadata(i), actualMetadata(i), 1e-6)
+      }
+
+      val expectedFirstVal = 60.95357131958008
+      val actualFirstVal = rasterDf.selectExpr("RS_Value(raster, 0, 0, 1) as raster").first().getDouble(0)
+      assertEquals(expectedFirstVal, actualFirstVal, 1e-6)
+    }
+
+    it("Passed RS_FromNetCDF with NetCDF classic long form") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/netcdf/test.nc")
+      val rasterDf = df.selectExpr("RS_FromNetCDF(content, 'O3', 'lon', 'lat') as raster")
+      val expectedMetadata = Seq(4.9375, 50.9375, 80, 48, 0.125, -0.125, 0, 0, 0, 4)
+      val actualMetadata = rasterDf.selectExpr("RS_Metadata(raster) as metadata").first().getSeq[Double](0)
+
+      for (i <- expectedMetadata.indices) {
+        assertEquals(expectedMetadata(i), actualMetadata(i), 1e-6)
+      }
+
+      val expectedFirstVal = 60.95357131958008
+      val actualFirstVal = rasterDf.selectExpr("RS_Value(raster, 0, 0, 1) as raster").first().getDouble(0)
+      assertEquals(expectedFirstVal, actualFirstVal, 1e-6)
+    }
+
+    it("Passed RS_NetCDFInfo") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/netcdf/test.nc")
+      val recordInfo = df.selectExpr("RS_NetCDFInfo(content) as record_info").first().getString(0)
+      val expectedRecordInfo = "O3(time=2, z=2, lat=48, lon=80)\n" +
+        "\n" +
+        "NO2(time=2, z=2, lat=48, lon=80)"
+      assertEquals(expectedRecordInfo, recordInfo)
+    }
   }
 }

@@ -18,10 +18,12 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
 import org.opengis.referencing.FactoryException;

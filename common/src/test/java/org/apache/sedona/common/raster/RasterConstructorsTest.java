@@ -20,12 +20,14 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 public class RasterConstructorsTest
         extends RasterTestBase {
@@ -235,5 +237,45 @@ public class RasterConstructorsTest
         assertEquals(upperLeftY, envelope.getEnvelopeInternal().getMaxY(), 0.001);
         assertEquals("SIGNED_32BITS", gridCoverage2D.getSampleDimension(0).getSampleDimensionType().name());
     }
+
+    @Test
+    public void testNetCdfClassic() throws FactoryException, IOException, TransformException {
+        GridCoverage2D testRaster = RasterConstructors.fromNetCDF(testNc, "O3");
+        double[] expectedMetadata = {4.9375, 50.9375, 80, 48, 0.125, -0.125, 0, 0, 0, 4};
+        double[] actualMetadata = RasterAccessors.metadata(testRaster);
+        for (int i = 0; i < expectedMetadata.length; i++) {
+            assertEquals(expectedMetadata[i], actualMetadata[i], 1e-5);
+        }
+
+        double actualFirstGridVal = PixelFunctions.value(testRaster, 0, 0, 1);
+        double expectedFirstGridVal = 60.95357131958008;
+        assertEquals(expectedFirstGridVal, actualFirstGridVal, 1e-6);
+    }
+
+    @Test
+    public void testNetCdfClassicLongForm() throws FactoryException, IOException, TransformException {
+        GridCoverage2D testRaster = RasterConstructors.fromNetCDF(testNc, "O3", "lon", "lat");
+        double[] expectedMetadata = {4.9375, 50.9375, 80, 48, 0.125, -0.125, 0, 0, 0, 4};
+        double[] actualMetadata = RasterAccessors.metadata(testRaster);
+        for (int i = 0; i < expectedMetadata.length; i++) {
+            assertEquals(expectedMetadata[i], actualMetadata[i], 1e-5);
+        }
+
+        double actualFirstGridVal = PixelFunctions.value(testRaster, 0, 0, 1);
+        double expectedFirstGridVal = 60.95357131958008;
+        assertEquals(expectedFirstGridVal, actualFirstGridVal, 1e-6);
+    }
+
+
+    @Test
+    public void testRecordInfo() throws IOException {
+        String actualRecordInfo = RasterConstructors.getRecordInfo(testNc);
+        String expectedRecordInfo = "O3(time=2, z=2, lat=48, lon=80)\n" +
+                "\n" +
+                "NO2(time=2, z=2, lat=48, lon=80)";
+        assertEquals(expectedRecordInfo, actualRecordInfo);
+    }
+
+
 
 }

@@ -256,7 +256,9 @@ object Catalog {
     function[RS_AsImage](),
     function[RS_ZonalStats](),
     function[RS_ZonalStatsAll](),
-    function[RS_Resample]()
+    function[RS_Resample](),
+    function[RS_FromNetCDF](),
+    function[RS_NetCDFInfo]()
   )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(
