@@ -890,8 +890,6 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
       df = df.selectExpr("RS_Union_aggr(raster, index) as rasters")
 
-      println(df.show(10, 50))
-
       val actualBands = df.selectExpr("RS_NumBands(rasters)").first().get(0)
       val expectedBands = 4
       assertEquals(expectedBands, actualBands)

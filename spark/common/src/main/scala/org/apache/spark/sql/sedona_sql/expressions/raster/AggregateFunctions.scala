@@ -63,10 +63,7 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
       val widthNewRaster = RasterAccessors.getWidth(raster)
       val heightNewRaster = RasterAccessors.getHeight(raster)
 
-      if (width == widthNewRaster && height == heightNewRaster)
-        true
-      else
-        false
+      width == widthNewRaster && height == heightNewRaster
     }
   }
 
