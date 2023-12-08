@@ -881,17 +881,20 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_Union_Aggr") {
-      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_aggregate_geotiff/*")
-        .withColumn("index", row_number().over(Window.orderBy("path")))
-        .selectExpr("RS_FromGeoTiff(content) as raster", "index")
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+        .union(sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+          .union(sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")))
+        .withColumn("raster", expr("RS_FromGeoTiff(content) as raster"))
+        .withColumn("index", row_number().over(Window.orderBy("raster")))
+        .selectExpr("raster", "index")
 
-      val dfTest = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_aggregate_geotiff/MOD17A2_GPP.A2000001.tif")
+      val dfTest = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
         .selectExpr("RS_FromGeoTiff(content) as raster")
 
       df = df.selectExpr("RS_Union_aggr(raster, index) as rasters")
 
       val actualBands = df.selectExpr("RS_NumBands(rasters)").first().get(0)
-      val expectedBands = 4
+      val expectedBands = 3
       assertEquals(expectedBands, actualBands)
 
       val actualMetadata = df.selectExpr("RS_Metadata(rasters)").first().getSeq(0).slice(0, 9)
