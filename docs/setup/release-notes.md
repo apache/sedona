@@ -76,7 +76,7 @@ Sedona 1.5.0 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 </li>
 </ul>
         
-###        New Feature
+### New Feature
 
 <ul>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-200'>SEDONA-200</a>] -         Add ST_CoordDim to Sedona
