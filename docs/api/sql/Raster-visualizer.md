@@ -6,6 +6,9 @@ Sedona offers APIs to visualize a raster in an image form. This API only works f
 ### RS_AsBase64
 Introduction: Returns a base64 encoded string of the given raster. If the datatype is integral then this function internally takes the first 4 bands as RGBA, and converts them to the PNG format, finally produces a base64 string. When the datatype is not integral, the function converts the raster to TIFF format, and then generate base64 string. To visualize other bands, please use it together with `RS_Band`. You can take the resulting base64 string in [an online viewer](https://base64-viewer.onrender.com/) to check how the image looks like.
 
+!!!Warning
+    This is not recommended for large files.
+
 Format: `RS_AsBase64(raster: Raster)`
 
 Since: `v1.5.0`
