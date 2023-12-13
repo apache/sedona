@@ -78,5 +78,5 @@ jobs:
         [ -d "flink-shaded/target/" ] && cp flink-shaded/target/sedona-*.jar staging 2>/dev/null || true
     - uses: actions/upload-artifact@v3
       with:
-        name: generated-jars
+        name: generated-jars ${{ matrix.spark }} ${{ matrix.scala }} ${{ matrix.jdk }}
         path: staging
