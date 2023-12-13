@@ -4,9 +4,21 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'common/**'
+      - 'spark/**'
+      - 'spark-shaded/**'
+      - 'pom.xml'
+      - 'python/**'
   pull_request:
     branches:
       - '*'
+    paths:
+      - 'common/**'
+      - 'spark/**'
+      - 'spark-shaded/**'
+      - 'pom.xml'
+      - 'python/**'
       
 jobs:
   build:

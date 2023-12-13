@@ -3,9 +3,19 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'docs/**'
+      - 'docs-overrides/**'
+      - 'mkdocs.yml'
+      - 'R/**'
   pull_request:
     branches:
       - '*'
+    paths:
+      - 'docs/**'
+      - 'docs-overrides/**'
+      - 'mkdocs.yml'
+      - 'R/**'
 
 jobs:
   build:

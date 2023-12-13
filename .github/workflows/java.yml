@@ -4,9 +4,25 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'common/**'
+      - 'spark/**'
+      - 'spark-shaded/**'
+      - 'flink/**'
+      - 'flink-shaded/**'
+      - 'snowflake/**'
+      - 'pom.xml'
   pull_request:
     branches:
       - '*'
+    paths:
+      - 'common/**'
+      - 'spark/**'
+      - 'spark-shaded/**'
+      - 'flink/**'
+      - 'flink-shaded/**'
+      - 'snowflake/**'
+      - 'pom.xml'
 
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
