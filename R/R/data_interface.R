@@ -19,7 +19,7 @@
 # ------- Read RDD ------------
 
 #' Create a SpatialRDD from an external data source.
-#' 
+#'
 #' Import spatial object from an external data source into a Sedona SpatialRDD.
 #'
 #' @param sc A `spark_connection`.
@@ -155,14 +155,14 @@ sedona_read_dsv_to_typed_rdd <- function(sc,
 #'
 #' @description
 #' `r lifecycle::badge("deprecated")`
-#' 
+#'
 #' Constructors of typed RDD (PointRDD, PolygonRDD, LineStringRDD) are soft deprecated, use non-types versions
-#' 
+#'
 #' Create a typed SpatialRDD (namely, a PointRDD, a PolygonRDD, or a
 #' LineStringRDD)
 #' * `sedona_read_shapefile_to_typed_rdd`: from a shapefile data source
 #' * `sedona_read_geojson_to_typed_rdd`: from a GeoJSON data source
-#' 
+#'
 #'
 #' @param sc A `spark_connection`.
 #' @param location Location of the data source.
@@ -197,13 +197,13 @@ sedona_read_shapefile_to_typed_rdd <- function(sc,
                                                location,
                                                type = c("point", "polygon", "linestring"),
                                                storage_level = "MEMORY_ONLY") {
-  
+
   lifecycle::deprecate_soft(
     "1.4.0",
     "sedona_read_shapefile_to_typed_rdd()",
     with = "sedona_read_shapefile()"
   )
-  
+
   invoke_static(
     sc,
     "org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader",
@@ -224,13 +224,13 @@ sedona_read_geojson_to_typed_rdd <- function(sc,
                                              has_non_spatial_attrs = TRUE,
                                              storage_level = "MEMORY_ONLY",
                                              repartition = 1L) {
-  
+
   lifecycle::deprecate_soft(
     "1.4.0",
     "sedona_read_geojson_to_typed_rdd()",
     with = "sedona_read_geojson()"
   )
-  
+
   invoke_new(
     sc,
     rdd_cls_from_type(type),
@@ -249,10 +249,10 @@ sedona_read_geojson_to_typed_rdd <- function(sc,
 #' Read geospatial data into a Spatial RDD
 #'
 #' @description Import spatial object from an external data source into a Sedona SpatialRDD.
-#' * `sedona_read_shapefile`: from a shapefile 
-#' * `sedona_read_geojson`: from a geojson file 
-#' * `sedona_read_wkt`: from a geojson file 
-#' * `sedona_read_wkb`: from a geojson file 
+#' * `sedona_read_shapefile`: from a shapefile
+#' * `sedona_read_geojson`: from a geojson file
+#' * `sedona_read_wkt`: from a geojson file
+#' * `sedona_read_wkb`: from a geojson file
 #'
 #' @param sc A `spark_connection`.
 #' @param location Location of the data source.
@@ -388,12 +388,12 @@ sedona_read_shapefile <- function(sc,
 
 # ------- Read SDF ------------
 #' Read geospatial data into a Spark DataFrame.
-#' 
+#'
 #' @description Functions to read geospatial data from a variety of formats into Spark DataFrames.
-#' 
-#' * `spark_read_shapefile`: from a shapefile 
-#' * `spark_read_geojson`: from a geojson file 
-#' * `spark_read_geoparquet`: from a geoparquet file 
+#'
+#' * `spark_read_shapefile`: from a shapefile
+#' * `spark_read_geojson`: from a geojson file
+#' * `spark_read_geoparquet`: from a geoparquet file
 #'
 #' @inheritParams sparklyr::spark_read_source
 #'
@@ -419,19 +419,19 @@ spark_read_shapefile <- function(sc,
                                  path = name,
                                  options = list(),
                                  ...) {
-  
+
   lapply(names(options), function(name) {
     if (!name %in% c("")) {
       warning(paste0("Ignoring unknown option '", name,"'"))
     }
   })
-  
+
   rdd <- sedona_read_shapefile(sc,
                                location = path,
                                storage_level = "MEMORY_ONLY")
-  
-  
-  
+
+
+
   rdd %>% sdf_register(name = name)
 }
 
@@ -445,7 +445,7 @@ spark_read_geojson <- function(sc,
                                repartition = 0,
                                memory = TRUE,
                                overwrite = TRUE) {
-  
+
   # check options
   if ("allow_invalid_geometries" %in% names(options)) final_allow_invalid <- options[["allow_invalid_geometries"]] else final_allow_invalid <- TRUE
   if ("skip_syntactically_invalid_geometries" %in% names(options)) final_skip <- options[["skip_syntactically_invalid_geometries"]] else final_skip <- TRUE
@@ -454,18 +454,18 @@ spark_read_geojson <- function(sc,
       warning(paste0("Ignoring unknown option '", name,"'"))
     }
   })
-  
+
   final_repartition <- max(as.integer(repartition), 1L)
-  
+
   rdd <- sedona_read_geojson(sc,
                              location = path,
                              allow_invalid_geometries = final_allow_invalid,
                              skip_syntactically_invalid_geometries = final_skip,
                              storage_level = "MEMORY_ONLY",
                              repartition = final_repartition)
-  
-  
-  
+
+
+
   rdd %>% sdf_register(name = name)
 }
 
@@ -479,8 +479,8 @@ spark_read_geoparquet <- function(sc,
                                   repartition = 0,
                                   memory = TRUE,
                                   overwrite = TRUE) {
-  
-  spark_read_source(sc, 
+
+  spark_read_source(sc,
                     name = name,
                     path = path,
                     source = "geoparquet",
@@ -603,7 +603,7 @@ sedona_save_spatial_rdd <- function(x,
 #' Write geospatial data from a Spark DataFrame.
 #'
 #' @description Functions to write geospatial data into a variety of formats from Spark DataFrames.
-#' 
+#'
 #' * `spark_write_geojson`: to GeoJSON
 #' * `spark_write_geoparquet`: to GeoParquet
 #' * `spark_write_raster`: to raster tiles after using RS output functions (`RS_AsXXX`)
@@ -643,12 +643,12 @@ spark_write_geojson <- function(x,
                                 options = list(),
                                 partition_by = NULL,
                                 ...) {
-  
+
   ## find geometry column if not specified
   if (!"spatial_col" %in% names(options)) {
     schema <- x %>% sdf_schema()
     potential_cols <- which(sapply(schema, function(x) x$type == "GeometryUDT"))
-    
+
     if (length(potential_cols) == 0) {
       cli::cli_abort("No geometry column found")
     } else if (length(potential_cols) > 1) {
@@ -657,15 +657,15 @@ spark_write_geojson <- function(x,
     } else {
       spatial_col = names(potential_cols)
     }
-    
+
   } else {
     spatial_col = options[["spatial_col"]]
   }
-  
+
   rdd <- x %>% to_spatial_rdd(spatial_col = spatial_col)
-  
+
   sedona_write_geojson(x = rdd, output_location = path)
-  
+
 }
 
 
@@ -678,7 +678,7 @@ spark_write_geoparquet <- function(x,
                                    options = list(),
                                    partition_by = NULL,
                                    ...) {
-  
+
   spark_write_source(
     x = x,
     source = "geoparquet",
@@ -688,7 +688,7 @@ spark_write_geoparquet <- function(x,
     save_args = list(path),
     ...
   )
-  
+
 }
 
 
@@ -701,7 +701,7 @@ spark_write_raster <- function(x,
                                    options = list(),
                                    partition_by = NULL,
                                    ...) {
-  
+
   spark_write_source(
     x = x,
     source = "raster",
@@ -711,7 +711,7 @@ spark_write_raster <- function(x,
     save_args = list(path),
     ...
   )
-  
+
 }
 
 

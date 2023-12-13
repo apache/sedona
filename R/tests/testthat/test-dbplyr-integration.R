@@ -21,9 +21,9 @@ sc <- testthat_spark_connection()
 
 test_that("ST_Point() works as expected", {
   sdf <- sdf_len(sc, 1) %>%
-    dplyr::mutate(pt = ST_Point(-40, 40)) 
+    dplyr::mutate(pt = ST_Point(-40, 40))
   df <- sdf %>% collect()
-  
+
   expect_equal(nrow(df), 1)
   expect_equal(colnames(df), c("id", "pt"))
   expect_equal(
@@ -39,7 +39,7 @@ test_that("ST_PolygonFromEnvelope() works as expected", {
   sdf <- sdf_len(sc, 1) %>%
     dplyr::mutate(rectangle = ST_PolygonFromEnvelope(-40, -30, 40, 30))
   df <- sdf %>% collect()
-  
+
   expect_equal(nrow(df), 1)
   expect_equal(colnames(df), c("id", "rectangle"))
   expect_equal(
@@ -59,7 +59,7 @@ test_that("ST_Buffer() works as expected", {
     dplyr::mutate(pt = ST_Point(-40, 40)) %>%
     # dplyr::compute() ## fixed in dev version of sparklyr (compute caches, sdf_register does not)
     sdf_register()
-  
+
   expect_equal(
     sdf %>%
       dplyr::mutate(pt = ST_Buffer(pt, 3L)) %>%
@@ -76,9 +76,9 @@ test_that("ST_ReducePrecision() works as expected", {
   sdf <- sdf_len(sc, 1) %>%
     dplyr::mutate(rectangle = ST_PolygonFromEnvelope(-40.12345678, -30.12345678, 40.11111111, 30.11111111)) %>%
     dplyr::mutate(rectangle = ST_ReducePrecision(rectangle, 2))
-  
+
   df <- sdf %>% collect()
-  
+
   expect_equal(nrow(df), 1)
   expect_equal(colnames(df), c("id", "rectangle"))
   expect_equal(
@@ -98,7 +98,7 @@ test_that("ST_SimplifyPreserveTopology() works as expected", {
     dplyr::mutate(pt = ST_Point(-40, 40)) %>%
     # dplyr::compute() ## fixed in dev version of sparklyr (compute caches, sdf_register does not)
     sdf_register()
-  
+
   expect_equal(
     sdf %>%
       dplyr::mutate(pt = ST_SimplifyPreserveTopology(pt, 1L)) %>%
@@ -116,7 +116,7 @@ test_that("ST_GeometryN() works as expected", {
     dplyr::mutate(pts = ST_GeomFromText("MULTIPOINT((1 2), (3 4), (5 6), (8 9))")) %>%
     dplyr::transmute(pt = ST_GeometryN(pts, 2))
   df <- sdf %>% collect()
-  
+
   expect_equal(nrow(df), 1)
   expect_equal(colnames(df), c("pt"))
   expect_equal(
@@ -133,7 +133,7 @@ test_that("ST_InteriorRingN() works as expected", {
     dplyr::mutate(polygon = ST_GeomFromText("POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))")) %>%
     dplyr::transmute(interior_ring = ST_InteriorRingN(polygon, 0))
   df <- sdf %>% collect()
-  
+
   expect_equal(nrow(df), 1)
   expect_equal(colnames(df), c("interior_ring"))
   expect_equal(
@@ -150,9 +150,9 @@ test_that("ST_InteriorRingN() works as expected", {
 test_that("ST_AddPoint() works as expected", {
   sdf <- sdf_len(sc, 1) %>%
     dplyr::mutate(linestring = ST_GeomFromText("LINESTRING(0 0, 1 1, 1 0)")) %>%
-    dplyr::transmute(linestring = ST_AddPoint(linestring, ST_GeomFromText("Point(21 52)"), 1)) 
+    dplyr::transmute(linestring = ST_AddPoint(linestring, ST_GeomFromText("Point(21 52)"), 1))
   df <- sdf %>% collect()
-  
+
   expect_equal(nrow(df), 1)
   expect_equal(colnames(df), c("linestring"))
   expect_equal(
@@ -164,12 +164,12 @@ test_that("ST_AddPoint() works as expected", {
     df$linestring[[1]],
     list(c(0, 0), c(21, 52), c(1, 1), c(1, 0))
   )
-  
+
   sdf <- sdf_len(sc, 1) %>%
     dplyr::mutate(linestring = ST_GeomFromText("LINESTRING(0 0, 1 1, 1 0)")) %>%
     dplyr::transmute(linestring = ST_AddPoint(linestring, ST_GeomFromText("Point(21 52)")))
   df <- sdf %>% collect()
-  
+
   expect_equal(nrow(df), 1)
   expect_equal(colnames(df), c("linestring"))
   expect_equal(
@@ -186,9 +186,9 @@ test_that("ST_AddPoint() works as expected", {
 test_that("ST_RemovePoint() works as expected", {
   sdf <- sdf_len(sc, 1) %>%
     dplyr::mutate(linestring = ST_GeomFromText("LINESTRING(0 0, 21 52, 1 1, 1 0)")) %>%
-    dplyr::transmute(linestring = ST_RemovePoint(linestring, 1)) 
+    dplyr::transmute(linestring = ST_RemovePoint(linestring, 1))
   df <- sdf %>% collect()
-  
+
   expect_equal(nrow(df), 1)
   expect_equal(colnames(df), c("linestring"))
   expect_equal(

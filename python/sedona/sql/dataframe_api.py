@@ -52,7 +52,7 @@ def call_sedona_function(object_name: str, function_name: str, args: Union[Any, 
     spark = SparkSession.getActiveSession()
     if spark is None:
         raise ValueError("No active spark session was detected. Unable to call sedona function.")
-    
+
     # apparently a Column is an Iterable so we need to check for it explicitly
     if (not isinstance(args, Iterable)) or isinstance(args, str) or isinstance(args, Column):
         args = [args]
@@ -61,7 +61,7 @@ def call_sedona_function(object_name: str, function_name: str, args: Union[Any, 
 
     jobject = getattr(spark._jvm, object_name)
     jfunc = getattr(jobject, function_name)
-    
+
     jc = jfunc(*args)
     return Column(jc)
 
@@ -79,11 +79,11 @@ def _get_type_list(annotated_type: Type) -> Tuple[Type, ...]:
     # in 3.8 there is a much nicer way to do this with typing.get_origin
     # we have to be a bit messy until we drop support for 3.7
     if isinstance(annotated_type, typing._GenericAlias) and annotated_type.__origin__._name == "Union":
-        # again, there is a really nice method for this in 3.8: typing.get_args 
+        # again, there is a really nice method for this in 3.8: typing.get_args
         valid_types = annotated_type.__args__
     else:
         valid_types = (annotated_type,)
-    
+
     return valid_types
 
 

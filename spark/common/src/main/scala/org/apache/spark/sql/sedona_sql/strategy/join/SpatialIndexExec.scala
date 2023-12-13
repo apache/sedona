@@ -41,7 +41,7 @@ case class SpatialIndexExec(child: SparkPlan,
     with Logging {
 
   override def output: Seq[Attribute] = child.output
-  
+
   override protected def doExecute(): RDD[InternalRow] = {
     throw new UnsupportedOperationException(
       "SpatialIndex does not support the execute() code path.")

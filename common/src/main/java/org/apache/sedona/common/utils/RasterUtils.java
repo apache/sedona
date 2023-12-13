@@ -444,7 +444,7 @@ public class RasterUtils {
     }
 
     /**
-     * If the raster has a CRS, then it transforms the geom to the raster's CRS. 
+     * If the raster has a CRS, then it transforms the geom to the raster's CRS.
      * If any of the inputs, raster or geom doesn't have a CRS, it defaults to 4326.
      * @param raster
      * @param geom

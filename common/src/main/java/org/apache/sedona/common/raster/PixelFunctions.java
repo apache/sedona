@@ -266,7 +266,7 @@ public class PixelFunctions
                 rasterGeom = pair.getLeft();
             }
         }
-        
+
         int numBands = rasterGeom.getNumSampleDimensions();
         double noDataValue = RasterUtils.getNoDataValue(rasterGeom.getSampleDimension(band - 1));
         double[] pixelBuffer = new double[numBands];

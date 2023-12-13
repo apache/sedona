@@ -23,7 +23,7 @@ home:
         title: Sedona Project
         text: >
           [Homepage](https://sedona.apache.org/)
- 
+
 reference:
 - title: "Reading and Writing Spatial DataFrames"
   desc: "Functions for reading and writing Spark DataFrames."

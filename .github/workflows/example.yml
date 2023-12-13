@@ -32,7 +32,7 @@ jobs:
     - name: Cache SBT
       uses: actions/cache@v3
       with:
-        path: | 
+        path: |
           ~/.ivy2/cache
           ~/.sbt
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}

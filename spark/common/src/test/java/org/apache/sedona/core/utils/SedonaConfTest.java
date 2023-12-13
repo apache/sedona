@@ -45,7 +45,7 @@ public class SedonaConfTest {
         SparkSession.active().conf().set("sedona.join.numpartition", "3");
         assertEquals(3, SedonaConf.fromActiveSession().getFallbackPartitionNum());
     }
-    
+
     @Test
     public void testDatasetBoundary() {
         SparkSession.active().conf().set("sedona.join.boundary", "1,2,3,4");
