@@ -8,8 +8,6 @@ on:
       - 'common/**'
       - 'spark/**'
       - 'spark-shaded/**'
-      - 'flink/**'
-      - 'flink-shaded/**'
       - 'pom.xml'
       - 'python/**'
   pull_request:
@@ -19,8 +17,6 @@ on:
       - 'common/**'
       - 'spark/**'
       - 'spark-shaded/**'
-      - 'flink/**'
-      - 'flink-shaded/**'
       - 'pom.xml'
       - 'python/**'
       

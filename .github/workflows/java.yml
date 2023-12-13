@@ -10,6 +10,7 @@ on:
       - 'spark-shaded/**'
       - 'flink/**'
       - 'flink-shaded/**'
+      - 'snowflake/**'
       - 'pom.xml'
   pull_request:
     branches:
@@ -20,6 +21,7 @@ on:
       - 'spark-shaded/**'
       - 'flink/**'
       - 'flink-shaded/**'
+      - 'snowflake/**'
       - 'pom.xml'
 
 env:
