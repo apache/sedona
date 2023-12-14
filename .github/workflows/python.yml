@@ -4,13 +4,25 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'common/**'
+      - 'spark/**'
+      - 'spark-shaded/**'
+      - 'pom.xml'
+      - 'python/**'
   pull_request:
     branches:
       - '*'
+    paths:
+      - 'common/**'
+      - 'spark/**'
+      - 'spark-shaded/**'
+      - 'pom.xml'
+      - 'python/**'
 
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
-      
+
 jobs:
   build:
 

@@ -13,7 +13,7 @@
  */
 package org.apache.sedona.common.raster;
 
-import org.geotools.coverage.grid.GridCoordinates2D;
+ import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.gce.geotiff.GeoTiffReader;
@@ -33,14 +33,14 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.RasterFactory;
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 public class RasterTestBase {
     String arc = "NCOLS 2\nNROWS 2\nXLLCORNER 378922\nYLLCORNER 4072345\nCELLSIZE 30\nNODATA_VALUE 0\n0 1 2 3\n";
@@ -52,6 +52,9 @@ public class RasterTestBase {
     GridCoverage2D oneBandRaster;
     GridCoverage2D multiBandRaster;
     byte[] geoTiff;
+    byte[] testNc;
+    String ncFile = resourceFolder + "raster/netcdf/test.nc";
+
 
     @Before
     public void setup() throws IOException {
@@ -60,6 +63,8 @@ public class RasterTestBase {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         new GeoTiffWriter(bos).write(multiBandRaster, new GeneralParameterValue[]{});
         geoTiff = bos.toByteArray();
+        File file = new File(ncFile);
+        testNc = Files.readAllBytes(file.toPath());
     }
 
     GridCoverage2D createEmptyRaster(int numBands)

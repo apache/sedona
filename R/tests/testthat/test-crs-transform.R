@@ -24,7 +24,7 @@ test_that("crs_transform() works as expected", {
     type = "point"
   ) %>%
     crs_transform("epsg:4326", "epsg:3857")
-  
+
 #  expect_equivalent(
 #    pt_rdd %>%
 #      sdf_register() %>%

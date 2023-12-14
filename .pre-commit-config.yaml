@@ -33,5 +33,17 @@ repos:
       # - id: check-yaml
       - id: detect-private-key
       - id: end-of-file-fixer
-        files: \.(java|md|py|scala)$
+        files: \.(ipynb|java|js|md|py|R|scala|sh|txt|xml|yaml|yml)$
         exclude: ^docs/image|^spark/common/src/test/resources
+      - id: trailing-whitespace
+        files: \.(ipynb|java|py|R|scala|sh|xml|yaml|yml)$
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.38.0
+    hooks:
+      - id: markdownlint
+        name: Run markdownlint
+        description: Check Markdown files with markdownlint
+        entry: markdownlint -c .github/linters/.markdown-lint.yml .
+        exclude: ^\.github/.*$
+        types: [markdown]
+        files: \.(md|mdown|markdown)$

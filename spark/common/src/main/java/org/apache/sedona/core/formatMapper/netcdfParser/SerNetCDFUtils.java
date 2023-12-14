@@ -32,7 +32,6 @@
 package org.apache.sedona.core.formatMapper.netcdfParser;
 
 import ucar.ma2.Array;
-import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
@@ -201,4 +200,5 @@ public class SerNetCDFUtils
 		if (dimSize < 0) {throw new IllegalStateException("Dimension does not exist!!!");}
         return dimSize;
     }
+
 }

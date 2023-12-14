@@ -22,12 +22,14 @@ import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, ExpressionInfo, Literal}
 import org.apache.spark.sql.expressions.Aggregator
-import org.apache.spark.sql.sedona_sql.expressions.collect.{ST_Collect}
+import org.apache.spark.sql.sedona_sql.expressions.collect.ST_Collect
 import org.apache.spark.sql.sedona_sql.expressions.raster._
 import org.apache.spark.sql.sedona_sql.expressions._
+import org.geotools.coverage.grid.GridCoverage2D
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.operation.buffer.BufferParameters
 
+import scala.collection.mutable.ArrayBuffer
 import scala.reflect.ClassTag
 
 object Catalog {
@@ -256,8 +258,12 @@ object Catalog {
     function[RS_AsImage](),
     function[RS_ZonalStats](),
     function[RS_ZonalStatsAll](),
-    function[RS_Resample]()
+    function[RS_Resample](),
+    function[RS_FromNetCDF](),
+    function[RS_NetCDFInfo]()
   )
+
+  val rasterAggregateExpression: Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandData], GridCoverage2D] = new RS_Union_Aggr
 
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(
     new ST_Union_Aggr,

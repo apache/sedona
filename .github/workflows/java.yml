@@ -4,13 +4,29 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'common/**'
+      - 'spark/**'
+      - 'spark-shaded/**'
+      - 'flink/**'
+      - 'flink-shaded/**'
+      - 'snowflake/**'
+      - 'pom.xml'
   pull_request:
     branches:
       - '*'
+    paths:
+      - 'common/**'
+      - 'spark/**'
+      - 'spark-shaded/**'
+      - 'flink/**'
+      - 'flink-shaded/**'
+      - 'snowflake/**'
+      - 'pom.xml'
 
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
-      
+
 jobs:
   build:
 
@@ -34,15 +50,15 @@ jobs:
           - spark: 3.3.0
             scala: 2.12.15
             jdk: '8'
-            skipTests: ''            
+            skipTests: ''
           - spark: 3.2.3
             scala: 2.12.15
             jdk: '8'
-            skipTests: ''            
+            skipTests: ''
           - spark: 3.1.2
             scala: 2.12.15
             jdk: '8'
-            skipTests: ''            
+            skipTests: ''
           - spark: 3.0.3
             scala: 2.12.15
             jdk: '8'
@@ -78,5 +94,5 @@ jobs:
         [ -d "flink-shaded/target/" ] && cp flink-shaded/target/sedona-*.jar staging 2>/dev/null || true
     - uses: actions/upload-artifact@v3
       with:
-        name: generated-jars
+        name: generated-jars ${{ matrix.spark }} ${{ matrix.scala }} ${{ matrix.jdk }}
         path: staging

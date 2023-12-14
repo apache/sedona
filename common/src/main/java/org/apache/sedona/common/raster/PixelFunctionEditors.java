@@ -18,6 +18,8 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.DirectPosition2D;
@@ -61,7 +63,7 @@ public class PixelFunctionEditors {
 
         // making them 0-indexed
         colX--; rowY--;
-      
+
         int iterator = 0;
         for (int j = rowY; j < rowY + height; j++) {
             for (int i = colX; i < colX + width; i++) {
@@ -108,6 +110,15 @@ public class PixelFunctionEditors {
     public static GridCoverage2D setValues(GridCoverage2D raster, int band, Geometry geom, double value, boolean keepNoData) throws FactoryException, TransformException {
         RasterUtils.ensureBand(raster, band);
 
+        Pair<GridCoverage2D, Geometry> pair = RasterUtils.setDefaultCRSAndTransform(raster, geom);
+        raster = pair.getLeft();
+        geom = pair.getRight();
+
+        // checking if the raster contains the geometry
+        if (!RasterPredicates.rsIntersects(raster, geom)) {
+            throw new IllegalArgumentException("The provided geometry is not intersecting the raster. Please provide a geometry that is in the raster's extent.");
+        }
+
         String bandDataType = RasterBandAccessors.getBandType(raster, band);
 
         GridCoverage2D rasterizedGeom;
@@ -140,7 +151,6 @@ public class PixelFunctionEditors {
         }
         // Converting geometry to raster and then iterating through them
         else {
-            // Starting pixel location on the given raster
             int[] pixelLocation = RasterUtils.getGridCoordinatesFromWorld(raster, colX, rowY);
             int x = pixelLocation[0], y = pixelLocation[1];
 

@@ -20,11 +20,12 @@ package org.apache.sedona.sql
 
 import org.apache.sedona.common.raster.MapAlgebra
 import org.apache.sedona.common.utils.RasterUtils
+import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.{Row, SaveMode}
-import org.apache.spark.sql.functions.{col, collect_list, expr}
+import org.apache.spark.sql.functions.{col, collect_list, expr, row_number}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.junit.Assert.{assertEquals, assertNull, assertTrue}
-import org.locationtech.jts.geom.{Coordinate, Geometry, Point}
+import org.locationtech.jts.geom.{Coordinate, Geometry}
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
 import java.awt.image.DataBuffer
@@ -400,6 +401,19 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertTrue(expectedMetadata.equals(actualMetadata))
     }
 
+    it("Passed RS_SetValues with raster and implicit CRS transformation") {
+      val dfFile = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+      val df = dfFile.selectExpr("RS_FromGeoTiff(content) as raster", "ST_GeomFromWKT('POLYGON ((-8682522.873537656 4572703.890837922, -8673439.664183248 4572993.532747675, -8673155.57366801 4563873.2099182755, -8701890.325907696 4562931.7093397, -8682522.873537656 4572703.890837922))', 3857) as geom")
+      val resultDf = df.selectExpr("RS_SetValues(raster, 1, geom, 10, false) as result")
+
+      var actual = resultDf.selectExpr("RS_Value(result, ST_GeomFromWKT('POINT (-77.9146 37.8916)'))").first().get(0)
+      val expected = 10.0
+      assertEquals(expected, actual)
+
+      actual = resultDf.selectExpr("RS_Value(result, ST_GeomFromWKT('POINT (235749.0869 4200557.7397)', 26918))").first().get(0)
+      assertEquals(expected, actual)
+    }
+
     it("Passed RS_SetValues with empty raster") {
       var inputDf = Seq((Seq(1, 1, 1, 0, 0, 0, 1, 2, 3, 3, 5, 6, 7, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0), Seq(11, 12, 13, 14, 15, 16, 17, 18, 19))).toDF("band","newValues")
       var df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as raster", "newValues")
@@ -493,8 +507,14 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
     it("Passed RS_Value with raster") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
-      val result = df.selectExpr("RS_Value(RS_FromGeoTiff(content), ST_Point(-13077301.685, 4002565.802))").first().getDouble(0)
+      val result = df.selectExpr("RS_Value(RS_FromGeoTiff(content), ST_SetSRID(ST_Point(-13077301.685, 4002565.802), 3857))").first().getDouble(0)
       assert(result == 255d)
+    }
+
+    it("Passed RS_Value with raster and implicit CRS transformation") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+      val result = df.selectExpr("RS_Value(RS_FromGeoTiff(content), ST_GeomFromWKT('POINT (-77.9146 37.8916)', 4326))").first().get(0)
+      assert(result == 99d)
     }
 
     it("Passed RS_Value with raster and coordinates") {
@@ -510,7 +530,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
     it("Passed RS_Values with raster") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
-      val result = df.selectExpr("RS_Values(RS_FromGeoTiff(content), array(ST_Point(-13077301.685, 4002565.802), null))").first().getList[Any](0)
+      val result = df.selectExpr("RS_Values(RS_FromGeoTiff(content), array(ST_SetSRID(ST_Point(-13077301.685, 4002565.802), 3857), null))").first().getList[Any](0)
       assert(result.size() == 2)
       assert(result.get(0) == 255d)
       assert(result.get(1) == null)
@@ -523,13 +543,30 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val points = sparkSession.createDataFrame(Seq(("POINT (-13077301.685 4002565.802)",1), ("POINT (0 0)",2)))
         .toDF("point", "id")
-        .withColumn("point", expr("ST_GeomFromText(point)"))
+        .withColumn("point", expr("ST_GeomFromText(point, 3857)"))
         .groupBy().agg(collect_list("point").alias("point"))
 
       val result = df.crossJoin(points).selectExpr("RS_Values(RS_FromGeoTiff(content), point, 1)").first().getList[Any](0)
 
       assert(result.size() == 2)
       assert(result.get(0) == 255d)
+      assert(result.get(1) == null)
+    }
+
+    it("Passed RS_Values with raster, serialized point array and implicit CRS transformation") {
+      // https://issues.apache.org/jira/browse/SEDONA-266
+      // A shuffle changes the internal type for the geometry array (point in this case) from GenericArrayData to UnsafeArrayData.
+      // UnsafeArrayData.array() throws UnsupportedOperationException.
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+      val points = sparkSession.createDataFrame(Seq(("POINT (-77.9146 37.8916)", 1), ("POINT (-100 100)", 2)))
+        .toDF("point", "id")
+        .withColumn("point", expr("ST_GeomFromText(point, 4326)"))
+        .groupBy().agg(collect_list("point").alias("point"))
+
+      val result = df.crossJoin(points).selectExpr("RS_Values(RS_FromGeoTiff(content), point, 1)").first().getList[Any](0)
+
+      assert(result.size() == 2)
+      assert(result.get(0) == 99d)
       assert(result.get(1) == null)
     }
 
@@ -543,10 +580,10 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(result.get(1) == 132.0)
     }
 
-    it("Passed RS_Clip with raster") {
+    it("Passed RS_Clip with implicit geometry transformation") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
         .selectExpr("RS_FromGeoTiff(content) as raster",
-                    "ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))') as geom")
+          "ST_GeomFromWKT('POLYGON ((-8682522.873537656 4572703.890837922, -8673439.664183248 4572993.532747675, -8673155.57366801 4563873.2099182755, -8701890.325907696 4562931.7093397, -8682522.873537656 4572703.890837922))', 3857) as geom")
       val clippedDf = df.selectExpr("RS_Clip(raster, 1, geom, 200, false) as clipped")
 
       val clippedMetadata = df.selectExpr("RS_Metadata(raster)").first().getSeq(0).slice(0, 9)
@@ -555,9 +592,29 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
       var actualValues = clippedDf.selectExpr(
         "RS_Values(clipped, " +
-          "Array(ST_GeomFromWKT('POINT(223802 4.21769e+06)'),ST_GeomFromWKT('POINT(224759 4.20453e+06)')," +
-          "ST_GeomFromWKT('POINT(237201 4.20429e+06)'),ST_GeomFromWKT('POINT(237919 4.20357e+06)')," +
-          "ST_GeomFromWKT('POINT(254668 4.21769e+06)')), 1)"
+          "Array(ST_GeomFromWKT('POINT(223802 4.21769e+06)', 26918),ST_GeomFromWKT('POINT(224759 4.20453e+06)', 26918)," +
+          "ST_GeomFromWKT('POINT(237201 4.20429e+06)', 26918),ST_GeomFromWKT('POINT(237919 4.20357e+06)', 26918)," +
+          "ST_GeomFromWKT('POINT(254668 4.21769e+06)', 26918)), 1)"
+      ).first().get(0)
+      var expectedValues = Seq(null, null, 0.0, 0.0, null)
+      assertTrue(expectedValues.equals(actualValues))
+    }
+
+    it("Passed RS_Clip with raster") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+        .selectExpr("RS_FromGeoTiff(content) as raster",
+                    "ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))', 26918) as geom")
+      val clippedDf = df.selectExpr("RS_Clip(raster, 1, geom, 200, false) as clipped")
+
+      val clippedMetadata = df.selectExpr("RS_Metadata(raster)").first().getSeq(0).slice(0, 9)
+      val originalMetadata = clippedDf.selectExpr("RS_Metadata(clipped)").first().getSeq(0).slice(0, 9)
+      assertTrue(originalMetadata.equals(clippedMetadata))
+
+      var actualValues = clippedDf.selectExpr(
+        "RS_Values(clipped, " +
+          "Array(ST_GeomFromWKT('POINT(223802 4.21769e+06)', 26918),ST_GeomFromWKT('POINT(224759 4.20453e+06)', 26918)," +
+          "ST_GeomFromWKT('POINT(237201 4.20429e+06)', 26918),ST_GeomFromWKT('POINT(237919 4.20357e+06)', 26918)," +
+          "ST_GeomFromWKT('POINT(254668 4.21769e+06)', 26918)), 1)"
       ).first().get(0)
       var expectedValues = Seq(null, null, 0.0, 0.0, null)
       assertTrue(expectedValues.equals(actualValues))
@@ -565,9 +622,9 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val croppedDf = df.selectExpr("RS_Clip(raster, 1, geom, 200, false) as cropped")
       actualValues = croppedDf.selectExpr(
       "RS_Values(cropped, " +
-      "Array(ST_GeomFromWKT('POINT(236842 4.20465e+06)'),ST_GeomFromWKT('POINT(236961 4.20453e+06)')," +
-      "ST_GeomFromWKT('POINT(237201 4.20429e+06)'),ST_GeomFromWKT('POINT(237919 4.20357e+06)')," +
-      "ST_GeomFromWKT('POINT(223802 4.20465e+06)')), 1)"
+      "Array(ST_GeomFromWKT('POINT(236842 4.20465e+06)', 26918),ST_GeomFromWKT('POINT(236961 4.20453e+06)', 26918)," +
+      "ST_GeomFromWKT('POINT(237201 4.20429e+06)', 26918),ST_GeomFromWKT('POINT(237919 4.20357e+06)', 26918)," +
+      "ST_GeomFromWKT('POINT(223802 4.20465e+06)', 26918)), 1)"
       ).first().get(0)
       expectedValues = Seq(0.0, 0.0, 0.0, 0.0, null)
       assertTrue(expectedValues.equals(actualValues))
@@ -877,6 +934,28 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       actual = df.selectExpr("RS_Count(raster)").first().getLong(0)
       expected = 928192
       assertEquals(expected, actual)
+    }
+
+    it("Passed RS_Union_Aggr") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+        .union(sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+          .union(sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")))
+        .withColumn("raster", expr("RS_FromGeoTiff(content) as raster"))
+        .withColumn("index", row_number().over(Window.orderBy("raster")))
+        .selectExpr("raster", "index")
+
+      val dfTest = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+
+      df = df.selectExpr("RS_Union_aggr(raster, index) as rasters")
+
+      val actualBands = df.selectExpr("RS_NumBands(rasters)").first().get(0)
+      val expectedBands = 3
+      assertEquals(expectedBands, actualBands)
+
+      val actualMetadata = df.selectExpr("RS_Metadata(rasters)").first().getSeq(0).slice(0, 9)
+      val expectedMetadata = dfTest.selectExpr("RS_Metadata(raster)").first().getSeq(0).slice(0, 9)
+      assertTrue(expectedMetadata.equals(actualMetadata))
     }
 
     it("Passed RS_ZonalStats") {
@@ -1372,6 +1451,45 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       for (i <- expectedMetadata.indices) {
         assertEquals(expectedMetadata(i), rasterMetadata(i), 1e-6)
       }
+    }
+
+    it("Passed RS_FromNetCDF with NetCDF classic") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/netcdf/test.nc")
+      val rasterDf = df.selectExpr("RS_FromNetCDF(content, 'O3') as raster")
+      val expectedMetadata = Seq(4.9375, 50.9375, 80, 48, 0.125, -0.125, 0, 0, 0, 4)
+      val actualMetadata = rasterDf.selectExpr("RS_Metadata(raster) as metadata").first().getSeq[Double](0)
+
+      for (i <- expectedMetadata.indices) {
+        assertEquals(expectedMetadata(i), actualMetadata(i), 1e-6)
+      }
+
+      val expectedFirstVal = 60.95357131958008
+      val actualFirstVal = rasterDf.selectExpr("RS_Value(raster, 0, 0, 1) as raster").first().getDouble(0)
+      assertEquals(expectedFirstVal, actualFirstVal, 1e-6)
+    }
+
+    it("Passed RS_FromNetCDF with NetCDF classic long form") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/netcdf/test.nc")
+      val rasterDf = df.selectExpr("RS_FromNetCDF(content, 'O3', 'lon', 'lat') as raster")
+      val expectedMetadata = Seq(4.9375, 50.9375, 80, 48, 0.125, -0.125, 0, 0, 0, 4)
+      val actualMetadata = rasterDf.selectExpr("RS_Metadata(raster) as metadata").first().getSeq[Double](0)
+
+      for (i <- expectedMetadata.indices) {
+        assertEquals(expectedMetadata(i), actualMetadata(i), 1e-6)
+      }
+
+      val expectedFirstVal = 60.95357131958008
+      val actualFirstVal = rasterDf.selectExpr("RS_Value(raster, 0, 0, 1) as raster").first().getDouble(0)
+      assertEquals(expectedFirstVal, actualFirstVal, 1e-6)
+    }
+
+    it("Passed RS_NetCDFInfo") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/netcdf/test.nc")
+      val recordInfo = df.selectExpr("RS_NetCDFInfo(content) as record_info").first().getString(0)
+      val expectedRecordInfo = "O3(time=2, z=2, lat=48, lon=80)\n" +
+        "\n" +
+        "NO2(time=2, z=2, lat=48, lon=80)"
+      assertEquals(expectedRecordInfo, recordInfo)
     }
   }
 }
