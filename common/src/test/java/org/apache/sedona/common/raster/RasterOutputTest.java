@@ -50,8 +50,6 @@ public class RasterOutputTest
         GridCoverage2D raster = RasterConstructors.makeNonEmptyRaster(1, "d", 5, 5, 1, 1, 1, 1, 0, 0, 4326, new double[][] {bandData});
 
         String resultRaw = RasterOutputs.asBase64(raster);
-        System.out.println("result base64: "+resultRaw);
-        System.out.println("Types of image writers: " + Arrays.toString(ImageIO.getWriterFormatNames()));
         assertTrue(resultRaw.startsWith("TU0AKgAAAAgADQEAAAMAAAABAAUAAAEBAAMAAAABAAUAAAECA"));
     }
 
