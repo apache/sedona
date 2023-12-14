@@ -44,11 +44,11 @@ public class RasterOutputTest
 
     @Test
     public void testAsBase64Float() throws IOException {
-        double[] bandData = {109, 249, 61, 150, 251, 1, 152, 16, 214, 242, 219, 93, 140, 138, 210, 226, 252, 169, 96, 51, 2, 201, 57, 143, 68};
+        double[] bandData = {202.125, 101.221, 7.468, 27.575, 18.463, 106.103, 80.995, 213.73, 249.73, 147.455, 202.669, 223.379, 6.898, 64.108, 81.585, 51.162, 198.681, 147.957, 14.233, 14.146, 209.691, 121.825, 197.658, 235.804, 129.798};
         GridCoverage2D raster = RasterConstructors.makeNonEmptyRaster(1, "d", 5, 5, 1, 1, 1, 1, 0, 0, 4326, new double[][] {bandData});
 
         String resultRaw = RasterOutputs.asBase64(raster);
-        assertTrue(resultRaw.startsWith("TU0AKgAAAAgADQEAAAMAAAABAAUAAAEBAAMAAAABAAUAAAECAAMAAAABACAAAAEDAAMAAAABA"));
+        assertTrue(resultRaw.startsWith("TU0AKgAAAAgADQEAAAMAAAABAAUAAAEBAAMAAAABAAUAAAECAAMAAAABACAAAAEDAAMAAAAB"));
     }
 
     @Test
