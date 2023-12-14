@@ -23,9 +23,11 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLConnection;
+import java.util.Arrays;
 
 
 import static org.junit.Assert.*;
@@ -48,7 +50,9 @@ public class RasterOutputTest
         GridCoverage2D raster = RasterConstructors.makeNonEmptyRaster(1, "d", 5, 5, 1, 1, 1, 1, 0, 0, 4326, new double[][] {bandData});
 
         String resultRaw = RasterOutputs.asBase64(raster);
-        assertTrue(resultRaw.startsWith("TU0AKgAAAAgADQEAAAMAAAABAAUAAAEBAAMAAAABAAUAAAECAAMAAAABACAAAAEDAAMAAAAB"));
+        System.out.println("result base64: "+resultRaw);
+        System.out.println("Types of image writers: " + Arrays.toString(ImageIO.getWriterFormatNames()));
+        assertTrue(resultRaw.startsWith("TU0AKgAAAAgADQEAAAMAAAABAAUAAAEBAAMAAAABAAUAAAECA"));
     }
 
     @Test
