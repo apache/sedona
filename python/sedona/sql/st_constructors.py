@@ -51,7 +51,7 @@ _call_constructor_function = partial(call_sedona_function, "st_constructors")
 def ST_GeomFromGeoHash(geohash: ColumnOrName, precision: Union[ColumnOrName, int]) -> Column:
     """Generate a geometry column from a geohash column at a specified precision.
 
-    :param geohash: Geohash string column to generate from. 
+    :param geohash: Geohash string column to generate from.
     :type geohash: ColumnOrName
     :param precision: Geohash precision to use, either an integer or an integer column.
     :type precision: Union[ColumnOrName, int]
@@ -261,13 +261,13 @@ def ST_PolygonFromEnvelope(min_x: ColumnOrNameOrNumber, min_y: ColumnOrNameOrNum
 
 
 @validate_argument_types
-def ST_PolygonFromText(coords: ColumnOrName, delimiter: ColumnOrName) -> Column: 
+def ST_PolygonFromText(coords: ColumnOrName, delimiter: ColumnOrName) -> Column:
     """Generate a polygon from a list of coordinates separated by a delimiter stored
     in a string column.
 
     :param coords: String column containing the coordinates.
     :type coords: ColumnOrName
-    :param delimiter: Delimiter separating the coordinates, a string constant must be wrapped as a string literal (using pyspark.sql.functions.lit). 
+    :param delimiter: Delimiter separating the coordinates, a string constant must be wrapped as a string literal (using pyspark.sql.functions.lit).
     :type delimiter: ColumnOrName
     :return: Polygon geometry column generated from the list of coordinates.
     :rtype: Column

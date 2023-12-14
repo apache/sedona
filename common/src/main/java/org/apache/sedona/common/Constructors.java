@@ -50,7 +50,7 @@ public class Constructors {
         }
         int SRID = 0;
         String wkt = ewkt;
-        
+
         int index = ewkt.indexOf("SRID=");
         if (index != -1) {
             int semicolonIndex = ewkt.indexOf(';', index);

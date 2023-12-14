@@ -17,7 +17,7 @@
 
 
 #' Import data from a spatial RDD into a Spark Dataframe.
-#' 
+#'
 #' @description Import data from a spatial RDD (possibly with non-spatial attributes) into a
 #' Spark Dataframe.
 #' * `sdf_register`: method for sparklyr's sdf_register to handle Spatial RDD
@@ -48,7 +48,7 @@
 #'     type = "polygon"
 #'   )
 #'   sdf <- sdf_register(rdd)
-#'   
+#'
 #'   input_location <- "/dev/null" # replace it with the path to your input file
 #'   rdd <- sedona_read_dsv_to_typed_rdd(
 #'     sc,
@@ -71,7 +71,7 @@ sdf_register.spatial_rdd <- function(x, name = NULL) {
 #' @rdname sdf_register.spatial_rdd
 as.spark.dataframe <- function(x, non_spatial_cols = NULL, name = NULL) {
   sc <- spark_connection(x$.jobj)
-  
+
   # Default keep all columns
   if (is.null(non_spatial_cols)) {
     if (!is.null(invoke(x$.jobj, "%>%", list("fieldNames")))) { ## Only if dataset has field names
@@ -82,7 +82,7 @@ as.spark.dataframe <- function(x, non_spatial_cols = NULL, name = NULL) {
   } else {
     stopifnot("non_spatial_cols needs to be a character vector (or NULL, default)" = is.character(non_spatial_cols))
   }
-  
+
   sdf <- invoke_static(
     sc,
     "org.apache.sedona.sql.utils.Adapter",

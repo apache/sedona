@@ -46,23 +46,23 @@ public class testSerNetCDF {
 
 	@Ignore
 	public void test() {
-		NetcdfDataset ncfile = null;		
+		NetcdfDataset ncfile = null;
 		int offset = 2;
 		int increment = 5;
 		double scaleFactor = 0.02;
-		
+
 		String swathName = "MOD_Swath_LST";
 		String geolocationFieldName = "Geolocation_Fields";
 		String dataFieldName = "Data_Fields";
 		String dataVariableName = "LST";
 		ncfile =  SerNetCDFUtils.loadNetCDFDataSet(filename);
-		
+
 		List<Variable> variables = ncfile.getVariables();
 		Array longitude = SerNetCDFUtils.getNetCDF2DArray(ncfile, swathName+"/"+geolocationFieldName+"/Longitude");
 		Array latitude = SerNetCDFUtils.getNetCDF2DArray(ncfile, swathName+"/"+geolocationFieldName+"/Latitude");
 		Array dataVariable = SerNetCDFUtils.getNetCDF2DArray(ncfile, swathName+"/"+dataFieldName+"/"+dataVariableName);
 		int[] geolocationShape = longitude.getShape();
-		
+
 		for (int j = 0; j < geolocationShape[0]; j++) {
 			for (int i = 0; i < geolocationShape[1]; i++) {
 				// We probably need to switch longitude and latitude if needed.
@@ -71,7 +71,7 @@ public class testSerNetCDF {
 				String userData = String.valueOf(SerNetCDFUtils.getDataAsym(dataVariable, j, i, offset, increment));
 			}
 		}
-		    
+
 	}
 
 }

@@ -429,4 +429,3 @@ object st_functions extends DataFrameAPI {
   def ST_IsCollection(geometry: String): Column = wrapExpression[ST_IsCollection](geometry)
 
 }
- 

@@ -494,5 +494,3 @@ class TestPredicateJoin(TestBase):
         range_join_df.show(3)
         assert range_join_df.rdd.getNumPartitions() == 9
         assert range_join_df.count() == 1000
-
-        

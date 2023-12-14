@@ -19,7 +19,7 @@ on:
       - 'spark-shaded/**'
       - 'pom.xml'
       - 'python/**'
-      
+
 jobs:
   build:
     strategy:

@@ -140,7 +140,7 @@ public class LineStringRDDTest
             List<Polygon> result = spatialRDD.indexedRDD.take(1).get(0).query(spatialRDD.boundaryEnvelope);
         }
     }
-    
+
     /*
     @Test
     public void testPolygonUnion()

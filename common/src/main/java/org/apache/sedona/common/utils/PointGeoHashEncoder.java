@@ -40,7 +40,7 @@ public class PointGeoHashEncoder {
         if (currentPrecision >= precision) {
             return geoHash;
         }
-        
+
         BBox updatedBbox = null;
         int updatedCh = -1;
         if (isEven) {

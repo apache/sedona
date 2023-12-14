@@ -154,7 +154,7 @@ public class RasterConstructors
         }
 
         Envelope2D bound = null;
-        
+
         if (useGeometryExtent) {
             bound = JTS.getEnvelope2D(geom.getEnvelopeInternal(), raster.getCoordinateReferenceSystem2D());
         } else {
@@ -188,7 +188,7 @@ public class RasterConstructors
         WritableRaster writableRaster = RasterFactory.createBandedRaster(RasterUtils.getDataTypeCode(pixelType), width, height, 1, null);
         double [] samples = RasterUtils.getRaster(rasterized.getRenderedImage()).getSamples(0, 0, width, height, 0, (double[]) null);
         writableRaster.setSamples(0, 0, width, height, 0, samples);
-        
+
         List<Object> objects = new ArrayList<>();
         objects.add(writableRaster);
         objects.add(rasterized);

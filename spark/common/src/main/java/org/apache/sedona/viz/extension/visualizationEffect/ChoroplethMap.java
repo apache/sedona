@@ -107,12 +107,12 @@ public class ChoroplethMap
         super(resolutionX, resolutionY, datasetBoundary, ColorizeOption.NORMAL, reverseSpatialCoordinate,
                 partitionX, partitionY, false, parallelRenderImage, generateVectorImage);
     }
-	
+
 	/*
 	@Override
 	protected JavaPairRDD<Integer, Color> GenerateColorMatrix()
 	{
-		//This Color Matrix version controls some too high pixel weights by dividing the max weight to 1/4. 
+		//This Color Matrix version controls some too high pixel weights by dividing the max weight to 1/4.
 		logger.debug("[VisualizationOperator][GenerateColorMatrix][Start]");
 		final long maxWeight = this.distributedCountMatrix.max(new PixelCountComparator())._2;
 		final long minWeight = 0;

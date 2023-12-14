@@ -2250,5 +2250,5 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
 
   }
-  
+
 }

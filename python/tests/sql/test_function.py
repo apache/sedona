@@ -1188,7 +1188,7 @@ class TestPredicateJoin(TestBase):
 
     def test_st_h3_kring(self):
         df = self.spark.sql("""
-        SELECT 
+        SELECT
             ST_H3KRing(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], 1, true) exactRings,
             ST_H3KRing(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], 1, false) allRings,
             ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true) original_cells
