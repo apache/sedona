@@ -43,6 +43,15 @@ public class RasterOutputTest
     }
 
     @Test
+    public void testAsBase64Float() throws IOException {
+        double[] bandData = {109, 249, 61, 150, 251, 1, 152, 16, 214, 242, 219, 93, 140, 138, 210, 226, 252, 169, 96, 51, 2, 201, 57, 143, 68};
+        GridCoverage2D raster = RasterConstructors.makeNonEmptyRaster(1, "d", 5, 5, 1, 1, 1, 1, 0, 0, 4326, new double[][] {bandData});
+
+        String resultRaw = RasterOutputs.asBase64(raster);
+        assertTrue(resultRaw.startsWith("TU0AKgAAAAgADQEAAAMAAAABAAUAAAEBAAMAAAABAAUAAAECAAMAAAABACAAAAEDAAMAAAABA"));
+    }
+
+    @Test
     public void testAsPNG() throws IOException, FactoryException {
         String dirPath = System.getProperty("user.dir") + "/target/testAsPNGFunction/";
         new File(dirPath).mkdirs();
