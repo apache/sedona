@@ -465,4 +465,3 @@ sc %>% spark_disconnect()
 spark_disconnect_all()
 rm(sc)
 ```
-

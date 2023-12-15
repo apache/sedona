@@ -33,8 +33,7 @@ repos:
       # - id: check-yaml
       - id: detect-private-key
       - id: end-of-file-fixer
-        files: \.(ipynb|java|js|md|py|R|scala|sh|txt|xml|yaml|yml)$
-        exclude: ^docs/image|^spark/common/src/test/resources
+        exclude: \.svg$|^docs/image|^spark/common/src/test/resources
       - id: trailing-whitespace
         files: \.(ipynb|java|py|R|scala|sh|xml|yaml|yml)$
   - repo: https://github.com/igorshubovych/markdownlint-cli
