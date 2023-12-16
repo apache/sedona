@@ -23,9 +23,11 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLConnection;
+import java.util.Arrays;
 
 
 import static org.junit.Assert.*;
@@ -40,6 +42,15 @@ public class RasterOutputTest
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
         String resultRaw = RasterOutputs.asBase64(raster);
         assertTrue(resultRaw.startsWith("iVBORw0KGgoAAAANSUhEUgAABaAAAALQCAMAAABR+ye1AAADAFBMVEXE9/W48vOq7PGa5u6L3"));
+    }
+
+    @Test
+    public void testAsBase64Float() throws IOException {
+        double[] bandData = {202.125, 101.221, 7.468, 27.575, 18.463, 106.103, 80.995, 213.73, 249.73, 147.455, 202.669, 223.379, 6.898, 64.108, 81.585, 51.162, 198.681, 147.957, 14.233, 14.146, 209.691, 121.825, 197.658, 235.804, 129.798};
+        GridCoverage2D raster = RasterConstructors.makeNonEmptyRaster(1, "d", 5, 5, 1, 1, 1, 1, 0, 0, 4326, new double[][] {bandData});
+
+        String resultRaw = RasterOutputs.asBase64(raster);
+        assertTrue(resultRaw.startsWith("TU0AKgAAAAgADQEAAAMAAAABAAUAAAEBAAMAAAABAAUAAAECA"));
     }
 
     @Test

@@ -135,7 +135,11 @@ public class RasterOutputs
     public static String asBase64(GridCoverage2D raster) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         RenderedImage renderedImage = raster.getRenderedImage();
-        ImageIO.write(renderedImage, "png", out);
+        if (RasterUtils.isDataTypeIntegral(RasterUtils.getDataTypeCode(RasterBandAccessors.getBandType(raster)))) {
+            ImageIO.write(renderedImage, "png", out);
+        } else {
+            ImageIO.write(renderedImage, "tiff", out);
+        }
         return Base64.getEncoder().encodeToString(out.toByteArray());
     }
 
