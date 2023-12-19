@@ -133,16 +133,10 @@ public class MapAlgebra
         int rasterDataType = pixelType != null? RasterUtils.getDataTypeCode(pixelType) : renderedImage.getSampleModel().getDataType();
         int width = renderedImage.getWidth();
         int height = renderedImage.getHeight();
-        ColorModel originalColorModel = renderedImage.getColorModel();
         // ImageUtils.createConstantImage is slow, manually constructing a buffered image proved to be faster.
         // It also eliminates the data-copying overhead when converting raster data types after running jiffle script.
         WritableRaster resultRaster = RasterFactory.createBandedRaster(DataBuffer.TYPE_DOUBLE, width, height, 1, null);
-        ColorModel cm;
-        if (originalColorModel.isCompatibleRaster(resultRaster)) {
-            cm = originalColorModel;
-        }else {
-            cm = PlanarImage.createColorModel(resultRaster.getSampleModel());
-        }
+        ColorModel cm = fetchColorModel(renderedImage.getColorModel(), resultRaster);
         WritableRenderedImage resultImage = new BufferedImage(cm, resultRaster, false, null);
         try {
             String prevScript = previousScript.get();
@@ -174,6 +168,82 @@ public class MapAlgebra
             } else {
                 // build a new GridCoverage2D from the resultImage
                 return RasterUtils.clone(resultImage, null, gridCoverage2D, noDataValue, false);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to run map algebra", e);
+        }
+    }
+
+    private static ColorModel fetchColorModel(ColorModel originalColorModel, WritableRaster resultRaster) {
+        if (originalColorModel.isCompatibleRaster(resultRaster)) {
+            return originalColorModel;
+        }else {
+            return PlanarImage.createColorModel(resultRaster.getSampleModel());
+        }
+    }
+
+    public static GridCoverage2D mapAlgebra(GridCoverage2D rast0, GridCoverage2D rast1, String pixelType, String script, Double noDataValue) {
+        if (rast0 == null || rast1 == null || script == null) {
+            return null;
+        }
+        RasterUtils.isRasterSameShape(rast0, rast1);
+
+        RenderedImage renderedImageRast0 = rast0.getRenderedImage();
+        int rasterDataType = pixelType != null ? RasterUtils.getDataTypeCode(pixelType) : renderedImageRast0.getSampleModel().getDataType();
+        int width = renderedImageRast0.getWidth();
+        int height = renderedImageRast0.getHeight();
+        // ImageUtils.createConstantImage is slow, manually constructing a buffered image proved to be faster.
+        // It also eliminates the data-copying overhead when converting raster data types after running jiffle script.
+        WritableRaster resultRaster = RasterFactory.createBandedRaster(DataBuffer.TYPE_DOUBLE, width, height, 1, null);
+
+        ColorModel cmRast0 = fetchColorModel(renderedImageRast0.getColorModel(), resultRaster);
+        RenderedImage renderedImageRast1 = rast1.getRenderedImage();
+        ColorModel cmRast1 = fetchColorModel(renderedImageRast1.getColorModel(), resultRaster);
+
+        // todo temp, figure out if needed
+        if (!cmRast0.equals(cmRast1)) {
+            throw new IllegalArgumentException("Color Model did not match. Provide rasters that has the same properties.");
+        }
+
+        WritableRenderedImage resultImage = new BufferedImage(cmRast0, resultRaster, false, null);
+        try {
+            String prevScript = previousScript.get();
+            JiffleDirectRuntime prevRuntime = previousRuntime.get();
+            JiffleDirectRuntime runtime;
+            if (prevRuntime != null && script.equals(prevScript)) {
+                // Reuse the runtime to avoid recompiling the script
+                runtime = prevRuntime;
+                runtime.setSourceImage("rast0", renderedImageRast0);
+                runtime.setSourceImage("rast1", renderedImageRast1);
+                runtime.setDestinationImage("out", resultImage);
+                runtime.setDefaultBounds();
+            } else {
+                JiffleBuilder builder = new JiffleBuilder();
+                runtime = builder.script(script)
+                        .source("rast0", renderedImageRast0)
+                        .source("rast1", renderedImageRast1)
+                        .dest("out", resultImage)
+                        .getRuntime();
+                previousScript.set(script);
+                previousRuntime.set(runtime);
+            }
+
+            // TODO is it worth to deduplicate code from 236-246 in this function
+            // TODO and code from 160-171?
+
+            runtime.evaluateAll(null);
+
+            // If pixelType does not match with the data type of the result image (should be double since Jiffle only supports
+            // double destination image), we need to convert the resultImage to the specified pixel type.
+            if (rasterDataType != resultImage.getSampleModel().getDataType()) {
+                // Copy the resultImage to a new raster with the specified pixel type
+                WritableRaster convertedRaster = RasterFactory.createBandedRaster(rasterDataType, width, height, 1, null);
+                double[] samples = resultRaster.getSamples(0, 0, width, height, 0, (double[]) null);
+                convertedRaster.setSamples(0, 0, width, height, 0, samples);
+                return RasterUtils.clone(convertedRaster, null, rast0, noDataValue, false);
+            } else {
+                // build a new GridCoverage2D from the resultImage
+                return RasterUtils.clone(resultImage, null, rast0, noDataValue, false);
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to run map algebra", e);

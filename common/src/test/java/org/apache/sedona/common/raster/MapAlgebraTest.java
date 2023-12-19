@@ -437,6 +437,68 @@ public class MapAlgebraTest extends RasterTestBase
     }
 
     @Test
+    public void testMapAlgebra2Rasters() throws FactoryException {
+        Random random = new Random();
+        String[] pixelTypes = {null, "b", "i", "s", "us", "f", "d"};
+        for (String pixelType : pixelTypes) {
+            int width = random.nextInt(100) + 10;
+            int height = random.nextInt(100) + 10;
+            testMapAlgebra2Rasters(width, height, pixelType, null);
+            testMapAlgebra2Rasters(width, height, pixelType, 100.0);
+        }
+    }
+
+    private void testMapAlgebra2Rasters(int width, int height, String pixelType, Double noDataValue) throws FactoryException {
+        GridCoverage2D rast0 = RasterConstructors.makeEmptyRaster(1, "b", width, height, 10, 20, 1);
+        GridCoverage2D rast1 = RasterConstructors.makeEmptyRaster(1, "b", width, height, 10, 20, 1);
+        double[] band1 = new double[width * height];
+        double[] band2 = new double[width * height];
+        for (int i = 0; i < band1.length; i++) {
+            band1[i] = Math.random() * 10;
+            band2[i] = Math.random() * 10;
+        }
+        rast0 = MapAlgebra.addBandFromArray(rast0, band1, 1);
+        rast1 = MapAlgebra.addBandFromArray(rast1, band2, 1);
+        GridCoverage2D result = MapAlgebra.mapAlgebra(rast0, rast1, pixelType, "out = (rast0[0] + rast1[0]) * 0.4;", noDataValue);
+        double actualNoDataValue = RasterUtils.getNoDataValue(result.getSampleDimension(0));
+        if (noDataValue != null) {
+            Assert.assertEquals(noDataValue, actualNoDataValue, 1e-9);
+        } else {
+            Assert.assertTrue(Double.isNaN(actualNoDataValue));
+        }
+
+        int resultDataType = result.getRenderedImage().getSampleModel().getDataType();
+        int expectedDataType;
+        if (pixelType != null) {
+            expectedDataType = RasterUtils.getDataTypeCode(pixelType);
+        } else {
+            expectedDataType = rast0.getRenderedImage().getSampleModel().getDataType();
+        }
+        Assert.assertEquals(expectedDataType, resultDataType);
+
+        Assert.assertEquals(rast0.getGridGeometry().getGridToCRS2D(), result.getGridGeometry().getGridToCRS2D());
+        Assert.assertEquals(rast1.getGridGeometry().getGridToCRS2D(), result.getGridGeometry().getGridToCRS2D());
+        band1 = MapAlgebra.bandAsArray(rast0, 1);
+        band2 = MapAlgebra.bandAsArray(rast1, 1);
+        double[] bandResult = MapAlgebra.bandAsArray(result, 1);
+        Assert.assertEquals(band1.length, bandResult.length);
+        for (int i = 0; i < band1.length; i++) {
+            double expected = (band1[i] + band2[i]) * 0.4;
+            double actual = bandResult[i];
+            switch (resultDataType) {
+                case DataBuffer.TYPE_BYTE:
+                case DataBuffer.TYPE_SHORT:
+                case DataBuffer.TYPE_USHORT:
+                case DataBuffer.TYPE_INT:
+                    Assert.assertEquals((int) expected, (int) actual);
+                    break;
+                default:
+                    Assert.assertEquals(expected, actual, 1e-3);
+            }
+        }
+    }
+
+    @Test
     public void testMapAlgebra() throws FactoryException {
         Random random = new Random();
         String[] pixelTypes = {null, "b", "i", "s", "us", "f", "d"};
