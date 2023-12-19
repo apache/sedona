@@ -1,41 +1,34 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+/**
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-import org.apache.log4j.{Level, Logger}
+import Main.resourceFolder
 import org.apache.sedona.core.enums.{GridType, IndexType}
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
 import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialRDD.{CircleRDD, SpatialRDD}
-import org.apache.sedona.spark.SedonaContext
 import org.apache.sedona.sql.utils.Adapter
-import org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 import org.apache.sedona.viz.core.{ImageGenerator, RasterOverlayOperator}
 import org.apache.sedona.viz.extension.visualizationEffect.{HeatMap, ScatterPlot}
 import org.apache.sedona.viz.utils.ImageType
+import org.apache.spark.sql.SparkSession
 import org.locationtech.jts.geom.Geometry
 
 import java.awt.Color
 
 
-object ScalaExample extends App{
-
-	val resourceFolder = System.getProperty("user.dir")+"/src/test/resources/"
+object RddExample {
 
   // Data link (in shapefile): https://geo.nyu.edu/catalog/nyu_2451_34514
   val nycArealandmarkShapefileLocation = resourceFolder+"nyc-area-landmark-shapefile"
@@ -45,23 +38,7 @@ object ScalaExample extends App{
 
   val colocationMapLocation = System.getProperty("user.dir")+"/colocationMap"
 
-  Logger.getLogger("org").setLevel(Level.WARN)
-  Logger.getLogger("akka").setLevel(Level.WARN)
-
-  val config = SedonaContext.builder()
-    .config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
-    .master("local[*]") // Delete this if run in cluster mode
-    .appName("sedona-analysis") // Change this to a proper name
-    .getOrCreate()
-  val sedona = SedonaContext.create(config)
-
-  visualizeSpatialColocation()
-  calculateSpatialColocation()
-
-  System.out.println("Finished Sedona Spatial Analysis Example")
-
-
-  def visualizeSpatialColocation(): Unit =
+  def visualizeSpatialColocation(sedona: SparkSession): Unit =
   {
     // Prepare NYC area landmarks which includes airports, museums, colleges, hospitals
     var arealmRDD = ShapefileReader.readToPolygonRDD(sedona.sparkContext, nycArealandmarkShapefileLocation)
@@ -98,7 +75,7 @@ object ScalaExample extends App{
     imageGenerator.SaveRasterImageAsLocalFile(overlayOperator.backRasterImage, colocationMapLocation, ImageType.PNG)
   }
 
-  def calculateSpatialColocation(): Unit =
+  def calculateSpatialColocation(sedona: SparkSession): Unit =
   {
 
     // Prepare NYC area landmarks which includes airports, museums, colleges, hospitals
@@ -154,13 +131,13 @@ object ScalaExample extends App{
 
       var bufferedArealmRDD = new CircleRDD(arealmRDD,currentDistance)
       bufferedArealmRDD.spatialPartitioning(tripRDD.getPartitioner)
-//    Run Sedona Distance Join Query
+      //    Run Sedona Distance Join Query
       var adjacentMatrix = JoinQuery.DistanceJoinQueryFlat(tripRDD, bufferedArealmRDD,true,true)
 
-//      Uncomment the following two lines if you want to see what the join result looks like in SparkSQL
-//      import scala.collection.JavaConversions._
-//      var adjacentMatrixDf = Adapter.toDf(adjacentMatrix, arealmRDD.fieldNames, tripRDD.fieldNames, sparkSession)
-//      adjacentMatrixDf.show()
+      //      Uncomment the following two lines if you want to see what the join result looks like in SparkSQL
+      //      import scala.collection.JavaConversions._
+      //      var adjacentMatrixDf = Adapter.toDf(adjacentMatrix, arealmRDD.fieldNames, tripRDD.fieldNames, sparkSession)
+      //      adjacentMatrixDf.show()
 
       var observedK = adjacentMatrix.count()*area*1.0/(arealmRDD.approximateTotalCount*tripRDD.approximateTotalCount)
       var observedL = Math.sqrt(observedK/Math.PI)
@@ -171,5 +148,4 @@ object ScalaExample extends App{
       println(s"""$currentDistance,$observedL,$colocationDifference,$colocationStatus""")
     }
   }
-
 }
