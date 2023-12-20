@@ -7,12 +7,34 @@ Apache Sedona provides two ways to perform map algebra operations:
 1. Using the `RS_MapAlgebra` function.
 2. Using `RS_BandAsArray` and array based map algebra functions, such as `RS_Add`, `RS_Multiply`, etc.
 
-Generally, the `RS_MapAlgebra` function is more flexible and can be used to perform more complex operations. The `RS_MapAlgebra(rast, pixelType, script, [noDataValue])` function takes three to four arguments:
+Generally, the `RS_MapAlgebra` function is more flexible and can be used to perform more complex operations. The function takes three to four arguments:
+
+```sql
+RS_MapAlgebra(rast: Raster, pixelType: String, script: String, [noDataValue: Double])
+```
 
 * `rast`: The raster to apply the map algebra expression to.
 * `pixelType`: The data type of the output raster. This can be one of `D` (double), `F` (float), `I` (integer), `S` (short), `US` (unsigned short) or `B` (byte). If specified `NULL`, the output raster will have the same data type as the input raster.
-* `script`: The map algebra script.
+* `script`: The map algebra script. [Refer here for more details on the format.](#:~:text=The Jiffle script is,current output pixel value)
 * `noDataValue`: (Optional) The nodata value of the output raster.
+
+As of version `v1.5.1`, the `RS_MapAlgebra` function allows two raster column inputs, with multi-band rasters supported. The function accepts 5 parameters:
+
+```sql
+RS_MapAlgebra(rast0: Raster, rast1: Raster, pixelType: String, script: String, noDataValue: Double)
+```
+
+* `rast0`: The first raster to apply the map algebra expression to.
+* `rast1`: The second raster to apply the map algebra expression to.
+* `pixelType`: The data type of the output raster. This can be one of `D` (double), `F` (float), `I` (integer), `S` (short), `US` (unsigned short) or `B` (byte). If specified `NULL`, the output raster will have the same data type as the input raster.
+* `script`: The map algebra script. [Refer here for more details on the format.](#:~:text=The Jiffle script is,current output pixel value)
+* `noDataValue`: (Not optional) The nodata value of the output raster, `null` is allowed.
+
+Spark SQL Example for two raster input `RS_MapAlgebra`:
+
+```sql
+RS_MapAlgebra(rast0, rast1, 'D', 'out = rast0[0] * 0.5 + rast1[0] * 0.5;', null)
+```
 
 `RS_MapAlgebra` also has good performance, since it is backed by [Jiffle](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle) and can be compiled to Java bytecode for
 execution. We'll demonstrate both approaches to implementing commonly used map algebra operations.
