@@ -1296,6 +1296,58 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals("UNSIGNED_8BITS", result)
     }
 
+    it("Passed RS_MapAlgebra with two raster columns") {
+      val df1 = sparkSession.read.format("binaryFile")
+        .option("recursiveFileLookup", "true")
+        .option("pathGlobFilter", "*.tif*")
+        .load(resourceFolder + "raster")
+        .selectExpr("path", "RS_FromGeoTiff(content) as rast0")
+      val df2 = sparkSession.read.format("binaryFile")
+        .option("recursiveFileLookup", "true")
+        .option("pathGlobFilter", "*.tif*")
+        .load(resourceFolder + "raster")
+        .selectExpr("path", "RS_FromGeoTiff(content) as rast1")
+        .withColumnRenamed("path", "path1")
+      val df = df1.join(df2, df1("path") === df2("path1"), "inner").select("rast0", "rast1", "path")
+      Seq(null, "b", "s", "i", "f", "d").foreach { pixelType =>
+        val pixelTypeExpr = if (pixelType == null) null else s"'$pixelType'"
+        val dfResult = df.withColumn("rast_2", expr(s"RS_MapAlgebra(rast0, rast1, $pixelTypeExpr, 'out[0] = rast0[0] * 0.5 + rast1[0] * 0.5;', null)"))
+          .select("path", "rast0", "rast1", "rast_2")
+        dfResult.collect().foreach { row =>
+          val rast0 = row.getAs[GridCoverage2D]("rast0")
+          val rast1 = row.getAs[GridCoverage2D]("rast1")
+          val resultRaster = row.getAs[GridCoverage2D]("rast_2")
+          assert(rast0.getGridGeometry.getGridToCRS2D == resultRaster.getGridGeometry.getGridToCRS2D)
+          val dataType = pixelType match {
+            case null => rast0.getRenderedImage.getSampleModel.getDataType
+            case _ => RasterUtils.getDataTypeCode(pixelType)
+          }
+          assert(resultRaster.getRenderedImage.getSampleModel.getDataType == dataType)
+          val noDataValue = RasterUtils.getNoDataValue(resultRaster.getSampleDimension(0))
+          assert(noDataValue.isNaN)
+          val band0 = MapAlgebra.bandAsArray(rast0, 1)
+          val band1 = MapAlgebra.bandAsArray(rast1, 1)
+          val bandResult = MapAlgebra.bandAsArray(resultRaster, 1)
+          assert(band0.size == bandResult.size)
+          for (i <- band0.indices) {
+            pixelType match {
+              case "b" => assert(((band0(i) * 0.5 + band1(i) * 0.5).toInt & 0xFF) == bandResult(i).toInt)
+              case "s" => assert((band0(i) * 0.5 + band1(i) * 0.5).toShort == bandResult(i))
+              case "i" | null => assert((band0(i) * 0.5 + band1(i) * 0.5).toInt == bandResult(i))
+              case "f" | "d" =>
+                if (band0(i) != 0) {
+                  assert((band0(i) * 0.5 + band1(i) * 0.5) == bandResult(i))
+                } else {
+                  // If the source image has NoDataContainer.GC_NODATA property, Jiffle may convert nodata values in
+                  // source raster to NaN.
+                  assert(bandResult(i) == 0 || bandResult(i).isNaN)
+                }
+            }
+          }
+        }
+      }
+    }
+
     it("Passed RS_MapAlgebra") {
       val df = sparkSession.read.format("binaryFile")
         .option("recursiveFileLookup", "true")

@@ -193,7 +193,9 @@ case class RS_BandAsArray(inputExpressions: Seq[Expression]) extends InferredExp
 }
 
 case class RS_MapAlgebra(inputExpressions: Seq[Expression])
-  extends InferredExpression(nullTolerantInferrableFunction4(MapAlgebra.mapAlgebra)) {
+  extends InferredExpression(nullTolerantInferrableFunction3(MapAlgebra.mapAlgebra),
+    nullTolerantInferrableFunction4(MapAlgebra.mapAlgebra),
+    nullTolerantInferrableFunction5(MapAlgebra.mapAlgebra)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
