@@ -174,6 +174,10 @@ public class MapAlgebra
         }
     }
 
+    public static GridCoverage2D mapAlgebra(GridCoverage2D gridCoverage2D, String pixelType, String script) {
+        return mapAlgebra(gridCoverage2D, pixelType, script, null);
+    }
+
     private static ColorModel fetchColorModel(ColorModel originalColorModel, WritableRaster resultRaster) {
         if (originalColorModel.isCompatibleRaster(resultRaster)) {
             return originalColorModel;
