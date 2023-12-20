@@ -1297,18 +1297,14 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_MapAlgebra with two raster columns") {
-      val df1 = sparkSession.read.format("binaryFile")
+      var df = sparkSession.read.format("binaryFile")
         .option("recursiveFileLookup", "true")
         .option("pathGlobFilter", "*.tif*")
         .load(resourceFolder + "raster")
-        .selectExpr("path", "RS_FromGeoTiff(content) as rast0")
-      val df2 = sparkSession.read.format("binaryFile")
-        .option("recursiveFileLookup", "true")
-        .option("pathGlobFilter", "*.tif*")
-        .load(resourceFolder + "raster")
-        .selectExpr("path", "RS_FromGeoTiff(content) as rast1")
-        .withColumnRenamed("path", "path1")
-      val df = df1.join(df2, df1("path") === df2("path1"), "inner").select("rast0", "rast1", "path")
+        .selectExpr("path", "RS_FromGeoTiff(content) as rast")
+      df = df.as("r1")
+        .join(df.as("r2"), col("r1.path") === col("r2.path"), "inner")
+        .select(col("r1.rast").alias("rast0"), col("r2.rast").alias("rast1"), col("r1.path"))
       Seq(null, "b", "s", "i", "f", "d").foreach { pixelType =>
         val pixelTypeExpr = if (pixelType == null) null else s"'$pixelType'"
         val dfResult = df.withColumn("rast_2", expr(s"RS_MapAlgebra(rast0, rast1, $pixelTypeExpr, 'out[0] = rast0[0] * 0.5 + rast1[0] * 0.5;', null)"))
