@@ -502,7 +502,7 @@ public class MapAlgebraTest extends RasterTestBase
                     Assert.assertEquals((int) expected, (int) actual);
                     break;
                 default:
-                    Assert.assertEquals(expected, actual, 1e-3);
+                    Assert.assertEquals(expected, actual, FP_TOLERANCE);
             }
         }
     }
@@ -551,7 +551,7 @@ public class MapAlgebraTest extends RasterTestBase
                     Assert.assertEquals((int) expected, (int) actual);
                     break;
                 default:
-                    Assert.assertEquals(expected, actual, 1e-3);
+                    Assert.assertEquals(expected, actual, FP_TOLERANCE);
             }
         }
     }
