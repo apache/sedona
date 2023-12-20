@@ -204,7 +204,6 @@ public class MapAlgebra
         RenderedImage renderedImageRast1 = rast1.getRenderedImage();
         ColorModel cmRast1 = fetchColorModel(renderedImageRast1.getColorModel(), resultRaster);
 
-        // todo temp, figure out if needed
         if (!cmRast0.equals(cmRast1)) {
             throw new IllegalArgumentException("Color Model did not match. Provide rasters that has the same properties.");
         }
@@ -231,9 +230,6 @@ public class MapAlgebra
                 previousScript.set(script);
                 previousRuntime.set(runtime);
             }
-
-            // TODO is it worth to deduplicate code from 236-246 in this function
-            // TODO and code from 160-171?
 
             runtime.evaluateAll(null);
 
