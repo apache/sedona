@@ -58,5 +58,5 @@ jobs:
         SPARK_VERSION: ${{ matrix.spark }}
         SPARK_COMPAT_VERSION: ${{ matrix.spark-compat }}
         SEDONA_VERSION: ${{ matrix.sedona }}
-      run: (cd examples/spark-sql;mvn clean install -Dspark.version=${SPARK_VERSION} -Dspark.compat.version=${SPARK_COMPAT_VERSION} -Dsedona.version=${SEDONA_VERSION};java -jar target/sedona-spark-example-1.0.0.jar)
-    - run: (cd examples/flink-sql;mvn clean install -D;java -jar target/sedona-flink-example-1.0.0.jar)
+      run: (echo ${SPARK_VERSION}; echo ${SPARK_COMPAT_VERSION}; echo ${SEDONA_VERSION};cd examples/spark-sql;mvn clean install -Dspark.version=${SPARK_VERSION} -Dspark.compat.version=${SPARK_COMPAT_VERSION} -Dsedona.version=${SEDONA_VERSION};java -jar target/sedona-spark-example-1.0.0.jar)
+    - run: (cd examples/flink-sql;mvn clean install;java -jar target/sedona-flink-example-1.0.0.jar)
