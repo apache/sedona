@@ -117,6 +117,7 @@ theme:
     primary: 'deep orange'
     accent: 'green'
   favicon: image/sedona_logo_symbol.png
+  logo: image/sedona_logo_symbol_white.svg
   icon:
     logo: fontawesome/solid/earth-americas
     repo: fontawesome/brands/github
