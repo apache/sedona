@@ -67,7 +67,7 @@ public class SedonaConf
     public SedonaConf(RuntimeConfig runtimeConfig)
     {
         this.useIndex = Boolean.parseBoolean(runtimeConfig.get("sedona.global.index", "true"));
-        this.indexType = IndexType.getIndexType(runtimeConfig.get("sedona.global.indextype", "quadtree"));
+        this.indexType = IndexType.getIndexType(runtimeConfig.get("sedona.global.indextype", "rtree"));
         this.joinApproximateTotalCount = Long.parseLong(runtimeConfig.get("sedona.join.approxcount", "-1"));
         String[] boundaryString = runtimeConfig.get("sedona.join.boundary", "0,0,0,0").split(",");
         this.datasetBoundary = new Envelope(Double.parseDouble(boundaryString[0]), Double.parseDouble(boundaryString[1]),
