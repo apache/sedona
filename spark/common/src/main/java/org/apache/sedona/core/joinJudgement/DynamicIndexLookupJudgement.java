@@ -123,7 +123,7 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
             if (index instanceof Quadtree && (envelope.getWidth() == 0 || envelope.getHeight() == 0)) {
                 // Quadtree works poorly with envelopes with 0 extent. Such envelopes are usually obtained from
                 // points. We expand the envelope by a small amount to avoid this problem.
-                envelope.expandBy(1e-6);
+                envelope.expandBy(1e-3);
             }
             index.insert(envelope, geometry);
             count++;
