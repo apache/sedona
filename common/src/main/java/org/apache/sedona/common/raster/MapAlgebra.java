@@ -202,11 +202,6 @@ public class MapAlgebra
 
         ColorModel cmRast0 = fetchColorModel(renderedImageRast0.getColorModel(), resultRaster);
         RenderedImage renderedImageRast1 = rast1.getRenderedImage();
-        ColorModel cmRast1 = fetchColorModel(renderedImageRast1.getColorModel(), resultRaster);
-
-        if (!cmRast0.equals(cmRast1)) {
-            throw new IllegalArgumentException("Color Model did not match. Provide rasters that has the same properties.");
-        }
 
         WritableRenderedImage resultImage = new BufferedImage(cmRast0, resultRaster, false, null);
         try {
