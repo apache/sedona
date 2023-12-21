@@ -605,4 +605,20 @@ public class RasterUtils {
     public static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, Number[] bandValues) {
         return copyRasterAndReplaceBand(gridCoverage2D, bandIndex, bandValues, null, false);
     }
+
+    /**
+     * Check if the two rasters are of the same shape
+     * @param raster1
+     * @param raster2
+     */
+    public static void isRasterSameShape(GridCoverage2D raster1, GridCoverage2D raster2) {
+        int width1 = RasterAccessors.getWidth(raster1), height1 = RasterAccessors.getHeight(raster1);
+        int width2 = RasterAccessors.getWidth(raster2), height2 = RasterAccessors.getHeight(raster2);
+
+        if (width1 != width2 && height1 != height2) {
+            throw new IllegalArgumentException(String.format("Provided rasters are not of same shape. \n" +
+                    "First raster having width of %d and height of %d. \n" +
+                    "Second raster having width of %d and height of %d", width1, height1, width2, height2));
+        }
+    }
 }

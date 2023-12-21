@@ -20,7 +20,6 @@ package org.apache.sedona.common.raster;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -99,7 +98,7 @@ public class RasterBandEditors {
     public static GridCoverage2D addBand(GridCoverage2D toRaster, GridCoverage2D fromRaster, int fromBand, int toRasterIndex) {
         RasterUtils.ensureBand(fromRaster, fromBand);
         ensureBandAppend(toRaster, toRasterIndex);
-        isRasterSameShape(toRaster, fromRaster);
+        RasterUtils.isRasterSameShape(toRaster, fromRaster);
 
         int width = RasterAccessors.getWidth(toRaster), height = RasterAccessors.getHeight(toRaster);
 
@@ -157,22 +156,6 @@ public class RasterBandEditors {
     private static void ensureBandAppend(GridCoverage2D raster, int band) {
         if (band < 1 || band > RasterAccessors.numBands(raster) + 1) {
             throw new IllegalArgumentException(String.format("Provided band index %d is not present in the raster", band));
-        }
-    }
-
-    /**
-     * Check if the two rasters are of the same shape
-     * @param raster1
-     * @param raster2
-     */
-    private static void isRasterSameShape(GridCoverage2D raster1, GridCoverage2D raster2) {
-        int width1 = RasterAccessors.getWidth(raster1), height1 = RasterAccessors.getHeight(raster1);
-        int width2 = RasterAccessors.getWidth(raster2), height2 = RasterAccessors.getHeight(raster2);
-
-        if (width1 != width2 && height1 != height2) {
-            throw new IllegalArgumentException(String.format("Provided rasters are not of same shape. \n" +
-                    "First raster having width of %d and height of %d. \n" +
-                    "Second raster having width of %d and height of %d", width1, height1, width2, height2));
         }
     }
 
