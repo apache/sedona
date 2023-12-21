@@ -29,7 +29,6 @@ import org.scalatest.prop.TableDrivenPropertyChecks
 class RasterJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
 
   private val spatialJoinPartitionSideConfKey = "sedona.join.spatitionside"
-  private val spatialJoinPartitionSide = sparkSession.sparkContext.getConf.get(spatialJoinPartitionSideConfKey, "left")
 
   private val rasters: Seq[(GridCoverage2D, Int)] = Seq(
     // Japan
@@ -178,60 +177,56 @@ class RasterJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       ("df2 JOIN df1", "RS_Within(df2.geom, df1.rast)")
     )
 
-    try {
-      forAll(joinConditions) { case (joinClause, joinCondition) =>
-        val expected = buildExpectedResult(joinCondition)
-        it(s"$joinClause ON $joinCondition, with left side as dominant side") {
-          sparkSession.sparkContext.getConf.set(spatialJoinPartitionSideConfKey, "left")
+    forAll(joinConditions) { case (joinClause, joinCondition) =>
+      val expected = buildExpectedResult(joinCondition)
+      it(s"$joinClause ON $joinCondition, with left side as dominant side") {
+        withConf(Map(spatialJoinPartitionSideConfKey -> "left")) {
           val result = sparkSession.sql(s"SELECT df1.id, df2.id FROM $joinClause ON $joinCondition")
-          verifyResult(expected, result)
-        }
-        it(s"$joinClause ON $joinCondition, with right side as dominant side") {
-          sparkSession.sparkContext.getConf.set(spatialJoinPartitionSideConfKey, "right")
-          val result = sparkSession.sql(s"SELECT df1.id, df2.id FROM $joinClause ON $joinCondition")
-          verifyResult(expected, result)
-        }
-        it(s"$joinClause ON $joinCondition, broadcast df1") {
-          val result = sparkSession.sql(s"SELECT /*+ BROADCAST(df1) */ df1.id, df2.id FROM $joinClause ON $joinCondition")
-          verifyResult(expected, result)
-        }
-        it(s"$joinClause ON $joinCondition, broadcast df2") {
-          val result = sparkSession.sql(s"SELECT /*+ BROADCAST(df2) */ df1.id, df2.id FROM $joinClause ON $joinCondition")
           verifyResult(expected, result)
         }
       }
-    } finally {
-      sparkSession.sparkContext.getConf.set(spatialJoinPartitionSideConfKey, spatialJoinPartitionSide)
+      it(s"$joinClause ON $joinCondition, with right side as dominant side") {
+        withConf(Map(spatialJoinPartitionSideConfKey -> "right")) {
+          val result = sparkSession.sql(s"SELECT df1.id, df2.id FROM $joinClause ON $joinCondition")
+          verifyResult(expected, result)
+        }
+      }
+      it(s"$joinClause ON $joinCondition, broadcast df1") {
+        val result = sparkSession.sql(s"SELECT /*+ BROADCAST(df1) */ df1.id, df2.id FROM $joinClause ON $joinCondition")
+        verifyResult(expected, result)
+      }
+      it(s"$joinClause ON $joinCondition, broadcast df2") {
+        val result = sparkSession.sql(s"SELECT /*+ BROADCAST(df2) */ df1.id, df2.id FROM $joinClause ON $joinCondition")
+        verifyResult(expected, result)
+      }
     }
   }
 
   describe("raster-raster join") {
-    try {
-      val expected = rasters.flatMap { case (rast, id1) =>
-        rasters.flatMap { case (otherRast, id2) =>
-          if (RasterPredicates.rsIntersects(rast, otherRast)) Some((id1, id2)) else None
-        }
+    val expected = rasters.flatMap { case (rast, id1) =>
+      rasters.flatMap { case (otherRast, id2) =>
+        if (RasterPredicates.rsIntersects(rast, otherRast)) Some((id1, id2)) else None
       }
-      it("raster-raster join, with left side as dominant side") {
-        sparkSession.sparkContext.getConf.set(spatialJoinPartitionSideConfKey, "left")
+    }
+    it("raster-raster join, with left side as dominant side") {
+      withConf(Map(spatialJoinPartitionSideConfKey -> "left")) {
         val result = sparkSession.sql("SELECT df1.id, df3.id FROM df1 JOIN df3 ON RS_Intersects(df1.rast, df3.rast)")
         verifyResult(expected, result)
       }
-      it("raster-raster join, with right side as dominant side") {
-        sparkSession.sparkContext.getConf.set(spatialJoinPartitionSideConfKey, "right")
+    }
+    it("raster-raster join, with right side as dominant side") {
+      withConf(Map(spatialJoinPartitionSideConfKey -> "right")) {
         val result = sparkSession.sql("SELECT df1.id, df3.id FROM df1 JOIN df3 ON RS_Intersects(df1.rast, df3.rast)")
         verifyResult(expected, result)
       }
-      it("raster-raster join, broadcast left") {
-        val result = sparkSession.sql("SELECT /*+ BROADCAST(df1) */ df1.id, df3.id FROM df1 JOIN df3 ON RS_Intersects(df1.rast, df3.rast)")
-        verifyResult(expected, result)
-      }
-      it("raster-raster join, broadcast right") {
-        val result = sparkSession.sql("SELECT /*+ BROADCAST(df3) */ df1.id, df3.id FROM df1 JOIN df3 ON RS_Intersects(df1.rast, df3.rast)")
-        verifyResult(expected, result)
-      }
-    } finally {
-      sparkSession.sparkContext.getConf.set(spatialJoinPartitionSideConfKey, spatialJoinPartitionSide)
+    }
+    it("raster-raster join, broadcast left") {
+      val result = sparkSession.sql("SELECT /*+ BROADCAST(df1) */ df1.id, df3.id FROM df1 JOIN df3 ON RS_Intersects(df1.rast, df3.rast)")
+      verifyResult(expected, result)
+    }
+    it("raster-raster join, broadcast right") {
+      val result = sparkSession.sql("SELECT /*+ BROADCAST(df3) */ df1.id, df3.id FROM df1 JOIN df3 ON RS_Intersects(df1.rast, df3.rast)")
+      verifyResult(expected, result)
     }
   }
 
