@@ -20,9 +20,12 @@ package org.apache.sedona.core.spatialRDD;
 
 import org.apache.sedona.core.enums.IndexType;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.index.SpatialIndex;
 import org.locationtech.jts.index.strtree.STRtree;
 
 import java.util.List;
@@ -139,5 +142,18 @@ public class PointRDDTest
         else {
             List<Point> result = spatialRDD.indexedRDD.take(1).get(0).query(spatialRDD.boundaryEnvelope);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testQuadtreeIndexEfficiency() throws Exception
+    {
+        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, 1);
+        spatialRDD.buildIndex(IndexType.QUADTREE, false);
+        List<SpatialIndex> indexes = spatialRDD.indexedRawRDD.collect();
+        Assert.assertEquals(1, indexes.size());
+        SpatialIndex index = indexes.get(0);
+        List<Point> results = index.query(new Envelope(-85.868310, -85.868300, 34.280345, 34.280349));
+        Assert.assertTrue(results.size() > 0 && results.size() < 100);
     }
 }

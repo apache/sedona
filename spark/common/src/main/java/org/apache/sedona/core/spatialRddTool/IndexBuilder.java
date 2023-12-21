@@ -54,7 +54,13 @@ public final class IndexBuilder<T extends Geometry>
         }
         while (objectIterator.hasNext()) {
             T spatialObject = objectIterator.next();
-            spatialIndex.insert(spatialObject.getEnvelopeInternal(), spatialObject);
+            Envelope envelope = spatialObject.getEnvelopeInternal();
+            if (spatialIndex instanceof Quadtree && (envelope.getWidth() == 0 || envelope.getHeight() == 0)) {
+                // Quadtree works poorly with envelopes with 0 extent. Such envelopes are usually obtained from
+                // points. We expand the envelope by a small amount to avoid this problem.
+                envelope.expandBy(1e-6);
+            }
+            spatialIndex.insert(envelope, spatialObject);
         }
         Set<SpatialIndex> result = new HashSet();
         spatialIndex.query(new Envelope(0.0, 0.0, 0.0, 0.0));
