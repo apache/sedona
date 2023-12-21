@@ -2036,10 +2036,16 @@ Introduction: Apply a map algebra script on a raster.
 
 Format: 
 
-`RS_MapAlgebra (raster: Raster, pixelType: String, script: String)`
+```
+RS_MapAlgebra (raster: Raster, pixelType: String, script: String)
+```
 
 ```
 RS_MapAlgebra (raster: Raster, pixelType: String, script: String, noDataValue: Double)
+```
+
+```
+RS_MapAlgebra(rast0: Raster, rast1: Raster, pixelType: String, script: String, noDataValue: Double)
 ```
 
 Since: `v1.5.0`
@@ -2064,6 +2070,12 @@ Output:
 +--------------------+
 |GridCoverage2D["g...|
 +--------------------+
+```
+
+Spark SQL Example for two raster input `RS_MapAlgebra`:
+
+```sql
+RS_MapAlgebra(rast0, rast1, 'D', 'out = rast0[0] * 0.5 + rast1[0] * 0.5;', null)
 ```
 
 For more details and examples about `RS_MapAlgebra`, please refer to the [Map Algebra documentation](../Raster-map-algebra/).
