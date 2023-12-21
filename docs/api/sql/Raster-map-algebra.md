@@ -39,6 +39,17 @@ RS_MapAlgebra(rast0, rast1, 'D', 'out = rast0[0] * 0.5 + rast1[0] * 0.5;', null)
 `RS_MapAlgebra` also has good performance, since it is backed by [Jiffle](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle) and can be compiled to Java bytecode for
 execution. We'll demonstrate both approaches to implementing commonly used map algebra operations.
 
+!!!Note
+    The `RS_MapAlgebra` function can cast the output raster to a different data type specified by `pixelType`:
+
+    - If `pixelType` is smaller than the input raster data type, narrowing casts will be performed, which may result in loss of data.
+
+    - If `pixelType` is larger, widening casts will retain data accuracy.
+
+    - If `pixelType` matches the input raster data type, no casting occurs.
+
+    This allows controlling the output pixel data type. Users should consider potential precision impacts when coercing to a smaller type. 
+
 ### NDVI
 
 The Normalized Difference Vegetation Index (NDVI) is a simple graphical indicator that can be used to analyze remote sensing measurements, typically, but not necessarily, from a space platform, and assess whether the target being observed contains live green vegetation or not. NDVI has become a de facto standard index used to determine whether a given area contains live green vegetation or not. The NDVI is calculated from these individual measurements as follows:
