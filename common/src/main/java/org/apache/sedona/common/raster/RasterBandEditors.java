@@ -49,7 +49,7 @@ public class RasterBandEditors {
      * @param noDataValue Value to set as no-data value, if null then remove existing no-data value
      * @return Raster with no-data value
      */
-    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, int bandIndex, Double noDataValue) {
+    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, int bandIndex, Double noDataValue, boolean replace) {
         RasterUtils.ensureBand(raster, bandIndex);
         Double rasterNoData = RasterBandAccessors.getBandNoDataValue(raster, bandIndex);
 
@@ -82,11 +82,22 @@ public class RasterBandEditors {
     /**
      * Adds no-data value to the raster.
      * @param raster Source raster to add no-data value
+     * @param bandIndex Band index to add no-data value
+     * @param noDataValue Value to set as no-data value, if null then remove existing no-data value
+     * @return Raster with no-data value
+     */
+    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, int bandIndex, Double noDataValue) {
+        return setBandNoDataValue(raster, bandIndex, noDataValue, false);
+    }
+
+    /**
+     * Adds no-data value to the raster.
+     * @param raster Source raster to add no-data value
      * @param noDataValue Value to set as no-data value, if null then remove existing no-data value
      * @return Raster with no-data value
      */
     public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, Double noDataValue) {
-        return setBandNoDataValue(raster, 1, noDataValue);
+        return setBandNoDataValue(raster, 1, noDataValue, false);
     }
 
     /**
