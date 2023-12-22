@@ -19,18 +19,13 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.Constructors;
-import org.apache.sedona.common.Functions;
-import org.apache.sedona.common.FunctionsGeoTools;
-import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.hsqldb.lib.ArrayUtil;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
-import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -39,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
 
