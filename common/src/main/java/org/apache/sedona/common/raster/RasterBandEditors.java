@@ -83,10 +83,8 @@ public class RasterBandEditors {
             int width = RasterAccessors.getWidth(raster);
             WritableRaster wr = RasterFactory.createBandedRaster(dataTypeCode, width, height, numBands, null);
             double[] bandData = rasterData.getSamples(0, 0, width, height, bandIndex - 1, (double[]) null);
-            int count = 0;
             for (int i = 0; i < bandData.length; i++) {
                 if (bandData[i] == previousNoDataValue) {
-                    count++;
                     bandData[i] = noDataValue;
                 }
             }
