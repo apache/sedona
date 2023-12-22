@@ -66,8 +66,7 @@ public class RasterBandEditors {
         bands[bandIndex - 1] = RasterUtils.createSampleDimensionWithNoDataValue(bands[bandIndex - 1], noDataValue);
 
         if (replace) {
-            Double previousNoDataValue = RasterBandAccessors.getBandNoDataValue(raster, bandIndex);
-            if (previousNoDataValue == null) {
+            if (rasterNoData == null) {
                 throw new IllegalArgumentException("The raster provided doesn't have a no-data value. Please provide a raster that has a no-data value to use `replace` option.");
             }
 
@@ -79,7 +78,7 @@ public class RasterBandEditors {
             WritableRaster wr = RasterFactory.createBandedRaster(dataTypeCode, width, height, numBands, null);
             double[] bandData = rasterData.getSamples(0, 0, width, height, bandIndex - 1, (double[]) null);
             for (int i = 0; i < bandData.length; i++) {
-                if (bandData[i] == previousNoDataValue) {
+                if (bandData[i] == rasterNoData) {
                     bandData[i] = noDataValue;
                 }
             }
