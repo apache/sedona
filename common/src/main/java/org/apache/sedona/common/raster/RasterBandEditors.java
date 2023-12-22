@@ -47,6 +47,7 @@ public class RasterBandEditors {
      * @param raster Source raster to add no-data value
      * @param bandIndex Band index to add no-data value
      * @param noDataValue Value to set as no-data value, if null then remove existing no-data value
+     * @param replace if true replaces the previous no-data value with the specified no-data value
      * @return Raster with no-data value
      */
     public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, int bandIndex, Double noDataValue, boolean replace) {
@@ -63,19 +64,36 @@ public class RasterBandEditors {
             return RasterUtils.clone(raster.getRenderedImage(), null, sampleDimensions, raster, null, true);
         }
 
-        if ( !(rasterNoData == null) && rasterNoData.equals(noDataValue)) {
+        if ( rasterNoData != null && rasterNoData.equals(noDataValue)) {
             return raster;
         }
         GridSampleDimension[] bands = raster.getSampleDimensions();
         bands[bandIndex - 1] = RasterUtils.createSampleDimensionWithNoDataValue(bands[bandIndex - 1], noDataValue);
 
-        int width = RasterAccessors.getWidth(raster), height = RasterAccessors.getHeight(raster);
-        AffineTransform2D affine = RasterUtils.getGDALAffineTransform(raster);
-        GridGeometry2D gridGeometry2D = new GridGeometry2D(
-                new GridEnvelope2D(0, 0, width, height),
-                PixelOrientation.UPPER_LEFT,
-                affine, raster.getCoordinateReferenceSystem2D(), null
-        );
+        if (replace) {
+            Double previousNoDataValue = RasterBandAccessors.getBandNoDataValue(raster, bandIndex);
+            if (previousNoDataValue == null) {
+                throw new IllegalArgumentException("The raster provided doesn't have a no-data value. Please provide a raster that has a no-data value to use `replace` option.");
+            }
+
+            Raster rasterData = RasterUtils.getRaster(raster.getRenderedImage());
+            int dataTypeCode = rasterData.getDataBuffer().getDataType();
+            int numBands = RasterAccessors.numBands(raster);
+            int height = RasterAccessors.getHeight(raster);
+            int width = RasterAccessors.getWidth(raster);
+            WritableRaster wr = RasterFactory.createBandedRaster(dataTypeCode, width, height, numBands, null);
+            double[] bandData = rasterData.getSamples(0, 0, width, height, bandIndex - 1, (double[]) null);
+            int count = 0;
+            for (int i = 0; i < bandData.length; i++) {
+                if (bandData[i] == previousNoDataValue) {
+                    count++;
+                    bandData[i] = noDataValue;
+                }
+            }
+            wr.setSamples(0, 0, width, height, bandIndex - 1, bandData);
+            return RasterUtils.clone(wr, null, bands, raster, null, true);
+        }
+
         return RasterUtils.clone(raster.getRenderedImage(), null, bands, raster, null, true);
     }
 

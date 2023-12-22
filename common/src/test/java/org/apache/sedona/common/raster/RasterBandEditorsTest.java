@@ -23,6 +23,7 @@ import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.hsqldb.lib.ArrayUtil;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
@@ -31,9 +32,14 @@ import org.opengis.referencing.operation.TransformException;
 
 import java.awt.geom.Point2D;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
 
@@ -62,6 +68,60 @@ public class RasterBandEditorsTest extends RasterTestBase{
         String actual = Arrays.toString(grid.getSampleDimensions());
         String expected = "[RenderedSampleDimension[\"PALETTE_INDEX\"]]";
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testSetBandNoDataValueWithReplaceOptionRaster() throws IOException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+        double[] originalSummary = RasterBandAccessors.getSummaryStats(raster, 1, false);
+        int sumOG = (int) originalSummary[1];
+
+        assertEquals(206233487, sumOG);
+        GridCoverage2D resultRaster = RasterBandEditors.setBandNoDataValue(raster, 1, 10.0, true);
+        double[] resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false);
+        int sumActual = (int) resultSummary[1];
+
+        // 108608 is the total no-data values in the raster
+        // 10.0 is the new no-data value
+        int sumExpected = sumOG + (10 * 108608);
+        assertEquals(sumExpected, sumActual);
+
+        // Not replacing previous no-data value
+        resultRaster = RasterBandEditors.setBandNoDataValue(raster, 1, 10.0);
+        resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false);
+        sumActual = (int) resultSummary[1];
+        assertEquals(sumOG, sumActual);
+    }
+
+    @Test
+    public void testSetBandNoDataValueWithReplaceOption() throws FactoryException {
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 10, 20, 10, 20, 1);
+        double[] band1 = new double[200];
+        DecimalFormat df = new DecimalFormat("0.00");
+        for (int i = 0; i < band1.length; i++) {
+            if (i % 3 == 0) {
+                band1[i] = 15;
+                continue;
+            }
+            band1[i] = Double.parseDouble(df.format(Math.random() * 10));
+        }
+        raster = MapAlgebra.addBandFromArray(raster, band1, 1);
+        // setting the noData property
+        raster = RasterBandEditors.setBandNoDataValue(raster, 1, 15.0);
+
+        // invoking replace option.
+        GridCoverage2D result = RasterBandEditors.setBandNoDataValue(raster, 1, 20.0, true);
+        double[] resultBand = MapAlgebra.bandAsArray(result, 1);
+
+        Map<Double, Long> resultMap = Arrays.stream(resultBand)
+                .boxed()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        Map<Double, Long> actualMap = Arrays.stream(band1)
+                .boxed()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        assertEquals(actualMap.get(15.0), resultMap.get(20.0));
     }
 
     @Test
