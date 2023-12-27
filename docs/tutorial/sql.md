@@ -656,6 +656,30 @@ Since v`1.3.0`, Sedona natively supports writing GeoParquet file. GeoParquet can
 df.write.format("geoparquet").save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
 ```
 
+Since v`1.5.1`, Sedona supports writing GeoParquet files with custom GeoParquet spec version and crs.
+The default GeoParquet spec version is `1.0.0` and the default crs is `null`. You can specify the GeoParquet spec version and crs as follows:
+
+```scala
+val projjson = "{...}" // PROJJSON string for all geometry columns
+df.write.format("geoparquet")
+		.option("geoparquet.version", "1.0.0")
+		.option("geoparquet.crs", projjson)
+		.save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
+```
+
+If you have multiple geometry columns written to the GeoParquet file, you can specify the CRS for each column.
+For example, `g0` and `g1` are two geometry columns in the DataFrame `df`, and you want to specify the CRS for each column as follows:
+
+```scala
+val projjson_g0 = "{...}" // PROJJSON string for g0
+val projjson_g1 = "{...}" // PROJJSON string for g1
+df.write.format("geoparquet")
+		.option("geoparquet.version", "1.0.0")
+		.option("geoparquet.crs.g0", projjson_g0)
+		.option("geoparquet.crs.g1", projjson_g1)
+		.save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
+```
+
 ## Sort then Save GeoParquet
 
 To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../../api/sql/Function/#st_geohash)) and then save as a GeoParquet file. An example is as follows:
