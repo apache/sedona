@@ -27,6 +27,7 @@ import org.apache.spark.SparkException
 import org.apache.spark.scheduler.{SparkListener, SparkListenerTaskEnd}
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.SaveMode
+import org.apache.spark.sql.execution.datasources.parquet.GeoParquetMetaData
 import org.apache.spark.sql.execution.datasources.parquet.ParquetReadSupport
 import org.apache.spark.sql.functions.{col, expr}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
@@ -150,6 +151,8 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         assert(metadata.containsKey("geo"))
         val geo = parseJson(metadata.get("geo"))
         implicit val formats : org.json4s.Formats = org.json4s.DefaultFormats
+        val version = (geo \ "version").extract[String]
+        assert(version == GeoParquetMetaData.VERSION)
         val g0Types = (geo \ "columns" \ "g0" \ "geometry_types").extract[Seq[String]]
         val g1Types = (geo \ "columns" \ "g1" \ "geometry_types").extract[Seq[String]]
         assert(g0Types.sorted == Seq("Point", "Point Z", "MultiPoint").sorted)
@@ -190,6 +193,230 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         val g0BBox = (geo \ "columns" \ "g" \ "bbox").extract[Seq[Double]]
         assert(g0Types.isEmpty)
         assert(g0BBox == Seq(0.0, 0.0, 0.0, 0.0))
+      }
+    }
+
+    it("GeoParquet save should write user specified version and crs to geo metadata") {
+      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation4)
+      // This CRS is taken from https://proj.org/en/9.3/specifications/projjson.html#geographiccrs
+      // with slight modification.
+      val projjson =
+        """
+          |{
+          |  "$schema": "https://proj.org/schemas/v0.4/projjson.schema.json",
+          |  "type": "GeographicCRS",
+          |  "name": "NAD83(2011)",
+          |  "datum": {
+          |    "type": "GeodeticReferenceFrame",
+          |    "name": "NAD83 (National Spatial Reference System 2011)",
+          |    "ellipsoid": {
+          |      "name": "GRS 1980",
+          |      "semi_major_axis": 6378137,
+          |      "inverse_flattening": 298.257222101
+          |    }
+          |  },
+          |  "coordinate_system": {
+          |    "subtype": "ellipsoidal",
+          |    "axis": [
+          |      {
+          |        "name": "Geodetic latitude",
+          |        "abbreviation": "Lat",
+          |        "direction": "north",
+          |        "unit": "degree"
+          |      },
+          |      {
+          |        "name": "Geodetic longitude",
+          |        "abbreviation": "Lon",
+          |        "direction": "east",
+          |        "unit": "degree"
+          |      }
+          |    ]
+          |  },
+          |  "scope": "Horizontal component of 3D system.",
+          |  "area": "Puerto Rico - onshore and offshore. United States (USA) onshore and offshore.",
+          |  "bbox": {
+          |    "south_latitude": 14.92,
+          |    "west_longitude": 167.65,
+          |    "north_latitude": 74.71,
+          |    "east_longitude": -63.88
+          |  },
+          |  "id": {
+          |    "authority": "EPSG",
+          |    "code": 6318
+          |  }
+          |}
+          |""".stripMargin
+      df.write.format("geoparquet")
+        .option("geoparquet.version", "10.9.8")
+        .option("geoparquet.crs", projjson)
+        .mode("overwrite").save(geoparquetoutputlocation + "/gp_custom_meta.parquet")
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_custom_meta.parquet"
+      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+      assert(df2.count() == df.count())
+
+      val parquetFiles = new File(geoParquetSavePath).listFiles().filter(_.getName.endsWith(".parquet"))
+      parquetFiles.foreach { filePath =>
+        val metadata = ParquetFileReader.open(
+          HadoopInputFile.fromPath(new Path(filePath.getPath), new Configuration()))
+          .getFooter.getFileMetaData.getKeyValueMetaData
+        assert(metadata.containsKey("geo"))
+        val geo = parseJson(metadata.get("geo"))
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        val version = (geo \ "version").extract[String]
+        val columnName = (geo \ "primary_column").extract[String]
+        assert(version == "10.9.8")
+        val crs = geo \ "columns" \ columnName \ "crs"
+        assert(crs.isInstanceOf[org.json4s.JObject])
+        assert(crs == parseJson(projjson))
+      }
+    }
+
+    it("GeoParquet save should support specifying per-column CRS") {
+      val wktReader = new WKTReader()
+      val testData = Seq(
+        Row(1, wktReader.read("POINT (1 2)"), wktReader.read("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))"))
+      )
+      val schema = StructType(Seq(
+        StructField("id", IntegerType, nullable = false),
+        StructField("g0", GeometryUDT, nullable = false),
+        StructField("g1", GeometryUDT, nullable = false)
+      ))
+      val df = sparkSession.createDataFrame(testData.asJava, schema).repartition(1)
+
+      val projjson0 =
+        """
+          |{
+          |  "$schema": "https://proj.org/schemas/v0.4/projjson.schema.json",
+          |  "type": "GeographicCRS",
+          |  "name": "NAD83(2011)",
+          |  "datum": {
+          |    "type": "GeodeticReferenceFrame",
+          |    "name": "NAD83 (National Spatial Reference System 2011)",
+          |    "ellipsoid": {
+          |      "name": "GRS 1980",
+          |      "semi_major_axis": 6378137,
+          |      "inverse_flattening": 298.257222101
+          |    }
+          |  },
+          |  "coordinate_system": {
+          |    "subtype": "ellipsoidal",
+          |    "axis": [
+          |      {
+          |        "name": "Geodetic latitude",
+          |        "abbreviation": "Lat",
+          |        "direction": "north",
+          |        "unit": "degree"
+          |      },
+          |      {
+          |        "name": "Geodetic longitude",
+          |        "abbreviation": "Lon",
+          |        "direction": "east",
+          |        "unit": "degree"
+          |      }
+          |    ]
+          |  },
+          |  "scope": "Horizontal component of 3D system.",
+          |  "area": "Puerto Rico - onshore and offshore. United States (USA) onshore and offshore.",
+          |  "bbox": {
+          |    "south_latitude": 14.92,
+          |    "west_longitude": 167.65,
+          |    "north_latitude": 74.71,
+          |    "east_longitude": -63.88
+          |  },
+          |  "id": {
+          |    "authority": "EPSG",
+          |    "code": 6318
+          |  }
+          |}
+          |""".stripMargin
+
+      val projjson1 =
+        """
+          |{
+          |  "$schema": "https://proj.org/schemas/v0.4/projjson.schema.json",
+          |  "type": "GeographicCRS",
+          |  "name": "Monte Mario (Rome)",
+          |  "datum": {
+          |    "type": "GeodeticReferenceFrame",
+          |    "name": "Monte Mario (Rome)",
+          |    "ellipsoid": {
+          |      "name": "International 1924",
+          |      "semi_major_axis": 6378388,
+          |      "inverse_flattening": 297
+          |    },
+          |    "prime_meridian": {
+          |      "name": "Rome",
+          |      "longitude": 12.4523333333333
+          |    }
+          |  },
+          |  "coordinate_system": {
+          |    "subtype": "ellipsoidal",
+          |    "axis": [
+          |      {
+          |        "name": "Geodetic latitude",
+          |        "abbreviation": "Lat",
+          |        "direction": "north",
+          |        "unit": "degree"
+          |      },
+          |      {
+          |        "name": "Geodetic longitude",
+          |        "abbreviation": "Lon",
+          |        "direction": "east",
+          |        "unit": "degree"
+          |      }
+          |    ]
+          |  },
+          |  "scope": "Geodesy, onshore minerals management.",
+          |  "area": "Italy - onshore and offshore; San Marino, Vatican City State.",
+          |  "bbox": {
+          |    "south_latitude": 34.76,
+          |    "west_longitude": 5.93,
+          |    "north_latitude": 47.1,
+          |    "east_longitude": 18.99
+          |  },
+          |  "id": {
+          |    "authority": "EPSG",
+          |    "code": 4806
+          |  }
+          |}
+          |""".stripMargin
+
+      val geoParquetSavePath = geoparquetoutputlocation + "/multi_geoms_with_custom_crs.parquet"
+      df.write.format("geoparquet")
+        .option("geoparquet.crs", projjson0)
+        .option("geoparquet.crs.g1", projjson1)
+        .mode("overwrite").save(geoParquetSavePath)
+
+      // Find parquet files in geoParquetSavePath directory and validate their metadata
+      var parquetFiles = new File(geoParquetSavePath).listFiles().filter(_.getName.endsWith(".parquet"))
+      parquetFiles.foreach { filePath =>
+        val metadata = ParquetFileReader.open(
+          HadoopInputFile.fromPath(new Path(filePath.getPath), new Configuration()))
+          .getFooter.getFileMetaData.getKeyValueMetaData
+        assert(metadata.containsKey("geo"))
+        val geo = parseJson(metadata.get("geo"))
+        val g0Crs = geo \ "columns" \ "g0" \ "crs"
+        val g1Crs = geo \ "columns" \ "g1" \ "crs"
+        assert(g0Crs == parseJson(projjson0))
+        assert(g1Crs == parseJson(projjson1))
+      }
+
+      // Write without fallback CRS for g0
+      df.write.format("geoparquet")
+        .option("geoparquet.crs.g1", projjson1)
+        .mode("overwrite").save(geoParquetSavePath)
+
+      parquetFiles = new File(geoParquetSavePath).listFiles().filter(_.getName.endsWith(".parquet"))
+      parquetFiles.foreach { filePath =>
+        val metadata = ParquetFileReader.open(
+          HadoopInputFile.fromPath(new Path(filePath.getPath), new Configuration()))
+          .getFooter.getFileMetaData.getKeyValueMetaData
+        assert(metadata.containsKey("geo"))
+        val geo = parseJson(metadata.get("geo"))
+        val g0Crs = geo \ "columns" \ "g0" \ "crs"
+        val g1Crs = geo \ "columns" \ "g1" \ "crs"
+        assert(g0Crs == org.json4s.JNull)
+        assert(g1Crs == parseJson(projjson1))
       }
     }
 
