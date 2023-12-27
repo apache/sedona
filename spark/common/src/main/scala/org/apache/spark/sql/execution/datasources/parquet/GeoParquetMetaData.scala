@@ -14,12 +14,7 @@
 package org.apache.spark.sql.execution.datasources.parquet
 
 import org.json4s.jackson.JsonMethods.parse
-
-/**
- * A case class that holds CRS metadata for geometry columns. This class is left empty since CRS
- * metadata was not implemented yet.
- */
-case class CRSMetaData()
+import org.json4s.JValue
 
 /**
  * A case class that holds the metadata of geometry column in GeoParquet metadata
@@ -31,7 +26,7 @@ case class GeometryFieldMetaData(
   encoding: String,
   geometryTypes: Seq[String],
   bbox: Seq[Double],
-  crs: Option[CRSMetaData] = None)
+  crs: Option[JValue] = None)
 
 /**
  * A case class that holds the metadata of GeoParquet file
@@ -45,10 +40,20 @@ case class GeoParquetMetaData(
   columns: Map[String, GeometryFieldMetaData])
 
 object GeoParquetMetaData {
-  // We're conforming to version 1.0.0-beta.1 of the GeoParquet specification, please refer to
-  // https://github.com/opengeospatial/geoparquet/blob/v1.0.0-beta.1/format-specs/geoparquet.md
-  // for more details.
-  val VERSION = "1.0.0-beta.1"
+  // We're conforming to version 1.0.0 of the GeoParquet specification, please refer to
+  // https://geoparquet.org/releases/v1.0.0/ for more details.
+  val VERSION = "1.0.0"
+
+  /**
+   * Configuration key for overriding the version field in GeoParquet file metadata.
+   */
+  val GEOPARQUET_VERSION_KEY = "geoparquet.version"
+
+  /**
+   * Configuration key for setting the CRS of the geometries in GeoParquet column metadata. This is applied to
+   * all geometry columns in the file.
+   */
+  val GEOPARQUET_CRS_KEY = "geoparquet.crs"
 
   def parseKeyValueMetaData(keyValueMetaData: java.util.Map[String, String]): Option[GeoParquetMetaData] = {
     Option(keyValueMetaData.get("geo")).map { geo =>
