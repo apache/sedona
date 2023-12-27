@@ -35,6 +35,18 @@ jobs:
       fail-fast: true
       matrix:
         include:
+          - spark: 3.5.0
+            scala: 2.13.8
+            jdk: '8'
+            skipTests: ''
+          - spark: 3.5.0
+            scala: 2.12.15
+            jdk: '8'
+            skipTests: ''
+          - spark: 3.5.0
+            scala: 2.12.15
+            jdk: '11'
+            skipTests: ''
           - spark: 3.4.0
             scala: 2.13.8
             jdk: '8'

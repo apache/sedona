@@ -25,10 +25,10 @@
         <version>1.5.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-	<artifactId>sedona-spark-common-${spark.compat.version}_${scala.compat.version}</artifactId>
+	<artifactId>sedona-spark-3.5_${scala.compat.version}</artifactId>
 
 	<name>${project.groupId}:${project.artifactId}</name>
-	<description>A cluster computing system for processing large-scale spatial data: Common SQL API.</description>
+	<description>A cluster computing system for processing large-scale spatial data: SQL API for Spark 3.5.</description>
     <url>http://sedona.apache.org/</url>
 	<packaging>jar</packaging>
 
@@ -49,43 +49,14 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.apache.sedona</groupId>
+            <artifactId>sedona-spark-common-${spark.compat.version}_${scala.compat.version}</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_${scala.compat.version}</artifactId>
-            <exclusions>
-                <!-- Make sure Hadoop's guava version is used for older versions of Spark tests -->
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-                <!-- These break the tests involving the mini HDFS cluster -->
-                <exclusion>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>hadoop-client-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>hadoop-client-runtime</artifactId>
-                </exclusion>
-                <!-- Exclude log4j 1 for older versions of Spark-->
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <!-- Exclude log4j-slf4j2-impl for Spark 3.4 -->
-                <exclusion>
-                    <groupId>org.apache.logging.log4j</groupId>
-                    <artifactId>log4j-slf4j2-impl</artifactId>
-                </exclusion>
-                <!-- Exclude avro for Spark 3.5, which avoids incompatible version of jackson-core being included -->
-                <exclusion>
-                    <groupId>org.apache.avro</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
@@ -94,14 +65,6 @@
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>edu.ucar</groupId>
-            <artifactId>cdm-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -121,15 +84,7 @@
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
-            <artifactId>gt-shapefile</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.geotools</groupId>
             <artifactId>gt-geotiff</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-process-feature</artifactId>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
@@ -138,10 +93,6 @@
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-arcgrid</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>it.geosolutions.jaiext.jiffle</groupId>
-            <artifactId>jt-jiffle-language</artifactId>
         </dependency>
         <dependency>
             <groupId>org.locationtech.jts</groupId>
@@ -173,58 +124,13 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.beryx</groupId>
-            <artifactId>awt-color-factory</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-s3</artifactId>
-            <version>1.12.362</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-minicluster</artifactId>
-            <version>${hadoop.version}</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>ch.qos.reload4j</groupId>
-                    <artifactId>reload4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
 	<build>
-        <sourceDirectory>src/main/java</sourceDirectory>
+        <sourceDirectory>src/main/scala</sourceDirectory>
         <plugins>
             <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
-                <executions>
-                   <execution>
-                        <id>attach-javadocs</id>
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.scalatest</groupId>
