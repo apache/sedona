@@ -139,8 +139,8 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       case version: String => Some(version)
     }
     defaultGeoParquetCrs = Option(configuration.get(GEOPARQUET_CRS_KEY)).map(parse(_))
-    configuration.getPropsWithPrefix(GEOPARQUET_CRS_KEY + ".").asScala.foreach {
-      case (key, value) => geoParquetColumnCrsMap.put(key, parse(value))
+    geometryColumnInfoMap.keys.map(schema(_).name).foreach { name =>
+      Option(configuration.get(GEOPARQUET_CRS_KEY + "." + name)).foreach(crs => geoParquetColumnCrsMap.put(name, parse(crs)))
     }
 
     val messageType = new SparkToParquetSchemaConverter(configuration).convert(schema)
