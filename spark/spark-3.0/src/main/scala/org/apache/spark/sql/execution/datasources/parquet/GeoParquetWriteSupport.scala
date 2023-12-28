@@ -130,9 +130,10 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
     }
 
     val messageType = new SparkToParquetSchemaConverter(configuration).convert(schema)
+    val sparkSqlParquetRowMetadata = GeoParquetWriteSupport.getSparkSqlParquetRowMetadata(schema)
     val metadata = Map(
       SPARK_VERSION_METADATA_KEY -> SPARK_VERSION_SHORT,
-      ParquetReadSupport.SPARK_METADATA_KEY -> schemaString
+      ParquetReadSupport.SPARK_METADATA_KEY -> sparkSqlParquetRowMetadata
     ) ++ {
       if (datetimeRebaseMode == LegacyBehaviorPolicy.LEGACY) {
         Some("org.apache.spark.legacyDateTime" -> "")
@@ -565,5 +566,18 @@ object GeoParquetWriteSupport {
       maxX = math.max(maxX, env.getMaxX)
       maxY = math.max(maxY, env.getMaxY)
     }
+  }
+
+  private def getSparkSqlParquetRowMetadata(schema: StructType): String = {
+    val fields = schema.fields.map { field =>
+      field.dataType match {
+        case _: GeometryUDT =>
+          // Don't write the GeometryUDT type to the Parquet metadata. Write the type as binary for maximum
+          // compatibility.
+          field.copy(dataType = BinaryType)
+        case _ => field
+      }
+    }
+    StructType(fields).json
   }
 }
