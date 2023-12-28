@@ -26,6 +26,7 @@ import org.apache.parquet.hadoop.util.HadoopInputFile
 import org.apache.spark.SparkException
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.SaveMode
+import org.apache.spark.sql.execution.datasources.parquet.ParquetReadSupport
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors.ST_Point
@@ -96,12 +97,30 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val rows = df.collect()
       assert(rows(0).getAs[AnyRef]("geometry").isInstanceOf[Geometry])
       assert(count == rows.length)
-      df.write.format("geoparquet").mode(SaveMode.Overwrite).save(geoparquetoutputlocation + "/gp_sample4.parquet")
-      val df2 = sparkSession.read.format("geoparquet").load(geoparquetoutputlocation + "/gp_sample4.parquet")
+
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_sample4.parquet"
+      df.write.format("geoparquet").mode(SaveMode.Overwrite).save(geoParquetSavePath)
+      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
       val newRows = df2.collect()
       assert(rows.length == newRows.length)
       assert(newRows(0).getAs[AnyRef]("geometry").isInstanceOf[Geometry])
       assert(rows sameElements newRows)
+
+      val parquetFiles = new File(geoParquetSavePath).listFiles().filter(_.getName.endsWith(".parquet"))
+      parquetFiles.foreach { filePath =>
+        val metadata = ParquetFileReader.open(
+          HadoopInputFile.fromPath(new Path(filePath.getPath), new Configuration()))
+          .getFooter.getFileMetaData.getKeyValueMetaData
+        assert(metadata.containsKey("geo"))
+        val geo = parseJson(metadata.get("geo"))
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        val columnName = (geo \ "primary_column").extract[String]
+        assert(columnName == "geometry")
+        val geomTypes = (geo \ "columns" \ "geometry" \ "geometry_types").extract[Seq[String]]
+        assert(geomTypes.nonEmpty)
+        val sparkSqlRowMetadata = metadata.get(ParquetReadSupport.SPARK_METADATA_KEY)
+        assert(!sparkSqlRowMetadata.contains("GeometryUDT"))
+      }
     }
 
     it("GeoParquet with multiple geometry columns") {
