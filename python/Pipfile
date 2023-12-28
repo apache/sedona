@@ -13,7 +13,7 @@ pytest-cov = "*"
 [packages]
 shapely="<=1.8.5"
 pandas="<=1.3.5"
-geopandas="<=0.10.2"
+geopandas="<=0.13.2"
 pyspark=">=2.3.0"
 attrs="*"
 pyarrow="*"
@@ -21,4 +21,4 @@ keplergl = "==0.3.2"
 pydeck = "===0.8.0"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"

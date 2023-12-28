@@ -109,7 +109,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
 
   private var geoParquetVersion: Option[String] = None
   private var defaultGeoParquetCrs: Option[JValue] = None
-  private val geoParquetColumnCrsMap: mutable.Map[String, JValue] = mutable.Map.empty
+  private val geoParquetColumnCrsMap: mutable.Map[String, Option[JValue]] = mutable.Map.empty
 
   override def init(configuration: Configuration): WriteContext = {
     val schemaString = configuration.get(ParquetWriteSupport.SPARK_ROW_SCHEMA)
@@ -138,9 +138,15 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       case null => Some(VERSION)
       case version: String => Some(version)
     }
-    defaultGeoParquetCrs = Option(configuration.get(GEOPARQUET_CRS_KEY)).map(parse(_))
+    defaultGeoParquetCrs = configuration.get(GEOPARQUET_CRS_KEY) match {
+      case null | "" => None
+      case crs: String => Some(parse(crs))
+    }
     geometryColumnInfoMap.keys.map(schema(_).name).foreach { name =>
-      Option(configuration.get(GEOPARQUET_CRS_KEY + "." + name)).foreach(crs => geoParquetColumnCrsMap.put(name, parse(crs)))
+      Option(configuration.get(GEOPARQUET_CRS_KEY + "." + name)).foreach {
+        case "" => geoParquetColumnCrsMap.put(name, None)
+        case crs: String => geoParquetColumnCrsMap.put(name, Some(parse(crs)))
+      }
     }
 
     val messageType = new SparkToParquetSchemaConverter(configuration).convert(schema)
@@ -187,11 +193,11 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         val bbox = if (geometryTypes.nonEmpty) {
           Seq(columnInfo.bbox.minX, columnInfo.bbox.minY, columnInfo.bbox.maxX, columnInfo.bbox.maxY)
         } else Seq(0.0, 0.0, 0.0, 0.0)
-        val crs = geoParquetColumnCrsMap.get(columnName).orElse(defaultGeoParquetCrs)
+        val crs = geoParquetColumnCrsMap.getOrElse(columnName, defaultGeoParquetCrs)
         columnName -> GeometryFieldMetaData("WKB", geometryTypes, bbox, crs)
       }.toMap
       val geoParquetMetadata = GeoParquetMetaData(geoParquetVersion, primaryColumn, columns)
-      implicit val formats: org.json4s.Formats = DefaultFormats.preservingEmptyValues
+      implicit val formats: org.json4s.Formats = DefaultFormats
       val geoParquetMetadataJson = compactJson(Extraction.decompose(geoParquetMetadata).underscoreKeys)
       metadata.put("geo", geoParquetMetadataJson)
     }
