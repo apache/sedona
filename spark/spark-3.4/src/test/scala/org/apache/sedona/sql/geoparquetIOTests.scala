@@ -24,12 +24,13 @@ import org.apache.hadoop.fs.Path
 import org.apache.parquet.hadoop.ParquetFileReader
 import org.apache.parquet.hadoop.util.HadoopInputFile
 import org.apache.spark.SparkException
+import org.apache.spark.scheduler.{SparkListener, SparkListenerTaskEnd}
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.SaveMode
+import org.apache.spark.sql.functions.{col, expr}
 import org.apache.spark.sql.execution.datasources.parquet.ParquetReadSupport
-import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.sedona_sql.expressions.st_constructors.ST_Point
+import org.apache.spark.sql.sedona_sql.expressions.st_constructors.{ST_Point, ST_PolygonFromEnvelope}
 import org.apache.spark.sql.sedona_sql.expressions.st_predicates.ST_Intersects
 import org.apache.spark.sql.types.IntegerType
 import org.apache.spark.sql.types.StructField
@@ -41,6 +42,7 @@ import org.scalatest.BeforeAndAfterAll
 
 import java.io.File
 import java.util.Collections
+import java.util.concurrent.atomic.AtomicLong
 import scala.collection.JavaConverters._
 
 class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
@@ -203,6 +205,49 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val rows = df.where(ST_Intersects(ST_Point(35.174722, -6.552465), col("geometry"))).collect()
       assert(rows.length == 1)
       assert(rows(0).getAs[String]("name") == "Tanzania")
+    }
+
+    it("Filter push down for nested columns") {
+      import sparkSession.implicits._
+
+      // Prepare multiple GeoParquet files with bbox metadata. There should be 10 files in total, each file contains
+      // 1000 records.
+      val dfIds = (0 until 10000).toDF("id")
+      val dfGeom = dfIds
+        .withColumn("bbox", expr("struct(id as minx, id as miny, id + 1 as maxx, id + 1 as maxy)"))
+        .withColumn("geom", expr("ST_PolygonFromEnvelope(id, id, id + 1, id + 1)"))
+        .withColumn("part_id", expr("CAST(id / 1000 AS INTEGER)"))
+        .coalesce(1)
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_with_bbox.parquet"
+      dfGeom.write.partitionBy("part_id").format("geoparquet").mode("overwrite").save(geoParquetSavePath)
+
+      val sparkListener = new SparkListener() {
+        val recordsRead = new AtomicLong(0)
+
+        def reset(): Unit = recordsRead.set(0)
+
+        override def onTaskEnd(taskEnd: SparkListenerTaskEnd): Unit = {
+          val recordsRead = taskEnd.taskMetrics.inputMetrics.recordsRead
+          this.recordsRead.getAndAdd(recordsRead)
+        }
+      }
+
+      sparkSession.sparkContext.addSparkListener(sparkListener)
+      try {
+        val df = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+
+        // This should trigger filter push down to Parquet and only read one of the files. The number of records read
+        // should be less than 1000.
+        df.where("bbox.minx > 6000 and bbox.minx < 6600").count()
+        assert(sparkListener.recordsRead.get() <= 1000)
+
+        // Reading these files using spatial filter. This should only read two of the files.
+        sparkListener.reset()
+        df.where(ST_Intersects(ST_PolygonFromEnvelope(7010, 7010, 8100, 8100), col("geom"))).count()
+        assert(sparkListener.recordsRead.get() <= 2000)
+      } finally {
+        sparkSession.sparkContext.removeSparkListener(sparkListener)
+      }
     }
   }
 }
