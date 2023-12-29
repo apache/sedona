@@ -139,7 +139,11 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       case version: String => Some(version)
     }
     defaultGeoParquetCrs = configuration.get(GEOPARQUET_CRS_KEY) match {
-      case null | "" => None
+      case null =>
+        // If no CRS is specified, we write null to the crs metadata field. This is for compatibility with
+        // geopandas 0.10.0 and earlier versions, which requires crs field to be present.
+        Some(org.json4s.JNull)
+      case "" => None
       case crs: String => Some(parse(crs))
     }
     geometryColumnInfoMap.keys.map(schema(_).name).foreach { name =>

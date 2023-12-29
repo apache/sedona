@@ -153,8 +153,8 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         assert(g1Types.sorted == Seq("Polygon", "Polygon Z", "MultiLineString").sorted)
         val g0Crs = geo \ "columns" \ "g0" \ "crs"
         val g1Crs = geo \ "columns" \ "g1" \ "crs"
-        assert(g0Crs == org.json4s.JNothing)
-        assert(g1Crs == org.json4s.JNothing)
+        assert(g0Crs == org.json4s.JNull)
+        assert(g1Crs == org.json4s.JNull)
       }
 
       // Read GeoParquet with multiple geometry columns
@@ -408,6 +408,18 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
 
       // Write without fallback CRS for g0
       df.write.format("geoparquet")
+        .option("geoparquet.crs.g1", projjson1)
+        .mode("overwrite").save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        val g0Crs = geo \ "columns" \ "g0" \ "crs"
+        val g1Crs = geo \ "columns" \ "g1" \ "crs"
+        assert(g0Crs == org.json4s.JNull)
+        assert(g1Crs == parseJson(projjson1))
+      }
+
+      // Fallback CRS is omitting CRS
+      df.write.format("geoparquet")
+        .option("geoparquet.crs", "")
         .option("geoparquet.crs.g1", projjson1)
         .mode("overwrite").save(geoParquetSavePath)
       validateGeoParquetMetadata(geoParquetSavePath) { geo =>
