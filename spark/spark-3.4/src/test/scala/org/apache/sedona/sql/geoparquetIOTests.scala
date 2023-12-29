@@ -143,13 +143,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       df.write.format("geoparquet").save(geoParquetSavePath)
 
       // Find parquet files in geoParquetSavePath directory and validate their metadata
-      val parquetFiles = new File(geoParquetSavePath).listFiles().filter(_.getName.endsWith(".parquet"))
-      parquetFiles.foreach { filePath =>
-        val metadata = ParquetFileReader.open(
-          HadoopInputFile.fromPath(new Path(filePath.getPath), new Configuration()))
-          .getFooter.getFileMetaData.getKeyValueMetaData
-        assert(metadata.containsKey("geo"))
-        val geo = parseJson(metadata.get("geo"))
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
         implicit val formats : org.json4s.Formats = org.json4s.DefaultFormats
         val version = (geo \ "version").extract[String]
         assert(version == GeoParquetMetaData.VERSION)
@@ -157,6 +151,10 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         val g1Types = (geo \ "columns" \ "g1" \ "geometry_types").extract[Seq[String]]
         assert(g0Types.sorted == Seq("Point", "Point Z", "MultiPoint").sorted)
         assert(g1Types.sorted == Seq("Polygon", "Polygon Z", "MultiLineString").sorted)
+        val g0Crs = geo \ "columns" \ "g0" \ "crs"
+        val g1Crs = geo \ "columns" \ "g1" \ "crs"
+        assert(g0Crs == org.json4s.JNull)
+        assert(g1Crs == org.json4s.JNull)
       }
 
       // Read GeoParquet with multiple geometry columns
@@ -181,13 +179,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       assert(df2.schema.fields(1).dataType.isInstanceOf[GeometryUDT])
       assert(0 == df2.count())
 
-      val parquetFiles = new File(geoParquetSavePath).listFiles().filter(_.getName.endsWith(".parquet"))
-      parquetFiles.foreach { filePath =>
-        val metadata = ParquetFileReader.open(
-          HadoopInputFile.fromPath(new Path(filePath.getPath), new Configuration()))
-          .getFooter.getFileMetaData.getKeyValueMetaData
-        assert(metadata.containsKey("geo"))
-        val geo = parseJson(metadata.get("geo"))
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
         implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
         val g0Types = (geo \ "columns" \ "g" \ "geometry_types").extract[Seq[String]]
         val g0BBox = (geo \ "columns" \ "g" \ "bbox").extract[Seq[Double]]
@@ -246,21 +238,15 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
           |  }
           |}
           |""".stripMargin
+      var geoParquetSavePath = geoparquetoutputlocation + "/gp_custom_meta.parquet"
       df.write.format("geoparquet")
         .option("geoparquet.version", "10.9.8")
         .option("geoparquet.crs", projjson)
-        .mode("overwrite").save(geoparquetoutputlocation + "/gp_custom_meta.parquet")
-      val geoParquetSavePath = geoparquetoutputlocation + "/gp_custom_meta.parquet"
+        .mode("overwrite").save(geoParquetSavePath)
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
       assert(df2.count() == df.count())
 
-      val parquetFiles = new File(geoParquetSavePath).listFiles().filter(_.getName.endsWith(".parquet"))
-      parquetFiles.foreach { filePath =>
-        val metadata = ParquetFileReader.open(
-          HadoopInputFile.fromPath(new Path(filePath.getPath), new Configuration()))
-          .getFooter.getFileMetaData.getKeyValueMetaData
-        assert(metadata.containsKey("geo"))
-        val geo = parseJson(metadata.get("geo"))
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
         implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
         val version = (geo \ "version").extract[String]
         val columnName = (geo \ "primary_column").extract[String]
@@ -268,6 +254,33 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         val crs = geo \ "columns" \ columnName \ "crs"
         assert(crs.isInstanceOf[org.json4s.JObject])
         assert(crs == parseJson(projjson))
+      }
+
+      // Setting crs to null explicitly
+      geoParquetSavePath = geoparquetoutputlocation + "/gp_crs_null.parquet"
+      df.write.format("geoparquet")
+        .option("geoparquet.crs", "null")
+        .mode("overwrite").save(geoParquetSavePath)
+      val df3 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+      assert(df3.count() == df.count())
+
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        val columnName = (geo \ "primary_column").extract[String]
+        val crs = geo \ "columns" \ columnName \ "crs"
+        assert(crs == org.json4s.JNull)
+      }
+
+      // Setting crs to "" to omit crs
+      geoParquetSavePath = geoparquetoutputlocation + "/gp_crs_omit.parquet"
+      df.write.format("geoparquet")
+        .option("geoparquet.crs", "")
+        .mode("overwrite").save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        val columnName = (geo \ "primary_column").extract[String]
+        val crs = geo \ "columns" \ columnName \ "crs"
+        assert(crs == org.json4s.JNothing)
       }
     }
 
@@ -386,15 +399,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         .option("geoparquet.crs", projjson0)
         .option("geoparquet.crs.g1", projjson1)
         .mode("overwrite").save(geoParquetSavePath)
-
-      // Find parquet files in geoParquetSavePath directory and validate their metadata
-      var parquetFiles = new File(geoParquetSavePath).listFiles().filter(_.getName.endsWith(".parquet"))
-      parquetFiles.foreach { filePath =>
-        val metadata = ParquetFileReader.open(
-          HadoopInputFile.fromPath(new Path(filePath.getPath), new Configuration()))
-          .getFooter.getFileMetaData.getKeyValueMetaData
-        assert(metadata.containsKey("geo"))
-        val geo = parseJson(metadata.get("geo"))
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
         val g0Crs = geo \ "columns" \ "g0" \ "crs"
         val g1Crs = geo \ "columns" \ "g1" \ "crs"
         assert(g0Crs == parseJson(projjson0))
@@ -405,18 +410,47 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       df.write.format("geoparquet")
         .option("geoparquet.crs.g1", projjson1)
         .mode("overwrite").save(geoParquetSavePath)
-
-      parquetFiles = new File(geoParquetSavePath).listFiles().filter(_.getName.endsWith(".parquet"))
-      parquetFiles.foreach { filePath =>
-        val metadata = ParquetFileReader.open(
-          HadoopInputFile.fromPath(new Path(filePath.getPath), new Configuration()))
-          .getFooter.getFileMetaData.getKeyValueMetaData
-        assert(metadata.containsKey("geo"))
-        val geo = parseJson(metadata.get("geo"))
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
         val g0Crs = geo \ "columns" \ "g0" \ "crs"
         val g1Crs = geo \ "columns" \ "g1" \ "crs"
         assert(g0Crs == org.json4s.JNull)
         assert(g1Crs == parseJson(projjson1))
+      }
+
+      // Fallback CRS is omitting CRS
+      df.write.format("geoparquet")
+        .option("geoparquet.crs", "")
+        .option("geoparquet.crs.g1", projjson1)
+        .mode("overwrite").save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        val g0Crs = geo \ "columns" \ "g0" \ "crs"
+        val g1Crs = geo \ "columns" \ "g1" \ "crs"
+        assert(g0Crs == org.json4s.JNothing)
+        assert(g1Crs == parseJson(projjson1))
+      }
+
+      // Write with CRS, explicitly set CRS to null for g1
+      df.write.format("geoparquet")
+        .option("geoparquet.crs", projjson0)
+        .option("geoparquet.crs.g1", "null")
+        .mode("overwrite").save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        val g0Crs = geo \ "columns" \ "g0" \ "crs"
+        val g1Crs = geo \ "columns" \ "g1" \ "crs"
+        assert(g0Crs == parseJson(projjson0))
+        assert(g1Crs == org.json4s.JNull)
+      }
+
+      // Write with CRS, explicitly omit CRS for g1
+      df.write.format("geoparquet")
+        .option("geoparquet.crs", projjson0)
+        .option("geoparquet.crs.g1", "")
+        .mode("overwrite").save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        val g0Crs = geo \ "columns" \ "g0" \ "crs"
+        val g1Crs = geo \ "columns" \ "g1" \ "crs"
+        assert(g0Crs == parseJson(projjson0))
+        assert(g1Crs == org.json4s.JNothing)
       }
     }
 
@@ -475,6 +509,18 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       } finally {
         sparkSession.sparkContext.removeSparkListener(sparkListener)
       }
+    }
+  }
+
+  def validateGeoParquetMetadata(path: String)(body: org.json4s.JValue => Unit): Unit = {
+    val parquetFiles = new File(path).listFiles().filter(_.getName.endsWith(".parquet"))
+    parquetFiles.foreach { filePath =>
+      val metadata = ParquetFileReader.open(
+        HadoopInputFile.fromPath(new Path(filePath.getPath), new Configuration()))
+        .getFooter.getFileMetaData.getKeyValueMetaData
+      assert(metadata.containsKey("geo"))
+      val geo = parseJson(metadata.get("geo"))
+      body(geo)
     }
   }
 }
