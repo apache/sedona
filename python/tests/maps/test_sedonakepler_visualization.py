@@ -40,7 +40,7 @@ class TestVisualization(TestBase):
         polygon_wkt_df.createOrReplaceTempView("polygontable")
         polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
         polygon_gdf = gpd.GeoDataFrame(data=polygon_df.toPandas(), geometry="countyshape")
-        polygon_gdf_renamed = polygon_gdf.rename(columns={"countyshape": "geometry"})
+        polygon_gdf_renamed = polygon_gdf.rename_geometry("geometry")
 
         sedona_kepler_map = SedonaKepler.create_map(df=polygon_df, name="data_1")
         kepler_map = KeplerGl()
@@ -59,7 +59,7 @@ class TestVisualization(TestBase):
 
         polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
         polygon_gdf = gpd.GeoDataFrame(data=polygon_df.toPandas(), geometry="countyshape")
-        polygon_gdf_renamed = polygon_gdf.rename(columns={"countyshape": "geometry"})
+        polygon_gdf_renamed = polygon_gdf.rename_geometry("geometry")
 
         sedona_kepler_empty_map = SedonaKepler.create_map()
         SedonaKepler.add_df(sedona_kepler_empty_map, polygon_df, name="data_1")
@@ -188,9 +188,9 @@ class TestVisualization(TestBase):
         SedonaKepler.add_df(sedona_kepler_map, point_df, name="data_2")
 
         polygon_gdf = gpd.GeoDataFrame(data=polygon_df.toPandas(), geometry="countyshape")
-        polygon_gdf_renamed = polygon_gdf.rename(columns={"countyshape": "geometry"})
+        polygon_gdf_renamed = polygon_gdf.rename_geometry("geometry")
         point_gdf = gpd.GeoDataFrame(data=point_df.toPandas(), geometry="arealandmark")
-        point_gdf_renamed = point_gdf.rename(columns={"arealandmark": "geometry"})
+        point_gdf_renamed = point_gdf.rename_geometry("geometry")
 
         kepler_map = KeplerGl(config=config)
         kepler_map.add_data(polygon_gdf_renamed, "data_1")
