@@ -56,8 +56,8 @@ JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}" exec "/usr/local/Cell
 ### 3. Use SVN to update KEYS
 
 Use SVN to append your armored PGP public key to the `KEYS` files
-     * https://dist.apache.org/repos/dist/dev/sedona/KEYS
-     * https://dist.apache.org/repos/dist/release/sedona/KEYS
+   * https://dist.apache.org/repos/dist/dev/sedona/KEYS
+   * https://dist.apache.org/repos/dist/release/sedona/KEYS
 
 1. Check out both KEYS files
 ```bash
