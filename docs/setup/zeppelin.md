@@ -33,7 +33,7 @@ Create a file called `sedona-zeppelin.json` in this folder and put the following
   "icon": "<i class='fa fa-globe'></i>"
 }
 ```
-	
+
 ### Enable Sedona-Zeppelin
 
 Restart Zeppelin then open Zeppelin Helium interface and enable Sedona-Zeppelin.

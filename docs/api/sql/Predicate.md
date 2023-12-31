@@ -111,7 +111,7 @@ Spark SQL Example:
 SELECT ST_OrderingEquals(ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'), ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'))
 ```
 
-Output: 
+Output:
 
 ```
 true
@@ -123,7 +123,7 @@ Spark SQL Example:
 SELECT ST_OrderingEquals(ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'), ST_GeomFromWKT('POLYGON((0 2, -2 0, 2 0, 0 2))'))
 ```
 
-Output: 
+Output:
 
 ```
 false

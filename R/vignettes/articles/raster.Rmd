@@ -36,11 +36,11 @@ sc <- spark_connect(master = "local")
 
 data_tbl <- spark_read_binary(sc, dir = here::here("/../spark/common/src/test/resources/raster/"), name = "data")
 
-raster <- 
-  data_tbl %>% 
+raster <-
+  data_tbl %>%
   mutate(raster = RS_FromGeoTiff(content))
 
-raster 
+raster
 
 raster %>% sdf_schema()
 ```
@@ -55,34 +55,34 @@ Functions taking in `raster: Raster` arguments are meant to be used with data lo
 
 For example, getting the number of bands:
 ```{r}
-raster %>% 
+raster %>%
   mutate(
     nbands = RS_NumBands(raster)
-  ) %>% 
-  select(path, nbands) %>% 
-  collect() %>% 
+  ) %>%
+  select(path, nbands) %>%
+  collect() %>%
   mutate(path = path %>% basename())
 ```
 
 Or getting values the envelope:
 ```{r}
-raster %>% 
+raster %>%
   mutate(
     env = RS_Envelope(raster) %>% st_astext()
-  ) %>% 
-  select(path, env) %>% 
-  collect() %>% 
+  ) %>%
+  select(path, env) %>%
+  collect() %>%
   mutate(path = path %>% basename())
 ```
 
 Or getting values at specific points:
 ```{r}
-raster %>% 
+raster %>%
   mutate(
     val = RS_Value(raster, ST_Point(-13077301.685, 4002565.802))
-  ) %>% 
-  select(path, val) %>% 
-  collect() %>% 
+  ) %>%
+  select(path, val) %>%
+  collect() %>%
   mutate(path = path %>% basename())
 ```
 
@@ -96,8 +96,8 @@ To write a Sedona binary DataFrame to external storage using Sedona's built-in `
 
 ```{r}
 dest_file <- tempfile()
-raster %>% 
-  mutate(content = RS_AsGeoTiff(raster)) %>% 
+raster %>%
+  mutate(content = RS_AsGeoTiff(raster)) %>%
   spark_write_raster(path = dest_file)
 
 dir(dest_file, recursive = TRUE)
@@ -112,10 +112,10 @@ Available options see [Raster writer](../../../api/sql/Raster-writer/):
 
 ```{r}
 dest_file <- tempfile()
-raster %>% 
-  mutate(content = RS_AsArcGrid(raster)) %>% 
-  spark_write_raster(path = dest_file, 
-                     options = list("rasterField" = "content", 
+raster %>%
+  mutate(content = RS_AsArcGrid(raster)) %>%
+  spark_write_raster(path = dest_file,
+                     options = list("rasterField" = "content",
                                     "fileExtension" = ".asc",
                                     "pathField" = "path"
                      ))

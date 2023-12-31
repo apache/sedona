@@ -42,7 +42,7 @@ When you create a EMR cluster, in the software configuration, add the following 
 ```bash
 [
   {
-    "Classification":"spark-defaults", 
+    "Classification":"spark-defaults",
     "Properties":{
       "spark.yarn.dist.jars": "/jars/sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar,/jars/geotools-wrapper-{{ sedona.current_geotools }}.jar",
       "spark.serializer": "org.apache.spark.serializer.KryoSerializer",

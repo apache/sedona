@@ -25,7 +25,7 @@ Introduction: Given the weight of a pixel, return the corresponding color. The w
 !!!note
 	The color is encoded to an Integer type value in DataFrame. When you print it, it will show some nonsense values. You can just treat them as colors in GeoSparkViz.
 
-Format: 
+Format:
 
 ```
 ST_Colorize (weight: Double, maxWeight: Double, mandatory color: String (Optional))
@@ -85,7 +85,7 @@ Introduction: Convert a geometry to an array of pixels given a resolution
 
 You should use it together with `Lateral View` and `Explode`
 
-Format: 
+Format:
 
 ```
 ST_Pixelize (A: Geometry, ResolutionX: Integer, ResolutionY: Integer, Boundary: Geometry)

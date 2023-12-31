@@ -49,7 +49,7 @@ This method cannot achieve the best performance of Sedona and does not work for 
 
 ### Initialize
 
-After you have installed the libraries and started the cluster, you can initialize the Sedona `ST_*` functions and types by running from your code: 
+After you have installed the libraries and started the cluster, you can initialize the Sedona `ST_*` functions and types by running from your code:
 
 (scala)
 ```scala
@@ -64,9 +64,9 @@ SedonaRegistrator.registerAll(spark)
 ```
 
 ## Install Sedona from the init script
- 
+
 In order to activate the Kryo serializer (this speeds up the serialization and deserialization of geometry types) you need to install the libraries via init script as described below.
- 
+
 In order to use the Sedona `ST_*` functions from SQL without having to register the Sedona functions from a python/scala cell, you need to install the Sedona libraries from the [cluster init-scripts](https://docs.databricks.com/clusters/init-scripts.html) as follows.
 
 ### Download Sedona jars
@@ -74,7 +74,7 @@ In order to use the Sedona `ST_*` functions from SQL without having to register 
 Download the Sedona jars to a DBFS location. You can do that manually via UI or from a notebook by executing this code in a cell:
 
 ```bash
-%sh 
+%sh
 # Create JAR directory for Sedona
 mkdir -p /dbfs/FileStore/jars/sedona/{{ sedona.current_version }}
 
@@ -86,10 +86,10 @@ curl -o /dbfs/FileStore/jars/sedona/{{ sedona.current_version }}/sedona-spark-sh
 
 ### Create an init script
 
-Create an init script in DBFS that loads the Sedona jars into the cluster's default jar directory. You can create that from any notebook by running: 
+Create an init script in DBFS that loads the Sedona jars into the cluster's default jar directory. You can create that from any notebook by running:
 
 ```bash
-%sh 
+%sh
 
 # Create init script directory for Sedona
 mkdir -p /dbfs/FileStore/sedona/
@@ -99,7 +99,7 @@ cat > /dbfs/FileStore/sedona/sedona-init.sh <<'EOF'
 #!/bin/bash
 #
 # File: sedona-init.sh
-# 
+#
 # On cluster startup, this script will copy the Sedona jars to the cluster's default jar directory.
 # In order to activate Sedona functions, remember to add to your spark configuration the Sedona extensions: "spark.sql.extensions org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions"
 
@@ -110,14 +110,14 @@ EOF
 
 ### Set up cluster config
 
-From your cluster configuration (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options` -> `Spark`) activate the Sedona functions and the kryo serializer by adding to the Spark Config 
+From your cluster configuration (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options` -> `Spark`) activate the Sedona functions and the kryo serializer by adding to the Spark Config
 ```
 spark.sql.extensions org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
 spark.serializer org.apache.spark.serializer.KryoSerializer
 spark.kryo.registrator org.apache.sedona.core.serde.SedonaKryoRegistrator
 ```
 
-From your cluster configuration (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options` -> `Init Scripts`) add the newly created init script 
+From your cluster configuration (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options` -> `Init Scripts`) add the newly created init script
 ```
 dbfs:/FileStore/sedona/sedona-init.sh
 ```

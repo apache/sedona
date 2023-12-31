@@ -65,7 +65,7 @@ Clone the Sedona GitHub repository
 
 Requirements: docker ([How?](https://docs.docker.com/engine/install/))
 
-Format: 
+Format:
 
 ```bash
 ./docker/sedona-spark-jupyterlab/build.sh <spark_version> <sedona_version> <build_mode>
@@ -89,7 +89,7 @@ Format:
 ./docker/sedona-spark-jupyterlab/build.sh <spark_version> latest <build_mode>
 ```
 
-Example: 
+Example:
 
 ```bash
 ./docker/sedona-spark-jupyterlab/build.sh 3.4.1 latest
