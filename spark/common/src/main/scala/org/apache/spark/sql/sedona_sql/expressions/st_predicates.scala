@@ -54,4 +54,7 @@ object st_predicates extends DataFrameAPI {
 
   def ST_CoveredBy(a: Column, b: Column): Column = wrapExpression[ST_CoveredBy](a, b)
   def ST_CoveredBy(a: String, b: String): Column = wrapExpression[ST_CoveredBy](a, b)
+  def ST_DWithin(a: Column, b: Column, distance: Column): Column = wrapExpression[ST_DWithin](a, b, distance)
+
+  def ST_DWithin(a: String, b: String, distance: Double): Column = wrapExpression[ST_DWithin](a, b, distance)
 }

@@ -26,6 +26,7 @@ import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression,
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.{AbstractDataType, BooleanType, DataType}
 import org.locationtech.jts.geom.Geometry
+import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 
 abstract class ST_Predicate extends Expression
   with FoldableExpression
@@ -251,3 +252,12 @@ case class ST_OrderingEquals(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+case class ST_DWithin(inputExpressions: Seq[Expression])
+  extends InferredExpression(Predicates.dWithin _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+

@@ -173,6 +173,7 @@ object Catalog {
     function[ST_Angle](),
     function[ST_Degrees](),
     function[ST_HausdorffDistance](-1),
+    function[ST_DWithin](),
     // Expression for rasters
     function[RS_NormalizedDifference](),
     function[RS_Mean](),

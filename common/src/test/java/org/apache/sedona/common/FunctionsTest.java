@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
-public class FunctionsTest {
+public class FunctionsTest extends TestBase {
     public static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
     protected static final double FP_TOLERANCE = 1e-12;
@@ -52,22 +52,6 @@ public class FunctionsTest {
     };
 
     private final WKTReader wktReader = new WKTReader();
-
-    private Coordinate[] coordArray(double... coordValues) {
-        Coordinate[] coords = new Coordinate[(int)(coordValues.length / 2)];
-        for (int i = 0; i < coordValues.length; i += 2) {
-            coords[(int)(i / 2)] = new Coordinate(coordValues[i], coordValues[i+1]);
-        }
-        return coords;
-    }
-
-    private Coordinate[] coordArray3d(double... coordValues) {
-        Coordinate[] coords = new Coordinate[(int)(coordValues.length / 3)];
-        for (int i = 0; i < coordValues.length; i += 3) {
-            coords[(int)(i / 3)] = new Coordinate(coordValues[i], coordValues[i+1], coordValues[i+2]);
-        }
-        return coords;
-    }
 
     @Test
     public void asEWKT() throws Exception{

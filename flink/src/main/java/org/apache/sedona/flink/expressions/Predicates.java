@@ -233,4 +233,20 @@ public class Predicates {
             return org.apache.sedona.common.Predicates.touches(geom1, geom2);
         }
     }
+
+    public static class ST_DWithin
+            extends ScalarFunction {
+
+        public ST_DWithin() {
+
+        }
+
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2, @DataTypeHint("Double") Double distance)
+        {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            return org.apache.sedona.common.Predicates.dWithin(geom1, geom2, distance);
+        }
+    }
 }
