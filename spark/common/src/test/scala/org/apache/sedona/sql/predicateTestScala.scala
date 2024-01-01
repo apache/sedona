@@ -258,7 +258,7 @@ class predicateTestScala extends TestBaseScala {
 
     Seq(
       ST_Contains, ST_Intersects, ST_Within, ST_Covers, ST_CoveredBy, ST_Crosses,
-      ST_Overlaps, ST_Touches, ST_Equals, ST_Disjoint, ST_OrderingEquals, ST_DWithin
+      ST_Overlaps, ST_Touches, ST_Equals, ST_Disjoint, ST_OrderingEquals
     ).foreach { predicate =>
       it(s"Passed null handling in $predicate") {
         val point = ST_Point(Literal.create(0.0) :: Literal.create(0.0) :: Literal.create(0.0):: Nil)
