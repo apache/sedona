@@ -1,6 +1,6 @@
 !!!note
 	Sedona writers are available in Scala, Java and Python and have the same APIs.
-	
+
 ## Write Raster DataFrame to raster files
 
 To write a Sedona Raster DataFrame to raster files, you need to (1) first convert the Raster DataFrame to a binary DataFrame using `RS_AsXXX` functions and (2) then write the binary DataFrame to raster files using Sedona's built-in `raster` data source.
@@ -210,7 +210,7 @@ The newly created DataFrame can be written to disk again but must be under a dif
 
 #### RS_AsRaster
 
-Introduction: Converts a Geometry to a Raster dataset. Defaults to using `1.0` for cell `value` and `null` for `noDataValue` if not provided. Supports all geometry types. 
+Introduction: Converts a Geometry to a Raster dataset. Defaults to using `1.0` for cell `value` and `null` for `noDataValue` if not provided. Supports all geometry types.
 The `pixelType` argument defines data type of the output raster. This can be one of the following, D (double), F (float), I (integer), S (short), US (unsigned short) or B (byte).
 
 Format:

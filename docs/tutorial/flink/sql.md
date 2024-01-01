@@ -197,7 +197,7 @@ geomTable.execute().print()
 
 !!!note
 	Read [SedonaSQL Predicate API](../../../api/flink/Predicate) to learn different spatial query predicates.
-	
+
 ## KNN query
 
 Use ==ST_Distance== to calculate the distance and rank the distance.
@@ -398,7 +398,7 @@ The output will be
 7> polygon3
 9> polygon5
 ```
-	
+
 ## Convert Spatial DataStream to Spatial Table
 
 ### Create Geometries using Sedona FormatUtils

@@ -116,49 +116,49 @@ CC: private@sedona.apache.org
 
 Hello [New PMC NAME],
 
-The Sedona Project Management Committee (PMC) 
-hereby offers you committer privileges to the project 
+The Sedona Project Management Committee (PMC)
+hereby offers you committer privileges to the project
 [as well as membership in the PMC]. These privileges are
 offered on the understanding that you'll use them
 reasonably and with common sense. We like to work on trust
-rather than unnecessary constraints. 
+rather than unnecessary constraints.
 
-Being a committer enables you to more easily make 
-changes without needing to go through the patch 
-submission process. Being a PMC member enables you 
+Being a committer enables you to more easily make
+changes without needing to go through the patch
+submission process. Being a PMC member enables you
 to guide the direction of the project.
 
-Being a committer does not require you to 
-participate any more than you already do. It does 
-tend to make one even more committed.  You will 
+Being a committer does not require you to
+participate any more than you already do. It does
+tend to make one even more committed.  You will
 probably find that you spend more time here.
 
-Of course, you can decline and instead remain as a 
+Of course, you can decline and instead remain as a
 contributor, participating as you do now.
 
-A. This personal invitation is a chance for you to 
-accept or decline in private.  Either way, please 
-let us know in reply to the private@sedona.apache.org 
+A. This personal invitation is a chance for you to
+accept or decline in private.  Either way, please
+let us know in reply to the private@sedona.apache.org
 address only.
 
 B. If you accept, the next step is to register an iCLA:
-    1. Details of the iCLA and the forms are found 
+    1. Details of the iCLA and the forms are found
     through this link: https://www.apache.org/licenses/#clas
 
-    2. Instructions for its completion and return to 
+    2. Instructions for its completion and return to
     the Secretary of the ASF are found at
     https://www.apache.org/licenses/#submitting
 
-    3. When you transmit the completed iCLA, request 
-    to notify the Apache Sedona project and choose a 
-    unique Apache ID. Look to see if your preferred 
-    ID is already taken at 
+    3. When you transmit the completed iCLA, request
+    to notify the Apache Sedona project and choose a
+    unique Apache ID. Look to see if your preferred
+    ID is already taken at
     https://people.apache.org/committer-index.html
-    This will allow the Secretary to notify the PMC 
+    This will allow the Secretary to notify the PMC
     when your iCLA has been recorded.
 
-When recording of your iCLA is noted, you will 
-receive a follow-up message with the next steps for 
+When recording of your iCLA is noted, you will
+receive a follow-up message with the next steps for
 establishing you as a committer.
 
 ```
@@ -182,15 +182,15 @@ You need to choose a preferred ASF user name and alternatives.
 In order to ensure it is available you can view a list of taken IDs at
 https://people.apache.org/committer-index.html
 
-Please notify us when you have submitted the CLA and by what means 
+Please notify us when you have submitted the CLA and by what means
 you did so. This will enable us to monitor its progress.
 
-We will arrange for your Apache user account when the CLA has 
+We will arrange for your Apache user account when the CLA has
 been recorded.
 
 2. After that is done, please use your ASF email to subscribe to the dev@sedona.apache.org
-and private@sedona.apache.org by sending an email to dev-subscribe@sedona.apache.org and 
-private-subscribe@sedona.apache.org. We generally discuss everything on the dev list and 
+and private@sedona.apache.org by sending an email to dev-subscribe@sedona.apache.org and
+private-subscribe@sedona.apache.org. We generally discuss everything on the dev list and
 keep the private@sedona.apache.org list for occasional matters which must be private.
 
 The developer section of the website describes roles within the ASF and provides other
@@ -226,7 +226,7 @@ To: dev@sedona.apache.org
 Subject: new committer: ###New PMC NAME
 
 The Project Management Committee (PMC) for Apache Sedona
-has invited New PMC NAME to become a committer and we are pleased 
+has invited New PMC NAME to become a committer and we are pleased
 to announce that they have accepted.
 
 ### add specific details here ###
@@ -264,7 +264,7 @@ Here are the steps
 	* GitBox (Apache Account Linking utility) https://gitbox.apache.org/setup/
 	* You should see 3 green checks in GitBox.
 	* Wait at least 30  minutes for an email inviting you to Apache GitHub Organization and accept invitation
-4. After accepting the GitHub Invitation verify that you are a 
+4. After accepting the GitHub Invitation verify that you are a
 member of the team https://github.com/orgs/apache/teams/sedona-committers
 
 Optionally, if you want, please follow the instructions to set up your GitHub, SSH, svn password, svn configuration, email forwarding, etc.

@@ -19,7 +19,7 @@ SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of 
 	Dataset<Row> myDataFrame = sedona.sql("YOUR_SQL")
 	myDataFrame.createOrReplaceTempView("spatialDf")
 	```
-	
+
 === "Python"
 
 	```python
@@ -80,7 +80,7 @@ You can add additional Spark runtime config to the config builder. For example, 
 	```scala
 	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 	```
-	
+
 === "Python"
 
 	```python
@@ -173,7 +173,7 @@ Add the following line after creating Sedona config. If you already have a Spark
 
 	```python
 	from sedona.spark import *
-	
+
 	sedona = SedonaContext.create(config)
 	```
 
@@ -192,12 +192,12 @@ The following method has been deprecated since Sedona 1.4.1. Please use the meth
 	```java
 	SedonaSQLRegistrator.registerAll(sparkSession)
 	```
-	
+
 === "Python"
 
 	```python
 	from sedona.register import SedonaRegistrator
-	
+
 	SedonaRegistrator.registerAll(spark)
 	```
 
@@ -208,7 +208,7 @@ You can also register everything by passing `--conf spark.sql.extensions=org.apa
 Assume we have a WKT file, namely `usa-county.tsv`, at Path `/Download/usa-county.tsv` as follows:
 
 ```
-POLYGON (..., ...)	Cuming County	
+POLYGON (..., ...)	Cuming County
 POLYGON (..., ...)	Wahkiakum County
 POLYGON (..., ...)	De Baca County
 POLYGON (..., ...)	Lancaster County
@@ -325,14 +325,14 @@ This prevents Spark from interpreting the property and allows us to use the ST_G
 
 	```python
 	schema = "type string, crs string, totalFeatures long, features array<struct<type string, geometry string, properties map<string, string>>>";
-	(sedona.read.json(geojson_path, schema=schema) 
+	(sedona.read.json(geojson_path, schema=schema)
 		.selectExpr("explode(features) as features") # Explode the envelope to get one feature per row.
 		.select("features.*") # Unpack the features struct.
 		.withColumn("geometry", f.expr("ST_GeomFromGeoJSON(geometry)")) # Convert the geometry string.
 		.printSchema())
 	```
 
-	
+
 ## Load Shapefile and GeoJSON using SpatialRDD
 
 Shapefile and GeoJSON can be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](../rdd/#create-a-generic-spatialrdd) and [DataFrame <-> RDD](#convert-between-dataframe-and-spatialrdd).
@@ -588,7 +588,7 @@ SedonaPyDeck.create_scatterplot_map(df=crimes_df)
 
 The dataset used here is the Chicago crimes dataset, available [here](https://github.com/apache/sedona/blob/sedona-1.5.0/spark/common/src/test/resources/Chicago_Crimes.csv)
 
-#### Creating a heatmap using SedonaPyDeck 
+#### Creating a heatmap using SedonaPyDeck
 
 SedonaPyDeck exposes a create_heatmap API which can be used to visualize a heatmap out of the passed SedonaDataFrame containing points:
 
@@ -604,7 +604,7 @@ The dataset used here is the Chicago crimes dataset, available [here](https://gi
 
 ### SedonaKepler
 
-Spatial query results can be visualized in a Jupyter lab/notebook environment using SedonaKepler. 
+Spatial query results can be visualized in a Jupyter lab/notebook environment using SedonaKepler.
 
 SedonaKepler exposes APIs to create interactive and customizable map visualizations using [KeplerGl](https://kepler.gl/).
 
@@ -702,7 +702,7 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Ple
 	```scala
 	var spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
 	```
-	
+
 === "Java"
 
 	```java
@@ -721,7 +721,7 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Ple
 
 !!!warning
 	Only one Geometry type column is allowed per DataFrame.
-	
+
 ### SpatialRDD to DataFrame
 
 Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html)
@@ -737,12 +737,12 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Ple
 	```java
 	Dataset<Row> spatialDf = Adapter.toDf(spatialRDD, sedona)
 	```
-	
+
 === "Python"
 
 	```python
 	from sedona.utils.adapter import Adapter
-	
+
 	spatialDf = Adapter.toDf(spatialRDD, sedona)
 	```
 
@@ -778,8 +778,8 @@ PairRDD is the result of a spatial join query or distance join query. SedonaSQL 
 === "Java"
 
 	```java
-	import scala.collection.JavaConverters;	
-	
+	import scala.collection.JavaConverters;
+
 	List leftFields = new ArrayList<>(Arrays.asList("c1", "c2", "c3"));
 	List rightFields = new ArrayList<>(Arrays.asList("c4", "c5", "c6"));
 	Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, JavaConverters.asScalaBuffer(leftFields).toSeq(), JavaConverters.asScalaBuffer(rightFields).toSeq(), sedona);
@@ -804,7 +804,7 @@ or you can use the attribute names directly from the input RDD
 === "Java"
 
 	```java
-	import scala.collection.JavaConverters;	
+	import scala.collection.JavaConverters;
 	Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, JavaConverters.asScalaBuffer(leftRdd.fieldNames).toSeq(), JavaConverters.asScalaBuffer(rightRdd.fieldNames).toSeq(), sedona);
 	```
 === "Python"

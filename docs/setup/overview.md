@@ -24,7 +24,7 @@
 - [x] Spatial query: range query, range join query, distance join query, K Nearest Neighbor query
 - [x] Spatial index: R-Tree, Quad-Tree
 
-## Rich spatial analytics tools 
+## Rich spatial analytics tools
 - [x] Coordinate Reference System / Spatial Reference System Transformation
 - [x] High resolution map generation: [Visualize Spatial DataFrame/RDD](../../tutorial/viz)
 - [x] Apache Zeppelin integration

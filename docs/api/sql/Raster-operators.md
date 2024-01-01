@@ -88,7 +88,7 @@ Spark SQL Example:
 SELECT ST_AsText(RS_PixelAsPoint(raster, 2, 1)) from rasters
 ```
 
-Output: 
+Output:
 ```
 POINT (123.19, -12)
 ```
@@ -155,7 +155,7 @@ Output:
 ### RS_PixelAsPolygon
 
 Introduction: Returns a polygon geometry that bounds the specified pixel.
-The pixel coordinates specified are 1-indexed. 
+The pixel coordinates specified are 1-indexed.
 If `colX` and `rowY` are out of bounds for the raster, they are interpolated assuming the same skew and translate values.
 
 Format: `RS_PixelAsPolygon(raster: Raster, colX: Integer, rowY: Integer)`
@@ -188,8 +188,8 @@ SELECT ST_AsText(RS_PixelAsPolygons(raster, 1)) from rasters
 
 Output:
 ```
-[[POLYGON ((123.19000244140625 -12, 127.19000244140625 -12, 127.19000244140625 -16, 123.19000244140625 -16, 123.19000244140625 -12)),0.0,1,1], 
-[POLYGON ((127.19000244140625 -12, 131.19000244140625 -12, 131.19000244140625 -16, 127.19000244140625 -16, 127.19000244140625 -12)),0.0,2,1], 
+[[POLYGON ((123.19000244140625 -12, 127.19000244140625 -12, 127.19000244140625 -16, 123.19000244140625 -16, 123.19000244140625 -12)),0.0,1,1],
+[POLYGON ((127.19000244140625 -12, 131.19000244140625 -12, 131.19000244140625 -16, 127.19000244140625 -16, 127.19000244140625 -12)),0.0,2,1],
 [POLYGON ((131.19000244140625 -12, 135.19000244140625 -12, 135.19000244140625 -16, 131.19000244140625 -16, 131.19000244140625 -12)),0.0,3,1]]
 ```
 
@@ -247,7 +247,7 @@ POLYGON ((0 0,20 0,20 60,0 60,0 0))
 
 ### RS_ConvexHull
 
-Introduction: Return the convex hull geometry of the raster including the NoDataBandValue band pixels. 
+Introduction: Return the convex hull geometry of the raster including the NoDataBandValue band pixels.
 For regular shaped and non-skewed rasters, this gives more or less the same result as RS_Envelope and hence is only useful for irregularly shaped or skewed rasters.
 
 Format: `RS_ConvexHull(raster: Raster)`
@@ -269,15 +269,15 @@ POLYGON ((156 -132, 181 -107, 211 -7, 186 -32, 156 -132))
 ### RS_MinConvexHull
 
 Introduction: Returns the min convex hull geometry of the raster **excluding** the NoDataBandValue band pixels, in the given band.
-If no band is specified, all the bands are considered when creating the min convex hull of the raster. 
-The created geometry representing the min convex hull has world coordinates of the raster in its CRS as the corner coordinates. 
+If no band is specified, all the bands are considered when creating the min convex hull of the raster.
+The created geometry representing the min convex hull has world coordinates of the raster in its CRS as the corner coordinates.
 
 !!!Note
     If the specified band does not exist in the raster, RS_MinConvexHull throws an IllegalArgumentException
 
-Format: 
+Format:
 
-`RS_MinConvexHull(raster: Raster)` 
+`RS_MinConvexHull(raster: Raster)`
 
 `RS_MinConvexHull(raster: Raster, band: Integer)`
 
@@ -339,21 +339,21 @@ Introduction: Returns the georeference metadata of raster as a string in GDAL or
 
 !!!note
     If you are using `show()` to display the output, it will show special characters as escape sequences. To get the expected behavior use the following code:
-    
+
     === "Scala"
 
         ```scala
         println(df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect().mkString("\n"))
         ```
-    
+
     === "Java"
-    
+
         ```java
         System.out.println(String.join("\n", df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect()))
         ```
-    
+
     === "Python"
-    
+
         ```python
         print("\n".join(df.selectExpr("RS_GeoReference(rast)").sample(0.5).collect()))
         ```
@@ -369,10 +369,10 @@ Difference between format representation is as follows:
 `GDAL`
 
 ```
-ScaleX 
-SkewY 
-SkewX 
-ScaleY 
+ScaleX
+SkewY
+SkewX
+ScaleY
 UpperLeftX
 UpperLeftY
 ```
@@ -380,10 +380,10 @@ UpperLeftY
 `ESRI`
 
 ```
-ScaleX 
-SkewY 
-SkewX 
-ScaleY 
+ScaleX
+SkewY
+SkewX
+ScaleY
 UpperLeftX + ScaleX * 0.5
 UpperLeftY + ScaleY * 0.5
 ```
@@ -397,11 +397,11 @@ SELECT RS_GeoReference(ST_MakeEmptyRaster(1, 100, 100, -53, 51, 2, -2, 4, 5, 432
 Output:
 
 ```
-2.000000 
-5.000000 
-4.000000 
--2.000000 
--53.000000 
+2.000000
+5.000000
+4.000000
+-2.000000
+-53.000000
 51.000000
 ```
 
@@ -414,11 +414,11 @@ SELECT RS_GeoReferrence(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1,
 Output:
 
 ```
-2.000000 
-0.200000 
-0.100000 
--3.000000 
-100.000000 
+2.000000
+0.200000
+0.100000
+-3.000000
+100.000000
 200.000000
 ```
 
@@ -429,11 +429,11 @@ SELECT RS_GeoReferrence(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1,
 ```
 
 ```
-2.000000 
-0.200000 
-0.100000 
--3.000000 
-101.000000 
+2.000000
+0.200000
+0.100000
+-3.000000
+101.000000
 198.500000
 ```
 
@@ -723,10 +723,10 @@ Output:
 
 Introduction: Returns the grid coordinate of the given world coordinates as a Point.
 
-Format: 
+Format:
 
 `RS_WorldToRasterCoord(raster: Raster, point: Geometry)`
- 
+
 `RS_WorldToRasterCoord(raster: Raster, x: Double, y: Point)`
 
 Since: `v1.5.0`
@@ -764,10 +764,10 @@ POINT (2 1)
 
 Introduction: Returns the X coordinate of the grid coordinate of the given world coordinates as an integer.
 
-Format: 
+Format:
 
 `RS_WorldToRasterCoord(raster: Raster, point: Geometry)`
-        
+
 `RS_WorldToRasterCoord(raster: Raster, x: Double, y: Double)`
 
 
@@ -779,7 +779,7 @@ Spark SQL Example:
 SELECT RS_WorldToRasterCoordX(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0), -53, 51) from rasters;
 ```
 
-Output: 
+Output:
 
 ```
 1
@@ -791,7 +791,7 @@ Spark SQL Example:
 SELECT RS_WorldToRasterCoordX(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0), ST_GeomFromText('POINT (-53 51)')) from rasters;
 ```
 
-Output: 
+Output:
 
 ```
 1
@@ -805,10 +805,10 @@ Output:
 
 Introduction: Returns the Y coordinate of the grid coordinate of the given world coordinates as an integer.
 
-Format: 
+Format:
 
 `RS_WorldToRasterCoordY(raster: Raster, point: Geometry)`
-        
+
 `RS_WorldToRasterCoordY(raster: Raster, x: Double, y: Double)`
 
 Since: `v1.5.0`
@@ -819,7 +819,7 @@ Spark SQL Example:
 SELECT RS_WorldToRasterCoordY(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0), ST_GeomFromText('POINT (-50 50)'));
 ```
 
-Output: 
+Output:
 
 ```
 2
@@ -831,7 +831,7 @@ Spark SQL Example:
 SELECT RS_WorldToRasterCoordY(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0), -50, 49);
 ```
 
-Output: 
+Output:
 
 ```
 3
@@ -903,7 +903,7 @@ Spark SQL Example:
 SELECT RS_BandNoDataValue(raster) from rasters_without_nodata;
 ```
 
-Output: 
+Output:
 
 ```
 null
@@ -915,7 +915,7 @@ Spark SQL Example:
 SELECT RS_BandNoDataValue(raster, 3) from rasters;
 ```
 
-Output: 
+Output:
 
 ```
 IllegalArgumentException: Provided band index 3 is not present in the raster.
@@ -957,7 +957,7 @@ Following are the possible values returned by RS_BandPixelType:
 5. `UNSIGNED_16BITS` - For unsigned Short values
 6. `UNSIGNED_8BITS` - For Byte values
 
-    
+
 Format: `RS_BandPixelType(rast: Raster, band: Integer = 1)`
 
 Since: `v1.5.0`
@@ -968,7 +968,7 @@ Spark SQL Example:
 SELECT RS_BandPixelType(RS_MakeEmptyRaster(2, "D", 5, 5, 53, 51, 1, 1, 0, 0, 0), 2);
 ```
 
-Output: 
+Output:
 
 ```
 REAL_64BITS
@@ -978,7 +978,7 @@ REAL_64BITS
 SELECT RS_BandPixelType(RS_MakeEmptyRaster(2, "I", 5, 5, 53, 51, 1, 1, 0, 0, 0));
 ```
 
-Output: 
+Output:
 
 ```
 SIGNED_32BITS
@@ -988,7 +988,7 @@ SIGNED_32BITS
 SELECT RS_BandPixelType(RS_MakeEmptyRaster(2, "I", 5, 5, 53, 51, 1, 1, 0, 0, 0), 3);
 ```
 
-Output: 
+Output:
 
 ```
 IllegalArgumentException: Provided band index 3 is not present in the raster
@@ -999,13 +999,13 @@ IllegalArgumentException: Provided band index 3 is not present in the raster
 Introduction: Returns the number of pixels in a given band. If band is not specified then it defaults to `1`.
 
 !!!Note
-    If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster. 
+    If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster.
     Set excludeNoDataValue to `false` to get count of all pixels in raster.
 
 !!!Note
     If the mentioned band index doesn't exist, this will throw an `IllegalArgumentException`.
 
-Format: 
+Format:
 
 `RS_Count(raster: Raster, band: Integer = 1, excludeNoDataValue: Boolean = true)`
 
@@ -1097,10 +1097,10 @@ Introduction: This returns a statistic value specified by `statType` over the re
 - `max`: Maximum value in the region.
 
 !!!note
-    If the coordinate reference system (CRS) of the input `zone` geometry differs from that of the `raster`, then `zone` will be transformed to match the CRS of the `raster` before computation.    
+    If the coordinate reference system (CRS) of the input `zone` geometry differs from that of the `raster`, then `zone` will be transformed to match the CRS of the `raster` before computation.
 
     The following conditions will throw an `IllegalArgumentException` if they are not met:
-    
+
     - The provided `raster` and `zone` geometry should intersect.
     - The option provided to `statType` should be valid.
 
@@ -1162,7 +1162,7 @@ Introduction: Returns an array of statistic values, where each statistic is comp
     If the coordinate reference system (CRS) of the input `zone` geometry differs from that of the `raster`, then `zone` will be transformed to match the CRS of the `raster` before computation.
 
     The following conditions will throw an `IllegalArgumentException` if they are not met:
-    
+
     - The provided `raster` and `zone` geometry should intersect.
     - The option provided to `statType` should be valid.
 
@@ -1315,7 +1315,7 @@ Output:
 
 ### RS_AddBand
 
-Introduction: Adds a new band to a raster `toRaster` at a specified index `toRasterIndex`. The new band's values are copied from `fromRaster` at a specified band index `fromBand`. 
+Introduction: Adds a new band to a raster `toRaster` at a specified index `toRasterIndex`. The new band's values are copied from `fromRaster` at a specified band index `fromBand`.
 If no `toRasterIndex` is provided, the new band is appended to the end of `toRaster`. If no `fromBand` is specified, band `1` from `fromRaster` is copied by default.
 
 !!!Note
@@ -1323,9 +1323,9 @@ If no `toRasterIndex` is provided, the new band is appended to the end of `toRas
 
     - The provided Rasters, `toRaster` & `fromRaster` don't have same shape.
     - The provided `fromBand` is not in `fromRaster`.
-    - The provided `toRasterIndex` is not in or at end of `toRaster`. 
+    - The provided `toRasterIndex` is not in or at end of `toRaster`.
 
-Format: 
+Format:
 
 ```
 RS_AddBand(toRaster: Raster, fromRaster: Raster, fromBand: Integer = 1, toRasterIndex: Integer = at_end)
@@ -1355,7 +1355,7 @@ GridCoverage2D["g...
 
 ### RS_Clip
 
-Introduction: Returns a raster that is clipped by the given geometry. 
+Introduction: Returns a raster that is clipped by the given geometry.
 
 If `crop` is not specified then it will default to `true`, meaning it will make the resulting raster shrink to the geometry's extent and if `noDataValue` is not specified then the resulting raster will have the minimum possible value for the band pixel data type.
 
@@ -1463,16 +1463,16 @@ Output:
 ### RS_Resample
 
 Introduction:
-Resamples a raster using a given resampling algorithm and new dimensions (width and height), a new grid corner to pivot the raster at (gridX and gridY) and a set of 
+Resamples a raster using a given resampling algorithm and new dimensions (width and height), a new grid corner to pivot the raster at (gridX and gridY) and a set of
 georeferencing attributes (scaleX and scaleY).
 
 RS_Resample also provides an option to pass a reference raster to draw the georeferencing attributes out of. However, the SRIDs of the input and reference raster must be same, otherwise RS_Resample throws an IllegalArgumentException.
 
-For the purpose of resampling, width-height pair and scaleX-scaleY pair are mutually exclusive, meaning any one of them can be used at a time. 
+For the purpose of resampling, width-height pair and scaleX-scaleY pair are mutually exclusive, meaning any one of them can be used at a time.
 
 The `useScale` parameter controls whether to use width-height or scaleX-scaleY. If `useScale` is false, the provided `widthOrScale` and `heightOrScale` values will be floored to integers and considered as width and height respectively (floating point width and height are not allowed). Otherwise, they are considered as scaleX and scaleY respectively.
 
-Currently, RS_Resample does not support skewed rasters, and hence even if a skewed reference raster is provided, its skew values are ignored. If the input raster is skewed, the output raster geometry and interpolation may be incorrect. 
+Currently, RS_Resample does not support skewed rasters, and hence even if a skewed reference raster is provided, its skew values are ignored. If the input raster is skewed, the output raster geometry and interpolation may be incorrect.
 
 The default algorithm used for resampling is `NearestNeighbor`, and hence if a null, empty or invalid value of algorithm is provided, RS_Resample defaults to using `NearestNeighbor`. However, the algorithm parameter is non-optional.
 
@@ -1484,9 +1484,9 @@ Following are valid values for the algorithm parameter (Case-insensitive):
 
 !!!Tip
     If you just want to resize or rescale an input raster, you can use RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, useScale: Boolean, algorithm: String)
-Format: 
+Format:
 
-```sql 
+```sql
 RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, gridX: Double, gridY: Double, useScale: Boolean, algorithm: String)
 ```
 
@@ -1500,7 +1500,7 @@ RS_Resample(raster: Raster, referenceRaster: Raster, useScale: Boolean, algorith
 
 Since: `v1.5.0`
 
-Spark SQL Example: 
+Spark SQL Example:
 
 ```sql
 WITH INPUT_RASTER AS (
@@ -1531,7 +1531,7 @@ Spark SQL Example:
 ```sql
  WITH INPUT_RASTER AS (
    SELECT RS_AddBandFromArray(
-    RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 2, -2, 0, 0, 0), 
+    RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 2, -2, 0, 0, 0),
     ARRAY(1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10), 1, null) as rast
    ),
    RESAMPLED_RASTER AS (
@@ -1583,7 +1583,7 @@ Output:
 
 Introduction: This sets the no data value for a specified band in the raster. If the band index is not provided, band 1 is assumed by default. Passing a `null` value for `noDataValue` will remove the no data value and that will ensure all pixels are included in functions rather than excluded as no data.
 
-Since `v1.5.1`, this function supports the ability to replace the current no-data value with the new `noDataValue`. 
+Since `v1.5.1`, this function supports the ability to replace the current no-data value with the new `noDataValue`.
 
 !!!Note
     When `replace` is true, any pixels matching the provided `noDataValue` will be considered as no-data in the output raster.
@@ -1592,7 +1592,7 @@ Since `v1.5.1`, this function supports the ability to replace the current no-dat
 
     To use this for no-data replacement, the input raster must first set its no-data value, which can then be selectively replaced via this function.
 
-Format: 
+Format:
 
 ```
 RS_SetBandNoDataValue(raster: Raster, bandIndex: Integer, noDataValue: Double, replace: Boolean)
@@ -1666,11 +1666,11 @@ SELECT RS_GeoReference(
 Output:
 
 ```
-3.000000 
-1.500000 
-1.500000 
-2.000000 
-22.000000 
+3.000000
+1.500000
+1.500000
+2.000000
+22.000000
 3.000000
 ```
 
@@ -1688,11 +1688,11 @@ SELECT RS_GeoReference(
 Output:
 
 ```
-3.000000 
-1.500000 
-1.500000 
-2.000000 
-20.500000 
+3.000000
+1.500000
+1.500000
+2.000000
+20.500000
 2.000000
 ```
 
@@ -1710,11 +1710,11 @@ SELECT RS_GeoReference(
 Output:
 
 ```
-4.000000 
-0.200000 
-0.200000 
-5.000000 
-8.000000 
+4.000000
+0.200000
+0.200000
+5.000000
+8.000000
 -3.000000
 ```
 
@@ -1722,7 +1722,7 @@ Output:
 
 Introduction: Returns a raster by replacing the value of pixel specified by `colX` and `rowY`.
 
-Format: 
+Format:
 
 ```
 RS_SetValue(raster: Raster, bandIndex: Integer = 1, colX: Integer, rowY: Integer, newValue: Double)
@@ -1752,15 +1752,15 @@ Output:
 
 ### RS_SetValues
 
-Introduction: Returns a raster by replacing the values of pixels in a specified rectangular region. The top left 
-corner of the region is defined by the `colX` and `rowY` coordinates. The `width` and `height` parameters specify the dimensions 
-of the rectangular region. The new values to be assigned to the pixels in this region can be specified as an array passed 
+Introduction: Returns a raster by replacing the values of pixels in a specified rectangular region. The top left
+corner of the region is defined by the `colX` and `rowY` coordinates. The `width` and `height` parameters specify the dimensions
+of the rectangular region. The new values to be assigned to the pixels in this region can be specified as an array passed
 to this function.
 
 !!!Note
     Since `v1.5.1`, if the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`. If the `raster` or `geom` doesn't have a CRS then it will default to `4326/WGS84`.
 
-Format: 
+Format:
 
 ```
 RS_SetValues(raster: Raster, bandIndex: Integer, colX: Integer, rowY: Integer, width: Integer, height: Integer, newValues: ARRAY[Double], keepNoData: Boolean = false)
@@ -1772,13 +1772,13 @@ RS_SetValues(raster: Raster, bandIndex: Integer, geom: Geometry, newValue: Doubl
 
 Since: `v1.5.0`
 
-The `colX`, `rowY`, and `bandIndex` are 1-indexed. If `keepNoData` is `true`, the pixels with NoData value will not be 
+The `colX`, `rowY`, and `bandIndex` are 1-indexed. If `keepNoData` is `true`, the pixels with NoData value will not be
 set to the corresponding value in `newValues`. The `newValues` should be provided in rows.
 
 The geometry variant of this function accepts all types of Geometries and it sets the `newValue` in the specified region under the `geom`.
 
-!!!note 
-    If the shape of `newValues` doesn't match with provided `width` and `height`, `IllegalArgumentException` is thrown. 
+!!!note
+    If the shape of `newValues` doesn't match with provided `width` and `height`, `IllegalArgumentException` is thrown.
 
 !!!Note
     If the mentioned `bandIndex` doesn't exist, this will throw an `IllegalArgumentException`.
@@ -1865,7 +1865,7 @@ Introduction: Returns the value at the given point in the raster. If no band num
 !!!Note
     Since `v1.5.1`, if the coordinate reference system (CRS) of the input `point` geometry differs from that of the `raster`, then `point` will be transformed to match the CRS of the `raster`. If the `raster` or `point` doesn't have a CRS then it will default to `4326/WGS84`.
 
-Format: 
+Format:
 
 `RS_Value (raster: Raster, point: Geometry)`
 
@@ -1905,7 +1905,7 @@ RS_Values can be significantly faster since a raster only has to be loaded once 
 !!!Note
     Since `v1.5.1`, if the coordinate reference system (CRS) of the input `points` geometries differs from that of the `raster`, then `points` will be transformed to match the CRS of the `raster`. If the `raster` or `points` doesn't have a CRS then it will default to `4326/WGS84`.
 
-Format: 
+Format:
 
 `RS_Values (raster: Raster, points: ARRAY[Geometry])`
 
@@ -2003,11 +2003,11 @@ Output:
 
 Introduction: Add a band to a raster from an array of doubles.
 
-Format: 
+Format:
 
-`RS_AddBandFromArray (raster: Raster, band: ARRAY[Double])` 
+`RS_AddBandFromArray (raster: Raster, band: ARRAY[Double])`
 
-`RS_AddBandFromArray (raster: Raster, band: ARRAY[Double], bandIndex: Integer)` 
+`RS_AddBandFromArray (raster: Raster, band: ARRAY[Double], bandIndex: Integer)`
 
 `RS_AddBandFromArray (raster: Raster, band: ARRAY[Double], bandIndex: Integer, noDataValue: Double)`
 
@@ -2051,7 +2051,7 @@ Output:
 
 Introduction: Apply a map algebra script on a raster.
 
-Format: 
+Format:
 
 ```
 RS_MapAlgebra (raster: Raster, pixelType: String, script: String)
@@ -2104,7 +2104,7 @@ Map algebra operators work on a single band of a raster. Each band is represente
 
 ### RS_Add
 
-Introduction: Add two spectral bands in a Geotiff image 
+Introduction: Add two spectral bands in a Geotiff image
 
 Format: `RS_Add (Band1: ARRAY[Double], Band2: ARRAY[Double])`
 
@@ -2190,7 +2190,7 @@ val multiplyDF = spark.sql("select RS_Divide(band1, band2) as divideBands from d
 
 Introduction: Fetch a subset of region from given Geotiff image based on minimumX, minimumY, maximumX and maximumY index as well original height and width of image
 
-Format: 
+Format:
 
 ```
 RS_FetchRegion (Band: ARRAY[Double], coordinates: ARRAY[Integer], dimensions: ARRAY[Integer])
@@ -2390,7 +2390,7 @@ val normalizedDF = spark.sql("select RS_NormalizedDifference(band1, band2) as no
 
 ### RS_SquareRoot
 
-Introduction: Find Square root of band values in a geotiff image 
+Introduction: Find Square root of band values in a geotiff image
 
 Format: `RS_SquareRoot (Band: ARRAY[Double])`
 

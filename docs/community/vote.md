@@ -106,5 +106,5 @@ d3bdfd4d870838ebe63f21cb93634d2421ec1ac1b8184636206a5dc0d89a78a88257798b1f17371a
 ## Check files manually
 
 1. Check if the downloaded files have the correct version.
- 
+
 2. In the unzipped source code folder, and check if DISCLAIMER and NOTICE files and included and up to date.
