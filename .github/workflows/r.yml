@@ -124,7 +124,7 @@ jobs:
           cd ./R/tests
           NOT_CRAN='true' Rscript testthat.R
         shell: bash
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Worker logs
