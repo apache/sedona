@@ -9,4 +9,4 @@ descartes
 ipywidgets
 jupyterlab-widgets==1.1.7
 ipykernel
-jupyterlab==3.6.4
+jupyterlab==4.0.10
