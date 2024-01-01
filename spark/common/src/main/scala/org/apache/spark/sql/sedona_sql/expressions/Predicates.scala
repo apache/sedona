@@ -260,4 +260,3 @@ case class ST_DWithin(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
-

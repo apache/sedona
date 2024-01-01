@@ -204,4 +204,3 @@ def ST_DWithin(a: ColumnOrName, b: ColumnOrName, distance: Union[ColumnOrName, f
     """
 
     return _call_predicate_function("ST_DWithin", (a, b, distance))
-
