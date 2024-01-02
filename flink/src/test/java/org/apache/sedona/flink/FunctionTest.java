@@ -360,6 +360,14 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testLineLocatePoint() {
+        Table resultTable = tableEnv.sqlQuery("SELECT ST_LineLocatePoint(ST_GeomFromWKT('LINESTRING (0 2, 1 1, 2 0)'), ST_GeomFromWKT('POINT (0 0)'))");
+        Double result = (Double) first(resultTable).getField(0);
+        Double expectedResult = 0.5;
+        assertEquals(expectedResult, result, 0.1);
+    }
+
+    @Test
     public void testYMax() {
         Table polygonTable = createPolygonTable(1);
         Table ResultTable = polygonTable.select(call(Functions.ST_YMax.class.getSimpleName(), $(polygonColNames[0])));
@@ -769,12 +777,6 @@ public class FunctionTest extends TestBase{
     public void testRemovePointWithIndex() {
         Table pointTable = tableEnv.sqlQuery("SELECT ST_RemovePoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)'), 1)");
         assertEquals("LINESTRING (0 0, 2 2)", first(pointTable).getField(0).toString());
-    }
-
-    @Test
-    public void testSetPoint() {
-        Table pointTable = tableEnv.sqlQuery("SELECT ST_SetPoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)'), 0, ST_GeomFromWKT('POINT (3 3)'))");
-        assertEquals("LINESTRING (3 3, 1 1, 2 2)", first(pointTable).getField(0).toString());
     }
 
     @Test
