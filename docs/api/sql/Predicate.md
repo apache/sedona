@@ -60,7 +60,7 @@ true
 
 ## ST_DWithin
 
-Introduction: Returns true if 'leftGeometry' and 'rightGeometry' are within a specified 'distance'
+Introduction: Returns true if 'leftGeometry' and 'rightGeometry' are within a specified 'distance'. This function essentially checks if the shortest distance between the envelope of the two geometries is <= the provided distance.
 
 Format: `ST_DWithin (leftGeometry: Geometry, rightGeometry: Geometry, distance: Double)`
 
