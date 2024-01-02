@@ -734,6 +734,7 @@
                 <module>spark-shaded</module>
                 <module>flink</module>
                 <module>flink-shaded</module>
+                <module>snowflake</module>
             </modules>
         </profile>
     </profiles>
