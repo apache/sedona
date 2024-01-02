@@ -62,16 +62,5 @@ public class PredicatesTest extends TestBase {
         assertTrue(actual);
     }
 
-    @Test
-    public void testDWithinException() {
-        Geometry point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
-        Geometry point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(2, 2));
-        Geometry transformedPoint2 = Functions.setSRID(point2, 4326);
-        double distance = 1.42;
-        Exception e = assertThrows(IllegalArgumentException.class, () -> Predicates.dWithin(point1, transformedPoint2, distance));
-        String expectedMessage = "Provided left and right geometries do not share the same SRID. SRIDs are 0 and 4326 respectively.";
-        assertEquals(expectedMessage, e.getMessage());
-    }
-
 
 }

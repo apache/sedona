@@ -50,10 +50,6 @@ public class Predicates {
         return leftGeometry.equalsExact(rightGeometry);
     }
     public static boolean dWithin(Geometry leftGeometry, Geometry rightGeometry, double distance) {
-        int leftSrid = leftGeometry.getSRID(), rightSrid = rightGeometry.getSRID();
-        if (leftSrid != rightSrid) {
-            throw new IllegalArgumentException(String.format("Provided left and right geometries do not share the same SRID. SRIDs are %d and %d respectively.", leftSrid, rightSrid));
-        }
         return leftGeometry.isWithinDistance(rightGeometry, distance);
     }
 }
