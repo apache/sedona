@@ -680,7 +680,11 @@ df.write.format("geoparquet")
 		.save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
 ```
 
-You can find the projjson string of a specific CRS from here: https://epsg.io/ (click the JSON option at the bottom of the page). You can also customize your projjson string as needed.
+The value of `geoparquet.crs` and `geoparquet.crs.<column_name>` can be one of the following:
+
+* `"null"`: Explicitly setting `crs` field to `null`. This is the default behavior.
+* `""` (empty string): Omit the `crs` field. This implies that the CRS is [OGC:CRS84](https://www.opengis.net/def/crs/OGC/1.3/CRS84) for CRS-aware implementations.
+* `"{...}"` (PROJJSON string): The `crs` field will be set as the PROJJSON object representing the Coordinate Reference System (CRS) of the geometry. You can find the PROJJSON string of a specific CRS from here: https://epsg.io/ (click the JSON option at the bottom of the page). You can also customize your PROJJSON string as needed.
 
 Please note that Sedona currently cannot set/get a projjson string to/from a CRS. Its geoparquet reader will ignore the projjson metadata and you will have to set your CRS via [`ST_SetSRID`](../api/sql/Function.md#st_setsrid) after reading the file.
 Its geoparquet writer will not leverage the SRID field of a geometry so you will have to always set the `geoparquet.crs` option manually when writing the file, if you want to write a meaningful CRS field.
