@@ -216,3 +216,9 @@ class TestPredicate(TestBase):
         assert order_equals.take(1)[0][0]
         assert not not_order_equals_diff_geom.take(1)[0][0]
         assert not not_order_equals_diff_order.take(1)[0][0]
+
+    def test_st_dwithin(self):
+        test_table = self.spark.sql("select ST_GeomFromWKT('POINT (0 0)') as origin, ST_GeomFromWKT('POINT (2 0)') as point_1")
+        test_table.createOrReplaceTempView("test_table")
+        isWithin = self.spark.sql("select ST_DWithin(origin, point_1, 3) from test_table").head()[0]
+        assert isWithin is True

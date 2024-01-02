@@ -13,16 +13,23 @@
  */
 package org.apache.sedona.flink;
 
+import org.apache.calcite.runtime.Geometries;
 import org.apache.flink.table.api.Table;
+import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.flink.expressions.Predicates;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
+import static org.junit.Assert.assertThrows;
 
 public class PredicateTest extends TestBase{
+
+    private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         initialize();
@@ -121,5 +128,21 @@ public class PredicateTest extends TestBase{
         table = table.select(call(Predicates.ST_Touches.class.getSimpleName(), $("g1"), $("g2")));
         Boolean actual = (Boolean) first(table).getField(0);
         assertEquals(true, actual);
+    }
+
+    @Test
+    public void testDWithin() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (0 0)') as origin, ST_GeomFromWKT('POINT (1 0)') as p1");
+        table = table.select(call(Predicates.ST_DWithin.class.getSimpleName(), $("origin"), $("p1"), 1));
+        Boolean actual = (Boolean) first(table).getField(0);
+        assertEquals(true, actual);
+    }
+
+    @Test
+    public void testDWithinFailure() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (0 0)') as origin, ST_GeomFromWKT('POINT (5 0)') as p1");
+        table = table.select(call(Predicates.ST_DWithin.class.getSimpleName(), $("origin"), $("p1"), 2));
+        Boolean actual = (Boolean) first(table).getField(0);
+        assertEquals(false, actual);
     }
 }

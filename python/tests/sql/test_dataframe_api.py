@@ -175,6 +175,7 @@ test_configurations = [
     (stp.ST_Within, (lambda: f.expr("ST_Point(0.0, 0.0)"), "geom"), "triangle_geom", "", False),
     (stp.ST_Covers, ("geom", lambda: f.expr("ST_Point(0.0, 0.0)")), "triangle_geom", "", True),
     (stp.ST_CoveredBy, (lambda: f.expr("ST_Point(0.0, 0.0)"), "geom"), "triangle_geom", "", True),
+    (stp.ST_DWithin, ("origin", "point", 5.0), "origin_and_point", "", True),
 
     # aggregates
     (sta.ST_Envelope_Aggr, ("geom",), "exploded_points", "", "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"),
@@ -423,6 +424,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION(POINT(1 1), LINESTRING(0 0, 1 1, 2 2))') AS geom")
         elif request.param == "point_and_line":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (0.0 1.0)') AS point, ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)') AS line")
+        elif request.param == "origin_and_point":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (0 0)') AS origin, ST_GeomFromWKT('POINT (1 0)') as point")
         raise ValueError(f"Invalid base_df name passed: {request.param}")
 
     def _id_test_configuration(val):
