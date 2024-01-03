@@ -13,18 +13,26 @@
  */
 package org.apache.sedona.common.raster;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.utils.RasterUtils;
+import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.junit.Assert;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
+import org.opengis.geometry.DirectPosition;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
+import java.awt.image.DataBuffer;
+import java.awt.image.RenderedImage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -236,6 +244,132 @@ public class RasterConstructorsTest
         assertEquals(upperLeftY - heightInPixel * (pixelSize + 1), envelope.getEnvelopeInternal().getMinY(), 0.001);
         assertEquals(upperLeftY, envelope.getEnvelopeInternal().getMaxY(), 0.001);
         assertEquals("SIGNED_32BITS", gridCoverage2D.getSampleDimension(0).getSampleDimensionType().name());
+    }
+
+    @Test
+    public void testInDbTileWithoutPadding() {
+        GridCoverage2D raster = createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 1, "EPSG:3857");
+        RasterConstructors.Tile[] tiles = RasterConstructors.generateTiles(raster, null, 10, 10, false, Double.NaN);
+        assertTilesSameWithGridCoverage(tiles, raster, null, 10, 10, Double.NaN);
+    }
+
+    @Test
+    public void testInDbTileWithoutPadding2() {
+        GridCoverage2D raster = createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 1, "EPSG:3857");
+        RasterConstructors.Tile[] tiles = RasterConstructors.generateTiles(raster, null, 9, 9, false, Double.NaN);
+        assertTilesSameWithGridCoverage(tiles, raster, null, 9, 9, Double.NaN);
+    }
+
+    @Test
+    public void testInDbTileWithPadding() {
+        GridCoverage2D raster = createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 2, "EPSG:3857");
+        RasterConstructors.Tile[] tiles = RasterConstructors.generateTiles(raster, null, 9, 9, true, 100);
+        assertTilesSameWithGridCoverage(tiles, raster, null, 9, 9, 100);
+    }
+
+    @Test
+    public void testInDbTileWithBandSelector() {
+        GridCoverage2D raster = createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 2, "EPSG:3857");
+        int[] bandIndices = {2};
+        RasterConstructors.Tile[] tiles = RasterConstructors.generateTiles(raster, bandIndices, 9, 9, true, 100);
+        assertTilesSameWithGridCoverage(tiles, raster, bandIndices, 9, 9, 100);
+    }
+
+    @Test
+    public void testInDbTileWithBandSelector2() {
+        GridCoverage2D raster = createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 4, "EPSG:3857");
+        int[] bandIndices = {3, 1};
+        RasterConstructors.Tile[] tiles = RasterConstructors.generateTiles(raster, bandIndices, 8, 7, true, 100);
+        assertTilesSameWithGridCoverage(tiles, raster, bandIndices, 8, 7, 100);
+    }
+
+    @Test
+    public void testInDbTileInheritSourceNoDataValue() {
+        GridCoverage2D raster = createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 1, "EPSG:3857");
+        raster = MapAlgebra.addBandFromArray(raster, MapAlgebra.bandAsArray(raster, 1), 1, 13.0);
+        RasterConstructors.Tile[] tiles = RasterConstructors.generateTiles(raster, null, 9, 9, true, Double.NaN);
+        assertTilesSameWithGridCoverage(tiles, raster, null, 9, 9, 13);
+    }
+
+    @Test
+    public void testInDbTileOverrideSourceNoDataValue() {
+        GridCoverage2D raster = createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 1, "EPSG:3857");
+        raster = MapAlgebra.addBandFromArray(raster, MapAlgebra.bandAsArray(raster, 1), 1, 13.0);
+        RasterConstructors.Tile[] tiles = RasterConstructors.generateTiles(raster, null, 9, 9, true, 42);
+        assertTilesSameWithGridCoverage(tiles, raster, null, 9, 9, 42);
+    }
+
+    private void assertTilesSameWithGridCoverage(RasterConstructors.Tile[] tiles, GridCoverage2D gridCoverage2D,
+                                                 int[] bandIndices, int tileWidth, int tileHeight, double noDataValue) {
+        RenderedImage image = gridCoverage2D.getRenderedImage();
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int numTilesX = (int) Math.ceil((double) width / tileWidth);
+        int numTilesY = (int) Math.ceil((double) height / tileHeight);
+        Assert.assertEquals(numTilesX * numTilesY, tiles.length);
+
+        // For each tile, select a few random points, and do the following checks
+        // 1. The pixel at the point is the same as the corresponding pixel in the grid coverage
+        // 2. The pixel at the point translates to the same world coordinate as the corresponding pixel in the grid
+        //    coverage
+        Set<Pair<Integer, Integer>> visitedTiles = new HashSet<>();
+        for (RasterConstructors.Tile tile : tiles) {
+            int tileX = tile.getTileX();
+            int tileY = tile.getTileY();
+            Pair<Integer, Integer> tilePosition = Pair.of(tileX, tileY);
+            Assert.assertFalse(visitedTiles.contains(tilePosition));
+            visitedTiles.add(tilePosition);
+
+            int offsetX = tileX * tileWidth;
+            int offsetY = tileY * tileHeight;
+            for (int i = 0; i < 10; i++) {
+                GridCoverage2D tileRaster = tile.getCoverage();
+                RenderedImage tileImage = tileRaster.getRenderedImage();
+                int currentTileWidth = tileImage.getWidth();
+                int currentTileHeight = tileImage.getHeight();
+                Assert.assertTrue(currentTileWidth <= tileWidth);
+                Assert.assertTrue(currentTileHeight <= tileHeight);
+                if (currentTileWidth < tileWidth || currentTileHeight < tileHeight) {
+                    Assert.assertTrue((tileX == numTilesX - 1) || (tileY == numTilesY - 1));
+                }
+
+                int x = (int) (Math.random() * currentTileWidth);
+                int y = (int) (Math.random() * currentTileHeight);
+
+                // Check that the pixel at the point is the same as the corresponding pixel in the grid coverage
+                GridCoordinates2D tileGridCoord = new GridCoordinates2D(x, y);
+                GridCoordinates2D gridCoord = new GridCoordinates2D(offsetX + x, offsetY + y);
+                float[] values = tileRaster.evaluate(tileGridCoord, (float[]) null);
+                if (offsetX + x < width && offsetY + y < height) {
+                    float[] expectedValues = gridCoverage2D.evaluate(gridCoord, (float[]) null);
+                    if (bandIndices == null) {
+                        Assert.assertArrayEquals(expectedValues, values, 1e-6f);
+                    } else {
+                        Assert.assertEquals(bandIndices.length, values.length);
+                        for (int j = 0; j < bandIndices.length; j++) {
+                            Assert.assertEquals(expectedValues[bandIndices[j] - 1], values[j], 1e-6f);
+                        }
+                    }
+
+                    // Check that the pixel at the point translates to the same world coordinate as the corresponding
+                    // pixel in the grid coverage
+                    try {
+                        DirectPosition actualWorldCoord = tileRaster.getGridGeometry().gridToWorld(tileGridCoord);
+                        DirectPosition expectedWorldCoord = gridCoverage2D.getGridGeometry().gridToWorld(gridCoord);
+                        Assert.assertEquals(expectedWorldCoord, actualWorldCoord);
+                    } catch (TransformException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    // Padded pixel
+                    for (int k = 0; k < values.length; k++) {
+                        double tileNoDataValue = RasterUtils.getNoDataValue(tileRaster.getSampleDimension(k));
+                        Assert.assertEquals(noDataValue, tileNoDataValue, 1e-6f);
+                        Assert.assertEquals(noDataValue, values[k], 1e-6f);
+                    }
+                }
+            }
+        }
     }
 
     @Test
