@@ -510,6 +510,12 @@ case class ST_LineInterpolatePoint(inputExpressions: Seq[Expression])
   }
 }
 
+/**
+ * Returns a float between 0 and 1 representing the location of the closest point on a LineString to the given Point,
+ * as a fraction of 2d line length.
+ *
+ * @param inputExpressions
+ */
 case class ST_LineLocatePoint(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.lineLocatePoint _) {
 

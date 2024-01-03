@@ -732,6 +732,14 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_LineLocatePoint") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)') AS line, ST_GeomFromWKT('POINT (0 2)') AS point")
+      val df = baseDf.select(ST_LineLocatePoint("line", "point"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Double]
+      val expectedResult = 0.5
+      assert(actualResult == expectedResult)
+    }
+
     it ("Passed ST_Multi"){
       val baseDf = sparkSession.sql("SELECT ST_Point(0.0, 0.0) AS point")
       val df = baseDf.select(ST_Multi("point"))

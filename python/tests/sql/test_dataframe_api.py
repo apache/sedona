@@ -116,6 +116,7 @@ test_configurations = [
     (stf.ST_LengthSpheroid, ("point",), "point_geom", "", 0.0),
     (stf.ST_LineFromMultiPoint, ("multipoint",), "multipoint_geom", "", "LINESTRING (10 40, 40 30, 20 20, 30 10)"),
     (stf.ST_LineInterpolatePoint, ("line", 0.5), "linestring_geom", "", "POINT (2.5 0)"),
+    (stf.ST_LineLocatePoint, ("line", "point"), "line_and_point", "", 0.5),
     (stf.ST_LineMerge, ("geom",), "multiline_geom", "", "LINESTRING (0 0, 1 0, 1 1, 0 0)"),
     (stf.ST_LineSubstring, ("line", 0.5, 1.0), "linestring_geom", "", "LINESTRING (2.5 0, 3 0, 4 0, 5 0)"),
     (stf.ST_MakeValid, ("geom",), "invalid_geom", "", "MULTIPOLYGON (((1 5, 3 3, 1 1, 1 5)), ((5 3, 7 5, 7 1, 5 3)))"),
@@ -260,6 +261,8 @@ wrong_type_configurations = [
     (stf.ST_LineFromMultiPoint, (None,)),
     (stf.ST_LineInterpolatePoint, (None, 0.5)),
     (stf.ST_LineInterpolatePoint, ("", None)),
+    (stf.ST_LineLocatePoint, (None, "")),
+    (stf.ST_LineLocatePoint, ("", None)),
     (stf.ST_LineMerge, (None,)),
     (stf.ST_LineSubstring, (None, 0.5, 1.0)),
     (stf.ST_LineSubstring, ("", None, 1.0)),
@@ -423,6 +426,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION(POINT(1 1), LINESTRING(0 0, 1 1, 2 2))') AS geom")
         elif request.param == "point_and_line":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (0.0 1.0)') AS point, ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)') AS line")
+        elif request.param == "line_and_point":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (0 2, 1 1, 2 0)') AS line, ST_GeomFromWKT('POINT (0 0)') AS point")
         raise ValueError(f"Invalid base_df name passed: {request.param}")
 
     def _id_test_configuration(val):
