@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.apache.sedona</groupId>
+        <artifactId>sedona-parent</artifactId>
+        <version>1.5.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>sedona-snowflake-tester</artifactId>
+
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>A cluster computing system for processing large-scale spatial data: Snowflake tester programs.</description>
+    <url>http://sedona.apache.org/</url>
+
+    <properties>
+        <maven.deploy.skip>${skip.deploy.common.modules}</maven.deploy.skip>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.sedona</groupId>
+            <artifactId>sedona-snowflake</artifactId>
+            <version>1.5.1-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>net.snowflake</groupId>
+            <artifactId>snowflake-jdbc</artifactId>
+            <version>3.13.30</version>
+        </dependency>
+    </dependencies>
+</project>

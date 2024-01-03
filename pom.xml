@@ -737,5 +737,20 @@
                 <module>snowflake</module>
             </modules>
         </profile>
+        <profile>
+            <id>snowflake</id>
+            <activation>
+                <property>
+                    <name>snowflake</name>
+                    <value>true</value>
+                </property>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>common</module>
+                <module>snowflake</module>
+                <module>snowflake-tester</module>
+            </modules>
+        </profile>
     </profiles>
 </project>
