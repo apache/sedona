@@ -24,7 +24,7 @@ import org.apache.spark.sql.sedona_sql.expressions.st_aggregates._
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
 import org.apache.spark.sql.sedona_sql.expressions.st_functions._
 import org.apache.spark.sql.sedona_sql.expressions.st_predicates._
-import org.junit.Assert.assertEquals
+import org.junit.Assert.{assertEquals, assertTrue}
 import org.locationtech.jts.geom.{Geometry, Polygon}
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.operation.buffer.BufferParameters
@@ -1242,6 +1242,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       val expected = "POLYGON"
       val actual = df.take(1)(0).get(0).asInstanceOf[String]
       assert(expected == actual)
+    }
+
+    it("Passed ST_DWithin") {
+      val pointDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (0 0)') as origin, ST_GeomFromWKT('POINT (1 0)') as point")
+      val df = pointDf.select(ST_DWithin("origin", "point", 2.0))
+      val actual = df.head()(0).asInstanceOf[Boolean]
+      assertTrue(actual)
     }
   }
 }

@@ -26,7 +26,7 @@ sparkSession.conf.set("sedona.global.index","false")
 	* Possible values: true, false
 * sedona.global.indextype
 	* Spatial index type, only valid when "sedona.global.index" is true
-	* Default: quadtree
+	* Default: rtree
 	* Possible values: rtree, quadtree
 * sedona.join.autoBroadcastJoinThreshold
 	* Configures the maximum size in bytes for a table that will be broadcast to all worker nodes when performing a join.

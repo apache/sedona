@@ -102,7 +102,7 @@ Example:
 SELECT ST_GeomFromGML('
     <gml:LineString srsName="EPSG:4269">
     	<gml:coordinates>
-        	-71.16028,42.258729  
+        	-71.16028,42.258729
         	-71.160837,42.259112
         	-71.161143,42.25932
     	</gml:coordinates>
@@ -131,7 +131,7 @@ Example:
 SELECT ST_GeomFromKML('
 	<LineString>
 		<coordinates>
-			-71.1663,42.2614 
+			-71.1663,42.2614
 			-71.1667,42.2616
 		</coordinates>
 	</LineString>
@@ -397,10 +397,10 @@ POINT (1.2345 2.3456)
 
 ## ST_PointZ
 
-Introduction: Construct a Point from X, Y and Z and an optional srid. If srid is not set, it defaults to 0 (unknown). 
+Introduction: Construct a Point from X, Y and Z and an optional srid. If srid is not set, it defaults to 0 (unknown).
 Must use ST_AsEWKT function to print the Z coordinate.
 
-Format: 
+Format:
 
 `ST_PointZ (X: Double, Y: Double, Z: Double)`
 
@@ -444,7 +444,7 @@ POINT (40.7128 -74.006)
 
 Introduction: Construct a Polygon from MinX, MinY, MaxX, MaxY.
 
-Format: 
+Format:
 
 `ST_PolygonFromEnvelope (MinX: Double, MinY: Double, MaxX: Double, MaxY: Double)`
 

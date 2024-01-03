@@ -49,4 +49,7 @@ public class Predicates {
     public static boolean orderingEquals(Geometry leftGeometry, Geometry rightGeometry) {
         return leftGeometry.equalsExact(rightGeometry);
     }
+    public static boolean dWithin(Geometry leftGeometry, Geometry rightGeometry, double distance) {
+        return leftGeometry.isWithinDistance(rightGeometry, distance);
+    }
 }

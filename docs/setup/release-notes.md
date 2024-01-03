@@ -75,7 +75,7 @@ Sedona 1.5.0 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-405'>SEDONA-405</a>] -         Sedona driver Out of Memory on 1.4.1
 </li>
 </ul>
-        
+
 ### New Feature
 
 <ul>
@@ -117,13 +117,13 @@ Sedona 1.5.0 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-328'>SEDONA-328</a>] -         Add wrapper for pydeck visualizations in sedona
 </li>
-<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-331'>SEDONA-331</a>] -         Add RS_Height and RS_Width 
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-331'>SEDONA-331</a>] -         Add RS_Height and RS_Width
 </li>
-<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-334'>SEDONA-334</a>] -         Add ScaleX and ScaleY 
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-334'>SEDONA-334</a>] -         Add ScaleX and ScaleY
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-335'>SEDONA-335</a>] -         Add RS_PixelAsPoint
 </li>
-<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-336'>SEDONA-336</a>] -         Add RS_UpperLeftX and RS_UpperLeftY 
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-336'>SEDONA-336</a>] -         Add RS_UpperLeftX and RS_UpperLeftY
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-340'>SEDONA-340</a>] -         Add RS_ConvexHull
 </li>
@@ -186,7 +186,7 @@ Sedona 1.5.0 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-404'>SEDONA-404</a>] -         Add RS_Resample
 </li>
 </ul>
-        
+
 ### Improvement
 
 <ul>
@@ -233,7 +233,7 @@ Sedona 1.5.0 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-408'>SEDONA-408</a>] -         Set a reasonable default size for RasterUDT
 </li>
 </ul>
-            
+
 ### Task
 
 <ul>
@@ -441,7 +441,7 @@ When `sedona.join.optimizationmode` is configured as `nonequi`, it won't optimiz
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-261'>SEDONA-261</a>] -         Cannot run distance join using broadcast index join when the distance expression references to attributes from the right-side relation
 </li>
 </ul>
-        
+
 ### New Feature
 
 <ul>
@@ -460,7 +460,7 @@ When `sedona.join.optimizationmode` is configured as `nonequi`, it won't optimiz
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-262'>SEDONA-262</a>] -         Don&#39;t optimize equi-join by default, add an option to configure when to optimize spatial joins
 </li>
 </ul>
-        
+
 <h2>        Improvement
 </h2>
 <ul>
@@ -486,7 +486,7 @@ When `sedona.join.optimizationmode` is configured as `nonequi`, it won't optimiz
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-244'>SEDONA-244</a>] -         Align R read/write functions with the Sparklyr framework
 </li>
-<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-249'>SEDONA-249</a>] -         Add jvm flags for running tests on Java 17 
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-249'>SEDONA-249</a>] -         Add jvm flags for running tests on Java 17
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-251'>SEDONA-251</a>] -         Add raster type to Sedona
 </li>
@@ -753,7 +753,7 @@ This version is a major release on Sedona 1.1.0 line. It includes bug fixes and 
 
 ### Global
 
-Dependency upgrade: 
+Dependency upgrade:
 
 * [SEDONA-30](https://issues.apache.org/jira/browse/SEDONA-30): Use Geotools-wrapper 1.1.0-24.1 to include geotools GeoTiff libraries.
 
@@ -808,7 +808,7 @@ Bug fix:
 Major update:
 
 * [SEDONA-31](https://issues.apache.org/jira/browse/SEDONA-31): Add R interface for Sedona
- 
+
 ## Sedona 1.0.1
 
 This version is a maintenance release on Sedona 1.0.0 line. It includes bug fixes, some new features, one ==API change==

@@ -1296,6 +1296,174 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals("UNSIGNED_8BITS", result)
     }
 
+    it("Passed RS_Tile - in-db raster") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+      val resultDf = df.selectExpr("RS_Tile(raster, 100, 100) as tiles")
+      val result = resultDf.first().get(0)
+      assert(result.isInstanceOf[mutable.WrappedArray[GridCoverage2D]])
+      val tiles = result.asInstanceOf[mutable.WrappedArray[GridCoverage2D]]
+      assert(tiles.exists(tile => tile.getRenderedImage.getWidth < 100 || tile.getRenderedImage.getHeight < 100))
+      tiles.foreach { tile =>
+        assert(tile.getRenderedImage.getData != null)
+        assert(RasterUtils.getNoDataValue(tile.getSampleDimension(0)) == 0)
+        tile.dispose(true)
+      }
+      val rsValuesDf = resultDf.selectExpr("explode(tiles) as tile")
+        .selectExpr("RS_Value(tile, ST_Centroid(RS_Envelope(tile))) as value")
+        .withColumn("is_non_null", expr("value is not null"))
+      assert(rsValuesDf.count() == 120)
+      assert((90 to 110) contains rsValuesDf.where("is_non_null").count())
+    }
+
+    it("Passed RS_Tile - in-db raster with padding") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+      val resultDf = df.selectExpr("RS_Tile(raster, null, 100, 100, true, 3) as tiles")
+      val result = resultDf.first().get(0)
+      assert(result.isInstanceOf[mutable.WrappedArray[GridCoverage2D]])
+      val tiles = result.asInstanceOf[mutable.WrappedArray[GridCoverage2D]]
+      assert(tiles.exists(tile => RasterUtils.getNoDataValue(tile.getSampleDimension(0)) == 3))
+      tiles.foreach { tile =>
+        assert(tile.getRenderedImage.getData != null)
+        assert(tile.getRenderedImage.getWidth == 100 && tile.getRenderedImage.getHeight == 100)
+        tile.dispose(true)
+      }
+    }
+
+    it("Passed RS_Tile - in-db raster with band index") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+      val resultDf = df.selectExpr("RS_Tile(raster, array(2), 100, 100, false) as tiles")
+      val result = resultDf.first().get(0)
+      assert(result.isInstanceOf[mutable.WrappedArray[GridCoverage2D]])
+      val tiles = result.asInstanceOf[mutable.WrappedArray[GridCoverage2D]]
+      tiles.foreach { tile =>
+        assert(tile.getRenderedImage.getData != null)
+        assert(tile.getNumSampleDimensions == 1)
+        tile.dispose(true)
+      }
+    }
+
+    it("Passed RS_Tile - in-db raster with band indices") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+      val resultDf = df.selectExpr("RS_Tile(raster, array(2, 1), 100, 100) as tiles")
+      val result = resultDf.first().get(0)
+      assert(result.isInstanceOf[mutable.WrappedArray[GridCoverage2D]])
+      val tiles = result.asInstanceOf[mutable.WrappedArray[GridCoverage2D]]
+      tiles.foreach { tile =>
+        assert(tile.getRenderedImage.getData != null)
+        assert(tile.getNumSampleDimensions == 2)
+        tile.dispose(true)
+      }
+    }
+
+    it("Passed RS_TileExplode - in-db raster") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+      val resultDf = df.selectExpr("RS_TileExplode(raster, 100, 100) AS (x, y, tile)")
+      val result = resultDf.collect()
+      assert(result.length == 120)
+      result.foreach { row =>
+        val tile = row.getAs[GridCoverage2D]("tile")
+        assert(tile.isInstanceOf[GridCoverage2D])
+        assert(tile.getRenderedImage.getData != null)
+        tile.dispose(true)
+      }
+    }
+
+    it("Passed RS_TileExplode - in-db raster with padding") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+      Seq("3", "3.0", "3.0d").foreach { noData =>
+        val resultDf = df.selectExpr(s"RS_TileExplode(raster, 100, 100, true, $noData) AS (x, y, tile)")
+        val result = resultDf.collect()
+        val tiles = result.map(_.getAs[GridCoverage2D]("tile"))
+        assert(tiles.exists(tile => RasterUtils.getNoDataValue(tile.getSampleDimension(0)) == 3))
+        tiles.foreach { tile =>
+          assert(tile.getRenderedImage.getData != null)
+          assert(tile.getRenderedImage.getWidth == 100 && tile.getRenderedImage.getHeight == 100)
+          tile.dispose(true)
+        }
+      }
+    }
+
+    it("Passed RS_TileExplode - in-db raster with band index") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+      val resultDf = df.selectExpr("RS_TileExplode(raster, 2, 100, 100, true, 5) AS (x, y, tile)")
+      val result = resultDf.collect()
+      val tiles = result.map(_.getAs[GridCoverage2D]("tile"))
+      assert(tiles.exists(tile => RasterUtils.getNoDataValue(tile.getSampleDimension(0)) == 5))
+      tiles.foreach { tile =>
+        assert(tile.getRenderedImage.getData != null)
+        assert(tile.getNumSampleDimensions == 1)
+        tile.dispose(true)
+      }
+    }
+
+    it("Passed RS_TileExplode - in-db raster with band indices") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+      val resultDf = df.selectExpr("RS_TileExplode(raster, array(2, 1), 100, 100) AS (x, y, tile)")
+      val result = resultDf.collect()
+      val tiles = result.map(_.getAs[GridCoverage2D]("tile"))
+      tiles.foreach { tile =>
+        assert(tile.getRenderedImage.getData != null)
+        assert(tile.getNumSampleDimensions == 2)
+        tile.dispose(true)
+      }
+    }
+
+    it("Passed RS_MapAlgebra with two raster columns") {
+      var df = sparkSession.read.format("binaryFile")
+        .option("recursiveFileLookup", "true")
+        .option("pathGlobFilter", "*.tif*")
+        .load(resourceFolder + "raster")
+        .selectExpr("path", "RS_FromGeoTiff(content) as rast")
+      df = df.as("r1")
+        .join(df.as("r2"), col("r1.path") === col("r2.path"), "inner")
+        .select(col("r1.rast").alias("rast0"), col("r2.rast").alias("rast1"), col("r1.path"))
+      Seq(null, "b", "s", "i", "f", "d").foreach { pixelType =>
+        val pixelTypeExpr = if (pixelType == null) null else s"'$pixelType'"
+        val dfResult = df.withColumn("rast_2", expr(s"RS_MapAlgebra(rast0, rast1, $pixelTypeExpr, 'out[0] = rast0[0] * 0.5 + rast1[0] * 0.5;', null)"))
+          .select("path", "rast0", "rast1", "rast_2")
+        dfResult.collect().foreach { row =>
+          val rast0 = row.getAs[GridCoverage2D]("rast0")
+          val rast1 = row.getAs[GridCoverage2D]("rast1")
+          val resultRaster = row.getAs[GridCoverage2D]("rast_2")
+          assert(rast0.getGridGeometry.getGridToCRS2D == resultRaster.getGridGeometry.getGridToCRS2D)
+          val dataType = pixelType match {
+            case null => rast0.getRenderedImage.getSampleModel.getDataType
+            case _ => RasterUtils.getDataTypeCode(pixelType)
+          }
+          assert(resultRaster.getRenderedImage.getSampleModel.getDataType == dataType)
+          val noDataValue = RasterUtils.getNoDataValue(resultRaster.getSampleDimension(0))
+          assert(noDataValue.isNaN)
+          val band0 = MapAlgebra.bandAsArray(rast0, 1)
+          val band1 = MapAlgebra.bandAsArray(rast1, 1)
+          val bandResult = MapAlgebra.bandAsArray(resultRaster, 1)
+          assert(band0.size == bandResult.size)
+          for (i <- band0.indices) {
+            pixelType match {
+              case "b" => assert(((band0(i) * 0.5 + band1(i) * 0.5).toInt & 0xFF) == bandResult(i).toInt)
+              case "s" => assert((band0(i) * 0.5 + band1(i) * 0.5).toShort == bandResult(i))
+              case "i" | null => assert((band0(i) * 0.5 + band1(i) * 0.5).toInt == bandResult(i))
+              case "f" | "d" =>
+                if (band0(i) != 0) {
+                  assert((band0(i) * 0.5 + band1(i) * 0.5) == bandResult(i))
+                } else {
+                  // If the source image has NoDataContainer.GC_NODATA property, Jiffle may convert nodata values in
+                  // source raster to NaN.
+                  assert(bandResult(i) == 0 || bandResult(i).isNaN)
+                }
+            }
+          }
+        }
+      }
+    }
+
     it("Passed RS_MapAlgebra") {
       val df = sparkSession.read.format("binaryFile")
         .option("recursiveFileLookup", "true")

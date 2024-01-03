@@ -34,7 +34,7 @@ class SedonaMapUtils:
         pandas_df = df.toPandas()
         geo_df = gpd.GeoDataFrame(pandas_df, geometry=geometry_col)
         if geometry_col != "geometry" and rename is True:
-            geo_df = geo_df.rename(columns={geometry_col: "geometry"})
+            geo_df.rename_geometry("geometry", inplace=True)
         return geo_df
 
     @classmethod

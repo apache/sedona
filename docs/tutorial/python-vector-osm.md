@@ -16,7 +16,7 @@ from pyspark.sql.functions import col, split, expr
 from pyspark.sql.functions import udf, lit, flatten
 from pywebhdfs.webhdfs import PyWebHdfsClient
 from datetime import date
-from pyspark.sql.functions import monotonically_increasing_id 
+from pyspark.sql.functions import monotonically_increasing_id
 import json
 ```
 
@@ -48,7 +48,7 @@ SedonaRegistrator.registerAll(spark)
 sc = spark.sparkContext
 ```
 
-### Connecting to Overpass API to search and downloading data for saving into HDFS 
+### Connecting to Overpass API to search and downloading data for saving into HDFS
 
 ```
 import requests
@@ -64,7 +64,7 @@ out geom;
 out skel qt;
 """
 
-response = requests.get(overpass_url, 
+response = requests.get(overpass_url,
                          params={'data': overpass_query})
 data = response.json()
 hdfs = PyWebHdfsClient(host='179.106.229.159',port='50070', user_name='root')

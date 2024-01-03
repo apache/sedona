@@ -79,22 +79,22 @@ RS_AsMatrix expects a raster, and optionally a band (default: 1) and postDecimal
         ```scala
         println(df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect().mkString("\n"))
         ```
-    
+
     === "Java"
-    
+
         ```java
         System.out.println(String.join("\n", df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect()))
         ```
-    
+
     === "Python"
-    
+
         ```python
         print("\n".join(df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect()))
         ```
 
     The `sample()` function is only there to reduce the data sent to `collect()`, you may also use `filter()` if that's appropriate.
 
-Format: 
+Format:
 
 ```
 RS_AsMatrix(raster: Raster, band: Integer = 1, postDecimalPrecision: Integer = 6)
@@ -102,7 +102,7 @@ RS_AsMatrix(raster: Raster, band: Integer = 1, postDecimalPrecision: Integer = 6
 
 Since: `1.5.0`
 
-Spark SQL Example: 
+Spark SQL Example:
 
 ```scala
 val inputDf = Seq(Seq(1, 3.333333, 4, 0.0001, 2.2222, 9, 10, 11.11111111, 3, 4, 5, 6)).toDF("band")

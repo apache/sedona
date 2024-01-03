@@ -24,6 +24,7 @@ import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
 case class RS_SetBandNoDataValue(inputExpressions: Seq[Expression]) extends InferredExpression(
+  inferrableFunction4(RasterBandEditors.setBandNoDataValue),
   inferrableFunction3(RasterBandEditors.setBandNoDataValue),
   inferrableFunction2(RasterBandEditors.setBandNoDataValue)
 ) {

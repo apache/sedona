@@ -131,7 +131,7 @@ This will give you a 256*256 resolution image after you run ST_Render at the end
 
 !!!warning
 	We highly suggest that you should use ST_Transform to transform coordinates to a visualization-specific coordinate system such as epsg:3857. Otherwise you map may look distorted.
-	
+
 ### Aggregate pixels
 
 Many objects may be pixelized to the same pixel locations. You now need to aggregate them based on either their spatial aggregation or spatial observations such as temperature or humidity.
@@ -192,7 +192,7 @@ If you are a map professional, you may need to generate map tiles for different 
 
 ### Pixelization and pixel aggregation
 
-Please first do pixelization and pixel aggregation using the same commands in single image generation. In ST_Pixelize, you need specify a very high resolution, such as 1000*1000. Note that, each dimension should be divisible by 2^zoom-level 
+Please first do pixelization and pixel aggregation using the same commands in single image generation. In ST_Pixelize, you need specify a very high resolution, such as 1000*1000. Note that, each dimension should be divisible by 2^zoom-level
 
 ### Create tile name
 

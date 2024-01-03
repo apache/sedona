@@ -21,7 +21,7 @@ public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer Off
 ```java
 public PointRDD(JavaRDD<Point> rawSpatialRDD, StorageLevel newLevel)
 ```
-	
+
 You may notice that these constructors all take as input a "StorageLevel" parameter. This is to tell Apache Spark cache the "rawSpatialRDD", one attribute of SpatialRDD. The reason why Sedona does this is that Sedona wants to calculate the dataset boundary and approximate total count using several Apache Spark "Action"s. These information are useful when doing Spatial Join Query and Distance Join Query.
 
 However, in some cases, you may know well about your datasets. If so, you can manually provide these information by calling this kind of Spatial RDD constructors:

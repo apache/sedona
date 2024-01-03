@@ -374,6 +374,27 @@ public class RasterUtils {
         return (AffineTransform2D) crsTransform;
     }
 
+    /**
+     * Translate an affine transformation by a given offset.
+     * @param affine the affine transformation
+     * @param offsetX the offset in x direction
+     * @param offsetY the offset in y direction
+     * @return the translated affine transformation
+     */
+    public static AffineTransform2D translateAffineTransform(AffineTransform2D affine, int offsetX, int offsetY) {
+        double ipX = affine.getTranslateX();
+        double ipY = affine.getTranslateY();
+        double scaleX = affine.getScaleX();
+        double scaleY = affine.getScaleY();
+        double skewX = affine.getShearX();
+        double skewY = affine.getShearY();
+
+        // Move the origin using the affine transformation, and leave scale and skew unchanged.
+        double newIpX = ipX + offsetX * scaleX + offsetY * skewX;
+        double newIpY = ipY + offsetX * skewY + offsetY * scaleY;
+        return new AffineTransform2D(scaleX, skewY, skewX, scaleY, newIpX, newIpY);
+    }
+
     public static Point2D getWorldCornerCoordinates(GridCoverage2D raster, int colX, int rowY) throws TransformException {
         return raster.getGridGeometry().getGridToCRS2D(PixelOrientation.UPPER_LEFT).transform(new GridCoordinates2D(colX - 1, rowY - 1), null);
     }
@@ -604,5 +625,21 @@ public class RasterUtils {
 
     public static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, Number[] bandValues) {
         return copyRasterAndReplaceBand(gridCoverage2D, bandIndex, bandValues, null, false);
+    }
+
+    /**
+     * Check if the two rasters are of the same shape
+     * @param raster1
+     * @param raster2
+     */
+    public static void isRasterSameShape(GridCoverage2D raster1, GridCoverage2D raster2) {
+        int width1 = RasterAccessors.getWidth(raster1), height1 = RasterAccessors.getHeight(raster1);
+        int width2 = RasterAccessors.getWidth(raster2), height2 = RasterAccessors.getHeight(raster2);
+
+        if (width1 != width2 && height1 != height2) {
+            throw new IllegalArgumentException(String.format("Provided rasters are not of same shape. \n" +
+                    "First raster having width of %d and height of %d. \n" +
+                    "Second raster having width of %d and height of %d", width1, height1, width2, height2));
+        }
     }
 }

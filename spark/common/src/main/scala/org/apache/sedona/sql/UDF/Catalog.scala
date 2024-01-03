@@ -174,6 +174,7 @@ object Catalog {
     function[ST_Angle](),
     function[ST_Degrees](),
     function[ST_HausdorffDistance](-1),
+    function[ST_DWithin](),
     // Expression for rasters
     function[RS_NormalizedDifference](),
     function[RS_Mean](),
@@ -203,6 +204,8 @@ object Catalog {
     function[RS_FromArcInfoAsciiGrid](),
     function[RS_FromGeoTiff](),
     function[RS_MakeEmptyRaster](),
+    function[RS_Tile](),
+    function[RS_TileExplode](),
     function[RS_Envelope](),
     function[RS_NumBands](),
     function[RS_Metadata](),

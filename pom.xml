@@ -677,6 +677,22 @@
             </properties>
         </profile>
         <profile>
+            <id>sedona-spark-3.5</id>
+            <activation>
+                <property>
+                    <name>spark</name>
+                    <value>3.5</value>
+                </property>
+            </activation>
+            <properties>
+                <spark.version>3.5.0</spark.version>
+                <spark.compat.version>3.5</spark.compat.version>
+                <log4j.version>2.20.0</log4j.version>
+                <!-- Skip deploying parent module for sedona-spark-3.0 profile, it will be deployed with sedona-spark-3.0 -->
+                <skip.deploy.common.modules>true</skip.deploy.common.modules>
+            </properties>
+        </profile>
+        <profile>
             <id>scala2.13</id>
             <activation>
                 <property>

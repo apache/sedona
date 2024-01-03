@@ -58,6 +58,26 @@ Output:
 true
 ```
 
+## ST_DWithin
+
+Introduction: Returns true if 'leftGeometry' and 'rightGeometry' are within a specified 'distance'. This function essentially checks if the shortest distance between the envelope of the two geometries is <= the provided distance.
+
+Format: `ST_DWithin (leftGeometry: Geometry, rightGeometry: Geometry, distance: Double)`
+
+Since: `v1.5.1`
+
+Spark SQL Example:
+
+```sql
+SELECT ST_DWithin(ST_GeomFromWKT('POINT (0 0)'), ST_GeomFromWKT('POINT (1 0)'), 2.5)
+```
+
+Output:
+
+```
+true
+```
+
 ## ST_Equals
 
 Introduction: Return true if A equals to B
@@ -111,7 +131,7 @@ Spark SQL Example:
 SELECT ST_OrderingEquals(ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'), ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'))
 ```
 
-Output: 
+Output:
 
 ```
 true
@@ -123,7 +143,7 @@ Spark SQL Example:
 SELECT ST_OrderingEquals(ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'), ST_GeomFromWKT('POLYGON((0 2, -2 0, 2 0, 0 2))'))
 ```
 
-Output: 
+Output:
 
 ```
 false

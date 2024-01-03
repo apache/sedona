@@ -103,7 +103,7 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
 
 ## Building Sedona
 
-* To install the Python package: 
+* To install the Python package:
 
   ```
   pip install apache-sedona
