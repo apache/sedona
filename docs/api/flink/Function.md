@@ -1703,7 +1703,7 @@ Format: `ST_LineLocatePoint(linestring: Geometry, point: Geometry)`
 
 Since: `v1.5.1`
 
-Spark SQL Example:
+SQL Example:
 
 ```sql
 SELECT ST_LineLocatePoint(ST_GeomFromWKT('LINESTRING(0 0, 1 1, 2 2)'), ST_GeomFromWKT('POINT(0 2)'))
