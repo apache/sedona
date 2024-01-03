@@ -1,0 +1,40 @@
+name: Snowflake integration test with real snowflake env
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
+env:
+  SNOWFLAKE_AUTH_METHOD: ${{vars.SNOWFLAKE_AUTH_METHOD}}
+  SNOWFLAKE_USER: ${{secrets.SNOWFLAKE_USER}}
+  SNOWFLAKE_PASSWORD: ${{secrets.SNOWFLAKE_PASSWORD}}
+  SNOWFLAKE_DB: ${{vars.SNOWFLAKE_DB}}
+  SNOWFLAKE_SCHEMA: ${{vars.SNOWFLAKE_SCHEMA}}
+  SNOWFLAKE_WAREHOUSE: ${{vars.SNOWFLAKE_WAREHOUSE}}
+  SNOWFLAKE_ROLE: ${{vars.SNOWFLAKE_ROLE}}
+  SNOWFLAKE_ACCOUNT: ${{vars.SNOWFLAKE_ACCOUNT}}
+  SNOWFLAKE_GEOTOOLS_VERSION: '1.5.0-28.2'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '8'
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - run: mkdir snowflake-tester/tmp
+      - run: sudo apt-get update && sudo apt-get -y install wget
+      - run: wget https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/${SNOWFLAKE_GEOTOOLS_VERSION}/geotools-wrapper-${SNOWFLAKE_GEOTOOLS_VERSION}.jar -O snowflake-tester/tmp/geotools-wrapper-${SNOWFLAKE_GEOTOOLS_VERSION}.jar
+      - run: mvn clean package -DskipTests -pl snowflake -am
+      - run: find snowflake/target -name sedona-snowflake-*.jar -exec cp {} snowflake-tester/tmp/ \;
+      - run: export SEDONA_VERSION=$(grep version pom.xml | grep -v -e '<?xml|~'| head -n 1 | sed 's/[[:space:]]//g' | sed -E 's/<.{0,1}version>//g') && echo $SEDONA_VERSION && mvn test -P snowflake
