@@ -7,6 +7,9 @@ on:
   pull_request:
     branches:
       - '*'
+  pull_request_target:
+        types: [labeled] # Only run this workflow if the PR is labelled `safe-to-test`
+
 env:
   SNOWFLAKE_AUTH_METHOD: ${{vars.SNOWFLAKE_AUTH_METHOD}}
   SNOWFLAKE_USER: ${{secrets.SNOWFLAKE_USER}}
