@@ -780,6 +780,12 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testSetPoint() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_SetPoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)'), 0, ST_GeomFromWKT('POINT (3 3)'))");
+        assertEquals("LINESTRING (3 3, 1 1, 2 2)", first(pointTable).getField(0).toString());
+    }
+
+    @Test
     public void testSetPointWithNegativeIndex() {
         Table pointTable = tableEnv.sqlQuery("SELECT ST_SetPoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)'), -1, ST_GeomFromWKT('POINT (3 3)'))");
         assertEquals("LINESTRING (0 0, 1 1, 3 3)", first(pointTable).getField(0).toString());
