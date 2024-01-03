@@ -1706,8 +1706,7 @@ POINT (51.5974135047432 76.5974135047432)
 
 ## ST_LineLocatePoint
 
-Introduction: Returns a double between 0 and 1, representing the location of the closest point on the LineString as a fraction of its total length. 
-The first argument must be a LINESTRING, and the second argument is a POINT geometry.
+Introduction: Returns a double between 0 and 1, representing the location of the closest point on the LineString as a fraction of its total length. The first argument must be a LINESTRING, and the second argument is a POINT geometry.
 
 Format: `ST_LineLocatePoint(linestring: Geometry, point: Geometry)`
 

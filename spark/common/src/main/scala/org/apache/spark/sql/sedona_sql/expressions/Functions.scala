@@ -519,7 +519,7 @@ case class ST_LineInterpolatePoint(inputExpressions: Seq[Expression])
 case class ST_LineLocatePoint(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.lineLocatePoint _) {
 
-  override protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
