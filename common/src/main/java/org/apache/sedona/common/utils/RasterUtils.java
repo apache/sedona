@@ -374,6 +374,27 @@ public class RasterUtils {
         return (AffineTransform2D) crsTransform;
     }
 
+    /**
+     * Translate an affine transformation by a given offset.
+     * @param affine the affine transformation
+     * @param offsetX the offset in x direction
+     * @param offsetY the offset in y direction
+     * @return the translated affine transformation
+     */
+    public static AffineTransform2D translateAffineTransform(AffineTransform2D affine, int offsetX, int offsetY) {
+        double ipX = affine.getTranslateX();
+        double ipY = affine.getTranslateY();
+        double scaleX = affine.getScaleX();
+        double scaleY = affine.getScaleY();
+        double skewX = affine.getShearX();
+        double skewY = affine.getShearY();
+
+        // Move the origin using the affine transformation, and leave scale and skew unchanged.
+        double newIpX = ipX + offsetX * scaleX + offsetY * skewX;
+        double newIpY = ipY + offsetX * skewY + offsetY * scaleY;
+        return new AffineTransform2D(scaleX, skewY, skewX, scaleY, newIpX, newIpY);
+    }
+
     public static Point2D getWorldCornerCoordinates(GridCoverage2D raster, int colX, int rowY) throws TransformException {
         return raster.getGridGeometry().getGridToCRS2D(PixelOrientation.UPPER_LEFT).transform(new GridCoordinates2D(colX - 1, rowY - 1), null);
     }
