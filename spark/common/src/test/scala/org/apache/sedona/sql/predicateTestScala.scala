@@ -20,7 +20,7 @@
 package org.apache.sedona.sql
 
 import org.apache.spark.sql.catalyst.expressions.{EmptyRow, Literal}
-import org.apache.spark.sql.sedona_sql.expressions.{ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_Disjoint, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Point, ST_Touches, ST_Within}
+import org.apache.spark.sql.sedona_sql.expressions.{ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Disjoint, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Point, ST_Touches, ST_Within}
 
 class predicateTestScala extends TestBaseScala {
 
@@ -247,6 +247,13 @@ class predicateTestScala extends TestBaseScala {
       val coveredBy = sparkSession.sql("select ST_CoveredBy(b, a) from testtable").take(1)(0)
       assert(!within.get(0).asInstanceOf[Boolean])
       assert(coveredBy.get(0).asInstanceOf[Boolean])
+    }
+
+    it ("Passed ST_DWithin") {
+      val testTable = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (0 0)') as origin, ST_GeomFromWKT('POINT (0 4.1)') as p1")
+      testTable.createOrReplaceTempView("testTable")
+      val actual = sparkSession.sql("SELECT ST_DWithin(origin, p1, 4.2) from testTable").first()(0).asInstanceOf[java.lang.Boolean]
+      assert(actual)
     }
 
     Seq(

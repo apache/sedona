@@ -20,16 +20,11 @@ package org.apache.sedona.common.raster;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.GridEnvelope2D;
-import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.coverage.processing.operation.Crop;
-import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.metadata.spatial.PixelOrientation;
 import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
@@ -47,9 +42,10 @@ public class RasterBandEditors {
      * @param raster Source raster to add no-data value
      * @param bandIndex Band index to add no-data value
      * @param noDataValue Value to set as no-data value, if null then remove existing no-data value
+     * @param replace if true replaces the previous no-data value with the specified no-data value
      * @return Raster with no-data value
      */
-    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, int bandIndex, Double noDataValue) {
+    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, int bandIndex, Double noDataValue, boolean replace) {
         RasterUtils.ensureBand(raster, bandIndex);
         Double rasterNoData = RasterBandAccessors.getBandNoDataValue(raster, bandIndex);
 
@@ -63,20 +59,45 @@ public class RasterBandEditors {
             return RasterUtils.clone(raster.getRenderedImage(), null, sampleDimensions, raster, null, true);
         }
 
-        if ( !(rasterNoData == null) && rasterNoData.equals(noDataValue)) {
+        if ( rasterNoData != null && rasterNoData.equals(noDataValue)) {
             return raster;
         }
         GridSampleDimension[] bands = raster.getSampleDimensions();
         bands[bandIndex - 1] = RasterUtils.createSampleDimensionWithNoDataValue(bands[bandIndex - 1], noDataValue);
 
-        int width = RasterAccessors.getWidth(raster), height = RasterAccessors.getHeight(raster);
-        AffineTransform2D affine = RasterUtils.getGDALAffineTransform(raster);
-        GridGeometry2D gridGeometry2D = new GridGeometry2D(
-                new GridEnvelope2D(0, 0, width, height),
-                PixelOrientation.UPPER_LEFT,
-                affine, raster.getCoordinateReferenceSystem2D(), null
-        );
+        if (replace) {
+            if (rasterNoData == null) {
+                throw new IllegalArgumentException("The raster provided doesn't have a no-data value. Please provide a raster that has a no-data value to use `replace` option.");
+            }
+
+            Raster rasterData = RasterUtils.getRaster(raster.getRenderedImage());
+            int dataTypeCode = rasterData.getDataBuffer().getDataType();
+            int numBands = RasterAccessors.numBands(raster);
+            int height = RasterAccessors.getHeight(raster);
+            int width = RasterAccessors.getWidth(raster);
+            WritableRaster wr = RasterFactory.createBandedRaster(dataTypeCode, width, height, numBands, null);
+            double[] bandData = rasterData.getSamples(0, 0, width, height, bandIndex - 1, (double[]) null);
+            for (int i = 0; i < bandData.length; i++) {
+                if (bandData[i] == rasterNoData) {
+                    bandData[i] = noDataValue;
+                }
+            }
+            wr.setSamples(0, 0, width, height, bandIndex - 1, bandData);
+            return RasterUtils.clone(wr, null, bands, raster, null, true);
+        }
+
         return RasterUtils.clone(raster.getRenderedImage(), null, bands, raster, null, true);
+    }
+
+    /**
+     * Adds no-data value to the raster.
+     * @param raster Source raster to add no-data value
+     * @param bandIndex Band index to add no-data value
+     * @param noDataValue Value to set as no-data value, if null then remove existing no-data value
+     * @return Raster with no-data value
+     */
+    public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, int bandIndex, Double noDataValue) {
+        return setBandNoDataValue(raster, bandIndex, noDataValue, false);
     }
 
     /**
@@ -86,7 +107,7 @@ public class RasterBandEditors {
      * @return Raster with no-data value
      */
     public static GridCoverage2D setBandNoDataValue(GridCoverage2D raster, Double noDataValue) {
-        return setBandNoDataValue(raster, 1, noDataValue);
+        return setBandNoDataValue(raster, 1, noDataValue, false);
     }
 
     /**
@@ -99,7 +120,7 @@ public class RasterBandEditors {
     public static GridCoverage2D addBand(GridCoverage2D toRaster, GridCoverage2D fromRaster, int fromBand, int toRasterIndex) {
         RasterUtils.ensureBand(fromRaster, fromBand);
         ensureBandAppend(toRaster, toRasterIndex);
-        isRasterSameShape(toRaster, fromRaster);
+        RasterUtils.isRasterSameShape(toRaster, fromRaster);
 
         int width = RasterAccessors.getWidth(toRaster), height = RasterAccessors.getHeight(toRaster);
 
@@ -157,22 +178,6 @@ public class RasterBandEditors {
     private static void ensureBandAppend(GridCoverage2D raster, int band) {
         if (band < 1 || band > RasterAccessors.numBands(raster) + 1) {
             throw new IllegalArgumentException(String.format("Provided band index %d is not present in the raster", band));
-        }
-    }
-
-    /**
-     * Check if the two rasters are of the same shape
-     * @param raster1
-     * @param raster2
-     */
-    private static void isRasterSameShape(GridCoverage2D raster1, GridCoverage2D raster2) {
-        int width1 = RasterAccessors.getWidth(raster1), height1 = RasterAccessors.getHeight(raster1);
-        int width2 = RasterAccessors.getWidth(raster2), height2 = RasterAccessors.getHeight(raster2);
-
-        if (width1 != width2 && height1 != height2) {
-            throw new IllegalArgumentException(String.format("Provided rasters are not of same shape. \n" +
-                    "First raster having width of %d and height of %d. \n" +
-                    "Second raster having width of %d and height of %d", width1, height1, width2, height2));
         }
     }
 

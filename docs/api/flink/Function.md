@@ -43,7 +43,7 @@ Since: `v1.3.0`
 Example:
 
 ```sql
-SELECT ST_3DDistance(ST_GeomFromText("POINT Z (0 0 -5)"), 
+SELECT ST_3DDistance(ST_GeomFromText("POINT Z (0 0 -5)"),
                      ST_GeomFromText("POINT Z(1  1 -6"))
 ```
 
@@ -56,7 +56,7 @@ Output:
 
 Introduction: Return Linestring with additional point at the given index, if position is not available the point will be added at the end of line.
 
-Format: 
+Format:
 
 `ST_AddPoint(geom: Geometry, point: Geometry, position: Integer)`
 
@@ -81,14 +81,14 @@ LINESTRING(0 0, 1 1, 1 0, 21 52)
 
 Introduction: Apply an affine transformation to the given geometry.
 
-ST_Affine has 2 overloaded signatures: 
+ST_Affine has 2 overloaded signatures:
 
-`ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)` 
+`ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)`
 
 `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
 
 
-Based on the invoked function, the following transformation is applied: 
+Based on the invoked function, the following transformation is applied:
 
 `x = a * x + b * y + c * z + xOff OR x = a * x + b * y + xOff`
 
@@ -96,11 +96,11 @@ Based on the invoked function, the following transformation is applied:
 
 `z = g * x + f * y + i * z + zOff OR z = g * x + f * y + zOff`
 
-If the given geometry is empty, the result is also empty. 
+If the given geometry is empty, the result is also empty.
 
-Format: 
+Format:
 
-`ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)`  
+`ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)`
 
 `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
 
@@ -248,7 +248,7 @@ Example:
 SELECT ST_AreaSpheroid(ST_GeomFromWKT('Polygon ((34 35, 28 30, 25 34, 34 35))'))
 ```
 
-Output: 
+Output:
 
 ```
 201824850811.76245
@@ -611,7 +611,7 @@ SELECT ST_Centroid(ST_GeomFromWKT('MULTIPOINT(-1  0, -1 2, 7 8, 9 8, 10 6)'))
 Output:
 
 ```
-POINT (4.8 4.8) 
+POINT (4.8 4.8)
 ```
 
 ## ST_ClosestPoint
@@ -703,7 +703,7 @@ The type numbers are:
 
 If the type parameter is omitted a multi-geometry of the highest dimension is returned.
 
-Format: 
+Format:
 
 `ST_CollectionExtract (A: Geometry)`
 
@@ -738,7 +738,7 @@ Result:
 
 Introduction: Return the Concave Hull of polygon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
 
-Format: 
+Format:
 
 `ST_ConcaveHull (A: Geometry, pctConvex: Double)`
 
@@ -755,7 +755,7 @@ SELECT ST_ConcaveHull(ST_GeomFromWKT('POLYGON((175 150, 20 40, 50 60, 125 100, 1
 Output:
 
 ```
-POLYGON ((125 100, 20 40, 50 60, 175 150, 125 100))  
+POLYGON ((125 100, 20 40, 50 60, 175 150, 125 100))
 ```
 ## ST_ConvexHull
 
@@ -791,7 +791,7 @@ Example with x, y, z coordinate:
 SELECT ST_CoordDim(ST_GeomFromText('POINT(1 1 2'))
 ```
 
-Output: 
+Output:
 
 ```
 3
@@ -803,7 +803,7 @@ Example with x, y coordinate:
 SELECT ST_CoordDim(ST_GeomFromWKT('POINT(3 7)'))
 ```
 
-Output: 
+Output:
 
 ```
 2
@@ -868,7 +868,7 @@ Example 1:
 SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (-0.56 51.3168)'), ST_GeomFromWKT('POINT (-3.1883 55.9533)'))
 ```
 
-Output: 
+Output:
 
 ```
 543796.9506134904
@@ -880,7 +880,7 @@ Example 2:
 SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (-0.56 51.3168)'), ST_GeomFromWKT('POINT (-3.1883 55.9533)'), 6378137.0)
 ```
 
-Output: 
+Output:
 
 ```
 544405.4459192449
@@ -905,7 +905,7 @@ Example:
 SELECT ST_DistanceSpheroid(ST_GeomFromWKT('POINT (-0.56 51.3168)'), ST_GeomFromWKT('POINT (-3.1883 55.9533)'))
 ```
 
-Output: 
+Output:
 
 ```
 544430.9411996207
@@ -925,7 +925,7 @@ Example:
 SELECT ST_Degrees(0.19739555984988044)
 ```
 
-Output: 
+Output:
 
 ```
 11.309932474020195
@@ -965,7 +965,7 @@ Example:
 SELECT ST_Dump(ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))'))
 ```
 
-Output: 
+Output:
 
 ```
 [POINT (10 40), POINT (40 30), POINT (20 20), POINT (30 10)]
@@ -985,7 +985,7 @@ Example:
 SELECT ST_DumpPoints(ST_GeomFromText('LINESTRING (0 0, 1 1, 1 0)'))
 ```
 
-Output: 
+Output:
 
 ```
 [POINT (0 0), POINT (0 1), POINT (1 1), POINT (1 0), POINT (0 0)]
@@ -1005,7 +1005,7 @@ Example:
 SELECT ST_EndPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'))
 ```
 
-Output: 
+Output:
 
 ```
 POINT(160 170)
@@ -1104,7 +1104,7 @@ Format: `ST_Force3D(geometry: Geometry, zValue: Double)`
 
 Since: `v1.4.1`
 
-Example: 
+Example:
 
 ```sql
 SELECT ST_AsText(ST_Force3D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'), 2.3))
@@ -1171,7 +1171,7 @@ Format: `ST_GeoHash(geom: Geometry, precision: Integer)`
 
 Since: `v1.2.0`
 
-Example: 
+Example:
 
 ```sql
 SELECT ST_GeoHash(ST_GeomFromText('POINT(21.427834 52.042576573)'), 5) AS geohash
@@ -1191,7 +1191,7 @@ The algorithm will iterate until the distance change between successive iteratio
 
 If a `tolerance` value is not provided, a default `tolerance` value is `1e-6`.
 
-Format: 
+Format:
 
 ```
 ST_GeometricMedian(geom: Geometry, tolerance: Double, maxIter: Integer, failIfNotConverged: Boolean)
@@ -1237,7 +1237,7 @@ Example:
 SELECT ST_GeometryN(ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))'), 1)
 ```
 
-Output: 
+Output:
 
 ```
 POINT (3 4)
@@ -1386,7 +1386,7 @@ Output:
 
 ## ST_HausdorffDistance
 
-Introduction: Returns a discretized (and hence approximate) [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance) between the given 2 geometries. 
+Introduction: Returns a discretized (and hence approximate) [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance) between the given 2 geometries.
 Optionally, a densityFraction parameter can be specified, which gives more accurate results by densifying segments before computing hausdorff distance between them.
 Each segment is broken down into equal-length subsegments whose ratio with segment length is closest to the given density fraction.
 
@@ -1445,7 +1445,7 @@ Example:
 SELECT ST_InteriorRingN(ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))'), 0)
 ```
 
-Output: 
+Output:
 
 ```
 LINEARRING (1 1, 2 1, 2 2, 1 2, 1 1)
@@ -1496,7 +1496,7 @@ false
 
 ## ST_IsCollection
 
-Introduction: Returns `TRUE` if the geometry type of the input is a geometry collection type. 
+Introduction: Returns `TRUE` if the geometry type of the input is a geometry collection type.
 Collection types are the following:
 
 - GEOMETRYCOLLECTION
@@ -1512,7 +1512,7 @@ Example:
 SELECT ST_IsCollection(ST_GeomFromText('MULTIPOINT(0 0), (6 6)'))
 ```
 
-Output: 
+Output:
 
 ```
 true
@@ -1524,7 +1524,7 @@ Example:
 SELECT ST_IsCollection(ST_GeomFromText('POINT(5 5)'))
 ```
 
-Output: 
+Output:
 
 ```
 false
@@ -1564,7 +1564,7 @@ Example:
 SELECT ST_IsRing(ST_GeomFromText("LINESTRING(0 0, 0 1, 1 1, 1 0, 0 0)"))
 ```
 
-Output: 
+Output:
 
 ```
 true
@@ -1649,7 +1649,7 @@ Example:
 SELECT ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 90 0, 0 0))'))
 ```
 
-Output: 
+Output:
 
 ```
 20037508.342789244
@@ -1740,7 +1740,7 @@ LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140
 
 Introduction: Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error.
 
-Format: 
+Format:
 
 `ST_MakeLine(geom1: Geometry, geom2: Geometry)`
 
@@ -1802,7 +1802,7 @@ Introduction: Given an invalid geometry, create a valid representation of the ge
 Collapsed geometries are either converted to empty (keepCollapsed=true) or a valid geometry of lower dimension (keepCollapsed=false).
 Default is keepCollapsed=false.
 
-Format: 
+Format:
 
 `ST_MakeValid (A: Geometry)`
 
@@ -1829,9 +1829,9 @@ Result:
 
 ## ST_MinimumBoundingCircle
 
-Introduction: Returns the smallest circle polygon that contains a geometry. The optional quadrantSegments parameter determines how many segments to use per quadrant and the default number of segments is 48. 
+Introduction: Returns the smallest circle polygon that contains a geometry. The optional quadrantSegments parameter determines how many segments to use per quadrant and the default number of segments is 48.
 
-Format: 
+Format:
 
 `ST_MinimumBoundingCircle(geom: Geometry, [Optional] quadrantSegments: Integer)`
 
@@ -1945,7 +1945,7 @@ Example with z coordinate:
 SELECT ST_NDims(ST_GeomFromEWKT('POINT(1 1 2)'))
 ```
 
-Output: 
+Output:
 
 ```
 3
@@ -1957,7 +1957,7 @@ Example with x,y coordinate:
 SELECT ST_NDims(ST_GeomFromText('POINT(1 1)'))
 ```
 
-Output: 
+Output:
 
 ```
 2
@@ -1965,7 +1965,7 @@ Output:
 
 ## ST_NRings
 
-Introduction: Returns the number of rings in a Polygon or MultiPolygon. Contrary to ST_NumInteriorRings, 
+Introduction: Returns the number of rings in a Polygon or MultiPolygon. Contrary to ST_NumInteriorRings,
 this function also takes into account the number of  exterior rings.
 
 This function returns 0 for an empty Polygon or MultiPolygon.
@@ -2030,7 +2030,7 @@ Example:
 SELECT ST_NumInteriorRings(ST_GeomFromText('POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))'))
 ```
 
-Output: 
+Output:
 
 ```
 1
@@ -2041,8 +2041,8 @@ Output:
 Introduction: Returns number of points in a LineString.
 
 !!!note
-    If any other geometry is provided as an argument, an IllegalArgumentException is thrown. 
-    Example: 
+    If any other geometry is provided as an argument, an IllegalArgumentException is thrown.
+    Example:
     `SELECT ST_NumPoints(ST_GeomFromWKT('MULTIPOINT ((0 0), (1 1), (0 1), (2 2))'))`
 
     Output: `IllegalArgumentException: Unsupported geometry type: MultiPoint, only LineString geometry is supported.`
@@ -2057,7 +2057,7 @@ Example:
 SELECT ST_NumPoints(ST_GeomFromText('LINESTRING(1 2, 1 3)'))
 ```
 
-Output: 
+Output:
 
 ```
 2
@@ -2143,7 +2143,7 @@ POLYGON((75 29 1, 77 29 2, 77 29 3, 75 29 1))
 
 ## ST_ReducePrecision
 
-Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded. 
+Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded.
 
 Format: `ST_ReducePrecision (A: Geometry, B: Integer)`
 
@@ -2187,7 +2187,7 @@ LINESTRING (3 6, 2 4, 1 2, 0 0)
 
 Introduction: Return Linestring with removed point at given index, position can be omitted and then last one will be removed.
 
-Format: 
+Format:
 
 `ST_RemovePoint(geom: Geometry, position: Integer)`
 
@@ -2201,7 +2201,7 @@ Example:
 SELECT ST_RemovePoint(ST_GeomFromText("LINESTRING(0 0, 1 1, 1 0)"), 1)
 ```
 
-Output: 
+Output:
 
 ```
 LINESTRING(0 0, 1 0)
@@ -2324,7 +2324,7 @@ Example:
 SELECT ST_StartPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'))
 ```
 
-Output: 
+Output:
 
 ```
 POINT(100 150)
@@ -2412,7 +2412,7 @@ Transform the Spatial Reference System / Coordinate Reference System of A, from 
 
 **Lon/Lat Order in the input geometry**
 
-If the input geometry is in lat/lon order, it might throw an error such as `too close to pole`, `latitude or longitude exceeded limits`, or give unexpected results. 
+If the input geometry is in lat/lon order, it might throw an error such as `too close to pole`, `latitude or longitude exceeded limits`, or give unexpected results.
 You need to make sure that the input geometry is in lon/lat order. If the input geometry is in lat/lon order, you can use ==ST_FlipCoordinates== to swap X and Y.
 
 **Lon/Lat Order in the source and target CRS**
@@ -2458,7 +2458,7 @@ PROJCS["WGS 84 / Pseudo-Mercator",
 !!!note
     By default, ==ST_Transform== follows the `lenient` mode which tries to fix issues by itself. You can append a boolean value at the end to enable the `strict` mode. In `strict` mode, ==ST_Transform== will throw an error if it finds any issue.
 
-Format: 
+Format:
 
 ```
 ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String, [Optional] lenientMode: Boolean)
@@ -2491,7 +2491,7 @@ If the geometry is empty, no change is done to it.
 
 If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGON/LINE/POINT), all underlying geometries are individually translated.
 
-Format: 
+Format:
 
 `ST_Translate(geometry: Geometry, deltaX: Double, deltaY: Double, deltaZ: Double)`
 
@@ -2509,7 +2509,7 @@ Output:
 GEOMETRYCOLLECTION (MULTIPOLYGON (((5 4, 5 5, 6 5, 6 4, 5 4)), ((5 6, 7 8, 7 9, 5 6))), POINT (3 3), LINESTRING EMPTY)
 ```
 
-Example: 
+Example:
 
 ```sql
 SELECT ST_Translate(ST_GeomFromText('POINT(-71.01 42.37)'),1,2)
@@ -2542,7 +2542,7 @@ Example:
 SELECT st_astext(ST_VoronoiPolygons(ST_GeomFromText('MULTIPOINT ((0 0), (1 1))')));
 ```
 
-Output: 
+Output:
 
 ```
 GEOMETRYCOLLECTION(POLYGON((-1 2,2 -1,-1 -1,-1 2)),POLYGON((-1 2,2 2,2 -1,-1 2)))
@@ -2562,7 +2562,7 @@ Example:
 SELECT ST_X(ST_POINT(0.0 25.0))
 ```
 
-Output: 
+Output:
 
 ```
 0.0
@@ -2582,7 +2582,7 @@ Example:
 SELECT ST_XMax(ST_GeomFromText('POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))'))
 ```
 
-Output: 
+Output:
 
 ```
 2
@@ -2622,7 +2622,7 @@ Example:
 SELECT ST_Y(ST_POINT(0.0 25.0))
 ```
 
-Output: 
+Output:
 
 ```
 25.0
@@ -2642,7 +2642,7 @@ Example:
 SELECT ST_YMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
-Output : 
+Output :
 
 ```
 2
@@ -2662,7 +2662,7 @@ Example:
 SELECT ST_YMin(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
-Output: 
+Output:
 
 ```
 0
@@ -2682,7 +2682,7 @@ Example:
 SELECT ST_Z(ST_POINT(0.0 25.0 11.0))
 ```
 
-Output: 
+Output:
 
 ```
 11.0
@@ -2701,7 +2701,7 @@ Example:
 SELECT ST_ZMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
 
-Output: 
+Output:
 
 ```
 1.0
@@ -2721,7 +2721,7 @@ Example:
 SELECT ST_ZMin(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'))
 ```
 
-Output: 
+Output:
 
 ```
 4.0

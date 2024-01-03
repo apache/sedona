@@ -35,7 +35,7 @@ repos:
       - id: end-of-file-fixer
         exclude: \.svg$|^docs/image|^spark/common/src/test/resources
       - id: trailing-whitespace
-        files: \.(ipynb|java|py|R|scala|sh|xml|yaml|yml)$
+        exclude: ^docs-overrides/main\.html$|\.Rd$
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.38.0
     hooks:

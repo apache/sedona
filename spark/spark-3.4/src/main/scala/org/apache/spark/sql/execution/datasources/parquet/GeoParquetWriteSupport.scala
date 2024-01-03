@@ -30,14 +30,15 @@ import org.apache.spark.sql.SPARK_VERSION_METADATA_KEY
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
+import org.apache.spark.sql.execution.datasources.parquet.GeoParquetMetaData.{GEOPARQUET_CRS_KEY, GEOPARQUET_VERSION_KEY, VERSION}
 import org.apache.spark.sql.execution.datasources.parquet.GeoParquetWriteSupport.GeometryColumnInfo
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.internal.SQLConf.LegacyBehaviorPolicy
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
-import org.json4s.DefaultFormats
-import org.json4s.Extraction
+import org.json4s.{DefaultFormats, Extraction, JValue}
 import org.json4s.jackson.compactJson
+import org.json4s.jackson.JsonMethods.parse
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKBWriter
 
@@ -106,6 +107,10 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
   // fields in nested structures.
   private val geometryColumnInfoMap: mutable.Map[Int, GeometryColumnInfo] = mutable.Map.empty
 
+  private var geoParquetVersion: Option[String] = None
+  private var defaultGeoParquetCrs: Option[JValue] = None
+  private val geoParquetColumnCrsMap: mutable.Map[String, Option[JValue]] = mutable.Map.empty
+
   override def init(configuration: Configuration): WriteContext = {
     val schemaString = configuration.get(ParquetWriteSupport.SPARK_ROW_SCHEMA)
     this.schema = StructType.fromString(schemaString)
@@ -129,10 +134,30 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       throw new RuntimeException("No geometry column found in the schema")
     }
 
+    geoParquetVersion = configuration.get(GEOPARQUET_VERSION_KEY) match {
+      case null => Some(VERSION)
+      case version: String => Some(version)
+    }
+    defaultGeoParquetCrs = configuration.get(GEOPARQUET_CRS_KEY) match {
+      case null =>
+        // If no CRS is specified, we write null to the crs metadata field. This is for compatibility with
+        // geopandas 0.10.0 and earlier versions, which requires crs field to be present.
+        Some(org.json4s.JNull)
+      case "" => None
+      case crs: String => Some(parse(crs))
+    }
+    geometryColumnInfoMap.keys.map(schema(_).name).foreach { name =>
+      Option(configuration.get(GEOPARQUET_CRS_KEY + "." + name)).foreach {
+        case "" => geoParquetColumnCrsMap.put(name, None)
+        case crs: String => geoParquetColumnCrsMap.put(name, Some(parse(crs)))
+      }
+    }
+
     val messageType = new SparkToParquetSchemaConverter(configuration).convert(schema)
+    val sparkSqlParquetRowMetadata = GeoParquetWriteSupport.getSparkSqlParquetRowMetadata(schema)
     val metadata = Map(
       SPARK_VERSION_METADATA_KEY -> SPARK_VERSION_SHORT,
-      ParquetReadSupport.SPARK_METADATA_KEY -> schemaString
+      ParquetReadSupport.SPARK_METADATA_KEY -> sparkSqlParquetRowMetadata
     ) ++ {
       if (datetimeRebaseMode == LegacyBehaviorPolicy.LEGACY) {
         Some("org.apache.spark.legacyDateTime" -> "")
@@ -172,10 +197,11 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         val bbox = if (geometryTypes.nonEmpty) {
           Seq(columnInfo.bbox.minX, columnInfo.bbox.minY, columnInfo.bbox.maxX, columnInfo.bbox.maxY)
         } else Seq(0.0, 0.0, 0.0, 0.0)
-        columnName -> GeometryFieldMetaData("WKB", geometryTypes, bbox)
+        val crs = geoParquetColumnCrsMap.getOrElse(columnName, defaultGeoParquetCrs)
+        columnName -> GeometryFieldMetaData("WKB", geometryTypes, bbox, crs)
       }.toMap
-      val geoParquetMetadata = GeoParquetMetaData(Some(GeoParquetMetaData.VERSION), primaryColumn, columns)
-      implicit val formats: org.json4s.Formats = DefaultFormats.preservingEmptyValues
+      val geoParquetMetadata = GeoParquetMetaData(geoParquetVersion, primaryColumn, columns)
+      implicit val formats: org.json4s.Formats = DefaultFormats
       val geoParquetMetadataJson = compactJson(Extraction.decompose(geoParquetMetadata).underscoreKeys)
       metadata.put("geo", geoParquetMetadataJson)
     }
@@ -565,5 +591,18 @@ object GeoParquetWriteSupport {
       maxX = math.max(maxX, env.getMaxX)
       maxY = math.max(maxY, env.getMaxY)
     }
+  }
+
+  private def getSparkSqlParquetRowMetadata(schema: StructType): String = {
+    val fields = schema.fields.map { field =>
+      field.dataType match {
+        case _: GeometryUDT =>
+          // Don't write the GeometryUDT type to the Parquet metadata. Write the type as binary for maximum
+          // compatibility.
+          field.copy(dataType = BinaryType)
+        case _ => field
+      }
+    }
+    StructType(fields).json
   }
 }

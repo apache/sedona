@@ -39,14 +39,14 @@ Let use data from `examples/sql`.  To load data from CSV file we need to execute
 Use the following code to load the data and create a raw DataFrame:
 
 ```sql
-CREATE TABLE IF NOT EXISTS pointraw (_c0 string, _c1 string) 
-USING csv 
-OPTIONS(header='false') 
+CREATE TABLE IF NOT EXISTS pointraw (_c0 string, _c1 string)
+USING csv
+OPTIONS(header='false')
 LOCATION '<some path>/sedona/examples/sql/src/test/resources/testpoint.csv';
 
-CREATE TABLE IF NOT EXISTS polygonraw (_c0 string, _c1 string, _c2 string, _c3 string) 
-USING csv 
-OPTIONS(header='false') 
+CREATE TABLE IF NOT EXISTS polygonraw (_c0 string, _c1 string, _c2 string, _c3 string)
+USING csv
+OPTIONS(header='false')
 LOCATION '<some path>/sedona/examples/sql/src/test/resources/testenvelope.csv';
 
 ```
@@ -62,8 +62,8 @@ CREATE OR REPLACE TEMP VIEW pointdata AS
 
 CREATE OR REPLACE TEMP VIEW polygondata AS
   select ST_PolygonFromEnvelope(cast(polygonraw._c0 as Decimal(24,20)),
-        cast(polygonraw._c1 as Decimal(24,20)), cast(polygonraw._c2 as Decimal(24,20)), 
-        cast(polygonraw._c3 as Decimal(24,20))) AS polygonshape 
+        cast(polygonraw._c1 as Decimal(24,20)), cast(polygonraw._c2 as Decimal(24,20)),
+        cast(polygonraw._c3 as Decimal(24,20))) AS polygonshape
   FROM polygonraw;
 ```
 
@@ -72,8 +72,8 @@ CREATE OR REPLACE TEMP VIEW polygondata AS
 For example, let join polygon and test data:
 
 ```sql
-SELECT * from polygondata, pointdata 
-WHERE ST_Contains(polygondata.polygonshape, pointdata.pointshape) 
+SELECT * from polygondata, pointdata
+WHERE ST_Contains(polygondata.polygonshape, pointdata.pointshape)
       AND ST_Contains(ST_PolygonFromEnvelope(1.0,101.0,501.0,601.0), polygondata.polygonshape)
 LIMIT 5;
 ```

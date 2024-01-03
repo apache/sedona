@@ -15,22 +15,22 @@ To compile all modules, please make sure you are in the root folder of all modul
 	mvn clean install -DskipTests
 	```
 	This command will first delete the old binary files and compile all modules. This compilation will skip the unit tests. To compile a single module, please make sure you are in the folder of that module. Then enter the same command.
-	
+
 === "With unit tests"
 	```bash
 	mvn clean install
 	```
-	The maven unit tests of all modules may take up to 30 minutes. 	
+	The maven unit tests of all modules may take up to 30 minutes.
 
 === "With Geotools jars packaged"
 	```bash
 	mvn clean install -DskipTests -Dgeotools
 	```
-	Geotools jars will be packaged into the produced fat jars.	
+	Geotools jars will be packaged into the produced fat jars.
 
 !!!note
 	By default, this command will compile Sedona with Spark 3.0 and Scala 2.12
-	
+
 
 ### Compile with different targets
 
@@ -106,7 +106,7 @@ pipenv run pytest tests
 ```
 ## Compile the documentation
 
-The website is automatically built after each commit. The built website can be downloaded here: 
+The website is automatically built after each commit. The built website can be downloaded here:
 
 ### MkDocs website
 

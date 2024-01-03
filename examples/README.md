@@ -1,27 +1,27 @@
 # Sedona Template Project
 
-This repository contains template projects for RDD, SQL and Viz. The template projects have been configured properly.
+This repository contains template projects for Sedona on Spark and Flink. The template projects have been configured properly.
 
 Note that, although the template projects are written in Scala, the same APIs can be  used in Java as well.
 
 ## Folder structure
 The folder structure of this repository is as follows.
 
-* rdd-colocation-mining: a scala template shows how to use Sedona RDD API in Spatial Data Mining
-* sql: a scala template shows how to use Sedona DataFrame and SQL API
-* viz: a scala template shows how to use Sedona Viz RDD and SQL API
+* spark-sql: a Scala template shows how to use Sedona RDD, DataFrame and SQL API
+* flink-sql: a Java template show how to use Sedona SQL via Flink Table APIs
+
 
 ## Compile and package
 
 ### Prerequisites
 Please make sure you have the following software installed on your local machine:
 
-* For Scala: Scala 2.12, SBT
+* For Scala: Scala 2.12
 * For Java: JDK 1.8, Apache Maven 3
 
 ### Compile
 
-Run a terminal command `sbt assembly` within the folder of each template
+Run a terminal command `mvn clean package` within the folder of each template
 
 
 ### Submit your fat jar to Spark

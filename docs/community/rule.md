@@ -33,7 +33,7 @@ Documentation contributions should satisfy the following requirements:
 
 ## Make a Pull Request
 
-After developing a contribution, the easiest and most visible way to submit a Pull Request (PR) to the [GitHub repo](https://github.com/apache/sedona). 
+After developing a contribution, the easiest and most visible way to submit a Pull Request (PR) to the [GitHub repo](https://github.com/apache/sedona).
 
 **Please use the JIRA ticket ID in the PR name, such as "[SEDONA-1] my subject".**
 

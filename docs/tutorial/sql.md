@@ -19,7 +19,7 @@ SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of 
 	Dataset<Row> myDataFrame = sedona.sql("YOUR_SQL")
 	myDataFrame.createOrReplaceTempView("spatialDf")
 	```
-	
+
 === "Python"
 
 	```python
@@ -80,7 +80,7 @@ You can add additional Spark runtime config to the config builder. For example, 
 	```scala
 	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 	```
-	
+
 === "Python"
 
 	```python
@@ -173,7 +173,7 @@ Add the following line after creating Sedona config. If you already have a Spark
 
 	```python
 	from sedona.spark import *
-	
+
 	sedona = SedonaContext.create(config)
 	```
 
@@ -192,12 +192,12 @@ The following method has been deprecated since Sedona 1.4.1. Please use the meth
 	```java
 	SedonaSQLRegistrator.registerAll(sparkSession)
 	```
-	
+
 === "Python"
 
 	```python
 	from sedona.register import SedonaRegistrator
-	
+
 	SedonaRegistrator.registerAll(spark)
 	```
 
@@ -208,7 +208,7 @@ You can also register everything by passing `--conf spark.sql.extensions=org.apa
 Assume we have a WKT file, namely `usa-county.tsv`, at Path `/Download/usa-county.tsv` as follows:
 
 ```
-POLYGON (..., ...)	Cuming County	
+POLYGON (..., ...)	Cuming County
 POLYGON (..., ...)	Wahkiakum County
 POLYGON (..., ...)	De Baca County
 POLYGON (..., ...)	Lancaster County
@@ -325,14 +325,14 @@ This prevents Spark from interpreting the property and allows us to use the ST_G
 
 	```python
 	schema = "type string, crs string, totalFeatures long, features array<struct<type string, geometry string, properties map<string, string>>>";
-	(sedona.read.json(geojson_path, schema=schema) 
+	(sedona.read.json(geojson_path, schema=schema)
 		.selectExpr("explode(features) as features") # Explode the envelope to get one feature per row.
 		.select("features.*") # Unpack the features struct.
 		.withColumn("geometry", f.expr("ST_GeomFromGeoJSON(geometry)")) # Convert the geometry string.
 		.printSchema())
 	```
 
-	
+
 ## Load Shapefile and GeoJSON using SpatialRDD
 
 Shapefile and GeoJSON can be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](../rdd/#create-a-generic-spatialrdd) and [DataFrame <-> RDD](#convert-between-dataframe-and-spatialrdd).
@@ -588,7 +588,7 @@ SedonaPyDeck.create_scatterplot_map(df=crimes_df)
 
 The dataset used here is the Chicago crimes dataset, available [here](https://github.com/apache/sedona/blob/sedona-1.5.0/spark/common/src/test/resources/Chicago_Crimes.csv)
 
-#### Creating a heatmap using SedonaPyDeck 
+#### Creating a heatmap using SedonaPyDeck
 
 SedonaPyDeck exposes a create_heatmap API which can be used to visualize a heatmap out of the passed SedonaDataFrame containing points:
 
@@ -604,7 +604,7 @@ The dataset used here is the Chicago crimes dataset, available [here](https://gi
 
 ### SedonaKepler
 
-Spatial query results can be visualized in a Jupyter lab/notebook environment using SedonaKepler. 
+Spatial query results can be visualized in a Jupyter lab/notebook environment using SedonaKepler.
 
 SedonaKepler exposes APIs to create interactive and customizable map visualizations using [KeplerGl](https://kepler.gl/).
 
@@ -656,6 +656,41 @@ Since v`1.3.0`, Sedona natively supports writing GeoParquet file. GeoParquet can
 df.write.format("geoparquet").save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
 ```
 
+Since v`1.5.1`, Sedona supports writing GeoParquet files with custom GeoParquet spec version and crs.
+The default GeoParquet spec version is `1.0.0` and the default crs is `null`. You can specify the GeoParquet spec version and crs as follows:
+
+```scala
+val projjson = "{...}" // PROJJSON string for all geometry columns
+df.write.format("geoparquet")
+		.option("geoparquet.version", "1.0.0")
+		.option("geoparquet.crs", projjson)
+		.save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
+```
+
+If you have multiple geometry columns written to the GeoParquet file, you can specify the CRS for each column.
+For example, `g0` and `g1` are two geometry columns in the DataFrame `df`, and you want to specify the CRS for each column as follows:
+
+```scala
+val projjson_g0 = "{...}" // PROJJSON string for g0
+val projjson_g1 = "{...}" // PROJJSON string for g1
+df.write.format("geoparquet")
+		.option("geoparquet.version", "1.0.0")
+		.option("geoparquet.crs.g0", projjson_g0)
+		.option("geoparquet.crs.g1", projjson_g1)
+		.save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
+```
+
+The value of `geoparquet.crs` and `geoparquet.crs.<column_name>` can be one of the following:
+
+* `"null"`: Explicitly setting `crs` field to `null`. This is the default behavior.
+* `""` (empty string): Omit the `crs` field. This implies that the CRS is [OGC:CRS84](https://www.opengis.net/def/crs/OGC/1.3/CRS84) for CRS-aware implementations.
+* `"{...}"` (PROJJSON string): The `crs` field will be set as the PROJJSON object representing the Coordinate Reference System (CRS) of the geometry. You can find the PROJJSON string of a specific CRS from here: https://epsg.io/ (click the JSON option at the bottom of the page). You can also customize your PROJJSON string as needed.
+
+Please note that Sedona currently cannot set/get a projjson string to/from a CRS. Its geoparquet reader will ignore the projjson metadata and you will have to set your CRS via [`ST_SetSRID`](../api/sql/Function.md#st_setsrid) after reading the file.
+Its geoparquet writer will not leverage the SRID field of a geometry so you will have to always set the `geoparquet.crs` option manually when writing the file, if you want to write a meaningful CRS field.
+
+Due to the same reason, Sedona geoparquet reader and writer do NOT check the axis order (lon/lat or lat/lon) and assume they are handled by the users themselves when writing / reading the files. You can always use [`ST_FlipCoordinates`](../api/sql/Function.md#st_flipcoordinates) to swap the axis order of your geometries.
+
 ## Sort then Save GeoParquet
 
 To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../../api/sql/Function/#st_geohash)) and then save as a GeoParquet file. An example is as follows:
@@ -702,7 +737,7 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Ple
 	```scala
 	var spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
 	```
-	
+
 === "Java"
 
 	```java
@@ -721,7 +756,7 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Ple
 
 !!!warning
 	Only one Geometry type column is allowed per DataFrame.
-	
+
 ### SpatialRDD to DataFrame
 
 Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html)
@@ -737,12 +772,12 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Ple
 	```java
 	Dataset<Row> spatialDf = Adapter.toDf(spatialRDD, sedona)
 	```
-	
+
 === "Python"
 
 	```python
 	from sedona.utils.adapter import Adapter
-	
+
 	spatialDf = Adapter.toDf(spatialRDD, sedona)
 	```
 
@@ -778,8 +813,8 @@ PairRDD is the result of a spatial join query or distance join query. SedonaSQL 
 === "Java"
 
 	```java
-	import scala.collection.JavaConverters;	
-	
+	import scala.collection.JavaConverters;
+
 	List leftFields = new ArrayList<>(Arrays.asList("c1", "c2", "c3"));
 	List rightFields = new ArrayList<>(Arrays.asList("c4", "c5", "c6"));
 	Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, JavaConverters.asScalaBuffer(leftFields).toSeq(), JavaConverters.asScalaBuffer(rightFields).toSeq(), sedona);
@@ -804,7 +839,7 @@ or you can use the attribute names directly from the input RDD
 === "Java"
 
 	```java
-	import scala.collection.JavaConverters;	
+	import scala.collection.JavaConverters;
 	Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, JavaConverters.asScalaBuffer(leftRdd.fieldNames).toSeq(), JavaConverters.asScalaBuffer(rightRdd.fieldNames).toSeq(), sedona);
 	```
 === "Python"
