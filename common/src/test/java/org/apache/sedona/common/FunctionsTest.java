@@ -1880,8 +1880,8 @@ public class FunctionsTest extends TestBase {
         Double expectedResult2 = 0.5;
         Double expectedResult3 = 1.0;
 
-        assertEquals(expectedResult1, actual1, 0.1);
-        assertEquals(expectedResult2, actual2, 0.1);
-        assertEquals(expectedResult3, actual3, 0.1);
+        assertEquals(expectedResult1, actual1, FP_TOLERANCE);
+        assertEquals(expectedResult2, actual2, FP_TOLERANCE);
+        assertEquals(expectedResult3, actual3, FP_TOLERANCE);
     }
 }
