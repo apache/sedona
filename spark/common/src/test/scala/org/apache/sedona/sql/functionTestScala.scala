@@ -1503,6 +1503,33 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       )
   }
 
+  it("Should pass ST_LineLocatePoint") {
+    Given("geometry dataframe")
+    val geometryDf = Seq(
+      ("POINT (-1 1)", "LINESTRING (0 0, 1 1, 2 2)"),
+      ("POINT (0 2)", "LINESTRING (0 0, 1 1, 2 2)"),
+      ("POINT (0 0)", "LINESTRING (0 2, 1 1, 2 0)"),
+      ("POINT (3 1)", "LINESTRING (0 2, 1 1, 2 0)")
+    ).map {
+      case (point, linestring) => (wktReader.read(point), wktReader.read(linestring))
+    }.toDF("Point", "LineString")
+    geometryDf.createOrReplaceTempView("geometries")
+
+    When("using ST_LineLocatePoint")
+        val resultDf = sparkSession.sql(
+          "SELECT ST_LineLocatePoint(LineString, Point) as Locations FROM geometries"
+        )
+
+    val result = resultDf.collect()
+
+    Then("Result should match")
+
+    assert(result(0).get(0).asInstanceOf[Double]==0.0)
+    assert(result(1).get(0).asInstanceOf[Double]==0.5)
+    assert(result(2).get(0).asInstanceOf[Double]==0.5)
+    assert(result(3).get(0).asInstanceOf[Double]==1.0)
+  }
+
   it ("Should pass ST_Multi"){
     val df = sparkSession.sql("select ST_Astext(ST_Multi(ST_Point(1.0,1.0)))")
     val result = df.collect()
