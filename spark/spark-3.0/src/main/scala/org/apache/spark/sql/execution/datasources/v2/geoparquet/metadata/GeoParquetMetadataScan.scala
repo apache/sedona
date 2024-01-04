@@ -18,7 +18,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.connector.read.PartitionReaderFactory
 import org.apache.spark.sql.execution.datasources.PartitioningAwareFileIndex
-import org.apache.spark.sql.execution.datasources.v2.TextBasedFileScan
+import org.apache.spark.sql.execution.datasources.v2.FileScan
 import org.apache.spark.sql.sources.Filter
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
@@ -36,7 +36,7 @@ case class GeoParquetMetadataScan(
     pushedFilters: Array[Filter],
     partitionFilters: Seq[Expression] = Seq.empty,
     dataFilters: Seq[Expression] = Seq.empty)
-  extends TextBasedFileScan(sparkSession, options) {
+  extends FileScan {
   override def createReaderFactory(): PartitionReaderFactory = {
     val caseSensitiveMap = options.asCaseSensitiveMap.asScala.toMap
     // Hadoop Configurations are case sensitive.
@@ -45,12 +45,9 @@ case class GeoParquetMetadataScan(
       new SerializableConfiguration(hadoopConf))
     // The partition values are already truncated in `FileScan.partitions`.
     // We should use `readPartitionSchema` as the partition schema here.
-    val fileSourceOptions = new FileSourceOptions(caseSensitiveMap)
     GeoParquetMetadataPartitionReaderFactory(sparkSession.sessionState.conf, broadcastedConf,
-      dataSchema, readDataSchema, readPartitionSchema, fileSourceOptions, pushedFilters)
+      dataSchema, readDataSchema, readPartitionSchema, pushedFilters)
   }
-
-  override def isSplitable(path: Path): Boolean = false
 
   override def getFileUnSplittableReason(path: Path): String =
     "Reading parquet file metadata does not require splitting the file"
