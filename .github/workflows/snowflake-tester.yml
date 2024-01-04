@@ -40,4 +40,4 @@ jobs:
       - run: wget https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/${SNOWFLAKE_GEOTOOLS_VERSION}/geotools-wrapper-${SNOWFLAKE_GEOTOOLS_VERSION}.jar -O snowflake-tester/tmp/geotools-wrapper-${SNOWFLAKE_GEOTOOLS_VERSION}.jar
       - run: mvn clean package -DskipTests -pl snowflake -am
       - run: find snowflake/target -name sedona-snowflake-*.jar -exec cp {} snowflake-tester/tmp/ \;
-      - run: export SEDONA_VERSION=$(grep version pom.xml | grep -v -e '<?xml|~'| head -n 1 | sed 's/[[:space:]]//g' | sed -E 's/<.{0,1}version>//g') && echo $SEDONA_VERSION && mvn test -P snowflake
+      - run: export SEDONA_VERSION=$(find snowflake/target -name "sedona-snowflake-*.jar" -not -name "*-javadoc.jar" | sed 's/.*sedona-snowflake-\(.*\)\.jar/\1/') && echo $SEDONA_VERSION && mvn test -P snowflake
