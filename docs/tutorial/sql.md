@@ -664,7 +664,7 @@ This UDF example takes a geometry type input and returns a primitive type output
 	// using lambda function to register the UDF
 	sparkSession.udf().register(
 			"udf_lengthPoly",
-			(UDF1<Geometry, Double>) Geometry::getLength, 
+			(UDF1<Geometry, Double>) Geometry::getLength,
 			DataTypes.DoubleType);
 
 	df.selectExpr("udf_lengthPoly(geom)").show()
@@ -723,7 +723,7 @@ This UDF example takes a geometry type input and returns a geometry type output:
 	sparkSession.udf().register(
 			"udf_bufferFixed",
 			(UDF1<Geometry, Geometry>) geom ->
-                geom.buffer(5.5), 
+                geom.buffer(5.5),
 			new GeometryUDT());
 
 	df.selectExpr("udf_bufferFixed(geom)").show()
@@ -781,7 +781,7 @@ This UDF example takes a geometry type input and a primitive type input and retu
 	// using lambda function to register the UDF
 	sparkSession.udf().register(
 			"udf_buffer",
-			(UDF2<Geometry, Double, Geometry>) Geometry::buffer, 
+			(UDF2<Geometry, Double, Geometry>) Geometry::buffer,
 			new GeometryUDT());
 
 	df.selectExpr("udf_buffer(geom, distance)").show()
