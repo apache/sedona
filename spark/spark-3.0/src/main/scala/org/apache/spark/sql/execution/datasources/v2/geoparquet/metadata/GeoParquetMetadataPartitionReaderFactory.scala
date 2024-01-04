@@ -77,6 +77,7 @@ object GeoParquetMetadataPartitionReaderFactory {
           ArrayBasedMapData(geoColumnsMap))
         new GenericInternalRow(fields)
       case None =>
+        // Not a GeoParquet file, return a row with null metadata values.
         val fields: Array[Any] = Array(UTF8String.fromString(filePath), null, null, null)
         new GenericInternalRow(fields)
     }

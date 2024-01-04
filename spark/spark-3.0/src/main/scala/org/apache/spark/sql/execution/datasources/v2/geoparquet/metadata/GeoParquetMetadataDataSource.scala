@@ -20,6 +20,12 @@ import org.apache.spark.sql.sources.DataSourceRegister
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
+/**
+ * Data source for reading GeoParquet metadata. This could be accessed using the `spark.read` interface:
+ * {{{
+ *  val df = spark.read.format("geoparquet.metadata").load("path/to/geoparquet")
+ * }}}
+ */
 class GeoParquetMetadataDataSource extends FileDataSourceV2 with DataSourceRegister {
   override val shortName: String = "geoparquet.metadata"
 
