@@ -873,7 +873,7 @@ This UDF example takes a geometry type input and a primitive type input and retu
 
 	```python
 	from sedona.sql.types import GeometryType
-	from pyspark.sql.types import DoubleType
+	from pyspark.sql.types import *
 
 	schemaUDF = StructType([
         StructField("buffed", GeometryType()),
