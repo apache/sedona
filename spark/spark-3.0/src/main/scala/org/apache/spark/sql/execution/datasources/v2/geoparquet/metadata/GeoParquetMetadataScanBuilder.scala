@@ -14,9 +14,11 @@
 package org.apache.spark.sql.execution.datasources.v2.geoparquet.metadata
 
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.connector.read.Scan
 import org.apache.spark.sql.execution.datasources.PartitioningAwareFileIndex
 import org.apache.spark.sql.execution.datasources.v2.FileScanBuilder
+import org.apache.spark.sql.sources.Filter
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
@@ -35,8 +37,43 @@ class GeoParquetMetadataScanBuilder(
       readDataSchema(),
       readPartitionSchema(),
       options,
-      pushedDataFilters,
-      partitionFilters,
-      dataFilters)
+      getPushedDataFilters,
+      getPartitionFilters,
+      getDataFilters)
+  }
+
+  // The following methods uses reflection to address compatibility issues for Spark 3.0 ~ 3.2
+
+  private def getPushedDataFilters: Array[Filter] = {
+    try {
+      val field = classOf[FileScanBuilder].getDeclaredField("pushedDataFilters")
+      field.setAccessible(true)
+      field.get(this).asInstanceOf[Array[Filter]]
+    } catch {
+      case _: NoSuchFieldException =>
+        Array.empty
+    }
+  }
+
+  private def getPartitionFilters: Seq[Expression] = {
+    try {
+      val field = classOf[FileScanBuilder].getDeclaredField("partitionFilters")
+      field.setAccessible(true)
+      field.get(this).asInstanceOf[Seq[Expression]]
+    } catch {
+      case _: NoSuchFieldException =>
+        Seq.empty
+    }
+  }
+
+  private def getDataFilters: Seq[Expression] = {
+    try {
+      val field = classOf[FileScanBuilder].getDeclaredField("dataFilters")
+      field.setAccessible(true)
+      field.get(this).asInstanceOf[Seq[Expression]]
+    } catch {
+      case _: NoSuchFieldException =>
+        Seq.empty
+    }
   }
 }

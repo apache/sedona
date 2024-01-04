@@ -51,4 +51,9 @@ case class GeoParquetMetadataScan(
 
   override def getFileUnSplittableReason(path: Path): String =
     "Reading parquet file metadata does not require splitting the file"
+
+  // This is for compatibility with Spark 3.0. Spark 3.3 does not have this method
+  def withFilters(partitionFilters: Seq[Expression], dataFilters: Seq[Expression]): FileScan = {
+    copy(partitionFilters = partitionFilters, dataFilters = dataFilters)
+  }
 }
