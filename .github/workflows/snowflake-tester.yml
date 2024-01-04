@@ -4,14 +4,14 @@ on:
   push:
     branches:
       - master
-  pull_request:
-    branches:
-      - '*'
+  pull_request_target: # This is a dangerous operation. Only people who are within Wherobots organization should be able to trigger this PR.
+    types:
+      - opened
 
 env:
   SNOWFLAKE_AUTH_METHOD: ${{vars.SNOWFLAKE_AUTH_METHOD}}
-  SNOWFLAKE_USER: ${{vars.SNOWFLAKE_USER}}
-  SNOWFLAKE_PASSWORD: ${{vars.SNOWFLAKE_PASSWORD}}
+  SNOWFLAKE_USER: ${{secrets.SNOWFLAKE_USER}}
+  SNOWFLAKE_PASSWORD: ${{secrets.SNOWFLAKE_PASSWORD}}
   SNOWFLAKE_DB: ${{vars.SNOWFLAKE_DB}}
   SNOWFLAKE_SCHEMA: ${{vars.SNOWFLAKE_SCHEMA}}
   SNOWFLAKE_WAREHOUSE: ${{vars.SNOWFLAKE_WAREHOUSE}}
@@ -24,6 +24,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/setup-java@v1
         with:
           java-version: '8'
