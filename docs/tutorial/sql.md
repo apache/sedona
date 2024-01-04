@@ -632,6 +632,277 @@ can also be found in the example notebook available [here](https://github.com/ap
 
 Details on all the APIs available by SedonaKepler are listed in the [SedonaKepler API docs](../../api/sql/Visualization_SedonaKepler)
 
+## Create a User-Defined Function (UDF)
+
+User-Defined Functions (UDFs) are user-created procedures that can perform operations on a single row of information. To cover almost all use cases, we will showcase 4 types of UDFs for a better understanding of how to use geometry with UDFs.
+
+### Geometry to primitive
+
+This UDF example takes a geometry type input and returns a primitive type output:
+
+=== "Scala"
+	
+	```scala
+	import org.locationtech.jts.geom.Geometry
+	import org.apache.spark.sql.types._
+	
+	def lengthPoly(geom: Geometry): Double = {
+        geom.getLength
+	}
+
+	sedona.udf.register("udf_lengthPoly", lengthPoly _)
+	
+	df.selectExpr("udf_lengthPoly(geom)").show()
+	```
+
+=== "Java"
+
+	```java
+	import org.apache.spark.sql.api.java.UDF1;
+	import org.apache.spark.sql.types.DataTypes;
+	
+	// using lambda function to register the UDF
+	sparkSession.udf().register(
+			"udf_lengthPoly",
+			(UDF1<Geometry, Double>) Geometry::getLength, 
+			DataTypes.DoubleType);
+	
+	df.selectExpr("udf_lengthPoly(geom)").show()
+	```
+
+=== "Python"
+
+	```python
+	from sedona.sql.types import GeometryType
+	from pyspark.sql.types import DoubleType
+	
+	def lengthPoly(geom: GeometryType()):
+		return geom.length
+	
+	sedona.udf.register("udf_lengthPoly", lengthPoly, DoubleType())
+	
+	df.selectExpr("udf_lengthPoly(geom)").show()
+	```
+
+Output:
+
+```
++--------------------+
+|udf_lengthPoly(geom)|
++--------------------+
+|   3.414213562373095|
++--------------------+
+```
+
+### Geometry to Geometry
+
+This UDF example takes a geometry type input and returns a geometry type output:
+
+=== "Scala"
+
+	```scala
+	import org.locationtech.jts.geom.Geometry
+	import org.apache.spark.sql.types._
+	
+	def bufferFixed(geom: Geometry): Geometry = {
+        geom.buffer(5.5)
+	}
+
+	sedona.udf.register("udf_bufferFixed", bufferFixed _)
+
+	df.selectExpr("udf_bufferFixed(geom)").show()
+	```
+
+=== "Java"
+
+	```java
+	import org.apache.spark.sql.api.java.UDF1;
+	import org.apache.spark.sql.types.DataTypes;
+	
+	// using lambda function to register the UDF
+	sparkSession.udf().register(
+			"udf_bufferFixed",
+			(UDF1<Geometry, Geometry>) geom ->
+                geom.buffer(5.5), 
+			new GeometryUDT());
+	
+	df.selectExpr("udf_bufferFixed(geom)").show()
+	```
+
+=== "Python"
+
+	```python
+	from sedona.sql.types import GeometryType
+	from pyspark.sql.types import DoubleType
+	
+	def bufferFixed(geom: GeometryType()):
+    	return geom.buffer(5.5)
+	
+	sedona.udf.register("udf_bufferFixed", bufferFixed, GeometryType())
+	
+	df.selectExpr("udf_bufferFixed(geom)").show()
+	```
+
+Output:
+
+```
++--------------------------------------------------+
+|                             udf_bufferFixed(geom)|
++--------------------------------------------------+
+|POLYGON ((1 -4.5, -0.0729967710887076 -4.394319...|
++--------------------------------------------------+
+```
+
+### Geometry, primitive to geometry
+
+This UDF example takes a geometry type input and a primitive type input and returns a geometry type output:
+
+=== "Scala"
+
+	```scala
+	import org.locationtech.jts.geom.Geometry
+	import org.apache.spark.sql.types._
+	
+	def bufferIt(geom: Geometry, distance: Double): Geometry = {
+        geom.buffer(distance)
+	}
+
+	sedona.udf.register("udf_buffer", bufferIt _)
+
+	df.selectExpr("udf_buffer(geom, distance)").show()
+	```
+
+=== "Java"
+
+	```java
+	import org.apache.spark.sql.api.java.UDF2;
+	import org.apache.spark.sql.types.DataTypes;
+	
+	// using lambda function to register the UDF
+	sparkSession.udf().register(
+			"udf_buffer",
+			(UDF2<Geometry, Double, Geometry>) Geometry::buffer, 
+			new GeometryUDT());
+	
+	df.selectExpr("udf_buffer(geom, distance)").show()
+	```
+
+=== "Python"
+
+	```python
+	from sedona.sql.types import GeometryType
+	from pyspark.sql.types import DoubleType
+	
+	def bufferIt(geom: GeometryType(), distance: DoubleType()):
+    	return geom.buffer(distance)
+	
+	sedona.udf.register("udf_buffer", bufferIt, GeometryType())
+	
+	df.selectExpr("udf_buffer(geom, distance)").show()
+	```
+
+Output:
+
+```
++--------------------------------------------------+
+|                        udf_buffer(geom, distance)|
++--------------------------------------------------+
+|POLYGON ((1 -9, -0.9509032201612866 -8.80785280...|
++--------------------------------------------------+
+```
+
+### Geometry, primitive to Geometry, primitive
+
+This UDF example takes a geometry type input and a primitive type input and returns a geometry type and a primitive type output:
+
+=== "Scala"
+
+	```scala
+	import org.locationtech.jts.geom.Geometry
+	import org.apache.spark.sql.types._
+	import org.apache.spark.sql.api.java.UDF2
+	
+	val schemaUDF = StructType(Array(
+		StructField("buffed", GeometryUDT),
+		StructField("length", DoubleType)
+	))
+	
+	val udf_bufferLength = udf(
+		new UDF2[Geometry, Double, (Geometry, Double)] {
+			def call(geom: Geometry, distance: Double): (Geometry, Double) = {
+				val buffed = geom.buffer(distance)
+				val length = geom.getLength
+				(buffed, length)
+			}
+		}, schemaUDF)
+
+	sedona.udf.register("udf_bufferLength", udf_bufferLength)
+
+	data.withColumn("bufferLength", expr("udf_bufferLengths(geom, distance)"))
+        .select("geom", "distance", "bufferLength.*")
+		.show()
+	```
+
+=== "Java"
+
+	```java
+	import org.apache.spark.sql.api.java.UDF2;
+	import org.apache.spark.sql.types.DataTypes;
+	import org.apache.spark.sql.types.StructType;
+	import scala.Tuple2;
+	
+	StructType schemaUDF = new StructType()
+                .add("buffedGeom", new GeometryUDT())
+                .add("length", DataTypes.DoubleType);
+
+	// using lambda function to register the UDF
+	sparkSession.udf().register("udf_bufferLength",
+                (UDF2<Geometry, Double, Tuple2<Geometry, Double>>) (geom, distance) -> {
+                    Geometry buffed = geom.buffer(distance);
+                    Double length = buffed.getLength();
+                    return new Tuple2<>(buffed, length);
+                },
+                schemaUDF);
+	
+	df.withColumn("bufferLength", functions.expr("udf_bufferLength(geom, distance)"))
+                .select("geom", "distance", "bufferLength.*")
+				.show();
+	```
+
+=== "Python"
+
+	```python
+	from sedona.sql.types import GeometryType
+	from pyspark.sql.types import DoubleType
+	
+	schemaUDF = StructType([
+        StructField("buffed", GeometryType()),
+        StructField("length", DoubleType())
+        ])
+	
+	def bufferAndLength(geom: GeometryType(), distance: DoubleType()):
+		buffed = geom.buffer(distance)
+		length = buffed.length
+		return [buffed, length]
+
+	sedona.udf.register("udf_bufferLength", bufferAndLength, schemaUDF)
+	
+	df.withColumn("bufferLength", expr("udf_bufferLength(geom, buffer)"))
+				.select("geom", "buffer", "bufferLength.*")
+				.show()
+	```
+
+Output:
+
+```
++------------------------------+--------+--------------------------------------------------+-----------------+
+|                          geom|distance|                                        buffedGeom|           length|
++------------------------------+--------+--------------------------------------------------+-----------------+
+|POLYGON ((1 1, 1 2, 2 1, 1 1))|    10.0|POLYGON ((1 -9, -0.9509032201612866 -8.80785280...|66.14518337329191|
++------------------------------+--------+--------------------------------------------------+-----------------+
+```
+
+
 ## Save to permanent storage
 
 To save a Spatial DataFrame to some permanent storage such as Hive tables and HDFS, you can simply convert each geometry in the Geometry type column back to a plain String and save the plain DataFrame to wherever you want.
