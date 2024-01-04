@@ -1694,6 +1694,26 @@ Output:
 POINT (51.5974135047432 76.5974135047432)
 ```
 
+## ST_LineLocatePoint
+
+Introduction: Returns a double between 0 and 1, representing the location of the closest point on the LineString as a fraction of its total length.
+The first argument must be a LINESTRING, and the second argument is a POINT geometry.
+
+Format: `ST_LineLocatePoint(linestring: Geometry, point: Geometry)`
+
+Since: `v1.5.1`
+
+SQL Example:
+
+```sql
+SELECT ST_LineLocatePoint(ST_GeomFromWKT('LINESTRING(0 0, 1 1, 2 2)'), ST_GeomFromWKT('POINT(0 2)'))
+```
+
+Output:
+```
+0.5
+```
+
 ## ST_LineMerge
 
 Introduction: Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.

@@ -639,6 +639,13 @@ public class Functions {
         return GEOMETRY_FACTORY.createPoint(interPoint);
     }
 
+    public static double lineLocatePoint(Geometry geom, Geometry point)
+    {
+        double length = geom.getLength();
+        LengthIndexedLine indexedLine = new LengthIndexedLine(geom);
+        return indexedLine.indexOf(point.getCoordinate()) / length;
+    }
+
     public static Geometry difference(Geometry leftGeometry, Geometry rightGeometry) {
         boolean isIntersects = leftGeometry.intersects(rightGeometry);
         if (!isIntersects) {

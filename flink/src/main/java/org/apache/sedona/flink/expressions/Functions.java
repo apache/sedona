@@ -297,6 +297,15 @@ public class Functions {
         }
     }
 
+    public static class ST_LineLocatePoint extends ScalarFunction {
+        @DataTypeHint("Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object p){
+            Geometry geom = (Geometry) o;
+            Geometry point = (Geometry) p;
+            return org.apache.sedona.common.Functions.lineLocatePoint(geom, point);
+        }
+    }
+
     public static class ST_YMin extends ScalarFunction {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o){
