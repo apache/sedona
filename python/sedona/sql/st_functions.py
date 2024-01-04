@@ -77,6 +77,7 @@ __all__ = [
     "ST_LengthSpheroid",
     "ST_LineFromMultiPoint",
     "ST_LineInterpolatePoint",
+    "ST_LineLocatePoint",
     "ST_LineMerge",
     "ST_LineSubstring",
     "ST_MakeLine",
@@ -849,6 +850,19 @@ def ST_LineInterpolatePoint(geometry: ColumnOrName, fraction: ColumnOrNameOrNumb
     :rtype: Column
     """
     return _call_st_function("ST_LineInterpolatePoint", (geometry, fraction))
+
+@validate_argument_types
+def ST_LineLocatePoint(linestring: ColumnOrName, point: ColumnOrName) -> Column:
+    """Returns a double between 0 and 1 representing the location of the closest point on a LineString to the given Point, as a fraction of 2d line length.
+
+    :param linestring: Linestring geometry column to locate point on.
+    :type geometry: ColumnOrName
+    :param point: Point geometry column.
+    :type geometry: ColumnOrNameOrNumber
+    :return: double between 0 and 1 as a fraction of 2d line length.
+    :rtype: Column
+    """
+    return _call_st_function("ST_LineLocatePoint", (linestring, point))
 
 
 @validate_argument_types

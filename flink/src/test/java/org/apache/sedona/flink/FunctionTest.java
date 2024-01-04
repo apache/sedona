@@ -360,6 +360,14 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testLineLocatePoint() {
+        Table resultTable = tableEnv.sqlQuery("SELECT ST_LineLocatePoint(ST_GeomFromWKT('LINESTRING (0 2, 1 1, 2 0)'), ST_GeomFromWKT('POINT (0 0)'))");
+        Double result = (Double) first(resultTable).getField(0);
+        Double expectedResult = 0.5;
+        assertEquals(expectedResult, result, 0.1);
+    }
+
+    @Test
     public void testYMax() {
         Table polygonTable = createPolygonTable(1);
         Table ResultTable = polygonTable.select(call(Functions.ST_YMax.class.getSimpleName(), $(polygonColNames[0])));

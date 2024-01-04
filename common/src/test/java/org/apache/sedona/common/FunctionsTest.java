@@ -1864,4 +1864,24 @@ public class FunctionsTest extends TestBase {
         Geometry actual5 = FunctionsGeoTools.voronoiPolygons(null, 0, null);
         assertEquals(null, actual5);
     }
+
+    @Test
+    public void lineLocatePoint() {
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 1, 1, 2, 2));
+        Geometry point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(-1, 1));
+        Geometry point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 2));
+        Geometry point3 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 3));
+
+        Double actual1 = Functions.lineLocatePoint(lineString, point1);
+        Double actual2 = Functions.lineLocatePoint(lineString, point2);
+        Double actual3 = Functions.lineLocatePoint(lineString, point3);
+
+        Double expectedResult1 = 0.0;
+        Double expectedResult2 = 0.5;
+        Double expectedResult3 = 1.0;
+
+        assertEquals(expectedResult1, actual1, FP_TOLERANCE);
+        assertEquals(expectedResult2, actual2, FP_TOLERANCE);
+        assertEquals(expectedResult3, actual3, FP_TOLERANCE);
+    }
 }
