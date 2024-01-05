@@ -376,6 +376,55 @@ root
 
 Sedona supports spatial predicate push-down for GeoParquet files, please refer to the [SedonaSQL query optimizer](../api/sql/Optimizer.md) documentation for details.
 
+### Inspect GeoParquet metadata
+
+Since v`1.5.1`, Sedona provides a Spark SQL data source `"geoparquet.metadata"` for inspecting GeoParquet metadata. The resulting dataframe contains
+the "geo" metadata for each input file.
+
+=== "Scala/Java"
+
+	```scala
+	val df = sedona.read.format("geoparquet.metadata").load(geoparquetdatalocation1)
+	df.printSchema()
+	```
+
+=== "Java"
+
+	```java
+	Dataset<Row> df = sedona.read.format("geoparquet.metadata").load(geoparquetdatalocation1)
+	df.printSchema()
+	```
+
+=== "Python"
+
+	```python
+	df = sedona.read.format("geoparquet.metadata").load(geoparquetdatalocation1)
+	df.printSchema()
+	```
+
+The output will be as follows:
+
+```
+root
+ |-- path: string (nullable = true)
+ |-- version: string (nullable = true)
+ |-- primary_column: string (nullable = true)
+ |-- columns: map (nullable = true)
+ |    |-- key: string
+ |    |-- value: struct (valueContainsNull = true)
+ |    |    |-- encoding: string (nullable = true)
+ |    |    |-- geometry_types: array (nullable = true)
+ |    |    |    |-- element: string (containsNull = true)
+ |    |    |-- bbox: array (nullable = true)
+ |    |    |    |-- element: double (containsNull = true)
+ |    |    |-- crs: string (nullable = true)
+```
+
+If the input Parquet file does not have GeoParquet metadata, the values of `version`, `primary_column` and `columns` fields of the resulting dataframe will be `null`.
+
+!!! note
+	`geoparquet.metadata` only supports reading GeoParquet specific metadata. Users can use [G-Research/spark-extension](https://github.com/G-Research/spark-extension/blob/13109b8e43dfba9272c85896ba5e30cfe280426f/PARQUET.md) to read comprehensive metadata of generic Parquet files.
+
 ## Load data from JDBC data sources
 
 The 'query' option in Spark SQL's JDBC data source can be used to convert geometry columns to a format that Sedona can interpret.

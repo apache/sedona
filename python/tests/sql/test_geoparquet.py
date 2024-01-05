@@ -17,6 +17,7 @@
 
 import pytest
 import os.path
+import json
 
 from shapely.geometry import Point
 from shapely.geometry import LineString
@@ -68,3 +69,16 @@ class TestGeoParquet(TestBase):
         with pytest.raises(Exception) as excinfo:
             self.spark.read.format("geoparquet").load(plain_parquet_input_location)
         assert "does not contain valid geo metadata" in str(excinfo.value)
+
+    def test_inspect_geoparquet_metadata(self):
+        df = self.spark.read.format("geoparquet.metadata").load(geoparquet_input_location)
+        rows = df.collect()
+        assert len(rows) == 1
+        row = rows[0]
+        assert row['path'].endswith('.parquet')
+        assert len(row['version'].split('.')) == 3
+        assert row['primary_column'] == 'geometry'
+        column_metadata = row['columns']['geometry']
+        assert column_metadata['encoding'] == 'WKB'
+        assert len(column_metadata['bbox']) == 4
+        assert isinstance(json.loads(column_metadata['crs']), dict)
