@@ -38,6 +38,7 @@ public class UDFAnnotations {
     @Target(ElementType.METHOD)
     public static @interface ParamMeta {
         String[] argNames();
-
+        String[] argTypes() default {};
+        String returnTypes() default "";
     }
 }

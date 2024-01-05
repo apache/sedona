@@ -21,7 +21,6 @@ import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.snowflake.snowsql.annotations.UDFAnnotations;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBWriter;
@@ -30,6 +29,12 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
+/**
+ * User defined functions for Apache Sedona
+ * All functions in this class takes a WKB binary as input and return a WKB binary as output.
+ * These functions can interact with Snowflake native functions but users must manually convert
+ * Snowflake native geometry type to WKB using ST_AsWKB (geom to WKB) and to_geometry (wkb to geom) function.
+ */
 public class UDFs {
 
     @UDFAnnotations.ParamMeta(argNames = {"linestring", "point", "position"})
@@ -726,6 +731,16 @@ public class UDFs {
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "precisionScale"})
     public static byte[] ST_PrecisionReduce(byte[] geometry, int precisionScale) {
+        return GeometrySerde.serialize(
+                Functions.reducePrecision(
+                        GeometrySerde.deserialize(geometry),
+                        precisionScale
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "precisionScale"})
+    public static byte[] ST_ReducePrecision(byte[] geometry, int precisionScale) {
         return GeometrySerde.serialize(
                 Functions.reducePrecision(
                         GeometrySerde.deserialize(geometry),

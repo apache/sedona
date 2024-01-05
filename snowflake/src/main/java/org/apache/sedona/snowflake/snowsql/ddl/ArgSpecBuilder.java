@@ -19,19 +19,20 @@ public class ArgSpecBuilder
 {
     /**
      * Build argument spec for a function. Format: argName1 argType1, argName2 argType2, ...
-     * @param paramTypes
+     * @param argTypesRaw
      * @param argNames
      * @return
      */
-    public static String args(Parameter[] paramTypes, String[] argNames){
+    public static String args(Parameter[] argTypesRaw, String[] argNames, String[] argTypesCustom){
         StringBuilder argTypesBuilder = new StringBuilder();
-        for (int it = 0; it < paramTypes.length; it++) {
+        for (int it = 0; it < argTypesRaw.length; it++) {
             argTypesBuilder.append(String.format(
                     "%s %s",
                     argNames[it],
-                    Constants.snowflakeTypeMap.get(paramTypes[it].getType().getTypeName())
+                    // Use the argTypes array if types are manually specified, otherwise use Reflection to get the type name
+                    Constants.snowflakeTypeMap.get(argTypesCustom.length == 0?argTypesRaw[it].getType().getTypeName():argTypesCustom[it])
             ));
-            if (it + 1 != paramTypes.length) {
+            if (it + 1 != argTypesRaw.length) {
                 argTypesBuilder.append(", ");
             }
         }
@@ -41,17 +42,18 @@ public class ArgSpecBuilder
 
     /**
      * Build argument spec for a function. Format: argType1, argType2, ...
-     * @param paramTypes
+     * @param argTypesRaw
      * @return
      */
-    public static String argTypes(Parameter[] paramTypes){
+    public static String argTypes(Parameter[] argTypesRaw, String[] argTypesCustom){
         StringBuilder argTypesBuilder = new StringBuilder();
-        for (int it = 0; it < paramTypes.length; it++) {
+        for (int it = 0; it < argTypesRaw.length; it++) {
             argTypesBuilder.append(String.format(
                     "%s",
-                    Constants.snowflakeTypeMap.get(paramTypes[it].getType().getTypeName())
+                    // Use the argTypes array if types are manually specified, otherwise use Reflection to get the type name
+                    Constants.snowflakeTypeMap.get(argTypesCustom.length == 0?argTypesRaw[it].getType().getTypeName():argTypesCustom[it])
             ));
-            if (it + 1 != paramTypes.length) {
+            if (it + 1 != argTypesRaw.length) {
                 argTypesBuilder.append(", ");
             }
         }

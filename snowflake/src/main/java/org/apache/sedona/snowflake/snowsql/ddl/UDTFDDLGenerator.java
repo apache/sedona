@@ -37,7 +37,7 @@ public class UDTFDDLGenerator {
     public static String formatUDTFDDL(
             String functionName,
             String schemaName,
-            Parameter[] argTypes,
+            Parameter[] argTypesRaw,
             String[] argNames,
             String returnType,
             String stageName,
@@ -59,7 +59,7 @@ public class UDTFDDLGenerator {
         ).replace(
                 "{KW_SCHEMA_NAME}", schemaName
         ).replace(
-                "{KW_ARG_SPEC}", ArgSpecBuilder.args(argTypes, argNames)
+                "{KW_ARG_SPEC}", ArgSpecBuilder.args(argTypesRaw, argNames, new String[]{})
         ).replace(
                 "{KW_RETURN_TYPE}", returnType
         ).replace(
@@ -77,7 +77,7 @@ public class UDTFDDLGenerator {
         );
         if (isNativeApp) {
             ddl += "\n";
-            ddl += "GRANT USAGE ON FUNCTION " + schemaName + "." + functionName + "(" + ArgSpecBuilder.argTypes(argTypes) + ") TO APPLICATION ROLE " + appRoleName + ";";
+            ddl += "GRANT USAGE ON FUNCTION " + schemaName + "." + functionName + "(" + ArgSpecBuilder.argTypes(argTypesRaw, new String[]{}) + ") TO APPLICATION ROLE " + appRoleName + ";";
         }
         return ddl;
     }
