@@ -1884,4 +1884,32 @@ public class FunctionsTest extends TestBase {
         assertEquals(expectedResult2, actual2, FP_TOLERANCE);
         assertEquals(expectedResult3, actual3, FP_TOLERANCE);
     }
+
+    @Test
+    public void isValidReason() {
+        // Valid geometry
+        Geometry validGeom = GEOMETRY_FACTORY.createPolygon(coordArray(30, 10, 40, 40, 20, 40, 10, 20, 30, 10));
+        String validReasonDefault = Functions.isValidReason(validGeom);
+        assertEquals("Valid Geometry", validReasonDefault);
+
+        Integer OGC_SFS_VALIDITY = 0;
+        Integer ESRI_VALIDITY = 1;
+
+        String validReasonOGC = Functions.isValidReason(validGeom, OGC_SFS_VALIDITY);
+        assertEquals("Valid Geometry", validReasonOGC);
+
+        String validReasonESRI = Functions.isValidReason(validGeom, ESRI_VALIDITY);
+        assertEquals("Valid Geometry", validReasonESRI);
+
+        // Invalid geometry (self-intersection)
+        Geometry invalidGeom = GEOMETRY_FACTORY.createPolygon(coordArray(30, 10, 40, 40, 20, 40, 30, 10, 10, 20, 30, 10));
+        String invalidReasonDefault = Functions.isValidReason(invalidGeom);
+        assertEquals("Ring Self-intersection at or near point (30.0, 10.0, NaN)", invalidReasonDefault);
+
+        String invalidReasonOGC = Functions.isValidReason(invalidGeom, OGC_SFS_VALIDITY);
+        assertEquals("Ring Self-intersection at or near point (30.0, 10.0, NaN)", invalidReasonOGC);
+
+        String invalidReasonESRI = Functions.isValidReason(invalidGeom, ESRI_VALIDITY);
+        assertEquals("Self-intersection at or near point (10.0, 20.0, NaN)", invalidReasonESRI);
+    }
 }

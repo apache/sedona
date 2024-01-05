@@ -50,6 +50,7 @@ import org.locationtech.jts.operation.distance3d.Distance3DOp;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
+import org.locationtech.jts.operation.valid.TopologyValidationError;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.wololo.jts2geojson.GeoJSONWriter;
@@ -71,6 +72,8 @@ public class Functions {
     private static GeometryCollection EMPTY_GEOMETRY_COLLECTION = GEOMETRY_FACTORY.createGeometryCollection(null);
     private static final double DEFAULT_TOLERANCE = 1e-6;
     private static final int DEFAULT_MAX_ITER = 1000;
+    private static final int OGC_SFS_VALIDITY = 0; // Use usual OGC SFS validity semantics
+    private static final int ESRI_VALIDITY = 1;    // ESRI validity model
 
     public static double area(Geometry geometry) {
         return geometry.getArea();
@@ -1271,5 +1274,27 @@ public class Functions {
 
     public static Double hausdorffDistance(Geometry g1, Geometry g2) throws Exception{
         return GeomUtils.getHausdorffDistance(g1, g2, -1);
+    }
+
+    public static String isValidReason(Geometry geom) {
+        return isValidReason(geom, OGC_SFS_VALIDITY);
+    }
+
+    public static String isValidReason(Geometry geom, int flags) {
+        IsValidOp isValidOp = new IsValidOp(geom);
+
+        // Set the validity model based on flags
+        if (flags == ESRI_VALIDITY) {
+            isValidOp.setSelfTouchingRingFormingHoleValid(true);
+        } else {
+            isValidOp.setSelfTouchingRingFormingHoleValid(false);
+        }
+
+        if (isValidOp.isValid()) {
+            return "Valid Geometry";
+        } else {
+            TopologyValidationError error = isValidOp.getValidationError();
+            return error.toString();
+        }
     }
 }
