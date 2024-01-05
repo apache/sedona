@@ -129,7 +129,8 @@ __all__ = [
     "ST_CoordDim",
     "ST_IsCollection",
     "ST_Affine",
-    "ST_BoundingDiagonal"
+    "ST_BoundingDiagonal",
+    "ST_IsValidReason"
 ]
 
 
@@ -1582,3 +1583,19 @@ def ST_IsCollection(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_IsCollection", geometry)
+
+@validate_argument_types
+def ST_IsValidReason(geometry: ColumnOrName, flag: Optional[Union[ColumnOrName, int]] = None) -> Column:
+    """
+    Provides a text description of why a geometry is not valid or states that it is valid.
+    An optional flag parameter can be provided for additional options.
+
+    :param geometry: Geometry column to validate.
+    :type geometry: ColumnOrName
+    :param flag: Optional flag to modify behavior of the validity check.
+    :type flag: Optional[Union[ColumnOrName, int]]
+    :return: Description of validity as a string column.
+    :rtype: Column
+    """
+    args = (geometry,) if flag is None else (geometry, flag)
+    return _call_st_function("ST_IsValidReason", args)

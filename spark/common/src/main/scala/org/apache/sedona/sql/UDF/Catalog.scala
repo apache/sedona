@@ -175,6 +175,7 @@ object Catalog {
     function[ST_Degrees](),
     function[ST_HausdorffDistance](-1),
     function[ST_DWithin](),
+    function[ST_IsValidReason](),
     // Expression for rasters
     function[RS_NormalizedDifference](),
     function[RS_Mean](),

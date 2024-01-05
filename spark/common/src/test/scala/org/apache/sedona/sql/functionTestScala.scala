@@ -2278,4 +2278,36 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   }
 
+  it ("ST_IsValidReason should provide reasons for invalid geometries") {
+    val testData = Seq(
+      (5330, "POLYGON ((0 0, 3 3, 0 3, 3 0, 0 0))"),
+      (5340, "POLYGON ((100 100, 300 300, 100 300, 300 100, 100 100))"),
+      (5350, "POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (20 20, 20 30, 30 30, 30 20, 20 20))")
+    )
+
+    val df = sparkSession.createDataFrame(testData).toDF("gid", "wkt")
+      .select($"gid", expr("ST_GeomFromWKT(wkt) as geom"))
+    df.createOrReplaceTempView("geometry_table")
+
+    val result = sparkSession.sql(
+      """
+        |SELECT gid, ST_IsValidReason(geom) as validity_info
+        |FROM geometry_table
+        |WHERE ST_IsValid(geom) = false
+        |ORDER BY gid
+        """.stripMargin)
+
+    val expectedResults = Map(
+      5330 -> "Self-intersection at or near point (1.5, 1.5, NaN)",
+      5340 -> "Self-intersection at or near point (200.0, 200.0, NaN)",
+      5350 -> "Hole lies outside shell at or near point (20.0, 20.0)"
+    )
+
+    result.collect().foreach { row =>
+      val gid = row.getAs[Int]("gid")
+      val validityInfo = row.getAs[String]("validity_info")
+      assert(validityInfo == expectedResults(gid))
+    }
+  }
+
 }

@@ -145,6 +145,7 @@ public class Catalog {
                 new Functions.ST_HausdorffDistance(),
                 new Functions.ST_IsCollection(),
                 new Functions.ST_CoordDim(),
+                new Functions.ST_IsValidReason()
         };
     }
 

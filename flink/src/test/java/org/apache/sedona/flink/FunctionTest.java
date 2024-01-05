@@ -1204,4 +1204,39 @@ public class FunctionTest extends TestBase{
         assertEquals(3, result, 0);
     }
 
+    @Test
+    public void testIsValidReason() {
+        // Test with an invalid geometry (bow-tie polygon)
+        String bowTieWKT = "POLYGON ((100 200, 100 100, 200 200, 200 100, 100 200))";
+        Table bowTieTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('" + bowTieWKT + "') AS geom");
+        Table bowTieValidityTable = bowTieTable.select(call("ST_IsValidReason", $("geom")));
+        String bowTieValidityReason = (String) first(bowTieValidityTable).getField(0);
+        System.out.println(bowTieValidityReason);
+        assertTrue(bowTieValidityReason.contains("Self-intersection"));
+
+        // Test with a valid geometry (simple linestring)
+        String lineWKT = "LINESTRING (220227 150406, 2220227 150407, 222020 150410)";
+        Table lineTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('" + lineWKT + "') AS geom");
+        Table lineValidityTable = lineTable.select(call("ST_IsValidReason", $("geom")));
+        String lineValidityReason = (String) first(lineValidityTable).getField(0);
+        assertEquals("Valid Geometry", lineValidityReason);
+
+        final int OGC_SFS_VALIDITY = 0;
+        final int ESRI_VALIDITY = 1;
+
+        // Geometry that is invalid under both OGC and ESRI standards, but with different reasons
+        String selfTouchingWKT = "POLYGON ((0 0, 2 0, 1 1, 2 2, 0 2, 1 1, 0 0))";
+        Table specialCaseTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('" + selfTouchingWKT + "') AS geom");
+
+        // Test with OGC flag
+        Table ogcValidityTable = specialCaseTable.select(call("ST_IsValidReason", $("geom"), OGC_SFS_VALIDITY));
+        String ogcValidityReason = (String) first(ogcValidityTable).getField(0);
+        assertEquals("Ring Self-intersection at or near point (1.0, 1.0, NaN)", ogcValidityReason); // Expecting a self-intersection error as per OGC standards
+
+        // Test with ESRI flag
+        Table esriValidityTable = specialCaseTable.select(call("ST_IsValidReason", $("geom"), ESRI_VALIDITY));
+        String esriValidityReason = (String) first(esriValidityTable).getField(0);
+        assertEquals("Interior is disconnected at or near point (1.0, 1.0, NaN)", esriValidityReason); // Expecting an error related to interior disconnection as per ESRI standards
+    }
+
 }
