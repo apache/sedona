@@ -1163,3 +1163,17 @@ case class ST_IsCollection(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+/**
+ * Returns a text description of the validity of the geometry considering the specified flags.
+ * If flag not specified, it defaults to OGC SFS validity semantics.
+ *
+ * @param geom  The geometry to validate.
+ * @param flag The validation flags.
+ * @return A string describing the validity of the geometry.
+ */
+case class ST_IsValidReason(inputExpressions: Seq[Expression])
+  extends InferredExpression(inferrableFunction2(Functions.isValidReason), inferrableFunction1(Functions.isValidReason)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = copy(inputExpressions = newChildren)
+}

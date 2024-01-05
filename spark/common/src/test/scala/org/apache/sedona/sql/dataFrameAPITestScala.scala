@@ -1258,5 +1258,28 @@ class dataFrameAPITestScala extends TestBaseScala {
       val actual = df.head()(0).asInstanceOf[Boolean]
       assertTrue(actual)
     }
+
+    it("Passed ST_IsValidReason") {
+      // Valid Geometry
+      val validPolygonWKT = "POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0))"
+      val validTable = Seq(validPolygonWKT).toDF("wkt").select(ST_GeomFromWKT($"wkt").as("geom"))
+      val validityTable = validTable.select(ST_IsValidReason($"geom"))
+      val validityReason = validityTable.take(1)(0).getString(0)
+      assertEquals("Valid Geometry", validityReason)
+
+      // Geometry that is invalid under both OGC and ESRI standards, but with different reasons
+      val selfTouchingWKT = "POLYGON ((0 0, 2 0, 1 1, 2 2, 0 2, 1 1, 0 0))"
+      val specialCaseTable = Seq(selfTouchingWKT).toDF("wkt").select(ST_GeomFromWKT($"wkt").as("geom"))
+
+      // Test with OGC flag (OGC_SFS_VALIDITY = 0)
+      val ogcValidityTable = specialCaseTable.select(ST_IsValidReason($"geom", lit(0)))
+      val ogcValidityReason = ogcValidityTable.take(1)(0).getString(0)
+      assertEquals("Ring Self-intersection at or near point (1.0, 1.0, NaN)", ogcValidityReason)
+
+      // Test with ESRI flag (ESRI_VALIDITY = 1)
+      val esriValidityTable = specialCaseTable.select(ST_IsValidReason($"geom", lit(1)))
+      val esriValidityReason = esriValidityTable.take(1)(0).getString(0)
+      assertEquals("Interior is disconnected at or near point (1.0, 1.0, NaN)", esriValidityReason)
+    }
   }
 }

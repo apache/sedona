@@ -1086,4 +1086,17 @@ public class Functions {
 
         }
     }
+
+    public static class ST_IsValidReason extends ScalarFunction {
+        @DataTypeHint("String")
+        public String eval(@DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object geomObject) {
+            Geometry geom = (Geometry) geomObject;
+            return org.apache.sedona.common.Functions.isValidReason(geom);
+        }
+        @DataTypeHint("String")
+        public String eval(@DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object geomObject, @DataTypeHint("Integer") Integer flags) {
+            Geometry geom = (Geometry) geomObject;
+            return org.apache.sedona.common.Functions.isValidReason(geom, flags);
+        }
+    }
 }
