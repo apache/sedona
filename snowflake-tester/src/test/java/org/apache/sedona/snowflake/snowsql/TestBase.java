@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,21 @@ public class TestBase extends TestCase {
     public void registerUDF(String functionName, Class<?> ... paramTypes) {
         try {
             String ddl = UDFDDLGenerator.buildUDFDDL(UDFs.class.getMethod(
+                    functionName,
+                    paramTypes
+            ), buildDDLConfigs, "@ApacheSedona", false, "");
+            System.out.println(ddl);
+            ResultSet res = snowClient.executeQuery(ddl);
+            res.next();
+            assert res.getString(1).contains("successfully created");
+        } catch (SQLException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void registerUDFV2(String functionName, Class<?> ... paramTypes) {
+        try {
+            String ddl = UDFDDLGenerator.buildUDFDDL(UDFsV2.class.getMethod(
                     functionName,
                     paramTypes
             ), buildDDLConfigs, "@ApacheSedona", false, "");

@@ -21,6 +21,7 @@ public class Constants {
 
     static {
         snowflakeTypeMap.put(String.class.getTypeName(), "VARCHAR");
+        snowflakeTypeMap.put("String", "VARCHAR");
         snowflakeTypeMap.put(byte[].class.getTypeName(), "BINARY");
         snowflakeTypeMap.put(long.class.getTypeName(), "NUMBER");
         snowflakeTypeMap.put(Long.class.getTypeName(), "NUMBER");
@@ -34,6 +35,7 @@ public class Constants {
         snowflakeTypeMap.put(Double.class.getTypeName(), "DOUBLE");
         snowflakeTypeMap.put(float.class.getTypeName(), "FLOAT");
         snowflakeTypeMap.put(Float.class.getTypeName(), "FLOAT");
+        snowflakeTypeMap.put("Geometry", "GEOMETRY");
     }
 
     public static String SEDONA_VERSION = "sedona_version";

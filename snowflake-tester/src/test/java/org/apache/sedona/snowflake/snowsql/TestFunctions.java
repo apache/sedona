@@ -43,6 +43,7 @@ public class TestFunctions extends TestBase {
                 "LINESTRING (0 0, 0 1, 1 1)"
         );
     }
+
     @Test
     public void test_ST_Area() {
         registerUDF("ST_Area", byte[].class);

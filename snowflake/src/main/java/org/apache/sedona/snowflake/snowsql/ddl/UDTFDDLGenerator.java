@@ -31,14 +31,19 @@ public class UDTFDDLGenerator {
             ST_Envelope_Aggr.class,
             ST_Union_Aggr.class,
             ST_Collect.class,
-            ST_Dump.class
+            ST_Dump.class,
+            // ST_SubDivideExplodeV2 is not supported in Snowflake.
+            // The error message is "java.lang.RuntimeException: net.snowflake.client.jdbc.SnowflakeSQLException: Data type GEOMETRY is not supported in non-SQL UDTF return type."
+            // Keep this comment here for future reference.
+//            ST_SubDivideExplodeV2.class
     };
 
     public static String formatUDTFDDL(
             String functionName,
             String schemaName,
-            Parameter[] argTypes,
+            Parameter[] argTypesRaw,
             String[] argNames,
+            String[] argTypesCustom,
             String returnType,
             String stageName,
             String handlerName,
@@ -59,7 +64,7 @@ public class UDTFDDLGenerator {
         ).replace(
                 "{KW_SCHEMA_NAME}", schemaName
         ).replace(
-                "{KW_ARG_SPEC}", ArgSpecBuilder.args(argTypes, argNames)
+                "{KW_ARG_SPEC}", ArgSpecBuilder.args(argTypesRaw, argNames, argTypesCustom)
         ).replace(
                 "{KW_RETURN_TYPE}", returnType
         ).replace(
@@ -77,7 +82,7 @@ public class UDTFDDLGenerator {
         );
         if (isNativeApp) {
             ddl += "\n";
-            ddl += "GRANT USAGE ON FUNCTION " + schemaName + "." + functionName + "(" + ArgSpecBuilder.argTypes(argTypes) + ") TO APPLICATION ROLE " + appRoleName + ";";
+            ddl += "GRANT USAGE ON FUNCTION " + schemaName + "." + functionName + "(" + ArgSpecBuilder.argTypes(argTypesRaw, argTypesCustom) + ") TO APPLICATION ROLE " + appRoleName + ";";
         }
         return ddl;
     }
@@ -88,20 +93,23 @@ public class UDTFDDLGenerator {
         Class outputRowClass = Arrays.stream(c.getDeclaredClasses()).filter(
                 cls -> cls.getName().endsWith("OutputRow")
         ).findFirst().get();
-        String returnTypes = Arrays.stream(outputRowClass.getFields()).map(
-                field -> field.getName() + " " + Constants.snowflakeTypeMap.get(field.getType().getTypeName())
-        ).collect(Collectors.joining(", "));
+
         Method processMethod = Arrays.stream(c.getDeclaredMethods()).filter(m -> m.getName().equals("process")).findFirst().get();
-        Parameter[] paramTypes = processMethod.getParameters();
+        Parameter[] argTypesRaw = processMethod.getParameters();
         String[] argNames = funcProps.argNames();
+        String[] argTypesCustom = funcProps.argTypes();
+        String returnTypes = Arrays.stream(outputRowClass.getFields()).map(
+                field -> field.getName() + " " + Constants.snowflakeTypeMap.get(funcProps.returnTypes().isEmpty()? field.getType().getTypeName() : funcProps.returnTypes())
+        ).collect(Collectors.joining(", "));
         String handlerName = c.getPackage().getName() + "." + c.getSimpleName();
         String null_input_conf = c.isAnnotationPresent(UDTFAnnotations.CallOnNull.class) ? "CALLED ON NULL INPUT" : "RETURNS NULL ON NULL INPUT";
         String immutable_conf = c.isAnnotationPresent(UDTFAnnotations.Volatile.class) ? "VOLATILE" : "IMMUTABLE";
         return formatUDTFDDL(
                 funcProps.name(),
                 configs.getOrDefault("schema", "sedona"),
-                paramTypes,
+                argTypesRaw,
                 argNames,
+                argTypesCustom,
                 returnTypes,
                 stageName,
                 handlerName,
