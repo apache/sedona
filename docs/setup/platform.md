@@ -20,7 +20,6 @@ Sedona binary releases are compiled by Java 1.8 and Scala 2.11/2.12 and tested i
     | Python 3.9 | not tested  |  not tested  |not tested  |not tested  |  ✅  |  ✅  | ✅  |
     | Python 3.10 | not tested  |  not tested  |not tested  |not tested  |  ✅  |  ✅  | ✅  |
 
-
 === "Sedona R"
 
 	|             | Spark 2.4 | Spark 3.0 | Spark 3.1 | Spark 3.2 | Spark 3.3 | Spark 3.4 | Spark 3.5 |

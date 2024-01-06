@@ -20,7 +20,6 @@ def create_geometry_map(df, fill_color="[85, 183, 177, 255]", line_color="[85, 1
                    map_style=None, map_provider=None):
 ```
 
-
 The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color polygons or point geometries in the map
 
 The parameter `line_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color the line geometries in the map.
@@ -29,7 +28,6 @@ The parameter `elevation_col` can be given a static elevation or elevation based
 
 Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
 More details on the parameters and their default values can be found on the pydeck website as well by deck.gl [here](https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/geojson-layer.md)
-
 
 ### **Choropleth Map**
 
@@ -51,7 +49,6 @@ Instead of giving a `fill_color` parameter, a 'plot_col' can be passed which spe
 SedonaPyDeck then creates a default color scheme based on the values of the column passed.
 
 The parameter `elevation_col` can be given a numeric or a string value (containing the column with/without operations on it) to set a 3D elevation to the plotted polygons if any.
-
 
 Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
 More details on the parameters and their default values can be found on the pydeck website.
@@ -75,9 +72,7 @@ The parameter `radius_scale` can be given a numeric value that sets a global rad
 Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
 More details on the parameters and their default values can be found on the pydeck website as well by deck.gl [here](https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/scatterplot-layer.md)
 
-
 ### **Heatmap**
-
 
 ```python
 def create_heatmap(df, color_range=None, weight=1, aggregation="SUM", initial_view_state=None, map_style=None,

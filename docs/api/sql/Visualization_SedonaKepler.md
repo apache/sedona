@@ -12,7 +12,6 @@ from sedona.maps.SedonaKepler import SedonaKepler
 
 Following are details on all the APIs exposed via SedonaKepler:
 
-
 ### **Creating a map object using SedonaKepler.create_map**
 
 SedonaKepler exposes a create_map API with the following signature:
@@ -20,7 +19,6 @@ SedonaKepler exposes a create_map API with the following signature:
 ```python
 create_map(df: SedonaDataFrame=None, name: str='unnamed', config: dict=None) -> map
 ```
-
 
 The parameter 'name' is used to associate the passed SedonaDataFrame in the map object and any config applied to the map is linked to this name. It is recommended you pass a unique identifier to the dataframe here.
 
@@ -30,7 +28,6 @@ A map config can be passed optionally to apply pre-apply customizations to the m
 
 !!!Note
     The map config references every customization with the name assigned to the SedonaDataFrame being displayed, if there is a mismatch in the name, the config will not be applied to the map object.
-
 
 !!! abstract "Example usage (Referenced from Sedona Jupyter examples)"
 
@@ -64,7 +61,6 @@ The parameters name has the same conditions as 'create_map'
 
 ### **Setting a config via the map**
 A map rendered by accessing the map object created by SedonaKepler includes a config panel which can be used to customize the map
-
 
 ### **Saving and setting config**
 

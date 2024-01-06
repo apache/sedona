@@ -23,7 +23,6 @@ If you prefer to run the steps on your local machine, please read the steps belo
 
 You can skip this step if you installed these software before.
 
-
 ## Run the verify script
 
 Please replace SEDONA\_CURRENT\_RC and SEDONA\_CURRENT\_VERSION with the correct versions. Then paste the content in a script called `verify.sh` and re-direct the output to a file. To run a script, do the following:

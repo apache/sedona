@@ -118,7 +118,6 @@ Output:
 true
 ```
 
-
 ## ST_Overlaps
 
 Introduction: Return true if A overlaps B
@@ -138,7 +137,6 @@ Output:
 ```
 true
 ```
-
 
 ## ST_Touches
 
@@ -230,7 +228,6 @@ Output:
 ```
 true
 ```
-
 
 ## ST_CoveredBy
 

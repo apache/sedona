@@ -77,7 +77,6 @@ Introduction: Returns a point geometry of the specified pixel's upper-left corne
 !!!Note
     If the pixel coordinates specified do not exist in the raster (out of bounds), RS_PixelAsPoint throws an IndexOutOfBoundsException.
 
-
 Format: `RS_PixelAsPoint(raster: Raster, colX: Integer, rowY: Integer)`
 
 Since: `v1.5.0`
@@ -120,7 +119,6 @@ Output:
 ```
 [[POINT (-13065223 4021262.75),148.0,0,0], [POINT (-13065150 4021262.75),123.0,0,1], [POINT (-13065078 4021262.75),99.0,1,0], [POINT (-13065006 4021262.75),140.0,1,1]]
 ```
-
 
 Spark SQL example for extracting Point, value, raster x and y coordinates:
 
@@ -758,8 +756,6 @@ POINT (2 1)
 !!!Note
     If the given geometry point is not in the same CRS as the given raster, the given geometry will be transformed to the given raster's CRS. You can use [ST_Transform](../Function/#st_transform) to transform the geometry beforehand.
 
-
-
 ### RS_WorldToRasterCoordX
 
 Introduction: Returns the X coordinate of the grid coordinate of the given world coordinates as an integer.
@@ -769,7 +765,6 @@ Format:
 `RS_WorldToRasterCoord(raster: Raster, point: Geometry)`
 
 `RS_WorldToRasterCoord(raster: Raster, x: Double, y: Double)`
-
 
 Since: `v1.5.0`
 
@@ -799,7 +794,6 @@ Output:
 
 !!!Tip
     For non-skewed rasters, you can provide any value for latitude and the intended value of world longitude, to get the desired answer
-
 
 ### RS_WorldToRasterCoordY
 
@@ -836,7 +830,6 @@ Output:
 ```
 3
 ```
-
 
 !!!Tip
     For non-skewed rasters, you can provide any value for longitude and the intended value of world latitude, to get the desired answer
@@ -949,14 +942,12 @@ Introduction: Returns the datatype of each pixel in the given band of the given 
     If the given band index does not exist in the given raster, RS_BandPixelType throws an IllegalArgumentException.
 Following are the possible values returned by RS_BandPixelType:
 
-
 1. `REAL_64BITS` - For Double values
 2. `REAL_32BITS` - For Float values
 3. `SIGNED_32BITS` - For Integer values
 4. `SIGNED_16BITS` - For Short values
 5. `UNSIGNED_16BITS` - For unsigned Short values
 6. `UNSIGNED_8BITS` - For Byte values
-
 
 Format: `RS_BandPixelType(rast: Raster, band: Integer = 1)`
 
@@ -1165,7 +1156,6 @@ Introduction: Returns an array of statistic values, where each statistic is comp
 
     - The provided `raster` and `zone` geometry should intersect.
     - The option provided to `statType` should be valid.
-
 
 Format:
 

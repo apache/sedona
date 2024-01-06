@@ -1,6 +1,5 @@
 # Maven Coordinates
 
-
 ## Use Sedona shaded (fat) jars
 
 !!!warning
@@ -86,7 +85,6 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		```
         If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version numbers.
 
-
 !!! abstract "Sedona with Apache Flink"
 
 	=== "Flink 1.12+ and Scala 2.12"
@@ -104,7 +102,6 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		    <version>{{ sedona.current_geotools }}</version>
 		</dependency>
 		```
-
 
 ### netCDF-Java 5.4.2
 
@@ -150,7 +147,6 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 		    <version>0.1.0</version>
 		</dependency>
 		```
-
 
 ## Use Sedona unshaded jars
 
@@ -239,7 +235,6 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		    <version>{{ sedona.current_geotools }}</version>
 		</dependency>
 		```
-
 
 ### netCDF-Java 5.4.2
 

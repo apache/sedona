@@ -43,7 +43,6 @@ Restart Zeppelin then open Zeppelin Helium interface and enable Sedona-Zeppelin.
 ### Add Sedona dependencies in Zeppelin Spark Interpreter
 ![add-geospark](../image/add-geospark-interpreter.gif)
 
-
 ### Visualize SedonaSQL results
 
 ![sql-zeppelin](../image/sql-zeppelin.gif)

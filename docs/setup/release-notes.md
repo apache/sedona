@@ -36,7 +36,6 @@ Sedona 1.5.0 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 * Add native support of [Uber H3 functions](../../api/sql/Function/#st_h3celldistance) in Sedona Spark and Sedona Flink.
 * Add SedonaKepler and SedonaPyDeck for [interactive map visualization](../../tutorial/sql/#visualize-query-results) on Sedona Spark.
 
-
 ### Bug
 
 <ul>
@@ -404,7 +403,6 @@ Sedona 1.4.0 is compiled against, Spark 3.3 / Flink 1.12, Java 8.
 
 When `sedona.join.optimizationmode` is configured as `nonequi`, it won't optimize join queries such as `SELECT * FROM A, B WHERE A.x = B.x AND ST_Contains(A.geom, B.geom)`, since it is an equi-join with equi-condition `A.x = B.x`. Sedona will optimize for `SELECT * FROM A, B WHERE ST_Contains(A.geom, B.geom)`
 
-
 ### Bug
 
 <ul>
@@ -508,19 +506,16 @@ This version is a minor release on Sedoma 1.3.0 line. It fixes a few critical bu
 * [SEDONA-211](https://issues.apache.org/jira/browse/SEDONA-211) - Enforce release managers to use JDK 8
 * [SEDONA-201](https://issues.apache.org/jira/browse/SEDONA-201) - Implement ST_MLineFromText and ST_MPolyFromText methods
 
-
 ### New Feature
 
 * [SEDONA-196](https://issues.apache.org/jira/browse/SEDONA-196) - Add ST_Force3D to Sedona
 * [SEDONA-197](https://issues.apache.org/jira/browse/SEDONA-197) - Add ST_ZMin, ST_ZMax to Sedona
 * [SEDONA-199](https://issues.apache.org/jira/browse/SEDONA-199) - Add ST_NDims to Sedona
 
-
 ### Improvement
 
 * [SEDONA-194](https://issues.apache.org/jira/browse/SEDONA-194) - Merge org.datasyslab.sernetcdf into Sedona
 * [SEDONA-208](https://issues.apache.org/jira/browse/SEDONA-208) - Use Spark RuntimeConfig in SedonaConf
-
 
 ## Sedona 1.3.0
 
@@ -581,7 +576,6 @@ GEOGCS["WGS 84",
   * [SEDONA-168](https://issues.apache.org/jira/browse/SEDONA-168) - Add ST_Normalize to Apache Sedona
   * [SEDONA-171](https://issues.apache.org/jira/browse/SEDONA-171) - Add ST_SetPoint to Apache Sedona
 
-
 ### Improvement
 
   * [SEDONA-121](https://issues.apache.org/jira/browse/SEDONA-121) - Add equivalent constructors left over from Spark to Flink
@@ -620,13 +614,11 @@ GEOGCS["WGS 84",
 
 * [SEDONA-150](https://issues.apache.org/jira/browse/SEDONA-150) - Drop Spark 2.4 and Scala 2.11 support
 
-
 ## Sedona 1.2.1
 
 This version is a maintenance release on Sedona 1.2.0 line. It includes bug fixes.
 
 Sedona on Spark is now compiled against Spark 3.3, instead of Spark 3.2.
-
 
 ### SQL (for Spark)
 
@@ -680,7 +672,6 @@ New features:
 * [SEDONA-121](https://issues.apache.org/jira/browse/SEDONA-124): More ST constructors to Flink
 * [SEDONA-122](https://issues.apache.org/jira/browse/SEDONA-122): Overload ST_GeomFromWKB for BYTES column
 
-
 ## Sedona 1.2.0
 
 This version is a major release on Sedona 1.2.0 line. It includes bug fixes and new features: Sedona with Apache Flink.
@@ -722,7 +713,6 @@ Major update:
 * [SEDONA-87](https://issues.apache.org/jira/browse/SEDONA-87): Support Flink Table and DataStream conversion
 * [SEDONA-93](https://issues.apache.org/jira/browse/SEDONA-93): Add ST_GeomFromGeoJSON
 
-
 ## Sedona 1.1.1
 
 This version is a maintenance release on Sedona 1.1.X line. It includes bug fixes and a few new functions.
@@ -744,8 +734,6 @@ New features:
 * [SEDONA-43](https://issues.apache.org/jira/browse/SEDONA-43): Add ST_GeoHash and ST_GeomFromGeoHash
 * [SEDONA-45](https://issues.apache.org/jira/browse/SEDONA-45): Add ST_MakePolygon
 * [SEDONA-71](https://issues.apache.org/jira/browse/SEDONA-71): Add ST_AsBinary, ST_AsEWKB, ST_SRID, ST_SetSRID
-
-
 
 ## Sedona 1.1.0
 
@@ -854,7 +842,6 @@ New function:
 * [SEDONA-24](https://issues.apache.org/jira/browse/SEDONA-24): Add ST_LineSubString and ST_LineInterpolatePoint
 * [SEDONA-26](https://issues.apache.org/jira/browse/SEDONA-26): Add broadcast join support
 
-
 ### Viz
 
 Improvement:
@@ -891,7 +878,6 @@ Key compilation target change:
 
 * [SEDONA-3](https://issues.apache.org/jira/browse/SEDONA-3): Paths and class names have been changed to Apache Sedona
 * [SEDONA-7](https://issues.apache.org/jira/browse/SEDONA-7): build the source code for Spark 2.4, 3.0, Scala 2.11, 2.12, Python 3.7, 3.8, 3.9. See [here](../compile).
-
 
 ### Sedona-core
 

@@ -226,7 +226,6 @@ SELECT lcs.id as lcs_id, lcs.geom as lcs_geom, lcs.name as lcs_name, rcs.id as r
 FROM lcs JOIN rcs ON lcs.cellId = rcs.cellId
 ```
 
-
 ### 3. Optional: Refine the result
 
 Due to the nature of S2 Cellid, the equi-join results might have a few false-positives depending on the S2 level you choose. A smaller level indicates bigger cells, less exploded rows, but more false positives.
@@ -279,8 +278,6 @@ In a nutshell, run this query first on the left table before Step 1. Please repl
 SELECT id, geom, ST_Buffer(geom, METER_DISTANCE/111000.0) as buffered_geom, name
 FROM lefts
 ```
-
-
 
 ## Regular spatial predicate pushdown
 Introduction: Given a join query and a predicate in the same WHERE clause, first executes the Predicate as a filter, then executes the join query.

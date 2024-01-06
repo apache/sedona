@@ -3,7 +3,6 @@ The page outlines the steps to manage spatial data using SedonaSQL.
 !!!note
     Since v`1.5.0`, Sedona assumes geographic coordinates to be in longitude/latitude order. If your data is lat/lon order, please use `ST_FlipCoordinates` to swap X and Y.
 
-
 SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:
 
 === "Scala"
@@ -45,7 +44,6 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.
 ## Create Sedona config
 
 Use the following code to create your Sedona config at the beginning. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please skip this step and can use `spark` directly.
-
 
 ==Sedona >= 1.4.1==
 
@@ -332,7 +330,6 @@ This prevents Spark from interpreting the property and allows us to use the ST_G
 		.printSchema())
 	```
 
-
 ## Load Shapefile and GeoJSON using SpatialRDD
 
 Shapefile and GeoJSON can be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](../rdd/#create-a-generic-spatialrdd) and [DataFrame <-> RDD](#convert-between-dataframe-and-spatialrdd).
@@ -519,7 +516,6 @@ The coordinates of polygons have been changed. The output will be like this:
 
 ```
 
-
 ## Run spatial queries
 
 After creating a Geometry type column, you are able to run spatial queries.
@@ -535,7 +531,6 @@ SELECT *
 FROM spatialdf
 WHERE ST_Contains (ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), newcountyshape)
 ```
-
 
 !!!note
 	Read [SedonaSQL constructor API](../api/sql/Constructor.md) to learn how to create a Geometry type query window
@@ -606,7 +601,6 @@ SedonaPyDeck.create_choropleth_map(df=groupedresult, plot_col='AirportCount')
 The dataset used is available [here](https://github.com/apache/sedona/tree/4c5fa8333b2c61850d5664b878df9493c7915066/binder/data/ne_50m_airports) and
 can also be found in the example notebook available [here](https://github.com/apache/sedona/blob/4c5fa8333b2c61850d5664b878df9493c7915066/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)
 
-
 #### Creating a Geometry map using SedonaPyDeck
 
 SedonaPyDeck exposes a create_geometry_map API which can be used to visualize a passed SedonaDataFrame containing any type of geometries:
@@ -621,7 +615,6 @@ SedonaPyDeck.create_geometry_map(df_building, elevation_col='height')
 
 !!!Tip
 	`elevation_col` is an optional argument which can be used to render a 3D map. Pass the column with 'elevation' values for the geometries here.
-
 
 #### Creating a Scatterplot map using SedonaPyDeck
 
@@ -650,7 +643,6 @@ SedonaPyDeck.create_heatmap(df=crimes_df)
 
 The dataset used here is the Chicago crimes dataset, available [here](https://github.com/apache/sedona/blob/sedona-1.5.0/spark/common/src/test/resources/Chicago_Crimes.csv)
 
-
 ### SedonaKepler
 
 Spatial query results can be visualized in a Jupyter lab/notebook environment using SedonaKepler.
@@ -677,7 +669,6 @@ SedonaKepler.create_map(df=groupedresult, name="AirportCount")
 
 The dataset used is available [here](https://github.com/apache/sedona/tree/4c5fa8333b2c61850d5664b878df9493c7915066/binder/data/ne_50m_airports) and
 can also be found in the example notebook available [here](https://github.com/apache/sedona/blob/4c5fa8333b2c61850d5664b878df9493c7915066/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)
-
 
 Details on all the APIs available by SedonaKepler are listed in the [SedonaKepler API docs](../../api/sql/Visualization_SedonaKepler)
 
@@ -955,7 +946,6 @@ Output:
 
 To save a Spatial DataFrame to some permanent storage such as Hive tables and HDFS, you can simply convert each geometry in the Geometry type column back to a plain String and save the plain DataFrame to wherever you want.
 
-
 Use the following code to convert the Geometry column in a DataFrame back to a WKT string column:
 
 ```sql
@@ -965,7 +955,6 @@ FROM polygondf
 
 !!!note
 	ST_AsGeoJSON is also available. We would like to invite you to contribute more functions
-
 
 ## Save GeoParquet
 

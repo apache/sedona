@@ -10,7 +10,6 @@ A committer will be promoted to a PMC member when the community thinks he/she is
 
 Current Sedona PMC members are as follows:
 
-
 |        Name       |  GitHub ID  |        Apache ID       |
 |:-----------------:|:-----------:|:----------------------:|
 |    Adam Binford   | Kimahriman  |  kimahriman@apache.org |
@@ -30,7 +29,6 @@ Current Sedona PMC members are as follows:
 | Jean-Baptiste Onofré || jbonofre@apache.org |
 |   George Percivall   || percivall@apache.org |
 |     Sunil Govindan   ||sunilg@apache.org|
-
 
 ## Become a committer
 
@@ -219,7 +217,6 @@ Once the new PMC subscribes to the Sedona mailing lists using his/her ASF accoun
 ### PMC announcement
 
 This is the email to announce the new committer to sedona-dev once the account has been created.
-
 
 ```
 To: dev@sedona.apache.org
