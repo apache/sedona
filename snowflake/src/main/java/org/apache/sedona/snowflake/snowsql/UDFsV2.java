@@ -27,7 +27,8 @@ import java.io.IOException;
  * User defined functions for Apache Sedona
  * This class is used to generate DDL for Snowflake UDFs
  * Different from UDFs.java, this class only contains functions can directly interact with Snowflake
- * native functions. This means no Constructors (ST_GeomFromXXX).
+ * native functions. This means no Constructors (ST_GeomFromXXX). Technically any ST functions that do not take
+ * geometry as input are ignored here. The trick here is to overload the functions in UDFs.java and UDFsV2.java.
  * This requires all functions must take a GeoJSON string as input and return a GeoJSON string as output.
  */
 public class UDFsV2
@@ -321,6 +322,15 @@ public class UDFsV2
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
     public static String ST_Force_2D(String geometry) {
+        return GeometrySerde.serGeoJson(
+                Functions.force2D(
+                        GeometrySerde.deserGeoJson(geometry)
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
+    public static String ST_Force2D(String geometry) {
         return GeometrySerde.serGeoJson(
                 Functions.force2D(
                         GeometrySerde.deserGeoJson(geometry)
@@ -642,10 +652,10 @@ public class UDFsV2
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"input", "level"}, argTypes = {"Geometry", "int"})
-    public static long[] ST_S2CellIDs(byte[] input, int level) {
+    public static long[] ST_S2CellIDs(String input, int level) {
         return TypeUtils.castLong(
                 Functions.s2CellIDs(
-                        GeometrySerde.deserialize(input),
+                        GeometrySerde.deserGeoJson(input),
                         level
                 )
         );
