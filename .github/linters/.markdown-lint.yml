@@ -1,26 +1,73 @@
 # https://github.com/DavidAnson/markdownlint#rules--aliases
+
+# heading-increment - Heading levels should only increment by one level at a time
 MD001: false
+
+# ul-style - Unordered list style
 MD004: false
+
+# ul-indent - Unordered list indentation
 MD007: false
-MD009: false
+
+# no-hard-tabs - Hard tabs
 MD010: false
+
+# no-multiple-blanks - Multiple consecutive blank lines
 MD012: false
+
+# line-length - Line length
 MD013: false
+
+# blanks-around-headings - Headings should be surrounded by blank lines
 MD022: false
+
+# no-duplicate-heading - Multiple headings with the same content
 MD024: false
+
+# single-title/single-h1 - Multiple top-level headings in the same document
 MD025: false
+
+# no-trailing-punctuation - Trailing punctuation in heading
 MD026: false
+
+# ol-prefix - Ordered list item prefix
 MD029: false
+
+# list-marker-space - Spaces after list markers
 MD030: false
+
+# blanks-around-fences - Fenced code blocks should be surrounded by blank lines
 MD031: false
+
+# blanks-around-lists - Lists should be surrounded by blank lines
 MD032: false
+
+# no-inline-html - Inline HTML
 MD033: false
+
+# no-bare-urls - Bare URL used
 MD034: false
+
+# no-emphasis-as-heading - Emphasis used instead of a heading
 MD036: false
+
+# no-space-in-code - Spaces inside code span elements
 MD038: false
+
+# fenced-code-language - Fenced code blocks should have a language specified
 MD040: false
+
+# first-line-heading/first-line-h1 - First line in a file should be a top-level heading
 MD041: false
+
+# no-empty-links - No empty links
 MD042: false
+
+# no-alt-text - Images should have alternate text (alt text)
 MD045: false
+
+# code-block-style - Code block style
 MD046: false
+
+# link-fragments - Link fragments should be valid
 MD051: false
