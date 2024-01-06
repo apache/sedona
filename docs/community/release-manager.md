@@ -24,7 +24,6 @@ JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}" exec "/usr/local/Cell
 ```
 5. Run `mvn --version` again. It should now point to JDK 8.
 
-
 ### 1. Obtain Write Access to Sedona GitHub repo
 
 1. Verify you have a GitHub ID enabled with 2FA https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/
@@ -101,7 +100,6 @@ In short:
 7. Select the scopes you'd like to grant this token. To use your token to access repositories from the command line, select `repo` and `admin:org`.
 8. Click `Generate token`.
 9. Please save your token somewhere because we will use it in the next step.
-
 
 ### 6. Set up credentials for Maven
 

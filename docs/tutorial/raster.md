@@ -48,7 +48,6 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../../api/sql/Overvi
 
 Use the following code to create your Sedona config at the beginning. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please skip this step and use `spark` directly.
 
-
 ==Sedona >= 1.4.1==
 
 You can add additional Spark runtime config to the config builder. For example, `SedonaContext.builder().config("spark.sql.autoBroadcastJoinThreshold", "10485760")`

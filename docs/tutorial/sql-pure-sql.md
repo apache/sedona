@@ -2,7 +2,6 @@ Starting from ==Sedona v1.0.1==, you can use Sedona in a pure Spark SQL environm
 
 SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.md)
 
-
 ## Initiate Session
 
 Start `spark-sql` as following (replace `<VERSION>` with actual version, like, `1.0.1-incubating` or `{{ sedona.current_version }}`):
@@ -28,13 +27,11 @@ Start `spark-sql` as following (replace `<VERSION>` with actual version, like, `
         ```
         If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version of Spark.
 
-
 This will register all Sedona types, functions and optimizations in SedonaSQL and SedonaViz.
 
 ## Load data
 
 Let use data from `examples/sql`.  To load data from CSV file we need to execute two commands:
-
 
 Use the following code to load the data and create a raw DataFrame:
 

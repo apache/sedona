@@ -93,7 +93,6 @@ gdf.plot(
 <br>
 <br>
 
-
 ## Interoperate with shapely objects
 
 ### Supported Shapely objects
@@ -288,7 +287,6 @@ gdf = sedona.createDataFrame(
 gdf.show(1, False)
 
 ```
-
 
 ```
 

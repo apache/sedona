@@ -12,9 +12,6 @@ MD007: false
 # no-hard-tabs - Hard tabs
 MD010: false
 
-# no-multiple-blanks - Multiple consecutive blank lines
-MD012: false
-
 # line-length - Line length
 MD013: false
 

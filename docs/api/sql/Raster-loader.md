@@ -15,7 +15,6 @@ You can load any type of raster data using the code below. Then use the RS const
 sedona.read.format("binaryFile").load("/some/path/*.asc")
 ```
 
-
 ### RS_FromArcInfoAsciiGrid
 
 Introduction: Returns a raster geometry from an Arc Info Ascii Grid file.
@@ -30,7 +29,6 @@ Spark SQL Example:
 var df = sedona.read.format("binaryFile").load("/some/path/*.asc")
 df = df.withColumn("raster", f.expr("RS_FromArcInfoAsciiGrid(content)"))
 ```
-
 
 ### RS_FromGeoTiff
 
@@ -101,7 +99,6 @@ Accepts one of:
 * SkewY: The skew of the raster on the Y axis, in terms of the CRS units.
 * SRID: The SRID of the raster. Use 0 if you want to use the default Cartesian coordinate system. Use 4326 if you want to use WGS84.
 
-
 !!!Note
   If any other value than the accepted values for the bandDataType is provided, RS_MakeEmptyRaster defaults to double as the data type for the raster.
 
@@ -137,7 +134,6 @@ Output:
 +--------------------------------------------+
 ```
 
-
 Spark SQL example 3 (with 2 bands, scale, skew, and SRID):
 
 ```sql
@@ -153,7 +149,6 @@ Output:
 |                                              GridCoverage2D["g...|
 +------------------------------------------------------------------+
 ```
-
 
 Spark SQL example 4 (with 2 bands, scale, skew, and SRID):
 
@@ -171,7 +166,6 @@ Output:
 ```
 
 ### RS_FromNetCDF
-
 
 Introduction: Returns a raster geometry representing the given record variable short name from a NetCDF file.
 This API reads the array data of the record variable *in memory* along with all its dimensions
@@ -198,12 +192,10 @@ val df = sedona.read.format("binaryFile").load("/some/path/test.nc")
 df = df.withColumn("raster", f.expr("RS_FromNetCDF(content, 'O3')"))
 ```
 
-
 ```scala
 val df = sedona.read.format("binaryFile").load("/some/path/test.nc")
 df = df.withColumn("raster", f.expr("RS_FromNetCDF(content, 'O3', 'lon', 'lat')"))
 ```
-
 
 ### RS_NetCDFInfo
 
@@ -220,7 +212,6 @@ val df = sedona.read.format("binaryFile").load("/some/path/test.nc")
 recordInfo = df.selectExpr("RS_NetCDFInfo(content) as record_info").first().getString(0)
 print(recordInfo)
 ```
-
 
 Output:
 
