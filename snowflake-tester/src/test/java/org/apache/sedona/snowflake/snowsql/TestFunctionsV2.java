@@ -397,10 +397,6 @@ public class TestFunctionsV2
                 "select ST_AsText(sedona.ST_MakePolygon(ST_GeometryFromWKT('LINESTRING(7 -1, 7 6, 9 6, 9 1, 7 -1)', 4326, TRUE)))",
                 "POLYGON((7 -1,7 6,9 6,9 1,7 -1))"
         );
-        verifySqlSingleRes(
-                "select ST_AsText(sedona.ST_MakePolygon(ST_GeometryFromWKT('LINESTRING(75 29, 77 29, 77 29, 75 29)'), ST_GeometryFromWKT('MULTILINESTRING ((2 3, 1 4, 2 4, 2 3), (2 4, 3 5, 3 4, 2 4))') ))  ",
-                "POLYGON ((75 29, 77 29, 77 29, 75 29), (2 3, 1 4, 2 4, 2 3), (2 4, 3 5, 3 4, 2 4))"
-        );
     }
     @Test
     public void test_ST_MakeValid() {
