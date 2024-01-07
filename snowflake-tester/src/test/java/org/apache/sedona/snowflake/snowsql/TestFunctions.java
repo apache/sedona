@@ -251,6 +251,15 @@ public class TestFunctions extends TestBase {
         );
     }
     @Test
+    public void test_ST_Force2D() {
+        registerUDF("ST_PointZ", double.class, double.class, double.class);
+        registerUDF("ST_Force2D", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_Force2D(sedona.ST_POINTZ(1, 2, 3)))",
+                "POINT (1 2)"
+        );
+    }
+    @Test
     public void test_ST_GeoHash() {
         registerUDF("ST_GeoHash", byte[].class, int.class);
         verifySqlSingleRes(
