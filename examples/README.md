@@ -10,7 +10,6 @@ The folder structure of this repository is as follows.
 * spark-sql: a Scala template shows how to use Sedona RDD, DataFrame and SQL API
 * flink-sql: a Java template show how to use Sedona SQL via Flink Table APIs
 
-
 ## Compile and package
 
 ### Prerequisites
@@ -22,7 +21,6 @@ Please make sure you have the following software installed on your local machine
 ### Compile
 
 Run a terminal command `mvn clean package` within the folder of each template
-
 
 ### Submit your fat jar to Spark
 After running the command mentioned above, you are able to see a fat jar in `./target` folder. Please take it and use `./bin/spark-submit` to submit this jar.

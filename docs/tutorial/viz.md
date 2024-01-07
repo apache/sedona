@@ -169,7 +169,6 @@ FROM pixelaggregates
 
 This DataFrame will contain a Image type column which has only one image.
 
-
 ### Store the image on disk
 
 Fetch the image from the previous DataFrame
@@ -188,7 +187,6 @@ imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir")+
 ## Generate map tiles
 
 If you are a map professional, you may need to generate map tiles for different zoom levels and eventually create the map tile layer.
-
 
 ### Pixelization and pixel aggregation
 

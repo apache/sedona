@@ -71,7 +71,6 @@ Use the following code to create a SpatialRDD
 	WkbReader.readToGeometryRDD(sc, wkb_geometries_location, 0, True, False)
 	```
 
-
 #### From GeoJSON
 
 Geometries in GeoJSON is similar to WKT/WKB. However, a GeoJSON file must be beaked into multiple lines.
@@ -140,8 +139,6 @@ Use the following code to create a generic SpatialRDD:
 
 	ShapefileReader.readToGeometryRDD(sc, shape_file_location)
 	```
-
-
 
 !!!note
 	The path to the shapefile is the path to the folder that contains the .shp file, not the path to the .shp file itself. The file extensions of .shp, .shx, .dbf must be in lowercase. Assume you have a shape file called ==myShapefile==, the path should be `XXX/myShapefile`. The file structure should be like this:
@@ -235,7 +232,6 @@ To convert Coordinate Reference System of an SpatialRDD, use the following code:
 
 !!!warning
 	CRS transformation should be done right after creating each SpatialRDD, otherwise it will lead to wrong query results. For instance, use something like this:
-
 
 === "Scala"
 
@@ -358,7 +354,6 @@ Assume you now have an SpatialRDD (typed or generic). You can use the following 
     query_result = RangeQueryRaw.SpatialRangeQuery(spatial_rdd, range_query_window, consider_boundary_intersection, using_index)
     gdf = Adapter.toDf(query_result, spark, ["col1", ..., "coln"])
     ```
-
 
 ### Range query window
 
@@ -579,9 +574,6 @@ Besides the Point type, Sedona KNN query center can be Polygon and LineString.
 
 	To create Polygon or Linestring object please follow [Shapely official docs](https://shapely.readthedocs.io/en/stable/manual.html)
 
-
-
-
 ### Use spatial indexes
 
 To utilize a spatial index in a spatial KNN query, use the following code:
@@ -633,7 +625,6 @@ To utilize a spatial index in a spatial KNN query, use the following code:
 	result = KNNQuery.SpatialKnnQuery(spatial_rdd, point, k, using_index)
 	```
 
-
 !!!warning
 	Only R-Tree index supports Spatial KNN query
 
@@ -656,7 +647,6 @@ To utilize a spatial index in a spatial KNN query, use the following code:
 	```
 
 ## Write a Spatial Join Query
-
 
 A spatial join query takes as input two Spatial RDD A and B. For each geometry in A, finds the geometries (from B) covered/intersected by it. A and B can be any geometry type and are not necessary to have the same geometry type.
 
@@ -751,7 +741,6 @@ Or
 	query_window_rdd.spatialPartitioning(GridType.KDBTREE)
 	object_rdd.spatialPartitioning(query_window_rdd.getPartitioner())
 	```
-
 
 ### Use spatial indexes
 
@@ -872,7 +861,6 @@ The index should be built on either one of two SpatialRDDs. In general, you shou
     gdf = Adapter.toDf(result, ["left_col1", ..., "lefcoln"], ["rightcol1", ..., "rightcol2"], spark)
     ```
 
-
 ## Write a Distance Join Query
 
 !!!warning
@@ -989,7 +977,6 @@ Use the following code to save an SpatialRDD as a distributed GeoJSON text file:
 ```scala
 objectRDD.saveAsGeoJSON("hdfs://PATH")
 ```
-
 
 #### Save to distributed object file
 

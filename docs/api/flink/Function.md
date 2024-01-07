@@ -87,7 +87,6 @@ ST_Affine has 2 overloaded signatures:
 
 `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
 
-
 Based on the invoked function, the following transformation is applied:
 
 `x = a * x + b * y + c * z + xOff OR x = a * x + b * y + xOff`
@@ -123,7 +122,6 @@ Output: `POLYGON Z((9 11 11, 11 12 13, 18 16 23, 9 11 11))`
 Input: `POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0), (1 0.5, 1 0.75, 1.5 0.75, 1.5 0.5, 1 0.5))`
 
 Output: `POLYGON((5 9, 7 10, 8 11, 6 10, 5 9), (6 9.5, 6.5 9.75, 7 10.25, 6.5 10, 6 9.5))`
-
 
 ```sql
 ST_Affine(geometry, 1, 2, 1, 2, 1, 2)
@@ -168,7 +166,6 @@ Computes the angle formed by vectors S1 - E1 and S2 - E2, where S and E denote s
 
 !!!Tip
     ST_Angle returns the angle in radian between 0 and 2\Pi. To convert the angle to degrees, use [ST_Degrees](./#st_degrees).
-
 
 Format: `ST_Angle(p1, p2, p3, p4) | ST_Angle(p1, p2, p3) | ST_Angle(line1, line2)`
 
@@ -1394,10 +1391,8 @@ Hence, the lower the densityFrac value, the more accurate is the computed hausdo
 
 If any of the geometry is empty, 0.0 is returned.
 
-
 !!!Note
     Accepted range of densityFrac is (0.0, 1.0], if any other value is provided, ST_HausdorffDistance throws an IllegalArgumentException
-
 
 !!!Note
     Even though the function accepts 3D geometry, the z ordinate is ignored and the computed hausdorff distance is equivalent to the geometries not having the z ordinate.
@@ -1429,7 +1424,6 @@ Output:
 ```
 5.0
 ```
-
 
 ## ST_InteriorRingN
 
@@ -1658,7 +1652,6 @@ gid  |                  validity_info
 5350 | Self-intersection at or near point (52.0, 5.0, NaN)
 
 ```
-
 
 ## ST_Length
 
@@ -1960,7 +1953,6 @@ Output:
 MULTIPOINT (1 1)
 ```
 
-
 ## ST_Normalize
 
 Introduction: Returns the input geometry in its normalized form.
@@ -2045,7 +2037,6 @@ Format: `ST_NRings(geom: Geometry)`
 
 Since: `v1.4.1`
 
-
 Examples:
 
 Input: `POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))`
@@ -2063,8 +2054,6 @@ Output: `0`
 Input: `'LINESTRING (1 0, 1 1, 2 1)'`
 
 Output: `Unsupported geometry type: LineString, only Polygon or MultiPolygon geometries are supported.`
-
-
 
 ## ST_NumGeometries
 
@@ -2457,7 +2446,6 @@ Output:
 
 Introduction: Return the symmetrical difference between geometry A and B (return parts of geometries which are in either of the sets, but not in their intersection)
 
-
 Format: `ST_SymDifference (A: Geometry, B: Geometry)`
 
 Since: `v1.5.0`
@@ -2594,7 +2582,6 @@ POINT (-70.01 44.37)
 ## ST_VoronoiPolygons
 
 Introduction: Returns a two-dimensional Voronoi diagram from the vertices of the supplied geometry. The result is a GeometryCollection of Polygons that covers an envelope larger than the extent of the input vertices. Returns null if input geometry is null. Returns an empty geometry collection if the input geometry contains only one vertex. Returns an empty geometry collection if the extend_to envelope has zero area.
-
 
 Format: `ST_VoronoiPolygons(g1: Geometry, tolerance: Double, extend_to: Geometry)`
 

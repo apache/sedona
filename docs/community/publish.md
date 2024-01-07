@@ -45,7 +45,6 @@ Make sure the Sedona version in the following files are {{ sedona_create_release
 3. https://github.com/apache/sedona/blob/99239524f17389fc4ae9548ea88756f8ea538bb9/R/R/dependencies.R#L42
 4. https://github.com/apache/sedona/blob/master/zeppelin/package.json
 
-
 ## 3. Update mkdocs.yml
 
 * Please change the following variables in `mkdocs.yml` to the version you want to publish.

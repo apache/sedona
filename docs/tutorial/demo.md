@@ -24,7 +24,6 @@ Please make sure you have the following software installed on your local machine
 
 Run a terminal command `sbt assembly` within the folder of each template
 
-
 ### Submit your fat jar to Spark or Flink
 After running the command mentioned above, you are able to see a fat jar in `./target` folder. Please take it and use `./bin/spark-submit` or `/bin/flink`to submit this jar.
 

@@ -21,7 +21,6 @@ We recommend Databricks 10.x+.
 !!!note
 	If you are using Spark 3.4+ and Scala 2.12, please use `sedona-spark-shaded-3.4_2.12`. Please pay attention to the Spark version postfix and Scala version postfix. Sedona is not able to support `Databricks photon acceleration`. Sedona requires Spark internal APIs to inject many optimization strategies, which is not accessible in `Photon`.
 
-
 ## Install Sedona from the web UI (not recommended)
 
 This method cannot achieve the best performance of Sedona and does not work for pure SQL environment.

@@ -4,7 +4,6 @@ Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/g
 
 Sedona Python provides a number of [Jupyter Notebook examples](https://github.com/apache/sedona/blob/master/binder/).
 
-
 Please use the following steps to run Jupyter notebook with Pipenv on your machine
 
 1. Clone Sedona GitHub repo or download the source code

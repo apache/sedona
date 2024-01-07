@@ -40,7 +40,7 @@ public class DDLGenerator {
             }
         }
         // add sedona version to argMap. This fetches value from pom.xml and only works when running from the terminal
-        argMap.put(Constants.SEDONA_VERSION, DDLGenerator.class.getPackage().getImplementationVersion());
+        argMap.put(Constants.SEDONA_VERSION, DDLGenerator.class.getPackage().getImplementationVersion() == null ? "unknown" : DDLGenerator.class.getPackage().getImplementationVersion());
         try {
             assert argMap.containsKey(Constants.GEOTOOLS_VERSION);
         } catch (AssertionError e) {

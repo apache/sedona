@@ -15,6 +15,8 @@ package org.apache.sedona.snowflake.snowsql;
 
 
 import org.apache.sedona.common.Functions;
+import org.apache.sedona.common.enums.FileDataSplitter;
+import org.apache.sedona.common.utils.FormatUtils;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -32,6 +34,14 @@ public class GeometrySerde {
         return Functions.asEWKB(geom);
     }
 
+    public static String serGeoJson(Geometry geom) {
+        return Functions.asGeoJson(geom);
+    }
+
+    public static String serGeoJson(Geometry[] geoms) {
+        return Functions.asGeoJson(Functions.createMultiGeometry(geoms));
+    }
+
     public static byte[] serialize(Geometry[] geoms) {
         return serialize(Functions.createMultiGeometry(geoms));
     }
@@ -43,6 +53,29 @@ public class GeometrySerde {
             String msg= String.format("Failed to parse WKB(printed through Arrays.toString(bytes)): %s, error: %s", Arrays.toString(bytes), e.getMessage());
             throw new IllegalArgumentException(msg);
         }
+    }
+
+    public static Geometry deserGeoJson(String geoJson) {
+        FormatUtils<Geometry> formatUtils = new FormatUtils<>(FileDataSplitter.GEOJSON, false);
+        try {
+            return formatUtils.readGeometry(geoJson);
+        }
+        catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Geometry[] deserGeoJson2List(String geoJson) {
+        FormatUtils<Geometry> formatUtils = new FormatUtils<>(FileDataSplitter.GEOJSON, false);
+        Geometry geom;
+        try {
+            geom = formatUtils.readGeometry(geoJson);
+        }
+        catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        assert geom instanceof GeometryCollection;
+        return GeomUtils.getSubGeometries(geom);
     }
 
     public static Geometry[] deserialize2List(byte[] bytes) {
