@@ -260,7 +260,7 @@ case class ST_MakeValid(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_IsValid(inputExpressions: Seq[Expression])
-  extends InferredExpression(Functions.isValid _) {
+  extends InferredExpression(inferrableFunction2(Functions.isValid), inferrableFunction1(Functions.isValid)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
