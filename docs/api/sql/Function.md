@@ -1610,7 +1610,7 @@ ST_IsValid (A: Geometry, flag: Integer)
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example:
 
 ```sql
 SELECT ST_IsValid(ST_GeomFromWKT('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0), (15 15, 15 20, 20 20, 20 15, 15 15))'))
