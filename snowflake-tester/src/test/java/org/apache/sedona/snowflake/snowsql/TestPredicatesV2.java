@@ -149,4 +149,16 @@ public class TestPredicatesV2
                 false
         );
     }
+    @Test
+    public void test_ST_DWithin() {
+        registerUDFV2("ST_DWithin", String.class,  String.class, double.class);
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_DWithin(ST_GeometryFromWKT('POINT (1.5 0.0)'), ST_GeometryFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))'), 0.5)",
+                true
+        );
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_DWithin(ST_GeometryFromWKT('POINT (0.0 1.0)'), ST_GeometryFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))'), 0.0)",
+                false
+        );
+    }
 }
