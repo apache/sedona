@@ -82,3 +82,12 @@ class TestGeoParquet(TestBase):
         assert column_metadata['encoding'] == 'WKB'
         assert len(column_metadata['bbox']) == 4
         assert isinstance(json.loads(column_metadata['crs']), dict)
+
+    def test_reading_legacy_parquet_files(self):
+        df = self.spark.read.format("geoparquet").option("legacyMode", "true").load(legacy_parquet_input_location)
+        rows = df.collect()
+        assert len(rows) > 0
+        for row in rows:
+            assert isinstance(row['geom'], BaseGeometry)
+            assert isinstance(row['struct_geom']['g0'], BaseGeometry)
+            assert isinstance(row['struct_geom']['g1'], BaseGeometry)
