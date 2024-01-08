@@ -36,6 +36,7 @@ import org.locationtech.jts.io.WKBReader
 import java.math.{BigDecimal, BigInteger}
 import java.time.{ZoneId, ZoneOffset}
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -75,6 +76,7 @@ import scala.collection.mutable.ArrayBuffer
  *                           calendar
  * @param int96RebaseMode the mode of rebasing INT96 timestamp from Julian to Proleptic Gregorian
  *                           calendar
+ * @param parameters Options for reading GeoParquet files. For example, if legacyMode is enabled or not.
  * @param updater An updater which propagates converted field values to the parent container
  */
 private[parquet] class GeoParquetRowConverter(
@@ -84,6 +86,7 @@ private[parquet] class GeoParquetRowConverter(
                                             convertTz: Option[ZoneId],
                                             datetimeRebaseMode: LegacyBehaviorPolicy.Value,
                                             int96RebaseMode: LegacyBehaviorPolicy.Value,
+                                            parameters: Map[String, String],
                                             updater: ParentContainerUpdater)
   extends ParquetGroupConverter(updater) with Logging {
 
@@ -202,11 +205,28 @@ private[parquet] class GeoParquetRowConverter(
         new ParquetPrimitiveConverter(updater)
 
       case GeometryUDT =>
-        new ParquetPrimitiveConverter(updater) {
-          override def addBinary(value: Binary): Unit = {
-            val wkbReader = new WKBReader()
-            val geom = wkbReader.read(value.getBytes)
-            updater.set(GeometryUDT.serialize(geom))
+        if (parquetType.isPrimitive) {
+          new ParquetPrimitiveConverter(updater) {
+            override def addBinary(value: Binary): Unit = {
+              val wkbReader = new WKBReader()
+              val geom = wkbReader.read(value.getBytes)
+              updater.set(GeometryUDT.serialize(geom))
+            }
+          }
+        } else {
+          if (GeoParquetUtils.isLegacyMode(parameters)) {
+            new ParquetArrayConverter(parquetType.asGroupType(), ArrayType(ByteType, containsNull = false), updater) {
+              override def end(): Unit = {
+                val wkbReader = new WKBReader()
+                val byteArray = currentArray.map(_.asInstanceOf[Byte]).toArray
+                val geom = wkbReader.read(byteArray)
+                updater.set(GeometryUDT.serialize(geom))
+              }
+            }
+          } else {
+            throw new IllegalArgumentException(
+              s"Parquet type for geometry column is $parquetType. This parquet file could be written by " +
+                "Apache Sedona <= 1.3.1-incubating. Please use option(\"legacyMode\", \"true\") to read this file.")
           }
         }
 
@@ -337,6 +357,7 @@ private[parquet] class GeoParquetRowConverter(
           convertTz,
           datetimeRebaseMode,
           int96RebaseMode,
+          parameters,
           wrappedUpdater)
 
       case t =>
@@ -474,13 +495,12 @@ private[parquet] class GeoParquetRowConverter(
    *
    * @see https://github.com/apache/parquet-format/blob/master/LogicalTypes.md#lists
    */
-  private final class ParquetArrayConverter(
-                                             parquetSchema: GroupType,
-                                             catalystSchema: ArrayType,
-                                             updater: ParentContainerUpdater)
+  private class ParquetArrayConverter(parquetSchema: GroupType,
+                                      catalystSchema: ArrayType,
+                                      updater: ParentContainerUpdater)
     extends ParquetGroupConverter(updater) {
 
-    private[this] val currentArray = ArrayBuffer.empty[Any]
+    protected[this] val currentArray: mutable.ArrayBuffer[Any] = ArrayBuffer.empty[Any]
 
     private[this] val elementConverter: Converter = {
       val repeatedType = parquetSchema.getType(0)

@@ -40,25 +40,27 @@ import org.apache.spark.sql.types._
  *        [[StringType]] fields.
  * @param assumeInt96IsTimestamp Whether unannotated INT96 fields should be assumed to be Spark SQL
  *        [[TimestampType]] fields.
+ * @param parameters Options for reading GeoParquet files.
  */
 class GeoParquetToSparkSchemaConverter(
   keyValueMetaData: java.util.Map[String, String],
   assumeBinaryIsString: Boolean = SQLConf.PARQUET_BINARY_AS_STRING.defaultValue.get,
-  assumeInt96IsTimestamp: Boolean = SQLConf.PARQUET_INT96_AS_TIMESTAMP.defaultValue.get) {
+  assumeInt96IsTimestamp: Boolean = SQLConf.PARQUET_INT96_AS_TIMESTAMP.defaultValue.get,
+  parameters: Map[String, String]) {
 
-  private val geoParquetMetaData: GeoParquetMetaData = GeoParquetMetaData.parseKeyValueMetaData(keyValueMetaData).getOrElse {
-    throw new IllegalArgumentException("GeoParquet file does not contain valid geo metadata")
-  }
+  private val geoParquetMetaData: GeoParquetMetaData = GeoParquetUtils.parseGeoParquetMetaData(keyValueMetaData, parameters)
 
-  def this(keyValueMetaData: java.util.Map[String, String], conf: SQLConf) = this(
+  def this(keyValueMetaData: java.util.Map[String, String], conf: SQLConf, parameters: Map[String, String]) = this(
     keyValueMetaData = keyValueMetaData,
     assumeBinaryIsString = conf.isParquetBinaryAsString,
-    assumeInt96IsTimestamp = conf.isParquetINT96AsTimestamp)
+    assumeInt96IsTimestamp = conf.isParquetINT96AsTimestamp,
+    parameters = parameters)
 
-  def this(keyValueMetaData: java.util.Map[String, String], conf: Configuration) = this(
+  def this(keyValueMetaData: java.util.Map[String, String], conf: Configuration, parameters: Map[String, String]) = this(
     keyValueMetaData = keyValueMetaData,
     assumeBinaryIsString = conf.get(SQLConf.PARQUET_BINARY_AS_STRING.key).toBoolean,
-    assumeInt96IsTimestamp = conf.get(SQLConf.PARQUET_INT96_AS_TIMESTAMP.key).toBoolean)
+    assumeInt96IsTimestamp = conf.get(SQLConf.PARQUET_INT96_AS_TIMESTAMP.key).toBoolean,
+    parameters = parameters)
 
   /**
    * Converts Parquet [[MessageType]] `parquetSchema` to a Spark SQL [[StructType]].
