@@ -2,7 +2,14 @@ Due to a breaking change in Apache Sedona 1.4.0 to the SQL type of `GeometryUDT`
 ([SEDONA-205](https://issues.apache.org/jira/browse/SEDONA-205)) as well as the
 serialization format of geometry values ([SEDONA-207](https://issues.apache.org/jira/browse/SEDONA-207)), Parquet files
 containing geometry columns written by Apache Sedona 1.3.1 or earlier cannot be read by Apache Sedona 1.4.0 or later.
-Here is an example of exception when trying to read such files:
+
+For parquet files written by `"parquet"` format when using Apache Sedona 1.3.1-incubating or earlier:
+
+```python
+df.write.format("parquet").save("path/to/parquet/files")
+```
+
+Reading such files with Apache Sedona 1.4.0 or later using `spark.read.format("parquet").load("path/to/parquet/files")` will result in an exception:
 
 ```
 24/01/08 12:52:56 ERROR Executor: Exception in task 0.0 in stage 12.0 (TID 11)
@@ -26,7 +33,7 @@ org.apache.spark.sql.AnalysisException: Invalid Spark read type: expected requir
 	...
 ```
 
-To read such files, you can use `"geoparquet"` format with the `.option("legacyMode", "true")` option. Here is an example:
+Since v1.5.1, GeoParquet supports reading legacy Parquet files. you can use `"geoparquet"` format with the `.option("legacyMode", "true")` option. Here is an example:
 
 === "Scala/Java"
 

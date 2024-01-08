@@ -378,7 +378,7 @@ Please refer to [Reading Legacy Parquet Files](../api/sql/Reading-legacy-parquet
 
 !!!warning
 	GeoParquet file reader does not work on Databricks runtime when Photon is enabled. Please disable Photon when using
-	GeoParquet file reader on Databricks runtime. 
+	GeoParquet file reader on Databricks runtime.
 
 ### Inspect GeoParquet metadata
 
