@@ -19,7 +19,9 @@
 package org.apache.sedona.sql
 
 import org.apache.commons.io.FileUtils
+import org.apache.sedona.common.raster.RasterAccessors
 import org.apache.spark.sql.SaveMode
+import org.apache.spark.sql.sedona_sql.expressions.raster.RS_Metadata
 import org.junit.Assert.assertEquals
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
@@ -119,6 +121,23 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
       actual = rasterized.selectExpr("RS_BandAsArray(rasterized, 1)").first().getSeq(0).mkString("Array(", ", ", ")")
       expected = "Array(1.0)"
       assertEquals(expected, actual)
+    }
+
+    it("Passed RS_AsRaster with raster extent") {
+      var df = sparkSession.sql("SELECT RS_MakeEmptyRaster(2, 255, 255, 3, 215, 2, -2, 0, 0, 0) as raster, ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))') as geom")
+      var rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', 255, 0d, false) as rasterized")
+      var actualSeq = rasterized.selectExpr("RS_BandAsArray(rasterized, 1)").first().getSeq[Double](0)
+      var actualMax = actualSeq.max
+      var actualSum = actualSeq.sum
+      var expectedMax = 255.0d
+      var expectedSum = 255.0*9
+      assertEquals(expectedMax, actualMax, 1e-5)
+      assertEquals(expectedSum, actualSum, 1e-5)
+
+      var actualWidth = rasterized.selectExpr("RS_Width(rasterized)").first().getInt(0)
+      var actualHeight = rasterized.selectExpr("RS_Height(rasterized)").first().getInt(0)
+      assertEquals(255, actualWidth)
+      assertEquals(255, actualHeight)
     }
 
     it("should read RS_FromGeoTiff and write RS_AsArcGrid") {
