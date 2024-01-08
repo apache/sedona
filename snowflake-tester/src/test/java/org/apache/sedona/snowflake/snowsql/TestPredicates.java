@@ -148,4 +148,16 @@ public class TestPredicates extends TestBase{
                 false
         );
     }
+    @Test
+    public void test_ST_DWithin() {
+        registerUDF("ST_DWithin", byte[].class, byte[].class, double.class);
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_DWithin(SEDONA.ST_GeomFromWKT('POINT (1.5 0.0)'), SEDONA.ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))'), 0.5)",
+                true
+        );
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_DWithin(SEDONA.ST_GeomFromWKT('POINT (0.0 1.0)'), SEDONA.ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))'), 0.0)",
+                false
+        );
+    }
 }
