@@ -947,13 +947,6 @@ public class UDFsV2
         );
     }
 
-    @UDFAnnotations.ParamMeta(argNames = {"geometry", "extent"}, argTypes = {"Geometry", "Geometry"}, returnTypes = "Geometry")
-    public static String ST_VoronoiPolygons(String geometry, String extent) {
-        return GeometrySerde.serGeoJson(
-                FunctionsGeoTools.voronoiPolygons(GeometrySerde.deserGeoJson(geometry), 0.0, GeometrySerde.deserGeoJson(extent))
-        );
-    }
-
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "tolerance", "extent"}, argTypes = {"Geometry", "double", "Geometry"}, returnTypes = "Geometry")
     public static String ST_VoronoiPolygons(String geometry, double tolerance, String extent) {
         return GeometrySerde.serGeoJson(

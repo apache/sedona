@@ -1098,13 +1098,6 @@ public class UDFs {
         );
     }
 
-    @UDFAnnotations.ParamMeta(argNames = {"geometry", "extent"})
-    public static byte[] ST_VoronoiPolygons(byte[] geometry, byte[] extent) {
-        return GeometrySerde.serialize(
-                FunctionsGeoTools.voronoiPolygons(GeometrySerde.deserialize(geometry), 0.0, GeometrySerde.deserialize(extent))
-        );
-    }
-
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "tolerance", "extent"})
     public static byte[] ST_VoronoiPolygons(byte[] geometry, double tolerance, byte[] extent) {
         return GeometrySerde.serialize(
