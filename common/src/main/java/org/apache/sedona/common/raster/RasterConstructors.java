@@ -82,7 +82,28 @@ public class RasterConstructors
     }
 
     /**
-    * Returns a raster that is converted from the geometry provided.
+     * Returns a raster that is converted from the geometry provided.
+     * @param geom The geometry to convert
+     * @param raster The reference raster
+     * @param pixelType The data type of pixel/cell of resultant raster
+     * @param value The value of the pixel of the resultant raster
+     * @param noDataValue The noDataValue of the resultant raster
+     * @param useGeometryExtent  The way to generate extent of the resultant raster.
+     *        Use the extent of the geometry to covert if true, else use the extent of the reference raster
+     *
+     * @return Rasterized Geometry
+     * @throws FactoryException
+     */
+    public static GridCoverage2D asRaster(Geometry geom, GridCoverage2D raster, String pixelType, double value, Double noDataValue, boolean useGeometryExtent) throws FactoryException {
+        List<Object> objects = rasterization(geom, raster, pixelType, value, noDataValue, useGeometryExtent);
+        WritableRaster writableRaster = (WritableRaster) objects.get(0);
+        GridCoverage2D rasterized = (GridCoverage2D) objects.get(1);
+
+        return RasterUtils.clone(writableRaster, rasterized.getSampleDimensions(), rasterized, noDataValue, false); //no need to original raster metadata since this is a new raster.
+    }
+
+    /**
+    * Returns a raster that is converted from the geometry provided. A convenience function for asRaster.
      * @param geom The geometry to convert
      * @param raster The reference raster
      * @param pixelType The data type of pixel/cell of resultant raster
@@ -93,12 +114,7 @@ public class RasterConstructors
      * @throws FactoryException
     */
     public static GridCoverage2D asRaster(Geometry geom, GridCoverage2D raster, String pixelType, double value, Double noDataValue) throws FactoryException {
-
-        List<Object> objects = rasterization(geom, raster, pixelType, value, noDataValue, true);
-        WritableRaster writableRaster = (WritableRaster) objects.get(0);
-        GridCoverage2D rasterized = (GridCoverage2D) objects.get(1);
-
-        return RasterUtils.clone(writableRaster, rasterized.getSampleDimensions(), rasterized, noDataValue, false); //no need to original raster metadata since this is a new raster.
+        return asRaster(geom, raster, pixelType, value, noDataValue, true);
     }
 
     /**
@@ -209,11 +225,7 @@ public class RasterConstructors
      * @throws FactoryException
      */
     public static GridCoverage2D asRasterWithRasterExtent(Geometry geom, GridCoverage2D raster, String pixelType, double value, Double noDataValue) throws FactoryException {
-        List<Object> objects = rasterization(geom, raster, pixelType, value, noDataValue, false);
-        WritableRaster writableRaster = (WritableRaster) objects.get(0);
-        GridCoverage2D rasterized = (GridCoverage2D) objects.get(1);
-
-        return RasterUtils.clone(writableRaster, rasterized.getSampleDimensions(), rasterized, noDataValue, false); //no need to original raster metadata since this is a new raster.
+        return asRaster(geom, raster, pixelType, value, noDataValue, false);
     }
 
     public static DefaultFeatureCollection getFeatureCollection(Geometry geom, CoordinateReferenceSystem crs) {

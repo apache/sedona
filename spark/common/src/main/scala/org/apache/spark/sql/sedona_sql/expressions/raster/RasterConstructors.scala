@@ -34,7 +34,7 @@ case class RS_FromArcInfoAsciiGrid(inputExpressions: Seq[Expression])
 
 case class RS_AsRaster(inputExpressions: Seq[Expression]) extends InferredExpression(
   inferrableFunction5(RasterConstructors.asRaster), inferrableFunction3(RasterConstructors.asRaster),
-  inferrableFunction4(RasterConstructors.asRaster)
+  inferrableFunction4(RasterConstructors.asRaster), inferrableFunction6(RasterConstructors.asRaster)
 ) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
