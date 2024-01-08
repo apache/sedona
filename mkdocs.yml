@@ -59,6 +59,7 @@ nav:
               - Aggregate function: api/sql/AggregateFunction.md
               - DataFrame Style functions: api/sql/DataFrameAPI.md
               - Query optimization: api/sql/Optimizer.md
+              - Reading Legacy Parquet Files: api/sql/Reading-legacy-parquet.md
               - Visualization:
                   - SedonaPyDeck: api/sql/Visualization_SedonaPyDeck.md
                   - SedonaKepler: api/sql/Visualization_SedonaKepler.md
