@@ -15,6 +15,7 @@ package org.apache.sedona.snowflake.snowsql;
 
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.Functions;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.Predicates;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.sphere.Haversine;
@@ -37,6 +38,10 @@ import java.io.IOException;
  */
 public class UDFs {
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static String GeometryType(byte[] geometry) {
+        return Functions.geometryTypeWithMeasured(GeometrySerde.deserialize(geometry));
+    }
     @UDFAnnotations.ParamMeta(argNames = {"linestring", "point", "position"})
     public static byte[] ST_AddPoint(byte[] linestring, byte[] point, int position) {
         return GeometrySerde.serialize(
@@ -46,6 +51,36 @@ public class UDFs {
                         position
                 )
         );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "a", "b", "c", "d", "e", "f", "g", "h", "i", "xOff", "yOff", "zOff"})
+    public static byte[] ST_Affine(byte[] geometry, double a, double b, double c, double d, double e, double f, double g, double h, double i, double xOff, double yOff,
+            double zOff) {
+        return GeometrySerde.serialize(
+                Functions.affine(GeometrySerde.deserialize(geometry), a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "a", "b", "c", "d", "e", "f", "xOff", "yOff"})
+    public static byte[] ST_Affine(byte[] geometry, double a, double b, double d, double e, double xOff, double yOff) {
+        return GeometrySerde.serialize(
+                Functions.affine(GeometrySerde.deserialize(geometry), a, b, d, e, xOff, yOff)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2"})
+    public static double ST_Angle(byte[] geom1, byte[] geom2) {
+        return Functions.angle(GeometrySerde.deserialize(geom1), GeometrySerde.deserialize(geom2));
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2", "geom3"})
+    public static double ST_Angle(byte[] geom1, byte[] geom2, byte[] geom3) {
+        return Functions.angle(GeometrySerde.deserialize(geom1), GeometrySerde.deserialize(geom2), GeometrySerde.deserialize(geom3));
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2", "geom3", "geom4"})
+    public static double ST_Angle(byte[] geom1, byte[] geom2, byte[] geom3, byte[] geom4) {
+        return Functions.angle(GeometrySerde.deserialize(geom1), GeometrySerde.deserialize(geom2), GeometrySerde.deserialize(geom3), GeometrySerde.deserialize(geom4));
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
@@ -114,6 +149,15 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static byte[] ST_BoundingDiagonal(byte[] geometry) {
+        return GeometrySerde.serialize(
+                Functions.boundingDiagonal(
+                        GeometrySerde.deserialize(geometry)
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius"})
     public static byte[] ST_Buffer(byte[] geometry, double radius) {
         return GeometrySerde.serialize(
@@ -138,6 +182,16 @@ public class UDFs {
         return GeometrySerde.serialize(
                 Functions.getCentroid(
                         GeometrySerde.deserialize(geometry)
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry1", "geometry2"})
+    public static byte[] ST_ClosestPoint(byte[] geom1, byte[] geom2) {
+        return GeometrySerde.serialize(
+                Functions.closestPoint(
+                        GeometrySerde.deserialize(geom1),
+                        GeometrySerde.deserialize(geom2)
                 )
         );
     }
@@ -190,7 +244,10 @@ public class UDFs {
                 GeometrySerde.deserialize(rightGeometry)
         );
     }
-
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static int ST_CoordDim(byte[] geometry) {
+        return Functions.nDims(GeometrySerde.deserialize(geometry));
+    }
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static byte[] ST_ConvexHull(byte[] geometry) {
         return GeometrySerde.serialize(
@@ -199,7 +256,6 @@ public class UDFs {
                 )
         );
     }
-
     @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry"})
     public static boolean ST_CoveredBy(byte[] leftGeometry, byte[] rightGeometry) {
         return Predicates.coveredBy(
@@ -224,6 +280,11 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"angleInRadian"})
+    public static double ST_Degrees(double angleInRadian) {
+        return Functions.degrees(angleInRadian);
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry"})
     public static byte[] ST_Difference(byte[] leftGeometry, byte[] rightGeometry) {
         return GeometrySerde.serialize(
@@ -231,6 +292,13 @@ public class UDFs {
                         GeometrySerde.deserialize(leftGeometry),
                         GeometrySerde.deserialize(rightGeometry)
                 )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static Integer ST_Dimension(byte[] geometry) {
+        return Functions.dimension(
+                GeometrySerde.deserialize(geometry)
         );
     }
 
@@ -314,6 +382,15 @@ public class UDFs {
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static byte[] ST_Force_2D(byte[] geometry) {
+        return GeometrySerde.serialize(
+                Functions.force2D(
+                        GeometrySerde.deserialize(geometry)
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static byte[] ST_Force2D(byte[] geometry) {
         return GeometrySerde.serialize(
                 Functions.force2D(
                         GeometrySerde.deserialize(geometry)
@@ -405,6 +482,25 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2"})
+    public static double ST_HausdorffDistance(byte[] geom1, byte[] geom2)
+    {
+        return Functions.hausdorffDistance(
+                GeometrySerde.deserialize(geom1),
+                GeometrySerde.deserialize(geom2)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2", "densifyFrac"})
+    public static double ST_HausdorffDistance(byte[] geom1, byte[] geom2, double densifyFrac)
+    {
+        return Functions.hausdorffDistance(
+                GeometrySerde.deserialize(geom1),
+                GeometrySerde.deserialize(geom2),
+                densifyFrac
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "n"})
     public static byte[] ST_InteriorRingN(byte[] geometry, int n) {
         return GeometrySerde.serialize(
@@ -441,6 +537,13 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static boolean ST_IsCollection(byte[] geometry) {
+        return Functions.isCollection(
+                GeometrySerde.deserialize(geometry)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static boolean ST_IsEmpty(byte[] geometry) {
         return Functions.isEmpty(
                 GeometrySerde.deserialize(geometry)
@@ -465,6 +568,27 @@ public class UDFs {
     public static boolean ST_IsValid(byte[] geometry) {
         return Functions.isValid(
                 GeometrySerde.deserialize(geometry)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "flags"})
+    public static boolean ST_IsValid(byte[] geometry, int flags) {
+        return Functions.isValid(
+                GeometrySerde.deserialize(geometry), flags
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static String ST_IsValidReason(byte[] geometry) {
+        return Functions.isValidReason(
+                GeometrySerde.deserialize(geometry)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "flags"})
+    public static String ST_IsValidReason(byte[] geometry, int flags) {
+        return Functions.isValidReason(
+                GeometrySerde.deserialize(geometry), flags
         );
     }
 
@@ -501,6 +625,14 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geom", "point"})
+    public static double ST_LineLocatePoint(byte[] geom, byte[] point) {
+        return Functions.lineLocatePoint(
+                GeometrySerde.deserialize(geom),
+                GeometrySerde.deserialize(point)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static byte[] ST_LineMerge(byte[] geometry) {
         return GeometrySerde.serialize(
@@ -527,7 +659,38 @@ public class UDFs {
                 )
         );
     }
+    @UDFAnnotations.ParamMeta(argNames = {"point1", "point2"})
+    public static byte[] ST_MakeLine(byte[] geom1, byte[] geom2) {
+        return GeometrySerde.serialize(
+                Functions.makeLine(GeometrySerde.deserialize(geom1), GeometrySerde.deserialize(geom2))
+        );
+    }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometryCollection"})
+    public static byte[] ST_MakeLine(byte[] geometry) {
+        return GeometrySerde.serialize(
+                Functions.makeLine(GeometrySerde.deserialize2List(geometry))
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"x", "y"})
+    public static byte[] ST_MakePoint(double x, double y) {
+        return GeometrySerde.serialize(
+                Constructors.makePoint(x, y, null, null)
+        );
+    }
+    @UDFAnnotations.ParamMeta(argNames = {"x", "y", "z"})
+    public static byte[] ST_MakePoint(double x, double y, double z) {
+        return GeometrySerde.serialize(
+                Constructors.makePoint(x, y, z, null)
+        );
+    }
+    @UDFAnnotations.ParamMeta(argNames = {"x", "y", "z", "m"})
+    public static byte[] ST_MakePoint(double x, double y, double z, double m) {
+        return GeometrySerde.serialize(
+                Constructors.makePoint(x, y, z, m)
+        );
+    }
     @UDFAnnotations.ParamMeta(argNames = {"wkt", "srid"})
     public static byte[] ST_MLineFromText(String wkt, int srid) throws ParseException {
         return GeometrySerde.serialize(
@@ -712,6 +875,15 @@ public class UDFs {
     public static byte[] ST_PointZ(double x, double y, double z, int srid) {
         return GeometrySerde.serialize(
                 Constructors.pointZ(x, y, z, srid)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "srid"})
+    public static byte[] ST_Polygon(byte[] geometry, int srid) {
+        return GeometrySerde.serialize(
+                Functions.makepolygonWithSRID(
+                        GeometrySerde.deserialize(geometry), srid
+                )
         );
     }
 
@@ -912,6 +1084,27 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static byte[] ST_VoronoiPolygons(byte[] geometry) {
+        return GeometrySerde.serialize(
+                FunctionsGeoTools.voronoiPolygons(GeometrySerde.deserialize(geometry), 0.0, null)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "tolerance"})
+    public static byte[] ST_VoronoiPolygons(byte[] geometry, double tolerance) {
+        return GeometrySerde.serialize(
+                FunctionsGeoTools.voronoiPolygons(GeometrySerde.deserialize(geometry), tolerance, null)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "tolerance", "extent"})
+    public static byte[] ST_VoronoiPolygons(byte[] geometry, double tolerance, byte[] extent) {
+        return GeometrySerde.serialize(
+                FunctionsGeoTools.voronoiPolygons(GeometrySerde.deserialize(geometry), tolerance, GeometrySerde.deserialize(extent))
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry"})
     public static boolean ST_Within(byte[] leftGeometry, byte[] rightGeometry) {
         return Predicates.within(
@@ -1010,6 +1203,23 @@ public class UDFs {
     @UDFAnnotations.ParamMeta(argNames = {"geomA", "geomB"})
     public static Double ST_DistanceSpheroid(byte[] geomA, byte[] geomB) {
         return Spheroid.distance(
+                GeometrySerde.deserialize(geomA),
+                GeometrySerde.deserialize(geomB)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geomA", "geomB", "distance"})
+    public static boolean ST_DWithin(byte[] geomA, byte[] geomB, double distance) {
+        return Predicates.dWithin(
+                GeometrySerde.deserialize(geomA),
+                GeometrySerde.deserialize(geomB),
+                distance
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geomA", "geomB"})
+    public static double ST_FrechetDistance(byte[] geomA, byte[] geomB) {
+        return Functions.frechetDistance(
                 GeometrySerde.deserialize(geomA),
                 GeometrySerde.deserialize(geomB)
         );

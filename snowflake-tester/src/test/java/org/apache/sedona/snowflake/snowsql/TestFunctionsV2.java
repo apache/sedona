@@ -28,7 +28,14 @@ import java.util.regex.Pattern;
 @RunWith(SnowTestRunner.class)
 public class TestFunctionsV2
         extends TestBase {
-
+    @Test
+    public void test_GeometryType() {
+        registerUDFV2("GeometryType", String.class);
+        verifySqlSingleRes(
+                "select sedona.GeometryType(ST_GeometryFromWKT('POINT(1 2)'))",
+                "POINT"
+        );
+    }
     @Test
     public void test_ST_3DDistance() {
         registerUDFV2("ST_3DDistance", String.class, String.class);
@@ -44,6 +51,40 @@ public class TestFunctionsV2
         verifySqlSingleRes(
                 "select ST_AsText(sedona.ST_AddPoint(ST_GeometryFromWKT('LINESTRING (0 0, 1 1)'), ST_GeometryFromWKT('POINT (0 1)'), 1))",
                 "LINESTRING(0 0,0 1,1 1)"
+        );
+    }
+
+    @Test
+    public void test_ST_Affine() {
+        registerUDFV2("ST_Affine", String.class, double.class, double.class, double.class, double.class, double.class, double.class);
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_Affine(ST_GeometryFromWKT('POINT (1 1)'), 2, 0, 0, 0, 2, 0))",
+                "POINT(4 0)"
+        );
+        registerUDFV2("ST_Affine", String.class, double.class, double.class, double.class, double.class, double.class, double.class,
+                double.class, double.class, double.class, double.class, double.class, double.class);
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_Affine(ST_GeometryFromWKT('POINT (1 1)'), 2, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0))",
+                "POINT(2 2)"
+        );
+    }
+
+    @Test
+    public void test_ST_Angle() {
+        registerUDFV2("ST_Angle", String.class, String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_Angle(ST_GeometryFromWKT('LINESTRING (0 0, 1 1)'), ST_GeometryFromWKT('LINESTRING (0 0, 1 0)'))",
+                0.7853981633974483
+        );
+        registerUDFV2("ST_Angle", String.class, String.class, String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_Angle(ST_GeometryFromWKT('POINT (1 1)'), ST_GeometryFromWKT('POINT (2 2)'),ST_GeometryFromWKT('POINT (3 3)'))",
+                3.141592653589793
+        );
+        registerUDFV2("ST_Angle", String.class, String.class, String.class, String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_Angle(ST_GeometryFromWKT('POINT (1 1)'), ST_GeometryFromWKT('POINT (2 2)'), ST_GeometryFromWKT('POINT (3 3)'), ST_GeometryFromWKT('POINT (4 4)'))",
+                0.0
         );
     }
 
@@ -136,6 +177,16 @@ public class TestFunctionsV2
                 "MULTILINESTRING((10 130,50 190,110 190,140 150,150 80,100 10,20 40,10 130),(70 40,100 50,120 80,80 110,50 90,70 40))"
         );
     }
+
+    @Test
+    public void test_ST_BoundingDiagonal() {
+        registerUDFV2("ST_BoundingDiagonal", String.class);
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_BoundingDiagonal(ST_GeometryFromWKT('POLYGON (( 10 130, 50 190, 110 190, 140 150, 150 80, 100 10, 20 40, 10 130 ),( 70 40, 100 50, 120 80, 80 110, 50 90, 70 40 ))')))",
+                "LINESTRING(10 10,150 190)"
+        );
+    }
+
     @Test
     public void test_ST_Buffer() {
         registerUDFV2("ST_Buffer", String.class, double.class);
@@ -161,6 +212,14 @@ public class TestFunctionsV2
         );
     }
     @Test
+    public void test_ST_ClosestPoint() {
+        registerUDFV2("ST_ClosestPoint", String.class, String.class);
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_ClosestPoint(ST_GeometryFromWKT('POINT (1 1)'), ST_GeometryFromWKT('LINESTRING (1 1, 2 2, 3 3)')))",
+                "POINT(1 1)"
+        );
+    }
+    @Test
     public void test_ST_CollectionExtract() {
         registerUDFV2("ST_CollectionExtract", String.class);
         verifySqlSingleRes(
@@ -181,6 +240,16 @@ public class TestFunctionsV2
                 "POLYGON((43 69,50 84,57 100,63 118,68 133,74 149,81 164,88 180,101 180,112 180,119 164,126 149,132 131,139 113,143 100,150 84,157 69,163 51,168 36,174 20,163 20,150 20,143 36,139 49,132 64,114 64,99 64,81 64,63 64,57 49,52 36,46 20,37 20,26 20,32 36,35 45,39 55,43 69),(88 124,81 109,74 93,83 82,99 82,112 82,121 96,114 109,110 122,103 138,92 138,88 124))"
         );
     }
+
+    @Test
+    public void test_ST_CoordDim() {
+        registerUDFV2("ST_CoordDim", String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_CoordDim(ST_GeometryFromWKT('POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))'))",
+                2
+        );
+    }
+
     @Test
     public void test_ST_ConvexHull() {
         registerUDFV2("ST_ConvexHull", String.class);
@@ -195,6 +264,14 @@ public class TestFunctionsV2
         verifySqlSingleRes(
                 "select ST_AsText(sedona.ST_Difference(ST_GeometryFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeometryFromWKT('POLYGON ((0 -4, 4 -4, 4 4, 0 4, 0 -4))')))",
                 "POLYGON((0 -3,-3 -3,-3 3,0 3,0 -3))"
+        );
+    }
+    @Test
+    public void test_ST_Dimension() {
+        registerUDFV2("ST_Dimension", String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_Dimension(ST_GeometryFromWKT('POINT(1 2)'))",
+                0
         );
     }
     @Test
@@ -285,6 +362,16 @@ public class TestFunctionsV2
                 "ST_Point"
         );
     }
+
+    @Test
+    public void test_ST_HausdorffDistance() {
+        registerUDFV2("ST_HausdorffDistance", String.class, String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_HausdorffDistance(ST_GeometryFromWKT('LINESTRING(0 0, 1 1, 2 2)'), ST_GeometryFromWKT('LINESTRING(0 0, 1 1, 3 3)'))",
+                1.4142135623730951
+        );
+    }
+
     @Test
     public void test_ST_InteriorRingN() {
         registerUDFV2("ST_InteriorRingN", String.class, int.class);
@@ -307,6 +394,18 @@ public class TestFunctionsV2
         verifySqlSingleRes(
                 "select sedona.ST_IsClosed(ST_GeometryFromWKT('LINESTRING(0 0, 2 2)'))",
                 false
+        );
+    }
+    @Test
+    public void test_ST_IsCollection() {
+        registerUDFV2("ST_IsCollection", String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_IsCollection(ST_GeometryFromWKT('LINESTRING(0 0, 2 2)'))",
+                false
+        );
+        verifySqlSingleRes(
+                "select sedona.ST_IsCollection(ST_GeometryFromWKT('GEOMETRYCOLLECTION(POINT(1 2), LINESTRING(1 2, 3 4))'))",
+                true
         );
     }
     @Test
@@ -348,7 +447,27 @@ public class TestFunctionsV2
                 "select sedona.ST_IsValid(ST_GeometryFromWKT('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0), (15 15, 15 20, 20 20, 20 15, 15 15))', 4326, TRUE))",
                 false
         );
+        registerUDFV2("ST_IsValid", String.class, int.class);
+        verifySqlSingleRes(
+                "select sedona.ST_IsValid(ST_GeometryFromWKT('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0), (15 15, 15 20, 20 20, 20 15, 15 15))', 4326, TRUE), 1)",
+                false
+        );
     }
+
+    @Test
+    public void test_ST_IsValidReason() {
+        registerUDFV2("ST_IsValidReason", String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_IsValidReason(ST_GeometryFromWKT('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0), (15 15, 15 20, 20 20, 20 15, 15 15))', 4326, TRUE))",
+                "Hole lies outside shell at or near point (15.0, 15.0, NaN)"
+        );
+        registerUDFV2("ST_IsValidReason", String.class, int.class);
+        verifySqlSingleRes(
+                "select sedona.ST_IsValidReason(ST_GeometryFromWKT('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0), (15 15, 15 20, 20 20, 20 15, 15 15))', 4326, TRUE), 1)",
+                "Hole lies outside shell at or near point (15.0, 15.0, NaN)"
+        );
+    }
+
     @Test
     public void test_ST_Length() {
         registerUDFV2("ST_Length", String.class);
@@ -373,6 +492,16 @@ public class TestFunctionsV2
                 "POINT(51.597413505 76.597413505)"
         );
     }
+
+    @Test
+    public void test_ST_LineLocatePoint() {
+        registerUDFV2("ST_LineLocatePoint", String.class, String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_LineLocatePoint(ST_GeometryFromWKT('LINESTRING(0 0, 10 10)'), ST_GeometryFromWKT('POINT(2 2)'))",
+                0.2
+        );
+    }
+
     @Test
     public void test_ST_LineMerge() {
         registerUDFV2("ST_LineMerge", String.class);
@@ -488,6 +617,17 @@ public class TestFunctionsV2
                 "POINT(2.5 2.5)"
         );
     }
+
+    @Test
+    public void test_ST_Polygon() {
+        registerUDFV2("ST_Polygon", String.class, int.class);
+        // GeoJSON spec does not contain SRID so the serialization process will lose SRID info
+        verifySqlSingleRes(
+                "select ST_AsEWKT(sedona.ST_Polygon(ST_GeometryFromWKT('LINESTRING(0 0, 0 1, 1 1, 1 0, 0 0)'), 4326))",
+                "SRID=0;POLYGON((0 0,0 1,1 1,1 0,0 0))"
+        );
+    }
+
     @Test
     public void test_ST_PrecisionReduce() {
         registerUDFV2("ST_PrecisionReduce", String.class, int.class);
@@ -619,6 +759,26 @@ public class TestFunctionsV2
                 "POLYGON((2 3,3 3,3 -3,-3 -3,-3 3,-2 3,-2 4,2 4,2 3))"
         );
     }
+
+    @Test
+    public void test_ST_VoronoiPolygons() {
+        registerUDFV2("ST_VoronoiPolygons", String.class);
+        registerUDFV2("ST_VoronoiPolygons", String.class, double.class);
+        registerUDFV2("ST_VoronoiPolygons", String.class, double.class, String.class);
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_VoronoiPolygons(ST_GeometryFromWKT('MULTIPOINT ((0 0), (1 1))')))",
+                "GEOMETRYCOLLECTION(POLYGON((-1 -1,-1 2,2 -1,-1 -1)),POLYGON((-1 2,2 2,2 -1,-1 2)))"
+        );
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_VoronoiPolygons(ST_GeometryFromWKT('MULTIPOINT ((0 0), (1 1))'), 1))",
+                "GEOMETRYCOLLECTION(POLYGON((-1 -1,-1 2,2 -1,-1 -1)),POLYGON((-1 2,2 2,2 -1,-1 2)))"
+        );
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_VoronoiPolygons(ST_GeometryFromWKT('MULTIPOINT ((0 0), (1 1))'), 1, ST_GeometryFromWKT('POLYGON ((-1 -1, -1 2, 2 -1, -1 -1))')))",
+                "GEOMETRYCOLLECTION(POLYGON((-1 -1,-1 2,2 -1,-1 -1)),POLYGON((-1 2,2 2,2 -1,-1 2)))"
+        );
+    }
+
     @Test
     public void test_ST_X() {
         registerUDFV2("ST_X", String.class);
@@ -733,6 +893,15 @@ public class TestFunctionsV2
         verifySqlSingleRes(
                 "SELECT sedona.ST_DistanceSpheroid(ST_GeomFromWKT('POINT (-0.56 51.3168)'), ST_GeomFromWKT('POINT (-3.1883 55.9533)'))",
                 544430.9411996207
+        );
+    }
+
+    @Test
+    public void test_ST_FrechetDistance() {
+        registerUDFV2("ST_FrechetDistance", String.class, String.class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_FrechetDistance(ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)'), ST_GeomFromWKT('LINESTRING (0 0, 1 1, 3 3)'))",
+                1.4142135623730951
         );
     }
 

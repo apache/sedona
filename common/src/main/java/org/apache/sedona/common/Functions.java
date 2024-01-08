@@ -463,7 +463,20 @@ public class Functions {
     }
 
     public static boolean isValid(Geometry geometry) {
-        return new IsValidOp(geometry).isValid();
+        return isValid(geometry, OGC_SFS_VALIDITY);
+    }
+
+    public static boolean isValid(Geometry geom, int flags) {
+        IsValidOp isValidOp = new IsValidOp(geom);
+
+        // Set the validity model based on flags
+        if (flags == ESRI_VALIDITY) {
+            isValidOp.setSelfTouchingRingFormingHoleValid(true);
+        } else {
+            isValidOp.setSelfTouchingRingFormingHoleValid(false);
+        }
+
+        return isValidOp.isValid();
     }
 
     public static Geometry addPoint(Geometry linestring, Geometry point) {
@@ -1268,11 +1281,11 @@ public class Functions {
         return GeomUtils.toDegrees(angleInRadian);
     }
 
-    public static Double hausdorffDistance(Geometry g1, Geometry g2, double densityFrac) throws Exception {
+    public static Double hausdorffDistance(Geometry g1, Geometry g2, double densityFrac) {
         return GeomUtils.getHausdorffDistance(g1, g2, densityFrac);
     }
 
-    public static Double hausdorffDistance(Geometry g1, Geometry g2) throws Exception{
+    public static Double hausdorffDistance(Geometry g1, Geometry g2) {
         return GeomUtils.getHausdorffDistance(g1, g2, -1);
     }
 
