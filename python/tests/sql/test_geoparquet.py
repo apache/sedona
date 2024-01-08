@@ -28,6 +28,7 @@ import geopandas
 from tests.test_base import TestBase
 from tests import geoparquet_input_location
 from tests import plain_parquet_input_location
+from tests import legacy_parquet_input_location
 
 
 class TestGeoParquet(TestBase):
