@@ -1595,9 +1595,18 @@ true
 
 ## ST_IsValid
 
-Introduction: Test if a geometry is well formed
+Introduction: Test if a geometry is well formed. The function can be invoked with just the geometry or with an additional flag (from `v1.5.1`). The flag alters the validity checking behavior. The flags parameter is a bitfield with the following options:
 
-Format: `ST_IsValid (A: Geometry)`
+- 0 (default): Use usual OGC SFS (Simple Features Specification) validity semantics.
+- 1: "ESRI flag", Accepts certain self-touching rings as valid, which are considered invalid under OGC standards.
+
+Formats:
+```
+ST_IsValid (A: Geometry)
+```
+```
+ST_IsValid (A: Geometry, flag: Integer)
+```
 
 Since: `v1.0.0`
 

@@ -466,11 +466,11 @@ public class Functions {
         return isValid(geometry, OGC_SFS_VALIDITY);
     }
 
-    public static boolean isValid(Geometry geom, int flags) {
+    public static boolean isValid(Geometry geom, int flag) {
         IsValidOp isValidOp = new IsValidOp(geom);
 
         // Set the validity model based on flags
-        if (flags == ESRI_VALIDITY) {
+        if (flag == ESRI_VALIDITY) {
             isValidOp.setSelfTouchingRingFormingHoleValid(true);
         } else {
             isValidOp.setSelfTouchingRingFormingHoleValid(false);
@@ -1293,11 +1293,11 @@ public class Functions {
         return isValidReason(geom, OGC_SFS_VALIDITY);
     }
 
-    public static String isValidReason(Geometry geom, int flags) {
+    public static String isValidReason(Geometry geom, int flag) {
         IsValidOp isValidOp = new IsValidOp(geom);
 
         // Set the validity model based on flags
-        if (flags == ESRI_VALIDITY) {
+        if (flag == ESRI_VALIDITY) {
             isValidOp.setSelfTouchingRingFormingHoleValid(true);
         } else {
             isValidOp.setSelfTouchingRingFormingHoleValid(false);
