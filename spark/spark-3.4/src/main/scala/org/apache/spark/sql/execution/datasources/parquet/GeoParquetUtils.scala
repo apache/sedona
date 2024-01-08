@@ -77,4 +77,41 @@ object GeoParquetUtils {
     file.getName == ParquetFileWriter.PARQUET_COMMON_METADATA_FILE ||
       file.getName == ParquetFileWriter.PARQUET_METADATA_FILE
   }
+
+  /**
+   * Legacy mode option is for reading Parquet files written by old versions of Apache Sedona (<= 1.3.1-incubating).
+   * Such files are actually not GeoParquet files and do not have GeoParquet file metadata. Geometry fields were
+   * encoded as list of bytes and stored as group type in Parquet files. The Definition of GeometryUDT before 1.4.0 was:
+   * {{{
+   *  case class GeometryUDT extends UserDefinedType[Geometry] {
+   *  override def sqlType: DataType = ArrayType(ByteType, containsNull = false)
+   *  // ...
+   *  }}}
+   * Since 1.4.0, the sqlType of GeometryUDT is changed to BinaryType. This is a breaking change for reading old Parquet
+   * files. To read old Parquet files, users need to use "geoparquet" format and set legacyMode to true.
+   * @param parameters user provided parameters for reading GeoParquet files using `.option()` method, e.g.
+   *                   `spark.read.format("geoparquet").option("legacyMode", "true").load("path")`
+   * @return true if legacyMode is set to true, false otherwise
+   */
+  def isLegacyMode(parameters: Map[String, String]): Boolean =
+    parameters.getOrElse("legacyMode", "false").toBoolean
+
+  /**
+   * Parse GeoParquet file metadata from Parquet file metadata. Legacy parquet files do not contain GeoParquet file
+   * metadata, so we'll simply return an empty GeoParquetMetaData object when legacy mode is enabled.
+   * @param keyValueMetaData Parquet file metadata
+   * @param parameters user provided parameters for reading GeoParquet files
+   * @return GeoParquetMetaData object
+   */
+  def parseGeoParquetMetaData(keyValueMetaData: java.util.Map[String, String],
+                              parameters: Map[String, String]): GeoParquetMetaData = {
+    val isLegacyMode = GeoParquetUtils.isLegacyMode(parameters)
+    GeoParquetMetaData.parseKeyValueMetaData(keyValueMetaData).getOrElse {
+      if (isLegacyMode) {
+        GeoParquetMetaData(None, "", Map.empty)
+      } else {
+        throw new IllegalArgumentException("GeoParquet file does not contain valid geo metadata")
+      }
+    }
+  }
 }
