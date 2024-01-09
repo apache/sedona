@@ -171,6 +171,15 @@ object st_functions extends DataFrameAPI {
   def ST_IsValid(geometry: Column): Column = wrapExpression[ST_IsValid](geometry)
   def ST_IsValid(geometry: String): Column = wrapExpression[ST_IsValid](geometry)
 
+  def ST_IsValid(geometry: Column, flag: Column): Column = wrapExpression[ST_IsValid](geometry, flag)
+  def ST_IsValid(geometry: String, flag: Integer): Column = wrapExpression[ST_IsValid](geometry, flag)
+
+  def ST_IsValidReason(geometry: Column): Column = wrapExpression[ST_IsValidReason](geometry)
+  def ST_IsValidReason(geometry: String): Column = wrapExpression[ST_IsValidReason](geometry)
+
+  def ST_IsValidReason(geometry: Column, flag: Column): Column = wrapExpression[ST_IsValidReason](geometry, flag)
+  def ST_IsValidReason(geometry: String, flag: Integer): Column = wrapExpression[ST_IsValidReason](geometry, flag)
+
   def ST_Length(geometry: Column): Column = wrapExpression[ST_Length](geometry)
   def ST_Length(geometry: String): Column = wrapExpression[ST_Length](geometry)
 
@@ -430,13 +439,5 @@ object st_functions extends DataFrameAPI {
   def ST_IsCollection(geometry: Column): Column = wrapExpression[ST_IsCollection](geometry)
 
   def ST_IsCollection(geometry: String): Column = wrapExpression[ST_IsCollection](geometry)
-
-  def ST_IsValidReason(geometry: Column): Column = wrapExpression[ST_IsValidReason](geometry)
-
-  def ST_IsValidReason(geometry: Column, flag: Column): Column = wrapExpression[ST_IsValidReason](geometry, flag)
-
-  def ST_IsValidReason(geometry: String): Column = wrapExpression[ST_IsValidReason](geometry)
-
-  def ST_IsValidReason(geometry: String, flag: Integer): Column = wrapExpression[ST_IsValidReason](geometry, flag)
 
 }

@@ -745,6 +745,23 @@ public class FunctionTest extends TestBase{
         Table polygonTable = createPolygonTable(1);
         polygonTable = polygonTable.select(call(Functions.ST_IsValid.class.getSimpleName(), $(polygonColNames[0])));
         assertTrue((boolean) first(polygonTable).getField(0));
+
+        final int OGC_SFS_VALIDITY = 0;
+        final int ESRI_VALIDITY = 1;
+
+        // Geometry that is invalid under both OGC and ESRI standards
+        String selfTouchingWKT = "POLYGON ((0 0, 2 0, 1 1, 2 2, 0 2, 1 1, 0 0))";
+        Table specialCaseTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('" + selfTouchingWKT + "') AS geom");
+
+        // Test with OGC flag
+        Table ogcValidityTable = specialCaseTable.select(call("ST_IsValid", $("geom"), OGC_SFS_VALIDITY));
+        java.lang.Boolean ogcValidity = (java.lang.Boolean)first(ogcValidityTable).getField(0);
+        assertEquals(false, ogcValidity); // Expecting a self-intersection error as per OGC standards
+
+        // Test with ESRI flag
+        Table esriValidityTable = specialCaseTable.select(call("ST_IsValid", $("geom"), ESRI_VALIDITY));
+        java.lang.Boolean esriValidity = (java.lang.Boolean) first(esriValidityTable).getField(0);
+        assertEquals(false, esriValidity); // Expecting an error related to interior disconnection as per ESRI standards
     }
 
     @Test

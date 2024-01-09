@@ -42,7 +42,7 @@
         <dependency>
             <groupId>org.apache.sedona</groupId>
             <artifactId>sedona-snowflake</artifactId>
-            <version>1.5.1-SNAPSHOT</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>

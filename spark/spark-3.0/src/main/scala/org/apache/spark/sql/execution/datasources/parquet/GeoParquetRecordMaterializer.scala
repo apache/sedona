@@ -35,6 +35,7 @@ import org.apache.spark.sql.types.StructType
  *                           Gregorian calendar: mode + optional original time zone
  * @param int96RebaseSpec the specification of rebasing INT96 timestamp from Julian to Proleptic
  *                        Gregorian calendar
+ * @param parameters Options for reading GeoParquet files. For example, if legacyMode is enabled or not.
  */
 class GeoParquetRecordMaterializer(
                                     parquetSchema: MessageType,
@@ -42,7 +43,8 @@ class GeoParquetRecordMaterializer(
                                     schemaConverter: GeoParquetToSparkSchemaConverter,
                                     convertTz: Option[ZoneId],
                                     datetimeRebaseMode: LegacyBehaviorPolicy.Value,
-                                    int96RebaseMode: LegacyBehaviorPolicy.Value)
+                                    int96RebaseMode: LegacyBehaviorPolicy.Value,
+                                    parameters: Map[String, String])
   extends RecordMaterializer[InternalRow] {
   private val rootConverter = new GeoParquetRowConverter(
     schemaConverter,
@@ -51,6 +53,7 @@ class GeoParquetRecordMaterializer(
     convertTz,
     datetimeRebaseMode,
     int96RebaseMode,
+    parameters,
     NoopUpdater)
 
   override def getCurrentRecord: InternalRow = rootConverter.currentRecord

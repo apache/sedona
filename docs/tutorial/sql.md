@@ -373,6 +373,13 @@ root
 
 Sedona supports spatial predicate push-down for GeoParquet files, please refer to the [SedonaSQL query optimizer](../api/sql/Optimizer.md) documentation for details.
 
+GeoParquet file reader can also be used to read legacy Parquet files written by Apache Sedona 1.3.1-incubating or earlier.
+Please refer to [Reading Legacy Parquet Files](../api/sql/Reading-legacy-parquet.md) for details.
+
+!!!warning
+	GeoParquet file reader does not work on Databricks runtime when Photon is enabled. Please disable Photon when using
+	GeoParquet file reader on Databricks runtime.
+
 ### Inspect GeoParquet metadata
 
 Since v`1.5.1`, Sedona provides a Spark SQL data source `"geoparquet.metadata"` for inspecting GeoParquet metadata. The resulting dataframe contains

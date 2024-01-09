@@ -54,7 +54,9 @@ class GeoParquetReadSupport (
                               override val convertTz: Option[ZoneId],
                               enableVectorizedReader: Boolean,
                               datetimeRebaseMode: LegacyBehaviorPolicy.Value,
-                              int96RebaseMode: LegacyBehaviorPolicy.Value)
+                              int96RebaseMode: LegacyBehaviorPolicy.Value,
+                              parameters: Map[String, String]
+                            )
   extends ParquetReadSupport with Logging {
   private var catalystRequestedSchema: StructType = _
 
@@ -121,10 +123,11 @@ class GeoParquetReadSupport (
     new GeoParquetRecordMaterializer(
       parquetRequestedSchema,
       GeoParquetReadSupport.expandUDT(catalystRequestedSchema),
-      new GeoParquetToSparkSchemaConverter(keyValueMetaData, conf),
+      new GeoParquetToSparkSchemaConverter(keyValueMetaData, conf, parameters),
       convertTz,
       datetimeRebaseMode,
-      int96RebaseMode)
+      int96RebaseMode,
+      parameters)
   }
 }
 

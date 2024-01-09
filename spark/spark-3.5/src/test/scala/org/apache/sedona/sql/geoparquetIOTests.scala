@@ -51,6 +51,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
   val geoparquetdatalocation2: String = resourceFolder + "geoparquet/example2.parquet"
   val geoparquetdatalocation3: String = resourceFolder + "geoparquet/example3.parquet"
   val geoparquetdatalocation4: String = resourceFolder + "geoparquet/example-1.0.0-beta.1.parquet"
+  val legacyparquetdatalocation: String = resourceFolder + "parquet/legacy-parquet-nested-columns.snappy.parquet"
   val geoparquetoutputlocation: String = resourceFolder + "geoparquet/geoparquet_output/"
 
   override def afterAll(): Unit = FileUtils.deleteDirectory(new File(geoparquetoutputlocation))
@@ -508,6 +509,19 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         assert(sparkListener.recordsRead.get() <= 2000)
       } finally {
         sparkSession.sparkContext.removeSparkListener(sparkListener)
+      }
+    }
+
+    it("Ready legacy parquet files written by Apache Sedona <= 1.3.1-incubating") {
+      val df = sparkSession.read.format("geoparquet").option("legacyMode", "true").load(legacyparquetdatalocation)
+      val rows = df.collect()
+      assert(rows.nonEmpty)
+      rows.foreach { row =>
+        assert(row.getAs[AnyRef]("geom").isInstanceOf[Geometry])
+        assert(row.getAs[AnyRef]("struct_geom").isInstanceOf[Row])
+        val structGeom = row.getAs[Row]("struct_geom")
+        assert(structGeom.getAs[AnyRef]("g0").isInstanceOf[Geometry])
+        assert(structGeom.getAs[AnyRef]("g1").isInstanceOf[Geometry])
       }
     }
   }
