@@ -609,6 +609,12 @@ public class Functions {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.isValid(geom);
         }
+
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("Integer") Integer flag) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.isValid(geom, flag);
+        }
     }
 
     public static class ST_Normalize extends ScalarFunction {
@@ -1089,14 +1095,15 @@ public class Functions {
 
     public static class ST_IsValidReason extends ScalarFunction {
         @DataTypeHint("String")
-        public String eval(@DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object geomObject) {
-            Geometry geom = (Geometry) geomObject;
+        public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.isValidReason(geom);
         }
+
         @DataTypeHint("String")
-        public String eval(@DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object geomObject, @DataTypeHint("Integer") Integer flags) {
-            Geometry geom = (Geometry) geomObject;
-            return org.apache.sedona.common.Functions.isValidReason(geom, flags);
+        public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("Integer") Integer flag) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.isValidReason(geom, flag);
         }
     }
 }

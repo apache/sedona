@@ -317,6 +317,20 @@ class dataFrameAPITestScala extends TestBaseScala {
       val df = polygonDf.select(ST_IsValid("geom"))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Boolean]
       assert(actualResult)
+
+      // Geometry that is invalid under both OGC and ESRI standards
+      val selfTouchingWKT = "POLYGON ((0 0, 2 0, 1 1, 2 2, 0 2, 1 1, 0 0))"
+      val specialCaseTable = Seq(selfTouchingWKT).toDF("wkt").select(ST_GeomFromWKT($"wkt").as("geom"))
+
+      // Test with OGC flag (OGC_SFS_VALIDITY = 0)
+      val ogcValidityTable = specialCaseTable.select(ST_IsValid($"geom", lit(0)))
+      val ogcValidity = ogcValidityTable.take(1)(0).getBoolean(0)
+      assertEquals(false, ogcValidity)
+
+      // Test with ESRI flag (ESRI_VALIDITY = 1)
+      val esriValidityTable = specialCaseTable.select(ST_IsValid($"geom", lit(1)))
+      val esriValidity = esriValidityTable.take(1)(0).getBoolean(0)
+      assertEquals(false, esriValidity)
     }
 
     it("Passed ST_ReducePrecision") {
