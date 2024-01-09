@@ -89,7 +89,7 @@ public class RasterConstructors
      * @param value The value of the pixel of the resultant raster
      * @param noDataValue The noDataValue of the resultant raster
      * @param useGeometryExtent  The way to generate extent of the resultant raster.
-     *        Use the extent of the geometry to covert if true, else use the extent of the reference raster
+     *        Use the extent of the geometry to convert if true, else use the extent of the reference raster
      *
      * @return Rasterized Geometry
      * @throws FactoryException
