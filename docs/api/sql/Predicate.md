@@ -119,6 +119,7 @@ true
 ```
 
 ## ST_OrderingEquals
+
 Introduction: Returns true if the geometries are equal and the coordinates are in the same order
 
 Format: `ST_OrderingEquals(A: geometry, B: geometry)`

@@ -15,6 +15,7 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../../../api/flink/O
 4. Please see [SQL example project](../../demo/)
 
 ## Initiate Stream Environment
+
 Use the following code to initiate your `StreamExecutionEnvironment` at the beginning:
 ```java
 StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();

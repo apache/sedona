@@ -8,21 +8,25 @@
 # What can Sedona do?
 
 ## Distributed spatial datasets
+
 - [x] Spatial RDD on Spark
 - [x] Spatial DataFrame/SQL on Spark
 - [x] Spatial DataStream on Flink
 - [x] Spatial Table/SQL on Flink
 
 ## Complex spatial objects
+
 - [x] Vector geometries / trajectories
 - [x] Raster images with Map Algebra
 - [x] Various input formats: CSV, TSV, WKT, WKB, GeoJSON, Shapefile, GeoTIFF, ArcGrid, NetCDF/HDF
 
 ## Distributed spatial queries
+
 - [x] Spatial query: range query, range join query, distance join query, K Nearest Neighbor query
 - [x] Spatial index: R-Tree, Quad-Tree
 
 ## Rich spatial analytics tools
+
 - [x] Coordinate Reference System / Spatial Reference System Transformation
 - [x] High resolution map generation: [Visualize Spatial DataFrame/RDD](../../tutorial/viz)
 - [x] Apache Zeppelin integration

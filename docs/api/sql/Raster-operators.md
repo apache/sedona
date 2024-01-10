@@ -23,6 +23,7 @@ POINT (156.5 -75.5)
 ```
 
 ### RS_PixelAsCentroids
+
 Introduction: Returns a list of the centroid point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band.
 Each centroid represents the geometric center of the corresponding pixel's area.
 
@@ -104,6 +105,7 @@ IndexOutOfBoundsException: Specified pixel coordinates (6, 2) do not lie in the 
 ```
 
 ### RS_PixelAsPoints
+
 Introduction: Returns a list of the pixel's upper-left corner point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band.
 
 Format: `RS_PixelAsPoints(raster: Raster, band: Integer)`
@@ -173,6 +175,7 @@ POLYGON ((131 -246, 139 -246, 139 -254, 131 -254, 131 -246))
 ```
 
 ### RS_PixelAsPolygons
+
 Introduction: Returns a list of the polygon geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band.
 
 Format: `RS_PixelAsPolygons(raster: Raster, band: Integer)`
@@ -1450,6 +1453,7 @@ Output:
 ```
 4
 ```
+
 ### RS_Resample
 
 Introduction:

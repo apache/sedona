@@ -28,6 +28,7 @@ Please refer to [Sedona Maven Central coordinates](maven-coordinates.md) to sele
     ```
 
 ### Download Sedona jar manually
+
 1. Have your Spark cluster ready.
 
 2. Download Sedona jars:

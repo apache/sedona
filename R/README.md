@@ -1,11 +1,13 @@
 
 # apache.sedona <img src="man/figures/logo.png" align="right" width="120"/>
+
 [Apache Sedona](https://sedona.apache.org/) is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark and Apache Flink, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
 
 The apache.sedona R package exposes an interface to Apache Sedona through `{sparklyr}`
 enabling higher-level access through a `{dplyr}` backend and familiar R functions.
 
 ## Installation
+
 To use Apache Sedona from R, you just need to install the apache.sedona package; Spark dependencies are managed directly by the package.
 
 ```r
@@ -14,6 +16,7 @@ install.packages("apache.sedona")
 ```
 
 #### Development version
+
 To use the development version, you will need both the latest version of the package and of the Apache Sedona jars.
 
 To get the latest R package from GtiHub:
