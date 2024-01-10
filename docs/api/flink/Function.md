@@ -754,6 +754,7 @@ Output:
 ```
 POLYGON ((125 100, 20 40, 50 60, 175 150, 125 100))
 ```
+
 ## ST_ConvexHull
 
 Introduction: Return the Convex Hull of polygon A
@@ -1089,6 +1090,7 @@ POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))
 ```
 
 ## ST_Force3D
+
 Introduction: Forces the geometry into a 3-dimensional model so that all output representations will have X, Y and Z coordinates.
 An optionally given zValue is tacked onto the geometry if the geometry is 2-dimensional. Default value of zValue is 0.0
 If the given geometry is 3-dimensional, no change is performed on it.
@@ -1293,6 +1295,7 @@ To understand the cell statistics please refer to [H3 Doc](https://h3geo.org/doc
 H3 native fill functions doesn't guarantee full coverage on the shapes.
 
 ### Cover Polygon
+
 When fullCover = false, for polygon sedona will use [polygonToCells](https://h3geo.org/docs/api/regions#polygontocells).
 This can't guarantee full coverage but will guarantee no false positive.
 
@@ -1302,6 +1305,7 @@ This will lead to redundancy but can guarantee full coverage.
 Choose the option according to your use case.
 
 ### Cover LineString
+
 For the lineString, sedona will call gridPathCells(https://h3geo.org/docs/api/traversal#gridpathcells) per segment.
 From H3's documentation
 > This function may fail to find the line between two indexes, for example if they are very far apart. It may also fail when finding distances for indexes on opposite sides of a pentagon.
@@ -2550,6 +2554,7 @@ POLYGON ((8766047.980342899 17809098.336766362, 5122546.516721856 18580261.91252
 ```
 
 ## ST_Translate
+
 Introduction: Returns the input geometry with its X, Y and Z coordinates (if present in the geometry) translated by deltaX, deltaY and deltaZ (if specified)
 
 If the geometry is 2D, and a deltaZ parameter is specified, no change is done to the Z coordinate of the geometry and the resultant geometry is also 2D.

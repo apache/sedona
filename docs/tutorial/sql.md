@@ -574,6 +574,7 @@ Sedona provides `SedonaPyDeck` and `SedonaKepler` wrappers, both of which expose
 	Both SedonaPyDeck and SedonaKepler are designed to work with SedonaDataFrames containing only 1 geometry column. Passing dataframes with multiple geometry columns will cause errors.
 
 ### SedonaPyDeck
+
 Spatial query results can be visualized in a Jupyter lab/notebook environment using SedonaPyDeck.
 
 SedonaPyDeck exposes APIs to create interactive map visualizations using [pydeck](https://pydeck.gl/index.html#) based on [deck.gl](https://deck.gl/)

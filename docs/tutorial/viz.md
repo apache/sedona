@@ -14,9 +14,11 @@ Data visualization allows users to summarize, analyze and reason about data. Gua
 SedonaViz encapsulates the main steps of map visualization process, e.g., pixelize, aggregate, and render, into a set of massively parallelized GeoViz operators and the user can assemble any customized styles.
 
 ## Visualize SpatialRDD
+
 This tutorial mainly focuses on explaining SQL/DataFrame API. SedonaViz RDD example can be found in Please see [Viz example project](https://github.com/apache/sedona/tree/master/examples/viz)
 
 ## Set up dependencies
+
 1. Read [Sedona Maven Central coordinates](../setup/maven-coordinates.md)
 2. Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz
 

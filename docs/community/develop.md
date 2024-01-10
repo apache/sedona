@@ -85,11 +85,13 @@ Re-run the test case. Do NOT right click the test case to re-run. Instead, click
 To run all Python test cases, follow steps mentioned [here](../../setup/compile/#run-python-test).
 
 #### Run all python tests in a single test file
+
 To run a particular python test file, specify the path of the .py file to pipenv.
 
 For example, to run all tests in `test_function.py` located in `python/tests/sql/`, use: `pipenv run pytest tests/sql/test_function.py`.
 
 #### Run a single test
+
 To run a particular test in a particular .py test file, specify `file_name::class_name::test_name` to the pytest command.
 
 For example, to run the test on ST_Contains function located in sql/test_predicate.py, use: `pipenv run pytest tests/sql/test_predicate.py::TestPredicate::test_st_contains`

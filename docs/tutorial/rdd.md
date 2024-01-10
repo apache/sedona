@@ -16,6 +16,7 @@ Please refer to [Initiate SedonaContext](../sql/#initiate-sedonacontext) to init
 ## Create a SpatialRDD
 
 ### Create a typed SpatialRDD
+
 Sedona-core provides three special SpatialRDDs: PointRDD, PolygonRDD, and LineStringRDD.
 
 !!!warning
