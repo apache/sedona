@@ -27,9 +27,6 @@ MD026: false
 # ol-prefix - Ordered list item prefix
 MD029: false
 
-# list-marker-space - Spaces after list markers
-MD030: false
-
 # blanks-around-fences - Fenced code blocks should be surrounded by blank lines
 MD031: false
 

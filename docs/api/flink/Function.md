@@ -2177,21 +2177,21 @@ SELECT ST_PointOnSurface(df.geometry)
 FROM df
 ```
 
-1.  Input: `POINT (0 5)`
+1. Input: `POINT (0 5)`
 
-    Output: `POINT (0 5)`
+   Output: `POINT (0 5)`
 
-2.  Input: `LINESTRING(0 5, 0 10)`
+2. Input: `LINESTRING(0 5, 0 10)`
 
-    Output: `POINT (0 5)`
+   Output: `POINT (0 5)`
 
-3.  Input: `POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))`
+3. Input: `POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))`
 
-    Output: `POINT (2.5 2.5)`
+   Output: `POINT (2.5 2.5)`
 
-4.  Input: `LINESTRING(0 5 1, 0 0 1, 0 10 2)`
+4. Input: `LINESTRING(0 5 1, 0 0 1, 0 10 2)`
 
-    Output: `POINT Z(0 0 1)`
+   Output: `POINT Z(0 0 1)`
 
 ## ST_Polygon
 
