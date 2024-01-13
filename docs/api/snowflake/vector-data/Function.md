@@ -39,7 +39,6 @@ Introduction: Return the 3-dimensional minimum cartesian distance between A and 
 
 Format: `ST_3DDistance (A:geometry, B:geometry)`
 
-
 SQL example:
 ```SQL
 SELECT ST_3DDistance(polygondf.countyshape, polygondf.countyshape)
@@ -53,8 +52,6 @@ Introduction: RETURN Linestring with additional point at the given index, if pos
 Format: `ST_AddPoint(geom: geometry, point: geometry, position: integer)`
 
 Format: `ST_AddPoint(geom: geometry, point: geometry)`
-
-
 
 SQL example:
 ```SQL
@@ -196,8 +193,6 @@ Introduction: Return the area of A
 
 Format: `ST_Area (A:geometry)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_Area(polygondf.countyshape)
@@ -212,8 +207,6 @@ Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lat/lon== orde
 
 Format: `ST_AreaSpheroid (A:geometry)`
 
-
-
 SQL example:
 
 ```sql
@@ -227,8 +220,6 @@ Output: `201824850811.76245`
 Introduction: Return the Well-Known Binary representation of a geometry
 
 Format: `ST_AsBinary (A:geometry)`
-
-
 
 SQL example:
 ```SQL
@@ -246,8 +237,6 @@ If the geometry is lacking SRID a WKB format is produced.
 
 Format: `ST_AsEWKB (A:geometry)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_AsEWKB(polygondf.countyshape)
@@ -264,8 +253,6 @@ If the geometry is lacking SRID a WKT format is produced.
 
 Format: `ST_AsEWKT (A:geometry)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_AsEWKT(polygondf.countyshape)
@@ -277,8 +264,6 @@ FROM polygondf
 Introduction: Return the [GeoJSON](https://geojson.org/) string representation of a geometry
 
 Format: `ST_AsGeoJSON (A:geometry)`
-
-
 
 SQL example:
 ```SQL
@@ -292,8 +277,6 @@ Introduction: Return the [GML](https://www.ogc.org/standards/gml) string represe
 
 Format: `ST_AsGML (A:geometry)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_AsGML(polygondf.countyshape)
@@ -305,8 +288,6 @@ FROM polygondf
 Introduction: Return the [KML](https://www.ogc.org/standards/kml) string representation of a geometry
 
 Format: `ST_AsKML (A:geometry)`
-
-
 
 SQL example:
 ```SQL
@@ -320,8 +301,6 @@ Introduction: Return the Well-Known Text string representation of a geometry
 
 Format: `ST_AsText (A:geometry)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_AsText(polygondf.countyshape)
@@ -333,8 +312,6 @@ FROM polygondf
 Introduction: Returns Azimuth for two given points in radians null otherwise.
 
 Format: `ST_Azimuth(pointA: Point, pointB: Point)`
-
-
 
 SQL example:
 ```SQL
@@ -348,8 +325,6 @@ Output: `3.141592653589793`
 Introduction: Returns the closure of the combinatorial boundary of this Geometry.
 
 Format: `ST_Boundary(geom: geometry)`
-
-
 
 SQL example:
 ```SQL
@@ -390,8 +365,6 @@ Introduction: Returns a geometry/geography that represents all points whose dist
 
 Format: `ST_Buffer (A:geometry, buffer: Double)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_Buffer(polygondf.countyshape, 1)
@@ -403,8 +376,6 @@ FROM polygondf
 Introduction: Returns the areal geometry formed by the constituent linework of the input geometry.
 
 Format: `ST_BuildArea (A:geometry)`
-
-
 
 Example:
 
@@ -430,8 +401,6 @@ Result:
 Introduction: Return the centroid point of A
 
 Format: `ST_Centroid (A:geometry)`
-
-
 
 SQL example:
 ```SQL
@@ -470,7 +439,6 @@ Introduction: Returns MultiGeometry object based on a geometry column.
 Format
 
 `ST_Collect(*geom: geometry)`
-
 
 Example:
 
@@ -525,8 +493,6 @@ Format: `ST_CollectionExtract (A:geometry)`
 
 Format: `ST_CollectionExtract (A:geometry, type:Int)`
 
-
-
 Example:
 
 ```SQL
@@ -569,8 +535,6 @@ FROM polygondf
 Introduction: Return the Convex Hull of polgyon A
 
 Format: `ST_ConvexHull (A:geometry)`
-
-
 
 SQL example:
 ```SQL
@@ -632,8 +596,6 @@ Introduction: Return the difference between geometry A and B (return part of geo
 
 Format: `ST_Difference (A:geometry, B:geometry)`
 
-
-
 Example:
 
 ```SQL
@@ -670,8 +632,6 @@ Introduction: Return the Euclidean distance between A and B
 
 Format: `ST_Distance (A:geometry, B:geometry)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_Distance(polygondf.countyshape, polygondf.countyshape)
@@ -685,8 +645,6 @@ Introduction: Return the haversine / great-circle distance of A using a given ea
 Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lat/lon== order. You can use ==ST_FlipCoordinates== to swap lat and lon. For non-point data, we first take the centroids of both geometries and then compute the distance.
 
 Format: `ST_DistanceSphere (A:geometry)`
-
-
 
 SQL example 1:
 ```sql
@@ -702,7 +660,6 @@ SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (51.3168 -0.56)'), ST_GeomFromWKT
 
 Output: `544405.4459192449`
 
-
 ## ST_DistanceSpheroid
 
 Introduction: Return the geodesic distance of A using WGS84 spheroid. Unit is meter. Compared to `ST_Distance` + `ST_Transform`, it works better for datasets that cover large regions such as continents or the entire planet. It is equivalent to PostGIS `ST_Distance(geography, use_spheroid=true)` and `ST_DistanceSpheroid` function and produces nearly identical results. It provides slower but more accurate result compared to `ST_DistanceSphere`.
@@ -710,8 +667,6 @@ Introduction: Return the geodesic distance of A using WGS84 spheroid. Unit is me
 Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lat/lon== order. You can use ==ST_FlipCoordinates== to swap lat and lon. For non-point data, we first take the centroids of both geometries and then compute the distance.
 
 Format: `ST_DistanceSpheroid (A:geometry)`
-
-
 
 SQL example:
 ```sql
@@ -726,7 +681,6 @@ Introduction: This is an aggregate function that takes a column of of geometries
 
 Format: `ST_Dump(geom: geometry)`
 
-
 SQL example:
 ```SQL
 SELECT ST_Dump(tbl.geom)
@@ -739,7 +693,6 @@ Output: `GeometryCollection ( (10 40), (40 30), (20 20), (30 10) )`
 Introduction: Returns a MultiPoint geometry which consists of individual points that compose the input line string.
 
 Format: `ST_DumpPoints(geom: geometry)`
-
 
 SQL example:
 ```SQL
@@ -754,8 +707,6 @@ Introduction: Returns last point of given linestring.
 
 Format: `ST_EndPoint(geom: geometry)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_EndPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'))
@@ -768,8 +719,6 @@ Output: `POINT(160 170)`
 Introduction: Return the envelop boundary of A
 
 Format: `ST_Envelope (A:geometry)`
-
-
 
 SQL example:
 
@@ -784,8 +733,6 @@ Introduction: Returns a line string representing the exterior ring of the POLYGO
 
 Format: `ST_ExteriorRing(geom: geometry)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_ExteriorRing(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
@@ -798,8 +745,6 @@ Output: `LINESTRING (0 0, 1 1, 1 2, 1 1, 0 0)`
 Introduction: Returns a version of the given geometry with X and Y axis flipped.
 
 Format: `ST_FlipCoordinates(A:geometry)`
-
-
 
 SQL example:
 ```SQL
@@ -816,8 +761,6 @@ Output: `POINT (2 1)`
 Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates
 
 Format: `ST_Force_2D (A:geometry)`
-
-
 
 Example:
 
@@ -838,6 +781,7 @@ Result:
 ```
 
 ## ST_Force3D
+
 Introduction: Forces the geometry into a 3-dimensional model so that all output representations will have X, Y and Z coordinates.
 An optionally given zValue is tacked onto the geometry if the geometry is 2-dimensional. Default value of zValue is 0.0
 If the given geometry is 3-dimensional, no change is performed on it.
@@ -905,8 +849,6 @@ Introduction: Returns GeoHash of the geometry with given precision
 
 Format: `ST_GeoHash(geom: geometry, precision: int)`
 
-
-
 Example:
 
 Query:
@@ -959,8 +901,6 @@ Introduction: Return the 0-based Nth geometry if the geometry is a GEOMETRYCOLLE
 
 Format: `ST_GeometryN(geom: geometry, n: Int)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_GeometryN(ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))'), 1)
@@ -973,8 +913,6 @@ Output: `POINT (3 4)`
 Introduction: Returns the type of the geometry as a string. EG: 'ST_Linestring', 'ST_Polygon' etc.
 
 Format: `ST_GeometryType (A:geometry)`
-
-
 
 SQL example:
 ```SQL
@@ -1030,8 +968,6 @@ Introduction: Returns the Nth interior linestring ring of the polygon geometry. 
 
 Format: `ST_InteriorRingN(geom: geometry, n: Int)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_InteriorRingN(ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))'), 0)
@@ -1045,8 +981,6 @@ Introduction: Return the intersection geometry of A and B
 
 Format: `ST_Intersection (A:geometry, B:geometry)`
 
-
-
 SQL example:
 
 ```SQL
@@ -1059,8 +993,6 @@ FROM polygondf
 Introduction: RETURNS true if the LINESTRING start and end point are the same.
 
 Format: `ST_IsClosed(geom: geometry)`
-
-
 
 SQL example:
 ```SQL
@@ -1109,8 +1041,6 @@ Introduction: Test if a geometry is empty geometry
 
 Format: `ST_IsEmpty (A:geometry)`
 
-
-
 SQL example:
 
 ```SQL
@@ -1124,8 +1054,6 @@ Introduction: RETURN true if LINESTRING is ST_IsClosed and ST_IsSimple.
 
 Format: `ST_IsRing(geom: geometry)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_IsRing(ST_GeomFromText('LINESTRING(0 0, 0 1, 1 1, 1 0, 0 0)'))
@@ -1138,8 +1066,6 @@ Output: `true`
 Introduction: Test if geometry's only self-intersections are at boundary points.
 
 Format: `ST_IsSimple (A:geometry)`
-
-
 
 SQL example:
 
@@ -1228,8 +1154,6 @@ Introduction: Return the perimeter of A
 
 Format: ST_Length (A:geometry)
 
-
-
 SQL example:
 ```SQL
 SELECT ST_Length(polygondf.countyshape)
@@ -1244,8 +1168,6 @@ Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lat/lon== orde
 
 Format: `ST_LengthSpheroid (A:geometry)`
 
-
-
 SQL example:
 ```sql
 SELECT ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 0 90, 0 0))'))
@@ -1258,8 +1180,6 @@ Output: `20037508.342789244`
 Introduction: Creates a LineString from a MultiPoint geometry.
 
 Format: `ST_LineFromMultiPoint (A:geometry)`
-
-
 
 Example:
 
@@ -1284,8 +1204,6 @@ Result:
 Introduction: Returns a point interpolated along a line. First argument must be a LINESTRING. Second argument is a Double between 0 and 1 representing fraction of total linestring length the point has to be located.
 
 Format: `ST_LineInterpolatePoint (geom: geometry, fraction: Double)`
-
-
 
 SQL example:
 ```SQL
@@ -1327,8 +1245,6 @@ Introduction: Returns a LineString formed by sewing together the constituent lin
 
 Format: `ST_LineMerge (A:geometry)`
 
-
-
 ```SQL
 SELECT ST_LineMerge(geometry)
 FROM df
@@ -1339,8 +1255,6 @@ FROM df
 Introduction: Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length. Second and third arguments are Double values between 0 and 1. This only works with LINESTRINGs.
 
 Format: `ST_LineSubstring (geom: geometry, startfraction: Double, endfraction: Double)`
-
-
 
 SQL example:
 ```SQL
@@ -1396,8 +1310,6 @@ Introduction: Function to convert closed linestring to polygon including holes. 
 
 Format: `ST_MakePolygon(geom: geometry, holes: <geometry>)`
 
-
-
 Example:
 
 Query:
@@ -1431,8 +1343,6 @@ Format: `ST_MakeValid (A:geometry)`
 
 Format: `ST_MakeValid (A:geometry, keepCollapsed:Boolean)`
 
-
-
 SQL example:
 
 ```SQL
@@ -1462,8 +1372,6 @@ Introduction: Returns the smallest circle polygon that contains a geometry.
 
 Format: `ST_MinimumBoundingCircle(geom: geometry, [Optional] quadrantSegments:int)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_MinimumBoundingCircle(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
@@ -1474,7 +1382,6 @@ SELECT ST_MinimumBoundingCircle(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))')
 Introduction: Returns two columns containing the center point and radius of the smallest circle that contains a geometry.
 
 Format: `ST_MinimumBoundingRadius(geom: geometry)`
-
 
 SQL example:
 ```SQL
@@ -1489,8 +1396,6 @@ ST_Multi is basically an alias for ST_Collect with one geometry.
 Format
 
 `ST_Multi(geom: geometry)`
-
-
 
 Example:
 
@@ -1509,13 +1414,12 @@ Result:
 |MULTIPOINT (1 1)                                               |
 +---------------------------------------------------------------+
 ```
+
 ## ST_NDims
 
 Introduction: Returns the coordinate dimension of the geometry.
 
 Format: `ST_NDims(geom: geometry)`
-
-
 
 SQL example with z co-rodinate:
 
@@ -1541,8 +1445,6 @@ Format
 
 `ST_Normalize(geom: geometry)`
 
-
-
 Example:
 
 ```SQL
@@ -1562,8 +1464,6 @@ Result:
 ## ST_NPoints
 
 Introduction: Return points of the geometry
-
-
 
 Format: `ST_NPoints (A:geometry)`
 
@@ -1606,8 +1506,6 @@ Introduction: Returns the number of Geometries. If geometry is a GEOMETRYCOLLECT
 
 Format: `ST_NumGeometries (A:geometry)`
 
-
-
 ```SQL
 SELECT ST_NumGeometries(df.geometry)
 FROM df
@@ -1619,8 +1517,6 @@ Introduction: RETURNS number of interior rings of polygon geometries.
 
 Format: `ST_NumInteriorRings(geom: geometry)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_NumInteriorRings(ST_GeomFromText('POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))'))
@@ -1629,6 +1525,7 @@ SELECT ST_NumInteriorRings(ST_GeomFromText('POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), 
 Output: `1`
 
 ## ST_NumPoints
+
 Introduction: Returns number of points in a LineString
 
 Format: `ST_NumPoints(geom: geometry)`
@@ -1661,8 +1558,6 @@ Introduction: Return the Nth point in a single linestring or circular linestring
 
 Format: `ST_PointN(geom: geometry, n: integer)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_PointN(ST_GeomFromText('LINESTRING(0 0, 1 2, 2 4, 3 6)'), 2) AS geom
@@ -1683,8 +1578,6 @@ Result:
 Introduction: Returns a POINT guaranteed to lie on the surface.
 
 Format: `ST_PointOnSurface(A:geometry)`
-
-
 
 Examples:
 
@@ -1757,8 +1650,6 @@ Format: `ST_RemovePoint(geom: geometry, position: integer)`
 
 Format: `ST_RemovePoint(geom: geometry)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_RemovePoint(ST_GeomFromText('LINESTRING(0 0, 1 1, 1 0)'), 1)
@@ -1771,8 +1662,6 @@ Output: `LINESTRING(0 0, 1 0)`
 Introduction: Return the geometry with vertex order reversed
 
 Format: `ST_Reverse (A:geometry)`
-
-
 
 Example:
 
@@ -1800,8 +1689,6 @@ the cells will be smaller, the coverage will be more accurate, but the result si
 
 Format: `ST_S2CellIDs(geom: geometry, level: Int)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_S2CellIDs(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'), 6)
@@ -1821,8 +1708,6 @@ Output:
 Introduction: Replace Nth point of linestring with given point. Index is 0-based. Negative index are counted backwards, e.g., -1 is last point.
 
 Format: `ST_SetPoint (linestring: geometry, index: integer, point: geometry)`
-
-
 
 Example:
 
@@ -1846,8 +1731,6 @@ Introduction: Sets the spatial reference system identifier (SRID) of the geometr
 
 Format: `ST_SetSRID (A:geometry, srid: Integer)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_SetSRID(polygondf.countyshape, 3021)
@@ -1858,8 +1741,6 @@ FROM polygondf
 
 Introduction: Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
 and with the components having the same topological relationship.
-
-
 
 Format: `ST_SimplifyPreserveTopology (A:geometry, distanceTolerance: Double)`
 
@@ -1895,8 +1776,6 @@ Introduction: Return the spatial reference system identifier (SRID) of the geome
 
 Format: `ST_SRID (A:geometry)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_SRID(polygondf.countyshape)
@@ -1908,8 +1787,6 @@ FROM polygondf
 Introduction: Returns first point of given linestring.
 
 Format: `ST_StartPoint(geom: geometry)`
-
-
 
 SQL example:
 ```SQL
@@ -1923,8 +1800,6 @@ Output: `POINT(100 150)`
 Introduction: Returns a multi-geometry divided based of given maximum number of vertices.
 
 Format: `ST_SubDivide(geom: geometry, maxVertices: int)`
-
-
 
 SQL example:
 ```SQL
@@ -1973,7 +1848,6 @@ Result:
 
 Introduction: Return the symmetrical difference between geometry A and B (return parts of geometries which are in either of the sets, but not in their intersection)
 
-
 Format: `ST_SymDifference (A:geometry, B:geometry)`
 
 Example:
@@ -2003,8 +1877,6 @@ For SourceCRS and TargetCRS, WKT format is also available.
 
 Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] DisableError)`
 
-
-
 SQL example (simple):
 ```SQL
 SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857')
@@ -2020,8 +1892,8 @@ FROM polygondf
 !!!note
 	The detailed EPSG information can be searched on [EPSG.io](https://epsg.io/).
 
-
 ## ST_Translate
+
 Introduction: Returns the input geometry with its X, Y and Z coordinates (if present in the geometry) translated by deltaX, deltaY and deltaZ (if specified)
 
 If the geometry is 2D, and a deltaZ parameter is specified, no change is done to the Z coordinate of the geometry and the resultant geometry is also 2D.
@@ -2045,10 +1917,7 @@ Output: `POINT(2, 5, 2)`
 
 Introduction: Return the union of geometry A and B
 
-
 Format: `ST_Union (A:geometry, B:geometry)`
-
-
 
 Example:
 
@@ -2092,8 +1961,6 @@ Introduction: Returns X Coordinate of given Point null otherwise.
 
 Format: `ST_X(pointA: Point)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_X(ST_POINT(0.0 25.0))
@@ -2106,8 +1973,6 @@ Output: `0.0`
 Introduction: Returns the maximum X coordinate of a geometry
 
 Format: `ST_XMax (A:geometry)`
-
-
 
 Example:
 
@@ -2126,8 +1991,6 @@ Introduction: Returns the minimum X coordinate of a geometry
 
 Format: `ST_XMin (A:geometry)`
 
-
-
 Example:
 
 ```SQL
@@ -2145,8 +2008,6 @@ Introduction: Returns Y Coordinate of given Point, null otherwise.
 
 Format: `ST_Y(pointA: Point)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_Y(ST_POINT(0.0 25.0))
@@ -2159,8 +2020,6 @@ Output: `25.0`
 Introduction: Return the minimum Y coordinate of A
 
 Format: `ST_YMax (A:geometry)`
-
-
 
 SQL example:
 ```SQL
@@ -2175,8 +2034,6 @@ Introduction: Return the minimum Y coordinate of A
 
 Format: `ST_Y_Min (A:geometry)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_YMin(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
@@ -2189,8 +2046,6 @@ Output : 0
 Introduction: Returns Z Coordinate of given Point, null otherwise.
 
 Format: `ST_Z(pointA: Point)`
-
-
 
 SQL example:
 ```SQL
@@ -2205,8 +2060,6 @@ Introduction: Returns Z maxima of the given geometry or null if there is no Z co
 
 Format: `ST_ZMax(geom: geometry)`
 
-
-
 SQL example:
 ```SQL
 SELECT ST_ZMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
@@ -2219,8 +2072,6 @@ Output: `1.0`
 Introduction: Returns Z minima of the given geometry or null if there is no Z coordinate.
 
 Format: `ST_ZMin(geom: geometry)`
-
-
 
 SQL example:
 ```SQL

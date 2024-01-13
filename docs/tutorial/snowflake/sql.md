@@ -383,6 +383,7 @@ SELECT ST_AREA(to_geometry(SEDONA.ST_GeomFromText('POLYGON((0 0, 0 1, 1 1, 1 0, 
 ```
 
 #### Pros:
+
 Sedona geometry constructors are more powerful than Snowflake native functions. It has the following advantages:
 
 * Sedona offers more constructors especially for 3D (XYZ) geometries, but Snowflake native functions don't.
@@ -404,7 +405,6 @@ As you can see, you can use Sedona functions and Snowflake native functions toge
 #### Pros:
 
 * You don't need to convert the geometry type, which is more convenient.
-
 
 Note that: Snowflake natively serializes Geometry type data to GeoJSON String and sends to UDF as input. GeoJSON spec does not include SRID. So the SRID information will be lost if you mix-match Snowflake functions and Sedona functions directly without using `WKB`.
 

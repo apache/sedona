@@ -22,7 +22,6 @@ In this case, we will create a stage named `ApacheSedona` in the `public` schema
 
 ![Create Stage](../../../../image/snowflake/snowflake-1.png)
 
-
 After creating the stage, you should be able to see the stage in the database.
 
 ![Stage Details](../../../../image/snowflake/snowflake-2.png)
