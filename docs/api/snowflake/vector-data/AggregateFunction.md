@@ -1,3 +1,6 @@
+!!!note
+    Please always keep the schema name `SEDONA` (e.g., `SEDONA.ST_GeomFromWKT`) when you use Sedona functions to avoid conflicting with Snowflake's built-in functions.
+
 ## ST_Envelope_Aggr
 
 Introduction: Return the entire envelope boundary of all geometries in A

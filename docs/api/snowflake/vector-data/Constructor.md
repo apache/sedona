@@ -1,3 +1,6 @@
+!!!note
+    Please always keep the schema name `SEDONA` (e.g., `SEDONA.ST_GeomFromWKT`) when you use Sedona functions to avoid conflicting with Snowflake's built-in functions.
+
 ## ST_GeomFromGeoHash
 
 Introduction: Create Geometry from geohash string and optional precision

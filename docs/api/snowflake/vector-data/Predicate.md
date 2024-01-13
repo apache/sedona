@@ -1,3 +1,6 @@
+!!!note
+    Please always keep the schema name `SEDONA` (e.g., `SEDONA.ST_GeomFromWKT`) when you use Sedona functions to avoid conflicting with Snowflake's built-in functions.
+
 ## ST_Contains
 
 Introduction: Return true if A fully contains B
@@ -38,6 +41,24 @@ SQL example:
 SELECT *
 FROM geom
 WHERE ST_Disjoinnt(geom.geom_a, geom.geom_b)
+```
+
+## ST_DWithin
+
+Introduction: Returns true if 'leftGeometry' and 'rightGeometry' are within a specified 'distance'. This function essentially checks if the shortest distance between the envelope of the two geometries is <= the provided distance.
+
+Format: `ST_DWithin (leftGeometry: Geometry, rightGeometry: Geometry, distance: Double)`
+
+SQL Example:
+
+```sql
+SELECT ST_DWithin(ST_GeomFromWKT('POINT (0 0)'), ST_GeomFromWKT('POINT (1 0)'), 2.5)
+```
+
+Output:
+
+```
+true
 ```
 
 ## ST_Equals

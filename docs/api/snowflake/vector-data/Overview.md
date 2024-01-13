@@ -1,5 +1,7 @@
-SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows.
+!!!note
+    Please always keep the schema name `SEDONA` (e.g., `SEDONA.ST_GeomFromWKT`) when you use Sedona functions to avoid conflicting with Snowflake's built-in functions.
 
+SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows.
 
 * Constructor: Construct a Geometry given an input string or coordinates
   * Example: ST_GeomFromWKT (string). Create a Geometry from a WKT String.
