@@ -338,7 +338,7 @@ SELECT id, geom, ST_Buffer(geom, METER_DISTANCE/111000.0) as buffered_geom, name
 FROM lefts
 ```
 
-## Functions that are only availble in Sedona
+## Functions that are only available in Sedona
 
 Sedona implements over 200 geospatial vector and raster functions, which are much more than what Snowflake native functions offer. For example:
 

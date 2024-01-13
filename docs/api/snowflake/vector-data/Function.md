@@ -1454,7 +1454,7 @@ Result:
     In Sedona up to and including version 1.2 the behaviour of ST_MakeValid was different.
     Be sure to check you code when upgrading.
     The previous implementation only worked for (multi)polygons and had a different interpretation of the second, boolean, argument.
-    It would also sometimes return multiple geometries for a single geomtry input.
+    It would also sometimes return multiple geometries for a single geometry input.
 
 ## ST_MinimumBoundingCircle
 
@@ -1525,7 +1525,7 @@ SELECT ST_NDims(ST_GeomFromEWKT('POINT(1 1 2)'))
 
 Output: `3`
 
-SQL example with x,y co-ordinate:
+SQL example with x,y coordinate:
 
 ```SQL
 SELECT ST_NDims(ST_GeomFromText('POINT(1 1)'))
