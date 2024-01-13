@@ -1,7 +1,7 @@
 After the installation done, you can start using Sedona functions. Please log in to Snowflake again using the user that has the privilege to access the database.
 
 !!!note
-	A good practice is to always keep at least the schema name "SEDONA" to avoid conflicting with Snowflake's built-in functions.
+	Please always keep the schema name `SEDONA` (e.g., `SEDONA.ST_GeomFromWKT`) when you use Sedona functions to avoid conflicting with Snowflake's built-in functions.
 
 ## Create a sample table
 
@@ -71,7 +71,7 @@ We use `lon/lat` order in the following functions:
 
 In Sedona `v1.5.0` and above, all functions will be fixed to lon/lat order.
 
-If your original data is in lon/lat order, you need to flip the coordinate using `ST_FlipCoordinates(geom: Geometry)` if you want to use those functions.
+If your original data is not in the order you want, you need to flip the coordinate using `ST_FlipCoordinates(geom: Geometry)`.
 
 The sample data used above is in lon/lat order, we can flip the coordinates as follows:
 
@@ -123,7 +123,7 @@ The second EPSG code EPSG:3857 in `ST_Transform` is the target CRS of the geomet
 This `ST_Transform` transform the CRS of these geometries from EPSG:4326 to EPSG:3857. The details CRS information can be found on [EPSG.io](https://epsg.io/).
 
 !!!note
-	This function follows lat/lon order. If your data is in lon/lat order, you can use `ST_FlipCoordinates` to swap X and Y.
+	This function follows lon/order in 1.5.0+ and lat/lon order in 1.4.1 and before. You can use `ST_FlipCoordinates` to swap X and Y.
 
 We can transform our sample data as follows
 
@@ -135,8 +135,8 @@ FROM city_tbl_geom
 The output will be like this:
 
 ```
-POINT (-13617713.308741156 6042216.250411431)  Seattle
-POINT (-13627732.06291255 4545577.120361927)  San Francisco
+POINT (6042216.250411431 -13617713.308741156)  Seattle
+POINT (4545577.120361927 -13627732.06291255)  San Francisco
 ```
 
 `ST_Transform` also supports the CRS string in OGC WKT format. For example, the following query generates the same output but with a OGC WKT CRS string.
@@ -198,9 +198,9 @@ LIMIT 5
 ## Range join query
 
 !!!warning
-	Sedona range join in Snowflake does not trigger Sedona's optimized spatial join algorithm while Sedona Spark does. It uses Snowflake's default Cartesian join which is very slow. Therefore, it is recommended to use Sedona's S2-based join or Snowflake's native ST functions to do range join, which will trigger Snowflake's `GeoJoin` algorithm.
+	Sedona range join in Snowflake does not trigger Sedona's optimized spatial join algorithm while Sedona Spark does. It uses Snowflake's default Cartesian join which is very slow. Therefore, it is recommended to use Sedona's S2-based join or Snowflake's native ST functions + native `Geography` type to do range join, which will trigger Snowflake's `GeoJoin` algorithm.
 
-Introduction: Find geometries from A and geometries from B such that each geometry pair satisfies a certain predicate. Most predicates supported by SedonaSQL can trigger a range join.
+Introduction: Find geometries from A and geometries from B such that each geometry pair satisfies a certain predicate.
 
 Example:
 
@@ -250,7 +250,7 @@ WHERE ST_FrechetDistance(pointDf.pointshape, polygonDf.polygonshape) < 2
 ```
 
 !!!warning
-	If you use planar euclidean distance functions like `ST_Distance`, `ST_HausdorffDistance` or `ST_FrechetDistance` as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of `distance` should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See [ST_Transform](Function.md#st_transform). If you don't want to transform your data, please consider using `ST_DistanceSpheroid` or `ST_DistanceSphere`.
+	If you use planar euclidean distance functions like `ST_Distance`, `ST_HausdorffDistance` or `ST_FrechetDistance` as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of `distance` should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See [ST_Transform](../../../api/snowflake/vector-data/Function#st_transform). If you don't want to transform your data, please consider using `ST_DistanceSpheroid` or `ST_DistanceSphere`.
 
 ```sql
 SELECT *
@@ -266,7 +266,7 @@ Please use the following steps:
 
 ### 1. Generate S2 ids for both tables
 
-Use [ST_S2CellIds](../Function/#st_s2cellids) to generate cell IDs. Each geometry may produce one or more IDs.
+Use [ST_S2CellIds](../../../api/snowflake/vector-data/Function/#st_s2cellids) to generate cell IDs. Each geometry may produce one or more IDs.
 
 ```sql
 SELECT * FROM lefts, TABLE(FLATTEN(ST_S2CellIDs(lefts.geom, 15))) s1
@@ -289,7 +289,7 @@ FROM lcs JOIN rcs ON lcs.cellId = rcs.cellId
 
 Due to the nature of S2 Cellid, the equi-join results might have a few false-positives depending on the S2 level you choose. A smaller level indicates bigger cells, less exploded rows, but more false positives.
 
-To ensure the correctness, you can use one of the [Spatial Predicates](../Predicate/) to filter out them. Use this query instead of the query in Step 2.
+To ensure the correctness, you can use one of the [Spatial Predicates](../../../api/snowflake/vector-data/Predicate/) to filter out them. Use this query instead of the query in Step 2.
 
 ```sql
 SELECT lcs.id as lcs_id, lcs.geom as lcs_geom, lcs.name as lcs_name, rcs.id as rcs_id, rcs.geom as rcs_geom, rcs.name as rcs_name
