@@ -11,6 +11,8 @@ nav:
         - Sedona with Apache Flink:
           - Modules: setup/flink/modules.md
           - Language wrappers: setup/flink/platform.md
+        - Sedona with Snowflake:
+          - Modules: setup/snowflake/modules.md
       - Maven Central coordinate: setup/maven-coordinates.md
       - Install with Apache Spark:
         - Install Sedona Scala/Java: setup/install-scala.md
@@ -24,6 +26,8 @@ nav:
         - Set up Spark cluster: setup/cluster.md
       - Install with Apache Flink:
         - Install Sedona Scala/Java: setup/flink/install-scala.md
+      - Install with Snowflake:
+        - Install Sedona SQL: setup/snowflake/install.md
       - Release notes: setup/release-notes.md
       - Compile the code: setup/compile.md
     - Download: download.md
@@ -45,6 +49,8 @@ nav:
           - Storing large raster geometries in Parquet files: tutorial/storing-blobs-in-parquet.md
       - Sedona with Apache Flink:
         - Spatial SQL app: tutorial/flink/sql.md
+      - Sedona with Snowflake:
+        - Spatial SQL app: tutorial/snowflake/sql.md
       - Examples:
           - Scala/Java: tutorial/demo.md
           - Python: tutorial/jupyter-notebook.md
@@ -84,6 +90,13 @@ nav:
           - Function: api/flink/Function.md
           - Aggregator: api/flink/Aggregator.md
           - Predicate: api/flink/Predicate.md
+      - Sedona with Snowflake:
+        - SQL:
+          - Overview: api/snowflake/vector-data/Overview.md
+          - Constructor: api/snowflake/vector-data/Constructor.md
+          - Function: api/snowflake/vector-data/Function.md
+          - Aggregate Function: api/snowflake/vector-data/AggregateFunction.md
+          - Predicate: api/snowflake/vector-data/Predicate.md
     - Community:
       - Community: community/contact.md
       - Contributor Guide:

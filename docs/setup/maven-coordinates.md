@@ -103,11 +103,27 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		</dependency>
 		```
 
+!!! abstract "Sedona with Snowflake"
+
+	=== "Snowflake 7.0+ (Year 2023 and later)"
+
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-snowflake</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
+
 ### netCDF-Java 5.4.2
 
-For Scala / Java API, it is required only if you want to read HDF/NetCDF files.
-
-HDF/NetCDF function is only supported in Spark RDD with Java/Scala API. The current function is deprecated and more mature support will be released soon.
+This is required only if you want to read HDF/NetCDF files using `RS_FromNetCDF`. Note that this JAR is not in Maven Central so you will need to add this repository to your pom.xml or build.sbt, or specify the URL in Spark Config `spark.jars.repositories` or spark-submit `--repositories` option.
 
 Under BSD 3-clause (compatible with Apache 2.0 license)
 
@@ -236,11 +252,11 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		</dependency>
 		```
 
+Sedona Snowflake does not have an unshaded version.
+
 ### netCDF-Java 5.4.2
 
-For Scala / Java API, it is required only if you want to read HDF/NetCDF files.
-
-HDF/NetCDF function is only supported in Spark RDD with Java/Scala API. The current function is deprecated and more mature support will be released soon.
+This is required only if you want to read HDF/NetCDF files using `RS_FromNetCDF`. Note that this JAR is not in Maven Central so you will need to add this repository to your pom.xml or build.sbt, or specify the URL in Spark Config `spark.jars.repositories` or spark-submit `--repositories` option.
 
 Under BSD 3-clause (compatible with Apache 2.0 license)
 
