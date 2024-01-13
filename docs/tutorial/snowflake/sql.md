@@ -384,7 +384,7 @@ SELECT ST_AREA(to_geometry(SEDONA.ST_GeomFromText('POLYGON((0 0, 0 1, 1 1, 1 0, 
 
 #### Pros:
 Sedona geometry constructors are more powerful than Snowflake native functions. It has the following advantages:
- 
+
 * Sedona offers more constructors especially for 3D (XYZ) geometries, but Snowflake native functions don't.
 * WKB serialization is more efficient. If you need to use multiple Sedona functions, it is more efficient to use this method, which might bring in 2X performance improvement.
 * SRID information of geometries is preserved. The method below will lose SRID information.

@@ -1642,7 +1642,7 @@ SQL Example:
 SELECT ST_NumPoints(ST_GeomFromWKT('MULTIPOINT ((0 0), (1 1), (0 1), (2 2))'))
 ```
 
-Output: 
+Output:
 
 ```
 IllegalArgumentException: Unsupported geometry type: MultiPoint, only LineString geometry is supported.

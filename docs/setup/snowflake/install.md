@@ -99,4 +99,3 @@ SRID=4326;POINT (1 2)
 The worksheet should look like this:
 
 ![Worksheet](../../../../image/snowflake/snowflake-8.png)
-
