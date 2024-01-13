@@ -3,6 +3,7 @@
 Download a Spark distribution from [Spark download page](http://spark.apache.org/downloads.html).
 
 ## Preliminary
+
 1. Set up password-less SSH on your cluster. Each master-worker pair should have bi-directional password-less SSH.
 2. Make sure you have installed JRE 1.8 or later.
 3. Add the list of your workers' IP address in ./conf/slaves
@@ -23,6 +24,7 @@ spark.driver.maxResultSize 5g
 For more details of Spark parameters, please visit [Spark Website](https://spark.apache.org/docs/latest/configuration.html).
 
 ## Start your cluster
+
 Go the root folder of the uncompressed Apache Spark folder. Start your spark cluster via a terminal
 
 ```

@@ -17,11 +17,13 @@
 * [Join the community](#join-the-community)
 
 ## What is Apache Sedona?
+
 Apache Sedona™ is a spatial computing engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as Apache Spark and Apache Flink. Sedona developers can express their spatial data processing tasks in Spatial SQL, Spatial Python or Spatial R. Internally, Sedona provides spatial data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
 
 <img alt="Sedona Ecosystem" src="docs/image/sedona-ecosystem.png" width="800" class="center">
 
 ### Features
+
 Some of the key features of Apache Sedona include:
 
 * Support for a wide range of geospatial data formats, including GeoJSON, WKT, and ESRI Shapefile.
@@ -53,6 +55,7 @@ Apache Sedona is a widely used framework for working with spatial data, and it h
 This example loads NYC taxi trip records and taxi zone information stored as .CSV files on AWS S3 into Sedona spatial dataframes. It then performs spatial SQL query on the taxi trip datasets to filter out all records except those within the Manhattan area of New York. The example also shows a spatial join operation that matches taxi trip records to zones based on whether the taxi trip lies within the geographical extents of the zone. Finally, the last code snippet integrates the output of Sedona with GeoPandas and plots the spatial distribution of both datasets.
 
 #### Load NYC taxi trips and taxi zones data from CSV Files Stored on AWS S3
+
 ```python
 taxidf = sedona.read.format('csv').option("header","true").option("delimiter", ",").load("s3a://your-directory/data/nyc-taxi-data.csv")
 taxidf = taxidf.selectExpr('ST_Point(CAST(Start_Lon AS Decimal(24,20)), CAST(Start_Lat AS Decimal(24,20))) AS pickup', 'Trip_Pickup_DateTime', 'Payment_Type', 'Fare_Amt')
@@ -69,6 +72,7 @@ taxidf_mhtn = taxidf.where('ST_Contains(ST_PolygonFromEnvelope(-74.01,40.73,-73.
 ```
 
 #### Spatial Join between Taxi Dataframe and Zone Dataframe to Find taxis in each zone
+
 ```python
 taxiVsZone = sedona.sql('SELECT zone, zipcode, pickup, Fare_Amt FROM zoneDf, taxiDf WHERE ST_Contains(zone, pickup)')
 ```
@@ -88,6 +92,7 @@ zone.set_ylim(40.65, 40.9)
 
 taxi = taxiGpd.plot(ax=zone, alpha=0.01, color='red', zorder=3)
 ```
+
 ## Docker image
 
 We provide a Docker image for Apache Sedona with Python JupyterLab and a single-node cluster. The images are available on [DockerHub](https://hub.docker.com/r/apache/sedona)

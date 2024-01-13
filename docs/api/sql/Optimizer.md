@@ -7,6 +7,7 @@ Sedona Spatial operators fully supports Apache SparkSQL query optimizer. It has 
 	Sedona join performance is heavily affected by the number of partitions. If the join performance is not ideal, please increase the number of partitions by doing `df.repartition(XXX)` right after you create the original DataFrame.
 
 ## Range join
+
 Introduction: Find geometries from A and geometries from B such that each geometry pair satisfies a certain predicate. Most predicates supported by SedonaSQL can trigger a range join.
 
 Spark SQL Example:
@@ -280,6 +281,7 @@ FROM lefts
 ```
 
 ## Regular spatial predicate pushdown
+
 Introduction: Given a join query and a predicate in the same WHERE clause, first executes the Predicate as a filter, then executes the join query.
 
 Spark SQL Example:

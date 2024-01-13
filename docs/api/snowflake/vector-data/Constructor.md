@@ -1,58 +1,13 @@
-## Read ESRI Shapefile
-
-Introduction: Construct a DataFrame from a Shapefile
-
-Since: `v1.0.0`
-
-SparkSQL example:
-
-```scala
-var spatialRDD = new SpatialRDD[Geometry]
-spatialRDD.rawSpatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
-var rawSpatialDf = Adapter.toDf(spatialRDD,sparkSession)
-rawSpatialDf.createOrReplaceTempView("rawSpatialDf")
-var spatialDf = sparkSession.sql("""
-          | ST_GeomFromWKT(rddshape), _c1, _c2
-          | FROM rawSpatialDf
-        """.stripMargin)
-spatialDf.show()
-spatialDf.printSchema()
-```
-
 !!!note
-	The path to the shapefile is the path to the folder that contains the .shp file, not the path to the .shp file itself. The file extensions of .shp, .shx, .dbf must be in lowercase. Assume you have a shape file called ==myShapefile==, the path should be `XXX/myShapefile`. The file structure should be like this:
-	```
-	- shapefile1
-	- shapefile2
-	- myshapefile
-		- myshapefile.shp
-		- myshapefile.shx
-		- myshapefile.dbf
-		- myshapefile...
-	- ...
-	```
-
-!!!warning
-	Please make sure you use ==ST_GeomFromWKT== to create Geometry type column otherwise that column cannot be used in SedonaSQL.
-
-If the file you are reading contains non-ASCII characters you'll need to explicitly set the encoding
-via `sedona.global.charset` system property before the call to `ShapefileReader.readToGeometryRDD`.
-
-Example:
-
-```scala
-System.setProperty("sedona.global.charset", "utf8")
-```
+    Please always keep the schema name `SEDONA` (e.g., `SEDONA.ST_GeomFromWKT`) when you use Sedona functions to avoid conflicting with Snowflake's built-in functions.
 
 ## ST_GeomFromGeoHash
 
 Introduction: Create Geometry from geohash string and optional precision
 
-Format: `ST_GeomFromGeoHash(geohash: String, precision: Integer)`
+Format: `ST_GeomFromGeoHash(geohash: string, precision: int)`
 
-Since: `v1.1.1`
-
-Spark SQL example:
+SQL example:
 
 ```sql
 SELECT ST_GeomFromGeoHash('s00twy01mt', 4)
@@ -68,11 +23,9 @@ POLYGON ((0.703125 0.87890625, 0.703125 1.0546875, 1.0546875 1.0546875, 1.054687
 
 Introduction: Construct a Geometry from GeoJson
 
-Format: `ST_GeomFromGeoJSON (GeoJson: String)`
+Format: `ST_GeomFromGeoJSON (GeoJson:string)`
 
-Since: `v1.0.0`
-
-Spark SQL example:
+SQL example:
 
 ```sql
 SELECT ST_GeomFromGeoJSON('{
@@ -110,7 +63,7 @@ Output:
 POLYGON ((-87.621765 34.873444, -87.617535 34.873369, -87.62119 34.85053, -87.62144 34.865379, -87.621765 34.873444))
 ```
 
-Spark SQL example:
+SQL example:
 
 ```sql
 SELECT ST_GeomFromGeoJSON('{
@@ -133,17 +86,12 @@ Output:
 POLYGON ((-87.621765 34.873444, -87.617535 34.873369, -87.62119 34.85053, -87.62144 34.865379, -87.621765 34.873444))
 ```
 
-!!!warning
-	The way that SedonaSQL reads GeoJSON is different from that in SparkSQL
-
 ## ST_GeomFromGML
 
 Introduction: Construct a Geometry from GML.
 
 Format:
-`ST_GeomFromGML (gml: String)`
-
-Since: `v1.3.0`
+`ST_GeomFromGML (gml:string)`
 
 SQL example:
 
@@ -170,9 +118,7 @@ LINESTRING (-71.16028 42.258729, -71.160837 42.259112, -71.161143 42.25932)
 Introduction: Construct a Geometry from KML.
 
 Format:
-`ST_GeomFromKML (kml: String)`
-
-Since: `v1.3.0`
+`ST_GeomFromKML (kml:string)`
 
 SQL example:
 
@@ -195,19 +141,13 @@ LINESTRING (-71.1663 42.2614, -71.1667 42.2616)
 
 ## ST_GeomFromText
 
-Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown). Alias of [ST_GeomFromWKT](#ST_GeomFromWKT)
+Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown). Alias of [ST_GeomFromWKT](#st_geomfromwkt)
 
 Format:
+`ST_GeomFromText (Wkt:string)`
+`ST_GeomFromText (Wkt:string, srid:integer)`
 
-`ST_GeomFromText (Wkt: String)`
-
-`ST_GeomFromText (Wkt: String, srid: Integer)`
-
-Since: `v1.0.0`
-
-The optional srid parameter was added in `v1.3.1`
-
-Spark SQL example:
+SQL example:
 
 ```sql
 SELECT ST_GeomFromText('POINT(40.7128 -74.0060)')
@@ -224,14 +164,10 @@ POINT(40.7128 -74.006)
 Introduction: Construct a Geometry from WKB string or Binary. This function also supports EWKB format.
 
 Format:
+`ST_GeomFromWKB (Wkb:string)`
+`ST_GeomFromWKB (Wkb:binary)`
 
-`ST_GeomFromWKB (Wkb: String)`
-
-`ST_GeomFromWKB (Wkb: Binary)`
-
-Since: `v1.0.0`
-
-Spark SQL example:
+SQL example:
 
 ```sql
 SELECT ST_GeomFromWKB([01 02 00 00 00 02 00 00 00 00 00 00 00 84 D6 00 C0 00 00 00 00 80 B5 D6 BF 00 00 00 60 E1 EF F7 BF 00 00 00 80 07 5D E5 BF])
@@ -243,7 +179,7 @@ Output:
 LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)
 ```
 
-Spark SQL example:
+SQL example:
 
 ```sql
 SELECT ST_asEWKT(ST_GeomFromWKB('01010000a0e6100000000000000000f03f000000000000f03f000000000000f03f'))
@@ -260,16 +196,12 @@ SRID=4326;POINT Z(1 1 1)
 Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown).
 
 Format:
-
-`ST_GeomFromWKT (Wkt: String)`
-
-`ST_GeomFromWKT (Wkt: String, srid: Integer)`
-
-Since: `v1.0.0`
+`ST_GeomFromWKT (Wkt:string)`
+`ST_GeomFromWKT (Wkt:string, srid:integer)`
 
 The optional srid parameter was added in `v1.3.1`
 
-Spark SQL example:
+SQL example:
 
 ```sql
 SELECT ST_GeomFromWKT('POINT(40.7128 -74.0060)')
@@ -286,9 +218,7 @@ POINT(40.7128 -74.006)
 Introduction: Construct a Geometry from OGC Extended WKT
 
 Format:
-`ST_GeomFromEWKT (EWkt: String)`
-
-Since: `v1.5.0`
+`ST_GeomFromEWKT (EWkt:string)`
 
 SQL example:
 ```sql
@@ -306,11 +236,9 @@ POINT(40.7128 -74.006)
 Introduction: Construct a Line from Wkt text
 
 Format:
-`ST_LineFromText (Wkt: String)`
+`ST_LineFromText (Wkt:string)`
 
-Since: `v1.2.1`
-
-Spark SQL example:
+SQL example:
 
 ```sql
 SELECT ST_LineFromText('LINESTRING(1 2,3 4)')
@@ -326,11 +254,9 @@ LINESTRING (1 2, 3 4)
 
 Introduction: Construct a LineString from Text, delimited by Delimiter
 
-Format: `ST_LineStringFromText (Text: String, Delimiter: Char)`
+Format: `ST_LineStringFromText (Text:string, Delimiter:char)`
 
-Since: `v1.0.0`
-
-Spark SQL example:
+SQL example:
 
 ```sql
 SELECT ST_LineStringFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794', ',')
@@ -346,9 +272,7 @@ LINESTRING (-74.0428197 40.6867969, -74.0421975 40.6921336, -74.050802 40.691279
 
 Introduction: Creates a 2D, 3D Z or 4D ZM Point geometry. Use ST_MakePointM to make points with XYM coordinates. Z and M values are optional.
 
-Format: `ST_MakePoint (X: Double, Y: Double, Z: Double, M: Double)`
-
-Since: `v1.5.0`
+Format: `ST_MakePoint (X:decimal, Y:decimal, Z:decimal, M:decimal)`
 
 Example:
 
@@ -391,14 +315,10 @@ POINT ZM (1.2345 2.3456 3.4567 4)
 Introduction: Construct a MultiLineString from Wkt. If srid is not set, it defaults to 0 (unknown).
 
 Format:
+`ST_MLineFromText (Wkt:string)`
+`ST_MLineFromText (Wkt:string, srid:integer)`
 
-`ST_MLineFromText (Wkt: String)`
-
-`ST_MLineFromText (Wkt: String, srid: Integer)`
-
-Since: `v1.3.1`
-
-Spark SQL example:
+SQL example:
 
 ```sql
 SELECT ST_MLineFromText('MULTILINESTRING((1 2, 3 4), (4 5, 6 7))')
@@ -415,14 +335,10 @@ MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))
 Introduction: Construct a MultiPolygon from Wkt. If srid is not set, it defaults to 0 (unknown).
 
 Format:
+`ST_MPolyFromText (Wkt:string)`
+`ST_MPolyFromText (Wkt:string, srid:integer)`
 
-`ST_MPolyFromText (Wkt: String)`
-
-`ST_MPolyFromText (Wkt: String, srid: Integer)`
-
-Since: `v1.3.1`
-
-Spark SQL example:
+SQL example:
 
 ```sql
 SELECT ST_MPolyFromText('MULTIPOLYGON(((0 0 1,20 0 1,20 20 1,0 20 1,0 0 1),(5 5 3,5 7 3,7 7 3,7 5 3,5 5 3)))')
@@ -438,14 +354,12 @@ MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))
 
 Introduction: Construct a Point from X and Y
 
-Format: `ST_Point (X: Double, Y: Double)`
-
-Since: `v1.0.0`
+Format: `ST_Point (X:decimal, Y:decimal)`
 
 In `v1.4.0` an optional Z parameter was removed to be more consistent with other spatial SQL implementations.
 If you are upgrading from an older version of Sedona - please use ST_PointZ to create 3D points.
 
-Spark SQL example:
+SQL example:
 
 ```sql
 SELECT ST_Point(double(1.2345), 2.3456)
@@ -462,15 +376,9 @@ POINT (1.2345 2.3456)
 Introduction: Construct a Point from X, Y and Z and an optional srid. If srid is not set, it defaults to 0 (unknown).
 Must use ST_AsEWKT function to print the Z coordinate.
 
-Format:
+Format: `ST_PointZ (X:decimal, Y:decimal, Z:decimal)`
 
-`ST_PointZ (X: Double, Y: Double, Z: Double)`
-
-`ST_PointZ (X: Double, Y: Double, Z: Double, srid: Integer)`
-
-Since: `v1.4.0`
-
-Spark SQL example:
+Format: `ST_PointZ (X:decimal, Y:decimal, Z:decimal, srid:integer)`
 
 ```sql
 SELECT ST_AsEWKT(ST_PointZ(1.2345, 2.3456, 3.4567))
@@ -486,11 +394,9 @@ POINT Z(1.2345 2.3456 3.4567)
 
 Introduction: Construct a Point from Text, delimited by Delimiter
 
-Format: `ST_PointFromText (Text: String, Delimiter: Char)`
+Format: `ST_PointFromText (Text:string, Delimiter:char)`
 
-Since: `v1.0.0`
-
-Spark SQL example:
+SQL example:
 
 ```sql
 SELECT ST_PointFromText('40.7128,-74.0060', ',')
@@ -506,13 +412,7 @@ POINT (40.7128 -74.006)
 
 Introduction: Construct a Polygon from MinX, MinY, MaxX, MaxY.
 
-Format:
-
-`ST_PolygonFromEnvelope (MinX: Double, MinY: Double, MaxX: Double, MaxY: Double)`
-
-Since: `v1.0.0`
-
-Spark SQL example:
+Format: `ST_PolygonFromEnvelope (MinX:decimal, MinY:decimal, MaxX:decimal, MaxY:decimal)`
 
 ```sql
 SELECT ST_PolygonFromEnvelope(double(1.234),double(2.234),double(3.345),double(3.345))
@@ -528,11 +428,9 @@ POLYGON ((1.234 2.234, 1.234 3.345, 3.345 3.345, 3.345 2.234, 1.234 2.234))
 
 Introduction: Construct a Polygon from Text, delimited by Delimiter. Path must be closed
 
-Format: `ST_PolygonFromText (Text: String, Delimiter: Char)`
+Format: `ST_PolygonFromText (Text:string, Delimiter:char)`
 
-Since: `v1.0.0`
-
-Spark SQL example:
+SQL example:
 
 ```sql
 SELECT ST_PolygonFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794,-74.0428197,40.6867969', ',')

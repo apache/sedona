@@ -3,6 +3,7 @@
 Apache Sedona was formerly called GeoSpark, initiated by Arizona State University [Data Systems Lab](https://www.datasyslab.net/).
 
 ## Key publications
+
 **"Spatial Data Management in Apache Spark: The
 GeoSpark Perspective and Beyond"** is the full research paper that talks about the entire GeoSpark ecosystem. Please cite this paper if your work mentions GeoSpark core system.
 
@@ -20,6 +21,7 @@ GeoSpark were evaluated by papers published on database top venues. It is worth 
 > GeoSpark comes close to a complete spatial analytics system. It also exhibits the best performance in most cases.
 
 ## Full publications
+
 ### GeoSpark Ecosystem
 
 ["Spatial Data Management in Apache Spark: The
