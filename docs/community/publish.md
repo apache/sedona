@@ -22,7 +22,7 @@ chmod 777 create-release.sh
 1. Run the following script:
 ```bash
 #!/bin/bash
-wget -q https://dlcdn.apache.org//creadur/apache-rat-0.15/apache-rat-0.15-bin.tar.gz
+wget -q https://archive.apache.org/dist/creadur/apache-rat-0.15/apache-rat-0.15-bin.tar.gz
 tar -xvf  apache-rat-0.15-bin.tar.gz
 git clone --shared --branch master https://github.com/apache/sedona.git sedona-src
 java -jar apache-rat-0.15/apache-rat-0.15.jar -d sedona-src > report.txt

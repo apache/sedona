@@ -9,13 +9,30 @@ You can participate in the community as follows:
 * Report bugs and submit patches.
 * Contribute code and documentation.
 
+## Community events
+
+Everyone is welcome to join our community events. We have a community office hour every 4 weeks.
+
+<iframe src="https://calendar.google.com/calendar/embed?src=c_ef7d54f5308a4b7f25ac33d0f7eeb54a3a7f115b689faf4d82425f3cb5ede935%40group.calendar.google.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+
 ## Twitter
 
 [Apache Sedona@Twitter](https://twitter.com/ApacheSedona)
 
 ## Discord Server
 
-[Join Apache Sedona community server](./discord-invite-form.html)!
+![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)
+
+Fill in the form below to join the Sedona Discord Server!
+
+<script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/embed/v2.js"></script>
+<script>
+  hbspt.forms.create({
+    region: "na1",
+    portalId: "44429642",
+    formId: "4af794ab-318a-4d3b-ae8b-50143dbbdca5"
+  });
+</script>
 
 ## Mailing list
 
