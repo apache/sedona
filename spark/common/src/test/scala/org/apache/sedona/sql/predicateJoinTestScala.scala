@@ -505,13 +505,13 @@ class predicateJoinTestScala extends TestBaseScala {
 
     it("Passed ST_DWithin in a spatial join") {
       val sampleCount = 200
-      val distanceCandidates = Seq(1, 2, 5, 10)
+      val distanceCandidates = Seq(1.0, 2.0, 5.0, 10.0)
       val inputPoint = buildPointDf.limit(sampleCount).repartition(5)
       val inputPolygon = buildPolygonDf.limit(sampleCount).repartition(3)
 
       distanceCandidates.foreach(distance => {
         val expected = bruteForceDWithin(sampleCount, distance)
-        val dWithinDf = inputPoint.alias("pointDf").join(inputPolygon.alias("polygonDf"), expr(s"ST_DWithin(pointDf.pointshape, polygonDf.polygonshape, cast($distance as double))"))
+        val dWithinDf = inputPoint.alias("pointDf").join(inputPolygon.alias("polygonDf"), expr(s"ST_DWithin(pointDf.pointshape, polygonDf.polygonshape, $distance)"))
 
         assert(dWithinDf.count() == expected)
         assert(dWithinDf.queryExecution.sparkPlan.collect { case p: RangeJoinExec => p }.size === 1)
