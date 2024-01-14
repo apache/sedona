@@ -16,6 +16,7 @@ Please refer to [Initiate SedonaContext](../sql/#initiate-sedonacontext) to init
 ## Create a SpatialRDD
 
 ### Create a typed SpatialRDD
+
 Sedona-core provides three special SpatialRDDs: PointRDD, PolygonRDD, and LineStringRDD.
 
 !!!warning
@@ -65,12 +66,11 @@ Use the following code to create a SpatialRDD
 	```python
 	from sedona.core.formatMapper import WktReader
 	from sedona.core.formatMapper import WkbReader
-	
+
 	WktReader.readToGeometryRDD(sc, wkt_geometries_location, 0, True, False)
-	
+
 	WkbReader.readToGeometryRDD(sc, wkb_geometries_location, 0, True, False)
 	```
-
 
 #### From GeoJSON
 
@@ -105,18 +105,18 @@ Use the following code to create a generic SpatialRDD:
 	boolean skipSyntaxInvalidGeometries = false // Optional
 	SpatialRDD spatialRDD = GeoJsonReader.readToGeometryRDD(sedona.sparkContext, inputLocation, allowTopologyInvalidGeometries, skipSyntaxInvalidGeometries)
 	```
-	
+
 === "Python"
 
 	```python
 	from sedona.core.formatMapper import GeoJsonReader
-	
+
 	GeoJsonReader.readToGeometryRDD(sc, geo_json_file_location)
 	```
 
 !!!warning
 	The way that Sedona reads JSON file is different from SparkSQL
-	
+
 #### From Shapefile
 
 === "Scala"
@@ -137,15 +137,13 @@ Use the following code to create a generic SpatialRDD:
 
 	```python
 	from sedona.core.formatMapper.shapefileParser import ShapefileReader
-	
+
 	ShapefileReader.readToGeometryRDD(sc, shape_file_location)
 	```
 
-
-
 !!!note
 	The path to the shapefile is the path to the folder that contains the .shp file, not the path to the .shp file itself. The file extensions of .shp, .shx, .dbf must be in lowercase. Assume you have a shape file called ==myShapefile==, the path should be `XXX/myShapefile`. The file structure should be like this:
-	
+
 	```
 	- shapefile1
 	- shapefile2
@@ -198,7 +196,7 @@ var spatialRDD = Adapter.toSpatialRdd(spatialDf, "checkin")
 "checkin" is the name of the geometry column
 
 For WKT/WKB/GeoJSON data, please use ==ST_GeomFromWKT / ST_GeomFromWKB / ST_GeomFromGeoJSON== instead.
-	
+
 ## Transform the Coordinate Reference System
 
 Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in an SpatialRDD. The unit of all related distances in Sedona is same as the unit of all geometries in an SpatialRDD.
@@ -235,7 +233,6 @@ To convert Coordinate Reference System of an SpatialRDD, use the following code:
 
 !!!warning
 	CRS transformation should be done right after creating each SpatialRDD, otherwise it will lead to wrong query results. For instance, use something like this:
-
 
 === "Scala"
 
@@ -336,7 +333,7 @@ Assume you now have an SpatialRDD (typed or generic). You can use the following 
 	```python
 	from sedona.core.geom.envelope import Envelope
 	from sedona.core.spatialOperator import RangeQuery
-	
+
 	range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
 	consider_boundary_intersection = False  ## Only return gemeotries fully covered by the window
 	using_index = False
@@ -345,20 +342,19 @@ Assume you now have an SpatialRDD (typed or generic). You can use the following 
 
 !!!note
     Sedona Python users: Please use RangeQueryRaw from the same module if you want to avoid jvm python serde while converting to Spatial DataFrame. It takes the same parameters as RangeQuery but returns reference to jvm rdd which can be converted to dataframe without python - jvm serde using Adapter.
-    
+
     Example:
     ```python
     from sedona.core.geom.envelope import Envelope
     from sedona.core.spatialOperator import RangeQueryRaw
     from sedona.utils.adapter import Adapter
-    
+
     range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
     consider_boundary_intersection = False  ## Only return gemeotries fully covered by the window
     using_index = False
     query_result = RangeQueryRaw.SpatialRangeQuery(spatial_rdd, range_query_window, consider_boundary_intersection, using_index)
     gdf = Adapter.toDf(query_result, spark, ["col1", ..., "coln"])
     ```
-
 
 ### Range query window
 
@@ -371,7 +367,7 @@ The code to create a point, linestring (4 vertices) and polygon (4 vertices) is 
 	```scala
 	val geometryFactory = new GeometryFactory()
 	val pointObject = geometryFactory.createPoint(new Coordinate(-84.01, 34.01))
-	
+
 	val geometryFactory = new GeometryFactory()
 	val coordinates = new Array[Coordinate](5)
 	coordinates(0) = new Coordinate(0,0)
@@ -380,7 +376,7 @@ The code to create a point, linestring (4 vertices) and polygon (4 vertices) is 
 	coordinates(3) = new Coordinate(4,0)
 	coordinates(4) = coordinates(0) // The last coordinate is the same as the first coordinate in order to compose a closed ring
 	val polygonObject = geometryFactory.createPolygon(coordinates)
-	
+
 	val geometryFactory = new GeometryFactory()
 	val coordinates = new Array[Coordinate](4)
 	coordinates(0) = new Coordinate(0,0)
@@ -395,7 +391,7 @@ The code to create a point, linestring (4 vertices) and polygon (4 vertices) is 
 	```java
 	GeometryFactory geometryFactory = new GeometryFactory()
 	Point pointObject = geometryFactory.createPoint(new Coordinate(-84.01, 34.01))
-	
+
 	GeometryFactory geometryFactory = new GeometryFactory()
 	Coordinate[] coordinates = new Array[Coordinate](5)
 	coordinates(0) = new Coordinate(0,0)
@@ -404,7 +400,7 @@ The code to create a point, linestring (4 vertices) and polygon (4 vertices) is 
 	coordinates(3) = new Coordinate(4,0)
 	coordinates(4) = coordinates(0) // The last coordinate is the same as the first coordinate in order to compose a closed ring
 	Polygon polygonObject = geometryFactory.createPolygon(coordinates)
-	
+
 	GeometryFactory geometryFactory = new GeometryFactory()
 	val coordinates = new Array[Coordinate](4)
 	coordinates(0) = new Coordinate(0,0)
@@ -429,10 +425,10 @@ To utilize a spatial index in a spatial range query, use the following code:
 	```scala
 	val rangeQueryWindow = new Envelope(-90.01, -80.01, 30.01, 40.01)
 	val spatialPredicate = SpatialPredicate.COVERED_BY // Only return gemeotries fully covered by the window
-	
+
 	val buildOnSpatialPartitionedRDD = false // Set to TRUE only if run join query
 	spatialRDD.buildIndex(IndexType.QUADTREE, buildOnSpatialPartitionedRDD)
-	
+
 	val usingIndex = true
 	var queryResult = RangeQuery.SpatialRangeQuery(spatialRDD, rangeQueryWindow, spatialPredicate, usingIndex)
 	```
@@ -442,10 +438,10 @@ To utilize a spatial index in a spatial range query, use the following code:
 	```java
 	Envelope rangeQueryWindow = new Envelope(-90.01, -80.01, 30.01, 40.01)
 	SpatialPredicate spatialPredicate = SpatialPredicate.COVERED_BY // Only return gemeotries fully covered by the window
-	
+
 	boolean buildOnSpatialPartitionedRDD = false // Set to TRUE only if run join query
 	spatialRDD.buildIndex(IndexType.QUADTREE, buildOnSpatialPartitionedRDD)
-	
+
 	boolean usingIndex = true
 	JavaRDD queryResult = RangeQuery.SpatialRangeQuery(spatialRDD, rangeQueryWindow, spatialPredicate, usingIndex)
 	```
@@ -456,15 +452,15 @@ To utilize a spatial index in a spatial range query, use the following code:
 	from sedona.core.geom.envelope import Envelope
 	from sedona.core.enums import IndexType
 	from sedona.core.spatialOperator import RangeQuery
-	
+
 	range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
 	consider_boundary_intersection = False ## Only return gemeotries fully covered by the window
-	
+
 	build_on_spatial_partitioned_rdd = False ## Set to TRUE only if run join query
 	spatial_rdd.buildIndex(IndexType.QUADTREE, build_on_spatial_partitioned_rdd)
-	
+
 	using_index = True
-	
+
 	query_result = RangeQuery.SpatialRangeQuery(
 	    spatial_rdd,
 	    range_query_window,
@@ -485,15 +481,15 @@ To utilize a spatial index in a spatial range query, use the following code:
 === "Python"
 
 	The output format of the spatial range query is another RDD which consists of GeoData objects.
-	
-	SpatialRangeQuery result can be used as RDD with map or other spark RDD functions. Also it can be used as 
+
+	SpatialRangeQuery result can be used as RDD with map or other spark RDD functions. Also it can be used as
 	Python objects when using collect method.
 	Example:
-	
+
 	```python
 	query_result.map(lambda x: x.geom.length).collect()
 	```
-	
+
 	```
 	[
 	 1.5900840000000045,
@@ -508,9 +504,9 @@ To utilize a spatial index in a spatial range query, use the following code:
 	 ...
 	]
 	```
-	
+
 	Or transformed to GeoPandas GeoDataFrame
-	
+
 	```python
 	import geopandas as gpd
 	gpd.GeoDataFrame(
@@ -551,7 +547,7 @@ Assume you now have an SpatialRDD (typed or generic). You can use the following 
 	```python
 	from sedona.core.spatialOperator import KNNQuery
 	from shapely.geometry import Point
-	
+
 	point = Point(-84.01, 34.01)
 	k = 1000 ## K Nearest Neighbors
 	using_index = False
@@ -579,9 +575,6 @@ Besides the Point type, Sedona KNN query center can be Polygon and LineString.
 
 	To create Polygon or Linestring object please follow [Shapely official docs](https://shapely.readthedocs.io/en/stable/manual.html)
 
-
-
-
 ### Use spatial indexes
 
 To utilize a spatial index in a spatial KNN query, use the following code:
@@ -592,11 +585,11 @@ To utilize a spatial index in a spatial KNN query, use the following code:
 	val geometryFactory = new GeometryFactory()
 	val pointObject = geometryFactory.createPoint(new Coordinate(-84.01, 34.01))
 	val K = 1000 // K Nearest Neighbors
-	
-	
+
+
 	val buildOnSpatialPartitionedRDD = false // Set to TRUE only if run join query
 	objectRDD.buildIndex(IndexType.RTREE, buildOnSpatialPartitionedRDD)
-	
+
 	val usingIndex = true
 	val result = KNNQuery.SpatialKnnQuery(objectRDD, pointObject, K, usingIndex)
 	```
@@ -607,11 +600,11 @@ To utilize a spatial index in a spatial KNN query, use the following code:
 	GeometryFactory geometryFactory = new GeometryFactory()
 	Point pointObject = geometryFactory.createPoint(new Coordinate(-84.01, 34.01))
 	val K = 1000 // K Nearest Neighbors
-	
-	
+
+
 	boolean buildOnSpatialPartitionedRDD = false // Set to TRUE only if run join query
 	objectRDD.buildIndex(IndexType.RTREE, buildOnSpatialPartitionedRDD)
-	
+
 	boolean usingIndex = true
 	JavaRDD result = KNNQuery.SpatialKnnQuery(objectRDD, pointObject, K, usingIndex)
 	```
@@ -622,17 +615,16 @@ To utilize a spatial index in a spatial KNN query, use the following code:
 	from sedona.core.spatialOperator import KNNQuery
 	from sedona.core.enums import IndexType
 	from shapely.geometry import Point
-	
+
 	point = Point(-84.01, 34.01)
 	k = 5 ## K Nearest Neighbors
-	
+
 	build_on_spatial_partitioned_rdd = False ## Set to TRUE only if run join query
 	spatial_rdd.buildIndex(IndexType.RTREE, build_on_spatial_partitioned_rdd)
-	
+
 	using_index = True
 	result = KNNQuery.SpatialKnnQuery(spatial_rdd, point, k, using_index)
 	```
-
 
 !!!warning
 	Only R-Tree index supports Spatial KNN query
@@ -645,18 +637,17 @@ To utilize a spatial index in a spatial KNN query, use the following code:
 
 === "Python"
 
-	The output format of the spatial KNN query is a list of GeoData objects. 
+	The output format of the spatial KNN query is a list of GeoData objects.
 	The list has K GeoData objects.
-	
+
 	Example:
 	```python
 	>> result
-	
+
 	[GeoData, GeoData, GeoData, GeoData, GeoData]
 	```
 
 ## Write a Spatial Join Query
-
 
 A spatial join query takes as input two Spatial RDD A and B. For each geometry in A, finds the geometries (from B) covered/intersected by it. A and B can be any geometry type and are not necessary to have the same geometry type.
 
@@ -667,12 +658,12 @@ Assume you now have two SpatialRDDs (typed or generic). You can use the followin
 	```scala
 	val spatialPredicate = SpatialPredicate.COVERED_BY // Only return gemeotries fully covered by each query window in queryWindowRDD
 	val usingIndex = false
-	
+
 	objectRDD.analyze()
-	
+
 	objectRDD.spatialPartitioning(GridType.KDBTREE)
 	queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
-	
+
 	val result = JoinQuery.SpatialJoinQuery(objectRDD, queryWindowRDD, usingIndex, spatialPredicate)
 	```
 
@@ -681,12 +672,12 @@ Assume you now have two SpatialRDDs (typed or generic). You can use the followin
 	```java
 	SpatialPredicate spatialPredicate = SpatialPredicate.COVERED_BY // Only return gemeotries fully covered by each query window in queryWindowRDD
 	val usingIndex = false
-	
+
 	objectRDD.analyze()
-	
+
 	objectRDD.spatialPartitioning(GridType.KDBTREE)
 	queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
-	
+
 	JavaPairRDD result = JoinQuery.SpatialJoinQuery(objectRDD, queryWindowRDD, usingIndex, spatialPredicate)
 	```
 
@@ -695,15 +686,15 @@ Assume you now have two SpatialRDDs (typed or generic). You can use the followin
 	```python
 	from sedona.core.enums import GridType
 	from sedona.core.spatialOperator import JoinQuery
-	
+
 	consider_boundary_intersection = False ## Only return geometries fully covered by each query window in queryWindowRDD
 	using_index = False
-	
+
 	object_rdd.analyze()
-	
+
 	object_rdd.spatialPartitioning(GridType.KDBTREE)
 	query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
-	
+
 	result = JoinQuery.SpatialJoinQuery(object_rdd, query_window_rdd, using_index, consider_boundary_intersection)
 	```
 
@@ -736,7 +727,7 @@ If you first partition SpatialRDD A, then you must use the partitioner of A to p
 	query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
 	```
 
-Or 
+Or
 
 === "Scala/Java"
 
@@ -752,7 +743,6 @@ Or
 	object_rdd.spatialPartitioning(query_window_rdd.getPartitioner())
 	```
 
-
 ### Use spatial indexes
 
 To utilize a spatial index in a spatial join query, use the following code:
@@ -762,11 +752,11 @@ To utilize a spatial index in a spatial join query, use the following code:
 	```scala
 	objectRDD.spatialPartitioning(joinQueryPartitioningType)
 	queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
-	
+
 	val buildOnSpatialPartitionedRDD = true // Set to TRUE only if run join query
 	val usingIndex = true
 	queryWindowRDD.buildIndex(IndexType.QUADTREE, buildOnSpatialPartitionedRDD)
-	
+
 	val result = JoinQuery.SpatialJoinQueryFlat(objectRDD, queryWindowRDD, usingIndex, spatialPredicate)
 	```
 
@@ -775,11 +765,11 @@ To utilize a spatial index in a spatial join query, use the following code:
 	```java
 	objectRDD.spatialPartitioning(joinQueryPartitioningType)
 	queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
-	
+
 	boolean buildOnSpatialPartitionedRDD = true // Set to TRUE only if run join query
 	boolean usingIndex = true
 	queryWindowRDD.buildIndex(IndexType.QUADTREE, buildOnSpatialPartitionedRDD)
-	
+
 	JavaPairRDD result = JoinQuery.SpatialJoinQueryFlat(objectRDD, queryWindowRDD, usingIndex, spatialPredicate)
 	```
 
@@ -789,14 +779,14 @@ To utilize a spatial index in a spatial join query, use the following code:
 	from sedona.core.enums import GridType
 	from sedona.core.enums import IndexType
 	from sedona.core.spatialOperator import JoinQuery
-	
+
 	object_rdd.spatialPartitioning(GridType.KDBTREE)
 	query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
-	
+
 	build_on_spatial_partitioned_rdd = True ## Set to TRUE only if run join query
 	using_index = True
 	query_window_rdd.buildIndex(IndexType.QUADTREE, build_on_spatial_partitioned_rdd)
-	
+
 	result = JoinQuery.SpatialJoinQueryFlat(object_rdd, query_window_rdd, using_index, True)
 	```
 
@@ -807,7 +797,7 @@ The index should be built on either one of two SpatialRDDs. In general, you shou
 === "Scala/Java"
 
 	The output format of the spatial join query is a PairRDD. In this PairRDD, each object is a pair of two geometries. The left one is the geometry from objectRDD and the right one is the geometry from the queryWindowRDD.
-	
+
 	```
 	Point,Polygon
 	Point,Polygon
@@ -817,7 +807,7 @@ The index should be built on either one of two SpatialRDDs. In general, you shou
 	Polygon,LineString
 	...
 	```
-	
+
 	Each object on the left is covered/intersected by the object on the right.
 
 === "Python"
@@ -827,51 +817,50 @@ The index should be built on either one of two SpatialRDDs. In general, you shou
 	```python
 	result.collect()
 	```
-	
+
 	```
 	[[GeoData, GeoData], [GeoData, GeoData] ...]
 	```
-	
+
 	It is possible to do some RDD operation on result data ex. Getting polygon centroid.
 	```python
 	result.map(lambda x: x[0].geom.centroid).collect()
 	```
 
 !!!note
-    Sedona Python users: Please use JoinQueryRaw from the same module for methods 
-    
+    Sedona Python users: Please use JoinQueryRaw from the same module for methods
+
     - spatialJoin
-    
+
     - DistanceJoinQueryFlat
 
     - SpatialJoinQueryFlat
 
-    For better performance while converting to dataframe with adapter. 
-    That approach allows to avoid costly serialization between Python 
+    For better performance while converting to dataframe with adapter.
+    That approach allows to avoid costly serialization between Python
     and jvm and in result operating on python object instead of native geometries.
-    
+
     Example:
     ```python
     from sedona.core.SpatialRDD import CircleRDD
     from sedona.core.enums import GridType
     from sedona.core.spatialOperator import JoinQueryRaw
-    
+
     object_rdd.analyze()
-    
+
     circle_rdd = CircleRDD(object_rdd, 0.1) ## Create a CircleRDD using the given distance
     circle_rdd.analyze()
-    
+
     circle_rdd.spatialPartitioning(GridType.KDBTREE)
     spatial_rdd.spatialPartitioning(circle_rdd.getPartitioner())
-    
+
     consider_boundary_intersection = False ## Only return gemeotries fully covered by each query window in queryWindowRDD
     using_index = False
-    
+
     result = JoinQueryRaw.DistanceJoinQueryFlat(spatial_rdd, circle_rdd, using_index, consider_boundary_intersection)
-    
+
     gdf = Adapter.toDf(result, ["left_col1", ..., "lefcoln"], ["rightcol1", ..., "rightcol2"], spark)
     ```
-
 
 ## Write a Distance Join Query
 
@@ -888,15 +877,15 @@ Assume you now have two SpatialRDDs (typed or generic). You can use the followin
 
 	```scala
 	objectRddA.analyze()
-	
+
 	val circleRDD = new CircleRDD(objectRddA, 0.1) // Create a CircleRDD using the given distance
-	
+
 	circleRDD.spatialPartitioning(GridType.KDBTREE)
 	objectRddB.spatialPartitioning(circleRDD.getPartitioner)
-	
+
 	val spatialPredicate = SpatialPredicate.COVERED_BY // Only return gemeotries fully covered by each query window in queryWindowRDD
 	val usingIndex = false
-	
+
 	val result = JoinQuery.DistanceJoinQueryFlat(objectRddB, circleRDD, usingIndex, spatialPredicate)
 	```
 
@@ -904,15 +893,15 @@ Assume you now have two SpatialRDDs (typed or generic). You can use the followin
 
 	```java
 	objectRddA.analyze()
-	
+
 	CircleRDD circleRDD = new CircleRDD(objectRddA, 0.1) // Create a CircleRDD using the given distance
-	
+
 	circleRDD.spatialPartitioning(GridType.KDBTREE)
 	objectRddB.spatialPartitioning(circleRDD.getPartitioner)
-	
+
 	SpatialPredicate spatialPredicate = SpatialPredicate.COVERED_BY // Only return gemeotries fully covered by each query window in queryWindowRDD
 	boolean usingIndex = false
-	
+
 	JavaPairRDD result = JoinQuery.DistanceJoinQueryFlat(objectRddB, circleRDD, usingIndex, spatialPredicate)
 	```
 
@@ -922,18 +911,18 @@ Assume you now have two SpatialRDDs (typed or generic). You can use the followin
 	from sedona.core.SpatialRDD import CircleRDD
 	from sedona.core.enums import GridType
 	from sedona.core.spatialOperator import JoinQuery
-	
+
 	object_rdd.analyze()
-	
+
 	circle_rdd = CircleRDD(object_rdd, 0.1) ## Create a CircleRDD using the given distance
 	circle_rdd.analyze()
-	
+
 	circle_rdd.spatialPartitioning(GridType.KDBTREE)
 	spatial_rdd.spatialPartitioning(circle_rdd.getPartitioner())
-	
+
 	consider_boundary_intersection = False ## Only return gemeotries fully covered by each query window in queryWindowRDD
 	using_index = False
-	
+
 	result = JoinQuery.DistanceJoinQueryFlat(spatial_rdd, circle_rdd, using_index, consider_boundary_intersection)
 	```
 
@@ -953,7 +942,7 @@ The output format of the distance join query is [here](#output-format_2).
 	WHERE ST_Distance(city.geom, superhero.geom) <= 10;
 	```
 	Find the superheroes within 10 miles of each city
-	
+
 ## Save to permanent storage
 
 You can always save an SpatialRDD back to some permanent storage such as HDFS and Amazon S3. You can save distributed SpatialRDD to WKT, GeoJSON and object files.
@@ -989,7 +978,6 @@ Use the following code to save an SpatialRDD as a distributed GeoJSON text file:
 ```scala
 objectRDD.saveAsGeoJSON("hdfs://PATH")
 ```
-
 
 #### Save to distributed object file
 

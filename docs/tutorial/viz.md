@@ -14,9 +14,11 @@ Data visualization allows users to summarize, analyze and reason about data. Gua
 SedonaViz encapsulates the main steps of map visualization process, e.g., pixelize, aggregate, and render, into a set of massively parallelized GeoViz operators and the user can assemble any customized styles.
 
 ## Visualize SpatialRDD
+
 This tutorial mainly focuses on explaining SQL/DataFrame API. SedonaViz RDD example can be found in Please see [Viz example project](https://github.com/apache/sedona/tree/master/examples/viz)
 
 ## Set up dependencies
+
 1. Read [Sedona Maven Central coordinates](../setup/maven-coordinates.md)
 2. Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql), Sedona-core, Sedona-SQL, Sedona-Viz
 
@@ -131,7 +133,7 @@ This will give you a 256*256 resolution image after you run ST_Render at the end
 
 !!!warning
 	We highly suggest that you should use ST_Transform to transform coordinates to a visualization-specific coordinate system such as epsg:3857. Otherwise you map may look distorted.
-	
+
 ### Aggregate pixels
 
 Many objects may be pixelized to the same pixel locations. You now need to aggregate them based on either their spatial aggregation or spatial observations such as temperature or humidity.
@@ -169,7 +171,6 @@ FROM pixelaggregates
 
 This DataFrame will contain a Image type column which has only one image.
 
-
 ### Store the image on disk
 
 Fetch the image from the previous DataFrame
@@ -189,10 +190,9 @@ imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir")+
 
 If you are a map professional, you may need to generate map tiles for different zoom levels and eventually create the map tile layer.
 
-
 ### Pixelization and pixel aggregation
 
-Please first do pixelization and pixel aggregation using the same commands in single image generation. In ST_Pixelize, you need specify a very high resolution, such as 1000*1000. Note that, each dimension should be divisible by 2^zoom-level 
+Please first do pixelization and pixel aggregation using the same commands in single image generation. In ST_Pixelize, you need specify a very high resolution, such as 1000*1000. Note that, each dimension should be divisible by 2^zoom-level
 
 ### Create tile name
 

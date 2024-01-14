@@ -15,7 +15,6 @@ You can load any type of raster data using the code below. Then use the RS const
 sedona.read.format("binaryFile").load("/some/path/*.asc")
 ```
 
-
 ### RS_FromArcInfoAsciiGrid
 
 Introduction: Returns a raster geometry from an Arc Info Ascii Grid file.
@@ -30,7 +29,6 @@ Spark SQL Example:
 var df = sedona.read.format("binaryFile").load("/some/path/*.asc")
 df = df.withColumn("raster", f.expr("RS_FromArcInfoAsciiGrid(content)"))
 ```
-
 
 ### RS_FromGeoTiff
 
@@ -53,7 +51,7 @@ Introduction: Returns an empty raster geometry. Every band in the raster is init
 
 Since: `v1.5.0`
 
-Format: 
+Format:
 
 ```
 RS_MakeEmptyRaster(numBands: Integer, bandDataType: String = 'D', width: Integer, height: Integer, upperleftX: Double, upperleftY: Double, cellSize: Double)
@@ -61,7 +59,7 @@ RS_MakeEmptyRaster(numBands: Integer, bandDataType: String = 'D', width: Integer
 
 * NumBands: The number of bands in the raster. If not specified, the raster will have a single band.
 * BandDataType: Optional parameter specifying the data types of all the bands in the created raster.
-Accepts one of: 
+Accepts one of:
     1. "D" - 64 bits Double
     2. "F" - 32 bits Float
     3. "I" - 32 bits signed Integer
@@ -76,7 +74,7 @@ Accepts one of:
 
 It uses the default Cartesian coordinate system.
 
-Format: 
+Format:
 
 ```
 RS_MakeEmptyRaster(numBands: Integer, bandDataType: String = 'D', width: Integer, height: Integer, upperleftX: Double, upperleftY: Double, scaleX: Double, scaleY: Double, skewX: Double, skewY: Double, srid: Integer)
@@ -100,7 +98,6 @@ Accepts one of:
 * SkewX: The skew of the raster on the X axis, in terms of the CRS units.
 * SkewY: The skew of the raster on the Y axis, in terms of the CRS units.
 * SRID: The SRID of the raster. Use 0 if you want to use the default Cartesian coordinate system. Use 4326 if you want to use WGS84.
-
 
 !!!Note
   If any other value than the accepted values for the bandDataType is provided, RS_MakeEmptyRaster defaults to double as the data type for the raster.
@@ -137,7 +134,6 @@ Output:
 +--------------------------------------------+
 ```
 
-
 Spark SQL example 3 (with 2 bands, scale, skew, and SRID):
 
 ```sql
@@ -153,7 +149,6 @@ Output:
 |                                              GridCoverage2D["g...|
 +------------------------------------------------------------------+
 ```
-
 
 Spark SQL example 4 (with 2 bands, scale, skew, and SRID):
 
@@ -172,8 +167,7 @@ Output:
 
 ### RS_FromNetCDF
 
-
-Introduction: Returns a raster geometry representing the given record variable short name from a NetCDF file. 
+Introduction: Returns a raster geometry representing the given record variable short name from a NetCDF file.
 This API reads the array data of the record variable *in memory* along with all its dimensions
 Since the netCDF format has many variants, the reader might not work for your test case, if that is so, please report this using the public forums.
 
@@ -181,7 +175,7 @@ This API has been tested for netCDF classic (NetCDF 1, 2, 5) and netCDF4/HDF5 fi
 
 This API requires the name of the record variable. It is assumed that a variable of the given name exists, and its last 2 dimensions are 'lat' and 'lon' dimensions *respectively*.
 
-If this assumption does not hold true for your case, you can choose to pass the lonDimensionName and latDimensionName explicitly. 
+If this assumption does not hold true for your case, you can choose to pass the lonDimensionName and latDimensionName explicitly.
 
 You can use [RS_NetCDFInfo](./#rs_netcdfinfo) to get the details of the passed netCDF file (variables and its dimensions).
 
@@ -189,7 +183,7 @@ Format 1: `RS_FromNetCDF(netCDF: ARRAY[Byte], recordVariableName: String)`
 
 Format 2: `RS_FromNetCDF(netCDF: ARRAY[Byte], recordVariableName: String, lonDimensionName: String, latDimensionName: String)`
 
-Since: `v1.5.1` 
+Since: `v1.5.1`
 
 Spark Example:
 
@@ -198,12 +192,10 @@ val df = sedona.read.format("binaryFile").load("/some/path/test.nc")
 df = df.withColumn("raster", f.expr("RS_FromNetCDF(content, 'O3')"))
 ```
 
-
 ```scala
 val df = sedona.read.format("binaryFile").load("/some/path/test.nc")
 df = df.withColumn("raster", f.expr("RS_FromNetCDF(content, 'O3', 'lon', 'lat')"))
 ```
-
 
 ### RS_NetCDFInfo
 
@@ -220,7 +212,6 @@ val df = sedona.read.format("binaryFile").load("/some/path/test.nc")
 recordInfo = df.selectExpr("RS_NetCDFInfo(content) as record_info").first().getString(0)
 print(recordInfo)
 ```
-
 
 Output:
 

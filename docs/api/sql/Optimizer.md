@@ -7,6 +7,7 @@ Sedona Spatial operators fully supports Apache SparkSQL query optimizer. It has 
 	Sedona join performance is heavily affected by the number of partitions. If the join performance is not ideal, please increase the number of partitions by doing `df.repartition(XXX)` right after you create the original DataFrame.
 
 ## Range join
+
 Introduction: Find geometries from A and geometries from B such that each geometry pair satisfies a certain predicate. Most predicates supported by SedonaSQL can trigger a range join.
 
 Spark SQL Example:
@@ -226,7 +227,6 @@ SELECT lcs.id as lcs_id, lcs.geom as lcs_geom, lcs.name as lcs_name, rcs.id as r
 FROM lcs JOIN rcs ON lcs.cellId = rcs.cellId
 ```
 
-
 ### 3. Optional: Refine the result
 
 Due to the nature of S2 Cellid, the equi-join results might have a few false-positives depending on the S2 level you choose. A smaller level indicates bigger cells, less exploded rows, but more false positives.
@@ -266,7 +266,7 @@ GROUP BY (lcs_geom, rcs_geom)
 
 !!!note
 	If you are doing point-in-polygon join, this is not a problem and you can safely discard this issue. This issue only happens when you do polygon-polygon, polygon-linestring, linestring-linestring join.
- 
+
 ### S2 for distance join
 
 This also works for distance join. You first need to use `ST_Buffer(geometry, distance)` to wrap one of your original geometry column. If your original geometry column contains points, this `ST_Buffer` will make them become circles with a radius of `distance`.
@@ -280,16 +280,15 @@ SELECT id, geom, ST_Buffer(geom, METER_DISTANCE/111000.0) as buffered_geom, name
 FROM lefts
 ```
 
-
-
 ## Regular spatial predicate pushdown
+
 Introduction: Given a join query and a predicate in the same WHERE clause, first executes the Predicate as a filter, then executes the join query.
 
 Spark SQL Example:
 
 ```sql
 SELECT *
-FROM polygondf, pointdf 
+FROM polygondf, pointdf
 WHERE ST_Contains(polygondf.polygonshape,pointdf.pointshape)
 AND ST_Contains(ST_PolygonFromEnvelope(1.0,101.0,501.0,601.0), polygondf.polygonshape)
 ```

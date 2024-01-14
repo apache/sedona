@@ -80,7 +80,7 @@ jobs:
     - uses: actions/setup-java@v1
       with:
         java-version: '8'
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python }}
     - name: Cache Maven packages

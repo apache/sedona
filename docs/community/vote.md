@@ -23,7 +23,6 @@ If you prefer to run the steps on your local machine, please read the steps belo
 
 You can skip this step if you installed these software before.
 
-
 ## Run the verify script
 
 Please replace SEDONA\_CURRENT\_RC and SEDONA\_CURRENT\_VERSION with the correct versions. Then paste the content in a script called `verify.sh` and re-direct the output to a file. To run a script, do the following:
@@ -106,5 +105,5 @@ d3bdfd4d870838ebe63f21cb93634d2421ec1ac1b8184636206a5dc0d89a78a88257798b1f17371a
 ## Check files manually
 
 1. Check if the downloaded files have the correct version.
- 
+
 2. In the unzipped source code folder, and check if DISCLAIMER and NOTICE files and included and up to date.

@@ -171,6 +171,15 @@ object st_functions extends DataFrameAPI {
   def ST_IsValid(geometry: Column): Column = wrapExpression[ST_IsValid](geometry)
   def ST_IsValid(geometry: String): Column = wrapExpression[ST_IsValid](geometry)
 
+  def ST_IsValid(geometry: Column, flag: Column): Column = wrapExpression[ST_IsValid](geometry, flag)
+  def ST_IsValid(geometry: String, flag: Integer): Column = wrapExpression[ST_IsValid](geometry, flag)
+
+  def ST_IsValidReason(geometry: Column): Column = wrapExpression[ST_IsValidReason](geometry)
+  def ST_IsValidReason(geometry: String): Column = wrapExpression[ST_IsValidReason](geometry)
+
+  def ST_IsValidReason(geometry: Column, flag: Column): Column = wrapExpression[ST_IsValidReason](geometry, flag)
+  def ST_IsValidReason(geometry: String, flag: Integer): Column = wrapExpression[ST_IsValidReason](geometry, flag)
+
   def ST_Length(geometry: Column): Column = wrapExpression[ST_Length](geometry)
   def ST_Length(geometry: String): Column = wrapExpression[ST_Length](geometry)
 
@@ -179,6 +188,9 @@ object st_functions extends DataFrameAPI {
 
   def ST_LineInterpolatePoint(geometry: Column, fraction: Column): Column = wrapExpression[ST_LineInterpolatePoint](geometry, fraction)
   def ST_LineInterpolatePoint(geometry: String, fraction: Double): Column = wrapExpression[ST_LineInterpolatePoint](geometry, fraction)
+
+  def ST_LineLocatePoint(linestring: Column, point: Column): Column = wrapExpression[ST_LineLocatePoint](linestring, point)
+  def ST_LineLocatePoint(linestring: String, point: String): Column = wrapExpression[ST_LineLocatePoint](linestring, point)
 
   def ST_LineMerge(multiLineString: Column): Column = wrapExpression[ST_LineMerge](multiLineString)
   def ST_LineMerge(multiLineString: String): Column = wrapExpression[ST_LineMerge](multiLineString)

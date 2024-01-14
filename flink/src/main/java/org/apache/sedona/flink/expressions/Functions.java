@@ -297,6 +297,15 @@ public class Functions {
         }
     }
 
+    public static class ST_LineLocatePoint extends ScalarFunction {
+        @DataTypeHint("Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object p){
+            Geometry geom = (Geometry) o;
+            Geometry point = (Geometry) p;
+            return org.apache.sedona.common.Functions.lineLocatePoint(geom, point);
+        }
+    }
+
     public static class ST_YMin extends ScalarFunction {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o){
@@ -599,6 +608,12 @@ public class Functions {
         public boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.isValid(geom);
+        }
+
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("Integer") Integer flag) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.isValid(geom, flag);
         }
     }
 
@@ -1075,6 +1090,20 @@ public class Functions {
         public Double eval(@DataTypeHint("Double") Double angleInRadian) {
             return org.apache.sedona.common.Functions.degrees(angleInRadian);
 
+        }
+    }
+
+    public static class ST_IsValidReason extends ScalarFunction {
+        @DataTypeHint("String")
+        public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.isValidReason(geom);
+        }
+
+        @DataTypeHint("String")
+        public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o, @DataTypeHint("Integer") Integer flag) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.isValidReason(geom, flag);
         }
     }
 }

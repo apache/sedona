@@ -111,11 +111,14 @@ test_configurations = [
     (stf.ST_IsEmpty, ("geom",), "empty_geom", "", True),
     (stf.ST_IsRing, ("line",), "linestring_geom", "", False),
     (stf.ST_IsSimple, ("geom",), "triangle_geom", "", True),
-    (stf.ST_IsValid, (lambda: f.col("geom"),), "triangle_geom", "", True),
+    (stf.ST_IsValid, ("geom",), "triangle_geom", "", True),
+    (stf.ST_IsValid, ("geom", 1), "triangle_geom", "", True),
+    (stf.ST_IsValid, ("geom", 0), "triangle_geom", "", True),
     (stf.ST_Length, ("line",), "linestring_geom", "", 5.0),
     (stf.ST_LengthSpheroid, ("point",), "point_geom", "", 0.0),
     (stf.ST_LineFromMultiPoint, ("multipoint",), "multipoint_geom", "", "LINESTRING (10 40, 40 30, 20 20, 30 10)"),
     (stf.ST_LineInterpolatePoint, ("line", 0.5), "linestring_geom", "", "POINT (2.5 0)"),
+    (stf.ST_LineLocatePoint, ("line", "point"), "line_and_point", "", 0.5),
     (stf.ST_LineMerge, ("geom",), "multiline_geom", "", "LINESTRING (0 0, 1 0, 1 1, 0 0)"),
     (stf.ST_LineSubstring, ("line", 0.5, 1.0), "linestring_geom", "", "LINESTRING (2.5 0, 3 0, 4 0, 5 0)"),
     (stf.ST_MakeValid, ("geom",), "invalid_geom", "", "MULTIPOLYGON (((1 5, 3 3, 1 1, 1 5)), ((5 3, 7 5, 7 1, 5 3)))"),
@@ -158,6 +161,8 @@ test_configurations = [
     (stf.ST_YMax, ("geom",), "triangle_geom", "", 1.0),
     (stf.ST_YMin, ("geom",), "triangle_geom", "", 0.0),
     (stf.ST_Z, ("b",), "two_points", "", 4.0),
+    (stf.ST_IsValidReason, ("geom",), "triangle_geom", "", "Valid Geometry"),
+    (stf.ST_IsValidReason, ("geom", 1), "triangle_geom", "", "Valid Geometry"),
 
     # predicates
     (stp.ST_Contains, ("geom", lambda: f.expr("ST_Point(0.5, 0.25)")), "triangle_geom", "", True),
@@ -257,10 +262,13 @@ wrong_type_configurations = [
     (stf.ST_IsRing, (None,)),
     (stf.ST_IsSimple, (None,)),
     (stf.ST_IsValid, (None,)),
+    (stf.ST_IsValidReason, (None,)),
     (stf.ST_Length, (None,)),
     (stf.ST_LineFromMultiPoint, (None,)),
     (stf.ST_LineInterpolatePoint, (None, 0.5)),
     (stf.ST_LineInterpolatePoint, ("", None)),
+    (stf.ST_LineLocatePoint, (None, "")),
+    (stf.ST_LineLocatePoint, ("", None)),
     (stf.ST_LineMerge, (None,)),
     (stf.ST_LineSubstring, (None, 0.5, 1.0)),
     (stf.ST_LineSubstring, ("", None, 1.0)),
@@ -424,6 +432,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION(POINT(1 1), LINESTRING(0 0, 1 1, 2 2))') AS geom")
         elif request.param == "point_and_line":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (0.0 1.0)') AS point, ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)') AS line")
+        elif request.param == "line_and_point":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (0 2, 1 1, 2 0)') AS line, ST_GeomFromWKT('POINT (0 0)') AS point")
         elif request.param == "origin_and_point":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (0 0)') AS origin, ST_GeomFromWKT('POINT (1 0)') as point")
         raise ValueError(f"Invalid base_df name passed: {request.param}")

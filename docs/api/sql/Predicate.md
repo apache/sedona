@@ -119,6 +119,7 @@ true
 ```
 
 ## ST_OrderingEquals
+
 Introduction: Returns true if the geometries are equal and the coordinates are in the same order
 
 Format: `ST_OrderingEquals(A: geometry, B: geometry)`
@@ -131,7 +132,7 @@ Spark SQL Example:
 SELECT ST_OrderingEquals(ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'), ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'))
 ```
 
-Output: 
+Output:
 
 ```
 true
@@ -143,7 +144,7 @@ Spark SQL Example:
 SELECT ST_OrderingEquals(ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))'), ST_GeomFromWKT('POLYGON((0 2, -2 0, 2 0, 0 2))'))
 ```
 
-Output: 
+Output:
 
 ```
 false

@@ -18,7 +18,7 @@ We recommend Intellij IDEA with Scala plugin installed. Please make sure that th
 
 #### The IDE might show errors
 
-The IDE usually has trouble understanding the complex project structure in Sedona. 
+The IDE usually has trouble understanding the complex project structure in Sedona.
 
 <img src="../../image/ide-java-4.png"/>
 
@@ -41,7 +41,6 @@ Make sure you reload the pom.xml or reload the maven project. The IDE will ask y
 
 <img src="../../image/ide-java-5.png"/>
 
-
 #### The final project structure should be like this:
 
 <img src="../../image/ide-java-3.png" style="width:400px;"/>
@@ -52,9 +51,8 @@ Make sure you reload the pom.xml or reload the maven project. The IDE will ask y
 
 In a terminal, go to the Sedona root folder. Run `mvn clean install`. All tests will take more than 15 minutes. To only build the project jars, run `mvn clean install -DskipTests`.
 !!!Note
-    `mvn clean install` will compile Sedona with Spark 3.0 and Scala 2.12. If you have a different version of Spark in $SPARK_HOME, make sure to specify that using -Dspark command line arg. 
+    `mvn clean install` will compile Sedona with Spark 3.0 and Scala 2.12. If you have a different version of Spark in $SPARK_HOME, make sure to specify that using -Dspark command line arg.
     For example, to compile sedona with Spark 3.4 and Scala 2.12, use: `mvn clean install -Dspark=3.4 -Dscala=2.12`
-    
 
 More details can be found on [Compile Sedona](../../setup/compile/)
 
@@ -87,11 +85,13 @@ Re-run the test case. Do NOT right click the test case to re-run. Instead, click
 To run all Python test cases, follow steps mentioned [here](../../setup/compile/#run-python-test).
 
 #### Run all python tests in a single test file
+
 To run a particular python test file, specify the path of the .py file to pipenv.
 
 For example, to run all tests in `test_function.py` located in `python/tests/sql/`, use: `pipenv run pytest tests/sql/test_function.py`.
 
 #### Run a single test
+
 To run a particular test in a particular .py test file, specify `file_name::class_name::test_name` to the pytest command.
 
 For example, to run the test on ST_Contains function located in sql/test_predicate.py, use: `pipenv run pytest tests/sql/test_predicate.py::TestPredicate::test_st_contains`
@@ -105,7 +105,6 @@ We recommend PyCharm
 ## R developers
 
 More details to come.
-
 
 ### IDE
 

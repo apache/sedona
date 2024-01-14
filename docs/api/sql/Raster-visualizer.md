@@ -1,9 +1,11 @@
 Sedona offers some APIs to aid in easy visualization of a raster object.
 
 ## Image-based visualization
+
 Sedona offers APIs to visualize a raster in an image form. This API only works for rasters with byte data, and bands <= 4 (Grayscale - RGBA). You can check the data type of an existing raster by using [RS_BandPixelType](../Raster-operators/#rs_bandpixeltype) or create your own raster by passing 'B' while using [RS_MakeEmptyRaster](../Raster-loader/#rs_makeemptyraster).
 
 ### RS_AsBase64
+
 Introduction: Returns a base64 encoded string of the given raster. If the datatype is integral then this function internally takes the first 4 bands as RGBA, and converts them to the PNG format, finally produces a base64 string. When the datatype is not integral, the function converts the raster to TIFF format, and then generates a base64 string. To visualize other bands, please use it together with `RS_Band`. You can take the resulting base64 string in [an online viewer](https://base64-viewer.onrender.com/) to check how the image looks like.
 
 !!!Warning
@@ -26,6 +28,7 @@ iVBORw0KGgoAAAA...
 ```
 
 ### RS_AsImage
+
 Introduction: Returns a HTML that when rendered using an HTML viewer or via a Jupyter Notebook, displays the raster as a square image of side length `imageWidth`. Optionally, an imageWidth parameter can be passed to RS_AsImage in order to increase the size of the rendered image (default: 200).
 
 Format: `RS_AsImage(raster: Raster, imageWidth: Integer = 200)`
@@ -79,22 +82,22 @@ RS_AsMatrix expects a raster, and optionally a band (default: 1) and postDecimal
         ```scala
         println(df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect().mkString("\n"))
         ```
-    
+
     === "Java"
-    
+
         ```java
         System.out.println(String.join("\n", df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect()))
         ```
-    
+
     === "Python"
-    
+
         ```python
         print("\n".join(df.selectExpr("RS_AsMatrix(rast)").sample(0.5).collect()))
         ```
 
     The `sample()` function is only there to reduce the data sent to `collect()`, you may also use `filter()` if that's appropriate.
 
-Format: 
+Format:
 
 ```
 RS_AsMatrix(raster: Raster, band: Integer = 1, postDecimalPrecision: Integer = 6)
@@ -102,7 +105,7 @@ RS_AsMatrix(raster: Raster, band: Integer = 1, postDecimalPrecision: Integer = 6
 
 Since: `1.5.0`
 
-Spark SQL Example: 
+Spark SQL Example:
 
 ```scala
 val inputDf = Seq(Seq(1, 3.333333, 4, 0.0001, 2.2222, 9, 10, 11.11111111, 3, 4, 5, 6)).toDF("band")

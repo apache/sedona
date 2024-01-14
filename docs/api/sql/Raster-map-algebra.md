@@ -48,7 +48,7 @@ execution. We'll demonstrate both approaches to implementing commonly used map a
 
     - If `pixelType` matches the input raster data type, no casting occurs.
 
-    This allows controlling the output pixel data type. Users should consider potential precision impacts when coercing to a smaller type. 
+    This allows controlling the output pixel data type. Users should consider potential precision impacts when coercing to a smaller type.
 
 ### NDVI
 

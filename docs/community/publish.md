@@ -14,7 +14,7 @@ chmod 777 create-release.sh
 ```
 2. Use your favourite GUI text editor to open `create-release.sh`.
 3. Then keep copying the scripts on this web page to replace all content in this script file.
-4. Do NOT directly copy/paste the scripts to your terminal because a bug in `clipboard.js` will create link breaks in such case. 
+4. Do NOT directly copy/paste the scripts to your terminal because a bug in `clipboard.js` will create link breaks in such case.
 5. Each time when you copy content to this script file, run `./create-release.sh` to execute it.
 
 ## 1. Check ASF copyright in all file headers
@@ -22,7 +22,7 @@ chmod 777 create-release.sh
 1. Run the following script:
 ```bash
 #!/bin/bash
-wget -q https://dlcdn.apache.org//creadur/apache-rat-0.15/apache-rat-0.15-bin.tar.gz
+wget -q https://archive.apache.org/dist/creadur/apache-rat-0.15/apache-rat-0.15-bin.tar.gz
 tar -xvf  apache-rat-0.15-bin.tar.gz
 git clone --shared --branch master https://github.com/apache/sedona.git sedona-src
 java -jar apache-rat-0.15/apache-rat-0.15.jar -d sedona-src > report.txt
@@ -38,13 +38,12 @@ rm report.txt
 
 ## 2. Update Sedona Python, R and Zeppelin versions
 
-Make sure the Sedona version in the following files are {{ sedona_create_release.current_version }}. 
+Make sure the Sedona version in the following files are {{ sedona_create_release.current_version }}.
 
 1. https://github.com/apache/sedona/blob/master/python/sedona/version.py
 2. https://github.com/apache/sedona/blob/master/R/DESCRIPTION
 3. https://github.com/apache/sedona/blob/99239524f17389fc4ae9548ea88756f8ea538bb9/R/R/dependencies.R#L42
 4. https://github.com/apache/sedona/blob/master/zeppelin/package.json
-
 
 ## 3. Update mkdocs.yml
 
@@ -215,7 +214,7 @@ https://cwiki.apache.org/confluence/display/INCUBATOR/Incubator+Release+Checklis
 ------------
 
 Changes according to the comments on the previous release
-Original comment (Permalink from https://lists.apache.org/list.html): 
+Original comment (Permalink from https://lists.apache.org/list.html):
 
 
 ```
@@ -230,7 +229,7 @@ Subject: [RESULT][VOTE] Release Apache Sedona {{ sedona_create_release.current_r
 Dear all,
 
 The vote closes now as 72hr have passed. The vote PASSES with
- 
+
 +? (binding): NAME1, NAME2, NAME3
 +? (non-binding): NAME4
 No -1 votes
@@ -254,7 +253,7 @@ Dear all,
 
 We are happy to report that we have released Apache Sedona {{ sedona_create_release.current_version }}. Thank you again for your help.
 
-Apache Sedona is a cluster computing system for processing large-scale spatial data. 
+Apache Sedona is a cluster computing system for processing large-scale spatial data.
 
 
 Vote thread (Permalink from https://lists.apache.org/list.html):
@@ -287,7 +286,7 @@ If a vote failed, do the following:
 
 1. In the vote email, say that we will create another release candidate.
 2. Restart from Step 3 `Update mkdocs.yml`. Please increment the release candidate ID (e.g., `{{ sedona_create_release.current_version}}-rc2`) and update `sedona_create_release.current_rc` and `sedona_create_release.current_git_tag` in `mkdocs.yml` to generate the script listed on this webpage.
- 
+
 ## 8. Release source code and Maven package
 
 ### Upload releases

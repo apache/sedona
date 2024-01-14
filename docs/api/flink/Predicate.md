@@ -118,7 +118,6 @@ Output:
 true
 ```
 
-
 ## ST_Overlaps
 
 Introduction: Return true if A overlaps B
@@ -138,7 +137,6 @@ Output:
 ```
 true
 ```
-
 
 ## ST_Touches
 
@@ -181,6 +179,7 @@ false
 ```
 
 ## ST_OrderingEquals
+
 Introduction: Returns true if the geometries are equal and the coordinates are in the same order
 
 Format: `ST_OrderingEquals(A: geometry, B: geometry)`
@@ -230,7 +229,6 @@ Output:
 ```
 true
 ```
-
 
 ## ST_CoveredBy
 

@@ -24,7 +24,6 @@ JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}" exec "/usr/local/Cell
 ```
 5. Run `mvn --version` again. It should now point to JDK 8.
 
-
 ### 1. Obtain Write Access to Sedona GitHub repo
 
 1. Verify you have a GitHub ID enabled with 2FA https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/
@@ -38,26 +37,26 @@ JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}" exec "/usr/local/Cell
 ### 2. Prepare Secret GPG key
 
 1. Install GNUGPG if it was not installed before. On Mac: `brew install gnupg gnupg2`
-2. Generate a secret key. It must be RSA4096 (4096 bits long). 
-	* Run `gpg --full-generate-key`. If not work, run `gpg --default-new-key-algo rsa4096 --gen-key`
-	* At the prompt, specify the kind of key you want: Select `RSA`, then press `enter`
-    * At the prompt, specify the key size you want: Enter `4096`
-    * At the prompt, enter the length of time the key should be valid: Press `enter` to make the key never expire.
-    * Verify that your selections are correct.
-    * Enter your user ID information: use your real name and Apache email address.
-    * Type a secure passphrase. Make sure you remember this because we will use it later.
-    * Use the `gpg --list-secret-keys --keyid-format=long` command to list the long form of the GPG keys.
-    * From the list of GPG keys, copy the long form of the GPG key ID you'd like to use (e.g., `3AA5C34371567BD2`)
-    * Run `gpg --export --armor 3AA5C34371567BD2`, substituting in the GPG key ID you'd like to use.
-    * Copy your GPG key, beginning with `-----BEGIN PGP PUBLIC KEY BLOCK-----` and ending with `-----END PGP PUBLIC KEY BLOCK-----`.
-    * There must be an empty line between `-----BEGIN PGP PUBLIC KEY BLOCK-----` and the actual key.
+2. Generate a secret key. It must be RSA4096 (4096 bits long).
+   * Run `gpg --full-generate-key`. If not work, run `gpg --default-new-key-algo rsa4096 --gen-key`
+   * At the prompt, specify the kind of key you want: Select `RSA`, then press `enter`
+   * At the prompt, specify the key size you want: Enter `4096`
+   * At the prompt, enter the length of time the key should be valid: Press `enter` to make the key never expire.
+   * Verify that your selections are correct.
+   * Enter your user ID information: use your real name and Apache email address.
+   * Type a secure passphrase. Make sure you remember this because we will use it later.
+   * Use the `gpg --list-secret-keys --keyid-format=long` command to list the long form of the GPG keys.
+   * From the list of GPG keys, copy the long form of the GPG key ID you'd like to use (e.g., `3AA5C34371567BD2`)
+   * Run `gpg --export --armor 3AA5C34371567BD2`, substituting in the GPG key ID you'd like to use.
+   * Copy your GPG key, beginning with `-----BEGIN PGP PUBLIC KEY BLOCK-----` and ending with `-----END PGP PUBLIC KEY BLOCK-----`.
+   * There must be an empty line between `-----BEGIN PGP PUBLIC KEY BLOCK-----` and the actual key.
 3. Publish your armored key in major key servers: https://keyserver.pgp.com/
 
 ### 3. Use SVN to update KEYS
 
 Use SVN to append your armored PGP public key to the `KEYS` files
-     * https://dist.apache.org/repos/dist/dev/sedona/KEYS
-     * https://dist.apache.org/repos/dist/release/sedona/KEYS
+   * https://dist.apache.org/repos/dist/dev/sedona/KEYS
+   * https://dist.apache.org/repos/dist/release/sedona/KEYS
 
 1. Check out both KEYS files
 ```bash
@@ -101,7 +100,6 @@ In short:
 7. Select the scopes you'd like to grant this token. To use your token to access repositories from the command line, select `repo` and `admin:org`.
 8. Click `Generate token`.
 9. Please save your token somewhere because we will use it in the next step.
-
 
 ### 6. Set up credentials for Maven
 

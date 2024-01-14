@@ -260,7 +260,7 @@ case class ST_MakeValid(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_IsValid(inputExpressions: Seq[Expression])
-  extends InferredExpression(Functions.isValid _) {
+  extends InferredExpression(inferrableFunction2(Functions.isValid), inferrableFunction1(Functions.isValid)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -504,6 +504,20 @@ case class ST_LineSubstring(inputExpressions: Seq[Expression])
   */
 case class ST_LineInterpolatePoint(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.lineInterpolatePoint _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Returns a float between 0 and 1 representing the location of the closest point on a LineString to the given Point,
+ * as a fraction of 2d line length.
+ *
+ * @param inputExpressions
+ */
+case class ST_LineLocatePoint(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.lineLocatePoint _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1148,4 +1162,18 @@ case class ST_IsCollection(inputExpressions: Seq[Expression])
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
     copy(inputExpressions = newChildren)
   }
+}
+
+/**
+ * Returns a text description of the validity of the geometry considering the specified flags.
+ * If flag not specified, it defaults to OGC SFS validity semantics.
+ *
+ * @param geom  The geometry to validate.
+ * @param flag The validation flags.
+ * @return A string describing the validity of the geometry.
+ */
+case class ST_IsValidReason(inputExpressions: Seq[Expression])
+  extends InferredExpression(inferrableFunction2(Functions.isValidReason), inferrableFunction1(Functions.isValidReason)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = copy(inputExpressions = newChildren)
 }

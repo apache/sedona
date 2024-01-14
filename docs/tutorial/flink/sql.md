@@ -15,6 +15,7 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../../../api/flink/O
 4. Please see [SQL example project](../../demo/)
 
 ## Initiate Stream Environment
+
 Use the following code to initiate your `StreamExecutionEnvironment` at the beginning:
 ```java
 StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -197,7 +198,7 @@ geomTable.execute().print()
 
 !!!note
 	Read [SedonaSQL Predicate API](../../../api/flink/Predicate) to learn different spatial query predicates.
-	
+
 ## KNN query
 
 Use ==ST_Distance== to calculate the distance and rank the distance.
@@ -398,7 +399,7 @@ The output will be
 7> polygon3
 9> polygon5
 ```
-	
+
 ## Convert Spatial DataStream to Spatial Table
 
 ### Create Geometries using Sedona FormatUtils

@@ -194,6 +194,19 @@ object InferredTypes {
         } else {
           null
         }
+    } else if (t =:= typeOf[Array[GridCoverage2D]]) {
+      output =>
+        if (output != null) {
+          val rasters = output.asInstanceOf[Array[GridCoverage2D]]
+          val serialized = rasters.map { raster =>
+            val serialized = raster.serialize
+            raster.dispose(true)
+            serialized
+          }
+          ArrayData.toArrayData(serialized)
+        } else {
+          null
+        }
     } else if (t =:= typeOf[Option[Boolean]]) {
       output =>
         if (output != null) {

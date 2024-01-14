@@ -48,7 +48,6 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../../api/sql/Overvi
 
 Use the following code to create your Sedona config at the beginning. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please skip this step and use `spark` directly.
 
-
 ==Sedona >= 1.4.1==
 
 You can add additional Spark runtime config to the config builder. For example, `SedonaContext.builder().config("spark.sql.autoBroadcastJoinThreshold", "10485760")`
@@ -175,7 +174,7 @@ Add the following line after creating the Sedona config. If you already have a S
 
 	```python
 	from sedona.spark import *
-	
+
 	sedona = SedonaContext.create(config)
 	```
 
@@ -199,7 +198,7 @@ The following method has been deprecated since Sedona 1.4.1. Please use the meth
 
 	```python
 	from sedona.register import SedonaRegistrator
-	
+
 	SedonaRegistrator.registerAll(spark)
 	```
 
@@ -344,11 +343,11 @@ SELECT RS_GeoReference(rast, "ESRI") FROM rasterDf
 The Output will be as follows:
 
 ```
-72.328613 
-0.000000 
-0.000000 
--72.328613 
--13095781.645176 
+72.328613
+0.000000
+0.000000
+-72.328613
+-13095781.645176
 4021226.584486
 ```
 
@@ -508,7 +507,7 @@ SELECT r.rast, g.geom FROM rasterDf r, geomDf g WHERE RS_Interest(r.rast, g.geom
 
 ## Visualize raster images
 
-Sedona provides APIs to visualize raster data in an image form. 
+Sedona provides APIs to visualize raster data in an image form.
 
 ### Base64 String
 

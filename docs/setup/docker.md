@@ -65,7 +65,7 @@ Clone the Sedona GitHub repository
 
 Requirements: docker ([How?](https://docs.docker.com/engine/install/))
 
-Format: 
+Format:
 
 ```bash
 ./docker/sedona-spark-jupyterlab/build.sh <spark_version> <sedona_version> <build_mode>
@@ -89,7 +89,7 @@ Format:
 ./docker/sedona-spark-jupyterlab/build.sh <spark_version> latest <build_mode>
 ```
 
-Example: 
+Example:
 
 ```bash
 ./docker/sedona-spark-jupyterlab/build.sh 3.4.1 latest
@@ -104,12 +104,14 @@ This docker image can only be built against Sedona 1.4.1+ and Spark 3.0+
 ## Cluster Configuration
 
 ### Software
+
 * OS: Ubuntu 22.02
 * JDK: openjdk-19
 * Python: 3.10
 * Spark 3.4.1
 
 ### Web UI
+
 * JupyterLab: http://localhost:8888/
 * Spark master URL: spark://localhost:7077
 * Spark job UI: http://localhost:4040

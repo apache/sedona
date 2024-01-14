@@ -51,7 +51,8 @@ import scala.collection.JavaConverters._
 class GeoParquetReadSupport (override val convertTz: Option[ZoneId],
                              enableVectorizedReader: Boolean,
                              datetimeRebaseSpec: RebaseSpec,
-                             int96RebaseSpec: RebaseSpec)
+                             int96RebaseSpec: RebaseSpec,
+                             parameters: Map[String, String])
   extends ParquetReadSupport with Logging {
   private var catalystRequestedSchema: StructType = _
 
@@ -85,10 +86,11 @@ class GeoParquetReadSupport (override val convertTz: Option[ZoneId],
     new GeoParquetRecordMaterializer(
       parquetRequestedSchema,
       GeoParquetReadSupport.expandUDT(catalystRequestedSchema),
-      new GeoParquetToSparkSchemaConverter(keyValueMetaData, conf),
+      new GeoParquetToSparkSchemaConverter(keyValueMetaData, conf, parameters),
       convertTz,
       datetimeRebaseSpec,
-      int96RebaseSpec)
+      int96RebaseSpec,
+      parameters)
   }
 }
 

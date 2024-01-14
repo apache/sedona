@@ -71,6 +71,7 @@ public class Catalog {
                 new Functions.ST_Length(),
                 new Functions.ST_LengthSpheroid(),
                 new Functions.ST_LineInterpolatePoint(),
+                new Functions.ST_LineLocatePoint(),
                 new FunctionsGeoTools.ST_Transform(),
                 new Functions.ST_FlipCoordinates(),
                 new Functions.ST_GeoHash(),
@@ -144,6 +145,7 @@ public class Catalog {
                 new Functions.ST_HausdorffDistance(),
                 new Functions.ST_IsCollection(),
                 new Functions.ST_CoordDim(),
+                new Functions.ST_IsValidReason()
         };
     }
 

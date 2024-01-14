@@ -1,4 +1,5 @@
 ## Usage
+
 SedonaSQL supports many parameters. To change their values,
 
 1. Set it through SparkConf:
@@ -18,6 +19,7 @@ println(sedonaConf)
 ```scala
 sparkSession.conf.set("sedona.global.index","false")
 ```
+
 ## Explanation
 
 * sedona.global.index

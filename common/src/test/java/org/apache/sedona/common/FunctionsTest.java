@@ -1864,4 +1864,52 @@ public class FunctionsTest extends TestBase {
         Geometry actual5 = FunctionsGeoTools.voronoiPolygons(null, 0, null);
         assertEquals(null, actual5);
     }
+
+    @Test
+    public void lineLocatePoint() {
+        LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 1, 1, 2, 2));
+        Geometry point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(-1, 1));
+        Geometry point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 2));
+        Geometry point3 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 3));
+
+        Double actual1 = Functions.lineLocatePoint(lineString, point1);
+        Double actual2 = Functions.lineLocatePoint(lineString, point2);
+        Double actual3 = Functions.lineLocatePoint(lineString, point3);
+
+        Double expectedResult1 = 0.0;
+        Double expectedResult2 = 0.5;
+        Double expectedResult3 = 1.0;
+
+        assertEquals(expectedResult1, actual1, FP_TOLERANCE);
+        assertEquals(expectedResult2, actual2, FP_TOLERANCE);
+        assertEquals(expectedResult3, actual3, FP_TOLERANCE);
+    }
+
+    @Test
+    public void isValidReason() {
+        // Valid geometry
+        Geometry validGeom = GEOMETRY_FACTORY.createPolygon(coordArray(30, 10, 40, 40, 20, 40, 10, 20, 30, 10));
+        String validReasonDefault = Functions.isValidReason(validGeom);
+        assertEquals("Valid Geometry", validReasonDefault);
+
+        Integer OGC_SFS_VALIDITY = 0;
+        Integer ESRI_VALIDITY = 1;
+
+        String validReasonOGC = Functions.isValidReason(validGeom, OGC_SFS_VALIDITY);
+        assertEquals("Valid Geometry", validReasonOGC);
+
+        String validReasonESRI = Functions.isValidReason(validGeom, ESRI_VALIDITY);
+        assertEquals("Valid Geometry", validReasonESRI);
+
+        // Invalid geometry (self-intersection)
+        Geometry invalidGeom = GEOMETRY_FACTORY.createPolygon(coordArray(30, 10, 40, 40, 20, 40, 30, 10, 10, 20, 30, 10));
+        String invalidReasonDefault = Functions.isValidReason(invalidGeom);
+        assertEquals("Ring Self-intersection at or near point (30.0, 10.0, NaN)", invalidReasonDefault);
+
+        String invalidReasonOGC = Functions.isValidReason(invalidGeom, OGC_SFS_VALIDITY);
+        assertEquals("Ring Self-intersection at or near point (30.0, 10.0, NaN)", invalidReasonOGC);
+
+        String invalidReasonESRI = Functions.isValidReason(invalidGeom, ESRI_VALIDITY);
+        assertEquals("Self-intersection at or near point (10.0, 20.0, NaN)", invalidReasonESRI);
+    }
 }

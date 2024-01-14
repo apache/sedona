@@ -317,6 +317,20 @@ class dataFrameAPITestScala extends TestBaseScala {
       val df = polygonDf.select(ST_IsValid("geom"))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Boolean]
       assert(actualResult)
+
+      // Geometry that is invalid under both OGC and ESRI standards
+      val selfTouchingWKT = "POLYGON ((0 0, 2 0, 1 1, 2 2, 0 2, 1 1, 0 0))"
+      val specialCaseTable = Seq(selfTouchingWKT).toDF("wkt").select(ST_GeomFromWKT($"wkt").as("geom"))
+
+      // Test with OGC flag (OGC_SFS_VALIDITY = 0)
+      val ogcValidityTable = specialCaseTable.select(ST_IsValid($"geom", lit(0)))
+      val ogcValidity = ogcValidityTable.take(1)(0).getBoolean(0)
+      assertEquals(false, ogcValidity)
+
+      // Test with ESRI flag (ESRI_VALIDITY = 1)
+      val esriValidityTable = specialCaseTable.select(ST_IsValid($"geom", lit(1)))
+      val esriValidity = esriValidityTable.take(1)(0).getBoolean(0)
+      assertEquals(false, esriValidity)
     }
 
     it("Passed ST_ReducePrecision") {
@@ -729,6 +743,14 @@ class dataFrameAPITestScala extends TestBaseScala {
       val df = baseDf.select(ST_LineInterpolatePoint("line", 0.5))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POINT (1 0)"
+      assert(actualResult == expectedResult)
+    }
+
+    it("Passed ST_LineLocatePoint") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)') AS line, ST_GeomFromWKT('POINT (0 2)') AS point")
+      val df = baseDf.select(ST_LineLocatePoint("line", "point"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Double]
+      val expectedResult = 0.5
       assert(actualResult == expectedResult)
     }
 
@@ -1249,6 +1271,29 @@ class dataFrameAPITestScala extends TestBaseScala {
       val df = pointDf.select(ST_DWithin("origin", "point", 2.0))
       val actual = df.head()(0).asInstanceOf[Boolean]
       assertTrue(actual)
+    }
+
+    it("Passed ST_IsValidReason") {
+      // Valid Geometry
+      val validPolygonWKT = "POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0))"
+      val validTable = Seq(validPolygonWKT).toDF("wkt").select(ST_GeomFromWKT($"wkt").as("geom"))
+      val validityTable = validTable.select(ST_IsValidReason($"geom"))
+      val validityReason = validityTable.take(1)(0).getString(0)
+      assertEquals("Valid Geometry", validityReason)
+
+      // Geometry that is invalid under both OGC and ESRI standards, but with different reasons
+      val selfTouchingWKT = "POLYGON ((0 0, 2 0, 1 1, 2 2, 0 2, 1 1, 0 0))"
+      val specialCaseTable = Seq(selfTouchingWKT).toDF("wkt").select(ST_GeomFromWKT($"wkt").as("geom"))
+
+      // Test with OGC flag (OGC_SFS_VALIDITY = 0)
+      val ogcValidityTable = specialCaseTable.select(ST_IsValidReason($"geom", lit(0)))
+      val ogcValidityReason = ogcValidityTable.take(1)(0).getString(0)
+      assertEquals("Ring Self-intersection at or near point (1.0, 1.0, NaN)", ogcValidityReason)
+
+      // Test with ESRI flag (ESRI_VALIDITY = 1)
+      val esriValidityTable = specialCaseTable.select(ST_IsValidReason($"geom", lit(1)))
+      val esriValidityReason = esriValidityTable.take(1)(0).getString(0)
+      assertEquals("Interior is disconnected at or near point (1.0, 1.0, NaN)", esriValidityReason)
     }
   }
 }

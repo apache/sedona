@@ -288,10 +288,18 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
       var testtable = sparkSession.sql(
         "SELECT ST_IsValid(ST_GeomFromWKT('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0), (15 15, 15 20, 20 20, 20 15, 15 15))')) AS a, " +
-          "ST_IsValid(ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')) as b"
+          "ST_IsValid(ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')) as b, " +
+          "ST_IsValid(ST_GeomFromWKT('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0), (15 15, 15 20, 20 20, 20 15, 15 15))'), 1) AS c, " +
+          "ST_IsValid(ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))'), 1) as d, " +
+          "ST_IsValid(ST_GeomFromWKT('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0), (15 15, 15 20, 20 20, 20 15, 15 15))'), 0) AS e, " +
+          "ST_IsValid(ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))'), 0) as f"
       )
       assert(!testtable.take(1)(0).get(0).asInstanceOf[Boolean])
       assert(testtable.take(1)(0).get(1).asInstanceOf[Boolean])
+      assert(!testtable.take(1)(0).get(2).asInstanceOf[Boolean])
+      assert(testtable.take(1)(0).get(3).asInstanceOf[Boolean])
+      assert(!testtable.take(1)(0).get(4).asInstanceOf[Boolean])
+      assert(testtable.take(1)(0).get(5).asInstanceOf[Boolean])
     }
 
     it("Fixed nullPointerException in ST_IsValid") {
@@ -1503,6 +1511,33 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       )
   }
 
+  it("Should pass ST_LineLocatePoint") {
+    Given("geometry dataframe")
+    val geometryDf = Seq(
+      ("POINT (-1 1)", "LINESTRING (0 0, 1 1, 2 2)"),
+      ("POINT (0 2)", "LINESTRING (0 0, 1 1, 2 2)"),
+      ("POINT (0 0)", "LINESTRING (0 2, 1 1, 2 0)"),
+      ("POINT (3 1)", "LINESTRING (0 2, 1 1, 2 0)")
+    ).map {
+      case (point, linestring) => (wktReader.read(point), wktReader.read(linestring))
+    }.toDF("Point", "LineString")
+    geometryDf.createOrReplaceTempView("geometries")
+
+    When("using ST_LineLocatePoint")
+        val resultDf = sparkSession.sql(
+          "SELECT ST_LineLocatePoint(LineString, Point) as Locations FROM geometries"
+        )
+
+    val result = resultDf.collect()
+
+    Then("Result should match")
+
+    assert(result(0).get(0).asInstanceOf[Double]==0.0)
+    assert(result(1).get(0).asInstanceOf[Double]==0.5)
+    assert(result(2).get(0).asInstanceOf[Double]==0.5)
+    assert(result(3).get(0).asInstanceOf[Double]==1.0)
+  }
+
   it ("Should pass ST_Multi"){
     val df = sparkSession.sql("select ST_Astext(ST_Multi(ST_Point(1.0,1.0)))")
     val result = df.collect()
@@ -2249,6 +2284,38 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         assertEquals(expected, actual)
     }
 
+  }
+
+  it ("ST_IsValidReason should provide reasons for invalid geometries") {
+    val testData = Seq(
+      (5330, "POLYGON ((0 0, 3 3, 0 3, 3 0, 0 0))"),
+      (5340, "POLYGON ((100 100, 300 300, 100 300, 300 100, 100 100))"),
+      (5350, "POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (20 20, 20 30, 30 30, 30 20, 20 20))")
+    )
+
+    val df = sparkSession.createDataFrame(testData).toDF("gid", "wkt")
+      .select($"gid", expr("ST_GeomFromWKT(wkt) as geom"))
+    df.createOrReplaceTempView("geometry_table")
+
+    val result = sparkSession.sql(
+      """
+        |SELECT gid, ST_IsValidReason(geom) as validity_info
+        |FROM geometry_table
+        |WHERE ST_IsValid(geom) = false
+        |ORDER BY gid
+        """.stripMargin)
+
+    val expectedResults = Map(
+      5330 -> "Self-intersection at or near point (1.5, 1.5, NaN)",
+      5340 -> "Self-intersection at or near point (200.0, 200.0, NaN)",
+      5350 -> "Hole lies outside shell at or near point (20.0, 20.0)"
+    )
+
+    result.collect().foreach { row =>
+      val gid = row.getAs[Int]("gid")
+      val validityInfo = row.getAs[String]("validity_info")
+      assert(validityInfo == expectedResults(gid))
+    }
   }
 
 }

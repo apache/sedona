@@ -1,6 +1,7 @@
 # Introduction
 
 ## Function list
+
 SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:
 ```scala
 var myDataFrame = sedona.sql("YOUR_SQL")
