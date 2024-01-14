@@ -21,6 +21,7 @@ package org.apache.sedona.sql
 import com.google.common.math.DoubleMath
 import org.apache.log4j.{Level, Logger}
 import org.apache.sedona.common.Functions.{frechetDistance, hausdorffDistance}
+import org.apache.sedona.common.Predicates.dWithin
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.sql.DataFrame
@@ -45,7 +46,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
 
   val sc = sparkSession.sparkContext
 
-  val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
+  val resourceFolder = System.getProperty("user.dir") + "/spark/common/src/test/resources/"
   val mixedWkbGeometryInputLocation = resourceFolder + "county_small_wkb.tsv"
   val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"
   val shapefileInputLocation = resourceFolder + "shapefiles/dbf"
@@ -169,6 +170,19 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
           if (frechetDistance(point, polygon) <= distance) 1 else 0
         else
           if (frechetDistance(point, polygon) < distance) 1 else 0
+      }).sum
+    }).sum
+  }
+
+  protected def bruteForceDWithin(sampleCount: Int, distance: Double): Int = {
+    val inputPolygon = buildPolygonDf.limit(sampleCount).collect()
+    val inputPoint = buildPointDf.limit(sampleCount).collect()
+
+    inputPoint.map(row => {
+      val point = row.getAs[org.locationtech.jts.geom.Point](0)
+      inputPolygon.map(row => {
+        val polygon = row.getAs[org.locationtech.jts.geom.Polygon](0)
+        if (dWithin(point, polygon, distance)) 1 else 0
       }).sum
     }).sum
   }

@@ -126,6 +126,12 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
           getJoinDetection(left, right, predicate, Some(extraCondition))
         case Some(And(extraCondition, predicate: ST_Predicate)) =>
           getJoinDetection(left, right, predicate, Some(extraCondition))
+        case Some(ST_DWithin(Seq(leftShape, rightShape, distance))) =>
+          Some(JoinQueryDetection(left, right, leftShape, ST_Buffer(Seq(rightShape, distance)), SpatialPredicate.INTERSECTS, isGeography = false, condition, None))
+        case Some(And(ST_DWithin(Seq(leftShape, rightShape, distance)), extraCondition)) =>
+          Some(JoinQueryDetection(left, right, leftShape, ST_Buffer(Seq(rightShape, distance)), SpatialPredicate.INTERSECTS, isGeography = false, condition, Some(extraCondition)))
+        case Some(And(extraCondition, ST_DWithin(Seq(leftShape, rightShape, distance)))) =>
+          Some(JoinQueryDetection(left, right, leftShape, ST_Buffer(Seq(rightShape, distance)), SpatialPredicate.INTERSECTS, isGeography = false, condition, Some(extraCondition)))
           //For raster-vector joins
         case Some(predicate: RS_Predicate) =>
           getRasterJoinDetection(left, right, predicate, None)
