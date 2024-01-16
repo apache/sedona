@@ -443,6 +443,24 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(1 == joinDfLeftBroadcast.count()) // raster within its own convexHull
 
     }
+
+    it("Passed ST_DWithin") {
+      val sampleCount = 200
+      val distance = 2.0
+      val polygonDf = buildPolygonDf.limit(sampleCount).repartition(3)
+      val pointDf = buildPointDf.limit(sampleCount).repartition(5)
+      val expected = bruteForceDWithin(sampleCount, distance)
+
+      var distanceJoinDF = pointDf.alias("pointDf").join(
+        broadcast(polygonDf).alias("polygonDF"), expr(s"ST_DWithin(pointDf.pointshape, polygonDf.polygonshape, $distance)"))
+      assert(distanceJoinDF.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
+      assert(distanceJoinDF.count() == expected)
+
+      distanceJoinDF = broadcast(pointDf).alias("pointDf").join(polygonDf.alias("polygonDf"), expr(s"ST_DWithin(pointDf.pointshape, polygonDf.polygonshape, $distance)"))
+
+      assert(distanceJoinDF.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
+      assert(distanceJoinDF.count() == expected)
+    }
   }
 
   describe("Sedona-SQL Broadcast Index Join Test for left semi joins") {
