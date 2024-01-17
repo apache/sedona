@@ -412,13 +412,13 @@ mkdir -p docs/api/javadoc/spark
 mv spark/common/target/apidocs/* docs/api/javadoc/spark
 ```
 
-Please use Intellij IDEA to generate Scaladoc for the spark-common module and paste to `docs/api/javadoc/spark`.
+Please use Intellij IDEA to generate Scaladoc for the spark-common module and paste to `docs/api/scaladoc/spark`.
 
 Please do not commit these generated docs to Sedona GitHub.
 
 ### Compile R html docs
 
-From [GitHub Action docs workflow](https://github.com/apache/sedona/actions/workflows/docs.yml), find generated-docs in the tagged commit. Download it and copy this folder `docs/api/rdocs` to the same location of the Sedona to-be-released source repo.
+From [GitHub Action docs workflow](https://github.com/apache/sedona/actions/workflows/docs.yml), find generated-docs of the commit which is right after the release candidate tag. Download it and copy this folder `docs/api/rdocs` to the same location of the Sedona to-be-released source repo.
 
 ### Deploy the website
 
