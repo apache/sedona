@@ -374,7 +374,7 @@ tar -xvf {{ sedona_create_release.current_git_tag}}.tar.gz
 mkdir apache-sedona-{{ sedona_create_release.current_version }}-src
 cp -r sedona-{{ sedona_create_release.current_git_tag}}/* apache-sedona-{{ sedona_create_release.current_version }}-src/
 
-rm -rf sedona-{{ sedona_create_release.current_git_tag}}
+rm -rf apache-{{ sedona_create_release.current_git_tag}}
 
 cd apache-sedona-{{ sedona_create_release.current_version }}-src/zeppelin && npm publish && cd ..
 rm -rf apache-sedona-{{ sedona_create_release.current_version }}-src
