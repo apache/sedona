@@ -5,5 +5,3 @@
 ### 06/25/2023: Sedona 1.4.1 released. It adds geodesic / geography functions, more raster functions and support Spark 3.4.
 
 ### 03/19/2023: Sedona 1.4.0 released. It provides GeoParquet filter pushdown (10X less memory footprint), faster serialization (3X speed), S2-based fast approximate join and enhanced R language support
-
-### 01/2023: Apache Sedona graduated to an Apache Top Level Project!
