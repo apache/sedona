@@ -1,0 +1,4348 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Apache Sedona&trade; is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark and Apache Flink, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.">
+      
+      
+      
+      
+        <link rel="prev" href="../../flink/sql/">
+      
+      
+        <link rel="next" href="../../demo/">
+      
+      
+      <link rel="icon" href="../../../image/sedona_logo_symbol.png">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.2.5">
+    
+    
+      
+        <title>Spatial SQL app - Apache Sedona&trade;</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.0e669242.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.85d0ee34.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="green">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#create-a-sample-table" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest stable version.
+  <a href="../../../.."> 
+    <strong>Click here to go to the latest stable version.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Apache Sedona&amp;trade;" class="md-header__button md-logo" aria-label="Apache Sedona&trade;" data-md-component="logo">
+      
+  <img src="../../../image/sedona_logo_symbol_white.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Apache Sedona&trade;
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Spatial SQL app
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7 0-.24-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08Z"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/apache/sedona" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    apache/sedona
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../setup/overview/" class="md-tabs__link">
+          
+  
+  Setup
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../download/" class="md-tabs__link">
+        
+  
+    
+  
+  Download
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../sql/" class="md-tabs__link">
+          
+  
+  Programming Guides
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      
+  
+  
+  
+    
+    
+      
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../api/sql/Overview/" class="md-tabs__link">
+          
+  
+  API Docs
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../community/contact/" class="md-tabs__link">
+          
+  
+  Community
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../usecases/airport-country/" class="md-tabs__link">
+          
+  
+  Use cases
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../asf/asf/" class="md-tabs__link">
+          
+  
+  Apache Software Foundation
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Apache Sedona&amp;trade;" class="md-nav__button md-logo" aria-label="Apache Sedona&trade;" data-md-component="logo">
+      
+  <img src="../../../image/sedona_logo_symbol_white.svg" alt="logo">
+
+    </a>
+    Apache Sedona&trade;
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/apache/sedona" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    apache/sedona
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Setup
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Setup
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Supported platforms
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Supported platforms
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_1" >
+        
+          <label class="md-nav__link" for="__nav_2_2_1" id="__nav_2_2_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Sedona with Apache Spark
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            Sedona with Apache Spark
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/modules/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Modules
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/platform/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Language wrappers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_2" >
+        
+          <label class="md-nav__link" for="__nav_2_2_2" id="__nav_2_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Sedona with Apache Flink
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Sedona with Apache Flink
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/flink/modules/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Modules
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/flink/platform/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Language wrappers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_3" >
+        
+          <label class="md-nav__link" for="__nav_2_2_3" id="__nav_2_2_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Sedona with Snowflake
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Sedona with Snowflake
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/snowflake/modules/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Modules
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/maven-coordinates/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Maven Central coordinate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+        
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Install with Apache Spark
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Install with Apache Spark
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/install-scala/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install Sedona Scala/Java
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/install-python/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install Sedona Python
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/rdocs" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install Sedona R
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/zeppelin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install Sedona-Zeppelin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/docker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Play Sedona in Docker
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/wherobots/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install on Wherobots
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/databricks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install on Databricks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/emr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install on AWS EMR
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/cluster/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Set up Spark cluster
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Install with Apache Flink
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            Install with Apache Flink
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/flink/install-scala/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install Sedona Scala/Java
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
+        
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Install with Snowflake
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            Install with Snowflake
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/snowflake/install/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install Sedona SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/release-notes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Release notes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../setup/compile/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Compile the code
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../download/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Download
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Programming Guides
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Programming Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Sedona with Apache Spark
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            Sedona with Apache Spark
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sql/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Spatial SQL app
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../raster/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Raster SQL app
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sql-pure-sql/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pure SQL environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../rdd/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Spatial RDD app
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/rdocs" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sedona R
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geopandas-shapely/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Work with GeoPandas and Shapely
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1_7" >
+        
+          <label class="md-nav__link" for="__nav_4_1_7" id="__nav_4_1_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Map visualization SQL app
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_1_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_7">
+            <span class="md-nav__icon md-icon"></span>
+            Map visualization SQL app
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../viz/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scala/Java
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../zeppelin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Use Apache Zeppelin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../viz-gallery/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Gallery
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1_8" >
+        
+          <label class="md-nav__link" for="__nav_4_1_8" id="__nav_4_1_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Performance tuning
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_1_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_8">
+            <span class="md-nav__icon md-icon"></span>
+            Performance tuning
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmark/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Benchmark
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Advanced-Tutorial-Tune-your-Application/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tune RDD application
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storing-blobs-in-parquet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Storing large raster geometries in Parquet files
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Sedona with Apache Flink
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            Sedona with Apache Flink
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../flink/sql/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Spatial SQL app
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" checked>
+        
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Sedona with Snowflake
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            Sedona with Snowflake
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Spatial SQL app
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Spatial SQL app
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#create-a-sample-table" class="md-nav__link">
+    Create a sample table
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-a-geometry-column" class="md-nav__link">
+    Create a Geometry column
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#check-the-lonlat-order" class="md-nav__link">
+    Check the lon/lat order
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#save-as-an-ordinary-column" class="md-nav__link">
+    Save as an ordinary column
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#transform-the-coordinate-reference-system" class="md-nav__link">
+    Transform the Coordinate Reference System
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#range-query" class="md-nav__link">
+    Range query
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#knn-query" class="md-nav__link">
+    KNN query
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#range-join-query" class="md-nav__link">
+    Range join query
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#distance-join" class="md-nav__link">
+    Distance join
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#google-s2-based-approximate-equi-join" class="md-nav__link">
+    Google S2 based approximate equi-join
+  </a>
+  
+    <nav class="md-nav" aria-label="Google S2 based approximate equi-join">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-generate-s2-ids-for-both-tables" class="md-nav__link">
+    1. Generate S2 ids for both tables
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-perform-equi-join" class="md-nav__link">
+    2. Perform equi-join
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-optional-refine-the-result" class="md-nav__link">
+    3. Optional: Refine the result
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-optional-de-duplicate" class="md-nav__link">
+    4. Optional: De-duplicate
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#s2-for-distance-join" class="md-nav__link">
+    S2 for distance join
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions-that-are-only-available-in-sedona" class="md-nav__link">
+    Functions that are only available in Sedona
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interoperate-with-snowflake-native-functions" class="md-nav__link">
+    Interoperate with Snowflake native functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Interoperate with Snowflake native functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#geometries-created-by-sedona-geometry-constructors" class="md-nav__link">
+    Geometries created by Sedona Geometry constructors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geometries-created-by-snowflake-geometry-constructors" class="md-nav__link">
+    Geometries created by Snowflake Geometry constructors
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-issues" class="md-nav__link">
+    Known issues
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
+        
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Examples
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demo/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scala/Java
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jupyter-notebook/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Python
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    API Docs
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            API Docs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1" >
+        
+          <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Sedona with Apache Spark
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            Sedona with Apache Spark
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1_1" >
+        
+          <label class="md-nav__link" for="__nav_5_1_1" id="__nav_5_1_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    SQL
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_1_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_1_1">
+            <span class="md-nav__icon md-icon"></span>
+            SQL
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/Overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1_1_2" >
+        
+          <label class="md-nav__link" for="__nav_5_1_1_2" id="__nav_5_1_1_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Vector data
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_5_1_1_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_1_1_2">
+            <span class="md-nav__icon md-icon"></span>
+            Vector data
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/Constructor/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Constructor
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/Function/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Function
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/Predicate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Predicate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/AggregateFunction/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Aggregate function
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/DataFrameAPI/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DataFrame Style functions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/Optimizer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Query optimization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/Reading-legacy-parquet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reading Legacy Parquet Files
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1_1_2_8" >
+        
+          <label class="md-nav__link" for="__nav_5_1_1_2_8" id="__nav_5_1_1_2_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Visualization
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_5_1_1_2_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_1_1_2_8">
+            <span class="md-nav__icon md-icon"></span>
+            Visualization
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/Visualization_SedonaPyDeck/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SedonaPyDeck
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/Visualization_SedonaKepler/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    SedonaKepler
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1_1_3" >
+        
+          <label class="md-nav__link" for="__nav_5_1_1_3" id="__nav_5_1_1_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Raster data
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_5_1_1_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_1_1_3">
+            <span class="md-nav__icon md-icon"></span>
+            Raster data
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/Raster-loader/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Raster loader
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/Raster-aggregate-function/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Raster aggregates
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/Raster-writer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Raster writer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/Raster-operators/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Raster operators
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/Raster-map-algebra/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Raster map algebra
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/Raster-visualizer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Raster visualization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/Parameter/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parameter
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1_2" >
+        
+          <label class="md-nav__link" for="__nav_5_1_2" id="__nav_5_1_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    RDD (core)
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_1_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_1_2">
+            <span class="md-nav__icon md-icon"></span>
+            RDD (core)
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/java-api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scala/Java doc
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1_3" >
+        
+          <label class="md-nav__link" for="__nav_5_1_3" id="__nav_5_1_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Viz
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_1_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_1_3">
+            <span class="md-nav__icon md-icon"></span>
+            Viz
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/viz/sql/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DataFrame/SQL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/viz/java-api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    RDD
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/rdocs" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sedona R
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Sedona with Apache Flink
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            Sedona with Apache Flink
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2_1" >
+        
+          <label class="md-nav__link" for="__nav_5_2_1" id="__nav_5_2_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    SQL
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            SQL
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/flink/Overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/flink/Constructor/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Constructor
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/flink/Function/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Function
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/flink/Aggregator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Aggregator
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/flink/Predicate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Predicate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
+        
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Sedona with Snowflake
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            Sedona with Snowflake
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3_1" >
+        
+          <label class="md-nav__link" for="__nav_5_3_1" id="__nav_5_3_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    SQL
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            SQL
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/snowflake/vector-data/Overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/snowflake/vector-data/Constructor/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Constructor
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/snowflake/vector-data/Function/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Function
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/snowflake/vector-data/AggregateFunction/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Aggregate Function
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/snowflake/vector-data/Predicate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Predicate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Community
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Community
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../community/contact/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Community
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Contributor Guide
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Contributor Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../community/rule/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rules
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../community/develop/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Develop
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+        
+          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Committer Guide
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            Committer Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../community/contributor/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Project Management Committee
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../community/release-manager/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Become a release manager
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../community/snapshot/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Publish a snapshot version
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../community/publish/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Make a release
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../community/vote/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Vote a release
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../community/publication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Publications
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Use cases
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Use cases
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../usecases/airport-country/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Spatially aggregate airports per country
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../usecases/foot-traffic/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Match foot traffic to Seattle coffee shops
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../usecases/raster/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Raster image manipulation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Apache Software Foundation
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Apache Software Foundation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../asf/asf/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Foundation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/licenses/" target="_blank" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    License
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/events/current-event" target="_blank" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Events
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/foundation/sponsorship.html" target="_blank" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sponsorship
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/foundation/thanks.html" target="_blank" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Thanks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/security/" target="_blank" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Security
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://privacy.apache.org/policies/privacy-policy-public.html" target="_blank" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Privacy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#create-a-sample-table" class="md-nav__link">
+    Create a sample table
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-a-geometry-column" class="md-nav__link">
+    Create a Geometry column
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#check-the-lonlat-order" class="md-nav__link">
+    Check the lon/lat order
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#save-as-an-ordinary-column" class="md-nav__link">
+    Save as an ordinary column
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#transform-the-coordinate-reference-system" class="md-nav__link">
+    Transform the Coordinate Reference System
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#range-query" class="md-nav__link">
+    Range query
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#knn-query" class="md-nav__link">
+    KNN query
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#range-join-query" class="md-nav__link">
+    Range join query
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#distance-join" class="md-nav__link">
+    Distance join
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#google-s2-based-approximate-equi-join" class="md-nav__link">
+    Google S2 based approximate equi-join
+  </a>
+  
+    <nav class="md-nav" aria-label="Google S2 based approximate equi-join">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-generate-s2-ids-for-both-tables" class="md-nav__link">
+    1. Generate S2 ids for both tables
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-perform-equi-join" class="md-nav__link">
+    2. Perform equi-join
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-optional-refine-the-result" class="md-nav__link">
+    3. Optional: Refine the result
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-optional-de-duplicate" class="md-nav__link">
+    4. Optional: De-duplicate
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#s2-for-distance-join" class="md-nav__link">
+    S2 for distance join
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions-that-are-only-available-in-sedona" class="md-nav__link">
+    Functions that are only available in Sedona
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interoperate-with-snowflake-native-functions" class="md-nav__link">
+    Interoperate with Snowflake native functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Interoperate with Snowflake native functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#geometries-created-by-sedona-geometry-constructors" class="md-nav__link">
+    Geometries created by Sedona Geometry constructors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geometries-created-by-snowflake-geometry-constructors" class="md-nav__link">
+    Geometries created by Snowflake Geometry constructors
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-issues" class="md-nav__link">
+    Known issues
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+  
+    
+                  
+
+  
+  
+
+
+  <h1>Spatial SQL app</h1>
+
+<p>After the installation done, you can start using Sedona functions. Please log in to Snowflake again using the user that has the privilege to access the database.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Please always keep the schema name <code>SEDONA</code> (e.g., <code>SEDONA.ST_GeomFromWKT</code>) when you use Sedona functions to avoid conflicting with Snowflake's built-in functions.</p>
+</div>
+<h2 id="create-a-sample-table">Create a sample table<a class="headerlink" href="#create-a-sample-table" title="Permanent link">&para;</a></h2>
+<p>Let's create a <code>city_tbl</code> that contains the locations and names of cities. Each location is a WKT string.</p>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">city_tbl</span><span class="w"> </span><span class="p">(</span><span class="n">wkt</span><span class="w"> </span><span class="n">STRING</span><span class="p">,</span><span class="w"> </span><span class="n">city_name</span><span class="w"> </span><span class="n">STRING</span><span class="p">);</span>
+<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">city_tbl</span><span class="p">(</span><span class="n">wkt</span><span class="p">,</span><span class="w"> </span><span class="n">city_name</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;POINT (-122.33 47.61)&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Seattle&#39;</span><span class="p">);</span>
+<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">city_tbl</span><span class="p">(</span><span class="n">wkt</span><span class="p">,</span><span class="w"> </span><span class="n">city_name</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;POINT (-122.42 37.76)&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;San Francisco&#39;</span><span class="p">);</span>
+</code></pre></div>
+<p>Then we can show the content of this table:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">city_tbl</span><span class="p">;</span>
+</code></pre></div>
+<p>Output:
+<div class="highlight"><pre><span></span><code>WKT CITY_NAME
+POINT (-122.33 47.61)   Seattle
+POINT (-122.42 37.76)   San Francisco
+</code></pre></div></p>
+<h2 id="create-a-geometry-column">Create a Geometry column<a class="headerlink" href="#create-a-geometry-column" title="Permanent link">&para;</a></h2>
+<p>All geometrical operations in SedonaSQL are on Geometry type objects. Therefore, before any kind of queries, you need to create a Geometry type column on the table.</p>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">city_tbl_geom</span><span class="w"> </span><span class="k">AS</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="n">wkt</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="n">city_name</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">city_tbl</span>
+</code></pre></div>
+<p>The <code>geom</code> column Table <code>city_tbl_geom</code> is now in a <code>Binary</code> type and data in this column is in a format that can be understood by Sedona. The output of this query will show geometries in WKB binary format like this:</p>
+<div class="highlight"><pre><span></span><code>GEOM CITY_NAME
+010100000085eb51b81e955ec0ae47e17a14ce4740  Seattle
+01010000007b14ae47e19a5ec0e17a14ae47e14240  San Francisco
+</code></pre></div>
+<p>To view the content of this column in a human-readable format, you can use <code>ST_AsText</code>. For example,</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">geom</span><span class="p">),</span><span class="w"> </span><span class="n">city_name</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">city_tbl_geom</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>SedonaSQL provides lots of functions to create a Geometry column, please read <a href="../../../api/snowflake/vector-data/Constructor/">SedonaSQL API</a>.</p>
+</div>
+<h2 id="check-the-lonlat-order">Check the lon/lat order<a class="headerlink" href="#check-the-lonlat-order" title="Permanent link">&para;</a></h2>
+<p>In SedonaSnow <code>v1.4.1</code> and before, we use lat/lon order in the following functions:</p>
+<ul>
+<li>ST_Transform</li>
+<li>ST_DistanceSphere</li>
+<li>ST_DistanceSpheroid</li>
+</ul>
+<p>We use <code>lon/lat</code> order in the following functions:</p>
+<ul>
+<li>ST_GeomFromGeoHash</li>
+<li>ST_GeoHash</li>
+<li>ST_S2CellIDs</li>
+</ul>
+<p>In Sedona <code>v1.5.0</code> and above, all functions will be fixed to lon/lat order.</p>
+<p>If your original data is not in the order you want, you need to flip the coordinate using <code>ST_FlipCoordinates(geom: Geometry)</code>.</p>
+<p>The sample data used above is in lon/lat order, we can flip the coordinates as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">REPLACE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">city_tbl_geom</span><span class="w"> </span><span class="k">AS</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_FlipCoordinates</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="n">city_name</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">city_tbl_geom</span>
+</code></pre></div>
+<p>If we show the content of this table, it is now in lat/lon order:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">geom</span><span class="p">),</span><span class="w"> </span><span class="n">city_name</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">city_tbl_geom</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>GEOM    CITY_NAME
+POINT (47.61 -122.33)   Seattle
+POINT (37.76 -122.42)   San Francisco
+</code></pre></div>
+<h2 id="save-as-an-ordinary-column">Save as an ordinary column<a class="headerlink" href="#save-as-an-ordinary-column" title="Permanent link">&para;</a></h2>
+<p>To save a table to some permanent storage, you can simply convert each geometry in the Geometry type column back to a plain String and save it anywhere you want.</p>
+<p>Use the following code to convert the Geometry column in a table back to a WKT string column:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">city_tbl_geom</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>SedonaSQL provides lots of functions to save the Geometry column, please read <a href="../../../api/snowflake/vector-data/Function/">SedonaSQL API</a>.</p>
+</div>
+<h2 id="transform-the-coordinate-reference-system">Transform the Coordinate Reference System<a class="headerlink" href="#transform-the-coordinate-reference-system" title="Permanent link">&para;</a></h2>
+<p>Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in a Geometry column. The unit of all related distances in SedonaSQL is same as the unit of all geometries in a Geometry column.</p>
+<p>To convert Coordinate Reference System of the Geometry column created before, use <code>ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string</code></p>
+<p>The first EPSG code EPSG:4326 in <code>ST_Transform</code> is the source CRS of the geometries. It is WGS84, the most common degree-based CRS.</p>
+<p>The second EPSG code EPSG:3857 in <code>ST_Transform</code> is the target CRS of the geometries. It is the most common meter-based CRS.</p>
+<p>This <code>ST_Transform</code> transform the CRS of these geometries from EPSG:4326 to EPSG:3857. The details CRS information can be found on <a href="https://epsg.io/">EPSG.io</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function follows lon/order in 1.5.0+ and lat/lon order in 1.4.1 and before. You can use <code>ST_FlipCoordinates</code> to swap X and Y.</p>
+</div>
+<p>We can transform our sample data as follows</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;epsg:4326&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;epsg:3857&#39;</span><span class="p">)),</span><span class="w"> </span><span class="n">city_name</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">city_tbl_geom</span>
+</code></pre></div>
+<p>The output will be like this:</p>
+<div class="highlight"><pre><span></span><code>POINT (6042216.250411431 -13617713.308741156)  Seattle
+POINT (4545577.120361927 -13627732.06291255)  San Francisco
+</code></pre></div>
+<p><code>ST_Transform</code> also supports the CRS string in OGC WKT format. For example, the following query generates the same output but with a OGC WKT CRS string.</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;epsg:4326&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;PROJCS[&quot;WGS 84 / Pseudo-Mercator&quot;,</span>
+<span class="s1">     GEOGCS[&quot;WGS 84&quot;,</span>
+<span class="s1">         DATUM[&quot;WGS_1984&quot;,</span>
+<span class="s1">             SPHEROID[&quot;WGS 84&quot;,6378137,298.257223563,</span>
+<span class="s1">                 AUTHORITY[&quot;EPSG&quot;,&quot;7030&quot;]],</span>
+<span class="s1">             AUTHORITY[&quot;EPSG&quot;,&quot;6326&quot;]],</span>
+<span class="s1">         PRIMEM[&quot;Greenwich&quot;,0,</span>
+<span class="s1">             AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]],</span>
+<span class="s1">         UNIT[&quot;degree&quot;,0.0174532925199433,</span>
+<span class="s1">             AUTHORITY[&quot;EPSG&quot;,&quot;9122&quot;]],</span>
+<span class="s1">         AUTHORITY[&quot;EPSG&quot;,&quot;4326&quot;]],</span>
+<span class="s1">     PROJECTION[&quot;Mercator_1SP&quot;],</span>
+<span class="s1">     PARAMETER[&quot;central_meridian&quot;,0],</span>
+<span class="s1">     PARAMETER[&quot;scale_factor&quot;,1],</span>
+<span class="s1">     PARAMETER[&quot;false_easting&quot;,0],</span>
+<span class="s1">     PARAMETER[&quot;false_northing&quot;,0],</span>
+<span class="s1">     UNIT[&quot;metre&quot;,1,</span>
+<span class="s1">         AUTHORITY[&quot;EPSG&quot;,&quot;9001&quot;]],</span>
+<span class="s1">     AXIS[&quot;Easting&quot;,EAST],</span>
+<span class="s1">     AXIS[&quot;Northing&quot;,NORTH],</span>
+<span class="s1">     EXTENSION[&quot;PROJ4&quot;,&quot;+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs&quot;],</span>
+<span class="s1">     AUTHORITY[&quot;EPSG&quot;,&quot;3857&quot;]]&#39;</span><span class="p">)),</span><span class="w"> </span><span class="n">city_name</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">city_tbl_geom</span>
+</code></pre></div>
+<h2 id="range-query">Range query<a class="headerlink" href="#range-query" title="Permanent link">&para;</a></h2>
+<p>Use <mark>ST_Contains</mark>, <mark>ST_Intersects</mark>, <mark>ST_Within</mark> to run a range query over a single column.</p>
+<p>The following example finds all geometries that are within the given polygon:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">city_tbl_geom</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_Contains</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_PolygonFromEnvelope</span><span class="p">(</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="mi">1000</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="mi">1100</span><span class="p">.</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">geom</span><span class="p">)</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Read <a href="../../../api/snowflake/vector-data/Constructor/">SedonaSQL API</a> to learn how to create a Geometry type query window.</p>
+</div>
+<h2 id="knn-query">KNN query<a class="headerlink" href="#knn-query" title="Permanent link">&para;</a></h2>
+<p>Use <mark>ST_Distance</mark>, <mark>ST_DistanceSphere</mark>, <mark>ST_DistanceSpheroid</mark> to calculate the distance and rank the distance.</p>
+<p>The following code returns the 5 nearest neighbor of the given point.</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="n">ST_Distance</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_Point</span><span class="p">(</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">distance</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">city_tbl_geom</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="k">DESC</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">5</span>
+</code></pre></div>
+<h2 id="range-join-query">Range join query<a class="headerlink" href="#range-join-query" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Sedona range join in Snowflake does not trigger Sedona's optimized spatial join algorithm while Sedona Spark does. It uses Snowflake's default Cartesian join which is very slow. Therefore, it is recommended to use Sedona's S2-based join or Snowflake's native ST functions + native <code>Geography</code> type to do range join, which will trigger Snowflake's <code>GeoJoin</code> algorithm.</p>
+</div>
+<p>Introduction: Find geometries from A and geometries from B such that each geometry pair satisfies a certain predicate.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span><span class="p">,</span><span class="w"> </span><span class="n">pointdf</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">ST_Contains</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">polygonshape</span><span class="p">,</span><span class="n">pointdf</span><span class="p">.</span><span class="n">pointshape</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span><span class="p">,</span><span class="w"> </span><span class="n">pointdf</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">ST_Intersects</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">polygonshape</span><span class="p">,</span><span class="n">pointdf</span><span class="p">.</span><span class="n">pointshape</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">pointdf</span><span class="p">,</span><span class="w"> </span><span class="n">polygondf</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">ST_Within</span><span class="p">(</span><span class="n">pointdf</span><span class="p">.</span><span class="n">pointshape</span><span class="p">,</span><span class="w"> </span><span class="n">polygondf</span><span class="p">.</span><span class="n">polygonshape</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="distance-join">Distance join<a class="headerlink" href="#distance-join" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Sedona distance join in Snowflake does not trigger Sedona's optimized spatial join algorithm while Sedona Spark does. It uses Snowflake's default Cartesian join which is very slow. Therefore, it is recommended to use Sedona's S2-based join or Snowflake's native ST functions to do range join, which will trigger Snowflake's <code>GeoJoin</code> algorithm.</p>
+</div>
+<p>Introduction: Find geometries from A and geometries from B such that the distance of each geometry pair is less or equal than a certain distance. It supports the planar Euclidean distance calculators <code>ST_Distance</code>, <code>ST_HausdorffDistance</code>, <code>ST_FrechetDistance</code> and the meter-based geodesic distance calculators <code>ST_DistanceSpheroid</code> and <code>ST_DistanceSphere</code>.</p>
+<p>Example for planar Euclidean distance:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">pointdf1</span><span class="p">,</span><span class="w"> </span><span class="n">pointdf2</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">ST_Distance</span><span class="p">(</span><span class="n">pointdf1</span><span class="p">.</span><span class="n">pointshape1</span><span class="p">,</span><span class="n">pointdf2</span><span class="p">.</span><span class="n">pointshape2</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">pointDf</span><span class="p">,</span><span class="w"> </span><span class="n">polygonDF</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">ST_HausdorffDistance</span><span class="p">(</span><span class="n">pointDf</span><span class="p">.</span><span class="n">pointshape</span><span class="p">,</span><span class="w"> </span><span class="n">polygonDf</span><span class="p">.</span><span class="n">polygonshape</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">pointDf</span><span class="p">,</span><span class="w"> </span><span class="n">polygonDF</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">ST_FrechetDistance</span><span class="p">(</span><span class="n">pointDf</span><span class="p">.</span><span class="n">pointshape</span><span class="p">,</span><span class="w"> </span><span class="n">polygonDf</span><span class="p">.</span><span class="n">polygonshape</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If you use planar euclidean distance functions like <code>ST_Distance</code>, <code>ST_HausdorffDistance</code> or <code>ST_FrechetDistance</code> as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of <code>distance</code> should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See <a href="../../../api/snowflake/vector-data/Function#st_transform">ST_Transform</a>. If you don't want to transform your data, please consider using <code>ST_DistanceSpheroid</code> or <code>ST_DistanceSphere</code>.</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">pointdf1</span><span class="p">,</span><span class="w"> </span><span class="n">pointdf2</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">ST_DistanceSpheroid</span><span class="p">(</span><span class="n">pointdf1</span><span class="p">.</span><span class="n">pointshape1</span><span class="p">,</span><span class="n">pointdf2</span><span class="p">.</span><span class="n">pointshape2</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span>
+</code></pre></div>
+<h2 id="google-s2-based-approximate-equi-join">Google S2 based approximate equi-join<a class="headerlink" href="#google-s2-based-approximate-equi-join" title="Permanent link">&para;</a></h2>
+<p>You can use Sedona built-in Google S2 functions to perform an approximate equi-join. This algorithm leverages Snowflake's internal equi-join algorithm and might be performant given that you can opt to skip the refinement step  by sacrificing query accuracy.</p>
+<p>Please use the following steps:</p>
+<h3 id="1-generate-s2-ids-for-both-tables">1. Generate S2 ids for both tables<a class="headerlink" href="#1-generate-s2-ids-for-both-tables" title="Permanent link">&para;</a></h3>
+<p>Use <a href="../../../api/snowflake/vector-data/Function/#st_s2cellids">ST_S2CellIds</a> to generate cell IDs. Each geometry may produce one or more IDs.</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">lefts</span><span class="p">,</span><span class="w"> </span><span class="k">TABLE</span><span class="p">(</span><span class="n">FLATTEN</span><span class="p">(</span><span class="n">ST_S2CellIDs</span><span class="p">(</span><span class="n">lefts</span><span class="p">.</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="mi">15</span><span class="p">)))</span><span class="w"> </span><span class="n">s1</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">rights</span><span class="p">,</span><span class="w"> </span><span class="k">TABLE</span><span class="p">(</span><span class="n">FLATTEN</span><span class="p">(</span><span class="n">ST_S2CellIDs</span><span class="p">(</span><span class="n">rights</span><span class="p">.</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="mi">15</span><span class="p">)))</span><span class="w"> </span><span class="n">s2</span>
+</code></pre></div>
+<h3 id="2-perform-equi-join">2. Perform equi-join<a class="headerlink" href="#2-perform-equi-join" title="Permanent link">&para;</a></h3>
+<p>Join the two tables by their S2 cellId</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">lcs</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">lcs_id</span><span class="p">,</span><span class="w"> </span><span class="n">lcs</span><span class="p">.</span><span class="n">geom</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">lcs_geom</span><span class="p">,</span><span class="w"> </span><span class="n">lcs</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">lcs_name</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">rcs_id</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">geom</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">rcs_geom</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">rcs_name</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">lcs</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">rcs</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">lcs</span><span class="p">.</span><span class="n">cellId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">cellId</span>
+</code></pre></div>
+<h3 id="3-optional-refine-the-result">3. Optional: Refine the result<a class="headerlink" href="#3-optional-refine-the-result" title="Permanent link">&para;</a></h3>
+<p>Due to the nature of S2 Cellid, the equi-join results might have a few false-positives depending on the S2 level you choose. A smaller level indicates bigger cells, less exploded rows, but more false positives.</p>
+<p>To ensure the correctness, you can use one of the <a href="../../../api/snowflake/vector-data/Predicate/">Spatial Predicates</a> to filter out them. Use this query instead of the query in Step 2.</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">lcs</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">lcs_id</span><span class="p">,</span><span class="w"> </span><span class="n">lcs</span><span class="p">.</span><span class="n">geom</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">lcs_geom</span><span class="p">,</span><span class="w"> </span><span class="n">lcs</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">lcs_name</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">rcs_id</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">geom</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">rcs_geom</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">rcs_name</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">lcs</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">lcs</span><span class="p">.</span><span class="n">cellId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">cellId</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">ST_Contains</span><span class="p">(</span><span class="n">lcs</span><span class="p">.</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">geom</span><span class="p">)</span>
+</code></pre></div>
+<p>As you see, compared to the query in Step 2, we added one more filter, which is <code>ST_Contains</code>, to remove false positives. You can also use <code>ST_Intersects</code> and so on.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>You can skip this step if you don't need 100% accuracy and want faster query speed.</p>
+</div>
+<h3 id="4-optional-de-duplicate">4. Optional: De-duplicate<a class="headerlink" href="#4-optional-de-duplicate" title="Permanent link">&para;</a></h3>
+<p>Due to the <code>Flatten</code> function used when we generate S2 Cell Ids, the resulting DataFrame may have several duplicate <lcs_geom, rcs_geom> matches. You can remove them by performing a GroupBy query.</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">lcs_id</span><span class="p">,</span><span class="w"> </span><span class="n">rcs_id</span><span class="p">,</span><span class="w"> </span><span class="n">ANY_VALUE</span><span class="p">(</span><span class="n">lcs_geom</span><span class="p">),</span><span class="w"> </span><span class="n">ANY_VALUE</span><span class="p">(</span><span class="n">lcs_name</span><span class="p">),</span><span class="w"> </span><span class="n">ANY_VALUE</span><span class="p">(</span><span class="n">rcs_geom</span><span class="p">),</span><span class="w"> </span><span class="n">ANY_VALUE</span><span class="p">(</span><span class="n">rcs_name</span><span class="p">)</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">joinresult</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="p">(</span><span class="n">lcs_id</span><span class="p">,</span><span class="w"> </span><span class="n">rcs_id</span><span class="p">)</span>
+</code></pre></div>
+<p>The <code>ANY_VALUE</code> function is to take the first value from a number of duplicate values.</p>
+<p>If you don't have a unique id for each geometry, you can also group by geometry itself. See below:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">lcs_geom</span><span class="p">,</span><span class="w"> </span><span class="n">rcs_geom</span><span class="p">,</span><span class="w"> </span><span class="n">ANY_VALUE</span><span class="p">(</span><span class="n">lcs_name</span><span class="p">),</span><span class="w"> </span><span class="n">ANY_VALUE</span><span class="p">(</span><span class="n">rcs_name</span><span class="p">)</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">joinresult</span>
+<span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="p">(</span><span class="n">lcs_geom</span><span class="p">,</span><span class="w"> </span><span class="n">rcs_geom</span><span class="p">)</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are doing point-in-polygon join, this is not a problem and you can safely discard this issue. This issue only happens when you do polygon-polygon, polygon-linestring, linestring-linestring join.</p>
+</div>
+<h3 id="s2-for-distance-join">S2 for distance join<a class="headerlink" href="#s2-for-distance-join" title="Permanent link">&para;</a></h3>
+<p>This also works for distance join. You first need to use <code>ST_Buffer(geometry, distance)</code> to wrap one of your original geometry column. If your original geometry column contains points, this <code>ST_Buffer</code> will make them become circles with a radius of <code>distance</code>.</p>
+<p>Since the coordinates are in the longitude and latitude system, so the unit of <code>distance</code> should be degree instead of meter or mile. You can get an approximation by performing <code>METER_DISTANCE/111000.0</code>, then filter out false-positives.  Note that this might lead to inaccurate results if your data is close to the poles or antimeridian.</p>
+<p>In a nutshell, run this query first on the left table before Step 1. Please replace <code>METER_DISTANCE</code> with a meter distance. In Step 1, generate S2 IDs based on the <code>buffered_geom</code> column. Then run Step 2, 3, 4 on the original <code>geom</code> column.</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="n">ST_Buffer</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="n">METER_DISTANCE</span><span class="o">/</span><span class="mi">111000</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">buffered_geom</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">lefts</span>
+</code></pre></div>
+<h2 id="functions-that-are-only-available-in-sedona">Functions that are only available in Sedona<a class="headerlink" href="#functions-that-are-only-available-in-sedona" title="Permanent link">&para;</a></h2>
+<p>Sedona implements over 200 geospatial vector and raster functions, which are much more than what Snowflake native functions offer. For example:</p>
+<ul>
+<li><a href="../../../api/snowflake/vector-data/Function/#st_3ddistance">ST_3DDistance</a></li>
+<li><a href="../../../api/snowflake/vector-data/Function/#st_force_2d">ST_Force2D</a></li>
+<li><a href="../../../api/snowflake/vector-data/Function/#st_geometryn">ST_GeometryN</a></li>
+<li><a href="../../../api/snowflake/vector-data/Function/#st_makevalid">ST_MakeValid</a></li>
+<li><a href="../../../api/snowflake/vector-data/Function/#st_multi">ST_Multi</a></li>
+<li><a href="../../../api/snowflake/vector-data/Function/#st_numgeometries">ST_NumGeometries</a></li>
+<li><a href="../../../api/snowflake/vector-data/Function/#st_precisionreduce">ST_ReducePrecision</a></li>
+<li><a href="../../../api/snowflake/vector-data/Function/#st_subdivideexplode">ST_SubdivdeExplode</a></li>
+</ul>
+<p>You can click the links above to learn more about these functions. More functions can be found in <a href="../../../api/snowflake/vector-data/Function/">SedonaSQL API</a>.</p>
+<h2 id="interoperate-with-snowflake-native-functions">Interoperate with Snowflake native functions<a class="headerlink" href="#interoperate-with-snowflake-native-functions" title="Permanent link">&para;</a></h2>
+<p>Sedona can interoperate with Snowflake native functions seamlessly. There are two ways to do this:</p>
+<ul>
+<li>Use Sedona functions to create a Geometry column, then use Snowflake native functions and Sedona functions to query the Geometry column.</li>
+<li>Use Snowflake native functions to create a Geometry column, then use Snowflake native functions and Sedona functions to query the Geometry column.</li>
+</ul>
+<p>Now we will show you how to do this.</p>
+<h3 id="geometries-created-by-sedona-geometry-constructors">Geometries created by Sedona Geometry constructors<a class="headerlink" href="#geometries-created-by-sedona-geometry-constructors" title="Permanent link">&para;</a></h3>
+<p>In this case, Sedona uses EWKB type as the input/output type for geometry. If you have datasets of built-in Snowflake GEOMETRY/GEOGRAPHY type, you can easily transform them into EWKB through this function.</p>
+<h4 id="from-snowflake-native-functions-to-sedona-functions">From Snowflake native functions to Sedona functions<a class="headerlink" href="#from-snowflake-native-functions-to-sedona-functions" title="Permanent link">&para;</a></h4>
+<p>In this example, <code>SEDONA.ST_X</code> is a Sedona function, <code>ST_GeommetryFromWkt</code> and <code>ST_AsEWKB</code> are Snowflake native functions.</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_X</span><span class="p">(</span><span class="n">ST_AsEWKB</span><span class="p">(</span><span class="n">ST_GeommetryFromWkt</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))&#39;</span><span class="p">)))</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="n">geometry_table</span><span class="w"> </span><span class="err">}}</span><span class="p">;</span>
+</code></pre></div>
+<h4 id="from-sedona-functions-to-snowflake-native-functions">From Sedona functions to Snowflake native functions<a class="headerlink" href="#from-sedona-functions-to-snowflake-native-functions" title="Permanent link">&para;</a></h4>
+<p>In this example, <code>SEDONA.ST_GeomFromText</code> is a Sedona function, <code>ST_AREA</code> and <code>to_geometry</code> are Snowflake native functions.</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AREA</span><span class="p">(</span><span class="n">to_geometry</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))&#39;</span><span class="p">)));</span>
+</code></pre></div>
+<h4 id="pros">Pros:<a class="headerlink" href="#pros" title="Permanent link">&para;</a></h4>
+<p>Sedona geometry constructors are more powerful than Snowflake native functions. It has the following advantages:</p>
+<ul>
+<li>Sedona offers more constructors especially for 3D (XYZ) geometries, but Snowflake native functions don't.</li>
+<li>WKB serialization is more efficient. If you need to use multiple Sedona functions, it is more efficient to use this method, which might bring in 2X performance improvement.</li>
+<li>SRID information of geometries is preserved. The method below will lose SRID information.</li>
+</ul>
+<h3 id="geometries-created-by-snowflake-geometry-constructors">Geometries created by Snowflake Geometry constructors<a class="headerlink" href="#geometries-created-by-snowflake-geometry-constructors" title="Permanent link">&para;</a></h3>
+<p>In this case, Sedona uses Snowflake native GEOMETRY/GEOGRAPHY type as the input/output type for geometry. The serialization format is GeoJSON string.</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AREA</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_Buffer</span><span class="p">(</span><span class="n">ST_GeometryFromWkt</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">));</span>
+</code></pre></div>
+<p>In this example, <code>SEDONA.ST_Buffer</code> is a Sedona function, <code>ST_GeommetryFromWkt</code> and <code>ST_AREA</code> are Snowflake native functions.</p>
+<p>As you can see, you can use Sedona functions and Snowflake native functions together without explicit conversion.</p>
+<h4 id="pros_1">Pros:<a class="headerlink" href="#pros_1" title="Permanent link">&para;</a></h4>
+<ul>
+<li>You don't need to convert the geometry type, which is more convenient.</li>
+</ul>
+<p>Note that: Snowflake natively serializes Geometry type data to GeoJSON String and sends to UDF as input. GeoJSON spec does not include SRID. So the SRID information will be lost if you mix-match Snowflake functions and Sedona functions directly without using <code>WKB</code>.</p>
+<p>In the example below, the SRID=4326 information is lost.</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsEWKT</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT(1 2)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">4326</span><span class="p">))</span>
+</code></pre></div>
+<p>Output:
+<div class="highlight"><pre><span></span><code>SRID=0;POINT(1 2)
+</code></pre></div></p>
+<h2 id="known-issues">Known issues<a class="headerlink" href="#known-issues" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Sedona Snowflake doesn't support <code>M</code> dimension due to the limitation of WKB serialization. Sedona Spark and Sedona Flink support XYZM because it uses our in-house serialization format. Although Sedona Snowflake has functions related to <code>M</code> dimension, all <code>M</code> values will be ignored.</li>
+<li>Sedona H3 functions are not supported because Snowflake does not allow embedded C code in UDF.</li>
+<li>All User Defined Table Functions only work with geometries created by Sedona constructors due to Snowflake current limitation <code>Data type GEOMETRY is not supported in non-SQL UDTF return type</code>. This includes:</li>
+<li>ST_MinimumBoundingRadius</li>
+<li>ST_Intersection_Aggr</li>
+<li>ST_SubDivideExplode</li>
+<li>ST_Envelope_Aggr</li>
+<li>ST_Union_Aggr</li>
+<li>ST_Collect</li>
+<li>ST_Dump</li>
+<li>Only Sedona ST functions are available in Snowflake. Raster functions (RS functions) are not available in Snowflake yet.</li>
+</ol>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 13, 2024 10:01:29</span>
+      
+    
+  </small>
+</div>
+
+
+
+
+
+                
+  
+
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../../flink/sql/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Spatial SQL app" rel="prev">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Spatial SQL app
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../demo/" class="md-footer__link md-footer__link--next" aria-label="Next: Scala/Java" rel="next">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Scala/Java
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright © 2024 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="http://www.apache.org/">Apache Software Foundation</a> for more details.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/apache/sedona" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M186.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1zM480 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2zm-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3zm-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/ApacheSedona" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="./community/discord-invite-form.html" target="_blank" rel="noopener" title="" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M524.531 69.836a1.5 1.5 0 0 0-.764-.7A485.065 485.065 0 0 0 404.081 32.03a1.816 1.816 0 0 0-1.923.91 337.461 337.461 0 0 0-14.9 30.6 447.848 447.848 0 0 0-134.426 0 309.541 309.541 0 0 0-15.135-30.6 1.89 1.89 0 0 0-1.924-.91 483.689 483.689 0 0 0-119.688 37.107 1.712 1.712 0 0 0-.788.676C39.068 183.651 18.186 294.69 28.43 404.354a2.016 2.016 0 0 0 .765 1.375 487.666 487.666 0 0 0 146.825 74.189 1.9 1.9 0 0 0 2.063-.676A348.2 348.2 0 0 0 208.12 430.4a1.86 1.86 0 0 0-1.019-2.588 321.173 321.173 0 0 1-45.868-21.853 1.885 1.885 0 0 1-.185-3.126 251.047 251.047 0 0 0 9.109-7.137 1.819 1.819 0 0 1 1.9-.256c96.229 43.917 200.41 43.917 295.5 0a1.812 1.812 0 0 1 1.924.233 234.533 234.533 0 0 0 9.132 7.16 1.884 1.884 0 0 1-.162 3.126 301.407 301.407 0 0 1-45.89 21.83 1.875 1.875 0 0 0-1 2.611 391.055 391.055 0 0 0 30.014 48.815 1.864 1.864 0 0 0 2.063.7A486.048 486.048 0 0 0 610.7 405.729a1.882 1.882 0 0 0 .765-1.352c12.264-126.783-20.532-236.912-86.934-334.541ZM222.491 337.58c-28.972 0-52.844-26.587-52.844-59.239s23.409-59.241 52.844-59.241c29.665 0 53.306 26.82 52.843 59.239 0 32.654-23.41 59.241-52.843 59.241Zm195.38 0c-28.971 0-52.843-26.587-52.843-59.239s23.409-59.241 52.843-59.241c29.667 0 53.307 26.82 52.844 59.239 0 32.654-23.177 59.241-52.844 59.241Z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.tabs", "navigation.top", "search.suggest", "search.highlight", "search.share", "navigation.footer"], "search": "../../../assets/javascripts/workers/search.dfff1995.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.78eede0e.min.js"></script>
+      
+    
+  </body>
+</html>
