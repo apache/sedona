@@ -3821,6 +3821,10 @@
 <span class="k">FROM</span><span class="w"> </span><span class="n">pointdf</span><span class="p">,</span><span class="w"> </span><span class="n">polygondf</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">ST_Within</span><span class="p">(</span><span class="n">pointdf</span><span class="p">.</span><span class="n">pointshape</span><span class="p">,</span><span class="w"> </span><span class="n">polygondf</span><span class="p">.</span><span class="n">polygonshape</span><span class="p">)</span>
 </code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">pointdf</span><span class="p">,</span><span class="w"> </span><span class="n">polygondf</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">ST_DWithin</span><span class="p">(</span><span class="n">pointdf</span><span class="p">.</span><span class="n">pointshape</span><span class="p">,</span><span class="w"> </span><span class="n">polygondf</span><span class="p">.</span><span class="n">polygonshape</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
 <p>Spark SQL Physical plan:</p>
 <div class="highlight"><pre><span></span><code>== Physical Plan ==
 RangeJoin polygonshape#20: geometry, pointshape#43: geometry, false
@@ -4045,7 +4049,7 @@ answer queries such as <code>SELECT * FROM geoparquet_dataset WHERE ST_Intersect
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 17, 2024 23:17:19</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 16, 2024 07:28:23</span>
       
     
   </small>

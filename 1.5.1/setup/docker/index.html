@@ -3833,14 +3833,18 @@
 </code></pre></div>
 <h3 id="start-the-container">Start the container<a class="headerlink" href="#start-the-container" title="Permanent link">&para;</a></h3>
 <p>Format:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:8081<span class="w"> </span>-p<span class="w"> </span><span class="m">4040</span>:4040<span class="w"> </span>apache/sedona:&lt;sedona_version&gt;
+<p><div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span><span class="nv">DRIVER_MEM</span><span class="o">=</span>&lt;driver_mem&gt;<span class="w"> </span>-e<span class="w"> </span><span class="nv">EXECUTOR_MEM</span><span class="o">=</span>&lt;executor_mem&gt;<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:8081<span class="w"> </span>-p<span class="w"> </span><span class="m">4040</span>:4040<span class="w"> </span>apache/sedona:&lt;sedona_version&gt;
 </code></pre></div>
+Driver memory and executor memory are optional. If their values are not given, the container will take 4GB RAM for the driver and 4GB RAM for the executor.</p>
 <p>Example 1:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:8081<span class="w"> </span>-p<span class="w"> </span><span class="m">4040</span>:4040<span class="w"> </span>apache/sedona:latest
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span><span class="nv">DRIVER_MEM</span><span class="o">=</span>6g<span class="w"> </span>-e<span class="w"> </span><span class="nv">EXECUTOR_MEM</span><span class="o">=</span>8g<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:8081<span class="w"> </span>-p<span class="w"> </span><span class="m">4040</span>:4040<span class="w"> </span>apache/sedona:latest
 </code></pre></div>
+<p>This command will start a container with 6GB RAM for the driver and 8GB RAM for the executor and use the latest Sedona image.</p>
+<p>This command will bind the container's ports 8888, 8080, 8081, 4040 to the host's ports 8888, 8080, 8081, 4040 respectively.</p>
 <p>Example 2:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:8081<span class="w"> </span>-p<span class="w"> </span><span class="m">4040</span>:4040<span class="w"> </span>apache/sedona:1.5.1
 </code></pre></div>
+<p>This command will start a container with 4GB RAM for the driver and 4GB RAM for the executor and use Sedona 1.5.1 image.</p>
 <p>This command will bind the container's ports 8888, 8080, 8081, 4040 to the host's ports 8888, 8080, 8081, 4040 respectively.</p>
 <h3 id="start-coding">Start coding<a class="headerlink" href="#start-coding" title="Permanent link">&para;</a></h3>
 <p>Open your browser and go to <a href="http://localhost:8888/">http://localhost:8888/</a> to start coding with Sedona.</p>
@@ -3902,7 +3906,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 10, 2024 19:16:11</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 18, 2024 08:46:35</span>
       
     
   </small>
