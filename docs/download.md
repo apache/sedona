@@ -14,6 +14,13 @@ Automatically generated binary JARs (per each Master branch commit): [GitHub Act
 
 ## Versions
 
+### 1.5.1
+
+| |                                    Download from ASF                                     |                                         Checksum                                          |                                      Signature                                      |
+|:-----------------:|:----------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------:|
+|    Source code    | [src](https://www.apache.org/dyn/closer.lua/sedona/1.5.1/apache-sedona-1.5.1-src.tar.gz) | [sha512](https://downloads.apache.org/sedona/1.5.1/apache-sedona-1.5.1-src.tar.gz.sha512) | [asc](https://downloads.apache.org/sedona/1.5.1/apache-sedona-1.5.1-src.tar.gz.asc) |
+|       Binary      | [bin](https://www.apache.org/dyn/closer.lua/sedona/1.5.1/apache-sedona-1.5.1-bin.tar.gz) | [sha512](https://downloads.apache.org/sedona/1.5.1/apache-sedona-1.5.1-bin.tar.gz.sha512) | [asc](https://downloads.apache.org/sedona/1.5.1/apache-sedona-1.5.1-bin.tar.gz.asc)
+
 ### 1.5.0
 
 | | Download from ASF | Checksum | Signature |
@@ -30,7 +37,7 @@ Automatically generated binary JARs (per each Master branch commit): [GitHub Act
 
 ### Past releases
 
-Past Sedona releases are archived and can be found here: [Apache archive](https://archive.apache.org/dist/sedona/) (on and after 1.2.1-incubating) and [Apache Incubator archive](https://archive.apache.org/dist/sedona/) (before v1.2.1-incubating)
+Past Sedona releases are archived and can be found here: [Apache archive](https://archive.apache.org/dist/sedona/) (on and after 1.2.1-incubating).
 
 ## Security
 
