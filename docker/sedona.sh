@@ -39,7 +39,7 @@ else
     # Download Sedona
 	curl https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-${sedona_spark_version}_2.12/${sedona_version}/sedona-spark-shaded-${sedona_spark_version}_2.12-${sedona_version}.jar -o $SPARK_HOME/jars/sedona-spark-shaded-${sedona_spark_version}_2.12-${sedona_version}.jar
 	curl https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/${geotools_wrapper_version}/geotools-wrapper-${geotools_wrapper_version}.jar -o $SPARK_HOME/jars/geotools-wrapper-${geotools_wrapper_version}.jar
-	
+
 	# Download gresearch spark extension
 	curl https://repo1.maven.org/maven2/uk/co/gresearch/spark/spark-extension_2.12/${spark_extension_version}-${sedona_spark_version}/spark-extension_2.12-${spark_extension_version}-${sedona_spark_version}.jar -o $SPARK_HOME/jars/spark-extension_2.12-${spark_extension_version}-${sedona_spark_version}.jar
 
