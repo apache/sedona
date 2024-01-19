@@ -180,8 +180,8 @@ test_configurations = [
     (stp.ST_Within, (lambda: f.expr("ST_Point(0.0, 0.0)"), "geom"), "triangle_geom", "", False),
     (stp.ST_Covers, ("geom", lambda: f.expr("ST_Point(0.0, 0.0)")), "triangle_geom", "", True),
     (stp.ST_CoveredBy, (lambda: f.expr("ST_Point(0.0, 0.0)"), "geom"), "triangle_geom", "", True),
-    (stp.ST_DWithin, ("origin", "point", 5.0), "origin_and_point", "", True),
-    (stp.ST_DWithin, ("ny", "seattle", 4000000, True), "ny_seattle", "", True),
+    (stp.ST_DWithin, ("origin", "point", 5.0,), "origin_and_point", "", True),
+    (stp.ST_DWithin, ("ny", "seattle", 4000000.0, True), "ny_seattle", "", True),
 
     # aggregates
     (sta.ST_Envelope_Aggr, ("geom",), "exploded_points", "", "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"),

@@ -194,7 +194,7 @@ def ST_CoveredBy(a: ColumnOrName, b: ColumnOrName) -> Column:
     return _call_predicate_function("ST_CoveredBy", (a, b))
 
 @validate_argument_types
-def ST_DWithin(a: ColumnOrName, b: ColumnOrName, distance: Union[ColumnOrName, float], use_sphere: Optional[Union[ColumnOrName, bool]]):
+def ST_DWithin(a: ColumnOrName, b: ColumnOrName, distance: Union[ColumnOrName, float], use_sphere: Optional[Union[ColumnOrName, bool]] = None):
     """
     Check if geometry a is within 'distance' units of geometry b
     :param a: Geometry column to check
@@ -203,5 +203,5 @@ def ST_DWithin(a: ColumnOrName, b: ColumnOrName, distance: Union[ColumnOrName, f
     :param use_sphere: whether to use spheroid distance or euclidean distance
     :return: True if a is within distance units of Geometry b
     """
-
-    return _call_predicate_function("ST_DWithin", (a, b, distance, use_sphere))
+    args = (a, b, distance, use_sphere) if use_sphere is not None else (a, b, distance,)
+    return _call_predicate_function("ST_DWithin", args)
