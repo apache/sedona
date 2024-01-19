@@ -451,13 +451,39 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       val pointDf = buildPointDf.limit(sampleCount).repartition(5)
       val expected = bruteForceDWithin(sampleCount, distance)
 
-      var distanceJoinDF = pointDf.alias("pointDf").join(
+      var distanceJoinShortFormDF = pointDf.alias("pointDf").join(
         broadcast(polygonDf).alias("polygonDF"), expr(s"ST_DWithin(pointDf.pointshape, polygonDf.polygonshape, $distance)"))
+      assert(distanceJoinShortFormDF.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
+      assert(distanceJoinShortFormDF.count() == expected)
+
+      distanceJoinShortFormDF = broadcast(pointDf).alias("pointDf").join(polygonDf.alias("polygonDf"), expr(s"ST_DWithin(pointDf.pointshape, polygonDf.polygonshape, $distance)"))
+
+      assert(distanceJoinShortFormDF.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
+      assert(distanceJoinShortFormDF.count() == expected)
+
+
+      var distanceJoinDF = pointDf.alias("pointDf").join(
+        broadcast(polygonDf).alias("polygonDF"), expr(s"ST_DWithin(pointDf.pointshape, polygonDf.polygonshape, $distance, false)"))
       assert(distanceJoinDF.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
       assert(distanceJoinDF.count() == expected)
 
-      distanceJoinDF = broadcast(pointDf).alias("pointDf").join(polygonDf.alias("polygonDf"), expr(s"ST_DWithin(pointDf.pointshape, polygonDf.polygonshape, $distance)"))
+      distanceJoinDF = broadcast(pointDf).alias("pointDf").join(polygonDf.alias("polygonDf"), expr(s"ST_DWithin(pointDf.pointshape, polygonDf.polygonshape, $distance, false)"))
 
+      assert(distanceJoinDF.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
+      assert(distanceJoinDF.count() == expected)
+    }
+
+    it ("Passed ST_DWithin long form") {
+      val Seq(sphericalDf1, sphericalDf2) = createSpheroidDataFrames()
+      val distance = 2000000
+      val expected = bruteForceDWithinSphere(distance)
+
+      var distanceJoinDF = sphericalDf1.alias("df1").join(
+        broadcast(sphericalDf2).alias("df2"), expr(s"ST_DWithin(df1.geom, df2.geom, $distance, true)"))
+      assert(distanceJoinDF.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
+      assert(distanceJoinDF.count() == expected)
+
+      distanceJoinDF = broadcast(sphericalDf1).alias("df1").join(sphericalDf2.alias("df2"), expr(s"ST_DWithin(df1.geom, df2.geom, $distance, true)"))
       assert(distanceJoinDF.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec => p }.size == 1)
       assert(distanceJoinDF.count() == expected)
     }

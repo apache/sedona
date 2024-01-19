@@ -248,5 +248,13 @@ public class Predicates {
             Geometry geom2 = (Geometry) o2;
             return org.apache.sedona.common.Predicates.dWithin(geom1, geom2, distance);
         }
+
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2, @DataTypeHint("Double") Double distance, @DataTypeHint("Boolean") Boolean useSphere)
+        {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            return org.apache.sedona.common.Predicates.dWithin(geom1, geom2, distance, useSphere);
+        }
     }
 }

@@ -25,8 +25,10 @@ import org.apache.sedona.common.Predicates.dWithin
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.sql.DataFrame
-import org.locationtech.jts.geom.{CoordinateSequence, CoordinateSequenceComparator}
+import org.locationtech.jts.geom.{Coordinate, CoordinateSequence, CoordinateSequenceComparator, Geometry, GeometryFactory}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
+
+import scala.util.Random
 
 trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   Logger.getRootLogger().setLevel(Level.WARN)
@@ -46,7 +48,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
 
   val sc = sparkSession.sparkContext
 
-  val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
+  val resourceFolder = System.getProperty("user.dir") + "/spark/common/src/test/resources/"
   val mixedWkbGeometryInputLocation = resourceFolder + "county_small_wkb.tsv"
   val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"
   val shapefileInputLocation = resourceFolder + "shapefiles/dbf"
@@ -73,6 +75,8 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   val rasterDataLocation: String = resourceFolder + "raster/raster_with_no_data/test5.tiff"
   val buildingDataLocation: String = resourceFolder + "813_buildings_test.csv"
   val smallRasterDataLocation: String = resourceFolder + "raster/test1.tiff"
+  private val factory = new GeometryFactory()
+
 
   override def beforeAll(): Unit = {
     SedonaContext.create(sparkSession)
@@ -93,6 +97,28 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
 
   def loadGeoTiff(path: String): DataFrame = {
     sparkSession.read.format("binaryFile").load(path)
+  }
+
+
+  def generateTestData(): Seq[(Int, Double, Geometry)] = {
+    val geometries = (-180 to 180 by 10).flatMap { x =>
+      (-80 to 80 by 10).map { y =>
+        factory.createPoint(new Coordinate(x, y))
+      }
+    } ++ Seq(factory.createPoint(new Coordinate(0, -90)), factory.createPoint(new Coordinate(0, 90)))
+    val rand = new Random()
+    geometries.zipWithIndex.map { case (geom, idx) =>
+      (idx, 110000 + 2000000 * rand.nextDouble, geom)
+    }
+  }
+
+  def createSpheroidDataFrames(): Seq[DataFrame] = {
+    import sparkSession.implicits._
+    val sphericalTestData1 = generateTestData()
+    val sphericalTestData2 = generateTestData()
+    val sphericalDf1 = sphericalTestData1.toDF("id", "dist", "geom")
+    val sphericalDf2 = sphericalTestData2.toDF("id", "dist", "geom")
+    Seq(sphericalDf1, sphericalDf2)
   }
 
   lazy val buildPointDf = loadCsv(csvPointInputLocation).selectExpr("ST_Point(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20))) as pointshape")
@@ -182,7 +208,20 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
       val point = row.getAs[org.locationtech.jts.geom.Point](0)
       inputPolygon.map(row => {
         val polygon = row.getAs[org.locationtech.jts.geom.Polygon](0)
-        if (dWithin(point, polygon, distance)) 1 else 0
+        if (dWithin(point, polygon, distance, false)) 1 else 0
+      }).sum
+    }).sum
+  }
+
+  protected def bruteForceDWithinSphere(distance: Double): Int = {
+    val Seq(sphericalDf1, sphericalDf2) = createSpheroidDataFrames()
+    val sphericalDf1Collected = sphericalDf1.collect()
+    val sphericalDf2Collected = sphericalDf2.collect()
+    sphericalDf1Collected.map(row => {
+      val geom1 = row.get(2).asInstanceOf[org.locationtech.jts.geom.Point]
+      sphericalDf2Collected.map(row => {
+        val geom2 = row.get(2).asInstanceOf[org.locationtech.jts.geom.Point]
+        if (dWithin(geom1, geom2, distance, true)) 1 else 0
       }).sum
     }).sum
   }

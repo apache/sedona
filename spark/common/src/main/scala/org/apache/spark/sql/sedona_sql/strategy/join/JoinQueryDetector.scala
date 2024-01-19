@@ -132,6 +132,12 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
           Some(JoinQueryDetection(left, right, leftShape, ST_Buffer(Seq(rightShape, distance)), SpatialPredicate.INTERSECTS, isGeography = false, condition, Some(extraCondition)))
         case Some(And(extraCondition, ST_DWithin(Seq(leftShape, rightShape, distance)))) =>
           Some(JoinQueryDetection(left, right, leftShape, ST_Buffer(Seq(rightShape, distance)), SpatialPredicate.INTERSECTS, isGeography = false, condition, Some(extraCondition)))
+        case Some(ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid))) =>
+          Some(JoinQueryDetection(left, right, leftShape, ST_Buffer(Seq(rightShape, distance)), SpatialPredicate.INTERSECTS, isGeography = useSpheroid.eval().asInstanceOf[Boolean], condition, None))
+        case Some(And(ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid)), extraCondition)) =>
+          Some(JoinQueryDetection(left, right, leftShape, ST_Buffer(Seq(rightShape, distance)), SpatialPredicate.INTERSECTS, isGeography = useSpheroid.eval().asInstanceOf[Boolean], condition, Some(extraCondition)))
+        case Some(And(extraCondition, ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid)))) =>
+          Some(JoinQueryDetection(left, right, leftShape, ST_Buffer(Seq(rightShape, distance)), SpatialPredicate.INTERSECTS, isGeography = useSpheroid.eval().asInstanceOf[Boolean], condition, Some(extraCondition)))
           //For raster-vector joins
         case Some(predicate: RS_Predicate) =>
           getRasterJoinDetection(left, right, predicate, None)
@@ -403,6 +409,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
       case (Some(_), SpatialPredicate.INTERSECTS, true, false) => "ST_Distance (Geography) <="
       case (Some(_), _, true, false) => "ST_Distance (Geography) <"
       case (None, _, false, false) => s"ST_$spatialPredicate"
+      case (None, _, true, false) => s"ST_$spatialPredicate"
       case (None, _, false, true) => s"RS_$spatialPredicate"
     }
     val (distanceOnIndexSide, distanceOnStreamSide) = distance.map { distanceExpr =>

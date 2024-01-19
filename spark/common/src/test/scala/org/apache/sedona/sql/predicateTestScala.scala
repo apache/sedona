@@ -256,6 +256,13 @@ class predicateTestScala extends TestBaseScala {
       assert(actual)
     }
 
+    it ("Passed ST_DWithin with useSphere") {
+      val testTable = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (-122.335167 47.608013)') as seattle, ST_GeomFromWKT('POINT (-73.935242 40.730610)') as ny")
+      testTable.createOrReplaceTempView("testTable")
+      val actual = sparkSession.sql("SELECT ST_DWithin(seattle, ny, 4000000, true) from testTable").first()(0).asInstanceOf[java.lang.Boolean]
+      assert(actual)
+    }
+
     Seq(
       ST_Contains, ST_Intersects, ST_Within, ST_Covers, ST_CoveredBy, ST_Crosses,
       ST_Overlaps, ST_Touches, ST_Equals, ST_Disjoint, ST_OrderingEquals

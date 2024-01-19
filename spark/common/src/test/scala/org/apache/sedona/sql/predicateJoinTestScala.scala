@@ -20,7 +20,7 @@
 package org.apache.sedona.sql
 
 import org.apache.sedona.core.utils.SedonaConf
-import org.apache.spark.sql.Row
+import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.functions.expr
 import org.apache.spark.sql.sedona_sql.strategy.join.{DistanceJoinExec, RangeJoinExec}
 import org.apache.spark.sql.types._
@@ -503,7 +503,7 @@ class predicateJoinTestScala extends TestBaseScala {
       })
     }
 
-    it("Passed ST_DWithin in a spatial join") {
+    it ("Passed ST_DWithin (useSpheroid = false) in a spatial join") {
       val sampleCount = 200
       val distanceCandidates = Seq(1.0, 2.0, 5.0, 10.0)
       val inputPoint = buildPointDf.limit(sampleCount).repartition(5)
@@ -511,7 +511,25 @@ class predicateJoinTestScala extends TestBaseScala {
 
       distanceCandidates.foreach(distance => {
         val expected = bruteForceDWithin(sampleCount, distance)
-        val dWithinDf = inputPoint.alias("pointDf").join(inputPolygon.alias("polygonDf"), expr(s"ST_DWithin(pointDf.pointshape, polygonDf.polygonshape, $distance)"))
+
+        val dfWithinDfShortForm = inputPoint.alias("pointDf").join(inputPolygon.alias("polygonDf"), expr(s"ST_DWithin(pointDf.pointshape, polygonDf.polygonshape, $distance)"))
+        assert(dfWithinDfShortForm.count() == expected)
+        assert(dfWithinDfShortForm.queryExecution.sparkPlan.collect { case p: RangeJoinExec => p }.size === 1)
+
+        val dWithinDf = inputPoint.alias("pointDf").join(inputPolygon.alias("polygonDf"), expr(s"ST_DWithin(pointDf.pointshape, polygonDf.polygonshape, $distance, false)"))
+
+        assert(dWithinDf.count() == expected)
+        assert(dWithinDf.queryExecution.sparkPlan.collect { case p: RangeJoinExec => p }.size === 1)
+      })
+    }
+
+    it ("Passed ST_DWithin useSphere long form (useSpheroid = true) in a spatial join") {
+      val Seq(sphericalDf1, sphericalDf2) = createSpheroidDataFrames()
+      val distanceCandidates = Seq(1000000, 2000000, 3000000, 4000000)
+
+      distanceCandidates.foreach(distance => {
+        val expected = bruteForceDWithinSphere(distance)
+        val dWithinDf = sphericalDf1.alias("df1").join(sphericalDf2.alias("df2"), expr(s"ST_DWithin(df1.geom, df2.geom, $distance, true)"))
 
         assert(dWithinDf.count() == expected)
         assert(dWithinDf.queryExecution.sparkPlan.collect { case p: RangeJoinExec => p }.size === 1)
