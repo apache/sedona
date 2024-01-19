@@ -70,7 +70,6 @@ public class PredicatesTest extends TestBase {
         double distance = 4000 * 1e3; //distance between NY and Seattle is less than 4000 km
         boolean actual = Predicates.dWithin(newYorkPoint, seattlePoint, distance, true);
         assertTrue(actual);
-
     }
 
 
