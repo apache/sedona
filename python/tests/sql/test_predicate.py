@@ -226,5 +226,5 @@ class TestPredicate(TestBase):
     def test_dwithin_use_sphere(self):
         test_table = self.spark.sql("select ST_GeomFromWKT('POINT (-122.335167 47.608013)') as seattle, ST_GeomFromWKT('POINT (-73.935242 40.730610)') as ny")
         test_table.createOrReplaceTempView("test_table")
-        isWithin = self.spark.sql("select ST_DWithin(seattle, ny, 2000000, false) from test_table").head()[0]
+        isWithin = self.spark.sql("select ST_DWithin(seattle, ny, 2000000, true) from test_table").head()[0]
         assert isWithin is False
