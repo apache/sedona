@@ -31,20 +31,27 @@ docker pull apache/sedona:{{ sedona.current_version }}
 Format:
 
 ```bash
-docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 apache/sedona:<sedona_version>
+docker run -e DRIVER_MEM=<driver_mem> -e EXECUTOR_MEM=<executor_mem> -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 apache/sedona:<sedona_version>
 ```
+Driver memory and executor memory are optional. If their values are not given, the container will take 4GB RAM for the driver and 4GB RAM for the executor.
 
 Example 1:
 
 ```bash
-docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 apache/sedona:latest
+docker run -e DRIVER_MEM=6g -e EXECUTOR_MEM=8g -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 apache/sedona:latest
 ```
+
+This command will start a container with 6GB RAM for the driver and 8GB RAM for the executor and use the latest Sedona image.
+
+This command will bind the container's ports 8888, 8080, 8081, 4040 to the host's ports 8888, 8080, 8081, 4040 respectively.
 
 Example 2:
 
 ```bash
 docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 apache/sedona:{{ sedona.current_version }}
 ```
+
+This command will start a container with 4GB RAM for the driver and 4GB RAM for the executor and use Sedona {{ sedona.current_version }} image.
 
 This command will bind the container's ports 8888, 8080, 8081, 4040 to the host's ports 8888, 8080, 8081, 4040 respectively.
 

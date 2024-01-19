@@ -154,8 +154,8 @@ extra:
     - icon: fontawesome/brands/discord
       link: './community/discord-invite-form.html'
   sedona:
-    current_version: 1.5.0
-    current_geotools: 1.5.0-28.2
+    current_version: 1.5.1
+    current_geotools: 1.5.1-28.2
   sedona_create_release:
     current_version: 1.5.1
     current_git_tag: sedona-1.5.1-rc1

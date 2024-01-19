@@ -10,6 +10,7 @@ Sedona 1.5.1 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.12, 
 
 ### Highlights
 
+* [X] **Sedona Snowflake** Add support for Snowflake
 * [X] **Sedona Spark** Support Spark 3.5
 * [X] **Sedona Spark** Support Snowflake 7+
 * [X] **Sedona Spark** Added 20+ raster functions (or variants)
