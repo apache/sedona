@@ -14,13 +14,15 @@
 package org.apache.spark.sql.execution.datasources.parquet
 
 import org.json4s.jackson.JsonMethods.parse
-import org.json4s.JValue
+import org.json4s.{JNothing, JNull, JValue}
 
 /**
  * A case class that holds the metadata of geometry column in GeoParquet metadata
  * @param encoding Name of the geometry encoding format. Currently only "WKB" is supported
  * @param geometryTypes The geometry types of all geometries, or an empty array if they are not known.
  * @param bbox Bounding Box of the geometries in the file, formatted according to RFC 7946, section 5.
+ * @param crs The CRS of the geometries in the file. None if crs metadata is absent, Some(JNull) if crs is null,
+ *            Some(value) if the crs is present and not null.
  */
 case class GeometryFieldMetaData(
   encoding: String,
@@ -58,7 +60,16 @@ object GeoParquetMetaData {
   def parseKeyValueMetaData(keyValueMetaData: java.util.Map[String, String]): Option[GeoParquetMetaData] = {
     Option(keyValueMetaData.get("geo")).map { geo =>
       implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
-      parse(geo).camelizeKeys.extract[GeoParquetMetaData]
+      val geoObject = parse(geo)
+      val metadata = geoObject.camelizeKeys.extract[GeoParquetMetaData]
+      metadata.copy(columns = metadata.columns.map { case (name, column) =>
+        // Postprocess to distinguish between null (JNull) and missing field (JNothing).
+        geoObject \ "columns" \ name \ "crs" match {
+          case JNothing => name -> column.copy(crs = None)
+          case JNull => name -> column.copy(crs = Some(JNull))
+          case _ => name -> column
+        }
+      })
     }
   }
 }
