@@ -514,7 +514,7 @@ class predicateJoinTestScala extends TestBaseScala {
 
         val dfWithinDfShortForm = inputPoint.alias("pointDf").join(inputPolygon.alias("polygonDf"), expr(s"ST_DWithin(pointDf.pointshape, polygonDf.polygonshape, $distance)"))
         assert(dfWithinDfShortForm.count() == expected)
-        assert(dfWithinDfShortForm.queryExecution.sparkPlan.collect { case p: RangeJoinExec => p }.size === 1)
+        assert(dfWithinDfShortForm.queryExecution.sparkPlan.collect { case p: DistanceJoinExec => p }.size === 1)
 
         val dWithinDf = inputPoint.alias("pointDf").join(inputPolygon.alias("polygonDf"), expr(s"ST_DWithin(pointDf.pointshape, polygonDf.polygonshape, $distance, false)"))
 
