@@ -126,18 +126,6 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
           getJoinDetection(left, right, predicate, Some(extraCondition))
         case Some(And(extraCondition, predicate: ST_Predicate)) =>
           getJoinDetection(left, right, predicate, Some(extraCondition))
-        case Some(ST_DWithin(Seq(leftShape, rightShape, distance))) =>
-          Some(JoinQueryDetection(left, right, leftShape, ST_Buffer(Seq(rightShape, distance)), SpatialPredicate.INTERSECTS, isGeography = false, condition, None))
-        case Some(And(ST_DWithin(Seq(leftShape, rightShape, distance)), extraCondition)) =>
-          Some(JoinQueryDetection(left, right, leftShape, ST_Buffer(Seq(rightShape, distance)), SpatialPredicate.INTERSECTS, isGeography = false, condition, Some(extraCondition)))
-        case Some(And(extraCondition, ST_DWithin(Seq(leftShape, rightShape, distance)))) =>
-          Some(JoinQueryDetection(left, right, leftShape, ST_Buffer(Seq(rightShape, distance)), SpatialPredicate.INTERSECTS, isGeography = false, condition, Some(extraCondition)))
-        case Some(ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid))) =>
-          Some(JoinQueryDetection(left, right, leftShape, ST_Buffer(Seq(rightShape, distance)), SpatialPredicate.INTERSECTS, isGeography = useSpheroid.eval().asInstanceOf[Boolean], condition, None))
-        case Some(And(ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid)), extraCondition)) =>
-          Some(JoinQueryDetection(left, right, leftShape, ST_Buffer(Seq(rightShape, distance)), SpatialPredicate.INTERSECTS, isGeography = useSpheroid.eval().asInstanceOf[Boolean], condition, Some(extraCondition)))
-        case Some(And(extraCondition, ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid)))) =>
-          Some(JoinQueryDetection(left, right, leftShape, ST_Buffer(Seq(rightShape, distance)), SpatialPredicate.INTERSECTS, isGeography = useSpheroid.eval().asInstanceOf[Boolean], condition, Some(extraCondition)))
           //For raster-vector joins
         case Some(predicate: RS_Predicate) =>
           getRasterJoinDetection(left, right, predicate, None)
@@ -146,6 +134,18 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
         case Some(And(extraCondition, predicate: RS_Predicate)) =>
           getRasterJoinDetection(left, right, predicate, Some(extraCondition))
         // For distance joins we execute the actual predicate (condition) and not only extraConditions.
+        case Some(ST_DWithin(Seq(leftShape, rightShape, distance))) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = false, condition, Some(distance)))
+        case Some(And(ST_DWithin(Seq(leftShape, rightShape, distance)), _)) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = false, condition, Some(distance)))
+        case Some(And(_, ST_DWithin(Seq(leftShape, rightShape, distance)))) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = false, condition, Some(distance)))
+        case Some(ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid))) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = useSpheroid.eval().asInstanceOf[Boolean], condition, Some(distance)))
+        case Some(And(ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid)), _)) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = useSpheroid.eval().asInstanceOf[Boolean], condition, Some(distance)))
+        case Some(And(_, ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid)))) =>
+          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = useSpheroid.eval().asInstanceOf[Boolean], condition, Some(distance)))
         case Some(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), distance)) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, false, condition, Some(distance)))
         case Some(And(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), distance), _)) =>
@@ -403,14 +403,15 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     val b = children.tail.head
     val isRasterPredicate = a.dataType.isInstanceOf[RasterUDT] || b.dataType.isInstanceOf[RasterUDT]
 
-    val relationship = (distance, spatialPredicate, isGeography, isRasterPredicate) match {
-      case (Some(_), SpatialPredicate.INTERSECTS, false, false) => "ST_Distance <="
-      case (Some(_), _, false, false) => "ST_Distance <"
-      case (Some(_), SpatialPredicate.INTERSECTS, true, false) => "ST_Distance (Geography) <="
-      case (Some(_), _, true, false) => "ST_Distance (Geography) <"
-      case (None, _, false, false) => s"ST_$spatialPredicate"
-      case (None, _, true, false) => s"ST_$spatialPredicate"
-      case (None, _, false, true) => s"RS_$spatialPredicate"
+    val relationship = (distance, spatialPredicate, isGeography, extraCondition, isRasterPredicate) match {
+      case (Some(_), SpatialPredicate.INTERSECTS, false, Some(ST_DWithin(Seq(_*))), false) => "ST_DWithin"
+      case (Some(_), SpatialPredicate.INTERSECTS, false, _, false) => "ST_Distance <="
+      case (Some(_), _, false, _, false) => "ST_Distance <"
+      case (Some(_), SpatialPredicate.INTERSECTS, true, Some(ST_DWithin(Seq(_*))), false) => "ST_DWithin(useSpheroid = true)"
+      case (Some(_), SpatialPredicate.INTERSECTS, true, _, false) => "ST_Distance (Geography) <="
+      case (Some(_), _, true, _, false) => "ST_Distance (Geography) <"
+      case (None, _, false, _, false) => s"ST_$spatialPredicate"
+      case (None, _, false,_,  true) => s"RS_$spatialPredicate"
     }
     val (distanceOnIndexSide, distanceOnStreamSide) = distance.map { distanceExpr =>
       matchDistanceExpressionToJoinSide(distanceExpr, left, right) match {

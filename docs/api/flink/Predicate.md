@@ -62,9 +62,9 @@ true
 
 Introduction: Returns true if 'leftGeometry' and 'rightGeometry' are within a specified 'distance' (in metres). This function essentially checks if the shortest distance between the envelope of the two geometries is <= the provided distance.
 
-If `useSphere` is passed true, ST_DWithin uses Sedona's ST_DistanceSpheroid. If `useSphere` is passed false or not passed at all, DWithin uses Euclidean distance.
+If `useSpheroid` is passed true, ST_DWithin uses Sedona's ST_DistanceSpheroid. If `useSpheroid` is passed false or not passed at all, DWithin uses Euclidean distance.
 
-Format: `ST_DWithin (leftGeometry: Geometry, rightGeometry: Geometry, distance: Double, useSphere: Optional(Boolean) = false)`
+Format: `ST_DWithin (leftGeometry: Geometry, rightGeometry: Geometry, distance: Double, useSpheroid: Optional(Boolean) = false)`
 
 Since: `v1.5.1`
 
