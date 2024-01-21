@@ -155,6 +155,9 @@ The optional GeoTools library is required if you want to use CRS transformation,
 
 This is required only if you want to read HDF/NetCDF files using `RS_FromNetCDF`. Note that this JAR is not in Maven Central so you will need to add this repository to your pom.xml or build.sbt, or specify the URL in Spark Config `spark.jars.repositories` or spark-submit `--repositories` option.
 
+!!!warning
+	Due to a bug in Sedona 1.5.1, the jar becomes a required dependency. You will need to specify the URL of the repository.
+
 Under BSD 3-clause (compatible with Apache 2.0 license)
 
 !!! abstract "Add HDF/NetCDF dependency"
