@@ -48,12 +48,6 @@
             <version>${geotools.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.sedona</groupId>
-            <artifactId>sedona-flink_${scala.compat.version}</artifactId>
-            <version>${sedona.version}</version>
-            <scope>${sedona.scope}</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-core</artifactId>
             <version>${flink.version}</version>
