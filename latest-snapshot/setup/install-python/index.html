@@ -887,8 +887,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#prepare-sedona-spark-shaded-jar" class="md-nav__link">
-    Prepare sedona-spark-shaded jar
+  <a href="#prepare-sedona-spark-jar" class="md-nav__link">
+    Prepare sedona-spark jar
   </a>
   
 </li>
@@ -3602,8 +3602,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#prepare-sedona-spark-shaded-jar" class="md-nav__link">
-    Prepare sedona-spark-shaded jar
+  <a href="#prepare-sedona-spark-jar" class="md-nav__link">
+    Prepare sedona-spark jar
   </a>
   
 </li>
@@ -3663,23 +3663,24 @@
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>python
 python3<span class="w"> </span>setup.py<span class="w"> </span>install
 </code></pre></div>
-<h3 id="prepare-sedona-spark-shaded-jar">Prepare sedona-spark-shaded jar<a class="headerlink" href="#prepare-sedona-spark-shaded-jar" title="Permanent link">&para;</a></h3>
-<p>Sedona Python needs one additional jar file called <code>sedona-spark-shaded</code> to work properly. Please make sure you use the correct version for Spark and Scala.</p>
+<h3 id="prepare-sedona-spark-jar">Prepare sedona-spark jar<a class="headerlink" href="#prepare-sedona-spark-jar" title="Permanent link">&para;</a></h3>
+<p>Sedona Python needs one additional jar file called <code>sedona-spark-shaded</code> or <code>sedona-spark</code> to work properly. Please make sure you use the correct version for Spark and Scala.</p>
 <ul>
-<li>For Spark 3.0 to 3.3 and Scala 2.12, it is called <code>sedona-spark-shaded-3.0_2.12-1.5.1.jar</code></li>
-<li>For Spark 3.4+ and Scala 2.12, it is called <code>sedona-spark-shaded-3.4_2.12-1.5.1.jar</code>. If you are using Spark versions higher than 3.4, please replace the <code>3.4</code> in artifact names with the corresponding major.minor version numbers.</li>
+<li>For Spark 3.0 to 3.3 and Scala 2.12, it is called <code>sedona-spark-shaded-3.0_2.12-1.5.1.jar</code> or <code>sedona-spark-3.0_2.12-1.5.1.jar</code></li>
+<li>For Spark 3.4+ and Scala 2.12, it is called <code>sedona-spark-shaded-3.4_2.12-1.5.1.jar</code> or <code>sedona-spark-3.4_2.12-1.5.1.jar</code>. If you are using Spark versions higher than 3.4, please replace the <code>3.4</code> in artifact names with the corresponding major.minor version numbers.</li>
 </ul>
 <p>You can get it using one of the following methods:</p>
 <ol>
-<li>Download <a href="https://repo.maven.apache.org/maven2/org/apache/sedona/">sedona-spark-shaded jar</a> and <a href="https://repo.maven.apache.org/maven2/org/datasyslab/geotools-wrapper/">geotools-wrapper jar</a> from Maven Central, and put them in SPARK_HOME/jars/ folder.</li>
-<li>Call the <a href="../maven-coordinates">Maven Central coordinate</a> in your python program. For example,
+<li>If you run Sedona in Databricks, AWS EMR, or other cloud platform's notebook, use the <code>shaded jar</code>: Download <a href="https://repo.maven.apache.org/maven2/org/apache/sedona/">sedona-spark-shaded jar</a> and <a href="https://repo.maven.apache.org/maven2/org/datasyslab/geotools-wrapper/">geotools-wrapper jar</a> from Maven Central, and put them in SPARK_HOME/jars/ folder.</li>
+<li>If you run Sedona in an IDE or a local Jupyter notebook, use the <code>unshaded jar</code>. Call the <a href="../maven-coordinates">Maven Central coordinate</a> in your python program. For example,
 <mark>Sedona &gt;= 1.4.1</mark></li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.spark</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span> \
     <span class="n">config</span><span class="p">(</span><span class="s1">&#39;spark.jars.packages&#39;</span><span class="p">,</span>
-           <span class="s1">&#39;org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.5.1,&#39;</span>
+           <span class="s1">&#39;org.apache.sedona:sedona-spark-3.0_2.12:1.5.1,&#39;</span>
            <span class="s1">&#39;org.datasyslab:geotools-wrapper:1.5.1-28.2&#39;</span><span class="p">)</span><span class="o">.</span> \
+    <span class="n">config</span><span class="p">(</span><span class="s1">&#39;spark.jars.repositories&#39;</span><span class="p">,</span> <span class="s1">&#39;https://artifacts.unidata.ucar.edu/repository/unidata-all&#39;</span><span class="p">)</span><span class="o">.</span> \
     <span class="n">getOrCreate</span><span class="p">()</span>
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </code></pre></div>
@@ -3718,7 +3719,7 @@ python3<span class="w"> </span>setup.py<span class="w"> </span>install
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 1, 2024 09:17:53</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 21, 2024 00:44:05</span>
       
     
   </small>
