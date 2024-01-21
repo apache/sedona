@@ -3890,6 +3890,10 @@
 </div>
 <h3 id="netcdf-java-542">netCDF-Java 5.4.2<a class="headerlink" href="#netcdf-java-542" title="Permanent link">&para;</a></h3>
 <p>This is required only if you want to read HDF/NetCDF files using <code>RS_FromNetCDF</code>. Note that this JAR is not in Maven Central so you will need to add this repository to your pom.xml or build.sbt, or specify the URL in Spark Config <code>spark.jars.repositories</code> or spark-submit <code>--repositories</code> option.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Due to a bug in Sedona 1.5.1, the jar becomes a required dependency. You will need to specify the URL of the repository.</p>
+</div>
 <p>Under BSD 3-clause (compatible with Apache 2.0 license)</p>
 <div class="admonition abstract">
 <p class="admonition-title">Add HDF/NetCDF dependency</p>
@@ -4109,7 +4113,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 18, 2024 00:00:28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 21, 2024 00:44:05</span>
       
     
   </small>
