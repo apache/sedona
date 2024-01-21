@@ -108,15 +108,18 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
 
 * Modules in the source code
 
-| Name  |  API |  Introduction|
-|---|---|---|
-|Core  | Scala/Java  | Distributed Spatial Datasets and Query Operators |
-|SQL  | Spark RDD/DataFrame in Scala/Java/SQL  |Geospatial data processing on Apache Spark|
-|Flink | Flink DataStream/Table in Scala/Java/SQL | Geospatial data processing on Apache Flink
-|Viz |  Spark RDD/DataFrame in Scala/Java/SQL | Geospatial data visualization on Apache Spark|
-|Python | Spark RDD/DataFrame in Python | Python wrapper for Sedona |
-|R | Spark RDD/DataFrame in R | R wrapper for Sedona |
-|Zeppelin |  Apache Zeppelin | Plugin for Apache Zeppelin 0.8.1+|
+| Name             | API                                      | Introduction                                           |
+|------------------|------------------------------------------|--------------------------------------------------------|
+| common           | Java                                     | Core geometric operation logics, serialization, index  |
+| spark            | Spark RDD/DataFrame Scala/Java/SQL       | Distributed geospatial data processing on Apache Spark |
+| flink            | Flink DataStream/Table in Scala/Java/SQL | Distributed geospatial data processing on Apache Flink |
+| snowflake        | Snowflake SQL                            | Distributed geospatial data processing on Snowflake    |
+| spark-shaded     | No source code                           | shaded jar for Sedona Spark                            |
+| flink-shaded     | No source code                           | shaded jar for Sedona Flink                            |
+| snowflake-tester | Java                                     | tester program for Sedona Snowflake                    |
+| python           | Spark RDD/DataFrame Python               | Distributed geospatial data processing on Apache Spark |
+| R                | Spark RDD/DataFrame in R                 | R wrapper for Sedona                                   |
+| Zeppelin         | Apache Zeppelin                          | Plugin for Apache Zeppelin 0.8.1+                      |
 
 ## Documentation
 
@@ -130,7 +133,7 @@ Please visit [Apache Sedona website](http://sedona.apache.org/) for detailed inf
 
 Follow Sedona on Twitter for fresh news: [Sedona@Twitter](https://twitter.com/ApacheSedona)
 
-Join the Sedona Discord community: [![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://sedona.apache.org/latest/community/discord-invite-form.html)
+Join the Sedona Discord community: [![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://sedona.apache.org/latest/community/contact/#discord-server)
 
 [Sedona JIRA](https://issues.apache.org/jira/projects/SEDONA): Bugs, Pull Requests, and other similar issues
 

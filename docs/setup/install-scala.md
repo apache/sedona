@@ -19,12 +19,12 @@ Please refer to [Sedona Maven Central coordinates](maven-coordinates.md) to sele
 
     * Local mode: test Sedona without setting up a cluster
     ```
-    ./bin/spark-shell --packages org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},org.apache.sedona:sedona-viz-3.0_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
+    ./bin/spark-shell --packages org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
     ```
 
     * Cluster mode: you need to specify Spark Master IP
     ```
-    ./bin/spark-shell --master spark://localhost:7077 --packages org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},org.apache.sedona:sedona-viz-3.0_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
+    ./bin/spark-shell --master spark://localhost:7077 --packages org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
     ```
 
 ### Download Sedona jar manually
@@ -42,12 +42,12 @@ If you are using Spark 3.0 to 3.3, please use jars with filenames containing `3.
 
     * Local mode: test Sedona without setting up a cluster
     ```
-    ./bin/spark-shell --jars /path/to/sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar,/path/to/sedona-viz-3.0_2.12-{{ sedona.current_version }}.jar,/path/to/geotools-wrapper-{{ sedona.current_geotools }}.jar
+    ./bin/spark-shell --jars /path/to/sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar,/path/to/geotools-wrapper-{{ sedona.current_geotools }}.jar
     ```
 
     * Cluster mode: you need to specify Spark Master IP
     ```
-    ./bin/spark-shell --master spark://localhost:7077 --jars /path/to/sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar,/path/to/sedona-viz-3.0_2.12-{{ sedona.current_version }}.jar,/path/to/geotools-wrapper-{{ sedona.current_geotools }}.jar
+    ./bin/spark-shell --master spark://localhost:7077 --jars /path/to/sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar,/path/to/geotools-wrapper-{{ sedona.current_geotools }}.jar
     ```
 
 ## Spark SQL shell

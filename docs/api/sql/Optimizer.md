@@ -30,6 +30,12 @@ FROM pointdf, polygondf
 WHERE ST_Within(pointdf.pointshape, polygondf.polygonshape)
 ```
 
+```sql
+SELECT *
+FROM pointdf, polygondf
+WHERE ST_DWithin(pointdf.pointshape, polygondf.polygonshape, 10.0)
+```
+
 Spark SQL Physical plan:
 
 ```

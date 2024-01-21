@@ -17,7 +17,7 @@ If you are using the Scala 2.13 builds of Spark, please use the corresponding pa
 
 The optional GeoTools library is required if you want to use CRS transformation, ShapefileReader or GeoTiff reader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
-!!! abstract "Sedona with Apache Spark"
+!!! abstract "Sedona with Apache Spark and Scala 2.12"
 
 	=== "Spark 3.0 to 3.3 and Scala 2.12"
 
@@ -50,7 +50,23 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		    <version>{{ sedona.current_geotools }}</version>
 		</dependency>
 		```
-        If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version numbers.
+	=== "Spark 3.5 and Scala 2.12"
+
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-spark-shaded-3.5_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
+
+!!! abstract "Sedona with Apache Spark and Scala 2.13"
 
 	=== "Spark 3.0 to 3.3 and Scala 2.13"
 
@@ -83,7 +99,21 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		    <version>{{ sedona.current_geotools }}</version>
 		</dependency>
 		```
-        If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version numbers.
+	=== "Spark 3.5 and Scala 2.13"
+
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-spark-shaded-3.5_2.13</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
 
 !!! abstract "Sedona with Apache Flink"
 
@@ -124,6 +154,9 @@ The optional GeoTools library is required if you want to use CRS transformation,
 ### netCDF-Java 5.4.2
 
 This is required only if you want to read HDF/NetCDF files using `RS_FromNetCDF`. Note that this JAR is not in Maven Central so you will need to add this repository to your pom.xml or build.sbt, or specify the URL in Spark Config `spark.jars.repositories` or spark-submit `--repositories` option.
+
+!!!warning
+	Due to a bug in Sedona 1.5.1, the jar becomes a required dependency. You will need to specify the URL of the repository.
 
 Under BSD 3-clause (compatible with Apache 2.0 license)
 
@@ -178,7 +211,7 @@ If you are using the Scala 2.13 builds of Spark, please use the corresponding pa
 
 The optional GeoTools library is required if you want to use CRS transformation, ShapefileReader or GeoTiff reader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
-!!! abstract "Sedona with Apache Spark"
+!!! abstract "Sedona with Apache Spark and Scala 2.12"
 
 	=== "Spark 3.0 to 3.3 and Scala 2.12"
 		```xml
@@ -206,7 +239,22 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		    <version>{{ sedona.current_geotools }}</version>
 		</dependency>
 		```
-        If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version numbers.
+	=== "Spark 3.5 and Scala 2.12"
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-spark-3.5_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
+
+!!! abstract "Sedona with Apache Spark and Scala 2.13"
+
 	=== "Spark 3.0+ and Scala 2.13"
 		```xml
 		<dependency>
@@ -233,7 +281,19 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		    <version>{{ sedona.current_geotools }}</version>
 		</dependency>
 		```
-        If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version numbers.
+	=== "Spark 3.5 and Scala 2.13"
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-spark-3.5_2.13</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
 
 !!! abstract "Sedona with Apache Flink"
 

@@ -4,6 +4,167 @@
 !!! note
 	Sedona Python currently only works with Shapely 1.x. If you use GeoPandas, please use <= GeoPandas `0.11.1`. GeoPandas > 0.11.1 will automatically install Shapely 2.0. If you use Shapely, please use <= `1.8.4`.
 
+## Sedona 1.5.1
+
+Sedona 1.5.1 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.12, Snowflake 7+, Java 8.
+
+### Highlights
+
+* [X] **Sedona Snowflake** Add support for Snowflake
+* [X] **Sedona Spark** Support Spark 3.5
+* [X] **Sedona Spark** Support Snowflake 7+
+* [X] **Sedona Spark** Added 20+ raster functions (or variants)
+* [X] **Sedona Spark/Flink/Snowflake** Added 7 vector functions (or variants)
+* [X] **Sedona Spark** GeoParquet reader and writer supports projjson in metadata
+* [X] **Sedona Spark** GeoParquet reader and writer conform to GeoParquet spec 1.0.0 instead of 1.0.0-beta1
+* [X] **Sedona Spark** Added a legacyMode in GeoParquet reader for 1.5.1+ users to read Parquet files written by Sedona 1.3.1 and earlier
+* [X] **Sedona Spark** Fixed a bug in GeoParquet writer so 1.3.1 and earlier users can read Parquet files written by 1.5.1+
+
+### Behavior change
+
+* All raster functions that take a geometry will implicitly transform the CRS of the geometry if needed.
+* The default CRS for these functions is 4326 for raster and geometry involved in raster functions, if not specified.
+* KeplerGL and DeckGL become optional dependencies for Sedona Spark Python.
+
+### New Contributors
+
+* @hongbo-miao made their first contribution in https://github.com/apache/sedona/pull/1063
+* @prantogg made their first contribution in https://github.com/apache/sedona/pull/1122
+* @MyEnthusiastic made their first contribution in https://github.com/apache/sedona/pull/1130
+* @duhaode520 made their first contribution in https://github.com/apache/sedona/pull/1193
+
+### Bug
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-414'>SEDONA-414</a>] -         ST_MakeLine in sedona-spark does not work with array inputs
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-417'>SEDONA-417</a>] -         Fix SedonaUtils.display_image
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-419'>SEDONA-419</a>] -         SedonaKepler and SedonaPyDeck should not be in `sedona.spark`
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-420'>SEDONA-420</a>] -         Make SedonaKepler and SedonaPydeck optional dependencies
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-424'>SEDONA-424</a>] -         Specify jt-jiffle as a provided dependency
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-426'>SEDONA-426</a>] -         Change cloning of rasters to be able to include metadata.
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-440'>SEDONA-440</a>] -         GeoParquet reader should support filter pushdown on nested fields
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-443'>SEDONA-443</a>] -         Upload-artifact leads to 503 error
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-453'>SEDONA-453</a>] -         Performance degrade when indexing points using Quadtree
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-456'>SEDONA-456</a>] -         SedonaKepler cannot work with geopandas &gt;= 0.13.0 correctly
+</li>
+</ul>
+
+### New Feature
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-369'>SEDONA-369</a>] -         Add ST_DWITHIN
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-411'>SEDONA-411</a>] -         Add RS_Rotation
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-413'>SEDONA-413</a>] -         Add buffer parameters to ST_Buffer
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-415'>SEDONA-415</a>] -         Add optional parameter to ST_Transform
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-421'>SEDONA-421</a>] -         Add RS_Clip
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-422'>SEDONA-422</a>] -         Add a feature in RS_SetBandNoDataValue and fix NoDataValue in RS_Clip
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-427'>SEDONA-427</a>] -         Add RS_RasterToWorldCoord
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-428'>SEDONA-428</a>] -         Add RS_ZonalStats &amp; RS_ZonalStatsAll
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-430'>SEDONA-430</a>] -         geoparquet writer should have an option called `writeToCrs`
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-431'>SEDONA-431</a>] -         Add RS_PixelAsPoints
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-432'>SEDONA-432</a>] -         Add RS_PixelAsCentroids
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-433'>SEDONA-433</a>] -         Improve RS_SummaryStats performance
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-435'>SEDONA-435</a>] -         Add RS_PixelAsPolygons
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-438'>SEDONA-438</a>] -         Add NetCDF reader to Sedona
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-439'>SEDONA-439</a>] -         Add RS_Union_Aggr
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-441'>SEDONA-441</a>] -         Implement ST_LineLocatePoint
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-449'>SEDONA-449</a>] -         Add two raster column support to RS_MapAlgebra
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-455'>SEDONA-455</a>] -         Add a new data source namely geoparquet.metadata
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-459'>SEDONA-459</a>] -         Add Snowflake support
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-460'>SEDONA-460</a>] -         RS_Tile and RS_TileExplode
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-461'>SEDONA-461</a>] -         ST_IsValidReason
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-465'>SEDONA-465</a>] -         Support reading legacy parquet files written by Apache Sedona &lt;= 1.3.1-incubating
+</li>
+</ul>
+
+### Improvement
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-339'>SEDONA-339</a>] -         Skip irrelevant GitHub actions
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-416'>SEDONA-416</a>] -         importing SedonaContext, kepler.gl is not found.
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-429'>SEDONA-429</a>] -         geoparquet reader/writer should print &quot;1.0.0&quot; in its version
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-434'>SEDONA-434</a>] -         Improve reliability by resolve the nondeterministic of the order of the Map
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-436'>SEDONA-436</a>] -         Fix RS_SetValues bug
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-437'>SEDONA-437</a>] -         Add implicit CRS transformation
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-446'>SEDONA-446</a>] -         Add floating point datatype support in RS_AsBase64
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-448'>SEDONA-448</a>] -         RS_SetBandNoDataValue should have `replace` option
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-454'>SEDONA-454</a>] -         Change the default value of sedona.global.indextype from quadtree to rtree
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-457'>SEDONA-457</a>] -         Don&#39;t write GeometryUDT into org.apache.spark.sql.parquet.row.metadata when writing GeoParquet files
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-464'>SEDONA-464</a>] -         ST_Valid should have integer flags
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-466'>SEDONA-466</a>] -         RS_AsRaster does not use the weight and height of the raster in its parameters.
+</li>
+</ul>
+
+### Test
+
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-410'>SEDONA-410</a>] -         pre-commit: check that scripts with shebangs are executable
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-412'>SEDONA-412</a>] -         pre-commit: add hook `end-of-file-fixer`
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-423'>SEDONA-423</a>] -         pre-commit: apply hook `end-of-file-fixer` to more files
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-442'>SEDONA-442</a>] -         pre-commit: add hook markdown-lint
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-444'>SEDONA-444</a>] -         pre-commit: add hook to trim trailing whitespace
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-445'>SEDONA-445</a>] -         pre-commit: apply hook end-of-file-fixer to more files
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-447'>SEDONA-447</a>] -         pre-commit: apply end-of-file-fixer to more files
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-463'>SEDONA-463</a>] -         Add a Makefile for convenience
+</li>
+</ul>
+
+### Task
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-450'>SEDONA-450</a>] -         Support Spark 3.5
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-458'>SEDONA-458</a>] -         The docs should have examples for UDF
+</li>
+</ul>
+
 ## Sedona 1.5.0
 
 Sedona 1.5.0 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.

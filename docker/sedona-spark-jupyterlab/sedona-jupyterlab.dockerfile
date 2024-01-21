@@ -23,8 +23,9 @@ ARG hadoop_version=3
 ARG hadoop_s3_version=3.3.4
 ARG aws_sdk_version=1.12.402
 ARG spark_xml_version=0.16.0
-ARG sedona_version=1.5.0
-ARG geotools_wrapper_version=1.5.0-28.2
+ARG sedona_version=1.5.1
+ARG geotools_wrapper_version=1.5.1-28.2
+ARG spark_extension_version=2.11.0
 
 # Set up envs
 ENV SHARED_WORKSPACE=${shared_workspace}
@@ -44,7 +45,7 @@ COPY ./ ${SEDONA_HOME}/
 RUN chmod +x ${SEDONA_HOME}/docker/spark.sh
 RUN chmod +x ${SEDONA_HOME}/docker/sedona.sh
 RUN ${SEDONA_HOME}/docker/spark.sh ${spark_version} ${hadoop_version} ${hadoop_s3_version} ${aws_sdk_version} ${spark_xml_version}
-RUN ${SEDONA_HOME}/docker/sedona.sh ${sedona_version} ${geotools_wrapper_version} ${spark_version}
+RUN ${SEDONA_HOME}/docker/sedona.sh ${sedona_version} ${geotools_wrapper_version} ${spark_version} ${spark_extension_version}
 
 # Install Python dependencies
 COPY docker/sedona-spark-jupyterlab/requirements.txt /opt/requirements.txt
@@ -60,6 +61,7 @@ RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i 's/config
 RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/spark\.jars\.packages/d' {} +
 RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/org\.apache\.sedona:sedona-spark-shaded-/d' {} +
 RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/org\.datasyslab:geotools-wrapper:/d' {} +
+RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/uk\.co\.gresearch\.spark:spark-extension_2\.12:/d' {} +
 
 RUN rm -rf ${SEDONA_HOME}
 
@@ -70,4 +72,12 @@ EXPOSE 4040
 
 WORKDIR ${SHARED_WORKSPACE}
 
-CMD service ssh start && ${SPARK_HOME}/sbin/start-all.sh && jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=
+
+
+CMD DRIVER_MEM=${DRIVER_MEM:-4g} && \
+    EXECUTOR_MEM=${EXECUTOR_MEM:-4g} && \
+    echo "spark.driver.memory $DRIVER_MEM" >> ${SPARK_HOME}/conf/spark-defaults.conf && \
+    echo "spark.executor.memory $EXECUTOR_MEM" >> ${SPARK_HOME}/conf/spark-defaults.conf && \
+    service ssh start && \
+    ${SPARK_HOME}/sbin/start-all.sh && \
+    jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=

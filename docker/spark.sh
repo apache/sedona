@@ -44,8 +44,6 @@ curl https://repo1.maven.org/maven2/com/databricks/spark-xml_2.12/${spark_xml_ve
 
 # Set up master IP address and executor memory
 cp ${SPARK_HOME}/conf/spark-defaults.conf.template ${SPARK_HOME}/conf/spark-defaults.conf
-echo "spark.driver.memory 4g" >> ${SPARK_HOME}/conf/spark-defaults.conf
-echo "spark.executor.memory 4g" >> ${SPARK_HOME}/conf/spark-defaults.conf
 
 # Install required libraries for GeoPandas on Apple chip mac
 apt-get install -y gdal-bin libgdal-dev
