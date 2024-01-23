@@ -4194,7 +4194,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <ol>
 <li>Sedona Snowflake doesn't support <code>M</code> dimension due to the limitation of WKB serialization. Sedona Spark and Sedona Flink support XYZM because it uses our in-house serialization format. Although Sedona Snowflake has functions related to <code>M</code> dimension, all <code>M</code> values will be ignored.</li>
 <li>Sedona H3 functions are not supported because Snowflake does not allow embedded C code in UDF.</li>
-<li>All User Defined Table Functions only work with geometries created by Sedona constructors due to Snowflake current limitation <code>Data type GEOMETRY is not supported in non-SQL UDTF return type</code>. This includes:</li>
+<li>All User Defined Table Functions only work with geometries created by Sedona constructors due to Snowflake current limitation <code>Data type GEOMETRY is not supported in non-SQL UDTF return type</code>. This includes:<ul>
 <li>ST_MinimumBoundingRadius</li>
 <li>ST_Intersection_Aggr</li>
 <li>ST_SubDivideExplode</li>
@@ -4202,6 +4202,8 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <li>ST_Union_Aggr</li>
 <li>ST_Collect</li>
 <li>ST_Dump</li>
+</ul>
+</li>
 <li>Only Sedona ST functions are available in Snowflake. Raster functions (RS functions) are not available in Snowflake yet.</li>
 </ol>
 
@@ -4210,7 +4212,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 13, 2024 10:01:29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 23, 2024 23:30:02</span>
       
     
   </small>
