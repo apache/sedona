@@ -60,9 +60,13 @@ true
 
 ## ST_DWithin
 
-Introduction: Returns true if 'leftGeometry' and 'rightGeometry' are within a specified 'distance' (in metres). This function essentially checks if the shortest distance between the envelope of the two geometries is <= the provided distance.
+Introduction: Returns true if 'leftGeometry' and 'rightGeometry' are within a specified 'distance'.
 
-If `useSpheroid` is passed true, ST_DWithin uses Sedona's ST_DistanceSpheroid. If `useSpheroid` is passed false or not passed at all, DWithin uses Euclidean distance.
+If `useSpheroid` is passed true, ST_DWithin uses Sedona's ST_DistanceSpheroid to check the spheroid distance between the centroids of two geometries. The unit of the distance in this case is meter.
+
+If `useSpheroid` is passed false, ST_DWithin uses Euclidean distance and the unit of the distance is the same as the CRS of the geometries. To obtain the correct result, please consider using ST_Transform to put data in an appropriate CRS.
+
+If useSpheroid is not given, it defaults to false
 
 Format: `ST_DWithin (leftGeometry: Geometry, rightGeometry: Geometry, distance: Double, useSpheroid: Optional(Boolean) = false)`
 
