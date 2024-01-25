@@ -446,7 +446,7 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
 
     it("Passed ST_DWithin") {
       val sampleCount = 200
-      val distance = 2.0
+      val distance = 2
       val polygonDf = buildPolygonDf.limit(sampleCount).repartition(3)
       val pointDf = buildPointDf.limit(sampleCount).repartition(5)
       val expected = bruteForceDWithin(sampleCount, distance)

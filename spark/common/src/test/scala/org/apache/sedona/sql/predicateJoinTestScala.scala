@@ -505,7 +505,7 @@ class predicateJoinTestScala extends TestBaseScala {
 
     it ("Passed ST_DWithin (useSpheroid = false) in a spatial join") {
       val sampleCount = 200
-      val distanceCandidates = Seq(1.0, 2.0, 5.0, 10.0)
+      val distanceCandidates = Seq(1, 2, 5, 10)
       val inputPoint = buildPointDf.limit(sampleCount).repartition(5)
       val inputPolygon = buildPolygonDf.limit(sampleCount).repartition(3)
 
@@ -525,7 +525,7 @@ class predicateJoinTestScala extends TestBaseScala {
 
     it ("Passed ST_DWithin useSphere long form (useSpheroid = true) in a spatial join") {
       val Seq(sphericalDf1, sphericalDf2) = createSpheroidDataFrames()
-      val distanceCandidates = Seq(1000000, 2000000, 3000000, 4000000)
+      val distanceCandidates = Seq(110000, 1055000, 2000000)
 
       distanceCandidates.foreach(distance => {
         val expected = bruteForceDWithinSphere(distance)

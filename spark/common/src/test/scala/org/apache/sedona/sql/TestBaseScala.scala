@@ -25,13 +25,11 @@ import org.apache.sedona.common.Predicates.dWithin
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.sql.DataFrame
-import org.locationtech.jts.geom.{Coordinate, CoordinateSequence, CoordinateSequenceComparator, Geometry, GeometryFactory}
+import org.locationtech.jts.geom._
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
-import scala.util.Random
-
 trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
-  Logger.getRootLogger().setLevel(Level.WARN)
+  Logger.getRootLogger.setLevel(Level.WARN)
   Logger.getLogger("org.apache").setLevel(Level.WARN)
   Logger.getLogger("com").setLevel(Level.WARN)
   Logger.getLogger("akka").setLevel(Level.WARN)
@@ -48,7 +46,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
 
   val sc = sparkSession.sparkContext
 
-  val resourceFolder = System.getProperty("user.dir") + "/src/test/resources/"
+  val resourceFolder = System.getProperty("user.dir") + "/spark/common/src/test/resources/"
   val mixedWkbGeometryInputLocation = resourceFolder + "county_small_wkb.tsv"
   val mixedWktGeometryInputLocation = resourceFolder + "county_small.tsv"
   val shapefileInputLocation = resourceFolder + "shapefiles/dbf"
@@ -106,9 +104,10 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
         factory.createPoint(new Coordinate(x, y))
       }
     } ++ Seq(factory.createPoint(new Coordinate(0, -90)), factory.createPoint(new Coordinate(0, 90)))
-    val rand = new Random()
+
+    // uniformly generate geometries.size partitions of distance between [110000,  110000 + 2000000)
     geometries.zipWithIndex.map { case (geom, idx) =>
-      (idx, 110000 + 2000000 * rand.nextDouble, geom)
+      (idx, 110000 + 2000000 * (idx.asInstanceOf[Double] / geometries.size), geom)
     }
   }
 
