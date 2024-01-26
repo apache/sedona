@@ -16,19 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.common.raster;
+package org.apache.sedona.common.raster.serde;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import org.apache.commons.io.IOUtils;
 import org.geotools.referencing.CRS;
+import org.geotools.referencing.wkt.Formattable;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import si.uom.NonSI;
+import si.uom.SI;
 
+import javax.measure.IncommensurableException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
@@ -41,6 +46,20 @@ import java.util.zip.InflaterInputStream;
  */
 public class CRSSerializer {
     private CRSSerializer() {}
+
+    static {
+        try {
+            // HACK: This is for warming up the piCache in tech.units.indriya.function.Calculus.
+            // Otherwise, concurrent calls to CoordinateReferenceSystem.toWKT() will cause a
+            // ConcurrentModificationException. This is a bug of tech.units.indriya, which was fixed
+            // in 2.1.4 by https://github.com/unitsofmeasurement/indriya/commit/fc370465
+            // However, 2.1.4 is not compatible with the GeoTools version we use. That's the reason
+            // why we have this workaround here.
+            NonSI.DEGREE_ANGLE.getConverterToAny(SI.RADIAN).convert(1);
+        } catch (IncommensurableException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private static class CRSKey {
         private final CoordinateReferenceSystem crs;
@@ -85,10 +104,15 @@ public class CRSSerializer {
     private static byte[] doSerializeCRS(CRSKey crsKey) throws IOException {
         CoordinateReferenceSystem crs = crsKey.crs;
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            DeflaterOutputStream dos = new DeflaterOutputStream(bos);
-            ObjectOutputStream oos = new ObjectOutputStream(dos)) {
-            oos.writeObject(crs);
-            oos.flush();
+            DeflaterOutputStream dos = new DeflaterOutputStream(bos)) {
+            String wktString;
+            if (crs instanceof Formattable) {
+                // Can specify "strict" as false to get rid of serialization errors in trade of correctness
+                wktString = ((Formattable) crs).toWKT(2, false);
+            } else {
+                wktString = crs.toWKT();
+            }
+            dos.write(wktString.getBytes(StandardCharsets.UTF_8));
             dos.finish();
             byte[] res = bos.toByteArray();
             crsDeserializationCache.put(ByteBuffer.wrap(res), crs);
@@ -96,12 +120,13 @@ public class CRSSerializer {
         }
     }
 
-    private static CoordinateReferenceSystem doDeserializeCRS(ByteBuffer byteBuffer) throws IOException, ClassNotFoundException {
+    private static CoordinateReferenceSystem doDeserializeCRS(ByteBuffer byteBuffer) throws IOException, FactoryException {
         byte[] bytes = byteBuffer.array();
         try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-             InflaterInputStream dis = new InflaterInputStream(bis);
-             ObjectInputStream ois = new ObjectInputStream(dis)) {
-            CoordinateReferenceSystem crs = (CoordinateReferenceSystem) ois.readObject();
+             InflaterInputStream dis = new InflaterInputStream(bis)) {
+            byte[] wktBytes = IOUtils.toByteArray(dis);
+            String wktString = new String(wktBytes, StandardCharsets.UTF_8);
+            CoordinateReferenceSystem crs = CRS.parseWKT(wktString);
             crsSerializationCache.put(new CRSKey(crs), bytes);
             return crs;
         }

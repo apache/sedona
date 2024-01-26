@@ -19,6 +19,7 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.Constructors;
+import org.apache.sedona.common.raster.serde.Serde;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
@@ -189,7 +190,7 @@ public class RasterBandEditorsTest extends RasterTestBase{
     }
 
     @Test
-    public void testClip() throws IOException, FactoryException, TransformException, ParseException {
+    public void testClip() throws IOException, FactoryException, TransformException, ParseException, ClassNotFoundException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
         String polygon = "POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))";
         Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
@@ -216,6 +217,8 @@ public class RasterBandEditorsTest extends RasterTestBase{
         GridCoverage2D croppedRaster = RasterBandEditors.clip(raster, 1, geom, 200, true);
         assertEquals(0, croppedRaster.getRenderedImage().getMinX());
         assertEquals(0, croppedRaster.getRenderedImage().getMinY());
+        GridCoverage2D croppedRaster2 = Serde.deserialize(Serde.serialize(croppedRaster));
+        assertSameCoverage(croppedRaster, croppedRaster2);
         points = new ArrayList<>();
         points.add(Constructors.geomFromWKT("POINT(236842 4.20465e+06)", 26918));
         points.add(Constructors.geomFromWKT("POINT(236961 4.20453e+06)", 26918));
