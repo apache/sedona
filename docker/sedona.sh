@@ -53,4 +53,3 @@ pip3 install pyspark-extension==${spark_extension_version}.${sedona_spark_versio
 
 # Download GeoTools jar
 curl https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/${geotools_wrapper_version}/geotools-wrapper-${geotools_wrapper_version}.jar -o $SPARK_HOME/jars/geotools-wrapper-${geotools_wrapper_version}.jar
-
