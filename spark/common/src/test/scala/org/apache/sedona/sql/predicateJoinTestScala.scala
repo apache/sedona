@@ -536,5 +536,12 @@ class predicateJoinTestScala extends TestBaseScala {
       })
     }
 
+    it("Passed ST_DWithin complex boolean expression") {
+      val expected = 55
+      val df_point = sparkSession.range(10).withColumn("pt", expr("ST_Point(id, id)"))
+      val df_polygon = sparkSession.range(10).withColumn("poly", expr("ST_Point(id, id + 0.01)"))
+      val actual = df_point.alias("a").join(df_polygon.alias("b"), expr("ST_DWithin(pt, poly, 10000, a.`id` % 2 = 0)")).count()
+      assert(expected == actual)
+    }
   }
 }

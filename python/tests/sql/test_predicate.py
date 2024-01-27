@@ -17,6 +17,7 @@
 
 from tests import csv_point_input_location, csv_point1_input_location, csv_polygon1_input_location
 from tests.test_base import TestBase
+from pyspark.sql.functions import expr
 
 
 class TestPredicate(TestBase):
@@ -228,3 +229,11 @@ class TestPredicate(TestBase):
         test_table.createOrReplaceTempView("test_table")
         isWithin = self.spark.sql("select ST_DWithin(seattle, ny, 2000000, true) from test_table").head()[0]
         assert isWithin is False
+
+
+    def test_dwithin_use_sphere_complex_boolean_expression(self):
+        expected = 55
+        df_point = self.spark.range(10).withColumn("pt", expr("ST_Point(id, id)"))
+        df_polygon = self.spark.range(10).withColumn("poly", expr("ST_Point(id, id + 0.01)"))
+        actual = df_point.alias("a").join(df_polygon.alias("b"), expr("ST_DWithin(pt, poly, 10000, a.`id` % 2 = 0)"))
+        assert expected == actual

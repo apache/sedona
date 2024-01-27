@@ -141,11 +141,29 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
         case Some(And(_, ST_DWithin(Seq(leftShape, rightShape, distance)))) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = false, condition, Some(distance)))
         case Some(ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid))) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = useSpheroid.eval().asInstanceOf[Boolean], condition, Some(distance)))
+          try {
+            val useSpheroidUnwrapped = useSpheroid.eval().asInstanceOf[Boolean]
+            Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = useSpheroidUnwrapped, condition, Some(distance)))
+          }catch {
+            case _: UnsupportedOperationException =>
+              Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = false, condition, Some(distance)))
+          }
         case Some(And(ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid)), _)) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = useSpheroid.eval().asInstanceOf[Boolean], condition, Some(distance)))
+          try {
+            val useSpheroidUnwrapped = useSpheroid.eval().asInstanceOf[Boolean]
+            Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = useSpheroidUnwrapped, condition, Some(distance)))
+          }catch {
+            case _: UnsupportedOperationException =>
+              Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = false, condition, Some(distance)))
+          }
         case Some(And(_, ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid)))) =>
-          Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = useSpheroid.eval().asInstanceOf[Boolean], condition, Some(distance)))
+          try {
+            val useSpheroidUnwrapped = useSpheroid.eval().asInstanceOf[Boolean]
+            Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = useSpheroidUnwrapped, condition, Some(distance)))
+          }catch {
+            case _: UnsupportedOperationException =>
+              Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = false, condition, Some(distance)))
+          }
         case Some(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), distance)) =>
           Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, false, condition, Some(distance)))
         case Some(And(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), distance), _)) =>
