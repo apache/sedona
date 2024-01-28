@@ -145,7 +145,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
             val useSpheroidUnwrapped = useSpheroid.eval().asInstanceOf[Boolean]
             Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = useSpheroidUnwrapped, condition, Some(distance)))
           }catch {
-            case _: UnsupportedOperationException =>
+            case _: Throwable =>
               Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = false, condition, Some(distance)))
           }
         case Some(And(ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid)), _)) =>
@@ -153,7 +153,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
             val useSpheroidUnwrapped = useSpheroid.eval().asInstanceOf[Boolean]
             Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = useSpheroidUnwrapped, condition, Some(distance)))
           }catch {
-            case _: UnsupportedOperationException =>
+            case _: Throwable =>
               Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = false, condition, Some(distance)))
           }
         case Some(And(_, ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid)))) =>
@@ -161,7 +161,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
             val useSpheroidUnwrapped = useSpheroid.eval().asInstanceOf[Boolean]
             Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = useSpheroidUnwrapped, condition, Some(distance)))
           }catch {
-            case _: UnsupportedOperationException =>
+            case _: Throwable =>
               Some(JoinQueryDetection(left, right, leftShape, rightShape, SpatialPredicate.INTERSECTS, isGeography = false, condition, Some(distance)))
           }
         case Some(LessThanOrEqual(ST_Distance(Seq(leftShape, rightShape)), distance)) =>
