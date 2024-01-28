@@ -35,7 +35,7 @@ After developing a contribution, the easiest and most visible way to submit a Pu
 
 **Please use the JIRA ticket ID in the PR name, such as "[SEDONA-1] my subject".**
 
-When creating a PR, please answser the questions in the PR template.
+When creating a PR, please answer the questions in the PR template.
 
 When a PR is submitted, GitHub Action will check the build correctness. Please check the PR status, and fix any reported problems.
 
