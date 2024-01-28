@@ -235,5 +235,5 @@ class TestPredicate(TestBase):
         expected = 55
         df_point = self.spark.range(10).withColumn("pt", expr("ST_Point(id, id)"))
         df_polygon = self.spark.range(10).withColumn("poly", expr("ST_Point(id, id + 0.01)"))
-        actual = df_point.alias("a").join(df_polygon.alias("b"), expr("ST_DWithin(pt, poly, 10000, a.`id` % 2 = 0)"))
+        actual = df_point.alias("a").join(df_polygon.alias("b"), expr("ST_DWithin(pt, poly, 10000, a.`id` % 2 = 0)")).head()[0]
         assert expected == actual
