@@ -13,6 +13,7 @@
 - [x] Spatial DataFrame/SQL on Spark
 - [x] Spatial DataStream on Flink
 - [x] Spatial Table/SQL on Flink
+- [x] Spatial SQL on Snowflake
 
 ## Complex spatial objects
 
@@ -28,6 +29,8 @@
 ## Rich spatial analytics tools
 
 - [x] Coordinate Reference System / Spatial Reference System Transformation
-- [x] High resolution map generation: [Visualize Spatial DataFrame/RDD](../../tutorial/viz)
-- [x] Apache Zeppelin integration
+- [x] Apache Zeppelin dashboard integration
+- [X] Integrate with a variety of Python tools including Jupyter notebook, GeoPandas, Shapely
+- [X] Integrate with a variety of visualization tools including KeplerGL, DeckGL
+- [x] High resolution and scalable map generation: [Visualize Spatial DataFrame/RDD](../../tutorial/viz)
 - [x] Support Scala, Java, Python, R
