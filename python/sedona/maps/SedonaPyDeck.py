@@ -195,7 +195,7 @@ class SedonaPyDeck:
         """
         if geometry_col is None:
             geometry_col = SedonaMapUtils.__get_geometry_col__(df=df)
-        gdf = SedonaMapUtils.__convert_to_gdf__(df, rename=False, geometry_col=geometry_col)
+        gdf = SedonaMapUtils.__convert_to_gdf_or_pdf__(df, rename=False, geometry_col=geometry_col)
         if add_coords is True:
             SedonaPyDeck._create_coord_column_(gdf=gdf, geometry_col=geometry_col)
         return gdf
