@@ -182,7 +182,7 @@ case class RS_Normalize(inputExpressions: Seq[Expression]) extends InferredExpre
 case class RS_NormalizeAll(inputExpressions: Seq[Expression]) extends InferredExpression(
   inferrableFunction1(MapAlgebra.normalizeAll), inferrableFunction3(MapAlgebra.normalizeAll)
 ) {
-  override protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
