@@ -454,6 +454,10 @@ public class MapAlgebra
      * @return a raster with all values in all bands normalized between minLim and maxLim
      */
     public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom, double minLim, double maxLim) {
+        if (minLim > maxLim) {
+            throw new IllegalArgumentException("minLim cannot be greater than maxLim");
+        }
+
         int numBands = rasterGeom.getNumSampleDimensions();
 
         for (int bandIndex = 1; bandIndex <= numBands; bandIndex++) {
