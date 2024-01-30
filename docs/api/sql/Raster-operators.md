@@ -2480,6 +2480,24 @@ Spark SQL Example:
 SELECT RS_Normalize(band)
 ```
 
+### RS_NormalizeAll
+
+Introduction: Normalizes values in all bands of a raster between a given normalization range. By default, the values are normalized to range [0, 255].
+
+Format:
+
+`RS_NormalizeAll (raster: Raster)`
+
+`RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double)`
+
+Since: `v1.6.0`
+
+Spark SQL Example:
+
+```sql
+SELECT RS_NormalizeAll(raster, 0, 1)
+```
+
 ### RS_NormalizedDifference
 
 Introduction: Returns Normalized Difference between two bands(band2 and band1) in a Geotiff image(example: NDVI, NDBI)

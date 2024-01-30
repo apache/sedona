@@ -199,6 +199,7 @@ object Catalog {
     function[RS_LogicalOver](),
     function[RS_Array](),
     function[RS_Normalize](),
+    function[RS_NormalizeAll](),
     function[RS_AddBandFromArray](),
     function[RS_BandAsArray](),
     function[RS_MapAlgebra](null),

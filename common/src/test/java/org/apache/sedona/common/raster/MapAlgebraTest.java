@@ -25,6 +25,8 @@ import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 
 import java.awt.image.DataBuffer;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Random;
 
 import static org.junit.Assert.*;
@@ -319,6 +321,40 @@ public class MapAlgebraTest extends RasterTestBase
         double[] actual = MapAlgebra.normalize(band);
         double[] expected = new double[] {226.0, 255.0, 0.0, 72.0};
         assertArrayEquals(expected, actual, 0.1d);
+    }
+
+    @Test
+    public void testNormalizeAll() throws FactoryException {
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(3, 4, 4, 0, 0, 1);
+
+        for (int band = 1; band <= 3; band++) {
+            double[] bandValues = new double[4 * 4];
+            for (int i = 0; i < bandValues.length; i++) {
+                bandValues[i] = (i) * band;
+            }
+            raster = MapAlgebra.addBandFromArray(raster, bandValues, band);
+        }
+
+        GridCoverage2D normalizedRaster1 = MapAlgebra.normalizeAll(raster);
+        GridCoverage2D normalizedRaster2 = MapAlgebra.normalizeAll(raster, 256d, 511d);
+
+        for (int band = 1; band <= 3; band++) {
+            double[] normalizedBand1 = MapAlgebra.bandAsArray(normalizedRaster1, band);
+            double[] normalizedBand2 = MapAlgebra.bandAsArray(normalizedRaster2, band);
+            double normalizedMin1 = Arrays.stream(normalizedBand1).min().getAsDouble();
+            double normalizedMax1 = Arrays.stream(normalizedBand1).max().getAsDouble();
+            double normalizedMin2 = Arrays.stream(normalizedBand2).min().getAsDouble();
+            double normalizedMax2 = Arrays.stream(normalizedBand2).max().getAsDouble();
+            double[] expected1 = {0.0, 17.0, 34.0, 51.0, 68.0, 85.0, 102.0, 119.0, 136.0, 153.0, 170.0, 187.0, 204.0, 221.0, 238.0, 255.0};
+            double[] expected2 = {256.0, 273.0, 290.0, 307.0, 324.0, 341.0, 358.0, 375.0, 392.0, 409.0, 426.0, 443.0, 460.0, 477.0, 494.0, 511.0};
+
+            assertEquals(0d, normalizedMin1, 0.01d);
+            assertEquals(255d, normalizedMax1, 0.01d);
+            assertEquals(256d, normalizedMin2, 0.01d);
+            assertEquals(511d, normalizedMax2, 0.01d);
+            assertEquals(Arrays.toString(expected1), Arrays.toString(normalizedBand1));
+            assertEquals(Arrays.toString(expected2), Arrays.toString(normalizedBand2));
+        }
     }
 
     @Test

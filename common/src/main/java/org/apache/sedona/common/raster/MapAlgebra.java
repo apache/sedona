@@ -438,6 +438,45 @@ public class MapAlgebra
     }
 
     /**
+     *
+     * @param rasterGeom Raster to be normalized
+     * @return a raster with all values in all bands normalized between [0 - 255]
+     */
+    public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom) {
+        return normalizeAll(rasterGeom, 0d, 255d);
+    }
+
+    /**
+     *
+     * @param rasterGeom Raster to be normalized
+     * @param minLim Lower limit of normalization range
+     * @param maxLim Upper limit of normalization range
+     * @return a raster with all values in all bands normalized between minLim and maxLim
+     */
+    public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom, double minLim, double maxLim) {
+        int numBands = rasterGeom.getNumSampleDimensions();
+
+        for (int bandIndex = 1; bandIndex <= numBands; bandIndex++) {
+            // Get the band values as an array
+            double[] bandValues = bandAsArray(rasterGeom, bandIndex);
+
+            // Find min and max values in the band
+            double minValue = Arrays.stream(bandValues).min().orElse(Double.NaN);
+            double maxValue = Arrays.stream(bandValues).max().orElse(Double.NaN);
+
+            // Normalize the band values
+            for (int i = 0; i < bandValues.length; i++) {
+                bandValues[i] = minLim + ((bandValues[i] - minValue) * (maxLim - minLim)) / (maxValue - minValue);
+            }
+
+            // Update the raster with the normalized band
+            rasterGeom = addBandFromArray(rasterGeom, bandValues, bandIndex);
+        }
+
+        return rasterGeom;
+    }
+
+    /**
      * @param band1 band values
      * @param band2 band values
      * @return an array with the normalized difference of the provided bands

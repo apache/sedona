@@ -216,6 +216,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(df.first().getAs[mutable.WrappedArray[Double]](0)(1) == 255)
     }
 
+    it("should pass RS_NormalizeAll") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val result = df.selectExpr("RS_NormalizeAll(raster) as normalized").first().get(0)
+      assert(result.isInstanceOf[GridCoverage2D])
+    }
+
     it("should pass RS_Array") {
       val df = sparkSession.sql("SELECT RS_Array(6, 1e-6) as band")
       val result = df.first().getAs[mutable.WrappedArray[Double]](0)
