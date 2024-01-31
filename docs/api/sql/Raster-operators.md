@@ -2482,13 +2482,29 @@ SELECT RS_Normalize(band)
 
 ### RS_NormalizeAll
 
-Introduction: Normalizes values in all bands of a raster between a given normalization range. By default, the values are normalized to range [0, 255].
+Introduction: Normalizes values in all bands of a raster between a given normalization range. By default, the values are normalized to range [0, 255]. RS_NormalizeAll can take upto 6 of the following arguments.
 
-Format:
+- `raster`: The raster to be normalized.
+- `minLim` and `maxLim` (Optional): The lower and upper limits of the normalization range. By default, normalization range is set to [0, 255].
+- `noDataValue` (Optional): NoDataValues in rasters represent missing or invalid data. By default, -9999 is taken as NoDataValue.
+- `minValue` and `maxValue` (Optional): Optionally, specific minimum and maximum values of the input raster can be provided. If not provided, these values are computed from the raster data.
 
-`RS_NormalizeAll (raster: Raster)`
+!!!Note
+    The function maintains the data type of the raster values. It ensures that the normalized values are cast back to the original data type of each band in the raster.
 
-`RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double)`
+Formats:
+```
+RS_NormalizeAll (raster: Raster)`
+```
+```
+RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double)
+```
+```
+RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double, noDataValue: Double)
+```
+```
+RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double, noDataValue: Double, minValue: Double, maxValue: Double)
+```
 
 Since: `v1.6.0`
 
