@@ -325,35 +325,47 @@ public class MapAlgebraTest extends RasterTestBase
 
     @Test
     public void testNormalizeAll() throws FactoryException {
-        GridCoverage2D raster1 = RasterConstructors.makeEmptyRaster(3, 4, 4, 0, 0, 1);
-        GridCoverage2D raster2 = RasterConstructors.makeEmptyRaster(3, 4, 4, 0, 0, 1);
+        GridCoverage2D raster1 = RasterConstructors.makeEmptyRaster(2, 4, 4, 0, 0, 1);
+        GridCoverage2D raster2 = RasterConstructors.makeEmptyRaster(2, 4, 4, 0, 0, 1);
+        GridCoverage2D raster3 = RasterConstructors.makeEmptyRaster(2, "I", 4, 4, 0, 0, 1);
+        GridCoverage2D raster4 = RasterConstructors.makeEmptyRaster(2, 4, 4, 0, 0, 1);
 
-        for (int band = 1; band <= 3; band++) {
+        for (int band = 1; band <= 2; band++) {
             double[] bandValues1 = new double[4 * 4];
             double[] bandValues2 = new double[4 * 4];
+            double[] bandValues3 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,-9999};
+            double[] bandValues4 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0};
             for (int i = 0; i < bandValues1.length; i++) {
                 bandValues1[i] = (i) * band;
                 bandValues2[i] = (1) * (band-1);
             }
             raster1 = MapAlgebra.addBandFromArray(raster1, bandValues1, band);
             raster2 = MapAlgebra.addBandFromArray(raster2, bandValues2, band);
+            raster3 = MapAlgebra.addBandFromArray(raster3, bandValues3, band);
+            raster4 = MapAlgebra.addBandFromArray(raster4, bandValues4, band);
         }
 
         GridCoverage2D normalizedRaster1 = MapAlgebra.normalizeAll(raster1);
         GridCoverage2D normalizedRaster2 = MapAlgebra.normalizeAll(raster1, 256d, 511d);
         GridCoverage2D normalizedRaster3 = MapAlgebra.normalizeAll(raster2);
+        GridCoverage2D normalizedRaster4 = MapAlgebra.normalizeAll(raster3, 0, 255);
+        GridCoverage2D normalizedRaster5 = MapAlgebra.normalizeAll(raster4, 0, 255, 0, 1, 15);
 
-        for (int band = 1; band <= 3; band++) {
+        for (int band = 1; band <= 2; band++) {
             double[] normalizedBand1 = MapAlgebra.bandAsArray(normalizedRaster1, band);
             double[] normalizedBand2 = MapAlgebra.bandAsArray(normalizedRaster2, band);
             double[] normalizedBand3 = MapAlgebra.bandAsArray(normalizedRaster3, band);
+            double[] normalizedBand4 = MapAlgebra.bandAsArray(normalizedRaster4, band);
+            double[] normalizedBand5 = MapAlgebra.bandAsArray(normalizedRaster5, band);
             double normalizedMin1 = Arrays.stream(normalizedBand1).min().getAsDouble();
             double normalizedMax1 = Arrays.stream(normalizedBand1).max().getAsDouble();
             double normalizedMin2 = Arrays.stream(normalizedBand2).min().getAsDouble();
             double normalizedMax2 = Arrays.stream(normalizedBand2).max().getAsDouble();
             double[] expected1 = {0.0, 17.0, 34.0, 51.0, 68.0, 85.0, 102.0, 119.0, 136.0, 153.0, 170.0, 187.0, 204.0, 221.0, 238.0, 255.0};
             double[] expected2 = {256.0, 273.0, 290.0, 307.0, 324.0, 341.0, 358.0, 375.0, 392.0, 409.0, 426.0, 443.0, 460.0, 477.0, 494.0, 511.0};
-            double[] expected3 = {127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5};
+            double[] expected3 = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+            double[] expected4 = {0.0, 18.0, 36.0, 54.0, 72.0, 91.0, 109.0, 127.0, 145.0, 163.0, 182.0, 200.0, 218.0, 236.0, 255.0, 255.0};
+            double[] expected5 = {0.0, 18.214285714285715, 36.42857142857143, 54.642857142857146, 72.85714285714286, 91.07142857142857, 109.28571428571429, 127.5, 145.71428571428572, 163.92857142857142, 182.14285714285714, 200.35714285714286, 218.57142857142858, 236.78571428571428, 255.0, 255.0};
 
             assertEquals(0d, normalizedMin1, 0.01d);
             assertEquals(255d, normalizedMax1, 0.01d);
@@ -362,8 +374,55 @@ public class MapAlgebraTest extends RasterTestBase
             assertEquals(Arrays.toString(expected1), Arrays.toString(normalizedBand1));
             assertEquals(Arrays.toString(expected2), Arrays.toString(normalizedBand2));
             assertEquals(Arrays.toString(expected3), Arrays.toString(normalizedBand3));
+            assertEquals(Arrays.toString(expected4), Arrays.toString(normalizedBand4));
+            assertEquals(Arrays.toString(expected5), Arrays.toString(normalizedBand5));
         }
     }
+
+    @Test
+    public void testNormalizeAll2() throws FactoryException {
+        String[] pixelTypes = {"B", "I", "S", "US", "F", "D"}; // Byte, Integer, Short, Unsigned Short, Float, Double
+        for (String pixelType : pixelTypes) {
+            testNormalizeAll2(10, 10, pixelType);
+        }
+    }
+
+    private void testNormalizeAll2(int width, int height, String pixelType) throws FactoryException {
+        // Create an empty raster with the specified pixel type
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, pixelType, width, height, 10, 20, 1);
+
+        // Fill raster
+        double[] bandValues = new double[width * height];
+        for (int i = 0; i < bandValues.length; i++) {
+            bandValues[i] = i;
+        }
+        raster = MapAlgebra.addBandFromArray(raster, bandValues, 1);
+
+        GridCoverage2D normalizedRaster = MapAlgebra.normalizeAll(raster, 0, 255);
+
+        // Check the normalized values and data type
+        double[] normalizedBandValues = MapAlgebra.bandAsArray(normalizedRaster, 1);
+        for (int i = 0; i < bandValues.length; i++) {
+            double expected = (bandValues[i] - 0) * (255 - 0) / (99 - 0);
+            double actual = normalizedBandValues[i];
+            switch (normalizedRaster.getRenderedImage().getSampleModel().getDataType()) {
+                case DataBuffer.TYPE_BYTE:
+                case DataBuffer.TYPE_SHORT:
+                case DataBuffer.TYPE_USHORT:
+                case DataBuffer.TYPE_INT:
+                    assertEquals((int) expected, (int) actual);
+                    break;
+                default:
+                    assertEquals(expected, actual, 0.01);
+            }
+        }
+
+        // Assert the data type remains as expected
+        int resultDataType = normalizedRaster.getRenderedImage().getSampleModel().getDataType();
+        int expectedDataType = RasterUtils.getDataTypeCode(pixelType);
+        assertEquals(expectedDataType, resultDataType);
+    }
+
 
     @Test
     public void testNormalizedDifference() {

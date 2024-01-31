@@ -437,13 +437,16 @@ public class MapAlgebra
         return result;
     }
 
-    /**
-     *
-     * @param rasterGeom Raster to be normalized
-     * @return a raster with all values in all bands normalized between [0 - 255]
-     */
     public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom) {
-        return normalizeAll(rasterGeom, 0d, 255d);
+        return normalizeAll(rasterGeom, 0d, 255d, -9999, -99999, -99999);
+    }
+
+    public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom, double minLim, double maxLim) {
+        return normalizeAll(rasterGeom, minLim, maxLim, -9999, -99999, -99999);
+    }
+
+    public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom, double minLim, double maxLim, double noDataValue) {
+        return normalizeAll(rasterGeom, minLim, maxLim, noDataValue, -99999, -99999);
     }
 
     /**
@@ -451,33 +454,45 @@ public class MapAlgebra
      * @param rasterGeom Raster to be normalized
      * @param minLim Lower limit of normalization range
      * @param maxLim Upper limit of normalization range
+     * @param noDataValue NoDataValue used in raster
+     * @param minValue Minimum value in raster
+     * @param maxValue Maximum value in raster
      * @return a raster with all values in all bands normalized between minLim and maxLim
      */
-    public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom, double minLim, double maxLim) {
+    public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom, double minLim, double maxLim, double noDataValue, double minValue, double maxValue) {
         if (minLim > maxLim) {
             throw new IllegalArgumentException("minLim cannot be greater than maxLim");
         }
 
+        // Unset minmaxFlag if minValue and maxValue are not given;
+        boolean minmaxFlag = minValue != -99999;
+
         int numBands = rasterGeom.getNumSampleDimensions();
+        RenderedImage renderedImage = rasterGeom.getRenderedImage();
+        int rasterDataType = renderedImage.getSampleModel().getDataType();
 
         for (int bandIndex = 1; bandIndex <= numBands; bandIndex++) {
             // Get the band values as an array
             double[] bandValues = bandAsArray(rasterGeom, bandIndex);
 
-            // Find min and max values in the band
-            double minValue = Arrays.stream(bandValues).min().orElse(Double.NaN);
-            double maxValue = Arrays.stream(bandValues).max().orElse(Double.NaN);
-            System.out.println("minValue: "+minValue);
-            System.out.println("maxValue: "+maxValue);
+            // Find min and max values in the band, excluding NoDataValue
+            if (!minmaxFlag) {
+                minValue = Arrays.stream(bandValues).filter(val -> val != noDataValue).min().orElse(Double.NaN);
+                maxValue = Arrays.stream(bandValues).filter(val -> val != noDataValue).max().orElse(Double.NaN);
+            }
 
             if (minValue == maxValue) {
-                // If all values in the band are same - set middle value of range as default value.
-                double defaultValue = (minLim + maxLim) / 2.0;
-                Arrays.fill(bandValues, defaultValue);
+                // Set default value for constant bands to minLim
+                Arrays.fill(bandValues, minLim);
             } else {
-                // Normalize the band values
+                // Normalize the band values, setting NoDataValue to maxLim
                 for (int i = 0; i < bandValues.length; i++) {
-                    bandValues[i] = minLim + ((bandValues[i] - minValue) * (maxLim - minLim)) / (maxValue - minValue);
+                    if (bandValues[i] == noDataValue) {
+                        bandValues[i] = maxLim;
+                    } else {
+                        double normalizedValue = minLim + ((bandValues[i] - minValue) * (maxLim - minLim)) / (maxValue - minValue);
+                        bandValues[i] = castRasterDataType(normalizedValue, rasterDataType);
+                    }
                 }
             }
 
@@ -486,6 +501,24 @@ public class MapAlgebra
         }
 
         return rasterGeom;
+    }
+
+    private static double castRasterDataType(double value, int dataType) {
+        switch (dataType) {
+            case DataBuffer.TYPE_BYTE:
+                return (byte) value;
+            case DataBuffer.TYPE_SHORT:
+                return (short) value;
+            case DataBuffer.TYPE_INT:
+                return (int) value;
+            case DataBuffer.TYPE_USHORT:
+                return (char) value;
+            case DataBuffer.TYPE_FLOAT:
+                return (float) value;
+            case DataBuffer.TYPE_DOUBLE:
+            default:
+                return value;
+        }
     }
 
     /**
