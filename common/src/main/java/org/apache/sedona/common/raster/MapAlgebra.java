@@ -467,10 +467,18 @@ public class MapAlgebra
             // Find min and max values in the band
             double minValue = Arrays.stream(bandValues).min().orElse(Double.NaN);
             double maxValue = Arrays.stream(bandValues).max().orElse(Double.NaN);
+            System.out.println("minValue: "+minValue);
+            System.out.println("maxValue: "+maxValue);
 
-            // Normalize the band values
-            for (int i = 0; i < bandValues.length; i++) {
-                bandValues[i] = minLim + ((bandValues[i] - minValue) * (maxLim - minLim)) / (maxValue - minValue);
+            if (minValue == maxValue) {
+                // If all values in the band are same - set middle value of range as default value.
+                double defaultValue = (minLim + maxLim) / 2.0;
+                Arrays.fill(bandValues, defaultValue);
+            } else {
+                // Normalize the band values
+                for (int i = 0; i < bandValues.length; i++) {
+                    bandValues[i] = minLim + ((bandValues[i] - minValue) * (maxLim - minLim)) / (maxValue - minValue);
+                }
             }
 
             // Update the raster with the normalized band

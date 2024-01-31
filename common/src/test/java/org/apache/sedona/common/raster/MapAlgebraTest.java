@@ -325,28 +325,35 @@ public class MapAlgebraTest extends RasterTestBase
 
     @Test
     public void testNormalizeAll() throws FactoryException {
-        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(3, 4, 4, 0, 0, 1);
+        GridCoverage2D raster1 = RasterConstructors.makeEmptyRaster(3, 4, 4, 0, 0, 1);
+        GridCoverage2D raster2 = RasterConstructors.makeEmptyRaster(3, 4, 4, 0, 0, 1);
 
         for (int band = 1; band <= 3; band++) {
-            double[] bandValues = new double[4 * 4];
-            for (int i = 0; i < bandValues.length; i++) {
-                bandValues[i] = (i) * band;
+            double[] bandValues1 = new double[4 * 4];
+            double[] bandValues2 = new double[4 * 4];
+            for (int i = 0; i < bandValues1.length; i++) {
+                bandValues1[i] = (i) * band;
+                bandValues2[i] = (1) * (band-1);
             }
-            raster = MapAlgebra.addBandFromArray(raster, bandValues, band);
+            raster1 = MapAlgebra.addBandFromArray(raster1, bandValues1, band);
+            raster2 = MapAlgebra.addBandFromArray(raster2, bandValues2, band);
         }
 
-        GridCoverage2D normalizedRaster1 = MapAlgebra.normalizeAll(raster);
-        GridCoverage2D normalizedRaster2 = MapAlgebra.normalizeAll(raster, 256d, 511d);
+        GridCoverage2D normalizedRaster1 = MapAlgebra.normalizeAll(raster1);
+        GridCoverage2D normalizedRaster2 = MapAlgebra.normalizeAll(raster1, 256d, 511d);
+        GridCoverage2D normalizedRaster3 = MapAlgebra.normalizeAll(raster2);
 
         for (int band = 1; band <= 3; band++) {
             double[] normalizedBand1 = MapAlgebra.bandAsArray(normalizedRaster1, band);
             double[] normalizedBand2 = MapAlgebra.bandAsArray(normalizedRaster2, band);
+            double[] normalizedBand3 = MapAlgebra.bandAsArray(normalizedRaster3, band);
             double normalizedMin1 = Arrays.stream(normalizedBand1).min().getAsDouble();
             double normalizedMax1 = Arrays.stream(normalizedBand1).max().getAsDouble();
             double normalizedMin2 = Arrays.stream(normalizedBand2).min().getAsDouble();
             double normalizedMax2 = Arrays.stream(normalizedBand2).max().getAsDouble();
             double[] expected1 = {0.0, 17.0, 34.0, 51.0, 68.0, 85.0, 102.0, 119.0, 136.0, 153.0, 170.0, 187.0, 204.0, 221.0, 238.0, 255.0};
             double[] expected2 = {256.0, 273.0, 290.0, 307.0, 324.0, 341.0, 358.0, 375.0, 392.0, 409.0, 426.0, 443.0, 460.0, 477.0, 494.0, 511.0};
+            double[] expected3 = {127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5, 127.5};
 
             assertEquals(0d, normalizedMin1, 0.01d);
             assertEquals(255d, normalizedMax1, 0.01d);
@@ -354,6 +361,7 @@ public class MapAlgebraTest extends RasterTestBase
             assertEquals(511d, normalizedMax2, 0.01d);
             assertEquals(Arrays.toString(expected1), Arrays.toString(normalizedBand1));
             assertEquals(Arrays.toString(expected2), Arrays.toString(normalizedBand2));
+            assertEquals(Arrays.toString(expected3), Arrays.toString(normalizedBand3));
         }
     }
 
