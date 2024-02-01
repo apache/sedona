@@ -47,6 +47,6 @@ jobs:
         CIBW_ARCHS_MACOS: 'x86_64 arm64'
       with:
         package-dir: python
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         path: ./wheelhouse/*.whl
