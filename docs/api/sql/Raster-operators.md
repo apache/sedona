@@ -2482,15 +2482,17 @@ SELECT RS_Normalize(band)
 
 ### RS_NormalizeAll
 
-Introduction: Normalizes values in all bands of a raster between a given normalization range. By default, the values are normalized to range [0, 255]. RS_NormalizeAll can take upto 6 of the following arguments.
+Introduction: Normalizes values in all bands of a raster between a given normalization range. The function maintains the data type of the raster values by ensuring that the normalized values are cast back to the original data type of each band in the raster. 
+By default, the values are normalized to range [0, 255]. RS_NormalizeAll can take upto 6 of the following arguments.
 
 - `raster`: The raster to be normalized.
 - `minLim` and `maxLim` (Optional): The lower and upper limits of the normalization range. By default, normalization range is set to [0, 255].
-- `noDataValue` (Optional): NoDataValues in rasters represent missing or invalid data. By default, -9999 is taken as NoDataValue.
+- `noDataValue` (Optional): Defines the value to be used for missing or invalid data in raster bands. By default, noDataValue is set to `maxLim`.
 - `minValue` and `maxValue` (Optional): Optionally, specific minimum and maximum values of the input raster can be provided. If not provided, these values are computed from the raster data.
+- `normalizeAcrossBands` (Optional): A boolean flag to determine the normalization method. If set to true (default), normalization is performed across all bands based on global min and max values. If false, each band is normalized individually based on its own min and max values.
 
-!!!Note
-    The function maintains the data type of the raster values. It ensures that the normalized values are cast back to the original data type of each band in the raster.
+!!! Warning
+    Using a noDataValue that falls within the normalization range can lead to loss of valid data. If any data value within a raster band matches the specified noDataValue, it will be replaced and cannot be distinguished or recovered later. Exercise caution in selecting a noDataValue to avoid unintentional data alteration.
 
 Formats:
 ```
@@ -2503,7 +2505,13 @@ RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double)
 RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double, noDataValue: Double)
 ```
 ```
+RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double, noDataValue: Double, normalizeAcrossBands: Boolean)
+```
+```
 RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double, noDataValue: Double, minValue: Double, maxValue: Double)
+```
+```
+RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double, noDataValue: Double, minValue: Double, maxValue: Double, normalizeAcrossBands: Boolean)
 ```
 
 Since: `v1.6.0`
