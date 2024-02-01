@@ -53,7 +53,12 @@ setup(
     long_description_content_type="text/markdown",
     python_requires='>=3.6',
     install_requires=['attrs', "shapely>=1.7.0"],
-    extras_require={"spark": ['pyspark>=2.3.0']},
+    extras_require={
+        "spark": ["pyspark>=2.3.0"],
+        "pydeck-map": ["pandas<=1.3.5", "geopandas<=0.10.2", "pydeck==0.8.0"],
+        "kepler-map": ["pandas<=1.3.5", "geopandas<=0.10.2", "keplergl==0.3.2"],
+        "all": ["pyspark>=2.3.0", "pandas<=1.3.5", "geopandas<=0.10.2","pydeck==0.8.0", "keplergl==0.3.2"],
+    },
     project_urls={
         'Documentation': 'https://sedona.apache.org',
         'Source code': 'https://github.com/apache/sedona',
