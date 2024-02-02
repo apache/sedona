@@ -31,6 +31,7 @@ import org.geotools.coverage.TypeMap;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
+import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
@@ -38,6 +39,7 @@ import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.util.ClassChanger;
 import org.geotools.util.NumberRange;
 import org.locationtech.jts.geom.Geometry;
+import org.opengis.coverage.grid.GridEnvelope;
 import org.opengis.geometry.DirectPosition;
 import org.opengis.metadata.spatial.PixelOrientation;
 import org.opengis.referencing.FactoryException;
@@ -59,6 +61,7 @@ import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
+import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
 import java.util.*;
 
@@ -640,6 +643,34 @@ public class RasterUtils {
             throw new IllegalArgumentException(String.format("Provided rasters are not of same shape. \n" +
                     "First raster having width of %d and height of %d. \n" +
                     "Second raster having width of %d and height of %d", width1, height1, width2, height2));
+        }
+    }
+
+    /**
+     * Shift the rendered image inside the grid coverage to have a zero origin. This won't alter the cell values of
+     * the raster, but will shift the affine transformation to cancel with the origin shift.
+     * @param raster The raster to shift
+     * @param noDataValue The no data value to use for the new raster
+     * @return A new grid coverage with the same cell values but its rendered image has a zero origin
+     */
+    public static GridCoverage2D shiftRasterToZeroOrigin(GridCoverage2D raster, Double noDataValue) {
+        RenderedImage image = raster.getRenderedImage();
+        SampleModel sampleModel = image.getSampleModel();
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int minX = image.getMinX();
+        int minY = image.getMinY();
+        if (minX != 0 || minY != 0) {
+            GridGeometry2D gridGeometry = raster.getGridGeometry();
+            AffineTransform2D transform = (AffineTransform2D) gridGeometry.getGridToCRS2D();
+            AffineTransform2D newAffine = RasterUtils.translateAffineTransform(transform, minX, minY);
+            GridEnvelope newGridEnvelope = new GridEnvelope2D(0, 0, width, height);
+            GridGeometry2D newGridGeometry = new GridGeometry2D(newGridEnvelope, newAffine, gridGeometry.getCoordinateReferenceSystem());
+            WritableRaster wr = RasterFactory.createBandedRaster(sampleModel.getDataType(), image.getWidth(), image.getHeight(), sampleModel.getNumBands(), null);
+            wr.setRect(-minX, -minY, RasterUtils.getRaster(image));
+            return RasterUtils.clone(wr, newGridGeometry, raster.getSampleDimensions(), raster, noDataValue, true);
+        } else {
+            return RasterUtils.clone(raster.getRenderedImage(), raster.getGridGeometry(), raster.getSampleDimensions(), raster, noDataValue, true);
         }
     }
 }
