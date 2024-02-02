@@ -473,29 +473,39 @@ public class MapAlgebra
             throw new IllegalArgumentException("minLim cannot be greater than maxLim");
         }
 
-        // Set minmaxFlag if minValue and maxValue are null;
-        boolean minmaxFlag = true;
-        if (minValue == null) {
-            minmaxFlag = false;
-        }
-
-        // Fetch raster data type
         int numBands = rasterGeom.getNumSampleDimensions();
         RenderedImage renderedImage = rasterGeom.getRenderedImage();
         int rasterDataType = renderedImage.getSampleModel().getDataType();
 
-        // Initialize global min and max if normalization is across all bands
-        double globalMin = Double.MAX_VALUE;
-        double globalMax = -Double.MAX_VALUE;
+        double globalMin = minValue != null ? minValue : Double.MAX_VALUE;
+        double globalMax = maxValue != null ? maxValue : -Double.MAX_VALUE;
 
-        // Compute Global min and max. Skip if minValue and maxValue are given.
-        if (!minmaxFlag) {
-            if (normalizeAcrossBands) {
-                for (int bandIndex = 1; bandIndex <= numBands; bandIndex++) {
-                    double[] bandValues = bandAsArray(rasterGeom, bandIndex);
-                    double bandNoDataValue = RasterUtils.getNoDataValue(rasterGeom.getSampleDimension(bandIndex - 1));
-                    globalMin = Math.min(globalMin, Arrays.stream(bandValues).filter(val -> val != bandNoDataValue).min().orElse(Double.NaN));
-                    globalMax = Math.max(globalMax, Arrays.stream(bandValues).filter(val -> val != bandNoDataValue).max().orElse(Double.NaN));
+        // Initialize arrays to store band-wise min and max values
+        double[] minValues = new double[numBands];
+        double[] maxValues = new double[numBands];
+        Arrays.fill(minValues, Double.MAX_VALUE);
+        Arrays.fill(maxValues, -Double.MAX_VALUE);
+
+        // Compute global min and max values across all bands if necessary and not provided
+        if (minValue == null || maxValue == null) {
+            for (int bandIndex = 0; bandIndex < numBands; bandIndex++) {
+                double[] bandValues = bandAsArray(rasterGeom, bandIndex + 1);
+                double bandNoDataValue = RasterUtils.getNoDataValue(rasterGeom.getSampleDimension(bandIndex));
+
+                if (noDataValue == null) {
+                    noDataValue = maxLim;
+                }
+
+                for (double val : bandValues) {
+                    if (val != bandNoDataValue) {
+                        if (normalizeAcrossBands) {
+                            globalMin = Math.min(globalMin, val);
+                            globalMax = Math.max(globalMax, val);
+                        } else {
+                            minValues[bandIndex] = Math.min(minValues[bandIndex], val);
+                            maxValues[bandIndex] = Math.max(maxValues[bandIndex], val);
+                        }
+                    }
                 }
             }
         } else {
@@ -503,42 +513,29 @@ public class MapAlgebra
             globalMax = maxValue;
         }
 
-
-        for (int bandIndex = 1; bandIndex <= numBands; bandIndex++) {
-            double[] bandValues = bandAsArray(rasterGeom, bandIndex);
-            double bandNoDataValue = RasterUtils.getNoDataValue(rasterGeom.getSampleDimension(bandIndex - 1));
-
-            // Default noDataValue to maxLim
-            if (noDataValue == null) {
-                noDataValue = maxLim;
-            }
-
-            // Determine min and max values for normalization.
-            double currentMin = globalMin;
-            double currentMax = globalMax;
-            if (!minmaxFlag && !normalizeAcrossBands) {
-                currentMin = Arrays.stream(bandValues).filter(val -> val != bandNoDataValue).min().orElse(Double.NaN);
-                currentMax = Arrays.stream(bandValues).filter(val -> val != bandNoDataValue).max().orElse(Double.NaN);
-            }
+        // Normalize each band
+        for (int bandIndex = 0; bandIndex < numBands; bandIndex++) {
+            double[] bandValues = bandAsArray(rasterGeom, bandIndex + 1);
+            double bandNoDataValue = RasterUtils.getNoDataValue(rasterGeom.getSampleDimension(bandIndex));
+            double currentMin = normalizeAcrossBands ? globalMin : (minValue != null ? minValue : minValues[bandIndex]);
+            double currentMax = normalizeAcrossBands ? globalMax : (maxValue != null ? maxValue : maxValues[bandIndex]);
 
             if (Double.compare(currentMax, currentMin) == 0) {
-                // Set default value for constant bands to minLim
                 Arrays.fill(bandValues, minLim);
             } else {
-                // Normalize the band values, setting NoDataValue to maxLim
                 for (int i = 0; i < bandValues.length; i++) {
-                    if (bandValues[i] == bandNoDataValue) {
-                        bandValues[i] = noDataValue;
-                    } else {
+                    if (bandValues[i] != bandNoDataValue) {
                         double normalizedValue = minLim + ((bandValues[i] - currentMin) * (maxLim - minLim)) / (currentMax - currentMin);
                         bandValues[i] = castRasterDataType(normalizedValue, rasterDataType);
+                    } else {
+                        bandValues[i] = noDataValue;
                     }
                 }
             }
 
             // Update the raster with the normalized band and noDataValue
-            rasterGeom = addBandFromArray(rasterGeom, bandValues, bandIndex);
-            rasterGeom = RasterBandEditors.setBandNoDataValue(rasterGeom, bandIndex, noDataValue);
+            rasterGeom = addBandFromArray(rasterGeom, bandValues, bandIndex+1);
+            rasterGeom = RasterBandEditors.setBandNoDataValue(rasterGeom, bandIndex+1, noDataValue);
         }
 
         return rasterGeom;
