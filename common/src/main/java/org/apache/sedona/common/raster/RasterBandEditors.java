@@ -32,6 +32,7 @@ import org.opengis.referencing.operation.TransformException;
 import javax.media.jai.RasterFactory;
 import java.awt.geom.Point2D;
 import java.awt.image.Raster;
+import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.util.Arrays;
 import java.util.Collections;
@@ -259,7 +260,14 @@ public class RasterBandEditors {
             }
             newRaster = RasterUtils.clone(resultRaster, raster.getGridGeometry(), newRaster.getSampleDimensions(), newRaster, noDataValue, true);
         } else {
-            newRaster = RasterUtils.clone(newRaster.getRenderedImage(), newRaster.getGridGeometry(), newRaster.getSampleDimensions(), newRaster, noDataValue, true);
+            RenderedImage image = newRaster.getRenderedImage();
+            int minX = image.getMinX();
+            int minY = image.getMinY();
+            if (minX != 0 || minY != 0) {
+                newRaster = RasterUtils.shiftRasterToZeroOrigin(newRaster, noDataValue);
+            } else {
+                newRaster = RasterUtils.clone(newRaster.getRenderedImage(), newRaster.getGridGeometry(), newRaster.getSampleDimensions(), newRaster, noDataValue, true);
+            }
         }
 
         return newRaster;
@@ -295,24 +303,4 @@ public class RasterBandEditors {
             return clip(raster, band, geometry, noDataValue, true);
         }
     }
-
-//    /**
-//     * Return a clipped raster with the specified ROI by the geometry.
-//     * @param raster Raster to clip
-//     * @param band Band number to perform clipping
-//     * @param geometry Specify ROI
-//     * @param crop Specifies to keep the original extent or not
-//     * @return A clip Raster with defined ROI by the geometry
-//     */
-//    public static GridCoverage2D clip(GridCoverage2D raster, int band, Geometry geometry, boolean crop) {
-//        boolean isDataTypeIntegral = RasterUtils.isDataTypeIntegral(RasterUtils.getDataTypeCode(RasterBandAccessors.getBandType(raster, band)));
-//
-//        if (isDataTypeIntegral) {
-//            double noDataValue = Integer.MIN_VALUE;
-//            return clip(raster, band, geometry, noDataValue, crop);
-//        } else {
-//            double noDataValue = Double.MIN_VALUE;
-//            return clip(raster, band, geometry, noDataValue, crop);
-//        }
-//    }
 }
