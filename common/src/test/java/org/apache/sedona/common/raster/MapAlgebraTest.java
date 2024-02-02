@@ -315,10 +315,20 @@ public class MapAlgebraTest extends RasterTestBase
 
     @Test
     public void testNormalize() {
-        double[] band = new double[] {800.0, 900.0, 0.0, 255.0};
-        double[] actual = MapAlgebra.normalize(band);
-        double[] expected = new double[] {226.0, 255.0, 0.0, 72.0};
-        assertArrayEquals(expected, actual, 0.1d);
+        double[] band1 = {800.0, 900.0, 0.0, 255.0};
+        double[] band2 = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+        double[] band3 = {16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
+        double[] band4 = {-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1};
+        double[] actual1 = MapAlgebra.normalize(band1);
+        double[] actual2 = MapAlgebra.normalize(band2);
+        double[] actual3 = MapAlgebra.normalize(band3);
+        double[] actual4 = MapAlgebra.normalize(band4);
+        double[] expected1 = {226.66666666666666, 255.0, 0.0, 72.25};
+        double[] expected2 = {0.0, 17.0, 34.0, 51.0, 68.0, 85.0, 102.0, 119.0, 136.0, 153.0, 170.0, 187.0, 204.0, 221.0, 238.0, 255.0};
+        assertArrayEquals(expected1, actual1, 0.1d);
+        assertArrayEquals(expected2, actual2, 0.1d);
+        assertArrayEquals(expected2, actual3, 0.1d);
+        assertArrayEquals(expected2, actual4, 0.1d);
     }
 
     @Test
