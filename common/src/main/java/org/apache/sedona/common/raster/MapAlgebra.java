@@ -423,18 +423,23 @@ public class MapAlgebra
     }
 
     /**
-     * @param band band values
+     * @param bandValues band values
      * @return an array with normalized band values to be within [0 - 255] range
      */
-    public static double[] normalize(double[] band) {
-        double[] result = new double[band.length];
-        double normalizer = Arrays.stream(band).max().getAsDouble() / 255d;
+    public static double[] normalize(double[] bandValues) {
+        Double minValue = Arrays.stream(bandValues).min().orElse(Double.NaN);
+        Double maxValue = Arrays.stream(bandValues).max().orElse(Double.NaN);
 
-        for (int i = 0; i < band.length; i++) {
-            result[i] = (int) (band[i] / normalizer);
+        if (Double.compare(maxValue, minValue) == 0) {
+            // Set default value for constant bands to 0
+            Arrays.fill(bandValues, 0);
+        } else {
+            for (int i = 0; i < bandValues.length; i++) {
+                bandValues[i] = ((bandValues[i] - minValue) * 255) / (maxValue - minValue);
+            }
         }
 
-        return result;
+        return bandValues;
     }
 
     public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom) {
