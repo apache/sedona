@@ -18,7 +18,7 @@
 from functools import partial
 
 from pyspark.sql import Column
-from typing import Union
+from typing import Union, Optional
 
 from sedona.sql.dataframe_api import ColumnOrName, call_sedona_function, validate_argument_types
 
@@ -194,13 +194,14 @@ def ST_CoveredBy(a: ColumnOrName, b: ColumnOrName) -> Column:
     return _call_predicate_function("ST_CoveredBy", (a, b))
 
 @validate_argument_types
-def ST_DWithin(a: ColumnOrName, b: ColumnOrName, distance: Union[ColumnOrName, float]):
+def ST_DWithin(a: ColumnOrName, b: ColumnOrName, distance: Union[ColumnOrName, float], use_sphere: Optional[Union[ColumnOrName, bool]] = None):
     """
     Check if geometry a is within 'distance' units of geometry b
     :param a: Geometry column to check
     :param b: Geometry column to check
     :param distance: distance units to check the within predicate
+    :param use_sphere: whether to use spheroid distance or euclidean distance
     :return: True if a is within distance units of Geometry b
     """
-
-    return _call_predicate_function("ST_DWithin", (a, b, distance))
+    args = (a, b, distance, use_sphere) if use_sphere is not None else (a, b, distance,)
+    return _call_predicate_function("ST_DWithin", args)

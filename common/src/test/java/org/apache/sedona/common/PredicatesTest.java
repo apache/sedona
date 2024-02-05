@@ -62,5 +62,15 @@ public class PredicatesTest extends TestBase {
         assertTrue(actual);
     }
 
+    @Test
+    public void testDWithinSpheroid() {
+        Geometry seattlePoint = GEOMETRY_FACTORY.createPoint(new Coordinate(-122.335167, 47.608013));
+        Geometry newYorkPoint = GEOMETRY_FACTORY.createPoint(new Coordinate(-73.935242, 40.730610));
+
+        double distance = 4000 * 1e3; //distance between NY and Seattle is less than 4000 km
+        boolean actual = Predicates.dWithin(newYorkPoint, seattlePoint, distance, true);
+        assertTrue(actual);
+    }
+
 
 }

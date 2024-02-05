@@ -60,6 +60,7 @@ RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i 's/config
 # Delete packages configured by the notebooks
 RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/spark\.jars\.packages/d' {} +
 RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/org\.apache\.sedona:sedona-spark-shaded-/d' {} +
+RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/org\.apache\.sedona:sedona-spark-/d' {} +
 RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/org\.datasyslab:geotools-wrapper:/d' {} +
 RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/uk\.co\.gresearch\.spark:spark-extension_2\.12:/d' {} +
 

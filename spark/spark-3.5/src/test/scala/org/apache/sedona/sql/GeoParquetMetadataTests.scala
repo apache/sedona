@@ -20,6 +20,7 @@ import scala.collection.JavaConverters._
 
 class GeoParquetMetadataTests extends TestBaseScala with BeforeAndAfterAll {
   val geoparquetdatalocation: String = resourceFolder + "geoparquet/"
+  val geoparquetoutputlocation: String = resourceFolder + "geoparquet/geoparquet_output/"
 
   describe("GeoParquet Metadata tests") {
     it("Reading GeoParquet Metadata") {
@@ -40,7 +41,8 @@ class GeoParquetMetadataTests extends TestBaseScala with BeforeAndAfterAll {
           columnMetadata.getAs[String]("encoding") == "WKB" &&
             columnMetadata.getList[Any](columnMetadata.fieldIndex("bbox")).asScala.forall(_.isInstanceOf[Double]) &&
             columnMetadata.getList[Any](columnMetadata.fieldIndex("geometry_types")).asScala.forall(_.isInstanceOf[String]) &&
-            columnMetadata.getAs[String]("crs").nonEmpty
+            columnMetadata.getAs[String]("crs").nonEmpty &&
+            columnMetadata.getAs[String]("crs") != "null"
         }
       })
     }
@@ -62,6 +64,30 @@ class GeoParquetMetadataTests extends TestBaseScala with BeforeAndAfterAll {
       assert(metadataArray.forall(_.getAs[String]("version") == null))
       assert(metadataArray.forall(_.getAs[String]("primary_column") == null))
       assert(metadataArray.forall(_.getAs[String]("columns") == null))
+    }
+
+    it("Read GeoParquet without CRS") {
+      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation + "/example-1.0.0-beta.1.parquet")
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_crs_omit.parquet"
+      df.write.format("geoparquet")
+        .option("geoparquet.crs", "")
+        .mode("overwrite").save(geoParquetSavePath)
+      val dfMeta = sparkSession.read.format("geoparquet.metadata").load(geoParquetSavePath)
+      val row = dfMeta.collect()(0)
+      val metadata = row.getJavaMap(row.fieldIndex("columns")).get("geometry").asInstanceOf[Row]
+      assert(metadata.getAs[String]("crs") == "")
+    }
+
+    it("Read GeoParquet with null CRS") {
+      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation + "/example-1.0.0-beta.1.parquet")
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_crs_null.parquet"
+      df.write.format("geoparquet")
+        .option("geoparquet.crs", "null")
+        .mode("overwrite").save(geoParquetSavePath)
+      val dfMeta = sparkSession.read.format("geoparquet.metadata").load(geoParquetSavePath)
+      val row = dfMeta.collect()(0)
+      val metadata = row.getJavaMap(row.fieldIndex("columns")).get("geometry").asInstanceOf[Row]
+      assert(metadata.getAs[String]("crs") == "null")
     }
   }
 }

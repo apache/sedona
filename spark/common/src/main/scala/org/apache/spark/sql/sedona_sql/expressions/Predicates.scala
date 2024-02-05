@@ -254,7 +254,7 @@ case class ST_OrderingEquals(inputExpressions: Seq[Expression])
 }
 
 case class ST_DWithin(inputExpressions: Seq[Expression])
-  extends InferredExpression(Predicates.dWithin _) {
+  extends InferredExpression(inferrableFunction3(Predicates.dWithin), inferrableFunction4(Predicates.dWithin)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
