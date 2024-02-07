@@ -424,11 +424,11 @@ SRID=0;POINT(1 2)
 1. Sedona Snowflake doesn't support `M` dimension due to the limitation of WKB serialization. Sedona Spark and Sedona Flink support XYZM because it uses our in-house serialization format. Although Sedona Snowflake has functions related to `M` dimension, all `M` values will be ignored.
 2. Sedona H3 functions are not supported because Snowflake does not allow embedded C code in UDF.
 3. All User Defined Table Functions only work with geometries created by Sedona constructors due to Snowflake current limitation `Data type GEOMETRY is not supported in non-SQL UDTF return type`. This includes:
-   * ST_MinimumBoundingRadius
-   * ST_Intersection_Aggr
-   * ST_SubDivideExplode
-   * ST_Envelope_Aggr
-   * ST_Union_Aggr
-   * ST_Collect
-   * ST_Dump
+   	* ST_MinimumBoundingRadius
+   	* ST_Intersection_Aggr
+   	* ST_SubDivideExplode
+   	* ST_Envelope_Aggr
+   	* ST_Union_Aggr
+   	* ST_Collect
+   	* ST_Dump
 4. Only Sedona ST functions are available in Snowflake. Raster functions (RS functions) are not available in Snowflake yet.

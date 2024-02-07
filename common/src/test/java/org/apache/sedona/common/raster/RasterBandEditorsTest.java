@@ -189,6 +189,8 @@ public class RasterBandEditorsTest extends RasterTestBase{
         assertTrue(Arrays.equals(expectedValues, actualValues));
 
         GridCoverage2D croppedRaster = RasterBandEditors.clip(raster, 1, geom, 200, true);
+        assertEquals(0, croppedRaster.getRenderedImage().getMinX());
+        assertEquals(0, croppedRaster.getRenderedImage().getMinY());
         points = new ArrayList<>();
         points.add(Constructors.geomFromWKT("POINT(236842 4.20465e+06)", 26918));
         points.add(Constructors.geomFromWKT("POINT(236961 4.20453e+06)", 26918));
