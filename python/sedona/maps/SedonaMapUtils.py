@@ -24,7 +24,7 @@ from sedona.sql.types import GeometryType
 class SedonaMapUtils:
 
     @classmethod
-    def __convert_to_gdf__(cls, df, rename=True, geometry_col=None):
+    def __convert_to_gdf_or_pdf__(cls, df, rename=True, geometry_col=None):
         """
         Converts a SedonaDataFrame to a GeoPandasDataFrame and also renames geometry column to a standard name of
         'geometry'
@@ -50,7 +50,7 @@ class SedonaMapUtils:
         :param df: SedonaDataFrame to convert
         :return: GeoJSON object
         """
-        gdf = SedonaMapUtils.__convert_to_gdf__(df)
+        gdf = SedonaMapUtils.__convert_to_gdf_or_pdf__(df)
         gjson_str = gdf.to_json()
         gjson = json.loads(gjson_str)
         return gjson
