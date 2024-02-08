@@ -15,7 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-import pydeck as pdk
+from types import ModuleType
 from sedona.maps.SedonaMapUtils import SedonaMapUtils
 
 
@@ -37,6 +37,7 @@ class SedonaPyDeck:
         :param map_provider:
         :return: A pydeck Map object with choropleth layer added:
         """
+        pdk = _try_import_pydeck()
 
         if initial_view_state is None:
             gdf = SedonaPyDeck._prepare_df_(df, add_coords=True)
@@ -79,6 +80,8 @@ class SedonaPyDeck:
         :param map_provider: optional map_provider of the pydeck map
         :return: A pydeck map with a GeoJsonLayer map added
         """
+        pdk = _try_import_pydeck()
+
         geometry_col = SedonaMapUtils.__get_geometry_col__(df)
         gdf = SedonaPyDeck._prepare_df_(df, geometry_col=geometry_col)
         geom_type = gdf[geometry_col][0].geom_type
@@ -116,6 +119,8 @@ class SedonaPyDeck:
         :param map_provider: optional map_provider to be added to the pydeck map
         :return: A pydeck map object with a scatterplot layer added
         """
+        pdk = _try_import_pydeck()
+
         gdf = SedonaPyDeck._prepare_df_(df, add_coords=True)
         layer = pdk.Layer(
             "ScatterplotLayer",
@@ -152,6 +157,7 @@ class SedonaPyDeck:
         :param map_provider: Optional map_provider for the pydeck map
         :return: A pydeck map with a heatmap layer added
         """
+        pdk = _try_import_pydeck()
 
         gdf = SedonaPyDeck._prepare_df_(df, add_coords=True)
 
@@ -195,7 +201,7 @@ class SedonaPyDeck:
         """
         if geometry_col is None:
             geometry_col = SedonaMapUtils.__get_geometry_col__(df=df)
-        gdf = SedonaMapUtils.__convert_to_gdf__(df, rename=False, geometry_col=geometry_col)
+        gdf = SedonaMapUtils.__convert_to_gdf_or_pdf__(df, rename=False, geometry_col=geometry_col)
         if add_coords is True:
             SedonaPyDeck._create_coord_column_(gdf=gdf, geometry_col=geometry_col)
         return gdf
@@ -239,6 +245,7 @@ class SedonaPyDeck:
 
     @classmethod
     def _create_fat_layer_(cls, gdf, fill_color, line_color, elevation_col):
+        pdk = _try_import_pydeck()
         layer = pdk.Layer(
             'GeoJsonLayer',  # `type` positional argument is here
             data=gdf,
@@ -254,3 +261,14 @@ class SedonaPyDeck:
         )
 
         return layer
+
+
+def _try_import_pydeck() -> ModuleType:
+    try:
+        import pydeck as pdk
+
+    except ImportError:
+        msg = "Install sedona[pydeck-map] to convert sedona dataframes to pydeck maps."
+        raise ImportError(msg) from None
+
+    return pdk

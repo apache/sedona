@@ -14,6 +14,7 @@
 package org.apache.sedona.common;
 
 import org.locationtech.jts.geom.Geometry;
+import org.apache.sedona.common.sphere.Spheroid;
 
 public class Predicates {
     public static boolean contains(Geometry leftGeometry, Geometry rightGeometry) {
@@ -50,6 +51,15 @@ public class Predicates {
         return leftGeometry.equalsExact(rightGeometry);
     }
     public static boolean dWithin(Geometry leftGeometry, Geometry rightGeometry, double distance) {
-        return leftGeometry.isWithinDistance(rightGeometry, distance);
+       return dWithin(leftGeometry, rightGeometry, distance, false);
+    }
+
+    public static boolean dWithin(Geometry leftGeometry, Geometry rightGeometry, double distance, boolean useSpheroid) {
+        if (useSpheroid) {
+            double distanceSpheroid = Spheroid.distance(leftGeometry, rightGeometry);
+            return distanceSpheroid <= distance;
+        }else {
+            return leftGeometry.isWithinDistance(rightGeometry, distance);
+        }
     }
 }

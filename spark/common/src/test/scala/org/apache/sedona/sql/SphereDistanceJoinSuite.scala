@@ -29,7 +29,6 @@ import scala.util.Random
 class SphereDistanceJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
   private val spatialJoinPartitionSideConfKey = "sedona.join.spatitionside"
   private val spatialJoinPartitionSide = sparkSession.sparkContext.getConf.get(spatialJoinPartitionSideConfKey, "left")
-  private val factory = new GeometryFactory()
 
   private val testData1: Seq[(Int, Double, Geometry)] = generateTestData()
   private val testData2: Seq[(Int, Double, Geometry)] = generateTestData()
@@ -97,17 +96,6 @@ class SphereDistanceJoinSuite extends TestBaseScala with TableDrivenPropertyChec
     testData2.toDF("id", "dist", "geom").createOrReplaceTempView("df2")
   }
 
-  private def generateTestData(): Seq[(Int, Double, Geometry)] = {
-    val geometries = (-180 to 180 by 10).flatMap { x =>
-      (-80 to 80 by 10).map { y =>
-        factory.createPoint(new Coordinate(x, y))
-      }
-    } ++ Seq(factory.createPoint(new Coordinate(0, -90)), factory.createPoint(new Coordinate(0, 90)))
-    val rand = new Random()
-    geometries.zipWithIndex.map { case (geom, idx) =>
-      (idx, 110000 + 2000000 * rand.nextDouble, geom)
-    }
-  }
 
   private def buildExpectedResult(joinCondition: String): Seq[(Int, Int)] = {
     val evaluate = joinCondition match {

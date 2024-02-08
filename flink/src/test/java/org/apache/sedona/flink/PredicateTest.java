@@ -145,4 +145,12 @@ public class PredicateTest extends TestBase{
         Boolean actual = (Boolean) first(table).getField(0);
         assertEquals(false, actual);
     }
+
+    @Test
+    public void testDWithinSphere() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (-122.335167 47.608013)') as seattle, ST_GeomFromWKT('POINT (-73.935242 40.730610)') as ny");
+        table = table.select(call(Predicates.ST_DWithin.class.getSimpleName(), $("seattle"), $("ny"), 3500 * 1e3, true));
+        Boolean actual = (Boolean) first(table).getField(0);
+        assertEquals(false, actual);
+    }
 }

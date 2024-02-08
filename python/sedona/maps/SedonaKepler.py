@@ -15,7 +15,6 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from keplergl import KeplerGl
 from sedona.maps.SedonaMapUtils import SedonaMapUtils
 
 
@@ -30,6 +29,13 @@ class SedonaKepler:
         dataframe, if a df is passed with no name, a default name of 'unnamed' is set for it.
         param config: [Optional] A map config to be applied to the rendered map :return: A map object
         """
+
+        try:
+            from keplergl import KeplerGl
+        except ImportError:
+            msg = "Install sedona[kepler-map] to convert sedona dataframes to kepler maps."
+            raise ImportError(msg) from None
+
         kepler_map = KeplerGl()
         if df is not None:
             SedonaKepler.add_df(kepler_map, df, name)
@@ -48,5 +54,5 @@ class SedonaKepler:
         :param name: [Optional] Name to assign to the dataframe, default name assigned is 'unnamed'
         :return: Does not return anything, adds df directly to the given map object
         """
-        geo_df = SedonaMapUtils.__convert_to_gdf__(df)
+        geo_df = SedonaMapUtils.__convert_to_gdf_or_pdf__(df)
         kepler_map.add_data(geo_df, name=name)
