@@ -443,23 +443,23 @@ public class MapAlgebra
     }
 
     public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom) {
-        return normalizeAll(rasterGeom, 0d, 255d, null, null, null, true);
+        return normalizeAll(rasterGeom, 0d, 255d, true, null, null, null);
     }
 
     public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom, double minLim, double maxLim) {
-        return normalizeAll(rasterGeom, minLim, maxLim, null, null, null, true);
+        return normalizeAll(rasterGeom, minLim, maxLim, true, null, null, null);
     }
 
-    public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom, double minLim, double maxLim, double noDataValue) {
-        return normalizeAll(rasterGeom, minLim, maxLim, noDataValue, null, null, true);
+    public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom, double minLim, double maxLim, boolean normalizeAcrossBands) {
+        return normalizeAll(rasterGeom, minLim, maxLim, normalizeAcrossBands, null, null, null);
     }
 
-    public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom, double minLim, double maxLim, Double noDataValue, boolean normalizeAcrossBands) {
-        return normalizeAll(rasterGeom, minLim, maxLim, noDataValue, null, null, normalizeAcrossBands);
+    public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom, double minLim, double maxLim, boolean normalizeAcrossBands, Double noDataValue) {
+        return normalizeAll(rasterGeom, minLim, maxLim, normalizeAcrossBands, noDataValue, null, null);
     }
 
     public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom, double minLim, double maxLim, Double noDataValue, Double minValue, Double maxValue) {
-        return normalizeAll(rasterGeom, minLim, maxLim, noDataValue, minValue, maxValue, true);
+        return normalizeAll(rasterGeom, minLim, maxLim, true, noDataValue, minValue, maxValue);
     }
 
     /**
@@ -467,13 +467,13 @@ public class MapAlgebra
      * @param rasterGeom Raster to be normalized
      * @param minLim Lower limit of normalization range
      * @param maxLim Upper limit of normalization range
+     * @param normalizeAcrossBands flag to determine the normalization method
      * @param noDataValue NoDataValue used in raster
      * @param minValue Minimum value in raster
      * @param maxValue Maximum value in raster
-     * @param normalizeAcrossBands flag to determine the normalization method
      * @return a raster with all values in all bands normalized between minLim and maxLim
      */
-    public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom, double minLim, double maxLim, Double noDataValue, Double minValue, Double maxValue, boolean normalizeAcrossBands) {
+    public static GridCoverage2D normalizeAll(GridCoverage2D rasterGeom, double minLim, double maxLim, boolean normalizeAcrossBands, Double noDataValue, Double minValue, Double maxValue) {
         if (minLim > maxLim) {
             throw new IllegalArgumentException("minLim cannot be greater than maxLim");
         }
@@ -490,6 +490,10 @@ public class MapAlgebra
         double[] maxValues = new double[numBands];
         Arrays.fill(minValues, Double.MAX_VALUE);
         Arrays.fill(maxValues, -Double.MAX_VALUE);
+
+        // Trigger safe mode if noDataValue is null - noDataValue is set to maxLim and data values are normalized to range [minLim, maxLim-1].
+        // This is done to prevent setting valid data as noDataValue.
+        double safetyTrigger = (noDataValue == null) ? 1 : 0;
 
         // Compute global min and max values across all bands if necessary and not provided
         if (minValue == null || maxValue == null) {
@@ -530,7 +534,7 @@ public class MapAlgebra
             } else {
                 for (int i = 0; i < bandValues.length; i++) {
                     if (bandValues[i] != bandNoDataValue) {
-                        double normalizedValue = minLim + ((bandValues[i] - currentMin) * (maxLim - minLim)) / (currentMax - currentMin);
+                        double normalizedValue = minLim + ((bandValues[i] - currentMin) * (maxLim - safetyTrigger - minLim)) / (currentMax - currentMin);
                         bandValues[i] = castRasterDataType(normalizedValue, rasterDataType);
                     } else {
                         bandValues[i] = noDataValue;
