@@ -24,14 +24,20 @@ from sedona.sql.types import GeometryType
 class SedonaMapUtils:
 
     @classmethod
-    def __convert_to_gdf__(cls, df, rename=True, geometry_col=None):
+    def __convert_to_gdf_or_pdf__(cls, df, rename=True, geometry_col=None):
         """
         Converts a SedonaDataFrame to a GeoPandasDataFrame and also renames geometry column to a standard name of
-        'geometry' :param df: SedonaDataFrame to convert :param geometry_col: [Optional] :return:
+        'geometry'
+        However, if no geometry column is found even after traversing schema, returns a Pandas Dataframe
+        :param df: SedonaDataFrame to convert
+        :param geometry_col: [Optional]
+        :return: GeoPandas Dataframe or Pandas Dataframe
         """
         if geometry_col is None:
             geometry_col = SedonaMapUtils.__get_geometry_col__(df)
         pandas_df = df.toPandas()
+        if geometry_col is None:  # No geometry column found even after searching schema, return Pandas Dataframe
+            return pandas_df
         geo_df = gpd.GeoDataFrame(pandas_df, geometry=geometry_col)
         if geometry_col != "geometry" and rename is True:
             geo_df.rename_geometry("geometry", inplace=True)
@@ -44,7 +50,7 @@ class SedonaMapUtils:
         :param df: SedonaDataFrame to convert
         :return: GeoJSON object
         """
-        gdf = SedonaMapUtils.__convert_to_gdf__(df)
+        gdf = SedonaMapUtils.__convert_to_gdf_or_pdf__(df)
         gjson_str = gdf.to_json()
         gjson = json.loads(gjson_str)
         return gjson

@@ -21,6 +21,7 @@ from tests.test_base import TestBase
 from tests import mixed_wkt_geometry_input_location
 from tests import csv_point_input_location
 import geopandas as gpd
+from pyspark.sql.functions import explode, hex
 
 
 class TestVisualization(TestBase):
@@ -69,6 +70,22 @@ class TestVisualization(TestBase):
 
         assert sedona_kepler_empty_map._repr_html_() == kepler_map._repr_html_()
         assert sedona_kepler_empty_map.config == kepler_map.config
+
+    def test_pandas_df_addition(self):
+        polygon_wkt_df = self.spark.read.format("csv"). \
+            option("delimiter", "\t"). \
+            option("header", "false"). \
+            load(mixed_wkt_geometry_input_location)
+
+        polygon_wkt_df.createOrReplaceTempView("polygontable")
+        polygon_h3_df = self.spark.sql(
+            "select ST_H3CellIDs(ST_GeomFromWKT(polygontable._c0), 3, false) as h3_cellID from polygontable")
+        polygon_exploded_h3 = polygon_h3_df.select(explode(polygon_h3_df.h3_cellID).alias("h3"))
+        polygon_hex_exploded_h3 = polygon_exploded_h3.select(hex(polygon_exploded_h3.h3).alias("hex_h3"))
+        kepler_map = SedonaKepler.create_map(df=polygon_hex_exploded_h3, name="h3")
+
+        # just test if the map creation is successful.
+        assert kepler_map is not None
 
     def test_adding_multiple_datasets(self):
         config = {'version': 'v1',
@@ -180,7 +197,8 @@ class TestVisualization(TestBase):
             load(csv_point_input_location)
 
         point_csv_df.createOrReplaceTempView("pointtable")
-        point_df = self.spark.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
+        point_df = self.spark.sql(
+            "select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
         polygon_wkt_df.createOrReplaceTempView("polygontable")
         polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
 

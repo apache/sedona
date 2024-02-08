@@ -54,5 +54,5 @@ class SedonaKepler:
         :param name: [Optional] Name to assign to the dataframe, default name assigned is 'unnamed'
         :return: Does not return anything, adds df directly to the given map object
         """
-        geo_df = SedonaMapUtils.__convert_to_gdf__(df)
+        geo_df = SedonaMapUtils.__convert_to_gdf_or_pdf__(df)
         kepler_map.add_data(geo_df, name=name)
