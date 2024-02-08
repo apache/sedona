@@ -24,20 +24,10 @@ import org.apache.sedona.common.utils.GeometryGeoHashEncoder;
 import org.apache.sedona.common.utils.GeometrySplitter;
 import org.apache.sedona.common.utils.H3Utils;
 import org.apache.sedona.common.utils.S2Utils;
+import org.apache.sedona.common.utils.CRSUtils;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.hull.ConcaveHull;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryCollection;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.LinearRing;
-import org.locationtech.jts.geom.MultiLineString;
-import org.locationtech.jts.geom.MultiPoint;
-import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.io.gml2.GMLWriter;
@@ -53,6 +43,8 @@ import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.operation.valid.TopologyValidationError;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 import org.wololo.jts2geojson.GeoJSONWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -96,8 +88,12 @@ public class Functions {
         return boundary;
     }
 
-    public static Geometry buffer(Geometry geometry, double radius) {
-        return buffer(geometry, radius, "");
+    public static Geometry buffer(Geometry geometry, double radius) throws FactoryException, TransformException {
+        return buffer(geometry, radius, "", false);
+    }
+
+    public static Geometry buffer(Geometry geometry, double radius, boolean spheroidal) throws FactoryException, TransformException {
+        return buffer(geometry, radius, "", spheroidal);
     }
 
     public static Geometry buffer(Geometry geometry, double radius, String params) {
@@ -116,6 +112,30 @@ public class Functions {
         }
 
         return BufferOp.bufferOp(geometry, radius, bufferParameters);
+    }
+
+    public static Geometry buffer(Geometry geometry, double radius, String params, boolean spheroidal) throws FactoryException, TransformException {
+        if (spheroidal) {
+            // Determine the best SRID for spheroidal calculations
+
+            Integer bestCRS = CRSUtils.bestSRID(geometry);
+            Integer originalCRS = geometry.getSRID();
+            Integer WGS84CRS = 4326;
+
+            // Transform the geometry to the selected SRID
+            Geometry transformedGeometry = FunctionsGeoTools.transform(geometry, "EPSG:"+originalCRS, "EPSG:"+bestCRS);
+            geometry.setSRID(bestCRS);
+            System.out.println("Best SRID: " + bestCRS);
+
+            // Apply the buffer operation in the selected SRID
+            Geometry bufferedGeometry = buffer(geometry, radius, params); // Planar buffer in the selected SRID
+
+            // Transform to WGS 84 -- WGS84 - World Geodetic System 1984,
+            return FunctionsGeoTools.transform(bufferedGeometry, "EPSG:"+bestCRS, "EPSG:"+WGS84CRS);
+        } else {
+            // Existing planar buffer logic
+            return buffer(geometry, radius, params);
+        }
     }
 
     private static BufferParameters parseBufferParams(String params) {
