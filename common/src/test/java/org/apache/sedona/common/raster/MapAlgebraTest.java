@@ -438,7 +438,7 @@ public class MapAlgebraTest extends RasterTestBase
         // Check the normalized values and data type
         double[] normalizedBandValues = MapAlgebra.bandAsArray(normalizedRaster, 1);
         for (int i = 0; i < bandValues.length; i++) {
-            double expected = (bandValues[i] - 0) * (255 - 0) / (99 - 0);
+            double expected = (bandValues[i] - 0) * (254 - 0) / (99 - 0);
             double actual = normalizedBandValues[i];
             switch (normalizedRaster.getRenderedImage().getSampleModel().getDataType()) {
                 case DataBuffer.TYPE_BYTE:
