@@ -44,3 +44,11 @@ case class RS_Resample(inputExpressions: Seq[Expression]) extends InferredExpres
     copy(inputExpressions = newChildren)
   }
 }
+
+case class RS_NormalizeAll(inputExpressions: Seq[Expression]) extends InferredExpression(
+  inferrableFunction1(RasterEditors.normalizeAll), inferrableFunction3(RasterEditors.normalizeAll), inferrableFunction4(RasterEditors.normalizeAll), inferrableFunction5(RasterEditors.normalizeAll), inferrableFunction6(RasterEditors.normalizeAll), inferrableFunction7(RasterEditors.normalizeAll)
+) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
