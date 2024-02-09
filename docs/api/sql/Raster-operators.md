@@ -2490,7 +2490,7 @@ Introduction: Normalizes values in all bands of a raster between a given normali
 - `minValue` and `maxValue` (Optional): Optionally, specific minimum and maximum values of the input raster can be provided. If not provided, these values are computed from the raster data.
 - `normalizeAcrossBands` (Optional): A boolean flag to determine the normalization method. If set to true (default), normalization is performed across all bands based on global min and max values. If false, each band is normalized individually based on its own min and max values.
 
-A safety mode is triggered when `noDataValue` is null, setting it to `maxLim` and normalizing data values to the range [minLim, maxLim-1]. This is to avoid replacing valid data that might coincide with the new `noDataValue`.
+A safety mode is triggered when `noDataValue` is not given or set to null. This sets `noDataValue` to `maxLim` and normalizes valid data values to the range [minLim, maxLim-1]. This is to avoid replacing valid data that might coincide with the new `noDataValue`.
 
 !!! Warning
     Using a noDataValue that falls within the normalization range can lead to loss of valid data. If any data value within a raster band matches the specified noDataValue, it will be replaced and cannot be distinguished or recovered later. Exercise caution in selecting a noDataValue to avoid unintentional data alteration.

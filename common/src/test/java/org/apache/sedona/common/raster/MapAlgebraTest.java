@@ -370,7 +370,9 @@ public class MapAlgebraTest extends RasterTestBase
         GridCoverage2D normalizedRaster6 = MapAlgebra.normalizeAll(raster5, 0.0, 255.0, -9999.0, 0.0, 30.0);
         GridCoverage2D normalizedRaster7 = MapAlgebra.normalizeAll(raster5, 0, 255, false, -9999.0);
         GridCoverage2D normalizedRaster8 = MapAlgebra.normalizeAll(raster3, 0, 255);
-        GridCoverage2D normalizedRaster9 = MapAlgebra.normalizeAll(raster3, 0, 255, false);
+        GridCoverage2D normalizedRaster9 = MapAlgebra.normalizeAll(raster3, 0, 255, true, null);
+        GridCoverage2D normalizedRaster10 = MapAlgebra.normalizeAll(raster3, 0, 255, false);
+        GridCoverage2D normalizedRaster11 = MapAlgebra.normalizeAll(raster3, 0, 255, false, null);
 
         double[] expected1 = {0.0, 17.0, 34.0, 51.0, 68.0, 85.0, 102.0, 119.0, 136.0, 153.0, 170.0, 187.0, 204.0, 221.0, 238.0, 255.0};
         double[] expected2 = {256.0, 273.0, 290.0, 307.0, 324.0, 341.0, 358.0, 375.0, 392.0, 409.0, 426.0, 443.0, 460.0, 477.0, 494.0, 511.0};
@@ -410,8 +412,12 @@ public class MapAlgebraTest extends RasterTestBase
         assertEquals(Arrays.toString(expected5), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster4, 2)));
         assertEquals(Arrays.toString(expected7), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster8, 1)));
         assertEquals(Arrays.toString(expected8), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster8, 2)));
-        assertEquals(Arrays.toString(expected9), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster9, 1)));
-        assertEquals(Arrays.toString(expected10), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster9, 2)));
+        assertEquals(Arrays.toString(expected7), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster9, 1)));
+        assertEquals(Arrays.toString(expected8), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster9, 2)));
+        assertEquals(Arrays.toString(expected9), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster10, 1)));
+        assertEquals(Arrays.toString(expected10), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster10, 2)));
+        assertEquals(Arrays.toString(expected9), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster11, 1)));
+        assertEquals(Arrays.toString(expected10), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster11, 2)));
     }
 
     @Test
