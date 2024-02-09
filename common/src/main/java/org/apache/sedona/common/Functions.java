@@ -117,21 +117,23 @@ public class Functions {
     public static Geometry buffer(Geometry geometry, double radius, String params, boolean spheroidal) throws FactoryException, TransformException {
         if (spheroidal) {
             // Determine the best SRID for spheroidal calculations
+            int bestCRS = CRSUtils.bestSRID(geometry);
+            int originalCRS = geometry.getSRID();
+            final int WGS84CRS = 4326;
 
-            Integer bestCRS = CRSUtils.bestSRID(geometry);
-            Integer originalCRS = geometry.getSRID();
-            Integer WGS84CRS = 4326;
+            // If originalCRS is not set, use bestCRS as the originalCRS for transformation
+            String sourceCRSCode = (originalCRS == 0) ? "EPSG:" + bestCRS : "EPSG:" + originalCRS;
+            String targetCRSCode = "EPSG:" + bestCRS;
 
             // Transform the geometry to the selected SRID
-            Geometry transformedGeometry = FunctionsGeoTools.transform(geometry, "EPSG:"+originalCRS, "EPSG:"+bestCRS);
-            geometry.setSRID(bestCRS);
-            System.out.println("Best SRID: " + bestCRS);
+            Geometry transformedGeometry = FunctionsGeoTools.transform(geometry, sourceCRSCode, targetCRSCode);
 
             // Apply the buffer operation in the selected SRID
-            Geometry bufferedGeometry = buffer(geometry, radius, params); // Planar buffer in the selected SRID
+            Geometry bufferedGeometry = buffer(transformedGeometry, radius, params);
 
-            // Transform to WGS 84 -- WGS84 - World Geodetic System 1984,
-            return FunctionsGeoTools.transform(bufferedGeometry, "EPSG:"+bestCRS, "EPSG:"+WGS84CRS);
+            // Transform back to the original SRID or to WGS 84 if original SRID was not set
+            String backTransformCRSCode = (originalCRS == 0) ? "EPSG:" + WGS84CRS : "EPSG:" + originalCRS;
+            return FunctionsGeoTools.transform(bufferedGeometry, targetCRSCode, backTransformCRSCode);
         } else {
             // Existing planar buffer logic
             return buffer(geometry, radius, params);
