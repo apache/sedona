@@ -104,7 +104,7 @@ private class RasterFileWriter(savePath: String,
     val rasterFilePath = getRasterFilePath(row, dataSchema, rasterOptions)
     // write the image to file
     try {
-      val out = hfs.create(new Path(Paths.get(savePath, new Path(rasterFilePath).getName).toString))
+      val out = hfs.create(new Path(savePath, new Path(rasterFilePath).getName))
       out.write(rasterRaw)
       out.close()
     } catch {
