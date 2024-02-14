@@ -19,9 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.commons.io.FileUtils
-import org.apache.sedona.common.raster.RasterAccessors
 import org.apache.spark.sql.SaveMode
-import org.apache.spark.sql.sedona_sql.expressions.raster.RS_Metadata
 import org.junit.Assert.assertEquals
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
@@ -147,6 +145,15 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
       rasterDf.write.format("raster").option("rasterField", "content").option("fileExtension", ".asc").option("pathField", "path").mode(SaveMode.Overwrite).save(tempDir + "/raster-written")
       df = sparkSession.read.format("binaryFile").load(tempDir + "/raster-written/*")
       rasterDf = df.selectExpr("RS_FromArcInfoAsciiGrid(content)")
+      assert(rasterDf.count() == rasterCount)
+    }
+
+    it("should read geotiff using binary source and write geotiff back to hdfs using raster source") {
+      var rasterDf = sparkSession.read.format("binaryFile").load(rasterdatalocation)
+      val rasterCount = rasterDf.count()
+      rasterDf.write.format("raster").mode(SaveMode.Overwrite).save(hdfsURI + "/raster-written")
+      rasterDf = sparkSession.read.format("binaryFile").load(hdfsURI + "/raster-written/*")
+      rasterDf = rasterDf.selectExpr("RS_FromGeoTiff(content)")
       assert(rasterDf.count() == rasterCount)
     }
   }
