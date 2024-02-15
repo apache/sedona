@@ -81,14 +81,6 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
 
   override def beforeAll(): Unit = {
     SedonaContext.create(sparkSession)
-    // Set up HDFS minicluster
-    val baseDir = new File("./target/hdfs/").getAbsoluteFile
-    FileUtil.fullyDelete(baseDir)
-    val hdfsConf = new HdfsConfiguration
-    hdfsConf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath)
-    val builder = new MiniDFSCluster.Builder(hdfsConf)
-    val hdfsCluster = builder.build
-    hdfsURI = "hdfs://127.0.0.1:" + hdfsCluster.getNameNodePort + "/"
   }
 
   override def afterAll(): Unit = {
@@ -185,5 +177,19 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
           if (frechetDistance(point, polygon) < distance) 1 else 0
       }).sum
     }).sum
+  }
+
+  /**
+    * Create a mini HDFS cluster and return the HDFS instance and the URI.
+    * @return (MiniDFSCluster, HDFS URI)
+    */
+  def creatMiniHdfs(): (MiniDFSCluster, String) = {
+    val baseDir = new File("./target/hdfs/").getAbsoluteFile
+    FileUtil.fullyDelete(baseDir)
+    val hdfsConf = new HdfsConfiguration
+    hdfsConf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath)
+    val builder = new MiniDFSCluster.Builder(hdfsConf)
+    val hdfsCluster = builder.build
+    (hdfsCluster, "hdfs://127.0.0.1:" + hdfsCluster.getNameNodePort + "/")
   }
 }
