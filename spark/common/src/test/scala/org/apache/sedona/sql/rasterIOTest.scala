@@ -149,7 +149,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
     }
 
     it("should read geotiff using binary source and write geotiff back to hdfs using raster source") {
-      var rasterDf = sparkSession.read.format("binaryFile").load(rasterdatalocation)
+      var rasterDf = sparkSession.read.format("binaryFile").load(rasterdatalocation).repartition(3)
       val rasterCount = rasterDf.count()
       rasterDf.write.format("raster").mode(SaveMode.Overwrite).save(hdfsURI + "/raster-written")
       rasterDf = sparkSession.read.format("binaryFile").load(hdfsURI + "/raster-written/*")
