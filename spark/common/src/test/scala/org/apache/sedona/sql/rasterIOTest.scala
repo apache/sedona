@@ -19,6 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.commons.io.FileUtils
+import org.apache.hadoop.hdfs.MiniDFSCluster
 import org.apache.spark.sql.SaveMode
 import org.junit.Assert.assertEquals
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
@@ -149,12 +150,14 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
     }
 
     it("should read geotiff using binary source and write geotiff back to hdfs using raster source") {
+      val miniHDFS: (MiniDFSCluster, String) = creatMiniHdfs()
       var rasterDf = sparkSession.read.format("binaryFile").load(rasterdatalocation).repartition(3)
       val rasterCount = rasterDf.count()
-      rasterDf.write.format("raster").mode(SaveMode.Overwrite).save(hdfsURI + "/raster-written")
-      rasterDf = sparkSession.read.format("binaryFile").load(hdfsURI + "/raster-written/*")
+      rasterDf.write.format("raster").mode(SaveMode.Overwrite).save(miniHDFS._2 + "/raster-written")
+      rasterDf = sparkSession.read.format("binaryFile").load(miniHDFS._2 + "/raster-written/*")
       rasterDf = rasterDf.selectExpr("RS_FromGeoTiff(content)")
       assert(rasterDf.count() == rasterCount)
+      miniHDFS._1.shutdown()
     }
   }
 
