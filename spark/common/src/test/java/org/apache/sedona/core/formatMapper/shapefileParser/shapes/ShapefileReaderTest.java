@@ -19,6 +19,7 @@
 
 package org.apache.sedona.core.formatMapper.shapefileParser.shapes;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.LocatedFileStatus;
@@ -35,6 +36,7 @@ import org.apache.sedona.core.spatialRDD.LineStringRDD;
 import org.apache.sedona.core.spatialRDD.PointRDD;
 import org.apache.sedona.core.spatialRDD.PolygonRDD;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
+import org.apache.spark.SparkException;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
@@ -62,6 +64,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 public class ShapefileReaderTest
         extends TestBase
@@ -392,5 +396,27 @@ public class ShapefileReaderTest
         // load shapes with our tool
         SpatialRDD shapeRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
         assert (shapeRDD.rawSpatialRDD.getNumPartitions() == 2);
+        assertEquals("[STATEFP, COUNTYFP, COUNTYNS, AFFGEOID, GEOID, NAME, LSAD, ALAND, AWATER]", shapeRDD.fieldNames.toString());
+    }
+
+    /**
+     * Test reading multiple shape files with inconsistent schema. It should throw an exception.
+     */
+    @Test
+    public void testReadMultipleShapeFilesWithInconsistentSchema() throws IOException {
+        String outputLocation = getShapeFilePath("multipleshapefiles") + "-multischema";
+        try {
+            String inputLocation = getShapeFilePath("multipleshapefiles");
+            String inputLocation2 = getShapeFilePath("gis_osm_pois_free_1");
+            FileUtils.copyDirectory(new File(inputLocation), new File(outputLocation));
+            FileUtils.copyDirectory(new File(inputLocation2), new File(outputLocation));
+            SparkException exception = assertThrows(SparkException.class, () -> ShapefileReader.readToGeometryRDD(sc, outputLocation));
+            assertTrue(exception.getMessage().contains("different schema"));
+        } finally {
+            File file = new File(outputLocation);
+            if (file.exists()) {
+                FileUtils.deleteDirectory(file);
+            }
+        }
     }
 }
