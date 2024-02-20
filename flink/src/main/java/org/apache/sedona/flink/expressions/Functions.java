@@ -20,6 +20,8 @@ import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.operation.buffer.BufferParameters;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 import java.util.Arrays;
 
@@ -69,7 +71,7 @@ public class Functions {
     public static class ST_Buffer extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-        Object o, @DataTypeHint("Double") Double radius) {
+        Object o, @DataTypeHint("Double") Double radius) throws FactoryException, TransformException {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.buffer(geom, radius);
         }

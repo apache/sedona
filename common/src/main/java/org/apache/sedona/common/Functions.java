@@ -18,13 +18,13 @@ import com.uber.h3core.exceptions.H3Exception;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.geometryObjects.Circle;
+import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.common.utils.GeometryGeoHashEncoder;
 import org.apache.sedona.common.utils.GeometrySplitter;
 import org.apache.sedona.common.utils.H3Utils;
 import org.apache.sedona.common.utils.S2Utils;
-import org.apache.sedona.common.utils.CRSUtils;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.hull.ConcaveHull;
 import org.locationtech.jts.geom.*;
@@ -114,15 +114,16 @@ public class Functions {
         return BufferOp.bufferOp(geometry, radius, bufferParameters);
     }
 
-    public static Geometry buffer(Geometry geometry, double radius, String params, boolean spheroidal) throws FactoryException, TransformException {
-        if (spheroidal) {
+    public static Geometry buffer(Geometry geometry, double radius, String params, boolean useSpheroidal) throws FactoryException, TransformException {
+        if (useSpheroidal) {
             // Determine the best SRID for spheroidal calculations
-            int bestCRS = CRSUtils.bestSRID(geometry);
+            int bestCRS = bestSRID(geometry);
+            System.out.println("bestCRS: "+bestCRS);
             int originalCRS = geometry.getSRID();
             final int WGS84CRS = 4326;
 
-            // If originalCRS is not set, use bestCRS as the originalCRS for transformation
-            String sourceCRSCode = (originalCRS == 0) ? "EPSG:" + bestCRS : "EPSG:" + originalCRS;
+            // If originalCRS is not set, use WGS84 as the originalCRS for transformation
+            String sourceCRSCode = (originalCRS == 0) ? "EPSG:" + WGS84CRS : "EPSG:" + originalCRS;
             String targetCRSCode = "EPSG:" + bestCRS;
 
             // Transform the geometry to the selected SRID
@@ -132,8 +133,10 @@ public class Functions {
             Geometry bufferedGeometry = buffer(transformedGeometry, radius, params);
 
             // Transform back to the original SRID or to WGS 84 if original SRID was not set
-            String backTransformCRSCode = (originalCRS == 0) ? "EPSG:" + WGS84CRS : "EPSG:" + originalCRS;
-            return FunctionsGeoTools.transform(bufferedGeometry, targetCRSCode, backTransformCRSCode);
+            int backTransformCRSCode = (originalCRS == 0) ? WGS84CRS : originalCRS;
+            Geometry bufferedResult = FunctionsGeoTools.transform(bufferedGeometry, targetCRSCode, "EPSG:" + backTransformCRSCode);
+            bufferedResult.setSRID(backTransformCRSCode);
+            return bufferedResult;
         } else {
             // Existing planar buffer logic
             return buffer(geometry, radius, params);
@@ -216,6 +219,42 @@ public class Functions {
             }
         }
         return bufferParameters;
+    }
+
+    public static int bestSRID(Geometry geometry) {
+        Envelope envelope = geometry.getEnvelopeInternal();
+//        System.out.println("Envelope: " + envelope); // Debug
+        if (envelope.isNull()) return Spheroid.EPSG_WORLD_MERCATOR; // Fallback EPSG
+
+        // Calculate the center of the envelope
+//        Coordinate centroid = gboxCentroid(envelope);
+        double centerX =  (envelope.getMinX() + envelope.getMaxX()) / 2.0; // centroid.getX();
+        double centerY = (envelope.getMinY() + envelope.getMaxY()) / 2.0; // centroid.getY();
+
+        // Calculate angular width and height
+        double xwidth = Spheroid.angularWidth(envelope); // envelope.getWidth(); // Spheroid.distance(west, east);
+        double ywidth = Spheroid.angularHeight(envelope); // envelope.getHeight(); // Spheroid.distance(south, north);
+//        System.out.println("Center: (" + centerX + ", " + centerY + ")"); // Debug
+//        System.out.println("xwidth: " + xwidth + ", ywidth: " + ywidth); // Debug
+
+        // Prioritize polar regions for Lambert Azimuthal Equal Area projection
+        if (centerY >= 70.0 && ywidth < 45.0) return Spheroid.EPSG_NORTH_LAMBERT;
+        if (centerY <= -70.0 && ywidth < 45.0) return Spheroid.EPSG_SOUTH_LAMBERT;
+
+        // Check for UTM zones
+        if (xwidth < 6.0) {
+            int zone;
+            if (centerX == -180.0 || centerX == 180.0) {
+                zone = 59; // UTM zone 60
+            } else {
+                zone = (int)Math.floor((centerX + 180.0) / 6.0);
+                zone = Math.min(zone, 59);
+            }
+            return (centerY < 0.0) ? Spheroid.EPSG_SOUTH_UTM_START + zone : Spheroid.EPSG_NORTH_UTM_START + zone;
+        }
+
+        // Default fallback to Mercator projection
+        return Spheroid.EPSG_WORLD_MERCATOR;
     }
 
     public static Geometry envelope(Geometry geometry) {
