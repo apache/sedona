@@ -307,6 +307,13 @@ def ST_Azimuth(point_a: ColumnOrName, point_b: ColumnOrName) -> Column:
 
 @validate_argument_types
 def ST_BestSRID(geometry: ColumnOrName) -> Column:
+    """Estimates the best SRID (EPSG code) of the geometry.
+
+    :param geometry: Geometry column to calculate the boundary for.
+    :type geometry: ColumnOrName
+    :return: SRID as an Integer
+    :rtype: Column
+    """
     return _call_st_function("ST_BestSRID", geometry)
 
 
