@@ -118,19 +118,6 @@ class TestPredicateJoin(TestBase):
         actual = function_df.take(1)[0][0]
         assert actual == 1234
 
-        polygon_wkt_df = self.spark.read.format("csv"). \
-            option("delimiter", "\t"). \
-            option("header", "false"). \
-            load(mixed_wkt_geometry_input_location)
-
-        polygon_wkt_df.createOrReplaceTempView("polygontable")
-        polygon_wkt_df.show()
-        polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
-        polygon_df.createOrReplaceTempView("polygondf")
-        polygon_df.show()
-        function_df = self.spark.sql("select ST_Area(polygondf.countyshape) from polygondf")
-        function_df.show()
-
     def test_st_envelope(self):
         polygon_from_wkt = self.spark.read.format("csv"). \
             option("delimiter", "\t"). \

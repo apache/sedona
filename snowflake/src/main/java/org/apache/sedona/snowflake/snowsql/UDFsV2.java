@@ -171,7 +171,7 @@ public class UDFsV2
         );
     }
 
-    @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius"}, argTypes = {"Geometry"})
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"})
     public static Integer ST_BestSRID(String geometry) {
         return Functions.bestSRID(
                 GeometrySerde.deserGeoJson(geometry)
