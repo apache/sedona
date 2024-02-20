@@ -101,6 +101,36 @@ class TestPredicateJoin(TestBase):
         actual = function_df.take(1)[0][0].wkt
         assert actual == "POLYGON ((-107.02 42.06, -107.02 42.07, -107.02 42.09, -107.02 42.11, -107.02 42.32, -107.02 42.33, -107.01 42.42, -107.01 42.43, -106.77 44.33, -106.16 46.15, -105.22 47.82, -103.98 49.27, -102.48 50.47, -100.78 51.36, -98.94 51.9, -97.04 52.09, -97.03 52.09, -97.01 52.09, -96.95 52.09, -96.9 52.09, -96.81 52.09, -96.7 52.09, -96.68 52.09, -96.65 52.09, -96.55 52.09, -96.54 52.09, -96.49 52.09, -96.48 52.09, -94.58 51.89, -92.74 51.33, -91.04 50.43, -89.55 49.23, -88.32 47.76, -87.39 46.08, -86.79 44.25, -86.56 42.35, -86.56 42.18, -86.56 42.17, -86.56 42.1, -86.55 41.99, -86.56 41.9, -86.56 41.78, -86.56 41.77, -86.56 41.75, -86.56 41.73, -86.56 41.7, -86.75 39.76, -87.33 37.89, -88.25 36.17, -89.49 34.66, -91 33.43, -92.72 32.51, -94.59 31.94, -96.53 31.74, -96.55 31.74, -96.56 31.74, -96.57 31.74, -96.58 31.74, -96.6 31.74, -96.69 31.74, -96.72 31.74, -96.75 31.74, -96.94 31.74, -97.02 31.74, -97.04 31.74, -97.06 31.74, -98.99 31.94, -100.85 32.5, -102.56 33.42, -104.07 34.65, -105.31 36.14, -106.23 37.85, -106.81 39.71, -107.02 41.64, -107.02 41.75, -107.02 41.94, -107.02 41.96, -107.02 41.99, -107.02 42.01, -107.02 42.02, -107.02 42.03, -107.02 42.06))"
 
+    def test_st_bestsrid(self):
+        polygon_from_wkt = self.spark.read.format("csv"). \
+            option("delimiter", "\t"). \
+            option("header", "false"). \
+            load(mixed_wkt_geometry_input_location)
+
+        polygon_from_wkt.createOrReplaceTempView("polgontable")
+        polygon_from_wkt.show()
+
+        polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+        polygon_df.createOrReplaceTempView("polygondf")
+        polygon_df.show()
+        function_df = self.spark.sql("select ST_BestSRID(polygondf.countyshape) from polygondf")
+        function_df.show()
+        actual = function_df.take(1)[0][0]
+        assert actual == 1234
+
+        polygon_wkt_df = self.spark.read.format("csv"). \
+            option("delimiter", "\t"). \
+            option("header", "false"). \
+            load(mixed_wkt_geometry_input_location)
+
+        polygon_wkt_df.createOrReplaceTempView("polygontable")
+        polygon_wkt_df.show()
+        polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+        polygon_df.createOrReplaceTempView("polygondf")
+        polygon_df.show()
+        function_df = self.spark.sql("select ST_Area(polygondf.countyshape) from polygondf")
+        function_df.show()
+
     def test_st_envelope(self):
         polygon_from_wkt = self.spark.read.format("csv"). \
             option("delimiter", "\t"). \

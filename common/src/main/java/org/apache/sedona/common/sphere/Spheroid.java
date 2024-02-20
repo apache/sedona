@@ -23,12 +23,24 @@ import net.sf.geographiclib.GeodesicData;
 import net.sf.geographiclib.PolygonArea;
 import net.sf.geographiclib.PolygonResult;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 
 import static java.lang.Math.abs;
 
 public class Spheroid
 {
+    // Standard EPSG Codes
+    public static final int EPSG_WORLD_MERCATOR = 3395;
+    public static final int EPSG_NORTH_UTM_START = 32601;
+    public static final int EPSG_NORTH_UTM_END = 32660;
+    public static final int EPSG_NORTH_LAMBERT = 3574;
+    public static final int EPSG_NORTH_STEREO = 3995;
+    public static final int EPSG_SOUTH_UTM_START = 32701;
+    public static final int EPSG_SOUTH_UTM_END = 32760;
+    public static final int EPSG_SOUTH_LAMBERT = 3409;
+    public static final int EPSG_SOUTH_STEREO = 3031;
+
     /**
      * Calculate the distance between two points on the earth using the Spheroid formula.
      * This algorithm does not use the radius of the earth, but instead uses the WGS84 ellipsoid.
@@ -117,5 +129,35 @@ public class Spheroid
         else {
             return 0.0;
         }
+    }
+
+    public static double angularWidth(Envelope envelope) {
+        double lon1 = envelope.getMinX();
+        double lon2 = envelope.getMaxX();
+        double lat = (envelope.getMinY() + envelope.getMaxY()) / 2; // Mid-latitude for width calculation
+
+        // Compute geodesic distance
+        GeodesicData g = Geodesic.WGS84.Inverse(lat, lon1, lat, lon2);
+        double distance = g.s12; // Distance in meters
+
+        // Convert distance to angular width in degrees
+        double angularWidth = Math.toDegrees(distance / (Geodesic.WGS84.EquatorialRadius() * Math.PI / 180));
+
+        return angularWidth;
+    }
+
+    public static double angularHeight(Envelope envelope) {
+        double lat1 = envelope.getMinY();
+        double lat2 = envelope.getMaxY();
+        double lon = (envelope.getMinX() + envelope.getMaxX()) / 2; // Mid-longitude for height calculation
+
+        // Compute geodesic distance
+        GeodesicData g = Geodesic.WGS84.Inverse(lat1, lon, lat2, lon);
+        double distance = g.s12; // Distance in meters
+
+        // Convert distance to angular height in degrees
+        double angularHeight = Math.toDegrees(distance / (Geodesic.WGS84.EquatorialRadius() * Math.PI / 180));
+
+        return angularHeight;
     }
 }

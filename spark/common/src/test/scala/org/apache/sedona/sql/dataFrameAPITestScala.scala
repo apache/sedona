@@ -216,6 +216,27 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertEquals(expected, actual)
     }
 
+    it("Passed ST_BestSRID") {
+      val pointDf = sparkSession.sql("SELECT ST_Point(-177, -60) AS geom")
+      val df = pointDf.select(ST_BestSRID("geom").as("geom"))
+      var actual = df.take(1)(0).get(0).asInstanceOf[Int]
+      var expected = 32701
+      assertEquals(expected, actual)
+
+      var linestringDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(-91.185 30.4505, -91.187 30.452, -91.189 30.4535)') AS geom")
+      var dfLine = linestringDf.select(ST_BestSRID("geom").as("geom"))
+      actual = dfLine.take(1)(0).get(0).asInstanceOf[Int]
+      expected = 32615
+      assertEquals(expected, actual)
+
+      val polygonDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((-120 30, -80 30, -80 50, -120 50, -120 30))') AS geom")
+      val dfPolygon = polygonDf.select(ST_BestSRID("geom").as("geom"))
+      actual = dfPolygon.take(1)(0).get(0).asInstanceOf[Int]
+      println(actual)
+      expected = 3395
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_Envelope") {
       val polygonDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS geom")
       val df = polygonDf.select(ST_Envelope("geom"))

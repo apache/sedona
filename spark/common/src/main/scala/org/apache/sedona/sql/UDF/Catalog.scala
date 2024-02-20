@@ -69,6 +69,7 @@ object Catalog {
     function[ST_NPoints](),
     function[ST_NDims](),
     function[ST_Buffer](),
+    function[ST_BestSRID](),
     function[ST_Envelope](),
     function[ST_Length](),
     function[ST_Area](),
