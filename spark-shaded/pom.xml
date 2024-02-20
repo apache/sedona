@@ -54,6 +54,11 @@
             <artifactId>sedona-spark-${spark.compat.version}_${scala.compat.version}</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- Define this to be shaded since it is provided in other modules -->
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>cdm-core</artifactId>
+        </dependency>
         <!-- Define these so they get included in shaded jar for python testing purposes -->
         <dependency>
             <groupId>org.geotools</groupId>
