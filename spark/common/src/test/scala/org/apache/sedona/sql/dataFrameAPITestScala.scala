@@ -223,8 +223,8 @@ class dataFrameAPITestScala extends TestBaseScala {
       var expected = 32701
       assertEquals(expected, actual)
 
-      var linestringDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(-91.185 30.4505, -91.187 30.452, -91.189 30.4535)') AS geom")
-      var dfLine = linestringDf.select(ST_BestSRID("geom").as("geom"))
+      val linestringDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(-91.185 30.4505, -91.187 30.452, -91.189 30.4535)') AS geom")
+      val dfLine = linestringDf.select(ST_BestSRID("geom").as("geom"))
       actual = dfLine.take(1)(0).get(0).asInstanceOf[Int]
       expected = 32615
       assertEquals(expected, actual)
@@ -232,8 +232,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       val polygonDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((-120 30, -80 30, -80 50, -120 50, -120 30))') AS geom")
       val dfPolygon = polygonDf.select(ST_BestSRID("geom").as("geom"))
       actual = dfPolygon.take(1)(0).get(0).asInstanceOf[Int]
-      println(actual)
       expected = 3395
+      assertEquals(expected, actual)
+
+      val polygonDf2 = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((-73.9980 40.7265, -73.9970 40.7265, -73.9970 40.7255, -73.9980 40.7255, -73.9980 40.7265))') AS geom")
+      val dfPolygon2 = polygonDf2.select(ST_BestSRID("geom").as("geom"))
+      actual = dfPolygon2.take(1)(0).get(0).asInstanceOf[Int]
+      expected = 32618
       assertEquals(expected, actual)
     }
 

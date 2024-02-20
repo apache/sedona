@@ -116,7 +116,7 @@ class TestPredicateJoin(TestBase):
         function_df = self.spark.sql("select ST_BestSRID(polygondf.countyshape) from polygondf")
         function_df.show()
         actual = function_df.take(1)[0][0]
-        assert actual == 1234
+        assert actual == 3395
 
     def test_st_envelope(self):
         polygon_from_wkt = self.spark.read.format("csv"). \
