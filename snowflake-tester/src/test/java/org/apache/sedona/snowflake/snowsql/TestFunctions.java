@@ -198,7 +198,7 @@ public class TestFunctions extends TestBase {
         verifySQLSingleRes(
                 "select sedona.ST_AsText(sedona.ST_BestSRID(sedona.ST_GeomFromText('POINT (-180 60)')))",
                 "32660"
-        )
+        );
     }
     @Test
     public void test_ST_BuildArea() {
