@@ -97,6 +97,14 @@ public class FunctionTest extends TestBase{
         actual = (String) first(tableEnv.sqlQuery("SELECT ST_AsText(ST_ReducePrecision(ST_Buffer(ST_Point(100, 90), 200, 'quad_segs=4'), 4))")).getField(0);
         expected = "POLYGON ((284.7759 13.4633, 241.4214 -51.4214, 176.5367 -94.7759, 100 -110, 23.4633 -94.7759, -41.4214 -51.4214, -84.7759 13.4633, -100 90, -84.7759 166.5367, -41.4214 231.4214, 23.4633 274.7759, 100 290, 176.5367 274.7759, 241.4214 231.4214, 284.7759 166.5367, 300 90, 284.7759 13.4633))";
         assertEquals(expected, actual);
+
+        actual = (String) first(tableEnv.sqlQuery("SELECT ST_AsText(ST_ReducePrecision(ST_Buffer(ST_GeomFromWKT('LINESTRING(-91.185 30.4505, -91.187 30.452, -91.189 30.4535)'), 10, 'side=left', true), 4))")).getField(0);
+        expected = "POLYGON ((-91.187 30.452, -91.185 30.4505, -91.1851 30.4504, -91.1871 30.4519, -91.1891 30.4534, -91.189 30.4535, -91.187 30.452))";
+        assertEquals(expected, actual);
+
+        actual = (String) first(tableEnv.sqlQuery("SELECT ST_AsText(ST_ReducePrecision(ST_Buffer(ST_GeomFromWKT('POLYGON((-120 30, -80 30, -80 50, -120 50, -120 30))'), 200, 'quad_segs=4', true), 4))")).getField(0);
+        expected = "POLYGON ((-120.0018 50, -120.0017 50.0004, -120.0013 50.0008, -120.0007 50.0011, -120 50.0012, -80 50.0012, -79.9993 50.0011, -79.9987 50.0008, -79.9983 50.0004, -79.9982 50, -79.9982 30, -79.9983 29.9994, -79.9987 29.9989, -79.9993 29.9986, -80 29.9984, -120 29.9984, -120.0007 29.9986, -120.0013 29.9989, -120.0017 29.9994, -120.0018 30, -120.0018 50))";
+        assertEquals(expected, actual);
     }
 
     @Test

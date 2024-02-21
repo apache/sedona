@@ -13,6 +13,7 @@
  */
 package org.apache.sedona.flink.expressions;
 
+import org.apache.calcite.runtime.Geometries;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.annotation.InputGroup;
@@ -78,9 +79,16 @@ public class Functions {
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-                             Object o, @DataTypeHint("Double") Double radius, @DataTypeHint("String") String params) {
+                             Object o, @DataTypeHint("Double") Double radius, @DataTypeHint("String") String params) throws FactoryException, TransformException {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.buffer(geom, radius, params);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+                             Object o, @DataTypeHint("Double") Double radius, @DataTypeHint("String") String params, @DataTypeHint("Boolean") Boolean useSpheroidal) throws FactoryException, TransformException {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.buffer(geom, radius, params, useSpheroidal);
         }
     }
 

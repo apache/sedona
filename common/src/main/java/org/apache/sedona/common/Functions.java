@@ -92,33 +92,32 @@ public class Functions {
         return buffer(geometry, radius, "", false);
     }
 
-    public static Geometry buffer(Geometry geometry, double radius, boolean spheroidal) throws FactoryException, TransformException {
-        return buffer(geometry, radius, "", spheroidal);
-    }
-
-    public static Geometry buffer(Geometry geometry, double radius, String params) {
-        if (params.isEmpty()) {
-            return BufferOp.bufferOp(geometry, radius);
-        }
-
-        BufferParameters bufferParameters = parseBufferParams(params);
-
-        // convert the sign to the appropriate direction
-        // left - radius should be positive
-        // right - radius should be negative
-        if (bufferParameters.isSingleSided() &&
-                (params.toLowerCase().contains("left") && radius < 0 || params.toLowerCase().contains("right") && radius > 0)) {
-                radius = -radius;
-        }
-
-        return BufferOp.bufferOp(geometry, radius, bufferParameters);
+    public static Geometry buffer(Geometry geometry, double radius, String params) throws FactoryException, TransformException {
+        return buffer(geometry, radius, params, false);
     }
 
     public static Geometry buffer(Geometry geometry, double radius, String params, boolean useSpheroidal) throws FactoryException, TransformException {
+        BufferParameters bufferParameters = new BufferParameters();
+
+        // Processing parameters
+        if (!params.isEmpty()) {
+            bufferParameters = parseBufferParams(params);
+
+            // convert the sign to the appropriate direction
+            // left - radius should be positive
+            // right - radius should be negative
+            if (bufferParameters.isSingleSided() &&
+                    (params.toLowerCase().contains("left") && radius < 0 || params.toLowerCase().contains("right") && radius > 0)) {
+                radius = -radius;
+            }
+        }
+
         if (useSpheroidal) {
+            // Spheroidal buffering logic
+
             // Determine the best SRID for spheroidal calculations
             int bestCRS = bestSRID(geometry);
-            System.out.println("bestCRS: "+bestCRS);
+            System.out.println("bestCRS: " + bestCRS);
             int originalCRS = geometry.getSRID();
             final int WGS84CRS = 4326;
 
@@ -130,7 +129,7 @@ public class Functions {
             Geometry transformedGeometry = FunctionsGeoTools.transform(geometry, sourceCRSCode, targetCRSCode);
 
             // Apply the buffer operation in the selected SRID
-            Geometry bufferedGeometry = buffer(transformedGeometry, radius, params);
+            Geometry bufferedGeometry = BufferOp.bufferOp(transformedGeometry, radius, bufferParameters);
 
             // Transform back to the original SRID or to WGS 84 if original SRID was not set
             int backTransformCRSCode = (originalCRS == 0) ? WGS84CRS : originalCRS;
@@ -138,10 +137,40 @@ public class Functions {
             bufferedResult.setSRID(backTransformCRSCode);
             return bufferedResult;
         } else {
-            // Existing planar buffer logic
-            return buffer(geometry, radius, params);
+            // Existing planar buffer logic with params handling
+            return BufferOp.bufferOp(geometry, radius, bufferParameters);
         }
     }
+
+
+//    public static Geometry buffer(Geometry geometry, double radius, String params, boolean useSpheroidal) throws FactoryException, TransformException {
+//        if (useSpheroidal) {
+//            // Determine the best SRID for spheroidal calculations
+//            int bestCRS = bestSRID(geometry);
+//            System.out.println("bestCRS: "+bestCRS);
+//            int originalCRS = geometry.getSRID();
+//            final int WGS84CRS = 4326;
+//
+//            // If originalCRS is not set, use WGS84 as the originalCRS for transformation
+//            String sourceCRSCode = (originalCRS == 0) ? "EPSG:" + WGS84CRS : "EPSG:" + originalCRS;
+//            String targetCRSCode = "EPSG:" + bestCRS;
+//
+//            // Transform the geometry to the selected SRID
+//            Geometry transformedGeometry = FunctionsGeoTools.transform(geometry, sourceCRSCode, targetCRSCode);
+//
+//            // Apply the buffer operation in the selected SRID
+//            Geometry bufferedGeometry = buffer(transformedGeometry, radius, params);
+//
+//            // Transform back to the original SRID or to WGS 84 if original SRID was not set
+//            int backTransformCRSCode = (originalCRS == 0) ? WGS84CRS : originalCRS;
+//            Geometry bufferedResult = FunctionsGeoTools.transform(bufferedGeometry, targetCRSCode, "EPSG:" + backTransformCRSCode);
+//            bufferedResult.setSRID(backTransformCRSCode);
+//            return bufferedResult;
+//        } else {
+//            // Existing planar buffer logic
+//            return buffer(geometry, radius, params);
+//        }
+//    }
 
     private static BufferParameters parseBufferParams(String params) {
 
