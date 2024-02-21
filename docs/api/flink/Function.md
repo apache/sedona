@@ -478,7 +478,7 @@ Output:
 
 ## ST_BestSRID
 
-Introduction: Returns the estimated most appropriate Spatial Reference Identifier (SRID) for a given geometry, based on its spatial extent and location.  It evaluates the geometry's bounding envelope and selects an SRID that optimally represents the geometry on the Earth's surface. The function prioritizes Universal Transverse Mercator (UTM), Lambert Azimuthal Equal Area (LAEA), or falls back to the Mercator projection.
+Introduction: Returns the estimated most appropriate Spatial Reference Identifier (SRID) for a given geometry, based on its spatial extent and location. It evaluates the geometry's bounding envelope and selects an SRID that optimally represents the geometry on the Earth's surface. The function prioritizes Universal Transverse Mercator (UTM), Lambert Azimuthal Equal Area (LAEA), or falls back to the Mercator projection. The function takes a WGS84 geometry and must be in ==lon/lat== order.
 
 - For geometries in the Arctic or Antarctic regions, the Lambert Azimuthal Equal Area projection is used.
 - For geometries that fit within a single UTM zone and do not cross the International Date Line (IDL), a corresponding UTM SRID is chosen.
@@ -492,7 +492,7 @@ Format: `ST_BestSRID(geom: Geometry)`
 
 Since: `v1.6.0`
 
-Spark SQL Example:
+SQL Example:
 
 ```sql
 SELECT ST_BestSRID(ST_GeomFromWKT('POLYGON((-73.9980 40.7265, -73.9970 40.7265, -73.9970 40.7255, -73.9980 40.7255, -73.9980 40.7265))'))
