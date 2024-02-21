@@ -169,14 +169,16 @@ public class TestFunctionsV2
                 240.0133139011053 * Math.PI / 180
         );
     }
+
     @Test
     public void test_ST_BestSRID() {
         registerUDFV2("ST_BestSRID", String.class);
         verifySqlSingleRes(
-                "select sedona.ST_BestSRID(sedona.ST_GeomFromText('POINT (-180 60)'))",
+                "select sedona.ST_BestSRID(ST_GeometryFromWKT('POINT (-180 60)'))",
                 32660
         );
     }
+
     @Test
     public void test_ST_Boundary() {
         registerUDFV2("ST_Boundary", String.class);
