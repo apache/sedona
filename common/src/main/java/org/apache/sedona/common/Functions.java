@@ -252,19 +252,15 @@ public class Functions {
 
     public static int bestSRID(Geometry geometry) {
         Envelope envelope = geometry.getEnvelopeInternal();
-//        System.out.println("Envelope: " + envelope); // Debug
         if (envelope.isNull()) return Spheroid.EPSG_WORLD_MERCATOR; // Fallback EPSG
 
         // Calculate the center of the envelope
-//        Coordinate centroid = gboxCentroid(envelope);
         double centerX =  (envelope.getMinX() + envelope.getMaxX()) / 2.0; // centroid.getX();
         double centerY = (envelope.getMinY() + envelope.getMaxY()) / 2.0; // centroid.getY();
 
         // Calculate angular width and height
-        double xwidth = Spheroid.angularWidth(envelope); // envelope.getWidth(); // Spheroid.distance(west, east);
-        double ywidth = Spheroid.angularHeight(envelope); // envelope.getHeight(); // Spheroid.distance(south, north);
-//        System.out.println("Center: (" + centerX + ", " + centerY + ")"); // Debug
-//        System.out.println("xwidth: " + xwidth + ", ywidth: " + ywidth); // Debug
+        double xwidth = Spheroid.angularWidth(envelope);
+        double ywidth = Spheroid.angularHeight(envelope);
 
         // Prioritize polar regions for Lambert Azimuthal Equal Area projection
         if (centerY >= 70.0 && ywidth < 45.0) return Spheroid.EPSG_NORTH_LAMBERT;

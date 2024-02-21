@@ -71,6 +71,9 @@ object st_functions extends DataFrameAPI {
   def ST_Buffer(geometry: Column, buffer: Column, parameters: Column, useSpheroidal: Column): Column = wrapExpression[ST_Buffer](geometry, buffer, parameters, useSpheroidal)
   def ST_Buffer(geometry: String, buffer: Double, parameters: String, useSpheroidal: Boolean): Column = wrapExpression[ST_Buffer](geometry, buffer, parameters, useSpheroidal)
 
+  def ST_BestSRID(geometry: Column): Column = wrapExpression[ST_BestSRID](geometry)
+  def ST_BestSRID(geometry: String): Column = wrapExpression[ST_BestSRID](geometry)
+
   def ST_BuildArea(geometry: Column): Column = wrapExpression[ST_BuildArea](geometry)
   def ST_BuildArea(geometry: String): Column = wrapExpression[ST_BuildArea](geometry)
 

@@ -297,7 +297,11 @@ SEDONA_LISTED_SQL_FUNCTIONS = [
         "ST_GeomFromText('POINT(21.427834 52.042576573)')",
         "ST_GeomFromText('POINT(45.342524 56.342354355)')"])
      .with_expected_result(0.0)
-     .with_transform("ST_LENGTH"))
+     .with_transform("ST_LENGTH")),
+    (SuiteContainer.empty()
+     .with_function_name("ST_BestSRID")
+     .with_arguments(["ST_GeomFromText('POINT (-177 60)')"])
+     .with_expected_result(32601))
 ]
 
 
