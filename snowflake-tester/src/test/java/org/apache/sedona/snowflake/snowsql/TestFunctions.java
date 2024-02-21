@@ -195,11 +195,12 @@ public class TestFunctions extends TestBase {
     @Test
     public void test_ST_BestSRID() {
         registerUDF("ST_BestSRID", byte[].class);
-        verifySQLSingleRes(
-                "select sedona.ST_AsText(sedona.ST_BestSRID(sedona.ST_GeomFromText('POINT (-180 60)')))",
-                "32660"
+        verifySqlSingleRes(
+                "select sedona.ST_BestSRID(sedona.ST_GeomFromText('POINT (-180 60)'))",
+                32660
         );
     }
+
     @Test
     public void test_ST_BuildArea() {
         registerUDF("ST_BuildArea", byte[].class);
