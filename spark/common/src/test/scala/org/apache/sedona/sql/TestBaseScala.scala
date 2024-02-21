@@ -19,6 +19,8 @@
 package org.apache.sedona.sql
 
 import com.google.common.math.DoubleMath
+import org.apache.hadoop.fs.FileUtil
+import org.apache.hadoop.hdfs.{HdfsConfiguration, MiniDFSCluster}
 import org.apache.log4j.{Level, Logger}
 import org.apache.sedona.common.Functions.{frechetDistance, hausdorffDistance}
 import org.apache.sedona.common.Predicates.dWithin
@@ -27,6 +29,8 @@ import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.sql.DataFrame
 import org.locationtech.jts.geom._
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
+
+import java.io.File
 
 trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   Logger.getRootLogger.setLevel(Level.WARN)
@@ -74,7 +78,6 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   val buildingDataLocation: String = resourceFolder + "813_buildings_test.csv"
   val smallRasterDataLocation: String = resourceFolder + "raster/test1.tiff"
   private val factory = new GeometryFactory()
-
 
   override def beforeAll(): Unit = {
     SedonaContext.create(sparkSession)
@@ -223,5 +226,19 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
         if (dWithin(geom1, geom2, distance, true)) 1 else 0
       }).sum
     }).sum
+  }
+
+  /**
+    * Create a mini HDFS cluster and return the HDFS instance and the URI.
+    * @return (MiniDFSCluster, HDFS URI)
+    */
+  def creatMiniHdfs(): (MiniDFSCluster, String) = {
+    val baseDir = new File("./target/hdfs/").getAbsoluteFile
+    FileUtil.fullyDelete(baseDir)
+    val hdfsConf = new HdfsConfiguration
+    hdfsConf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath)
+    val builder = new MiniDFSCluster.Builder(hdfsConf)
+    val hdfsCluster = builder.build
+    (hdfsCluster, "hdfs://127.0.0.1:" + hdfsCluster.getNameNodePort + "/")
   }
 }

@@ -20,7 +20,7 @@
 
 package org.apache.spark.sql.sedona_sql.io.raster
 
-import org.apache.hadoop.fs.{FileStatus, Path}
+import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 import org.apache.hadoop.mapreduce.{Job, TaskAttemptContext}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.InternalRow
@@ -29,7 +29,6 @@ import org.apache.spark.sql.sources.DataSourceRegister
 import org.apache.spark.sql.types.StructType
 
 import java.io.IOException
-import java.nio.file.Paths
 import java.util.UUID
 
 private[spark] class RasterFileFormat extends FileFormat with DataSourceRegister {
@@ -82,7 +81,7 @@ private class RasterFileWriter(savePath: String,
                                 dataSchema: StructType,
                                 context: TaskAttemptContext) extends OutputWriter {
 
-  private val hfs = new Path(savePath).getFileSystem(context.getConfiguration)
+  private val hfs = FileSystem.newInstance(new Path(savePath).toUri, context.getConfiguration)
   private val rasterFieldIndex = if (rasterOptions.rasterField.isEmpty) getRasterFieldIndex else dataSchema.fieldIndex(rasterOptions.rasterField.get)
 
   private def getRasterFieldIndex: Int = {
@@ -104,7 +103,7 @@ private class RasterFileWriter(savePath: String,
     val rasterFilePath = getRasterFilePath(row, dataSchema, rasterOptions)
     // write the image to file
     try {
-      val out = hfs.create(new Path(Paths.get(savePath, new Path(rasterFilePath).getName).toString))
+      val out = hfs.create(new Path(savePath, new Path(rasterFilePath).getName))
       out.write(rasterRaw)
       out.close()
     } catch {

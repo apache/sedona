@@ -59,6 +59,6 @@ Select the image and its geospatial boundary:
 
 ## Zeppelin Spark notebook demo
 
-We provide a full Zeppelin Spark notebook which demonstrates al functions. Please download [Sedona-Zeppelin notebook template](../image/geospark-zeppelin-demo.json) and [test data - arealm.csv](../image/arealm.csv).
+We provide a full Zeppelin Spark notebook which demonstrates all functions. Please download [Sedona-Zeppelin notebook template](../image/geospark-zeppelin-demo.json) and [test data - arealm.csv](../image/arealm.csv).
 
 You need to use Zeppelin to import this notebook JSON file and modify the input data path in the notebook.

@@ -178,10 +178,16 @@ public class ShapefileReader
         fieldDescriptors = fieldDescriptors.reduceByKey(new Function2<String, String, String>()
         {
             @Override
-            public String call(String descripter1, String descripter2)
+            public String call(String descriptor1, String descriptor2)
                     throws Exception
             {
-                return descripter1 + " " + descripter2;
+                if (!descriptor1.equals(descriptor2)) {
+                    String message = String.format("Detected different schema in the input shapefiles:\n  %s\n  %s\n" +
+                            "Please make sure all shapefiles have the same schema.",
+                            descriptor1, descriptor2);
+                    throw new IOException(message);
+                }
+                return descriptor1;
             }
         });
         // if there is a result assign it to variable : fieldNames
