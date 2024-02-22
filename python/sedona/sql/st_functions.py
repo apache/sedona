@@ -1270,7 +1270,7 @@ def ST_Split(input: ColumnOrName, blade: ColumnOrName) -> Column:
     :return: Multi-geometry representing the split of input by blade.
     :rtype: Column
     """
-    return _call_st_function("ST_SymDifference", (input, blade))
+    return _call_st_function("ST_Split", (input, blade))
 
 
 @validate_argument_types
