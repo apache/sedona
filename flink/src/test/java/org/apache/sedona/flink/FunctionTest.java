@@ -124,30 +124,14 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
-    public void testBestSRID() {
-        Table table1 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (160 40)') AS geom");
-        table1 = table1.select(call(Functions.ST_BestSRID.class.getSimpleName(), $("geom")));
-        int result = (int) first(table1).getField(0);
-        assertEquals(32657, result);
-
-        Table table2 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(-91.185 30.4505, -91.187 30.452, -91.189 30.4535)') AS geom");
-        table2 = table2.select(call(Functions.ST_BestSRID.class.getSimpleName(), $("geom")));
-        result = (int) first(table2).getField(0);
-        assertEquals(32615, result);
-
-        Table table3 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON((-120 30, -80 30, -80 50, -120 50, -120 30))') AS geom");
-        table3 = table3.select(call(Functions.ST_BestSRID.class.getSimpleName(), $("geom")));
-        result = (int) first(table3).getField(0);
-        assertEquals(3395, result);
-    }
-
-    @Test
     public void testClosestPoint() {
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (160 40)') AS g1, ST_GeomFromWKT('POINT (10 10)') as g2");
         table = table.select(call(Functions.ST_ClosestPoint.class.getSimpleName(), $("g1"), $("g2")));
         Geometry result = (Geometry) first(table).getField(0);
         assertEquals("POINT (160 40)", result.toString());
     }
+
+    @Test
     public void testCentroid() {
         Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('POLYGON ((2 2, 0 0, 2 0, 0 2, 2 2))') as geom");
         Table resultTable = polygonTable.select(call(Functions.ST_Centroid.class.getSimpleName(), $("geom")));

@@ -117,7 +117,6 @@ public class Functions {
 
             // Determine the best SRID for spheroidal calculations
             int bestCRS = bestSRID(geometry);
-            System.out.println("bestCRS: " + bestCRS);
             int originalCRS = geometry.getSRID();
             final int WGS84CRS = 4326;
 
