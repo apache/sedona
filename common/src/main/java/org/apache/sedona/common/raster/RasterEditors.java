@@ -51,6 +51,65 @@ import static org.apache.sedona.common.raster.MapAlgebra.bandAsArray;
 
 public class RasterEditors
 {
+
+    public static GridCoverage2D setBandPixelType(GridCoverage2D raster, String bandDataType) {
+        return setBandPixelType(raster, bandDataType, null);
+    }
+
+    /**
+     * Changes the pixel type of a specified band or all bands in a raster.
+     *
+     * @param raster The raster whose band pixel type is to be changed.
+     * @param bandDataType The target data type for the band ("D", "F", "I", "S", "US", "B").
+     * @param bandIndex The index of the band to be modified (1-based index), or null to modify all bands.
+     * @return The raster with the modified band pixel type.
+     */
+    public static GridCoverage2D setBandPixelType(GridCoverage2D raster, String bandDataType, Integer bandIndex) {
+        int numBands = raster.getNumSampleDimensions();
+
+        if (bandIndex == null) {
+            for (int i = 1; i <= numBands; i++) {
+                double[] bandValues = bandAsArray(raster, i);
+                bandValues = changeBandDataType(bandValues, bandDataType);
+                raster = addBandFromArray(raster, bandValues, i);
+            }
+        } else {
+            double[] bandValues = bandAsArray(raster, bandIndex);
+            bandValues = changeBandDataType(bandValues, bandDataType);
+            raster = addBandFromArray(raster, bandValues, bandIndex);
+        }
+
+        return raster;
+    }
+
+    private static double[] changeBandDataType(double[] bandValues, String bandDataType) {
+        int dataType = mapBandDataTypeToDataBufferType(bandDataType);
+
+        for (int i = 0; i < bandValues.length; i++) {
+            bandValues[i] = castRasterDataType(bandValues[i], dataType);
+        }
+        return bandValues;
+    }
+
+    private static int mapBandDataTypeToDataBufferType(String bandDataType) {
+        switch (bandDataType) {
+            case "D":
+                return DataBuffer.TYPE_DOUBLE;
+            case "F":
+                return DataBuffer.TYPE_FLOAT;
+            case "I":
+                return DataBuffer.TYPE_INT;
+            case "S":
+                return DataBuffer.TYPE_SHORT;
+            case "US":
+                return DataBuffer.TYPE_USHORT; // Assuming this maps to TYPE_USHORT
+            case "B":
+                return DataBuffer.TYPE_BYTE;
+            default:
+                throw new IllegalArgumentException("Invalid Band Data Type");
+        }
+    }
+
     public static GridCoverage2D setSrid(GridCoverage2D raster, int srid)
     {
         CoordinateReferenceSystem crs;

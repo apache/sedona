@@ -32,6 +32,27 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 public class RasterEditorsTest extends RasterTestBase {
+
+    @Test
+    public void testSetBandPixelType() throws FactoryException {
+        // Create a test raster using makeEmptyRaster
+        GridCoverage2D testRaster = RasterConstructors.makeEmptyRaster(3, "I", 10, 10, 0, 0, 1);
+
+        // Change the pixel type of a specific band
+        GridCoverage2D modifiedRaster = RasterEditors.setBandPixelType(testRaster, "F", 1); // Changing to Float type for band 1
+        // Verify the change in data type for the specified band
+        assertEquals(DataBuffer.TYPE_FLOAT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+
+        // Change the pixel type of all bands
+        modifiedRaster = RasterEditors.setBandPixelType(testRaster, "B", null); // Changing to Byte type for all bands
+        // Verify the change in data type for all bands
+        assertEquals(DataBuffer.TYPE_BYTE, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+
+        // Additional verification: Check if the raster dimensions remain unchanged
+        assertEquals(testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
+        assertEquals(testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
+    }
+
     @Test
     public void testSetGeoReferenceWithRaster() throws IOException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
