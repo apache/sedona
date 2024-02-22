@@ -47,6 +47,11 @@ SEDONA_LISTED_SQL_FUNCTIONS = [
      .with_expected_result(3.1214451522580533)
      .with_transform("ST_AREA")),
     (SuiteContainer.empty()
+     .with_function_name("ST_Buffer")
+     .with_arguments(["ST_GeomFromText('POINT (21 52)')", "1.0", "", True])
+     .with_expected_result(3.1214451522580533)
+     .with_transform("ST_AREA")),
+    (SuiteContainer.empty()
      .with_function_name("ST_Distance")
      .with_arguments(["ST_GeomFromText('POINT (21 52)')", "ST_GeomFromText('POINT (21 53)')"])
      .with_expected_result(1.0)),

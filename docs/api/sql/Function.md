@@ -552,8 +552,7 @@ Output: `LINESTRING Z(-1 -1 0, 10 5 5)`
 ## ST_Buffer
 
 Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance. The function supports both Planar/Euclidean and Spheroidal/Geodesic buffering (Since v1.6.0).
-
-Buffer Style Parameters: 
+Buffer Style Parameters:
 
 The optional third parameter controls the buffer accuracy and style. Buffer accuracy is specified by the number of line segments approximating a quarter circle, with a default of 8 segments. Buffer style can be set by providing blank-separated key=value pairs in a list format.
 
