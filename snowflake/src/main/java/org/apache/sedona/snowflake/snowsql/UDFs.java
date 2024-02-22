@@ -169,6 +169,13 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static int ST_BestSRID(byte[] geometry) {
+        return Functions.bestSRID(
+                GeometrySerde.deserialize(geometry)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static byte[] ST_BuildArea(byte[] geometry) {
         return GeometrySerde.serialize(
                 Functions.buildArea(

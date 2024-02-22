@@ -46,6 +46,7 @@ public class Catalog {
                 new Functions.ST_Azimuth(),
                 new Functions.ST_Boundary(),
                 new Functions.ST_Buffer(),
+                new Functions.ST_BestSRID(),
                 new Functions.ST_ClosestPoint(),
                 new Functions.ST_Centroid(),
                 new Functions.ST_Collect(),
