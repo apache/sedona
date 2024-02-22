@@ -127,6 +127,23 @@ class TestPredicateJoin(TestBase):
         actual = function_df.take(1)[0][0]
         assert actual == 3395
 
+    def test_st_bestsrid(self):
+        polygon_from_wkt = self.spark.read.format("csv"). \
+            option("delimiter", "\t"). \
+            option("header", "false"). \
+            load(mixed_wkt_geometry_input_location)
+
+        polygon_from_wkt.createOrReplaceTempView("polgontable")
+        polygon_from_wkt.show()
+
+        polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+        polygon_df.createOrReplaceTempView("polygondf")
+        polygon_df.show()
+        function_df = self.spark.sql("select ST_BestSRID(polygondf.countyshape) from polygondf")
+        function_df.show()
+        actual = function_df.take(1)[0][0]
+        assert actual == 3395
+
     def test_st_envelope(self):
         polygon_from_wkt = self.spark.read.format("csv"). \
             option("delimiter", "\t"). \

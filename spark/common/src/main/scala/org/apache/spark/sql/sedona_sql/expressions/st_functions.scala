@@ -74,6 +74,9 @@ object st_functions extends DataFrameAPI {
   def ST_BestSRID(geometry: Column): Column = wrapExpression[ST_BestSRID](geometry)
   def ST_BestSRID(geometry: String): Column = wrapExpression[ST_BestSRID](geometry)
 
+  def ST_BestSRID(geometry: Column): Column = wrapExpression[ST_BestSRID](geometry)
+  def ST_BestSRID(geometry: String): Column = wrapExpression[ST_BestSRID](geometry)
+
   def ST_BuildArea(geometry: Column): Column = wrapExpression[ST_BuildArea](geometry)
   def ST_BuildArea(geometry: String): Column = wrapExpression[ST_BuildArea](geometry)
 
