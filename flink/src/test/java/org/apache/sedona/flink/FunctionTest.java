@@ -16,16 +16,14 @@ package org.apache.sedona.flink;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.api.Table;
+import org.apache.flink.table.planner.expressions.In;
 import org.apache.sedona.flink.expressions.Functions;
 import org.apache.sedona.flink.expressions.FunctionsGeoTools;
 import org.geotools.referencing.CRS;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.opengis.referencing.FactoryException;
@@ -97,6 +95,24 @@ public class FunctionTest extends TestBase{
         actual = (String) first(tableEnv.sqlQuery("SELECT ST_AsText(ST_ReducePrecision(ST_Buffer(ST_Point(100, 90), 200, 'quad_segs=4'), 4))")).getField(0);
         expected = "POLYGON ((284.7759 13.4633, 241.4214 -51.4214, 176.5367 -94.7759, 100 -110, 23.4633 -94.7759, -41.4214 -51.4214, -84.7759 13.4633, -100 90, -84.7759 166.5367, -41.4214 231.4214, 23.4633 274.7759, 100 290, 176.5367 274.7759, 241.4214 231.4214, 284.7759 166.5367, 300 90, 284.7759 13.4633))";
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testBestSRID() {
+        Table table1 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (160 40)') AS geom");
+        table1 = table1.select(call(Functions.ST_BestSRID.class.getSimpleName(), $("geom")));
+        int result = (int) first(table1).getField(0);
+        assertEquals(32657, result);
+
+        Table table2 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(-91.185 30.4505, -91.187 30.452, -91.189 30.4535)') AS geom");
+        table2 = table2.select(call(Functions.ST_BestSRID.class.getSimpleName(), $("geom")));
+        result = (int) first(table2).getField(0);
+        assertEquals(32615, result);
+
+        Table table3 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON((-120 30, -80 30, -80 50, -120 50, -120 30))') AS geom");
+        table3 = table3.select(call(Functions.ST_BestSRID.class.getSimpleName(), $("geom")));
+        result = (int) first(table3).getField(0);
+        assertEquals(3395, result);
     }
 
     @Test

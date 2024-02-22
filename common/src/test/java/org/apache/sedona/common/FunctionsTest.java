@@ -1172,6 +1172,75 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void testBestSRID() {
+        int[][] testCases_special = {
+                {0, -70, 3409}, // EPSG:3409 (Antarctic Polar Stereographic)
+                {0, 70, 3574}, // EPSG:3575 (North Pole LAEA Alaska)
+                // Special cases
+                {-180, 60, 32660}, {180, 60, 32660}, {-180, -60, 32760}, {180, -60, 32760},
+        };
+
+        // Number of UTM zones
+        int numZones = (177 - (-177)) / 6 + 1;
+        int numZonesSouth = (177 - (-177)) / 6 + 1;
+
+        int[][] testCases_UTMNorth = new int[numZones][3];
+        int[][] testCases_UTMSouth = new int[numZonesSouth][3];
+
+        int indexNorth = 0;
+        int northernLat = 60; // Latitude for Northern Hemisphere UTM zones
+        for (int lon = -177, epsg = 32601; lon <= 177; lon += 6, epsg++) {
+            testCases_UTMNorth[indexNorth][0] = lon;   // Longitude
+            testCases_UTMNorth[indexNorth][1] = northernLat; // Latitude
+            testCases_UTMNorth[indexNorth][2] = epsg;  // EPSG code
+            indexNorth++;
+        }
+
+        int indexSouth = 0;
+        int southernLat = -60; // Latitude for Southern Hemisphere UTM zones
+        for (int lon = -177, epsg = 32701; lon <= 177; lon += 6, epsg++) {
+            testCases_UTMSouth[indexSouth][0] = lon;   // Longitude
+            testCases_UTMSouth[indexSouth][1] = southernLat; // Latitude
+            testCases_UTMSouth[indexSouth][2] = epsg;  // EPSG code
+            indexSouth++;
+        }
+
+        for (int[] testCase : testCases_special) {
+            Geometry geom = GEOMETRY_FACTORY.createPoint(new Coordinate(testCase[0], testCase[1]));
+            int actualEPSG = Functions.bestSRID(geom);
+            int expectedEPSG = testCase[2];
+            assertEquals("Failed at coordinates (" + testCase[0] + ", " + testCase[1] + ")", expectedEPSG, actualEPSG);
+        }
+
+        for (int[] testCase : testCases_UTMNorth) {
+            Geometry geom = GEOMETRY_FACTORY.createPoint(new Coordinate(testCase[0], testCase[1]));
+            int actualEPSG = Functions.bestSRID(geom);
+            int expectedEPSG = testCase[2];
+            assertEquals("Failed at coordinates (" + testCase[0] + ", " + testCase[1] + ")", expectedEPSG, actualEPSG);
+        }
+
+        for (int[] testCase : testCases_UTMSouth) {
+            Geometry geom = GEOMETRY_FACTORY.createPoint(new Coordinate(testCase[0], testCase[1]));
+            int actualEPSG = Functions.bestSRID(geom);
+            int expectedEPSG = testCase[2];
+            assertEquals("Failed at coordinates (" + testCase[0] + ", " + testCase[1] + ")", expectedEPSG, actualEPSG);
+        }
+
+        // Large geometry that does not fit into UTM or polar categories
+        Geometry geom = GEOMETRY_FACTORY.createPolygon(new Coordinate[] {
+                new Coordinate(-160, -40),
+                new Coordinate(-160, 40),
+                new Coordinate(160, 40),
+                new Coordinate(160, -40),
+                new Coordinate(-160, -40)
+        });
+        int expectedEPSG = 3395; // EPSG code for World Mercator
+        int actualEPSG = Functions.bestSRID(geom);
+
+        assertEquals("Expected World Mercator projection for wide range geometry", expectedEPSG, actualEPSG);
+    }
+
+    @Test
     public void nRingsUnsupported() {
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray3d(0, 1, 1, 1, 2, 1, 1, 2, 2));
         String expected = "Unsupported geometry type: " + "LineString" + ", only Polygon or MultiPolygon geometries are supported.";

@@ -18,6 +18,7 @@ import com.uber.h3core.exceptions.H3Exception;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.geometryObjects.Circle;
+import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.common.utils.GeometryGeoHashEncoder;
@@ -26,18 +27,7 @@ import org.apache.sedona.common.utils.H3Utils;
 import org.apache.sedona.common.utils.S2Utils;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.hull.ConcaveHull;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryCollection;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.LinearRing;
-import org.locationtech.jts.geom.MultiLineString;
-import org.locationtech.jts.geom.MultiPoint;
-import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.io.gml2.GMLWriter;
@@ -194,6 +184,38 @@ public class Functions {
             }
         }
         return bufferParameters;
+    }
+
+    public static int bestSRID(Geometry geometry) {
+        Envelope envelope = geometry.getEnvelopeInternal();
+        if (envelope.isNull()) return Spheroid.EPSG_WORLD_MERCATOR; // Fallback EPSG
+
+        // Calculate the center of the envelope
+        double centerX =  (envelope.getMinX() + envelope.getMaxX()) / 2.0; // centroid.getX();
+        double centerY = (envelope.getMinY() + envelope.getMaxY()) / 2.0; // centroid.getY();
+
+        // Calculate angular width and height
+        double xwidth = Spheroid.angularWidth(envelope);
+        double ywidth = Spheroid.angularHeight(envelope);
+
+        // Prioritize polar regions for Lambert Azimuthal Equal Area projection
+        if (centerY >= 70.0 && ywidth < 45.0) return Spheroid.EPSG_NORTH_LAMBERT;
+        if (centerY <= -70.0 && ywidth < 45.0) return Spheroid.EPSG_SOUTH_LAMBERT;
+
+        // Check for UTM zones
+        if (xwidth < 6.0) {
+            int zone;
+            if (centerX == -180.0 || centerX == 180.0) {
+                zone = 59; // UTM zone 60
+            } else {
+                zone = (int)Math.floor((centerX + 180.0) / 6.0);
+                zone = Math.min(zone, 59);
+            }
+            return (centerY < 0.0) ? Spheroid.EPSG_SOUTH_UTM_START + zone : Spheroid.EPSG_NORTH_UTM_START + zone;
+        }
+
+        // Default fallback to Mercator projection
+        return Spheroid.EPSG_WORLD_MERCATOR;
     }
 
     public static Geometry envelope(Geometry geometry) {
