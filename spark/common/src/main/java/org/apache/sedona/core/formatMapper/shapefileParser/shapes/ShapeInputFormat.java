@@ -101,16 +101,20 @@ public class ShapeInputFormat
                 String filename = FilenameUtils.removeExtension(filePath.getName()).toLowerCase();
                 String suffix = FilenameUtils.getExtension(filePath.getName()).toLowerCase();
 
-                fileSplitPathParts.add(filePath);
-                fileSplitSizeParts.add(filePathSizePair.get(filePath));
+                if (!(suffix.equals(SHX_SUFFIX) || suffix.equals(DBF_SUFFIX) || suffix.equals(SHP_SUFFIX))) {
+                    // Currently we only support .shp, .shx, and .dbf files
+                    continue;
+                }
 
-                if (prevfilename != "" && !prevfilename.equals(filename)
-                        && (suffix.equals(SHX_SUFFIX) || suffix.equals(DBF_SUFFIX) || suffix.equals(SHP_SUFFIX))) {
-                    // compare file name and if it is different then all same filename is into CombileFileSplit
+                if (!prevfilename.isEmpty() && !prevfilename.equals(filename)) {
+                    // compare file name and if it is different then all same filename is into CombineFileSplit
                     splits.add(new CombineFileSplit(fileSplitPathParts.toArray(new Path[0]), Longs.toArray(fileSplitSizeParts)));
                     fileSplitPathParts.clear();
                     fileSplitSizeParts.clear();
                 }
+
+                fileSplitPathParts.add(filePath);
+                fileSplitSizeParts.add(filePathSizePair.get(filePath));
                 prevfilename = filename;
             }
 
