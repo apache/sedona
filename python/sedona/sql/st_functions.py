@@ -330,7 +330,7 @@ def ST_Boundary(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_Buffer(geometry: ColumnOrName, buffer: ColumnOrNameOrNumber, parameters: Optional[Union[ColumnOrName, str]] = None, useSpheroidal: Optional[Union[ColumnOrName, bool]] = None) -> Column:
+def ST_Buffer(geometry: ColumnOrName, buffer: ColumnOrNameOrNumber, parameters: Optional[Union[ColumnOrName, str]] = None, useSpheroid: Optional[Union[ColumnOrName, bool]] = None) -> Column:
     """Calculate a geometry that represents all points whose distance from the
     input geometry column is equal to or less than a given amount.
 
@@ -341,12 +341,12 @@ def ST_Buffer(geometry: ColumnOrName, buffer: ColumnOrNameOrNumber, parameters: 
     :return: Buffered geometry as a geometry column.
     :rtype: Column
     """
-    if parameters is None and useSpheroidal is None:
+    if parameters is None and useSpheroid is None:
         args = (geometry, buffer)
-    elif useSpheroidal is None:
+    elif useSpheroid is None:
         args = (geometry, buffer, parameters)
     else:
-        args = (geometry, buffer, parameters, useSpheroidal)
+        args = (geometry, buffer, parameters, useSpheroid)
 
     return _call_st_function("ST_Buffer", args)
 
