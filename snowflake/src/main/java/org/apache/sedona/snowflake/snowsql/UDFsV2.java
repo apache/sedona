@@ -21,6 +21,8 @@ import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.snowflake.snowsql.annotations.UDFAnnotations;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 import java.io.IOException;
 
@@ -179,7 +181,7 @@ public class UDFsV2
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius"}, argTypes = {"Geometry", "double"}, returnTypes = "Geometry")
-    public static String ST_Buffer(String geometry, double radius) {
+    public static String ST_Buffer(String geometry, double radius) throws FactoryException, TransformException {
         return GeometrySerde.serGeoJson(
                 Functions.buffer(
                         GeometrySerde.deserGeoJson(geometry),

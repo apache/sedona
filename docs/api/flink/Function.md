@@ -555,6 +555,8 @@ Output: `LINESTRING Z(-1 -1 0, 10 5 5)`
 
 Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.
 
+Buffer Style Parameters:
+
 The optional third parameter controls the buffer accuracy and style. Buffer accuracy is specified by the number of line segments approximating a quarter circle, with a default of 8 segments. Buffer style can be set by providing blank-separated key=value pairs in a list format.
 
 - `quad_segs=#` : Number of line segments utilized to approximate a quarter circle (default is 8).
@@ -563,18 +565,31 @@ The optional third parameter controls the buffer accuracy and style. Buffer accu
 - `mitre_limit=#.#` : mitre ratio limit and it only affects mitred join style. `miter_limit` is an accepted synonym for `mitre_limit`.
 - `side=both|left|right` : The option `left` or `right` enables a single-sided buffer operation on the geometry, with the buffered side aligned according to the direction of the line. This functionality is specific to LINESTRING geometry and has no impact on POINT or POLYGON geometries. By default, square end caps are applied.
 
+Mode of buffer calculation:
+
+- Planar Buffering (default): When `useSpheroid` is false, ST_Buffer performs standard planar buffering based on the provided parameters.
+- Spheroidal Buffering:
+    - When `useSpheroid` is set to true, the function performs spheroidal buffering for more accurate representation over the Earth's spheroid.
+    - ST_Buffer first determines the best SRID for spheroidal calculations by using ST_BestSRID, which chooses an SRID that optimally represents the geometry on the Earth's surface.
+    - If the original SRID of the input geometry is not set, `ST_Buffer` defaults to using WGS 84 (SRID 4326) as the baseline for transformations.
+    - The geometry is then transformed to the selected SRID, and the buffer operation is applied in this coordinate system.
+    - Finally, the buffered geometry is transformed back to its original SRID, or to WGS 84 if the original SRID was not set.
+
 !!!note
-    `ST_Buffer` throws an `IllegalArgumentException` if the correct format, parameters, or options are not provided.
+`ST_Buffer` throws an `IllegalArgumentException` if the correct format, parameters, or options are not provided.
 
 Format:
 
 ```
 ST_Buffer (A: Geometry, buffer: Double, bufferStyleParameters: String [Optional])
 ```
+```
+ST_Buffer (A: Geometry, buffer: Double, bufferStyleParameters: String [Optional], useSperoidal: Boolean)
+```
 
 Since: `v1.5.1`
 
-Example:
+Spark SQL Example:
 
 ```sql
 SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10)
@@ -588,7 +603,7 @@ Output:
 
 8 Segments &ensp; 2 Segments
 
-Example:
+Spark SQL Example:
 
 ```sql
 SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(0 0, 50 70, 100 100)'), 10, 'side=left')

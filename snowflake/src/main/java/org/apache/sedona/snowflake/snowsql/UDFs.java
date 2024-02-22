@@ -25,6 +25,8 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBWriter;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -159,7 +161,7 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius"})
-    public static byte[] ST_Buffer(byte[] geometry, double radius) {
+    public static byte[] ST_Buffer(byte[] geometry, double radius) throws FactoryException, TransformException {
         return GeometrySerde.serialize(
                 Functions.buffer(
                         GeometrySerde.deserialize(geometry),
