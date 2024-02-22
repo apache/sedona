@@ -551,7 +551,7 @@ Output: `LINESTRING Z(-1 -1 0, 10 5 5)`
 
 ## ST_Buffer
 
-Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.
+Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance. The function supports both Planar/Euclidean and Spheroidal/Geodesic buffering (Since v1.6.0).
 
 Buffer Style Parameters: 
 
@@ -563,7 +563,7 @@ The optional third parameter controls the buffer accuracy and style. Buffer accu
 - `mitre_limit=#.#` : mitre ratio limit and it only affects mitred join style. `miter_limit` is an accepted synonym for `mitre_limit`.
 - `side=both|left|right` : The option `left` or `right` enables a single-sided buffer operation on the geometry, with the buffered side aligned according to the direction of the line. This functionality is specific to LINESTRING geometry and has no impact on POINT or POLYGON geometries. By default, square end caps are applied.
 
-Mode of buffer calculation:
+Mode of buffer calculation (Since: `v1.6.0`):
 
 - Planar Buffering (default): When `useSpheroid` is false, `ST_Buffer` performs standard planar buffering based on the provided parameters.
 - Spheroidal Buffering:
