@@ -343,10 +343,10 @@ def ST_Buffer(geometry: ColumnOrName, buffer: ColumnOrNameOrNumber, parameters: 
     """
     if parameters is None and useSpheroid is None:
         args = (geometry, buffer)
-    elif useSpheroid is None:
-        args = (geometry, buffer, parameters)
+    elif parameters is None:
+        args = (geometry, buffer, useSpheroid)
     else:
-        args = (geometry, buffer, parameters, useSpheroid)
+        args = (geometry, buffer, useSpheroid, parameters)
 
     return _call_st_function("ST_Buffer", args)
 

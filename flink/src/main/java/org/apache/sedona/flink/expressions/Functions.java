@@ -79,16 +79,16 @@ public class Functions {
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-                             Object o, @DataTypeHint("Double") Double radius, @DataTypeHint("String") String params) throws FactoryException, TransformException {
+                             Object o, @DataTypeHint("Double") Double radius, @DataTypeHint("Boolean") Boolean useSpheroid) throws FactoryException, TransformException {
             Geometry geom = (Geometry) o;
-            return org.apache.sedona.common.Functions.buffer(geom, radius, params);
+            return org.apache.sedona.common.Functions.buffer(geom, radius, useSpheroid);
         }
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-                             Object o, @DataTypeHint("Double") Double radius, @DataTypeHint("String") String params, @DataTypeHint("Boolean") Boolean useSpheroid) throws FactoryException, TransformException {
+                             Object o, @DataTypeHint("Double") Double radius, @DataTypeHint("Boolean") Boolean useSpheroid, @DataTypeHint("String") String params) throws FactoryException, TransformException {
             Geometry geom = (Geometry) o;
-            return org.apache.sedona.common.Functions.buffer(geom, radius, params, useSpheroid);
+            return org.apache.sedona.common.Functions.buffer(geom, radius, useSpheroid, params);
         }
     }
 

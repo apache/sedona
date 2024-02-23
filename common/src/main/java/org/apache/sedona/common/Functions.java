@@ -89,14 +89,14 @@ public class Functions {
     }
 
     public static Geometry buffer(Geometry geometry, double radius) throws FactoryException, TransformException {
-        return buffer(geometry, radius, "", false);
+        return buffer(geometry, radius, false, "");
     }
 
-    public static Geometry buffer(Geometry geometry, double radius, String params) throws FactoryException, TransformException {
-        return buffer(geometry, radius, params, false);
+    public static Geometry buffer(Geometry geometry, double radius, boolean useSpheroid) throws FactoryException, TransformException {
+        return buffer(geometry, radius, useSpheroid, "");
     }
 
-    public static Geometry buffer(Geometry geometry, double radius, String params, boolean useSpheroid) throws FactoryException, TransformException {
+    public static Geometry buffer(Geometry geometry, double radius, boolean useSpheroid, String params) throws FactoryException, TransformException {
         BufferParameters bufferParameters = new BufferParameters();
 
         // Processing parameters
@@ -226,6 +226,8 @@ public class Functions {
         // Calculate the center of the envelope
         double centerX =  (envelope.getMinX() + envelope.getMaxX()) / 2.0; // centroid.getX();
         double centerY = (envelope.getMinY() + envelope.getMaxY()) / 2.0; // centroid.getY();
+        System.out.println("\ncenterX: "+ centerX);
+        System.out.println("centerY: "+ centerY);
 
         // Calculate angular width and height
         double xwidth = Spheroid.angularWidth(envelope);
