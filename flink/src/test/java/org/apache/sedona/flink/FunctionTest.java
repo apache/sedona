@@ -111,9 +111,8 @@ public class FunctionTest extends TestBase{
         assertEquals(expected, actual);
 
         actual = (String) first(tableEnv.sqlQuery("SELECT ST_AsText(ST_ReducePrecision(ST_Buffer(ST_GeomFromWKT('LINESTRING(0 0, 50 70, 70 -3)'), 10, true, 'endcap=square'), 4))")).getField(0);
-        expected = "POLYGON ((-91.187 30.452, -91.185 30.4505, -91.1851 30.4504, -91.1871 30.4519, -91.1891 30.4534, -91.189 30.4535, -91.187 30.452))";
-        System.out.println(actual);
-//        assertEquals(expected, actual);
+        expected = "POLYGON ((50 70, 50.0001 70, 70.0001 -3, 70.0001 -3.0001, 69.9999 -3.0001, 50 69.9999, 0.0001 0, 0 -0.0001, -0.0001 0, 49.9999 70, 50 70))";
+        assertEquals(expected, actual);
 
         actual = (String) first(tableEnv.sqlQuery("SELECT ST_AsText(ST_ReducePrecision(ST_Buffer(ST_GeomFromWKT('POLYGON((-120 30, -80 30, -80 50, -120 50, -120 30))'), 200, true, 'quad_segs=4'), 4))")).getField(0);
         expected = "POLYGON ((-120.0018 50, -120.0017 50.0004, -120.0013 50.0008, -120.0007 50.0011, -120 50.0012, -80 50.0012, -79.9993 50.0011, -79.9987 50.0008, -79.9983 50.0004, -79.9982 50, -79.9982 30, -79.9983 29.9994, -79.9987 29.9989, -79.9993 29.9986, -80 29.9984, -120 29.9984, -120.0007 29.9986, -120.0013 29.9989, -120.0017 29.9994, -120.0018 30, -120.0018 50))";
@@ -122,26 +121,20 @@ public class FunctionTest extends TestBase{
 
     @Test
     public void testBestSRID() {
-//        Table table1 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (160 40)') AS geom");
-//        table1 = table1.select(call(Functions.ST_BestSRID.class.getSimpleName(), $("geom")));
-//        int result = (int) first(table1).getField(0);
-//        assertEquals(32657, result);
-//
-//        Table table2 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(-91.185 30.4505, -91.187 30.452, -91.189 30.4535)') AS geom");
-//        table2 = table2.select(call(Functions.ST_BestSRID.class.getSimpleName(), $("geom")));
-//        result = (int) first(table2).getField(0);
-//        assertEquals(32615, result);
+        Table table1 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (160 40)') AS geom");
+        table1 = table1.select(call(Functions.ST_BestSRID.class.getSimpleName(), $("geom")));
+        int result = (int) first(table1).getField(0);
+        assertEquals(32657, result);
 
-        Table table4 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(179.95 -80, -179.95 -80)') AS geom");
-        table4 = table4.select(call(Functions.ST_BestSRID.class.getSimpleName(), $("geom")));
-        int result = (int) first(table4).getField(0);
-        System.out.println(result);
-//        assertEquals(32615, result);
+        Table table2 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(-91.185 30.4505, -91.187 30.452, -91.189 30.4535)') AS geom");
+        table2 = table2.select(call(Functions.ST_BestSRID.class.getSimpleName(), $("geom")));
+        result = (int) first(table2).getField(0);
+        assertEquals(32615, result);
 
-//        Table table3 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON((-120 30, -80 30, -80 50, -120 50, -120 30))') AS geom");
-//        table3 = table3.select(call(Functions.ST_BestSRID.class.getSimpleName(), $("geom")));
-//        result = (int) first(table3).getField(0);
-//        assertEquals(3395, result);
+        Table table3 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON((-120 30, -80 30, -80 50, -120 50, -120 30))') AS geom");
+        table3 = table3.select(call(Functions.ST_BestSRID.class.getSimpleName(), $("geom")));
+        result = (int) first(table3).getField(0);
+        assertEquals(3395, result);
     }
 
     @Test

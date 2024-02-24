@@ -235,6 +235,8 @@ wrong_type_configurations = [
     (stf.ST_Boundary, (None,)),
     (stf.ST_Buffer, (None, 1.0)),
     (stf.ST_Buffer, ("", None)),
+    (stf.ST_Buffer, ("", 1.0, "")),
+    (stf.ST_Buffer, ("", 1.0, "", None)),
     (stf.ST_BuildArea, (None,)),
     (stf.ST_Centroid, (None,)),
     (stf.ST_Collect, (None,)),

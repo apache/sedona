@@ -43,8 +43,6 @@ import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.operation.valid.TopologyValidationError;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 import org.wololo.jts2geojson.GeoJSONWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,6 +54,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import static com.google.common.geometry.S2.DBL_EPSILON;
+import static org.apache.sedona.common.FunctionsGeoTools.bufferSpheroid;
 
 
 public class Functions {
@@ -88,15 +87,15 @@ public class Functions {
         return boundary;
     }
 
-    public static Geometry buffer(Geometry geometry, double radius) throws FactoryException, TransformException {
+    public static Geometry buffer(Geometry geometry, double radius) {
         return buffer(geometry, radius, false, "");
     }
 
-    public static Geometry buffer(Geometry geometry, double radius, boolean useSpheroid) throws FactoryException, TransformException {
+    public static Geometry buffer(Geometry geometry, double radius, boolean useSpheroid) {
         return buffer(geometry, radius, useSpheroid, "");
     }
 
-    public static Geometry buffer(Geometry geometry, double radius, boolean useSpheroid, String params) throws FactoryException, TransformException {
+    public static Geometry buffer(Geometry geometry, double radius, boolean useSpheroid, String params) {
         BufferParameters bufferParameters = new BufferParameters();
 
         // Processing parameters
@@ -114,27 +113,32 @@ public class Functions {
 
         if (useSpheroid) {
             // Spheroidal buffering logic
+            try {
+                return bufferSpheroid(geometry, radius, bufferParameters);
+            } catch (RuntimeException e) {
+                throw new RuntimeException("Error processing spheroidal buffer", e);
+            }
 
-            // Determine the best SRID for spheroidal calculations
-            int bestCRS = bestSRID(geometry);
-            int originalCRS = geometry.getSRID();
-            final int WGS84CRS = 4326;
-
-            // If originalCRS is not set, use WGS84 as the originalCRS for transformation
-            String sourceCRSCode = (originalCRS == 0) ? "EPSG:" + WGS84CRS : "EPSG:" + originalCRS;
-            String targetCRSCode = "EPSG:" + bestCRS;
-
-            // Transform the geometry to the selected SRID
-            Geometry transformedGeometry = FunctionsGeoTools.transform(geometry, sourceCRSCode, targetCRSCode);
-
-            // Apply the buffer operation in the selected SRID
-            Geometry bufferedGeometry = BufferOp.bufferOp(transformedGeometry, radius, bufferParameters);
-
-            // Transform back to the original SRID or to WGS 84 if original SRID was not set
-            int backTransformCRSCode = (originalCRS == 0) ? WGS84CRS : originalCRS;
-            Geometry bufferedResult = FunctionsGeoTools.transform(bufferedGeometry, targetCRSCode, "EPSG:" + backTransformCRSCode);
-            bufferedResult.setSRID(backTransformCRSCode);
-            return bufferedResult;
+//            // Determine the best SRID for spheroidal calculations
+//            int bestCRS = bestSRID(geometry);
+//            int originalCRS = geometry.getSRID();
+//            final int WGS84CRS = 4326;
+//
+//            // If originalCRS is not set, use WGS84 as the originalCRS for transformation
+//            String sourceCRSCode = (originalCRS == 0) ? "EPSG:" + WGS84CRS : "EPSG:" + originalCRS;
+//            String targetCRSCode = "EPSG:" + bestCRS;
+//
+//            // Transform the geometry to the selected SRID
+//            Geometry transformedGeometry = FunctionsGeoTools.transform(geometry, sourceCRSCode, targetCRSCode);
+//
+//            // Apply the buffer operation in the selected SRID
+//            Geometry bufferedGeometry = BufferOp.bufferOp(transformedGeometry, radius, bufferParameters);
+//
+//            // Transform back to the original SRID or to WGS 84 if original SRID was not set
+//            int backTransformCRSCode = (originalCRS == 0) ? WGS84CRS : originalCRS;
+//            Geometry bufferedResult = FunctionsGeoTools.transform(bufferedGeometry, targetCRSCode, "EPSG:" + backTransformCRSCode);
+//            bufferedResult.setSRID(backTransformCRSCode);
+//            return bufferedResult;
         } else {
             // Existing planar buffer logic with params handling
             return BufferOp.bufferOp(geometry, radius, bufferParameters);
@@ -226,8 +230,8 @@ public class Functions {
         // Calculate the center of the envelope
         double centerX =  (envelope.getMinX() + envelope.getMaxX()) / 2.0; // centroid.getX();
         double centerY = (envelope.getMinY() + envelope.getMaxY()) / 2.0; // centroid.getY();
-        System.out.println("\ncenterX: "+ centerX);
-        System.out.println("centerY: "+ centerY);
+//        System.out.println("\ncenterX: "+ centerX);
+//        System.out.println("centerY: "+ centerY);
 
         // Calculate angular width and height
         double xwidth = Spheroid.angularWidth(envelope);
