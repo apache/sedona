@@ -137,7 +137,7 @@ public class FunctionsGeoTools {
         return builder.getDiagram(FunctionsGeoTools.GEOMETRY_FACTORY);
     }
 
-    public static Geometry bufferSpheroid(Geometry geometry, double radius, BufferParameters params){
+    public static Geometry bufferSpheroid(Geometry geometry, double radius, BufferParameters params) throws IllegalArgumentException {
         // Determine the best SRID for spheroidal calculations
         int bestCRS = Functions.bestSRID(geometry);
         int originalCRS = geometry.getSRID();

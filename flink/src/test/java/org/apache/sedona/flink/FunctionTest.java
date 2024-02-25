@@ -92,20 +92,6 @@ public class FunctionTest extends TestBase{
         expected = "POLYGON ((43.2156 77.3465, 44.8523 78.5733, 46.7044 79.4413, 48.6944 79.9144, 50.739 79.9727, 52.7527 79.6137, 54.6512 78.8525, 56.3552 77.7209, 57.7932 76.2663, 58.9052 74.5495, 59.6446 72.6424, 79.6446 -0.3576, 82.2869 -10.0022, 62.9978 -15.2869, 45.9128 47.0733, 8.1373 -5.8124, 2.325 -13.9497, -13.9497 -2.325, 41.8627 75.8124, 43.2156 77.3465))";
         assertEquals(expected, actual);
 
-//        actual = (String) first(tableEnv.sqlQuery("SELECT ST_AsText(ST_ReducePrecision(ST_Buffer(ST_GeomFromWKT('LINESTRING(179.95 -10, -179.95 -10)'), 10), 4))")).getField(0);
-//        expected = "POLYGON ((43.2156 77.3465, 44.8523 78.5733, 46.7044 79.4413, 48.6944 79.9144, 50.739 79.9727, 52.7527 79.6137, 54.6512 78.8525, 56.3552 77.7209, 57.7932 76.2663, 58.9052 74.5495, 59.6446 72.6424, 79.6446 -0.3576, 82.2869 -10.0022, 62.9978 -15.2869, 45.9128 47.0733, 8.1373 -5.8124, 2.325 -13.9497, -13.9497 -2.325, 41.8627 75.8124, 43.2156 77.3465))";
-//        System.out.println("actual: "+actual);
-//        String area = (String) first(tableEnv.sqlQuery("ST_AsText(ST_Area(ST_GeomFromWKT('POLYGON ((181.05 0, 181.05 -20, 170.95 -20, 160.95 -20, 160.95 0, 171.05 0, 181.05 0))')))")).getField(0);
-//        System.out.println("area: "+area);
-//        assertEquals(expected, actual);
-
-//        actual = (String) first(tableEnv.sqlQuery("SELECT ST_AsText(ST_ReducePrecision(ST_Buffer(ST_GeomFromWKT('LINESTRING(179.95 -10, -179.95 -10)'), 10, true, 'endcap=square'), 4))")).getField(0);
-//        expected = "POLYGON ((43.2156 77.3465, 44.8523 78.5733, 46.7044 79.4413, 48.6944 79.9144, 50.739 79.9727, 52.7527 79.6137, 54.6512 78.8525, 56.3552 77.7209, 57.7932 76.2663, 58.9052 74.5495, 59.6446 72.6424, 79.6446 -0.3576, 82.2869 -10.0022, 62.9978 -15.2869, 45.9128 47.0733, 8.1373 -5.8124, 2.325 -13.9497, -13.9497 -2.325, 41.8627 75.8124, 43.2156 77.3465))";
-//        System.out.println("actual: "+actual);
-//        area = (String) first(tableEnv.sqlQuery("SELECT ST_AsText(ST_Area(ST_ReducePrecision(ST_Buffer(ST_GeomFromWKT('LINESTRING(179.95 -10, -179.95 -10)'), 10, 'endcap=square', true), 4)))")).getField(0);
-//        System.out.println("area: "+area);
-//        assertEquals(expected, actual);
-
         actual = (String) first(tableEnv.sqlQuery("SELECT ST_AsText(ST_ReducePrecision(ST_Buffer(ST_Point(100, 90), 200, false, 'quad_segs=4'), 4))")).getField(0);
         expected = "POLYGON ((284.7759 13.4633, 241.4214 -51.4214, 176.5367 -94.7759, 100 -110, 23.4633 -94.7759, -41.4214 -51.4214, -84.7759 13.4633, -100 90, -84.7759 166.5367, -41.4214 231.4214, 23.4633 274.7759, 100 290, 176.5367 274.7759, 241.4214 231.4214, 284.7759 166.5367, 300 90, 284.7759 13.4633))";
         assertEquals(expected, actual);
@@ -121,7 +107,7 @@ public class FunctionTest extends TestBase{
 
     @Test
     public void testBestSRID() {
-        Table table1 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (160 40)') AS geom");
+        Table table1 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1000 -500)', 3857) AS geom");
         table1 = table1.select(call(Functions.ST_BestSRID.class.getSimpleName(), $("geom")));
         int result = (int) first(table1).getField(0);
         assertEquals(32657, result);
