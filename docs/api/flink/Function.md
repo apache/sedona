@@ -555,17 +555,9 @@ Output: `LINESTRING Z(-1 -1 0, 10 5 5)`
 
 Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance. The function supports both Planar/Euclidean and Spheroidal/Geodesic buffering (Since v1.6.0).
 
-Buffer Style Parameters:
-
-The optional third parameter controls the buffer accuracy and style. Buffer accuracy is specified by the number of line segments approximating a quarter circle, with a default of 8 segments. Buffer style can be set by providing blank-separated key=value pairs in a list format.
-
-- `quad_segs=#` : Number of line segments utilized to approximate a quarter circle (default is 8).
-- `endcap=round|flat|square` : End cap style (default is `round`). `butt` is an accepted synonym for `flat`.
-- `join=round|mitre|bevel` : Join style (default is `round`). `miter` is an accepted synonym for `mitre`.
-- `mitre_limit=#.#` : mitre ratio limit and it only affects mitred join style. `miter_limit` is an accepted synonym for `mitre_limit`.
-- `side=both|left|right` : The option `left` or `right` enables a single-sided buffer operation on the geometry, with the buffered side aligned according to the direction of the line. This functionality is specific to LINESTRING geometry and has no impact on POINT or POLYGON geometries. By default, square end caps are applied.
-
 Mode of buffer calculation (Since: `v1.6.0`):
+
+The optional third parameter, `useSpheroid`, controls the mode of buffer calculation.
 
 - Planar Buffering (default): When `useSpheroid` is false, `ST_Buffer` performs standard planar buffering based on the provided parameters.
 - Spheroidal Buffering:
@@ -576,7 +568,22 @@ Mode of buffer calculation (Since: `v1.6.0`):
     - Finally, the buffered geometry is transformed back to its original SRID, or to WGS 84 if the original SRID was not set.
 
 !!!note
-`ST_Buffer` throws an `IllegalArgumentException` if the correct format, parameters, or options are not provided.
+    As of now, spheroidal buffering only supports lon/lat coordinate systems and will throw an `IllegalArgumentException` for input geometries in meter based coordinate systems.
+!!!note
+    Spheroidal buffering may not produce accurate output buffer for input geometries larger than a UTM zone. 
+
+Buffer Style Parameters:
+
+The optional forth parameter controls the buffer accuracy and style. Buffer accuracy is specified by the number of line segments approximating a quarter circle, with a default of 8 segments. Buffer style can be set by providing blank-separated key=value pairs in a list format.
+
+- `quad_segs=#` : Number of line segments utilized to approximate a quarter circle (default is 8).
+- `endcap=round|flat|square` : End cap style (default is `round`). `butt` is an accepted synonym for `flat`.
+- `join=round|mitre|bevel` : Join style (default is `round`). `miter` is an accepted synonym for `mitre`.
+- `mitre_limit=#.#` : mitre ratio limit and it only affects mitred join style. `miter_limit` is an accepted synonym for `mitre_limit`.
+- `side=both|left|right` : The option `left` or `right` enables a single-sided buffer operation on the geometry, with the buffered side aligned according to the direction of the line. This functionality is specific to LINESTRING geometry and has no impact on POINT or POLYGON geometries. By default, square end caps are applied.
+
+!!!note
+    `ST_Buffer` throws an `IllegalArgumentException` if the correct format, parameters, or options are not provided.
 
 Format:
 
@@ -589,7 +596,7 @@ ST_Buffer (A: Geometry, buffer: Double, bufferStyleParameters: String [Optional]
 
 Since: `v1.5.1`
 
-Spark SQL Example:
+SQL Example:
 
 ```sql
 SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10)
@@ -603,7 +610,7 @@ Output:
 
 8 Segments &ensp; 2 Segments
 
-Spark SQL Example:
+SQL Example:
 
 ```sql
 SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(0 0, 50 70, 100 100)'), 10, 'side=left')
