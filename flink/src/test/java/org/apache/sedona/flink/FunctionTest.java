@@ -107,7 +107,7 @@ public class FunctionTest extends TestBase{
 
     @Test
     public void testBestSRID() {
-        Table table1 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1000 -500)', 3857) AS geom");
+        Table table1 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (160 40)') AS geom");
         table1 = table1.select(call(Functions.ST_BestSRID.class.getSimpleName(), $("geom")));
         int result = (int) first(table1).getField(0);
         assertEquals(32657, result);
