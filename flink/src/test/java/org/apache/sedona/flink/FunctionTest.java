@@ -116,6 +116,21 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testShiftLogitude() {
+        String actual = (String) first(tableEnv.sqlQuery("SELECT ST_AsText(ST_ShiftLongitude(ST_GeomFromWKT('POLYGON((179 10, -179 10, -179 20, 179 20, 179 10))')))")).getField(0);
+        String expected = "POLYGON ((179 10, 181 10, 181 20, 179 20, 179 10))";
+        assertEquals(expected, actual);
+
+        actual = (String) first(tableEnv.sqlQuery("SELECT ST_AsText(ST_ShiftLongitude(ST_GeomFromWKT('MULTIPOLYGON(((179 10, -179 10, -179 20, 179 20, 179 10)), ((-185 10, -185 20, -175 20, -175 10, -185 10)))')))")).getField(0);
+        expected = "MULTIPOLYGON (((179 10, 181 10, 181 20, 179 20, 179 10)), ((175 10, 175 20, 185 20, 185 10, 175 10)))";
+        assertEquals(expected, actual);
+
+        actual = (String) first(tableEnv.sqlQuery("SELECT ST_AsText(ST_ShiftLongitude(ST_GeomFromWKT('LINESTRING(179 10, 181 10)')))")).getField(0);
+        expected = "LINESTRING (179 10, -179 10)";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testClosestPoint() {
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (160 40)') AS g1, ST_GeomFromWKT('POINT (10 10)') as g2");
         table = table.select(call(Functions.ST_ClosestPoint.class.getSimpleName(), $("g1"), $("g2")));

@@ -1765,6 +1765,25 @@ SELECT ST_SetSRID(polygondf.countyshape, 3021)
 FROM polygondf
 ```
 
+## ST_ShiftLongitude
+
+Introduction: Modifies longitude coordinates in geometries, shifting values between -180..0 degrees to 180..360 degrees and vice versa. This is useful for normalizing data across the International Date Line and standardizing coordinate ranges for visualization and spheroidal calculations.
+
+Format: `ST_ShiftLongitude (geom: geometry)`
+
+!!!note
+    This function is only applicable to geometries that use lon/lat coordinate systems.
+
+SQL example:
+```SQL
+SELECT ST_ShiftLongitude(ST_GeomFromText('LINESTRING(177 10, 179 10, -179 10, -177 10)'))
+```
+
+Output:
+```sql
+LINESTRING(177 10, 179 10, 181 10, 183 10)
+```
+
 ## ST_SimplifyPreserveTopology
 
 Introduction: Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,

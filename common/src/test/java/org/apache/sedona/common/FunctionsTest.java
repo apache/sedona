@@ -24,6 +24,7 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.projection.ProjectionException;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
 import org.opengis.referencing.FactoryException;
@@ -32,6 +33,8 @@ import org.opengis.referencing.operation.TransformException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.apache.sedona.common.Constructors.geomFromEWKT;
+import static org.apache.sedona.common.Constructors.geomFromWKT;
 import static org.junit.Assert.*;
 
 public class FunctionsTest extends TestBase {
@@ -1238,6 +1241,36 @@ public class FunctionsTest extends TestBase {
         int actualEPSG = Functions.bestSRID(geom);
 
         assertEquals("Expected World Mercator projection for wide range geometry", expectedEPSG, actualEPSG);
+    }
+
+    @Test
+    public void testShiftLongitude() throws ParseException {
+        Geometry point = geomFromWKT("POINT(-175 10)", 4230);
+        Geometry linestring1 = geomFromEWKT("LINESTRING(179 10, -179 10)");
+        Geometry linestring2 = geomFromEWKT("LINESTRING(179 10, 181 10)");
+        Geometry polygon = geomFromEWKT("POLYGON((179 10, -179 10, -179 20, 179 20, 179 10))");
+        Geometry multiPoint = geomFromEWKT("MULTIPOINT((179 10), (-179 10))");
+        Geometry multiLineString = geomFromEWKT("MULTILINESTRING((179 10, -179 10), (179 20, 181 20))");
+        Geometry multiPolygon = geomFromEWKT("MULTIPOLYGON(((179 10, -179 10, -179 20, 179 20, 179 10)), ((-185 10, -185 20, -175 20, -175 10, -185 10)))");
+        Geometry geomCollection = geomFromEWKT("GEOMETRYCOLLECTION(POINT(190 10), LINESTRING(179 10, -179 10))");
+
+        Geometry expected1 = geomFromWKT("POINT (185 10)", 4230);
+        Geometry expected2 = geomFromEWKT("LINESTRING (179 10, 181 10)");
+        Geometry expected3 = geomFromEWKT("LINESTRING (179 10, -179 10)");
+        Geometry expected4 = geomFromEWKT("POLYGON ((179 10, 181 10, 181 20, 179 20, 179 10))");
+        Geometry expected5 = geomFromEWKT("MULTIPOINT ((179 10), (181 10))");
+        Geometry expected6 = geomFromEWKT("MULTILINESTRING ((179 10, 181 10), (179 20, -179 20))");
+        Geometry expected7 = geomFromEWKT("MULTIPOLYGON (((179 10, 181 10, 181 20, 179 20, 179 10)), ((175 10, 175 20, 185 20, 185 10, 175 10)))");
+        Geometry expected8 = geomFromEWKT("GEOMETRYCOLLECTION (POINT (-170 10), LINESTRING (179 10, 181 10))");
+
+        assertEquals(expected1, Functions.shiftLongitude(point));
+        assertEquals(expected2, Functions.shiftLongitude(linestring1));
+        assertEquals(expected3, Functions.shiftLongitude(linestring2));
+        assertEquals(expected4, Functions.shiftLongitude(polygon));
+        assertEquals(expected5, Functions.shiftLongitude(multiPoint));
+        assertEquals(expected6, Functions.shiftLongitude(multiLineString));
+        assertEquals(expected7, Functions.shiftLongitude(multiPolygon));
+        assertEquals(expected8, Functions.shiftLongitude(geomCollection));
     }
 
     @Test

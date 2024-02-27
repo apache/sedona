@@ -180,6 +180,15 @@ public class TestFunctionsV2
     }
 
     @Test
+    public void test_ST_ShiftLongitude() {
+        registerUDFV2("ST_ShiftLongitude", String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_ShiftLongitude(ST_GeometryFromWKT('POINT (-179 60)'))",
+                "POINT (181 60)"
+        );
+    }
+
+    @Test
     public void test_ST_Boundary() {
         registerUDFV2("ST_Boundary", String.class);
         verifySqlSingleRes(
