@@ -254,6 +254,7 @@ public class Functions {
             while (coord.x > 180) coord.x -= 360;
             while (coord.x < -180) coord.x += 360;
         }
+        geometry.geometryChanged();
     }
 
     public static Geometry shiftLongitude(Geometry geometry) {
