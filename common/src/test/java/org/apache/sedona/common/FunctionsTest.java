@@ -1265,8 +1265,6 @@ public class FunctionsTest extends TestBase {
         Geometry expected8 = geomFromEWKT("GEOMETRYCOLLECTION (POINT (-170 10), LINESTRING (179 10, 181 10))");
         Geometry expected9 = geomFromEWKT("POLYGON ((190 -20, 170 -20, 170 20, 190 20, 190 -20), (185 -10, 175 -10, 175 10, 185 10, 185 -10))");
 
-        System.out.println(Functions.shiftLongitude(polygonRing));
-
         assertEquals(expected1, Functions.shiftLongitude(point));
         assertEquals(expected2, Functions.shiftLongitude(linestring1));
         assertEquals(expected3, Functions.shiftLongitude(linestring2));
