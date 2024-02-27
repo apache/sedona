@@ -1095,10 +1095,16 @@ Introduction: This returns a statistic value specified by `statType` over the re
 
     The following conditions will throw an `IllegalArgumentException` if they are not met:
 
-    - The provided `raster` and `zone` geometry should intersect.
+    - The provided `raster` and `zone` geometry should intersect when `lenient` parameter is set to `false`.
     - The option provided to `statType` should be valid.
 
+    `lenient` parameter is set to `false` by default. If `lenient` is set to `true`, then the function will return `null` if the `raster` and `zone` geometry do not intersect.
+
 Format:
+
+```
+RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, excludeNoData: Boolean, lenient: Boolean)
+```
 
 ```
 RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, excludeNoData: Boolean)
@@ -1157,10 +1163,16 @@ Introduction: Returns an array of statistic values, where each statistic is comp
 
     The following conditions will throw an `IllegalArgumentException` if they are not met:
 
-    - The provided `raster` and `zone` geometry should intersect.
+    - The provided `raster` and `zone` geometry should intersect when `lenient` parameter is set to `false`.
     - The option provided to `statType` should be valid.
 
+    `lenient` parameter is set to `false` by default. If `lenient` is set to `true`, then the function will return `null` if the `raster` and `zone` geometry do not intersect.
+
 Format:
+
+```
+RS_ZonalStatsAll(raster: Raster, zone: Geometry, band: Integer, excludeNodata: Boolean, lenient: Boolean)
+```
 
 ```
 RS_ZonalStatsAll(raster: Raster, zone: Geometry, band: Integer, excludeNodata: Boolean)

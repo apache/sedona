@@ -18,7 +18,6 @@
  */
 package org.apache.sedona.common.raster;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
@@ -36,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class RasterBandAccessors {
 
@@ -94,11 +94,15 @@ public class RasterBandAccessors {
      * @param roi Geometry to define the region of interest
      * @param band Band to be used for computation
      * @param excludeNoData Specifies whether to exclude no-data value or not
+     * @param lenient Return null if the raster and roi do not intersect when set to true, otherwise will throw an exception
      * @return An array with all the stats for the region
      * @throws FactoryException
      */
-    public static double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi, int band, boolean excludeNoData) throws FactoryException {
-        List<Object> objects = getStatObjects(raster, roi, band, excludeNoData);
+    public static double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi, int band, boolean excludeNoData, boolean lenient) throws FactoryException {
+        List<Object> objects = getStatObjects(raster, roi, band, excludeNoData, lenient);
+        if (objects == null) {
+            return null;
+        }
         DescriptiveStatistics stats = (DescriptiveStatistics) objects.get(0);
         double[] pixelData = (double[]) objects.get(1);
 
@@ -116,6 +120,18 @@ public class RasterBandAccessors {
         result[8] = stats.getMax();
 
         return result;
+    }
+
+    /**
+     * @param raster Raster to use for computing stats
+     * @param roi Geometry to define the region of interest
+     * @param band Band to be used for computation
+     * @param excludeNoData Specifies whether to exclude no-data value or not
+     * @return An array with all the stats for the region
+     * @throws FactoryException
+     */
+    public static double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi, int band, boolean excludeNoData) throws FactoryException {
+        return getZonalStatsAll(raster, roi, band, excludeNoData, false);
     }
 
     /**
@@ -145,12 +161,15 @@ public class RasterBandAccessors {
      * @param band Band to be used for computation
      * @param statType Define the statistic to be computed
      * @param excludeNoData Specifies whether to exclude no-data value or not
+     * @param lenient Return null if the raster and roi do not intersect when set to true, otherwise will throw an exception
      * @return A double precision floating point number representing the requested statistic calculated over the specified region.
      * @throws FactoryException
      */
-    public static double getZonalStats(GridCoverage2D raster, Geometry roi, int band, String statType, boolean excludeNoData) throws FactoryException {
-
-        List<Object> objects = getStatObjects(raster, roi, band, excludeNoData);
+    public static Double getZonalStats(GridCoverage2D raster, Geometry roi, int band, String statType, boolean excludeNoData, boolean lenient) throws FactoryException {
+        List<Object> objects = getStatObjects(raster, roi, band, excludeNoData, lenient);
+        if (objects == null) {
+            return null;
+        }
         DescriptiveStatistics stats = (DescriptiveStatistics) objects.get(0);
         double[] pixelData = (double[]) objects.get(1);
 
@@ -162,7 +181,7 @@ public class RasterBandAccessors {
             case "mean":
                 return stats.getMean();
             case "count":
-                return stats.getN();
+                return (double) stats.getN();
             case "max":
                 return stats.getMax();
             case "min":
@@ -179,6 +198,11 @@ public class RasterBandAccessors {
             default:
                 throw new IllegalArgumentException("Please select from the accepted options. Some of the valid options are sum, mean, stddev, etc.");
         }
+    }
+
+    public static double getZonalStats(GridCoverage2D raster, Geometry roi, int band, String statType, boolean excludeNoData) throws FactoryException {
+        Double stat = getZonalStats(raster, roi, band, statType, excludeNoData, false);
+        return Objects.requireNonNull(stat);
     }
 
     /**
@@ -219,10 +243,11 @@ public class RasterBandAccessors {
      * @param roi Geometry to define the region of interest
      * @param band Band to be used for computation
      * @param excludeNoData Specifies whether to exclude no-data value or not
+     * @param lenient Return null if the raster and roi do not intersect when set to true, otherwise will throw an exception
      * @return an object of DescriptiveStatistics and an array of double with pixel data.
      * @throws FactoryException
      */
-    private static List<Object> getStatObjects(GridCoverage2D raster, Geometry roi, int band, boolean excludeNoData) throws FactoryException {
+    private static List<Object> getStatObjects(GridCoverage2D raster, Geometry roi, int band, boolean excludeNoData, boolean lenient) throws FactoryException {
         RasterUtils.ensureBand(raster, band);
 
         if(RasterAccessors.srid(raster) != roi.getSRID()) {
@@ -234,7 +259,11 @@ public class RasterBandAccessors {
 
         // checking if the raster contains the geometry
         if (!RasterPredicates.rsIntersects(raster, roi)) {
-            throw new IllegalArgumentException("The provided geometry is not intersecting the raster. Please provide a geometry that is in the raster's extent.");
+            if (lenient) {
+                return null;
+            } else {
+                throw new IllegalArgumentException("The provided geometry is not intersecting the raster. Please provide a geometry that is in the raster's extent.");
+            }
         }
 
         Raster rasterData = RasterUtils.getRaster(raster.getRenderedImage());
