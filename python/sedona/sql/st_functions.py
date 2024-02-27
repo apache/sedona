@@ -316,6 +316,16 @@ def ST_BestSRID(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_BestSRID", geometry)
 
+@validate_argument_types
+def ST_ShiftLongitude(geometry: ColumnOrName) -> Column:
+    """Shifts longitudes between -180..0 degrees to 180..360 degrees and vice versa.
+
+    :param geometry: Geometry column.
+    :type geometry: ColumnOrName
+    :return: Shifted geometry
+    :rtype: Column
+    """
+    return _call_st_function("ST_ShiftLongitude", geometry)
 
 @validate_argument_types
 def ST_Boundary(geometry: ColumnOrName) -> Column:
