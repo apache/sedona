@@ -34,6 +34,11 @@ jobs:
             scala: '2.12.8'
             python: '3.10'
             hadoop: '3'
+            shapely: '1'
+          - spark: '3.5.0'
+            scala: '2.12.8'
+            python: '3.10'
+            hadoop: '3'
           - spark: '3.5.0'
             scala: '2.12.8'
             python: '3.9'
@@ -58,6 +63,11 @@ jobs:
             scala: '2.12.8'
             python: '3.7'
             hadoop: '3'
+          - spark: '3.4.0'
+            scala: '2.12.8'
+            python: '3.7'
+            hadoop: '3'
+            shapely: '1'
           - spark: '3.3.0'
             scala: '2.12.8'
             python: '3.8'
@@ -115,7 +125,17 @@ jobs:
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         PYTHON_VERSION: ${{ matrix.python }}
-      run: (cd python;pipenv --python ${PYTHON_VERSION};pipenv install pyspark==${SPARK_VERSION};pipenv install --dev;pipenv graph)
+        SHAPELY_VERSION: ${{ matrix.shapely }}
+      run: |
+        cd python
+        if [ "${SHAPELY_VERSION}" == "1" ]; then
+          echo "Patching Pipfile to use Shapely 1.x"
+          sed -i 's/^shapely.*$/shapely="<2.0.0"/g' Pipfile
+        fi
+        pipenv --python ${PYTHON_VERSION}
+        pipenv install pyspark==${SPARK_VERSION}
+        pipenv install --dev
+        pipenv graph
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         HADOOP_VERSION: ${{ matrix.hadoop }}
