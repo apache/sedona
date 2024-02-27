@@ -239,6 +239,105 @@ public class Functions {
         return geometry;
     }
 
+    public static Geometry shiftLongitude(Geometry geometry) {
+        if (geometry instanceof Point) {
+            return shiftCoordinates((Point) geometry);
+        } else if (geometry instanceof LineString) {
+            return shiftCoordinates((LineString) geometry);
+        } else if (geometry instanceof Polygon) {
+            return shiftCoordinates((Polygon) geometry);
+        } else if (geometry instanceof MultiPoint) {
+            return shiftMultiGeometry((MultiPoint) geometry);
+        } else if (geometry instanceof MultiLineString) {
+            return shiftMultiGeometry((MultiLineString) geometry);
+        } else if (geometry instanceof MultiPolygon) {
+            return shiftMultiGeometry((MultiPolygon) geometry);
+        } else if (geometry instanceof GeometryCollection) {
+            return shiftMultiGeometry((GeometryCollection) geometry);
+        }
+        return geometry;
+    }
+
+    private static Geometry shiftCoordinates(Point point) {
+        Coordinate newCoord = shiftCoordinate(point.getCoordinate());
+        return point.getFactory().createPoint(newCoord);
+    }
+
+    private static Geometry shiftCoordinates(LineString lineString) {
+        Coordinate[] newCoords = new Coordinate[lineString.getNumPoints()];
+        for (int i = 0; i < lineString.getNumPoints(); i++) {
+            newCoords[i] = shiftCoordinate(lineString.getCoordinateN(i));
+        }
+        return lineString.getFactory().createLineString(newCoords);
+    }
+
+    private static Geometry shiftCoordinates(Polygon polygon) {
+        GeometryFactory factory = polygon.getFactory();
+
+        // Shift exterior ring and convert to LinearRing
+        LinearRing exteriorRing = shiftRingToLinearRing(polygon.getExteriorRing());
+
+        // Process interior rings
+        int numInteriorRings = polygon.getNumInteriorRing();
+        LinearRing[] interiorRings = new LinearRing[numInteriorRings];
+        for (int i = 0; i < numInteriorRings; i++) {
+            interiorRings[i] = shiftRingToLinearRing(polygon.getInteriorRingN(i));
+        }
+
+        return factory.createPolygon(exteriorRing, interiorRings);
+    }
+
+    private static LinearRing shiftRingToLinearRing(LineString ring) {
+        GeometryFactory factory = ring.getFactory();
+        Coordinate[] shiftedCoords = new Coordinate[ring.getNumPoints()];
+        for (int i = 0; i < ring.getNumPoints(); i++) {
+            shiftedCoords[i] = shiftCoordinate(ring.getCoordinateN(i));
+        }
+        return factory.createLinearRing(shiftedCoords);
+    }
+
+    private static Geometry shiftMultiGeometry(GeometryCollection geometryCollection) {
+        int numGeometries = geometryCollection.getNumGeometries();
+        GeometryFactory factory = geometryCollection.getFactory();
+
+        if (geometryCollection instanceof MultiPoint) {
+            Point[] points = new Point[numGeometries];
+            for (int i = 0; i < numGeometries; i++) {
+                points[i] = (Point) shiftLongitude(geometryCollection.getGeometryN(i));
+            }
+            return factory.createMultiPoint(points);
+        } else if (geometryCollection instanceof MultiLineString) {
+            LineString[] lineStrings = new LineString[numGeometries];
+            for (int i = 0; i < numGeometries; i++) {
+                lineStrings[i] = (LineString) shiftLongitude(geometryCollection.getGeometryN(i));
+            }
+            return factory.createMultiLineString(lineStrings);
+        } else if (geometryCollection instanceof MultiPolygon) {
+            Polygon[] polygons = new Polygon[numGeometries];
+            for (int i = 0; i < numGeometries; i++) {
+                polygons[i] = (Polygon) shiftLongitude(geometryCollection.getGeometryN(i));
+            }
+            return factory.createMultiPolygon(polygons);
+        } else {
+            // For other geometry collections, just create a new collection with shifted geometries
+            Geometry[] geometries = new Geometry[numGeometries];
+            for (int i = 0; i < numGeometries; i++) {
+                geometries[i] = shiftLongitude(geometryCollection.getGeometryN(i));
+            }
+            return factory.createGeometryCollection(geometries);
+        }
+    }
+
+    private static Coordinate shiftCoordinate(Coordinate coord) {
+        double newX = coord.x;
+        if (newX < 0) {
+            newX += 360;
+        } else if (newX > 180) {
+            newX -= 360;
+        }
+        return new Coordinate(newX, coord.y);
+    }
+
     public static Double x(Geometry geometry) {
         if (geometry instanceof Point) {
             return geometry.getCoordinate().x;
