@@ -205,7 +205,7 @@ public class TestFunctions extends TestBase {
     public void test_ST_ShiftLongitude() {
         registerUDF("ST_BestSRID", byte[].class);
         verifySqlSingleRes(
-                "select sedona.ST_ShiftLongitude(sedona.ST_GeomFromText('LINESTRING (179.95 10, -179.95 10)'))",
+                "select sedona.ST_AsText(sedona.ST_ShiftLongitude(sedona.ST_GeomFromText('LINESTRING (179.95 10, -179.95 10)')))",
                 "LINESTRING (179.95 10, 180.05 10)"
         );
     }
