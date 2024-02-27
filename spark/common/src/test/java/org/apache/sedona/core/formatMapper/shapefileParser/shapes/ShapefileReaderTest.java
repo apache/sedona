@@ -392,11 +392,12 @@ public class ShapefileReaderTest
     {
         // load shape with geotool.shapefile
         String inputLocation = getShapeFilePath("multipleshapefiles");
-        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = loadFeatures(inputLocation);
         // load shapes with our tool
         SpatialRDD shapeRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
         assert (shapeRDD.rawSpatialRDD.getNumPartitions() == 2);
         assertEquals("[STATEFP, COUNTYFP, COUNTYNS, AFFGEOID, GEOID, NAME, LSAD, ALAND, AWATER]", shapeRDD.fieldNames.toString());
+        long count = shapeRDD.rawSpatialRDD.count();
+        assertEquals(3220, count);
     }
 
     /**
