@@ -306,7 +306,12 @@ SEDONA_LISTED_SQL_FUNCTIONS = [
     (SuiteContainer.empty()
      .with_function_name("ST_BestSRID")
      .with_arguments(["ST_GeomFromText('POINT (-177 60)')"])
-     .with_expected_result(32601))
+     .with_expected_result(32601)),
+    (SuiteContainer.empty()
+     .with_function_name("ST_ShiftLongitude")
+     .with_arguments(["ST_GeomFromText('POINT (-177 60)')"])
+     .with_expected_result("POINT (183 60)")
+     .with_transform("ST_AsText"))
 ]
 
 

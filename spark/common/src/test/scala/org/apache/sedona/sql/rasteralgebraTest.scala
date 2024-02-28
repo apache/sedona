@@ -24,7 +24,7 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.{Row, SaveMode}
 import org.apache.spark.sql.functions.{col, collect_list, expr, row_number}
 import org.geotools.coverage.grid.GridCoverage2D
-import org.junit.Assert.{assertEquals, assertNull, assertTrue}
+import org.junit.Assert.{assertEquals, assertNotNull, assertNull, assertTrue}
 import org.locationtech.jts.geom.{Coordinate, Geometry}
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
@@ -988,6 +988,14 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 'sd')").first().get(0)
       assertEquals(92.13277429243035, actual)
+
+      // Test with a polygon in EPSG:4326
+      actual = df.selectExpr("RS_ZonalStats(raster, ST_GeomFromWKT('POLYGON ((-77.96672569800863073 37.91971182746296876, -77.9688630154902711 37.89620133516485367, -77.93936803424354309 37.90517806858776595, -77.96672569800863073 37.91971182746296876))'), 1, 'mean', false)").first().get(0)
+      assertNotNull(actual)
+
+      // Test with a polygon that does not intersect the raster in lenient mode
+      actual = df.selectExpr("RS_ZonalStats(raster, ST_GeomFromWKT('POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))'), 1, 'mean', false)").first().get(0)
+      assertNull(actual)
     }
 
     it("Passed RS_ZonalStats - Raster with no data") {
@@ -1015,6 +1023,10 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val actual = df.selectExpr("RS_ZonalStatsAll(raster, geom, 1, true)").first().get(0)
       val expected = Seq(184792.0, 1.0690406E7, 57.851021689230684, 0.0, 0.0, 92.13277429243035, 8488.448098819916, 0.0, 255.0)
       assertTrue(expected.equals(actual))
+
+      // Test with a polygon that does not intersect the raster in lenient mode
+      val actual2 = df.selectExpr("RS_ZonalStatsAll(raster, ST_GeomFromWKT('POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))'), 1, false)").first().get(0)
+      assertNull(actual2)
     }
 
     it("Passed RS_ZonalStatsAll - Raster with no data") {
@@ -1235,25 +1247,37 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_WorldToRasterCoord with raster - geom parameter") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")
-      val result = df.selectExpr("ST_AsText(RS_WorldToRasterCoord(raster, ST_GeomFromText('POINT (-13095817.809482181 4021262.7487925636)')))").first().getString(0);
+      val results = df.selectExpr(
+        "ST_AsText(RS_WorldToRasterCoord(raster, ST_GeomFromText('POINT (-13095817.809482181 4021262.7487925636)', 3857)))",
+        "ST_AsText(RS_WorldToRasterCoord(raster, ST_GeomFromText('POINT (-117.64173 33.943833)')))"
+      ).first()
       val expected = "POINT (1 1)"
-      assertEquals(expected, result)
+      assertEquals(expected, results.getString(0))
+      assertEquals(expected, results.getString(1))
     }
 
     it("Passed RS_WorldToRasterCoordX with raster - geom parameter") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")
-      val result = df.selectExpr("RS_WorldToRasterCoordX(raster, ST_GeomFromText('POINT (-13095817.809482181 4021262.7487925636)'))").first().getInt(0);
+      val results = df.selectExpr(
+        "RS_WorldToRasterCoordX(raster, ST_GeomFromText('POINT (-13095817.809482181 4021262.7487925636)', 3857))",
+        "RS_WorldToRasterCoordX(raster, ST_GeomFromText('POINT (-117.64173 33.943833)'))"
+      ).first()
       val expected = 1
-      assertEquals(expected, result)
+      assertEquals(expected, results.getInt(0))
+      assertEquals(expected, results.getInt(1))
     }
 
     it("Passed RS_WorldToRasterCoordY with raster - geom parameter") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")
-      val result = df.selectExpr("RS_WorldToRasterCoordY(raster, ST_GeomFromText('POINT (-13095817.809482181 4021262.7487925636)'))").first().getInt(0);
+      val results = df.selectExpr(
+        "RS_WorldToRasterCoordY(raster, ST_GeomFromText('POINT (-13095817.809482181 4021262.7487925636)', 3857))",
+        "RS_WorldToRasterCoordY(raster, ST_GeomFromText('POINT (-117.64173 33.943833)'))"
+      ).first()
       val expected = 1
-      assertEquals(expected, result)
+      assertEquals(expected, results.getInt(0))
+      assertEquals(expected, results.getInt(1))
     }
 
     it("Passed RS_Contains") {

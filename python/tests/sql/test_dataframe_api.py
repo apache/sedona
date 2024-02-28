@@ -145,8 +145,9 @@ test_configurations = [
     (stf.ST_S2CellIDs, ("point", 30), "point_geom", "", [1153451514845492609]),
     (stf.ST_SetPoint, ("line", 1, lambda: f.expr("ST_Point(1.0, 1.0)")), "linestring_geom", "", "LINESTRING (0 0, 1 1, 2 0, 3 0, 4 0, 5 0)"),
     (stf.ST_SetSRID, ("point", 3021), "point_geom", "ST_SRID(geom)", 3021),
+    (stf.ST_ShiftLongitude, ("geom",), "triangle_geom", "", "POLYGON ((0 0, 1 0, 1 1, 0 0))"),
     (stf.ST_SimplifyPreserveTopology, ("geom", 0.2), "0.9_poly", "", "POLYGON ((0 0, 1 0, 1 1, 0 0))"),
-    (stf.ST_Split, ("a", "b"), "overlapping_polys", "", "MULTIPOLYGON (((1 0, 0 0, 0 1, 1 1, 1 0)), ((2 0, 2 1, 3 1, 3 0, 2 0)))"),
+    (stf.ST_Split, ("line", "points"), "multipoint_splitting_line", "", "MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))"),
     (stf.ST_SRID, ("point",), "point_geom", "", 0),
     (stf.ST_StartPoint, ("line",), "linestring_geom", "", "POINT (0 0)"),
     (stf.ST_SubDivide, ("line", 5), "linestring_geom", "", ["LINESTRING (0 0, 2.5 0)", "LINESTRING (2.5 0, 5 0)"]),
@@ -304,6 +305,7 @@ wrong_type_configurations = [
     (stf.ST_SetSRID, (None, 3021)),
     (stf.ST_SetSRID, ("", None)),
     (stf.ST_SetSRID, ("", 3021.0)),
+    (stf.ST_ShiftLongitude, (None,)),
     (stf.ST_SimplifyPreserveTopology, (None, 0.2)),
     (stf.ST_SimplifyPreserveTopology, ("", None)),
     (stf.ST_SRID, (None,)),
@@ -438,6 +440,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (0.0 1.0)') AS point, ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)') AS line")
         elif request.param == "line_and_point":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (0 2, 1 1, 2 0)') AS line, ST_GeomFromWKT('POINT (0 0)') AS point")
+        elif request.param == "multipoint_splitting_line":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1.5 1.5, 2 2)') AS line, ST_GeomFromWKT('MULTIPOINT (0.5 0.5, 1 1)') AS points")
         elif request.param == "origin_and_point":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (0 0)') AS origin, ST_GeomFromWKT('POINT (1 0)') as point")
         elif request.param == "ny_seattle":

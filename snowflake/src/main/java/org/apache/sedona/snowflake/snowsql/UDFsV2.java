@@ -180,6 +180,15 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"})
+    public static String ST_ShiftLongitude(String geometry) {
+        return GeometrySerde.serGeoJson(
+                Functions.shiftLongitude(
+                        GeometrySerde.deserGeoJson(geometry)
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius"}, argTypes = {"Geometry", "double"}, returnTypes = "Geometry")
     public static String ST_Buffer(String geometry, double radius) throws FactoryException, TransformException {
         return GeometrySerde.serGeoJson(

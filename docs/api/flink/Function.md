@@ -2391,6 +2391,27 @@ Output:
 SRID=3021;POLYGON ((1 1, 8 1, 8 8, 1 8, 1 1))
 ```
 
+## ST_ShiftLongitude
+
+Introduction: Modifies longitude coordinates in geometries, shifting values between -180..0 degrees to 180..360 degrees and vice versa. This is useful for normalizing data across the International Date Line and standardizing coordinate ranges for visualization and spheroidal calculations.
+
+!!!note
+    This function is only applicable to geometries that use lon/lat coordinate systems.
+
+Format: `ST_ShiftLongitude (geom: geometry)`
+
+Since: `v1.6.0`
+
+SQL example:
+```SQL
+SELECT ST_ShiftLongitude(ST_GeomFromText('LINESTRING(177 10, 179 10, -179 10, -177 10)'))
+```
+
+Output:
+```sql
+LINESTRING(177 10, 179 10, 181 10, 183 10)
+```
+
 ## ST_SRID
 
 Introduction: Return the spatial reference system identifier (SRID) of the geometry.

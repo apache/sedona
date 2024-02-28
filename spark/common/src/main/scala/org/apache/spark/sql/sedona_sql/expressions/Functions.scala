@@ -168,6 +168,14 @@ case class ST_BestSRID(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_ShiftLongitude(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.shiftLongitude _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
   * Return the bounding rectangle for a Geometry
   *
