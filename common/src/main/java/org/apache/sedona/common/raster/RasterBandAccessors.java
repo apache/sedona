@@ -131,7 +131,7 @@ public class RasterBandAccessors {
      * @throws FactoryException
      */
     public static double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi, int band, boolean excludeNoData) throws FactoryException {
-        return getZonalStatsAll(raster, roi, band, excludeNoData, false);
+        return getZonalStatsAll(raster, roi, band, excludeNoData, true);
     }
 
     /**
@@ -200,9 +200,8 @@ public class RasterBandAccessors {
         }
     }
 
-    public static double getZonalStats(GridCoverage2D raster, Geometry roi, int band, String statType, boolean excludeNoData) throws FactoryException {
-        Double stat = getZonalStats(raster, roi, band, statType, excludeNoData, false);
-        return Objects.requireNonNull(stat);
+    public static Double getZonalStats(GridCoverage2D raster, Geometry roi, int band, String statType, boolean excludeNoData) throws FactoryException {
+        return getZonalStats(raster, roi, band, statType, excludeNoData, true);
     }
 
     /**
@@ -213,7 +212,7 @@ public class RasterBandAccessors {
      * @return A double precision floating point number representing the requested statistic calculated over the specified region. The excludeNoData is set to true.
      * @throws FactoryException
      */
-    public static double getZonalStats(GridCoverage2D raster, Geometry roi, int band, String statType) throws FactoryException {
+    public static Double getZonalStats(GridCoverage2D raster, Geometry roi, int band, String statType) throws FactoryException {
         return getZonalStats(raster, roi, band, statType, true);
     }
 
@@ -224,7 +223,7 @@ public class RasterBandAccessors {
      * @return A double precision floating point number representing the requested statistic calculated over the specified region. The excludeNoData is set to true and band is set to 1.
      * @throws FactoryException
      */
-    public static double getZonalStats(GridCoverage2D raster, Geometry roi, String statType) throws FactoryException {
+    public static Double getZonalStats(GridCoverage2D raster, Geometry roi, String statType) throws FactoryException {
         return getZonalStats(raster, roi, 1, statType, true);
     }
 

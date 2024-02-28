@@ -1098,7 +1098,7 @@ Introduction: This returns a statistic value specified by `statType` over the re
     - The provided `raster` and `zone` geometry should intersect when `lenient` parameter is set to `false`.
     - The option provided to `statType` should be valid.
 
-    `lenient` parameter is set to `false` by default. If `lenient` is set to `true`, then the function will return `null` if the `raster` and `zone` geometry do not intersect.
+    `lenient` parameter is set to `true` by default. The function will return `null` if the `raster` and `zone` geometry do not intersect.
 
 Format:
 
@@ -1166,7 +1166,7 @@ Introduction: Returns an array of statistic values, where each statistic is comp
     - The provided `raster` and `zone` geometry should intersect when `lenient` parameter is set to `false`.
     - The option provided to `statType` should be valid.
 
-    `lenient` parameter is set to `false` by default. If `lenient` is set to `true`, then the function will return `null` if the `raster` and `zone` geometry do not intersect.
+    `lenient` parameter is set to `true` by default. The function will return `null` if the `raster` and `zone` geometry do not intersect.
 
 Format:
 
