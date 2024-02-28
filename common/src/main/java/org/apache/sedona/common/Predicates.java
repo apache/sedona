@@ -76,10 +76,9 @@ public class Predicates {
             return false;
         }
 
-        AtomicBoolean crossesDateLine = new AtomicBoolean(false);
-
         CoordinateSequenceFilter filter = new CoordinateSequenceFilter() {
             private Coordinate previous = null;
+            private boolean crossesDateLine = false;
 
             @Override
             public void filter(CoordinateSequence seq, int i) {
@@ -90,7 +89,7 @@ public class Predicates {
 
                 Coordinate current = seq.getCoordinateCopy(i);
                 if (Math.abs(current.x - previous.x) > 180) {
-                    crossesDateLine.set(true);
+                    crossesDateLine = true;
                 }
 
                 previous = current;
@@ -98,7 +97,7 @@ public class Predicates {
 
             @Override
             public boolean isDone() {
-                return crossesDateLine.get();
+                return crossesDateLine;
             }
 
             @Override
@@ -107,39 +106,8 @@ public class Predicates {
             }
         };
 
-        if (geometry instanceof GeometryCollection) {
-            GeometryCollection collection = (GeometryCollection) geometry;
-            for (int i = 0; i < collection.getNumGeometries(); i++) {
-                Geometry part = collection.getGeometryN(i);
-                part.apply(filter);
-                if (crossesDateLine.get()) {
-                    return true;
-                }
-            }
-        } else {
-            geometry.apply(filter);
-        }
-
-        return crossesDateLine.get();
+        geometry.apply(filter);
+        return filter.isDone();
     }
 
-
-//    public static boolean crossesDateLine(Geometry geometry) {
-//        if (geometry == null || geometry.isEmpty()) {
-//            return false;
-//        }
-//
-//        boolean crossesDateLine = false;
-//        Coordinate previous = null;
-//
-//        for (Coordinate coord : geometry.getCoordinates()) {
-//            if (previous != null && Math.abs(coord.x - previous.x) > 180) {
-//                crossesDateLine = true;
-//                break;
-//            }
-//            previous = coord;
-//        }
-//
-//        return crossesDateLine;
-//    }
 }

@@ -168,7 +168,7 @@ test_configurations = [
     # predicates
     (stp.ST_Contains, ("geom", lambda: f.expr("ST_Point(0.5, 0.25)")), "triangle_geom", "", True),
     (stp.ST_Crosses, ("line", "poly"), "line_crossing_poly", "", True),
-    (stp.ST_CrossesDateLine, ("line"), "line_crossing_dateline", "", True),
+    (stp.ST_CrossesDateLine, ("line",), "line_crossing_dateline", "", True),
     (stp.ST_Disjoint, ("a", "b"), "two_points", "", True),
     (stp.ST_Equals, ("line", lambda: f.expr("ST_Reverse(line)")), "linestring_geom", "", True),
     (stp.ST_Intersects, ("a", "b"), "overlapping_polys", "", True),
