@@ -456,10 +456,13 @@ public class RasterUtils {
         // to the raster CRS.
         // Note that:
         // In Sedona vector, we do not perform implicit CRS transform. Everything must be done explicitly via ST_Transform
-        // In Sedona raster, we do implicit CRS transform if the geometry has a SRID and the raster has a CRS
-        if (targetCRS != null && !(targetCRS instanceof DefaultEngineeringCRS) && geomSRID > 0) {
+        // In Sedona raster, we do implicit CRS transform if the raster has a CRS. If the the SRID of the geometry is 0, we assume it is 4326.
+        if (geomSRID == 0) {
+            geomSRID = 4326;
+        }
+        if (targetCRS != null && !(targetCRS instanceof DefaultEngineeringCRS)) {
             try {
-                geometry = FunctionsGeoTools.transformToGivenTarget(geometry, null, targetCRS, true);
+                geometry = FunctionsGeoTools.transformToGivenTarget(geometry, "epsg:" + geomSRID, targetCRS, true);
             } catch (FactoryException | TransformException e) {
                 throw new RuntimeException("Cannot transform CRS of query window", e);
             }
