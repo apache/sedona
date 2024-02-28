@@ -45,18 +45,6 @@ public class TestPredicates extends TestBase{
         );
     }
     @Test
-    public void test_ST_CrossesDateLine() {
-        registerUDF("ST_CrossesDateLine", byte[].class);
-        verifySqlSingleRes(
-                "SELECT SEDONA.ST_CrossesDateLine(sedona.ST_GeomFromWKT('POLYGON((175 10, -175 10, -175 -10, 175 -10, 175 10))'))",
-                true
-        );
-        verifySqlSingleRes(
-                "SELECT SEDONA.ST_CrossesDateLine(sedona.ST_GeomFromWKT('POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'))",
-                false
-        );
-    }
-    @Test
     public void test_ST_Disjoint() {
         registerUDF("ST_Disjoint", byte[].class, byte[].class);
         verifySqlSingleRes(

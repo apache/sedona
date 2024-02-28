@@ -218,6 +218,51 @@ public class Functions {
         return Spheroid.EPSG_WORLD_MERCATOR;
     }
 
+    /**
+     * Checks if a geometry crosses the International Date Line.
+     *
+     * @param geometry The geometry to check.
+     * @return True if the geometry crosses the Date Line, false otherwise.
+     */
+    public static boolean crossesDateLine(Geometry geometry) {
+        if (geometry == null || geometry.isEmpty()) {
+            return false;
+        }
+
+        CoordinateSequenceFilter filter = new CoordinateSequenceFilter() {
+            private Coordinate previous = null;
+            private boolean crossesDateLine = false;
+
+            @Override
+            public void filter(CoordinateSequence seq, int i) {
+                if (i == 0) {
+                    previous = seq.getCoordinateCopy(i);
+                    return;
+                }
+
+                Coordinate current = seq.getCoordinateCopy(i);
+                if (Math.abs(current.x - previous.x) > 180) {
+                    crossesDateLine = true;
+                }
+
+                previous = current;
+            }
+
+            @Override
+            public boolean isDone() {
+                return crossesDateLine;
+            }
+
+            @Override
+            public boolean isGeometryChanged() {
+                return false;
+            }
+        };
+
+        geometry.apply(filter);
+        return filter.isDone();
+    }
+
     public static Geometry envelope(Geometry geometry) {
         return geometry.getEnvelope();
     }

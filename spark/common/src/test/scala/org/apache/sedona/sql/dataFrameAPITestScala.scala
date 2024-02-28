@@ -579,6 +579,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_CrossesDateLine") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((175 10, -175 10, -175 -10, 175 -10, 175 10))') AS geom")
+      val df = baseDf.select(ST_CrossesDateLine("geom"))
+      val actualResult = df.take(1)(0).getBoolean(0)
+      assert(actualResult)
+    }
+
     it("Passed ST_EndPoint") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom")
       val df = baseDf.select(ST_EndPoint("geom"))
@@ -950,13 +957,6 @@ class dataFrameAPITestScala extends TestBaseScala {
     it("Passed ST_Crosses") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((1 1, 4 1, 4 4, 1 4, 1 1))') AS a,ST_GeomFromWKT('LINESTRING(1 5, 5 1)') AS b")
       val df = baseDf.select(ST_Crosses("a", "b"))
-      val actualResult = df.take(1)(0).getBoolean(0)
-      assert(actualResult)
-    }
-
-    it("Passed ST_CrossesDateLine") {
-      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((175 10, -175 10, -175 -10, 175 -10, 175 10))') AS geom")
-      val df = baseDf.select(ST_CrossesDateLine("geom"))
       val actualResult = df.take(1)(0).getBoolean(0)
       assert(actualResult)
     }

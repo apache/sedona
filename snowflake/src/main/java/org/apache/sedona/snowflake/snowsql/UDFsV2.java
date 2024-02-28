@@ -303,7 +303,7 @@ public class UDFsV2
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"})
     public static boolean ST_CrossesDateLine(String geometry) {
-        return Predicates.crossesDateLine(
+        return Functions.crossesDateLine(
                 GeometrySerde.deserGeoJson(geometry)
         );
     }

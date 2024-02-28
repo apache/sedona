@@ -166,14 +166,6 @@ case class ST_Crosses(inputExpressions: Seq[Expression])
   }
 }
 
-case class ST_CrossesDateLine(inputExpressions: Seq[Expression])
-  extends InferredExpression(Predicates.crossesDateLine _) {
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
 /**
   * Test if leftGeometry overlaps rightGeometry
   *

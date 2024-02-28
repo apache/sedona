@@ -98,33 +98,6 @@ public class PredicateTest extends TestBase{
     }
 
     @Test
-    public void testCrossesDateLine() {
-        // Test line crossing the Date Line
-        Table table1 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(170 30, -170 30)') AS geom");
-        table1 = table1.select(call("ST_CrossesDateLine", $("geom")));
-        Boolean actual1 = (Boolean) first(table1).getField(0);
-        assertEquals(true, actual1);
-
-        // Test line not crossing the Date Line
-        Table table2 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(-120 30, -130 40)') AS geom");
-        table2 = table2.select(call("ST_CrossesDateLine", $("geom")));
-        Boolean actual2 = (Boolean) first(table2).getField(0);
-        assertEquals(false, actual2);
-
-        // Test polygon crossing the Date Line
-        Table table3 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON((175 10, -175 10, -175 -10, 175 -10, 175 10))') AS geom");
-        table3 = table3.select(call("ST_CrossesDateLine", $("geom")));
-        Boolean actual3 = (Boolean) first(table3).getField(0);
-        assertEquals(true, actual3);
-
-        // Test polygon not crossing the Date Line
-        Table table4 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON((-120 10, -130 10, -130 -10, -120 -10, -120 10))') AS geom");
-        table4 = table4.select(call("ST_CrossesDateLine", $("geom")));
-        Boolean actual4 = (Boolean) first(table4).getField(0);
-        assertEquals(false, actual4);
-    }
-
-    @Test
     public void testEquals() {
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 2 2)') AS g1, ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)') as g2");
         table = table.select(call(Predicates.ST_Equals.class.getSimpleName(), $("g1"), $("g2")));

@@ -600,6 +600,35 @@ Output:
 2
 ```
 
+## ST_CrossesDateLine
+
+Introduction: This function determines if a given geometry crosses the International Date Line. It operates by checking if the difference in longitude between any pair of consecutive points in the geometry exceeds 180 degrees. If such a difference is found, it is assumed that the geometry crosses the Date Line. It returns true if the geometry crosses the Date Line, and false otherwise.
+
+!!!note
+    The function assumes that the provided geometry is in lon/lat coordinate reference system where longitude values range from -180 to 180 degrees.
+
+!!!note
+    For multi-geometries (e.g., MultiPolygon, MultiLineString), this function will return true if any one of the geometries within the multi-geometry crosses the International Date Line.
+
+Format: `ST_CrossesDateLine(geometry: Geometry)`
+
+Since: `v1.6.0`
+
+SQL Example:
+
+```sql
+SELECT ST_CrossesDateLine(ST_GeomFromWKT('LINESTRING(170 30, -170 30)'))
+```
+
+Output:
+
+```sql
+true
+```
+
+!!!Warning
+    For geometries that span more than 180 degrees in longitude without actually crossing the Date Line, this function may still return true, indicating a crossing.
+
 ## ST_Degrees
 
 Introduction: Convert an angle in radian to degrees.

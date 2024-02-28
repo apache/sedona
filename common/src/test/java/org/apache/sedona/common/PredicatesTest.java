@@ -26,7 +26,7 @@ import org.locationtech.jts.io.ParseException;
 
 import static org.apache.sedona.common.Constructors.geomFromEWKT;
 import static org.apache.sedona.common.Constructors.geomFromWKT;
-import static org.apache.sedona.common.Predicates.crossesDateLine;
+import static org.apache.sedona.common.Functions.crossesDateLine;
 import static org.junit.Assert.*;
 
 public class PredicatesTest extends TestBase {

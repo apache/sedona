@@ -26,7 +26,6 @@ from sedona.sql.dataframe_api import ColumnOrName, call_sedona_function, validat
 __all__ = [
     "ST_Contains",
     "ST_Crosses",
-    "ST_CrossesDateLine",
     "ST_Disjoint",
     "ST_Equals",
     "ST_Intersects",
@@ -67,17 +66,6 @@ def ST_Crosses(a: ColumnOrName, b: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_predicate_function("ST_Crosses", (a, b))
-
-@validate_argument_types
-def ST_CrossesDateLine(a: ColumnOrName) -> Column:
-    """Check whether geometry a crosses the International Date Line.
-
-    :param a: Geometry to check crossing with.
-    :type a: ColumnOrName
-    :return: True if geometry a cross the dateline.
-    :rtype: Column
-    """
-    return _call_predicate_function("ST_CrossesDateLine", (a))
 
 @validate_argument_types
 def ST_Disjoint(a: ColumnOrName, b: ColumnOrName) -> Column:

@@ -289,7 +289,7 @@ public class UDFs {
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static boolean ST_CrossesDateLine(byte[] geometry) {
-        return Predicates.crossesDateLine(
+        return Functions.crossesDateLine(
                 GeometrySerde.deserialize(geometry)
         );
     }
