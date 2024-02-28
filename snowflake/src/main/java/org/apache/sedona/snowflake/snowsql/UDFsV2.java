@@ -199,6 +199,29 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius", "useSpheroid"}, argTypes = {"Geometry", "double", "boolean"}, returnTypes = "Geometry")
+    public static String ST_Buffer(String geometry, double radius, boolean useSpheroid) throws FactoryException, TransformException {
+        return GeometrySerde.serGeoJson(
+                Functions.buffer(
+                        GeometrySerde.deserGeoJson(geometry),
+                        radius,
+                        useSpheroid
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius", "useSpheroid", "parameters"}, argTypes = {"Geometry", "double", "boolean", "String"}, returnTypes = "Geometry")
+    public static String ST_Buffer(String geometry, double radius, boolean useSpheroid, String parameters) throws FactoryException, TransformException {
+        return GeometrySerde.serGeoJson(
+                Functions.buffer(
+                        GeometrySerde.deserGeoJson(geometry),
+                        radius,
+                        useSpheroid,
+                        parameters
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
     public static String ST_BuildArea(String geometry) {
         return GeometrySerde.serGeoJson(

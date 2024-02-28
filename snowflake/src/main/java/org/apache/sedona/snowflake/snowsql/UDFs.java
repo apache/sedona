@@ -170,6 +170,29 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius", "useSpheroid"})
+    public static byte[] ST_Buffer(byte[] geometry, double radius, boolean useSpheroid) throws FactoryException, TransformException {
+        return GeometrySerde.serialize(
+                Functions.buffer(
+                        GeometrySerde.deserialize(geometry),
+                        radius,
+                        useSpheroid
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius", "useSpheroid", "parameters"})
+    public static byte[] ST_Buffer(byte[] geometry, double radius, boolean useSpheroid, String parameters) throws FactoryException, TransformException {
+        return GeometrySerde.serialize(
+                Functions.buffer(
+                        GeometrySerde.deserialize(geometry),
+                        radius,
+                        useSpheroid,
+                        parameters
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static int ST_BestSRID(byte[] geometry) {
         return Functions.bestSRID(

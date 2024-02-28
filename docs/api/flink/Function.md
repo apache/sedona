@@ -568,7 +568,7 @@ The optional third parameter, `useSpheroid`, controls the mode of buffer calcula
     - Finally, the buffered geometry is transformed back to its original SRID, or to WGS 84 if the original SRID was not set.
 
 !!!note
-    As of now, spheroidal buffering only supports lon/lat coordinate systems and will throw an `IllegalArgumentException` for input geometries in meter based coordinate systems.
+    Spheroidal buffering only supports lon/lat coordinate systems and will throw an `IllegalArgumentException` for input geometries in meter based coordinate systems.
 !!!note
     Spheroidal buffering may not produce accurate output buffer for input geometries larger than a UTM zone.
 
