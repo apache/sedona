@@ -260,7 +260,7 @@ public class Functions {
         geometry.geometryChanged();
     }
 
-    public static void shiftLongitude(Geometry geometry) {
+    public static Geometry shiftLongitude(Geometry geometry) {
         geometry.apply(new CoordinateSequenceFilter() {
             @Override
             public void filter(CoordinateSequence seq, int i) {
@@ -283,6 +283,7 @@ public class Functions {
                 return true;
             }
         });
+        return geometry;
     }
 
 
