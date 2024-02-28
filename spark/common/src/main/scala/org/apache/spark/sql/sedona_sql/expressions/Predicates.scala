@@ -166,6 +166,17 @@ case class ST_Crosses(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_CrossesDateLine(inputExpressions: Seq[Expression])
+  extends ST_Predicate with CodegenFallback {
+
+  override def evalGeom(geom: Geometry): Boolean = {
+    Predicates.crossesDateLine(geom)
+  }
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
 
 /**
   * Test if leftGeometry overlaps rightGeometry

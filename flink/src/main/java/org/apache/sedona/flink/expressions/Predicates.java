@@ -134,6 +134,21 @@ public class Predicates {
         }
     }
 
+    public static class ST_CrossesDateLine extends ScalarFunction
+    {
+        /**
+         * Constructor for relation checking without duplicate removal
+         */
+        public ST_CrossesDateLine() {}
+
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o)
+        {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Predicates.crossesDateLine(geom);
+        }
+    }
+
     public static class ST_Disjoint
             extends ScalarFunction
     {

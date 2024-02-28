@@ -155,6 +155,7 @@ public class Catalog {
                 new Predicates.ST_Intersects(),
                 new Predicates.ST_Contains(),
                 new Predicates.ST_Crosses(),
+                new Predicates.ST_CrossesDateLine(),
                 new Predicates.ST_Within(),
                 new Predicates.ST_Covers(),
                 new Predicates.ST_CoveredBy(),

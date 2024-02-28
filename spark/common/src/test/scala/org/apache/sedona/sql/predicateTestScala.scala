@@ -194,6 +194,19 @@ class predicateTestScala extends TestBaseScala {
       assert(!notCrosses.take(1)(0).get(0).asInstanceOf[Boolean])
     }
 
+    it("Passed ST_CrossesDateLine") {
+      var crossesTesttable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((170 -10, -170 -10, -170 10, 170 10, 170 -10), (175 -5, -175 -5, -175 5, 175 5, 175 -5))') as geom")
+      crossesTesttable.createOrReplaceTempView("crossesTesttable")
+      var crosses = sparkSession.sql("select(ST_CrossesDateLine(geom)) from crossesTesttable")
+
+      var notCrossesTesttable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 4 1, 4 4, 1 4, 1 1))') as geom")
+      notCrossesTesttable.createOrReplaceTempView("notCrossesTesttable")
+      var notCrosses = sparkSession.sql("select(ST_CrossesDateLine(geom)) from notCrossesTesttable")
+
+      assert(crosses.take(1)(0).get(0).asInstanceOf[Boolean])
+      assert(!notCrosses.take(1)(0).get(0).asInstanceOf[Boolean])
+    }
+
     it("Passed ST_Touches") {
       var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")

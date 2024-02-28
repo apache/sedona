@@ -46,6 +46,18 @@ public class TestPredicatesV2
         );
     }
     @Test
+    public void test_ST_CrossesDateLine() {
+        registerUDFV2("ST_CrossesDateLine",  String.class);
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_CrossesDateLine( ST_GeometryFromWKT('POLYGON((175 10, -175 10, -175 -10, 175 -10, 175 10))'))",
+                true
+        );
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_CrossesDateLine( ST_GeometryFromWKT('POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'))",
+                false
+        );
+    }
+    @Test
     public void test_ST_Disjoint() {
          registerUDFV2("ST_Disjoint",  String.class,  String.class);
         verifySqlSingleRes(

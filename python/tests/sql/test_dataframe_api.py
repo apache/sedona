@@ -168,6 +168,7 @@ test_configurations = [
     # predicates
     (stp.ST_Contains, ("geom", lambda: f.expr("ST_Point(0.5, 0.25)")), "triangle_geom", "", True),
     (stp.ST_Crosses, ("line", "poly"), "line_crossing_poly", "", True),
+    (stp.ST_CrossesDateLine, ("line"), "line_crossing_dateline", "", True),
     (stp.ST_Disjoint, ("a", "b"), "two_points", "", True),
     (stp.ST_Equals, ("line", lambda: f.expr("ST_Reverse(line)")), "linestring_geom", "", True),
     (stp.ST_Intersects, ("a", "b"), "overlapping_polys", "", True),
@@ -332,6 +333,7 @@ wrong_type_configurations = [
     (stp.ST_Contains, ("", None)),
     (stp.ST_Crosses, (None, "")),
     (stp.ST_Crosses, ("", None)),
+    (stp.ST_CrossesDateLine, (None,)),
     (stp.ST_Disjoint, (None, "")),
     (stp.ST_Disjoint, ("", None)),
     (stp.ST_Equals, (None, "")),
@@ -443,6 +445,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (0 0)') AS origin, ST_GeomFromWKT('POINT (1 0)') as point")
         elif request.param == "ny_seattle":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (-122.335167 47.608013)') AS seattle, ST_GeomFromWKT('POINT (-73.935242 40.730610)') as ny")
+        elif request.param == "line_crossing_dateline":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (179.95 30, -179.95 30)') AS line")
         raise ValueError(f"Invalid base_df name passed: {request.param}")
 
     def _id_test_configuration(val):

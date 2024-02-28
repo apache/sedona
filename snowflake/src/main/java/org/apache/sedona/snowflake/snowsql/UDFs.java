@@ -287,6 +287,13 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static boolean ST_CrossesDateLine(byte[] geometry) {
+        return Predicates.crossesDateLine(
+                GeometrySerde.deserialize(geometry)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"angleInRadian"})
     public static double ST_Degrees(double angleInRadian) {
         return Functions.degrees(angleInRadian);

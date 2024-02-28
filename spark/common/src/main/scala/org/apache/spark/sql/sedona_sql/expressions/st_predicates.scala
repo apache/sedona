@@ -28,6 +28,9 @@ object st_predicates extends DataFrameAPI {
   def ST_Crosses(a: Column, b: Column): Column = wrapExpression[ST_Crosses](a, b)
   def ST_Crosses(a: String, b: String): Column = wrapExpression[ST_Crosses](a, b)
 
+  def ST_CrossesDateLine(a: Column): Column = wrapExpression[ST_CrossesDateLine](a)
+  def ST_CrossesDateLine(a: String): Column = wrapExpression[ST_CrossesDateLine](a)
+
   def ST_Disjoint(a: Column, b: Column): Column = wrapExpression[ST_Disjoint](a, b)
   def ST_Disjoint(a: String, b: String): Column = wrapExpression[ST_Disjoint](a, b)
 
