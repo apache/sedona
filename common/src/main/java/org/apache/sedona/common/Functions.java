@@ -239,6 +239,32 @@ public class Functions {
         return geometry;
     }
 
+    public static Geometry shiftLongitude(Geometry geometry) {
+        geometry.apply(new CoordinateSequenceFilter() {
+            @Override
+            public void filter(CoordinateSequence seq, int i) {
+                double newX = seq.getX(i);
+                if (newX < 0) {
+                    newX += 360;
+                } else if (newX > 180) {
+                    newX -= 360;
+                }
+                seq.setOrdinate(i, CoordinateSequence.X, newX);
+            }
+
+            @Override
+            public boolean isDone() {
+                return false;
+            }
+
+            @Override
+            public boolean isGeometryChanged() {
+                return true;
+            }
+        });
+        return geometry;
+    }
+
     public static Double x(Geometry geometry) {
         if (geometry instanceof Point) {
             return geometry.getCoordinate().x;
