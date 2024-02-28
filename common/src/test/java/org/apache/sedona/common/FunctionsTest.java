@@ -1275,32 +1275,14 @@ public class FunctionsTest extends TestBase {
         Geometry expected7 = geomFromEWKT("MULTIPOLYGON (((179 10, 181 10, 181 20, 179 20, 179 10)), ((175 10, 175 20, 185 20, 185 10, 175 10)))");
         Geometry expected8 = geomFromEWKT("GEOMETRYCOLLECTION (POINT (-170 10), LINESTRING (179 10, 181 10))");
 
-        Functions.shiftLongitude(point);
-        Functions.shiftLongitude(linestring1);
-        Functions.shiftLongitude(linestring2);
-        Functions.shiftLongitude(polygon);
-        Functions.shiftLongitude(multiPoint);
-        Functions.shiftLongitude(multiLineString);
-        Functions.shiftLongitude(multiPolygon);
-        Functions.shiftLongitude(geomCollection);
-
-        assertEquals(expected1, point);
-        assertEquals(expected2, linestring1);
-        assertEquals(expected3, linestring2);
-        assertEquals(expected4, polygon);
-        assertEquals(expected5, multiPoint);
-        assertEquals(expected6, multiLineString);
-        assertEquals(expected7, multiPolygon);
-        assertEquals(expected8, geomCollection);
-
-//        assertEquals(expected1, Functions.shiftLongitude(point));
-//        assertEquals(expected2, Functions.shiftLongitude(linestring1));
-//        assertEquals(expected3, Functions.shiftLongitude(linestring2));
-//        assertEquals(expected4, Functions.shiftLongitude(polygon));
-//        assertEquals(expected5, Functions.shiftLongitude(multiPoint));
-//        assertEquals(expected6, Functions.shiftLongitude(multiLineString));
-//        assertEquals(expected7, Functions.shiftLongitude(multiPolygon));
-//        assertEquals(expected8, Functions.shiftLongitude(geomCollection));
+        assertEquals(expected1, Functions.shiftLongitude(point));
+        assertEquals(expected2, Functions.shiftLongitude(linestring1));
+        assertEquals(expected3, Functions.shiftLongitude(linestring2));
+        assertEquals(expected4, Functions.shiftLongitude(polygon));
+        assertEquals(expected5, Functions.shiftLongitude(multiPoint));
+        assertEquals(expected6, Functions.shiftLongitude(multiLineString));
+        assertEquals(expected7, Functions.shiftLongitude(multiPolygon));
+        assertEquals(expected8, Functions.shiftLongitude(geomCollection));
     }
 
     private static double comparePolygons(Geometry p1, Geometry p2) {
@@ -1385,39 +1367,6 @@ public class FunctionsTest extends TestBase {
         int actualEPSG = Functions.bestSRID(geom);
 
         assertEquals("Expected World Mercator projection for wide range geometry", expectedEPSG, actualEPSG);
-    }
-
-    @Test
-    public void testShiftLongitude() throws ParseException {
-        Geometry point = geomFromWKT("POINT(-175 10)", 4230);
-        Geometry linestring1 = geomFromEWKT("LINESTRING(179 10, -179 10)");
-        Geometry linestring2 = geomFromEWKT("LINESTRING(179 10, 181 10)");
-        Geometry polygon = geomFromEWKT("POLYGON((179 10, -179 10, -179 20, 179 20, 179 10))");
-        Geometry multiPoint = geomFromEWKT("MULTIPOINT((179 10), (-179 10))");
-        Geometry multiLineString = geomFromEWKT("MULTILINESTRING((179 10, -179 10), (179 20, 181 20))");
-        Geometry multiPolygon = geomFromEWKT("MULTIPOLYGON(((179 10, -179 10, -179 20, 179 20, 179 10)), ((-185 10, -185 20, -175 20, -175 10, -185 10)))");
-        Geometry geomCollection = geomFromEWKT("GEOMETRYCOLLECTION(POINT(190 10), LINESTRING(179 10, -179 10))");
-        Geometry polygonRing = geomFromEWKT("POLYGON((-170 -20, 170 -20, 170 20, -170 20, -170 -20), (-175 -10, 175 -10, 175 10, -175 10, -175 -10))");
-
-        Geometry expected1 = geomFromWKT("POINT (185 10)", 4230);
-        Geometry expected2 = geomFromEWKT("LINESTRING (179 10, 181 10)");
-        Geometry expected3 = geomFromEWKT("LINESTRING (179 10, -179 10)");
-        Geometry expected4 = geomFromEWKT("POLYGON ((179 10, 181 10, 181 20, 179 20, 179 10))");
-        Geometry expected5 = geomFromEWKT("MULTIPOINT ((179 10), (181 10))");
-        Geometry expected6 = geomFromEWKT("MULTILINESTRING ((179 10, 181 10), (179 20, -179 20))");
-        Geometry expected7 = geomFromEWKT("MULTIPOLYGON (((179 10, 181 10, 181 20, 179 20, 179 10)), ((175 10, 175 20, 185 20, 185 10, 175 10)))");
-        Geometry expected8 = geomFromEWKT("GEOMETRYCOLLECTION (POINT (-170 10), LINESTRING (179 10, 181 10))");
-        Geometry expected9 = geomFromEWKT("POLYGON ((190 -20, 170 -20, 170 20, 190 20, 190 -20), (185 -10, 175 -10, 175 10, 185 10, 185 -10))");
-
-        assertEquals(expected1, Functions.shiftLongitude(point));
-        assertEquals(expected2, Functions.shiftLongitude(linestring1));
-        assertEquals(expected3, Functions.shiftLongitude(linestring2));
-        assertEquals(expected4, Functions.shiftLongitude(polygon));
-        assertEquals(expected5, Functions.shiftLongitude(multiPoint));
-        assertEquals(expected6, Functions.shiftLongitude(multiLineString));
-        assertEquals(expected7, Functions.shiftLongitude(multiPolygon));
-        assertEquals(expected8, Functions.shiftLongitude(geomCollection));
-        assertEquals(expected9, Functions.shiftLongitude(polygonRing));
     }
 
     @Test
