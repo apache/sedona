@@ -167,11 +167,7 @@ case class ST_Crosses(inputExpressions: Seq[Expression])
 }
 
 case class ST_CrossesDateLine(inputExpressions: Seq[Expression])
-  extends ST_Predicate with CodegenFallback {
-
-  override def evalGeom(geom: Geometry): Boolean = {
-    Predicates.crossesDateLine(geom)
-  }
+  extends InferredExpression(Predicates.crossesDateLine _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

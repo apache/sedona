@@ -13,9 +13,10 @@
  */
 package org.apache.sedona.common;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.*;
 import org.apache.sedona.common.sphere.Spheroid;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Predicates {
     public static boolean contains(Geometry leftGeometry, Geometry rightGeometry) {
@@ -75,17 +76,70 @@ public class Predicates {
             return false;
         }
 
-        boolean crossesDateLine = false;
-        Coordinate previous = null;
+        AtomicBoolean crossesDateLine = new AtomicBoolean(false);
 
-        for (Coordinate coord : geometry.getCoordinates()) {
-            if (previous != null && Math.abs(coord.x - previous.x) > 180) {
-                crossesDateLine = true;
-                break;
+        CoordinateSequenceFilter filter = new CoordinateSequenceFilter() {
+            private Coordinate previous = null;
+
+            @Override
+            public void filter(CoordinateSequence seq, int i) {
+                if (i == 0) {
+                    previous = seq.getCoordinateCopy(i);
+                    return;
+                }
+
+                Coordinate current = seq.getCoordinateCopy(i);
+                if (Math.abs(current.x - previous.x) > 180) {
+                    crossesDateLine.set(true);
+                }
+
+                previous = current;
             }
-            previous = coord;
+
+            @Override
+            public boolean isDone() {
+                return crossesDateLine.get();
+            }
+
+            @Override
+            public boolean isGeometryChanged() {
+                return false;
+            }
+        };
+
+        if (geometry instanceof GeometryCollection) {
+            GeometryCollection collection = (GeometryCollection) geometry;
+            for (int i = 0; i < collection.getNumGeometries(); i++) {
+                Geometry part = collection.getGeometryN(i);
+                part.apply(filter);
+                if (crossesDateLine.get()) {
+                    return true;
+                }
+            }
+        } else {
+            geometry.apply(filter);
         }
 
-        return crossesDateLine;
+        return crossesDateLine.get();
     }
+
+
+//    public static boolean crossesDateLine(Geometry geometry) {
+//        if (geometry == null || geometry.isEmpty()) {
+//            return false;
+//        }
+//
+//        boolean crossesDateLine = false;
+//        Coordinate previous = null;
+//
+//        for (Coordinate coord : geometry.getCoordinates()) {
+//            if (previous != null && Math.abs(coord.x - previous.x) > 180) {
+//                crossesDateLine = true;
+//                break;
+//            }
+//            previous = coord;
+//        }
+//
+//        return crossesDateLine;
+//    }
 }
