@@ -979,6 +979,10 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       // Test with a polygon in EPSG:4326
       actual = df.selectExpr("RS_ZonalStats(raster, ST_GeomFromWKT('POLYGON ((-77.96672569800863073 37.91971182746296876, -77.9688630154902711 37.89620133516485367, -77.93936803424354309 37.90517806858776595, -77.96672569800863073 37.91971182746296876))'), 1, 'mean', false)").first().get(0)
       assertNotNull(actual)
+
+      // Test with a polygon that does not intersect the raster in lenient mode
+      actual = df.selectExpr("RS_ZonalStats(raster, ST_GeomFromWKT('POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))'), 1, 'mean', false)").first().get(0)
+      assertNull(actual)
     }
 
     it("Passed RS_ZonalStats - Raster with no data") {
@@ -1006,6 +1010,10 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val actual = df.selectExpr("RS_ZonalStatsAll(raster, geom, 1, true)").first().get(0)
       val expected = Seq(184792.0, 1.0690406E7, 57.851021689230684, 0.0, 0.0, 92.13277429243035, 8488.448098819916, 0.0, 255.0)
       assertTrue(expected.equals(actual))
+
+      // Test with a polygon that does not intersect the raster in lenient mode
+      val actual2 = df.selectExpr("RS_ZonalStatsAll(raster, ST_GeomFromWKT('POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))'), 1, false)").first().get(0)
+      assertNull(actual2)
     }
 
     it("Passed RS_ZonalStatsAll - Raster with no data") {
