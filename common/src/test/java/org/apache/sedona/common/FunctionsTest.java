@@ -1275,14 +1275,32 @@ public class FunctionsTest extends TestBase {
         Geometry expected7 = geomFromEWKT("MULTIPOLYGON (((179 10, 181 10, 181 20, 179 20, 179 10)), ((175 10, 175 20, 185 20, 185 10, 175 10)))");
         Geometry expected8 = geomFromEWKT("GEOMETRYCOLLECTION (POINT (-170 10), LINESTRING (179 10, 181 10))");
 
-        assertEquals(expected1, Functions.shiftLongitude(point));
-        assertEquals(expected2, Functions.shiftLongitude(linestring1));
-        assertEquals(expected3, Functions.shiftLongitude(linestring2));
-        assertEquals(expected4, Functions.shiftLongitude(polygon));
-        assertEquals(expected5, Functions.shiftLongitude(multiPoint));
-        assertEquals(expected6, Functions.shiftLongitude(multiLineString));
-        assertEquals(expected7, Functions.shiftLongitude(multiPolygon));
-        assertEquals(expected8, Functions.shiftLongitude(geomCollection));
+        Functions.shiftLongitude(point);
+        Functions.shiftLongitude(linestring1);
+        Functions.shiftLongitude(linestring2);
+        Functions.shiftLongitude(polygon);
+        Functions.shiftLongitude(multiPoint);
+        Functions.shiftLongitude(multiLineString);
+        Functions.shiftLongitude(multiPolygon);
+        Functions.shiftLongitude(geomCollection);
+
+        assertEquals(expected1, point);
+        assertEquals(expected2, linestring1);
+        assertEquals(expected3, linestring2);
+        assertEquals(expected4, polygon);
+        assertEquals(expected5, multiPoint);
+        assertEquals(expected6, multiLineString);
+        assertEquals(expected7, multiPolygon);
+        assertEquals(expected8, geomCollection);
+
+//        assertEquals(expected1, Functions.shiftLongitude(point));
+//        assertEquals(expected2, Functions.shiftLongitude(linestring1));
+//        assertEquals(expected3, Functions.shiftLongitude(linestring2));
+//        assertEquals(expected4, Functions.shiftLongitude(polygon));
+//        assertEquals(expected5, Functions.shiftLongitude(multiPoint));
+//        assertEquals(expected6, Functions.shiftLongitude(multiLineString));
+//        assertEquals(expected7, Functions.shiftLongitude(multiPolygon));
+//        assertEquals(expected8, Functions.shiftLongitude(geomCollection));
     }
 
     private static double comparePolygons(Geometry p1, Geometry p2) {

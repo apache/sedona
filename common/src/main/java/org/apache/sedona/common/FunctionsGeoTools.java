@@ -144,7 +144,10 @@ public class FunctionsGeoTools {
         final int WGS84CRS = 4326;
 
         // Shift longitude if geometry crosses dateline
-        geometry = (Predicates.crossesDateLine(geometry)) ? Functions.shiftLongitude(geometry) : geometry;
+        if (Predicates.crossesDateLine(geometry)) {
+            Functions.shiftLongitude(geometry);
+        }
+//        geometry = (Predicates.crossesDateLine(geometry)) ? Functions.shiftLongitude(geometry) : geometry;
 
         // If originalCRS is not set, use WGS84 as the originalCRS for transformation
         String sourceCRSCode = (originalCRS == 0) ? "EPSG:" + WGS84CRS : "EPSG:" + originalCRS;
