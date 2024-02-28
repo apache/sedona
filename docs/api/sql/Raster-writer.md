@@ -107,7 +107,11 @@ Introduction: Returns a PNG byte array, that can be written to raster files as P
 !!!Note
 	Raster that have float or double values will result in an empty byte array. PNG only accepts Integer values, if you want to write your raster to an image file, please refer to [RS_AsGeoTiff](#rs_asgeotiff).
 
-Format: `RS_AsPNG(raster: Raster)`
+Format:
+
+`RS_AsPNG(raster: Raster, maxWidth: Integer)`
+
+`RS_AsPNG(raster: Raster)`
 
 Since: `v1.5.0`
 

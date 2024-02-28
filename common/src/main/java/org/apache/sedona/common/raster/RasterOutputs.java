@@ -31,8 +31,15 @@ import org.opengis.parameter.ParameterValueGroup;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
+import javax.media.jai.InterpolationNearest;
+import javax.media.jai.JAI;
+import javax.media.jai.RenderedOp;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
+import java.awt.image.WritableRaster;
+import java.awt.image.renderable.ParameterBlock;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -94,11 +101,152 @@ public class RasterOutputs
         return true;
     }
 
+    public static byte[] asPNG(GridCoverage2D raster, int maxWidth) throws IOException {
+        String bandType = RasterBandAccessors.getBandType(raster);
+        if ("B".equals(bandType) || "UNSIGNED_8BITS".equals(bandType)) {
+            byte[] out = doAsPNGByteBands(raster, maxWidth);
+            if (out.length > 0) {
+                return out;
+            } else {
+                // Directly writing the image as-is failed, try a more reliable way
+                return doAsPNGMultiBand(raster, maxWidth);
+            }
+        } else if (raster.getRenderedImage().getSampleModel().getNumBands() == 1) {
+            return doAsPNGSingleBand(raster, maxWidth);
+        } else {
+            return doAsPNGMultiBand(raster, maxWidth);
+        }
+    }
+
+    private static byte[] doAsPNGByteBands(GridCoverage2D raster, int maxWidth) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        RenderedImage image = raster.getRenderedImage();
+        RenderedOp scaleOp = scaleImageToFitMaxWidth(image, maxWidth);
+        if (scaleOp != null) {
+            image = scaleOp.getAsBufferedImage();
+        }
+        try {
+            ImageIO.write(image, "png", out);
+            return out.toByteArray();
+        } finally {
+            if (scaleOp != null) {
+                scaleOp.dispose();
+            }
+        }
+    }
+
+    private static byte[] doAsPNGSingleBand(GridCoverage2D raster, int maxWidth) throws IOException {
+        RenderedImage image = raster.getRenderedImage();
+        RenderedOp scaleOp = scaleImageToFitMaxWidth(image, maxWidth);
+        if (scaleOp != null) {
+            image = scaleOp.getAsBufferedImage();
+        }
+
+        try {
+            Raster inputRaster = RasterUtils.getRaster(image);
+            double noDataValue = RasterUtils.getNoDataValue(raster.getSampleDimension(0));
+
+            // Find the min and max pixel values
+            double min = Double.MAX_VALUE;
+            double max = Double.MIN_VALUE;
+            for (int y = 0; y < image.getHeight(); y++) {
+                for (int x = 0; x < image.getWidth(); x++) {
+                    double value = inputRaster.getSampleDouble(x, y, 0);
+                    if (Double.compare(value, noDataValue) != 0) {
+                        min = Math.min(min, value);
+                        max = Math.max(max, value);
+                    }
+                }
+            }
+            double scale = (max != min) ? 255.0 / (max - min): 1;
+
+            // Create a new image with the same dimensions but with grayscale and alpha channel
+            BufferedImage outputImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+
+            // Normalize the pixel values and create the alpha channel
+            WritableRaster outputRaster = outputImage.getRaster();
+            double[] pixel = new double[1];
+            for (int y = 0; y < image.getHeight(); y++) {
+                for (int x = 0; x < image.getWidth(); x++) {
+                    pixel = inputRaster.getPixel(x, y, pixel);
+                    if (Double.compare(pixel[0], noDataValue) == 0) {
+                        // transparent pixel for nodata value
+                        outputRaster.setPixel(x, y, new int[]{0, 0, 0, 0});
+                    } else {
+                        // opaque pixel for valid data
+                        int normalizedValue = (int) ((pixel[0] - min) * scale);
+                        outputRaster.setPixel(x, y, new int[]{normalizedValue, normalizedValue, normalizedValue, 255});
+                    }
+                }
+            }
+
+            // Write the PNG image
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            ImageIO.write(outputImage, "png", os);
+            return os.toByteArray();
+        } finally {
+            if (scaleOp != null) {
+                scaleOp.dispose();
+            }
+        }
+    }
+
+    private static byte[] doAsPNGMultiBand(GridCoverage2D raster, int maxWidth) throws IOException {
+        RenderedImage image = raster.getRenderedImage();
+        RenderedOp scaleOp = scaleImageToFitMaxWidth(image, maxWidth);
+        if (scaleOp != null) {
+            image = scaleOp.getAsBufferedImage();
+        }
+
+        try {
+            // Create a new image with RGB data
+            BufferedImage outputImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+
+            // Convert pixel values to RGB using the color model
+            ColorModel colorModel = image.getColorModel();
+            Raster inputRaster = RasterUtils.getRaster(image);
+            WritableRaster outputRaster = outputImage.getRaster();
+            for (int y = 0; y < image.getHeight(); y++) {
+                for (int x = 0; x < image.getWidth(); x++) {
+                    Object pixel = inputRaster.getDataElements(x, y, null);
+                    try {
+                        int rgb = colorModel.getRGB(pixel);
+                        outputRaster.setPixel(x, y, new int[]{(rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF});
+                    } catch (Exception e) {
+                        outputRaster.setPixel(x, y, new int[] {0, 0, 0});
+                    }
+                }
+            }
+
+            // Write the PNG image
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            ImageIO.write(outputImage, "png", os);
+            return os.toByteArray();
+        } finally {
+            if (scaleOp != null) {
+                scaleOp.dispose();
+            }
+        }
+    }
+
+    private static RenderedOp scaleImageToFitMaxWidth(RenderedImage image, int maxWidth) {
+        int width = maxWidth < 0? image.getWidth(): Math.min(image.getWidth(), maxWidth);
+        if (width == image.getWidth()) {
+            return null;
+        }
+        double scaleFactor = (double) width / image.getWidth();
+        ParameterBlock pb = new ParameterBlock();
+        pb.addSource(image);
+        pb.add((float) scaleFactor);
+        pb.add((float) scaleFactor);
+        pb.add(0.0F);
+        pb.add(0.0F);
+        pb.add(new InterpolationNearest());
+        return JAI.create("scale", pb, null);
+    }
+
     public static byte[] asPNG(GridCoverage2D raster) throws IOException {
-        RenderedImage renderedImage = raster.getRenderedImage();
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        ImageIO.write(renderedImage, "png", os);
-        return os.toByteArray();
+        return asPNG(raster, -1);
     }
 
     public static byte[] asArcGrid(GridCoverage2D raster, int sourceBand) {
@@ -132,15 +280,14 @@ public class RasterOutputs
         return asArcGrid(raster, -1);
     }
 
+    public static String asBase64(GridCoverage2D raster, int maxWidth) throws IOException {
+        byte[] png = asPNG(raster, maxWidth);
+        return Base64.getEncoder().encodeToString(png);
+    }
+
     public static String asBase64(GridCoverage2D raster) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        RenderedImage renderedImage = raster.getRenderedImage();
-        if (RasterUtils.isDataTypeIntegral(RasterUtils.getDataTypeCode(RasterBandAccessors.getBandType(raster)))) {
-            ImageIO.write(renderedImage, "png", out);
-        } else {
-            ImageIO.write(renderedImage, "tiff", out);
-        }
-        return Base64.getEncoder().encodeToString(out.toByteArray());
+        byte[] png = asPNG(raster, -1);
+        return Base64.getEncoder().encodeToString(png);
     }
 
     public static String asMatrix(GridCoverage2D raster, int band, int postDecimalPrecision) {
@@ -211,7 +358,7 @@ public class RasterOutputs
     }
 
     public static String createHTMLString(GridCoverage2D raster, int imageWidth) throws IOException {
-        String rasterAsBase64 = asBase64(raster);
+        String rasterAsBase64 = asBase64(raster, imageWidth);
         String imageString = String.format("data:image/png;base64,%s", rasterAsBase64);
         String htmlString =  "<img src=\"" + imageString + "\" width=\"" + imageWidth + "\" />";
         return new String(htmlString.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);

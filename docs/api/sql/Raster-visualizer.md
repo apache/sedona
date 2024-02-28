@@ -11,7 +11,11 @@ Introduction: Returns a base64 encoded string of the given raster. If the dataty
 !!!Warning
     This is not recommended for large files.
 
-Format: `RS_AsBase64(raster: Raster)`
+Format:
+
+`RS_AsBase64(raster: Raster, maxWidth: Integer)`
+
+`RS_AsBase64(raster: Raster)`
 
 Since: `v1.5.0`
 
@@ -54,8 +58,8 @@ Output:
 Example:
 
 ```python
-df = sedona.read.format('binaryFile').load(DATA_DIR + 'raster.tiff').selectExpr(\"RS_FromGeoTiff(content) as raster\")
-htmlDF = df.selectExpr(\"RS_AsImage(raster, 500) as raster_image\")
+df = sedona.read.format('binaryFile').load(DATA_DIR + 'raster.tiff').selectExpr("RS_FromGeoTiff(content) as raster")
+htmlDF = df.selectExpr("RS_AsImage(raster, 500) as raster_image")
 SedonaUtils.display_image(htmlDF)
 ```
 
