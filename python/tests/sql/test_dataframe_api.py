@@ -87,6 +87,7 @@ test_configurations = [
     (stf.ST_ConcaveHull, ("geom", 1.0, True), "triangle_geom", "", "POLYGON ((1 1, 1 0, 0 0, 1 1))"),
     (stf.ST_ConvexHull, ("geom",), "triangle_geom", "", "POLYGON ((0 0, 1 1, 1 0, 0 0))"),
     (stf.ST_CoordDim, ("point",), "point_geom", "", 2),
+    (stf.ST_CrossesDateLine, ("line",), "line_crossing_dateline", "", True),
     (stf.ST_Difference, ("a", "b"), "overlapping_polys", "", "POLYGON ((1 0, 0 0, 0 1, 1 1, 1 0))"),
     (stf.ST_Dimension, ("geom",), "geometry_geom_collection", "", 1),
     (stf.ST_Distance, ("a", "b"), "two_points", "", 3.0),
@@ -242,6 +243,7 @@ wrong_type_configurations = [
     (stf.ST_CollectionExtract, (None,)),
     (stf.ST_ConcaveHull, (None, 1.0)),
     (stf.ST_ConvexHull, (None,)),
+    (stf.ST_CrossesDateLine, (None,)),
     (stf.ST_Difference, (None, "b")),
     (stf.ST_Difference, ("", None)),
     (stf.ST_Distance, (None, "")),
@@ -446,6 +448,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (0 0)') AS origin, ST_GeomFromWKT('POINT (1 0)') as point")
         elif request.param == "ny_seattle":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (-122.335167 47.608013)') AS seattle, ST_GeomFromWKT('POINT (-73.935242 40.730610)') as ny")
+        elif request.param == "line_crossing_dateline":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (179.95 30, -179.95 30)') AS line")
         raise ValueError(f"Invalid base_df name passed: {request.param}")
 
     def _id_test_configuration(val):

@@ -276,6 +276,19 @@ public class TestFunctions extends TestBase {
                 "POLYGON ((10 8, 20 30, 100 190, 150 10, 10 8))"
         );
     }
+
+    @Test
+    public void test_ST_CrossesDateLine() {
+        registerUDF("ST_CrossesDateLine", byte[].class);
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_CrossesDateLine(sedona.ST_GeomFromWKT('POLYGON((175 10, -175 10, -175 -10, 175 -10, 175 10))'))",
+                true
+        );
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_CrossesDateLine(sedona.ST_GeomFromWKT('POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'))",
+                false
+        );
+    }
     @Test
     public void test_ST_Difference() {
         registerUDF("ST_Difference", byte[].class, byte[].class);

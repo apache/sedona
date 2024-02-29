@@ -13,8 +13,7 @@
  */
 package org.apache.sedona.common;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.*;
 import org.apache.sedona.common.sphere.Spheroid;
 
 public class Predicates {
@@ -64,28 +63,4 @@ public class Predicates {
         }
     }
 
-    /**
-     * Checks if a geometry crosses the International Date Line.
-     *
-     * @param geometry The geometry to check.
-     * @return True if the geometry crosses the Date Line, false otherwise.
-     */
-    public static boolean crossesDateLine(Geometry geometry) {
-        if (geometry == null || geometry.isEmpty()) {
-            return false;
-        }
-
-        boolean crossesDateLine = false;
-        Coordinate previous = null;
-
-        for (Coordinate coord : geometry.getCoordinates()) {
-            if (previous != null && Math.abs(coord.x - previous.x) > 180) {
-                crossesDateLine = true;
-                break;
-            }
-            previous = coord;
-        }
-
-        return crossesDateLine;
-    }
 }

@@ -47,6 +47,7 @@ __all__ = [
     "ST_ClosestPoint",
     "ST_ConcaveHull",
     "ST_ConvexHull",
+    "ST_CrossesDateLine",
     "ST_Difference",
     "ST_Dimension",
     "ST_Distance",
@@ -458,6 +459,17 @@ def ST_ConvexHull(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_ConvexHull", geometry)
+
+@validate_argument_types
+def ST_CrossesDateLine(a: ColumnOrName) -> Column:
+    """Check whether geometry a crosses the International Date Line.
+
+    :param a: Geometry to check crossing with.
+    :type a: ColumnOrName
+    :return: True if geometry a cross the dateline.
+    :rtype: Column
+    """
+    return _call_st_function("ST_CrossesDateLine", (a))
 
 @validate_argument_types
 def ST_Dimension(geometry: ColumnOrName):

@@ -103,6 +103,9 @@ object st_functions extends DataFrameAPI {
   def ST_ConvexHull(geometry: Column): Column = wrapExpression[ST_ConvexHull](geometry)
   def ST_ConvexHull(geometry: String): Column = wrapExpression[ST_ConvexHull](geometry)
 
+  def ST_CrossesDateLine(a: Column): Column = wrapExpression[ST_CrossesDateLine](a)
+  def ST_CrossesDateLine(a: String): Column = wrapExpression[ST_CrossesDateLine](a)
+
   def ST_Difference(a: Column, b: Column): Column = wrapExpression[ST_Difference](a, b)
   def ST_Difference(a: String, b: String): Column = wrapExpression[ST_Difference](a, b)
 

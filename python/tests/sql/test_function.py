@@ -185,6 +185,20 @@ class TestPredicateJoin(TestBase):
         function_df = self.spark.sql("select ST_Centroid(polygondf.countyshape) from polygondf")
         function_df.show()
 
+    def test_st_crossesdateline(self):
+        crosses_test_table = self.spark.sql(
+            "select ST_GeomFromWKT('POLYGON((175 10, -175 10, -175 -10, 175 -10, 175 10))') as geom")
+        crosses_test_table.createOrReplaceTempView("crossesTesttable")
+        crosses = self.spark.sql("select(ST_CrossesDateLine(geom)) from crossesTesttable")
+
+        not_crosses_test_table = self.spark.sql(
+            "select ST_GeomFromWKT('POLYGON((1 1, 4 1, 4 4, 1 4, 1 1))') as geom")
+        not_crosses_test_table.createOrReplaceTempView("notCrossesTesttable")
+        not_crosses = self.spark.sql("select(ST_CrossesDateLine(geom)) from notCrossesTesttable")
+
+        assert crosses.take(1)[0][0]
+        assert not not_crosses.take(1)[0][0]
+
     def test_st_length(self):
         polygon_wkt_df = self.spark.read.format("csv"). \
             option("delimiter", "\t"). \
