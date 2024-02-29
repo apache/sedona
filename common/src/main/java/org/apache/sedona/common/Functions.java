@@ -349,129 +349,131 @@ public class Functions {
         return geometry;
     }
 
-    public static Geometry envelope(Geometry geometry) {
+    public static Geometry envelope (Geometry geometry){
         return geometry.getEnvelope();
     }
 
-    public static double distance(Geometry left, Geometry right) {
+    public static double distance (Geometry left, Geometry right){
         return left.distance(right);
     }
 
-    public static double distance3d(Geometry left, Geometry right) {
+    public static double distance3d (Geometry left, Geometry right){
         return new Distance3DOp(left, right).distance();
     }
 
-    public static double length(Geometry geometry) {
+    public static double length (Geometry geometry){
         return geometry.getLength();
     }
 
-    public static Geometry normalize(Geometry geometry) {
+    public static Geometry normalize (Geometry geometry){
         geometry.normalize();
         return geometry;
     }
 
-    public static Double x(Geometry geometry) {
+    public static Double x (Geometry geometry){
         if (geometry instanceof Point) {
             return geometry.getCoordinate().x;
         }
         return null;
     }
 
-    public static Double y(Geometry geometry) {
+    public static Double y (Geometry geometry){
         if (geometry instanceof Point) {
             return geometry.getCoordinate().y;
         }
         return null;
     }
 
-    public static Double z(Geometry geometry) {
+    public static Double z (Geometry geometry){
         if (geometry instanceof Point) {
             return geometry.getCoordinate().z;
         }
         return null;
     }
 
-    public static double xMin(Geometry geometry) {
+    public static double xMin (Geometry geometry){
         Coordinate[] points = geometry.getCoordinates();
         double min = Double.MAX_VALUE;
-        for(int i=0; i < points.length; i++){
+        for (int i = 0; i < points.length; i++) {
             min = Math.min(points[i].getX(), min);
         }
         return min;
     }
 
-    public static double xMax(Geometry geometry) {
+    public static double xMax (Geometry geometry){
         Coordinate[] points = geometry.getCoordinates();
+        double max = -Double.MAX_VALUE;
+        for (int i = 0; i < points.length; i++) {
             max = Math.max(points[i].getX(), max);
         }
         return max;
     }
 
-    public static double yMin(Geometry geometry) {
+    public static double yMin (Geometry geometry){
         Coordinate[] points = geometry.getCoordinates();
         double min = Double.MAX_VALUE;
-        for(int i=0; i < points.length; i++){
+        for (int i = 0; i < points.length; i++) {
             min = Math.min(points[i].getY(), min);
         }
         return min;
     }
 
-    public static double yMax(Geometry geometry) {
+    public static double yMax (Geometry geometry){
         Coordinate[] points = geometry.getCoordinates();
-        double max = - Double.MAX_VALUE;
-        for (int i=0; i < points.length; i++) {
+        double max = -Double.MAX_VALUE;
+        for (int i = 0; i < points.length; i++) {
             max = Math.max(points[i].getY(), max);
         }
         return max;
     }
 
-    public static Double zMax(Geometry geometry) {
+    public static Double zMax (Geometry geometry){
         Coordinate[] points = geometry.getCoordinates();
-        double max = - Double.MAX_VALUE;
-        for (int i=0; i < points.length; i++) {
-            if(java.lang.Double.isNaN(points[i].getZ()))
+        double max = -Double.MAX_VALUE;
+        for (int i = 0; i < points.length; i++) {
+            if (java.lang.Double.isNaN(points[i].getZ()))
                 continue;
             max = Math.max(points[i].getZ(), max);
         }
         return max == -Double.MAX_VALUE ? null : max;
     }
 
-    public static Double zMin(Geometry geometry) {
+    public static Double zMin (Geometry geometry){
         Coordinate[] points = geometry.getCoordinates();
         double min = Double.MAX_VALUE;
-        for(int i=0; i < points.length; i++){
-            if(java.lang.Double.isNaN(points[i].getZ()))
+        for (int i = 0; i < points.length; i++) {
+            if (java.lang.Double.isNaN(points[i].getZ()))
                 continue;
             min = Math.min(points[i].getZ(), min);
         }
         return min == Double.MAX_VALUE ? null : min;
     }
 
-    public static Geometry flipCoordinates(Geometry geometry) {
+    public static Geometry flipCoordinates (Geometry geometry){
         GeomUtils.flipCoordinates(geometry);
         return geometry;
     }
 
-    public static String geohash(Geometry geometry, int precision) {
+    public static String geohash (Geometry geometry,int precision){
         return GeometryGeoHashEncoder.calculate(geometry, precision);
     }
 
-    public static Geometry pointOnSurface(Geometry geometry) {
+    public static Geometry pointOnSurface (Geometry geometry){
         return GeomUtils.getInteriorPoint(geometry);
     }
 
-    public static Geometry reverse(Geometry geometry) {
+    public static Geometry reverse (Geometry geometry){
         return geometry.reverse();
     }
 
-    public static Geometry geometryN(Geometry geometry, int n) {
+    public static Geometry geometryN (Geometry geometry,int n){
         if (n < geometry.getNumGeometries()) {
             return geometry.getGeometryN(n);
         }
         return null;
     }
 
-    public static Geometry interiorRingN(Geometry geometry, int n) {
+    public static Geometry interiorRingN (Geometry geometry,int n){
         if (geometry instanceof Polygon) {
             Polygon polygon = (Polygon) geometry;
             if (n < polygon.getNumInteriorRing()) {
@@ -485,14 +487,14 @@ public class Functions {
         return null;
     }
 
-    public static Geometry pointN(Geometry geometry, int n) {
-        if(!(geometry instanceof LineString)) {
+    public static Geometry pointN (Geometry geometry,int n){
+        if (!(geometry instanceof LineString)) {
             return null;
         }
-        return GeomUtils.getNthPoint((LineString)geometry, n);
+        return GeomUtils.getNthPoint((LineString) geometry, n);
     }
 
-    public static Geometry exteriorRing(Geometry geometry) {
+    public static Geometry exteriorRing (Geometry geometry){
         Geometry ring = GeomUtils.getExteriorRing(geometry);
         if (ring instanceof LinearRing) {
             ring = GEOMETRY_FACTORY.createLineString(ring.getCoordinates());
@@ -500,23 +502,23 @@ public class Functions {
         return ring;
     }
 
-    public static String asEWKT(Geometry geometry) {
+    public static String asEWKT (Geometry geometry){
         return GeomUtils.getEWKT(geometry);
     }
 
-    public static String asWKT(Geometry geometry) {
+    public static String asWKT (Geometry geometry){
         return GeomUtils.getWKT(geometry);
     }
 
-    public static byte[] asEWKB(Geometry geometry) {
+    public static byte[] asEWKB (Geometry geometry){
         return GeomUtils.getEWKB(geometry);
     }
 
-    public static byte[] asWKB(Geometry geometry) {
+    public static byte[] asWKB (Geometry geometry){
         return GeomUtils.getWKB(geometry);
     }
 
-    public static String asGeoJson(Geometry geometry) {
+    public static String asGeoJson (Geometry geometry){
         if (geometry == null) {
             return null;
         }
@@ -524,60 +526,60 @@ public class Functions {
         return writer.write(geometry).toString();
     }
 
-    public static int nPoints(Geometry geometry) {
+    public static int nPoints (Geometry geometry){
         return geometry.getNumPoints();
     }
 
-    public static int nDims(Geometry geometry) {
-        int count_dimension =0;
+    public static int nDims (Geometry geometry){
+        int count_dimension = 0;
         Coordinate geom = geometry.getCoordinate();
         Double x_cord = geom.getX();
         Double y_cord = geom.getY();
         Double z_cord = geom.getZ();
         Double m_cord = geom.getM();
-        if(!java.lang.Double.isNaN(x_cord))
+        if (!java.lang.Double.isNaN(x_cord))
             count_dimension++;
-        if(!java.lang.Double.isNaN(y_cord))
+        if (!java.lang.Double.isNaN(y_cord))
             count_dimension++;
-        if(!java.lang.Double.isNaN(z_cord))
+        if (!java.lang.Double.isNaN(z_cord))
             count_dimension++;
-        if(!java.lang.Double.isNaN(m_cord))
+        if (!java.lang.Double.isNaN(m_cord))
             count_dimension++;
         return count_dimension;
     }
 
-    public static int numGeometries(Geometry geometry) {
+    public static int numGeometries (Geometry geometry){
         return geometry.getNumGeometries();
     }
 
-    public static Integer numInteriorRings(Geometry geometry) {
+    public static Integer numInteriorRings (Geometry geometry){
         if (geometry instanceof Polygon) {
             return ((Polygon) geometry).getNumInteriorRing();
         }
         return null;
     }
 
-    public static String asGML(Geometry geometry) {
+    public static String asGML (Geometry geometry){
         return new GMLWriter().write(geometry);
     }
 
-    public static String asKML(Geometry geometry) {
+    public static String asKML (Geometry geometry){
         return new KMLWriter().write(geometry);
     }
 
-    public static Geometry force2D(Geometry geometry) {
+    public static Geometry force2D (Geometry geometry){
         return GeomUtils.get2dGeom(geometry);
     }
 
-    public static boolean isEmpty(Geometry geometry) {
+    public static boolean isEmpty (Geometry geometry){
         return geometry.isEmpty();
     }
 
-    public static Geometry buildArea(Geometry geometry) {
+    public static Geometry buildArea (Geometry geometry){
         return GeomUtils.buildArea(geometry);
     }
 
-    public static Geometry setSRID(Geometry geometry, int srid) {
+    public static Geometry setSRID (Geometry geometry,int srid){
         if (geometry == null) {
             return null;
         }
@@ -585,14 +587,14 @@ public class Functions {
         return factory.createGeometry(geometry);
     }
 
-    public static int getSRID(Geometry geometry) {
+    public static int getSRID (Geometry geometry){
         if (geometry == null) {
             return 0;
         }
         return geometry.getSRID();
     }
 
-    public static boolean isClosed(Geometry geometry) {
+    public static boolean isClosed (Geometry geometry){
         if (geometry instanceof Circle || geometry instanceof MultiPoint || geometry instanceof MultiPolygon || geometry instanceof Point || geometry instanceof Polygon) {
             return true;
         } else if (geometry instanceof LineString) {
@@ -605,19 +607,19 @@ public class Functions {
         return false;
     }
 
-    public static boolean isRing(Geometry geometry) {
+    public static boolean isRing (Geometry geometry){
         return geometry instanceof LineString && ((LineString) geometry).isClosed() && geometry.isSimple();
     }
 
-    public static boolean isSimple(Geometry geometry) {
+    public static boolean isSimple (Geometry geometry){
         return new IsSimpleOp(geometry).isSimple();
     }
 
-    public static boolean isValid(Geometry geometry) {
+    public static boolean isValid (Geometry geometry){
         return isValid(geometry, OGC_SFS_VALIDITY);
     }
 
-    public static boolean isValid(Geometry geom, int flag) {
+    public static boolean isValid (Geometry geom,int flag){
         IsValidOp isValidOp = new IsValidOp(geom);
 
         // Set the validity model based on flags
@@ -630,11 +632,11 @@ public class Functions {
         return isValidOp.isValid();
     }
 
-    public static Geometry addPoint(Geometry linestring, Geometry point) {
+    public static Geometry addPoint (Geometry linestring, Geometry point){
         return addPoint(linestring, point, -1);
     }
 
-    public static Geometry addPoint(Geometry linestring, Geometry point, int position) {
+    public static Geometry addPoint (Geometry linestring, Geometry point,int position){
         if (linestring instanceof LineString && point instanceof Point) {
             List<Coordinate> coordinates = new ArrayList<>(Arrays.asList(linestring.getCoordinates()));
             if (-1 <= position && position <= coordinates.size()) {
@@ -649,14 +651,14 @@ public class Functions {
         return null;
     }
 
-    public static Geometry removePoint(Geometry linestring) {
+    public static Geometry removePoint (Geometry linestring){
         if (linestring != null) {
             return removePoint(linestring, -1);
         }
         return null;
     }
 
-    public static Geometry removePoint(Geometry linestring, int position) {
+    public static Geometry removePoint (Geometry linestring,int position){
         if (linestring instanceof LineString) {
             List<Coordinate> coordinates = new ArrayList<>(Arrays.asList(linestring.getCoordinates()));
             if (2 < coordinates.size() && position < coordinates.size()) {
@@ -670,7 +672,7 @@ public class Functions {
         return null;
     }
 
-    public static Geometry setPoint(Geometry linestring, int position, Geometry point) {
+    public static Geometry setPoint (Geometry linestring,int position, Geometry point){
         if (linestring instanceof LineString) {
             List<Coordinate> coordinates = new ArrayList<>(Arrays.asList(linestring.getCoordinates()));
             if (-coordinates.size() <= position && position < coordinates.size()) {
@@ -685,29 +687,28 @@ public class Functions {
         return null;
     }
 
-    public static Geometry lineFromMultiPoint(Geometry geometry) {
-        if(!(geometry instanceof MultiPoint)) {
+    public static Geometry lineFromMultiPoint (Geometry geometry){
+        if (!(geometry instanceof MultiPoint)) {
             return null;
         }
         List<Coordinate> coordinates = new ArrayList<>();
-        for(Coordinate c : geometry.getCoordinates()){
+        for (Coordinate c : geometry.getCoordinates()) {
             coordinates.add(c);
         }
         return GEOMETRY_FACTORY.createLineString(coordinates.toArray(new Coordinate[0]));
     }
 
-    public static Geometry closestPoint(Geometry left, Geometry right) {
+    public static Geometry closestPoint (Geometry left, Geometry right){
         DistanceOp distanceOp = new DistanceOp(left, right);
         try {
             Coordinate[] closestPoints = distanceOp.nearestPoints();
             return GEOMETRY_FACTORY.createPoint(closestPoints[0]);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException("ST_ClosestPoint doesn't support empty geometry object.");
         }
     }
 
-    public static Geometry concaveHull(Geometry geometry, double pctConvex, boolean allowHoles){
+    public static Geometry concaveHull (Geometry geometry,double pctConvex, boolean allowHoles){
         ConcaveHull concave_hull = new ConcaveHull(geometry);
         concave_hull.setMaximumEdgeLengthRatio(pctConvex);
         concave_hull.setHolesAllowed(allowHoles);
@@ -715,15 +716,15 @@ public class Functions {
         return concave_hull.getHull();
     }
 
-    public static Geometry convexHull(Geometry geometry) {
+    public static Geometry convexHull (Geometry geometry){
         return geometry.convexHull();
     }
 
-    public static Geometry getCentroid(Geometry geometry) {
+    public static Geometry getCentroid (Geometry geometry){
         return geometry.getCentroid();
     }
 
-    public static Geometry intersection(Geometry leftGeometry, Geometry rightGeometry) {
+    public static Geometry intersection (Geometry leftGeometry, Geometry rightGeometry){
         boolean isIntersects = leftGeometry.intersects(rightGeometry);
         if (!isIntersects) {
             return EMPTY_POLYGON;
@@ -737,18 +738,18 @@ public class Functions {
         return leftGeometry.intersection(rightGeometry);
     }
 
-    public static Geometry makeValid(Geometry geometry, boolean keepCollapsed) {
+    public static Geometry makeValid (Geometry geometry,boolean keepCollapsed){
         GeometryFixer fixer = new GeometryFixer(geometry);
         fixer.setKeepCollapsed(keepCollapsed);
         return fixer.getResult();
     }
 
-    public static Geometry reducePrecision(Geometry geometry, int precisionScale) {
+    public static Geometry reducePrecision (Geometry geometry,int precisionScale){
         GeometryPrecisionReducer precisionReduce = new GeometryPrecisionReducer(new PrecisionModel(Math.pow(10, precisionScale)));
         return precisionReduce.reduce(geometry);
     }
 
-    public static Geometry lineMerge(Geometry geometry) {
+    public static Geometry lineMerge (Geometry geometry){
         if (geometry instanceof MultiLineString) {
             MultiLineString multiLineString = (MultiLineString) geometry;
             int numLineStrings = multiLineString.getNumGeometries();
@@ -768,7 +769,7 @@ public class Functions {
         return EMPTY_GEOMETRY_COLLECTION;
     }
 
-    public static Geometry minimumBoundingCircle(Geometry geometry, int quadrantSegments) {
+    public static Geometry minimumBoundingCircle (Geometry geometry,int quadrantSegments){
         MinimumBoundingCircle minimumBoundingCircle = new MinimumBoundingCircle(geometry);
         Coordinate centre = minimumBoundingCircle.getCentre();
         double radius = minimumBoundingCircle.getRadius();
@@ -784,7 +785,7 @@ public class Functions {
         return circle;
     }
 
-    public static Pair<Geometry, Double> minimumBoundingRadius(Geometry geometry) {
+    public static Pair<Geometry, Double> minimumBoundingRadius (Geometry geometry){
         MinimumBoundingCircle minimumBoundingCircle = new MinimumBoundingCircle(geometry);
         Coordinate coods = minimumBoundingCircle.getCentre();
         double radius = minimumBoundingCircle.getRadius();
@@ -792,28 +793,28 @@ public class Functions {
         return Pair.of(centre, radius);
     }
 
-    public static Geometry lineSubString(Geometry geom, double fromFraction, double toFraction) {
+    public static Geometry lineSubString (Geometry geom,double fromFraction, double toFraction){
         double length = geom.getLength();
         LengthIndexedLine indexedLine = new LengthIndexedLine(geom);
         Geometry subLine = indexedLine.extractLine(length * fromFraction, length * toFraction);
         return subLine;
     }
 
-    public static Geometry lineInterpolatePoint(Geometry geom, double fraction) {
+    public static Geometry lineInterpolatePoint (Geometry geom,double fraction){
         double length = geom.getLength();
         LengthIndexedLine indexedLine = new LengthIndexedLine(geom);
         Coordinate interPoint = indexedLine.extractPoint(length * fraction);
         return GEOMETRY_FACTORY.createPoint(interPoint);
     }
 
-    public static double lineLocatePoint(Geometry geom, Geometry point)
+    public static double lineLocatePoint (Geometry geom, Geometry point)
     {
         double length = geom.getLength();
         LengthIndexedLine indexedLine = new LengthIndexedLine(geom);
         return indexedLine.indexOf(point.getCoordinate()) / length;
     }
 
-    public static Geometry difference(Geometry leftGeometry, Geometry rightGeometry) {
+    public static Geometry difference (Geometry leftGeometry, Geometry rightGeometry){
         boolean isIntersects = leftGeometry.intersects(rightGeometry);
         if (!isIntersects) {
             return leftGeometry;
@@ -824,12 +825,12 @@ public class Functions {
         }
     }
 
-    public static Geometry split(Geometry input, Geometry blade) {
+    public static Geometry split (Geometry input, Geometry blade){
         // check input geometry
         return new GeometrySplitter(GEOMETRY_FACTORY).split(input, blade);
     }
 
-    public static Integer dimension(Geometry geometry) {
+    public static Integer dimension (Geometry geometry){
         Integer dimension = geometry.getDimension();
         // unknown dimension such as an empty GEOMETRYCOLLECTION
         if (dimension < 0) {
@@ -844,7 +845,7 @@ public class Functions {
      * @param level integer, minimum level of cells covering the geometry
      * @return List of coordinates
      */
-    public static Long[] s2CellIDs(Geometry input, int level) {
+    public static Long[] s2CellIDs (Geometry input,int level){
         HashSet<S2CellId> cellIds = new HashSet<>();
         List<Geometry> geoms = GeomUtils.extractGeometryCollection(input);
         for (Geometry geom : geoms) {
@@ -865,7 +866,7 @@ public class Functions {
      * @param fullCover whether enforce full cover or not.
      * @return
      */
-    public static Long[] h3CellIDs(Geometry input, int level, boolean fullCover) {
+    public static Long[] h3CellIDs (Geometry input,int level, boolean fullCover){
         if (level < 0 || level > 15) {
             throw new IllegalArgumentException("level must be between 0 and 15");
         }
@@ -877,11 +878,11 @@ public class Functions {
                 cellIds.addAll(H3Utils.polygonToCells((Polygon) geom, level, fullCover));
             } else if (geom instanceof LineString) {
                 cellIds.addAll(H3Utils.lineStringToCells((LineString) geom, level, fullCover));
-            } else if (geom instanceof Point){
+            } else if (geom instanceof Point) {
                 cellIds.add(H3Utils.coordinateToCell(geom.getCoordinate(), level));
             } else {
                 // if not type of polygon, point or lienSting, we cover its MBR
-                cellIds.addAll(H3Utils.polygonToCells((Polygon)geom.getEnvelope(), level, fullCover));
+                cellIds.addAll(H3Utils.polygonToCells((Polygon) geom.getEnvelope(), level, fullCover));
             }
         }
         return cellIds.toArray(new Long[0]);
@@ -893,7 +894,7 @@ public class Functions {
      * @param cell2 destination cell
      * @return
      */
-    public static long h3CellDistance(long cell1, long cell2) {
+    public static long h3CellDistance ( long cell1, long cell2){
         int resolution = H3Utils.h3.getResolution(cell1);
         if (resolution != H3Utils.h3.getResolution(cell2)) {
             throw new IllegalArgumentException("The argument cells should be of the same resolution");
@@ -918,7 +919,7 @@ public class Functions {
      * @param exactDistance: if exactDistance is true, it will only return the cells on the exact kth ring, else will return all 0 - kth neighbors
      * @return
      */
-    public static Long[] h3KRing(long cell, int k, boolean exactDistance) {
+    public static Long[] h3KRing ( long cell, int k, boolean exactDistance){
         Set<Long> cells = new LinkedHashSet<>(H3Utils.h3.gridDisk(cell, k));
         if (exactDistance && k > 0) {
             List<Long> tbdCells = H3Utils.h3.gridDisk(cell, k - 1);
@@ -932,7 +933,7 @@ public class Functions {
      * @param cells: the set of cells
      * @return Multiple Polygons reversed
      */
-    public static Geometry h3ToGeom(long[] cells) {
+    public static Geometry h3ToGeom ( long[] cells){
         GeometryFactory geomFactory = new GeometryFactory();
         Collection<Long> h3 = Arrays.stream(cells).boxed().collect(Collectors.toList());
         return geomFactory.createMultiPolygon(
@@ -953,15 +954,15 @@ public class Functions {
     }
 
     // create static function named simplifyPreserveTopology
-    public static Geometry simplifyPreserveTopology(Geometry geometry, double distanceTolerance) {
+    public static Geometry simplifyPreserveTopology (Geometry geometry,double distanceTolerance){
         return TopologyPreservingSimplifier.simplify(geometry, distanceTolerance);
     }
 
-    public static String geometryType(Geometry geometry) {
+    public static String geometryType (Geometry geometry){
         return "ST_" + geometry.getGeometryType();
     }
 
-    public static String geometryTypeWithMeasured(Geometry geometry) {
+    public static String geometryTypeWithMeasured (Geometry geometry){
         String geometryType = geometry.getGeometryType().toUpperCase();
         if (GeomUtils.isMeasuredGeometry(geometry)) {
             geometryType += "M";
@@ -969,7 +970,7 @@ public class Functions {
         return geometryType;
     }
 
-    public static Geometry startPoint(Geometry geometry) {
+    public static Geometry startPoint (Geometry geometry){
         if (geometry instanceof LineString) {
             LineString line = (LineString) geometry;
             return line.getStartPoint();
@@ -977,7 +978,7 @@ public class Functions {
         return null;
     }
 
-    public static Geometry endPoint(Geometry geometry) {
+    public static Geometry endPoint (Geometry geometry){
         if (geometry instanceof LineString) {
             LineString line = (LineString) geometry;
             return line.getEndPoint();
@@ -985,7 +986,7 @@ public class Functions {
         return null;
     }
 
-    public static Geometry[] dump(Geometry geometry) {
+    public static Geometry[] dump (Geometry geometry){
         int numGeom = geometry.getNumGeometries();
         if (geometry instanceof GeometryCollection) {
             Geometry[] geoms = new Geometry[geometry.getNumGeometries()];
@@ -994,56 +995,55 @@ public class Functions {
             }
             return geoms;
         } else {
-            return new Geometry[] {geometry};
+            return new Geometry[]{geometry};
         }
     }
 
-    public static Geometry[] dumpPoints(Geometry geometry) {
+    public static Geometry[] dumpPoints (Geometry geometry){
         return Arrays.stream(geometry.getCoordinates()).map(GEOMETRY_FACTORY::createPoint).toArray(Point[]::new);
     }
 
-    public static Geometry symDifference(Geometry leftGeom, Geometry rightGeom) {
+    public static Geometry symDifference (Geometry leftGeom, Geometry rightGeom){
         return leftGeom.symDifference(rightGeom);
     }
 
-    public static Geometry union(Geometry leftGeom, Geometry rightGeom) {
+    public static Geometry union (Geometry leftGeom, Geometry rightGeom){
         return leftGeom.union(rightGeom);
     }
 
-    public static Geometry createMultiGeometryFromOneElement(Geometry geometry) {
+    public static Geometry createMultiGeometryFromOneElement (Geometry geometry){
         if (geometry instanceof Circle) {
-            return GEOMETRY_FACTORY.createGeometryCollection(new Circle[] {(Circle) geometry});
+            return GEOMETRY_FACTORY.createGeometryCollection(new Circle[]{(Circle) geometry});
         } else if (geometry instanceof GeometryCollection) {
             return geometry;
-        } else if (geometry instanceof  LineString) {
+        } else if (geometry instanceof LineString) {
             return GEOMETRY_FACTORY.createMultiLineString(new LineString[]{(LineString) geometry});
         } else if (geometry instanceof Point) {
-            return GEOMETRY_FACTORY.createMultiPoint(new Point[] {(Point) geometry});
+            return GEOMETRY_FACTORY.createMultiPoint(new Point[]{(Point) geometry});
         } else if (geometry instanceof Polygon) {
-            return GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {(Polygon) geometry});
+            return GEOMETRY_FACTORY.createMultiPolygon(new Polygon[]{(Polygon) geometry});
         } else {
             return GEOMETRY_FACTORY.createGeometryCollection();
         }
     }
 
-    public static Geometry[] subDivide(Geometry geometry, int maxVertices) {
+    public static Geometry[] subDivide (Geometry geometry,int maxVertices){
         return GeometrySubDivider.subDivide(geometry, maxVertices);
     }
 
-    public static Geometry makeLine(Geometry geom1, Geometry geom2) {
+    public static Geometry makeLine (Geometry geom1, Geometry geom2){
         Geometry[] geoms = new Geometry[]{geom1, geom2};
         return makeLine(geoms);
     }
 
-    public static Geometry makeLine(Geometry[] geoms) {
+    public static Geometry makeLine (Geometry[]geoms){
         ArrayList<Coordinate> coordinates = new ArrayList<>();
         for (Geometry geom : geoms) {
             if (geom instanceof Point || geom instanceof MultiPoint || geom instanceof LineString) {
                 for (Coordinate coord : geom.getCoordinates()) {
                     coordinates.add(coord);
                 }
-            }
-            else {
+            } else {
                 throw new IllegalArgumentException("ST_MakeLine only supports Point, MultiPoint and LineString geometries");
             }
         }
@@ -1052,10 +1052,10 @@ public class Functions {
         return GEOMETRY_FACTORY.createLineString(coords);
     }
 
-    public static Geometry makePolygon(Geometry shell, Geometry[] holes) {
+    public static Geometry makePolygon (Geometry shell, Geometry[]holes){
         try {
             if (holes != null) {
-                LinearRing[] interiorRings =  Arrays.stream(holes).filter(
+                LinearRing[] interiorRings = Arrays.stream(holes).filter(
                         h -> h != null && !h.isEmpty() && h instanceof LineString && ((LineString) h).isClosed()
                 ).map(
                         h -> GEOMETRY_FACTORY.createLinearRing(h.getCoordinates())
@@ -1079,27 +1079,25 @@ public class Functions {
         }
     }
 
-    public static Geometry makepolygonWithSRID(Geometry lineString, Integer srid) {
+    public static Geometry makepolygonWithSRID (Geometry lineString, Integer srid){
         Geometry geom = makePolygon(lineString, null);
-        if(geom != null) {
+        if (geom != null) {
             geom.setSRID(srid);
         }
         return geom;
     }
 
-    public static Geometry createMultiGeometry(Geometry[] geometries) {
-        if (geometries.length > 1){
+    public static Geometry createMultiGeometry (Geometry[]geometries){
+        if (geometries.length > 1) {
             return GEOMETRY_FACTORY.buildGeometry(Arrays.asList(geometries));
-        }
-        else if(geometries.length==1){
+        } else if (geometries.length == 1) {
             return createMultiGeometryFromOneElement(geometries[0]);
-        }
-        else{
+        } else {
             return GEOMETRY_FACTORY.createGeometryCollection();
         }
     }
 
-    public static Geometry collectionExtract(Geometry geometry, Integer geomType) {
+    public static Geometry collectionExtract (Geometry geometry, Integer geomType){
         if (geomType == null) {
             return collectionExtract(geometry);
         }
@@ -1128,7 +1126,7 @@ public class Functions {
         return Functions.createMultiGeometry(geometries.toArray(new Geometry[0]));
     }
 
-    public static Geometry collectionExtract(Geometry geometry) {
+    public static Geometry collectionExtract (Geometry geometry){
         List<Geometry> geometries = GeomUtils.extractGeometryCollection(geometry);
         Polygon[] polygons = geometries.stream().filter(g -> g instanceof Polygon).toArray(Polygon[]::new);
         if (polygons.length > 0) {
@@ -1149,20 +1147,20 @@ public class Functions {
     // ported from https://github.com/postgis/postgis/blob/f6ed58d1fdc865d55d348212d02c11a10aeb2b30/liblwgeom/lwgeom_median.c
     // geometry ST_GeometricMedian ( geometry g , float8 tolerance , int max_iter , boolean fail_if_not_converged );
 
-    private static double distance3d(Coordinate p1, Coordinate p2) {
+    private static double distance3d (Coordinate p1, Coordinate p2){
         double dx = p2.x - p1.x;
         double dy = p2.y - p1.y;
         double dz = p2.z - p1.z;
         return Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
 
-    private static void distances(Coordinate curr, Coordinate[] points, double[] distances) {
-        for(int i = 0; i < points.length; i++) {
+    private static void distances (Coordinate curr, Coordinate[]points,double[] distances){
+        for (int i = 0; i < points.length; i++) {
             distances[i] = distance3d(curr, points[i]);
         }
     }
 
-    private static double iteratePoints(Coordinate curr, Coordinate[] points, double[] distances) {
+    private static double iteratePoints (Coordinate curr, Coordinate[]points,double[] distances){
         Coordinate next = new Coordinate(0, 0, 0);
         double delta = 0;
         double denom = 0;
@@ -1218,13 +1216,13 @@ public class Functions {
                         dz += (coordinate.z - curr.z) / distance;
                     }
                 }
-                double dSqr = Math.sqrt(dx*dx + dy*dy + dz*dz);
+                double dSqr = Math.sqrt(dx * dx + dy * dy + dz * dz);
                 /* Avoid division by zero if the intermediate point is the median */
                 if (dSqr > DBL_EPSILON) {
                     double rInv = Math.max(0, 1.0 / dSqr);
-                    next.x = (1.0 - rInv)*next.x + rInv*curr.x;
-                    next.y = (1.0 - rInv)*next.y + rInv*curr.y;
-                    next.z = (1.0 - rInv)*next.z + rInv*curr.z;
+                    next.x = (1.0 - rInv) * next.x + rInv * curr.x;
+                    next.y = (1.0 - rInv) * next.y + rInv * curr.y;
+                    next.z = (1.0 - rInv) * next.z + rInv * curr.z;
                 }
             }
             delta = distance3d(curr, next);
@@ -1235,7 +1233,7 @@ public class Functions {
         return delta;
     }
 
-    private static Coordinate initGuess(Coordinate[] points) {
+    private static Coordinate initGuess (Coordinate[]points){
         Coordinate guess = new Coordinate(0, 0, 0);
         for (Coordinate point : points) {
             guess.x += point.x / points.length;
@@ -1245,22 +1243,22 @@ public class Functions {
         return guess;
     }
 
-    private static Coordinate[] extractCoordinates(Geometry geometry) {
+    private static Coordinate[] extractCoordinates (Geometry geometry){
         Coordinate[] points = geometry.getCoordinates();
-        if(points.length == 0)
+        if (points.length == 0)
             return points;
 
         Coordinate[] coordinates = new Coordinate[points.length];
-        for(int i = 0; i < points.length; i++) {
+        for (int i = 0; i < points.length; i++) {
             boolean is3d = !Double.isNaN(points[i].z);
             coordinates[i] = points[i].copy();
-            if(!is3d)
+            if (!is3d)
                 coordinates[i].z = 0.0;
         }
         return coordinates;
     }
 
-    public static int numPoints(Geometry geometry) throws Exception {
+    public static int numPoints (Geometry geometry) throws Exception {
         String geometryType = geometry.getGeometryType();
         if (!(Geometry.TYPENAME_LINESTRING.equalsIgnoreCase(geometryType))) {
             throw new IllegalArgumentException("Unsupported geometry type: " + geometryType + ", only LineString geometry is supported.");
@@ -1268,15 +1266,15 @@ public class Functions {
         return geometry.getNumPoints();
     }
 
-    public static Geometry force3D(Geometry geometry, double zValue) {
+    public static Geometry force3D (Geometry geometry,double zValue){
         return GeomUtils.get3DGeom(geometry, zValue);
     }
 
-    public static Geometry force3D(Geometry geometry) {
+    public static Geometry force3D (Geometry geometry){
         return GeomUtils.get3DGeom(geometry, 0.0);
     }
 
-    public static Integer nRings(Geometry geometry) throws Exception {
+    public static Integer nRings (Geometry geometry) throws Exception {
         String geometryType = geometry.getGeometryType();
         if (!(geometry instanceof Polygon || geometry instanceof MultiPolygon)) {
             throw new IllegalArgumentException("Unsupported geometry type: " + geometryType + ", only Polygon or MultiPolygon geometries are supported.");
@@ -1285,7 +1283,7 @@ public class Functions {
         if (geometry instanceof Polygon) {
             Polygon polygon = (Polygon) geometry;
             numRings = GeomUtils.getPolygonNumRings(polygon);
-        }else {
+        } else {
             MultiPolygon multiPolygon = (MultiPolygon) geometry;
             int numPolygons = multiPolygon.getNumGeometries();
             for (int i = 0; i < numPolygons; i++) {
@@ -1296,75 +1294,78 @@ public class Functions {
         return numRings;
     }
 
-    public static Geometry translate(Geometry geometry, double deltaX, double deltaY, double deltaZ) {
+    public static Geometry translate (Geometry geometry,double deltaX, double deltaY, double deltaZ){
         if (!geometry.isEmpty()) {
             GeomUtils.translateGeom(geometry, deltaX, deltaY, deltaZ);
         }
         return geometry;
     }
 
-    public static Geometry translate(Geometry geometry, double deltaX, double deltaY) {
+    public static Geometry translate (Geometry geometry,double deltaX, double deltaY){
         if (!geometry.isEmpty()) {
             GeomUtils.translateGeom(geometry, deltaX, deltaY, 0.0);
         }
         return geometry;
     }
 
-    public static Geometry affine(Geometry geometry, double a, double b, double c, double d, double e, double f, double g, double h, double i, double xOff, double yOff,
-            double zOff) {
+    public static Geometry affine (Geometry geometry,double a, double b, double c, double d, double e, double f,
+    double g, double h, double i, double xOff, double yOff,
+    double zOff){
         if (!geometry.isEmpty()) {
             GeomUtils.affineGeom(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff);
         }
         return geometry;
     }
 
-    public static Geometry affine(Geometry geometry, double a, double b, double d, double e, double xOff, double yOff) {
+    public static Geometry affine (Geometry geometry,double a, double b, double d, double e, double xOff,
+    double yOff){
         if (!geometry.isEmpty()) {
             GeomUtils.affineGeom(geometry, a, b, null, d, e, null, null, null, null, xOff, yOff, null);
         }
         return geometry;
     }
 
-    public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter, boolean failIfNotConverged) throws Exception {
+    public static Geometry geometricMedian (Geometry geometry,double tolerance, int maxIter,
+    boolean failIfNotConverged) throws Exception {
         String geometryType = geometry.getGeometryType();
-        if(!(Geometry.TYPENAME_POINT.equals(geometryType) || Geometry.TYPENAME_MULTIPOINT.equals(geometryType))) {
+        if (!(Geometry.TYPENAME_POINT.equals(geometryType) || Geometry.TYPENAME_MULTIPOINT.equals(geometryType))) {
             throw new Exception("Unsupported geometry type: " + geometryType);
         }
         Coordinate[] coordinates = extractCoordinates(geometry);
-        if(coordinates.length == 0)
+        if (coordinates.length == 0)
             return new Point(null, GEOMETRY_FACTORY);
         Coordinate median = initGuess(coordinates);
         double delta = Double.MAX_VALUE;
         double[] distances = new double[coordinates.length]; // preallocate to reduce gc pressure for large iterations
-        for(int i = 0; i < maxIter && delta > tolerance; i++)
+        for (int i = 0; i < maxIter && delta > tolerance; i++)
             delta = iteratePoints(median, coordinates, distances);
         if (failIfNotConverged && delta > tolerance)
             throw new Exception(String.format("Median failed to converge within %.1E after %d iterations.", tolerance, maxIter));
         boolean is3d = !Double.isNaN(geometry.getCoordinate().z);
-        if(!is3d)
+        if (!is3d)
             median.z = Double.NaN;
         Point point = new Point(new CoordinateArraySequence(new Coordinate[]{median}), GEOMETRY_FACTORY);
         point.setSRID(geometry.getSRID());
         return point;
     }
 
-    public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter) throws Exception {
+    public static Geometry geometricMedian (Geometry geometry,double tolerance, int maxIter) throws Exception {
         return geometricMedian(geometry, tolerance, maxIter, false);
     }
 
-    public static Geometry geometricMedian(Geometry geometry, double tolerance) throws Exception {
+    public static Geometry geometricMedian (Geometry geometry,double tolerance) throws Exception {
         return geometricMedian(geometry, tolerance, DEFAULT_MAX_ITER, false);
     }
 
-    public static Geometry geometricMedian(Geometry geometry) throws Exception {
+    public static Geometry geometricMedian (Geometry geometry) throws Exception {
         return geometricMedian(geometry, DEFAULT_TOLERANCE, DEFAULT_MAX_ITER, false);
     }
 
-    public static double frechetDistance(Geometry g1, Geometry g2) {
+    public static double frechetDistance (Geometry g1, Geometry g2){
         return GeomUtils.getFrechetDistance(g1, g2);
     }
 
-    public static boolean isCollection(Geometry geometry) {
+    public static boolean isCollection (Geometry geometry){
         String geoType = geometry.getGeometryType();
         return Geometry.TYPENAME_GEOMETRYCOLLECTION.equalsIgnoreCase(geoType) ||
                 Geometry.TYPENAME_MULTIPOINT.equalsIgnoreCase(geoType) ||
@@ -1372,10 +1373,10 @@ public class Functions {
                 Geometry.TYPENAME_MULTILINESTRING.equalsIgnoreCase(geoType);
     }
 
-    public static Geometry boundingDiagonal(Geometry geometry) {
+    public static Geometry boundingDiagonal (Geometry geometry){
         if (geometry.isEmpty()) {
             return GEOMETRY_FACTORY.createLineString();
-        }else {
+        } else {
             Double startX = null, startY = null, startZ = null,
                     endX = null, endY = null, endZ = null;
             boolean is3d = !Double.isNaN(geometry.getCoordinate().z);
@@ -1396,7 +1397,7 @@ public class Functions {
             if (is3d) {
                 startCoordinate = new Coordinate(startX, startY, startZ);
                 endCoordinate = new Coordinate(endX, endY, endZ);
-            }else {
+            } else {
                 startCoordinate = new Coordinate(startX, startY);
                 endCoordinate = new Coordinate(endX, endY);
             }
@@ -1404,23 +1405,29 @@ public class Functions {
         }
     }
 
-    public static double angle(Geometry point1, Geometry point2, Geometry point3, Geometry point4) throws IllegalArgumentException {
+    public static double angle (Geometry point1, Geometry point2, Geometry point3, Geometry point4) throws IllegalArgumentException {
         if (point3 == null && point4 == null) return Functions.angle(point1, point2);
         else if (point4 == null) return Functions.angle(point1, point2, point3);
-        if (GeomUtils.isAnyGeomEmpty(point1, point2, point3, point4)) throw new IllegalArgumentException("ST_Angle cannot support empty geometries.");
-        if (!(point1 instanceof Point && point2 instanceof Point && point3 instanceof Point && point4 instanceof Point)) throw new IllegalArgumentException("ST_Angle supports either only POINT or only LINESTRING geometries.");
+        if (GeomUtils.isAnyGeomEmpty(point1, point2, point3, point4))
+            throw new IllegalArgumentException("ST_Angle cannot support empty geometries.");
+        if (!(point1 instanceof Point && point2 instanceof Point && point3 instanceof Point && point4 instanceof Point))
+            throw new IllegalArgumentException("ST_Angle supports either only POINT or only LINESTRING geometries.");
         return GeomUtils.calcAngle(point1.getCoordinate(), point2.getCoordinate(), point3.getCoordinate(), point4.getCoordinate());
     }
 
-    public static double angle(Geometry point1, Geometry point2, Geometry point3) throws IllegalArgumentException {
-        if (GeomUtils.isAnyGeomEmpty(point1, point2, point3)) throw new IllegalArgumentException("ST_Angle cannot support empty geometries.");
-        if (!(point1 instanceof Point && point2 instanceof Point && point3 instanceof Point)) throw new IllegalArgumentException("ST_Angle supports either only POINT or only LINESTRING geometries.");
+    public static double angle (Geometry point1, Geometry point2, Geometry point3) throws IllegalArgumentException {
+        if (GeomUtils.isAnyGeomEmpty(point1, point2, point3))
+            throw new IllegalArgumentException("ST_Angle cannot support empty geometries.");
+        if (!(point1 instanceof Point && point2 instanceof Point && point3 instanceof Point))
+            throw new IllegalArgumentException("ST_Angle supports either only POINT or only LINESTRING geometries.");
         return GeomUtils.calcAngle(point2.getCoordinate(), point1.getCoordinate(), point2.getCoordinate(), point3.getCoordinate());
     }
 
-    public static double angle(Geometry line1, Geometry line2) throws IllegalArgumentException {
-        if (GeomUtils.isAnyGeomEmpty(line1, line2)) throw new IllegalArgumentException("ST_Angle cannot support empty geometries.");
-        if (!(line1 instanceof LineString && line2 instanceof LineString)) throw new IllegalArgumentException("ST_Angle supports either only POINT or only LINESTRING geometries.");
+    public static double angle (Geometry line1, Geometry line2) throws IllegalArgumentException {
+        if (GeomUtils.isAnyGeomEmpty(line1, line2))
+            throw new IllegalArgumentException("ST_Angle cannot support empty geometries.");
+        if (!(line1 instanceof LineString && line2 instanceof LineString))
+            throw new IllegalArgumentException("ST_Angle supports either only POINT or only LINESTRING geometries.");
         Coordinate[] startEndLine1 = GeomUtils.getStartEndCoordinates(line1);
         Coordinate[] startEndLine2 = GeomUtils.getStartEndCoordinates(line2);
         assert startEndLine1 != null;
@@ -1428,23 +1435,23 @@ public class Functions {
         return GeomUtils.calcAngle(startEndLine1[0], startEndLine1[1], startEndLine2[0], startEndLine2[1]);
     }
 
-    public static double degrees(double angleInRadian) {
+    public static double degrees ( double angleInRadian){
         return GeomUtils.toDegrees(angleInRadian);
     }
 
-    public static Double hausdorffDistance(Geometry g1, Geometry g2, double densityFrac) {
+    public static Double hausdorffDistance (Geometry g1, Geometry g2,double densityFrac){
         return GeomUtils.getHausdorffDistance(g1, g2, densityFrac);
     }
 
-    public static Double hausdorffDistance(Geometry g1, Geometry g2) {
+    public static Double hausdorffDistance (Geometry g1, Geometry g2){
         return GeomUtils.getHausdorffDistance(g1, g2, -1);
     }
 
-    public static String isValidReason(Geometry geom) {
+    public static String isValidReason (Geometry geom){
         return isValidReason(geom, OGC_SFS_VALIDITY);
     }
 
-    public static String isValidReason(Geometry geom, int flag) {
+    public static String isValidReason (Geometry geom,int flag){
         IsValidOp isValidOp = new IsValidOp(geom);
 
         // Set the validity model based on flags
