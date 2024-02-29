@@ -166,7 +166,6 @@ case class ST_Crosses(inputExpressions: Seq[Expression])
   }
 }
 
-
 /**
   * Test if leftGeometry overlaps rightGeometry
   *

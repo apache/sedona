@@ -87,6 +87,7 @@ object Catalog {
     function[ST_Touches](),
     function[ST_Overlaps](),
     function[ST_Crosses](),
+    function[ST_CrossesDateLine](),
     function[ST_IsSimple](),
     function[ST_MakeValid](false),
     function[ST_SimplifyPreserveTopology](),

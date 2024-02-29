@@ -310,6 +310,13 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"})
+    public static boolean ST_CrossesDateLine(String geometry) {
+        return Functions.crossesDateLine(
+                GeometrySerde.deserGeoJson(geometry)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry"}, argTypes = {"Geometry", "Geometry"}, returnTypes = "Geometry")
     public static String ST_Difference(String leftGeometry, String rightGeometry) {
         return GeometrySerde.serGeoJson(

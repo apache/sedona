@@ -121,6 +121,14 @@ case class ST_ConvexHull(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_CrossesDateLine(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.crossesDateLine _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
   * Return the number of Points in geometry.
   *

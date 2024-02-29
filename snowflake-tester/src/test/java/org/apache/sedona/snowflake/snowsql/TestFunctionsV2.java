@@ -277,6 +277,19 @@ public class TestFunctionsV2
                 "POLYGON((10 8,20 30,100 190,150 10,10 8))"
         );
     }
+
+    @Test
+    public void test_ST_CrossesDateLine() {
+        registerUDFV2("ST_CrossesDateLine",  String.class);
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_CrossesDateLine( ST_GeometryFromWKT('POLYGON((175 10, -175 10, -175 -10, 175 -10, 175 10))'))",
+                true
+        );
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_CrossesDateLine( ST_GeometryFromWKT('POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'))",
+                false
+        );
+    }
     @Test
     public void test_ST_Difference() {
         registerUDFV2("ST_Difference", String.class, String.class);

@@ -13,8 +13,10 @@
  */
 package org.apache.sedona.common;
 
-import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.*;
 import org.apache.sedona.common.sphere.Spheroid;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Predicates {
     public static boolean contains(Geometry leftGeometry, Geometry rightGeometry) {
@@ -62,4 +64,5 @@ public class Predicates {
             return leftGeometry.isWithinDistance(rightGeometry, distance);
         }
     }
+
 }

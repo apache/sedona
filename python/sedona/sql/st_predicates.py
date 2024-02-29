@@ -67,7 +67,6 @@ def ST_Crosses(a: ColumnOrName, b: ColumnOrName) -> Column:
     """
     return _call_predicate_function("ST_Crosses", (a, b))
 
-
 @validate_argument_types
 def ST_Disjoint(a: ColumnOrName, b: ColumnOrName) -> Column:
     """Check whether two geometries are disjoint.
