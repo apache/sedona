@@ -21,8 +21,6 @@ import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.snowflake.snowsql.annotations.UDFAnnotations;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
 import java.io.IOException;
 
@@ -190,7 +188,7 @@ public class UDFsV2
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius"}, argTypes = {"Geometry", "double"}, returnTypes = "Geometry")
-    public static String ST_Buffer(String geometry, double radius) throws FactoryException, TransformException {
+    public static String ST_Buffer(String geometry, double radius) throws IllegalArgumentException {
         return GeometrySerde.serGeoJson(
                 Functions.buffer(
                         GeometrySerde.deserGeoJson(geometry),
@@ -200,7 +198,7 @@ public class UDFsV2
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius", "useSpheroid"}, argTypes = {"Geometry", "double", "boolean"}, returnTypes = "Geometry")
-    public static String ST_Buffer(String geometry, double radius, boolean useSpheroid) throws FactoryException, TransformException {
+    public static String ST_Buffer(String geometry, double radius, boolean useSpheroid) throws IllegalArgumentException {
         return GeometrySerde.serGeoJson(
                 Functions.buffer(
                         GeometrySerde.deserGeoJson(geometry),
@@ -211,7 +209,7 @@ public class UDFsV2
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius", "useSpheroid", "parameters"}, argTypes = {"Geometry", "double", "boolean", "String"}, returnTypes = "Geometry")
-    public static String ST_Buffer(String geometry, double radius, boolean useSpheroid, String parameters) throws FactoryException, TransformException {
+    public static String ST_Buffer(String geometry, double radius, boolean useSpheroid, String parameters) throws IllegalArgumentException {
         return GeometrySerde.serGeoJson(
                 Functions.buffer(
                         GeometrySerde.deserGeoJson(geometry),

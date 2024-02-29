@@ -25,8 +25,6 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBWriter;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -161,7 +159,7 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius"})
-    public static byte[] ST_Buffer(byte[] geometry, double radius) throws FactoryException, TransformException {
+    public static byte[] ST_Buffer(byte[] geometry, double radius) throws IllegalArgumentException {
         return GeometrySerde.serialize(
                 Functions.buffer(
                         GeometrySerde.deserialize(geometry),
@@ -171,7 +169,7 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius", "useSpheroid"})
-    public static byte[] ST_Buffer(byte[] geometry, double radius, boolean useSpheroid) throws FactoryException, TransformException {
+    public static byte[] ST_Buffer(byte[] geometry, double radius, boolean useSpheroid) throws IllegalArgumentException {
         return GeometrySerde.serialize(
                 Functions.buffer(
                         GeometrySerde.deserialize(geometry),
@@ -182,7 +180,7 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius", "useSpheroid", "parameters"})
-    public static byte[] ST_Buffer(byte[] geometry, double radius, boolean useSpheroid, String parameters) throws FactoryException, TransformException {
+    public static byte[] ST_Buffer(byte[] geometry, double radius, boolean useSpheroid, String parameters) throws IllegalArgumentException {
         return GeometrySerde.serialize(
                 Functions.buffer(
                         GeometrySerde.deserialize(geometry),
