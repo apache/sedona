@@ -551,7 +551,7 @@ Output: `LINESTRING Z(-1 -1 0, 10 5 5)`
 
 ## ST_Buffer
 
-Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance. The function supports both Planar/Euclidean and Spheroidal/Geodesic buffering (Since v1.6.0).
+Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance. The function supports both Planar/Euclidean and Spheroidal/Geodesic buffering (Since v1.6.0). Spheroidal buffer also supports geometries crossing the International Date Line (IDL).
 
 Mode of buffer calculation (Since: `v1.6.0`):
 
