@@ -144,7 +144,7 @@ public class FunctionsGeoTools {
         final int WGS84CRS = 4326;
 
         // Shift longitude if geometry crosses dateline
-        if (Predicates.crossesDateLine(geometry)) {
+        if (Functions.crossesDateLine(geometry)) {
             Functions.shiftLongitude(geometry);
         }
 //        geometry = (Predicates.crossesDateLine(geometry)) ? Functions.shiftLongitude(geometry) : geometry;

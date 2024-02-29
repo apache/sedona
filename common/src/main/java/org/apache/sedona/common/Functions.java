@@ -95,7 +95,7 @@ public class Functions {
         return buffer(geometry, radius, useSpheroid, "");
     }
 
-    public static Geometry buffer(Geometry geometry, double radius, boolean useSpheroid, String params) throws IllegalArgumentException{
+    public static Geometry buffer(Geometry geometry, double radius, boolean useSpheroid, String params) throws IllegalArgumentException {
         BufferParameters bufferParameters = new BufferParameters();
 
         // Processing parameters
@@ -134,7 +134,7 @@ public class Functions {
         BufferParameters bufferParameters = new BufferParameters();
         String[] listParams = params.split(" ");
 
-        for (String param: listParams) {
+        for (String param : listParams) {
             String[] singleParam = param.split("=");
 
             if (singleParam.length != 2) {
@@ -150,7 +150,7 @@ public class Functions {
                 }
             }
             // Set end cap style
-             else if (singleParam[0].equalsIgnoreCase(listBufferParameters[1])) {
+            else if (singleParam[0].equalsIgnoreCase(listBufferParameters[1])) {
                 if (singleParam[1].equalsIgnoreCase(endcapOptions[0])) {
                     bufferParameters.setEndCapStyle(BufferParameters.CAP_ROUND);
                 } else if (singleParam[1].equalsIgnoreCase(endcapOptions[1]) || singleParam[1].equalsIgnoreCase(endcapOptions[2])) {
@@ -202,25 +202,26 @@ public class Functions {
         return bufferParameters;
     }
 
-    public static int bestSRID(Geometry geometry) throws IllegalArgumentException{
-        // Shift longitudes of geometry crosses dateline
-        if (Predicates.crossesDateLine(geometry)) {
+    public static int bestSRID(Geometry geometry) throws IllegalArgumentException {
+        // Shift longitudes if geometry crosses dateline
+        if (crossesDateLine(geometry)) {
             shiftLongitude(geometry);
         }
-        // geometry = (Predicates.crossesDateLine(geometry)) ? shiftLongitude(geometry) : geometry;
 
         // Check envelope
         Envelope envelope = geometry.getEnvelopeInternal();
         if (envelope.isNull()) return Spheroid.EPSG_WORLD_MERCATOR; // Fallback EPSG
 
         // Calculate the center of the envelope
-        double centerX =  (envelope.getMinX() + envelope.getMaxX()) / 2.0; // centroid.getX();
+        double centerX = (envelope.getMinX() + envelope.getMaxX()) / 2.0; // centroid.getX();
         double centerY = (envelope.getMinY() + envelope.getMaxY()) / 2.0; // centroid.getY();
 
         // Calculate angular width and height
         Double xwidth = Spheroid.angularWidth(envelope);
         Double ywidth = Spheroid.angularHeight(envelope);
-        if (xwidth.isNaN() | ywidth.isNaN()) {throw new IllegalArgumentException("Only lon/lat coordinate systems are supported by ST_BestSRID");}
+        if (xwidth.isNaN() | ywidth.isNaN()) {
+            throw new IllegalArgumentException("Only lon/lat coordinate systems are supported by ST_BestSRID");
+        }
 
         // Prioritize polar regions for Lambert Azimuthal Equal Area projection
         if (centerY >= 70.0 && ywidth < 45.0) return Spheroid.EPSG_NORTH_LAMBERT;
@@ -232,8 +233,8 @@ public class Functions {
             if (centerX == -180.0 || centerX == 180.0) {
                 zone = 59; // UTM zone 60
             } else {
-                zone = (int)Math.floor((centerX + 180.0) / 6.0);
-                zone = (zone > 59) ? zone-60 : zone;
+                zone = (int) Math.floor((centerX + 180.0) / 6.0);
+                zone = (zone > 59) ? zone - 60 : zone;
             }
             return (centerY < 0.0) ? Spheroid.EPSG_SOUTH_UTM_START + zone : Spheroid.EPSG_NORTH_UTM_START + zone;
         }
@@ -252,19 +253,38 @@ public class Functions {
         if (geometry == null || geometry.isEmpty()) {
             return;
         }
-        for (Coordinate coord : geometry.getCoordinates()) {
-            // Normalize the longitude to be within -180 to 180 range
-            while (coord.x > 180) coord.x -= 360;
-            while (coord.x < -180) coord.x += 360;
-        }
-        geometry.geometryChanged();
+
+        geometry.apply(new CoordinateSequenceFilter() {
+            @Override
+            public void filter(CoordinateSequence seq, int i) {
+                double x = seq.getX(i);
+                // Normalize the longitude to be within -180 to 180 range
+                while (x > 180) x -= 360;
+                while (x < -180) x += 360;
+                seq.setOrdinate(i, CoordinateSequence.X, x);
+            }
+
+            @Override
+            public boolean isDone() {
+                return false; // Continue processing until all coordinates are processed
+            }
+
+            @Override
+            public boolean isGeometryChanged() {
+                return true; // The geometry is changed as we are modifying the coordinates
+            }
+        });
+
+        geometry.geometryChanged(); // Notify the geometry that its coordinates have been changed
+    }
+
     /**
      * Checks if a geometry crosses the International Date Line.
      *
      * @param geometry The geometry to check.
      * @return True if the geometry crosses the Date Line, false otherwise.
      */
-    public static boolean crossesDateLine(Geometry geometry) {
+    public static boolean crossesDateLine (Geometry geometry){
         if (geometry == null || geometry.isEmpty()) {
             return false;
         }
@@ -303,28 +323,7 @@ public class Functions {
         return filter.isDone();
     }
 
-    public static Geometry envelope(Geometry geometry) {
-        return geometry.getEnvelope();
-    }
-
-    public static double distance(Geometry left, Geometry right) {
-        return left.distance(right);
-    }
-
-    public static double distance3d(Geometry left, Geometry right) {
-        return new Distance3DOp(left, right).distance();
-    }
-
-    public static double length(Geometry geometry) {
-        return geometry.getLength();
-    }
-
-    public static Geometry normalize(Geometry geometry) {
-        geometry.normalize();
-        return geometry;
-    }
-
-    public static Geometry shiftLongitude(Geometry geometry) {
+    public static Geometry shiftLongitude (Geometry geometry){
         geometry.apply(new CoordinateSequenceFilter() {
             @Override
             public void filter(CoordinateSequence seq, int i) {
@@ -347,6 +346,27 @@ public class Functions {
                 return true;
             }
         });
+        return geometry;
+    }
+
+    public static Geometry envelope(Geometry geometry) {
+        return geometry.getEnvelope();
+    }
+
+    public static double distance(Geometry left, Geometry right) {
+        return left.distance(right);
+    }
+
+    public static double distance3d(Geometry left, Geometry right) {
+        return new Distance3DOp(left, right).distance();
+    }
+
+    public static double length(Geometry geometry) {
+        return geometry.getLength();
+    }
+
+    public static Geometry normalize(Geometry geometry) {
+        geometry.normalize();
         return geometry;
     }
 
@@ -382,8 +402,6 @@ public class Functions {
 
     public static double xMax(Geometry geometry) {
         Coordinate[] points = geometry.getCoordinates();
-        double max = - Double.MAX_VALUE;
-        for (int i=0; i < points.length; i++) {
             max = Math.max(points[i].getX(), max);
         }
         return max;
@@ -1382,7 +1400,7 @@ public class Functions {
                 startCoordinate = new Coordinate(startX, startY);
                 endCoordinate = new Coordinate(endX, endY);
             }
-            return GEOMETRY_FACTORY.createLineString(new Coordinate[] {startCoordinate, endCoordinate});
+            return GEOMETRY_FACTORY.createLineString(new Coordinate[]{startCoordinate, endCoordinate});
         }
     }
 
