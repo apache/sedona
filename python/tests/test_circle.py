@@ -16,6 +16,8 @@
 #  under the License.
 
 import pytest
+
+import shapely
 from shapely import wkt
 from shapely.geometry import Point
 
@@ -28,13 +30,14 @@ class TestCircle:
     def test_get_center(self):
         point = Point(0.0, 0.0)
         circle = Circle(point, 0.1)
-        assert circle.centerGeometry.x == point.x and circle.centerGeometry.y == point.y
+        assert circle.centerGeometry.x == pytest.approx(point.x, 1e-6) and circle.centerGeometry.y == pytest.approx(point.y, 1e-6)
 
     def test_get_radius(self):
         point = Point(0.0, 0.0)
         circle = Circle(point, 0.1)
         assert circle.getRadius() == pytest.approx(0.1, 0.01)
 
+    @pytest.mark.skipif(shapely.__version__.startswith('2.'), reason="Circle is immutable when working with Shapely 2.0")
     def test_set_radius(self):
         point = Point(0.0, 0.0)
         circle = Circle(point, 0.1)

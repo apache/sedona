@@ -218,6 +218,51 @@ public class Functions {
         return Spheroid.EPSG_WORLD_MERCATOR;
     }
 
+    /**
+     * Checks if a geometry crosses the International Date Line.
+     *
+     * @param geometry The geometry to check.
+     * @return True if the geometry crosses the Date Line, false otherwise.
+     */
+    public static boolean crossesDateLine(Geometry geometry) {
+        if (geometry == null || geometry.isEmpty()) {
+            return false;
+        }
+
+        CoordinateSequenceFilter filter = new CoordinateSequenceFilter() {
+            private Coordinate previous = null;
+            private boolean crossesDateLine = false;
+
+            @Override
+            public void filter(CoordinateSequence seq, int i) {
+                if (i == 0) {
+                    previous = seq.getCoordinateCopy(i);
+                    return;
+                }
+
+                Coordinate current = seq.getCoordinateCopy(i);
+                if (Math.abs(current.x - previous.x) > 180) {
+                    crossesDateLine = true;
+                }
+
+                previous = current;
+            }
+
+            @Override
+            public boolean isDone() {
+                return crossesDateLine;
+            }
+
+            @Override
+            public boolean isGeometryChanged() {
+                return false;
+            }
+        };
+
+        geometry.apply(filter);
+        return filter.isDone();
+    }
+
     public static Geometry envelope(Geometry geometry) {
         return geometry.getEnvelope();
     }
@@ -236,6 +281,32 @@ public class Functions {
 
     public static Geometry normalize(Geometry geometry) {
         geometry.normalize();
+        return geometry;
+    }
+
+    public static Geometry shiftLongitude(Geometry geometry) {
+        geometry.apply(new CoordinateSequenceFilter() {
+            @Override
+            public void filter(CoordinateSequence seq, int i) {
+                double newX = seq.getX(i);
+                if (newX < 0) {
+                    newX += 360;
+                } else if (newX > 180) {
+                    newX -= 360;
+                }
+                seq.setOrdinate(i, CoordinateSequence.X, newX);
+            }
+
+            @Override
+            public boolean isDone() {
+                return false;
+            }
+
+            @Override
+            public boolean isGeometryChanged() {
+                return true;
+            }
+        });
         return geometry;
     }
 

@@ -22,7 +22,11 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.io.ParseException;
 
+import static org.apache.sedona.common.Constructors.geomFromEWKT;
+import static org.apache.sedona.common.Constructors.geomFromWKT;
+import static org.apache.sedona.common.Functions.crossesDateLine;
 import static org.junit.Assert.*;
 
 public class PredicatesTest extends TestBase {
@@ -72,5 +76,33 @@ public class PredicatesTest extends TestBase {
         assertTrue(actual);
     }
 
+    @Test
+    public void testCrossesDateLine() throws ParseException {
+        Geometry geom1 = geomFromEWKT("LINESTRING(170 30, -170 30)");
+        Geometry geom2 = geomFromEWKT("LINESTRING(-120 30, -130 40)");
+        Geometry geom3 = geomFromEWKT("POLYGON((175 10, -175 10, -175 -10, 175 -10, 175 10))");
+        Geometry geom4 = geomFromEWKT("POLYGON((-120 10, -130 10, -130 -10, -120 -10, -120 10))");
+        Geometry geom5 = geomFromEWKT("POINT(180 30)");
+        Geometry geom6 = geomFromEWKT("POLYGON((160 20, 180 20, 180 -20, 160 -20, 160 20), (165 15, 175 15, 175 -15, 165 -15, 165 15))");
+        Geometry geom8 = geomFromEWKT("POLYGON((170 -10, -170 -10, -170 10, 170 10, 170 -10), (175 -5, -175 -5, -175 5, 175 5, 175 -5))");
+
+        // Multi-geometry test cases
+        Geometry multiGeom1 = geomFromEWKT("MULTILINESTRING((170 30, -170 30), (-120 30, -130 40))");
+        Geometry multiGeom2 = geomFromEWKT("MULTIPOLYGON(((175 10, -175 10, -175 -10, 175 -10, 175 10)), ((-120 10, -130 10, -130 -10, -120 -10, -120 10)))");
+        Geometry multiGeom3 = geomFromEWKT("MULTIPOINT((180 30), (170 -20))");
+        Geometry multiGeom4 = geomFromEWKT("MULTIPOLYGON(((160 20, 180 20, 180 -20, 160 -20, 160 20)), ((-120 10, -130 10, -130 -10, -120 -10, -120 10)))");
+
+        assertEquals(true, crossesDateLine(geom1));
+        assertEquals(false, crossesDateLine(geom2));
+        assertEquals(true, crossesDateLine(geom3));
+        assertEquals(false, crossesDateLine(geom4));
+        assertEquals(false, crossesDateLine(geom5));
+        assertEquals(false, crossesDateLine(geom6));
+        assertEquals(true, crossesDateLine(geom8));
+        assertEquals(true, crossesDateLine(multiGeom1));
+        assertEquals(true, crossesDateLine(multiGeom2));
+        assertEquals(false, crossesDateLine(multiGeom3));
+        assertEquals(false, crossesDateLine(multiGeom4));
+    }
 
 }

@@ -202,6 +202,15 @@ public class TestFunctions extends TestBase {
     }
 
     @Test
+    public void test_ST_ShiftLongitude() {
+        registerUDF("ST_ShiftLongitude", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_ShiftLongitude(sedona.ST_GeomFromText('LINESTRING (179.95 10, -179.95 10)')))",
+                "LINESTRING (179.95 10, 180.05 10)"
+        );
+    }
+
+    @Test
     public void test_ST_BuildArea() {
         registerUDF("ST_BuildArea", byte[].class);
         verifySqlSingleRes(
@@ -260,6 +269,19 @@ public class TestFunctions extends TestBase {
         verifySqlSingleRes(
                 "select sedona.ST_AsText(sedona.ST_ConvexHull(sedona.ST_GeomFromText('MULTILINESTRING((100 190,10 8),(150 10, 20 30))')))",
                 "POLYGON ((10 8, 20 30, 100 190, 150 10, 10 8))"
+        );
+    }
+
+    @Test
+    public void test_ST_CrossesDateLine() {
+        registerUDF("ST_CrossesDateLine", byte[].class);
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_CrossesDateLine(sedona.ST_GeomFromWKT('POLYGON((175 10, -175 10, -175 -10, 175 -10, 175 10))'))",
+                true
+        );
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_CrossesDateLine(sedona.ST_GeomFromWKT('POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'))",
+                false
         );
     }
     @Test

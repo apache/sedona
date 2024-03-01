@@ -842,6 +842,35 @@ Output:
 2
 ```
 
+## ST_CrossesDateLine
+
+Introduction: This function determines if a given geometry crosses the International Date Line. It operates by checking if the difference in longitude between any pair of consecutive points in the geometry exceeds 180 degrees. If such a difference is found, it is assumed that the geometry crosses the Date Line. It returns true if the geometry crosses the Date Line, and false otherwise.
+
+!!!note
+    The function assumes that the provided geometry is in lon/lat coordinate reference system where longitude values range from -180 to 180 degrees.
+
+!!!note
+    For multi-geometries (e.g., MultiPolygon, MultiLineString), this function will return true if any one of the geometries within the multi-geometry crosses the International Date Line.
+
+Format: `ST_CrossesDateLine(geometry: Geometry)`
+
+Since: `v1.6.0`
+
+SQL Example:
+
+```sql
+SELECT ST_CrossesDateLine(ST_GeomFromWKT('LINESTRING(170 30, -170 30)'))
+```
+
+Output:
+
+```sql
+true
+```
+
+!!!Warning
+    For geometries that span more than 180 degrees in longitude without actually crossing the Date Line, this function may still return true, indicating a crossing.
+
 ## ST_Degrees
 
 Introduction: Convert an angle in radian to degrees.
@@ -2377,6 +2406,27 @@ Output:
 
 ```
 SRID=3021;POLYGON ((1 1, 8 1, 8 8, 1 8, 1 1))
+```
+
+## ST_ShiftLongitude
+
+Introduction: Modifies longitude coordinates in geometries, shifting values between -180..0 degrees to 180..360 degrees and vice versa. This is useful for normalizing data across the International Date Line and standardizing coordinate ranges for visualization and spheroidal calculations.
+
+!!!note
+    This function is only applicable to geometries that use lon/lat coordinate systems.
+
+Format: `ST_ShiftLongitude (geom: geometry)`
+
+Since: `v1.6.0`
+
+SQL example:
+```SQL
+SELECT ST_ShiftLongitude(ST_GeomFromText('LINESTRING(177 10, 179 10, -179 10, -177 10)'))
+```
+
+Output:
+```sql
+LINESTRING(177 10, 179 10, 181 10, 183 10)
 ```
 
 ## ST_SimplifyPreserveTopology

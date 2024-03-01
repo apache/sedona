@@ -180,6 +180,15 @@ public class TestFunctionsV2
     }
 
     @Test
+    public void test_ST_ShiftLongitude() {
+        registerUDFV2("ST_ShiftLongitude", String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_ShiftLongitude(ST_GeometryFromWKT('POINT (-179 60)'))",
+                "{\"type\":\"Point\",\"coordinates\":[181.0,60.0]}"
+        );
+    }
+
+    @Test
     public void test_ST_Boundary() {
         registerUDFV2("ST_Boundary", String.class);
         verifySqlSingleRes(
@@ -266,6 +275,19 @@ public class TestFunctionsV2
         verifySqlSingleRes(
                 "select ST_AsText(sedona.ST_ConvexHull(ST_GeometryFromWKT('MULTILINESTRING((100 190,10 8),(150 10, 20 30))')))",
                 "POLYGON((10 8,20 30,100 190,150 10,10 8))"
+        );
+    }
+
+    @Test
+    public void test_ST_CrossesDateLine() {
+        registerUDFV2("ST_CrossesDateLine",  String.class);
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_CrossesDateLine( ST_GeometryFromWKT('POLYGON((175 10, -175 10, -175 -10, 175 -10, 175 10))'))",
+                true
+        );
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_CrossesDateLine( ST_GeometryFromWKT('POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'))",
+                false
         );
     }
     @Test

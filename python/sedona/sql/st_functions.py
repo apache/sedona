@@ -47,6 +47,7 @@ __all__ = [
     "ST_ClosestPoint",
     "ST_ConcaveHull",
     "ST_ConvexHull",
+    "ST_CrossesDateLine",
     "ST_Difference",
     "ST_Dimension",
     "ST_Distance",
@@ -316,6 +317,16 @@ def ST_BestSRID(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_BestSRID", geometry)
 
+@validate_argument_types
+def ST_ShiftLongitude(geometry: ColumnOrName) -> Column:
+    """Shifts longitudes between -180..0 degrees to 180..360 degrees and vice versa.
+
+    :param geometry: Geometry column.
+    :type geometry: ColumnOrName
+    :return: Shifted geometry
+    :rtype: Column
+    """
+    return _call_st_function("ST_ShiftLongitude", geometry)
 
 @validate_argument_types
 def ST_Boundary(geometry: ColumnOrName) -> Column:
@@ -446,6 +457,17 @@ def ST_ConvexHull(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_ConvexHull", geometry)
+
+@validate_argument_types
+def ST_CrossesDateLine(a: ColumnOrName) -> Column:
+    """Check whether geometry a crosses the International Date Line.
+
+    :param a: Geometry to check crossing with.
+    :type a: ColumnOrName
+    :return: True if geometry a cross the dateline.
+    :rtype: Column
+    """
+    return _call_st_function("ST_CrossesDateLine", (a))
 
 @validate_argument_types
 def ST_Dimension(geometry: ColumnOrName):
@@ -1270,7 +1292,7 @@ def ST_Split(input: ColumnOrName, blade: ColumnOrName) -> Column:
     :return: Multi-geometry representing the split of input by blade.
     :rtype: Column
     """
-    return _call_st_function("ST_SymDifference", (input, blade))
+    return _call_st_function("ST_Split", (input, blade))
 
 
 @validate_argument_types

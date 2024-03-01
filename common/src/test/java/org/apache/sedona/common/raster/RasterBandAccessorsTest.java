@@ -114,6 +114,15 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sd", false);
         expected = 92.1327;
         assertEquals(expected, actual, FP_TOLERANCE);
+
+        geom = Constructors.geomFromWKT("POLYGON ((-77.96672569800863073 37.91971182746296876, -77.9688630154902711 37.89620133516485367, -77.93936803424354309 37.90517806858776595, -77.96672569800863073 37.91971182746296876))", 0);
+        Double statValue = RasterBandAccessors.getZonalStats(raster, geom, 1, "sum", false, true);
+        assertNotNull(statValue);
+
+        Geometry nonIntersectingGeom = Constructors.geomFromWKT("POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))", 0);
+        statValue = RasterBandAccessors.getZonalStats(raster, nonIntersectingGeom, 1, "sum", false, true);
+        assertNull(statValue);
+        assertThrows(IllegalArgumentException.class, () -> RasterBandAccessors.getZonalStats(raster, nonIntersectingGeom, 1, "sum", false, false));
     }
 
     @Test
@@ -161,6 +170,15 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false);
         double[] expected = new double[] {184792.0, 1.0690406E7, 57.8510, 0.0, 0.0, 92.1327, 8488.4480, 0.0, 255.0};
         assertArrayEquals(expected, actual, FP_TOLERANCE);
+
+        geom = Constructors.geomFromWKT("POLYGON ((-77.96672569800863073 37.91971182746296876, -77.9688630154902711 37.89620133516485367, -77.93936803424354309 37.90517806858776595, -77.96672569800863073 37.91971182746296876))", 0);
+        actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false);
+        assertNotNull(actual);
+
+        Geometry nonIntersectingGeom = Constructors.geomFromWKT("POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))", 0);
+        actual = RasterBandAccessors.getZonalStatsAll(raster, nonIntersectingGeom, 1, false, true);
+        assertNull(actual);
+        assertThrows(IllegalArgumentException.class, () -> RasterBandAccessors.getZonalStatsAll(raster, nonIntersectingGeom, 1, false, false));
     }
 
     @Test

@@ -415,7 +415,7 @@ class SpatialRDD:
             grid = partitioning.jvm_partitioner
         elif type(partitioning) == list:
             if isinstance(partitioning[0], Envelope):
-                bytes_data = pickle.dumps(partitioning)
+                bytes_data = Envelope.serialize_for_java(partitioning)
                 jvm_envelopes = self._jvm.EnvelopeAdapter.getFromPython(bytes_data)
                 grid = jvm_envelopes
             else:

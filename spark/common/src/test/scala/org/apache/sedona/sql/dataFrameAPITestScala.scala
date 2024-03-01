@@ -242,6 +242,26 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertEquals(expected, actual)
     }
 
+    it("Passed ST_ShiftLongitude") {
+      val polygonDf = sparkSession.sql("SELECT ST_Point(1.0, 1.0) AS geom")
+      val df = polygonDf.select(ST_ShiftLongitude("geom").as("geom"))
+      var actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      var expected = "POINT (1 1)"
+      assertEquals(expected, actual)
+
+      var linestringDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(179 75, 180 75, 181 75)') AS geom")
+      var dfLine = linestringDf.select(ST_ShiftLongitude("geom").as("geom"))
+      actual = dfLine.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      expected = "LINESTRING (179 75, 180 75, -179 75)"
+      assertEquals(expected, actual)
+
+      linestringDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(0 10, -1 10)') AS geom")
+      dfLine = linestringDf.select(ST_ShiftLongitude("geom").as("geom"))
+      actual = dfLine.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      expected = "LINESTRING (0 10, 359 10)"
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_Envelope") {
       val polygonDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS geom")
       val df = polygonDf.select(ST_Envelope("geom"))
@@ -577,6 +597,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "LINESTRING (0 0, 1 0, 1 1, 0 0)"
       assert(actualResult == expectedResult)
+    }
+
+    it("Passed ST_CrossesDateLine") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((175 10, -175 10, -175 -10, 175 -10, 175 10))') AS geom")
+      val df = baseDf.select(ST_CrossesDateLine("geom"))
+      val actualResult = df.take(1)(0).getBoolean(0)
+      assert(actualResult)
     }
 
     it("Passed ST_EndPoint") {

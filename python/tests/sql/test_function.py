@@ -118,6 +118,19 @@ class TestPredicateJoin(TestBase):
         actual = function_df.take(1)[0][0]
         assert actual == 3395
 
+    def test_st_shiftlongitude(self):
+        function_df = self.spark.sql("select ST_ShiftLongitude(ST_GeomFromWKT('POLYGON((179 10, -179 10, -179 20, 179 20, 179 10))'))")
+        actual = function_df.take(1)[0][0].wkt
+        assert actual == "POLYGON ((179 10, 181 10, 181 20, 179 20, 179 10))"
+
+        function_df = self.spark.sql("select ST_ShiftLongitude(ST_GeomFromWKT('POINT(-179 10)'))")
+        actual = function_df.take(1)[0][0].wkt
+        assert actual == "POINT (181 10)"
+
+        function_df = self.spark.sql("select ST_ShiftLongitude(ST_GeomFromWKT('LINESTRING(179 10, 181 10)'))")
+        actual = function_df.take(1)[0][0].wkt
+        assert actual == "LINESTRING (179 10, -179 10)"
+
     def test_st_envelope(self):
         polygon_from_wkt = self.spark.read.format("csv"). \
             option("delimiter", "\t"). \
@@ -145,6 +158,20 @@ class TestPredicateJoin(TestBase):
         polygon_df.show()
         function_df = self.spark.sql("select ST_Centroid(polygondf.countyshape) from polygondf")
         function_df.show()
+
+    def test_st_crossesdateline(self):
+        crosses_test_table = self.spark.sql(
+            "select ST_GeomFromWKT('POLYGON((175 10, -175 10, -175 -10, 175 -10, 175 10))') as geom")
+        crosses_test_table.createOrReplaceTempView("crossesTesttable")
+        crosses = self.spark.sql("select(ST_CrossesDateLine(geom)) from crossesTesttable")
+
+        not_crosses_test_table = self.spark.sql(
+            "select ST_GeomFromWKT('POLYGON((1 1, 4 1, 4 4, 1 4, 1 1))') as geom")
+        not_crosses_test_table.createOrReplaceTempView("notCrossesTesttable")
+        not_crosses = self.spark.sql("select(ST_CrossesDateLine(geom)) from notCrossesTesttable")
+
+        assert crosses.take(1)[0][0]
+        assert not not_crosses.take(1)[0][0]
 
     def test_st_length(self):
         polygon_wkt_df = self.spark.read.format("csv"). \

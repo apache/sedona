@@ -116,6 +116,21 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testShiftLogitude() {
+        String actual = (String) first(tableEnv.sqlQuery("SELECT ST_AsText(ST_ShiftLongitude(ST_GeomFromWKT('POLYGON((179 10, -179 10, -179 20, 179 20, 179 10))')))")).getField(0);
+        String expected = "POLYGON ((179 10, 181 10, 181 20, 179 20, 179 10))";
+        assertEquals(expected, actual);
+
+        actual = (String) first(tableEnv.sqlQuery("SELECT ST_AsText(ST_ShiftLongitude(ST_GeomFromWKT('MULTIPOLYGON(((179 10, -179 10, -179 20, 179 20, 179 10)), ((-185 10, -185 20, -175 20, -175 10, -185 10)))')))")).getField(0);
+        expected = "MULTIPOLYGON (((179 10, 181 10, 181 20, 179 20, 179 10)), ((175 10, 175 20, 185 20, 185 10, 175 10)))";
+        assertEquals(expected, actual);
+
+        actual = (String) first(tableEnv.sqlQuery("SELECT ST_AsText(ST_ShiftLongitude(ST_GeomFromWKT('LINESTRING(179 10, 181 10)')))")).getField(0);
+        expected = "LINESTRING (179 10, -179 10)";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testClosestPoint() {
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (160 40)') AS g1, ST_GeomFromWKT('POINT (10 10)') as g2");
         table = table.select(call(Functions.ST_ClosestPoint.class.getSimpleName(), $("g1"), $("g2")));
@@ -182,6 +197,33 @@ public class FunctionTest extends TestBase{
         Table concaveHullPolygonTable = polygonTable.select(call(Functions.ST_ConvexHull.class.getSimpleName(), $("geom")));
         Geometry result = (Geometry) first(concaveHullPolygonTable).getField(0);
         assertEquals("POLYGON ((0 0, 1 2, 3 2, 5 0, 0 0))", result.toString());
+    }
+
+    @Test
+    public void testCrossesDateLine() {
+        // Test line crossing the Date Line
+        Table table1 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(170 30, -170 30)') AS geom");
+        table1 = table1.select(call("ST_CrossesDateLine", $("geom")));
+        Boolean actual1 = (Boolean) first(table1).getField(0);
+        assertEquals(true, actual1);
+
+        // Test line not crossing the Date Line
+        Table table2 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(-120 30, -130 40)') AS geom");
+        table2 = table2.select(call("ST_CrossesDateLine", $("geom")));
+        Boolean actual2 = (Boolean) first(table2).getField(0);
+        assertEquals(false, actual2);
+
+        // Test polygon crossing the Date Line
+        Table table3 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON((175 10, -175 10, -175 -10, 175 -10, 175 10))') AS geom");
+        table3 = table3.select(call("ST_CrossesDateLine", $("geom")));
+        Boolean actual3 = (Boolean) first(table3).getField(0);
+        assertEquals(true, actual3);
+
+        // Test polygon not crossing the Date Line
+        Table table4 = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON((-120 10, -130 10, -130 -10, -120 -10, -120 10))') AS geom");
+        table4 = table4.select(call("ST_CrossesDateLine", $("geom")));
+        Boolean actual4 = (Boolean) first(table4).getField(0);
+        assertEquals(false, actual4);
     }
 
     @Test

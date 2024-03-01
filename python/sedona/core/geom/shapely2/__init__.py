@@ -14,11 +14,3 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
-
-import shapely
-
-
-if shapely.__version__.startswith('2.'):
-    from .shapely2.envelope import Envelope
-else:
-    from .shapely1.envelope import Envelope

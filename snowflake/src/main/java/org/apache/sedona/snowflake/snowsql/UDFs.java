@@ -176,6 +176,15 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static byte[] ST_ShiftLongitude(byte[] geometry) {
+        return GeometrySerde.serialize(
+                Functions.shiftLongitude(
+                        GeometrySerde.deserialize(geometry)
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static byte[] ST_BuildArea(byte[] geometry) {
         return GeometrySerde.serialize(
                 Functions.buildArea(
@@ -284,6 +293,13 @@ public class UDFs {
         return Predicates.crosses(
                 GeometrySerde.deserialize(leftGeometry),
                 GeometrySerde.deserialize(rightGeometry)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static boolean ST_CrossesDateLine(byte[] geometry) {
+        return Functions.crossesDateLine(
+                GeometrySerde.deserialize(geometry)
         );
     }
 
