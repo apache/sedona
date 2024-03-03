@@ -588,10 +588,13 @@ The optional forth parameter controls the buffer accuracy and style. Buffer accu
 Format:
 
 ```
-ST_Buffer (A: Geometry, buffer: Double, bufferStyleParameters: String [Optional])
+ST_Buffer (A: Geometry, buffer: Double)
 ```
 ```
-ST_Buffer (A: Geometry, buffer: Double, bufferStyleParameters: String [Optional], useSperoidal: Boolean)
+ST_Buffer (A: Geometry, buffer: Double, useSpheroid: Boolean)
+```
+```
+ST_Buffer (A: Geometry, buffer: Double, useSpheroid: Boolean, bufferStyleParameters: String)
 ```
 
 Since: `v1.5.1`
@@ -600,7 +603,7 @@ SQL Example:
 
 ```sql
 SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10)
-SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10, 'quad_segs=2')
+SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10, false, 'quad_segs=2')
 ```
 
 Output:
@@ -613,7 +616,7 @@ Output:
 SQL Example:
 
 ```sql
-SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(0 0, 50 70, 100 100)'), 10, 'side=left')
+SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(0 0, 50 70, 100 100)'), 10, false, 'side=left')
 ```
 
 Output:

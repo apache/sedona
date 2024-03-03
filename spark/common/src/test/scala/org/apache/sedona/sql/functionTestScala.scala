@@ -91,7 +91,11 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       polygonWktDf.createOrReplaceTempView("polygontable")
       val polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      val functionDf = sparkSession.sql("select ST_Buffer(polygondf.countyshape, 1, true) from polygondf")
+
+      var functionDf = sparkSession.sql("select ST_Buffer(polygondf.countyshape, 1, true) from polygondf")
+      assert(functionDf.count() > 0);
+
+      functionDf = sparkSession.sql("select ST_Buffer(polygondf.countyshape, 1, true, 'quad_segs=2') from polygondf")
       assert(functionDf.count() > 0);
     }
 
