@@ -47,6 +47,7 @@ __all__ = [
     "ST_ClosestPoint",
     "ST_ConcaveHull",
     "ST_ConvexHull",
+    "ST_CrossesDateLine",
     "ST_Difference",
     "ST_Dimension",
     "ST_Distance",
@@ -316,6 +317,16 @@ def ST_BestSRID(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_BestSRID", geometry)
 
+@validate_argument_types
+def ST_ShiftLongitude(geometry: ColumnOrName) -> Column:
+    """Shifts longitudes between -180..0 degrees to 180..360 degrees and vice versa.
+
+    :param geometry: Geometry column.
+    :type geometry: ColumnOrName
+    :return: Shifted geometry
+    :rtype: Column
+    """
+    return _call_st_function("ST_ShiftLongitude", geometry)
 
 @validate_argument_types
 def ST_Boundary(geometry: ColumnOrName) -> Column:
@@ -330,7 +341,7 @@ def ST_Boundary(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_Buffer(geometry: ColumnOrName, buffer: ColumnOrNameOrNumber, parameters: Optional[Union[ColumnOrName, str]] = None) -> Column:
+def ST_Buffer(geometry: ColumnOrName, buffer: ColumnOrNameOrNumber, useSpheroid: Optional[Union[ColumnOrName, bool]] = None, parameters: Optional[Union[ColumnOrName, str]] = None) -> Column:
     """Calculate a geometry that represents all points whose distance from the
     input geometry column is equal to or less than a given amount.
 
@@ -341,10 +352,12 @@ def ST_Buffer(geometry: ColumnOrName, buffer: ColumnOrNameOrNumber, parameters: 
     :return: Buffered geometry as a geometry column.
     :rtype: Column
     """
-    if parameters is None:
+    if parameters is None and useSpheroid is None:
         args = (geometry, buffer)
+    elif parameters is None:
+        args = (geometry, buffer, useSpheroid)
     else:
-        args = (geometry, buffer, parameters)
+        args = (geometry, buffer, useSpheroid, parameters)
 
     return _call_st_function("ST_Buffer", args)
 
@@ -446,6 +459,17 @@ def ST_ConvexHull(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_ConvexHull", geometry)
+
+@validate_argument_types
+def ST_CrossesDateLine(a: ColumnOrName) -> Column:
+    """Check whether geometry a crosses the International Date Line.
+
+    :param a: Geometry to check crossing with.
+    :type a: ColumnOrName
+    :return: True if geometry a cross the dateline.
+    :rtype: Column
+    """
+    return _call_st_function("ST_CrossesDateLine", (a))
 
 @validate_argument_types
 def ST_Dimension(geometry: ColumnOrName):

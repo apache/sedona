@@ -39,13 +39,15 @@ case class RS_AsArcGrid(inputExpressions: Seq[Expression])
   }
 }
 
-case class RS_AsPNG(inputExpressions: Seq[Expression]) extends InferredExpression(RasterOutputs.asPNG _) {
+case class RS_AsPNG(inputExpressions: Seq[Expression]) extends InferredExpression(
+  inferrableFunction1(RasterOutputs.asPNG), inferrableFunction2(RasterOutputs.asPNG)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-case class RS_AsBase64(inputExpressions: Seq[Expression]) extends InferredExpression(RasterOutputs.asBase64 _) {
+case class RS_AsBase64(inputExpressions: Seq[Expression]) extends InferredExpression(
+  inferrableFunction1(RasterOutputs.asBase64), inferrableFunction2(RasterOutputs.asBase64)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

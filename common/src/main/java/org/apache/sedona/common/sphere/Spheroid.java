@@ -26,6 +26,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 
+import static java.lang.Float.NaN;
 import static java.lang.Math.abs;
 
 public class Spheroid
@@ -131,7 +132,7 @@ public class Spheroid
         }
     }
 
-    public static double angularWidth(Envelope envelope) {
+    public static Double angularWidth(Envelope envelope) {
         double lon1 = envelope.getMinX();
         double lon2 = envelope.getMaxX();
         double lat = (envelope.getMinY() + envelope.getMaxY()) / 2; // Mid-latitude for width calculation
@@ -141,12 +142,12 @@ public class Spheroid
         double distance = g.s12; // Distance in meters
 
         // Convert distance to angular width in degrees
-        double angularWidth = Math.toDegrees(distance / (Geodesic.WGS84.EquatorialRadius() * Math.PI / 180));
+        Double angularWidth = Math.toDegrees(distance / (Geodesic.WGS84.EquatorialRadius() * Math.PI / 180));
 
         return angularWidth;
     }
 
-    public static double angularHeight(Envelope envelope) {
+    public static Double angularHeight(Envelope envelope) {
         double lat1 = envelope.getMinY();
         double lat2 = envelope.getMaxY();
         double lon = (envelope.getMinX() + envelope.getMaxX()) / 2; // Mid-longitude for height calculation
@@ -156,7 +157,7 @@ public class Spheroid
         double distance = g.s12; // Distance in meters
 
         // Convert distance to angular height in degrees
-        double angularHeight = Math.toDegrees(distance / (Geodesic.WGS84.EquatorialRadius() * Math.PI / 180));
+        Double angularHeight = Math.toDegrees(distance / (Geodesic.WGS84.EquatorialRadius() * Math.PI / 180));
 
         return angularHeight;
     }

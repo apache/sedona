@@ -66,11 +66,16 @@ object st_functions extends DataFrameAPI {
 
   def ST_Buffer(geometry: Column, buffer: Column): Column = wrapExpression[ST_Buffer](geometry, buffer)
   def ST_Buffer(geometry: String, buffer: Double): Column = wrapExpression[ST_Buffer](geometry, buffer)
-  def ST_Buffer(geometry: Column, buffer: Column, parameters: Column): Column = wrapExpression[ST_Buffer](geometry, buffer, parameters)
-  def ST_Buffer(geometry: String, buffer: Double, parameters: String): Column = wrapExpression[ST_Buffer](geometry, buffer, parameters)
+  def ST_Buffer(geometry: Column, buffer: Column, useSpheroid: Column): Column = wrapExpression[ST_Buffer](geometry, buffer, useSpheroid)
+  def ST_Buffer(geometry: String, buffer: Double, useSpheroid: Boolean): Column = wrapExpression[ST_Buffer](geometry, buffer, useSpheroid)
+  def ST_Buffer(geometry: Column, buffer: Column, useSpheroid: Column, parameters: Column): Column = wrapExpression[ST_Buffer](geometry, buffer, useSpheroid, parameters)
+  def ST_Buffer(geometry: String, buffer: Double, useSpheroid: Boolean, parameters: String): Column = wrapExpression[ST_Buffer](geometry, buffer, useSpheroid, parameters)
 
   def ST_BestSRID(geometry: Column): Column = wrapExpression[ST_BestSRID](geometry)
   def ST_BestSRID(geometry: String): Column = wrapExpression[ST_BestSRID](geometry)
+
+  def ST_ShiftLongitude(geometry: Column): Column = wrapExpression[ST_ShiftLongitude](geometry)
+  def ST_ShiftLongitude(geometry: String): Column = wrapExpression[ST_ShiftLongitude](geometry)
 
   def ST_BuildArea(geometry: Column): Column = wrapExpression[ST_BuildArea](geometry)
   def ST_BuildArea(geometry: String): Column = wrapExpression[ST_BuildArea](geometry)
@@ -97,6 +102,9 @@ object st_functions extends DataFrameAPI {
 
   def ST_ConvexHull(geometry: Column): Column = wrapExpression[ST_ConvexHull](geometry)
   def ST_ConvexHull(geometry: String): Column = wrapExpression[ST_ConvexHull](geometry)
+
+  def ST_CrossesDateLine(a: Column): Column = wrapExpression[ST_CrossesDateLine](a)
+  def ST_CrossesDateLine(a: String): Column = wrapExpression[ST_CrossesDateLine](a)
 
   def ST_Difference(a: Column, b: Column): Column = wrapExpression[ST_Difference](a, b)
   def ST_Difference(a: String, b: String): Column = wrapExpression[ST_Difference](a, b)

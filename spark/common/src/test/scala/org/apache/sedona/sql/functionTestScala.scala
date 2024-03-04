@@ -64,6 +64,19 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(functionDf.count() > 0);
     }
 
+    it("Passed ST_CrossesDateLine") {
+      var crossesTesttable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((170 -10, -170 -10, -170 10, 170 10, 170 -10), (175 -5, -175 -5, -175 5, 175 5, 175 -5))') as geom")
+      crossesTesttable.createOrReplaceTempView("crossesTesttable")
+      var crosses = sparkSession.sql("select(ST_CrossesDateLine(geom)) from crossesTesttable")
+
+      var notCrossesTesttable = sparkSession.sql("select ST_GeomFromWKT('POLYGON((1 1, 4 1, 4 4, 1 4, 1 1))') as geom")
+      notCrossesTesttable.createOrReplaceTempView("notCrossesTesttable")
+      var notCrosses = sparkSession.sql("select(ST_CrossesDateLine(geom)) from notCrossesTesttable")
+
+      assert(crosses.take(1)(0).get(0).asInstanceOf[Boolean])
+      assert(!notCrosses.take(1)(0).get(0).asInstanceOf[Boolean])
+    }
+
     it("Passed ST_Buffer") {
       val polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
@@ -73,12 +86,34 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(functionDf.count() > 0);
     }
 
+    it("Passed ST_Buffer Spheroid") {
+      val polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      val polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+
+      var functionDf = sparkSession.sql("select ST_Buffer(polygondf.countyshape, 1, true) from polygondf")
+      assert(functionDf.count() > 0);
+
+      functionDf = sparkSession.sql("select ST_Buffer(polygondf.countyshape, 1, true, 'quad_segs=2') from polygondf")
+      assert(functionDf.count() > 0);
+    }
+
     it("Passed ST_BestSRID") {
       val polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
       val polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
       val functionDf = sparkSession.sql("select ST_BestSRID(polygondf.countyshape) from polygondf")
+      assert(functionDf.count() > 0);
+    }
+
+    it("Passed ST_ShiftLongitude") {
+      val polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      val polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      val functionDf = sparkSession.sql("select ST_ShiftLongitude(polygondf.countyshape) from polygondf")
       assert(functionDf.count() > 0);
     }
 

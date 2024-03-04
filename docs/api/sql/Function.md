@@ -551,9 +551,28 @@ Output: `LINESTRING Z(-1 -1 0, 10 5 5)`
 
 ## ST_Buffer
 
-Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.
+Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance. The function supports both Planar/Euclidean and Spheroidal/Geodesic buffering (Since v1.6.0). Spheroidal buffer also supports geometries crossing the International Date Line (IDL).
 
-The optional third parameter controls the buffer accuracy and style. Buffer accuracy is specified by the number of line segments approximating a quarter circle, with a default of 8 segments. Buffer style can be set by providing blank-separated key=value pairs in a list format.
+Mode of buffer calculation (Since: `v1.6.0`):
+
+The optional third parameter, `useSpheroid`, controls the mode of buffer calculation.
+
+- Planar Buffering (default): When `useSpheroid` is false, `ST_Buffer` performs standard planar buffering based on the provided parameters.
+- Spheroidal Buffering:
+    - When `useSpheroid` is set to true, the function returns the spheroidal buffer polygon for more accurate representation over the Earth. In this mode, the unit of the buffer distance is interpreted as meters.
+    - ST_Buffer first determines the most appropriate Spatial Reference Identifier (SRID) for a given geometry, based on its spatial extent and location, using `ST_BestSRID`.
+    - The geometry is then transformed from its original SRID to the selected SRID. If the input geometry does not have a set SRID, `ST_Buffer` defaults to using WGS 84 (SRID 4326) as its original SRID.
+    - The standard planar buffer operation is then applied in this coordinate system.
+    - Finally, the buffered geometry is transformed back to its original SRID, or to WGS 84 if the original SRID was not set.
+
+!!!note
+    As of now, spheroidal buffering only supports lon/lat coordinate systems and will throw an `IllegalArgumentException` for input geometries in meter based coordinate systems.
+!!!note
+    Spheroidal buffering may not produce accurate output buffer for input geometries larger than a UTM zone.
+
+Buffer Style Parameters:
+
+The optional forth parameter controls the buffer accuracy and style. Buffer accuracy is specified by the number of line segments approximating a quarter circle, with a default of 8 segments. Buffer style can be set by providing blank-separated key=value pairs in a list format.
 
 - `quad_segs=#` : Number of line segments utilized to approximate a quarter circle (default is 8).
 - `endcap=round|flat|square` : End cap style (default is `round`). `butt` is an accepted synonym for `flat`.
@@ -567,16 +586,22 @@ The optional third parameter controls the buffer accuracy and style. Buffer accu
 Format:
 
 ```
-ST_Buffer (A: Geometry, buffer: Double, bufferStyleParameters: String [Optional])
+ST_Buffer (A: Geometry, buffer: Double)
+```
+```
+ST_Buffer (A: Geometry, buffer: Double, useSpheroid: Boolean)
+```
+```
+ST_Buffer (A: Geometry, buffer: Double, useSpheroid: Boolean, bufferStyleParameters: String)
 ```
 
 Since: `v1.5.1`
 
-Spark SQL Example:
+SQL Example:
 
 ```sql
 SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10)
-SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10, 'quad_segs=2')
+SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10, false, 'quad_segs=2')
 ```
 
 Output:
@@ -586,10 +611,10 @@ Output:
 
 8 Segments &ensp; 2 Segments
 
-Spark SQL Example:
+SQL Example:
 
 ```sql
-SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(0 0, 50 70, 100 100)'), 10, 'side=left')
+SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(0 0, 50 70, 100 100)'), 10, false, 'side=left')
 ```
 
 Output:
@@ -841,6 +866,35 @@ Output:
 ```
 2
 ```
+
+## ST_CrossesDateLine
+
+Introduction: This function determines if a given geometry crosses the International Date Line. It operates by checking if the difference in longitude between any pair of consecutive points in the geometry exceeds 180 degrees. If such a difference is found, it is assumed that the geometry crosses the Date Line. It returns true if the geometry crosses the Date Line, and false otherwise.
+
+!!!note
+    The function assumes that the provided geometry is in lon/lat coordinate reference system where longitude values range from -180 to 180 degrees.
+
+!!!note
+    For multi-geometries (e.g., MultiPolygon, MultiLineString), this function will return true if any one of the geometries within the multi-geometry crosses the International Date Line.
+
+Format: `ST_CrossesDateLine(geometry: Geometry)`
+
+Since: `v1.6.0`
+
+SQL Example:
+
+```sql
+SELECT ST_CrossesDateLine(ST_GeomFromWKT('LINESTRING(170 30, -170 30)'))
+```
+
+Output:
+
+```sql
+true
+```
+
+!!!Warning
+    For geometries that span more than 180 degrees in longitude without actually crossing the Date Line, this function may still return true, indicating a crossing.
 
 ## ST_Degrees
 
@@ -2377,6 +2431,27 @@ Output:
 
 ```
 SRID=3021;POLYGON ((1 1, 8 1, 8 8, 1 8, 1 1))
+```
+
+## ST_ShiftLongitude
+
+Introduction: Modifies longitude coordinates in geometries, shifting values between -180..0 degrees to 180..360 degrees and vice versa. This is useful for normalizing data across the International Date Line and standardizing coordinate ranges for visualization and spheroidal calculations.
+
+!!!note
+    This function is only applicable to geometries that use lon/lat coordinate systems.
+
+Format: `ST_ShiftLongitude (geom: geometry)`
+
+Since: `v1.6.0`
+
+SQL example:
+```SQL
+SELECT ST_ShiftLongitude(ST_GeomFromText('LINESTRING(177 10, 179 10, -179 10, -177 10)'))
+```
+
+Output:
+```sql
+LINESTRING(177 10, 179 10, 181 10, 183 10)
 ```
 
 ## ST_SimplifyPreserveTopology

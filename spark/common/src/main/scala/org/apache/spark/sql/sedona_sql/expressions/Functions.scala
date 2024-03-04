@@ -121,6 +121,14 @@ case class ST_ConvexHull(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_CrossesDateLine(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.crossesDateLine _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
   * Return the number of Points in geometry.
   *
@@ -153,7 +161,7 @@ case class ST_NDims(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Buffer(inputExpressions: Seq[Expression])
-  extends InferredExpression(inferrableFunction2(Functions.buffer), inferrableFunction3(Functions.buffer)) {
+  extends InferredExpression(inferrableFunction2(Functions.buffer), inferrableFunction3(Functions.buffer), inferrableFunction4(Functions.buffer)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -162,6 +170,14 @@ case class ST_Buffer(inputExpressions: Seq[Expression])
 
 case class ST_BestSRID(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.bestSRID _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_ShiftLongitude(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.shiftLongitude _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

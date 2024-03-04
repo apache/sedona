@@ -20,6 +20,8 @@ import org.geotools.util.factory.Hints;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.operation.buffer.BufferOp;
+import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.locationtech.jts.triangulate.VoronoiDiagramBuilder;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
@@ -133,5 +135,40 @@ public class FunctionsGeoTools {
             builder.setClipEnvelope(e);
         }
         return builder.getDiagram(FunctionsGeoTools.GEOMETRY_FACTORY);
+    }
+
+    public static Geometry bufferSpheroid(Geometry geometry, double radius, BufferParameters params) throws IllegalArgumentException {
+        // Determine the best SRID for spheroidal calculations
+        int bestCRS = Functions.bestSRID(geometry);
+        int originalCRS = geometry.getSRID();
+        final int WGS84CRS = 4326;
+
+        // Shift longitude if geometry crosses dateline
+        if (Functions.crossesDateLine(geometry)) {
+            Functions.shiftLongitude(geometry);
+        }
+//        geometry = (Predicates.crossesDateLine(geometry)) ? Functions.shiftLongitude(geometry) : geometry;
+
+        // If originalCRS is not set, use WGS84 as the originalCRS for transformation
+        String sourceCRSCode = (originalCRS == 0) ? "EPSG:" + WGS84CRS : "EPSG:" + originalCRS;
+        String targetCRSCode = "EPSG:" + bestCRS;
+
+        try {
+            // Transform the geometry to the selected SRID
+            Geometry transformedGeometry = transform(geometry, sourceCRSCode, targetCRSCode);
+            // Apply the buffer operation in the selected SRID
+            Geometry bufferedGeometry = BufferOp.bufferOp(transformedGeometry, radius, params);
+
+            // Transform back to the original SRID or to WGS 84 if original SRID was not set
+            int backTransformCRSCode = (originalCRS == 0) ? WGS84CRS : originalCRS;
+            Geometry bufferedResult = transform(bufferedGeometry, targetCRSCode, "EPSG:" + backTransformCRSCode);
+            bufferedResult.setSRID(backTransformCRSCode);
+
+            // Normalize longitudes between -180 and 180
+            Functions.normalizeLongitude(bufferedResult);
+            return bufferedResult;
+        } catch (FactoryException | TransformException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

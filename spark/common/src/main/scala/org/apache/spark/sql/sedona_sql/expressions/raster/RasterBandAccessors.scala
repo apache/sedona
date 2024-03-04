@@ -44,7 +44,9 @@ case class RS_Count(inputExpressions: Seq[Expression]) extends InferredExpressio
   }
 
 case class RS_ZonalStats(inputExpressions: Seq[Expression]) extends InferredExpression(
-  inferrableFunction5(RasterBandAccessors.getZonalStats), inferrableFunction4(RasterBandAccessors.getZonalStats),
+  inferrableFunction6(RasterBandAccessors.getZonalStats),
+  inferrableFunction5(RasterBandAccessors.getZonalStats),
+  inferrableFunction4(RasterBandAccessors.getZonalStats),
   inferrableFunction3(RasterBandAccessors.getZonalStats)
 ) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -54,7 +56,7 @@ case class RS_ZonalStats(inputExpressions: Seq[Expression]) extends InferredExpr
 
 case class RS_ZonalStatsAll(inputExpressions: Seq[Expression]) extends InferredExpression(
   inferrableFunction2(RasterBandAccessors.getZonalStatsAll), inferrableFunction4(RasterBandAccessors.getZonalStatsAll),
-  inferrableFunction3(RasterBandAccessors.getZonalStatsAll)
+  inferrableFunction3(RasterBandAccessors.getZonalStatsAll), inferrableFunction5(RasterBandAccessors.getZonalStatsAll)
 ) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

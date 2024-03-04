@@ -13,7 +13,7 @@
  */
 package org.apache.sedona.common;
 
-import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.*;
 import org.apache.sedona.common.sphere.Spheroid;
 
 public class Predicates {
@@ -62,4 +62,5 @@ public class Predicates {
             return leftGeometry.isWithinDistance(rightGeometry, distance);
         }
     }
+
 }

@@ -50,7 +50,7 @@ public class RasterOutputTest
         GridCoverage2D raster = RasterConstructors.makeNonEmptyRaster(1, "d", 5, 5, 1, 1, 1, 1, 0, 0, 4326, new double[][] {bandData});
 
         String resultRaw = RasterOutputs.asBase64(raster);
-        assertTrue(resultRaw.startsWith("TU0AKgAAAAgADQEAAAMAAAABAAUAAAEBAAMAAAABAAUAAAECA"));
+        assertTrue(resultRaw.startsWith("iVBORw0KGgoAAAANSUhEUgAAAAUAAAA"));
     }
 
     @Test
@@ -211,5 +211,27 @@ public class RasterOutputTest
         assertTrue(htmlString.endsWith(expectedEnd));
     }
 
-
+    @Test
+    public void testAsImageVariousBandDataType() throws IOException, FactoryException {
+        String[] dataTypes = {"b", "d", "f", "i", "s", "us"};
+        int width = 100;
+        int height = 100;
+        for (String dataType : dataTypes) {
+            for (int numBands = 1; numBands < 5; numBands++) {
+                GridCoverage2D testRaster = RasterConstructors.makeEmptyRaster(numBands, dataType, width, height, 0, 0, 1, -1, 0, 0, 0);
+                double[] bandValues = new double[width * height];
+                for (int k = 0; k < numBands; k++) {
+                    for (int i = 0; i < bandValues.length; i++) {
+                        bandValues[i] = k + i;
+                    }
+                    testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues, k + 1);
+                }
+                String htmlString = RasterOutputs.createHTMLString(testRaster, 50);
+                String expectedStart = "<img src=\"data:image/png;base64,iVBORw0K";
+                String expectedEnd = "width=\"50\" />";
+                assertTrue(htmlString.startsWith(expectedStart));
+                assertTrue(htmlString.endsWith(expectedEnd));
+            }
+        }
+    }
 }

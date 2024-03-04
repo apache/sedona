@@ -159,7 +159,7 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius"})
-    public static byte[] ST_Buffer(byte[] geometry, double radius) {
+    public static byte[] ST_Buffer(byte[] geometry, double radius) throws IllegalArgumentException {
         return GeometrySerde.serialize(
                 Functions.buffer(
                         GeometrySerde.deserialize(geometry),
@@ -168,10 +168,42 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius", "useSpheroid"})
+    public static byte[] ST_Buffer(byte[] geometry, double radius, boolean useSpheroid) throws IllegalArgumentException {
+        return GeometrySerde.serialize(
+                Functions.buffer(
+                        GeometrySerde.deserialize(geometry),
+                        radius,
+                        useSpheroid
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius", "useSpheroid", "parameters"})
+    public static byte[] ST_Buffer(byte[] geometry, double radius, boolean useSpheroid, String parameters) throws IllegalArgumentException {
+        return GeometrySerde.serialize(
+                Functions.buffer(
+                        GeometrySerde.deserialize(geometry),
+                        radius,
+                        useSpheroid,
+                        parameters
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static int ST_BestSRID(byte[] geometry) {
         return Functions.bestSRID(
                 GeometrySerde.deserialize(geometry)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static byte[] ST_ShiftLongitude(byte[] geometry) {
+        return GeometrySerde.serialize(
+                Functions.shiftLongitude(
+                        GeometrySerde.deserialize(geometry)
+                )
         );
     }
 
@@ -284,6 +316,13 @@ public class UDFs {
         return Predicates.crosses(
                 GeometrySerde.deserialize(leftGeometry),
                 GeometrySerde.deserialize(rightGeometry)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static boolean ST_CrossesDateLine(byte[] geometry) {
+        return Functions.crossesDateLine(
+                GeometrySerde.deserialize(geometry)
         );
     }
 
