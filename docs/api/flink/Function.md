@@ -557,7 +557,7 @@ Introduction: Returns a geometry/geography that represents all points whose dist
 
 Mode of buffer calculation (Since: `v1.6.0`):
 
-The optional third parameter, `useSpheroid`, controls the mode of buffer calculation. 
+The optional third parameter, `useSpheroid`, controls the mode of buffer calculation.
 
 - Planar Buffering (default): When `useSpheroid` is false, `ST_Buffer` performs standard planar buffering based on the provided parameters.
 - Spheroidal Buffering:
