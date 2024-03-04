@@ -52,7 +52,7 @@ Format: `ST_GeomFromGeoHash(geohash: String, precision: Integer)`
 
 Since: `v1.1.1`
 
-Spark SQL example:
+SQL Example
 
 ```sql
 SELECT ST_GeomFromGeoHash('s00twy01mt', 4)
@@ -72,7 +72,7 @@ Format: `ST_GeomFromGeoJSON (GeoJson: String)`
 
 Since: `v1.0.0`
 
-Spark SQL example:
+SQL Example
 
 ```sql
 SELECT ST_GeomFromGeoJSON('{
@@ -110,7 +110,7 @@ Output:
 POLYGON ((-87.621765 34.873444, -87.617535 34.873369, -87.62119 34.85053, -87.62144 34.865379, -87.621765 34.873444))
 ```
 
-Spark SQL example:
+SQL Example
 
 ```sql
 SELECT ST_GeomFromGeoJSON('{
@@ -207,7 +207,7 @@ Since: `v1.0.0`
 
 The optional srid parameter was added in `v1.3.1`
 
-Spark SQL example:
+SQL Example
 
 ```sql
 SELECT ST_GeomFromText('POINT(40.7128 -74.0060)')
@@ -231,7 +231,7 @@ Format:
 
 Since: `v1.0.0`
 
-Spark SQL example:
+SQL Example
 
 ```sql
 SELECT ST_GeomFromWKB([01 02 00 00 00 02 00 00 00 00 00 00 00 84 D6 00 C0 00 00 00 00 80 B5 D6 BF 00 00 00 60 E1 EF F7 BF 00 00 00 80 07 5D E5 BF])
@@ -243,7 +243,7 @@ Output:
 LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)
 ```
 
-Spark SQL example:
+SQL Example
 
 ```sql
 SELECT ST_asEWKT(ST_GeomFromWKB('01010000a0e6100000000000000000f03f000000000000f03f000000000000f03f'))
@@ -269,7 +269,7 @@ Since: `v1.0.0`
 
 The optional srid parameter was added in `v1.3.1`
 
-Spark SQL example:
+SQL Example
 
 ```sql
 SELECT ST_GeomFromWKT('POINT(40.7128 -74.0060)')
@@ -310,7 +310,7 @@ Format:
 
 Since: `v1.2.1`
 
-Spark SQL example:
+SQL Example
 
 ```sql
 SELECT ST_LineFromText('LINESTRING(1 2,3 4)')
@@ -330,7 +330,7 @@ Format: `ST_LineStringFromText (Text: String, Delimiter: Char)`
 
 Since: `v1.0.0`
 
-Spark SQL example:
+SQL Example
 
 ```sql
 SELECT ST_LineStringFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794', ',')
@@ -398,7 +398,7 @@ Format:
 
 Since: `v1.3.1`
 
-Spark SQL example:
+SQL Example
 
 ```sql
 SELECT ST_MLineFromText('MULTILINESTRING((1 2, 3 4), (4 5, 6 7))')
@@ -422,7 +422,7 @@ Format:
 
 Since: `v1.3.1`
 
-Spark SQL example:
+SQL Example
 
 ```sql
 SELECT ST_MPolyFromText('MULTIPOLYGON(((0 0 1,20 0 1,20 20 1,0 20 1,0 0 1),(5 5 3,5 7 3,7 7 3,7 5 3,5 5 3)))')
@@ -445,7 +445,7 @@ Since: `v1.0.0`
 In `v1.4.0` an optional Z parameter was removed to be more consistent with other spatial SQL implementations.
 If you are upgrading from an older version of Sedona - please use ST_PointZ to create 3D points.
 
-Spark SQL example:
+SQL Example
 
 ```sql
 SELECT ST_Point(double(1.2345), 2.3456)
@@ -470,7 +470,7 @@ Format:
 
 Since: `v1.4.0`
 
-Spark SQL example:
+SQL Example
 
 ```sql
 SELECT ST_AsEWKT(ST_PointZ(1.2345, 2.3456, 3.4567))
@@ -490,7 +490,7 @@ Format: `ST_PointFromText (Text: String, Delimiter: Char)`
 
 Since: `v1.0.0`
 
-Spark SQL example:
+SQL Example
 
 ```sql
 SELECT ST_PointFromText('40.7128,-74.0060', ',')
@@ -512,7 +512,7 @@ Format:
 
 Since: `v1.0.0`
 
-Spark SQL example:
+SQL Example
 
 ```sql
 SELECT ST_PolygonFromEnvelope(double(1.234),double(2.234),double(3.345),double(3.345))
@@ -532,7 +532,7 @@ Format: `ST_PolygonFromText (Text: String, Delimiter: Char)`
 
 Since: `v1.0.0`
 
-Spark SQL example:
+SQL Example
 
 ```sql
 SELECT ST_PolygonFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794,-74.0428197,40.6867969', ',')
