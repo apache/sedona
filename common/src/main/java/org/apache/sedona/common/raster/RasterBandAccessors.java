@@ -301,7 +301,7 @@ public class RasterBandAccessors {
         return statObjects;
     }
 
-    public static double[] getSummaryStats(GridCoverage2D rasterGeom, int band, boolean excludeNoDataValue) {
+    public static double[] getSummaryStats(GridCoverage2D rasterGeom, int band, boolean excludeNoDataValue, String statType) {
         RasterUtils.ensureBand(rasterGeom, band);
         Raster raster = RasterUtils.getRaster(rasterGeom.getRenderedImage());
         int height = RasterAccessors.getHeight(rasterGeom), width = RasterAccessors.getWidth(rasterGeom);
@@ -312,7 +312,7 @@ public class RasterBandAccessors {
         if (excludeNoDataValue) {
             pixelData = new ArrayList<>();
             Double noDataValue = RasterBandAccessors.getBandNoDataValue(rasterGeom, band);
-            for (double pixel: pixels) {
+            for (double pixel : pixels) {
                 if (noDataValue == null || pixel != noDataValue) {
                     pixelData.add(pixel);
                 }
@@ -337,15 +337,35 @@ public class RasterBandAccessors {
         double min = stats.getMin();
         double max = stats.getMax();
 
-        return new double[]{count, sum, mean, stddev, min, max};
+        if (statType == null) {
+            return new double[]{count, sum, mean, stddev, min, max};
+        } else if ("count".equalsIgnoreCase(statType)) {
+            return new double[]{count};
+        } else if ("sum".equalsIgnoreCase(statType)) {
+            return new double[]{sum};
+        } else if ("mean".equalsIgnoreCase(statType)) {
+            return new double[]{mean};
+        } else if ("stddev".equalsIgnoreCase(statType)) {
+            return new double[]{stddev};
+        } else if ("min".equalsIgnoreCase(statType)) {
+            return new double[]{min};
+        } else if ("max".equalsIgnoreCase(statType)) {
+            return new double[]{max};
+        } else {
+            // Default case: return all statistics
+            throw new IllegalArgumentException("Invalid 'statType': '" + statType + "'. Expected one of: 'count', 'sum', 'mean', 'stddev', 'min', 'max'.");
+        }
     }
 
+    public static double[] getSummaryStats(GridCoverage2D raster, int band, boolean excludeNoDataValue) {
+        return getSummaryStats(raster, band, excludeNoDataValue, null);
+    }
     public static double[] getSummaryStats(GridCoverage2D raster, int band) {
-        return getSummaryStats(raster, band, true);
+        return getSummaryStats(raster, band, true, null);
     }
 
     public static double[] getSummaryStats(GridCoverage2D raster) {
-        return getSummaryStats(raster, 1, true);
+        return getSummaryStats(raster, 1, true, null);
     }
 
 //  Adding the function signature when InferredExpression supports function with same arity but different argument types

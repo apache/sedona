@@ -80,6 +80,25 @@ public class RasterBandEditorsTest extends RasterTestBase{
         int sumExpected = sumOG + (10 * 108608);
         assertEquals(sumExpected, sumActual);
 
+        // Test single output
+        resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false, "count");
+        assertEquals(1036800, (int) resultSummary[0]);
+
+        resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false, "sum");
+        assertEquals(sumExpected, (int) resultSummary[0]);
+
+        resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false, "mean");
+        assertEquals(199, (int) resultSummary[0]);
+
+        resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false, "stddev");
+        assertEquals(92, (int) resultSummary[0]);
+
+        resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false, "min");
+        assertEquals(1, (int) resultSummary[0]);
+
+        resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false, "max");
+        assertEquals(255, (int) resultSummary[0]);
+
         // Not replacing previous no-data value
         resultRaster = RasterBandEditors.setBandNoDataValue(raster, 1, 10.0);
         resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false);

@@ -1063,6 +1063,24 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(70.20559521132097, actual(3), 1e-6d)
       assertEquals(1.0, actual(4), 0.1d)
       assertEquals(255.0, actual(5), 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStats(raster, 1, false, 'count')").first().getSeq(0)
+      assertEquals(1036800.0, actual.head, 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStats(raster, 1, false, 'sum')").first().getSeq(0)
+      assertEquals(2.06233487E8, actual.head, 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStats(raster, 1, false, 'mean')").first().getSeq(0)
+      assertEquals(198.91347125771605, actual.head, 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStats(raster, 1, false, 'stddev')").first().getSeq(0)
+      assertEquals(95.09054096106192, actual.head, 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStats(raster, 1, false, 'min')").first().getSeq(0)
+      assertEquals(0.0, actual.head, 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStats(raster, 1, false, 'max')").first().getSeq(0)
+      assertEquals(255.0, actual.head, 0.1d)
     }
 
     it("Passed RS_BandIsNoData") {
