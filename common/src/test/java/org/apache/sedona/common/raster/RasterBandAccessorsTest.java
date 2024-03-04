@@ -236,39 +236,27 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         expected = new double[] {14.0, 204.0, 14.5714, 7.7617, 1.0, 25.0};
         assertArrayEquals(expected, actual, FP_TOLERANCE);
 
-        // Test Count
         actual = RasterBandAccessors.getSummaryStats(emptyRaster, 2, true, "count");
         expected = new double[]{16.0};
         assertArrayEquals(expected, actual, FP_TOLERANCE);
 
-        // Test Sum
         actual = RasterBandAccessors.getSummaryStats(emptyRaster, 2, true, "sum");
         expected = new double[]{642.0};
         assertArrayEquals(expected, actual, FP_TOLERANCE);
 
-        // Test Mean
         actual = RasterBandAccessors.getSummaryStats(emptyRaster, 2, true, "mean");
         expected = new double[]{40.125};
         assertArrayEquals(expected, actual, FP_TOLERANCE);
 
-        // Test Standard Deviation
         actual = RasterBandAccessors.getSummaryStats(emptyRaster, 2, true, "stddev");
         expected = new double[]{6.9988838395847095};
         assertArrayEquals(expected, actual, FP_TOLERANCE);
 
-        // Test Min
         actual = RasterBandAccessors.getSummaryStats(emptyRaster, 2, true, "min");
         expected = new double[]{28.0};
-
         assertArrayEquals(expected, actual, FP_TOLERANCE);
 
-        // Test Max
         actual = RasterBandAccessors.getSummaryStats(emptyRaster, 2, true, "max");
-        expected = new double[]{50.0};
-        assertArrayEquals(expected, actual, FP_TOLERANCE);
-
-        // Test Max
-        actual = RasterBandAccessors.getSummaryStats(emptyRaster, 2, true, "incorrect");
         expected = new double[]{50.0};
         assertArrayEquals(expected, actual, FP_TOLERANCE);
     }

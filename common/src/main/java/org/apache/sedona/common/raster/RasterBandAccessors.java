@@ -352,7 +352,6 @@ public class RasterBandAccessors {
         } else if ("max".equalsIgnoreCase(statType)) {
             return new double[]{max};
         } else {
-            // Default case: return all statistics
             throw new IllegalArgumentException("Invalid 'statType': '" + statType + "'. Expected one of: 'count', 'sum', 'mean', 'stddev', 'min', 'max'.");
         }
     }
