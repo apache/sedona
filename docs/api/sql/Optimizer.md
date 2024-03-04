@@ -10,7 +10,7 @@ Sedona Spatial operators fully supports Apache SparkSQL query optimizer. It has 
 
 Introduction: Find geometries from A and geometries from B such that each geometry pair satisfies a certain predicate. Most predicates supported by SedonaSQL can trigger a range join.
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT *
@@ -290,7 +290,7 @@ FROM lefts
 
 Introduction: Given a join query and a predicate in the same WHERE clause, first executes the Predicate as a filter, then executes the join query.
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT *

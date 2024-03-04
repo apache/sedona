@@ -48,9 +48,9 @@ nav:
           - Tune RDD application: tutorial/Advanced-Tutorial-Tune-your-Application.md
           - Storing large raster geometries in Parquet files: tutorial/storing-blobs-in-parquet.md
       - Sedona with Apache Flink:
-        - Spatial SQL app: tutorial/flink/sql.md
+        - Spatial SQL app (Flink): tutorial/flink/sql.md
       - Sedona with Snowflake:
-        - Spatial SQL app: tutorial/snowflake/sql.md
+        - Spatial SQL app (Flink): tutorial/snowflake/sql.md
       - Examples:
           - Scala/Java: tutorial/demo.md
           - Python: tutorial/jupyter-notebook.md
@@ -85,18 +85,18 @@ nav:
         - Sedona R: api/rdocs
       - Sedona with Apache Flink:
         - SQL:
-          - Overview: api/flink/Overview.md
-          - Constructor: api/flink/Constructor.md
-          - Function: api/flink/Function.md
-          - Aggregator: api/flink/Aggregator.md
-          - Predicate: api/flink/Predicate.md
+          - Overview (Flink): api/flink/Overview.md
+          - Constructor (Flink): api/flink/Constructor.md
+          - Function (Flink): api/flink/Function.md
+          - Aggregator (Flink): api/flink/Aggregator.md
+          - Predicate (Flink): api/flink/Predicate.md
       - Sedona with Snowflake:
         - SQL:
-          - Overview: api/snowflake/vector-data/Overview.md
-          - Constructor: api/snowflake/vector-data/Constructor.md
-          - Function: api/snowflake/vector-data/Function.md
-          - Aggregate Function: api/snowflake/vector-data/AggregateFunction.md
-          - Predicate: api/snowflake/vector-data/Predicate.md
+          - Overview (Snowflake): api/snowflake/vector-data/Overview.md
+          - Constructor (Snowflake): api/snowflake/vector-data/Constructor.md
+          - Function (Snowflake): api/snowflake/vector-data/Function.md
+          - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
+          - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
     - Community:
       - Community: community/contact.md
       - Contributor Guide:
