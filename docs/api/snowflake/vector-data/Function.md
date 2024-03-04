@@ -397,7 +397,7 @@ The optional third parameter, `useSpheroid`, controls the mode of buffer calcula
 
 - Planar Buffering (default): When `useSpheroid` is false, `ST_Buffer` performs standard planar buffering based on the provided parameters.
 - Spheroidal Buffering:
-    - When `useSpheroid` is set to true, the function returns the spheroidal buffer polygon for more accurate representation over the Earth.
+    - When `useSpheroid` is set to true, the function returns the spheroidal buffer polygon for more accurate representation over the Earth. In this mode, the unit of the buffer distance is interpreted as meters.
     - ST_Buffer first determines the most appropriate Spatial Reference Identifier (SRID) for a given geometry, based on its spatial extent and location, using `ST_BestSRID`.
     - The geometry is then transformed from its original SRID to the selected SRID. If the input geometry does not have a set SRID, `ST_Buffer` defaults to using WGS 84 (SRID 4326) as its original SRID.
     - The standard planar buffer operation is then applied in this coordinate system.
