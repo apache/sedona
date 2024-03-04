@@ -159,11 +159,34 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius"})
-    public static byte[] ST_Buffer(byte[] geometry, double radius) {
+    public static byte[] ST_Buffer(byte[] geometry, double radius) throws IllegalArgumentException {
         return GeometrySerde.serialize(
                 Functions.buffer(
                         GeometrySerde.deserialize(geometry),
                         radius
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius", "useSpheroid"})
+    public static byte[] ST_Buffer(byte[] geometry, double radius, boolean useSpheroid) throws IllegalArgumentException {
+        return GeometrySerde.serialize(
+                Functions.buffer(
+                        GeometrySerde.deserialize(geometry),
+                        radius,
+                        useSpheroid
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius", "useSpheroid", "parameters"})
+    public static byte[] ST_Buffer(byte[] geometry, double radius, boolean useSpheroid, String parameters) throws IllegalArgumentException {
+        return GeometrySerde.serialize(
+                Functions.buffer(
+                        GeometrySerde.deserialize(geometry),
+                        radius,
+                        useSpheroid,
+                        parameters
                 )
         );
     }
