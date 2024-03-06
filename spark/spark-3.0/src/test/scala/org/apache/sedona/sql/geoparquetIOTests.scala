@@ -141,7 +141,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       ))
       val df = sparkSession.createDataFrame(testData.asJava, schema).repartition(1)
       val geoParquetSavePath = geoparquetoutputlocation + "/multi_geoms.parquet"
-      df.write.format("geoparquet").save(geoParquetSavePath)
+      df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
 
       // Find parquet files in geoParquetSavePath directory and validate their metadata
       validateGeoParquetMetadata(geoParquetSavePath) { geo =>
@@ -175,7 +175,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       ))
       val df = sparkSession.createDataFrame(Collections.emptyList[Row](), schema)
       val geoParquetSavePath = geoparquetoutputlocation + "/empty.parquet"
-      df.write.format("geoparquet").save(geoParquetSavePath)
+      df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
       assert(df2.schema.fields(1).dataType.isInstanceOf[GeometryUDT])
       assert(0 == df2.count())
@@ -187,6 +187,36 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         assert(g0Types.isEmpty)
         assert(g0BBox == Seq(0.0, 0.0, 0.0, 0.0))
       }
+    }
+
+    it("GeoParquet save should work with snake_case column names") {
+      val schema = StructType(Seq(
+        StructField("id", IntegerType, nullable = false),
+        StructField("geom_column", GeometryUDT, nullable = false)
+      ))
+      val df = sparkSession.createDataFrame(Collections.emptyList[Row](), schema)
+      val geoParquetSavePath = geoparquetoutputlocation + "/snake_case_column_name.parquet"
+      df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
+      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+      val geomField = df2.schema.fields(1)
+      assert(geomField.name == "geom_column")
+      assert(geomField.dataType.isInstanceOf[GeometryUDT])
+      assert(0 == df2.count())
+    }
+
+    it("GeoParquet save should work with camelCase column names") {
+      val schema = StructType(Seq(
+        StructField("id", IntegerType, nullable = false),
+        StructField("geomColumn", GeometryUDT, nullable = false)
+      ))
+      val df = sparkSession.createDataFrame(Collections.emptyList[Row](), schema)
+      val geoParquetSavePath = geoparquetoutputlocation + "/camel_case_column_name.parquet"
+      df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
+      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+      val geomField = df2.schema.fields(1)
+      assert(geomField.name == "geomColumn")
+      assert(geomField.dataType.isInstanceOf[GeometryUDT])
+      assert(0 == df2.count())
     }
 
     it("GeoParquet save should write user specified version and crs to geo metadata") {

@@ -201,8 +201,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         columnName -> GeometryFieldMetaData("WKB", geometryTypes, bbox, crs)
       }.toMap
       val geoParquetMetadata = GeoParquetMetaData(geoParquetVersion, primaryColumn, columns)
-      implicit val formats: org.json4s.Formats = DefaultFormats
-      val geoParquetMetadataJson = compactJson(Extraction.decompose(geoParquetMetadata).underscoreKeys)
+      val geoParquetMetadataJson = GeoParquetMetaData.toJson(geoParquetMetadata)
       metadata.put("geo", geoParquetMetadataJson)
     }
     new FinalizedWriteContext(metadata)
