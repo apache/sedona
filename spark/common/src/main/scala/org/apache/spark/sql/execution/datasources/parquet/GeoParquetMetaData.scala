@@ -14,7 +14,8 @@
 package org.apache.spark.sql.execution.datasources.parquet
 
 import org.json4s.jackson.JsonMethods.parse
-import org.json4s.{JNothing, JNull, JValue}
+import org.json4s.jackson.compactJson
+import org.json4s.{DefaultFormats, Extraction, JField, JNothing, JNull, JObject, JValue}
 
 /**
  * A case class that holds the metadata of geometry column in GeoParquet metadata
@@ -62,14 +63,31 @@ object GeoParquetMetaData {
       implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
       val geoObject = parse(geo)
       val metadata = geoObject.camelizeKeys.extract[GeoParquetMetaData]
-      metadata.copy(columns = metadata.columns.map { case (name, column) =>
+      val columns = (geoObject \ "columns").extract[Map[String, JValue]].map { case (name, columnObject) =>
+        val fieldMetadata = columnObject.camelizeKeys.extract[GeometryFieldMetaData]
         // Postprocess to distinguish between null (JNull) and missing field (JNothing).
-        geoObject \ "columns" \ name \ "crs" match {
-          case JNothing => name -> column.copy(crs = None)
-          case JNull => name -> column.copy(crs = Some(JNull))
-          case _ => name -> column
+        columnObject \ "crs" match {
+          case JNothing => name -> fieldMetadata.copy(crs = None)
+          case JNull => name -> fieldMetadata.copy(crs = Some(JNull))
+          case _ => name -> fieldMetadata
         }
-      })
+      }
+      metadata.copy(columns = columns)
     }
+  }
+
+  def toJson(geoParquetMetadata: GeoParquetMetaData): String = {
+    implicit val formats: org.json4s.Formats = DefaultFormats
+    val geoObject = Extraction.decompose(geoParquetMetadata)
+
+    // Make sure that the keys of columns are not transformed to camel case, so we use the columns map with
+    // original keys to replace the transformed columns map.
+    val columnsMap = (geoObject \ "columns").extract[Map[String, JValue]].map { case (name, columnObject) =>
+      name -> columnObject.underscoreKeys
+    }
+    val serializedGeoObject = geoObject.underscoreKeys transformField {
+      case JField("columns", _) => JField("columns", JObject(columnsMap.toList))
+    }
+    compactJson(serializedGeoObject)
   }
 }
