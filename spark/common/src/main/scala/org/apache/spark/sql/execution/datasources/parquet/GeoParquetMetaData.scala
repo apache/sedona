@@ -85,8 +85,17 @@ object GeoParquetMetaData {
     val columnsMap = (geoObject \ "columns").extract[Map[String, JValue]].map { case (name, columnObject) =>
       name -> columnObject.underscoreKeys
     }
-    val serializedGeoObject = geoObject.underscoreKeys transformField {
-      case JField("columns", _) => JField("columns", JObject(columnsMap.toList))
+
+    // We are not using transformField here for binary compatibility with various json4s versions shipped with
+    // Spark 3.0.x ~ Spark 3.5.x
+    val serializedGeoObject = geoObject.underscoreKeys mapField {
+      case field@(jField: JField) =>
+        if (jField._1 == "columns") {
+          JField("columns", JObject(columnsMap.toList))
+        } else {
+          field
+        }
+      case field: Any => field
     }
     compactJson(serializedGeoObject)
   }
