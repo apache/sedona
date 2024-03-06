@@ -14,8 +14,11 @@
 package org.apache.sedona.sql
 
 import org.apache.spark.sql.Row
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.types.{IntegerType, StructField, StructType}
 import org.scalatest.BeforeAndAfterAll
 
+import java.util.Collections
 import scala.collection.JavaConverters._
 
 class GeoParquetMetadataTests extends TestBaseScala with BeforeAndAfterAll {
@@ -88,6 +91,26 @@ class GeoParquetMetadataTests extends TestBaseScala with BeforeAndAfterAll {
       val row = dfMeta.collect()(0)
       val metadata = row.getJavaMap(row.fieldIndex("columns")).get("geometry").asInstanceOf[Row]
       assert(metadata.getAs[String]("crs") == "null")
+    }
+
+    it("Read GeoParquet with snake_case geometry column name and camelCase column name") {
+      val schema = StructType(Seq(
+        StructField("id", IntegerType, nullable = false),
+        StructField("geom_column_1", GeometryUDT, nullable = false),
+        StructField("geomColumn2", GeometryUDT, nullable = false)
+      ))
+      val df = sparkSession.createDataFrame(Collections.emptyList[Row](), schema)
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_column_name_styles.parquet"
+      df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
+
+      val dfMeta = sparkSession.read.format("geoparquet.metadata").load(geoParquetSavePath)
+      val row = dfMeta.collect()(0)
+      val metadata = row.getJavaMap(row.fieldIndex("columns"))
+      assert(metadata.containsKey("geom_column_1"))
+      assert(!metadata.containsKey("geoColumn1"))
+      assert(metadata.containsKey("geomColumn2"))
+      assert(!metadata.containsKey("geom_column2"))
+      assert(!metadata.containsKey("geom_column_2"))
     }
   }
 }
