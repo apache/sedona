@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import static com.google.common.geometry.S2.DBL_EPSILON;
+import static org.apache.sedona.common.FunctionsGeoTools.bufferSpheroid;
 
 
 public class Functions {
@@ -87,25 +88,40 @@ public class Functions {
     }
 
     public static Geometry buffer(Geometry geometry, double radius) {
-        return buffer(geometry, radius, "");
+        return buffer(geometry, radius, false, "");
     }
 
-    public static Geometry buffer(Geometry geometry, double radius, String params) {
-        if (params.isEmpty()) {
-            return BufferOp.bufferOp(geometry, radius);
-        }
+    public static Geometry buffer(Geometry geometry, double radius, boolean useSpheroid) {
+        return buffer(geometry, radius, useSpheroid, "");
+    }
 
-        BufferParameters bufferParameters = parseBufferParams(params);
+    public static Geometry buffer(Geometry geometry, double radius, boolean useSpheroid, String params) throws IllegalArgumentException {
+        BufferParameters bufferParameters = new BufferParameters();
 
-        // convert the sign to the appropriate direction
-        // left - radius should be positive
-        // right - radius should be negative
-        if (bufferParameters.isSingleSided() &&
-                (params.toLowerCase().contains("left") && radius < 0 || params.toLowerCase().contains("right") && radius > 0)) {
+        // Processing parameters
+        if (!params.isEmpty()) {
+            bufferParameters = parseBufferParams(params);
+
+            // convert the sign to the appropriate direction
+            // left - radius should be positive
+            // right - radius should be negative
+            if (bufferParameters.isSingleSided() &&
+                    (params.toLowerCase().contains("left") && radius < 0 || params.toLowerCase().contains("right") && radius > 0)) {
                 radius = -radius;
+            }
         }
 
-        return BufferOp.bufferOp(geometry, radius, bufferParameters);
+        if (useSpheroid) {
+            // Spheroidal buffering logic
+            try {
+                return bufferSpheroid(geometry, radius, bufferParameters);
+            } catch (RuntimeException e) {
+                throw new RuntimeException("Error processing spheroidal buffer", e);
+            }
+        } else {
+            // Existing planar buffer logic with params handling
+            return BufferOp.bufferOp(geometry, radius, bufferParameters);
+        }
     }
 
     private static BufferParameters parseBufferParams(String params) {
@@ -186,17 +202,26 @@ public class Functions {
         return bufferParameters;
     }
 
-    public static int bestSRID(Geometry geometry) {
+    public static int bestSRID(Geometry geometry) throws IllegalArgumentException {
+        // Shift longitudes if geometry crosses dateline
+        if (crossesDateLine(geometry)) {
+            shiftLongitude(geometry);
+        }
+
+        // Check envelope
         Envelope envelope = geometry.getEnvelopeInternal();
         if (envelope.isNull()) return Spheroid.EPSG_WORLD_MERCATOR; // Fallback EPSG
 
         // Calculate the center of the envelope
-        double centerX =  (envelope.getMinX() + envelope.getMaxX()) / 2.0; // centroid.getX();
+        double centerX = (envelope.getMinX() + envelope.getMaxX()) / 2.0; // centroid.getX();
         double centerY = (envelope.getMinY() + envelope.getMaxY()) / 2.0; // centroid.getY();
 
         // Calculate angular width and height
-        double xwidth = Spheroid.angularWidth(envelope);
-        double ywidth = Spheroid.angularHeight(envelope);
+        Double xwidth = Spheroid.angularWidth(envelope);
+        Double ywidth = Spheroid.angularHeight(envelope);
+        if (xwidth.isNaN() | ywidth.isNaN()) {
+            throw new IllegalArgumentException("Only lon/lat coordinate systems are supported by ST_BestSRID");
+        }
 
         // Prioritize polar regions for Lambert Azimuthal Equal Area projection
         if (centerY >= 70.0 && ywidth < 45.0) return Spheroid.EPSG_NORTH_LAMBERT;
@@ -208,14 +233,49 @@ public class Functions {
             if (centerX == -180.0 || centerX == 180.0) {
                 zone = 59; // UTM zone 60
             } else {
-                zone = (int)Math.floor((centerX + 180.0) / 6.0);
-                zone = Math.min(zone, 59);
+                zone = (int) Math.floor((centerX + 180.0) / 6.0);
+                zone = (zone > 59) ? zone - 60 : zone;
             }
             return (centerY < 0.0) ? Spheroid.EPSG_SOUTH_UTM_START + zone : Spheroid.EPSG_NORTH_UTM_START + zone;
         }
 
         // Default fallback to Mercator projection
         return Spheroid.EPSG_WORLD_MERCATOR;
+    }
+
+    /**
+     * Corrects the longitudes of a geometry to be within the -180 to 180 range.
+     * This method modifies the original geometry.
+     *
+     * @param geometry The geometry to be corrected.
+     */
+    public static void normalizeLongitude(Geometry geometry) {
+        if (geometry == null || geometry.isEmpty()) {
+            return;
+        }
+
+        geometry.apply(new CoordinateSequenceFilter() {
+            @Override
+            public void filter(CoordinateSequence seq, int i) {
+                double x = seq.getX(i);
+                // Normalize the longitude to be within -180 to 180 range
+                while (x > 180) x -= 360;
+                while (x < -180) x += 360;
+                seq.setOrdinate(i, CoordinateSequence.X, x);
+            }
+
+            @Override
+            public boolean isDone() {
+                return false; // Continue processing until all coordinates are processed
+            }
+
+            @Override
+            public boolean isGeometryChanged() {
+                return true; // The geometry is changed as we are modifying the coordinates
+            }
+        });
+
+        geometry.geometryChanged(); // Notify the geometry that its coordinates have been changed
     }
 
     /**
@@ -263,28 +323,7 @@ public class Functions {
         return filter.isDone();
     }
 
-    public static Geometry envelope(Geometry geometry) {
-        return geometry.getEnvelope();
-    }
-
-    public static double distance(Geometry left, Geometry right) {
-        return left.distance(right);
-    }
-
-    public static double distance3d(Geometry left, Geometry right) {
-        return new Distance3DOp(left, right).distance();
-    }
-
-    public static double length(Geometry geometry) {
-        return geometry.getLength();
-    }
-
-    public static Geometry normalize(Geometry geometry) {
-        geometry.normalize();
-        return geometry;
-    }
-
-    public static Geometry shiftLongitude(Geometry geometry) {
+    public static Geometry shiftLongitude (Geometry geometry){
         geometry.apply(new CoordinateSequenceFilter() {
             @Override
             public void filter(CoordinateSequence seq, int i) {
@@ -307,6 +346,27 @@ public class Functions {
                 return true;
             }
         });
+        return geometry;
+    }
+
+    public static Geometry envelope (Geometry geometry){
+        return geometry.getEnvelope();
+    }
+
+    public static double distance (Geometry left, Geometry right){
+        return left.distance(right);
+    }
+
+    public static double distance3d (Geometry left, Geometry right){
+        return new Distance3DOp(left, right).distance();
+    }
+
+    public static double length (Geometry geometry){
+        return geometry.getLength();
+    }
+
+    public static Geometry normalize (Geometry geometry){
+        geometry.normalize();
         return geometry;
     }
 

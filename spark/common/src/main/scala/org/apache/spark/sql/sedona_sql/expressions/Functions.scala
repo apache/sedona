@@ -161,7 +161,7 @@ case class ST_NDims(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Buffer(inputExpressions: Seq[Expression])
-  extends InferredExpression(inferrableFunction2(Functions.buffer), inferrableFunction3(Functions.buffer)) {
+  extends InferredExpression(inferrableFunction2(Functions.buffer), inferrableFunction3(Functions.buffer), inferrableFunction4(Functions.buffer)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

@@ -23,13 +23,13 @@ Format:
 
 Since: `v1.4.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT RS_AsArcGrid(raster) FROM my_raster_table
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT RS_AsArcGrid(raster, 1) FROM my_raster_table
@@ -68,13 +68,13 @@ Format:
 
 Since: `v1.4.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT RS_AsGeoTiff(raster) FROM my_raster_table
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT RS_AsGeoTiff(raster, 'LZW', '0.75') FROM my_raster_table
@@ -115,7 +115,7 @@ Format:
 
 Since: `v1.5.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT RS_AsPNG(raster) FROM Rasters
@@ -127,7 +127,7 @@ Output:
 [-119, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73...]
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT RS_AsPNG(RS_Band(raster, Array(3, 1, 2)))
@@ -247,7 +247,7 @@ Since: `v1.5.0`
 	```
 	If a raster is provided with anyone of these properties then IllegalArgumentException is thrown.
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT RS_AsRaster(
@@ -263,7 +263,7 @@ Output:
 GridCoverage2D["g...
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT RS_AsRaster(

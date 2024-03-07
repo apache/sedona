@@ -19,7 +19,7 @@ Format:
 
 Since: `v1.5.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT RS_AsBase64(raster) from rasters
@@ -39,7 +39,7 @@ Format: `RS_AsImage(raster: Raster, imageWidth: Integer = 200)`
 
 Since: `v1.5.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT RS_AsImage(raster, 500) from rasters
@@ -109,7 +109,7 @@ RS_AsMatrix(raster: Raster, band: Integer = 1, postDecimalPrecision: Integer = 6
 
 Since: `1.5.0`
 
-Spark SQL Example:
+SQL Example
 
 ```scala
 val inputDf = Seq(Seq(1, 3.333333, 4, 0.0001, 2.2222, 9, 10, 11.11111111, 3, 4, 5, 6)).toDF("band")
@@ -124,7 +124,7 @@ Output:
 | 3.00000   4.00000   5.00000   6.00000|
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```scala
 val inputDf = Seq(Seq(1, 3, 4, 0, 2, 9, 10, 11, 3, 4, 5, 6)).toDF("band")

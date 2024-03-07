@@ -188,11 +188,34 @@ public class UDFsV2
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius"}, argTypes = {"Geometry", "double"}, returnTypes = "Geometry")
-    public static String ST_Buffer(String geometry, double radius) {
+    public static String ST_Buffer(String geometry, double radius) throws IllegalArgumentException {
         return GeometrySerde.serGeoJson(
                 Functions.buffer(
                         GeometrySerde.deserGeoJson(geometry),
                         radius
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius", "useSpheroid"}, argTypes = {"Geometry", "double", "boolean"}, returnTypes = "Geometry")
+    public static String ST_Buffer(String geometry, double radius, boolean useSpheroid) throws IllegalArgumentException {
+        return GeometrySerde.serGeoJson(
+                Functions.buffer(
+                        GeometrySerde.deserGeoJson(geometry),
+                        radius,
+                        useSpheroid
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "radius", "useSpheroid", "parameters"}, argTypes = {"Geometry", "double", "boolean", "String"}, returnTypes = "Geometry")
+    public static String ST_Buffer(String geometry, double radius, boolean useSpheroid, String parameters) throws IllegalArgumentException {
+        return GeometrySerde.serGeoJson(
+                Functions.buffer(
+                        GeometrySerde.deserGeoJson(geometry),
+                        radius,
+                        useSpheroid,
+                        parameters
                 )
         );
     }

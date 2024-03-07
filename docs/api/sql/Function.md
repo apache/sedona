@@ -6,7 +6,7 @@ Format: `GeometryType (A: Geometry)`
 
 Since: `v1.5.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'));
@@ -40,7 +40,7 @@ Format: `ST_3DDistance (A: Geometry, B: Geometry)`
 
 Since: `v1.2.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_3DDistance(ST_GeomFromText("POINT Z (0 0 -5)"),
@@ -65,7 +65,7 @@ Format:
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AddPoint(ST_GeomFromText("LINESTRING(0 0, 1 1, 1 0)"), ST_GeomFromText("Point(21 52)"), 1)
@@ -167,7 +167,7 @@ Format: `ST_Angle(p1, p2, p3, p4) | ST_Angle(p1, p2, p3) | ST_Angle(line1, line2
 
 Since: `v1.5.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Angle(ST_GeomFromWKT('POINT(0 0)'), ST_GeomFromWKT('POINT (1 1)'), ST_GeomFromWKT('POINT(1 0)'), ST_GeomFromWKT('POINT(6 2)'))
@@ -179,7 +179,7 @@ Output:
 0.4048917862850834
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Angle(ST_GeomFromWKT('POINT (1 1)'), ST_GeomFromWKT('POINT (0 0)'), ST_GeomFromWKT('POINT(3 2)'))
@@ -191,7 +191,7 @@ Output:
 0.19739555984988044
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Angle(ST_GeomFromWKT('LINESTRING (0 0, 1 1)'), ST_GeomFromWKT('LINESTRING (0 0, 3 2)'))
@@ -211,7 +211,7 @@ Format: `ST_Area (A: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 ```sql
 SELECT ST_Area(ST_GeomFromText("POLYGON(0 0, 0 10, 10 10, 0 10, 0 0)"))
 ```
@@ -234,7 +234,7 @@ Format: `ST_AreaSpheroid (A: Geometry)`
 
 Since: `v1.4.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AreaSpheroid(ST_GeomFromWKT('Polygon ((34 35, 28 30, 25 34, 34 35))'))
@@ -254,7 +254,7 @@ Format: `ST_AsBinary (A: Geometry)`
 
 Since: `v1.1.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsBinary(ST_GeomFromWKT('POINT (1 1)'))
@@ -279,7 +279,7 @@ Format: `ST_AsEWKB (A: Geometry)`
 
 Since: `v1.1.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsEWKB(ST_SetSrid(ST_GeomFromWKT('POINT (1 1)'), 3021))
@@ -304,7 +304,7 @@ Format: `ST_AsEWKT (A: Geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsEWKT(ST_SetSrid(ST_GeomFromWKT('POLYGON((0 0,0 1,1 1,1 0,0 0))'), 4326))
@@ -316,7 +316,7 @@ Output:
 SRID=4326;POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsEWKT(ST_MakePointM(1.0, 1.0, 1.0))
@@ -328,7 +328,7 @@ Output:
 POINT M(1 1 1)
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsEWKT(ST_MakePoint(1.0, 1.0, 1.0, 1.0))
@@ -348,7 +348,7 @@ Format: `ST_AsGeoJSON (A: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsGeoJSON(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
@@ -377,7 +377,7 @@ Format: `ST_AsGML (A: Geometry)`
 
 Since: `v1.3.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsGML(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
@@ -397,7 +397,7 @@ Format: `ST_AsKML (A: Geometry)`
 
 Since: `v1.3.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsKML(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
@@ -418,7 +418,7 @@ Format: `ST_AsText (A: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsText(ST_SetSRID(ST_Point(1.0,1.0), 3021))
@@ -430,7 +430,7 @@ Output:
 POINT (1 1)
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsText(ST_MakePointM(1.0, 1.0, 1.0))
@@ -442,7 +442,7 @@ Output:
 POINT M(1 1 1)
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsText(ST_MakePoint(1.0, 1.0, 1.0, 1.0))
@@ -462,7 +462,7 @@ Format: `ST_Azimuth(pointA: Point, pointB: Point)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Azimuth(ST_POINT(0.0, 25.0), ST_POINT(0.0, 0.0))
@@ -510,7 +510,7 @@ Format: `ST_Boundary(geom: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Boundary(ST_GeomFromWKT('POLYGON((1 1,0 0, -1 1, 1 1))'))
@@ -532,7 +532,7 @@ Format: `ST_BoundingDiagonal(geom: Geometry)`
 
 Since: `v1.5.0`
 
-Spark SQL Example:
+SQL Example
 ```sql
 SELECT ST_BoundingDiagonal(ST_GeomFromWKT(geom))
 ```
@@ -551,9 +551,28 @@ Output: `LINESTRING Z(-1 -1 0, 10 5 5)`
 
 ## ST_Buffer
 
-Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.
+Introduction: Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance. The function supports both Planar/Euclidean and Spheroidal/Geodesic buffering (Since v1.6.0). Spheroidal buffer also supports geometries crossing the International Date Line (IDL).
 
-The optional third parameter controls the buffer accuracy and style. Buffer accuracy is specified by the number of line segments approximating a quarter circle, with a default of 8 segments. Buffer style can be set by providing blank-separated key=value pairs in a list format.
+Mode of buffer calculation (Since: `v1.6.0`):
+
+The optional third parameter, `useSpheroid`, controls the mode of buffer calculation.
+
+- Planar Buffering (default): When `useSpheroid` is false, `ST_Buffer` performs standard planar buffering based on the provided parameters.
+- Spheroidal Buffering:
+    - When `useSpheroid` is set to true, the function returns the spheroidal buffer polygon for more accurate representation over the Earth. In this mode, the unit of the buffer distance is interpreted as meters.
+    - ST_Buffer first determines the most appropriate Spatial Reference Identifier (SRID) for a given geometry, based on its spatial extent and location, using `ST_BestSRID`.
+    - The geometry is then transformed from its original SRID to the selected SRID. If the input geometry does not have a set SRID, `ST_Buffer` defaults to using WGS 84 (SRID 4326) as its original SRID.
+    - The standard planar buffer operation is then applied in this coordinate system.
+    - Finally, the buffered geometry is transformed back to its original SRID, or to WGS 84 if the original SRID was not set.
+
+!!!note
+    As of now, spheroidal buffering only supports lon/lat coordinate systems and will throw an `IllegalArgumentException` for input geometries in meter based coordinate systems.
+!!!note
+    Spheroidal buffering may not produce accurate output buffer for input geometries larger than a UTM zone.
+
+Buffer Style Parameters:
+
+The optional forth parameter controls the buffer accuracy and style. Buffer accuracy is specified by the number of line segments approximating a quarter circle, with a default of 8 segments. Buffer style can be set by providing blank-separated key=value pairs in a list format.
 
 - `quad_segs=#` : Number of line segments utilized to approximate a quarter circle (default is 8).
 - `endcap=round|flat|square` : End cap style (default is `round`). `butt` is an accepted synonym for `flat`.
@@ -567,16 +586,22 @@ The optional third parameter controls the buffer accuracy and style. Buffer accu
 Format:
 
 ```
-ST_Buffer (A: Geometry, buffer: Double, bufferStyleParameters: String [Optional])
+ST_Buffer (A: Geometry, buffer: Double)
+```
+```
+ST_Buffer (A: Geometry, buffer: Double, useSpheroid: Boolean)
+```
+```
+ST_Buffer (A: Geometry, buffer: Double, useSpheroid: Boolean, bufferStyleParameters: String)
 ```
 
 Since: `v1.5.1`
 
-Spark SQL Example:
+SQL Example:
 
 ```sql
 SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10)
-SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10, 'quad_segs=2')
+SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10, false, 'quad_segs=2')
 ```
 
 Output:
@@ -586,10 +611,10 @@ Output:
 
 8 Segments &ensp; 2 Segments
 
-Spark SQL Example:
+SQL Example:
 
 ```sql
-SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(0 0, 50 70, 100 100)'), 10, 'side=left')
+SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(0 0, 50 70, 100 100)'), 10, false, 'side=left')
 ```
 
 Output:
@@ -607,7 +632,7 @@ Format: `ST_BuildArea (A: Geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_BuildArea(
@@ -634,7 +659,7 @@ Format: `ST_Centroid (A: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Centroid(ST_GeomFromWKT('MULTIPOINT(-1  0, -1 2, 7 8, 9 8, 10 6)'))
@@ -655,7 +680,7 @@ Format: `ST_ClosestPoint(g1: Geometry, g2: Geometry)`
 
 Since: `v1.5.0`
 
-Spark SQL Example:
+SQL Example
 ```sql
 SELECT ST_AsText( ST_ClosestPoint(g1, g2)) As ptwkt;
 ```
@@ -684,7 +709,7 @@ Format:
 
 Since: `v1.2.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Collect(
@@ -703,7 +728,7 @@ Result:
 +---------------------------------------------------------------+
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Collect(
@@ -743,7 +768,7 @@ Format:
 
 Since: `v1.2.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 WITH test_data as (
@@ -778,7 +803,7 @@ Format:
 
 Since: `v1.4.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_ConcaveHull(ST_GeomFromWKT('POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))'), 1)
@@ -798,7 +823,7 @@ Format: `ST_ConvexHull (A: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_ConvexHull(ST_GeomFromText('POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))'))
@@ -879,7 +904,7 @@ Format: `ST_Degrees(angleInRadian)`
 
 Since: `v1.5.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Degrees(0.19739555984988044)
@@ -899,7 +924,7 @@ Format: `ST_Difference (A: Geometry, B: Geometry)`
 
 Since: `v1.2.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Difference(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((0 -4, 4 -4, 4 4, 0 4, 0 -4))'))
@@ -919,7 +944,7 @@ Format: `ST_Dimension (A: Geometry) | ST_Dimension (C: Geometrycollection)`
 
 Since: `v1.5.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Dimension('GEOMETRYCOLLECTION(LINESTRING(1 1,0 0),POINT(0 0))');
@@ -939,7 +964,7 @@ Format: `ST_Distance (A: Geometry, B: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Distance(ST_GeomFromText('POINT(72 42)'), ST_GeomFromText('LINESTRING(-72 -42, 82 92)'))
@@ -964,7 +989,7 @@ Format: `ST_DistanceSphere (A: Geometry)`
 
 Since: `v1.4.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (-0.56 51.3168)'), ST_GeomFromWKT('POINT (-3.1883 55.9533)'))
@@ -976,7 +1001,7 @@ Output:
 543796.9506134904
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_DistanceSphere(ST_GeomFromWKT('POINT (-0.56 51.3168)'), ST_GeomFromWKT('POINT (-3.1883 55.9533)'), 6378137.0)
@@ -1001,7 +1026,7 @@ Format: `ST_DistanceSpheroid (A: Geometry)`
 
 Since: `v1.4.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_DistanceSpheroid(ST_GeomFromWKT('POINT (-0.56 51.3168)'), ST_GeomFromWKT('POINT (-3.1883 55.9533)'))
@@ -1022,7 +1047,7 @@ Format: `ST_Dump(geom: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 ```sql
 SELECT ST_Dump(ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))'))
 ```
@@ -1041,7 +1066,7 @@ Format: `ST_DumpPoints(geom: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_DumpPoints(ST_GeomFromText('LINESTRING (0 0, 1 1, 1 0)'))
@@ -1061,7 +1086,7 @@ Format: `ST_EndPoint(geom: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_EndPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'))
@@ -1081,7 +1106,7 @@ Format: `ST_Envelope (A: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Envelope(ST_GeomFromWKT('LINESTRING(0 0, 1 3)'))
@@ -1101,7 +1126,7 @@ Format: `ST_ExteriorRing(geom: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_ExteriorRing(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
@@ -1121,7 +1146,7 @@ Format: `ST_FlipCoordinates(A: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_FlipCoordinates(ST_GeomFromWKT("POINT (1 2)"))
@@ -1141,7 +1166,7 @@ Format: `ST_Force_2D (A: Geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Force_2D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'))
@@ -1167,7 +1192,7 @@ Format: `ST_Force3D(geometry: Geometry, zValue: Double)`
 
 Since: `v1.4.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsText(ST_Force3D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'), 2.3))
@@ -1179,7 +1204,7 @@ Output:
 POLYGON Z((0 0 2, 0 5 2, 5 0 2, 0 0 2), (1 1 2, 3 1 2, 1 3 2, 1 1 2))
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsText(ST_Force3D(ST_GeomFromText('LINESTRING(0 1,1 0,2 0)'), 2.3))
@@ -1191,7 +1216,7 @@ Output:
 LINESTRING Z(0 1 2.3, 1 0 2.3, 2 0 2.3)
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsText(ST_Force3D(ST_GeomFromText('LINESTRING EMPTY'), 3))
@@ -1214,7 +1239,7 @@ Format: `ST_FrechetDistance(g1: Geometry, g2: Geometry)`
 
 Since: `v1.5.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_FrechetDistance(ST_GeomFromWKT('POINT (0 1)'), ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)'))
@@ -1234,7 +1259,7 @@ Format: `ST_GeoHash(geom: Geometry, precision: Integer)`
 
 Since: `v1.1.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_GeoHash(ST_GeomFromText('POINT(21.427834 52.042576573)'), 5) AS geohash
@@ -1276,7 +1301,7 @@ Default parameters: `tolerance: 1e-6, maxIter: 1000, failIfNotConverged: false`
 
 Since: `v1.4.1`
 
-Spark SQL Example:
+SQL Example
 ```sql
 SELECT ST_GeometricMedian(ST_GeomFromWKT('MULTIPOINT((0 0), (1 1), (2 2), (200 200))'))
 ```
@@ -1294,7 +1319,7 @@ Format: `ST_GeometryN(geom: Geometry, n: Integer)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_GeometryN(ST_GeomFromText('MULTIPOINT((1 2), (3 4), (5 6), (8 9))'), 1)
@@ -1314,7 +1339,7 @@ Format: `ST_GeometryType (A: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))
@@ -1338,7 +1363,7 @@ Format: `ST_H3CellDistance(cell1: Long, cell2: Long)`
 
 Since: `v1.5.0`
 
-Spark SQL example:
+SQL Example
 ```sql
 select ST_H3CellDistance(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], ST_H3CellIDs(ST_GeomFromWKT('POINT(1.23 1.59)'), 8, true)[0])
 ```
@@ -1385,7 +1410,7 @@ Format: `ST_H3CellIDs(geom: geometry, level: Int, fullCover: Boolean)`
 
 Since: `v1.5.0`
 
-Spark SQL example:
+SQL Example
 ```sql
 SELECT ST_H3CellIDs(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'), 6, true)
 ```
@@ -1412,7 +1437,7 @@ Format: `ST_H3KRing(cell: Long, k: Int, exactRing: Boolean)`
 
 Since: `v1.5.0`
 
-Spark SQL example:
+SQL Example
 ```sql
 SELECT ST_H3KRing(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], 1, true) cells union select ST_H3KRing(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], 1, false) cells
 ```
@@ -1437,7 +1462,7 @@ Format: `ST_H3ToGeom(cells: Array[Long])`
 
 Since: `v1.5.0`
 
-Spark SQL example:
+SQL Example
 ```sql
 SELECT ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], 1, true))
 ```
@@ -1470,7 +1495,7 @@ Format: `ST_HausdorffDistance(g1: Geometry, g2: Geometry, densityFrac: Double)`
 
 Since: `v1.5.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_HausdorffDistance(ST_GeomFromWKT('POINT (0.0 1.0)'), ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)'), 0.1)
@@ -1482,7 +1507,7 @@ Output:
 5.0990195135927845
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_HausdorffDistance(ST_GeomFromText('POLYGON Z((1 0 1, 1 1 2, 2 1 5, 2 0 1, 1 0 1))'), ST_GeomFromText('POLYGON Z((4 0 4, 6 1 4, 6 4 9, 6 1 3, 4 0 4))'))
@@ -1502,7 +1527,7 @@ Format: `ST_InteriorRingN(geom: Geometry, n: Integer)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_InteriorRingN(ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))'), 0)
@@ -1522,7 +1547,7 @@ Format: `ST_Intersection (A: Geometry, B: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Intersection(
@@ -1545,7 +1570,7 @@ Format: `ST_IsClosed(geom: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_IsClosed(ST_GeomFromText('LINESTRING(0 0, 1 1, 1 0)'))
@@ -1569,7 +1594,7 @@ Format: `ST_IsCollection(geom: Geometry)`
 
 Since: `v1.5.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_IsCollection(ST_GeomFromText('MULTIPOINT(0 0), (6 6)'))
@@ -1581,7 +1606,7 @@ Output:
 true
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_IsCollection(ST_GeomFromText('POINT(5 5)'))
@@ -1601,7 +1626,7 @@ Format: `ST_IsEmpty (A: Geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_IsEmpty(ST_GeomFromWKT('POLYGON((0 0,0 1,1 1,1 0,0 0))'))
@@ -1621,7 +1646,7 @@ Format: `ST_IsRing(geom: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_IsRing(ST_GeomFromText("LINESTRING(0 0, 0 1, 1 1, 1 0, 0 0)"))
@@ -1641,7 +1666,7 @@ Format: `ST_IsSimple (A: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_IsSimple(ST_GeomFromWKT('POLYGON((1 1, 3 1, 3 3, 1 3, 1 1))'))
@@ -1739,7 +1764,7 @@ Format: `ST_Length (A: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Length(ST_GeomFromWKT('LINESTRING(38 16,38 50,65 50,66 16,38 16)'))
@@ -1764,7 +1789,7 @@ Format: `ST_LengthSpheroid (A: Geometry)`
 
 Since: `v1.4.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 90 0, 0 0))'))
@@ -1784,7 +1809,7 @@ Format: `ST_LineFromMultiPoint (A: Geometry)`
 
 Since: `v1.3.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_LineFromMultiPoint(ST_GeomFromText('MULTIPOINT((10 40), (40 30), (20 20), (30 10))'))
@@ -1804,7 +1829,7 @@ Format: `ST_LineInterpolatePoint (geom: Geometry, fraction: Double)`
 
 Since: `v1.0.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_LineInterpolatePoint(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.2)
@@ -1845,7 +1870,7 @@ Format: `ST_LineMerge (A: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_LineMerge(ST_GeomFromWKT('MULTILINESTRING ((-29 -27, -30 -29.7, -45 -33), (-45 -33, -46 -32))'))
@@ -1867,7 +1892,7 @@ Format:
 
 Since: `v1.0.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_LineSubstring(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.333, 0.666)
@@ -1891,7 +1916,7 @@ Format:
 
 Since: `v1.5.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsText( ST_MakeLine(ST_Point(1,2), ST_Point(3,4)) );
@@ -1903,7 +1928,7 @@ Output:
 LINESTRING(1 2,3 4)
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsText( ST_MakeLine( 'LINESTRING(0 0, 1 1)', 'LINESTRING(2 2, 3 3)' ) );
@@ -1923,7 +1948,7 @@ Format: `ST_MakePolygon(geom: Geometry, holes: ARRAY[Geometry])`
 
 Since: `v1.1.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_MakePolygon(
@@ -1953,7 +1978,7 @@ Format:
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 WITH linestring AS (
@@ -1985,7 +2010,7 @@ Format:
 
 Since: `v1.0.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_MinimumBoundingCircle(ST_GeomFromWKT('LINESTRING(0 0, 0 1)'))
@@ -2005,7 +2030,7 @@ Format: `ST_MinimumBoundingRadius(geom: Geometry)`
 
 Since: `v1.0.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_MinimumBoundingRadius(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
@@ -2026,7 +2051,7 @@ Format: `ST_Multi(geom: Geometry)`
 
 Since: `v1.2.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Multi(ST_GeomFromText('POINT(1 1)'))
@@ -2080,7 +2105,7 @@ Format:
 
 Since: `v1.3.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsEWKT(ST_Normalize(ST_GeomFromWKT('POLYGON((0 1, 1 1, 1 0, 0 0, 0 1))')))
@@ -2100,7 +2125,7 @@ Format: `ST_NPoints (A: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))
@@ -2150,7 +2175,7 @@ Format: `ST_NumGeometries (A: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_NumGeometries(ST_GeomFromWKT('LINESTRING (-29 -27, -30 -29.7, -45 -33)'))
@@ -2170,7 +2195,7 @@ Format: `ST_NumInteriorRings(geom: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_NumInteriorRings(ST_GeomFromText('POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))'))
@@ -2197,7 +2222,7 @@ Format: `ST_NumPoints(geom: Geometry)`
 
 Since: `v1.4.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_NumPoints(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'))
@@ -2217,7 +2242,7 @@ Format: `ST_PointN(geom: Geometry, n: Integer)`
 
 Since: `v1.2.1`
 
-Spark SQL Example:
+SQL Example
 ```sql
 SELECT ST_PointN(ST_GeomFromText("LINESTRING(0 0, 1 2, 2 4, 3 6)"), 2)
 ```
@@ -2269,7 +2294,7 @@ Format: `ST_Polygon(geom: Geometry, srid: Integer)`
 
 Since: `v1.5.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsText( ST_Polygon(ST_GeomFromEWKT('LINESTRING(75 29 1, 77 29 2, 77 29 3, 75 29 1)'), 4326) );
@@ -2289,7 +2314,7 @@ Format: `ST_ReducePrecision (A: Geometry, B: Integer)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_ReducePrecision(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)')
@@ -2315,7 +2340,7 @@ Format:
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_RemovePoint(ST_GeomFromText("LINESTRING(0 0, 1 1, 1 0)"), 1)
@@ -2335,7 +2360,7 @@ Format: `ST_Reverse (A: Geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Reverse(ST_GeomFromWKT('LINESTRING(0 0, 1 2, 2 4, 3 6)'))
@@ -2357,7 +2382,7 @@ Format: `ST_S2CellIDs(geom: Geometry, level: Integer)`
 
 Since: `v1.4.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_S2CellIDs(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'), 6)
@@ -2376,7 +2401,7 @@ Format: `ST_SetPoint (linestring: Geometry, index: Integer, point: Geometry)`
 
 Since: `v1.3.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_SetPoint(ST_GeomFromText('LINESTRING (0 0, 0 1, 1 1)'), 2, ST_GeomFromText('POINT (1 0)'))
@@ -2396,7 +2421,7 @@ Format: `ST_SetSRID (A: Geometry, srid: Integer)`
 
 Since: `v1.1.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsEWKT(ST_SetSRID(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'), 3021))
@@ -2438,7 +2463,7 @@ Since: `v1.0.0`
 
 Format: `ST_SimplifyPreserveTopology (A: Geometry, distanceTolerance: Double)`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_SimplifyPreserveTopology(ST_GeomFromText('POLYGON((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33,46 34, 47 44, 35 36, 45 33, 43 19, 29 21, 29 22,35 26, 24 39, 8 25))'), 10)
@@ -2464,7 +2489,7 @@ Since: `v1.4.0`
 
 Format: `ST_Split (input: Geometry, blade: Geometry)`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Split(
@@ -2486,7 +2511,7 @@ Format: `ST_SRID (A: Geometry)`
 
 Since: `v1.1.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_SRID(ST_SetSRID(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'), 3021))
@@ -2506,7 +2531,7 @@ Format: `ST_StartPoint(geom: Geometry)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_StartPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'))
@@ -2526,7 +2551,7 @@ Format: `ST_SubDivide(geom: Geometry, maxVertices: Integer)`
 
 Since: `v1.1.0`
 
-Spark SQL Example:
+SQL Example
 ```sql
 SELECT ST_SubDivide(ST_GeomFromText("POLYGON((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))"), 5)
 
@@ -2552,7 +2577,7 @@ Output:
 ]
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_SubDivide(ST_GeomFromText("LINESTRING(0 0, 85 85, 100 100, 120 120, 21 21, 10 10, 5 5)"), 5)
@@ -2579,7 +2604,7 @@ Format: `ST_SubDivideExplode(geom: Geometry, maxVertices: Integer)`
 
 Since: `v1.1.0`
 
-Spark SQL Example:
+SQL Example
 
 Query:
 ```sql
@@ -2641,7 +2666,7 @@ Format: `ST_SymDifference (A: Geometry, B: Geometry)`
 
 Since: `v1.2.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_SymDifference(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((-2 -3, 4 -3, 4 3, -2 3, -2 -3))'))
@@ -2723,7 +2748,7 @@ ST_Transform (A: Geometry, TargetCRS: String)
 
 Since: `v1.2.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_AsText(ST_Transform(ST_GeomFromText('POLYGON((170 50,170 72,-130 72,-130 50,170 50))'),'EPSG:4326', 'EPSG:32649'))
@@ -2754,7 +2779,7 @@ Format:
 
 Since: `v1.4.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Translate(ST_GeomFromText('GEOMETRYCOLLECTION(MULTIPOLYGON(((3 2,3 3,4 3,4 2,3 2)),((3 4,5 6,5 7,3 4))), POINT(1 1 1), LINESTRING EMPTY)'), 2, 2, 3)
@@ -2766,7 +2791,7 @@ Output:
 GEOMETRYCOLLECTION (MULTIPOLYGON (((5 4, 5 5, 6 5, 6 4, 5 4)), ((5 6, 7 8, 7 9, 5 6))), POINT (3 3), LINESTRING EMPTY)
 ```
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Translate(ST_GeomFromText('POINT(-71.01 42.37)'),1,2)
@@ -2786,7 +2811,7 @@ Format: `ST_Union (A: Geometry, B: Geometry)`
 
 Since: `v1.2.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Union(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((1 -2, 5 0, 1 2, 1 -2))'))
@@ -2812,7 +2837,7 @@ Optional parameters:
 
 Since: `v1.5.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT st_astext(ST_VoronoiPolygons(ST_GeomFromText('MULTIPOINT ((0 0), (1 1))')));
@@ -2832,7 +2857,7 @@ Format: `ST_X(pointA: Point)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_X(ST_POINT(0.0 25.0))
@@ -2852,7 +2877,7 @@ Format: `ST_XMax (A: Geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_XMax(ST_GeomFromText('POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))'))
@@ -2872,7 +2897,7 @@ Format: `ST_XMin (A: Geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_XMin(ST_GeomFromText('POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))'))
@@ -2892,7 +2917,7 @@ Format: `ST_Y(pointA: Point)`
 
 Since: `v1.0.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Y(ST_POINT(0.0 25.0))
@@ -2912,7 +2937,7 @@ Format: `ST_YMax (A: Geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL Example:
+SQL Example
 ```sql
 SELECT ST_YMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
@@ -2931,7 +2956,7 @@ Format: `ST_Y_Min (A: Geometry)`
 
 Since: `v1.2.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_YMin(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
@@ -2951,7 +2976,7 @@ Format: `ST_Z(pointA: Point)`
 
 Since: `v1.2.0`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_Z(ST_POINT(0.0 25.0 11.0))
@@ -2971,7 +2996,7 @@ Format: `ST_ZMax(geom: Geometry)`
 
 Since: `v1.3.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_ZMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
@@ -2991,7 +3016,7 @@ Format: `ST_ZMin(geom: Geometry)`
 
 Since: `v1.3.1`
 
-Spark SQL Example:
+SQL Example
 
 ```sql
 SELECT ST_ZMin(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'))

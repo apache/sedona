@@ -23,7 +23,7 @@ Format: `RS_FromArcInfoAsciiGrid(asc: ARRAY[Byte])`
 
 Since: `v1.4.0`
 
-Spark SQL Example:
+SQL Example
 
 ```scala
 var df = sedona.read.format("binaryFile").load("/some/path/*.asc")
@@ -38,7 +38,7 @@ Format: `RS_FromGeoTiff(asc: ARRAY[Byte])`
 
 Since: `v1.4.0`
 
-Spark SQL Example:
+SQL Example
 
 ```scala
 var df = sedona.read.format("binaryFile").load("/some/path/*.tiff")

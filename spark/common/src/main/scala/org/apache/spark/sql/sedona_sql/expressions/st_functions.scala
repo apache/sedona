@@ -66,8 +66,10 @@ object st_functions extends DataFrameAPI {
 
   def ST_Buffer(geometry: Column, buffer: Column): Column = wrapExpression[ST_Buffer](geometry, buffer)
   def ST_Buffer(geometry: String, buffer: Double): Column = wrapExpression[ST_Buffer](geometry, buffer)
-  def ST_Buffer(geometry: Column, buffer: Column, parameters: Column): Column = wrapExpression[ST_Buffer](geometry, buffer, parameters)
-  def ST_Buffer(geometry: String, buffer: Double, parameters: String): Column = wrapExpression[ST_Buffer](geometry, buffer, parameters)
+  def ST_Buffer(geometry: Column, buffer: Column, useSpheroid: Column): Column = wrapExpression[ST_Buffer](geometry, buffer, useSpheroid)
+  def ST_Buffer(geometry: String, buffer: Double, useSpheroid: Boolean): Column = wrapExpression[ST_Buffer](geometry, buffer, useSpheroid)
+  def ST_Buffer(geometry: Column, buffer: Column, useSpheroid: Column, parameters: Column): Column = wrapExpression[ST_Buffer](geometry, buffer, useSpheroid, parameters)
+  def ST_Buffer(geometry: String, buffer: Double, useSpheroid: Boolean, parameters: String): Column = wrapExpression[ST_Buffer](geometry, buffer, useSpheroid, parameters)
 
   def ST_BestSRID(geometry: Column): Column = wrapExpression[ST_BestSRID](geometry)
   def ST_BestSRID(geometry: String): Column = wrapExpression[ST_BestSRID](geometry)

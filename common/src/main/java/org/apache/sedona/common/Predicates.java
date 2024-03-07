@@ -16,8 +16,6 @@ package org.apache.sedona.common;
 import org.locationtech.jts.geom.*;
 import org.apache.sedona.common.sphere.Spheroid;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class Predicates {
     public static boolean contains(Geometry leftGeometry, Geometry rightGeometry) {
         return leftGeometry.contains(rightGeometry);
