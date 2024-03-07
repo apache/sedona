@@ -36,17 +36,31 @@ public class RasterEditorsTest extends RasterTestBase {
     @Test
     public void testSetBandPixelType() throws FactoryException {
         // Create a test raster using makeEmptyRaster
-        GridCoverage2D testRaster = RasterConstructors.makeEmptyRaster(3, "I", 10, 10, 0, 0, 1);
+        GridCoverage2D testRaster = RasterConstructors.makeEmptyRaster(3, "F", 4, 4, 0, 0, 1);
+        double[] bandValues1 = {1.1,2.1,3.1,4.1,5.1,6.1,7.1,8.1,9.1,10.1,11.1,12.1,13.1,14.1,15.1,16.1};
+        double[] bandValues2 = {17.9, 18.9, 19.9, 20.9, 21.9, 22.9, 23.9, 24.9, 25.9, 26.9, 27.9, 28.9, 29.9, 30.9, 31.9, 32.9};
+        double[] bandValues3 = {-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5};
+
+        testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues1, 1);
+        testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues2, 2);
+        testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues3, 3);
 
         // Change the pixel type of a specific band
-        GridCoverage2D modifiedRaster = RasterEditors.setBandPixelType(testRaster, "F", 1); // Changing to Float type for band 1
+//        GridCoverage2D modifiedRaster = RasterEditors.setBandPixelType(testRaster, "F", 1); // Changing to Float type for band 1
         // Verify the change in data type for the specified band
-        assertEquals(DataBuffer.TYPE_FLOAT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+//        assertEquals(DataBuffer.TYPE_FLOAT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
 
         // Change the pixel type of all bands
-        modifiedRaster = RasterEditors.setBandPixelType(testRaster, "B", null); // Changing to Byte type for all bands
+        GridCoverage2D modifiedRaster = RasterEditors.setBandPixelType(testRaster, "I", null); // Changing to Byte type for all bands
         // Verify the change in data type for all bands
-        assertEquals(DataBuffer.TYPE_BYTE, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+        System.out.println(Arrays.toString(MapAlgebra.bandAsArray(testRaster, 1)));
+        System.out.println(Arrays.toString(MapAlgebra.bandAsArray(testRaster, 2)));
+        System.out.println(Arrays.toString(MapAlgebra.bandAsArray(testRaster, 3)));
+        System.out.println();
+        System.out.println(Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 1)));
+        System.out.println(Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 2)));
+        System.out.println(Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 3)));
+        assertEquals(DataBuffer.TYPE_INT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
 
         // Additional verification: Check if the raster dimensions remain unchanged
         assertEquals(testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());

@@ -21,6 +21,7 @@ package org.apache.sedona.common.raster;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.CoverageFactoryFinder;
+import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridEnvelope2D;
@@ -29,7 +30,9 @@ import org.geotools.coverage.processing.Operations;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.opengis.coverage.SampleDimensionType;
 import org.opengis.coverage.grid.GridCoverage;
+import org.opengis.geometry.Envelope;
 import org.opengis.metadata.spatial.PixelOrientation;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -39,9 +42,10 @@ import org.opengis.referencing.operation.MathTransform2D;
 import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.Interpolation;
+import javax.media.jai.RasterFactory;
+import java.awt.*;
 import java.awt.geom.Point2D;
-import java.awt.image.DataBuffer;
-import java.awt.image.RenderedImage;
+import java.awt.image.*;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -52,63 +56,247 @@ import static org.apache.sedona.common.raster.MapAlgebra.bandAsArray;
 public class RasterEditors
 {
 
-    public static GridCoverage2D setBandPixelType(GridCoverage2D raster, String bandDataType) {
-        return setBandPixelType(raster, bandDataType, null);
-    }
-
     /**
-     * Changes the pixel type of a specified band or all bands in a raster.
+     * Changes the band pixel type of a specific band of a raster.
      *
-     * @param raster The raster whose band pixel type is to be changed.
-     * @param bandDataType The target data type for the band ("D", "F", "I", "S", "US", "B").
-     * @param bandIndex The index of the band to be modified (1-based index), or null to modify all bands.
-     * @return The raster with the modified band pixel type.
+     * @param raster      The input raster.
+     * @param BandDataType The desired data type of the band(s).
+     * @param bandID      The specific band to change. If null, all bands are changed.
+     * @return The modified raster with updated band pixel type.
      */
-    public static GridCoverage2D setBandPixelType(GridCoverage2D raster, String bandDataType, Integer bandIndex) {
-        int numBands = raster.getNumSampleDimensions();
+//    public static GridCoverage2D setBandPixelType(GridCoverage2D raster, String BandDataType, Integer bandID) {
+//        int newDataType = RasterUtils.getDataTypeCode(BandDataType);
+//        System.out.println("Original raster band 1: "+Arrays.toString(MapAlgebra.bandAsArray(raster, 1)));
+//        System.out.println("Original raster band 1: "+Arrays.toString(MapAlgebra.bandAsArray(raster, 2)));
+//
+//        // Extracting the WritableRaster from the original GridCoverage2D
+//        RenderedImage originalImage = raster.getRenderedImage();
+//        WritableRaster originalRaster = RasterUtils.getRaster(originalImage).createCompatibleWritableRaster();
+//        System.out.println("originalRaster minX: "+originalRaster.getMinX());
+//        System.out.println("originalRaster minY: "+originalRaster.getMinY());
+//
+//        // Create a new raster with modified data type for the specified band
+//        WritableRaster modifiedRaster = null;
+//        if (bandID == null) {
+//            modifiedRaster = modifyRasterBandType(originalRaster, 0, newDataType);
+//            for (int band = 1; band < raster.getNumSampleDimensions(); band++) {
+//                modifiedRaster = modifyRasterBandType(modifiedRaster, band, newDataType);
+//            }
+//        } else {
+//            modifiedRaster = modifyRasterBandType(originalRaster, bandID-1, newDataType);
+//        }
+//
+//        // Update GridSampleDimension for the modified band
+//        GridSampleDimension[] sampleDimensions = raster.getSampleDimensions();
+////        GridSampleDimension modifiedDimension;
+////        if (bandID == null) {
+////            for (int band = 0; band < raster.getNumSampleDimensions(); band++) {
+////                modifiedDimension = RasterUtils.createSampleDimensionWithNoDataValue(sampleDimensions[band], RasterUtils.getNoDataValue(sampleDimensions[band]));
+////                sampleDimensions[band] = modifiedDimension;
+////            }
+////        } else {
+////            modifiedDimension = RasterUtils.createSampleDimensionWithNoDataValue(sampleDimensions[bandID - 1], RasterUtils.getNoDataValue(sampleDimensions[bandID - 1]));
+////            sampleDimensions[bandID - 1] = modifiedDimension;
+////        }
+//
+//        // Clone the original GridCoverage2D with the modified raster and sample dimensions
+//        System.out.println(modifiedRaster.getMinX());
+//        System.out.println(modifiedRaster.getMinY());
+//        return RasterUtils.clone(modifiedRaster, raster.getGridGeometry(), sampleDimensions, raster, null, true);
+//    }
 
-        if (bandIndex == null) {
-            for (int i = 1; i <= numBands; i++) {
-                double[] bandValues = bandAsArray(raster, i);
-                bandValues = changeBandDataType(bandValues, bandDataType);
-                raster = addBandFromArray(raster, bandValues, i);
+    public static GridCoverage2D setBandPixelType(GridCoverage2D raster, String BandDataType, Integer bandID) {
+        int newDataType = RasterUtils.getDataTypeCode(BandDataType);
+
+        // Extracting the original data
+        RenderedImage originalImage = raster.getRenderedImage();
+        Raster originalData = RasterUtils.getRaster(originalImage);
+
+        int width = originalImage.getWidth();
+        int height = originalImage.getHeight();
+        int numBands = originalImage.getSampleModel().getNumBands();
+
+        // Create a new writable raster with the specified data type
+        WritableRaster modifiedRaster = RasterFactory.createBandedRaster(newDataType, width, height, numBands, null);
+
+        // Copy data to the new raster, converting type as necessary
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                for (int band = 0; band < numBands; band++) {
+                    double originalValue = originalData.getSampleDouble(x, y, band);
+                    if (bandID == null || band == bandID - 1) {
+                        double convertedValue = castRasterDataType(originalValue, newDataType);
+                        modifiedRaster.setSample(x, y, band, convertedValue);
+                    } else {
+                        modifiedRaster.setSample(x, y, band, originalValue);
+                    }
+                }
             }
-        } else {
-            double[] bandValues = bandAsArray(raster, bandIndex);
-            bandValues = changeBandDataType(bandValues, bandDataType);
-            raster = addBandFromArray(raster, bandValues, bandIndex);
         }
 
-        return raster;
+        // Re-create sample dimensions if necessary
+        GridSampleDimension[] sampleDimensions = raster.getSampleDimensions();
+//        if (bandID != null) {
+//            sampleDimensions[bandID - 1] = RasterUtils.createSampleDimensionWithNoDataValue(sampleDimensions[bandID - 1], RasterUtils.getNoDataValue(sampleDimensions[bandID - 1]));
+//        }
+
+        // Clone the original GridCoverage2D with the modified raster
+        return RasterUtils.clone(modifiedRaster, raster.getGridGeometry(), sampleDimensions, raster, null, true);
     }
 
-    private static double[] changeBandDataType(double[] bandValues, String bandDataType) {
-        int dataType = mapBandDataTypeToDataBufferType(bandDataType);
+//    public static GridCoverage2D setBandPixelType(GridCoverage2D raster, String BandDataType, Integer bandID) {
+//        int numBands = raster.getNumSampleDimensions();
+//        double[] bandValues;
+//        if (bandID == null) {
+//            for (int band = 0; band < numBands; band++) {
+//                bandValues = bandAsArray(raster, band + 1);
+//                double bandNoDataValue = RasterUtils.getNoDataValue(raster.getSampleDimension(band));
+//
+//                for (int i = 0; i < bandValues.length; i++) {
+//                    bandValues[i] = castRasterDataType(bandValues[i], RasterUtils.getDataTypeCode(BandDataType));
+//                }
+//
+//                raster = addBandFromArray(raster, bandValues, band+1);
+//            }
+//        } else {
+//            bandValues = bandAsArray(raster,  bandID);
+//
+//            for (int i = 0; i < bandValues.length; i++) {
+//                bandValues[i] = castRasterDataType(bandValues[i], RasterUtils.getDataTypeCode(BandDataType));
+//            }
+//
+//            raster = addBandFromArray(raster, bandValues, bandID);
+//        }
+//
+//        return raster;
+//    }
 
-        for (int i = 0; i < bandValues.length; i++) {
-            bandValues[i] = castRasterDataType(bandValues[i], dataType);
+    private static WritableRaster modifyRasterBandType(WritableRaster raster, int bandIndex, int newDataType) {
+        int width = raster.getWidth();
+        int height = raster.getHeight();
+        int numBands = raster.getNumBands();
+
+        WritableRaster modifiedRaster = RasterFactory.createBandedRaster(newDataType, width, height, numBands, null);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                for (int band = 0; band < numBands; band++) {
+                    double originalValue = raster.getSampleDouble(x, y, band);
+                    if (band == bandIndex) {
+                        double convertedValue = castRasterDataType(originalValue, newDataType);
+                        modifiedRaster.setSample(x, y, band, convertedValue);
+                        System.out.println("Original Value: " + originalValue + ", Converted Value: " + convertedValue);
+                    } else {
+                        modifiedRaster.setSample(x, y, band, originalValue);
+                    }
+                }
+            }
         }
-        return bandValues;
+        return modifiedRaster;
     }
 
-    private static int mapBandDataTypeToDataBufferType(String bandDataType) {
-        switch (bandDataType) {
-            case "D":
-                return DataBuffer.TYPE_DOUBLE;
-            case "F":
-                return DataBuffer.TYPE_FLOAT;
-            case "I":
-                return DataBuffer.TYPE_INT;
-            case "S":
-                return DataBuffer.TYPE_SHORT;
-            case "US":
-                return DataBuffer.TYPE_USHORT; // Assuming this maps to TYPE_USHORT
-            case "B":
-                return DataBuffer.TYPE_BYTE;
-            default:
-                throw new IllegalArgumentException("Invalid Band Data Type");
-        }
-    }
+
+
+
+
+//    private static WritableRaster modifyRasterBandType(WritableRaster raster, int bandIndex, int newDataType) {
+//        int width = raster.getWidth();
+//        int height = raster.getHeight();
+//        WritableRaster modifiedRaster = raster.createCompatibleWritableRaster(width, height);
+//
+//        // Iterate over each pixel to convert the data type of the specified band
+//        for (int y = 0; y < height; y++) {
+//            for (int x = 0; x < width; x++) {
+//                // Handle the conversion based on the data type
+//                switch (newDataType) {
+//                    case DataBuffer.TYPE_BYTE:
+//                        byte byteValue = (byte) raster.getSample(x, y, bandIndex);
+//                        modifiedRaster.setSample(x, y, bandIndex, byteValue);
+//                        break;
+//                    case DataBuffer.TYPE_SHORT:
+//                    case DataBuffer.TYPE_USHORT:
+//                        short shortValue = (short) raster.getSample(x, y, bandIndex);
+//                        modifiedRaster.setSample(x, y, bandIndex, shortValue);
+//                        break;
+//                    case DataBuffer.TYPE_INT:
+//                        int intValue = (int) raster.getSample(x, y, bandIndex);
+//                        modifiedRaster.setSample(x, y, bandIndex, intValue);
+//                        break;
+//                    case DataBuffer.TYPE_FLOAT:
+//                        float floatValue = raster.getSampleFloat(x, y, bandIndex);
+//                        modifiedRaster.setSample(x, y, bandIndex, floatValue);
+//                        break;
+//                    case DataBuffer.TYPE_DOUBLE:
+//                        double doubleValue = raster.getSampleDouble(x, y, bandIndex);
+//                        modifiedRaster.setSample(x, y, bandIndex, doubleValue);
+//                        break;
+//                    default:
+//                        throw new IllegalArgumentException("Unsupported data type: " + newDataType);
+//                }
+//            }
+//        }
+//        return modifiedRaster;
+//    }
+
+//    private static RenderedImage createNewRenderedImageWithBandType(RenderedImage image, int newDataType, Integer bandID) {
+//        // This is a placeholder logic, real implementation can be significantly more complex.
+//        // This example only changes the data type and copies data for a single band.
+//
+//        if (bandID == null) {
+//            throw new IllegalArgumentException("Band ID cannot be null");
+//        }
+//
+//        // Assuming we are changing the data type of a single band.
+//        // A more complex implementation would be needed for multi-band images.
+//        int band = bandID - 1; // Adjusting for 0-based index
+//
+//        // Get the data from the specified band
+//        Raster raster = image.getData();
+//        int width = image.getWidth();
+//        int height = image.getHeight();
+//        double[] samples = raster.getSamples(0, 0, width, height, band, (double[]) null);
+//
+//        // Create a new writable raster with the new data type
+//        WritableRaster newRaster = Raster.createBandedRaster(newDataType, width, height, 1, new Point(0, 0));
+//
+//        // Set the samples to the new raster
+//        for (int y = 0; y < height; y++) {
+//            for (int x = 0; x < width; x++) {
+//                double value = samples[y * width + x];
+//                newRaster.setSample(x, y, 0, value); // Casts are applied here based on newDataType
+//            }
+//        }
+//
+//        // Return a new RenderedImage
+//        return new BufferedImage(image.getColorModel(), newRaster, image.getColorModel().isAlphaPremultiplied(), null);
+//    }
+
+//    private static GridSampleDimension[] updateSampleDimensions(GridSampleDimension[] sampleDimensions, int newDataType, Integer bandID) {
+//        if (bandID == null) {
+//            throw new IllegalArgumentException("Band ID cannot be null");
+//        }
+//
+//        int band = bandID - 1; // Adjusting for 0-based index
+//        GridSampleDimension[] newSampleDimensions = new GridSampleDimension[sampleDimensions.length];
+//
+//        for (int i = 0; i < sampleDimensions.length; i++) {
+//            if (i == band) {
+//                // Update the sample dimension for the specified band.
+//                // This example just updates the data type; you might want to modify other properties.
+//                GridSampleDimension sd = sampleDimensions[i];
+//                // Sample code to recreate the sample dimension with a new data type
+//                // The specifics of this operation depend on your data and requirements
+//                newSampleDimensions[i] = new GridSampleDimension(sd.getDescription().toString(),
+//                        SampleDimensionType.valueOf(newDataType), sd.getNoDataValues());
+//            } else {
+//                // Keep other bands as is
+//                newSampleDimensions[i] = sampleDimensions[i];
+//            }
+//        }
+//
+//        return newSampleDimensions;
+//    }
+
 
     public static GridCoverage2D setSrid(GridCoverage2D raster, int srid)
     {
