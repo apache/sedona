@@ -36,33 +36,79 @@ public class RasterEditorsTest extends RasterTestBase {
     @Test
     public void testSetBandPixelType() throws FactoryException {
         // Create a test raster using makeEmptyRaster
-        GridCoverage2D testRaster = RasterConstructors.makeEmptyRaster(3, "F", 4, 4, 0, 0, 1);
-        double[] bandValues1 = {1.1,2.1,3.1,4.1,5.1,6.1,7.1,8.1,9.1,10.1,11.1,12.1,13.1,14.1,15.1,16.1};
+        GridCoverage2D testRaster = RasterConstructors.makeEmptyRaster(4, "F", 4, 4, 0, 0, 1);
+        double[] bandValues1 = {1.1,2.1,3.1,4.1,5.1,6.1,7.1,8.1,9.1,10.1,11.1,12.1,13.1,14.1,15.1,99.2};
         double[] bandValues2 = {17.9, 18.9, 19.9, 20.9, 21.9, 22.9, 23.9, 24.9, 25.9, 26.9, 27.9, 28.9, 29.9, 30.9, 31.9, 32.9};
         double[] bandValues3 = {-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5};
+        double[] bandValues4 = {65535, 65536, 65537, 65538, 65539, 65540, 65541, 65542, 65543, 65544, 65545, 65546, 65547, 65548, 65549, -9999};
 
         testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues1, 1);
         testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues2, 2);
         testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues3, 3);
+        testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues4, 4);
+        testRaster = RasterBandEditors.setBandNoDataValue(testRaster, 1, 99.2);
+        testRaster = RasterBandEditors.setBandNoDataValue(testRaster, 4, -9999.0);
 
-        // Change the pixel type of a specific band
-//        GridCoverage2D modifiedRaster = RasterEditors.setBandPixelType(testRaster, "F", 1); // Changing to Float type for band 1
-        // Verify the change in data type for the specified band
-//        assertEquals(DataBuffer.TYPE_FLOAT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+        GridCoverage2D modifiedRaster = RasterEditors.setRasterPixelType(testRaster, "D");
 
-        // Change the pixel type of all bands
-        GridCoverage2D modifiedRaster = RasterEditors.setBandPixelType(testRaster, "I", null); // Changing to Byte type for all bands
-        // Verify the change in data type for all bands
-        System.out.println(Arrays.toString(MapAlgebra.bandAsArray(testRaster, 1)));
-        System.out.println(Arrays.toString(MapAlgebra.bandAsArray(testRaster, 2)));
-        System.out.println(Arrays.toString(MapAlgebra.bandAsArray(testRaster, 3)));
-        System.out.println();
-        System.out.println(Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 1)));
-        System.out.println(Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 2)));
-        System.out.println(Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 3)));
+        assertEquals(DataBuffer.TYPE_DOUBLE, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+        assertEquals(99.19999694824219, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
+        assertEquals(-9999, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
+        assertEquals(testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
+        assertEquals(testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
+
+        modifiedRaster = RasterEditors.setRasterPixelType(testRaster, "F");
+
+        assertEquals(DataBuffer.TYPE_FLOAT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+        assertEquals(99.19999694824219, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
+        assertEquals(-9999, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
+        assertEquals(testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
+        assertEquals(testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
+
+
+        modifiedRaster = RasterEditors.setRasterPixelType(testRaster, "I");
+
         assertEquals(DataBuffer.TYPE_INT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+        assertEquals(99, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
+        assertEquals(-9999, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
+        assertEquals(testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
+        assertEquals(testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
 
-        // Additional verification: Check if the raster dimensions remain unchanged
+        modifiedRaster = RasterEditors.setRasterPixelType(testRaster, "S");
+        double[] expected = {-1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, -9999.0};
+
+        assertEquals(DataBuffer.TYPE_SHORT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+        assertEquals(99, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
+        assertEquals(-9999, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
+        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 4)));
+        assertEquals(testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
+        assertEquals(testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
+
+        modifiedRaster = RasterEditors.setRasterPixelType(testRaster, "US");
+        expected = new double[]{65526.0, 65527.0, 65528.0, 65529.0, 65530.0, 65531.0, 65532.0, 65533.0, 65534.0, 65535.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
+
+        assertEquals(DataBuffer.TYPE_USHORT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+        assertEquals(99, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
+        assertEquals(55537, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
+        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 3)));
+        assertEquals(testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
+        assertEquals(testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
+
+        modifiedRaster = RasterEditors.setRasterPixelType(testRaster, "B");
+
+        System.out.println("\nOriginal Band 1: "+Arrays.toString(MapAlgebra.bandAsArray(testRaster, 1))+", noDataValue: "+ RasterUtils.getNoDataValue(testRaster.getSampleDimension(0)));
+        System.out.println("Original Band 2: "+Arrays.toString(MapAlgebra.bandAsArray(testRaster, 2))+", noDataValue: "+ RasterUtils.getNoDataValue(testRaster.getSampleDimension(1)));
+        System.out.println("Original Band 3: "+Arrays.toString(MapAlgebra.bandAsArray(testRaster, 3))+", noDataValue: "+ RasterUtils.getNoDataValue(testRaster.getSampleDimension(2)));
+        System.out.println("Original Band 4: "+Arrays.toString(MapAlgebra.bandAsArray(testRaster, 4))+", noDataValue: "+ RasterUtils.getNoDataValue(testRaster.getSampleDimension(3)));
+
+        System.out.println("\nModified Band 1: "+Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 1))+", noDataValue: "+ RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)));
+        System.out.println("Modified Band 2: "+Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 2))+", noDataValue: "+ RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(1)));
+        System.out.println("Modified Band 3: "+Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 3))+", noDataValue: "+ RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(2)));
+        System.out.println("Modified Band 4: "+Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 4))+", noDataValue: "+ RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)));
+
+        assertEquals(DataBuffer.TYPE_BYTE, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+        assertEquals(99, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
+        assertEquals(99, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
         assertEquals(testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
         assertEquals(testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
     }
