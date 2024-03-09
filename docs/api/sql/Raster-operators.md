@@ -1076,15 +1076,6 @@ Output:
 
 Introduction: Returns summary stats consisting of count, sum, mean, stddev, min, max for a given band in raster. If band is not specified then it defaults to `1`.
 
-`statType` parameter (Since: `v1.6.0`) takes the following strings:
-
-- `count`: Total count of all pixels in the specified band
-- `sum`: Sum of all pixel values in the specified band
-- `mean`: Mean value of all pixel values in the specified band
-- `stddev`: Standard deviation of all pixels in the specified band
-- `min`: Minimum pixel value in the specified band
-- `max`: Maximum pixel value in the specified band
-
 !!!Note
     If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster.
     Set excludeNoDataValue to `false` to get count of all pixels in raster.
