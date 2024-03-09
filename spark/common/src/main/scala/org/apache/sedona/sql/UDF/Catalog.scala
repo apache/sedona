@@ -250,6 +250,7 @@ object Catalog {
     function[RS_Band](),
     function[RS_AddBand](),
     function[RS_SummaryStats](),
+    function[RS_SummaryStat](),
     function[RS_BandIsNoData](),
     function[RS_ConvexHull](),
     function[RS_RasterToWorldCoordX](),

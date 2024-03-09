@@ -65,6 +65,31 @@ public class RasterBandEditorsTest extends RasterTestBase{
     }
 
     @Test
+    public void testGetSummaryStat() throws IOException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+        raster = RasterBandEditors.setBandNoDataValue(raster, 1, 10.0, true);
+
+        // Test single output
+        double resultSummary = RasterBandAccessors.getSummaryStat(raster, "count", 1, false);
+        assertEquals(1036800, (int) resultSummary);
+
+        resultSummary = RasterBandAccessors.getSummaryStat(raster, "sum", 1, false);
+        assertEquals(207319567, (int) resultSummary);
+
+        resultSummary = RasterBandAccessors.getSummaryStat(raster, "mean", 1, false);
+        assertEquals(199, (int) resultSummary);
+
+        resultSummary = RasterBandAccessors.getSummaryStat(raster, "stddev", 1, false);
+        assertEquals(92, (int) resultSummary);
+
+        resultSummary = RasterBandAccessors.getSummaryStat(raster, "min", 1, false);
+        assertEquals(1, (int) resultSummary);
+
+        resultSummary = RasterBandAccessors.getSummaryStat(raster, "max", 1, false);
+        assertEquals(255, (int) resultSummary);
+    }
+
+    @Test
     public void testSetBandNoDataValueWithReplaceOptionRaster() throws IOException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
         double[] originalSummary = RasterBandAccessors.getSummaryStats(raster, 1, false);
@@ -79,25 +104,6 @@ public class RasterBandEditorsTest extends RasterTestBase{
         // 10.0 is the new no-data value
         int sumExpected = sumOG + (10 * 108608);
         assertEquals(sumExpected, sumActual);
-
-        // Test single output
-        resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false, "count");
-        assertEquals(1036800, (int) resultSummary[0]);
-
-        resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false, "sum");
-        assertEquals(sumExpected, (int) resultSummary[0]);
-
-        resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false, "mean");
-        assertEquals(199, (int) resultSummary[0]);
-
-        resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false, "stddev");
-        assertEquals(92, (int) resultSummary[0]);
-
-        resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false, "min");
-        assertEquals(1, (int) resultSummary[0]);
-
-        resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false, "max");
-        assertEquals(255, (int) resultSummary[0]);
 
         // Not replacing previous no-data value
         resultRaster = RasterBandEditors.setBandNoDataValue(raster, 1, 10.0);

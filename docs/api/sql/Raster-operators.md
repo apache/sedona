@@ -1033,9 +1033,48 @@ Output:
 6
 ```
 
+### RS_SummaryStat
+
+Introduction: Returns summary statistic for a particular band based on the `statType` parameter. The function defaults to band index of `1` when `band` is not specified and excludes noDataValue if `excludeNoDataValue` is not specified.
+
+`statType` parameter takes the following strings:
+
+- `count`: Total count of all pixels in the specified band
+- `sum`: Sum of all pixel values in the specified band
+- `mean`: Mean value of all pixel values in the specified band
+- `stddev`: Standard deviation of all pixels in the specified band
+- `min`: Minimum pixel value in the specified band
+- `max`: Maximum pixel value in the specified band
+
+!!!Note
+    If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster.
+    Set excludeNoDataValue to `false` to get count of all pixels in raster.
+
+Formats:
+
+`RS_SummaryStat(raster: Raster, statType: String, band: Integer = 1, excludeNoDataValue: Boolean = true)`
+
+`RS_SummaryStat(raster: Raster, statType: String, band: Integer = 1)`
+
+`RS_SummaryStat(raster: Raster, statType: String)`
+
+Since: `v1.6.0`
+
+SQL Example
+
+```sql
+SELECT RS_SummaryStat(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), "stddev", 1, false)
+```
+
+Output:
+
+```
+9.4678403028357
+```
+
 ### RS_SummaryStats
 
-Introduction: Returns summary stats consisting of count, sum, mean, stddev, min, max for a given band in raster. If band is not specified then it defaults to `1`. If the statistic type (Since: `v1.6.0`), `statType`,is not specified, it returns all statistics.
+Introduction: Returns summary stats consisting of count, sum, mean, stddev, min, max for a given band in raster. If band is not specified then it defaults to `1`.
 
 `statType` parameter (Since: `v1.6.0`) takes the following strings:
 
@@ -1051,9 +1090,9 @@ Introduction: Returns summary stats consisting of count, sum, mean, stddev, min,
     Set excludeNoDataValue to `false` to get count of all pixels in raster.
 
 !!!Note
-    If the mentioned band index doesn't exist or an invalid statistic type is specified, this will throw an `IllegalArgumentException`.
+    If the mentioned band index doesn't exist, this will throw an `IllegalArgumentException`.
 
-`RS_SummaryStats(raster: Raster, band: Integer = 1, excludeNoDataValue: Boolean = true, statType: String)`
+Formats:
 
 `RS_SummaryStats(raster: Raster, band: Integer = 1, excludeNoDataValue: Boolean = true)`
 
@@ -1062,18 +1101,6 @@ Introduction: Returns summary stats consisting of count, sum, mean, stddev, min,
 `RS_SummaryStats(raster: Raster)`
 
 Since: `v1.5.0`
-
-SQL Example
-
-```sql
-SELECT RS_SummaryStats(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1, false, "sum")
-```
-
-Output:
-
-```
-204.0
-```
 
 SQL Example
 

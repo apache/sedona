@@ -1037,6 +1037,29 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertTrue(expected.equals(actual))
     }
 
+    it("Passed RS_SummaryStat with raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+
+      var actual = df.selectExpr("RS_SummaryStat(raster, 'count')").first().getDouble(0)
+      assertEquals(928192.0, actual, 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStat(raster, 'sum', 1)").first().getDouble(0)
+      assertEquals(2.06233487E8, actual, 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStat(raster, 'mean', 1, false)").first().getDouble(0)
+      assertEquals(198.91347125771605, actual, 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStat(raster, 'stddev', 1, false)").first().getDouble(0)
+      assertEquals(95.09054096106192, actual, 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStat(raster, 'min', 1, false)").first().getDouble(0)
+      assertEquals(0.0, actual, 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStat(raster, 'max', 1, false)").first().getDouble(0)
+      assertEquals(255.0, actual, 0.1d)
+    }
+
     it("Passed RS_SummaryStats with raster") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")
@@ -1063,24 +1086,6 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(70.20559521132097, actual(3), 1e-6d)
       assertEquals(1.0, actual(4), 0.1d)
       assertEquals(255.0, actual(5), 0.1d)
-
-      actual = df.selectExpr("RS_SummaryStats(raster, 1, false, 'count')").first().getSeq(0)
-      assertEquals(1036800.0, actual.head, 0.1d)
-
-      actual = df.selectExpr("RS_SummaryStats(raster, 1, false, 'sum')").first().getSeq(0)
-      assertEquals(2.06233487E8, actual.head, 0.1d)
-
-      actual = df.selectExpr("RS_SummaryStats(raster, 1, false, 'mean')").first().getSeq(0)
-      assertEquals(198.91347125771605, actual.head, 0.1d)
-
-      actual = df.selectExpr("RS_SummaryStats(raster, 1, false, 'stddev')").first().getSeq(0)
-      assertEquals(95.09054096106192, actual.head, 0.1d)
-
-      actual = df.selectExpr("RS_SummaryStats(raster, 1, false, 'min')").first().getSeq(0)
-      assertEquals(0.0, actual.head, 0.1d)
-
-      actual = df.selectExpr("RS_SummaryStats(raster, 1, false, 'max')").first().getSeq(0)
-      assertEquals(255.0, actual.head, 0.1d)
     }
 
     it("Passed RS_BandIsNoData") {
