@@ -1033,7 +1033,7 @@ Output:
 6
 ```
 
-### RS_SummaryStat
+### RS_SummaryStats
 
 Introduction: Returns summary statistic for a particular band based on the `statType` parameter. The function defaults to band index of `1` when `band` is not specified and excludes noDataValue if `excludeNoDataValue` is not specified.
 
@@ -1052,18 +1052,18 @@ Introduction: Returns summary statistic for a particular band based on the `stat
 
 Formats:
 
-`RS_SummaryStat(raster: Raster, statType: String, band: Integer = 1, excludeNoDataValue: Boolean = true)`
+`RS_SummaryStats(raster: Raster, statType: String, band: Integer = 1, excludeNoDataValue: Boolean = true)`
 
-`RS_SummaryStat(raster: Raster, statType: String, band: Integer = 1)`
+`RS_SummaryStats(raster: Raster, statType: String, band: Integer = 1)`
 
-`RS_SummaryStat(raster: Raster, statType: String)`
+`RS_SummaryStats(raster: Raster, statType: String)`
 
 Since: `v1.6.0`
 
 SQL Example
 
 ```sql
-SELECT RS_SummaryStat(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), "stddev", 1, false)
+SELECT RS_SummaryStats(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), "stddev", 1, false)
 ```
 
 Output:
@@ -1072,7 +1072,7 @@ Output:
 9.4678403028357
 ```
 
-### RS_SummaryStats
+### RS_SummaryStatsAll
 
 Introduction: Returns summary stats consisting of count, sum, mean, stddev, min, max for a given band in raster. If band is not specified then it defaults to `1`.
 
@@ -1085,18 +1085,18 @@ Introduction: Returns summary stats consisting of count, sum, mean, stddev, min,
 
 Formats:
 
-`RS_SummaryStats(raster: Raster, band: Integer = 1, excludeNoDataValue: Boolean = true)`
+`RS_SummaryStatsAll(raster: Raster, band: Integer = 1, excludeNoDataValue: Boolean = true)`
 
-`RS_SummaryStats(raster: Raster, band: Integer = 1)`
+`RS_SummaryStatsAll(raster: Raster, band: Integer = 1)`
 
-`RS_SummaryStats(raster: Raster)`
+`RS_SummaryStatsAll(raster: Raster)`
 
 Since: `v1.5.0`
 
 SQL Example
 
 ```sql
-SELECT RS_SummaryStats(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1, false)
+SELECT RS_SummaryStatsAll(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1, false)
 ```
 
 Output:
@@ -1108,7 +1108,7 @@ Output:
 SQL Example
 
 ```sql
-SELECT RS_SummaryStats(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1)
+SELECT RS_SummaryStatsAll(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1)
 ```
 
 Output:
