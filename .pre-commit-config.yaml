@@ -44,7 +44,7 @@ repos:
       - id: markdownlint
         name: Run markdownlint
         description: Check Markdown files with markdownlint
-        entry: markdownlint -c .github/linters/.markdown-lint.yml .
+        args: [--config=.github/linters/.markdown-lint.yml]
         exclude: ^\.github/.*$
         types: [markdown]
         files: \.(md|mdown|markdown)$
