@@ -85,23 +85,10 @@ public class RasterEditors
             double[] samples = originalData.getSamples(0, 0, width, height, band, (double[]) null);
             modifiedRaster.setSamples(0, 0, width, height, band, samples);
             if (!Double.isNaN(RasterUtils.getNoDataValue(sampleDimensions[band]))) {
-                System.out.println("NoDataValue: "+ RasterUtils.getNoDataValue(sampleDimensions[band])+", newNoDataValue: "+castRasterDataType(RasterUtils.getNoDataValue(sampleDimensions[band]), newDataType));
+//                System.out.println("NoDataValue: "+ RasterUtils.getNoDataValue(sampleDimensions[band])+", newNoDataValue: "+castRasterDataType(RasterUtils.getNoDataValue(sampleDimensions[band]), newDataType));
                 sampleDimensions[band] = RasterUtils.createSampleDimensionWithNoDataValue(sampleDimensions[band], castRasterDataType(RasterUtils.getNoDataValue(sampleDimensions[band]), newDataType));
             }
         }
-//        for (int band = 0; band < numBands; band++) {
-//            for (int y = 0; y < height; y++) {
-//                for (int x = 0; x < width; x++) {
-//                    double originalValue = originalData.getSampleDouble(x, y, band);
-//                    double convertedValue = castRasterDataType(originalValue, newDataType);
-//                    modifiedRaster.setSample(x, y, band, convertedValue);
-//                }
-//            }
-//            if (!Double.isNaN(RasterUtils.getNoDataValue(sampleDimensions[band]))) {
-//                System.out.println("NoDataValue: "+ RasterUtils.getNoDataValue(sampleDimensions[band])+", newNoDataValue: "+castRasterDataType(RasterUtils.getNoDataValue(sampleDimensions[band]), newDataType));
-//                sampleDimensions[band] = RasterUtils.createSampleDimensionWithNoDataValue(sampleDimensions[band], castRasterDataType(RasterUtils.getNoDataValue(sampleDimensions[band]), newDataType));
-//            }
-//        }
 
         // Clone the original GridCoverage2D with the modified raster
         return RasterUtils.clone(modifiedRaster, raster.getGridGeometry(), sampleDimensions, raster, null, true);
@@ -418,26 +405,5 @@ public class RasterEditors
                 return value;
         }
     }
-
-//    private static double castRasterDataType(double value, int dataType) {
-//        switch (dataType) {
-//            case DataBuffer.TYPE_BYTE:
-//                // Cast to byte and clamp values to byte range
-//                return (byte) Math.max(Math.min(value, 255), 0);
-//            case DataBuffer.TYPE_USHORT:
-//                // Cast to unsigned short (0-65535) range
-//                return (int) Math.max(Math.min(value, 65535), 0);
-//            case DataBuffer.TYPE_SHORT:
-//                return (short) value;
-//            case DataBuffer.TYPE_INT:
-//                return (int) value;
-//            case DataBuffer.TYPE_FLOAT:
-//                return (float) value;
-//            case DataBuffer.TYPE_DOUBLE:
-//            default:
-//                return value;
-//        }
-//    }
-
 
 }

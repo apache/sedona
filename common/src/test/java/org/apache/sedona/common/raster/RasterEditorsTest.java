@@ -35,7 +35,6 @@ public class RasterEditorsTest extends RasterTestBase {
 
     @Test
     public void testSetBandPixelType() throws FactoryException {
-        // Create a test raster using makeEmptyRaster
         GridCoverage2D testRaster = RasterConstructors.makeEmptyRaster(4, "F", 4, 4, 0, 0, 1);
         double[] bandValues1 = {1.1,2.1,3.1,4.1,5.1,6.1,7.1,8.1,9.1,10.1,11.1,12.1,13.1,14.1,15.1,99.2};
         double[] bandValues2 = {17.9, 18.9, 19.9, 20.9, 21.9, 22.9, 23.9, 24.9, 25.9, 26.9, 27.9, 28.9, 29.9, 30.9, 31.9, 32.9};
@@ -95,15 +94,6 @@ public class RasterEditorsTest extends RasterTestBase {
         assertEquals(testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
 
         modifiedRaster = RasterEditors.setPixelType(testRaster, "B");
-//        System.out.println("\nOriginal Band 1: "+Arrays.toString(MapAlgebra.bandAsArray(testRaster, 1))+", noDataValue: "+ RasterUtils.getNoDataValue(testRaster.getSampleDimension(0)));
-//        System.out.println("Original Band 2: "+Arrays.toString(MapAlgebra.bandAsArray(testRaster, 2))+", noDataValue: "+ RasterUtils.getNoDataValue(testRaster.getSampleDimension(1)));
-//        System.out.println("Original Band 3: "+Arrays.toString(MapAlgebra.bandAsArray(testRaster, 3))+", noDataValue: "+ RasterUtils.getNoDataValue(testRaster.getSampleDimension(2)));
-//        System.out.println("Original Band 4: "+Arrays.toString(MapAlgebra.bandAsArray(testRaster, 4))+", noDataValue: "+ RasterUtils.getNoDataValue(testRaster.getSampleDimension(3)));
-//
-//        System.out.println("\nModified Band 1: "+Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 1))+", noDataValue: "+ RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)));
-//        System.out.println("Modified Band 2: "+Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 2))+", noDataValue: "+ RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(1)));
-//        System.out.println("Modified Band 3: "+Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 3))+", noDataValue: "+ RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(2)));
-//        System.out.println("Modified Band 4: "+Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 4))+", noDataValue: "+ RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)));
 
         assertEquals(DataBuffer.TYPE_BYTE, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
         assertEquals(99, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
