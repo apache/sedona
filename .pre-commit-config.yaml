@@ -34,6 +34,8 @@ repos:
       - id: detect-private-key
       - id: end-of-file-fixer
         exclude: \.svg$|^docs/image|^spark/common/src/test/resources
+      - id: mixed-line-ending
+        exclude: \.csv$
       - id: trailing-whitespace
         exclude: ^docs-overrides/main\.html$|\.Rd$
   - repo: https://github.com/igorshubovych/markdownlint-cli
