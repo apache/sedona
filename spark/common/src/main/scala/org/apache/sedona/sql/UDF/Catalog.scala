@@ -217,6 +217,7 @@ object Catalog {
     function[RS_SetSRID](),
     function[RS_SetGeoReference](),
     function[RS_SetBandNoDataValue](),
+    function[RS_SetPixelType](),
     function[RS_SetValues](),
     function[RS_SetValue](),
     function[RS_SRID](),

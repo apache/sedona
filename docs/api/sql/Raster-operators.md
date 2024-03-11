@@ -1767,6 +1767,35 @@ Output:
 -3.000000
 ```
 
+### RS_SetPixelType
+
+Introduction: Returns a modified raster with the desired pixel data type.
+
+The `dataType` parameter accepts one of the following strings.
+
+- "D" - 64 bits Double
+- "F" - 32 bits Float
+- "I" - 32 bits signed Integer
+- "S" - 16 bits signed Short
+- "US" - 16 bits unsigned Short
+- "B" - 8 bits unsigned Byte
+
+!!!note
+    If the specified `dataType` is narrower than the original data type, the function will truncate the pixel values to fit the new data type range.
+
+Format:
+```
+RS_SetPixelType(raster: Raster, dataType: String)
+```
+
+Since: `v1.6.0`
+
+SQL Example:
+
+```sql
+RS_SetPixelType(raster, "I")
+```
+
 ### RS_SetValue
 
 Introduction: Returns a raster by replacing the value of pixel specified by `colX` and `rowY`.
