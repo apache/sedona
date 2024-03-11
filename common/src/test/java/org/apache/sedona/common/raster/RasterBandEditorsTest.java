@@ -65,14 +65,39 @@ public class RasterBandEditorsTest extends RasterTestBase{
     }
 
     @Test
+    public void testGetSummaryStats() throws IOException {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+        raster = RasterBandEditors.setBandNoDataValue(raster, 1, 10.0, true);
+
+        // Test single output
+        double resultSummary = RasterBandAccessors.getSummaryStats(raster, "count", 1, false);
+        assertEquals(1036800, (int) resultSummary);
+
+        resultSummary = RasterBandAccessors.getSummaryStats(raster, "sum", 1, false);
+        assertEquals(207319567, (int) resultSummary);
+
+        resultSummary = RasterBandAccessors.getSummaryStats(raster, "mean", 1, false);
+        assertEquals(199, (int) resultSummary);
+
+        resultSummary = RasterBandAccessors.getSummaryStats(raster, "stddev", 1, false);
+        assertEquals(92, (int) resultSummary);
+
+        resultSummary = RasterBandAccessors.getSummaryStats(raster, "min", 1, false);
+        assertEquals(1, (int) resultSummary);
+
+        resultSummary = RasterBandAccessors.getSummaryStats(raster, "max", 1, false);
+        assertEquals(255, (int) resultSummary);
+    }
+
+    @Test
     public void testSetBandNoDataValueWithReplaceOptionRaster() throws IOException {
         GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
-        double[] originalSummary = RasterBandAccessors.getSummaryStats(raster, 1, false);
+        double[] originalSummary = RasterBandAccessors.getSummaryStatsAll(raster, 1, false);
         int sumOG = (int) originalSummary[1];
 
         assertEquals(206233487, sumOG);
         GridCoverage2D resultRaster = RasterBandEditors.setBandNoDataValue(raster, 1, 10.0, true);
-        double[] resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false);
+        double[] resultSummary = RasterBandAccessors.getSummaryStatsAll(resultRaster, 1, false);
         int sumActual = (int) resultSummary[1];
 
         // 108608 is the total no-data values in the raster
@@ -82,7 +107,7 @@ public class RasterBandEditorsTest extends RasterTestBase{
 
         // Not replacing previous no-data value
         resultRaster = RasterBandEditors.setBandNoDataValue(raster, 1, 10.0);
-        resultSummary = RasterBandAccessors.getSummaryStats(resultRaster, 1, false);
+        resultSummary = RasterBandAccessors.getSummaryStatsAll(resultRaster, 1, false);
         sumActual = (int) resultSummary[1];
         assertEquals(sumOG, sumActual);
     }

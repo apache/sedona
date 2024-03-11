@@ -301,7 +301,35 @@ public class RasterBandAccessors {
         return statObjects;
     }
 
-    public static double[] getSummaryStats(GridCoverage2D rasterGeom, int band, boolean excludeNoDataValue) {
+    public static double getSummaryStats(GridCoverage2D rasterGeom, String statType, int band, boolean excludeNoDataValue) {
+        double[] stats = getSummaryStatsAll(rasterGeom,band,excludeNoDataValue);
+
+        if ("count".equalsIgnoreCase(statType)) {
+            return stats[0];
+        } else if ("sum".equalsIgnoreCase(statType)) {
+            return stats[1];
+        } else if ("mean".equalsIgnoreCase(statType)) {
+            return stats[2];
+        } else if ("stddev".equalsIgnoreCase(statType)) {
+            return stats[3];
+        } else if ("min".equalsIgnoreCase(statType)) {
+            return stats[4];
+        } else if ("max".equalsIgnoreCase(statType)) {
+            return stats[5];
+        } else {
+            throw new IllegalArgumentException("Invalid 'statType': '" + statType + "'. Expected one of: 'count', 'sum', 'mean', 'stddev', 'min', 'max'.");
+        }
+    }
+
+    public static double getSummaryStats(GridCoverage2D rasterGeom, String statType, int band) {
+        return getSummaryStats(rasterGeom, statType, band, true);
+    }
+
+    public static double getSummaryStats(GridCoverage2D rasterGeom, String statType) {
+        return getSummaryStats(rasterGeom, statType, 1, true);
+    }
+
+    public static double[] getSummaryStatsAll(GridCoverage2D rasterGeom, int band, boolean excludeNoDataValue) {
         RasterUtils.ensureBand(rasterGeom, band);
         Raster raster = RasterUtils.getRaster(rasterGeom.getRenderedImage());
         int height = RasterAccessors.getHeight(rasterGeom), width = RasterAccessors.getWidth(rasterGeom);
@@ -312,7 +340,7 @@ public class RasterBandAccessors {
         if (excludeNoDataValue) {
             pixelData = new ArrayList<>();
             Double noDataValue = RasterBandAccessors.getBandNoDataValue(rasterGeom, band);
-            for (double pixel: pixels) {
+            for (double pixel : pixels) {
                 if (noDataValue == null || pixel != noDataValue) {
                     pixelData.add(pixel);
                 }
@@ -340,12 +368,12 @@ public class RasterBandAccessors {
         return new double[]{count, sum, mean, stddev, min, max};
     }
 
-    public static double[] getSummaryStats(GridCoverage2D raster, int band) {
-        return getSummaryStats(raster, band, true);
+    public static double[] getSummaryStatsAll(GridCoverage2D raster, int band) {
+        return getSummaryStatsAll(raster, band, true);
     }
 
-    public static double[] getSummaryStats(GridCoverage2D raster) {
-        return getSummaryStats(raster, 1, true);
+    public static double[] getSummaryStatsAll(GridCoverage2D raster) {
+        return getSummaryStatsAll(raster, 1, true);
     }
 
 //  Adding the function signature when InferredExpression supports function with same arity but different argument types

@@ -249,6 +249,7 @@ object Catalog {
     function[RS_Clip](),
     function[RS_Band](),
     function[RS_AddBand](),
+    function[RS_SummaryStatsAll](),
     function[RS_SummaryStats](),
     function[RS_BandIsNoData](),
     function[RS_ConvexHull](),
