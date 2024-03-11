@@ -60,9 +60,9 @@ public class RasterEditors
     /**
      * Changes the band pixel type of a specific band of a raster.
      *
-     * @param raster      The input raster.
+     * @param raster The input raster.
      * @param dataType The desired data type of the pixel.
-     * @return The modified raster with updated band pixel type.
+     * @return The modified raster with updated pixel type.
      */
 
     public static GridCoverage2D setPixelType(GridCoverage2D raster, String dataType) {
@@ -85,7 +85,6 @@ public class RasterEditors
             double[] samples = originalData.getSamples(0, 0, width, height, band, (double[]) null);
             modifiedRaster.setSamples(0, 0, width, height, band, samples);
             if (!Double.isNaN(RasterUtils.getNoDataValue(sampleDimensions[band]))) {
-//                System.out.println("NoDataValue: "+ RasterUtils.getNoDataValue(sampleDimensions[band])+", newNoDataValue: "+castRasterDataType(RasterUtils.getNoDataValue(sampleDimensions[band]), newDataType));
                 sampleDimensions[band] = RasterUtils.createSampleDimensionWithNoDataValue(sampleDimensions[band], castRasterDataType(RasterUtils.getNoDataValue(sampleDimensions[band]), newDataType));
             }
         }
