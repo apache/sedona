@@ -21,12 +21,14 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Assert;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.io.ParseException;
+import org.opengis.coverage.SampleDimensionType;
 import org.opengis.geometry.DirectPosition;
+import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import java.awt.image.DataBuffer;
+import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -244,6 +246,65 @@ public class RasterConstructorsTest
         assertEquals(upperLeftY - heightInPixel * (pixelSize + 1), envelope.getEnvelopeInternal().getMinY(), 0.001);
         assertEquals(upperLeftY, envelope.getEnvelopeInternal().getMaxY(), 0.001);
         assertEquals("SIGNED_32BITS", gridCoverage2D.getSampleDimension(0).getSampleDimensionType().name());
+    }
+
+    @Test
+    public void testMakeNonEmptyRaster(){
+        double[] bandData = new double[10000];
+        for (int i = 0; i < bandData.length; i++) {
+            bandData[i] = i;
+        }
+        GridCoverage2D ref = RasterConstructors.makeNonEmptyRaster(1, "d", 100, 100,
+                100, 80, 10, -10, 0, 0, 4326,
+                new double[][] {bandData});
+
+        // Test with empty band data
+        Assert.assertThrows(IllegalArgumentException.class, () -> RasterConstructors.makeNonEmptyRaster(ref, "D", new double[0]));
+
+        // Test with single band
+        double[] values = new double[10000];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = i * i;
+        }
+        GridCoverage2D raster = RasterConstructors.makeNonEmptyRaster(ref, "D", values);
+        assertEquals(100, raster.getRenderedImage().getWidth());
+        assertEquals(100, raster.getRenderedImage().getHeight());
+        assertEquals(1, raster.getNumSampleDimensions());
+        assertEquals(ref.getGridGeometry(), raster.getGridGeometry());
+        assertEquals(ref.getCoordinateReferenceSystem(), raster.getCoordinateReferenceSystem());
+        Raster r = RasterUtils.getRaster(raster.getRenderedImage());
+        for (int i = 0; i < values.length; i++) {
+            assertEquals(values[i], r.getSampleDouble(i % 100, i / 100, 0), 0.001);
+        }
+
+        // Test with multi band
+        values = new double[20000];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = i * i;
+        }
+        raster = RasterConstructors.makeNonEmptyRaster(ref, "D", values);
+        assertEquals(100, raster.getRenderedImage().getWidth());
+        assertEquals(100, raster.getRenderedImage().getHeight());
+        assertEquals(2, raster.getNumSampleDimensions());
+        assertEquals(SampleDimensionType.REAL_64BITS, raster.getSampleDimension(0).getSampleDimensionType());
+        assertEquals(ref.getGridGeometry(), raster.getGridGeometry());
+        assertEquals(ref.getCoordinateReferenceSystem(), raster.getCoordinateReferenceSystem());
+        r = RasterUtils.getRaster(raster.getRenderedImage());
+        for (int i = 0; i < values.length; i++) {
+            assertEquals(values[i], r.getSampleDouble(i % 100, (i / 100) % 100, i / 10000), 0.001);
+        }
+
+        // Test with integer data type
+        values = new double[10000];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = 10.0 + i;
+        }
+        raster = RasterConstructors.makeNonEmptyRaster(ref, "US", values);
+        assertEquals(SampleDimensionType.UNSIGNED_16BITS, raster.getSampleDimension(0).getSampleDimensionType());
+        r = RasterUtils.getRaster(raster.getRenderedImage());
+        for (int i = 0; i < values.length; i++) {
+            assertEquals(values[i], r.getSampleDouble(i % 100, i / 100, 0), 0.001);
+        }
     }
 
     @Test
