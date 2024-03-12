@@ -848,6 +848,14 @@ public class Functions {
         }
     }
 
+    public static class ST_S2ToGeom extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry[].class)
+        public Geometry[] eval(@DataTypeHint(value = "ARRAY<BIGINT>") Long[] cellIds
+        ) {
+            return org.apache.sedona.common.Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+        }
+    }
+
     public static class ST_H3CellIDs extends ScalarFunction {
         @DataTypeHint(value = "ARRAY<BIGINT>")
         public Long[] eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,

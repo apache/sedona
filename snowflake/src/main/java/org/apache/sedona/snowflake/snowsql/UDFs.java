@@ -1005,6 +1005,13 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"cellIds"})
+    public static byte[] ST_S2ToGeom(long[] cellIds) {
+        return GeometrySerde.serialize(
+                Functions.s2ToGeom(cellIds)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static int ST_SRID(byte[] geometry) {
         return Functions.getSRID(

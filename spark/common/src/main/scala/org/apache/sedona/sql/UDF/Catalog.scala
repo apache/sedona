@@ -161,6 +161,7 @@ object Catalog {
     function[ST_MLineFromText](0),
     function[ST_Split](),
     function[ST_S2CellIDs](),
+    function[ST_S2ToGeom](),
     function[ST_GeometricMedian](1e-6, 1000, false),
     function[ST_DistanceSphere](),
     function[ST_DistanceSpheroid](),

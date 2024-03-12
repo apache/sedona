@@ -561,6 +561,27 @@ public class FunctionsTest extends TestBase {
         assertEquals(expects, levels);
     }
 
+    @Test
+    public void testS2ToGeom() throws ParseException {
+        Geometry target = GEOMETRY_FACTORY.createPolygon(
+                coordArray(0.1, 0.1, 0.5, 0.1, 1.0, 0.3, 1.0, 1.0, 0.1, 1.0, 0.1, 0.1)
+        );
+        System.out.println(target);
+//        System.out.println("-----------------------------");
+        System.out.println(Arrays.toString(Functions.s2CellIDs(Constructors.point(0.0, 1.0), 3)));
+        System.out.println(Functions.s2ToGeom(new long[]{1170935903116328960L})[0]);
+        System.out.println(Functions.buffer(Constructors.geomFromWKT("POLYGON ((-36.609392788630245 -38.169532607255846, -36.609392706252954 -38.169532607255846, -36.609392706252954 -38.169532507473015, -36.609392788630245 -38.169532507473015, -36.609392788630245 -38.169532607255846))", 0), 5));
+//        System.out.println(Functions.reducePrecision(Functions.s2ToGeom(new long[]{1154047404513689600L})[0], 5));
+//        System.out.println("-----------------------------");
+        Long[] cellIds = Functions.s2CellIDs(target, 10);
+        Geometry[] polygons = Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+        System.out.println("100: "+polygons[100].intersects(target));
+//        System.out.println(Predicates.contains(target, ));
+        assertTrue(polygons[0].intersects(target));
+        assertTrue(polygons[20].intersects(target));
+        assertTrue(polygons[100].intersects(target));
+    }
+
     /**
      * Test H3CellIds: pass in all the types of geometry, test if the function cover
      */

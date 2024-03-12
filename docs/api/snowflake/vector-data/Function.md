@@ -1823,6 +1823,26 @@ Output:
 +------------------------------------------------------------------------------------------------------------------------------+
 ```
 
+## ST_S2ToGeom
+
+Introduction: Returns an array of Polygons for the corresponding S2 cell IDs.
+
+Format: `ST_S2ToGeom(cellIds: Array[Long])`
+
+Since: `v1.6.0`
+
+SQL Example:
+
+```sql
+SELECT ST_S2ToGeom(array(11540474045136890))
+```
+
+Output:
+
+```
+[POLYGON ((-36.609392788630245 -38.169532607255846, -36.609392706252954 -38.169532607255846, -36.609392706252954 -38.169532507473015, -36.609392788630245 -38.169532507473015, -36.609392788630245 -38.169532607255846))]
+```
+
 ## ST_SetPoint
 
 Introduction: Replace Nth point of linestring with given point. Index is 0-based. Negative index are counted backwards, e.g., -1 is last point.
