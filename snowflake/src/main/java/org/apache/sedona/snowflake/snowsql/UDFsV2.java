@@ -855,8 +855,8 @@ public class UDFsV2
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"cellIds"}, argTypes = {"long[]"})
-    public static byte[] ST_S2ToGeom(long[] cellIds) {
-        return GeometrySerde.serialize(
+    public static String ST_S2ToGeom(long[] cellIds) {
+        return GeometrySerde.serGeoJson(
                 Functions.s2ToGeom(cellIds)
         );
     }

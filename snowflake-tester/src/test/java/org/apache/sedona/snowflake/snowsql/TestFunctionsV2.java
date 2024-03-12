@@ -713,9 +713,9 @@ public class TestFunctionsV2
 
     @Test
     public void test_ST_S2ToGeom() {
-        registerUDFV2("ST_S2ToGeom", String.class);
+        registerUDFV2("ST_S2ToGeom", long[].class);
         verifySqlSingleRes(
-                "select sedona.ST_ReducePrecision(sedona.ST_S2ToGeom(array(1154047404513689600))[0], 5)",
+                "select sedona.ST_ReducePrecision(sedona.ST_S2ToGeom(ARRAY_CONSTRUCT(1154047404513689600))[0], 5)",
                 "POLYGON ((0 2.46041, 2.46041 2.46041, 2.46041 0, 0 0, 0 2.46041))"
         );
     }
