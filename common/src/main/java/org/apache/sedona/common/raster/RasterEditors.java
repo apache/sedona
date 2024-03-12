@@ -21,6 +21,7 @@ package org.apache.sedona.common.raster;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.CoverageFactoryFinder;
+import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridEnvelope2D;
@@ -29,7 +30,9 @@ import org.geotools.coverage.processing.Operations;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.opengis.coverage.SampleDimensionType;
 import org.opengis.coverage.grid.GridCoverage;
+import org.opengis.geometry.Envelope;
 import org.opengis.metadata.spatial.PixelOrientation;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -39,18 +42,57 @@ import org.opengis.referencing.operation.MathTransform2D;
 import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.Interpolation;
+import javax.media.jai.RasterFactory;
+import java.awt.*;
 import java.awt.geom.Point2D;
-import java.awt.image.DataBuffer;
-import java.awt.image.RenderedImage;
+import java.awt.image.*;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 
+import static java.lang.Double.NaN;
 import static org.apache.sedona.common.raster.MapAlgebra.addBandFromArray;
 import static org.apache.sedona.common.raster.MapAlgebra.bandAsArray;
 
 public class RasterEditors
 {
+
+    /**
+     * Changes the band pixel type of a specific band of a raster.
+     *
+     * @param raster The input raster.
+     * @param dataType The desired data type of the pixel.
+     * @return The modified raster with updated pixel type.
+     */
+
+    public static GridCoverage2D setPixelType(GridCoverage2D raster, String dataType) {
+        int newDataType = RasterUtils.getDataTypeCode(dataType);
+
+        // Extracting the original data
+        RenderedImage originalImage = raster.getRenderedImage();
+        Raster originalData = RasterUtils.getRaster(originalImage);
+
+        int width = originalImage.getWidth();
+        int height = originalImage.getHeight();
+        int numBands = originalImage.getSampleModel().getNumBands();
+
+        // Create a new writable raster with the specified data type
+        WritableRaster modifiedRaster = RasterFactory.createBandedRaster(newDataType, width, height, numBands, null);
+
+        // Populate modified raster and recreate sample dimensions
+        GridSampleDimension[] sampleDimensions = raster.getSampleDimensions();
+        for (int band = 0; band < numBands; band++) {
+            double[] samples = originalData.getSamples(0, 0, width, height, band, (double[]) null);
+            modifiedRaster.setSamples(0, 0, width, height, band, samples);
+            if (!Double.isNaN(RasterUtils.getNoDataValue(sampleDimensions[band]))) {
+                sampleDimensions[band] = RasterUtils.createSampleDimensionWithNoDataValue(sampleDimensions[band], castRasterDataType(RasterUtils.getNoDataValue(sampleDimensions[band]), newDataType));
+            }
+        }
+
+        // Clone the original GridCoverage2D with the modified raster
+        return RasterUtils.clone(modifiedRaster, raster.getGridGeometry(), sampleDimensions, raster, null, true);
+    }
+
     public static GridCoverage2D setSrid(GridCoverage2D raster, int srid)
     {
         CoordinateReferenceSystem crs;
@@ -345,7 +387,10 @@ public class RasterEditors
     private static double castRasterDataType(double value, int dataType) {
         switch (dataType) {
             case DataBuffer.TYPE_BYTE:
-                return (byte) value;
+                // Cast to unsigned byte (0-255)
+                double remainder = value%256;
+                double v = (remainder < 0) ? remainder+256 : remainder;
+                return (int) v;
             case DataBuffer.TYPE_SHORT:
                 return (short) value;
             case DataBuffer.TYPE_INT:

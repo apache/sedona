@@ -37,6 +37,12 @@ case class RS_SetGeoReference(inputExpressions: Seq[Expression]) extends Inferre
   }
 }
 
+case class RS_SetPixelType(inputExpressions: Seq[Expression]) extends InferredExpression(RasterEditors.setPixelType _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class RS_Resample(inputExpressions: Seq[Expression]) extends InferredExpression(
   nullTolerantInferrableFunction4(RasterEditors.resample), nullTolerantInferrableFunction5(RasterEditors.resample),
   nullTolerantInferrableFunction7(RasterEditors.resample)) {

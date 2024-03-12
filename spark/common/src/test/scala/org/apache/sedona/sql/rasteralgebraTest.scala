@@ -229,6 +229,35 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(result4.isInstanceOf[GridCoverage2D])
     }
 
+    it("should pass RS_SetPixelType") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+
+      val df1 = df.selectExpr("RS_SetPixelType(raster, 'D') as modifiedRaster")
+      val result1 = df1.selectExpr("RS_BandPixelType(modifiedRaster)").first().get(0).toString
+      assert(result1 == "REAL_64BITS")
+
+      val df2 = df.selectExpr("RS_SetPixelType(raster, 'F') as modifiedRaster")
+      val result2 = df2.selectExpr("RS_BandPixelType(modifiedRaster)").first().get(0).toString
+      assert(result2 == "REAL_32BITS")
+
+      val df3 = df.selectExpr("RS_SetPixelType(raster, 'I') as modifiedRaster")
+      val result3 = df3.selectExpr("RS_BandPixelType(modifiedRaster)").first().get(0).toString
+      assert(result3 == "SIGNED_32BITS")
+
+      val df4 = df.selectExpr("RS_SetPixelType(raster, 'S') as modifiedRaster")
+      val result4 = df4.selectExpr("RS_BandPixelType(modifiedRaster)").first().get(0).toString
+      assert(result4 == "SIGNED_16BITS")
+
+      val df5 = df.selectExpr("RS_SetPixelType(raster, 'US') as modifiedRaster")
+      val result5 = df5.selectExpr("RS_BandPixelType(modifiedRaster)").first().get(0).toString
+      assert(result5 == "UNSIGNED_16BITS")
+
+      val df6 = df.selectExpr("RS_SetPixelType(raster, 'B') as modifiedRaster")
+      val result6 = df6.selectExpr("RS_BandPixelType(modifiedRaster)").first().get(0).toString
+      assert(result6 == "UNSIGNED_8BITS")
+    }
+
     it("should pass RS_Array") {
       val df = sparkSession.sql("SELECT RS_Array(6, 1e-6) as band")
       val result = df.first().getAs[mutable.WrappedArray[Double]](0)
