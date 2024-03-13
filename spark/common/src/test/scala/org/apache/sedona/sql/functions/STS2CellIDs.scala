@@ -100,4 +100,24 @@ class STS2CellIDs extends TestBaseScala with Matchers with GeometrySample with G
       )
     }
   }
+
+  describe("should pass ST_S2ToGeom") {
+    it("should intersect with the target geometry") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))') as geom")
+      val df = baseDf.selectExpr("ST_S2ToGeom(ST_S2CellIDs(geom, 10)) as polygons", "geom")
+      var intersectsDf = df.selectExpr("ST_Intersects(geom, polygons[0])")
+      assert(intersectsDf.first().getBoolean(0))
+      intersectsDf = df.selectExpr("ST_Intersects(geom, polygons[20])")
+      assert(intersectsDf.first().getBoolean(0))
+      intersectsDf = df.selectExpr("ST_Intersects(geom, polygons[100])")
+      assert(intersectsDf.first().getBoolean(0))
+    }
+
+    it("should collect array of Geometry into a MultiPolygon") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))') as geom")
+      val df = baseDf.selectExpr("ST_Collect(ST_S2ToGeom(ST_S2CellIDs(geom, 10))) as multipolygon")
+      val geomType = df.selectExpr("GeometryType(multipolygon)").first().get(0)
+      assert(geomType == "MULTIPOLYGON")
+    }
+  }
 }
