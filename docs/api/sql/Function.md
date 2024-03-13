@@ -2397,6 +2397,9 @@ Output:
 
 Introduction: Returns an array of Polygons for the corresponding S2 cell IDs.
 
+!!!Hint
+    To convert a Polygon array to MultiPolygon, use [ST_Collect](#st_collect). However, the result may be an invalid geometry. Apply [ST_MakeValid](#st_makevalid) to the `ST_Collect` output to ensure a valid MultiPolygon. 
+
 Format: `ST_S2ToGeom(cellIds: Array[Long])`
 
 Since: `v1.6.0`
