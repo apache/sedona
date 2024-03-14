@@ -13,7 +13,7 @@ Format: `RS_Union_Aggr(A: rasterColumn, B: indexColumn)`
 
 Since: `v1.5.1`
 
-Spark SQL Example:
+SQL Example
 
 Contents of `raster_table`.
 

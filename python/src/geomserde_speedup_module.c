@@ -192,21 +192,33 @@ static GEOSGeometry *do_deserialize(PyObject *args,
 /* serialize/deserialize functions for Shapely 2.x */
 
 static PyObject *serialize(PyObject *self, PyObject *args) {
-  PyObject *pygeos_geom = NULL;
-  if (!PyArg_ParseTuple(args, "O", &pygeos_geom)) {
-    return NULL;
-  }
+    PyObject *pygeos_geom = NULL;
+    if (!PyArg_ParseTuple(args, "O", &pygeos_geom)) {
+        return NULL;  // Argument parsing failed; error already set by PyArg_ParseTuple
+    }
 
-  GEOSGeometry *geos_geom = NULL;
-  char success = PyGEOS_GetGEOSGeometry(pygeos_geom, &geos_geom);
-  if (success == 0) {
-    PyErr_SetString(
-        PyExc_TypeError,
-        "Argument is of incorrect type. Please provide only Geometry objects.");
-    return NULL;
-  }
+    GEOSGeometry *geos_geom = NULL;
+    char success = PyGEOS_GetGEOSGeometry(pygeos_geom, &geos_geom);
+    if (success == 0) {
+        // Retrieve the type of the supplied object
+        PyObject *type = (PyObject *)Py_TYPE(pygeos_geom);
+        PyObject *type_name = PyObject_GetAttrString(type, "__name__");
+        if (type_name == NULL) {
+            // Fallback error if we can't get the type name
+            PyErr_SetString(PyExc_TypeError, "Argument is of incorrect type.");
+        } else {
+            // Construct the error message with the type name
+            const char *type_str = PyUnicode_AsUTF8(type_name);
+            char error_msg[256];
+            snprintf(error_msg, sizeof(error_msg), "Argument is of incorrect type: '%s'. Please provide only Geometry objects.", type_str);
 
-  return do_serialize(geos_geom);
+            PyErr_SetString(PyExc_TypeError, error_msg);
+            Py_DECREF(type_name);  // Cleanup the reference to type_name
+        }
+        return NULL;
+    }
+
+    return do_serialize(geos_geom);
 }
 
 static PyObject *deserialize(PyObject *self, PyObject *args) {

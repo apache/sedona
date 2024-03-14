@@ -984,6 +984,13 @@ case class ST_S2CellIDs(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_S2ToGeom(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.s2ToGeom _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_H3CellIDs(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.h3CellIDs _) {
 

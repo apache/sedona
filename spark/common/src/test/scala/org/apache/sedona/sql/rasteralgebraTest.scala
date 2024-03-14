@@ -229,6 +229,35 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(result4.isInstanceOf[GridCoverage2D])
     }
 
+    it("should pass RS_SetPixelType") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+
+      val df1 = df.selectExpr("RS_SetPixelType(raster, 'D') as modifiedRaster")
+      val result1 = df1.selectExpr("RS_BandPixelType(modifiedRaster)").first().get(0).toString
+      assert(result1 == "REAL_64BITS")
+
+      val df2 = df.selectExpr("RS_SetPixelType(raster, 'F') as modifiedRaster")
+      val result2 = df2.selectExpr("RS_BandPixelType(modifiedRaster)").first().get(0).toString
+      assert(result2 == "REAL_32BITS")
+
+      val df3 = df.selectExpr("RS_SetPixelType(raster, 'I') as modifiedRaster")
+      val result3 = df3.selectExpr("RS_BandPixelType(modifiedRaster)").first().get(0).toString
+      assert(result3 == "SIGNED_32BITS")
+
+      val df4 = df.selectExpr("RS_SetPixelType(raster, 'S') as modifiedRaster")
+      val result4 = df4.selectExpr("RS_BandPixelType(modifiedRaster)").first().get(0).toString
+      assert(result4 == "SIGNED_16BITS")
+
+      val df5 = df.selectExpr("RS_SetPixelType(raster, 'US') as modifiedRaster")
+      val result5 = df5.selectExpr("RS_BandPixelType(modifiedRaster)").first().get(0).toString
+      assert(result5 == "UNSIGNED_16BITS")
+
+      val df6 = df.selectExpr("RS_SetPixelType(raster, 'B') as modifiedRaster")
+      val result6 = df6.selectExpr("RS_BandPixelType(modifiedRaster)").first().get(0).toString
+      assert(result6 == "UNSIGNED_8BITS")
+    }
+
     it("should pass RS_Array") {
       val df = sparkSession.sql("SELECT RS_Array(6, 1e-6) as band")
       val result = df.first().getAs[mutable.WrappedArray[Double]](0)
@@ -1040,7 +1069,30 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_SummaryStats with raster") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")
-      var actual = df.selectExpr("RS_SummaryStats(raster, 1, false)").first().getSeq(0)
+
+      var actual = df.selectExpr("RS_SummaryStats(raster, 'count')").first().getDouble(0)
+      assertEquals(928192.0, actual, 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStats(raster, 'sum', 1)").first().getDouble(0)
+      assertEquals(2.06233487E8, actual, 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStats(raster, 'mean', 1, false)").first().getDouble(0)
+      assertEquals(198.91347125771605, actual, 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStats(raster, 'stddev', 1, false)").first().getDouble(0)
+      assertEquals(95.09054096106192, actual, 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStats(raster, 'min', 1, false)").first().getDouble(0)
+      assertEquals(0.0, actual, 0.1d)
+
+      actual = df.selectExpr("RS_SummaryStats(raster, 'max', 1, false)").first().getDouble(0)
+      assertEquals(255.0, actual, 0.1d)
+    }
+
+    it("Passed RS_SummaryStatsAll with raster") {
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
+      df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      var actual = df.selectExpr("RS_SummaryStatsAll(raster, 1, false)").first().getSeq(0)
       assertEquals(1036800.0, actual.head, 0.1d)
       assertEquals(2.06233487E8, actual(1), 0.1d)
       assertEquals(198.91347125771605, actual(2), 1e-6d)
@@ -1048,7 +1100,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(0.0, actual(4), 0.1d)
       assertEquals(255.0, actual(5), 0.1d)
 
-      actual = df.selectExpr("RS_SummaryStats(raster, 1)").first().getSeq(0)
+      actual = df.selectExpr("RS_SummaryStatsAll(raster, 1)").first().getSeq(0)
       assertEquals(928192.0, actual.head, 0.1d)
       assertEquals(2.06233487E8, actual(1), 0.1d)
       assertEquals(222.18839097945252, actual(2), 1e-6d)
@@ -1056,7 +1108,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(1.0, actual(4), 0.1d)
       assertEquals(255.0, actual(5), 0.1d)
 
-      actual = df.selectExpr("RS_SummaryStats(raster)").first().getSeq(0)
+      actual = df.selectExpr("RS_SummaryStatsAll(raster)").first().getSeq(0)
       assertEquals(928192.0, actual.head, 0.1d)
       assertEquals(2.06233487E8, actual(1), 0.1d)
       assertEquals(222.18839097945252, actual(2), 1e-6d)

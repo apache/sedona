@@ -23,7 +23,7 @@ Format: `RS_FromArcInfoAsciiGrid(asc: ARRAY[Byte])`
 
 Since: `v1.4.0`
 
-Spark SQL Example:
+SQL Example
 
 ```scala
 var df = sedona.read.format("binaryFile").load("/some/path/*.asc")
@@ -38,7 +38,7 @@ Format: `RS_FromGeoTiff(asc: ARRAY[Byte])`
 
 Since: `v1.4.0`
 
-Spark SQL Example:
+SQL Example
 
 ```scala
 var df = sedona.read.format("binaryFile").load("/some/path/*.tiff")
@@ -65,7 +65,7 @@ Accepts one of:
     3. "I" - 32 bits signed Integer
     4. "S" - 16 bits signed Short
     5. "US" - 16 bits unsigned Short
-    6. "B" - 8 bits Byte
+    6. "B" - 8 bits unsigned Byte
 * Width: The width of the raster in pixels.
 * Height: The height of the raster in pixels.
 * UpperleftX: The X coordinate of the upper left corner of the raster, in terms of the CRS units.
