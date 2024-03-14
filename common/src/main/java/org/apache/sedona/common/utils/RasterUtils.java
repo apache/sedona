@@ -676,4 +676,137 @@ public class RasterUtils {
             return RasterUtils.clone(raster.getRenderedImage(), raster.getGridGeometry(), raster.getSampleDimensions(), raster, noDataValue, true);
         }
     }
+
+    // Helper function to get neighboring pixels
+    public static List<Double> getNeighboringPixels(int x, int y, int band, Raster raster, double noDataValue) {
+        List<Double> neighbors = new ArrayList<>();
+        int width = raster.getWidth();
+        int height = raster.getHeight();
+
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                int nx = x + dx;
+                int ny = y + dy;
+
+                if (nx >= 0 && nx < width && ny >= 0 && ny < height && !(dx == 0 && dy == 0)) {
+                    double value = raster.getSampleDouble(nx, ny, band); // Now checks the specified band
+                    if (value != noDataValue) {
+                        neighbors.add(value);
+                    }
+                }
+            }
+        }
+        return neighbors;
+    }
+
+    public static GridCoverage2D replaceNoDataValues(GridCoverage2D raster) {
+        Raster rasterData = raster.getRenderedImage().getData();
+        WritableRaster writableRaster = rasterData.createCompatibleWritableRaster();
+
+        // Iterate over each band
+        for (int band = 0; band < raster.getNumSampleDimensions(); band++) {
+            GridSampleDimension sampleDimension = raster.getSampleDimension(band);
+            double noDataValue = RasterUtils.getNoDataValue(sampleDimension);
+
+            // Replace no data values with the mean of neighboring pixels for each band
+            for (int y = 0; y < rasterData.getHeight(); y++) {
+                for (int x = 0; x < rasterData.getWidth(); x++) {
+                    double originalValue = rasterData.getSampleDouble(x, y, band);
+                    if (originalValue == noDataValue) {
+                        List<Double> neighbors = RasterUtils.getNeighboringPixels(x, y, band, rasterData, noDataValue);
+                        double meanValue = neighbors.stream().mapToDouble(Double::doubleValue).average().orElse(Double.NaN);
+                        if (!Double.isNaN(meanValue)) {
+                            writableRaster.setSample(x, y, band, meanValue);
+                        }
+                    } else {
+                        writableRaster.setSample(x, y, band, originalValue);
+                    }
+                }
+            }
+        }
+
+        GridCoverage2D modifiedRaster = RasterUtils.clone(writableRaster, raster.getGridGeometry(), raster.getSampleDimensions(), raster, null, true);
+        return modifiedRaster;
+    }
+
+    public static GridCoverage2D extractNoDataValueMask(GridCoverage2D raster) {
+        Raster rasterData = raster.getRenderedImage().getData();
+        WritableRaster writableRaster = rasterData.createCompatibleWritableRaster();
+
+        // Iterate over each band
+        for (int band = 0; band < raster.getNumSampleDimensions(); band++) {
+            GridSampleDimension sampleDimension = raster.getSampleDimension(band);
+            double noDataValue = RasterUtils.getNoDataValue(sampleDimension);
+
+            for (int y = 0; y < rasterData.getHeight(); y++) {
+                for (int x = 0; x < rasterData.getWidth(); x++) {
+                    double originalValue = rasterData.getSampleDouble(x, y, band);
+                    if (originalValue == noDataValue) {
+                        writableRaster.setSample(x, y, band, originalValue);
+                    } else {
+                        writableRaster.setSample(x, y, band, Double.NaN);
+                    }
+                }
+            }
+        }
+
+        GridCoverage2D modifiedRaster = RasterUtils.clone(writableRaster, raster.getGridGeometry(), raster.getSampleDimensions(), raster, null, true);
+        return modifiedRaster;
+    }
+
+    public static GridCoverage2D applyRasterMask(GridCoverage2D raster, GridCoverage2D mask) {
+        Raster rasterData = raster.getRenderedImage().getData();
+        Raster maskData = mask.getRenderedImage().getData();
+        WritableRaster writableRaster = rasterData.createCompatibleWritableRaster();
+
+//        System.out.println("raster minx: " + raster.getRenderedImage().getMinX());
+//        System.out.println("raster miny: " + raster.getRenderedImage().getMinY());
+        System.out.println("before wraster minx: " + writableRaster.getMinX());
+        System.out.println("before wraster miny: " + writableRaster.getMinY());
+
+        System.out.println("raster gridDimensionX: " + raster.getGridGeometry().gridDimensionX);
+        System.out.println("raster gridDimensionY: " + raster.getGridGeometry().gridDimensionY);
+        System.out.println("raster getGridRange: " + raster.getGridGeometry().getGridRange());
+        System.out.println("raster getGridRange2D: " + raster.getGridGeometry().getGridRange2D());
+        System.out.println("mask gridDimensionX: " + mask.getGridGeometry().gridDimensionX);
+        System.out.println("mask gridDimensionY: " + mask.getGridGeometry().gridDimensionY);
+        System.out.println("mask getGridRange: " + mask.getGridGeometry().getGridRange());
+        System.out.println("mask getGridRange2D: " + mask.getGridGeometry().getGridRange2D());
+
+        // Iterate over each band
+        for (int band = 0; band < raster.getNumSampleDimensions(); band++) {
+            System.out.println("\nBand: "+band);
+            for (int y = 0; y < rasterData.getHeight(); y++) {
+                for (int x = 0; x < rasterData.getWidth(); x++) {
+                    double originalValue = rasterData.getSampleDouble(x, y, band);
+                    double maskValue = maskData.getSampleDouble(x, y, band);
+                    System.out.println("originalValue: "+originalValue);
+                    System.out.println("maskValue: "+maskValue);
+                    if (!Double.isNaN(maskValue)) {
+                        writableRaster.setSample(x, y, band, maskValue);
+                    } else {
+                        writableRaster.setSample(x, y, band, originalValue);
+                    }
+                }
+            }
+        }
+//        GridGeometry2D gridGeometry = raster.getGridGeometry();
+//        AffineTransform2D transform = (AffineTransform2D) gridGeometry.getGridToCRS2D();
+//        AffineTransform2D newAffine = RasterUtils.translateAffineTransform(transform, raster.getRenderedImage().getMinX(), raster.getRenderedImage().getMinY());
+//        GridEnvelope newGridEnvelope = new GridEnvelope2D(0, 0, width, height);
+//        GridGeometry2D newGridGeometry = new GridGeometry2D(newGridEnvelope, newAffine, gridGeometry.getCoordinateReferenceSystem());
+
+        System.out.println("\n\nraster.getGridGeometry(): "+raster.getGridGeometry());
+        System.out.println("mask.getGridGeometry(): "+mask.getGridGeometry());
+        System.out.println("raster.getNumSampleDimensions(): "+raster.getNumSampleDimensions());
+        System.out.println("mask.getNumSampleDimensions(): "+mask.getNumSampleDimensions());
+        System.out.println("raster.getSampleDimension(0).getCategories(): "+raster.getSampleDimension(0).getCategories());
+        System.out.println("mask.getSampleDimension(0).getCategories(): "+mask.getSampleDimension(0).getCategories());
+        System.out.println("before wraster minx: " + writableRaster.getMinX());
+        System.out.println("before wraster miny: " + writableRaster.getMinY());
+
+        GridCoverage2D modifiedRaster = RasterUtils.clone(writableRaster, raster.getGridGeometry(), raster.getSampleDimensions(), raster, null, false);
+        return modifiedRaster;
+    }
+
 }
