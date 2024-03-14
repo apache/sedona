@@ -765,6 +765,14 @@ public class TestFunctionsV2
         );
     }
     @Test
+    public void test_ST_Snap() {
+        registerUDFV2("ST_Snap", String.class, String.class, double.class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_AsText(sedona.ST_Snap(ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))'), ST_GeomFromWKT('LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)'), 2.525))",
+                "POLYGON ((2.6 12.5, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 2.6 12.5))"
+        );
+    }
+    @Test
     public void test_ST_SubDivide() {
         registerUDFV2("ST_SubDivide", String.class, int.class);
         verifySqlSingleRes(

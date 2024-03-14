@@ -1176,9 +1176,29 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void testSnap() throws ParseException {
+        Geometry poly = geomFromWKT("POLYGON ((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))", 0);
+        Geometry line = geomFromWKT("LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)", 0);
+        double distance = Functions.distance(poly, line);
+        String actual = Functions.asWKT(Functions.snap(poly, line, distance * 1.01));
+        String expected = "POLYGON ((2.6 12.5, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 2.6 12.5))";
+        assertEquals(expected, actual);
+
+        System.out.println(distance * 1.25);
+        actual = Functions.asWKT(Functions.snap(poly, line, distance * 1.25));
+        expected = "POLYGON ((0.5 10.7, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 5.4 8.4, 0.5 10.7))";
+        assertEquals(expected, actual);
+
+        // if the tolerance is less than distance between Geometries then input Geometry will be returned as is.
+        actual = Functions.asWKT(Functions.snap(poly, line, distance * 0.9));
+        expected = Functions.asWKT(poly);
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testBufferSpheroidal() throws ParseException {
         Geometry polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray(16.2500, 48.2500, 16.3500, 48.2500, 16.3500, 48.2000, 16.2500, 48.2000, 16.2500, 48.2500));
-        Geometry polygon2 = geomFromWKT("POLYGON((-120 30, -80 30, -80 50, -120 50, -120 30))", 4269);
+        Geometry polygon2 = geomFromWKT("POLYGON((-120 30, -80 30, -80 50, -120 50, -1204326  30))", 4269);
         Geometry point1 = geomFromWKT("POINT(-180 60)", 4269);
         Geometry linestring1 = geomFromEWKT("LINESTRING(-91.185 30.4505, -91.187 30.452, -91.189 30.4535)");
         Geometry polygon3 = geomFromWKT("POLYGON((-120 30, -80 30, -80 50, -120 50, -120 30))", 4269);

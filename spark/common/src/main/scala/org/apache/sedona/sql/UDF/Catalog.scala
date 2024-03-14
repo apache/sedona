@@ -107,6 +107,7 @@ object Catalog {
     function[ST_Y](),
     function[ST_Z](),
     function[ST_StartPoint](),
+    function[ST_Snap](),
     function[ST_ClosestPoint](),
     function[ST_Boundary](),
     function[ST_MinimumBoundingRadius](),

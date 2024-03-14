@@ -148,6 +148,7 @@ test_configurations = [
     (stf.ST_SetSRID, ("point", 3021), "point_geom", "ST_SRID(geom)", 3021),
     (stf.ST_ShiftLongitude, ("geom",), "triangle_geom", "", "POLYGON ((0 0, 1 0, 1 1, 0 0))"),
     (stf.ST_SimplifyPreserveTopology, ("geom", 0.2), "0.9_poly", "", "POLYGON ((0 0, 1 0, 1 1, 0 0))"),
+    (stf.ST_Snap, ("poly", "line", 2.525), "poly_and_line", "" ,"POLYGON ((2.6 12.5, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 2.6 12.5))"),
     (stf.ST_Split, ("line", "points"), "multipoint_splitting_line", "", "MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))"),
     (stf.ST_SRID, ("point",), "point_geom", "", 0),
     (stf.ST_StartPoint, ("line",), "linestring_geom", "", "POINT (0 0)"),
@@ -310,6 +311,7 @@ wrong_type_configurations = [
     (stf.ST_ShiftLongitude, (None,)),
     (stf.ST_SimplifyPreserveTopology, (None, 0.2)),
     (stf.ST_SimplifyPreserveTopology, ("", None)),
+    (stf.ST_Snap, (None, None, 12)),
     (stf.ST_SRID, (None,)),
     (stf.ST_StartPoint, (None,)),
     (stf.ST_SubDivide, (None, 5)),
@@ -450,6 +452,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (-122.335167 47.608013)') AS seattle, ST_GeomFromWKT('POINT (-73.935242 40.730610)') as ny")
         elif request.param == "line_crossing_dateline":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (179.95 30, -179.95 30)') AS line")
+        elif request.param == "poly_and_line":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))') as poly, ST_GeomFromWKT('LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)') as line")
         raise ValueError(f"Invalid base_df name passed: {request.param}")
 
     def _id_test_configuration(val):

@@ -284,6 +284,9 @@ object st_functions extends DataFrameAPI {
   def ST_StartPoint(lineString: Column): Column = wrapExpression[ST_StartPoint](lineString)
   def ST_StartPoint(lineString: String): Column = wrapExpression[ST_StartPoint](lineString)
 
+  def ST_Snap(input: Column, reference: Column, tolerance: Column): Column = wrapExpression[ST_Snap](input, reference, tolerance)
+  def ST_Snap(input: String, reference: String, tolerance: Double): Column = wrapExpression[ST_Snap](input, reference, tolerance)
+
   def ST_SubDivide(geometry: Column, maxVertices: Column): Column = wrapExpression[ST_SubDivide](geometry, maxVertices)
   def ST_SubDivide(geometry: String, maxVertices: Int): Column = wrapExpression[ST_SubDivide](geometry, maxVertices)
 

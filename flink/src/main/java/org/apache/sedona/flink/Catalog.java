@@ -134,6 +134,7 @@ public class Catalog {
                 new Functions.ST_Subdivide(),
                 new Functions.ST_SymDifference(),
                 new Functions.ST_S2CellIDs(),
+                new Functions.ST_Snap(),
                 new Functions.ST_GeometricMedian(),
                 new Functions.ST_NumPoints(),
                 new Functions.ST_Force3D(),

@@ -974,6 +974,20 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testSnap() {
+        Table base = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))') AS poly, ST_GeomFromWKT('LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)') AS line");
+        Table table = base.select(call(Functions.ST_Snap.class.getSimpleName(), $("poly"), $("line"), 2.525).as("result"));
+        String actual = (String) first(table.select(call(Functions.ST_AsText.class.getSimpleName(), $("result")))).getField(0);
+        String expected = "POLYGON ((2.6 12.5, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 2.6 12.5))";
+        assertEquals(expected, actual);
+
+        table = base.select(call(Functions.ST_Snap.class.getSimpleName(), $("poly"), $("line"), 3.125).as("result"));
+        actual = (String) first(table.select(call(Functions.ST_AsText.class.getSimpleName(), $("result")))).getField(0);
+        expected = "POLYGON ((0.5 10.7, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 5.4 8.4, 0.5 10.7))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testMulti() {
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (0 0)') AS geom");
         table = table.select(call(Functions.ST_Multi.class.getSimpleName(), $("geom")));

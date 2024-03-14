@@ -839,6 +839,17 @@ public class Functions {
         }
     }
 
+    public static class ST_Snap extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
+                             @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2,
+                             @DataTypeHint("Double") Double tolerance) {
+            Geometry input = (Geometry) o1;
+            Geometry reference = (Geometry) o2;
+            return org.apache.sedona.common.Functions.snap(input, reference, tolerance);
+        }
+    }
+
     public static class ST_S2CellIDs extends ScalarFunction {
         @DataTypeHint(value = "ARRAY<BIGINT>")
         public Long[] eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
