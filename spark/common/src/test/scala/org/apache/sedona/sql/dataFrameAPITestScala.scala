@@ -19,7 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.commons.codec.binary.Hex
-import org.apache.spark.sql.functions.{col, element_at, lit}
+import org.apache.spark.sql.functions.{array, col, element_at, lit}
 import org.apache.spark.sql.sedona_sql.expressions.st_aggregates._
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
 import org.apache.spark.sql.sedona_sql.expressions.st_functions._
@@ -1088,6 +1088,17 @@ class dataFrameAPITestScala extends TestBaseScala {
       val actualResult = df.take(1)(0).getAs[mutable.WrappedArray[Long]](0).toSet
       val mbrResult = dfMRB.take(1)(0).getAs[mutable.WrappedArray[Long]](0).toSet
       assert (actualResult.subsetOf(mbrResult))
+    }
+
+    it("Passed ST_S2ToGeom") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))') as geom")
+      val df = baseDf.select(ST_S2ToGeom(ST_S2CellIDs("geom", 10)).as("polygons"), col("geom"))
+      var intersectsDf = df.select(ST_Intersects(col("geom"), element_at(col("polygons"), 1)))
+      assert(intersectsDf.first().getBoolean(0))
+      intersectsDf = df.select(ST_Intersects(col("geom"), element_at(col("polygons"), 21)))
+      assert(intersectsDf.first().getBoolean(0))
+      intersectsDf = df.select(ST_Intersects(col("geom"), element_at(col("polygons"), 101)))
+      assert(intersectsDf.first().getBoolean(0))
     }
 
     it("Passed ST_H3CellIDs") {

@@ -1067,6 +1067,16 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testS2ToGeom() {
+        Table pointTable = tableEnv.sqlQuery("select ST_S2ToGeom(ST_S2CellIDs(ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))'), 10))");
+        Geometry target = (Geometry) first(tableEnv.sqlQuery("select ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))')")).getField(0);
+        Geometry[] actual = (Geometry[]) Objects.requireNonNull(first(pointTable).getField(0));
+        assertTrue(actual[0].intersects(target));
+        assertTrue(actual[20].intersects(target));
+        assertTrue(actual[100].intersects(target));
+    }
+
+    @Test
     public void testH3CellIDs() {
         String initExplodeQuery = "SELECT id, geom, cell_tbl.cell from (VALUES %s) as raw_tbl(id, geom, cells) CROSS JOIN UNNEST(raw_tbl.cells) AS cell_tbl (cell)";
         // left is a polygon

@@ -1249,6 +1249,16 @@ class TestPredicateJoin(TestBase):
         cell_ids = self.spark.sql("select ST_S2CellIDs(null, 6)").take(1)[0][0]
         assert cell_ids is None
 
+    def test_st_s2_to_geom(self):
+        df = self.spark.sql("""
+        SELECT
+            ST_Intersects(ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))'), ST_S2ToGeom(ST_S2CellIDs(ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))'), 10))[0]),
+            ST_Intersects(ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))'), ST_S2ToGeom(ST_S2CellIDs(ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))'), 10))[1]),
+            ST_Intersects(ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))'), ST_S2ToGeom(ST_S2CellIDs(ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))'), 10))[2])
+        """)
+        res1, res2, res3 = df.take(1)[0]
+        assert res1 and res2 and res3
+
     def test_st_h3_cell_ids(self):
         test_cases = [
             "'POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'",
