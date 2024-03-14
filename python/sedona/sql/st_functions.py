@@ -101,6 +101,7 @@ __all__ = [
     "ST_RemovePoint",
     "ST_Reverse",
     "ST_S2CellIDs",
+    "ST_S2ToGeom",
     "ST_SetPoint",
     "ST_SetSRID",
     "ST_SRID",
@@ -1185,6 +1186,18 @@ def ST_S2CellIDs(geometry: ColumnOrName, level: Union[ColumnOrName, int]) -> Col
     """
     args = (geometry, level)
     return _call_st_function("ST_S2CellIDs", args)
+
+
+@validate_argument_types
+def ST_S2ToGeom(cells: Union[ColumnOrName, list]) -> Column:
+    """Create a polygon from the S2 cells
+
+    :param cells: S2 cells
+    :type cells: List[long]
+    :return: the Polygon for all S2 cells
+    :rtype: Geometry
+    """
+    return _call_st_function("ST_S2ToGeom", cells)
 
 
 @validate_argument_types

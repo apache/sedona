@@ -862,6 +862,16 @@ public class Functions {
     }
 
     /**
+     *
+     * @param cellIds array of cell ids
+     * @return An array of polygons for the cell ids
+     */
+    public static Geometry[] s2ToGeom(long[] cellIds) {
+        List<S2CellId> s2CellObjs = Arrays.stream(cellIds).mapToObj(S2CellId::new).collect(Collectors.toList());
+        return s2CellObjs.stream().map(S2Utils::toJTSPolygon).toArray(Polygon[]::new);
+    }
+
+    /**
      * cover the geometry with H3 cells
      * @param input the input geometry
      * @param level the resolution of h3 cells
