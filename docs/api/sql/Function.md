@@ -2477,7 +2477,7 @@ POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))
 
 ## ST_Snap
 
-Introduction: Snaps the vertices and segments of the `input` geometry to `reference` geometry within the specified `tolerance` distance. The `tolerance` parameter controls the maximum snap distance. 
+Introduction: Snaps the vertices and segments of the `input` geometry to `reference` geometry within the specified `tolerance` distance. The `tolerance` parameter controls the maximum snap distance.
 
 If the minimum distance between the geometries exceeds the `tolerance`, the `input` geometry is returned unmodified. Adjusting the `tolerance` value allows tuning which vertices should snap to the `reference` and which remain untouched.
 
@@ -2489,9 +2489,9 @@ SQL Example:
 
 ```sql
 SELECT ST_Snap(
-        ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))'), 
+        ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))'),
         ST_GeomFromWKT('LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)'),
-       2.525     
+       2.525
        )
 ```
 

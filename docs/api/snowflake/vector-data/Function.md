@@ -1902,9 +1902,9 @@ SQL Example:
 
 ```sql
 SELECT ST_Snap(
-        ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))'), 
+        ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))'),
         ST_GeomFromWKT('LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)'),
-       2.525     
+       2.525
        )
 ```
 

@@ -1184,7 +1184,6 @@ public class FunctionsTest extends TestBase {
         String expected = "POLYGON ((2.6 12.5, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 2.6 12.5))";
         assertEquals(expected, actual);
 
-        System.out.println(distance * 1.25);
         actual = Functions.asWKT(Functions.snap(poly, line, distance * 1.25));
         expected = "POLYGON ((0.5 10.7, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 5.4 8.4, 0.5 10.7))";
         assertEquals(expected, actual);
