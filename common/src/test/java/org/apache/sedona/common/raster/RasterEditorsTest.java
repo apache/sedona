@@ -19,18 +19,14 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.utils.RasterUtils;
-import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import java.awt.image.DataBuffer;
-import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -99,62 +95,98 @@ public class RasterEditorsTest extends RasterTestBase {
 
     @Test
     public void testResample() throws FactoryException, TransformException {
-        double[] values1 = {1,99,3,4,99,6,7,99,9,10,99,12};
-//        double[] values2 = {Double.NaN, 99, Double.NaN, Double.NaN, 99, Double.NaN, Double.NaN, 99, Double.NaN, Double.NaN, 99, Double.NaN};
+        double[] values = {1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10};
         GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
-        raster = MapAlgebra.addBandFromArray(raster, values1, 1, 99.0);
-//        raster = MapAlgebra.addBandFromArray(raster, values2, 2, null);
-        System.out.println("Orignal Raster: \n" + RasterOutputs.asMatrix(raster, 1));
-
-        GridCoverage2D raster2 = RasterUtils.replaceNoDataValues(raster);
-
-        GridCoverage2D raster3 = RasterUtils.extractNoDataValueMask(raster);
-        GridCoverage2D raster4 = RasterEditors.resample(raster3, 6, 5, 1, -1, false, "nearestneighbor");
-
-        System.out.println("NoDataValue Removed Raster: \n" + RasterOutputs.asMatrix(raster2));
-        System.out.println("NoDataValue Mask Raster: \n" + RasterOutputs.asMatrix(raster3));
-        System.out.println("Resampled NoDataValue Mask Raster: \n" + RasterOutputs.asMatrix(raster4));
+        raster = MapAlgebra.addBandFromArray(raster, values, 1, null);
 
         //test with height and width
         GridCoverage2D newRaster = RasterEditors.resample(raster, 6, 5, 1, -1, false, "nearestneighbor");
-        GridCoverage2D newRaster2 = RasterEditors.resample(raster2, 6, 5, 1, -1, false, "nearestneighbor");
-
-        System.out.println("Unhandled NoDataValues: \n" + RasterOutputs.asMatrix(newRaster, 1));
-        System.out.println("Handled NoDataValues: \n" + RasterOutputs.asMatrix(newRaster2, 1));
-        GridCoverage2D newRaster3 = RasterUtils.applyRasterMask(newRaster2, raster4);
-        System.out.println("NoDataValue Mask applied Raster: \n" + RasterOutputs.asMatrix(newRaster3, 1));
-
-//        String res = RasterOutputs.asMatrix(newRaster, 1);
-//        String expectedRes = "| 1.0   1.0   2.0   3.0   3.0   5.0|\n" +
-//                "| 1.0   1.0   2.0   3.0   3.0   5.0|\n" +
-//                "| 4.0   4.0   5.0   6.0   6.0   9.0|\n" +
-//                "| 7.0   7.0   8.0   9.0   9.0  10.0|\n" +
-//                "| 7.0   7.0   8.0   9.0   9.0  10.0|\n";
+        String res = RasterOutputs.asMatrix(newRaster);
+        String expectedRes = "| 1.0   1.0   2.0   3.0   3.0   5.0|\n" +
+                "| 1.0   1.0   2.0   3.0   3.0   5.0|\n" +
+                "| 4.0   4.0   5.0   6.0   6.0   9.0|\n" +
+                "| 7.0   7.0   8.0   9.0   9.0  10.0|\n" +
+                "| 7.0   7.0   8.0   9.0   9.0  10.0|\n";
         //verify correct interpolation
-//        assertEquals(expectedRes, res);
-//        double[] metadata = RasterAccessors.metadata(newRaster);
-//        double[] expectedMetadata = {-0.33333333333333326,0.19999999999999996,6,5,1.388888888888889,-1.24,0,0,0,1};
-//        //verify correct raster geometry
-//        for (int i = 0; i < metadata.length; i++) {
-//            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
-//        }
-//
-//        //test with scaleX and scaleY
-//        newRaster = RasterEditors.resample(raster, 1.2, -1.4, 1, -1, true, null);
-//        res = RasterOutputs.asMatrix(newRaster);
-//        expectedRes = "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n" +
-//                "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n" +
-//                "| 4.0   4.0   5.0   6.0   6.0   9.0   9.0|\n" +
-//                "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n" +
-//                "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n";
-//        //verify correct interpolation
-//        assertEquals(expectedRes, res);
-//        metadata = RasterAccessors.metadata(newRaster);
-//        expectedMetadata = new double[]{-0.20000000298023224, 0.4000000059604645, 7.0, 5.0, 1.2, -1.4, 0.0, 0.0, 0.0, 1.0};
-//        //verify correct raster geometry
-//        for (int i = 0; i < metadata.length; i++) {
-//            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
-//        }
+        assertEquals(expectedRes, res);
+        double[] metadata = RasterAccessors.metadata(newRaster);
+        double[] expectedMetadata = {-0.33333333333333326, 0.19999999999999996, 6, 5, 1.388888888888889, -1.24, 0, 0, 0, 1};
+        //verify correct raster geometry
+        for (int i = 0; i < metadata.length; i++) {
+            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
+        }
+
+        //test with scaleX and scaleY
+        newRaster = RasterEditors.resample(raster, 1.2, -1.4, 1, -1, true, null);
+        res = RasterOutputs.asMatrix(newRaster);
+        expectedRes = "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n" +
+                "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n" +
+                "| 4.0   4.0   5.0   6.0   6.0   9.0   9.0|\n" +
+                "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n" +
+                "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n";
+        //verify correct interpolation
+        assertEquals(expectedRes, res);
+        metadata = RasterAccessors.metadata(newRaster);
+        expectedMetadata = new double[]{-0.20000000298023224, 0.4000000059604645, 7.0, 5.0, 1.2, -1.4, 0.0, 0.0, 0.0, 1.0};
+        //verify correct raster geometry
+        for (int i = 0; i < metadata.length; i++) {
+            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
+        }
+    }
+
+    @Test
+    public void testResampleNoDataValueHandled() throws FactoryException, TransformException {
+        double[] values1 = {1,99,3,4,99,6,7,99,9,10,99,12};
+        double[] values2 = {10,11,-9999,13,14,15,-9999,17,18,19,-9999,21};
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
+        raster = MapAlgebra.addBandFromArray(raster, values1, 1, 99.0);
+        raster = MapAlgebra.addBandFromArray(raster, values2, 2, -9999.0);
+
+        GridCoverage2D newRaster = RasterEditors.resample(raster, 6, 5, 1, -1, false, "bilinear");
+
+        String res1 = RasterOutputs.asMatrix(newRaster, 1);
+        String res2 = RasterOutputs.asMatrix(newRaster, 2);
+        String expectedRes1 = "|99.000000  99.000000  99.000000  99.000000  99.000000  99.000000|\n" +
+                "|99.000000   3.569688  99.000000   4.439826   4.551458   4.825000|\n" +
+                "|99.000000  99.000000   5.974132   6.590451   6.605208  99.000000|\n" +
+                "|99.000000  99.000000   8.260383   8.064202   8.748022  99.000000|\n" +
+                "|99.000000   9.375000   9.913194  99.000000  99.000000  12.000000|\n";
+        String expectedRes2 = "|-9999.000000  -9999.000000  -9999.000000  -9999.000000  -9999.000000  -9999.000000|\n" +
+                "|-9999.000000     11.695000     12.482500  -9999.000000  -9999.000000     14.320000|\n" +
+                "|-9999.000000     14.175000     14.876389  -9999.000000  -9999.000000     16.800000|\n" +
+                "|-9999.000000     16.655001     17.270278  -9999.000000  -9999.000000     19.280001|\n" +
+                "|-9999.000000     18.375000     18.930555  -9999.000000  -9999.000000     21.000000|\n";
+
+        double[] metadata = RasterAccessors.metadata(newRaster);
+        double[] expectedMetadata = {-0.33333298563957214, 0.20000000298023224, 6.0, 5.0, 1.3888888309399288, -1.2400000005960465, 0.0, 0.0, 0.0, 2.0};
+        assertEquals(expectedRes1, res1);
+        assertEquals(expectedRes2, res2);
+        for (int i = 0; i < metadata.length; i++) {
+            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
+        }
+
+        newRaster = RasterEditors.resample(raster, 6, 5, 1, -1, false, "bicubic");
+
+        res1 = RasterOutputs.asMatrix(newRaster, 1);
+        res2 = RasterOutputs.asMatrix(newRaster, 2);
+        expectedRes1 = "|99.000000  99.000000  99.000000  99.000000  99.000000  99.000000|\n" +
+                "|99.000000   3.257045  99.000000   4.211917   4.254402   4.550135|\n" +
+                "|99.000000  99.000000   5.885300   6.683639   6.667900  99.000000|\n" +
+                "|99.000000  99.000000   8.418216   8.162022   8.936398  99.000000|\n" +
+                "|99.000000   9.593572  10.217107  99.000000  99.000000  12.530972|\n";
+        expectedRes2 = "|-9999.000000  -9999.000000  -9999.000000  -9999.000000  -9999.000000  -9999.000000|\n" +
+                "|-9999.000000     11.252455     12.144701  -9999.000000  -9999.000000     13.989338|\n" +
+                "|-9999.000000     14.089166     14.862710  -9999.000000  -9999.000000     16.841017|\n" +
+                "|-9999.000000     16.901485     17.557348  -9999.000000  -9999.000000     19.668177|\n" +
+                "|-9999.000000     18.642647     19.225651  -9999.000000  -9999.000000     21.418527|\n";
+
+        metadata = RasterAccessors.metadata(newRaster);
+        expectedMetadata = new double[] {-0.33333298563957214, 0.20000000298023224, 6.0, 5.0, 1.3888888309399288, -1.2400000005960465, 0.0, 0.0, 0.0, 2.0};
+        assertEquals(expectedRes1, res1);
+        assertEquals(expectedRes2, res2);
+        for (int i = 0; i < metadata.length; i++) {
+            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
+        }
     }
 
     @Test

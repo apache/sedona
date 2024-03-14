@@ -677,8 +677,17 @@ public class RasterUtils {
         }
     }
 
-    // Helper function to get neighboring pixels
-    public static List<Double> getNeighboringPixels(int x, int y, int band, Raster raster, double noDataValue) {
+    /**
+     * Retrieves a List<Double> of neighboring pixel values excluding noDataValue neighbors
+     *
+     * @param x grid coordinate
+     * @param y grid coordinate
+     * @param band Band index of raster
+     * @param raster
+     * @param noDataValue
+     * @return
+     */
+    public static List<Double> getNeighboringPixels(int x, int y, int band, Raster raster, Double noDataValue) {
         List<Double> neighbors = new ArrayList<>();
         int width = raster.getWidth();
         int height = raster.getHeight();
@@ -699,9 +708,16 @@ public class RasterUtils {
         return neighbors;
     }
 
+
+    /**
+     * Replaces noDataValue pixels in each band with mean of neighboring pixel values
+     *
+     * @param raster
+     * @return A new grid coverage with noDataValues pixels replaced
+     */
     public static GridCoverage2D replaceNoDataValues(GridCoverage2D raster) {
         Raster rasterData = raster.getRenderedImage().getData();
-        WritableRaster writableRaster = rasterData.createCompatibleWritableRaster();
+        WritableRaster writableRaster = rasterData.createCompatibleWritableRaster(RasterAccessors.getWidth(raster), RasterAccessors.getHeight(raster));
 
         // Iterate over each band
         for (int band = 0; band < raster.getNumSampleDimensions(); band++) {
@@ -729,14 +745,20 @@ public class RasterUtils {
         return modifiedRaster;
     }
 
+    /**
+     * Filters out the noDataValue pixels from each band as a grid coverage
+     *
+     * @param raster
+     * @return Returns a grid coverage with noDataValues and valid data values as Double.Nan
+     */
     public static GridCoverage2D extractNoDataValueMask(GridCoverage2D raster) {
         Raster rasterData = raster.getRenderedImage().getData();
-        WritableRaster writableRaster = rasterData.createCompatibleWritableRaster();
+        WritableRaster writableRaster = rasterData.createCompatibleWritableRaster(RasterAccessors.getWidth(raster), RasterAccessors.getHeight(raster));
 
         // Iterate over each band
         for (int band = 0; band < raster.getNumSampleDimensions(); band++) {
             GridSampleDimension sampleDimension = raster.getSampleDimension(band);
-            double noDataValue = RasterUtils.getNoDataValue(sampleDimension);
+            Double noDataValue = RasterUtils.getNoDataValue(sampleDimension);
 
             for (int y = 0; y < rasterData.getHeight(); y++) {
                 for (int x = 0; x < rasterData.getWidth(); x++) {
@@ -754,34 +776,24 @@ public class RasterUtils {
         return modifiedRaster;
     }
 
+    /**
+     * Superimposes the mask values onto the original raster, maintaining the original values where the mask is NaN.
+     *
+     * @param raster The original raster to which the mask will be applied.
+     * @param mask Grid coverage mask to be applied, containing the values to overlay. This mask should have the same dimensions and number of bands as the original raster.
+     * @return A new GridCoverage2D object with the mask applied.
+     */
     public static GridCoverage2D applyRasterMask(GridCoverage2D raster, GridCoverage2D mask) {
         Raster rasterData = raster.getRenderedImage().getData();
         Raster maskData = mask.getRenderedImage().getData();
-        WritableRaster writableRaster = rasterData.createCompatibleWritableRaster();
-
-//        System.out.println("raster minx: " + raster.getRenderedImage().getMinX());
-//        System.out.println("raster miny: " + raster.getRenderedImage().getMinY());
-        System.out.println("before wraster minx: " + writableRaster.getMinX());
-        System.out.println("before wraster miny: " + writableRaster.getMinY());
-
-        System.out.println("raster gridDimensionX: " + raster.getGridGeometry().gridDimensionX);
-        System.out.println("raster gridDimensionY: " + raster.getGridGeometry().gridDimensionY);
-        System.out.println("raster getGridRange: " + raster.getGridGeometry().getGridRange());
-        System.out.println("raster getGridRange2D: " + raster.getGridGeometry().getGridRange2D());
-        System.out.println("mask gridDimensionX: " + mask.getGridGeometry().gridDimensionX);
-        System.out.println("mask gridDimensionY: " + mask.getGridGeometry().gridDimensionY);
-        System.out.println("mask getGridRange: " + mask.getGridGeometry().getGridRange());
-        System.out.println("mask getGridRange2D: " + mask.getGridGeometry().getGridRange2D());
+        WritableRaster writableRaster = rasterData.createCompatibleWritableRaster(RasterAccessors.getWidth(raster), RasterAccessors.getHeight(raster));
 
         // Iterate over each band
         for (int band = 0; band < raster.getNumSampleDimensions(); band++) {
-            System.out.println("\nBand: "+band);
             for (int y = 0; y < rasterData.getHeight(); y++) {
                 for (int x = 0; x < rasterData.getWidth(); x++) {
                     double originalValue = rasterData.getSampleDouble(x, y, band);
                     double maskValue = maskData.getSampleDouble(x, y, band);
-                    System.out.println("originalValue: "+originalValue);
-                    System.out.println("maskValue: "+maskValue);
                     if (!Double.isNaN(maskValue)) {
                         writableRaster.setSample(x, y, band, maskValue);
                     } else {
@@ -790,20 +802,6 @@ public class RasterUtils {
                 }
             }
         }
-//        GridGeometry2D gridGeometry = raster.getGridGeometry();
-//        AffineTransform2D transform = (AffineTransform2D) gridGeometry.getGridToCRS2D();
-//        AffineTransform2D newAffine = RasterUtils.translateAffineTransform(transform, raster.getRenderedImage().getMinX(), raster.getRenderedImage().getMinY());
-//        GridEnvelope newGridEnvelope = new GridEnvelope2D(0, 0, width, height);
-//        GridGeometry2D newGridGeometry = new GridGeometry2D(newGridEnvelope, newAffine, gridGeometry.getCoordinateReferenceSystem());
-
-        System.out.println("\n\nraster.getGridGeometry(): "+raster.getGridGeometry());
-        System.out.println("mask.getGridGeometry(): "+mask.getGridGeometry());
-        System.out.println("raster.getNumSampleDimensions(): "+raster.getNumSampleDimensions());
-        System.out.println("mask.getNumSampleDimensions(): "+mask.getNumSampleDimensions());
-        System.out.println("raster.getSampleDimension(0).getCategories(): "+raster.getSampleDimension(0).getCategories());
-        System.out.println("mask.getSampleDimension(0).getCategories(): "+mask.getSampleDimension(0).getCategories());
-        System.out.println("before wraster minx: " + writableRaster.getMinX());
-        System.out.println("before wraster miny: " + writableRaster.getMinY());
 
         GridCoverage2D modifiedRaster = RasterUtils.clone(writableRaster, raster.getGridGeometry(), raster.getSampleDimensions(), raster, null, false);
         return modifiedRaster;
