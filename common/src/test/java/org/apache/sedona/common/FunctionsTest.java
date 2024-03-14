@@ -1209,7 +1209,7 @@ public class FunctionsTest extends TestBase {
     @Test
     public void testBufferSpheroidal() throws ParseException {
         Geometry polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray(16.2500, 48.2500, 16.3500, 48.2500, 16.3500, 48.2000, 16.2500, 48.2000, 16.2500, 48.2500));
-        Geometry polygon2 = geomFromWKT("POLYGON((-120 30, -80 30, -80 50, -120 50, -120  30))", 4269);
+        Geometry polygon2 = geomFromWKT("POLYGON((-120 30, -80 30, -80 50, -120 50, -120 30))", 4269);
         Geometry point1 = geomFromWKT("POINT(-180 60)", 4269);
         Geometry linestring1 = geomFromEWKT("LINESTRING(-91.185 30.4505, -91.187 30.452, -91.189 30.4535)");
         Geometry polygon3 = geomFromWKT("POLYGON((-120 30, -80 30, -80 50, -120 50, -120 30))", 4269);
