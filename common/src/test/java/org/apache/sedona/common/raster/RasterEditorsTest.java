@@ -138,19 +138,25 @@ public class RasterEditorsTest extends RasterTestBase {
     public void testResampleNoDataValueHandled() throws FactoryException, TransformException {
         double[] values1 = {1,99,3,4,99,6,7,99,9,10,99,12};
         double[] values2 = {10,11,-9999,13,14,15,-9999,17,18,19,-9999,21};
-        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
-        raster = MapAlgebra.addBandFromArray(raster, values1, 1, 99.0);
-        raster = MapAlgebra.addBandFromArray(raster, values2, 2, -9999.0);
+        GridCoverage2D raster1 = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
+        raster1 = MapAlgebra.addBandFromArray(raster1, values1, 1, 99.0);
+        raster1 = MapAlgebra.addBandFromArray(raster1, values2, 2, -9999.0);
 
-        GridCoverage2D newRaster = RasterEditors.resample(raster, 6, 5, 1, -1, false, "bilinear");
+        values1 = new double[] {1,2,3,4,5,6,7,8,9,10,99,12,13,14,15,16,17,18,19,20,21,22,23,24,25};
+        values2 = new double[] {10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,-9999};
+        GridCoverage2D raster2 = RasterConstructors.makeEmptyRaster(1, "d", 5, 5, 0, 0, 2, -2, 0, 0, 0);
+        raster2 = MapAlgebra.addBandFromArray(raster2, values1, 1, 99.0);
+        raster2 = MapAlgebra.addBandFromArray(raster2, values2, 2, -9999.0);
+
+        GridCoverage2D newRaster = RasterEditors.resample(raster1, 6, 5, 1, -1, false, "bilinear");
 
         String res1 = RasterOutputs.asMatrix(newRaster, 1);
         String res2 = RasterOutputs.asMatrix(newRaster, 2);
         String expectedRes1 = "|99.000000  99.000000  99.000000  99.000000  99.000000  99.000000|\n" +
-                "|99.000000   3.569688  99.000000   4.439826   4.551458   4.825000|\n" +
-                "|99.000000  99.000000   5.974132   6.590451   6.605208  99.000000|\n" +
-                "|99.000000  99.000000   8.260383   8.064202   8.748022  99.000000|\n" +
-                "|99.000000   9.375000   9.913194  99.000000  99.000000  12.000000|\n";
+                "|99.000000   3.838750  99.000000   4.479375   4.400208   4.495000|\n" +
+                "|99.000000  99.000000   5.985764   6.593403   6.169791  99.000000|\n" +
+                "|99.000000  99.000000   8.250487   7.955348   8.473751  99.000000|\n" +
+                "|99.000000   9.375000   9.895833  99.000000  99.000000  12.000000|\n";
         String expectedRes2 = "|-9999.000000  -9999.000000  -9999.000000  -9999.000000  -9999.000000  -9999.000000|\n" +
                 "|-9999.000000     11.695000     12.482500  -9999.000000  -9999.000000     14.320000|\n" +
                 "|-9999.000000     14.175000     14.876389  -9999.000000  -9999.000000     16.800000|\n" +
@@ -165,15 +171,15 @@ public class RasterEditorsTest extends RasterTestBase {
             assertEquals(expectedMetadata[i], metadata[i], 1e-6);
         }
 
-        newRaster = RasterEditors.resample(raster, 6, 5, 1, -1, false, "bicubic");
+        newRaster = RasterEditors.resample(raster1, 6, 5, 1, -1, false, "bicubic");
 
         res1 = RasterOutputs.asMatrix(newRaster, 1);
         res2 = RasterOutputs.asMatrix(newRaster, 2);
         expectedRes1 = "|99.000000  99.000000  99.000000  99.000000  99.000000  99.000000|\n" +
-                "|99.000000   3.257045  99.000000   4.211917   4.254402   4.550135|\n" +
-                "|99.000000  99.000000   5.885300   6.683639   6.667900  99.000000|\n" +
-                "|99.000000  99.000000   8.418216   8.162022   8.936398  99.000000|\n" +
-                "|99.000000   9.593572  10.217107  99.000000  99.000000  12.530972|\n";
+                "|99.000000   3.539351  99.000000   4.273053   4.102367   4.205373|\n" +
+                "|99.000000  99.000000   5.866029   6.737416   6.227383  99.000000|\n" +
+                "|99.000000  99.000000   8.386340   8.053590   8.636799  99.000000|\n" +
+                "|99.000000   9.564744  10.207731  99.000000  99.000000  12.610778|\n";
         expectedRes2 = "|-9999.000000  -9999.000000  -9999.000000  -9999.000000  -9999.000000  -9999.000000|\n" +
                 "|-9999.000000     11.252455     12.144701  -9999.000000  -9999.000000     13.989338|\n" +
                 "|-9999.000000     14.089166     14.862710  -9999.000000  -9999.000000     16.841017|\n" +
@@ -182,6 +188,25 @@ public class RasterEditorsTest extends RasterTestBase {
 
         metadata = RasterAccessors.metadata(newRaster);
         expectedMetadata = new double[] {-0.33333298563957214, 0.20000000298023224, 6.0, 5.0, 1.3888888309399288, -1.2400000005960465, 0.0, 0.0, 0.0, 2.0};
+        assertEquals(expectedRes1, res1);
+        assertEquals(expectedRes2, res2);
+        for (int i = 0; i < metadata.length; i++) {
+            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
+        }
+
+        newRaster = RasterEditors.resample(raster2, 3, 3, 1, -1, false, "bilinear");
+
+        res1 = RasterOutputs.asMatrix(newRaster, 1);
+        res2 = RasterOutputs.asMatrix(newRaster, 2);
+        expectedRes1 = "|99.000000  99.000000  99.000000|\n" +
+                "|99.000000   9.500002  11.555557|\n" +
+                "|99.000000  19.777779  21.833334|\n";
+        expectedRes2 = "|-9999.000000  -9999.000000  -9999.000000|\n" +
+                "|-9999.000000     18.500002     20.555557|\n" +
+                "|-9999.000000     28.777779     29.718364|\n";
+
+        metadata = RasterAccessors.metadata(newRaster);
+        expectedMetadata = new double[] {-2.3333330154418945, 2.3333330154418945, 3.0, 3.0, 4.111111005147298, -4.111111005147298, 0.0, 0.0, 0.0, 2.0};
         assertEquals(expectedRes1, res1);
         assertEquals(expectedRes2, res2);
         for (int i = 0; i < metadata.length; i++) {

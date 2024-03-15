@@ -20,6 +20,7 @@ package org.apache.sedona.common.utils;
 
 import com.sun.media.imageioimpl.common.BogusColorSpace;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.RasterAccessors;
@@ -717,23 +718,24 @@ public class RasterUtils {
      */
     public static GridCoverage2D replaceNoDataValues(GridCoverage2D raster) {
         Raster rasterData = raster.getRenderedImage().getData();
-        WritableRaster writableRaster = rasterData.createCompatibleWritableRaster(RasterAccessors.getWidth(raster), RasterAccessors.getHeight(raster));
+        WritableRaster writableRaster = rasterData.createCompatibleWritableRaster();
+
+        Median medianCalculator = new Median();
 
         // Iterate over each band
         for (int band = 0; band < raster.getNumSampleDimensions(); band++) {
             GridSampleDimension sampleDimension = raster.getSampleDimension(band);
             double noDataValue = RasterUtils.getNoDataValue(sampleDimension);
 
-            // Replace no data values with the mean of neighboring pixels for each band
+            // Replace no data values with the median of neighboring pixels for each band
             for (int y = 0; y < rasterData.getHeight(); y++) {
                 for (int x = 0; x < rasterData.getWidth(); x++) {
                     double originalValue = rasterData.getSampleDouble(x, y, band);
                     if (originalValue == noDataValue) {
                         List<Double> neighbors = RasterUtils.getNeighboringPixels(x, y, band, rasterData, noDataValue);
-                        double meanValue = neighbors.stream().mapToDouble(Double::doubleValue).average().orElse(Double.NaN);
-                        if (!Double.isNaN(meanValue)) {
-                            writableRaster.setSample(x, y, band, meanValue);
-                        }
+                        double[] neighborArray = neighbors.stream().mapToDouble(Double::doubleValue).toArray();
+                        double medianValue = neighborArray.length > 0 ? medianCalculator.evaluate(neighborArray) : Double.NaN;
+                        writableRaster.setSample(x, y, band, !Double.isNaN(medianValue) ? medianValue : originalValue);
                     } else {
                         writableRaster.setSample(x, y, band, originalValue);
                     }
