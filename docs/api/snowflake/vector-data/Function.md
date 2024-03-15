@@ -1898,20 +1898,26 @@ If the minimum distance between the geometries exceeds the `tolerance`, the `inp
 
 Format: `ST_Snap(input: Geometry, reference: Geometry, tolerance: double)`
 
+Input geometry:
+
+<img width="250" src="../../../../image/st_snap/st-snap-base-example.png" title="ST_Snap Base example"/>
+
 SQL Example:
 
 ```sql
 SELECT ST_Snap(
-        ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))'),
-        ST_GeomFromWKT('LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)'),
-       2.525
+        ST_GeomFromWKT('POLYGON ((236877.58 -6.61, 236878.29 -8.35, 236879.98 -8.33, 236879.72 -7.63, 236880.35 -6.62, 236877.58 -6.61), (236878.45 -7.01, 236878.43 -7.52, 236879.29 -7.50, 236878.63 -7.22, 236878.76 -6.89, 236878.45 -7.01))') as poly,
+        ST_GeomFromWKT('LINESTRING (236880.53 -8.22, 236881.15 -7.68, 236880.69 -6.81)') as line,
+       ST_Distance(poly, line) * 1.01
        )
 ```
 
 Output:
 
+<img width="250" src="../../../../image/st_snap/st-snap-applied.png" title="ST_Snap applied example"/>
+
 ```
-POLYGON ((2.6 12.5, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 2.6 12.5))
+POLYGON ((236877.58 -6.61, 236878.29 -8.35, 236879.98 -8.33, 236879.72 -7.63, 236880.69 -6.81, 236877.58 -6.61), (236878.45 -7.01, 236878.43 -7.52, 236879.29 -7.5, 236878.63 -7.22, 236878.76 -6.89, 236878.45 -7.01))
 ```
 
 ## ST_Split
