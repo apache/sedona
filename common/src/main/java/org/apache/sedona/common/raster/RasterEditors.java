@@ -180,6 +180,10 @@ public class RasterEditors
                 PixelInCell.CELL_CORNER,
                 transform, crs, null);
         Interpolation resamplingAlgorithm = Interpolation.getInstance(0);
+        GridCoverage2D newRaster;
+        GridCoverage2D noDataValueMask;
+        GridCoverage2D resampledNoDataValueMask;
+
         if (!Objects.isNull(algorithm) && !algorithm.isEmpty()) {
             if (algorithm.equalsIgnoreCase("nearestneighbor")) {
                 resamplingAlgorithm = Interpolation.getInstance(0);
@@ -187,11 +191,30 @@ public class RasterEditors
                 resamplingAlgorithm = Interpolation.getInstance(1);
             }else if (algorithm.equalsIgnoreCase("bicubic")) {
                 resamplingAlgorithm = Interpolation.getInstance(2);
+            } else {
+                throw new IllegalArgumentException("Invalid 'algorithm': '" + algorithm + "'. Expected one of: 'NearestNeighbor', 'Bilinear', 'Bicubic'.");
             }
         }
-        GridCoverage2D newRaster = (GridCoverage2D) Operations.DEFAULT.resample(raster, null, gridGeometry, resamplingAlgorithm);
+
+
+        if ((!Objects.isNull(algorithm) && !algorithm.isEmpty()) && (algorithm.equalsIgnoreCase("Bilinear") || algorithm.equalsIgnoreCase("Bicubic"))) {
+            // Create and resample noDataValue mask
+            noDataValueMask = RasterUtils.extractNoDataValueMask(raster);
+            resampledNoDataValueMask = resample(noDataValueMask, widthOrScale, heightOrScale, gridX, -gridY, useScale,"NearestNeighbor");
+
+            // Replace noDataValues with mean of neighbors and resample
+            raster = RasterUtils.replaceNoDataValues(raster);
+            newRaster = (GridCoverage2D) Operations.DEFAULT.resample(raster, null, gridGeometry, resamplingAlgorithm);
+
+            // Apply resampled noDataValue mask to resampled raster
+            newRaster = RasterUtils.applyRasterMask(newRaster, resampledNoDataValueMask);
+        } else {
+            newRaster = (GridCoverage2D) Operations.DEFAULT.resample(raster, null, gridGeometry, resamplingAlgorithm);
+        }
+
         return newRaster;
     }
+
     public static GridCoverage2D resample(GridCoverage2D raster, double widthOrScale, double heightOrScale, boolean useScale, String algorithm) throws TransformException {
         return resample(raster, widthOrScale, heightOrScale, RasterAccessors.getUpperLeftX(raster), RasterAccessors.getUpperLeftY(raster), useScale, algorithm);
 
