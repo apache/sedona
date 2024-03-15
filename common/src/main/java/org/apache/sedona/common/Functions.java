@@ -38,6 +38,7 @@ import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.locationtech.jts.operation.distance.DistanceOp;
 import org.locationtech.jts.operation.distance3d.Distance3DOp;
 import org.locationtech.jts.operation.linemerge.LineMerger;
+import org.locationtech.jts.operation.overlay.snap.GeometrySnapper;
 import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.operation.valid.TopologyValidationError;
@@ -1040,6 +1041,11 @@ public class Functions {
 
     public static Geometry[] subDivide(Geometry geometry, int maxVertices) {
         return GeometrySubDivider.subDivide(geometry, maxVertices);
+    }
+
+    public static Geometry snap(Geometry input, Geometry reference, double tolerance) {
+        GeometrySnapper snapper = new GeometrySnapper(input);
+        return snapper.snapTo(reference, tolerance);
     }
 
     public static Geometry makeLine(Geometry geom1, Geometry geom2) {

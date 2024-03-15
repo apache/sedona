@@ -918,6 +918,17 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"input", "reference", "tolerance"}, argTypes = {"Geometry", "Geometry", "double"}, returnTypes = "Geometry")
+    public static String ST_Snap(String input, String reference, double tolerance) {
+        return GeometrySerde.serGeoJson(
+                Functions.snap(
+                        GeometrySerde.deserGeoJson(input),
+                        GeometrySerde.deserGeoJson(reference),
+                        tolerance
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "maxVertices"}, argTypes = {"Geometry", "int"}, returnTypes = "Geometry")
     public static String ST_SubDivide(String geometry, int maxVertices) {
         return GeometrySerde.serGeoJson(

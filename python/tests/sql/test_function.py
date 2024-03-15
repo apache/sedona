@@ -576,6 +576,17 @@ class TestPredicateJoin(TestBase):
 
         assert (not polygons.count())
 
+    def test_st_snap(self):
+        baseDf = self.spark.sql("SELECT ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 "
+                                "))') AS poly, ST_GeomFromWKT('LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)') AS line")
+        actual = baseDf.selectExpr("ST_AsText(ST_Snap(poly, line, 2.525))").take(1)[0][0]
+        expected = "POLYGON ((2.6 12.5, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 2.6 12.5))"
+        assert (expected == actual)
+
+        actual = baseDf.selectExpr("ST_AsText(ST_Snap(poly, line, 3.125))").take(1)[0][0]
+        expected = "POLYGON ((0.5 10.7, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 5.4 8.4, 0.5 10.7))"
+        assert (expected == actual)
+
     def test_st_end_point(self):
         linestring_dataframe = create_sample_lines_df(self.spark, 5)
         other_geometry_dataframe = create_sample_points_df(self.spark, 5). \

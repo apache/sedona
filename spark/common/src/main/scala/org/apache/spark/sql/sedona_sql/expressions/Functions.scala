@@ -445,6 +445,14 @@ case class ST_StartPoint(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Snap(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.snap _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_Boundary(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.boundary _) {
 

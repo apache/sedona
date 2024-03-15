@@ -801,6 +801,15 @@ public class TestFunctions extends TestBase {
                 "POINT (1 2)"
         );
     }
+
+    @Test
+    public void test_ST_Snap() {
+        registerUDF("ST_Snap", byte[].class, byte[].class, double.class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_AsText(sedona.ST_Snap(ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))'), ST_GeomFromWKT('LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)'), 2.525))",
+                "POLYGON ((2.6 12.5, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 2.6 12.5))"
+        );
+    }
     @Test
     public void test_ST_SubDivide() {
         registerUDF("ST_SubDivide", byte[].class, int.class);

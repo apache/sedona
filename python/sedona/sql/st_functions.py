@@ -1229,6 +1229,17 @@ def ST_SetSRID(geometry: ColumnOrName, srid: Union[ColumnOrName, int]) -> Column
     """
     return _call_st_function("ST_SetSRID", (geometry, srid))
 
+@validate_argument_types
+def ST_Snap(input: ColumnOrName, reference: ColumnOrName, tolerance: Union[ColumnOrName, float]) -> Column:
+    """Snaps input Geometry to reference Geometry controlled by distance tolerance.
+
+    :param input: Geometry
+    :param reference: Geometry to snap to
+    :param tolerance: Distance to control snapping
+    :return: Snapped Geometry
+    """
+    return _call_st_function("ST_Snap", (input, reference, tolerance))
+
 
 @validate_argument_types
 def ST_SRID(geometry: ColumnOrName) -> Column:
