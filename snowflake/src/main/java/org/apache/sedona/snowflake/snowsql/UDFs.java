@@ -1069,6 +1069,17 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"input", "reference", "tolerance"})
+    public static byte[] ST_Snap(byte[] input, byte[] reference, double tolerance) {
+        return GeometrySerde.serialize(
+                Functions.snap(
+                        GeometrySerde.deserialize(input),
+                        GeometrySerde.deserialize(reference),
+                        tolerance
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "maxVertices"})
     public static byte[] ST_SubDivide(byte[] geometry, int maxVertices) {
         return GeometrySerde.serialize(

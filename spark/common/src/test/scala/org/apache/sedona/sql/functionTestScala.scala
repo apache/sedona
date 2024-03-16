@@ -895,6 +895,17 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       And("Polygon DataFrame should result with empty list ")
       polygons.isEmpty shouldBe true
     }
+
+    it("Should pass ST_Snap") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))') AS poly, ST_GeomFromWKT('LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)') AS line")
+      var actual = baseDf.selectExpr("ST_AsText(ST_Snap(poly, line, 2.525))").first().getString(0)
+      var expected = "POLYGON ((2.6 12.5, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 2.6 12.5))"
+      assert(expected.equals(actual))
+
+      actual = baseDf.selectExpr("ST_AsText(ST_Snap(poly, line, 3.125))").first().getString(0)
+      expected = "POLYGON ((0.5 10.7, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 5.4 8.4, 0.5 10.7))"
+      assert(expected.equals(actual))
+    }
   }
 
   it("Should pass ST_Boundary") {

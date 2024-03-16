@@ -20,6 +20,7 @@ package org.apache.sedona.common.utils;
 
 import com.sun.media.imageioimpl.common.BogusColorSpace;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.RasterAccessors;
@@ -676,4 +677,136 @@ public class RasterUtils {
             return RasterUtils.clone(raster.getRenderedImage(), raster.getGridGeometry(), raster.getSampleDimensions(), raster, noDataValue, true);
         }
     }
+
+    /**
+     * Retrieves a List<Double> of neighboring pixel values excluding noDataValue neighbors
+     *
+     * @param x grid coordinate
+     * @param y grid coordinate
+     * @param band Band index of raster
+     * @param raster
+     * @param noDataValue
+     * @return
+     */
+    public static List<Double> getNeighboringPixels(int x, int y, int band, Raster raster, Double noDataValue) {
+        List<Double> neighbors = new ArrayList<>();
+        int width = raster.getWidth();
+        int height = raster.getHeight();
+
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                int nx = x + dx;
+                int ny = y + dy;
+
+                if (nx >= 0 && nx < width && ny >= 0 && ny < height && !(dx == 0 && dy == 0)) {
+                    double value = raster.getSampleDouble(nx, ny, band); // Now checks the specified band
+                    if (value != noDataValue) {
+                        neighbors.add(value);
+                    }
+                }
+            }
+        }
+        return neighbors;
+    }
+
+
+    /**
+     * Replaces noDataValue pixels in each band with mean of neighboring pixel values
+     *
+     * @param raster
+     * @return A new grid coverage with noDataValues pixels replaced
+     */
+    public static GridCoverage2D replaceNoDataValues(GridCoverage2D raster) {
+        Raster rasterData = raster.getRenderedImage().getData();
+        WritableRaster writableRaster = rasterData.createCompatibleWritableRaster();
+
+        Median medianCalculator = new Median();
+
+        // Iterate over each band
+        for (int band = 0; band < raster.getNumSampleDimensions(); band++) {
+            GridSampleDimension sampleDimension = raster.getSampleDimension(band);
+            double noDataValue = RasterUtils.getNoDataValue(sampleDimension);
+
+            // Replace no data values with the median of neighboring pixels for each band
+            for (int y = 0; y < rasterData.getHeight(); y++) {
+                for (int x = 0; x < rasterData.getWidth(); x++) {
+                    double originalValue = rasterData.getSampleDouble(x, y, band);
+                    if (originalValue == noDataValue) {
+                        List<Double> neighbors = RasterUtils.getNeighboringPixels(x, y, band, rasterData, noDataValue);
+                        double[] neighborArray = neighbors.stream().mapToDouble(Double::doubleValue).toArray();
+                        double medianValue = neighborArray.length > 0 ? medianCalculator.evaluate(neighborArray) : Double.NaN;
+                        writableRaster.setSample(x, y, band, !Double.isNaN(medianValue) ? medianValue : originalValue);
+                    } else {
+                        writableRaster.setSample(x, y, band, originalValue);
+                    }
+                }
+            }
+        }
+
+        GridCoverage2D modifiedRaster = RasterUtils.clone(writableRaster, raster.getGridGeometry(), raster.getSampleDimensions(), raster, null, true);
+        return modifiedRaster;
+    }
+
+    /**
+     * Filters out the noDataValue pixels from each band as a grid coverage
+     *
+     * @param raster
+     * @return Returns a grid coverage with noDataValues and valid data values as Double.Nan
+     */
+    public static GridCoverage2D extractNoDataValueMask(GridCoverage2D raster) {
+        Raster rasterData = raster.getRenderedImage().getData();
+        WritableRaster writableRaster = rasterData.createCompatibleWritableRaster(RasterAccessors.getWidth(raster), RasterAccessors.getHeight(raster));
+
+        // Iterate over each band
+        for (int band = 0; band < raster.getNumSampleDimensions(); band++) {
+            GridSampleDimension sampleDimension = raster.getSampleDimension(band);
+            Double noDataValue = RasterUtils.getNoDataValue(sampleDimension);
+
+            for (int y = 0; y < rasterData.getHeight(); y++) {
+                for (int x = 0; x < rasterData.getWidth(); x++) {
+                    double originalValue = rasterData.getSampleDouble(x, y, band);
+                    if (originalValue == noDataValue) {
+                        writableRaster.setSample(x, y, band, originalValue);
+                    } else {
+                        writableRaster.setSample(x, y, band, Double.NaN);
+                    }
+                }
+            }
+        }
+
+        GridCoverage2D modifiedRaster = RasterUtils.clone(writableRaster, raster.getGridGeometry(), raster.getSampleDimensions(), raster, null, true);
+        return modifiedRaster;
+    }
+
+    /**
+     * Superimposes the mask values onto the original raster, maintaining the original values where the mask is NaN.
+     *
+     * @param raster The original raster to which the mask will be applied.
+     * @param mask Grid coverage mask to be applied, containing the values to overlay. This mask should have the same dimensions and number of bands as the original raster.
+     * @return A new GridCoverage2D object with the mask applied.
+     */
+    public static GridCoverage2D applyRasterMask(GridCoverage2D raster, GridCoverage2D mask) {
+        Raster rasterData = raster.getRenderedImage().getData();
+        Raster maskData = mask.getRenderedImage().getData();
+        WritableRaster writableRaster = rasterData.createCompatibleWritableRaster(RasterAccessors.getWidth(raster), RasterAccessors.getHeight(raster));
+
+        // Iterate over each band
+        for (int band = 0; band < raster.getNumSampleDimensions(); band++) {
+            for (int y = 0; y < rasterData.getHeight(); y++) {
+                for (int x = 0; x < rasterData.getWidth(); x++) {
+                    double originalValue = rasterData.getSampleDouble(x, y, band);
+                    double maskValue = maskData.getSampleDouble(x, y, band);
+                    if (!Double.isNaN(maskValue)) {
+                        writableRaster.setSample(x, y, band, maskValue);
+                    } else {
+                        writableRaster.setSample(x, y, band, originalValue);
+                    }
+                }
+            }
+        }
+
+        GridCoverage2D modifiedRaster = RasterUtils.clone(writableRaster, raster.getGridGeometry(), raster.getSampleDimensions(), raster, null, false);
+        return modifiedRaster;
+    }
+
 }
