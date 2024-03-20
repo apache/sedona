@@ -30,9 +30,8 @@ import org.geotools.coverage.processing.Operations;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
-import org.opengis.coverage.SampleDimensionType;
 import org.opengis.coverage.grid.GridCoverage;
-import org.opengis.geometry.Envelope;
+import org.opengis.coverage.grid.GridGeometry;
 import org.opengis.metadata.spatial.PixelOrientation;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -43,7 +42,6 @@ import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.Interpolation;
 import javax.media.jai.RasterFactory;
-import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.image.*;
 import java.util.Arrays;
@@ -227,23 +225,10 @@ public class RasterEditors
                 new GridEnvelope2D(0, 0, newWidth, newHeight),
                 PixelInCell.CELL_CORNER,
                 transform, crs, null);
-        Interpolation resamplingAlgorithm = Interpolation.getInstance(0);
+        Interpolation resamplingAlgorithm = createInterpolationAlgorithm(algorithm);
         GridCoverage2D newRaster;
         GridCoverage2D noDataValueMask;
         GridCoverage2D resampledNoDataValueMask;
-
-        if (!Objects.isNull(algorithm) && !algorithm.isEmpty()) {
-            if (algorithm.equalsIgnoreCase("nearestneighbor")) {
-                resamplingAlgorithm = Interpolation.getInstance(0);
-            }else if (algorithm.equalsIgnoreCase("bilinear")) {
-                resamplingAlgorithm = Interpolation.getInstance(1);
-            }else if (algorithm.equalsIgnoreCase("bicubic")) {
-                resamplingAlgorithm = Interpolation.getInstance(2);
-            } else {
-                throw new IllegalArgumentException("Invalid 'algorithm': '" + algorithm + "'. Expected one of: 'NearestNeighbor', 'Bilinear', 'Bicubic'.");
-            }
-        }
-
 
         if ((!Objects.isNull(algorithm) && !algorithm.isEmpty()) && (algorithm.equalsIgnoreCase("Bilinear") || algorithm.equalsIgnoreCase("Bicubic"))) {
             // Create and resample noDataValue mask
@@ -259,7 +244,6 @@ public class RasterEditors
         } else {
             newRaster = (GridCoverage2D) Operations.DEFAULT.resample(raster, null, gridGeometry, resamplingAlgorithm);
         }
-
         return newRaster;
     }
 
@@ -405,6 +389,28 @@ public class RasterEditors
         }
 
         return rasterGeom;
+    }
+
+    public static GridCoverage2D reprojectMatch(GridCoverage2D source, GridCoverage2D target, String interpolationAlgorithm) {
+        Interpolation interp = createInterpolationAlgorithm(interpolationAlgorithm);
+        CoordinateReferenceSystem crs = target.getCoordinateReferenceSystem();
+        GridGeometry gridGeometry = target.getGridGeometry();
+        GridCoverage2D result = (GridCoverage2D) Operations.DEFAULT.resample(source, crs, gridGeometry, interp);
+        return RasterUtils.shiftRasterToZeroOrigin(result, null);
+    }
+
+    private static Interpolation createInterpolationAlgorithm(String algorithm) {
+        Interpolation interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
+        if (!Objects.isNull(algorithm) && !algorithm.isEmpty()) {
+            if (algorithm.equalsIgnoreCase("nearestneighbor")) {
+                interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
+            } else if (algorithm.equalsIgnoreCase("bilinear")) {
+                interp = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
+            } else if (algorithm.equalsIgnoreCase("bicubic")) {
+                interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
+            }
+        }
+        return interp;
     }
 
     private static double castRasterDataType(double value, int dataType) {

@@ -58,3 +58,10 @@ case class RS_NormalizeAll(inputExpressions: Seq[Expression]) extends InferredEx
     copy(inputExpressions = newChildren)
   }
 }
+
+case class RS_ReprojectMatch(inputExpressions: Seq[Expression])
+  extends InferredExpression(RasterEditors.reprojectMatch _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

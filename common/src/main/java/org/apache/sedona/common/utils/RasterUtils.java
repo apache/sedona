@@ -672,9 +672,12 @@ public class RasterUtils {
             GridGeometry2D newGridGeometry = new GridGeometry2D(newGridEnvelope, newAffine, gridGeometry.getCoordinateReferenceSystem());
             WritableRaster wr = RasterFactory.createBandedRaster(sampleModel.getDataType(), image.getWidth(), image.getHeight(), sampleModel.getNumBands(), null);
             wr.setRect(-minX, -minY, RasterUtils.getRaster(image));
-            return RasterUtils.clone(wr, newGridGeometry, raster.getSampleDimensions(), raster, noDataValue, true);
+            return RasterUtils.clone(wr, newGridGeometry, raster.getSampleDimensions(), raster, noDataValue, false);
         } else {
-            return RasterUtils.clone(raster.getRenderedImage(), raster.getGridGeometry(), raster.getSampleDimensions(), raster, noDataValue, true);
+            // Copy the data out to break the dependency on the original raster
+            WritableRaster wr = RasterFactory.createBandedRaster(sampleModel.getDataType(), image.getWidth(), image.getHeight(), sampleModel.getNumBands(), null);
+            wr.setRect(0, 0, RasterUtils.getRaster(image));
+            return RasterUtils.clone(wr, raster.getGridGeometry(), raster.getSampleDimensions(), raster, noDataValue, false);
         }
     }
 
