@@ -19,6 +19,7 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.FunctionsGeoTools;
+import org.apache.sedona.common.utils.RasterInterpolate;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
@@ -30,6 +31,10 @@ import org.geotools.coverage.processing.Operations;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.index.quadtree.Quadtree;
 import org.opengis.coverage.SampleDimensionType;
 import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.geometry.Envelope;
@@ -47,6 +52,7 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.image.*;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -426,6 +432,62 @@ public class RasterEditors
             default:
                 return value;
         }
+    }
+
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, Double radius) {
+        WritableRaster raster = (WritableRaster) inputRaster.getRenderedImage().getData();
+        int width = raster.getWidth();
+        int height = raster.getHeight();
+        int numBands = raster.getNumBands();
+
+        GeometryFactory geometryFactory = new GeometryFactory();
+
+        // Interpolation for each band
+        for (int band = 0; band < numBands; band++) {
+            System.out.println("\nBand: " + band);
+            System.out.println("Reinitialize the quadtree and map for each new band");
+            // Reinitialize the quadtree and map for each new band
+            Quadtree quadtree = new Quadtree();
+            Map<Point, Double> pointValueMap = new HashMap<>();
+            Double noDataValue = RasterUtils.getNoDataValue(inputRaster.getSampleDimension(band));
+            int countNaNs = 0;
+
+            System.out.println("Populate quadtree and map");
+            // Populate quadtree and map
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    double value = raster.getSampleDouble(x, y, band);
+                    if (!Double.isNaN(value) && value != noDataValue) {
+                        Point point = geometryFactory.createPoint(new Coordinate(x, y));
+                        pointValueMap.put(point, value);
+                        quadtree.insert(point.getEnvelopeInternal(), point);
+                    } else {
+                        countNaNs += 1;
+                    }
+                }
+            }
+
+            if (countNaNs==0) {
+                System.out.println("Skipped Band "+band+". No nodataValues to be interpolated.\n\n");
+                continue;
+            }
+
+            System.out.println("Perform interpolation using the quadtree");
+            // Perform interpolation using the quadtree
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    double value = raster.getSampleDouble(x, y, band);
+                    if (Double.isNaN(value) || value == noDataValue) {
+                        double interpolatedValue = RasterInterpolate.interpolateIDW(x, y, quadtree, pointValueMap, radius, power);
+                        raster.setSample(x, y, band, interpolatedValue);
+                    }
+                }
+            }
+
+            RasterUtils.removeNoDataValue(inputRaster.getSampleDimension(band));
+        }
+
+        return RasterUtils.clone(raster, inputRaster.getGridGeometry(), inputRaster.getSampleDimensions(), inputRaster, null, true);
     }
 
 }

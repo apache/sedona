@@ -162,6 +162,71 @@ public class RasterEditorsTest extends RasterTestBase {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void testInterpolate() throws FactoryException {
+//        double[] values = new double[10 * 10];
+//        double[] values2 = new double[10 * 10];
+//        for (int i = 0; i < values.length; i++) {
+//            values[i] = Double.NaN;
+//            values2[i] = 1;
+//        }
+//        values[7] = 20;
+//        values[20] = 14;
+//        values[29] = 24;
+//        values[54] = 16;
+//        values[90] = 30;
+//        values[92] = 27;
+//        values[97] = 20;
+//        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(2, 10, 10, 0, 0, 1);
+
+        double[] values = new double[15 * 15];
+//        double[] values2 = new double[10 * 10];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = Double.NaN;
+//            values2[i] = 1;
+        }
+        values[1] = 37;
+        values[7] = 20;
+        values[20] = 14;
+        values[29] = 24;
+        values[48] = 10;
+        values[54] = 16;
+        values[90] = 30;
+        values[92] = 27;
+        values[97] = 20;
+        values[110] = 22;
+        values[133] = 34;
+        values[141] = 19;
+        values[159] = 30;
+        values[163] = 21;
+        values[177] = 14;
+        values[182] = 10;
+        values[189] = 15;
+        values[201] = 30;
+        values[215] = 23;
+        values[219] = 12;
+        values[224] = 30;
+
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 15, 15, 0, 0, 1);
+
+
+        raster = MapAlgebra.addBandFromArray(raster, values, 1);
+//        raster = MapAlgebra.addBandFromArray(raster, values2, 2);
+        System.out.println("Original Raster: \n" + RasterOutputs.asMatrix(raster));
+
+        GridCoverage2D modifiedRaster1 = RasterEditors.interpolate(raster, 2.0, 15.0);
+        System.out.println("Modified Raster (Radius = 15; Power = 2): \n" + RasterOutputs.asMatrix(modifiedRaster1));
+        System.out.println(Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster1, 1)));
+
+        GridCoverage2D modifiedRaster2 = RasterEditors.interpolate(raster, 2.0, 5.0 );
+        System.out.println("Modified Raster (Radius = 5; Power = 2): \n" + RasterOutputs.asMatrix(modifiedRaster2));
+
+        GridCoverage2D modifiedRaster3 = RasterEditors.interpolate(raster, 1.0, 15.0);
+        System.out.println("Modified Raster (Radius = 15; Power = 1): \n" + RasterOutputs.asMatrix(modifiedRaster3));
+
+        GridCoverage2D modifiedRaster4 = RasterEditors.interpolate(raster, 1.0, 5.0);
+        System.out.println("Modified Raster (Radius = 5; Power = 1): \n" + RasterOutputs.asMatrix(modifiedRaster4));
+    }
 
     @Test
     public void testResample() throws FactoryException, TransformException {
