@@ -24,10 +24,8 @@ public class RasterInterpolate {
         GeometryFactory geometryFactory = new GeometryFactory();
         Quadtree quadtree = new Quadtree();
 
-        System.out.println("Populate quadtree with RasterPoint objects");
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-//                double value = raster.getSampleDouble(x, y, band);
                 double value = rasterData.getSampleDouble(x, y, band);
                 if (!Double.isNaN(value) && value != noDataValue) {
                     Point jtsPoint = geometryFactory.createPoint(new Coordinate(x, y));
@@ -107,7 +105,7 @@ public class RasterInterpolate {
         public RasterPoint(Point point, double value, double distance) {
             this.point = point;
             this.value = value;
-            this.distance = distance; // Initialize with default value
+            this.distance = distance;
         }
 
         public Point getPoint() {
@@ -126,13 +124,4 @@ public class RasterInterpolate {
             this.distance = distance;
         }
     }
-
-    private static void printRasterPoint(List<RasterPoint> rasterPoints) {
-        String ans = "";
-        for (RasterPoint rasterPoint: rasterPoints) {
-            ans += "("+rasterPoint.getPoint()+","+rasterPoint.getValue()+","+rasterPoint.getDistance()+"), ";
-        }
-        System.out.println(ans);
-    }
 }
-

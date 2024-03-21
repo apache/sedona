@@ -473,16 +473,12 @@ public class RasterEditors
         // Interpolation for each band
         for (int bandIndex=0; bandIndex < numBands; bandIndex++) {
             if (band == null || bandIndex == band - 1) {
-                System.out.println("\nbandIndex: " + bandIndex);
-                System.out.println("Reinitialize the quadtree and map for each new band");
                 // Generate quadtree
-                System.out.println("Generate quadtree");
                 Quadtree quadtree = RasterInterpolate.generateQuadtree(inputRaster, bandIndex);
                 Double noDataValue = RasterUtils.getNoDataValue(inputRaster.getSampleDimension(bandIndex));
                 int countNoDataValues = 0;
 
                 if (quadtree.isEmpty() || quadtree.size() == width*height) {
-                    System.out.println("Skipped bandIndex "+bandIndex+". No nodataValues to be interpolated.\n\n");
                     continue;
                 }
 
@@ -490,7 +486,6 @@ public class RasterEditors
                     throw new IllegalArgumentException("Parameter 'numPoints' is larger than no. of valid pixels in band "+bandIndex+". Please choose an appropriate value");
                 }
 
-                System.out.println("Perform interpolation using the quadtree");
                 // Perform interpolation using the quadtree
                 for (int y = 0; y < height; y++) {
                     for (int x = 0; x < width; x++) {
