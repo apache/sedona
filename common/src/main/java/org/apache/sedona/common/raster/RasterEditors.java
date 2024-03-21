@@ -434,27 +434,27 @@ public class RasterEditors
         }
     }
 
-    public static GridCoverage2D interpolate(GridCoverage2D inputRaster) {
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster) throws IllegalArgumentException{
         return interpolate(inputRaster, 2.0, "fixed", null, null, null);
     }
 
-    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power) {
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power) throws IllegalArgumentException{
         return interpolate(inputRaster, power, "fixed", null, null, null);
     }
 
-    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, String mode) {
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, String mode) throws IllegalArgumentException{
         return interpolate(inputRaster, power, mode, null, null, null);
     }
 
-    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, String mode, Double numPointsOrRadius) {
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, String mode, Double numPointsOrRadius) throws IllegalArgumentException{
         return interpolate(inputRaster, power, mode, numPointsOrRadius, null, null);
     }
 
-    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, String mode, Double numPointsOrRadius, Double maxRadiusOrMinPoints) {
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, String mode, Double numPointsOrRadius, Double maxRadiusOrMinPoints) throws IllegalArgumentException{
         return interpolate(inputRaster, power, mode, numPointsOrRadius, maxRadiusOrMinPoints, null);
     }
 
-    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, String mode, Double numPointsOrRadius, Double maxRadiusOrMinPoints, Integer band) {
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, String mode, Double numPointsOrRadius, Double maxRadiusOrMinPoints, Integer band) throws IllegalArgumentException {
         if (!mode.equalsIgnoreCase("variable") && !mode.equalsIgnoreCase("fixed")) {
             throw new IllegalArgumentException("Invalid 'mode': '" + mode + "'. Expected one of: 'Variable', 'Fixed'.");
         }

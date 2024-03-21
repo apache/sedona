@@ -45,6 +45,9 @@ public class RasterInterpolate {
             Double numPoints = (numPointsOrRadius==null) ? 12:numPointsOrRadius; // Default no. of points -> 12
             Double maxRadius = (maxRadiusOrMinPoints==null) ? Math.sqrt((width*width)+(height*height)):maxRadiusOrMinPoints; // Default max radius -> diagonal of raster
             List<RasterPoint> queryResult = quadtree.query(new Envelope(x - maxRadius, x + maxRadius, y - maxRadius, y + maxRadius));
+            if (mode.equalsIgnoreCase("variable") && quadtree.size() < numPointsOrRadius) {
+                throw new IllegalArgumentException("Parameter 'numPoints' defaulted to 12 which is larger than no. of valid pixels within the max search radius. Please choose an appropriate value");
+            }
             for (RasterPoint rasterPoint : queryResult) {
                 if (numPoints<=0) {
                     break;
