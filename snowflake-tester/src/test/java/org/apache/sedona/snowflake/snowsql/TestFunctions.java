@@ -1004,6 +1004,15 @@ public class TestFunctions extends TestBase {
     }
 
     @Test
+    public void test_ST_ForcePolygonCW() {
+        registerUDF("ST_ForcePolygonCW", byte[].class);
+        verifySqlSingleRes(
+                "SELECT ST_AsText(sedona.ST_ForcePolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))')))",
+                "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))"
+        );
+    }
+
+    @Test
     public void test_ST_LengthSpheroid() {
         registerUDF("ST_LengthSpheroid", byte[].class);
         verifySqlSingleRes(

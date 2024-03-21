@@ -173,6 +173,9 @@ object st_functions extends DataFrameAPI {
   def ST_IsEmpty(geometry: Column): Column = wrapExpression[ST_IsEmpty](geometry)
   def ST_IsEmpty(geometry: String): Column = wrapExpression[ST_IsEmpty](geometry)
 
+  def ST_IsPolygonCW(geometry: Column): Column = wrapExpression[ST_IsPolygonCW](geometry)
+  def ST_IsPolygonCW(geometry: String): Column = wrapExpression[ST_IsPolygonCW](geometry)
+
   def ST_IsRing(lineString: Column): Column = wrapExpression[ST_IsRing](lineString)
   def ST_IsRing(lineString: String): Column = wrapExpression[ST_IsRing](lineString)
 
@@ -379,6 +382,9 @@ object st_functions extends DataFrameAPI {
   def ST_Force3D(geometry: Column, zValue: Column): Column = wrapExpression[ST_Force3D](geometry, zValue)
 
   def ST_Force3D(geometry: String, zValue: Double): Column = wrapExpression[ST_Force3D](geometry, zValue)
+
+  def ST_ForcePolygonCW(geometry: Column): Column = wrapExpression[ST_ForcePolygonCW](geometry)
+  def ST_ForcePolygonCW(geometry: String): Column = wrapExpression[ST_ForcePolygonCW](geometry)
 
   def ST_NRings(geometry: Column): Column = wrapExpression[ST_NRings](geometry)
 

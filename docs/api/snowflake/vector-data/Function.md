@@ -942,6 +942,24 @@ Input: `LINESTRING EMPTY`
 
 Output: `LINESTRING EMPTY`
 
+## ST_ForcePolygonCW
+
+Introduction: For (Multi)Polygon geometries, this function sets the exterior ring orientation to clockwise and interior rings to counter-clockwise orientation. Non-polygonal geometries are returned unchanged.
+
+Format: `ST_ForcePolygonCW(geom: Geometry)`
+
+SQL Example:
+
+```sql
+SELECT ST_AsText(ST_ForcePolygonCW(ST_GeomFromText('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))')))
+```
+
+Output:
+
+```
+POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))
+```
+
 ## ST_FrechetDistance
 
 Introduction: Computes and returns discrete [Frechet Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_distance) between the given two geometries,

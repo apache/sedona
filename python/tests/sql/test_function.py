@@ -836,6 +836,13 @@ class TestPredicateJoin(TestBase):
         for actual, expected in result_and_expected:
             assert (actual == expected)
 
+    def test_isPolygonCW(self):
+        actual = self.spark.sql("SELECT ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))'))").take(1)[0][0]
+        assert actual == False
+
+        actual = self.spark.sql("SELECT ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))").take(1)[0][0]
+        assert actual == True
+
     def test_st_is_ring(self):
         result_and_expected = [
             [self.calculate_st_is_ring("LINESTRING(0 0, 0 1, 1 0, 1 1, 0 0)"), False],
@@ -1315,6 +1322,12 @@ class TestPredicateJoin(TestBase):
         expected = 3
         actualDf = self.spark.sql("SELECT ST_Force3D(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'), 1.1) AS geom")
         actual = actualDf.selectExpr("ST_NDims(geom)").take(1)[0][0]
+        assert expected == actual
+
+    def test_forcePolygonCW(self):
+        actualDf = self.spark.sql("SELECT ST_ForcePolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))')) AS polyCW")
+        actual = actualDf.selectExpr("ST_AsText(polyCW)").take(1)[0][0]
+        expected = "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))"
         assert expected == actual
 
     def test_nRings(self):

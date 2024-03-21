@@ -690,6 +690,29 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void testForcePolygonCW() throws ParseException {
+        Geometry polyCCW = Constructors.geomFromWKT("POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))", 0);
+        String actual = Functions.asWKT(Functions.forcePolygonCW(polyCCW));
+        String expected = "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))";
+        assertEquals(expected, actual);
+
+        // both exterior ring and interior ring are counter-clockwise
+        polyCCW = Constructors.geomFromWKT("POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 25, 20 15, 30 20))", 0);
+        actual = Functions.asWKT(Functions.forcePolygonCW(polyCCW));
+        expected = "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testIsPolygonCW() throws ParseException {
+        Geometry polyCCW = Constructors.geomFromWKT("POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))", 0);
+        assertFalse(Functions.isPolygonCW(polyCCW));
+
+        Geometry polyCW = Constructors.geomFromWKT("POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))", 0);
+        assertTrue(Functions.isPolygonCW(polyCW));
+    }
+
+    @Test
     public void geometricMedianTolerance() throws Exception {
         MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(
                 coordArray(0,0, 10,1, 5,1, 20,20));
