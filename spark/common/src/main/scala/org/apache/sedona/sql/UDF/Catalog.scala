@@ -273,6 +273,7 @@ object Catalog {
     function[RS_ZonalStats](),
     function[RS_ZonalStatsAll](),
     function[RS_Resample](),
+    function[RS_ReprojectMatch]("nearestneighbor"),
     function[RS_FromNetCDF](),
     function[RS_NetCDFInfo]()
   )

@@ -19,9 +19,19 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.utils.RasterUtils;
+import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridEnvelope2D;
+import org.geotools.geometry.DirectPosition2D;
+import org.geotools.referencing.CRS;
+import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.junit.Assert;
 import org.junit.Test;
+import org.opengis.geometry.DirectPosition;
+import org.opengis.geometry.Envelope;
 import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 import java.awt.image.DataBuffer;
@@ -543,4 +553,119 @@ public class RasterEditorsTest extends RasterTestBase {
         assertEquals(expectedDataType, resultDataType);
     }
 
+    @Test
+    public void testReprojectMatchCropping() throws Exception {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+        GridCoverage2D alignTo = RasterConstructors.makeEmptyRaster(1, 100, 80, -13091202, 4015754, 100, -100, 0, 0, 3857);
+        GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
+        verifyReprojectMatchResult(raster, alignTo, transformed);
+    }
+
+    @Test
+    public void testReprojectMatchExtending() throws Exception {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+        GridCoverage2D alignTo = RasterConstructors.makeEmptyRaster(1, 600, 500, -13102225, 4026420, 100, -100, 0, 0, 3857);
+        GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
+        verifyReprojectMatchResult(raster, alignTo, transformed);
+    }
+
+    @Test
+    public void testReprojectMatchIntersecting() throws Exception {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+        GridCoverage2D alignTo = RasterConstructors.makeEmptyRaster(1, 300, 310, -13070875, 4023162, 100, -100, 0, 0, 3857);
+        GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
+        verifyReprojectMatchResult(raster, alignTo, transformed);
+    }
+
+    @Test
+    public void testReprojectMatchDisjoint() throws Exception {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+        GridCoverage2D alignTo = RasterConstructors.makeEmptyRaster(1, 100, 100, -13027131, 3975625, 100, -100, 0, 0, 3857);
+        GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
+        verifyReprojectMatchResult(raster, alignTo, transformed);
+    }
+
+    @Test
+    public void testReprojectMatchDisjoint2() throws Exception {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+        GridCoverage2D alignTo = RasterConstructors.makeEmptyRaster(1, 100, 100, 490155, 3720761, 100, -100, 0, 0, 32611);
+        GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
+        verifyReprojectMatchResult(raster, alignTo, transformed);
+    }
+
+    @Test
+    public void testReprojectMatchReproject() throws Exception {
+        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+        GridCoverage2D alignTo = RasterConstructors.makeEmptyRaster(1, 300, 300, 453926, 3741637, 100, -100, 0, 0, 32611);
+        GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
+        verifyReprojectMatchResult(raster, alignTo, transformed);
+    }
+
+    private void verifyReprojectMatchResult(GridCoverage2D source, GridCoverage2D target, GridCoverage2D transformed)
+            throws TransformException, FactoryException {
+        // Check the envelope and CRS
+        Envelope expectedEnvelope = target.getEnvelope();
+        Envelope actualEnvelope = transformed.getEnvelope();
+        assertSameEnvelope(expectedEnvelope, actualEnvelope, 1e-6);
+        CoordinateReferenceSystem expectedCrs = target.getCoordinateReferenceSystem();
+        CoordinateReferenceSystem actualCrs = transformed.getCoordinateReferenceSystem();
+        Assert.assertTrue(CRS.equalsIgnoreMetadata(expectedCrs, actualCrs));
+
+        // Get no data values. Transformed pixels that does not have a corresponding source pixel will be filled with
+        // no data values
+        int numBands = source.getNumSampleDimensions();
+        double[] values = new double[numBands];
+        double[] expectedValues = new double[numBands];
+        double[] noDataValues = new double[numBands];
+        for (int k = 0; k < numBands; k++) {
+            double noData = RasterUtils.getNoDataValue(source.getSampleDimension(k));
+            noDataValues[k] = Double.isNaN(noData)? 0: noData;
+        }
+
+        // Compare the pixel values of the transformed raster with the source raster
+        AffineTransform2D affine = (AffineTransform2D) transformed.getGridGeometry().getGridToCRS();
+        double scaleX = affine.getScaleX();
+        double scaleY = affine.getScaleY();
+        double ipX = affine.getTranslateX();
+        double ipY = affine.getTranslateY();
+        MathTransform crsTrans = CRS.findMathTransform(actualCrs, source.getCoordinateReferenceSystem());
+        for (double worldY = ipY; worldY > expectedEnvelope.getMinimum(1); worldY += scaleY) {
+            for (double worldX = ipX; worldX < expectedEnvelope.getMaximum(0); worldX += scaleX) {
+                // Fetch the pixel values from the transformed raster
+                DirectPosition worldPos = new DirectPosition2D(worldX, worldY);
+                transformed.evaluate(worldPos, values);
+
+                // Find the corresponding grid coordinates on the source raster
+                DirectPosition srcWorldPos = crsTrans.transform(worldPos, null);
+                GridCoordinates2D sourceGridPos = source.getGridGeometry().worldToGrid(srcWorldPos);
+                GridEnvelope2D sourceGridRange = source.getGridGeometry().getGridRange2D();
+
+                if (!sourceGridRange.contains(sourceGridPos)) {
+                    // The point on transformed raster is outside the source raster. We should have nodata values.
+                    Assert.assertArrayEquals(noDataValues, values, 1e-6);
+                } else {
+                    // Should match with values retrieved from source raster. The transformed raster may not have the
+                    // same grid as the source raster so we need to fetch some nearby values from the source raster and
+                    // see if any of them matches the transformed value. Please note that this requires us to use the
+                    // nearest neighbor interpolation method.
+                    boolean found = false;
+                    for (int yoff = -1; yoff <= 1; yoff++) {
+                        for (int xoff = -1; xoff <= 1 ; xoff++) {
+                            int x = sourceGridPos.x + xoff;
+                            int y = sourceGridPos.y + yoff;
+                            if (!sourceGridRange.contains(x, y)) {
+                                continue;
+                            }
+                            source.evaluate(new GridCoordinates2D(x, y), expectedValues);
+                            if (Arrays.equals(values, expectedValues)) {
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                    Assert.assertTrue(found);
+                }
+            }
+        }
+    }
 }

@@ -1730,6 +1730,18 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       }
     }
 
+    it("Passed RS_ReprojectMatch") {
+      val rasterDf = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+        .selectExpr("RS_FromGeoTiff(content) as rast")
+      val df = rasterDf.selectExpr("rast", "RS_MakeEmptyRaster(1, 300, 300, 453926, 3741637, 100, -100, 0, 0, 32611) as align_rast")
+      val results = df.selectExpr("RS_ReprojectMatch(rast, align_rast) as trans_rast", "align_rast").first()
+      val transformedRast = results.get(0).asInstanceOf[GridCoverage2D]
+      val alignRast = results.get(1).asInstanceOf[GridCoverage2D]
+      assertEquals(alignRast.getEnvelope2D, transformedRast.getEnvelope2D)
+      assertEquals(alignRast.getCoordinateReferenceSystem, transformedRast.getCoordinateReferenceSystem)
+      assertEquals(alignRast.getGridGeometry.getGridToCRS2D, transformedRast.getGridGeometry.getGridToCRS2D)
+    }
+
     it("Passed RS_FromNetCDF with NetCDF classic") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/netcdf/test.nc")
       val rasterDf = df.selectExpr("RS_FromNetCDF(content, 'O3') as raster")
