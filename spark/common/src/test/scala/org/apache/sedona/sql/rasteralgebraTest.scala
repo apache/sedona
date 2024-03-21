@@ -22,7 +22,7 @@ import org.apache.sedona.common.raster.MapAlgebra
 import org.apache.sedona.common.utils.RasterUtils
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.{Row, SaveMode}
-import org.apache.spark.sql.functions.{col, collect_list, expr, row_number}
+import org.apache.spark.sql.functions.{col, collect_list, expr, lit, row_number}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.junit.Assert.{assertEquals, assertNotNull, assertNull, assertTrue}
 import org.locationtech.jts.geom.{Coordinate, Geometry}
@@ -824,6 +824,26 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       //Test with skewX, skewY, srid and datatype
       result = sparkSession.sql(s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, 'I', $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize, -$cellSize, $skewX, $skewY, $srid))").first().getSeq(0)
       assertEquals(numBands, result(9), 0.001)
+    }
+
+    it("Passed RS_MakeRaster") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+        .withColumn("rast", expr("RS_FromGeoTiff(content)"))
+      val metadata = df.selectExpr("RS_Metadata(rast)").first().getSeq(0)
+      val width = metadata(2).asInstanceOf[Double].toInt
+      val height = metadata(3).asInstanceOf[Double].toInt
+      val values = Array.tabulate(width * height) { i => i * i }
+
+      // Attach values as a new column to the dataframe
+      val dfWithValues = df.withColumn("values", lit(values))
+
+      // Call RS_MakeRaster to create a new raster with the values
+      val result = dfWithValues.selectExpr("RS_MakeRaster(rast, 'D', values) AS rast").first().get(0)
+      val rast = result.asInstanceOf[GridCoverage2D].getRenderedImage
+      val r = RasterUtils.getRaster(rast)
+      for (i <- values.indices) {
+        assertEquals(values(i), r.getSampleDouble(i % width, i / width, 0), 0.001)
+      }
     }
 
     it("Passed RS_BandAsArray") {
