@@ -1491,7 +1491,7 @@ Since: `v1.6.0`
 Parameters:
 
 - `raster`: The raster to be interpolated.
-- `band`: The band of the raster to be used for interpolation.
+- `band`: The band of the raster to be used for interpolation. If `band` is not provided, interpolation is performed across all bands.
 - `power`: A positive real number defining the exponent of distance in the IDW calculation. This parameter controls the influence of distant points on the interpolated values, default being set to 2.
 - `mode`: Specifies the interpolation mode - either `"Variable"` or `"Fixed"`.
   - In `"Variable"` mode:
