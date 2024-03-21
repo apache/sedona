@@ -1016,7 +1016,7 @@ public class TestFunctions extends TestBase {
     public void test_ST_IsPolygonCW() {
         registerUDF("ST_IsPolygonCW", byte[].class);
         verifySqlSingleRes(
-                "SELECT ST_IsPolygonCW(ST_GeomFromText('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))",
+                "SELECT sedona.ST_IsPolygonCW(ST_GeomFromText('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))",
                 "true"
         );
     }
