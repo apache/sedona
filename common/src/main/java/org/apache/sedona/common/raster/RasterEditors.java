@@ -434,60 +434,80 @@ public class RasterEditors
         }
     }
 
-    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, Double radius) {
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster) {
+        return interpolate(inputRaster, 2.0, "fixed", null, null, null);
+    }
+
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power) {
+        return interpolate(inputRaster, power, "fixed", null, null, null);
+    }
+
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, String mode) {
+        return interpolate(inputRaster, power, mode, null, null, null);
+    }
+
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, String mode, Double numPointsOrRadius) {
+        return interpolate(inputRaster, power, mode, numPointsOrRadius, null, null);
+    }
+
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, String mode, Double numPointsOrRadius, Double maxRadiusOrMinPoints) {
+        return interpolate(inputRaster, power, mode, numPointsOrRadius, maxRadiusOrMinPoints, null);
+    }
+
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, String mode, Double numPointsOrRadius, Double maxRadiusOrMinPoints, Integer band) {
+        if (!mode.equalsIgnoreCase("variable") && !mode.equalsIgnoreCase("fixed")) {
+            throw new IllegalArgumentException("Invalid 'mode': '" + mode + "'. Expected one of: 'Variable', 'Fixed'.");
+        }
         WritableRaster raster = (WritableRaster) inputRaster.getRenderedImage().getData();
         int width = raster.getWidth();
         int height = raster.getHeight();
-        int numBands = raster.getNumBands();
-
-        GeometryFactory geometryFactory = new GeometryFactory();
+        int bandIndex = (band != null) ? band:0;
+        int numBands = (band != null) ? band+1:raster.getNumBands();
+        GridSampleDimension [] gridSampleDimensions = inputRaster.getSampleDimensions();
 
         // Interpolation for each band
-        for (int band = 0; band < numBands; band++) {
-            System.out.println("\nBand: " + band);
+        for (; bandIndex < numBands; bandIndex++) {
+            System.out.println("\nbandIndex: " + bandIndex);
             System.out.println("Reinitialize the quadtree and map for each new band");
-            // Reinitialize the quadtree and map for each new band
-            Quadtree quadtree = new Quadtree();
-            Map<Point, Double> pointValueMap = new HashMap<>();
-            Double noDataValue = RasterUtils.getNoDataValue(inputRaster.getSampleDimension(band));
-            int countNaNs = 0;
+            // Generate quadtree
+            System.out.println("Generate quadtree");
+            Quadtree quadtree = RasterInterpolate.generateQuadtree(inputRaster, bandIndex);
+            Double noDataValue = RasterUtils.getNoDataValue(inputRaster.getSampleDimension(bandIndex));
+            int countNoDataValues = 0;
 
-            System.out.println("Populate quadtree and map");
-            // Populate quadtree and map
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    double value = raster.getSampleDouble(x, y, band);
-                    if (!Double.isNaN(value) && value != noDataValue) {
-                        Point point = geometryFactory.createPoint(new Coordinate(x, y));
-                        pointValueMap.put(point, value);
-                        quadtree.insert(point.getEnvelopeInternal(), point);
-                    } else {
-                        countNaNs += 1;
-                    }
-                }
+            if (quadtree.isEmpty() || quadtree.size() == width*height) {
+                System.out.println("Skipped bandIndex "+bandIndex+". No nodataValues to be interpolated.\n\n");
+                continue;
             }
 
-            if (countNaNs==0) {
-                System.out.println("Skipped Band "+band+". No nodataValues to be interpolated.\n\n");
-                continue;
+            if (mode.equalsIgnoreCase("variable") && quadtree.size() < numPointsOrRadius) {
+                throw new IllegalArgumentException("Parameter 'numPoints' is larger than no. of valid pixels in band "+bandIndex+". Please choose an appropriate value");
             }
 
             System.out.println("Perform interpolation using the quadtree");
             // Perform interpolation using the quadtree
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    double value = raster.getSampleDouble(x, y, band);
+                    double value = raster.getSampleDouble(x, y, bandIndex);
                     if (Double.isNaN(value) || value == noDataValue) {
-                        double interpolatedValue = RasterInterpolate.interpolateIDW(x, y, quadtree, pointValueMap, radius, power);
-                        raster.setSample(x, y, band, interpolatedValue);
+                        countNoDataValues ++;
+                        double interpolatedValue = RasterInterpolate.interpolateIDW(x, y, quadtree, width, height, power, mode, numPointsOrRadius, maxRadiusOrMinPoints);
+                        interpolatedValue = (Double.isNaN(interpolatedValue)) ? noDataValue:interpolatedValue;
+                        if (interpolatedValue != noDataValue) {
+                            countNoDataValues --;
+                        }
+                        raster.setSample(x, y, bandIndex, interpolatedValue);
                     }
                 }
             }
 
-            RasterUtils.removeNoDataValue(inputRaster.getSampleDimension(band));
+            // If all noDataValues are interpolated, update band metadata (remove nodatavalue)
+            if (countNoDataValues == 0){
+                gridSampleDimensions[bandIndex] = RasterUtils.removeNoDataValue(inputRaster.getSampleDimension(bandIndex));
+            }
         }
 
-        return RasterUtils.clone(raster, inputRaster.getGridGeometry(), inputRaster.getSampleDimensions(), inputRaster, null, true);
+        return RasterUtils.clone(raster, inputRaster.getGridGeometry(), gridSampleDimensions, inputRaster, null, true);
     }
 
 }
