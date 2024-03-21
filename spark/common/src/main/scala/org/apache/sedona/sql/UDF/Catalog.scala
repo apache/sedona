@@ -226,6 +226,7 @@ object Catalog {
     function[RS_Value](1),
     function[RS_Values](1),
     function[RS_Intersects](),
+    function[RS_Interpolate](),
     function[RS_AsGeoTiff](),
     function[RS_AsRaster](),
     function[RS_AsArcGrid](),

@@ -1,5 +1,6 @@
 package org.apache.sedona.common.utils;
 
+import org.apache.sedona.common.raster.RasterAccessors;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
@@ -7,6 +8,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.index.quadtree.Quadtree;
 import org.locationtech.jts.geom.Point;
 
+import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.*;
 
@@ -14,7 +16,8 @@ public class RasterInterpolate {
     private RasterInterpolate() {}
 
     public static Quadtree generateQuadtree(GridCoverage2D inputRaster, int band) {
-        WritableRaster raster = (WritableRaster) inputRaster.getRenderedImage().getData();
+        Raster rasterData = inputRaster.getRenderedImage().getData();
+        WritableRaster raster = rasterData.createCompatibleWritableRaster(RasterAccessors.getWidth(inputRaster), RasterAccessors.getHeight(inputRaster));
         int width = raster.getWidth();
         int height = raster.getHeight();
         Double noDataValue = RasterUtils.getNoDataValue(inputRaster.getSampleDimension(band));
@@ -24,7 +27,8 @@ public class RasterInterpolate {
         System.out.println("Populate quadtree with RasterPoint objects");
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                double value = raster.getSampleDouble(x, y, band);
+//                double value = raster.getSampleDouble(x, y, band);
+                double value = rasterData.getSampleDouble(x, y, band);
                 if (!Double.isNaN(value) && value != noDataValue) {
                     Point jtsPoint = geometryFactory.createPoint(new Coordinate(x, y));
                     RasterPoint rasterPoint = new RasterInterpolate.RasterPoint(jtsPoint, value, 0.0);

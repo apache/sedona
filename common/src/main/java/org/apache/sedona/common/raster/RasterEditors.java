@@ -458,52 +458,63 @@ public class RasterEditors
         if (!mode.equalsIgnoreCase("variable") && !mode.equalsIgnoreCase("fixed")) {
             throw new IllegalArgumentException("Invalid 'mode': '" + mode + "'. Expected one of: 'Variable', 'Fixed'.");
         }
-        WritableRaster raster = (WritableRaster) inputRaster.getRenderedImage().getData();
+
+        Raster rasterData = inputRaster.getRenderedImage().getData();
+        WritableRaster raster = rasterData.createCompatibleWritableRaster(RasterAccessors.getWidth(inputRaster), RasterAccessors.getHeight(inputRaster));
         int width = raster.getWidth();
         int height = raster.getHeight();
-        int bandIndex = (band != null) ? band:0;
-        int numBands = (band != null) ? band+1:raster.getNumBands();
+        int numBands = raster.getNumBands();
         GridSampleDimension [] gridSampleDimensions = inputRaster.getSampleDimensions();
 
+        if (band != null && (band < 1 || band > numBands)) {
+            throw new IllegalArgumentException("Band index out of range.");
+        }
+
         // Interpolation for each band
-        for (; bandIndex < numBands; bandIndex++) {
-            System.out.println("\nbandIndex: " + bandIndex);
-            System.out.println("Reinitialize the quadtree and map for each new band");
-            // Generate quadtree
-            System.out.println("Generate quadtree");
-            Quadtree quadtree = RasterInterpolate.generateQuadtree(inputRaster, bandIndex);
-            Double noDataValue = RasterUtils.getNoDataValue(inputRaster.getSampleDimension(bandIndex));
-            int countNoDataValues = 0;
+        for (int bandIndex=0; bandIndex < numBands; bandIndex++) {
+            if (band == null || bandIndex == band - 1) {
+                System.out.println("\nbandIndex: " + bandIndex);
+                System.out.println("Reinitialize the quadtree and map for each new band");
+                // Generate quadtree
+                System.out.println("Generate quadtree");
+                Quadtree quadtree = RasterInterpolate.generateQuadtree(inputRaster, bandIndex);
+                Double noDataValue = RasterUtils.getNoDataValue(inputRaster.getSampleDimension(bandIndex));
+                int countNoDataValues = 0;
 
-            if (quadtree.isEmpty() || quadtree.size() == width*height) {
-                System.out.println("Skipped bandIndex "+bandIndex+". No nodataValues to be interpolated.\n\n");
-                continue;
-            }
+                if (quadtree.isEmpty() || quadtree.size() == width*height) {
+                    System.out.println("Skipped bandIndex "+bandIndex+". No nodataValues to be interpolated.\n\n");
+                    continue;
+                }
 
-            if (mode.equalsIgnoreCase("variable") && quadtree.size() < numPointsOrRadius) {
-                throw new IllegalArgumentException("Parameter 'numPoints' is larger than no. of valid pixels in band "+bandIndex+". Please choose an appropriate value");
-            }
+                if (mode.equalsIgnoreCase("variable") && quadtree.size() < numPointsOrRadius) {
+                    throw new IllegalArgumentException("Parameter 'numPoints' is larger than no. of valid pixels in band "+bandIndex+". Please choose an appropriate value");
+                }
 
-            System.out.println("Perform interpolation using the quadtree");
-            // Perform interpolation using the quadtree
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    double value = raster.getSampleDouble(x, y, bandIndex);
-                    if (Double.isNaN(value) || value == noDataValue) {
-                        countNoDataValues ++;
-                        double interpolatedValue = RasterInterpolate.interpolateIDW(x, y, quadtree, width, height, power, mode, numPointsOrRadius, maxRadiusOrMinPoints);
-                        interpolatedValue = (Double.isNaN(interpolatedValue)) ? noDataValue:interpolatedValue;
-                        if (interpolatedValue != noDataValue) {
-                            countNoDataValues --;
+                System.out.println("Perform interpolation using the quadtree");
+                // Perform interpolation using the quadtree
+                for (int y = 0; y < height; y++) {
+                    for (int x = 0; x < width; x++) {
+                        double value = rasterData.getSampleDouble(x, y, bandIndex);
+                        if (Double.isNaN(value) || value == noDataValue) {
+                            countNoDataValues ++;
+                            double interpolatedValue = RasterInterpolate.interpolateIDW(x, y, quadtree, width, height, power, mode, numPointsOrRadius, maxRadiusOrMinPoints);
+                            interpolatedValue = (Double.isNaN(interpolatedValue)) ? noDataValue:interpolatedValue;
+                            if (interpolatedValue != noDataValue) {
+                                countNoDataValues --;
+                            }
+                            raster.setSample(x, y, bandIndex, interpolatedValue);
+                        } else {
+                            raster.setSample(x, y, bandIndex, value);
                         }
-                        raster.setSample(x, y, bandIndex, interpolatedValue);
                     }
                 }
-            }
 
-            // If all noDataValues are interpolated, update band metadata (remove nodatavalue)
-            if (countNoDataValues == 0){
-                gridSampleDimensions[bandIndex] = RasterUtils.removeNoDataValue(inputRaster.getSampleDimension(bandIndex));
+                // If all noDataValues are interpolated, update band metadata (remove nodatavalue)
+                if (countNoDataValues == 0){
+                    gridSampleDimensions[bandIndex] = RasterUtils.removeNoDataValue(inputRaster.getSampleDimension(bandIndex));
+                }
+            } else {
+                raster.setSamples(0, 0, raster.getWidth(), raster.getHeight(), band, rasterData.getSamples(0, 0, raster.getWidth(), raster.getHeight(), band, (double[]) null));
             }
         }
 
