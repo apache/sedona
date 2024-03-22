@@ -31,11 +31,7 @@ import org.geotools.coverage.processing.Operations;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.index.quadtree.Quadtree;
-import org.opengis.coverage.SampleDimensionType;
+import org.locationtech.jts.index.strtree.STRtree;
 import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.coverage.grid.GridGeometry;
 import org.opengis.metadata.spatial.PixelOrientation;
@@ -51,11 +47,9 @@ import javax.media.jai.RasterFactory;
 import java.awt.geom.Point2D;
 import java.awt.image.*;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static java.lang.Double.NaN;
 import static org.apache.sedona.common.raster.MapAlgebra.addBandFromArray;
 import static org.apache.sedona.common.raster.MapAlgebra.bandAsArray;
 
@@ -480,26 +474,26 @@ public class RasterEditors
         // Interpolation for each band
         for (int bandIndex=0; bandIndex < numBands; bandIndex++) {
             if (band == null || bandIndex == band - 1) {
-                // Generate quadtree
-                Quadtree quadtree = RasterInterpolate.generateQuadtree(inputRaster, bandIndex);
+                // Generate STRtree
+                STRtree strtree = RasterInterpolate.generateSTRtree(inputRaster, bandIndex);
                 Double noDataValue = RasterUtils.getNoDataValue(inputRaster.getSampleDimension(bandIndex));
                 int countNoDataValues = 0;
 
-                if (quadtree.isEmpty() || quadtree.size() == width*height) {
+                if (strtree.isEmpty() || strtree.size() == width*height) {
                     continue;
                 }
 
-                if (mode.equalsIgnoreCase("variable") && quadtree.size() < numPointsOrRadius) {
+                if (mode.equalsIgnoreCase("variable") && strtree.size() < numPointsOrRadius) {
                     throw new IllegalArgumentException("Parameter 'numPoints' is larger than no. of valid pixels in band "+bandIndex+". Please choose an appropriate value");
                 }
 
-                // Perform interpolation using the quadtree
+                // Perform interpolation
                 for (int y = 0; y < height; y++) {
                     for (int x = 0; x < width; x++) {
                         double value = rasterData.getSampleDouble(x, y, bandIndex);
                         if (Double.isNaN(value) || value == noDataValue) {
                             countNoDataValues ++;
-                            double interpolatedValue = RasterInterpolate.interpolateIDW(x, y, quadtree, width, height, power, mode, numPointsOrRadius, maxRadiusOrMinPoints);
+                            double interpolatedValue = RasterInterpolate.interpolateIDW(x, y, strtree, width, height, power, mode, numPointsOrRadius, maxRadiusOrMinPoints);
                             interpolatedValue = (Double.isNaN(interpolatedValue)) ? noDataValue:interpolatedValue;
                             if (interpolatedValue != noDataValue) {
                                 countNoDataValues --;

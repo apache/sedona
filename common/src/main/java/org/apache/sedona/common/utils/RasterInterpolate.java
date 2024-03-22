@@ -1,51 +1,49 @@
 package org.apache.sedona.common.utils;
 
-import org.apache.sedona.common.raster.RasterAccessors;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.index.quadtree.Quadtree;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.index.strtree.STRtree;
 
 import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
 import java.util.*;
 
 public class RasterInterpolate {
     private RasterInterpolate() {}
 
-    public static Quadtree generateQuadtree(GridCoverage2D inputRaster, int band) {
+    public static STRtree generateSTRtree(GridCoverage2D inputRaster, int band) {
         Raster rasterData = inputRaster.getRenderedImage().getData();
-        WritableRaster raster = rasterData.createCompatibleWritableRaster(RasterAccessors.getWidth(inputRaster), RasterAccessors.getHeight(inputRaster));
-        int width = raster.getWidth();
-        int height = raster.getHeight();
+        int width = rasterData.getWidth();
+        int height = rasterData.getHeight();
         Double noDataValue = RasterUtils.getNoDataValue(inputRaster.getSampleDimension(band));
         GeometryFactory geometryFactory = new GeometryFactory();
-        Quadtree quadtree = new Quadtree();
+        STRtree rtree = new STRtree();
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 double value = rasterData.getSampleDouble(x, y, band);
                 if (!Double.isNaN(value) && value != noDataValue) {
-                    Point jtsPoint = geometryFactory.createPoint(new Coordinate(x, y));
-                    RasterPoint rasterPoint = new RasterInterpolate.RasterPoint(jtsPoint, value, 0.0);
-                    quadtree.insert(jtsPoint.getEnvelopeInternal(), rasterPoint);
+                    Point point = geometryFactory.createPoint(new Coordinate(x, y));
+                    RasterPoint rasterPoint = new RasterPoint(point, value, 0.0);
+                    rtree.insert(new Envelope(point.getCoordinate()), rasterPoint);
                 }
             }
         }
-        return quadtree;
+        rtree.build();
+        return rtree;
     }
 
-    public static double interpolateIDW(int x, int y, Quadtree quadtree, int width, int height, double power, String mode, Double numPointsOrRadius, Double maxRadiusOrMinPoints) {
+    public static double interpolateIDW(int x, int y, STRtree strtree, int width, int height, double power, String mode, Double numPointsOrRadius, Double maxRadiusOrMinPoints) {
         GeometryFactory geometryFactory = new GeometryFactory();
         PriorityQueue<RasterPoint> minHeap = new PriorityQueue<>(Comparator.comparingDouble(RasterPoint::getDistance));
 
         if (mode.equalsIgnoreCase("variable")) {
             Double numPoints = (numPointsOrRadius==null) ? 12:numPointsOrRadius; // Default no. of points -> 12
             Double maxRadius = (maxRadiusOrMinPoints==null) ? Math.sqrt((width*width)+(height*height)):maxRadiusOrMinPoints; // Default max radius -> diagonal of raster
-            List<RasterPoint> queryResult = quadtree.query(new Envelope(x - maxRadius, x + maxRadius, y - maxRadius, y + maxRadius));
-            if (mode.equalsIgnoreCase("variable") && quadtree.size() < numPointsOrRadius) {
+            List<RasterPoint> queryResult = strtree.query(new Envelope(x - maxRadius, x + maxRadius, y - maxRadius, y + maxRadius));
+            if (mode.equalsIgnoreCase("variable") && strtree.size() < numPointsOrRadius) {
                 throw new IllegalArgumentException("Parameter 'numPoints' defaulted to 12 which is larger than no. of valid pixels within the max search radius. Please choose an appropriate value");
             }
             for (RasterPoint rasterPoint : queryResult) {
@@ -65,7 +63,7 @@ public class RasterInterpolate {
             do {
                 queryResult.clear();
                 Envelope searchEnvelope = new Envelope(x - radius, x + radius, y - radius, y + radius);
-                queryResult = quadtree.query(searchEnvelope);
+                queryResult = strtree.query(searchEnvelope);
                 // If minimum points requirement met, break the loop
                 if (queryResult.size() >= minPoints) {
                     break;

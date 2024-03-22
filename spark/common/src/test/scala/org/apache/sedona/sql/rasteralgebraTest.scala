@@ -1688,7 +1688,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertTrue(actual.endsWith(expectedEnd))
     }
 
-    it("Passed RS_Interpolate with custom width") {
+    it("Passed RS_Interpolate") {
       val inputDf = Seq(Seq(1, 34, 1, 1, 23, 1, 1, 1, 1, 1, 1, 1, 1, 56, 1, 1, 1, 67, 1, 1)).toDF("band")
       val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'b', 5, 4, 0, 0, 1, -1, 0, 0, 0), band, 1, 1d) as emptyRaster")
       val result1 = df.selectExpr("RS_Interpolate(emptyRaster)").first().get(0)
