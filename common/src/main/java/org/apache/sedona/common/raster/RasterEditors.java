@@ -479,6 +479,7 @@ public class RasterEditors
                 Double noDataValue = RasterUtils.getNoDataValue(inputRaster.getSampleDimension(bandIndex));
                 int countNoDataValues = 0;
 
+                // Skip band if STRtree is empty or has all valid data pixels
                 if (strtree.isEmpty() || strtree.size() == width*height) {
                     continue;
                 }
