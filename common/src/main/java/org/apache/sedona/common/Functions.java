@@ -872,7 +872,7 @@ public class Functions {
         if (geom instanceof MultiPolygon) {
             MultiPolygon multiPolygon = (MultiPolygon) geom;
 
-            boolean arePolygonsCW = Orientation.isCCW(((Polygon) multiPolygon.getGeometryN(0)).getExteriorRing().getCoordinateSequence());
+            boolean arePolygonsCW = checkIfPolygonCW((Polygon) multiPolygon.getGeometryN(0));
             for (int i = 1; i < multiPolygon.getNumGeometries(); i++) {
                 arePolygonsCW = arePolygonsCW && checkIfPolygonCW((Polygon) multiPolygon.getGeometryN(i));
             }
