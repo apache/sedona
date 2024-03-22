@@ -546,7 +546,7 @@ public class UDFsV2
         );
     }
 
-    @UDFAnnotations.ParamMeta(argNames = {"geom"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
+    @UDFAnnotations.ParamMeta(argNames = {"geom"}, argTypes = {"Geometry"})
     public static boolean ST_IsPolygonCCW(String geom) {
         return Functions.isPolygonCCW(
                 GeometrySerde.deserGeoJson(geom)
