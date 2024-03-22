@@ -1662,7 +1662,7 @@ false
 
 Introduction: Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise.
 
-Format: `ST_IsPolygonCW(geom: Geometry)`
+Format: `ST_IsPolygonCCW(geom: Geometry)`
 
 Since: `v1.6.0`
 
