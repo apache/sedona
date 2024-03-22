@@ -49,8 +49,8 @@ public class RasterTestBase {
 
     protected static final double FP_TOLERANCE = 1E-4;
 
-    GridCoverage2D oneBandRaster;
-    GridCoverage2D multiBandRaster;
+    protected GridCoverage2D oneBandRaster;
+    protected GridCoverage2D multiBandRaster;
     byte[] geoTiff;
     byte[] testNc;
     String ncFile = resourceFolder + "raster/netcdf/test.nc";
@@ -119,6 +119,10 @@ public class RasterTestBase {
             }
         }
         return factory.create("test", image, new Envelope2D(DefaultGeographicCRS.WGS84, 0, 0, 10, 10));
+    }
+
+    protected void assertSameCoverage(GridCoverage2D expected, GridCoverage2D actual) {
+        assertSameCoverage(expected, actual, 10);
     }
 
     protected void assertSameCoverage(GridCoverage2D expected, GridCoverage2D actual, int density) {

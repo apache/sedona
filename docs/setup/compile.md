@@ -73,11 +73,20 @@ For example,
 export SPARK_HOME=$PWD/spark-3.0.1-bin-hadoop2.7
 export PYTHONPATH=$SPARK_HOME/python
 ```
-2. Compile the Sedona Scala and Java code with `-Dgeotools` and then copy the ==sedona-spark-shaded-{{ sedona.current_version }}.jar== to ==SPARK_HOME/jars/== folder.
+2. Put JAI jars to ==SPARK_HOME/jars/== folder.
+```
+export JAI_CORE_VERSION="1.1.3"
+export JAI_CODEC_VERSION="1.1.3"
+export JAI_IMAGEIO_VERSION="1.1"
+wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar
+wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar
+wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
+```
+3. Compile the Sedona Scala and Java code with `-Dgeotools` and then copy the ==sedona-spark-shaded-{{ sedona.current_version }}.jar== to ==SPARK_HOME/jars/== folder.
 ```
 cp spark-shaded/target/sedona-spark-shaded-xxx.jar $SPARK_HOME/jars/
 ```
-3. Install the following libraries
+4. Install the following libraries
 ```
 sudo apt-get -y install python3-pip python-dev libgeos-dev
 sudo pip3 install -U setuptools
@@ -86,12 +95,12 @@ sudo pip3 install -U virtualenvwrapper
 sudo pip3 install -U pipenv
 ```
 Homebrew can be used to install libgeos-dev in macOS: `brew install geos`
-4. Set up pipenv to the desired Python version: 3.7, 3.8, or 3.9
+5. Set up pipenv to the desired Python version: 3.7, 3.8, or 3.9
 ```
 cd python
 pipenv --python 3.7
 ```
-5. Install the PySpark version and the other dependency
+6. Install the PySpark version and the other dependency
 ```
 cd python
 pipenv install pyspark
@@ -99,7 +108,7 @@ pipenv install --dev
 ```
 `pipenv install pyspark` installs the latest version of pyspark.
 In order to remain consistent with the installed spark version, use `pipenv install pyspark==<spark_version>`
-6. Run the Python tests
+7. Run the Python tests
 ```
 cd python
 pipenv run python setup.py build_ext --inplace

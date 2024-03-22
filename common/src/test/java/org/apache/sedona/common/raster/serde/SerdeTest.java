@@ -16,11 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.common.raster;
+package org.apache.sedona.common.raster.serde;
 
+import org.apache.sedona.common.raster.RasterConstructors;
+import org.apache.sedona.common.raster.RasterTestBase;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.junit.Test;
+import org.opengis.referencing.FactoryException;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,12 +40,12 @@ public class SerdeTest extends RasterTestBase {
     };
 
     @Test
-    public void testRoundtripSerdeSingelbandRaster() throws IOException, ClassNotFoundException {
+    public void testRoundTripSerdeSingleBandRaster() throws IOException, ClassNotFoundException {
         testRoundTrip(oneBandRaster);
     }
 
     @Test
-    public void testRoundtripSerdeMultibandRaster() throws IOException, ClassNotFoundException {
+    public void testRoundTripSerdeMultiBandRaster() throws IOException, ClassNotFoundException {
         testRoundTrip(multiBandRaster);
     }
 
@@ -53,6 +56,20 @@ public class SerdeTest extends RasterTestBase {
             GridCoverage2D raster = reader.read(null);
             testRoundTrip(raster);
         }
+    }
+
+    @Test
+    public void testNorthPoleRaster() throws IOException, ClassNotFoundException, FactoryException {
+        // If we are not using non-strict mode to serializing CRS, this will raise an exception:
+        // org.geotools.referencing.wkt.UnformattableObjectException: This "AxisDirection" object is too complex for
+        // WKT syntax.
+        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(
+                1, "B", 256, 256,
+                -345000.000,  345000.000,
+                2000, -2000,
+                0, 0,
+                3996);
+        testRoundTrip(raster);
     }
 
     private GridCoverage2D testRoundTrip(GridCoverage2D raster) throws IOException, ClassNotFoundException {
