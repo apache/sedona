@@ -546,6 +546,13 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geom"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
+    public static boolean ST_IsPolygonCCW(String geom) {
+        return Functions.isPolygonCCW(
+                GeometrySerde.deserGeoJson(geom)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"})
     public static boolean ST_IsRing(String geometry) {
         return Functions.isRing(
@@ -1145,6 +1152,15 @@ public class UDFsV2
     public static String ST_Force3D(String geom) {
         return GeometrySerde.serGeoJson(
                 Functions.force3D(
+                        GeometrySerde.deserGeoJson(geom)
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
+    public static String ST_ForcePolygonCCW(String geom) {
+        return GeometrySerde.serGeoJson(
+                Functions.forcePolygonCCW(
                         GeometrySerde.deserGeoJson(geom)
                 )
         );

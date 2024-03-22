@@ -111,6 +111,8 @@ __all__ = [
     "ST_SubDivideExplode",
     "ST_SimplifyPreserveTopology",
     "ST_SymDifference",
+    "ST_IsPolygonCCW",
+    "ST_ForcePolygonCCW",
     "ST_Transform",
     "ST_Union",
     "ST_X",
@@ -1239,6 +1241,28 @@ def ST_Snap(input: ColumnOrName, reference: ColumnOrName, tolerance: Union[Colum
     :return: Snapped Geometry
     """
     return _call_st_function("ST_Snap", (input, reference, tolerance))
+
+
+@validate_argument_types
+def ST_IsPolygonCCW(geometry: ColumnOrName) -> Column:
+    """Check if the Polygon or MultiPolygon use a counter-clockwise orientation for exterior ring and clockwise
+    orientation for interior ring.
+    :param geometry: Geometry column to check.
+    :type geometry: ColumnOrName
+    :return: True if the geometry is empty and False otherwise as a boolean column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_IsPolygonCCW", geometry)
+
+
+@validate_argument_types
+def ST_ForcePolygonCCW(geometry: ColumnOrName) -> Column:
+    """
+    Returns a geometry with counter-clockwise oriented exterior ring and clockwise oriented interior rings
+    :param geometry: Geometry column to change orientation
+    :return: counter-clockwise oriented geometry
+    """
+    return _call_st_function("ST_ForcePolygonCCW", geometry)
 
 
 @validate_argument_types
