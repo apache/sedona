@@ -1658,6 +1658,26 @@ Output:
 false
 ```
 
+## ST_IsPolygonCW
+
+Introduction: Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise.
+
+Format: `ST_IsPolygonCW(geom: Geometry)`
+
+Since: `v1.6.0`
+
+SQL Example:
+
+```sql
+SELECT ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))
+```
+
+Output:
+
+```
+true
+```
+
 ## ST_IsRing
 
 Introduction: RETURN true if LINESTRING is ST_IsClosed and ST_IsSimple.
