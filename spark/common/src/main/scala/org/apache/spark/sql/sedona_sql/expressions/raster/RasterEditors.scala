@@ -65,3 +65,11 @@ case class RS_ReprojectMatch(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+case class RS_Interpolate(inputExpressions: Seq[Expression]) extends InferredExpression(
+  inferrableFunction1(RasterEditors.interpolate), inferrableFunction2(RasterEditors.interpolate), inferrableFunction3(RasterEditors.interpolate), inferrableFunction4(RasterEditors.interpolate), inferrableFunction5(RasterEditors.interpolate), inferrableFunction6(RasterEditors.interpolate)
+) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

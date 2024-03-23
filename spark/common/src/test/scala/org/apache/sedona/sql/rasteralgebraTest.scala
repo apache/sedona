@@ -1695,6 +1695,24 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertTrue(actual.endsWith(expectedEnd))
     }
 
+    it("Passed RS_Interpolate") {
+      val inputDf = Seq(Seq(1, 34, 1, 1, 23, 1, 1, 1, 1, 1, 1, 1, 1, 56, 1, 1, 1, 67, 1, 1)).toDF("band")
+      val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'b', 5, 4, 0, 0, 1, -1, 0, 0, 0), band, 1, 1d) as emptyRaster")
+      val result1 = df.selectExpr("RS_Interpolate(emptyRaster)").first().get(0)
+      val result2 = df.selectExpr("RS_Interpolate(emptyRaster, 4)").first().get(0)
+      val result3 = df.selectExpr("RS_Interpolate(emptyRaster, 4, 'variable', 2)").first().get(0)
+      val result4 = df.selectExpr("RS_Interpolate(emptyRaster, 2, 'variable', 2)").first().get(0)
+      val result5 = df.selectExpr("RS_Interpolate(emptyRaster, 4, 'variable', 2, 5)").first().get(0)
+      val result6 = df.selectExpr("RS_Interpolate(emptyRaster, 5, 'variable', 3, 5, 1)").first().get(0)
+
+      assert(result1.isInstanceOf[GridCoverage2D])
+      assert(result2.isInstanceOf[GridCoverage2D])
+      assert(result3.isInstanceOf[GridCoverage2D])
+      assert(result4.isInstanceOf[GridCoverage2D])
+      assert(result5.isInstanceOf[GridCoverage2D])
+      assert(result6.isInstanceOf[GridCoverage2D])
+    }
+
     it("Passed RS_Resample full version") {
       val inputDf = Seq(Seq(1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10)).toDF("band")
       val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, null) as raster")
