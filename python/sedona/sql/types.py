@@ -18,6 +18,8 @@
 from pyspark.sql.types import UserDefinedType, BinaryType
 
 from ..utils import geometry_serde
+from ..raster import raster_serde
+from ..raster.sedona_raster import SedonaRaster
 
 
 class GeometryType(UserDefinedType):
@@ -55,7 +57,7 @@ class RasterType(UserDefinedType):
         raise NotImplementedError("RasterType.serialize is not implemented yet")
 
     def deserialize(self, datum):
-        raise NotImplementedError("RasterType.deserialize is not implemented yet")
+        return raster_serde.deserialize(datum)
 
     @classmethod
     def module(cls):
@@ -67,3 +69,6 @@ class RasterType(UserDefinedType):
     @classmethod
     def scalaUDT(cls):
         return "org.apache.spark.sql.sedona_sql.UDT.RasterUDT"
+
+
+SedonaRaster.__UDT__ = RasterType()

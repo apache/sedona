@@ -19,6 +19,7 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.sedona.common.FunctionsGeoTools;
+import org.apache.sedona.common.utils.RasterInterpolate;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
@@ -30,9 +31,9 @@ import org.geotools.coverage.processing.Operations;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
-import org.opengis.coverage.SampleDimensionType;
+import org.locationtech.jts.index.strtree.STRtree;
 import org.opengis.coverage.grid.GridCoverage;
-import org.opengis.geometry.Envelope;
+import org.opengis.coverage.grid.GridGeometry;
 import org.opengis.metadata.spatial.PixelOrientation;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -43,14 +44,12 @@ import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.Interpolation;
 import javax.media.jai.RasterFactory;
-import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.image.*;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 
-import static java.lang.Double.NaN;
 import static org.apache.sedona.common.raster.MapAlgebra.addBandFromArray;
 import static org.apache.sedona.common.raster.MapAlgebra.bandAsArray;
 
@@ -227,23 +226,10 @@ public class RasterEditors
                 new GridEnvelope2D(0, 0, newWidth, newHeight),
                 PixelInCell.CELL_CORNER,
                 transform, crs, null);
-        Interpolation resamplingAlgorithm = Interpolation.getInstance(0);
+        Interpolation resamplingAlgorithm = createInterpolationAlgorithm(algorithm);
         GridCoverage2D newRaster;
         GridCoverage2D noDataValueMask;
         GridCoverage2D resampledNoDataValueMask;
-
-        if (!Objects.isNull(algorithm) && !algorithm.isEmpty()) {
-            if (algorithm.equalsIgnoreCase("nearestneighbor")) {
-                resamplingAlgorithm = Interpolation.getInstance(0);
-            }else if (algorithm.equalsIgnoreCase("bilinear")) {
-                resamplingAlgorithm = Interpolation.getInstance(1);
-            }else if (algorithm.equalsIgnoreCase("bicubic")) {
-                resamplingAlgorithm = Interpolation.getInstance(2);
-            } else {
-                throw new IllegalArgumentException("Invalid 'algorithm': '" + algorithm + "'. Expected one of: 'NearestNeighbor', 'Bilinear', 'Bicubic'.");
-            }
-        }
-
 
         if ((!Objects.isNull(algorithm) && !algorithm.isEmpty()) && (algorithm.equalsIgnoreCase("Bilinear") || algorithm.equalsIgnoreCase("Bicubic"))) {
             // Create and resample noDataValue mask
@@ -259,7 +245,6 @@ public class RasterEditors
         } else {
             newRaster = (GridCoverage2D) Operations.DEFAULT.resample(raster, null, gridGeometry, resamplingAlgorithm);
         }
-
         return newRaster;
     }
 
@@ -407,6 +392,28 @@ public class RasterEditors
         return rasterGeom;
     }
 
+    public static GridCoverage2D reprojectMatch(GridCoverage2D source, GridCoverage2D target, String interpolationAlgorithm) {
+        Interpolation interp = createInterpolationAlgorithm(interpolationAlgorithm);
+        CoordinateReferenceSystem crs = target.getCoordinateReferenceSystem();
+        GridGeometry gridGeometry = target.getGridGeometry();
+        GridCoverage2D result = (GridCoverage2D) Operations.DEFAULT.resample(source, crs, gridGeometry, interp);
+        return RasterUtils.shiftRasterToZeroOrigin(result, null);
+    }
+
+    private static Interpolation createInterpolationAlgorithm(String algorithm) {
+        Interpolation interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
+        if (!Objects.isNull(algorithm) && !algorithm.isEmpty()) {
+            if (algorithm.equalsIgnoreCase("nearestneighbor")) {
+                interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
+            } else if (algorithm.equalsIgnoreCase("bilinear")) {
+                interp = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
+            } else if (algorithm.equalsIgnoreCase("bicubic")) {
+                interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
+            }
+        }
+        return interp;
+    }
+
     private static double castRasterDataType(double value, int dataType) {
         switch (dataType) {
             case DataBuffer.TYPE_BYTE:
@@ -426,6 +433,89 @@ public class RasterEditors
             default:
                 return value;
         }
+    }
+
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster) throws IllegalArgumentException{
+        return interpolate(inputRaster, 2.0, "fixed", null, null, null);
+    }
+
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power) throws IllegalArgumentException{
+        return interpolate(inputRaster, power, "fixed", null, null, null);
+    }
+
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, String mode) throws IllegalArgumentException{
+        return interpolate(inputRaster, power, mode, null, null, null);
+    }
+
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, String mode, Double numPointsOrRadius) throws IllegalArgumentException{
+        return interpolate(inputRaster, power, mode, numPointsOrRadius, null, null);
+    }
+
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, String mode, Double numPointsOrRadius, Double maxRadiusOrMinPoints) throws IllegalArgumentException{
+        return interpolate(inputRaster, power, mode, numPointsOrRadius, maxRadiusOrMinPoints, null);
+    }
+
+    public static GridCoverage2D interpolate(GridCoverage2D inputRaster, Double power, String mode, Double numPointsOrRadius, Double maxRadiusOrMinPoints, Integer band) throws IllegalArgumentException {
+        if (!mode.equalsIgnoreCase("variable") && !mode.equalsIgnoreCase("fixed")) {
+            throw new IllegalArgumentException("Invalid 'mode': '" + mode + "'. Expected one of: 'Variable', 'Fixed'.");
+        }
+
+        Raster rasterData = inputRaster.getRenderedImage().getData();
+        WritableRaster raster = rasterData.createCompatibleWritableRaster(RasterAccessors.getWidth(inputRaster), RasterAccessors.getHeight(inputRaster));
+        int width = raster.getWidth();
+        int height = raster.getHeight();
+        int numBands = raster.getNumBands();
+        GridSampleDimension [] gridSampleDimensions = inputRaster.getSampleDimensions();
+
+        if (band != null && (band < 1 || band > numBands)) {
+            throw new IllegalArgumentException("Band index out of range.");
+        }
+
+        // Interpolation for each band
+        for (int bandIndex=0; bandIndex < numBands; bandIndex++) {
+            if (band == null || bandIndex == band - 1) {
+                // Generate STRtree
+                STRtree strtree = RasterInterpolate.generateSTRtree(inputRaster, bandIndex);
+                Double noDataValue = RasterUtils.getNoDataValue(inputRaster.getSampleDimension(bandIndex));
+                int countNoDataValues = 0;
+
+                // Skip band if STRtree is empty or has all valid data pixels
+                if (strtree.isEmpty() || strtree.size() == width*height) {
+                    continue;
+                }
+
+                if (mode.equalsIgnoreCase("variable") && strtree.size() < numPointsOrRadius) {
+                    throw new IllegalArgumentException("Parameter 'numPoints' is larger than no. of valid pixels in band "+bandIndex+". Please choose an appropriate value");
+                }
+
+                // Perform interpolation
+                for (int y = 0; y < height; y++) {
+                    for (int x = 0; x < width; x++) {
+                        double value = rasterData.getSampleDouble(x, y, bandIndex);
+                        if (Double.isNaN(value) || value == noDataValue) {
+                            countNoDataValues ++;
+                            double interpolatedValue = RasterInterpolate.interpolateIDW(x, y, strtree, width, height, power, mode, numPointsOrRadius, maxRadiusOrMinPoints);
+                            interpolatedValue = (Double.isNaN(interpolatedValue)) ? noDataValue:interpolatedValue;
+                            if (interpolatedValue != noDataValue) {
+                                countNoDataValues --;
+                            }
+                            raster.setSample(x, y, bandIndex, interpolatedValue);
+                        } else {
+                            raster.setSample(x, y, bandIndex, value);
+                        }
+                    }
+                }
+
+                // If all noDataValues are interpolated, update band metadata (remove nodatavalue)
+                if (countNoDataValues == 0){
+                    gridSampleDimensions[bandIndex] = RasterUtils.removeNoDataValue(inputRaster.getSampleDimension(bandIndex));
+                }
+            } else {
+                raster.setSamples(0, 0, raster.getWidth(), raster.getHeight(), band, rasterData.getSamples(0, 0, raster.getWidth(), raster.getHeight(), band, (double[]) null));
+            }
+        }
+
+        return RasterUtils.clone(raster, inputRaster.getGridGeometry(), gridSampleDimensions, inputRaster, null, true);
     }
 
 }

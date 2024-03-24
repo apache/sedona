@@ -52,9 +52,10 @@ import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class RasterConstructors
 {
@@ -399,6 +400,39 @@ public class RasterConstructors
         return RasterUtils.create(raster, gridGeometry, null);
     }
 
+    /**
+     * Make a non-empty raster from a reference raster and a set of values. The constructed raster will have the same CRS,
+     * geo-reference metadata, width and height as the reference raster. The number of bands of the reference raster is
+     * determined by the size of values. The size of values should be multiple of width * height of the reference raster.
+     * @param ref the reference raster
+     * @param bandDataType the data type of the band
+     * @param values the values to set
+     * @return the constructed raster
+     */
+    public static GridCoverage2D makeNonEmptyRaster(GridCoverage2D ref, String bandDataType, double[] values) {
+        CoordinateReferenceSystem crs = ref.getCoordinateReferenceSystem();
+        int widthInPixel = ref.getRenderedImage().getWidth();
+        int heightInPixel = ref.getRenderedImage().getHeight();
+        int valuesPerBand = widthInPixel * heightInPixel;
+        if (values.length == 0) {
+            throw new IllegalArgumentException("The size of values should be greater than 0");
+        }
+        if (values.length % valuesPerBand != 0) {
+            throw new IllegalArgumentException("The size of values should be multiple of width * height of the reference raster");
+        }
+        int numBands = values.length / valuesPerBand;
+        WritableRaster raster = RasterFactory.createBandedRaster(RasterUtils.getDataTypeCode(bandDataType), widthInPixel, heightInPixel, numBands, null);
+        for (int i = 0; i < numBands; i++) {
+            double[] bandValues = Arrays.copyOfRange(values, i * valuesPerBand, (i + 1) * valuesPerBand);
+            raster.setSamples(0, 0, widthInPixel, heightInPixel, i, bandValues);
+        }
+        MathTransform transform = ref.getGridGeometry().getGridToCRS(PixelInCell.CELL_CENTER);
+        GridGeometry2D gridGeometry = new GridGeometry2D(
+                new GridEnvelope2D(0, 0, widthInPixel, heightInPixel),
+                PixelInCell.CELL_CENTER,
+                transform, crs, null);
+        return RasterUtils.create(raster, gridGeometry, null);
+    }
 
     public static class Tile {
         private final int tileX;

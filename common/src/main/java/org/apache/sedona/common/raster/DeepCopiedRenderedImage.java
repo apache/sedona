@@ -13,8 +13,16 @@
  */
 package org.apache.sedona.common.raster;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoSerializable;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.serializers.JavaSerializer;
+import com.sun.media.jai.rmi.ColorModelState;
 import com.sun.media.jai.util.ImageUtil;
 import it.geosolutions.jaiext.range.NoDataContainer;
+import org.apache.sedona.common.raster.serde.AWTRasterSerializer;
+import org.apache.sedona.common.raster.serde.KryoUtil;
 import org.apache.sedona.common.utils.RasterUtils;
 
 import javax.media.jai.JAI;
@@ -48,7 +56,7 @@ import java.util.Vector;
  * object is being disposed, it tries to connect to the remote server. However, there is no remote server in deep-copy
  * mode, so the dispose() method throws a java.net.SocketException.
  */
-public final class DeepCopiedRenderedImage implements RenderedImage, Serializable {
+public final class DeepCopiedRenderedImage implements RenderedImage, Serializable, KryoSerializable {
     private transient RenderedImage source;
     private int minX;
     private int minY;
@@ -69,7 +77,7 @@ public final class DeepCopiedRenderedImage implements RenderedImage, Serializabl
     private Rectangle imageBounds;
     private transient Raster imageRaster;
 
-    DeepCopiedRenderedImage() {
+    public DeepCopiedRenderedImage() {
         this.sampleModel = null;
         this.colorModel = null;
         this.sources = null;
@@ -87,57 +95,54 @@ public final class DeepCopiedRenderedImage implements RenderedImage, Serializabl
         this.properties = null;
         if (source == null) {
             throw new IllegalArgumentException("source cannot be null");
-        } else {
-            SampleModel sm = source.getSampleModel();
-            if (sm != null && SerializerFactory.getSerializer(sm.getClass()) == null) {
-                throw new IllegalArgumentException("sample model object is not serializable");
-            } else {
-                ColorModel cm = source.getColorModel();
-                if (cm != null && SerializerFactory.getSerializer(cm.getClass()) == null) {
-                    throw new IllegalArgumentException("color model object is not serializable");
-                } else {
-                    if (checkDataBuffer) {
-                        Raster ras = source.getTile(source.getMinTileX(), source.getMinTileY());
-                        if (ras != null) {
-                            DataBuffer db = ras.getDataBuffer();
-                            if (db != null && SerializerFactory.getSerializer(db.getClass()) == null) {
-                                throw new IllegalArgumentException("data buffer object is not serializable");
-                            }
-                        }
-                    }
-
-                    this.source = source;
-                    if (source instanceof RemoteImage) {
-                        throw new IllegalArgumentException("RemoteImage is not supported");
-                    }
-                    this.minX = source.getMinX();
-                    this.minY = source.getMinY();
-                    this.width = source.getWidth();
-                    this.height = source.getHeight();
-                    this.minTileX = source.getMinTileX();
-                    this.minTileY = source.getMinTileY();
-                    this.numXTiles = source.getNumXTiles();
-                    this.numYTiles = source.getNumYTiles();
-                    this.tileWidth = source.getTileWidth();
-                    this.tileHeight = source.getTileHeight();
-                    this.tileGridXOffset = source.getTileGridXOffset();
-                    this.tileGridYOffset = source.getTileGridYOffset();
-                    this.sampleModel = source.getSampleModel();
-                    this.colorModel = source.getColorModel();
-                    this.sources = new Vector<>();
-                    this.sources.add(source);
-                    this.properties = new Hashtable<>();
-                    String[] propertyNames = source.getPropertyNames();
-                    if (propertyNames != null) {
-                        for (String propertyName : propertyNames) {
-                            this.properties.put(propertyName, source.getProperty(propertyName));
-                        }
-                    }
-
-                    this.imageBounds = new Rectangle(this.minX, this.minY, this.width, this.height);
+        }
+        SampleModel sm = source.getSampleModel();
+        if (sm != null && SerializerFactory.getSerializer(sm.getClass()) == null) {
+            throw new IllegalArgumentException("sample model object is not serializable");
+        }
+        ColorModel cm = source.getColorModel();
+        if (cm != null && SerializerFactory.getSerializer(cm.getClass()) == null) {
+            throw new IllegalArgumentException("color model object is not serializable");
+        }
+        if (checkDataBuffer) {
+            Raster ras = source.getTile(source.getMinTileX(), source.getMinTileY());
+            if (ras != null) {
+                DataBuffer db = ras.getDataBuffer();
+                if (db != null && SerializerFactory.getSerializer(db.getClass()) == null) {
+                    throw new IllegalArgumentException("data buffer object is not serializable");
                 }
             }
         }
+
+        this.source = source;
+        if (source instanceof RemoteImage) {
+            throw new IllegalArgumentException("RemoteImage is not supported");
+        }
+        this.minX = source.getMinX();
+        this.minY = source.getMinY();
+        this.width = source.getWidth();
+        this.height = source.getHeight();
+        this.minTileX = source.getMinTileX();
+        this.minTileY = source.getMinTileY();
+        this.numXTiles = source.getNumXTiles();
+        this.numYTiles = source.getNumYTiles();
+        this.tileWidth = source.getTileWidth();
+        this.tileHeight = source.getTileHeight();
+        this.tileGridXOffset = source.getTileGridXOffset();
+        this.tileGridYOffset = source.getTileGridYOffset();
+        this.sampleModel = source.getSampleModel();
+        this.colorModel = source.getColorModel();
+        this.sources = new Vector<>();
+        this.sources.add(source);
+        this.properties = new Hashtable<>();
+        String[] propertyNames = source.getPropertyNames();
+        if (propertyNames != null) {
+            for (String propertyName : propertyNames) {
+                this.properties.put(propertyName, source.getProperty(propertyName));
+            }
+        }
+
+        this.imageBounds = new Rectangle(this.minX, this.minY, this.width, this.height);
     }
 
     @Override
@@ -325,32 +330,10 @@ public final class DeepCopiedRenderedImage implements RenderedImage, Serializabl
         return this.width;
     }
 
-    @SuppressWarnings("unchecked")
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
 
-        // Prepare serialize properties. non-serializable properties won't be serialized.
-        Hashtable<String, Object> propertyTable = this.properties;
-        boolean propertiesCloned = false;
-        Enumeration<String> keys = propertyTable.keys();
-        while (keys.hasMoreElements()) {
-            String key = keys.nextElement();
-            Object value = this.properties.get(key);
-            if (!(value instanceof Serializable)) {
-                if (!propertiesCloned) {
-                    propertyTable = (Hashtable<String, Object>) this.properties.clone();
-                    propertiesCloned = true;
-                }
-                // GC_NODATA is a special property used by GeoTools. We need to serialize it.
-                if (value instanceof NoDataContainer) {
-                    NoDataContainer noDataContainer = (NoDataContainer) value;
-                    propertyTable.put(key, new SingleValueNoDataContainer(noDataContainer.getAsSingleValue()));
-                } else {
-                    propertyTable.remove(key);
-                }
-            }
-        }
-
+        Hashtable<String, Object> propertyTable = getSerializableProperties();
         out.writeObject(SerializerFactory.getState(this.colorModel, null));
         out.writeObject(propertyTable);
         if (this.source != null) {
@@ -387,6 +370,111 @@ public final class DeepCopiedRenderedImage implements RenderedImage, Serializabl
         this.tileHeight = this.height;
         this.numXTiles = 1;
         this.numYTiles = 1;
+        this.minTileX = 0;
+        this.minTileY = 0;
+        this.tileGridXOffset = minX;
+        this.tileGridYOffset = minY;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Hashtable<String, Object> getSerializableProperties() {
+        // Prepare serialize properties. non-serializable properties won't be serialized.
+        Hashtable<String, Object> propertyTable = this.properties;
+        boolean propertiesCloned = false;
+        Enumeration<String> keys = propertyTable.keys();
+        while (keys.hasMoreElements()) {
+            String key = keys.nextElement();
+            Object value = this.properties.get(key);
+            if (!(value instanceof Serializable)) {
+                if (!propertiesCloned) {
+                    propertyTable = (Hashtable<String, Object>) this.properties.clone();
+                    propertiesCloned = true;
+                }
+                // GC_NODATA is a special property used by GeoTools. We need to serialize it.
+                if (value instanceof NoDataContainer) {
+                    NoDataContainer noDataContainer = (NoDataContainer) value;
+                    propertyTable.put(key, new SingleValueNoDataContainer(noDataContainer.getAsSingleValue()));
+                } else {
+                    propertyTable.remove(key);
+                }
+            }
+        }
+        return propertyTable;
+    }
+
+    public static void registerKryo(Kryo kryo) {
+        kryo.register(ColorModelState.class, new JavaSerializer());
+    }
+
+    private static final AWTRasterSerializer awtRasterSerializer = new AWTRasterSerializer();
+
+    @Override
+    public void write(Kryo kryo, Output output) {
+        // write basic properties
+        output.writeInt(minX);
+        output.writeInt(minY);
+        output.writeInt(width);
+        output.writeInt(height);
+
+        // write properties
+        Hashtable<String, Object> propertyTable = getSerializableProperties();
+        KryoUtil.writeObjectWithLength(kryo, output, propertyTable);
+
+        // write color model
+        SerializableState colorModelState = SerializerFactory.getState(this.colorModel, null);
+        KryoUtil.writeObjectWithLength(kryo, output, colorModelState);
+
+        // write raster
+        Raster serializedRaster;
+        if (this.source != null) {
+            serializedRaster = RasterUtils.getRaster(this.source);
+        } else {
+            serializedRaster = imageRaster;
+        }
+        awtRasterSerializer.write(kryo, output, serializedRaster);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void read(Kryo kryo, Input input) {
+        // read basic properties
+        minX = input.readInt();
+        minY = input.readInt();
+        width = input.readInt();
+        height = input.readInt();
+        imageBounds = new Rectangle(minX, minY, width, height);
+
+        // read properties
+        input.readInt(); // skip the length of the property table
+        properties = kryo.readObject(input, Hashtable.class);
+        for (String key : this.properties.keySet()) {
+            Object value = this.properties.get(key);
+            // Restore the value of GC_NODATA property as a NoDataContainer object.
+            if (value instanceof SingleValueNoDataContainer) {
+                SingleValueNoDataContainer noDataContainer = (SingleValueNoDataContainer) value;
+                this.properties.put(key, new NoDataContainer(noDataContainer.singleValue));
+            }
+        }
+
+        // read color model
+        input.readInt(); // skip the length of the color model state
+        ColorModelState cmState = kryo.readObject(input, ColorModelState.class);
+        this.colorModel = (ColorModel) cmState.getObject();
+
+        // read raster
+        this.imageRaster = awtRasterSerializer.read(kryo, input, Raster.class);
+
+        // The deserialized rendered image contains only one tile (imageRaster). We need to update
+        // the sample model and tile properties to reflect this.
+        this.sampleModel = this.imageRaster.getSampleModel();
+        this.tileWidth = this.width;
+        this.tileHeight = this.height;
+        this.numXTiles = 1;
+        this.numYTiles = 1;
+        this.minTileX = 0;
+        this.minTileY = 0;
+        this.tileGridXOffset = minX;
+        this.tileGridYOffset = minY;
     }
 
     /**

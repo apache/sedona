@@ -211,6 +211,8 @@ object Catalog {
     function[RS_FromArcInfoAsciiGrid](),
     function[RS_FromGeoTiff](),
     function[RS_MakeEmptyRaster](),
+    function[RS_MakeRaster](),
+    function[RS_MakeRasterForTesting](),
     function[RS_Tile](),
     function[RS_TileExplode](),
     function[RS_Envelope](),
@@ -226,6 +228,7 @@ object Catalog {
     function[RS_Value](1),
     function[RS_Values](1),
     function[RS_Intersects](),
+    function[RS_Interpolate](),
     function[RS_AsGeoTiff](),
     function[RS_AsRaster](),
     function[RS_AsArcGrid](),
@@ -272,6 +275,7 @@ object Catalog {
     function[RS_ZonalStats](),
     function[RS_ZonalStatsAll](),
     function[RS_Resample](),
+    function[RS_ReprojectMatch]("nearestneighbor"),
     function[RS_FromNetCDF](),
     function[RS_NetCDFInfo]()
   )
