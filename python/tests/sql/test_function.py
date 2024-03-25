@@ -847,6 +847,20 @@ class TestPredicateJoin(TestBase):
         for actual, expected in result_and_expected:
             assert (actual == expected)
 
+    def test_isPolygonCCW(self):
+        actual = self.spark.sql("SELECT ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))'))").take(1)[0][0]
+        assert actual == True
+
+        actual = self.spark.sql("SELECT ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))").take(1)[0][0]
+        assert actual == False
+
+    def test_forcePolygonCCW(self):
+        actualDf = self.spark.sql(
+            "SELECT ST_ForcePolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))')) AS polyCW")
+        actual = actualDf.selectExpr("ST_AsText(polyCW)").take(1)[0][0]
+        expected = "POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35), (30 20, 20 15, 20 25, 30 20))"
+        assert expected == actual
+
     def test_st_subdivide(self):
         # Given
         geometry_df = self.__wkt_list_to_data_frame(
