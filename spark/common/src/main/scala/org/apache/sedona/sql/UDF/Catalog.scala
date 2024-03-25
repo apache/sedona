@@ -129,6 +129,8 @@ object Catalog {
     function[ST_RemovePoint](-1),
     function[ST_SetPoint](),
     function[ST_IsRing](),
+    function[ST_IsPolygonCCW](),
+    function[ST_ForcePolygonCCW](),
     function[ST_FlipCoordinates](),
     function[ST_LineSubstring](),
     function[ST_LineInterpolatePoint](),

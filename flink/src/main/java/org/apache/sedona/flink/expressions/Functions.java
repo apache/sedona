@@ -1007,6 +1007,22 @@ public class Functions {
         }
     }
 
+    public static class ST_ForcePolygonCCW extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.forcePolygonCCW(geometry);
+        }
+    }
+
+    public static class ST_IsPolygonCCW extends ScalarFunction {
+        @DataTypeHint("Boolean")
+        public boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.isPolygonCCW(geom);
+        }
+    }
+
     public static class ST_Translate extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
