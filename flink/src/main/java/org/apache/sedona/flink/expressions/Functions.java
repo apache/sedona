@@ -898,8 +898,8 @@ public class Functions {
     }
 
     public static class ST_H3ToGeom extends ScalarFunction {
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-        public Geometry eval(@DataTypeHint(value = "ARRAY<BIGINT>") Long[] cells
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry[].class)
+        public Geometry[] eval(@DataTypeHint(value = "ARRAY<BIGINT>") Long[] cells
         ) {
             return org.apache.sedona.common.Functions.h3ToGeom(Arrays.stream(cells).mapToLong(Long::longValue).toArray());
         }

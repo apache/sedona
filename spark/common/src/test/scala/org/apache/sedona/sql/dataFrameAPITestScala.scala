@@ -1103,7 +1103,7 @@ class dataFrameAPITestScala extends TestBaseScala {
 
     it("Passed ST_H3CellIDs") {
       val baseDF = sparkSession.sql("SELECT ST_GeomFromWKT('Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))') as geom")
-      val df = baseDF.select(ST_H3ToGeom(ST_H3CellIDs("geom", 6, true)))
+      val df = baseDF.select(ST_MakeValid(ST_Collect(ST_H3ToGeom(ST_H3CellIDs("geom", 6, true)))))
       val actualResult = df.take(1)(0).getAs[Geometry](0)
       val targetShape = baseDF.take(1)(0).getAs[Polygon](0);
       assert (actualResult.contains(targetShape))
