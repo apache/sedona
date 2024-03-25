@@ -763,7 +763,7 @@ public class FunctionsTest extends TestBase {
         Geometry lineClosed = Constructors.geomFromWKT("LINESTRING (30 20, 20 25, 20 15, 30 20)", 0);
         assertFalse(Functions.isPolygonCW(lineClosed));
       }
-  
+
     public void testIsPolygonCCW() throws ParseException {
         Geometry polyCCW = Constructors.geomFromWKT("POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))", 0);
         assertTrue(Functions.isPolygonCCW(polyCCW));

@@ -602,7 +602,7 @@ public class UDFs {
                 GeometrySerde.deserialize(geom)
         );
     }
-  
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static boolean ST_IsPolygonCCW(byte[] geom) {
         return Functions.isPolygonCCW(
