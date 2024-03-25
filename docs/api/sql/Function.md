@@ -1458,7 +1458,6 @@ Introduction: Return the result of H3 function [cellsToMultiPolygon(cells)](http
 
 Converts an array of Uber H3 cell indices into an array of Polygon geometries, where each polygon represents a hexagonal H3 cell.
 
-
 !!!Hint
     To convert a Polygon array to MultiPolygon, use [ST_Collect](#st_collect). However, the result may be an invalid geometry. Apply [ST_MakeValid](#st_makevalid) to the `ST_Collect` output to ensure a valid MultiPolygon.
 
