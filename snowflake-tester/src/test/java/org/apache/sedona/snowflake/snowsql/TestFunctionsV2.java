@@ -977,7 +977,7 @@ public class TestFunctionsV2
     public void test_ST_ForcePolygonCCW() {
         registerUDFV2("ST_ForcePolygonCCW", String.class);
         verifySqlSingleRes(
-                "SELECT sedona.ST_AsText(sedona.ST_ForcePolygonCCW(sedona.ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))')))",
+                "SELECT ST_AsText(sedona.ST_ForcePolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))')))",
                 "POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35), (30 20, 20 15, 20 25, 30 20))"
         );
     }
@@ -986,7 +986,7 @@ public class TestFunctionsV2
     public void test_ST_IsPolygonCCW() {
         registerUDFV2("ST_IsPolygonCCW", String.class);
         verifySqlSingleRes(
-                "SELECT sedona.ST_IsPolygonCCW(sedona.ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))'))",
+                "SELECT sedona.ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))'))",
                 true
         );
     }
