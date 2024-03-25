@@ -583,6 +583,92 @@ SELECT RS_AsPNG(raster)
 
 Please refer to [Raster writer docs](../../api/sql/Raster-writer) for more details.
 
+## Collecting raster Dataframes and working with them locally in Python
+
+Sedona allows collecting Dataframes with raster columns and working with them locally in Python since `v1.6.0`.
+The raster objects are represented as `SedonaRaster` objects in Python, which can be used to perform raster operations.
+
+```python
+df_raster = sedona.read.format("binaryFile").load("/path/to/raster.tif").selectExpr("RS_FromGeoTiff(content) as rast")
+rows = df_raster.collect()
+raster = rows[0].rast
+raster  # <sedona.raster.sedona_raster.InDbSedonaRaster at 0x1618fb1f0>
+```
+
+You can retrieve the metadata of the raster by accessing the properties of the `SedonaRaster` object.
+
+```python
+raster.width        # width of the raster
+raster.height       # height of the raster
+raster.affine_trans # affine transformation matrix
+raster.crs_wkt      # coordinate reference system as WKT
+```
+
+You can get a numpy array containing the band data of the raster using the `as_numpy` or `as_numpy_masked` method. The
+band data is organized in CHW order.
+
+```python
+raster.as_numpy()        # numpy array of the raster
+raster.as_numpy_masked() # numpy array with nodata values masked as nan
+```
+
+If you want to work with the raster data using `rasterio`, you can retrieve a `rasterio.DatasetReader` object using the
+`as_rasterio` method.
+
+```python
+ds = raster.as_rasterio()  # rasterio.DatasetReader object
+# Work with the raster using rasterio
+band1 = ds.read(1)         # read the first band
+```
+
+## Writing Python UDF to work with raster data
+
+You can write Python UDFs to work with raster data in Python. The UDFs can take `SedonaRaster` objects as input and
+return any Spark data type as output. This is an example of a Python UDF that calculates the mean of the raster data.
+
+```python
+from pyspark.sql.types import DoubleType
+
+def mean_udf(raster):
+    return float(raster.as_numpy().mean())
+
+sedona.udf.register("mean_udf", mean_udf, DoubleType())
+df_raster.withColumn("mean", expr("mean_udf(rast)")).show()
+```
+
+```
++--------------------+------------------+
+|                rast|              mean|
++--------------------+------------------+
+|GridCoverage2D["g...|1542.8092886117788|
++--------------------+------------------+
+```
+
+It is much trickier to write an UDF that returns a raster object, since Sedona does not support serializing Python raster
+objects yet. However, you can write a UDF that returns the band data as an array and then construct the raster object using
+`RS_MakeRaster`. This is an example of a Python UDF that creates a mask raster based on the first band of the input raster.
+
+```python
+from pyspark.sql.types import ArrayType, DoubleType
+import numpy as np
+
+def mask_udf(raster):
+    band1 = raster.as_numpy()[0,:,:]
+    mask = (band1 < 1400).astype(np.float64)
+    return mask.flatten().tolist()
+
+sedona.udf.register("mask_udf", band_udf, ArrayType(DoubleType()))
+df_raster.withColumn("mask", expr("mask_udf(rast)")).withColumn("mask_rast", expr("RS_MakeRaster(rast, 'I', mask)")).show()
+```
+
+```
++--------------------+--------------------+--------------------+
+|                rast|                mask|           mask_rast|
++--------------------+--------------------+--------------------+
+|GridCoverage2D["g...|[0.0, 0.0, 0.0, 0...|GridCoverage2D["g...|
++--------------------+--------------------+--------------------+
+```
+
 ## Performance optimization
 
 When working with large raster datasets, refer to the [documentation on storing raster geometries in Parquet format](../storing-blobs-in-parquet) for recommendations to optimize performance.

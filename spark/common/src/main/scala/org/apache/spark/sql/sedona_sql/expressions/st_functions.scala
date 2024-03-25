@@ -238,6 +238,12 @@ object st_functions extends DataFrameAPI {
   def ST_MinimumBoundingRadius(geometry: Column): Column = wrapExpression[ST_MinimumBoundingRadius](geometry)
   def ST_MinimumBoundingRadius(geometry: String): Column = wrapExpression[ST_MinimumBoundingRadius](geometry)
 
+  def ST_IsPolygonCCW(geometry: Column): Column = wrapExpression[ST_IsPolygonCCW](geometry)
+  def ST_IsPolygonCCW(geometry: String): Column = wrapExpression[ST_IsPolygonCCW](geometry)
+
+  def ST_ForcePolygonCCW(geometry: Column): Column = wrapExpression[ST_ForcePolygonCCW](geometry)
+  def ST_ForcePolygonCCW(geometry: String): Column = wrapExpression[ST_ForcePolygonCCW](geometry)
+
   def ST_Multi(geometry: Column): Column = wrapExpression[ST_Multi](geometry)
   def ST_Multi(geometry: String): Column = wrapExpression[ST_Multi](geometry)
 

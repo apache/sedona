@@ -18,7 +18,8 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
-import org.apache.sedona.common.raster.RasterConstructors
+import org.apache.sedona.common.raster.{RasterConstructors, RasterConstructorsForTesting}
+import org.apache.sedona.sql.utils.RasterSerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{CreateArray, Expression, Generator, Literal}
@@ -64,6 +65,20 @@ case class RS_MakeEmptyRaster(inputExpressions: Seq[Expression])
 
   override def foldable: Boolean = false
 
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class RS_MakeRaster(inputExpressions: Seq[Expression])
+  extends InferredExpression(inferrableFunction3(RasterConstructors.makeNonEmptyRaster)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class RS_MakeRasterForTesting(inputExpressions: Seq[Expression])
+  extends InferredExpression(RasterConstructorsForTesting.makeRasterForTesting _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

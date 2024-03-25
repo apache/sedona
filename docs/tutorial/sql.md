@@ -922,7 +922,7 @@ This UDF example takes a geometry type input and a primitive type input and retu
 	schemaUDF = StructType([
         StructField("buffed", GeometryType()),
         StructField("length", DoubleType())
-        ])
+    ])
 
 	def bufferAndLength(geom: GeometryType(), distance: DoubleType()):
 		buffed = geom.buffer(distance)
@@ -931,8 +931,8 @@ This UDF example takes a geometry type input and a primitive type input and retu
 
 	sedona.udf.register("udf_bufferLength", bufferAndLength, schemaUDF)
 
-	df.withColumn("bufferLength", expr("udf_bufferLength(geom, buffer)"))
-				.select("geom", "buffer", "bufferLength.*")
+	df.withColumn("bufferLength", expr("udf_bufferLength(geom, buffer)")) \
+				.select("geom", "buffer", "bufferLength.*") \
 				.show()
 	```
 

@@ -1122,6 +1122,19 @@ case class ST_NRings(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_IsPolygonCCW(inputExpressions: Seq[Expression]) extends InferredExpression(Functions.isPolygonCCW _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_ForcePolygonCCW(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.forcePolygonCCW _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_Translate(inputExpressions: Seq[Expression])
   extends InferredExpression(inferrableFunction4(Functions.translate)) with FoldableExpression {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {

@@ -22,13 +22,13 @@ import org.apache.sedona.common.raster.MapAlgebra
 import org.apache.sedona.common.utils.RasterUtils
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.{Row, SaveMode}
-import org.apache.spark.sql.functions.{col, collect_list, expr, row_number}
+import org.apache.spark.sql.functions.{col, collect_list, expr, lit, row_number}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.junit.Assert.{assertEquals, assertNotNull, assertNull, assertTrue}
 import org.locationtech.jts.geom.{Coordinate, Geometry}
 import org.scalatest.{BeforeAndAfter, GivenWhenThen}
 
-import java.awt.image.DataBuffer
+import java.awt.image.{DataBuffer, SinglePixelPackedSampleModel}
 import java.io.File
 import java.net.URLConnection
 import scala.collection.mutable
@@ -824,6 +824,33 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       //Test with skewX, skewY, srid and datatype
       result = sparkSession.sql(s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, 'I', $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize, -$cellSize, $skewX, $skewY, $srid))").first().getSeq(0)
       assertEquals(numBands, result(9), 0.001)
+    }
+
+    it("Passed RS_MakeRaster") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+        .withColumn("rast", expr("RS_FromGeoTiff(content)"))
+      val metadata = df.selectExpr("RS_Metadata(rast)").first().getSeq(0)
+      val width = metadata(2).asInstanceOf[Double].toInt
+      val height = metadata(3).asInstanceOf[Double].toInt
+      val values = Array.tabulate(width * height) { i => i * i }
+
+      // Attach values as a new column to the dataframe
+      val dfWithValues = df.withColumn("values", lit(values))
+
+      // Call RS_MakeRaster to create a new raster with the values
+      val result = dfWithValues.selectExpr("RS_MakeRaster(rast, 'D', values) AS rast").first().get(0)
+      val rast = result.asInstanceOf[GridCoverage2D].getRenderedImage
+      val r = RasterUtils.getRaster(rast)
+      for (i <- values.indices) {
+        assertEquals(values(i), r.getSampleDouble(i % width, i / width, 0), 0.001)
+      }
+    }
+
+    it("Passed RS_MakeRasterForTesting") {
+      val result = sparkSession.sql("SELECT RS_MakeRasterForTesting(4, 'I', 'SinglePixelPackedSampleModel', 10, 10, 100, 100, 10, -10, 0, 0, 3857) as raster").first().get(0)
+      assert(result.isInstanceOf[GridCoverage2D])
+      val gridCoverage2D = result.asInstanceOf[GridCoverage2D]
+      assert(gridCoverage2D.getRenderedImage.getSampleModel.isInstanceOf[SinglePixelPackedSampleModel])
     }
 
     it("Passed RS_BandAsArray") {
@@ -1668,6 +1695,24 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertTrue(actual.endsWith(expectedEnd))
     }
 
+    it("Passed RS_Interpolate") {
+      val inputDf = Seq(Seq(1, 34, 1, 1, 23, 1, 1, 1, 1, 1, 1, 1, 1, 56, 1, 1, 1, 67, 1, 1)).toDF("band")
+      val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'b', 5, 4, 0, 0, 1, -1, 0, 0, 0), band, 1, 1d) as emptyRaster")
+      val result1 = df.selectExpr("RS_Interpolate(emptyRaster)").first().get(0)
+      val result2 = df.selectExpr("RS_Interpolate(emptyRaster, 4)").first().get(0)
+      val result3 = df.selectExpr("RS_Interpolate(emptyRaster, 4, 'variable', 2)").first().get(0)
+      val result4 = df.selectExpr("RS_Interpolate(emptyRaster, 2, 'variable', 2)").first().get(0)
+      val result5 = df.selectExpr("RS_Interpolate(emptyRaster, 4, 'variable', 2, 5)").first().get(0)
+      val result6 = df.selectExpr("RS_Interpolate(emptyRaster, 5, 'variable', 3, 5, 1)").first().get(0)
+
+      assert(result1.isInstanceOf[GridCoverage2D])
+      assert(result2.isInstanceOf[GridCoverage2D])
+      assert(result3.isInstanceOf[GridCoverage2D])
+      assert(result4.isInstanceOf[GridCoverage2D])
+      assert(result5.isInstanceOf[GridCoverage2D])
+      assert(result6.isInstanceOf[GridCoverage2D])
+    }
+
     it("Passed RS_Resample full version") {
       val inputDf = Seq(Seq(1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10)).toDF("band")
       val df = inputDf.selectExpr("RS_AddBandFromArray(RS_MakeEmptyRaster(1, 'd', 4, 3, 0, 0, 2, -2, 0, 0, 0), band, 1, null) as raster")
@@ -1708,6 +1753,18 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       for (i <- expectedMetadata.indices) {
         assertEquals(expectedMetadata(i), rasterMetadata(i), 1e-6)
       }
+    }
+
+    it("Passed RS_ReprojectMatch") {
+      val rasterDf = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+        .selectExpr("RS_FromGeoTiff(content) as rast")
+      val df = rasterDf.selectExpr("rast", "RS_MakeEmptyRaster(1, 300, 300, 453926, 3741637, 100, -100, 0, 0, 32611) as align_rast")
+      val results = df.selectExpr("RS_ReprojectMatch(rast, align_rast) as trans_rast", "align_rast").first()
+      val transformedRast = results.get(0).asInstanceOf[GridCoverage2D]
+      val alignRast = results.get(1).asInstanceOf[GridCoverage2D]
+      assertEquals(alignRast.getEnvelope2D, transformedRast.getEnvelope2D)
+      assertEquals(alignRast.getCoordinateReferenceSystem, transformedRast.getCoordinateReferenceSystem)
+      assertEquals(alignRast.getGridGeometry.getGridToCRS2D, transformedRast.getGridGeometry.getGridToCRS2D)
     }
 
     it("Passed RS_FromNetCDF with NetCDF classic") {
