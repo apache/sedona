@@ -16,6 +16,7 @@ package org.apache.sedona.common;
 import com.google.common.geometry.S2CellId;
 import com.uber.h3core.exceptions.H3Exception;
 
+import com.uber.h3core.util.LatLng;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.sphere.Spheroid;
@@ -26,6 +27,7 @@ import org.apache.sedona.common.utils.GeometrySplitter;
 import org.apache.sedona.common.utils.H3Utils;
 import org.apache.sedona.common.utils.S2Utils;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
+import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.algorithm.hull.ConcaveHull;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
@@ -45,13 +47,8 @@ import org.locationtech.jts.operation.valid.TopologyValidationError;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.wololo.jts2geojson.GeoJSONWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.LinkedHashSet;
-import java.util.Collection;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.geometry.S2.DBL_EPSILON;
@@ -809,11 +806,183 @@ public class Functions {
         return GEOMETRY_FACTORY.createPoint(interPoint);
     }
 
+    /**
+     * Forces a Polygon/MultiPolygon to use clockwise orientation for the exterior ring and a counter-clockwise for the interior ring(s).
+     * @param geom
+     * @return a clockwise orientated (Multi)Polygon
+     */
+    public static Geometry forcePolygonCW(Geometry geom) {
+        if (isPolygonCW(geom)) {
+            return geom;
+        }
+
+        if (geom instanceof Polygon) {
+            return transformCW((Polygon) geom);
+
+        } else if (geom instanceof MultiPolygon) {
+            List<Polygon> polygons = new ArrayList<>();
+            for (int i = 0; i < geom.getNumGeometries(); i++) {
+                Polygon polygon = (Polygon) geom.getGeometryN(i);
+                polygons.add((Polygon) transformCW(polygon));
+            }
+
+            return new GeometryFactory().createMultiPolygon(polygons.toArray(new Polygon[0]));
+
+        }
+        // Non-polygonal geometries are returned unchanged
+        return geom;
+    }
+
+    private static Geometry transformCW(Polygon polygon) {
+        LinearRing exteriorRing = polygon.getExteriorRing();
+        LinearRing exteriorRingEnforced = transformCW(exteriorRing, true);
+
+        List<LinearRing> interiorRings = new ArrayList<>();
+        for (int i = 0; i < polygon.getNumInteriorRing(); i++) {
+            interiorRings.add(transformCW(polygon.getInteriorRingN(i), false));
+        }
+
+        return new GeometryFactory(polygon.getPrecisionModel(), polygon.getSRID())
+                .createPolygon(exteriorRingEnforced, interiorRings.toArray(new LinearRing[0]));
+    }
+
+    private static LinearRing transformCW(LinearRing ring, boolean isExteriorRing) {
+        boolean isRingClockwise = !Orientation.isCCW(ring.getCoordinateSequence());
+
+        LinearRing enforcedRing;
+        if (isExteriorRing) {
+            enforcedRing = isRingClockwise ? (LinearRing) ring.copy() : ring.reverse();
+        } else {
+            enforcedRing = isRingClockwise ? ring.reverse() : (LinearRing) ring.copy();
+        }
+        return enforcedRing;
+    }
+
+    /**
+     * This function accepts Polygon and MultiPolygon, if any other type is provided then it will return false.
+     * If the exterior ring is clockwise and the interior ring(s) are counter-clockwise then returns true, otherwise false.
+     * @param geom Polygon or MultiPolygon
+     * @return
+     */
+    public static boolean isPolygonCW(Geometry geom) {
+        if (geom instanceof MultiPolygon) {
+            MultiPolygon multiPolygon = (MultiPolygon) geom;
+
+            boolean arePolygonsCW = checkIfPolygonCW((Polygon) multiPolygon.getGeometryN(0));
+            for (int i = 1; i < multiPolygon.getNumGeometries(); i++) {
+                arePolygonsCW = arePolygonsCW && checkIfPolygonCW((Polygon) multiPolygon.getGeometryN(i));
+            }
+            return arePolygonsCW;
+        } else if (geom instanceof Polygon) {
+            return checkIfPolygonCW((Polygon) geom);
+        }
+        // False for remaining geometry types
+        return false;
+    }
+
+    private static boolean checkIfPolygonCW(Polygon geom) {
+        LinearRing exteriorRing = geom.getExteriorRing();
+        boolean isExteriorRingCW = !Orientation.isCCW(exteriorRing.getCoordinateSequence());
+
+        boolean isInteriorRingCW = Orientation.isCCW(geom.getInteriorRingN(0).getCoordinateSequence());
+        for (int i = 1; i < geom.getNumInteriorRing(); i++) {
+            isInteriorRingCW = isInteriorRingCW && Orientation.isCCW(geom.getInteriorRingN(i).getCoordinateSequence());
+        }
+
+        return isExteriorRingCW && isInteriorRingCW;
+    }
+
     public static double lineLocatePoint(Geometry geom, Geometry point)
     {
         double length = geom.getLength();
         LengthIndexedLine indexedLine = new LengthIndexedLine(geom);
         return indexedLine.indexOf(point.getCoordinate()) / length;
+    }
+
+    /**
+     * Forces a Polygon/MultiPolygon to use counter-clockwise orientation for the exterior ring and a clockwise for the interior ring(s).
+     * @param geom
+     * @return a counter-clockwise orientated (Multi)Polygon
+     */
+    public static Geometry forcePolygonCCW(Geometry geom) {
+        if (isPolygonCCW(geom)) {
+            return geom;
+        }
+
+        if (geom instanceof Polygon) {
+            return transformCCW((Polygon) geom);
+
+        } else if (geom instanceof MultiPolygon) {
+            List<Polygon> polygons = new ArrayList<>();
+            for (int i = 0; i < geom.getNumGeometries(); i++) {
+                Polygon polygon = (Polygon) geom.getGeometryN(i);
+                polygons.add((Polygon) transformCCW(polygon));
+            }
+
+            return new GeometryFactory().createMultiPolygon(polygons.toArray(new Polygon[0]));
+
+        }
+        // Non-polygonal geometries are returned unchanged
+        return geom;
+    }
+
+    private static Geometry transformCCW(Polygon polygon) {
+        LinearRing exteriorRing = polygon.getExteriorRing();
+        LinearRing exteriorRingEnforced = transformCCW(exteriorRing, true);
+
+        List<LinearRing> interiorRings = new ArrayList<>();
+        for (int i = 0; i < polygon.getNumInteriorRing(); i++) {
+            interiorRings.add(transformCCW(polygon.getInteriorRingN(i), false));
+        }
+
+        return new GeometryFactory(polygon.getPrecisionModel(), polygon.getSRID())
+                .createPolygon(exteriorRingEnforced, interiorRings.toArray(new LinearRing[0]));
+    }
+
+    private static LinearRing transformCCW(LinearRing ring, boolean isExteriorRing) {
+        boolean isRingCounterClockwise = Orientation.isCCW(ring.getCoordinateSequence());
+
+        LinearRing enforcedRing;
+        if (isExteriorRing) {
+            enforcedRing = isRingCounterClockwise ? (LinearRing) ring.copy() : ring.reverse();
+        } else {
+            enforcedRing = isRingCounterClockwise ? ring.reverse() : (LinearRing) ring.copy();
+        }
+        return enforcedRing;
+    }
+
+    /**
+     * This function accepts Polygon and MultiPolygon, if any other type is provided then it will return false.
+     * If the exterior ring is counter-clockwise and the interior ring(s) are clockwise then returns true, otherwise false.
+     * @param geom Polygon or MultiPolygon
+     * @return
+     */
+    public static boolean isPolygonCCW(Geometry geom) {
+        if (geom instanceof MultiPolygon) {
+            MultiPolygon multiPolygon = (MultiPolygon) geom;
+
+            boolean arePolygonsCCW = checkIfPolygonCCW(((Polygon) multiPolygon.getGeometryN(0)));
+            for (int i = 1; i < multiPolygon.getNumGeometries(); i++) {
+                arePolygonsCCW = arePolygonsCCW && checkIfPolygonCCW((Polygon) multiPolygon.getGeometryN(i));
+            }
+            return arePolygonsCCW;
+        } else if (geom instanceof Polygon) {
+            return checkIfPolygonCCW((Polygon) geom);
+        }
+        // False for remaining geometry types
+        return false;
+    }
+
+    private static boolean checkIfPolygonCCW(Polygon geom) {
+        LinearRing exteriorRing = geom.getExteriorRing();
+        boolean isExteriorRingCCW = Orientation.isCCW(exteriorRing.getCoordinateSequence());
+
+        boolean isInteriorRingCCW = !Orientation.isCCW(geom.getInteriorRingN(0).getCoordinateSequence());
+        for (int i = 1; i < geom.getNumInteriorRing(); i++) {
+            isInteriorRingCCW = isInteriorRingCCW && !Orientation.isCCW(geom.getInteriorRingN(i).getCoordinateSequence());
+        }
+
+        return isExteriorRingCCW && isInteriorRingCCW;
     }
 
     public static Geometry difference(Geometry leftGeometry, Geometry rightGeometry) {
@@ -941,28 +1110,37 @@ public class Functions {
     }
 
     /**
-     * get the neighbor cells of the input cell by h3.gridDisk function
+     * gets the polygon for each h3 index provided
      * @param cells: the set of cells
-     * @return Multiple Polygons reversed
+     * @return An Array of Polygons reversed
      */
-    public static Geometry h3ToGeom(long[] cells) {
+    public static Geometry[] h3ToGeom(long[] cells) {
         GeometryFactory geomFactory = new GeometryFactory();
-        Collection<Long> h3 = Arrays.stream(cells).boxed().collect(Collectors.toList());
-        return geomFactory.createMultiPolygon(
-                H3Utils.h3.cellsToMultiPolygon(h3, true).stream().map(
-                        shellHoles -> {
-                            List<LinearRing> rings = shellHoles.stream().map(
-                                    shell -> geomFactory.createLinearRing(shell.stream().map(latLng -> new Coordinate(latLng.lng, latLng.lat)).toArray(Coordinate[]::new))
-                            ).collect(Collectors.toList());
-                            LinearRing shell = rings.remove(0);
-                            if (rings.isEmpty()) {
-                                return geomFactory.createPolygon(shell);
-                            } else {
-                                return geomFactory.createPolygon(shell, rings.toArray(new LinearRing[0]));
-                            }
-                        }
-                ).toArray(Polygon[]::new)
-        );
+        List<Long> h3 = Arrays.stream(cells).boxed().collect(Collectors.toList());
+        List<Polygon> polygons = new ArrayList<>();
+
+        for (int j = 0; j < h3.size(); j++) {
+            for (List<List<LatLng>> shellHoles : H3Utils.h3.cellsToMultiPolygon(Collections.singleton(h3.get(j)), true)) {
+                List<LinearRing> rings = new ArrayList<>();
+                for (List<LatLng> shell : shellHoles) {
+                    Coordinate[] coordinates = new Coordinate[shell.size()];
+                    for (int i = 0; i < shell.size(); i++) {
+                        LatLng latLng = shell.get(i);
+                        coordinates[i] = new Coordinate(latLng.lng, latLng.lat);
+                    }
+                    LinearRing ring = geomFactory.createLinearRing(coordinates);
+                    rings.add(ring);
+                }
+
+                LinearRing shell = rings.remove(0);
+                if (rings.isEmpty()) {
+                    polygons.add(geomFactory.createPolygon(shell));
+                } else {
+                    polygons.add(geomFactory.createPolygon(shell, rings.toArray(new LinearRing[0])));
+                }
+            }
+        }
+        return polygons.toArray(new Polygon[0]);
     }
 
     // create static function named simplifyPreserveTopology

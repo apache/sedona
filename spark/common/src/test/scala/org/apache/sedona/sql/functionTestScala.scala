@@ -903,6 +903,21 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       polygons.isEmpty shouldBe true
     }
 
+    it("Should pass ST_ForcePolygonCCW") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))') as poly")
+      val actual = baseDf.selectExpr("ST_AsText(ST_ForcePolygonCCW(poly))").first().getString(0)
+      val expected = "POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35), (30 20, 20 15, 20 25, 30 20))"
+      assert(expected.equals(actual))
+    }
+
+    it("Should pass ST_IsPolygonCCW") {
+      var actual = sparkSession.sql("SELECT ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))'))").first().getBoolean(0)
+      assert(actual == true)
+
+      actual = sparkSession.sql("SELECT ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))").first().getBoolean(0)
+      assert(actual == false)
+    }
+
     it("Should pass ST_Snap") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))') AS poly, ST_GeomFromWKT('LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)') AS line")
       var actual = baseDf.selectExpr("ST_AsText(ST_Snap(poly, line, 2.525))").first().getString(0)
@@ -913,6 +928,22 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       expected = "POLYGON ((0.5 10.7, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 5.4 8.4, 0.5 10.7))"
       assert(expected.equals(actual))
     }
+  }
+
+  it("Should pass ST_ForcePolygonCW") {
+    val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))') as poly")
+    val actual = baseDf.selectExpr("ST_AsText(ST_ForcePolygonCW(poly))").first().getString(0)
+    val expected = "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))"
+    assert(expected.equals(actual))
+  }
+
+  it("Should pass ST_IsPolygonCW") {
+    var actual = sparkSession.sql("SELECT ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))'))").first().getBoolean(0)
+    print(actual)
+    assert(actual == false)
+
+    actual = sparkSession.sql("SELECT ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))").first().getBoolean(0)
+    assert(actual == true)
   }
 
   it("Should pass ST_Boundary") {

@@ -1228,6 +1228,46 @@ Output:
 LINESTRING EMPTY
 ```
 
+## ST_ForcePolygonCCW
+
+Introduction: For (Multi)Polygon geometries, this function sets the exterior ring orientation to counter-clockwise and interior rings to clockwise orientation. Non-polygonal geometries are returned unchanged.
+
+Format: `ST_ForcePolygonCCW(geom: Geometry)`
+
+Since: `v1.6.0`
+
+SQL Example:
+
+```sql
+SELECT ST_AsText(ST_ForcePolygonCCW(ST_GeomFromText('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))')))
+```
+
+Output:
+
+```
+POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35), (30 20, 20 15, 20 25, 30 20))
+```
+
+## ST_ForcePolygonCW
+
+Introduction: For (Multi)Polygon geometries, this function sets the exterior ring orientation to clockwise and interior rings to counter-clockwise orientation. Non-polygonal geometries are returned unchanged.
+
+Format: `ST_ForcePolygonCW(geom: Geometry)`
+
+Since: `v1.6.0`
+
+SQL Example:
+
+```sql
+SELECT ST_AsText(ST_ForcePolygonCW(ST_GeomFromText('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))')))
+```
+
+Output:
+
+```
+POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))
+```
+
 ## ST_FrechetDistance
 
 Introduction: Computes and returns discrete [Frechet Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_distance) between the given two geometries,
@@ -1454,25 +1494,25 @@ Output:
 
 ## ST_H3ToGeom
 
-Introduction: return the result of H3 function [cellsToMultiPolygon(cells)](https://h3geo.org/docs/api/regions#cellstolinkedmultipolygon--cellstomultipolygon).
+Introduction: Return the result of H3 function [cellsToMultiPolygon(cells)](https://h3geo.org/docs/api/regions#cellstolinkedmultipolygon--cellstomultipolygon).
 
-Reverse the uber h3 cells to MultiPolygon object composed by the geometry hexagons.
+Converts an array of Uber H3 cell indices into an array of Polygon geometries, where each polygon represents a hexagonal H3 cell.
+
+!!!Hint
+    To convert a Polygon array to MultiPolygon, use [ST_Collect](#st_collect). However, the result may be an invalid geometry. Apply [ST_MakeValid](#st_makevalid) to the `ST_Collect` output to ensure a valid MultiPolygon.
 
 Format: `ST_H3ToGeom(cells: Array[Long])`
 
-Since: `v1.5.0`
+Since: `v1.6.0`
 
-SQL Example
+Example:
 ```sql
 SELECT ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], 1, true))
 ```
 
 Output:
 ```
-|st_h3togeom(st_h3cellids(st_geomfromwkt(POINT(1 2), 0), 8, true))                                                                                                                                                                                                                              |
-+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|MULTIPOLYGON (((1.0057629565404935 1.9984665139177658, 1.0037116327309032 2.001832524914011, 0.9997277993570498 2.0011632704656668, 0.9977951427833285 1.99712822839324, 0.9998461908217768 1.9937621529331915, 1.0038301712104252 1.9944311839965554, 1.0057629565404935 1.9984665139177658)))|
-+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+[POLYGON ((1.0057629565405093 1.9984665139177547, 1.0037116327309097 2.0018325249140068, 0.999727799357053 2.001163270465665, 0.9977951427833316 1.997128228393235, 0.9998461908217928 1.993762152933182, 1.0038301712104316 1.9944311839965523, 1.0057629565405093 1.9984665139177547))]
 ```
 
 ## ST_HausdorffDistance
@@ -1636,6 +1676,46 @@ Output:
 
 ```
 false
+```
+
+## ST_IsPolygonCCW
+
+Introduction: Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise.
+
+Format: `ST_IsPolygonCCW(geom: Geometry)`
+
+Since: `v1.6.0`
+
+SQL Example:
+
+```sql
+SELECT ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35), (30 20, 20 15, 20 25, 30 20))'))
+```
+
+Output:
+
+```
+true
+```
+
+## ST_IsPolygonCW
+
+Introduction: Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise.
+
+Format: `ST_IsPolygonCW(geom: Geometry)`
+
+Since: `v1.6.0`
+
+SQL Example:
+
+```sql
+SELECT ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))
+```
+
+Output:
+
+```
+true
 ```
 
 ## ST_IsRing

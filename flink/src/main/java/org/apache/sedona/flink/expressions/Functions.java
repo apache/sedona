@@ -628,6 +628,14 @@ public class Functions {
         }
     }
 
+    public static class ST_IsPolygonCW extends ScalarFunction {
+        @DataTypeHint("Boolean")
+        public boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.isPolygonCW(geom);
+        }
+    }
+
     public static class ST_IsRing extends ScalarFunction {
         @DataTypeHint("Boolean")
         public boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
@@ -898,8 +906,8 @@ public class Functions {
     }
 
     public static class ST_H3ToGeom extends ScalarFunction {
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-        public Geometry eval(@DataTypeHint(value = "ARRAY<BIGINT>") Long[] cells
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry[].class)
+        public Geometry[] eval(@DataTypeHint(value = "ARRAY<BIGINT>") Long[] cells
         ) {
             return org.apache.sedona.common.Functions.h3ToGeom(Arrays.stream(cells).mapToLong(Long::longValue).toArray());
         }
@@ -999,11 +1007,35 @@ public class Functions {
         }
     }
 
+    public static class ST_ForcePolygonCW extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.forcePolygonCW(geometry);
+        }
+    }
+
     public static class ST_NRings extends ScalarFunction {
         @DataTypeHint(value = "Integer")
         public int eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) throws Exception {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.nRings(geom);
+        }
+    }
+
+    public static class ST_ForcePolygonCCW extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.forcePolygonCCW(geometry);
+        }
+    }
+
+    public static class ST_IsPolygonCCW extends ScalarFunction {
+        @DataTypeHint("Boolean")
+        public boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.isPolygonCCW(geom);
         }
     }
 

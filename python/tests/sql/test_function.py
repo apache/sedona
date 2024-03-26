@@ -842,6 +842,13 @@ class TestPredicateJoin(TestBase):
         for actual, expected in result_and_expected:
             assert (actual == expected)
 
+    def test_isPolygonCW(self):
+        actual = self.spark.sql("SELECT ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))'))").take(1)[0][0]
+        assert actual == False
+
+        actual = self.spark.sql("SELECT ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))").take(1)[0][0]
+        assert actual == True
+
     def test_st_is_ring(self):
         result_and_expected = [
             [self.calculate_st_is_ring("LINESTRING(0 0, 0 1, 1 0, 1 1, 0 0)"), False],
@@ -852,6 +859,20 @@ class TestPredicateJoin(TestBase):
         ]
         for actual, expected in result_and_expected:
             assert (actual == expected)
+
+    def test_isPolygonCCW(self):
+        actual = self.spark.sql("SELECT ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))'))").take(1)[0][0]
+        assert actual == True
+
+        actual = self.spark.sql("SELECT ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))").take(1)[0][0]
+        assert actual == False
+
+    def test_forcePolygonCCW(self):
+        actualDf = self.spark.sql(
+            "SELECT ST_ForcePolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))')) AS polyCW")
+        actual = actualDf.selectExpr("ST_AsText(polyCW)").take(1)[0][0]
+        expected = "POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35), (30 20, 20 15, 20 25, 30 20))"
+        assert expected == actual
 
     def test_st_subdivide(self):
         # Given
@@ -1296,21 +1317,21 @@ class TestPredicateJoin(TestBase):
     def test_st_h3_togeom(self):
         df = self.spark.sql("""
         SELECT
-            ST_Contains(
-                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, true)),
-                ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))')
-            ),
-            ST_Contains(
-                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, false)),
+            ST_Intersects(
+                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, true))[10],
                 ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))')
             ),
             ST_Intersects(
-                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, false)),
+                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, false))[25],
+                ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))')
+            ),
+            ST_Intersects(
+                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, false))[50],
                 ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))')
             )
         """)
         res1, res2, res3 = df.take(1)[0]
-        assert res1 and not res2 and res3
+        assert res1 and res2 and res3
 
     def test_st_numPoints(self):
         actual = self.spark.sql("SELECT ST_NumPoints(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'))").take(1)[0][0]
@@ -1321,6 +1342,12 @@ class TestPredicateJoin(TestBase):
         expected = 3
         actualDf = self.spark.sql("SELECT ST_Force3D(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'), 1.1) AS geom")
         actual = actualDf.selectExpr("ST_NDims(geom)").take(1)[0][0]
+        assert expected == actual
+
+    def test_forcePolygonCW(self):
+        actualDf = self.spark.sql("SELECT ST_ForcePolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))')) AS polyCW")
+        actual = actualDf.selectExpr("ST_AsText(polyCW)").take(1)[0][0]
+        expected = "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))"
         assert expected == actual
 
     def test_nRings(self):

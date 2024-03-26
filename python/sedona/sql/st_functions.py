@@ -72,6 +72,7 @@ __all__ = [
     "ST_Intersection",
     "ST_IsClosed",
     "ST_IsEmpty",
+    "ST_IsPolygonCW",
     "ST_IsRing",
     "ST_IsSimple",
     "ST_IsValid",
@@ -111,6 +112,8 @@ __all__ = [
     "ST_SubDivideExplode",
     "ST_SimplifyPreserveTopology",
     "ST_SymDifference",
+    "ST_IsPolygonCCW",
+    "ST_ForcePolygonCCW",
     "ST_Transform",
     "ST_Union",
     "ST_X",
@@ -124,6 +127,7 @@ __all__ = [
     "ST_ZMin",
     "ST_NumPoints",
     "ST_Force3D",
+    "ST_ForcePolygonCW",
     "ST_NRings",
     "ST_Translate",
     "ST_VoronoiPolygons",
@@ -808,6 +812,19 @@ def ST_IsEmpty(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_IsPolygonCW(geometry: ColumnOrName) -> Column:
+    """Check if the Polygon or MultiPolygon use a clockwise orientation for exterior ring and counter-clockwise
+    orientation for interior ring.
+
+    :param geometry: Geometry column to check.
+    :type geometry: ColumnOrName
+    :return: True if the geometry is empty and False otherwise as a boolean column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_IsPolygonCW", geometry)
+
+
+@validate_argument_types
 def ST_IsRing(line_string: ColumnOrName) -> Column:
     """Check if a linestring geometry is both closed and simple.
 
@@ -1242,6 +1259,28 @@ def ST_Snap(input: ColumnOrName, reference: ColumnOrName, tolerance: Union[Colum
 
 
 @validate_argument_types
+def ST_IsPolygonCCW(geometry: ColumnOrName) -> Column:
+    """Check if the Polygon or MultiPolygon use a counter-clockwise orientation for exterior ring and clockwise
+    orientation for interior ring.
+    :param geometry: Geometry column to check.
+    :type geometry: ColumnOrName
+    :return: True if the geometry is empty and False otherwise as a boolean column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_IsPolygonCCW", geometry)
+
+
+@validate_argument_types
+def ST_ForcePolygonCCW(geometry: ColumnOrName) -> Column:
+    """
+    Returns a geometry with counter-clockwise oriented exterior ring and clockwise oriented interior rings
+    :param geometry: Geometry column to change orientation
+    :return: counter-clockwise oriented geometry
+    """
+    return _call_st_function("ST_ForcePolygonCCW", geometry)
+
+
+@validate_argument_types
 def ST_SRID(geometry: ColumnOrName) -> Column:
     """Get the SRID of geometry.
 
@@ -1509,6 +1548,15 @@ def ST_Force3D(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, floa
     """
     args = (geometry, zValue)
     return _call_st_function("ST_Force3D", args)
+
+@validate_argument_types
+def ST_ForcePolygonCW(geometry: ColumnOrName) -> Column:
+    """
+    Returns
+    :param geometry: Geometry column to change orientation
+    :return: Clockwise oriented geometry
+    """
+    return _call_st_function("ST_ForcePolygonCW", geometry)
 
 @validate_argument_types
 def ST_NRings(geometry: ColumnOrName) -> Column:

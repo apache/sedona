@@ -965,11 +965,47 @@ public class TestFunctionsV2
     }
 
     @Test
+    public void test_ST_ForcePolygonCW() {
+        registerUDFV2("ST_ForcePolygonCW", String.class);
+        verifySqlSingleRes(
+                "SELECT ST_AsText(sedona.ST_ForcePolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))')))",
+                "POLYGON((20 35,45 20,30 5,10 10,10 30,20 35),(30 20,20 25,20 15,30 20))"
+        );
+    }
+
+    @Test
+    public void test_ST_IsPolygonCW() {
+        registerUDFV2("ST_IsPolygonCW", String.class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))",
+                true
+        );
+    }
+
+    @Test
     public void test_ST_LengthSpheroid() {
         registerUDFV2("ST_LengthSpheroid", String.class);
         verifySqlSingleRes(
                 "select sedona.ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 90 0, 90 90, 0 90, 0 0))'))",
                 30022685.630020067
+        );
+    }
+
+    @Test
+    public void test_ST_ForcePolygonCCW() {
+        registerUDFV2("ST_ForcePolygonCCW", String.class);
+        verifySqlSingleRes(
+                "SELECT ST_AsText(sedona.ST_ForcePolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))')))",
+                "POLYGON((20 35,10 30,10 10,30 5,45 20,20 35),(30 20,20 15,20 25,30 20))"
+        );
+    }
+
+    @Test
+    public void test_ST_IsPolygonCCW() {
+        registerUDFV2("ST_IsPolygonCCW", String.class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))'))",
+                true
         );
     }
 

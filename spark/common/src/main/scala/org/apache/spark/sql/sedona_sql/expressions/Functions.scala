@@ -653,6 +653,13 @@ case class ST_ClosestPoint(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_IsPolygonCW(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.isPolygonCW _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_IsRing(inputExpressions: Seq[Expression])
   extends InferredExpression(ST_IsRing.isRing _) {
 
@@ -1101,8 +1108,28 @@ case class ST_Force3D(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_ForcePolygonCW(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.forcePolygonCW _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_NRings(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.nRings _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_IsPolygonCCW(inputExpressions: Seq[Expression]) extends InferredExpression(Functions.isPolygonCCW _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_ForcePolygonCCW(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.forcePolygonCCW _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

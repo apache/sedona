@@ -24,7 +24,7 @@ import org.apache.spark.sql.sedona_sql.expressions.st_aggregates._
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
 import org.apache.spark.sql.sedona_sql.expressions.st_functions._
 import org.apache.spark.sql.sedona_sql.expressions.st_predicates._
-import org.junit.Assert.{assertEquals, assertTrue}
+import org.junit.Assert.{assertEquals, assertFalse, assertTrue}
 import org.locationtech.jts.geom.{Geometry, Polygon}
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.operation.buffer.BufferParameters
@@ -1111,7 +1111,7 @@ class dataFrameAPITestScala extends TestBaseScala {
 
     it("Passed ST_H3CellIDs") {
       val baseDF = sparkSession.sql("SELECT ST_GeomFromWKT('Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))') as geom")
-      val df = baseDF.select(ST_H3ToGeom(ST_H3CellIDs("geom", 6, true)))
+      val df = baseDF.select(ST_MakeValid(ST_Collect(ST_H3ToGeom(ST_H3CellIDs("geom", 6, true)))))
       val actualResult = df.take(1)(0).getAs[Geometry](0)
       val targetShape = baseDF.take(1)(0).getAs[Polygon](0);
       assert (actualResult.contains(targetShape))
@@ -1195,12 +1195,46 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertEquals(expectedGeomDefaultValue, wktWriter.write(actualGeomDefaultValue))
     }
 
+    it("Passed ST_ForcePolygonCW") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))') AS poly")
+      val actual = baseDf.select(ST_AsText(ST_ForcePolygonCW("poly"))).take(1)(0).get(0).asInstanceOf[String]
+      val expected = "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))"
+      assertEquals(expected, actual)
+    }
+
+    it("Passed ST_IsPolygonCW") {
+      var baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))') as poly")
+      var actual = baseDf.select(ST_IsPolygonCW("poly")).take(1)(0).get(0).asInstanceOf[Boolean]
+      assertFalse(actual)
+
+      baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))') as poly")
+      actual = baseDf.select(ST_IsPolygonCW("poly")).take(1)(0).get(0).asInstanceOf[Boolean]
+      assertTrue(actual)
+    }
+
     it("Passed ST_NRings") {
       val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))') AS geom")
       val expected = 1
       val df = polyDf.select(ST_NRings("geom"))
       val actual = df.take(1)(0).getInt(0)
       assert(expected == actual)
+    }
+
+    it("Passed ST_ForcePolygonCCW") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))') AS poly")
+      val actual = baseDf.select(ST_AsText(ST_ForcePolygonCCW("poly"))).take(1)(0).get(0).asInstanceOf[String]
+      val expected = "POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35), (30 20, 20 15, 20 25, 30 20))"
+      assertEquals(expected, actual)
+    }
+
+    it("Passed ST_IsPolygonCCW") {
+      var baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))') as poly")
+      var actual = baseDf.select(ST_IsPolygonCCW("poly")).take(1)(0).get(0).asInstanceOf[Boolean]
+      assertTrue(actual)
+
+      baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))') as poly")
+      actual = baseDf.select(ST_IsPolygonCCW("poly")).take(1)(0).get(0).asInstanceOf[Boolean]
+      assertFalse(actual)
     }
 
     it("Passed ST_Translate") {
