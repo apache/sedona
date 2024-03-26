@@ -445,6 +445,12 @@ class TestPredicateJoin(TestBase):
         assert union.take(1)[0][
                    0].wkt == "MULTIPOLYGON (((-3 -3, -3 3, 3 3, 3 -3, -3 -3)), ((5 -3, 5 -1, 7 -1, 7 -3, 5 -3)))"
 
+    def test_st_union_array_variant(self):
+        test_table = self.spark.sql("select array(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'),ST_GeomFromWKT('POLYGON ((5 -3, 7 -3, 7 -1, 5 -1, 5 -3))'), ST_GeomFromWKT('POLYGON((4 4, 4 6, 6 6, 6 4, 4 4))')) as polys")
+        actual = test_table.selectExpr("ST_Union(polys)").take(1)[0][0].wkt
+        expected = "MULTIPOLYGON (((5 -3, 5 -1, 7 -1, 7 -3, 5 -3)), ((-3 -3, -3 3, 3 3, 3 -3, -3 -3)), ((4 4, 4 6, 6 6, 6 4, 4 4)))"
+        assert expected == actual
+
     def test_st_azimuth(self):
         sample_points = create_sample_points(20)
         sample_pair_points = [[el, sample_points[1]] for el in sample_points]

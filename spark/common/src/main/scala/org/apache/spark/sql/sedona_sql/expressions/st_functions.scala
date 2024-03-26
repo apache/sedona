@@ -323,6 +323,8 @@ object st_functions extends DataFrameAPI {
 
   def ST_Union(a: Column, b: Column): Column = wrapExpression[ST_Union](a, b)
   def ST_Union(a: String, b: String): Column = wrapExpression[ST_Union](a, b)
+  def ST_Union(geoms: Column): Column = wrapExpression[ST_Union](geoms)
+  def ST_Union(geoms: String): Column = wrapExpression[ST_Union](geoms)
 
   def ST_X(point: Column): Column = wrapExpression[ST_X](point)
   def ST_X(point: String): Column = wrapExpression[ST_X](point)
