@@ -597,6 +597,13 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static boolean ST_IsPolygonCW(byte[] geom) {
+        return Functions.isPolygonCW(
+                GeometrySerde.deserialize(geom)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static boolean ST_IsPolygonCCW(byte[] geom) {
         return Functions.isPolygonCCW(
                 GeometrySerde.deserialize(geom)
@@ -1310,6 +1317,15 @@ public class UDFs {
                         GeometrySerde.deserialize(
                                 writer.write(GeometrySerde.deserialize(geom))
                         )
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom"})
+    public static byte[] ST_ForcePolygonCW(byte[] geom) {
+        return GeometrySerde.serialize(
+                Functions.forcePolygonCW(
+                        GeometrySerde.deserialize(geom)
                 )
         );
     }

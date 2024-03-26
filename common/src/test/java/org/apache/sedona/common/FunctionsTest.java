@@ -690,6 +690,34 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void testForcePolygonCW() throws ParseException {
+        Geometry polyCCW = Constructors.geomFromWKT("POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))", 0);
+        String actual = Functions.asWKT(Functions.forcePolygonCW(polyCCW));
+        String expected = "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))";
+        assertEquals(expected, actual);
+
+        // both exterior ring and interior ring are counter-clockwise
+        polyCCW = Constructors.geomFromWKT("POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 25, 20 15, 30 20))", 0);
+        actual = Functions.asWKT(Functions.forcePolygonCW(polyCCW));
+        expected = "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))";
+        assertEquals(expected, actual);
+
+        Geometry mPoly = Constructors.geomFromWKT("MULTIPOLYGON (((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 25, 20 15, 30 20)), ((40 40, 20 45, 45 30, 40 40)))", 0);
+        actual = Functions.asWKT(Functions.forcePolygonCW(mPoly));
+        expected = "MULTIPOLYGON (((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20)), ((40 40, 45 30, 20 45, 40 40)))";
+        assertEquals(expected, actual);
+
+        mPoly = Constructors.geomFromWKT("MULTIPOLYGON (((0 0, 10 0, 10 10, 0 10, 0 0), (2 2, 2 8, 8 8, 8 2, 2 2), (4 4, 4 6, 6 6, 6 4, 4 4), (6 6, 6 8, 8 8, 8 6, 6 6), (3 3, 3 4, 4 4, 4 3, 3 3), (5 5, 5 6, 6 6, 6 5, 5 5), (7 7, 7 8, 8 8, 8 7, 7 7)))", 0);
+        actual = Functions.asWKT(Functions.forcePolygonCW(mPoly));
+        expected = "MULTIPOLYGON (((0 0, 0 10, 10 10, 10 0, 0 0), (2 2, 8 2, 8 8, 2 8, 2 2), (4 4, 6 4, 6 6, 4 6, 4 4), (6 6, 8 6, 8 8, 6 8, 6 6), (3 3, 4 3, 4 4, 3 4, 3 3), (5 5, 6 5, 6 6, 5 6, 5 5), (7 7, 8 7, 8 8, 7 8, 7 7)))";
+        assertEquals(expected, actual);
+
+        Geometry nonPoly = Constructors.geomFromWKT("POINT (45 20)", 0);
+        actual = Functions.asWKT(Functions.forcePolygonCW(nonPoly));
+        expected = Functions.asWKT(nonPoly);
+        assertEquals(expected, actual);
+    }
+
     public void testForcePolygonCCW() throws ParseException {
         Geometry polyCW = Constructors.geomFromWKT("POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))", 0);
         String actual = Functions.asWKT(Functions.forcePolygonCCW(polyCW));
@@ -719,6 +747,23 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void testIsPolygonCW() throws ParseException {
+        Geometry polyCCW = Constructors.geomFromWKT("POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))", 0);
+        assertFalse(Functions.isPolygonCW(polyCCW));
+
+        Geometry polyCW = Constructors.geomFromWKT("POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))", 0);
+        assertTrue(Functions.isPolygonCW(polyCW));
+
+        Geometry mPoly = Constructors.geomFromWKT("MULTIPOLYGON (((0 0, 0 10, 10 10, 10 0, 0 0), (2 2, 8 2, 8 8, 2 8, 2 2), (4 4, 6 4, 6 6, 4 6, 4 4), (6 6, 8 6, 8 8, 6 8, 6 6), (3 3, 4 3, 4 4, 3 4, 3 3), (5 5, 6 5, 6 6, 5 6, 5 5), (7 7, 8 7, 8 8, 7 8, 7 7)))", 0);
+        assertTrue(Functions.isPolygonCW(mPoly));
+
+        Geometry point = Constructors.geomFromWKT("POINT (45 20)", 0);
+        assertFalse(Functions.isPolygonCW(point));
+
+        Geometry lineClosed = Constructors.geomFromWKT("LINESTRING (30 20, 20 25, 20 15, 30 20)", 0);
+        assertFalse(Functions.isPolygonCW(lineClosed));
+      }
+
     public void testIsPolygonCCW() throws ParseException {
         Geometry polyCCW = Constructors.geomFromWKT("POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))", 0);
         assertTrue(Functions.isPolygonCCW(polyCCW));
