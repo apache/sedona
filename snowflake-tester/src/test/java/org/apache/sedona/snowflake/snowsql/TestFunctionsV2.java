@@ -965,6 +965,24 @@ public class TestFunctionsV2
     }
 
     @Test
+    public void test_ST_ForcePolygonCW() {
+        registerUDFV2("ST_ForcePolygonCW", String.class);
+        verifySqlSingleRes(
+                "SELECT ST_AsText(sedona.ST_ForcePolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))')))",
+                "POLYGON((20 35,45 20,30 5,10 10,10 30,20 35),(30 20,20 25,20 15,30 20))"
+        );
+    }
+
+    @Test
+    public void test_ST_IsPolygonCW() {
+        registerUDFV2("ST_IsPolygonCW", String.class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))",
+                true
+        );
+    }
+
+    @Test
     public void test_ST_LengthSpheroid() {
         registerUDFV2("ST_LengthSpheroid", String.class);
         verifySqlSingleRes(

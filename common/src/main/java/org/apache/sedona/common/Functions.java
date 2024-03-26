@@ -810,6 +810,92 @@ public class Functions {
         return GEOMETRY_FACTORY.createPoint(interPoint);
     }
 
+    /**
+     * Forces a Polygon/MultiPolygon to use clockwise orientation for the exterior ring and a counter-clockwise for the interior ring(s).
+     * @param geom
+     * @return a clockwise orientated (Multi)Polygon
+     */
+    public static Geometry forcePolygonCW(Geometry geom) {
+        if (isPolygonCW(geom)) {
+            return geom;
+        }
+
+        if (geom instanceof Polygon) {
+            return transformCW((Polygon) geom);
+
+        } else if (geom instanceof MultiPolygon) {
+            List<Polygon> polygons = new ArrayList<>();
+            for (int i = 0; i < geom.getNumGeometries(); i++) {
+                Polygon polygon = (Polygon) geom.getGeometryN(i);
+                polygons.add((Polygon) transformCW(polygon));
+            }
+
+            return new GeometryFactory().createMultiPolygon(polygons.toArray(new Polygon[0]));
+
+        }
+        // Non-polygonal geometries are returned unchanged
+        return geom;
+    }
+
+    private static Geometry transformCW(Polygon polygon) {
+        LinearRing exteriorRing = polygon.getExteriorRing();
+        LinearRing exteriorRingEnforced = transformCW(exteriorRing, true);
+
+        List<LinearRing> interiorRings = new ArrayList<>();
+        for (int i = 0; i < polygon.getNumInteriorRing(); i++) {
+            interiorRings.add(transformCW(polygon.getInteriorRingN(i), false));
+        }
+
+        return new GeometryFactory(polygon.getPrecisionModel(), polygon.getSRID())
+                .createPolygon(exteriorRingEnforced, interiorRings.toArray(new LinearRing[0]));
+    }
+
+    private static LinearRing transformCW(LinearRing ring, boolean isExteriorRing) {
+        boolean isRingClockwise = !Orientation.isCCW(ring.getCoordinateSequence());
+
+        LinearRing enforcedRing;
+        if (isExteriorRing) {
+            enforcedRing = isRingClockwise ? (LinearRing) ring.copy() : ring.reverse();
+        } else {
+            enforcedRing = isRingClockwise ? ring.reverse() : (LinearRing) ring.copy();
+        }
+        return enforcedRing;
+    }
+
+    /**
+     * This function accepts Polygon and MultiPolygon, if any other type is provided then it will return false.
+     * If the exterior ring is clockwise and the interior ring(s) are counter-clockwise then returns true, otherwise false.
+     * @param geom Polygon or MultiPolygon
+     * @return
+     */
+    public static boolean isPolygonCW(Geometry geom) {
+        if (geom instanceof MultiPolygon) {
+            MultiPolygon multiPolygon = (MultiPolygon) geom;
+
+            boolean arePolygonsCW = checkIfPolygonCW((Polygon) multiPolygon.getGeometryN(0));
+            for (int i = 1; i < multiPolygon.getNumGeometries(); i++) {
+                arePolygonsCW = arePolygonsCW && checkIfPolygonCW((Polygon) multiPolygon.getGeometryN(i));
+            }
+            return arePolygonsCW;
+        } else if (geom instanceof Polygon) {
+            return checkIfPolygonCW((Polygon) geom);
+        }
+        // False for remaining geometry types
+        return false;
+    }
+
+    private static boolean checkIfPolygonCW(Polygon geom) {
+        LinearRing exteriorRing = geom.getExteriorRing();
+        boolean isExteriorRingCW = !Orientation.isCCW(exteriorRing.getCoordinateSequence());
+
+        boolean isInteriorRingCW = Orientation.isCCW(geom.getInteriorRingN(0).getCoordinateSequence());
+        for (int i = 1; i < geom.getNumInteriorRing(); i++) {
+            isInteriorRingCW = isInteriorRingCW && Orientation.isCCW(geom.getInteriorRingN(i).getCoordinateSequence());
+        }
+
+        return isExteriorRingCW && isInteriorRingCW;
+    }
+
     public static double lineLocatePoint(Geometry geom, Geometry point)
     {
         double length = geom.getLength();
