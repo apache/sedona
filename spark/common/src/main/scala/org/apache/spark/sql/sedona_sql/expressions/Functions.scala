@@ -796,7 +796,7 @@ case class ST_SymDifference(inputExpressions: Seq[Expression])
   * @param inputExpressions
   */
 case class ST_Union(inputExpressions: Seq[Expression])
-  extends InferredExpression(Functions.union _) {
+  extends InferredExpression(inferrableFunction2(Functions.union), inferrableFunction1(Functions.union)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

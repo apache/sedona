@@ -1366,7 +1366,7 @@ def ST_Transform(geometry: ColumnOrName, source_crs: ColumnOrName, target_crs: O
 
 
 @validate_argument_types
-def ST_Union(a: ColumnOrName, b: ColumnOrName) -> Column:
+def ST_Union(a: ColumnOrName, b: Optional[ColumnOrName] = None) -> Column:
     """Calculate the union of two geometries.
 
     :param a: One geometry column to use.
@@ -1376,7 +1376,13 @@ def ST_Union(a: ColumnOrName, b: ColumnOrName) -> Column:
     :return: Geometry representing the union of a and b as a geometry column.
     :rtype: Column
     """
-    return _call_st_function("ST_Union", (a, b))
+
+    if b is None:
+        args = a
+    else:
+        args = (a, b)
+
+    return _call_st_function("ST_Union", args)
 
 
 @validate_argument_types

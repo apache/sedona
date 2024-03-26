@@ -1023,6 +1023,10 @@ public class Functions {
         return leftGeom.union(rightGeom);
     }
 
+    public static Geometry union(Geometry[] geoms) {
+        return GEOMETRY_FACTORY.createGeometryCollection(geoms).union();
+    }
+
     public static Geometry createMultiGeometryFromOneElement(Geometry geometry) {
         if (geometry instanceof Circle) {
             return GEOMETRY_FACTORY.createGeometryCollection(new Circle[] {(Circle) geometry});

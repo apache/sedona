@@ -309,6 +309,22 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testUnion() {
+        Table polyTable = tableEnv.sqlQuery("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a, ST_GeomFromWKT('POLYGON ((-2 1, 2 1, 2 4, -2 4, -2 1))') as b");
+        String actual = first(polyTable.select(call(Functions.ST_Union.class.getSimpleName(), $("a"), $("b")))).getField(0).toString();
+        String expected = "POLYGON ((2 3, 3 3, 3 -3, -3 -3, -3 3, -2 3, -2 4, 2 4, 2 3))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testUnionArrayVariant() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ARRAY[ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((-2 1, 2 1, 2 4, -2 4, -2 1))')] as polys");
+        String actual = first(polyTable.select(call(Functions.ST_Union.class.getSimpleName(), $("polys")))).getField(0).toString();
+        String expected = "POLYGON ((2 3, 3 3, 3 -3, -3 -3, -3 3, -2 3, -2 4, 2 4, 2 3))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testTransformWKT() throws FactoryException {
         Table pointTable = createPointTable_real(testDataSize);
 

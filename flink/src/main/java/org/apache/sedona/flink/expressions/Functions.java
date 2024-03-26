@@ -1023,6 +1023,22 @@ public class Functions {
         }
     }
 
+    public static class ST_Union extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
+                             @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2) {
+            Geometry a = (Geometry) o1;
+            Geometry b = (Geometry) o2;
+            return org.apache.sedona.common.Functions.union(a, b);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(inputGroup = InputGroup.ANY) Object o) {
+            Geometry[] geoms = (Geometry[]) o;
+            return org.apache.sedona.common.Functions.union(geoms);
+        }
+    }
+
     public static class ST_VoronoiPolygons extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,

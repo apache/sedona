@@ -563,6 +563,14 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_Union array variant") {
+      val polygonDf = sparkSession.sql("SELECT array(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') , ST_GeomFromWKT('POLYGON ((-2 1, 2 1, 2 4, -2 4, -2 1))')) AS polys")
+      val df = polygonDf.select(ST_Union("polys"))
+      val actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText
+      val expected = "POLYGON ((2 3, 3 3, 3 -3, -3 -3, -3 3, -2 3, -2 4, 2 4, 2 3))"
+      assert(expected.equals(actual))
+    }
+
     it("Passed ST_Azimuth") {
       val baseDf = sparkSession.sql("SELECT ST_Point(0.0, 0.0) AS a, ST_Point(1.0, 1.0) AS b")
       val df = baseDf.select(ST_Azimuth("a", "b"))

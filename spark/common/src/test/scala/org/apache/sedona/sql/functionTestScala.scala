@@ -697,6 +697,13 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(union.first().get(0) == null)
     }
 
+    it("Passed ST_Union - array variant") {
+      val polyDf = sparkSession.sql("select array(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'),ST_GeomFromWKT('POLYGON ((5 -3, 7 -3, 7 -1, 5 -1, 5 -3))'), ST_GeomFromWKT('POLYGON((4 4, 4 6, 6 6, 6 4, 4 4))')) as polys")
+      val actual = polyDf.selectExpr("ST_Union(polys)").take(1)(0).get(0).asInstanceOf[Geometry].toText
+      val expected = "MULTIPOLYGON (((5 -3, 5 -1, 7 -1, 7 -3, 5 -3)), ((-3 -3, -3 3, 3 3, 3 -3, -3 -3)), ((4 4, 4 6, 6 6, 6 4, 4 4)))"
+      assert(expected.equals(actual))
+    }
+
     it("Passed ST_Azimuth") {
 
       val pointDataFrame = samplePoints
