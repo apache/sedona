@@ -1501,6 +1501,8 @@ Converts an array of Uber H3 cell indices into an array of Polygon geometries, w
 !!!Hint
     To convert a Polygon array to MultiPolygon, use [ST_Collect](#st_collect). However, the result may be an invalid geometry. Apply [ST_MakeValid](#st_makevalid) to the `ST_Collect` output to ensure a valid MultiPolygon.
 
+    An alternative approach to consolidate a Polygon array into a Polygon/MultiPolygon, use the [ST_Union](#st_union) function.
+
 Format: `ST_H3ToGeom(cells: Array[Long])`
 
 Since: `v1.6.0`
@@ -2480,6 +2482,8 @@ Introduction: Returns an array of Polygons for the corresponding S2 cell IDs.
 !!!Hint
     To convert a Polygon array to MultiPolygon, use [ST_Collect](#st_collect). However, the result may be an invalid geometry. Apply [ST_MakeValid](#st_makevalid) to the `ST_Collect` output to ensure a valid MultiPolygon.
 
+    An alternative approach to consolidate a Polygon array into a Polygon/MultiPolygon, use the [ST_Union](#st_union) function.
+
 Format: `ST_S2ToGeom(cellIds: Array[Long])`
 
 Since: `v1.6.0`
@@ -2944,7 +2948,7 @@ Introduction:
 
 Variant 1: Return the union of geometry A and B.
 
-Variant 2 : As of version `1.6.0`, this function accepts an array of Geometry objects and returns the geometric union of all geometries in the input array.
+Variant 2 : As of version `1.6.0`, this function accepts an array of Geometry objects and returns the geometric union of all geometries in the input array. If the polygons within the input array do not share common boundaries, the ST_Union result will be a MultiPolygon geometry.
 
 Format:
 
