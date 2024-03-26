@@ -1125,9 +1125,12 @@ public class FunctionTest extends TestBase{
 
     @Test
     public void testH3ToGeom() {
-            Table pointTable = tableEnv.sqlQuery("select ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true))");
-        Geometry exact = (Geometry) Objects.requireNonNull(first(pointTable).getField(0));
-        assertEquals(exact.getNumGeometries(), 1);
+        Table pointTable = tableEnv.sqlQuery("select ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))'), 4, true))");
+        Geometry target = (Geometry) first(tableEnv.sqlQuery("select ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))')")).getField(0);
+        Geometry[] actual = (Geometry[]) first(pointTable).getField(0);
+        assertTrue(actual[0].intersects(target));
+        assertTrue(actual[11].intersects(target));
+        assertTrue(actual[20].intersects(target));
     }
 
     @Test
