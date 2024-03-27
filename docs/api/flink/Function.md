@@ -1486,13 +1486,18 @@ Output:
 
 ## ST_H3ToGeom
 
-Introduction: return the result of H3 function [cellsToMultiPolygon(cells)](https://h3geo.org/docs/api/regions#cellstolinkedmultipolygon--cellstomultipolygon).
+Introduction: Return the result of H3 function [cellsToMultiPolygon(cells)](https://h3geo.org/docs/api/regions#cellstolinkedmultipolygon--cellstomultipolygon).
 
-Reverse the uber h3 cells to MultiPolygon object composed by the geometry hexagons.
+Converts an array of Uber H3 cell indices into an array of Polygon geometries, where each polygon represents a hexagonal H3 cell.
+
+!!!Hint
+    To convert a Polygon array to MultiPolygon, use [ST_Collect](#st_collect). However, the result may be an invalid geometry. Apply [ST_MakeValid](#st_makevalid) to the `ST_Collect` output to ensure a valid MultiPolygon.
+
+    An alternative approach to consolidate a Polygon array into a Polygon/MultiPolygon, use the [ST_Union](#st_union) function.
 
 Format: `ST_H3ToGeom(cells: Array[Long])`
 
-Since: `v1.5.0`
+Since: `v1.6.0`
 
 Example:
 ```sql
@@ -1501,10 +1506,7 @@ SELECT ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], 1, tr
 
 Output:
 ```
-|st_h3togeom(st_h3cellids(st_geomfromwkt(POINT(1 2), 0), 8, true))                                                                                                                                                                                                                              |
-+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|MULTIPOLYGON (((1.0057629565404935 1.9984665139177658, 1.0037116327309032 2.001832524914011, 0.9997277993570498 2.0011632704656668, 0.9977951427833285 1.99712822839324, 0.9998461908217768 1.9937621529331915, 1.0038301712104252 1.9944311839965554, 1.0057629565404935 1.9984665139177658)))|
-+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+[POLYGON ((1.0057629565405093 1.9984665139177547, 1.0037116327309097 2.0018325249140068, 0.999727799357053 2.001163270465665, 0.9977951427833316 1.997128228393235, 0.9998461908217928 1.993762152933182, 1.0038301712104316 1.9944311839965523, 1.0057629565405093 1.9984665139177547))]
 ```
 
 ## ST_HausdorffDistance
@@ -2470,6 +2472,8 @@ Introduction: Returns an array of Polygons for the corresponding S2 cell IDs.
 !!!Hint
     To convert a Polygon array to MultiPolygon, use [ST_Collect](#st_collect). However, the result may be an invalid geometry. Apply [ST_MakeValid](#st_makevalid) to the `ST_Collect` output to ensure a valid MultiPolygon.
 
+    An alternative approach to consolidate a Polygon array into a Polygon/MultiPolygon, use the [ST_Union](#st_union) function.
+
 Format: `ST_S2ToGeom(cellIds: Array[Long])`
 
 Since: `v1.6.0`
@@ -2829,6 +2833,51 @@ Output:
 
 ```
 POINT (-70.01 44.37)
+```
+
+## ST_Union
+
+Introduction:
+
+Variant 1: Return the union of geometry A and B.
+
+Variant 2: This function accepts an array of Geometry objects and returns the geometric union of all geometries in the input array. If the polygons within the input array do not share common boundaries, the ST_Union result will be a MultiPolygon geometry.
+
+Format:
+
+`ST_Union (A: Geometry, B: Geometry)`
+
+`ST_Union (geoms: Array(Geometry))`
+
+Since: `v1.6.0`
+
+SQL Example
+
+```sql
+SELECT ST_Union(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((1 -2, 5 0, 1 2, 1 -2))'))
+```
+
+Output:
+
+```
+POLYGON ((3 -1, 3 -3, -3 -3, -3 3, 3 3, 3 1, 5 0, 3 -1))
+```
+
+SQL Example
+
+```sql
+SELECT ST_Union(
+    Array(
+        ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'),
+        ST_GeomFromWKT('POLYGON ((-2 1, 2 1, 2 4, -2 4, -2 1))')
+    )
+)
+```
+
+Output:
+
+```
+POLYGON ((2 3, 3 3, 3 -3, -3 -3, -3 3, -2 3, -2 4, 2 4, 2 3))
 ```
 
 ## ST_VoronoiPolygons

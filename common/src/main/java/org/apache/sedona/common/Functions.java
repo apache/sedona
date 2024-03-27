@@ -16,6 +16,7 @@ package org.apache.sedona.common;
 import com.google.common.geometry.S2CellId;
 import com.uber.h3core.exceptions.H3Exception;
 
+import com.uber.h3core.util.LatLng;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.sphere.Spheroid;
@@ -46,13 +47,8 @@ import org.locationtech.jts.operation.valid.TopologyValidationError;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.wololo.jts2geojson.GeoJSONWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.LinkedHashSet;
-import java.util.Collection;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.geometry.S2.DBL_EPSILON;
@@ -1114,28 +1110,37 @@ public class Functions {
     }
 
     /**
-     * get the neighbor cells of the input cell by h3.gridDisk function
+     * gets the polygon for each h3 index provided
      * @param cells: the set of cells
-     * @return Multiple Polygons reversed
+     * @return An Array of Polygons reversed
      */
-    public static Geometry h3ToGeom(long[] cells) {
+    public static Geometry[] h3ToGeom(long[] cells) {
         GeometryFactory geomFactory = new GeometryFactory();
-        Collection<Long> h3 = Arrays.stream(cells).boxed().collect(Collectors.toList());
-        return geomFactory.createMultiPolygon(
-                H3Utils.h3.cellsToMultiPolygon(h3, true).stream().map(
-                        shellHoles -> {
-                            List<LinearRing> rings = shellHoles.stream().map(
-                                    shell -> geomFactory.createLinearRing(shell.stream().map(latLng -> new Coordinate(latLng.lng, latLng.lat)).toArray(Coordinate[]::new))
-                            ).collect(Collectors.toList());
-                            LinearRing shell = rings.remove(0);
-                            if (rings.isEmpty()) {
-                                return geomFactory.createPolygon(shell);
-                            } else {
-                                return geomFactory.createPolygon(shell, rings.toArray(new LinearRing[0]));
-                            }
-                        }
-                ).toArray(Polygon[]::new)
-        );
+        List<Long> h3 = Arrays.stream(cells).boxed().collect(Collectors.toList());
+        List<Polygon> polygons = new ArrayList<>();
+
+        for (int j = 0; j < h3.size(); j++) {
+            for (List<List<LatLng>> shellHoles : H3Utils.h3.cellsToMultiPolygon(Collections.singleton(h3.get(j)), true)) {
+                List<LinearRing> rings = new ArrayList<>();
+                for (List<LatLng> shell : shellHoles) {
+                    Coordinate[] coordinates = new Coordinate[shell.size()];
+                    for (int i = 0; i < shell.size(); i++) {
+                        LatLng latLng = shell.get(i);
+                        coordinates[i] = new Coordinate(latLng.lng, latLng.lat);
+                    }
+                    LinearRing ring = geomFactory.createLinearRing(coordinates);
+                    rings.add(ring);
+                }
+
+                LinearRing shell = rings.remove(0);
+                if (rings.isEmpty()) {
+                    polygons.add(geomFactory.createPolygon(shell));
+                } else {
+                    polygons.add(geomFactory.createPolygon(shell, rings.toArray(new LinearRing[0])));
+                }
+            }
+        }
+        return polygons.toArray(new Polygon[0]);
     }
 
     // create static function named simplifyPreserveTopology
@@ -1194,6 +1199,10 @@ public class Functions {
 
     public static Geometry union(Geometry leftGeom, Geometry rightGeom) {
         return leftGeom.union(rightGeom);
+    }
+
+    public static Geometry union(Geometry[] geoms) {
+        return GEOMETRY_FACTORY.createGeometryCollection(geoms).union();
     }
 
     public static Geometry createMultiGeometryFromOneElement(Geometry geometry) {

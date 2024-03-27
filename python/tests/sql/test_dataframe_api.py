@@ -163,6 +163,7 @@ test_configurations = [
     (stf.ST_Transform, ("point", lambda: f.lit("EPSG:4326"), lambda: f.lit("EPSG:32649")), "point_geom", "ST_ReducePrecision(geom, 2)", "POINT (-34870890.91 1919456.06)"),
     (stf.ST_Translate, ("geom", 1.0, 1.0,), "square_geom", "", "POLYGON ((2 1, 2 2, 3 2, 3 1, 2 1))"),
     (stf.ST_Union, ("a", "b"), "overlapping_polys", "", "POLYGON ((1 0, 0 0, 0 1, 1 1, 2 1, 3 1, 3 0, 2 0, 1 0))"),
+    (stf.ST_Union, ("polys",), "array_polygons", "", "POLYGON ((2 3, 3 3, 3 -3, -3 -3, -3 3, -2 3, -2 4, 2 4, 2 3))"),
     (stf.ST_VoronoiPolygons, ("geom",), "multipoint", "", "GEOMETRYCOLLECTION (POLYGON ((-1 -1, -1 2, 2 -1, -1 -1)), POLYGON ((-1 2, 2 2, 2 -1, -1 2)))"),
     (stf.ST_X, ("b",), "two_points", "", 3.0),
     (stf.ST_XMax, ("line",), "linestring_geom", "", 5.0),
@@ -335,7 +336,7 @@ wrong_type_configurations = [
     (stf.ST_Transform, (None, "", "")),
     (stf.ST_Transform, ("", None, "")),
     (stf.ST_Union, (None, "")),
-    (stf.ST_Union, ("", None)),
+    (stf.ST_Union, (None,)),
     (stf.ST_X, (None,)),
     (stf.ST_XMax, (None,)),
     (stf.ST_XMin, (None,)),
@@ -462,6 +463,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT (-122.335167 47.608013)') AS seattle, ST_GeomFromWKT('POINT (-73.935242 40.730610)') as ny")
         elif request.param == "line_crossing_dateline":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (179.95 30, -179.95 30)') AS line")
+        elif request.param == "array_polygons":
+            return TestDataFrameAPI.spark.sql("SELECT array(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((-2 1, 2 1, 2 4, -2 4, -2 1))')) as polys")
         elif request.param == "poly_and_line":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))') as poly, ST_GeomFromWKT('LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)') as line")
         raise ValueError(f"Invalid base_df name passed: {request.param}")

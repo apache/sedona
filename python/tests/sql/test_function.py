@@ -445,6 +445,12 @@ class TestPredicateJoin(TestBase):
         assert union.take(1)[0][
                    0].wkt == "MULTIPOLYGON (((-3 -3, -3 3, 3 3, 3 -3, -3 -3)), ((5 -3, 5 -1, 7 -1, 7 -3, 5 -3)))"
 
+    def test_st_union_array_variant(self):
+        test_table = self.spark.sql("select array(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'),ST_GeomFromWKT('POLYGON ((5 -3, 7 -3, 7 -1, 5 -1, 5 -3))'), ST_GeomFromWKT('POLYGON((4 4, 4 6, 6 6, 6 4, 4 4))')) as polys")
+        actual = test_table.selectExpr("ST_Union(polys)").take(1)[0][0].wkt
+        expected = "MULTIPOLYGON (((5 -3, 5 -1, 7 -1, 7 -3, 5 -3)), ((-3 -3, -3 3, 3 3, 3 -3, -3 -3)), ((4 4, 4 6, 6 6, 6 4, 4 4)))"
+        assert expected == actual
+
     def test_st_azimuth(self):
         sample_points = create_sample_points(20)
         sample_pair_points = [[el, sample_points[1]] for el in sample_points]
@@ -1311,21 +1317,21 @@ class TestPredicateJoin(TestBase):
     def test_st_h3_togeom(self):
         df = self.spark.sql("""
         SELECT
-            ST_Contains(
-                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, true)),
-                ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))')
-            ),
-            ST_Contains(
-                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, false)),
+            ST_Intersects(
+                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, true))[10],
                 ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))')
             ),
             ST_Intersects(
-                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, false)),
+                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, false))[25],
+                ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))')
+            ),
+            ST_Intersects(
+                ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, false))[50],
                 ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))')
             )
         """)
         res1, res2, res3 = df.take(1)[0]
-        assert res1 and not res2 and res3
+        assert res1 and res2 and res3
 
     def test_st_numPoints(self):
         actual = self.spark.sql("SELECT ST_NumPoints(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'))").take(1)[0][0]
