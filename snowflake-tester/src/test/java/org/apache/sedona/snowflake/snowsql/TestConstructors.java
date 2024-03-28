@@ -90,6 +90,14 @@ public class TestConstructors extends TestBase{
         );
     }
     @Test
+    public void test_ST_GeomFromEWKB() {
+        registerUDF("ST_GeomFromEWKB", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_GeomFromEWKB(ST_ASWKB(to_geometry('POINT (0.0 1.0)'))))",
+                "POINT (0 1)"
+        );
+    }
+    @Test
     public void test_ST_LineFromText() {
         registerUDF("ST_LineFromText", String.class);
         verifySqlSingleRes(

@@ -109,6 +109,17 @@ def ST_GeomFromWKB(wkb: ColumnOrName) -> Column:
     """
     return _call_constructor_function("ST_GeomFromWKB", wkb)
 
+@validate_argument_types
+def ST_GeomFromEWKB(wkb: ColumnOrName) -> Column:
+    """Generate a geometry column from a Well-Known Binary (WKB) binary column.
+
+    :param wkb: WKB binary column to generate from.
+    :type wkb: ColumnOrName
+    :return: Geometry column representing the WKB binary.
+    :rtype: Column
+    """
+    return _call_constructor_function("ST_GeomFromEWKB", wkb)
+
 
 @validate_argument_types
 def ST_GeomFromWKT(wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None) -> Column:

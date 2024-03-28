@@ -497,6 +497,11 @@ public class UDFs {
         return wkb;
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"wkb"})
+    public static byte[] ST_GeomFromEWKB(byte[] wkb) throws ParseException {
+        return wkb;
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"wkt", "srid"})
     public static byte[] ST_GeomFromWKT(String wkt, int srid) throws ParseException {
         return GeometrySerde.serialize(
