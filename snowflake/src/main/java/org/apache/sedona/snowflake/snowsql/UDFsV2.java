@@ -766,6 +766,13 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"})
+    public static Integer ST_NumInteriorRing(String geometry) {
+        return Functions.numInteriorRings(
+                GeometrySerde.deserGeoJson(geometry)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry"}, argTypes = {"Geometry", "Geometry"})
     public static boolean ST_OrderingEquals(String leftGeometry, String rightGeometry) {
         return Predicates.orderingEquals(

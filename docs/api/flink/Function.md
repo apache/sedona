@@ -2283,6 +2283,26 @@ Output:
 1
 ```
 
+## ST_NumInteriorRing
+
+Introduction: Returns number of interior rings of polygon geometries. It is an alias of [ST_NumInteriorRings](#st_numinteriorrings).
+
+Format: `ST_NumInteriorRing(geom: Geometry)`
+
+Since: `vTBD`
+
+SQL Example
+
+```sql
+SELECT ST_NumInteriorRing(ST_GeomFromText('POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))'))
+```
+
+Output:
+
+```
+1
+```
+
 ## ST_NumInteriorRings
 
 Introduction: Returns number of interior rings of polygon geometries.

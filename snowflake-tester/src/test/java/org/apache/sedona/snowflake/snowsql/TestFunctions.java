@@ -687,6 +687,19 @@ public class TestFunctions extends TestBase {
         );
 
     }
+
+    @Test
+    public void test_ST_NumInteriorRing() {
+        registerUDF("ST_NumInteriorRing", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_NumInteriorRing(sedona.ST_GeomFromText('POLYGON((0 0 0,0 5 0,5 0 0,0 0 5),(1 1 0,3 1 0,1 3 0,1 1 0))'))",
+                1
+        );
+        verifySqlSingleRes(
+                "select sedona.ST_NumInteriorRing(sedona.ST_GeomFromText('POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'))",
+                0
+        );
+    }
     @Test
     public void test_ST_PointN() {
         registerUDF("ST_PointN", byte[].class, int.class);

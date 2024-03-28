@@ -86,6 +86,7 @@ public class Catalog {
                 new Functions.ST_NPoints(),
                 new Functions.ST_NumGeometries(),
                 new Functions.ST_NumInteriorRings(),
+                new Functions.ST_NumInteriorRing(),
                 new Functions.ST_ExteriorRing(),
                 new Functions.ST_AsEWKT(),
                 new Functions.ST_AsEWKB(),

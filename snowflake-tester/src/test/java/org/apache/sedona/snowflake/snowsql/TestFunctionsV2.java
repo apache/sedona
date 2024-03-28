@@ -634,6 +634,19 @@ public class TestFunctionsV2
         );
 
     }
+
+    @Test
+    public void test_ST_NumInteriorRing() {
+        registerUDFV2("ST_NumInteriorRing", String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_NumInteriorRing(ST_GeometryFromWKT('POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))'))",
+                1
+        );
+        verifySqlSingleRes(
+                "select sedona.ST_NumInteriorRing(ST_GeometryFromWKT('POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'))",
+                0
+        );
+    }
     @Test
     public void test_ST_PointN() {
         registerUDFV2("ST_PointN", String.class, int.class);
