@@ -232,6 +232,13 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(functionDf.take(1)(0).get(0).asInstanceOf[Double].equals(expected))
     }
 
+    it("Passed ST_TriangulatePolygon") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (5 5, 5 8, 8 8, 8 5, 5 5))') as poly")
+      val actual = baseDf.selectExpr("ST_AsText(ST_TriangulatePolygon(poly))").first().getString(0)
+      val expected = "GEOMETRYCOLLECTION (POLYGON ((0 0, 0 10, 5 5, 0 0)), POLYGON ((5 8, 5 5, 0 10, 5 8)), POLYGON ((10 0, 0 0, 5 5, 10 0)), POLYGON ((10 10, 5 8, 0 10, 10 10)), POLYGON ((10 0, 5 5, 8 5, 10 0)), POLYGON ((5 8, 10 10, 8 8, 5 8)), POLYGON ((10 10, 10 0, 8 5, 10 10)), POLYGON ((8 5, 8 8, 10 10, 8 5)))"
+      assert(expected.equals(actual))
+    }
+
     it("Passed ST_Transform") {
       var point = "POINT (120 60)"
       val transformedResult = sparkSession.sql(s"""select ST_Transform(ST_geomFromWKT('$point'),'EPSG:4326', 'EPSG:3857', false)""").rdd.map(row => row.getAs[Geometry](0)).collect()(0)

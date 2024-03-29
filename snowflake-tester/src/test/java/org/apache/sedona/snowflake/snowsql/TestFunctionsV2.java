@@ -1052,6 +1052,15 @@ public class TestFunctionsV2
     }
 
     @Test
+    public void test_ST_TriangulatePolygon() {
+        registerUDFV2("ST_TriangulatePolygon", String.class);
+        verifySqlSingleRes(
+                "SELECT ST_AsText(sedona.ST_TriangulatePolygon(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (5 5, 5 8, 8 8, 8 5, 5 5))')))",
+                "GEOMETRYCOLLECTION(POLYGON((0 0,0 10,5 5,0 0)),POLYGON((5 8,5 5,0 10,5 8)),POLYGON((10 0,0 0,5 5,10 0)),POLYGON((10 10,5 8,0 10,10 10)),POLYGON((10 0,5 5,8 5,10 0)),POLYGON((5 8,10 10,8 8,5 8)),POLYGON((10 10,10 0,8 5,10 10)),POLYGON((8 5,8 8,10 10,8 5)))"
+        );
+    }
+
+    @Test
     public void test_ST_Translate() {
         registerUDFV2("ST_Translate", String.class, double.class, double.class);
         verifySqlSingleRes(
