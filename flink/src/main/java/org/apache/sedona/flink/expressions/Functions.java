@@ -1022,6 +1022,14 @@ public class Functions {
         }
     }
 
+    public static class ST_ForceRHR extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.forcePolygonCW(geometry);
+        }
+    }
+
     public static class ST_NRings extends ScalarFunction {
         @DataTypeHint(value = "Integer")
         public int eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) throws Exception {

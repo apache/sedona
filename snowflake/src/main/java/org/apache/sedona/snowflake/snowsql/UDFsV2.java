@@ -1191,6 +1191,15 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geom"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
+    public static String ST_ForceRHR(String geom) {
+        return GeometrySerde.serGeoJson(
+                Functions.forcePolygonCW(
+                        GeometrySerde.deserGeoJson(geom)
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geom"}, argTypes = {"Geometry"})
     public static double ST_LengthSpheroid(String geom) {
         return Spheroid.length(

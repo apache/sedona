@@ -1123,6 +1123,13 @@ case class ST_ForcePolygonCW(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_ForceRHR(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.forcePolygonCW _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_NRings(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.nRings _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {

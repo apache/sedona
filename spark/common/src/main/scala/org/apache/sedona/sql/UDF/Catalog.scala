@@ -150,6 +150,7 @@ object Catalog {
     function[ST_AsEWKT](),
     function[ST_Force_2D](),
     function[ST_ForcePolygonCW](),
+    function[ST_ForceRHR](),
     function[ST_ZMax](),
     function[ST_ZMin](),
     function[ST_YMax](),
