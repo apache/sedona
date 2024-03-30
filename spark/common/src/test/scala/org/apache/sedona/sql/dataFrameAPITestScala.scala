@@ -52,6 +52,12 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_M") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT ZM (10 20 30 40)') AS point")
+      val actual = baseDf.select(ST_M("point")).first().getDouble(0)
+      assert(actual == 40.0)
+    }
+
     it("passed st_makepoint") {
       val df = sparkSession.sql("SELECT 0.0 AS x, 1.0 AS y, 2.0 AS z").select(ST_AsText(ST_MakePoint("x", "y", "z")))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[String]

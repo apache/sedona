@@ -910,6 +910,11 @@ class TestPredicateJoin(TestBase):
         # Then
         assert subdivided.count() == 16
 
+    def test_st_m(self):
+        baseDf = self.spark.sql("SELECT ST_GeomFromWKT('POINT ZM (1 2 3 4)') AS point")
+        actual = baseDf.selectExpr("ST_M(point)").take(1)[0][0]
+        assert actual == 4.0
+
     def test_st_subdivide_explode_lateral(self):
         # Given
         geometry_df = self.__wkt_list_to_data_frame(

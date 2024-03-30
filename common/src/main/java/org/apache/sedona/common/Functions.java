@@ -390,6 +390,13 @@ public class Functions {
         return null;
     }
 
+    public static Double m(Geometry geom) {
+        if (geom instanceof Point) {
+            return geom.getCoordinate().getM();
+        }
+        return null;
+    }
+
     public static double xMin(Geometry geometry) {
         Coordinate[] points = geometry.getCoordinates();
         double min = Double.MAX_VALUE;
