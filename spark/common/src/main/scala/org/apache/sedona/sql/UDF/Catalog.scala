@@ -53,6 +53,7 @@ object Catalog {
     function[ST_Point](),
     function[ST_MakePoint](null, null),
     function[ST_PointZ](0),
+    function[ST_PointZM](0),
     function[ST_PolygonFromEnvelope](),
     function[ST_Contains](),
     function[ST_Intersects](),

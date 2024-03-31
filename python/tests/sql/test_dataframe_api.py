@@ -58,6 +58,7 @@ test_configurations = [
     (stc.ST_MPolyFromText, ("mpoly", 4326), "constructor", "" , "MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))"),
     (stc.ST_MLineFromText, ("mline", ), "constructor", "" , "MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))"),
     (stc.ST_MLineFromText, ("mline", 4326), "constructor", "" , "MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))"),
+    (stc.ST_PointZM, ("x", "y", "z", "m", "srid"), "x_y_z_m_srid", "", "POINT Z (1 2 3)"),
     (stc.ST_PointFromText, ("single_point", lambda: f.lit(',')), "constructor", "", "POINT (0 1)"),
     (stc.ST_MakePoint, ("x", "y", "z"), "constructor", "", "POINT Z (0 1 2)"),
     (stc.ST_PolygonFromEnvelope, ("minx", "miny", "maxx", "maxy"), "min_max_x_y", "", "POLYGON ((0 1, 0 3, 2 3, 2 1, 0 1))"),
@@ -431,6 +432,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT 'SRID=4269;LINESTRING (1 2, 3 4)' AS ewkt")
         elif request.param == "min_max_x_y":
             return TestDataFrameAPI.spark.sql("SELECT 0.0 AS minx, 1.0 AS miny, 2.0 AS maxx, 3.0 AS maxy")
+        elif request.param == "x_y_z_m_srid":
+            return TestDataFrameAPI.spark.sql("SELECT 1.0 AS x, 2.0 AS y, 3.0 AS z, 100.9 AS m, 4326 AS srid")
         elif request.param == "multipoint_geom":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('MULTIPOINT((10 40), (40 30), (20 20), (30 10))') AS multipoint")
         elif request.param == "null":

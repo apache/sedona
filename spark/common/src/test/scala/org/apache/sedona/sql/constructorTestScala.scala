@@ -76,6 +76,11 @@ class constructorTestScala extends TestBaseScala {
       assert(pointDf.count() == 1)
     }
 
+    it("Passed ST_PointZM") {
+      val pointDf = sparkSession.sql("SELECT ST_PointZM(1.2345, 2.3456, 3.4567, 100)")
+      assert(pointDf.count() == 1)
+    }
+
     it("Passed ST_PointZ null safety") {
       val pointDf = sparkSession.sql("SELECT ST_PointZ(null, null, null)")
       assert(pointDf.count() == 1)

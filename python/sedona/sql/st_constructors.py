@@ -206,6 +206,26 @@ def ST_PointZ(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, z: ColumnOrNameO
     return _call_constructor_function("ST_PointZ", args)
 
 @validate_argument_types
+def ST_PointZM(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, z: ColumnOrNameOrNumber, m: ColumnOrNameOrNumber,srid: Optional[ColumnOrNameOrNumber] = None) -> Column:
+    """Generates a 3D point geometry column from numeric values.
+
+    :param x: Either a number or numeric column representing the X coordinate of a point.
+    :type x: ColumnOrNameOrNumber
+    :param y: Either a number or numeric column representing the Y coordinate of a point.
+    :type y: ColumnOrNameOrNumber
+    :param z: Either a number or numeric column representing the Z coordinate of a point, if None then a 2D point is generated, defaults to None
+    :type z: ColumnOrNameOrNumber
+    :param m: Either a number or numeric column representing the M value of a point.
+    :type m: ColumnOrNameOrNumber
+    :param srid: The srid of the point. Defaults to 0 (unknown).
+    :type srid: Optional[ColumnOrNameOrNumber], optional
+    :return: Point geometry column generated from the coordinate values.
+    :rtype: Column
+    """
+    args = (x, y, z, m) if srid is None else (x, y, z, m, srid)
+    return _call_constructor_function("ST_PointZM", args)
+
+@validate_argument_types
 def ST_PointFromText(coords: ColumnOrName, delimiter: ColumnOrName) -> Column:
     """Generate a point geometry column from coordinates separated by a delimiter and stored
     in a string column.

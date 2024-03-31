@@ -136,6 +136,21 @@ public class Constructors {
         return geometryFactory.createPoint(new Coordinate(x, y, z));
     }
 
+    /**
+     * Creates a point from the given coordinate.
+     *
+     * @param x the x value
+     * @param y the y value
+     * @param z the z value
+     * @param m the m value
+     * @param srid Set to 0 if unknown
+     * @return The point geometry
+     */
+    public static Geometry pointZM(double x, double y, double z, double m, int srid) {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        return geometryFactory.createPoint(new CoordinateXYZM(x, y, z, m));
+    }
+
     public static Geometry geomFromText(String geomString, String geomFormat, GeometryType geometryType) {
         FileDataSplitter fileDataSplitter = FileDataSplitter.getFileDataSplitter(geomFormat);
         FormatUtils<Geometry> formatMapper = new FormatUtils<>(fileDataSplitter, false, geometryType);

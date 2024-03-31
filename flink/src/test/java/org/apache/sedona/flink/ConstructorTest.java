@@ -100,6 +100,33 @@ public class ConstructorTest extends TestBase{
     }
 
     @Test
+    public void testPointZM() {
+        List<Row> data = new ArrayList<>();
+        data.add(Row.of(2.0, 2.0, 5.0, 100.0, "point"));
+        String[] colNames = new String[]{"x", "y", "z", "m", "name_point"};
+
+        TypeInformation<?>[] colTypes = {
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.STRING_TYPE_INFO};
+        RowTypeInfo typeInfo = new RowTypeInfo(colTypes, colNames);
+        DataStream<Row> ds = env.fromCollection(data).returns(typeInfo);
+        Table pointTable = tableEnv.fromDataStream(ds);
+
+        Table geomTable = pointTable
+                .select(call(Constructors.ST_PointZM.class.getSimpleName(), $(colNames[0]), $(colNames[1]), $(colNames[2]), $(colNames[3]))
+                        .as(colNames[4]));
+
+        Point result = first(geomTable)
+                .getFieldAs(colNames[4]);
+
+        assertEquals(5.0, result.getCoordinate().getZ(), 1e-6);
+        assertEquals(100.0, result.getCoordinate().getM(), 1e-6);
+    }
+
+    @Test
     public void testMakePoint() {
         List<Row> data = new ArrayList<>();
         data.add(Row.of(1.0, 2.0, "point"));

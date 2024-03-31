@@ -1461,5 +1461,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       val esriValidityReason = esriValidityTable.take(1)(0).getString(0)
       assertEquals("Interior is disconnected at or near point (1.0, 1.0, NaN)", esriValidityReason)
     }
+
+    it("Passed ST_PointZM") {
+      val pointDf = sparkSession.sql("SELECT ST_PointZM(1,2,3,100) as point1, ST_PointZM(1,2,3,100,4326) as point2")
+      val point1 = pointDf.select(ST_AsEWKT("point1")).take(1)(0).getString(0)
+      val point2 = pointDf.select(ST_AsEWKT("point2")).take(1)(0).getString(0)
+      assertEquals("POINT ZM(1 2 3 100)", point1)
+      assertEquals("SRID=4326;POINT ZM(1 2 3 100)", point2)
+    }
   }
 }
