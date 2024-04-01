@@ -34,6 +34,7 @@ repos:
       - id: detect-private-key
       - id: end-of-file-fixer
         exclude: \.svg$|^docs/image|^spark/common/src/test/resources
+      - id: fix-byte-order-marker
       - id: mixed-line-ending
         exclude: \.csv$
       - id: trailing-whitespace
