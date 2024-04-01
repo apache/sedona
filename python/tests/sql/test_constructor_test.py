@@ -37,6 +37,10 @@ class TestConstructors(TestBase):
         point_df = self.spark.sql("SELECT ST_PointZ(1.2345, 2.3456, 3.4567)")
         assert point_df.count() == 1
 
+    def test_st_point_m(self):
+        point_df = self.spark.sql("SELECT ST_PointM(1.2345, 2.3456, 3.4567)")
+        assert point_df.count() == 1
+
     def test_st_makepoint(self):
         point_csv_df = self.spark.read.format("csv").\
             option("delimiter", ",").\

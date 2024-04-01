@@ -58,6 +58,7 @@ test_configurations = [
     (stc.ST_MPolyFromText, ("mpoly", 4326), "constructor", "" , "MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))"),
     (stc.ST_MLineFromText, ("mline", ), "constructor", "" , "MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))"),
     (stc.ST_MLineFromText, ("mline", 4326), "constructor", "" , "MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))"),
+    (stc.ST_PointM, ("x", "y", "m", "srid"), "x_y_z_m_srid", "ST_AsEWKT(geom)", "SRID=4326;POINT ZM(1 2 0 100.9)"),
     (stc.ST_PointZM, ("x", "y", "z", "m", "srid"), "x_y_z_m_srid", "", "POINT Z (1 2 3)"),
     (stc.ST_PointFromText, ("single_point", lambda: f.lit(',')), "constructor", "", "POINT (0 1)"),
     (stc.ST_MakePoint, ("x", "y", "z"), "constructor", "", "POINT Z (0 1 2)"),

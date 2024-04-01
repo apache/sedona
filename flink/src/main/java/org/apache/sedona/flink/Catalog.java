@@ -24,6 +24,7 @@ public class Catalog {
                 new Aggregators.ST_Union_Aggr(),
                 new Constructors.ST_Point(),
                 new Constructors.ST_PointZ(),
+                new Constructors.ST_PointM(),
                 new Constructors.ST_PointZM(),
                 new Constructors.ST_PointFromText(),
                 new Constructors.ST_MakePoint(),

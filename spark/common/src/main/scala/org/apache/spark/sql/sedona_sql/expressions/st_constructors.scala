@@ -81,6 +81,16 @@ object st_constructors extends DataFrameAPI {
 
   def ST_PointZ(x: Double, y: Double, z: Double, srid: Int): Column = wrapExpression[ST_PointZ](x, y, z, srid)
 
+  def ST_PointM(x: Column, y: Column, m: Column): Column = wrapExpression[ST_PointM](x, y, m, 0)
+  def ST_PointM(x: String, y: String, m: String): Column = wrapExpression[ST_PointM](x, y, m, 0)
+  def ST_PointM(x: Double, y: Double, m: Double): Column = wrapExpression[ST_PointM](x, y, m, 0)
+
+  def ST_PointM(x: Column, y: Column, m: Column, srid: Column): Column = wrapExpression[ST_PointM](x, y, m, srid)
+
+  def ST_PointM(x: String, y: String, m: String, srid: Column): Column = wrapExpression[ST_PointM](x, y, m, srid)
+
+  def ST_PointM(x: Double, y: Double, m: Double, srid: Int): Column = wrapExpression[ST_PointM](x, y, m, srid)
+
   def ST_PointZM(x: Column, y: Column, z: Column, m: Column): Column = wrapExpression[ST_PointZM](x, y, z, m, 0)
   def ST_PointZM(x: String, y: String, z: String, m: String): Column = wrapExpression[ST_PointZM](x, y, z, m, 0)
   def ST_PointZM(x: Double, y: Double, z: Double, m: Double): Column = wrapExpression[ST_PointZM](x, y, z, m, 0)

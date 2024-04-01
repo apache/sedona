@@ -54,6 +54,18 @@ public class Constructors {
         }
     }
 
+    public static class ST_PointM extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y, @DataTypeHint("Double") Double m) throws ParseException {
+            return eval(x, y, m, 0);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y, @DataTypeHint("Double") Double m, @DataTypeHint("Integer") Integer srid) throws ParseException {
+            return org.apache.sedona.common.Constructors.pointM(x, y, m, srid);
+        }
+    }
+
     public static class ST_PointZM extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y, @DataTypeHint("Double") Double z, @DataTypeHint("Double") Double m) throws ParseException {

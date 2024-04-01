@@ -58,6 +58,14 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actual == 40.0)
     }
 
+    it("Passed st_pointm") {
+      val pointDf = sparkSession.sql("SELECT ST_PointM(1,2,100) as point1, ST_PointM(1,2,100,4326) as point2")
+      val point1 = pointDf.select(ST_AsEWKT("point1")).take(1)(0).getString(0)
+      val point2 = pointDf.select(ST_AsEWKT("point2")).take(1)(0).getString(0)
+      assertEquals("POINT ZM(1 2 0 100)", point1)
+      assertEquals("SRID=4326;POINT ZM(1 2 0 100)", point2)
+    }
+
     it("passed st_makepoint") {
       val df = sparkSession.sql("SELECT 0.0 AS x, 1.0 AS y, 2.0 AS z").select(ST_AsText(ST_MakePoint("x", "y", "z")))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[String]

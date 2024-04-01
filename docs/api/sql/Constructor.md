@@ -542,6 +542,31 @@ Output:
 POINT Z(1.2345 2.3456 3.4567)
 ```
 
+## ST_PointM
+
+Introduction: Construct a Point from X, Y and M and an optional srid. If srid is not set, it defaults to 0 (unknown).
+Must use ST_AsEWKT function to print the Z and M coordinates.
+
+Format:
+
+`ST_PointM (X: Double, Y: Double, M: Double)`
+
+`ST_PointM (X: Double, Y: Double, M: Double, srid: Integer)`
+
+Since: `vTBD`
+
+Example:
+
+```sql
+SELECT ST_AsEWKT(ST_PointM(1.2345, 2.3456, 3.4567))
+```
+
+Output:
+
+```
+POINT ZM(1.2345 2.3456 0 3.4567)
+```
+
 ## ST_PointZM
 
 Introduction: Construct a Point from X, Y, Z, M and an optional srid. If srid is not set, it defaults to 0 (unknown).

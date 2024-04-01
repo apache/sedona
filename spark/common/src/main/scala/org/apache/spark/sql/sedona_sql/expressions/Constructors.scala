@@ -246,6 +246,19 @@ case class ST_PointZ(inputExpressions: Seq[Expression])
   }
 }
 
+/**
+ * Return a Point from X, Y, M and srid
+ *
+ * @param inputExpressions This function takes 4 parameter which are point x, y, m and srid (default 0).
+ */
+case class ST_PointM(inputExpressions: Seq[Expression])
+  extends InferredExpression(Constructors.pointM _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_PointZM(inputExpressions: Seq[Expression])
   extends InferredExpression(Constructors.pointZM _) {
 

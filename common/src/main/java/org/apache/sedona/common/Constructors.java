@@ -141,6 +141,20 @@ public class Constructors {
      *
      * @param x the x value
      * @param y the y value
+     * @param m the m value
+     * @param srid Set to 0 if unknown
+     * @return The point geometry
+     */
+    public static Geometry pointM(double x, double y, double m, int srid) {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        return geometryFactory.createPoint(new CoordinateXYZM(x, y, 0, m));
+    }
+
+    /**
+     * Creates a point from the given coordinate.
+     *
+     * @param x the x value
+     * @param y the y value
      * @param z the z value
      * @param m the m value
      * @param srid Set to 0 if unknown
