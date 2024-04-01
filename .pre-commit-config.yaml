@@ -16,7 +16,7 @@ repos:
       - id: codespell
         name: Run codespell
         description: Check spelling with codespell
-        entry: codespell --ignore-words=codespell.txt
+        args: [--ignore-words=.github/linters/codespell.txt]
         exclude: ^docs/image|^spark/common/src/test/resources
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
