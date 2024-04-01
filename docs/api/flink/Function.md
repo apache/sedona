@@ -2068,6 +2068,28 @@ Output:
 4.0
 ```
 
+## ST_MMin
+
+Introduction: Returns M minima of the given geometry or null if there is no M coordinate.
+
+Format: `ST_MMin(geom: Geometry)`
+
+Since: `vTBD`
+
+SQL Example:
+
+```sql
+SELECT ST_MMin(
+        ST_GeomFromWKT('LINESTRING ZM(1 1 1 1, 2 2 2 2, 3 3 3 3, -1 -1 -1 -1)')
+)
+```
+
+Output:
+
+```
+-1.0
+```
+
 ## ST_MakeLine
 
 Introduction: Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error.

@@ -714,6 +714,17 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testMMin() {
+        Table lineTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING ZM(1 1 1 1, 2 2 2 2, 3 3 3 3, -1 -1 -1 -1)') AS line");
+        double actual = (double) first(lineTable.select(call(Functions.ST_MMin.class.getSimpleName(), $("line")))).getField(0);
+        assertEquals(-1.0, actual, FP_TOLERANCE);
+
+        lineTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(1 1, 2 2, 3 3, -1 -1)') AS line");
+        Double actualNull = (Double) first(lineTable.select(call(Functions.ST_MMin.class.getSimpleName(), $("line")))).getField(0);
+        assertNull(actualNull);
+    }
+
+    @Test
     public void testZMax() {
         Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(1 3 4, 5 6 7)') AS " + polygonColNames[0]);
         polygonTable = polygonTable.select(call(Functions.ST_ZMax.class.getSimpleName(), $(polygonColNames[0])));

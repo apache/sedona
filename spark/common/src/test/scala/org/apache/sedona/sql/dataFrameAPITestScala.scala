@@ -64,6 +64,16 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actual == 40.0)
     }
 
+    it("Passed ST_MMin") {
+      var baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING ZM(1 1 1 1, 2 2 2 2, 3 3 3 3, -1 -1 -1 -1)') as line")
+      val actual = baseDf.select(ST_MMin("line")).first().getDouble(0)
+      assert(actual == -1.0)
+
+      baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(1 1, 2 2, 3 3, -1 -1)') AS line")
+      val actualNull = baseDf.select(ST_MMin("line")).first().get(0)
+      assert(actualNull == null)
+    }
+
     it("Passed st_pointm") {
       val pointDf = sparkSession.sql("SELECT ST_PointM(1,2,100) as point1, ST_PointM(1,2,100,4326) as point2")
       val point1 = pointDf.select(ST_AsEWKT("point1")).take(1)(0).getString(0)

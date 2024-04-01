@@ -128,6 +128,7 @@ public class Catalog {
                 new Functions.ST_LineSubstring(),
                 new Functions.ST_HasM(),
                 new Functions.ST_M(),
+                new Functions.ST_MMin(),
                 new Functions.ST_MakeLine(),
                 new Functions.ST_Polygon(),
                 new Functions.ST_Polygonize(),
