@@ -16,6 +16,20 @@
 * [Documentation](#documentation)
 * [Join the community](#join-the-community)
 
+## Join the community
+
+Follow Sedona on Twitter for fresh news: [Sedona@Twitter](https://twitter.com/ApacheSedona)
+
+Join the Sedona Discord community: [![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://sedona.apache.org/latest/community/contact/#discord-server)
+
+Join the Sedona monthly community office hour: [Google Calendar](https://calendar.google.com/calendar/event?action=TEMPLATE&tmeid=NjI0cWgwcTZndnI1anAzYnFrNHY5Y2wyaTRfMjAyNDA0MDlUMTUwMDAwWiBjX2VmN2Q1NGY1MzA4YTRiN2YyNWFjMzNkMGY3ZWViNTRhM2E3ZjExNWI2ODlmYWY0ZDgyNDI1ZjNjYjVlZGU5MzVAZw&tmsrc=c_ef7d54f5308a4b7f25ac33d0f7eeb54a3a7f115b689faf4d82425f3cb5ede935%40group.calendar.google.com&scp=ALL), Tuesdays from 8 AM to 9 AM Pacific Time, every 4 weeks
+
+[Sedona JIRA](https://issues.apache.org/jira/projects/SEDONA): Bugs, Pull Requests, and other similar issues
+
+[Sedona Mailing Lists](https://lists.apache.org/list.html?sedona.apache.org): [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org): project development, general questions or tutorials.
+
+* Please first subscribe and then post emails. To subscribe, please send an email (leave the subject and content blank) to dev-subscribe@sedona.apache.org
+
 ## What is Apache Sedona?
 
 Apache Sedona™ is a spatial computing engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as Apache Spark and Apache Flink. Sedona developers can express their spatial data processing tasks in Spatial SQL, Spatial Python or Spatial R. Internally, Sedona provides spatial data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
@@ -104,7 +118,7 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
   ```
   pip install apache-sedona
   ```
-* To Compile the source code, please refer to [Sedona website](https://sedona.apache.org/latest-snapshot/setup/compile/)
+* To compile the source code, please refer to [Sedona website](https://sedona.apache.org/latest-snapshot/setup/compile/)
 
 * Modules in the source code
 
@@ -129,17 +143,6 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
 
 Please visit [Apache Sedona website](http://sedona.apache.org/) for detailed information
 
-## Join the community
-
-Follow Sedona on Twitter for fresh news: [Sedona@Twitter](https://twitter.com/ApacheSedona)
-
-Join the Sedona Discord community: [![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://sedona.apache.org/latest/community/contact/#discord-server)
-
-[Sedona JIRA](https://issues.apache.org/jira/projects/SEDONA): Bugs, Pull Requests, and other similar issues
-
-[Sedona Mailing Lists](https://lists.apache.org/list.html?sedona.apache.org): [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org): project development, general questions or tutorials.
-
-* Please first subscribe and then post emails. To subscribe, please send an email (leave the subject and content blank) to dev-subscribe@sedona.apache.org
 
 ## Powered by
 
