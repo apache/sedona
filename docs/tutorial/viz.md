@@ -94,7 +94,7 @@ SELECT ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as De
 FROM pointtable
 ```
 
-As you know, Sedona provides many different methods to load various spatial data formats. Please read [Write an Spatial DataFrame application](../sql).
+As you know, Sedona provides many different methods to load various spatial data formats. Please read [Write a Spatial DataFrame application](../sql).
 
 ## Generate a single image
 
@@ -169,7 +169,7 @@ SELECT ST_Render(pixel, color) AS image, (SELECT ST_AsText(bound) FROM boundtabl
 FROM pixelaggregates
 ```
 
-This DataFrame will contain a Image type column which has only one image.
+This DataFrame will contain an Image type column which has only one image.
 
 ### Store the image on disk
 
