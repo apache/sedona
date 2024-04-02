@@ -21,6 +21,7 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
+      - id: check-ast
       - id: check-case-conflict
       # - id: check-docstring-first
       # - id: check-executables-have-shebangs
@@ -31,6 +32,8 @@ repos:
       - id: check-vcs-permalinks
       - id: check-xml
       # - id: check-yaml
+      - id: detect-aws-credentials
+        args: [--allow-missing-credentials]
       - id: detect-private-key
       - id: end-of-file-fixer
         exclude: \.svg$|^docs/image|^spark/common/src/test/resources
@@ -38,6 +41,7 @@ repos:
       - id: mixed-line-ending
         exclude: \.csv$
       - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
         exclude: ^docs-overrides/main\.html$|\.Rd$
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.38.0
