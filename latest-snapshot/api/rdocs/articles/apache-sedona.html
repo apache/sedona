@@ -89,13 +89,13 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p><a href="https://github.com/apache/sedona/" class="external-link">apache.sedona</a> is a <a href="https://spark.rstudio.com/" class="external-link">sparklyr</a>-based R interface for <a href="https://sedona.apache.org" class="external-link">Apache Sedona</a>. It presents what Apache Sedona has to offer through idiomatic frameworks and constructs in R (e.g., one can build spatial Spark SQL queries using Sedona UDFs in conjunction with a wide range of dplyr expressions), hence making Apache Sedona highly friendly for R users.</p>
+<p><a href="https://github.com/apache/sedona/" class="external-link">apache.sedona</a> is a <a href="https://spark.posit.co/" class="external-link">sparklyr</a>-based R interface for <a href="https://sedona.apache.org" class="external-link">Apache Sedona</a>. It presents what Apache Sedona has to offer through idiomatic frameworks and constructs in R (e.g., one can build spatial Spark SQL queries using Sedona UDFs in conjunction with a wide range of dplyr expressions), hence making Apache Sedona highly friendly for R users.</p>
 <p>Generally speaking, when working with Apache Sedona, one choose between the following two modes:</p>
 <ul>
 <li>Manipulating Sedona <a href="../../../tutorial/rdd">Spatial Resilient Distributed Datasets</a> with spatial-RDD-related routines</li>
 <li>Querying geometric columns within <a href="../../../tutorial/sql">Spatial DataFrames</a> with Sedona spatial UDFs</li>
 </ul>
-<p>While the former option enables more fine-grained control over low-level implementation details (e.g., which index to build for spatial queries, which data structure to use for spatial partitioning, etc), the latter is simpler and leads to a straightforward integration with <a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a>, <a href="https://spark.rstudio.com/" class="external-link">sparklyr</a>, and other <code>sparklyr</code> extensions (e.g., one can build ML feature extractors with Sedona UDFs and connect them with ML pipelines using <code>ml_*()</code> family of functions in <code>sparklyr</code>, hence creating ML workflows capable of understanding spatial data).</p>
+<p>While the former option enables more fine-grained control over low-level implementation details (e.g., which index to build for spatial queries, which data structure to use for spatial partitioning, etc), the latter is simpler and leads to a straightforward integration with <a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a>, <a href="https://spark.posit.co/" class="external-link">sparklyr</a>, and other <code>sparklyr</code> extensions (e.g., one can build ML feature extractors with Sedona UDFs and connect them with ML pipelines using <code>ml_*()</code> family of functions in <code>sparklyr</code>, hence creating ML workflows capable of understanding spatial data).</p>
 <p>Because data from spatial RDDs can be imported into Spark DataFrames as geometry columns and vice versa, one can switch between the abovementioned two modes fairly easily.</p>
 <p>At the moment <code>apache.sedona</code> consists of the following components:</p>
 <ul>
@@ -121,14 +121,14 @@
 </h2>
 <p>To ensure Sedona serialization routines, UDTs, and UDFs are properly registered when creating a Spark session, one simply needs to attach <code>apache.sedona</code> before instantiating a Spark connection. apache.sedona will take care of the rest. For example,</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://spark.rstudio.com/" class="external-link">sparklyr</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://spark.posit.co/" class="external-link">sparklyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/apache/sedona/" class="external-link">apache.sedona</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">spark_home</span> <span class="op">&lt;-</span> <span class="st">"/usr/lib/spark"</span>  <span class="co"># NOTE: replace this with your $SPARK_HOME directory</span></span>
 <span><span class="va">sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/sparklyr/man/spark-connections.html" class="external-link">spark_connect</a></span><span class="op">(</span>master <span class="op">=</span> <span class="st">"yarn"</span>, spark_home <span class="op">=</span> <span class="va">spark_home</span><span class="op">)</span></span></code></pre></div>
 <p>will create a Sedona-capable Spark connection in YARN client mode, and</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://spark.rstudio.com/" class="external-link">sparklyr</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://spark.posit.co/" class="external-link">sparklyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/apache/sedona/" class="external-link">apache.sedona</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/sparklyr/man/spark-connections.html" class="external-link">spark_connect</a></span><span class="op">(</span>master <span class="op">=</span> <span class="st">"local"</span><span class="op">)</span></span></code></pre></div>
