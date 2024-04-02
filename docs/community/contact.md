@@ -11,9 +11,7 @@ You can participate in the community as follows:
 
 ## Community events
 
-Everyone is welcome to join our community events. We have a community office hour every 4 weeks.
-
-<iframe src="https://calendar.google.com/calendar/embed?src=c_ef7d54f5308a4b7f25ac33d0f7eeb54a3a7f115b689faf4d82425f3cb5ede935%40group.calendar.google.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+Everyone is welcome to join our community events. We have a community office hour every 4 weeks. Please import the event to your [Google Calendar](https://calendar.google.com/calendar/event?action=TEMPLATE&tmeid=NjI0cWgwcTZndnI1anAzYnFrNHY5Y2wyaTRfMjAyNDA0MDlUMTUwMDAwWiBjX2VmN2Q1NGY1MzA4YTRiN2YyNWFjMzNkMGY3ZWViNTRhM2E3ZjExNWI2ODlmYWY0ZDgyNDI1ZjNjYjVlZGU5MzVAZw&tmsrc=c_ef7d54f5308a4b7f25ac33d0f7eeb54a3a7f115b689faf4d82425f3cb5ede935%40group.calendar.google.com&scp=ALL).
 
 ## Twitter
 

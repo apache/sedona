@@ -53,7 +53,7 @@ jobs:
 
     - run: git config --global user.name = "test-name"
     - run: git config --global user.email = "test-email@abc.com"
-    - run: mike deploy --update-aliases current-snapshot
+    - run: mike deploy --update-aliases latest-snapshot -b website -p
     - run: mkdir staging
     - run: cp -r site/* staging/
     - uses: actions/upload-artifact@v3
