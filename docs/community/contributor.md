@@ -47,6 +47,7 @@ Current Sedona Committers are as follows:
 |        Name       |  GitHub ID  |        Apache ID       |
 |:-----------------:|:-----------:|:----------------------:|
 |  Nilesh Gajwani   | 	iGN5117  	 |  nilesh@apache.org     |
+|  Furqaan Khan   | 	furqaankhan  	 |  furqaan@apache.org     |
 
 ## Nominate a committer or PMC member
 
