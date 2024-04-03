@@ -21,7 +21,7 @@
 
 Follow Sedona on Twitter for fresh news: [Sedona@Twitter](https://twitter.com/ApacheSedona)
 
-Join the Sedona Discord community: [![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://sedona.apache.org/latest/community/contact/#discord-server)
+Join the Sedona Discord community: [![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://share.hsforms.com/1Ndql_ZigTdmLlVQc_d1o4gqga4q)
 
 Join the Sedona monthly community office hour: [Google Calendar](https://calendar.google.com/calendar/event?action=TEMPLATE&tmeid=NjI0cWgwcTZndnI1anAzYnFrNHY5Y2wyaTRfMjAyNDA0MDlUMTUwMDAwWiBjX2VmN2Q1NGY1MzA4YTRiN2YyNWFjMzNkMGY3ZWViNTRhM2E3ZjExNWI2ODlmYWY0ZDgyNDI1ZjNjYjVlZGU5MzVAZw&tmsrc=c_ef7d54f5308a4b7f25ac33d0f7eeb54a3a7f115b689faf4d82425f3cb5ede935%40group.calendar.google.com&scp=ALL), Tuesdays from 8 AM to 9 AM Pacific Time, every 4 weeks
 

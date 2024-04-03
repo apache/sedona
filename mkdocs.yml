@@ -110,9 +110,10 @@ nav:
         - Vote a release: community/vote.md
       - Publications: community/publication.md
     - Use cases:
-      - Spatially aggregate airports per country: usecases/airport-country.md
-      - Match foot traffic to Seattle coffee shops: usecases/foot-traffic.md
-      - Raster image manipulation: usecases/raster.md
+      - Use cases: usecases/usecases.md
+      - Spatially aggregate airports per country: https://nbviewer.org/github/apache/sedona/blob/master/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb" target="_blank
+      - Match foot traffic to Seattle coffee shops: https://nbviewer.org/github/jiayuasu/sigspatial-2021-cafe-analysis/blob/master/notebooks/Workshop_example.ipynb" target="_blank
+      - Raster image manipulation: https://nbviewer.org/github/johnymontana/raster-data-analysis-spatial-sql/blob/main/00-raster-data-analysis.ipynb" target="_blank
     - Apache Software Foundation:
       - Foundation: asf/asf.md
       - License: https://www.apache.org/licenses/" target="_blank
