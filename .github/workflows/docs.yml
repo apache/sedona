@@ -60,6 +60,7 @@ jobs:
           ${{ runner.os }}-pip-
     - run: git config --global user.name = "GitHub Action"
     - run: git config --global user.email = "test@abc.com"
+    - run: mkdocs build
     - run: mike deploy --update-aliases latest-snapshot -b website -p
     - run: mkdir staging
     - run: cp -r site/* staging/
