@@ -9,12 +9,13 @@
 | Apache Sedona              | 225k/month | [![PyPI - Downloads](https://img.shields.io/pypi/dm/apache-sedona)](https://pepy.tech/project/apache-sedona) [![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/apache-sedona) | [![Anaconda-Server Badge](https://anaconda.org/conda-forge/apache-sedona/badges/downloads.svg)](https://anaconda.org/conda-forge/apache-sedona) | [![](https://cranlogs.r-pkg.org/badges/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) [![](https://cranlogs.r-pkg.org/badges/grand-total/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) | [![Docker pulls](https://img.shields.io/docker/pulls/apache/sedona?color=brightgreen)](https://hub.docker.com/r/apache/sedona) |
 | Archived GeoSpark releases | 10k/month  | [![PyPI - Downloads](https://img.shields.io/pypi/dm/geospark)](https://pepy.tech/project/geospark)[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/geospark)                      |                                                                                                                                                 |                                                                                                                                                                                                                                                                   |                                                                                                                                |
 
+* [Join the community](#join-the-community)
 * [What is Apache Sedona?](#what-is-apache-sedona)
 * [Features](#features)
 * [When to use Sedona?](#when-to-use-sedona)
+* [Docker image](#docker-image)
 * [Building Sedona](#building-sedona)
 * [Documentation](#documentation)
-* [Join the community](#join-the-community)
 
 ## Join the community
 
@@ -142,7 +143,6 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
 * [Working with Spatial R in Sedona](https://sedona.apache.org/latest-snapshot/api/rdocs/)
 
 Please visit [Apache Sedona website](http://sedona.apache.org/) for detailed information
-
 
 ## Powered by
 
