@@ -184,7 +184,8 @@ repos:
       - id: check-docstring-first
       - id: check-executables-have-shebangs
       - id: check-illegal-windows-names
-      # - id: check-json
+      - id: check-json
+        exclude: ^docs/usecases/data/testPolygon\.json$|^spark/common/src/test/resources/.*\.json$
       - id: check-merge-conflict
       - id: check-shebang-scripts-are-executable
       - id: check-toml
