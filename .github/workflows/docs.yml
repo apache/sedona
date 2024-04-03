@@ -23,7 +23,7 @@ jobs:
       with:
         java-version: '8'
     - name: Compile JavaDoc
-      run: mvn javadoc:javadoc && mkdir -p docs/api/javadoc/spark && cp spark/common/target/site/apidocs/* docs/api/javadoc/spark/
+      run: mvn -q clean install && mkdir -p docs/api/javadoc/spark && cp spark/common/target/apidocs/* docs/api/javadoc/spark/
     - name: Compile ScalaDoc
       run: mvn scala:doc && mkdir -p docs/api/scaladoc/spark && cp spark/common/target/site/scaladocs/* docs/api/scaladoc/spark
     - uses: actions/setup-python@v5
