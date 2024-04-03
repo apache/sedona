@@ -49,7 +49,9 @@ jobs:
     - run: git config --global user.name = "GitHub Action"
     - run: git config --global user.email = "test@abc.com"
     - run: mkdocs build
-    - run: mike deploy latest-snapshot -b website -p
+    - name: Deploy the doc to the website branch
+      if: ${{ github.event_name != 'pull_request' }}
+      run: mike deploy latest-snapshot -b website -p
     - run: mkdir staging
     - run: cp -r site/* staging/
     - uses: actions/upload-artifact@v3
