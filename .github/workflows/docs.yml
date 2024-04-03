@@ -22,16 +22,10 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: '11'
-    - name: Cache Maven packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
     - name: Compile Scala and Java packages
-      run: mvn -q clean install -DskipTests
+      run: mvn javadoc:javadoc
     - run: mkdir -p docs/api/javadoc/spark
-    - run: mv spark/common/target/apidocs/* docs/api/javadoc/spark
+    - run: cp spark/common/target/site/apidocs/* docs/api/javadoc/spark
     - uses: actions/setup-python@v5
       with:
         python-version: 3.x
@@ -52,19 +46,26 @@ jobs:
           any::pkgdown
         working-directory : './R'
     - run: Rscript -e 'pkgdown::build_site(pkg = "./R", preview = FALSE, override = list(destination = "../docs/api/rdocs"))'
-    - uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
     - run: git config --global user.name = "GitHub Action"
     - run: git config --global user.email = "test@abc.com"
     - run: mkdocs build
-    - run: mike deploy --update-aliases latest-snapshot -b website -p
+    - run: mike deploy latest-snapshot -b website -p
     - run: mkdir staging
     - run: cp -r site/* staging/
     - uses: actions/upload-artifact@v3
       with:
         name: generated-docs
         path: staging
+    - name: Cache Python packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
