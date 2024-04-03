@@ -2,7 +2,7 @@
 
 ## Did you read the Contributor Guide?
 
-- Yes, I have read [Contributor Rules](https://sedona.apache.org/latest-snapshot/community/rule/) and [Contributor Development Guide](https://sedona.apache.org/latest-snapshot/community/develop/)
+- Yes, I have read the [Contributor Rules](https://sedona.apache.org/latest-snapshot/community/rule/) and [Contributor Development Guide](https://sedona.apache.org/latest-snapshot/community/develop/)
 
 - No, I haven't read it.
 
@@ -21,6 +21,6 @@
 
 ## Did this PR include necessary documentation updates?
 
-- Yes, I am adding a new API. I am using the [current SNAPSHOT version number](https://github.com/apache/sedona/blob/99239524f17389fc4ae9548ea88756f8ea538bb9/pom.xml#L29) in since `vX.Y.Z` format.
-- Yes, I have updated the documentation update.
-- No, this PR does not affect any public API so no need to change the docs.
+- Yes, I am adding a new API. I am using the [current SNAPSHOT version number](https://github.com/apache/sedona/blob/99239524f17389fc4ae9548ea88756f8ea538bb9/pom.xml#L29) in `vX.Y.Z` format.
+- Yes, I have updated the documentation.
+- No, this PR does not affect any public API so no need to change the documentation.
