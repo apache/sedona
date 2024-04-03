@@ -11,11 +11,14 @@
 
 * [Join the community](#join-the-community)
 * [What is Apache Sedona?](#what-is-apache-sedona)
-* [Features](#features)
+  * [Features](#features)
 * [When to use Sedona?](#when-to-use-sedona)
+  * [Use Cases](#use-cases)
+  * [Code Example](#code-example)
 * [Docker image](#docker-image)
 * [Building Sedona](#building-sedona)
 * [Documentation](#documentation)
+* [Powered by](#powered-by)
 
 ## Join the community
 
