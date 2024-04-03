@@ -19,18 +19,7 @@ Everyone is welcome to join our community events. We have a community office hou
 
 ## Discord Server
 
-![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)
-
-Fill in the form below to join the Sedona Discord Server!
-
-<script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/embed/v2.js"></script>
-<script>
-  hbspt.forms.create({
-    region: "na1",
-    portalId: "44429642",
-    formId: "4af794ab-318a-4d3b-ae8b-50143dbbdca5"
-  });
-</script>
+[![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://share.hsforms.com/1Ndql_ZigTdmLlVQc_d1o4gqga4q)
 
 ## Mailing list
 
