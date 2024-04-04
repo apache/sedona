@@ -41,6 +41,7 @@ import org.locationtech.jts.operation.distance.DistanceOp;
 import org.locationtech.jts.operation.distance3d.Distance3DOp;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.overlay.snap.GeometrySnapper;
+import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.operation.valid.TopologyValidationError;
@@ -1659,6 +1660,33 @@ public class Functions {
         } else {
             TopologyValidationError error = isValidOp.getValidationError();
             return error.toString();
+        }
+    }
+
+    /**
+     * This method takes a GeometryCollection and returns another GeometryCollection
+     * containing the polygons formed by the linework of a set of geometries.
+     * @param geometry A collection of Geometry objects that should contain only linestrings.
+     * @return A GeometryCollection containing the resultant polygons.
+     */
+    public static Geometry polygonize(Geometry geometry) {
+        if (geometry == null || geometry.isEmpty()) {
+            return GEOMETRY_FACTORY.createGeometryCollection(null);
+        }
+
+        if (geometry instanceof GeometryCollection) {
+            Polygonizer polygonizer = new Polygonizer();
+
+            for (int i = 0; i < geometry.getNumGeometries(); i++) {
+                polygonizer.add(geometry.getGeometryN(i));
+            }
+
+            Collection polygons = polygonizer.getPolygons();
+            Geometry[] polyArray = (Geometry[]) polygons.toArray(new Geometry[0]);
+
+            return GEOMETRY_FACTORY.createGeometryCollection(polyArray);
+        } else {
+            return GEOMETRY_FACTORY.createGeometryCollection(null);
         }
     }
 }

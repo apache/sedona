@@ -666,6 +666,16 @@ public class TestFunctionsV2
     }
 
     @Test
+    public void test_ST_Polygonize() {
+        registerUDFV2("ST_Polygonize", String.class);
+        registerUDFV2("ST_Area", String.class);
+        verifySqlSingleRes(
+                "select ST_Area(sedona.ST_Polygonize(ST_GeometryFromWKT('GEOMETRYCOLLECTION (LINESTRING (2 0, 2 1, 2 2), LINESTRING (2 2, 2 3, 2 4), LINESTRING (0 2, 1 2, 2 2), LINESTRING (2 2, 3 2, 4 2), LINESTRING (0 2, 1 3, 2 4), LINESTRING (2 4, 3 3, 4 2))')))",
+                4.0
+        );
+    }
+
+    @Test
     public void test_ST_PrecisionReduce() {
         registerUDFV2("ST_PrecisionReduce", String.class, int.class);
         verifySqlSingleRes(

@@ -220,6 +220,9 @@ object st_functions extends DataFrameAPI {
   def ST_Polygon(lineString: Column, srid: Column): Column = wrapExpression[ST_Polygon](lineString, srid)
   def ST_Polygon(lineString: String, srid: Integer): Column = wrapExpression[ST_Polygon](lineString, srid)
 
+  def ST_Polygonize(geoms: Column): Column = wrapExpression[ST_Polygonize](geoms)
+  def ST_Polygonize(geoms: String): Column = wrapExpression[ST_Polygonize](geoms)
+
   def ST_MakePolygon(lineString: Column): Column = wrapExpression[ST_MakePolygon](lineString, null)
   def ST_MakePolygon(lineString: String): Column = wrapExpression[ST_MakePolygon](lineString, null)
   def ST_MakePolygon(lineString: Column, holes: Column): Column = wrapExpression[ST_MakePolygon](lineString, holes)

@@ -947,6 +947,15 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static byte[] ST_Polygonize(byte[] geometry) {
+        return GeometrySerde.serialize(
+                Functions.polygonize(
+                        GeometrySerde.deserialize(geometry)
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"minX", "minY", "maxX", "maxY"})
     public static byte[] ST_PolygonFromEnvelope(double minX, double minY, double maxX, double maxY) {
         return GeometrySerde.serialize(

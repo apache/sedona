@@ -86,6 +86,7 @@ __all__ = [
     "ST_LineSubstring",
     "ST_MakeLine",
     "ST_Polygon"
+    "ST_Polygonize"
     "ST_MakePolygon",
     "ST_MakeValid",
     "ST_MinimumBoundingCircle",
@@ -995,6 +996,17 @@ def ST_Polygon(line_string: ColumnOrName, srid: ColumnOrNameOrNumber) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_Polygon", (line_string, srid))
+
+@validate_argument_types
+def ST_Polygonize(geometry: ColumnOrName) -> Column:
+    """Generates a GeometryCollection composed of polygons that are formed from the linework of a set of input geometries.
+
+    :param geometry: input geometry of type GeometryCollection
+    :type geometry: ColumnOrName
+    :return: GeometryCollection geometry column created from the input geometry.
+    :rtype: Column
+    """
+    return _call_st_function("ST_Polygonize", (geometry))
 
 @validate_argument_types
 def ST_MakePolygon(line_string: ColumnOrName, holes: Optional[ColumnOrName] = None) -> Column:

@@ -783,6 +783,14 @@ public class Functions {
         }
     }
 
+    public static class ST_Polygonize extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1) {
+            Geometry geom = (Geometry) o1;
+            return org.apache.sedona.common.Functions.polygonize(geom);
+        }
+    }
+
     public static class ST_MakeValid extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
