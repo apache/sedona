@@ -13,6 +13,8 @@
  */
 package org.apache.sedona.flink;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.types.Row;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -322,11 +324,11 @@ public class ConstructorTest extends TestBase{
     @Test
     public void testPointFromWKB() throws Exception {
         String hexWkb1 = "010100000000000000000000000000000000000000";
-        byte[] wkbPoint1 = org.apache.commons.codec.binary.Hex.decodeHex(hexWkb1);
+        byte[] wkbPoint1 = Hex.decodeHex(hexWkb1);
         String hexWkb2 = "010100000000000000000024400000000000002e40";
-        byte[] wkbPoint2 = org.apache.commons.codec.binary.Hex.decodeHex(hexWkb2);
+        byte[] wkbPoint2 = Hex.decodeHex(hexWkb2);
         String hexWkb3 = "01030000000100000005000000000000000000e0bf000000000000e0bf000000000000e0bf000000000000e03f000000000000e03f000000000000e03f000000000000e03f000000000000e0bf000000000000e0bf000000000000e0bf";
-        byte[] wkbPolygon = org.apache.commons.codec.binary.Hex.decodeHex(hexWkb3);
+        byte[] wkbPolygon = Hex.decodeHex(hexWkb3);
 
         List<Row> data1 = new ArrayList<>();
         data1.add(Row.of(wkbPoint1));
@@ -359,6 +361,45 @@ public class ConstructorTest extends TestBase{
         List<Row> results2 = TestBase.take(pointTable2, 3);
         assertEquals("POINT (0 0)", results2.get(0).getField(0).toString());
         assertEquals("POINT (10 15)", results2.get(1).getField(0).toString());
+        assertNull(results2.get(2).getField(0));
+    }
+
+    @Test
+    public void testLineFromWKB() throws DecoderException {
+        String hexWkb1 = "010200000003000000000000000000000000000000000000000000000000000040000000000000004000000000000010400000000000001040";
+        byte[] wkbLine1 = Hex.decodeHex(hexWkb1);
+        String hexWkb2 = "010200000003000000000000000000000000000000000000000000000000407f400000000000407f400000000000407f4000000000000059c0";
+        byte[] wkbLine2 = Hex.decodeHex(hexWkb2);
+        String hexWkb3 = "01030000000100000005000000000000000000e0bf000000000000e0bf000000000000e0bf000000000000e03f000000000000e03f000000000000e03f000000000000e03f000000000000e0bf000000000000e0bf000000000000e0bf";
+        byte[] wkbPolygon = Hex.decodeHex(hexWkb3);
+
+        List<Row> data1 = Arrays.asList(Row.of(wkbLine1), Row.of(wkbLine2), Row.of(wkbPolygon));
+        List<Row> data2 = Arrays.asList(Row.of(hexWkb1), Row.of(hexWkb2), Row.of(hexWkb3));
+
+        TypeInformation<?>[] colTypes1 = {PrimitiveArrayTypeInfo.BYTE_PRIMITIVE_ARRAY_TYPE_INFO};
+        TypeInformation<?>[] colTypes2 = {BasicTypeInfo.STRING_TYPE_INFO};
+        RowTypeInfo typeInfo1 = new RowTypeInfo(colTypes1, new String[]{"wkb"});
+        RowTypeInfo typeInfo2 = new RowTypeInfo(colTypes2, new String[]{"wkb"});
+
+        DataStream<Row> wkbDS1 = env.fromCollection(data1).returns(typeInfo1);
+        Table wkbTable1 = tableEnv.fromDataStream(wkbDS1, $("wkb"));
+
+        DataStream<Row> wkbDS2 = env.fromCollection(data2).returns(typeInfo2);
+        Table wkbTable2 = tableEnv.fromDataStream(wkbDS2, $("wkb"));
+
+        Table lineTable1 = wkbTable1.select(call(Constructors.ST_LineFromWKB.class.getSimpleName(), $("wkb")).as("point"));
+        Table lineTable2 = wkbTable2.select(call(Constructors.ST_LineFromWKB.class.getSimpleName(), $("wkb")).as("point"));
+
+        // Test with byte array
+        List<Row> results1 = TestBase.take(lineTable1, 3);
+        assertEquals("LINESTRING (0 0, 2 2, 4 4)", results1.get(0).getField(0).toString());
+        assertEquals("LINESTRING (0 0, 500 500, 500 -100)", results1.get(1).getField(0).toString());
+        assertNull(results1.get(2).getField(0));
+
+        // Test with hex string
+        List<Row> results2 = TestBase.take(lineTable2, 3);
+        assertEquals("LINESTRING (0 0, 2 2, 4 4)", results2.get(0).getField(0).toString());
+        assertEquals("LINESTRING (0 0, 500 500, 500 -100)", results2.get(1).getField(0).toString());
         assertNull(results2.get(2).getField(0));
     }
 

@@ -964,6 +964,20 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"wkb"})
+    public static byte[] ST_LineFromWKB(byte[] wkb) throws ParseException {
+        return GeometrySerde.serialize(
+                Constructors.lineFromWKB(wkb, 0)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"wkb", "srid"})
+    public static byte[] ST_LineFromWKB(byte[] wkb, int srid) throws ParseException {
+        return GeometrySerde.serialize(
+                Constructors.lineFromWKB(wkb, srid)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "srid"})
     public static byte[] ST_Polygon(byte[] geometry, int srid) {
         return GeometrySerde.serialize(

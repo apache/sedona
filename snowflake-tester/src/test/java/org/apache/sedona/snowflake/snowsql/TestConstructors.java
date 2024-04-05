@@ -104,6 +104,22 @@ public class TestConstructors extends TestBase{
                 "SRID=4326;POINT (10 15)"
         );
     }
+
+    @Test
+    public void test_ST_LineFromWKB() {
+        registerUDF("ST_LineFromWKB", byte[].class);
+        registerUDF("ST_AsEWKT", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_LineFromWKB(ST_ASWKB(to_geometry('LINESTRING (0 0, 2 2, 4 4)'))))",
+                "LINESTRING (0 0, 2 2, 4 4)"
+        );
+        registerUDF("ST_LineFromWKB", byte[].class, int.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsEWKT(sedona.ST_LineFromWKB(ST_ASWKB(to_geometry('LINESTRING (0 0, 2 2, 4 4)')), 4326))",
+                "SRID=4326;LINESTRING (0 0, 2 2, 4 4)"
+        );
+    }
+
     @Test
     public void test_ST_GeomFromEWKB() {
         registerUDF("ST_GeomFromEWKB", byte[].class);

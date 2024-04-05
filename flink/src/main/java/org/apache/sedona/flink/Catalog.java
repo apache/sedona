@@ -28,6 +28,7 @@ public class Catalog {
                 new Constructors.ST_PointZM(),
                 new Constructors.ST_PointFromText(),
                 new Constructors.ST_PointFromWKB(),
+                new Constructors.ST_LineFromWKB(),
                 new Constructors.ST_MakePoint(),
                 new Constructors.ST_LineStringFromText(),
                 new Constructors.ST_LineFromText(),
