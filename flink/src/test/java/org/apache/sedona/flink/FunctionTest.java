@@ -700,6 +700,13 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testHasZ() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))') as poly");
+        boolean actual = (boolean) first(polyTable.select(call(Functions.ST_HasZ.class.getSimpleName(), $("poly")))).getField(0);
+        assertTrue(actual);
+    }
+
+    @Test
     public void testHasM() {
         Table polyTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))') as poly");
         boolean actual = (boolean) first(polyTable.select(call(Functions.ST_HasM.class.getSimpleName(), $("poly")))).getField(0);

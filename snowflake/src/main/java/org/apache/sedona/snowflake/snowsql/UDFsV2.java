@@ -478,6 +478,13 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"})
+    public static boolean ST_HasZ(String geometry) {
+        return Functions.hasZ(
+                GeometrySerde.deserGeoJson(geometry)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2"}, argTypes = {"Geometry", "Geometry"})
     public static double ST_HausdorffDistance(String geom1, String geom2)
     {

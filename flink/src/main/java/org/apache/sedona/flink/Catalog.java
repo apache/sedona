@@ -126,6 +126,7 @@ public class Catalog {
                 new Functions.ST_LineFromMultiPoint(),
                 new Functions.ST_LineMerge(),
                 new Functions.ST_LineSubstring(),
+                new Functions.ST_HasZ(),
                 new Functions.ST_HasM(),
                 new Functions.ST_M(),
                 new Functions.ST_MMin(),

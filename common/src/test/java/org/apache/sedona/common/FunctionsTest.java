@@ -389,6 +389,21 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void hasZ() throws ParseException {
+        Geometry geom = Constructors.geomFromWKT("POINT ZM(1 2 3 4)", 0);
+        assertTrue(Functions.hasZ(geom));
+
+        geom = Constructors.geomFromWKT("POINT(1 2)", 0);
+        assertFalse(Functions.hasZ(geom));
+
+        geom = Constructors.geomFromWKT("POINT(34 25)", 0);
+        assertFalse(Functions.hasZ(geom));
+
+        geom = Constructors.geomFromWKT("POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))", 0);
+        assertTrue(Functions.hasZ(geom));
+    }
+
+    @Test
     public void hasM() throws ParseException {
         Geometry geom = Constructors.geomFromWKT("POINT ZM(1 2 3 4)", 0);
         assertTrue(Functions.hasM(geom));

@@ -533,6 +533,13 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static boolean ST_HasZ(byte[] geometry) {
+        return Functions.hasZ(
+                GeometrySerde.deserialize(geometry)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2"})
     public static double ST_HausdorffDistance(byte[] geom1, byte[] geom2)
     {
