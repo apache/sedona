@@ -26,6 +26,9 @@ env:
   JAI_CODEC_VERSION: "1.1.3"
   JAI_IMAGEIO_VERSION: "1.1"
 
+permissions:
+  contents: read
+
 jobs:
   build:
 
