@@ -109,6 +109,7 @@ object Catalog {
     function[ST_Snap](),
     function[ST_ClosestPoint](),
     function[ST_Boundary](),
+    function[ST_HasM](),
     function[ST_M](),
     function[ST_MinimumBoundingRadius](),
     function[ST_MinimumBoundingCircle](BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6),

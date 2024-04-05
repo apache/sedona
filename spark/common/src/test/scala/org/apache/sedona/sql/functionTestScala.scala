@@ -385,6 +385,12 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(!testtable.take(1)(0).get(1).asInstanceOf[Boolean])
     }
 
+    it("Passed ST_HasM") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))') as poly")
+      val actual = baseDf.selectExpr("ST_HasM(poly)").first().getBoolean(0)
+      assert(actual)
+    }
+
     it("Passed ST_M") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT ZM (1 2 3 4)') AS point")
       val actual = baseDf.selectExpr("ST_M(point)").first().getDouble(0)

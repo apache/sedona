@@ -1552,6 +1552,28 @@ Output:
 [POLYGON ((1.0057629565405093 1.9984665139177547, 1.0037116327309097 2.0018325249140068, 0.999727799357053 2.001163270465665, 0.9977951427833316 1.997128228393235, 0.9998461908217928 1.993762152933182, 1.0038301712104316 1.9944311839965523, 1.0057629565405093 1.9984665139177547))]
 ```
 
+## ST_HasM
+
+Introduction: Checks for the presence of M coordinate values representing measures or linear references. Returns true if the input geometry includes an M coordinate, false otherwise.
+
+Format: `ST_HasM(geom: Geometry)`
+
+Since: `vTBD`
+
+SQL Example
+
+```sql
+SELECT ST_HasM(
+        ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))')
+)
+```
+
+Output:
+
+```
+True
+```
+
 ## ST_HausdorffDistance
 
 Introduction: Returns a discretized (and hence approximate) [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance) between the given 2 geometries.
