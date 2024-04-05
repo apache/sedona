@@ -22,6 +22,7 @@ import org.apache.sedona.common.utils.GeoHashDecoder;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.gml2.GMLReader;
@@ -215,6 +216,38 @@ public class Constructors {
             return wkbReader.read(wkb);
         }
 
+    }
+
+    public static class ST_PointFromWKB extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String wkbString) throws ParseException {
+            Geometry geometry = getGeometryByFileData(wkbString, FileDataSplitter.WKB);
+            if (geometry instanceof Point) {
+                geometry.setSRID(0);
+                return geometry;
+            }
+            return null;  // Return null if geometry is not a Point
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String wkbString, int srid) throws ParseException {
+            Geometry geometry = getGeometryByFileData(wkbString, FileDataSplitter.WKB);
+            if (geometry instanceof Point) {
+                geometry.setSRID(srid);
+                return geometry;
+            }
+            return null;  // Return null if geometry is not a Point
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+        public Geometry eval(@DataTypeHint("Bytes") byte[] wkb) throws ParseException {
+            return org.apache.sedona.common.Constructors.pointFromWKB(wkb, 0);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+        public Geometry eval(@DataTypeHint("Bytes") byte[] wkb, int srid) throws ParseException {
+            return org.apache.sedona.common.Constructors.pointFromWKB(wkb, srid);
+        }
     }
 
     public static class ST_GeomFromGeoJSON extends ScalarFunction {

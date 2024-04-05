@@ -17,11 +17,7 @@ import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.enums.GeometryType;
 import org.apache.sedona.common.utils.FormatUtils;
 import org.apache.sedona.common.utils.GeoHashDecoder;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.CoordinateXYZM;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKTReader;
@@ -68,6 +64,19 @@ public class Constructors {
 
     public static Geometry geomFromWKB(byte[] wkb) throws ParseException {
         return new WKBReader().read(wkb);
+    }
+
+    public  static Geometry pointFromWKB(byte[] wkb) throws ParseException {
+        return pointFromWKB(wkb, 0);
+    }
+
+    public static Geometry pointFromWKB(byte[] wkb, int srid) throws ParseException {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        Geometry geom =  new WKBReader(geometryFactory).read(wkb);
+        if (!(geom instanceof Point)) {
+            return null;
+        }
+        return geom;
     }
 
     public static Geometry mLineFromText(String wkt, int srid) throws ParseException {

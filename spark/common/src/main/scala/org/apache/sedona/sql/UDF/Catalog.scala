@@ -38,6 +38,7 @@ object Catalog {
     // Expression for vectors
     function[GeometryType](),
     function[ST_PointFromText](),
+    function[ST_PointFromWKB](),
     function[ST_PolygonFromText](),
     function[ST_LineStringFromText](),
     function[ST_GeomFromText](0),

@@ -25,7 +25,7 @@ import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
 import org.apache.spark.sql.sedona_sql.expressions.st_functions._
 import org.apache.spark.sql.sedona_sql.expressions.st_predicates._
 import org.junit.Assert.{assertEquals, assertFalse, assertTrue}
-import org.locationtech.jts.geom.{Geometry, Polygon}
+import org.locationtech.jts.geom.{Geometry, Point, Polygon}
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.operation.buffer.BufferParameters
 
@@ -78,6 +78,19 @@ class dataFrameAPITestScala extends TestBaseScala {
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POINT (0 1)"
       assert(actualResult == expectedResult)
+    }
+
+    it("passed st_pointfromwkb") {
+      val wkbSeq = Seq[Array[Byte]](Array[Byte](1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 64, 0, 0, 0, 0, 0, 0, 46, 64))
+      val df = wkbSeq.toDF("wkb").select(ST_PointFromWKB("wkb"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expectedResult = "POINT (10 15)"
+      assert(actualResult == expectedResult)
+
+      val wkbStringSeq = Seq("010100000000000000000024400000000000002E40")
+      val dfWithString = wkbStringSeq.toDF("wkb").select(ST_PointFromWKB("wkb"))
+      val actualStringResult = dfWithString.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      assert(actualStringResult == expectedResult)
     }
 
     it("passed st_polygonfromtext") {

@@ -109,6 +109,50 @@ class constructorTestScala extends TestBaseScala {
       assert(pointDf.count() == 121960)
     }
 
+    it("Passed ST_PointFromWKB") {
+      val geometryDf = Seq(
+        "0101000000000000000000F03F0000000000000040",
+        "0102000000020000000000000084d600c00000000080b5d6bf00000060e1eff7bf00000080075de5bf",
+        "010100000000000000000024400000000000002e40",
+        "0103000000010000000500000000000000000000000000000000000000000000000000f03f000000000000f03f0000000000001440000000000000f03f0000000000001440000000000000000000000000000000000000000000000000"
+      ).map(Tuple1.apply).toDF("wkb")
+
+      geometryDf.createOrReplaceTempView("wkbtable")
+
+      var validPointDf = sparkSession.sql("SELECT ST_PointFromWKB(wkbtable.wkb) FROM wkbtable")
+      validPointDf.show()
+      var rows = validPointDf.collect()
+      assert(rows.length == 4)
+
+      var expectedPoints = Seq("POINT (1 2)", null, "POINT (10 15)", null)
+      for (i <- rows.indices) {
+        if (expectedPoints(i) == null) {
+          assert(rows(i).isNullAt(0))
+        } else {
+          assert(rows(i).getAs[Geometry](0).toString == expectedPoints(i))
+        }
+      }
+
+      validPointDf = sparkSession.sql("SELECT ST_AsEWKT(ST_PointFromWKB(wkbtable.wkb, 4326)) FROM wkbtable")
+      validPointDf.show()
+      rows = validPointDf.collect()
+      assert(rows.length == 4)
+
+      expectedPoints = Seq("SRID=4326;POINT (1 2)", null, "SRID=4326;POINT (10 15)", null)
+      for (i <- rows.indices) {
+        if (expectedPoints(i) == null) {
+          assert(rows(i).isNullAt(0))
+        } else {
+          assert(rows(i).get(0).toString == expectedPoints(i))
+        }
+      }
+
+      intercept[Exception] {
+        sparkSession.sql("SELECT ST_PointFromWKB('invalid')").collect()
+      }
+    }
+
+
     it("Passed ST_GeomFromWKT") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
