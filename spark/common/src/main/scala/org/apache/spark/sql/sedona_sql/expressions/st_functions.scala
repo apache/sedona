@@ -221,6 +221,9 @@ object st_functions extends DataFrameAPI {
   def ST_MMin(geoms: Column): Column = wrapExpression[ST_MMin](geoms)
   def ST_MMin(geoms: String): Column = wrapExpression[ST_MMin](geoms)
 
+  def ST_MMax(geoms: Column): Column = wrapExpression[ST_MMax](geoms)
+  def ST_MMax(geoms: String): Column = wrapExpression[ST_MMax](geoms)
+
   def ST_MakeLine(geoms: Column): Column = wrapExpression[ST_MakeLine](geoms)
   def ST_MakeLine(geoms: String): Column = wrapExpression[ST_MakeLine](geoms)
   def ST_MakeLine(geom1: Column, geom2: Column): Column = wrapExpression[ST_MakeLine](geom1, geom2)

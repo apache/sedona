@@ -891,6 +891,17 @@ def ST_MMin(geom: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_MMin", geom)
 
+@validate_argument_types
+def ST_MMax(geom: ColumnOrName) -> Column:
+    """Return the maximum M coordinate of a geometry.
+
+    :param geometry: Geometry column to get the maximum M coordinate from.
+    :type geometry: ColumnOrName
+    :return: Minimum M coordinate for the geometry as a double column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_MMax", geom)
+
 
 @validate_argument_types
 def ST_MakeLine(geom1: ColumnOrName, geom2: Optional[ColumnOrName] = None) -> Column:

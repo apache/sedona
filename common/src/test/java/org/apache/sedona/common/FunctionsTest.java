@@ -437,6 +437,18 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void testMMax() throws ParseException {
+        Geometry geom = Constructors.geomFromWKT("LINESTRING ZM(1 1 1 1, 2 2 2 2, 3 3 3 3, -1 -1 -1 -1)", 0);
+        Double actual = Functions.mMax(geom);
+        Double expected = 3.0;
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("LINESTRING(1 1 1, 2 2 2, 3 3 3, -1 -1 -1)", 0);
+        actual = Functions.mMax(geom);
+        assertNull(actual);
+    }
+
+    @Test
     public void dimensionGeometry3D() {
         Point point3D = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 1));
         Integer actualResult = Functions.dimension(point3D);

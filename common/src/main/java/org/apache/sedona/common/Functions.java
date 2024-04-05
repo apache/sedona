@@ -409,6 +409,17 @@ public class Functions {
         return min == Double.MAX_VALUE ? null : min;
     }
 
+    public static Double mMax(Geometry geometry) {
+        Coordinate[] points = geometry.getCoordinates();
+        double max = - Double.MAX_VALUE;
+        for (int i=0; i < points.length; i++) {
+            if(java.lang.Double.isNaN(points[i].getM()))
+                continue;
+            max = Math.max(points[i].getM(), max);
+        }
+        return max == -Double.MAX_VALUE ? null : max;
+    }
+
     public static double xMin(Geometry geometry) {
         Coordinate[] points = geometry.getCoordinates();
         double min = Double.MAX_VALUE;

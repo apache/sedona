@@ -950,6 +950,15 @@ class TestPredicateJoin(TestBase):
         actual = baseDf.selectExpr("ST_MMin(line)").take(1)[0][0]
         assert actual is None
 
+    def test_st_m_max(self):
+        baseDf = self.spark.sql("SELECT ST_GeomFromWKT('LINESTRING ZM(1 1 1 1, 2 2 2 2, 3 3 3 3, -1 -1 -1 -1)') AS line")
+        actual = baseDf.selectExpr("ST_MMax(line)").take(1)[0][0]
+        assert actual == 3.0
+
+        baseDf = self.spark.sql("SELECT ST_GeomFromWKT('LINESTRING(1 1, 2 2, 3 3, -1 -1)') AS line")
+        actual = baseDf.selectExpr("ST_MMax(line)").take(1)[0][0]
+        assert actual is None
+
     def test_st_subdivide_explode_lateral(self):
         # Given
         geometry_df = self.__wkt_list_to_data_frame(

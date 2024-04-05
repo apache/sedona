@@ -2075,6 +2075,28 @@ Output:
 4.0
 ```
 
+## ST_MMax
+
+Introduction: Returns M maxima of the given geometry or null if there is no M coordinate.
+
+Format: `ST_MMax(geom: Geometry)`
+
+Since: `vTBD`
+
+SQL Example
+
+```sql
+SELECT ST_MMax(
+        ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))')
+)
+```
+
+Output:
+
+```
+4.0
+```
+
 ## ST_MMin
 
 Introduction: Returns M minima of the given geometry or null if there is no M coordinate.

@@ -407,6 +407,18 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(actualNull == null)
     }
 
+    it("Passed ST_MMax") {
+      var baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING ZM(1 1 1 1, 2 2 2 2, 3 3 3 3, -1 -1 -1 -1)') as line")
+      val actual = baseDf.selectExpr("ST_MMax(line)").first().getDouble(0)
+      assert(actual == 3.0)
+
+      baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(1 1, 2 2, 3 3, -1 -1)') AS line")
+      val actualNull = baseDf.selectExpr("ST_MMax(line)").first().get(0)
+      assert(actualNull == null)
+
+      print(sparkSession.sql("SELECT ST_MMax(ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))'))").first().get(0))
+    }
+
     it("Passed ST_MakeLine") {
       val testtable = sparkSession.sql(
         """SELECT
