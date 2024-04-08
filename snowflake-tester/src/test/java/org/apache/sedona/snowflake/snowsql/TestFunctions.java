@@ -720,6 +720,17 @@ public class TestFunctions extends TestBase {
                 "POINT (2.5 2.5)"
         );
     }
+
+    @Test
+    public void test_ST_Points() {
+        registerUDF("ST_Points", byte[].class);
+        registerUDF("ST_AsEWKT", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsEWKT(sedona.ST_Points(sedona.ST_GeomFromText('LINESTRING(0 0, 0 1, 0 2, 0 3, 0 4)')))",
+                "MULTIPOINT ((0 0), (0 1), (0 2), (0 3), (0 4))"
+        );
+    }
+
     @Test
     public void test_ST_Polygon() {
         registerUDF("ST_Polygon", byte[].class, int.class);

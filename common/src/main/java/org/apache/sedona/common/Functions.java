@@ -1728,4 +1728,23 @@ public class Functions {
             return GEOMETRY_FACTORY.createGeometryCollection(null);
         }
     }
+
+    /**
+     * Creates a MultiPoint containing all coordinates of the given geometry.
+     * Duplicates, M and Z coordinates are preserved.
+     *
+     * @param geometry The input geometry
+     * @return A MultiPoint geometry
+     */
+    public static Geometry points(Geometry geometry) {
+        if (geometry == null) {
+            return null;
+        }
+
+        // Extracting all coordinates from the geometry
+        Coordinate[] coordinates = geometry.getCoordinates();
+
+        // Creating a MultiPoint from the extracted coordinates
+        return GEOMETRY_FACTORY.createMultiPointFromCoords(coordinates);
+    }
 }

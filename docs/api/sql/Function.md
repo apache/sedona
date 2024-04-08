@@ -2523,6 +2523,26 @@ SELECT ST_AsText(ST_PointOnSurface(ST_GeomFromText('LINESTRING(0 5 1, 0 0 1, 0 1
 
 ```
 
+## ST_Points
+
+Introduction: Returns a MultiPoint geometry consisting of all the coordinates of the input geometry. It preserves duplicate points as well as M and Z coordinates.
+
+Format: `ST_Points(geom: Geometry)`
+
+Since: `vTBD`
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Points(ST_GeomFromEWKT('LINESTRING (2 4, 3 3, 4 2, 7 3)')));
+```
+
+Output:
+
+```
+MULTIPOINT ((2 4), (3 3), (4 2), (7,3))
+```
+
 ## ST_Polygon
 
 Introduction: Function to create a polygon built from the given LineString and sets the spatial reference system from the srid

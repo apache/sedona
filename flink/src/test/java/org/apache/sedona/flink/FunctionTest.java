@@ -970,6 +970,14 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testPoints() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 1, 5 1, 5 0, 1 0, 0 0))') AS polygon");
+        table = table.select(call(Functions.ST_Points.class.getSimpleName(), $("polygon")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("MULTIPOINT ((0 0), (1 1), (5 1), (5 0), (1 0), (0 0))", result.toString());
+    }
+
+    @Test
     public void testPolygon() {
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)') AS line");
         table = table.select(call(Functions.ST_Polygon.class.getSimpleName(), $("line"), 4236));

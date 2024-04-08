@@ -514,6 +514,15 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_Points") {
+      val invalidDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 1, 5 1, 5 0, 1 0, 0 0))') AS geom")
+      val df = invalidDf.select(ST_Normalize(ST_Points("geom")))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry]
+      actualResult.normalize()
+      val expectedResult = "MULTIPOINT ((0 0), (0 0), (1 0), (1 1), (5 0), (5 1))"
+      assert(actualResult.toText()  == expectedResult)
+    }
+
     it("Passed ST_Polygon") {
       val invalidDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)') AS geom")
       val df = invalidDf.select(ST_Polygon("geom", 4236))
