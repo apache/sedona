@@ -234,6 +234,19 @@ class constructorTestScala extends TestBaseScala {
       }
     }
 
+    it("Passed ST_GeometryFromText") {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      var polygonDf = sparkSession.sql("select ST_GeometryFromText(polygontable._c0, 4326) as countyshape from polygontable")
+      assert(polygonDf.count() == 100)
+      val nullGeom = sparkSession.sql("select ST_GeometryFromText(null)")
+      assert(nullGeom.first().isNullAt(0))
+      // Fail on wrong input type
+      intercept[Exception] {
+        sparkSession.sql("SELECT ST_GeometryFromText(0)").collect()
+      }
+    }
+
     it("Passed ST_GeomFromWKT multipolygon read as polygon bug") {
       val multipolygon =
         """'MULTIPOLYGON (((-97.143362 27.84948, -97.14051 27.849375, -97.13742 27.849375, -97.13647 27.851056, -97.136945 27.853788, -97.138728 27.855784, -97.141223 27.853158, -97.143362 27.84948)),

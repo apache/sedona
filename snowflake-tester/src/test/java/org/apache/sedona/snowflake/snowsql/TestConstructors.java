@@ -81,6 +81,21 @@ public class TestConstructors extends TestBase{
                 "POINT (0 1)"
         );
     }
+
+    @Test
+    public void test_ST_GeometryFromText() {
+        registerUDF("ST_GeometryFromText", String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_GeometryFromText('POINT (0 1)'))",
+                "POINT (0 1)"
+        );
+        registerUDF("ST_GeometryFromText", String.class, int.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_GeometryFromText('POINT (0 1)', 4326))",
+                "POINT (0 1)"
+        );
+    }
+
     @Test
     public void test_ST_GeomFromWKB() {
         registerUDF("ST_GeomFromWKB", byte[].class);

@@ -43,6 +43,7 @@ object Catalog {
     function[ST_PolygonFromText](),
     function[ST_LineStringFromText](),
     function[ST_GeomFromText](0),
+    function[ST_GeometryFromText](0),
     function[ST_LineFromText](),
     function[ST_GeomFromWKT](0),
     function[ST_GeomFromEWKT](),

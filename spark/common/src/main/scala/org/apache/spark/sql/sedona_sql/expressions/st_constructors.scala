@@ -45,6 +45,13 @@ object st_constructors extends DataFrameAPI {
 
   def ST_GeomFromText(wkt: String, srid: Int): Column = wrapExpression[ST_GeomFromText](wkt, srid)
 
+  def ST_GeometryFromText(wkt: Column): Column = wrapExpression[ST_GeometryFromText](wkt, 0)
+  def ST_GeometryFromText(wkt: String): Column = wrapExpression[ST_GeometryFromText](wkt, 0)
+
+  def ST_GeometryFromText(wkt: Column, srid: Column): Column = wrapExpression[ST_GeometryFromText](wkt, srid)
+
+  def ST_GeometryFromText(wkt: String, srid: Int): Column = wrapExpression[ST_GeometryFromText](wkt, srid)
+
   def ST_GeomFromWKB(wkb: Column): Column = wrapExpression[ST_GeomFromWKB](wkb)
   def ST_GeomFromWKB(wkb: String): Column = wrapExpression[ST_GeomFromWKB](wkb)
 

@@ -291,6 +291,30 @@ Output:
 POINT(40.7128 -74.006)
 ```
 
+## ST_GeometryFromText
+
+Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown). Alias of [ST_GeomFromWKT](#ST_GeomFromWKT)
+
+Format:
+
+`ST_GeometryFromText (Wkt: String)`
+
+`ST_GeometryFromText (Wkt: String, srid: Integer)`
+
+Since: `vTBD`
+
+SQL Example
+
+```sql
+SELECT ST_GeometryFromText('POINT(40.7128 -74.0060)')
+```
+
+Output:
+
+```
+POINT(40.7128 -74.006)
+```
+
 ## ST_LineFromText
 
 Introduction: Construct a LineString from Text

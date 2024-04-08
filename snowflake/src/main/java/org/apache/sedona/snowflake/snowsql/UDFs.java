@@ -492,6 +492,20 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"wkt"})
+    public static byte[] ST_GeometryFromText(String geomString) throws ParseException {
+        return GeometrySerde.serialize(
+                Constructors.geomFromWKT(geomString, 0)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"wkt", "srid"})
+    public static byte[] ST_GeometryFromText(String geomString, int srid) throws ParseException {
+        return GeometrySerde.serialize(
+                Constructors.geomFromWKT(geomString, srid)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"wkb"})
     public static byte[] ST_GeomFromWKB(byte[] wkb) throws ParseException {
         return wkb;

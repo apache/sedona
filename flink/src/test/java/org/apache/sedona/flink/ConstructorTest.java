@@ -19,6 +19,7 @@ import org.apache.flink.table.api.Table;
 import org.apache.flink.types.Row;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.sedona.flink.expressions.Constructors;
+import org.apache.sedona.flink.expressions.Functions;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
@@ -254,6 +255,22 @@ public class ConstructorTest extends TestBase{
                 $(polygonColNames[1]));
         Row result = last(geomTable);
         assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
+    }
+
+    @Test
+    public void testGeometryFromText() {
+        List<Row> data = createPolygonWKT(testDataSize);
+        Table wktTable = createTextTable(data, polygonColNames);
+        Table geomTable = wktTable.select(call(Constructors.ST_GeometryFromText.class.getSimpleName(),
+                        $(polygonColNames[0])).as(polygonColNames[0]),
+                $(polygonColNames[1]));
+        Row result = last(geomTable);
+        assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
+
+        geomTable  = wktTable.select(call(Constructors.ST_GeometryFromText.class.getSimpleName(),
+                    $(polygonColNames[0]), 4326));
+        int actual = (int) last(geomTable.select(call(Functions.ST_SRID.class.getSimpleName(), $("_c0")))).getField(0);
+        assertEquals(4326, actual);
     }
 
     @Test

@@ -104,6 +104,19 @@ case class ST_GeomFromEWKT(inputExpressions: Seq[Expression])
   }
 }
 
+/**
+ * Return a Geometry from a WKT string. Alias to ST_GeomFromWKT
+ *
+ * @param inputExpressions This function takes a geometry string and a srid. The string format must be WKT.
+ */
+case class ST_GeometryFromText(inputExpressions: Seq[Expression])
+  extends InferredExpression(Constructors.geomFromWKT _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 
 /**
   * Return a Geometry from a WKT string
