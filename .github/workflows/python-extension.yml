@@ -20,6 +20,9 @@ on:
       - 'pom.xml'
       - 'python/**'
 
+permissions:
+  contents: read
+
 jobs:
   build:
     strategy:

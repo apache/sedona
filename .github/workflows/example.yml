@@ -11,6 +11,9 @@ on:
     paths:
       - 'examples/**'
 
+permissions:
+  contents: read
+
 jobs:
   build:
 
