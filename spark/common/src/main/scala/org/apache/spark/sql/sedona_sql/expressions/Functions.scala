@@ -365,6 +365,14 @@ case class ST_AsEWKB(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_AsHEXEWKB(inputExpressions: Seq[Expression])
+  extends InferredExpression(inferrableFunction2(Functions.asHexEWKB), inferrableFunction1(Functions.asHexEWKB)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_SRID(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.getSRID _) {
 

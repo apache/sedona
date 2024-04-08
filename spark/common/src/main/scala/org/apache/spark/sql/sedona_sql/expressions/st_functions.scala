@@ -43,6 +43,12 @@ object st_functions extends DataFrameAPI {
   def ST_AsEWKB(geometry: Column): Column = wrapExpression[ST_AsEWKB](geometry)
   def ST_AsEWKB(geometry: String): Column = wrapExpression[ST_AsEWKB](geometry)
 
+
+  def ST_AsHEXEWKB(geometry: Column, endian: Column): Column = wrapExpression[ST_AsHEXEWKB](geometry, endian)
+  def ST_AsHEXEWKB(geometry: String, endian: String): Column = wrapExpression[ST_AsHEXEWKB](geometry, endian)
+  def ST_AsHEXEWKB(geometry: Column): Column = wrapExpression[ST_AsHEXEWKB](geometry)
+  def ST_AsHEXEWKB(geometry: String): Column = wrapExpression[ST_AsHEXEWKB](geometry)
+
   def ST_AsEWKT(geometry: Column): Column = wrapExpression[ST_AsEWKT](geometry)
   def ST_AsEWKT(geometry: String): Column = wrapExpression[ST_AsEWKT](geometry)
 

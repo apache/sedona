@@ -613,6 +613,16 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testAsHEXEWKB() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1 2)') AS point");
+        String result = (String) first(pointTable.select(call(Functions.ST_AsHEXEWKB.class.getSimpleName(), $("point"), "XDR"))).getField(0);
+        assertEquals("00000000013FF00000000000004000000000000000", result);
+
+        result = (String) first(pointTable.select(call(Functions.ST_AsHEXEWKB.class.getSimpleName(), $("point")))).getField(0);
+        assertEquals("0101000000000000000000F03F0000000000000040", result);
+    }
+
+    @Test
     public void testAsBinary() {
         Table polygonTable = createPolygonTable(testDataSize);
         polygonTable = polygonTable.select(call(Functions.ST_AsBinary.class.getSimpleName(), $(polygonColNames[0])));

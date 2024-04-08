@@ -110,6 +110,20 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"})
+    public static String ST_AsHEXEWKB(String geometry) {
+        return Functions.asHexEWKB(
+                GeometrySerde.deserGeoJson(geometry)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "endian"}, argTypes = {"Geometry", "String"})
+    public static String ST_AsHEXEWKB(String geometry, String endian) {
+        return Functions.asHexEWKB(
+                GeometrySerde.deserGeoJson(geometry), endian
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry"},
             argTypes = {"Geometry"})
     public static String ST_AsEWKT(String geometry) {

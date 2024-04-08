@@ -99,6 +99,7 @@ object Catalog {
     function[ST_AsGeoJSON](),
     function[ST_AsBinary](),
     function[ST_AsEWKB](),
+    function[ST_AsHEXEWKB](),
     function[ST_AsGML](),
     function[ST_AsKML](),
     function[ST_SRID](),

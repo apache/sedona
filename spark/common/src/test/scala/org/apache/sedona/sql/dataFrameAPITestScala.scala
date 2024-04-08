@@ -620,6 +620,18 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+
+    it("Passed ST_AsHEXEWKB") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT(1 2)') as point")
+      var actual = baseDf.select(ST_AsHEXEWKB("point")).first().get(0)
+      var expected = "0101000000000000000000F03F0000000000000040"
+      assert(expected.equals(actual))
+
+      actual = baseDf.select(ST_AsHEXEWKB(col("point"), lit("xdr"))).first().get(0)
+      expected = "00000000013FF00000000000004000000000000000"
+      assert(expected.equals(actual))
+    }
+
     it("Passed ST_NPoints") {
       val lineDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 1)') AS geom")
       val df = lineDf.select(ST_NPoints("geom"))

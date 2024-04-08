@@ -177,6 +177,11 @@ public class GeomUtils {
         return new WKTWriter(4).write(geometry);
     }
 
+    public static String getHexEWKB(Geometry geometry, int endian) {
+        WKBWriter writer = new WKBWriter(GeomUtils.getDimension(geometry), endian, geometry.getSRID() != 0);
+        return WKBWriter.toHex(writer.write(geometry));
+    }
+
     public static byte[] getEWKB(Geometry geometry) {
         if (geometry == null) {
             return null;

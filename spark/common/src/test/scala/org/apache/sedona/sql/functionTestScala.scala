@@ -611,6 +611,17 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(Hex.encodeHexString(df.first().get(0).asInstanceOf[Array[Byte]]) == s)
     }
 
+    it("Passed ST_AsHEXEWKB") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT(1 2)') as point")
+      var actual = baseDf.selectExpr("ST_AsHEXEWKB(point)").first().get(0)
+      var expected = "0101000000000000000000F03F0000000000000040"
+      assert(expected.equals(actual))
+
+      actual = baseDf.selectExpr("ST_AsHEXEWKB(point, 'XDR')").first().get(0)
+      expected = "00000000013FF00000000000004000000000000000"
+      assert(expected.equals(actual))
+    }
+
     it("Passed ST_AsEWKB empty geometry") {
       val df = sparkSession.sql("SELECT ST_AsEWKB(ST_SetSrid(ST_GeomFromWKT('POINT EMPTY'), 3021))")
       val s = "0101000020cd0b0000000000000000f87f000000000000f87f"
