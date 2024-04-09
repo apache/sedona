@@ -685,7 +685,6 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a,ST_GeomFromWKT('POLYGON ((5 -3, 7 -3, 7 -1, 5 -1, 5 -3))') as b")
       testtable.createOrReplaceTempView("union_table")
       val union = sparkSession.sql("select ST_Union(a,b) from union_table")
-      println(union.take(1)(0).get(0).asInstanceOf[Geometry].toText)
       assert(union.take(1)(0).get(0).asInstanceOf[Geometry].toText.equals("MULTIPOLYGON (((-3 -3, -3 3, 3 3, 3 -3, -3 -3)), ((5 -3, 5 -1, 7 -1, 7 -3, 5 -3)))"))
     }
 
@@ -939,7 +938,6 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   it("Should pass ST_IsPolygonCW") {
     var actual = sparkSession.sql("SELECT ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))'))").first().getBoolean(0)
-    print(actual)
     assert(actual == false)
 
     actual = sparkSession.sql("SELECT ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))").first().getBoolean(0)

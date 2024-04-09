@@ -64,7 +64,10 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       "ST_Distance(df1.geom, df2.geom) < df1.dist",
       "ST_Distance(df1.geom, df2.geom) < df2.dist",
       "ST_Distance(df2.geom, df1.geom) < df1.dist",
-      "ST_Distance(df2.geom, df1.geom) < df2.dist"
+      "ST_Distance(df2.geom, df1.geom) < df2.dist",
+
+      "1.0 > ST_Distance(df1.geom, df2.geom)",
+      "1.0 >= ST_Distance(df1.geom, df2.geom)"
     )
 
     var spatialJoinPartitionSide = "left"
@@ -242,6 +245,12 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
           } else {
             (l: Geometry, r: Geometry) => l.distance(r) < 1.0
           }
+        }
+      case _ =>
+        if (udf.contains(">=")) {
+          (l: Geometry, r: Geometry) => l.distance(r) <= 1.0
+        } else {
+          (l: Geometry, r: Geometry) => l.distance(r) < 1.0
         }
     }
     left.flatMap { case (id, geom) =>
