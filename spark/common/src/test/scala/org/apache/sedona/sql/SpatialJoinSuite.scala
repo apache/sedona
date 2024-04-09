@@ -172,6 +172,22 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     }
   }
 
+  describe("Spatial join optimizer should work with complex join conditions") {
+    it("Optimize spatial join with complex join conditions") {
+      withOptimizationMode("all") {
+        prepareTempViewsForTestData()
+        val df = sparkSession.sql(
+          """
+            |SELECT df1.id, df2.id FROM df1 JOIN df2 ON
+            |ST_Intersects(df1.geom, df2.geom) AND df1.id > df2.id AND df1.id < df2.id + 100""".stripMargin)
+        assert(isUsingOptimizedSpatialJoin(df))
+        val expectedResult = buildExpectedResult("ST_Intersects(df1.geom, df2.geom)")
+          .filter { case (id1, id2) => id1 > id2 && id1 < id2 + 100 }
+        verifyResult(expectedResult, df)
+      }
+    }
+  }
+
   private def withOptimizationMode(mode: String)(body: => Unit) : Unit = {
     val oldOptimizationMode = sparkSession.conf.get("sedona.join.optimizationmode", "nonequi")
     try {
