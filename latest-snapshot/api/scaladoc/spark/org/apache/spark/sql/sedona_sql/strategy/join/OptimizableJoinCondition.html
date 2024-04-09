@@ -3,9 +3,9 @@
         <head>
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-          <title>org.apache.sedona:sedona-spark-common-3.0_2.12 1.6.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.strategy.join.JoinedGeometry</title>
-          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.0 2.12 1.6.0 - SNAPSHOT API - org.apache.spark.sql.sedona sql.strategy.join.JoinedGeometry" />
-          <meta name="keywords" content="org.apache.sedona sedona spark common 3.0 2.12 1.6.0 SNAPSHOT API org.apache.spark.sql.sedona sql.strategy.join.JoinedGeometry" />
+          <title>org.apache.sedona:sedona-spark-common-3.0_2.12 1.6.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.strategy.join.OptimizableJoinCondition</title>
+          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.0 2.12 1.6.0 - SNAPSHOT API - org.apache.spark.sql.sedona sql.strategy.join.OptimizableJoinCondition" />
+          <meta name="keywords" content="org.apache.sedona sedona spark common 3.0 2.12 1.6.0 SNAPSHOT API org.apache.spark.sql.sedona sql.strategy.join.OptimizableJoinCondition" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       
@@ -203,8 +203,8 @@
                         <a href="JoinSide.html" title="">JoinSide</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
-                        <a class="object" href="" title="Utility functions for generating geometries for spatial join."></a>
-                        <a href="" title="Utility functions for generating geometries for spatial join.">JoinedGeometry</a>
+                        <a class="object" href="JoinedGeometry$.html" title="Utility functions for generating geometries for spatial join."></a>
+                        <a href="JoinedGeometry$.html" title="Utility functions for generating geometries for spatial join.">JoinedGeometry</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
                         <a class="object" href="JoinedGeometryRaster$.html" title=""></a>
@@ -215,8 +215,8 @@
                         <a href="LeftSide$.html" title="">LeftSide</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
-                        <a class="class" href="OptimizableJoinCondition.html" title=""></a>
-                        <a href="OptimizableJoinCondition.html" title="">OptimizableJoinCondition</a>
+                        <a class="class" href="" title=""></a>
+                        <a href="" title="">OptimizableJoinCondition</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
                         <a class="class" href="RangeJoinExec.html" title="ST_Contains(left, right) - left contains right or ST_Intersects(left, right) - left and right intersect"></a>
@@ -242,12 +242,12 @@
             </div>
           </div>
           <div id="content">
-            <body class="object value">
+            <body class="class type">
       <div id="definition">
-        <div class="big-circle object">o</div>
+        <div class="big-circle class">c</div>
         <p id="owner"><a href="../../../../../../index.html" class="extype" name="org">org</a>.<a href="../../../../../index.html" class="extype" name="org.apache">apache</a>.<a href="../../../../index.html" class="extype" name="org.apache.spark">spark</a>.<a href="../../../index.html" class="extype" name="org.apache.spark.sql">sql</a>.<a href="../../index.html" class="extype" name="org.apache.spark.sql.sedona_sql">sedona_sql</a>.<a href="../index.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy">strategy</a>.<a href="index.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join">join</a></p>
-        <h1>JoinedGeometry<span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html" title="Permalink">
+        <h1>OptimizableJoinCondition<span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
@@ -257,20 +257,19 @@
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">object</span>
+        <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">JoinedGeometry</span>
+        <span class="name">OptimizableJoinCondition</span><span class="params">(<span name="left">left: <span class="extype" name="org.apache.spark.sql.catalyst.plans.logical.LogicalPlan">LogicalPlan</span></span>, <span name="right">right: <span class="extype" name="org.apache.spark.sql.catalyst.plans.logical.LogicalPlan">LogicalPlan</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Utility functions for generating geometries for spatial join.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -296,7 +295,7 @@
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinedGeometry"><span>JoinedGeometry</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="org.apache.spark.sql.sedona_sql.strategy.join.OptimizableJoinCondition"><span>OptimizableJoinCondition</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -314,7 +313,26 @@
 
       <div id="template">
         <div id="allMembers">
-        
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="org.apache.spark.sql.sedona_sql.strategy.join.OptimizableJoinCondition#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(left:org.apache.spark.sql.catalyst.plans.logical.LogicalPlan,right:org.apache.spark.sql.catalyst.plans.logical.LogicalPlan):org.apache.spark.sql.sedona_sql.strategy.join.OptimizableJoinCondition"></a><a id="&lt;init&gt;:OptimizableJoinCondition"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#&lt;init&gt;(left:org.apache.spark.sql.catalyst.plans.logical.LogicalPlan,right:org.apache.spark.sql.catalyst.plans.logical.LogicalPlan):org.apache.spark.sql.sedona_sql.strategy.join.OptimizableJoinCondition" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">OptimizableJoinCondition</span><span class="params">(<span name="left">left: <span class="extype" name="org.apache.spark.sql.catalyst.plans.logical.LogicalPlan">LogicalPlan</span></span>, <span name="right">right: <span class="extype" name="org.apache.spark.sql.catalyst.plans.logical.LogicalPlan">LogicalPlan</span></span>)</span>
+      </span>
+      
+      
+    </li></ol>
+            </div>
 
         
 
@@ -326,7 +344,7 @@
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -342,7 +360,7 @@
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html###():Int" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -358,7 +376,7 @@
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -374,7 +392,7 @@
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -390,7 +408,7 @@
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#clone():Object" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -414,7 +432,7 @@
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -427,26 +445,10 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#equals(x$1:Any):Boolean" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#finalize():Unit" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -465,26 +467,10 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.JoinedGeometry#geometryToExpandedEnvelope" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="geometryToExpandedEnvelope(geom:org.locationtech.jts.geom.Geometry,distance:Double,isGeography:Boolean):org.locationtech.jts.geom.Geometry"></a><a id="geometryToExpandedEnvelope(Geometry,Double,Boolean):Geometry"></a>
-      <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#geometryToExpandedEnvelope(geom:org.locationtech.jts.geom.Geometry,distance:Double,isGeography:Boolean):org.locationtech.jts.geom.Geometry" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">geometryToExpandedEnvelope</span><span class="params">(<span name="geom">geom: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>, <span name="distance">distance: <span class="extype" name="scala.Double">Double</span></span>, <span name="isGeography">isGeography: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Convert the given geometry to an envelope expanded by distance.</p><div class="fullcomment"><div class="comment cmt"><p>Convert the given geometry to an envelope expanded by distance.</p></div><dl class="paramcmts block"><dt class="param">geom</dt><dd class="cmt"><p>the geometry to expand</p></dd><dt class="param">distance</dt><dd class="cmt"><p>the distance to expand</p></dd><dt class="param">isGeography</dt><dd class="cmt"><p>whether the geometry is on a sphere</p></dd><dt>returns</dt><dd class="cmt"><p>the expanded envelope</p></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -500,29 +486,10 @@
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="hashCode():Int"></a>
-      <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#hashCode():Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
-                <span class="name">@native</span><span class="args">()</span>
-              
-        </dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -535,10 +502,26 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.OptimizableJoinCondition#left" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="left:org.apache.spark.sql.catalyst.plans.logical.LogicalPlan"></a><a id="left:LogicalPlan"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#left:org.apache.spark.sql.catalyst.plans.logical.LogicalPlan" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">left</span><span class="result">: <span class="extype" name="org.apache.spark.sql.catalyst.plans.logical.LogicalPlan">LogicalPlan</span></span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -554,7 +537,7 @@
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#notify():Unit" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -573,7 +556,7 @@
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -589,10 +572,26 @@
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.OptimizableJoinCondition#right" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="right:org.apache.spark.sql.catalyst.plans.logical.LogicalPlan"></a><a id="right:LogicalPlan"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#right:org.apache.spark.sql.catalyst.plans.logical.LogicalPlan" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">right</span><span class="result">: <span class="extype" name="org.apache.spark.sql.catalyst.plans.logical.LogicalPlan">LogicalPlan</span></span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -605,10 +604,10 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="toString():String"></a>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.OptimizableJoinCondition#unapply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="unapply(expression:org.apache.spark.sql.catalyst.expressions.Expression):Option[(org.apache.spark.sql.catalyst.expressions.Expression,Option[org.apache.spark.sql.catalyst.expressions.Expression])]"></a><a id="unapply(Expression):Option[(Expression,Option[Expression])]"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#toString():String" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#unapply(expression:org.apache.spark.sql.catalyst.expressions.Expression):Option[(org.apache.spark.sql.catalyst.expressions.Expression,Option[org.apache.spark.sql.catalyst.expressions.Expression])]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -617,14 +616,15 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">unapply</span><span class="params">(<span name="expression">expression: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[(<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>, <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>])]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <p class="shortcomment cmt">An extractor that matches expressions that are optimizable join conditions.</p><div class="fullcomment"><div class="comment cmt"><p>An extractor that matches expressions that are optimizable join conditions. Join queries with optimizable join
+conditions will be executed as a spatial join (RangeJoin or DistanceJoin).</p></div><dl class="paramcmts block"><dt class="param">expression</dt><dd class="cmt"><p>the join condition</p></dd><dt>returns</dt><dd class="cmt"><p>an optional tuple containing the spatial predicate and the other predicates</p></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#wait():Unit" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -646,7 +646,7 @@
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -668,7 +668,7 @@
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/OptimizableJoinCondition.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -699,7 +699,15 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="scala.Serializable">
+              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="scala.Product">
+              <h3>Inherited from <span class="extype" name="scala.Product">Product</span></h3>
+            </div><div class="parent" name="scala.Equals">
+              <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
