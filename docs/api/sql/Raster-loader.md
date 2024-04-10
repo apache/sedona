@@ -208,7 +208,7 @@ This API requires the name of the record variable. It is assumed that a variable
 
 If this assumption does not hold true for your case, you can choose to pass the lonDimensionName and latDimensionName explicitly.
 
-You can use [RS_NetCDFInfo](./#rs_netcdfinfo) to get the details of the passed netCDF file (variables and its dimensions).
+You can use [RS_NetCDFInfo](#rs_netcdfinfo) to get the details of the passed netCDF file (variables and its dimensions).
 
 Format 1: `RS_FromNetCDF(netCDF: ARRAY[Byte], recordVariableName: String)`
 

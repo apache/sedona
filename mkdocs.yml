@@ -110,9 +110,10 @@ nav:
         - Vote a release: community/vote.md
       - Publications: community/publication.md
     - Use cases:
-      - Spatially aggregate airports per country: usecases/airport-country.md
-      - Match foot traffic to Seattle coffee shops: usecases/foot-traffic.md
-      - Raster image manipulation: usecases/raster.md
+      - Use cases: usecases/usecases.md
+      - Spatially aggregate airports per country: https://nbviewer.org/github/apache/sedona/blob/master/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb" target="_blank
+      - Match foot traffic to Seattle coffee shops: https://nbviewer.org/github/jiayuasu/sigspatial-2021-cafe-analysis/blob/master/notebooks/Workshop_example.ipynb" target="_blank
+      - Raster image manipulation: https://nbviewer.org/github/johnymontana/raster-data-analysis-spatial-sql/blob/main/00-raster-data-analysis.ipynb" target="_blank
     - Apache Software Foundation:
       - Foundation: asf/asf.md
       - License: https://www.apache.org/licenses/" target="_blank
@@ -162,7 +163,7 @@ extra:
     current_rc: 1.5.1-rc1
     current_snapshot: 1.5.1-SNAPSHOT
     next_version: 1.6.0
-copyright: Copyright © 2024 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="http://www.apache.org/">Apache Software Foundation</a> for more details.
+copyright: Copyright © 2024 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="http://www.apache.org/">Apache Software Foundation</a> for more details.<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f3e121f6-c909-4592-8be6-5bd345768cba" />
 
 markdown_extensions:
   - admonition

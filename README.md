@@ -9,12 +9,30 @@
 | Apache Sedona              | 225k/month | [![PyPI - Downloads](https://img.shields.io/pypi/dm/apache-sedona)](https://pepy.tech/project/apache-sedona) [![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/apache-sedona) | [![Anaconda-Server Badge](https://anaconda.org/conda-forge/apache-sedona/badges/downloads.svg)](https://anaconda.org/conda-forge/apache-sedona) | [![](https://cranlogs.r-pkg.org/badges/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) [![](https://cranlogs.r-pkg.org/badges/grand-total/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) | [![Docker pulls](https://img.shields.io/docker/pulls/apache/sedona?color=brightgreen)](https://hub.docker.com/r/apache/sedona) |
 | Archived GeoSpark releases | 10k/month  | [![PyPI - Downloads](https://img.shields.io/pypi/dm/geospark)](https://pepy.tech/project/geospark)[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/geospark)                      |                                                                                                                                                 |                                                                                                                                                                                                                                                                   |                                                                                                                                |
 
+* [Join the community](#join-the-community)
 * [What is Apache Sedona?](#what-is-apache-sedona)
-* [Features](#features)
+  * [Features](#features)
 * [When to use Sedona?](#when-to-use-sedona)
+  * [Use Cases](#use-cases)
+  * [Code Example](#code-example)
+* [Docker image](#docker-image)
 * [Building Sedona](#building-sedona)
 * [Documentation](#documentation)
-* [Join the community](#join-the-community)
+* [Powered by](#powered-by)
+
+## Join the community
+
+Follow Sedona on Twitter for fresh news: [Sedona@Twitter](https://twitter.com/ApacheSedona)
+
+Join the Sedona Discord community: [![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://share.hsforms.com/1Ndql_ZigTdmLlVQc_d1o4gqga4q)
+
+Join the Sedona monthly community office hour: [Google Calendar](https://calendar.google.com/calendar/event?action=TEMPLATE&tmeid=NjI0cWgwcTZndnI1anAzYnFrNHY5Y2wyaTRfMjAyNDA0MDlUMTUwMDAwWiBjX2VmN2Q1NGY1MzA4YTRiN2YyNWFjMzNkMGY3ZWViNTRhM2E3ZjExNWI2ODlmYWY0ZDgyNDI1ZjNjYjVlZGU5MzVAZw&tmsrc=c_ef7d54f5308a4b7f25ac33d0f7eeb54a3a7f115b689faf4d82425f3cb5ede935%40group.calendar.google.com&scp=ALL), Tuesdays from 8 AM to 9 AM Pacific Time, every 4 weeks
+
+[Sedona JIRA](https://issues.apache.org/jira/projects/SEDONA): Bugs, Pull Requests, and other similar issues
+
+[Sedona Mailing Lists](https://lists.apache.org/list.html?sedona.apache.org): [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org): project development, general questions or tutorials.
+
+* Please first subscribe and then post emails. To subscribe, please send an email (leave the subject and content blank) to dev-subscribe@sedona.apache.org
 
 ## What is Apache Sedona?
 
@@ -104,7 +122,7 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
   ```
   pip install apache-sedona
   ```
-* To Compile the source code, please refer to [Sedona website](https://sedona.apache.org/latest-snapshot/setup/compile/)
+* To compile the source code, please refer to [Sedona website](https://sedona.apache.org/latest-snapshot/setup/compile/)
 
 * Modules in the source code
 
@@ -128,18 +146,6 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
 * [Working with Spatial R in Sedona](https://sedona.apache.org/latest-snapshot/api/rdocs/)
 
 Please visit [Apache Sedona website](http://sedona.apache.org/) for detailed information
-
-## Join the community
-
-Follow Sedona on Twitter for fresh news: [Sedona@Twitter](https://twitter.com/ApacheSedona)
-
-Join the Sedona Discord community: [![](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://sedona.apache.org/latest/community/contact/#discord-server)
-
-[Sedona JIRA](https://issues.apache.org/jira/projects/SEDONA): Bugs, Pull Requests, and other similar issues
-
-[Sedona Mailing Lists](https://lists.apache.org/list.html?sedona.apache.org): [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org): project development, general questions or tutorials.
-
-* Please first subscribe and then post emails. To subscribe, please send an email (leave the subject and content blank) to dev-subscribe@sedona.apache.org
 
 ## Powered by
 
