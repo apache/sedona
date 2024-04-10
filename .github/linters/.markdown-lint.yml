@@ -3,9 +3,6 @@
 # heading-increment - Heading levels should only increment by one level at a time
 MD001: false
 
-# ul-style - Unordered list style
-MD004: false
-
 # ul-indent - Unordered list indentation
 MD007: false
 
