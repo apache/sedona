@@ -677,7 +677,7 @@ Output: `544430.9411996207`
 
 ## ST_Dump
 
-Introduction: This is an aggregate function that takes a column of of geometries as input, and returns a single GeometryCollection of all these geometries.
+Introduction: This is an aggregate function that takes a column of geometries as input, and returns a single GeometryCollection of all these geometries.
 
 Format: `ST_Dump(geom: geometry)`
 
@@ -716,7 +716,7 @@ Output: `POINT(160 170)`
 
 ## ST_Envelope
 
-Introduction: Return the envelop boundary of A
+Introduction: Return the envelope boundary of A
 
 Format: `ST_Envelope (A:geometry)`
 
@@ -1076,7 +1076,7 @@ FROM polygondf
 
 ## ST_IsValid
 
-Introduction: Test if a geometry is well formed. The function can be invoked with just the geometry or with an additional flag (from `v1.5.1`). The flag alters the validity checking behavior. The flags parameter is a bitfield with the following options:
+Introduction: Test if a geometry is well-formed. The function can be invoked with just the geometry or with an additional flag (from `v1.5.1`). The flag alters the validity checking behavior. The flags parameter is a bitfield with the following options:
 
 - 0 (default): Use usual OGC SFS (Simple Features Specification) validity semantics.
 - 1: "ESRI flag", Accepts certain self-touching rings as valid, which are considered invalid under OGC standards.
@@ -1336,7 +1336,7 @@ Result:
 
 Introduction: Given an invalid geometry, create a valid representation of the geometry.
 
-Collapsed geometries are either converted to empty (keepCollaped=true) or a valid geometry of lower dimension (keepCollapsed=false).
+Collapsed geometries are either converted to empty (keepCollapsed=true) or a valid geometry of lower dimension (keepCollapsed=false).
 Default is keepCollapsed=false.
 
 Format: `ST_MakeValid (A:geometry)`
