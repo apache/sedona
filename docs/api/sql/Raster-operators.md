@@ -1254,9 +1254,9 @@ The convex hull of the raster is considered in the test.
 
 Rules for testing spatial relationship:
 
-* If the raster or geometry does not have a defined SRID, it is assumed to be in WGS84.
-* If both sides are in the same CRS, then perform the relationship test directly.
-* Otherwise, both sides will be transformed to WGS84 before the relationship test.
+- If the raster or geometry does not have a defined SRID, it is assumed to be in WGS84.
+- If both sides are in the same CRS, then perform the relationship test directly.
+- Otherwise, both sides will be transformed to WGS84 before the relationship test.
 
 Format:
 
@@ -2058,9 +2058,9 @@ NODATA values. If raster band(s) do not have NODATA value(s) specified, one can 
 
 The returned records have the following schema:
 
-* `x`: The index of the tile along X axis (0-based).
-* `y`: The index of the tile along Y axis (0-based).
-* `tile`: The tile.
+- `x`: The index of the tile along X axis (0-based).
+- `y`: The index of the tile along Y axis (0-based).
+- `tile`: The tile.
 
 SQL example:
 

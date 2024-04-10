@@ -684,19 +684,19 @@ This version is a major release on Sedona 1.3.0 line and consists of 50 PRs. It 
 
 ### Highlights
 
-- [X] Sedona on Spark in this release is compiled against Spark 3.3.
-- [X] Sedona on Flink in this release is compiled against Flink 1.14.
-- [X] Scala 2.11 support is removed.
-- [X] Spark 2.X support is removed.
-- [X] Python 3.10 support is added.
-- [X] Aggregators in Flink are added
-- [X] Correctness fixes for corner cases in range join and distance join.
-- [X] Native GeoParquet read and write (../../tutorial/sql/#load-geoparquet).
+* [X] Sedona on Spark in this release is compiled against Spark 3.3.
+* [X] Sedona on Flink in this release is compiled against Flink 1.14.
+* [X] Scala 2.11 support is removed.
+* [X] Spark 2.X support is removed.
+* [X] Python 3.10 support is added.
+* [X] Aggregators in Flink are added
+* [X] Correctness fixes for corner cases in range join and distance join.
+* [X] Native GeoParquet read and write (../../tutorial/sql/#load-geoparquet).
     * `df = spark.read.format("geoparquet").option("fieldGeometry", "myGeometryColumn").load("PATH/TO/MYFILE.parquet")`
     * `df.write.format("geoparquet").save("PATH/TO/MYFILE.parquet")`
-- [X] DataFrame style API (../../tutorial/sql/#dataframe-style-api)
+* [X] DataFrame style API (../../tutorial/sql/#dataframe-style-api)
     * `df.select(ST_Point(min_value, max_value).as("point"))`
-- [X] Allow WKT format CRS in ST_Transform
+* [X] Allow WKT format CRS in ST_Transform
     * `ST_Transform(geom, "srcWktString", "tgtWktString")`
 
 ```yaml
