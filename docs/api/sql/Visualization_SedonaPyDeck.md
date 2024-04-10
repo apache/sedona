@@ -1,11 +1,13 @@
 SedonaPyDeck offers a number of APIs which aid in quick and interactive visualization of a geospatial data in a Jupyter notebook/lab environment.
 
 Inorder to start using SedonaPyDeck, simply import Sedona using:
+
 ```python
 from sedona.spark import *
 ```
 
 Alternatively it can also be imported using:
+
 ```python
 from sedona.maps.SedonaPyDeck import SedonaPyDeck
 ```
@@ -39,6 +41,7 @@ def create_choropleth_map(df, fill_color=None, plot_col=None, initial_view_state
 The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.
 
 For example, all these are valid values of fill_color:
+
 ```python
 fill_color=[255, 12, 250]
 fill_color=[0, 12, 250, 255]
