@@ -221,6 +221,16 @@ class constructorTestScala extends TestBaseScala {
       assert(polygonDf.count() == 8)
     }
 
+    it("Passed ST_PointFromGeoHash") {
+      var actual = sparkSession.sql("SELECT ST_AsText(ST_PointFromGeoHash('9qqj7nmxncgyy4d0dbxqz0', 4))").first().get(0)
+      var expected = "POINT (-115.13671875 36.123046875)"
+      assert(expected.equals(actual))
+
+      actual = sparkSession.sql("SELECT ST_AsText(ST_PointFromGeoHash('9qqj7nmxncgyy4d0dbxqz0'))").first().get(0)
+      expected = "POINT (-115.17281600000001 36.11464599999999)"
+      assert(expected.equals(actual))
+    }
+
     it("Passed ST_GeomFromText") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")

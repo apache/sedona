@@ -464,6 +464,19 @@ public class ConstructorTest extends TestBase{
     }
 
     @Test
+    public void testPointFromGeoHash() {
+        String actual = first(tableEnv.sqlQuery("SELECT 's00twy01mt' as geohash")
+                .select(call(Constructors.ST_PointFromGeoHash.class.getSimpleName(),
+                        $("geohash"), 4))).getField(0).toString();
+        assertEquals("POINT (0.87890625 0.966796875)", actual);
+
+        actual = first(tableEnv.sqlQuery("SELECT 's00twy01mt' as geohash")
+                .select(call(Constructors.ST_PointFromGeoHash.class.getSimpleName(),
+                        $("geohash")))).getField(0).toString();
+        assertEquals("POINT (0.9999972581863403 0.9999999403953552)", actual);
+    }
+
+    @Test
     public void testGeomFromGeoHashNullPrecision() {
         List<Row> data = new ArrayList<>();
         data.add(Row.of("2131s12fd", "polygon", 0L));

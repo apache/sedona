@@ -409,6 +409,13 @@ case class ST_GeomFromGeoHash(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_PointFromGeoHash(inputExpressions: Seq[Expression])
+  extends InferredExpression(InferrableFunction.allowRightNull(Constructors.pointFromGeoHash)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_GeomFromGML(inputExpressions: Seq[Expression])
   extends InferredExpression(Constructors.geomFromGML _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {

@@ -26,6 +26,7 @@ public class Catalog {
                 new Constructors.ST_PointZ(),
                 new Constructors.ST_PointM(),
                 new Constructors.ST_PointZM(),
+                new Constructors.ST_PointFromGeoHash(),
                 new Constructors.ST_PointFromText(),
                 new Constructors.ST_PointFromWKB(),
                 new Constructors.ST_LineFromWKB(),

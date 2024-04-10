@@ -952,6 +952,20 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geoHash", "precision"})
+    public static byte[] ST_PointFromGeoHash(String geoHash, Integer precision) {
+        return GeometrySerde.serialize(
+                Constructors.pointFromGeoHash(geoHash, precision)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geoHash"})
+    public static byte[] ST_PointFromGeoHash(String geoHash) {
+        return GeometrySerde.serialize(
+                Constructors.pointFromGeoHash(geoHash, null)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "n"})
     public static byte[] ST_PointN(byte[] geometry, int n) {
         return GeometrySerde.serialize(

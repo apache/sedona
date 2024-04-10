@@ -317,6 +317,20 @@ public class Constructors {
         }
     }
 
+    public static class ST_PointFromGeoHash extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String value,
+                             @DataTypeHint("Int") Integer precision) {
+            // The default precision is the geohash length. Otherwise, use the precision given by the user
+            return org.apache.sedona.common.Constructors.pointFromGeoHash(value, precision);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String value) {
+            return eval(value, null);
+        }
+    }
+
     public static class ST_GeomFromGML extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String gml) throws ParseException {

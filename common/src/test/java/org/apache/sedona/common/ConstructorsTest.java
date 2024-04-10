@@ -108,6 +108,18 @@ public class ConstructorsTest {
     }
 
     @Test
+    public void pointFromGeoHash() {
+        String point = Functions.asWKT(Constructors.pointFromGeoHash("9qqj7nmxncgyy4d0dbxqz0", 4));
+        assertEquals("POINT (-115.13671875 36.123046875)", point);
+
+        point = Functions.asWKT(Constructors.pointFromGeoHash("9qqj7nmxncgyy4d0dbxqz0", null));
+        assertEquals("POINT (-115.17281600000001 36.11464599999999)", point);
+
+        point = Functions.asWKT(Constructors.pointFromGeoHash("9qqj7nmxncgyy4d0dbxqz0", 1));
+        assertEquals("POINT (-112.5 22.5)", point);
+    }
+
+    @Test
     public void point2d() {
         Geometry point = Constructors.makePoint(1.0d, 2.0d, null, null);
 
