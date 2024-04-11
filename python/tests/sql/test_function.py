@@ -540,6 +540,19 @@ class TestPredicateJoin(TestBase):
 
         assert (not polygons.count())
 
+    def test_st_zmflag(self):
+        actual = self.spark.sql("SELECT ST_Zmflag(ST_GeomFromWKT('POINT (1 2)'))").take(1)[0][0]
+        assert actual == 0
+
+        actual = self.spark.sql("SELECT ST_Zmflag(ST_GeomFromWKT('LINESTRING (1 2 3, 4 5 6)'))").take(1)[0][0]
+        assert actual == 2
+
+        actual = self.spark.sql("SELECT ST_Zmflag(ST_GeomFromWKT('POLYGON M((1 2 3, 3 4 3, 5 6 3, 3 4 3, 1 2 3))'))").take(1)[0][0]
+        assert actual == 1
+
+        actual = self.spark.sql("SELECT ST_Zmflag(ST_GeomFromWKT('MULTIPOLYGON ZM (((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1)), ((15 5 3 1, 20 10 6 2, 10 10 7 3, 15 5 3 1)))'))").take(1)[0][0]
+        assert actual == 3
+
     def test_st_z_max(self):
         linestring_df = self.spark.sql("SELECT ST_GeomFromWKT('LINESTRING Z (0 0 1, 0 1 2)') as geom")
         linestring_row = [lnstr_row[0] for lnstr_row in linestring_df.selectExpr("ST_ZMax(geom)").collect()]

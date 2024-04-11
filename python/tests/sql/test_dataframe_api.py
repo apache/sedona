@@ -202,6 +202,7 @@ test_configurations = [
     (stf.ST_YMax, ("geom",), "triangle_geom", "", 1.0),
     (stf.ST_YMin, ("geom",), "triangle_geom", "", 0.0),
     (stf.ST_Z, ("b",), "two_points", "", 4.0),
+    (stf.ST_Zmflag, ("b",), "two_points", "", 2),
     (stf.ST_IsValidReason, ("geom",), "triangle_geom", "", "Valid Geometry"),
     (stf.ST_IsValidReason, ("geom", 1), "triangle_geom", "", "Valid Geometry"),
 
@@ -386,6 +387,7 @@ wrong_type_configurations = [
     (stf.ST_YMax, (None,)),
     (stf.ST_YMin, (None,)),
     (stf.ST_Z, (None,)),
+    (stf.ST_Zmflag, (None,)),
 
     # predicates
     (stp.ST_Contains, (None, "")),

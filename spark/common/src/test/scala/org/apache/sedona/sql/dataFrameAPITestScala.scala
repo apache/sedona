@@ -727,6 +727,20 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Should pass ST_Zmflag") {
+      var actual = sparkSession.sql("SELECT ST_GeomFromWKT('POINT (1 2)') AS geom").select(ST_Zmflag("geom")).first().get(0)
+      assert(actual == 0)
+
+      actual = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (1 2 3, 4 5 6)') AS geom").select(ST_Zmflag("geom")).first().get(0)
+      assert(actual == 2)
+
+      actual = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON M((1 2 3, 3 4 3, 5 6 3, 3 4 3, 1 2 3))') AS geom").select(ST_Zmflag("geom")).first().get(0)
+      assert(actual == 1)
+
+      actual = sparkSession.sql("SELECT ST_GeomFromWKT('MULTIPOLYGON ZM (((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1)), ((15 5 3 1, 20 10 6 2, 10 10 7 3, 15 5 3 1)))') AS geom").select(ST_Zmflag("geom")).first().get(0)
+      assert(actual == 3)
+    }
+
     it("Passed ST_StartPoint") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom")
       val df = baseDf.select(ST_StartPoint("geom"))

@@ -1510,6 +1510,18 @@ def ST_Z(point: ColumnOrName) -> Column:
     return _call_st_function("ST_Z", point)
 
 @validate_argument_types
+def ST_Zmflag(geom: ColumnOrName) -> Column:
+    """Return the code indicating the ZM coordinate dimension of a geometry
+        2D = 0, 3D-M = 1, 3D-Z = 2, 4D = 3
+
+    :param geom: Geometry column
+    :type geom: ColumnOrName
+    :return: Code for coordinate dimension of the geometry as an integer column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_Zmflag", geom)
+
+@validate_argument_types
 def ST_ZMax(geometry: ColumnOrName) -> Column:
     """Return the maximum Z coordinate of a geometry.
 

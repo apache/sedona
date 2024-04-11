@@ -2305,6 +2305,22 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void testZmFlag() throws ParseException {
+        int _2D = 0, _3DM = 1, _3DZ = 2, _4D = 3;
+        Geometry geom = Constructors.geomFromWKT("POINT (1 2)", 0);
+        assertEquals(_2D, Functions.zmFlag(geom));
+
+        geom = Constructors.geomFromWKT("LINESTRING (1 2 3, 4 5 6)", 0);
+        assertEquals(_3DZ, Functions.zmFlag(geom));
+
+        geom = Constructors.geomFromWKT("POLYGON M((1 2 3, 3 4 3, 5 6 3, 3 4 3, 1 2 3))", 0);
+        assertEquals(_3DM, Functions.zmFlag(geom));
+
+        geom = Constructors.geomFromWKT("MULTIPOLYGON ZM (((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1)), ((15 5 3 1, 20 10 6 2, 10 10 7 3, 15 5 3 1)))", 0);
+        assertEquals(_4D, Functions.zmFlag(geom));
+    }
+
+    @Test
     public void hausdorffDistanceDefaultGeom2D() throws Exception {
         Polygon polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 1, 1, 2, 2, 1, 5, 2, 0, 1, 1, 0, 1));
         Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(4, 0, 4, 6, 1, 4, 6, 4, 9, 6, 1, 3, 4, 0, 4));

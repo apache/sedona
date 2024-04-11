@@ -107,6 +107,7 @@ public class Catalog {
                 new Functions.ST_X(),
                 new Functions.ST_Y(),
                 new Functions.ST_Z(),
+                new Functions.ST_Zmflag(),
                 new Functions.ST_YMax(),
                 new Functions.ST_YMin(),
                 new Functions.ST_XMax(),

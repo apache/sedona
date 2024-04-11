@@ -3477,3 +3477,41 @@ Output:
 ```
 4.0
 ```
+
+## ST_Zmflag
+
+Introduction: Returns a code indicating the Z and M coordinate dimensions present in the input geometry.
+
+Values are: 0 = 2D, 1 = 3D-M, 2 = 3D-Z, 3 = 4D.
+
+Format: `ST_Zmflag(geom: Geometry)`
+
+Since: `vTBD`
+
+SQL Example
+
+```sql
+SELECT ST_Zmflag(
+        ST_GeomFromWKT('LINESTRING Z(1 2 3, 4 5 6)')
+)
+```
+
+Output:
+
+```
+2
+```
+
+SQL Example
+
+```sql
+SELECT ST_Zmflag(
+        ST_GeomFromWKT('POINT ZM(1 2 3 4)')
+)
+```
+
+Output:
+
+```
+3
+```

@@ -445,6 +445,14 @@ case class ST_Z(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Zmflag(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.zmFlag _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_StartPoint(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.startPoint _) {
 

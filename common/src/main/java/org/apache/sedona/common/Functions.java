@@ -762,6 +762,24 @@ public class Functions {
         }
     }
 
+    public static int zmFlag(Geometry geom) {
+        Coordinate coords = geom.getCoordinate();
+        boolean hasZ = !Double.isNaN(coords.getZ());
+        boolean hasM = !Double.isNaN(coords.getM());
+        if (hasM && hasZ) {
+            // geom is 4D
+            return 3;
+        } else if (hasZ) {
+            // geom is 3D-Z
+            return 2;
+        } else if (hasM) {
+            // geom is 3D-M
+            return 1;
+        }
+        // geom is 2D
+        return 0;
+    }
+
     public static Geometry concaveHull(Geometry geometry, double pctConvex, boolean allowHoles){
         ConcaveHull concave_hull = new ConcaveHull(geometry);
         concave_hull.setMaximumEdgeLengthRatio(pctConvex);
