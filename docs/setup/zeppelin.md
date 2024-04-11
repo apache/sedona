@@ -1,7 +1,7 @@
 # Install Sedona-Zeppelin
 
 !!!warning
-	**Known issue**: due to an issue in Leaflet JS, Sedona can only plot each geometry (point, line string and polygon) as a point on Zeppelin map. To enjoy the scalable and full-fleged visualization, please use SedonaViz to plot scatter plots and heat maps on Zeppelin map.
+	**Known issue**: due to an issue in Leaflet JS, Sedona can only plot each geometry (point, line string and polygon) as a point on Zeppelin map. To enjoy the scalable and full-fledged visualization, please use SedonaViz to plot scatter plots and heat maps on Zeppelin map.
 
 ## Compatibility
 

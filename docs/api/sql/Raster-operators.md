@@ -757,7 +757,7 @@ POINT (2 1)
 ```
 
 !!!Note
-    If the given geometry point is not in the same CRS as the given raster, the given geometry will be transformed to the given raster's CRS. You can use [ST_Transform](../Function/#st_transform) to transform the geometry beforehand.
+    If the given geometry point is not in the same CRS as the given raster, the given geometry will be transformed to the given raster's CRS. You can use [ST_Transform](Function.md#st_transform) to transform the geometry beforehand.
 
 ### RS_WorldToRasterCoordX
 
@@ -1426,7 +1426,7 @@ Since: `v1.5.1`
 
 Original Raster:
 
-<img alt="Original raster" src="../../../image/original-raster-clip.png" width="400"/>
+![Original raster](../../image/original-raster-clip.png "Original raster"){: width="400px"}
 
 SQL Example
 
@@ -1440,7 +1440,7 @@ SELECT RS_Clip(
 
 Output:
 
-<img alt="Cropped raster" src="../../../image/cropped-raster.png" width="400"/>
+![Cropped raster](../../image/cropped-raster.png "Cropped raster"){: width="400px"}
 
 SQL Example
 
@@ -1454,7 +1454,7 @@ SELECT RS_Clip(
 
 Output:
 
-<img alt="Clipped raster" src="../../../image/clipped-raster.png" width="400"/>
+![Clipped raster](../../image/clipped-raster.png "Clipped raster"){: width="400px"}
 
 ### RS_Interpolate
 
@@ -1509,8 +1509,8 @@ SELECT RS_Interpolate(raster, 1, 2.0, 'Variable', 12, 1000)
 
 Output (Shown as heatmap):
 
-<img alt="Original raster" src="../../../image/heatmap_Interpolate.png" width="400"/>
-<img alt="Interpolated raster" src="../../../image/heatmap_Interpolate2.png" width="400"/>
+![Original raster](../../image/heatmap_Interpolate.png "Original raster"){: width="400px"}
+![Interpolated raster](../../image/heatmap_Interpolate2.png "Interpolated raster"){: width="400px"}
 
 ### RS_MetaData
 
@@ -2415,7 +2415,7 @@ Spark SQL Example for two raster input `RS_MapAlgebra`:
 RS_MapAlgebra(rast0, rast1, 'D', 'out = rast0[0] * 0.5 + rast1[0] * 0.5;', null)
 ```
 
-For more details and examples about `RS_MapAlgebra`, please refer to the [Map Algebra documentation](../Raster-map-algebra/).
+For more details and examples about `RS_MapAlgebra`, please refer to the [Map Algebra documentation](Raster-map-algebra.md).
 To learn how to write map algebra script, please refer to [Jiffle language summary](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle---language-summary).
 
 ## Map Algebra Operators

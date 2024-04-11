@@ -32,5 +32,5 @@
 - [x] Apache Zeppelin dashboard integration
 - [X] Integrate with a variety of Python tools including Jupyter notebook, GeoPandas, Shapely
 - [X] Integrate with a variety of visualization tools including KeplerGL, DeckGL
-- [x] High resolution and scalable map generation: [Visualize Spatial DataFrame/RDD](../../tutorial/viz)
+- [x] High resolution and scalable map generation: [Visualize Spatial DataFrame/RDD](../tutorial/viz.md)
 - [x] Support Scala, Java, Python, R

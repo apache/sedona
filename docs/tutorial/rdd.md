@@ -3,15 +3,15 @@ The page outlines the steps to create Spatial RDDs and run spatial queries using
 
 ## Set up dependencies
 
-Please refer to [Set up dependencies](../sql/#set-up-dependencies) to set up dependencies.
+Please refer to [Set up dependencies](sql.md#set-up-dependencies) to set up dependencies.
 
 ## Create Sedona config
 
-Please refer to [Create Sedona config](../sql/#create-sedona-config) to create a Sedona config.
+Please refer to [Create Sedona config](sql.md#create-sedona-config) to create a Sedona config.
 
 ## Initiate SedonaContext
 
-Please refer to [Initiate SedonaContext](../sql/#initiate-sedonacontext) to initiate a SedonaContext.
+Please refer to [Initiate SedonaContext](sql.md#initiate-sedonacontext) to initiate a SedonaContext.
 
 ## Create a SpatialRDD
 

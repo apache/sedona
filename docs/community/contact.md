@@ -45,4 +45,4 @@ Before submitting an issue, please:
 
 Enhancement requests for new features are also welcome. The more concrete and rationale the request is, the greater the chance it will be incorporated into future releases.
 
-Enter an issue in the [Sedona JIRA](https://issues.apache.org/jira/projects/SEDONA) or send an email to [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org)
+Enter an issue in the [Sedona JIRA](https://issues.apache.org/jira/projects/SEDONA) or email to [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org)
