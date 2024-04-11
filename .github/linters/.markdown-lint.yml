@@ -24,9 +24,6 @@ MD026: false
 # ol-prefix - Ordered list item prefix
 MD029: false
 
-# blanks-around-fences - Fenced code blocks should be surrounded by blank lines
-MD031: false
-
 # blanks-around-lists - Lists should be surrounded by blank lines
 MD032: false
 

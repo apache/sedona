@@ -32,11 +32,13 @@ Format: `RS_PixelAsCentroids(raster: Raster, band: Integer)`
 Since: `v1.5.1`
 
 SQL Example
+
 ```sql
 SELECT ST_AsText(RS_PixelAsCentroids(raster, 1)) from rasters
 ```
 
 Output:
+
 ```
 [[POINT (-13065222 4021263.75),148.0,0,0], [POINT (-13065151 4021263.75),123.0,0,1], [POINT (-13065077 4021263.75),99.0,1,0], [POINT (-13065007 4021261.75),140.0,1,1]]
 ```
@@ -89,6 +91,7 @@ SELECT ST_AsText(RS_PixelAsPoint(raster, 2, 1)) from rasters
 ```
 
 Output:
+
 ```
 POINT (123.19, -12)
 ```
@@ -100,6 +103,7 @@ SELECT ST_AsText(RS_PixelAsPoint(raster, 6, 2)) from rasters
 ```
 
 Output:
+
 ```
 IndexOutOfBoundsException: Specified pixel coordinates (6, 2) do not lie in the raster
 ```
@@ -113,11 +117,13 @@ Format: `RS_PixelAsPoints(raster: Raster, band: Integer)`
 Since: `v1.5.1`
 
 SQL Example
+
 ```sql
 SELECT ST_AsText(RS_PixelAsPoints(raster, 1)) from rasters
 ```
 
 Output:
+
 ```
 [[POINT (-13065223 4021262.75),148.0,0,0], [POINT (-13065150 4021262.75),123.0,0,1], [POINT (-13065078 4021262.75),99.0,1,0], [POINT (-13065006 4021262.75),140.0,1,1]]
 ```
@@ -183,11 +189,13 @@ Format: `RS_PixelAsPolygons(raster: Raster, band: Integer)`
 Since: `v1.5.1`
 
 SQL Example
+
 ```sql
 SELECT ST_AsText(RS_PixelAsPolygons(raster, 1)) from rasters
 ```
 
 Output:
+
 ```
 [[POLYGON ((123.19000244140625 -12, 127.19000244140625 -12, 127.19000244140625 -16, 123.19000244140625 -16, 123.19000244140625 -12)),0.0,1,1],
 [POLYGON ((127.19000244140625 -12, 131.19000244140625 -12, 131.19000244140625 -16, 127.19000244140625 -16, 127.19000244140625 -12)),0.0,2,1],
@@ -294,6 +302,7 @@ inputDf.selectExpr("ST_AsText(RS_MinConvexHull(RS_AddBandFromArray(" +
 ```
 
 Output:
+
 ```sql
 +----------------------------------------+
 |minConvexHullAll                        |
@@ -312,6 +321,7 @@ inputDf.selectExpr("ST_AsText(RS_MinConvexHull(RS_AddBandFromArray(" +
 ```
 
 Output:
+
 ```sql
 +----------------------------------------+
 |minConvexHull1                          |
@@ -617,6 +627,7 @@ SELECT RS_ScaleY(raster) FROM rasters
 ```
 
 Output:
+
 ```
 -2
 ```
@@ -716,6 +727,7 @@ SELECT RS_Width(raster) FROM rasters
 ```
 
 Output:
+
 ```
 517
 ```
@@ -1239,6 +1251,7 @@ SELECT RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLY
 ```
 
 Output:
+
 ```
 +---------+---------+
 |rast_geom|rast_rast|
@@ -1308,6 +1321,7 @@ SELECT RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGO
 ```
 
 Output:
+
 ```
 +---------+---------+
 |rast_geom|rast_rast|
@@ -1725,6 +1739,7 @@ Output:
 ```
 
 ### RS_SetValue
+
 
 Introduction: Returns a raster by replacing the value of pixel specified by `colX` and `rowY`.
 
@@ -2157,6 +2172,7 @@ SELECT RS_AddBandFromArray(raster, RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTi
 ```
 
 Output:
+
 ```
 +--------------------+
 |              raster|
@@ -2199,6 +2215,7 @@ SELECT RS_MapAlgebra(rast, 'D', 'out = (rast[3] - rast[0]) / (rast[3] + rast[0])
 ```
 
 Output:
+
 ```
 +--------------------+
 |              raster|

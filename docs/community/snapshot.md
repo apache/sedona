@@ -12,10 +12,12 @@ The detailed requirement is on [ASF Infra website](https://infra.apache.org/publ
 ## 0. Prepare an empty script file
 
 1. In your local Sedona Git repo under master branch, run
+
 ```bash
 echo '#!/bin/bash' > create-release.sh
 chmod 777 create-release.sh
 ```
+
 2. Use your favourite GUI text editor to open `create-release.sh`.
 3. Then keep copying the scripts on this web page to replace all content in this text file.
 4. Do NOT directly copy/paste the scripts to your terminal because a bug in `clipboard.js` will create link breaks in such case.
