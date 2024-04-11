@@ -211,6 +211,7 @@ POLYGON (..., ...)	Wahkiakum County
 POLYGON (..., ...)	De Baca County
 POLYGON (..., ...)	Lancaster County
 ```
+
 The file may have many other columns.
 
 Use the following code to load the data and create a raw DataFrame:
@@ -641,6 +642,7 @@ The dataset used here is the Chicago crimes dataset, available [here](https://gi
 SedonaPyDeck exposes a create_heatmap API which can be used to visualize a heatmap out of the passed SedonaDataFrame containing points:
 
 Example:
+
 ```python
 SedonaPyDeck.create_heatmap(df=crimes_df)
 ```

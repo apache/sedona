@@ -1,11 +1,13 @@
 SedonaKepler offers a number of APIs which aid in quick and interactive visualization of a geospatial data in a Jupyter notebook/lab environment.
 
 Inorder to start using SedonaKepler, simply import Sedona using:
+
 ```python
 from sedona.spark import *
 ```
 
 Alternatively it can also be imported using:
+
 ```python
 from sedona.maps.SedonaKepler import SedonaKepler
 ```

@@ -33,6 +33,7 @@ Format:
 ```bash
 docker run -e DRIVER_MEM=<driver_mem> -e EXECUTOR_MEM=<executor_mem> -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 apache/sedona:<sedona_version>
 ```
+
 Driver memory and executor memory are optional. If their values are not given, the container will take 4GB RAM for the driver and 4GB RAM for the executor.
 
 Example 1:

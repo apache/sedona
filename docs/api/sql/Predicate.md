@@ -93,6 +93,7 @@ SELECT ST_DWithin(ST_GeomFromWKT(-122.335167 47.608013), ST_GeomFromWKT(-73.9352
 ```
 
 Output:
+
 ```
 true
 ```
