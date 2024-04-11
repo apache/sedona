@@ -4170,9 +4170,9 @@
 <p>Format:
 <code>ST_GeomFromEWKT (EWkt: String)</code></p>
 <p>Since: <code>v1.5.0</code></p>
-<p>Example:
+<p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">ST_GeomFromEWKT</span><span class="p">(</span><span class="s1">&#39;SRID=4269;POINT(40.7128 -74.0060)&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>POINT(40.7128 -74.006)
 </code></pre></div>
@@ -4308,18 +4308,18 @@
 <p>Format:
 <code>ST_GeomFromWKB (Wkb: Bytes)</code></p>
 <p>Since: <code>v1.2.1</code></p>
-<p>Example:
+<p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromWKB</span><span class="p">(</span><span class="n">polygontable</span><span class="p">.</span><span class="n">_c0</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">polygonshape</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygontable</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_geomfromwkt">ST_GeomFromWKT<a class="headerlink" href="#st_geomfromwkt" title="Permanent link">&para;</a></h2>
 <p>Introduction: Construct a Geometry from WKT</p>
 <p>Format:
 <code>ST_GeomFromWKT (Wkt: String)</code></p>
 <p>Since: <code>v1.2.0</code></p>
-<p>Example:
+<p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT(40.7128 -74.0060)&#39;</span><span class="p">)</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>POINT(40.7128 -74.006)
 </code></pre></div>
@@ -4327,9 +4327,9 @@
 <p>Introduction: Construct a LineString from Text</p>
 <p>Format: <code>ST_LineFromText (Text: String)</code></p>
 <p>Since: <code>v1.2.1</code></p>
-<p>Example:
+<p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_LineFromText</span><span class="p">(</span><span class="s1">&#39;Linestring(1 2, 3 4)&#39;</span><span class="p">)</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>LINESTRING (1 2, 3 4)
 </code></pre></div>
@@ -4459,7 +4459,7 @@ Must use ST_AsEWKT function to print the Z coordinate.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 10, 2024 21:08:17</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 11, 2024 00:47:00</span>
   </span>
 
     

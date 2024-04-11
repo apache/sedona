@@ -5607,12 +5607,12 @@ If <code>colX</code> and <code>rowY</code> are out of bounds for the raster, the
 Each centroid represents the geometric center of the corresponding pixel's area.</p>
 <p>Format: <code>RS_PixelAsCentroids(raster: Raster, band: Integer)</code></p>
 <p>Since: <code>v1.5.1</code></p>
-<p>SQL Example
+<p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">RS_PixelAsCentroids</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">rasters</span>
-</code></pre></div></p>
-<p>Output:
+</code></pre></div>
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>[[POINT (-13065222 4021263.75),148.0,0,0], [POINT (-13065151 4021263.75),123.0,0,1], [POINT (-13065077 4021263.75),99.0,1,0], [POINT (-13065007 4021261.75),140.0,1,1]]
-</code></pre></div></p>
+</code></pre></div>
 <p>Spark SQL example for extracting Point, value, raster x and y coordinates:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">pointDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">...</span>
 <span class="kd">val</span><span class="w"> </span><span class="n">rasterDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;binaryFile&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/some/path/*.tiff&quot;</span><span class="p">)</span>
@@ -5648,25 +5648,25 @@ Each centroid represents the geometric center of the corresponding pixel's area.
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">RS_PixelAsPoint</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">rasters</span>
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>POINT (123.19, -12)
-</code></pre></div></p>
+</code></pre></div>
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">RS_PixelAsPoint</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">))</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">rasters</span>
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>IndexOutOfBoundsException: Specified pixel coordinates (6, 2) do not lie in the raster
-</code></pre></div></p>
+</code></pre></div>
 <h3 id="rs_pixelaspoints">RS_PixelAsPoints<a class="headerlink" href="#rs_pixelaspoints" title="Permanent link">&para;</a></h3>
 <p>Introduction: Returns a list of the pixel's upper-left corner point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band.</p>
 <p>Format: <code>RS_PixelAsPoints(raster: Raster, band: Integer)</code></p>
 <p>Since: <code>v1.5.1</code></p>
-<p>SQL Example
+<p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">RS_PixelAsPoints</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">rasters</span>
-</code></pre></div></p>
-<p>Output:
+</code></pre></div>
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>[[POINT (-13065223 4021262.75),148.0,0,0], [POINT (-13065150 4021262.75),123.0,0,1], [POINT (-13065078 4021262.75),99.0,1,0], [POINT (-13065006 4021262.75),140.0,1,1]]
-</code></pre></div></p>
+</code></pre></div>
 <p>Spark SQL example for extracting Point, value, raster x and y coordinates:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">pointDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">...</span>
 <span class="kd">val</span><span class="w"> </span><span class="n">rasterDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;binaryFile&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/some/path/*.tiff&quot;</span><span class="p">)</span>
@@ -5707,14 +5707,14 @@ If <code>colX</code> and <code>rowY</code> are out of bounds for the raster, the
 <p>Introduction: Returns a list of the polygon geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band.</p>
 <p>Format: <code>RS_PixelAsPolygons(raster: Raster, band: Integer)</code></p>
 <p>Since: <code>v1.5.1</code></p>
-<p>SQL Example
+<p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">RS_PixelAsPolygons</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">rasters</span>
-</code></pre></div></p>
-<p>Output:
+</code></pre></div>
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>[[POLYGON ((123.19000244140625 -12, 127.19000244140625 -12, 127.19000244140625 -16, 123.19000244140625 -16, 123.19000244140625 -12)),0.0,1,1],
 [POLYGON ((127.19000244140625 -12, 131.19000244140625 -12, 131.19000244140625 -16, 127.19000244140625 -16, 127.19000244140625 -12)),0.0,2,1],
 [POLYGON ((131.19000244140625 -12, 135.19000244140625 -12, 135.19000244140625 -16, 131.19000244140625 -16, 131.19000244140625 -12)),0.0,3,1]]
-</code></pre></div></p>
+</code></pre></div>
 <p>Spark SQL example for extracting Point, value, raster x and y coordinates:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">pointDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">...</span>
 <span class="kd">val</span><span class="w"> </span><span class="n">rasterDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;binaryFile&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/some/path/*.tiff&quot;</span><span class="p">)</span>
@@ -5779,26 +5779,26 @@ The created geometry representing the min convex hull has world coordinates of t
 <span class="n">inputDf</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">&quot;ST_AsText(RS_MinConvexHull(RS_AddBandFromArray(&quot;</span><span class="w"> </span><span class="o">+</span>
 <span class="w">        </span><span class="s">&quot;RS_AddBandFromArray(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), values1, 1, 0), values2, 2, 0))) as minConvexHullAll&quot;</span><span class="p">).</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code><span class="o">+</span><span class="c1">----------------------------------------+</span>
 <span class="o">|</span><span class="n">minConvexHullAll</span><span class="w">                        </span><span class="o">|</span>
 <span class="o">+</span><span class="c1">----------------------------------------+</span>
 <span class="o">|</span><span class="n">POLYGON</span><span class="w"> </span><span class="p">((</span><span class="mi">0</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">|</span>
 <span class="o">+</span><span class="c1">----------------------------------------+</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">inputDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Seq</span><span class="p">((</span><span class="nc">Seq</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
 <span class="w">        </span><span class="nc">Seq</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">))).</span><span class="n">toDF</span><span class="p">(</span><span class="s">&quot;values2&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;values1&quot;</span><span class="p">)</span>
 <span class="n">inputDf</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">&quot;ST_AsText(RS_MinConvexHull(RS_AddBandFromArray(&quot;</span><span class="w"> </span><span class="o">+</span>
 <span class="w">  </span><span class="s">&quot;RS_AddBandFromArray(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), values1, 1, 0), values2, 2, 0), 1)) as minConvexHull1&quot;</span><span class="p">).</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code><span class="o">+</span><span class="c1">----------------------------------------+</span>
 <span class="o">|</span><span class="n">minConvexHull1</span><span class="w">                          </span><span class="o">|</span>
 <span class="o">+</span><span class="c1">----------------------------------------+</span>
 <span class="o">|</span><span class="n">POLYGON</span><span class="w"> </span><span class="p">((</span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">|</span>
 <span class="o">+</span><span class="c1">----------------------------------------+</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MinConvexHull</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">rasters</span><span class="p">;</span>
 </code></pre></div>
@@ -5985,9 +5985,9 @@ UpperLeftY + ScaleY * 0.5
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_ScaleY</span><span class="p">(</span><span class="n">raster</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">rasters</span>
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>-2
-</code></pre></div></p>
+</code></pre></div>
 <h3 id="rs_skewx">RS_SkewX<a class="headerlink" href="#rs_skewx" title="Permanent link">&para;</a></h3>
 <p>Introduction: Returns the X skew or rotation parameter.</p>
 <p>Format: <code>RS_SkewX(raster: Raster)</code></p>
@@ -6035,9 +6035,9 @@ UpperLeftY + ScaleY * 0.5
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_Width</span><span class="p">(</span><span class="n">raster</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">rasters</span>
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>517
-</code></pre></div></p>
+</code></pre></div>
 <h3 id="rs_worldtorastercoord">RS_WorldToRasterCoord<a class="headerlink" href="#rs_worldtorastercoord" title="Permanent link">&para;</a></h3>
 <p>Introduction: Returns the grid coordinate of the given world coordinates as a Point.</p>
 <p>Format:</p>
@@ -6382,13 +6382,13 @@ The convex hull of the raster is considered in the test.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_Contains</span><span class="p">(</span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON ((5 5, 5 10, 10 10, 10 5, 5 5))&#39;</span><span class="p">))</span><span class="w"> </span><span class="n">rast_geom</span><span class="p">,</span>
 <span class="w">    </span><span class="n">RS_Contains</span><span class="p">(</span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"> </span><span class="n">rast_rast</span>
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>+---------+---------+
 |rast_geom|rast_rast|
 +---------+---------+
 |     true|     true|
 +---------+---------+
-</code></pre></div></p>
+</code></pre></div>
 <h3 id="rs_intersects">RS_Intersects<a class="headerlink" href="#rs_intersects" title="Permanent link">&para;</a></h3>
 <p>Introduction: Returns true if raster or geometry on the left side intersects with the raster or geometry on the right side.
 The convex hull of the raster is considered in the test.</p>
@@ -6426,13 +6426,13 @@ The convex hull of the raster is considered in the test.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_Within</span><span class="p">(</span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON ((0 0, 0 50, 100 50, 100 0, 0 0))&#39;</span><span class="p">))</span><span class="w"> </span><span class="n">rast_geom</span><span class="p">,</span>
 <span class="w">    </span><span class="n">RS_Within</span><span class="p">(</span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"> </span><span class="n">rast_rast</span>
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>+---------+---------+
 |rast_geom|rast_rast|
 +---------+---------+
 |     true|     true|
 +---------+---------+
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="raster-based-operators">Raster Based Operators<a class="headerlink" href="#raster-based-operators" title="Permanent link">&para;</a></h2>
 <h3 id="rs_addband">RS_AddBand<a class="headerlink" href="#rs_addband" title="Permanent link">&para;</a></h3>
 <p>Introduction: Adds a new band to a raster <code>toRaster</code> at a specified index <code>toRasterIndex</code>. The new band's values are copied from <code>fromRaster</code> at a specified band index <code>fromBand</code>.
@@ -6503,7 +6503,7 @@ If no <code>toRasterIndex</code> is provided, the new band is appended to the en
 <p>This method assumes that the spatial influence of a variable diminishes with distance. In geospatial analysis, this means features or phenomena closer to a point of interest are given more weight than those further away. For example, in environmental data analysis, measurements from nearby locations have a greater impact on interpolated values than distant ones, reflecting the natural gradation and spatial continuity.</p>
 </div>
 <p>Formats:</p>
-<p><div class="highlight"><pre><span></span><code><span class="n">RS_Interpolate</span><span class="p">(</span><span class="n">raster</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">RS_Interpolate</span><span class="p">(</span><span class="n">raster</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="n">RS_Interpolate</span><span class="p">(</span><span class="n">raster</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">power</span><span class="p">:</span><span class="w"> </span><span class="n">Double</span><span class="p">)</span>
 </code></pre></div>
@@ -6514,7 +6514,7 @@ If no <code>toRasterIndex</code> is provided, the new band is appended to the en
 <div class="highlight"><pre><span></span><code><span class="n">RS_Interpolate</span><span class="p">(</span><span class="n">raster</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">power</span><span class="p">:</span><span class="w"> </span><span class="n">Double</span><span class="p">,</span><span class="w"> </span><span class="k">mode</span><span class="p">:</span><span class="w"> </span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">numPointsOrRadius</span><span class="p">:</span><span class="w"> </span><span class="n">Double</span><span class="p">,</span><span class="w"> </span><span class="n">maxRadiusOrMinPoints</span><span class="p">:</span><span class="w"> </span><span class="n">Double</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="n">RS_Interpolate</span><span class="p">(</span><span class="n">raster</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">power</span><span class="p">:</span><span class="w"> </span><span class="n">Double</span><span class="p">,</span><span class="w"> </span><span class="k">mode</span><span class="p">:</span><span class="w"> </span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">numPointsOrRadius</span><span class="p">:</span><span class="w"> </span><span class="n">Double</span><span class="p">,</span><span class="w"> </span><span class="n">maxRadiusOrMinPoints</span><span class="p">:</span><span class="w"> </span><span class="n">Double</span><span class="p">,</span><span class="w"> </span><span class="n">band</span><span class="p">:</span><span class="w"> </span><span class="nb">Integer</span><span class="p">)</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Since: <code>v1.6.0</code></p>
 <p>Parameters:</p>
 <ul>
@@ -6575,7 +6575,7 @@ If no <code>toRasterIndex</code> is provided, the new band is appended to the en
 <p class="admonition-title">Warning</p>
 <p>Using a noDataValue that falls within the normalization range can lead to loss of valid data. If any data value within a raster band matches the specified noDataValue, it will be replaced and cannot be distinguished or recovered later. Exercise caution in selecting a noDataValue to avoid unintentional data alteration.</p>
 </div>
-<p>Formats:
+<p>Formats:</p>
 <div class="highlight"><pre><span></span><code>RS_NormalizeAll (raster: Raster)
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double)
@@ -6587,7 +6587,7 @@ If no <code>toRasterIndex</code> is provided, the new band is appended to the en
 <div class="highlight"><pre><span></span><code>RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double, noDataValue: Double, minValue: Double, maxValue: Double)
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double, normalizeAcrossBands: Boolean, noDataValue: Double, minValue: Double, maxValue: Double )
-</code></pre></div></p>
+</code></pre></div>
 <p>Since: <code>v1.6.0</code></p>
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_NormalizeAll</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
@@ -6817,9 +6817,9 @@ Default format is <code>GDAL</code>. If all 6 parameters are not provided then w
 <p class="admonition-title">Note</p>
 <p>If the specified <code>dataType</code> is narrower than the original data type, the function will truncate the pixel values to fit the new data type range.</p>
 </div>
-<p>Format:
+<p>Format:</p>
 <div class="highlight"><pre><span></span><code>RS_SetPixelType(raster: Raster, dataType: String)
-</code></pre></div></p>
+</code></pre></div>
 <p>Since: <code>v1.6.0</code></p>
 <p>SQL Example:</p>
 <div class="highlight"><pre><span></span><code><span class="n">RS_SetPixelType</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="ss">&quot;I&quot;</span><span class="p">)</span>
@@ -7113,13 +7113,13 @@ NODATA values. If raster band(s) do not have NODATA value(s) specified, one can 
 <span class="k">SELECT</span><span class="w"> </span><span class="n">RS_AddBandFromArray</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="n">RS_MultiplyFactor</span><span class="p">(</span><span class="n">RS_BandAsArray</span><span class="p">(</span><span class="n">RS_FromGeoTiff</span><span class="p">(</span><span class="n">content</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">raster</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">RS_AddBandFromArray</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="n">RS_MultiplyFactor</span><span class="p">(</span><span class="n">RS_BandAsArray</span><span class="p">(</span><span class="n">RS_FromGeoTiff</span><span class="p">(</span><span class="n">content</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">999</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">raster</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>+--------------------+
 |              raster|
 +--------------------+
 |GridCoverage2D[&quot;g...|
 +--------------------+
-</code></pre></div></p>
+</code></pre></div>
 <h3 id="rs_mapalgebra">RS_MapAlgebra<a class="headerlink" href="#rs_mapalgebra" title="Permanent link">&para;</a></h3>
 <p>Introduction: Apply a map algebra script on a raster.</p>
 <p>Format:</p>
@@ -7138,13 +7138,13 @@ as input and returns a raster of the same size as output. The script can be used
 <span class="c1">-- rast[0] refers to the R band, rast[3] refers to the NIR band.</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;out = (rast[3] - rast[0]) / (rast[3] + rast[0]);&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">ndvi</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>+--------------------+
 |              raster|
 +--------------------+
 |GridCoverage2D[&quot;g...|
 +--------------------+
-</code></pre></div></p>
+</code></pre></div>
 <p>Spark SQL Example for two raster input <code>RS_MapAlgebra</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast0</span><span class="p">,</span><span class="w"> </span><span class="n">rast1</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;out = rast0[0] * 0.5 + rast1[0] * 0.5;&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">null</span><span class="p">)</span>
 </code></pre></div>
@@ -7329,7 +7329,7 @@ To learn how to write map algebra script, please refer to <a href="https://githu
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 10, 2024 21:09:12</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 11, 2024 00:47:00</span>
   </span>
 
     

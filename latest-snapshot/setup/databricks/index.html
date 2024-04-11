@@ -4047,25 +4047,31 @@
 <h2 id="install-sedona-from-the-web-ui-not-recommended">Install Sedona from the web UI (not recommended)<a class="headerlink" href="#install-sedona-from-the-web-ui-not-recommended" title="Permanent link">&para;</a></h2>
 <p>This method cannot achieve the best performance of Sedona and does not work for pure SQL environment.</p>
 <h3 id="install-libraries">Install libraries<a class="headerlink" href="#install-libraries" title="Permanent link">&para;</a></h3>
-<p>1) From the Libraries tab install from Maven Coordinates
-    <div class="highlight"><pre><span></span><code>org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.5.1
-org.datasyslab:geotools-wrapper:1.5.1-28.2
-</code></pre></div></p>
-<p>2) For enabling python support, from the Libraries tab install from PyPI
-    <div class="highlight"><pre><span></span><code>apache-sedona
+<p>1) From the Libraries tab install from Maven Coordinates</p>
+<div class="codehilite"><pre><span></span><code><span class="err">```</span>
+<span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">sedona</span><span class="p">:</span><span class="n">sedona</span><span class="o">-</span><span class="n">spark</span><span class="o">-</span><span class="n">shaded</span><span class="o">-</span><span class="mf">3.0</span><span class="n">_2</span><span class="o">.</span><span class="mi">12</span><span class="p">:</span><span class="mf">1.5</span><span class="o">.</span><span class="mi">1</span>
+<span class="n">org</span><span class="o">.</span><span class="n">datasyslab</span><span class="p">:</span><span class="n">geotools</span><span class="o">-</span><span class="n">wrapper</span><span class="p">:</span><span class="mf">1.5</span><span class="o">.</span><span class="mi">1</span><span class="o">-</span><span class="mf">28.2</span>
+<span class="err">```</span>
+</code></pre></div>
+
+<p>2) For enabling python support, from the Libraries tab install from PyPI</p>
+<div class="codehilite"><pre><span></span><code>```
+apache-sedona
 keplergl==0.3.2
 pydeck==0.8.0
-</code></pre></div></p>
+```
+</code></pre></div>
+
 <h3 id="initialize">Initialize<a class="headerlink" href="#initialize" title="Permanent link">&para;</a></h3>
 <p>After you have installed the libraries and started the cluster, you can initialize the Sedona <code>ST_*</code> functions and types by running from your code:</p>
-<p>(scala)
+<p>(scala)</p>
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">sedona</span><span class="p">.</span><span class="nn">sql</span><span class="p">.</span><span class="nn">utils</span><span class="p">.</span><span class="nc">SedonaSQLRegistrator</span>
 <span class="nc">SedonaSQLRegistrator</span><span class="p">.</span><span class="n">registerAll</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
-</code></pre></div></p>
-<p>(or python)
+</code></pre></div>
+<p>(or python)</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.register.geo_registrator</span> <span class="kn">import</span> <span class="n">SedonaRegistrator</span>
 <span class="n">SedonaRegistrator</span><span class="o">.</span><span class="n">registerAll</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="install-sedona-from-the-init-script">Install Sedona from the init script<a class="headerlink" href="#install-sedona-from-the-init-script" title="Permanent link">&para;</a></h2>
 <p>In order to activate the Kryo serializer (this speeds up the serialization and deserialization of geometry types) you need to install the libraries via init script as described below.</p>
 <p>In order to use the Sedona <code>ST_*/RS_*</code> functions from SQL without having to register the Sedona functions from a python/scala cell, you need to install the Sedona libraries from the <a href="https://docs.databricks.com/clusters/init-scripts.html">cluster init-scripts</a> as follows.</p>
@@ -4105,20 +4111,20 @@ cat<span class="w"> </span>&gt;<span class="w"> </span>/Workspace/Shared/sedona/
 <span class="s">EOF</span>
 </code></pre></div>
 <h3 id="set-up-cluster-config">Set up cluster config<a class="headerlink" href="#set-up-cluster-config" title="Permanent link">&para;</a></h3>
-<p>From your cluster configuration (<code>Cluster</code> -&gt; <code>Edit</code> -&gt; <code>Configuration</code> -&gt; <code>Advanced options</code> -&gt; <code>Spark</code>) activate the Sedona functions and the kryo serializer by adding to the Spark Config
+<p>From your cluster configuration (<code>Cluster</code> -&gt; <code>Edit</code> -&gt; <code>Configuration</code> -&gt; <code>Advanced options</code> -&gt; <code>Spark</code>) activate the Sedona functions and the kryo serializer by adding to the Spark Config</p>
 <div class="highlight"><pre><span></span><code>spark.sql.extensions org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
 spark.serializer org.apache.spark.serializer.KryoSerializer
 spark.kryo.registrator org.apache.sedona.core.serde.SedonaKryoRegistrator
-</code></pre></div></p>
-<p>From your cluster configuration (<code>Cluster</code> -&gt; <code>Edit</code> -&gt; <code>Configuration</code> -&gt; <code>Advanced options</code> -&gt; <code>Init Scripts</code>) add the newly created <code>Workspace</code> init script
+</code></pre></div>
+<p>From your cluster configuration (<code>Cluster</code> -&gt; <code>Edit</code> -&gt; <code>Configuration</code> -&gt; <code>Advanced options</code> -&gt; <code>Init Scripts</code>) add the newly created <code>Workspace</code> init script</p>
 <div class="highlight"><pre><span></span><code>/Workspace/sedona/sedona-init.sh
-</code></pre></div></p>
-<p>For enabling python support, from the Libraries tab install from PyPI
+</code></pre></div>
+<p>For enabling python support, from the Libraries tab install from PyPI</p>
 <div class="highlight"><pre><span></span><code>apache-sedona==1.5.1
 geopandas==0.11.1
 keplergl==0.3.2
 pydeck==0.8.0
-</code></pre></div></p>
+</code></pre></div>
 <div class="admonition tips">
 <p class="admonition-title">Tips</p>
 <p>You need to install the Sedona libraries via init script because the libraries installed via UI are installed after the cluster has already started, and therefore the classes specified by the config <code>spark.sql.extensions</code>, <code>spark.serializer</code>, and <code>spark.kryo.registrator</code> are not available at startup time.*</p>
@@ -4143,7 +4149,7 @@ pydeck==0.8.0
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 14, 2024 03:01:17</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 11, 2024 00:47:00</span>
   </span>
 
     

@@ -3977,14 +3977,18 @@
 <ol>
 <li>Find all Java installed on your machine: <code>/usr/libexec/java_home -V</code>. You should see multiple JDK versions including JDK 8.</li>
 <li>Run <code>whereis mvn</code> to get the installation location of your Maven. The result is a symlink to the actual location.</li>
-<li>Open it in the terminal (with <code>sudo</code> if needed). It will be like this
+<li>Open it in the terminal (with <code>sudo</code> if needed). It will be like this</li>
+</ol>
 <div class="highlight"><pre><span></span><code>#!/bin/bash
 JAVA_HOME=&quot;${JAVA_HOME:-$(/usr/libexec/java_home)}&quot; exec &quot;/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn&quot; &quot;$@&quot;
-</code></pre></div></li>
-<li>Change <code>JAVA_HOME:-$(/usr/libexec/java_home)}</code> to <code>JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}</code>.  The resulting content will be like this:
+</code></pre></div>
+<ol>
+<li>Change <code>JAVA_HOME:-$(/usr/libexec/java_home)}</code> to <code>JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}</code>.  The resulting content will be like this:</li>
+</ol>
 <div class="highlight"><pre><span></span><code>#!/bin/bash
 JAVA_HOME=&quot;${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}&quot; exec &quot;/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn&quot; &quot;$@&quot;
-</code></pre></div></li>
+</code></pre></div>
+<ol>
 <li>Run <code>mvn --version</code> again. It should now point to JDK 8.</li>
 </ol>
 <h3 id="1-obtain-write-access-to-sedona-github-repo">1. Obtain Write Access to Sedona GitHub repo<a class="headerlink" href="#1-obtain-write-access-to-sedona-github-repo" title="Permanent link">&para;</a></h3>
@@ -4022,21 +4026,25 @@ JAVA_HOME=&quot;${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}&quot; exec &quot;
    * <a href="https://dist.apache.org/repos/dist/dev/sedona/KEYS">https://dist.apache.org/repos/dist/dev/sedona/KEYS</a>
    * <a href="https://dist.apache.org/repos/dist/release/sedona/KEYS">https://dist.apache.org/repos/dist/release/sedona/KEYS</a></p>
 <ol>
-<li>Check out both KEYS files
+<li>Check out both KEYS files</li>
+</ol>
 <div class="highlight"><pre><span></span><code>svn<span class="w"> </span>checkout<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/<span class="w"> </span>sedona-dev<span class="w"> </span>--depth<span class="w"> </span>files
 svn<span class="w"> </span>checkout<span class="w"> </span>https://dist.apache.org/repos/dist/release/sedona/<span class="w"> </span>sedona-release<span class="w"> </span>--depth<span class="w"> </span>files
-</code></pre></div></li>
+</code></pre></div>
+<ol>
 <li>Use your favorite text editor to open <code>sedona-dev/KEYS</code> and <code>sedona-release/KEYS</code>.</li>
 <li>Paste your armored key to the end of both files. Note: There must be an empty line between <code>-----BEGIN PGP PUBLIC KEY BLOCK-----</code> and the actual key.</li>
-<li>Commit both KEYS. SVN might ask you to enter your ASF ID and password. Make sure you do it so SVN can always store your ID and password locally.
+<li>Commit both KEYS. SVN might ask you to enter your ASF ID and password. Make sure you do it so SVN can always store your ID and password locally.</li>
+</ol>
 <div class="highlight"><pre><span></span><code>svn<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Update KEYS&quot;</span><span class="w"> </span>sedona-dev/KEYS
 svn<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Update KEYS&quot;</span><span class="w"> </span>sedona-release/KEYS
-</code></pre></div></li>
-<li>Then remove both svn folders
+</code></pre></div>
+<ol>
+<li>Then remove both svn folders</li>
+</ol>
 <div class="highlight"><pre><span></span><code>rm<span class="w"> </span>-rf<span class="w"> </span>sedona-dev
 rm<span class="w"> </span>-rf<span class="w"> </span>sedona-release
-</code></pre></div></li>
-</ol>
+</code></pre></div>
 <h3 id="4-add-gpg_tty-environment-variable">4. Add GPG_TTY environment variable<a class="headerlink" href="#4-add-gpg_tty-environment-variable" title="Permanent link">&para;</a></h3>
 <p>In your <code>~/.bashrc</code> file, add the following content. Then restart your terminal.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">GPG_TTY</span><span class="o">=</span><span class="k">$(</span>tty<span class="k">)</span>
@@ -4110,7 +4118,7 @@ rm<span class="w"> </span>-rf<span class="w"> </span>sedona-release
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 6, 2024 22:01:24</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 11, 2024 00:47:00</span>
   </span>
 
     

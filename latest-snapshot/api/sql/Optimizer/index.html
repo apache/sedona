@@ -4132,11 +4132,11 @@ RangeJoin polygonshape#20: geometry, pointshape#43: geometry, false
 <h2 id="distance-join">Distance join<a class="headerlink" href="#distance-join" title="Permanent link">&para;</a></h2>
 <p>Introduction: Find geometries from A and geometries from B such that the distance of each geometry pair is less or equal than a certain distance. It supports the planar Euclidean distance calculators <code>ST_Distance</code>, <code>ST_HausdorffDistance</code>, <code>ST_FrechetDistance</code> and the meter-based geodesic distance calculators <code>ST_DistanceSpheroid</code> and <code>ST_DistanceSphere</code>.</p>
 <p>Spark SQL Example for planar Euclidean distance:</p>
-<p><em>Only consider <mark>fully within a certain distance</mark></em>
+<p><em>Only consider <mark>fully within a certain distance</mark></em></p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pointdf1</span><span class="p">,</span><span class="w"> </span><span class="n">pointdf2</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">ST_Distance</span><span class="p">(</span><span class="n">pointdf1</span><span class="p">.</span><span class="n">pointshape1</span><span class="p">,</span><span class="n">pointdf2</span><span class="p">.</span><span class="n">pointshape2</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span>
-</code></pre></div></p>
+</code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pointDf</span><span class="p">,</span><span class="w"> </span><span class="n">polygonDF</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">ST_HausdorffDistance</span><span class="p">(</span><span class="n">pointDf</span><span class="p">.</span><span class="n">pointshape</span><span class="p">,</span><span class="w"> </span><span class="n">polygonDf</span><span class="p">.</span><span class="n">polygonshape</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span>
@@ -4145,11 +4145,11 @@ RangeJoin polygonshape#20: geometry, pointshape#43: geometry, false
 <span class="k">FROM</span><span class="w"> </span><span class="n">pointDf</span><span class="p">,</span><span class="w"> </span><span class="n">polygonDF</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">ST_FrechetDistance</span><span class="p">(</span><span class="n">pointDf</span><span class="p">.</span><span class="n">pointshape</span><span class="p">,</span><span class="w"> </span><span class="n">polygonDf</span><span class="p">.</span><span class="n">polygonshape</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span>
 </code></pre></div>
-<p><em>Consider <mark>intersects within a certain distance</mark></em>
+<p><em>Consider <mark>intersects within a certain distance</mark></em></p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pointdf1</span><span class="p">,</span><span class="w"> </span><span class="n">pointdf2</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">ST_Distance</span><span class="p">(</span><span class="n">pointdf1</span><span class="p">.</span><span class="n">pointshape1</span><span class="p">,</span><span class="n">pointdf2</span><span class="p">.</span><span class="n">pointshape2</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">2</span>
-</code></pre></div></p>
+</code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pointDf</span><span class="p">,</span><span class="w"> </span><span class="n">polygonDF</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">ST_HausdorffDistance</span><span class="p">(</span><span class="n">pointDf</span><span class="p">.</span><span class="n">pointshape</span><span class="p">,</span><span class="w"> </span><span class="n">polygonDf</span><span class="p">.</span><span class="n">polygonshape</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">2</span>
@@ -4158,29 +4158,29 @@ RangeJoin polygonshape#20: geometry, pointshape#43: geometry, false
 <span class="k">FROM</span><span class="w"> </span><span class="n">pointDf</span><span class="p">,</span><span class="w"> </span><span class="n">polygonDF</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">ST_FrechetDistance</span><span class="p">(</span><span class="n">pointDf</span><span class="p">.</span><span class="n">pointshape</span><span class="p">,</span><span class="w"> </span><span class="n">polygonDf</span><span class="p">.</span><span class="n">polygonshape</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">2</span>
 </code></pre></div>
-<p>Spark SQL Physical plan:
+<p>Spark SQL Physical plan:</p>
 <div class="highlight"><pre><span></span><code>== Physical Plan ==
 DistanceJoin pointshape1#12: geometry, pointshape2#33: geometry, 2.0, true
 :- Project [st_point(cast(_c0#0 as decimal(24,20)), cast(_c1#1 as decimal(24,20)), myPointId) AS pointshape1#12]
 :  +- *FileScan csv
 +- Project [st_point(cast(_c0#21 as decimal(24,20)), cast(_c1#22 as decimal(24,20)), myPointId) AS pointshape2#33]
    +- *FileScan csv
-</code></pre></div></p>
+</code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>If you use planar euclidean distance functions like <code>ST_Distance</code>, <code>ST_HausdorffDistance</code> or <code>ST_FrechetDistance</code> as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of <code>distance</code> should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See <a href="../Function/#st_transform">ST_Transform</a>. If you don't want to transform your data, please consider using <code>ST_DistanceSpheroid</code> or <code>ST_DistanceSphere</code>.</p>
 </div>
 <p>Spark SQL Example for meter-based geodesic distance <code>ST_DistanceSpheroid</code> (works for <code>ST_DistanceSphere</code> too):</p>
-<p><em>Less than a certain distance==</em>
+<p><em>Less than a certain distance==</em></p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pointdf1</span><span class="p">,</span><span class="w"> </span><span class="n">pointdf2</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">ST_DistanceSpheroid</span><span class="p">(</span><span class="n">pointdf1</span><span class="p">.</span><span class="n">pointshape1</span><span class="p">,</span><span class="n">pointdf2</span><span class="p">.</span><span class="n">pointshape2</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span>
-</code></pre></div></p>
-<p><em>Less than or equal to a certain distance==</em>
+</code></pre></div>
+<p><em>Less than or equal to a certain distance==</em></p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pointdf1</span><span class="p">,</span><span class="w"> </span><span class="n">pointdf2</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">ST_DistanceSpheroid</span><span class="p">(</span><span class="n">pointdf1</span><span class="p">.</span><span class="n">pointshape1</span><span class="p">,</span><span class="n">pointdf2</span><span class="p">.</span><span class="n">pointshape2</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">2</span>
-</code></pre></div></p>
+</code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>If you use <code>ST_DistanceSpheroid</code> or <code>ST_DistanceSphere</code> as the predicate, the unit of the distance is meter. Currently, distance join with geodesic distance calculators work best for point data. For non-point data, it only considers their centroids.</p>
@@ -4199,7 +4199,7 @@ The supported join type - broadcast side combinations are:</p>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="n">pointDf</span><span class="p">.</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;pointDf&quot;</span><span class="p">).</span><span class="n">join</span><span class="p">(</span><span class="n">broadcast</span><span class="p">(</span><span class="n">polygonDf</span><span class="p">).</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;polygonDf&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;ST_Contains(polygonDf.polygonshape, pointDf.pointshape)&quot;</span><span class="p">))</span>
 </code></pre></div>
-<p>Spark SQL Physical plan:
+<p>Spark SQL Physical plan:</p>
 <div class="highlight"><pre><span></span><code>== Physical Plan ==
 BroadcastIndexJoin pointshape#52: geometry, BuildRight, BuildRight, false ST_Contains(polygonshape#30, pointshape#52)
 :- Project [st_point(cast(_c0#48 as decimal(24,20)), cast(_c1#49 as decimal(24,20))) AS pointshape#52]
@@ -4207,11 +4207,11 @@ BroadcastIndexJoin pointshape#52: geometry, BuildRight, BuildRight, false ST_Con
 +- SpatialIndex polygonshape#30: geometry, QUADTREE, [id=#62]
    +- Project [st_polygonfromenvelope(cast(_c0#22 as decimal(24,20)), cast(_c1#23 as decimal(24,20)), cast(_c2#24 as decimal(24,20)), cast(_c3#25 as decimal(24,20))) AS polygonshape#30]
       +- FileScan csv
-</code></pre></div></p>
+</code></pre></div>
 <p>This also works for distance joins with <code>ST_Distance</code>, <code>ST_DistanceSpheroid</code>, <code>ST_DistanceSphere</code>, <code>ST_HausdorffDistance</code> or <code>ST_FrechetDistance</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="n">pointDf1</span><span class="p">.</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;pointDf1&quot;</span><span class="p">).</span><span class="n">join</span><span class="p">(</span><span class="n">broadcast</span><span class="p">(</span><span class="n">pointDf2</span><span class="p">).</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;pointDf2&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;ST_Distance(pointDf1.pointshape, pointDf2.pointshape) &lt;= 2&quot;</span><span class="p">))</span>
 </code></pre></div>
-<p>Spark SQL Physical plan:
+<p>Spark SQL Physical plan:</p>
 <div class="highlight"><pre><span></span><code>== Physical Plan ==
 BroadcastIndexJoin pointshape#52: geometry, BuildRight, BuildLeft, true, 2.0 ST_Distance(pointshape#52, pointshape#415) &lt;= 2.0
 :- Project [st_point(cast(_c0#48 as decimal(24,20)), cast(_c1#49 as decimal(24,20))) AS pointshape#52]
@@ -4219,7 +4219,7 @@ BroadcastIndexJoin pointshape#52: geometry, BuildRight, BuildLeft, true, 2.0 ST_
 +- SpatialIndex pointshape#415: geometry, QUADTREE, [id=#1068]
    +- Project [st_point(cast(_c0#48 as decimal(24,20)), cast(_c1#49 as decimal(24,20))) AS pointshape#415]
       +- FileScan csv
-</code></pre></div></p>
+</code></pre></div>
 <p>Note: If the distance is an expression, it is only evaluated on the first argument to ST_Distance (<code>pointDf1</code> above).</p>
 <h2 id="automatic-broadcast-index-join">Automatic broadcast index join<a class="headerlink" href="#automatic-broadcast-index-join" title="Permanent link">&para;</a></h2>
 <p>When one table involved a spatial join query is smaller than a threshold, Sedona will automatically choose broadcast index join instead of Sedona optimized join. The current threshold is controlled by <a href="../Parameter">sedona.join.autoBroadcastJoinThreshold</a> and set to the same as <code>spark.sql.autoBroadcastJoinThreshold</code>.</p>
@@ -4355,7 +4355,7 @@ answer queries such as <code>SELECT * FROM geoparquet_dataset WHERE ST_Intersect
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">March 4, 2024 06:47:59</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 11, 2024 00:47:00</span>
   </span>
 
     

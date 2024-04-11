@@ -4038,11 +4038,13 @@ Please replace <code>3.4</code> with Spark major.minor version when building for
 <ol>
 <li>Set up the environment variable SPARK_HOME and PYTHONPATH</li>
 </ol>
-<p>For example,
+<p>For example,</p>
 <div class="highlight"><pre><span></span><code>export SPARK_HOME=$PWD/spark-3.0.1-bin-hadoop2.7
 export PYTHONPATH=$SPARK_HOME/python
 </code></pre></div>
-2. Put JAI jars to <mark>SPARK_HOME/jars/</mark> folder.
+<ol>
+<li>Put JAI jars to <mark>SPARK_HOME/jars/</mark> folder.</li>
+</ol>
 <div class="highlight"><pre><span></span><code>export JAI_CORE_VERSION=&quot;1.1.3&quot;
 export JAI_CODEC_VERSION=&quot;1.1.3&quot;
 export JAI_IMAGEIO_VERSION=&quot;1.1&quot;
@@ -4050,33 +4052,39 @@ wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/
 wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar
 wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
 </code></pre></div>
-3. Compile the Sedona Scala and Java code with <code>-Dgeotools</code> and then copy the <mark>sedona-spark-shaded-1.5.1.jar</mark> to <mark>SPARK_HOME/jars/</mark> folder.
+<ol>
+<li>Compile the Sedona Scala and Java code with <code>-Dgeotools</code> and then copy the <mark>sedona-spark-shaded-1.5.1.jar</mark> to <mark>SPARK_HOME/jars/</mark> folder.</li>
+</ol>
 <div class="highlight"><pre><span></span><code>cp spark-shaded/target/sedona-spark-shaded-xxx.jar $SPARK_HOME/jars/
 </code></pre></div>
-4. Install the following libraries
+<ol>
+<li>Install the following libraries</li>
+</ol>
 <div class="highlight"><pre><span></span><code>sudo apt-get -y install python3-pip python-dev libgeos-dev
 sudo pip3 install -U setuptools
 sudo pip3 install -U wheel
 sudo pip3 install -U virtualenvwrapper
 sudo pip3 install -U pipenv
 </code></pre></div>
-Homebrew can be used to install libgeos-dev in macOS: <code>brew install geos</code>
-5. Set up pipenv to the desired Python version: 3.7, 3.8, or 3.9
+<p>Homebrew can be used to install libgeos-dev in macOS: <code>brew install geos</code>
+5. Set up pipenv to the desired Python version: 3.7, 3.8, or 3.9</p>
 <div class="highlight"><pre><span></span><code>cd python
 pipenv --python 3.7
 </code></pre></div>
-6. Install the PySpark version and the other dependency
+<ol>
+<li>Install the PySpark version and the other dependency</li>
+</ol>
 <div class="highlight"><pre><span></span><code>cd python
 pipenv install pyspark
 pipenv install --dev
 </code></pre></div>
-<code>pipenv install pyspark</code> installs the latest version of pyspark.
+<p><code>pipenv install pyspark</code> installs the latest version of pyspark.
 In order to remain consistent with the installed spark version, use <code>pipenv install pyspark==&lt;spark_version&gt;</code>
-7. Run the Python tests
+7. Run the Python tests</p>
 <div class="highlight"><pre><span></span><code>cd python
 pipenv run python setup.py build_ext --inplace
 pipenv run pytest tests
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="compile-the-documentation">Compile the documentation<a class="headerlink" href="#compile-the-documentation" title="Permanent link">&para;</a></h2>
 <p>The website is automatically built after each commit. The built website can be downloaded here:</p>
 <h3 id="mkdocs-website">MkDocs website<a class="headerlink" href="#mkdocs-website" title="Permanent link">&para;</a></h3>
@@ -4115,7 +4123,7 @@ mike serve
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">March 22, 2024 03:05:15</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 11, 2024 00:47:00</span>
   </span>
 
     

@@ -4243,10 +4243,12 @@
 </div>
 <h2 id="0-prepare-an-empty-script-file">0. Prepare an empty script file<a class="headerlink" href="#0-prepare-an-empty-script-file" title="Permanent link">&para;</a></h2>
 <ol>
-<li>In your local Sedona Git repo under master branch, run
+<li>In your local Sedona Git repo under master branch, run</li>
+</ol>
 <div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;#!/bin/bash&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>create-release.sh
 chmod<span class="w"> </span><span class="m">777</span><span class="w"> </span>create-release.sh
-</code></pre></div></li>
+</code></pre></div>
+<ol>
 <li>Use your favourite GUI text editor to open <code>create-release.sh</code>.</li>
 <li>Then keep copying the scripts on this web page to replace all content in this script file.</li>
 <li>Do NOT directly copy/paste the scripts to your terminal because a bug in <code>clipboard.js</code> will create link breaks in such case.</li>
@@ -4254,21 +4256,23 @@ chmod<span class="w"> </span><span class="m">777</span><span class="w"> </span>c
 </ol>
 <h2 id="1-check-asf-copyright-in-all-file-headers">1. Check ASF copyright in all file headers<a class="headerlink" href="#1-check-asf-copyright-in-all-file-headers" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Run the following script:
+<li>Run the following script:</li>
+</ol>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 wget<span class="w"> </span>-q<span class="w"> </span>https://archive.apache.org/dist/creadur/apache-rat-0.15/apache-rat-0.15-bin.tar.gz
 tar<span class="w"> </span>-xvf<span class="w">  </span>apache-rat-0.15-bin.tar.gz
 git<span class="w"> </span>clone<span class="w"> </span>--shared<span class="w"> </span>--branch<span class="w"> </span>master<span class="w"> </span>https://github.com/apache/sedona.git<span class="w"> </span>sedona-src
 java<span class="w"> </span>-jar<span class="w"> </span>apache-rat-0.15/apache-rat-0.15.jar<span class="w"> </span>-d<span class="w"> </span>sedona-src<span class="w"> </span>&gt;<span class="w"> </span>report.txt
-</code></pre></div></li>
+</code></pre></div>
+<ol>
 <li>Read the generated report.txt file and make sure all source code files have ASF header.</li>
-<li>Delete the generated report and cloned files
+<li>Delete the generated report and cloned files</li>
+</ol>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 rm<span class="w"> </span>-rf<span class="w"> </span>apache-rat-0.15
 rm<span class="w"> </span>-rf<span class="w"> </span>sedona-src
 rm<span class="w"> </span>report.txt
-</code></pre></div></li>
-</ol>
+</code></pre></div>
 <h2 id="2-update-sedona-python-r-and-zeppelin-versions">2. Update Sedona Python, R and Zeppelin versions<a class="headerlink" href="#2-update-sedona-python-r-and-zeppelin-versions" title="Permanent link">&para;</a></h2>
 <p>Make sure the Sedona version in the following files are 1.5.1.</p>
 <ol>
@@ -4640,7 +4644,7 @@ mv<span class="w"> </span>spark/common/target/apidocs/*<span class="w"> </span>d
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 18, 2024 00:00:28</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 11, 2024 00:47:00</span>
   </span>
 
     

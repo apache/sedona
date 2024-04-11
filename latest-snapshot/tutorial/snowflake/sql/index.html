@@ -4236,11 +4236,11 @@
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">city_tbl</span><span class="p">;</span>
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>WKT CITY_NAME
 POINT (-122.33 47.61)   Seattle
 POINT (-122.42 37.76)   San Francisco
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="create-a-geometry-column">Create a Geometry column<a class="headerlink" href="#create-a-geometry-column" title="Permanent link">&para;</a></h2>
 <p>All geometrical operations in SedonaSQL are on Geometry type objects. Therefore, before any kind of queries, you need to create a Geometry type column on the table.</p>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">city_tbl_geom</span><span class="w"> </span><span class="k">AS</span>
@@ -4507,9 +4507,9 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <p>In the example below, the SRID=4326 information is lost.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsEWKT</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT(1 2)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">4326</span><span class="p">))</span>
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>SRID=0;POINT(1 2)
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="known-issues">Known issues<a class="headerlink" href="#known-issues" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Sedona Snowflake doesn't support <code>M</code> dimension due to the limitation of WKB serialization. Sedona Spark and Sedona Flink support XYZM because it uses our in-house serialization format. Although Sedona Snowflake has functions related to <code>M</code> dimension, all <code>M</code> values will be ignored.</li>
@@ -4546,7 +4546,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 28, 2024 22:35:26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 11, 2024 00:47:00</span>
   </span>
 
     

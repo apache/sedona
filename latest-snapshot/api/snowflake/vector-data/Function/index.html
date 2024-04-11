@@ -5882,23 +5882,23 @@
 <h2 id="st_3ddistance">ST_3DDistance<a class="headerlink" href="#st_3ddistance" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the 3-dimensional minimum cartesian distance between A and B</p>
 <p>Format: <code>ST_3DDistance (A:geometry, B:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_3DDistance</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">,</span><span class="w"> </span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_addpoint">ST_AddPoint<a class="headerlink" href="#st_addpoint" title="Permanent link">&para;</a></h2>
 <p>Introduction: RETURN Linestring with additional point at the given index, if position is not available the point will be added at the end of line.</p>
 <p>Format: <code>ST_AddPoint(geom: geometry, point: geometry, position: integer)</code></p>
 <p>Format: <code>ST_AddPoint(geom: geometry, point: geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AddPoint</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 0, 1 1, 1 0)&#39;</span><span class="p">),</span><span class="w"> </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;Point(21 52)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
 
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AddPoint</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;Linestring(0 0, 1 1, 1 0)&#39;</span><span class="p">),</span><span class="w"> </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;Point(21 52)&#39;</span><span class="p">))</span>
-</code></pre></div></p>
-<p>Output:
+</code></pre></div>
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>LINESTRING(0 0, 21 52, 1 1, 1 0)
 LINESTRING(0 0, 1 1, 1 0, 21 52)
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_affine">ST_Affine<a class="headerlink" href="#st_affine" title="Permanent link">&para;</a></h2>
 <p>Introduction: Apply an affine transformation to the given geometry.</p>
 <p>ST_Affine has 2 overloaded signatures:</p>
@@ -5972,10 +5972,10 @@ Computes the angle formed by vectors S1 - E1 and S2 - E2, where S and E denote s
 <h2 id="st_area">ST_Area<a class="headerlink" href="#st_area" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the area of A</p>
 <p>Format: <code>ST_Area (A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Area</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_areaspheroid">ST_AreaSpheroid<a class="headerlink" href="#st_areaspheroid" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the geodesic area of A using WGS84 spheroid. Unit is square meter. Works better for large geometries (country level) compared to <code>ST_Area</code> + <code>ST_Transform</code>. It is equivalent to PostGIS <code>ST_Area(geography, use_spheroid=true)</code> function and produces nearly identical results.</p>
 <p>Geometry must be in EPSG:4326 (WGS84) projection and must be in <mark>lat/lon</mark> order. You can use <mark>ST_FlipCoordinates</mark> to swap lat and lon.</p>
@@ -5987,10 +5987,10 @@ Computes the angle formed by vectors S1 - E1 and S2 - E2, where S and E denote s
 <h2 id="st_asbinary">ST_AsBinary<a class="headerlink" href="#st_asbinary" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the Well-Known Binary representation of a geometry</p>
 <p>Format: <code>ST_AsBinary (A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsBinary</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_asewkb">ST_AsEWKB<a class="headerlink" href="#st_asewkb" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the Extended Well-Known Binary representation of a geometry.
 EWKB is an extended version of WKB which includes the SRID of the geometry.
@@ -5998,10 +5998,10 @@ The format originated in PostGIS but is supported by many GIS tools.
 If the geometry is lacking SRID a WKB format is produced.
 <a href="#st_setsrid">See ST_SetSRID</a></p>
 <p>Format: <code>ST_AsEWKB (A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsEWKB</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_asewkt">ST_AsEWKT<a class="headerlink" href="#st_asewkt" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the Extended Well-Known Text representation of a geometry.
 EWKT is an extended version of WKT which includes the SRID of the geometry.
@@ -6009,44 +6009,44 @@ The format originated in PostGIS but is supported by many GIS tools.
 If the geometry is lacking SRID a WKT format is produced.
 <a href="#st_setsrid">See ST_SetSRID</a></p>
 <p>Format: <code>ST_AsEWKT (A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsEWKT</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_asgeojson">ST_AsGeoJSON<a class="headerlink" href="#st_asgeojson" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the <a href="https://geojson.org/">GeoJSON</a> string representation of a geometry</p>
 <p>Format: <code>ST_AsGeoJSON (A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsGeoJSON</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_asgml">ST_AsGML<a class="headerlink" href="#st_asgml" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the <a href="https://www.ogc.org/standards/gml">GML</a> string representation of a geometry</p>
 <p>Format: <code>ST_AsGML (A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsGML</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_askml">ST_AsKML<a class="headerlink" href="#st_askml" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the <a href="https://www.ogc.org/standards/kml">KML</a> string representation of a geometry</p>
 <p>Format: <code>ST_AsKML (A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsKML</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_astext">ST_AsText<a class="headerlink" href="#st_astext" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the Well-Known Text string representation of a geometry</p>
 <p>Format: <code>ST_AsText (A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_azimuth">ST_Azimuth<a class="headerlink" href="#st_azimuth" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns Azimuth for two given points in radians null otherwise.</p>
 <p>Format: <code>ST_Azimuth(pointA: Point, pointB: Point)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Azimuth</span><span class="p">(</span><span class="n">ST_POINT</span><span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">25</span><span class="p">.</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">ST_POINT</span><span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>3.141592653589793</code></p>
 <h2 id="st_bestsrid">ST_BestSRID<a class="headerlink" href="#st_bestsrid" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns the estimated most appropriate Spatial Reference Identifier (SRID) for a given geometry, based on its spatial extent and location. It evaluates the geometry's bounding envelope and selects an SRID that optimally represents the geometry on the Earth's surface. The function prioritizes Universal Transverse Mercator (UTM), Lambert Azimuthal Equal Area (LAEA), or falls back to the Mercator projection. The function takes a WGS84 geometry and must be in <mark>lon/lat</mark> order.</p>
@@ -6071,9 +6071,9 @@ If the geometry is lacking SRID a WKT format is produced.
 <h2 id="st_boundary">ST_Boundary<a class="headerlink" href="#st_boundary" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns the closure of the combinatorial boundary of this Geometry.</p>
 <p>Format: <code>ST_Boundary(geom: geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Boundary</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((1 1,0 0, -1 1, 1 1))&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>LINESTRING (1 1, 0 0, -1 1, 1 1)</code></p>
 <h2 id="st_boundingdiagonal">ST_BoundingDiagonal<a class="headerlink" href="#st_boundingdiagonal" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns a linestring spanning minimum and maximum values of each dimension of the given geometry's coordinates as its start and end point respectively.
@@ -6126,12 +6126,12 @@ If a single vertex (POINT) is provided, the returned LineString has both the sta
 <p><code>ST_Buffer</code> throws an <code>IllegalArgumentException</code> if the correct format, parameters, or options are not provided.</p>
 </div>
 <p>Format:</p>
-<p><div class="highlight"><pre><span></span><code>ST_Buffer (A: Geometry, buffer: Double)
+<div class="highlight"><pre><span></span><code>ST_Buffer (A: Geometry, buffer: Double)
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>ST_Buffer (A: Geometry, buffer: Double, useSpheroid: Boolean)
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>ST_Buffer (A: Geometry, buffer: Double, useSpheroid: Boolean, bufferStyleParameters: String)
-</code></pre></div></p>
+</code></pre></div>
 <p>Since: <code>v1.5.1</code></p>
 <p>SQL Example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Buffer</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT(0 0)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
@@ -6166,17 +6166,17 @@ If a single vertex (POINT) is provided, the returned LineString has both the sta
 <h2 id="st_centroid">ST_Centroid<a class="headerlink" href="#st_centroid" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the centroid point of A</p>
 <p>Format: <code>ST_Centroid (A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Centroid</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_closestpoint">ST_ClosestPoint<a class="headerlink" href="#st_closestpoint" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns the 2-dimensional point on geom1 that is closest to geom2. This is the first point of the shortest line between the geometries. If using 3D geometries, the Z coordinates will be ignored. If you have a 3D Geometry, you may prefer to use ST_3DClosestPoint.
 It will throw an exception indicates illegal argument if one of the params is an empty geometry.</p>
 <p>Format: <code>ST_ClosestPoint(g1: Geometry, g2: Geometry)</code></p>
-<p>SQL Example:
+<p>SQL Example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="w"> </span><span class="n">ST_ClosestPoint</span><span class="p">(</span><span class="n">g1</span><span class="p">,</span><span class="w"> </span><span class="n">g2</span><span class="p">))</span><span class="w"> </span><span class="k">As</span><span class="w"> </span><span class="n">ptwkt</span><span class="p">;</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Input: <code>g1: POINT (160 40), g2: LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190)</code></p>
 <p>Output: <code>POINT(160 40)</code></p>
 <p>Input: <code>g1: LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190), g2: POINT (160 40)</code></p>
@@ -6242,17 +6242,17 @@ It will throw an exception indicates illegal argument if one of the params is an
 <p>Introduction: Return the Concave Hull of polgyon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true</p>
 <p>Format: <code>ST_ConcaveHull (A:geometry, pctConvex:float)</code></p>
 <p>Format: <code>ST_ConcaveHull (A:geometry, pctConvex:float, allowHoles:Boolean)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ConcaveHull</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">,</span><span class="w"> </span><span class="n">pctConvex</span><span class="p">)</span><span class="o">`</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_convexhull">ST_ConvexHull<a class="headerlink" href="#st_convexhull" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the Convex Hull of polgyon A</p>
 <p>Format: <code>ST_ConvexHull (A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ConvexHull</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_coorddim">ST_CoordDim<a class="headerlink" href="#st_coorddim" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns the coordinate dimensions of the geometry. It is an alias of <code>ST_NDims</code>.</p>
 <p>Format: <code>ST_CoordDim(geom: Geometry)</code></p>
@@ -6320,50 +6320,50 @@ It will throw an exception indicates illegal argument if one of the params is an
 <h2 id="st_distance">ST_Distance<a class="headerlink" href="#st_distance" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the Euclidean distance between A and B</p>
 <p>Format: <code>ST_Distance (A:geometry, B:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Distance</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">,</span><span class="w"> </span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_distancesphere">ST_DistanceSphere<a class="headerlink" href="#st_distancesphere" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the haversine / great-circle distance of A using a given earth radius (default radius: 6371008.0). Unit is meter. Compared to <code>ST_Distance</code> + <code>ST_Transform</code>, it works better for datasets that cover large regions such as continents or the entire planet. It is equivalent to PostGIS <code>ST_Distance(geography, use_spheroid=false)</code> and <code>ST_DistanceSphere</code> function and produces nearly identical results. It provides faster but less accurate result compared to <code>ST_DistanceSpheroid</code>.</p>
 <p>Geometry must be in EPSG:4326 (WGS84) projection and must be in <mark>lat/lon</mark> order. You can use <mark>ST_FlipCoordinates</mark> to swap lat and lon. For non-point data, we first take the centroids of both geometries and then compute the distance.</p>
 <p>Format: <code>ST_DistanceSphere (A:geometry)</code></p>
-<p>SQL example 1:
+<p>SQL example 1:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_DistanceSphere</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT (51.3168 -0.56)&#39;</span><span class="p">),</span><span class="w"> </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT (55.9533 -3.1883)&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>543796.9506134904</code></p>
-<p>SQL example 2:
+<p>SQL example 2:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_DistanceSphere</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT (51.3168 -0.56)&#39;</span><span class="p">),</span><span class="w"> </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT (55.9533 -3.1883)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">6378137</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>544405.4459192449</code></p>
 <h2 id="st_distancespheroid">ST_DistanceSpheroid<a class="headerlink" href="#st_distancespheroid" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the geodesic distance of A using WGS84 spheroid. Unit is meter. Compared to <code>ST_Distance</code> + <code>ST_Transform</code>, it works better for datasets that cover large regions such as continents or the entire planet. It is equivalent to PostGIS <code>ST_Distance(geography, use_spheroid=true)</code> and <code>ST_DistanceSpheroid</code> function and produces nearly identical results. It provides slower but more accurate result compared to <code>ST_DistanceSphere</code>.</p>
 <p>Geometry must be in EPSG:4326 (WGS84) projection and must be in <mark>lat/lon</mark> order. You can use <mark>ST_FlipCoordinates</mark> to swap lat and lon. For non-point data, we first take the centroids of both geometries and then compute the distance.</p>
 <p>Format: <code>ST_DistanceSpheroid (A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_DistanceSpheroid</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT (51.3168 -0.56)&#39;</span><span class="p">),</span><span class="w"> </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT (55.9533 -3.1883)&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>544430.9411996207</code></p>
 <h2 id="st_dump">ST_Dump<a class="headerlink" href="#st_dump" title="Permanent link">&para;</a></h2>
 <p>Introduction: This is an aggregate function that takes a column of geometries as input, and returns a single GeometryCollection of all these geometries.</p>
 <p>Format: <code>ST_Dump(geom: geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Dump</span><span class="p">(</span><span class="n">tbl</span><span class="p">.</span><span class="n">geom</span><span class="p">)</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>GeometryCollection ( (10 40), (40 30), (20 20), (30 10) )</code></p>
 <h2 id="st_dumppoints">ST_DumpPoints<a class="headerlink" href="#st_dumppoints" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns a MultiPoint geometry which consists of individual points that compose the input line string.</p>
 <p>Format: <code>ST_DumpPoints(geom: geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_DumpPoints</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING (0 0, 1 1, 1 0)&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>MultiPoint ((0 0), (0 1), (1 1), (1 0), (0 0))</code></p>
 <h2 id="st_endpoint">ST_EndPoint<a class="headerlink" href="#st_endpoint" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns last point of given linestring.</p>
 <p>Format: <code>ST_EndPoint(geom: geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_EndPoint</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(100 150,50 60, 70 80, 160 170)&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>POINT(160 170)</code></p>
 <h2 id="st_envelope">ST_Envelope<a class="headerlink" href="#st_envelope" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the envelope boundary of A</p>
@@ -6375,17 +6375,17 @@ It will throw an exception indicates illegal argument if one of the params is an
 <h2 id="st_exteriorring">ST_ExteriorRing<a class="headerlink" href="#st_exteriorring" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns a line string representing the exterior ring of the POLYGON geometry. Return NULL if the geometry is not a polygon.</p>
 <p>Format: <code>ST_ExteriorRing(geom: geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ExteriorRing</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>LINESTRING (0 0, 1 1, 1 2, 1 1, 0 0)</code></p>
 <h2 id="st_flipcoordinates">ST_FlipCoordinates<a class="headerlink" href="#st_flipcoordinates" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns a version of the given geometry with X and Y axis flipped.</p>
 <p>Format: <code>ST_FlipCoordinates(A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_FlipCoordinates</span><span class="p">(</span><span class="n">df</span><span class="p">.</span><span class="n">geometry</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">df</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Input: <code>POINT (1 2)</code></p>
 <p>Output: <code>POINT (2 1)</code></p>
 <h2 id="st_force_2d">ST_Force_2D<a class="headerlink" href="#st_force_2d" title="Permanent link">&para;</a></h2>
@@ -6480,26 +6480,26 @@ based on <a href="http://www.kr.tuwien.ac.at/staff/eiter/et-archive/cdtr9464.pdf
 <p>Format: <code>ST_GeometricMedian(geom: geometry, tolerance: float)</code></p>
 <p>Format: <code>ST_GeometricMedian(geom: geometry)</code></p>
 <p>Default parameters: <code>tolerance: 1e-6, maxIter: 1000, failIfNotConverged: false</code></p>
-<p>Example:
+<p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeometricMedian</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;MULTIPOINT((0 0), (1 1), (2 2), (200 200))&#39;</span><span class="p">))</span>
-</code></pre></div></p>
-<p>Output:
+</code></pre></div>
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>POINT (1.9761550281255005 1.9761550281255005)
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_geometryn">ST_GeometryN<a class="headerlink" href="#st_geometryn" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the 0-based Nth geometry if the geometry is a GEOMETRYCOLLECTION, (MULTI)POINT, (MULTI)LINESTRING, MULTICURVE or (MULTI)POLYGON. Otherwise, return null</p>
 <p>Format: <code>ST_GeometryN(geom: geometry, n: Int)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeometryN</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;MULTIPOINT((1 2), (3 4), (5 6), (8 9))&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>POINT (3 4)</code></p>
 <h2 id="st_geometrytype">ST_GeometryType<a class="headerlink" href="#st_geometrytype" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns the type of the geometry as a string. EG: 'ST_Linestring', 'ST_Polygon' etc.</p>
 <p>Format: <code>ST_GeometryType (A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeometryType</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_hausdorffdistance">ST_HausdorffDistance<a class="headerlink" href="#st_hausdorffdistance" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns a discretized (and hence approximate) <a href="https://en.wikipedia.org/wiki/Hausdorff_distance">Hausdorff distance</a> between the given 2 geometries.
 Optionally, a densityFraction parameter can be specified, which gives more accurate results by densifying segments before computing hausdorff distance between them.
@@ -6530,9 +6530,9 @@ Each segment is broken down into equal-length subsegments whose ratio with segme
 <h2 id="st_interiorringn">ST_InteriorRingN<a class="headerlink" href="#st_interiorringn" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns the Nth interior linestring ring of the polygon geometry. Returns NULL if the geometry is not a polygon or the given N is out of range</p>
 <p>Format: <code>ST_InteriorRingN(geom: geometry, n: Int)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_InteriorRingN</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1), (1 3, 2 3, 2 4, 1 4, 1 3), (3 3, 4 3, 4 4, 3 4, 3 3))&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>LINESTRING (1 1, 2 1, 2 2, 1 2, 1 1)</code></p>
 <h2 id="st_intersection">ST_Intersection<a class="headerlink" href="#st_intersection" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the intersection geometry of A and B</p>
@@ -6544,9 +6544,9 @@ Each segment is broken down into equal-length subsegments whose ratio with segme
 <h2 id="st_isclosed">ST_IsClosed<a class="headerlink" href="#st_isclosed" title="Permanent link">&para;</a></h2>
 <p>Introduction: RETURNS true if the LINESTRING start and end point are the same.</p>
 <p>Format: <code>ST_IsClosed(geom: geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_IsClosed</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 0, 1 1, 1 0)&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>false</code></p>
 <h2 id="st_iscollection">ST_IsCollection<a class="headerlink" href="#st_iscollection" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns <code>TRUE</code> if the geometry type of the input is a geometry collection type.
@@ -6596,9 +6596,9 @@ Collection types are the following:</p>
 <h2 id="st_isring">ST_IsRing<a class="headerlink" href="#st_isring" title="Permanent link">&para;</a></h2>
 <p>Introduction: RETURN true if LINESTRING is ST_IsClosed and ST_IsSimple.</p>
 <p>Format: <code>ST_IsRing(geom: geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_IsRing</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 0, 0 1, 1 1, 1 0, 0 0)&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>true</code></p>
 <h2 id="st_issimple">ST_IsSimple<a class="headerlink" href="#st_issimple" title="Permanent link">&para;</a></h2>
 <p>Introduction: Test if geometry's only self-intersections are at boundary points.</p>
@@ -6613,11 +6613,11 @@ Collection types are the following:</p>
 <li>0 (default): Use usual OGC SFS (Simple Features Specification) validity semantics.</li>
 <li>1: "ESRI flag", Accepts certain self-touching rings as valid, which are considered invalid under OGC standards.</li>
 </ul>
-<p>Formats:
+<p>Formats:</p>
 <div class="highlight"><pre><span></span><code>ST_IsValid (A: Geometry)
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>ST_IsValid (A: Geometry, flag: Integer)
-</code></pre></div></p>
+</code></pre></div>
 <p>SQL Example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_IsValid</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 10 0, 10 10, 0 10, 0 0), (15 15, 15 20, 20 20, 20 15, 15 15))&#39;</span><span class="p">))</span>
 </code></pre></div>
@@ -6630,11 +6630,11 @@ Collection types are the following:</p>
 <li>0 (default): Use usual OGC SFS (Simple Features Specification) validity semantics.</li>
 <li>1: "ESRI flag", Accepts certain self-touching rings as valid, which are considered invalid under OGC standards.</li>
 </ul>
-<p>Formats:
+<p>Formats:</p>
 <div class="highlight"><pre><span></span><code>ST_IsValidReason (A: Geometry)
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>ST_IsValidReason (A: Geometry, flag: Integer)
-</code></pre></div></p>
+</code></pre></div>
 <p>SQL Example for valid geometry:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_IsValidReason</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON ((100 100, 100 300, 300 300, 300 100, 100 100))&#39;</span><span class="p">))</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">validity_info</span>
 </code></pre></div>
@@ -6657,17 +6657,17 @@ Collection types are the following:</p>
 <h2 id="st_length">ST_Length<a class="headerlink" href="#st_length" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the perimeter of A</p>
 <p>Format: ST_Length (A:geometry)</p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Length</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_lengthspheroid">ST_LengthSpheroid<a class="headerlink" href="#st_lengthspheroid" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the geodesic perimeter of A using WGS84 spheroid. Unit is meter. Works better for large geometries (country level) compared to <code>ST_Length</code> + <code>ST_Transform</code>. It is equivalent to PostGIS <code>ST_Length(geography, use_spheroid=true)</code> and <code>ST_LengthSpheroid</code> function and produces nearly identical results.</p>
 <p>Geometry must be in EPSG:4326 (WGS84) projection and must be in <mark>lat/lon</mark> order. You can use <mark>ST_FlipCoordinates</mark> to swap lat and lon.</p>
 <p>Format: <code>ST_LengthSpheroid (A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_LengthSpheroid</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;Polygon ((0 0, 0 90, 0 0))&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>20037508.342789244</code></p>
 <h2 id="st_linefrommultipoint">ST_LineFromMultiPoint<a class="headerlink" href="#st_linefrommultipoint" title="Permanent link">&para;</a></h2>
 <p>Introduction: Creates a LineString from a MultiPoint geometry.</p>
@@ -6687,25 +6687,25 @@ Collection types are the following:</p>
 <h2 id="st_lineinterpolatepoint">ST_LineInterpolatePoint<a class="headerlink" href="#st_lineinterpolatepoint" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns a point interpolated along a line. First argument must be a LINESTRING. Second argument is a Double between 0 and 1 representing fraction of total linestring length the point has to be located.</p>
 <p>Format: <code>ST_LineInterpolatePoint (geom: geometry, fraction: Double)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_LineInterpolatePoint</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING(25 50, 100 125, 150 190)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">Interpolated</span>
-</code></pre></div></p>
-<p>Output:
+</code></pre></div>
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>+-----------------------------------------+
 |Interpolated                             |
 +-----------------------------------------+
 |POINT (51.5974135047432 76.5974135047432)|
 +-----------------------------------------+
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_linelocatepoint">ST_LineLocatePoint<a class="headerlink" href="#st_linelocatepoint" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns a double between 0 and 1, representing the location of the closest point on the LineString as a fraction of its total length. The first argument must be a LINESTRING, and the second argument is a POINT geometry.</p>
 <p>Format: <code>ST_LineLocatePoint(linestring: Geometry, point: Geometry)</code></p>
 <p>SQL Example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_LineLocatePoint</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 0, 1 1, 2 2)&#39;</span><span class="p">),</span><span class="w"> </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT(0 2)&#39;</span><span class="p">))</span>
 </code></pre></div>
-<p>Output:
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>0.5
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_linemerge">ST_LineMerge<a class="headerlink" href="#st_linemerge" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.</p>
 <div class="admonition note">
@@ -6719,16 +6719,16 @@ Collection types are the following:</p>
 <h2 id="st_linesubstring">ST_LineSubstring<a class="headerlink" href="#st_linesubstring" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length. Second and third arguments are Double values between 0 and 1. This only works with LINESTRINGs.</p>
 <p>Format: <code>ST_LineSubstring (geom: geometry, startfraction: Double, endfraction: Double)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_LineSubstring</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING(25 50, 100 125, 150 190)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">333</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">666</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="k">Substring</span>
-</code></pre></div></p>
-<p>Output:
+</code></pre></div>
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>+------------------------------------------------------------------------------------------------+
 |Substring                                                                                       |
 +------------------------------------------------------------------------------------------------+
 |LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140.21046313888758)|
 +------------------------------------------------------------------------------------------------+
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_makeline">ST_MakeLine<a class="headerlink" href="#st_makeline" title="Permanent link">&para;</a></h2>
 <p>Introduction: Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error.</p>
 <p>Format:</p>
@@ -6750,13 +6750,13 @@ Collection types are the following:</p>
 <p>Introduction: Function to convert closed linestring to polygon including holes. The holes must be a MultiLinestring.</p>
 <p>Format: <code>ST_MakePolygon(geom: geometry, holes: &lt;geometry&gt;)</code></p>
 <p>Example:</p>
-<p>Query:
+<p>Query:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span>
 <span class="w">    </span><span class="n">ST_MakePolygon</span><span class="p">(</span>
 <span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(7 -1, 7 6, 9 6, 9 1, 7 -1)&#39;</span><span class="p">),</span>
 <span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;MultiLINESTRING((6 2, 8 2, 8 1, 6 1, 6 2))&#39;</span><span class="p">)</span>
 <span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">polygon</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Result:</p>
 <div class="highlight"><pre><span></span><code>+----------------------------------------------------------------+
 |polygon                                                         |
@@ -6775,13 +6775,13 @@ Default is keepCollapsed=false.</p>
 <span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING(1 1, 1 1)&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span>
 <span class="p">)</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_MakeValid</span><span class="p">(</span><span class="n">geom</span><span class="p">),</span><span class="w"> </span><span class="n">ST_MakeValid</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="k">true</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">linestring</span>
 </code></pre></div>
-<p>Result:
+<p>Result:</p>
 <div class="highlight"><pre><span></span><code>+------------------+------------------------+
 |st_makevalid(geom)|st_makevalid(geom, true)|
 +------------------+------------------------+
 |  LINESTRING EMPTY|             POINT (1 1)|
 +------------------+------------------------+
-</code></pre></div></p>
+</code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>In Sedona up to and including version 1.2 the behaviour of ST_MakeValid was different.
@@ -6792,15 +6792,15 @@ It would also sometimes return multiple geometries for a single geometry input.<
 <h2 id="st_minimumboundingcircle">ST_MinimumBoundingCircle<a class="headerlink" href="#st_minimumboundingcircle" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns the smallest circle polygon that contains a geometry.</p>
 <p>Format: <code>ST_MinimumBoundingCircle(geom: geometry, [Optional] quadrantSegments:int)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_MinimumBoundingCircle</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((1 1,0 0, -1 1, 1 1))&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_minimumboundingradius">ST_MinimumBoundingRadius<a class="headerlink" href="#st_minimumboundingradius" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns two columns containing the center point and radius of the smallest circle that contains a geometry.</p>
 <p>Format: <code>ST_MinimumBoundingRadius(geom: geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_MinimumBoundingRadius</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((1 1,0 0, -1 1, 1 1))&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_multi">ST_Multi<a class="headerlink" href="#st_multi" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns a MultiGeometry object based on the geometry input.
 ST_Multi is basically an alias for ST_Collect with one geometry.</p>
@@ -6873,9 +6873,9 @@ If the geometry is not a Polygon or MultiPolygon, an IllegalArgument Exception i
 <h2 id="st_numinteriorrings">ST_NumInteriorRings<a class="headerlink" href="#st_numinteriorrings" title="Permanent link">&para;</a></h2>
 <p>Introduction: RETURNS number of interior rings of polygon geometries.</p>
 <p>Format: <code>ST_NumInteriorRings(geom: geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_NumInteriorRings</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>1</code></p>
 <h2 id="st_numpoints">ST_NumPoints<a class="headerlink" href="#st_numpoints" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns number of points in a LineString</p>
@@ -6890,16 +6890,16 @@ If the geometry is not a Polygon or MultiPolygon, an IllegalArgument Exception i
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>IllegalArgumentException: Unsupported geometry type: MultiPoint, only LineString geometry is supported.
 </code></pre></div>
-<p>SQL Example:
+<p>SQL Example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_NumPoints</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 1, 1 0, 2 0)&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>3</code></p>
 <h2 id="st_pointn">ST_PointN<a class="headerlink" href="#st_pointn" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the Nth point in a single linestring or circular linestring in the geometry. Negative values are counted backwards from the end of the LineString, so that -1 is the last point. Returns NULL if there is no linestring in the geometry.</p>
 <p>Format: <code>ST_PointN(geom: geometry, n: integer)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_PointN</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 0, 1 2, 2 4, 3 6)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Result:</p>
 <div class="highlight"><pre><span></span><code>+---------------------------------------------------------------+
 |geom                                                           |
@@ -6944,10 +6944,10 @@ SELECT ST_AsText(ST_PointOnSurface(ST_GeomFromText(&#39;LINESTRING(0 5 1, 0 0 1,
 <p>Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded. This function was called ST_PrecisionReduce in versions prior to v1.5.0.</p>
 <p>Format: <code>ST_ReducePrecision (A: Geometry, B: Integer)</code></p>
 <p>SQL Example:</p>
-<p><div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ReducePrecision</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;Point(0.1234567890123456789 0.1234567890123456789)&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ReducePrecision</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;Point(0.1234567890123456789 0.1234567890123456789)&#39;</span><span class="p">)</span>
 <span class="w">    </span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">)</span>
 </code></pre></div>
-The new coordinates will only have 9 decimal places.</p>
+<p>The new coordinates will only have 9 decimal places.</p>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>POINT (0.123456789 0.123456789)
 </code></pre></div>
@@ -6955,9 +6955,9 @@ The new coordinates will only have 9 decimal places.</p>
 <p>Introduction: RETURN Line with removed point at given index, position can be omitted and then last one will be removed.</p>
 <p>Format: <code>ST_RemovePoint(geom: geometry, position: integer)</code></p>
 <p>Format: <code>ST_RemovePoint(geom: geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_RemovePoint</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 0, 1 1, 1 0)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>LINESTRING(0 0, 1 0)</code></p>
 <h2 id="st_reverse">ST_Reverse<a class="headerlink" href="#st_reverse" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the geometry with vertex order reversed</p>
@@ -6979,16 +6979,16 @@ The new coordinates will only have 9 decimal places.</p>
 The level indicates the <a href="https://s2geometry.io/resources/s2cell_statistics.html">size of cells</a>. With a bigger level,
 the cells will be smaller, the coverage will be more accurate, but the result size will be exponentially increasing.</p>
 <p>Format: <code>ST_S2CellIDs(geom: geometry, level: Int)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_S2CellIDs</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(1 3 4, 5 6 7)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">6</span><span class="p">)</span>
-</code></pre></div></p>
-<p>Output:
+</code></pre></div>
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>+------------------------------------------------------------------------------------------------------------------------------+
 |st_s2cellids(st_geomfromtext(LINESTRING(1 3 4, 5 6 7), 0), 6)                                                                 |
 +------------------------------------------------------------------------------------------------------------------------------+
 |[1159395429071192064, 1159958379024613376, 1160521328978034688, 1161084278931456000, 1170091478186196992, 1170654428139618304]|
 +------------------------------------------------------------------------------------------------------------------------------+
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_setpoint">ST_SetPoint<a class="headerlink" href="#st_setpoint" title="Permanent link">&para;</a></h2>
 <p>Introduction: Replace Nth point of linestring with given point. Index is 0-based. Negative index are counted backwards, e.g., -1 is last point.</p>
 <p>Format: <code>ST_SetPoint (linestring: geometry, index: integer, point: geometry)</code></p>
@@ -7005,10 +7005,10 @@ the cells will be smaller, the coverage will be more accurate, but the result si
 <h2 id="st_setsrid">ST_SetSRID<a class="headerlink" href="#st_setsrid" title="Permanent link">&para;</a></h2>
 <p>Introduction: Sets the spatial reference system identifier (SRID) of the geometry.</p>
 <p>Format: <code>ST_SetSRID (A:geometry, srid: Integer)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">,</span><span class="w"> </span><span class="mi">3021</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_shiftlongitude">ST_ShiftLongitude<a class="headerlink" href="#st_shiftlongitude" title="Permanent link">&para;</a></h2>
 <p>Introduction: Modifies longitude coordinates in geometries, shifting values between -180..0 degrees to 180..360 degrees and vice versa. This is useful for normalizing data across the International Date Line and standardizing coordinate ranges for visualization and spheroidal calculations.</p>
 <div class="admonition note">
@@ -7017,12 +7017,12 @@ the cells will be smaller, the coverage will be more accurate, but the result si
 </div>
 <p>Format: <code>ST_ShiftLongitude (geom: geometry)</code></p>
 <p>Since: <code>v1.6.0</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ShiftLongitude</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(177 10, 179 10, -179 10, -177 10)&#39;</span><span class="p">))</span>
-</code></pre></div></p>
-<p>Output:
+</code></pre></div>
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code><span class="n">LINESTRING</span><span class="p">(</span><span class="mi">177</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">179</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">181</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">183</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_simplifypreservetopology">ST_SimplifyPreserveTopology<a class="headerlink" href="#st_simplifypreservetopology" title="Permanent link">&para;</a></h2>
 <p>Introduction: Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
 and with the components having the same topological relationship.</p>
@@ -7056,44 +7056,44 @@ ST_Split will always return either a MultiLineString or MultiPolygon even if the
 Homogeneous GeometryCollections are treated as a multi-geometry of the type it contains.
 For example, if a GeometryCollection of only Point geometries is passed as a blade it is the same as passing a MultiPoint of the same geometries.</p>
 <p>Format: <code>ST_Split (input: geometry, blade: geometry)</code></p>
-<p>SQL Example:
+<p>SQL Example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Split</span><span class="p">(</span>
 <span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING (0 0, 1.5 1.5, 2 2)&#39;</span><span class="p">),</span>
 <span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;MULTIPOINT (0.5 0.5, 1 1)&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))</code></p>
 <h2 id="st_srid">ST_SRID<a class="headerlink" href="#st_srid" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the spatial reference system identifier (SRID) of the geometry.</p>
 <p>Format: <code>ST_SRID (A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_SRID</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_startpoint">ST_StartPoint<a class="headerlink" href="#st_startpoint" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns first point of given linestring.</p>
 <p>Format: <code>ST_StartPoint(geom: geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_StartPoint</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(100 150,50 60, 70 80, 160 170)&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>POINT(100 150)</code></p>
 <h2 id="st_subdivide">ST_SubDivide<a class="headerlink" href="#st_subdivide" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns a multi-geometry divided based of given maximum number of vertices.</p>
 <p>Format: <code>ST_SubDivide(geom: geometry, maxVertices: int)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_SubDivide</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 0, 85 85, 100 100, 120 120, 21 21, 10 10, 5 5)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">5</span><span class="p">));</span>
-</code></pre></div></p>
-<p>Output:
+</code></pre></div>
+<p>Output:</p>
 <div class="highlight"><pre><span></span><code>MULTILINESTRING ((0 0, 5 5), (5 5, 10 10), (10 10, 21 21), (21 21, 60 60), (60 60, 85 85), (85 85, 100 100), (100 100, 120 120))
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="st_subdivideexplode">ST_SubDivideExplode<a class="headerlink" href="#st_subdivideexplode" title="Permanent link">&para;</a></h2>
 <p>Introduction: It works the same as ST_SubDivide but returns new rows with geometries instead of a multi-geometry.</p>
 <p>Format: <code>SELECT SEDONA.ST_AsText(GEOM)
 FROM table(SEDONA.ST_SubDivideExplode(geom: geometry, maxVertices: int))</code></p>
 <p>Example:</p>
-<p>Query:
+<p>Query:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">GEOM</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="k">table</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_SubDivideExplode</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 0, 85 85, 100 100, 120 120, 21 21, 10 10, 5 5)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">5</span><span class="p">));</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Result:</p>
 <div class="highlight"><pre><span></span><code>+-----------------------------+
 |geom                         |
@@ -7129,14 +7129,14 @@ For SourceCRS and TargetCRS, WKT format is also available.</p>
 <p>If <mark>ST_Transform</mark> throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.</p>
 </div>
 <p>Format: <code>ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] DisableError)</code></p>
-<p>SQL example (simple):
+<p>SQL example (simple):</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;epsg:4326&#39;</span><span class="p">,</span><span class="s1">&#39;epsg:3857&#39;</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
-<p>SQL example (with optional parameters):
+</code></pre></div>
+<p>SQL example (with optional parameters):</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">polygondf</span><span class="p">.</span><span class="n">countyshape</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;epsg:4326&#39;</span><span class="p">,</span><span class="s1">&#39;epsg:3857&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
-</code></pre></div></p>
+</code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The detailed EPSG information can be searched on <a href="https://epsg.io/">EPSG.io</a>.</p>
@@ -7176,9 +7176,9 @@ If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGO
 <h2 id="st_x">ST_X<a class="headerlink" href="#st_x" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns X Coordinate of given Point null otherwise.</p>
 <p>Format: <code>ST_X(pointA: Point)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_X</span><span class="p">(</span><span class="n">ST_POINT</span><span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="mi">25</span><span class="p">.</span><span class="mi">0</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>0.0</code></p>
 <h2 id="st_xmax">ST_XMax<a class="headerlink" href="#st_xmax" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns the maximum X coordinate of a geometry</p>
@@ -7201,44 +7201,44 @@ If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGO
 <h2 id="st_y">ST_Y<a class="headerlink" href="#st_y" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns Y Coordinate of given Point, null otherwise.</p>
 <p>Format: <code>ST_Y(pointA: Point)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Y</span><span class="p">(</span><span class="n">ST_POINT</span><span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="mi">25</span><span class="p">.</span><span class="mi">0</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>25.0</code></p>
 <h2 id="st_ymax">ST_YMax<a class="headerlink" href="#st_ymax" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the minimum Y coordinate of A</p>
 <p>Format: <code>ST_YMax (A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_YMax</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: 2</p>
 <h2 id="st_ymin">ST_YMin<a class="headerlink" href="#st_ymin" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the minimum Y coordinate of A</p>
 <p>Format: <code>ST_Y_Min (A:geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_YMin</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output : 0</p>
 <h2 id="st_z">ST_Z<a class="headerlink" href="#st_z" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns Z Coordinate of given Point, null otherwise.</p>
 <p>Format: <code>ST_Z(pointA: Point)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Z</span><span class="p">(</span><span class="n">ST_POINT</span><span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="mi">25</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="mi">11</span><span class="p">.</span><span class="mi">0</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>11.0</code></p>
 <h2 id="st_zmax">ST_ZMax<a class="headerlink" href="#st_zmax" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns Z maxima of the given geometry or null if there is no Z coordinate.</p>
 <p>Format: <code>ST_ZMax(geom: geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ZMax</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>1.0</code></p>
 <h2 id="st_zmin">ST_ZMin<a class="headerlink" href="#st_zmin" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns Z minima of the given geometry or null if there is no Z coordinate.</p>
 <p>Format: <code>ST_ZMin(geom: geometry)</code></p>
-<p>SQL example:
+<p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ZMin</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(1 3 4, 5 6 7)&#39;</span><span class="p">))</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Output: <code>4.0</code></p>
 
 
@@ -7260,7 +7260,7 @@ If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGO
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 10, 2024 21:10:43</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 11, 2024 00:47:00</span>
   </span>
 
     

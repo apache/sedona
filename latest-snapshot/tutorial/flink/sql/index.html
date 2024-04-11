@@ -4270,9 +4270,9 @@
   <h1>Spatial SQL app (Flink)</h1>
 
 <p>The page outlines the steps to manage spatial data using SedonaSQL. <mark>The example code is written in Java but also works for Scala</mark>.</p>
-<p>SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:
+<p>SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:</p>
 <div class="highlight"><pre><span></span><code><span class="n">Table</span><span class="w"> </span><span class="n">myTable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tableEnv</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">&quot;YOUR_SQL&quot;</span><span class="p">)</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Detailed SedonaSQL APIs are available here: <a href="../../../api/flink/Overview">SedonaSQL API</a></p>
 <h2 id="set-up-dependencies">Set up dependencies<a class="headerlink" href="#set-up-dependencies" title="Permanent link">&para;</a></h2>
 <ol>
@@ -4282,11 +4282,11 @@
 <li>Please see <a href="../../demo/">SQL example project</a></li>
 </ol>
 <h2 id="initiate-stream-environment">Initiate Stream Environment<a class="headerlink" href="#initiate-stream-environment" title="Permanent link">&para;</a></h2>
-<p>Use the following code to initiate your <code>StreamExecutionEnvironment</code> at the beginning:
+<p>Use the following code to initiate your <code>StreamExecutionEnvironment</code> at the beginning:</p>
 <div class="highlight"><pre><span></span><code><span class="n">StreamExecutionEnvironment</span><span class="w"> </span><span class="n">env</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StreamExecutionEnvironment</span><span class="p">.</span><span class="na">getExecutionEnvironment</span><span class="p">();</span>
 <span class="n">EnvironmentSettings</span><span class="w"> </span><span class="n">settings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EnvironmentSettings</span><span class="p">.</span><span class="na">newInstance</span><span class="p">().</span><span class="na">inStreamingMode</span><span class="p">().</span><span class="na">build</span><span class="p">();</span>
 <span class="n">StreamTableEnvironment</span><span class="w"> </span><span class="n">tableEnv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StreamTableEnvironment</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">env</span><span class="p">,</span><span class="w"> </span><span class="n">settings</span><span class="p">);</span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="initiate-sedonacontext">Initiate SedonaContext<a class="headerlink" href="#initiate-sedonacontext" title="Permanent link">&para;</a></h2>
 <p>Add the following line after your <code>StreamExecutionEnvironment</code> and <code>StreamTableEnvironment</code> declaration</p>
 <p><mark>Sedona &gt;= 1.4.1</mark></p>
@@ -4371,7 +4371,7 @@
 <p>Read <a href="../../../api/flink/Function/#st_transform">SedonaSQL ST_Transform API</a> to learn different spatial query predicates.</p>
 </div>
 <p>For example, a Table that has coordinates in the US will become like this.</p>
-<p>Before the transformation:
+<p>Before the transformation:</p>
 <div class="highlight"><pre><span></span><code>+----+--------------------------------+--------------------------------+
 | op |                     geom_point |                     name_point |
 +----+--------------------------------+--------------------------------+
@@ -4386,7 +4386,7 @@
 | +I |                POINT (40 -110) |                          point |
 | +I |                POINT (41 -109) |                          point |
 +----+--------------------------------+--------------------------------+
-</code></pre></div></p>
+</code></pre></div>
 <p>After the transformation:</p>
 <div class="highlight"><pre><span></span><code>+----+--------------------------------+--------------------------------+
 | op |                            _c0 |                     name_point |
@@ -4628,9 +4628,9 @@ FROM rights CROSS JOIN UNNEST(rights.idarray) AS tmpTbl2(cellId)
 <span class="w">        </span><span class="p">})</span>
 </code></pre></div>
 <h3 id="get-spatial-table">Get Spatial Table<a class="headerlink" href="#get-spatial-table" title="Permanent link">&para;</a></h3>
-<p>Use TableEnv's fromDataStream function, with two column names <code>geom</code> and <code>geom_name</code>.
+<p>Use TableEnv's fromDataStream function, with two column names <code>geom</code> and <code>geom_name</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="n">Table</span><span class="w"> </span><span class="n">geomTable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">fromDataStream</span><span class="p">(</span><span class="n">geomStream</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;geom&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;geom_name&quot;</span><span class="p">)</span>
-</code></pre></div></p>
+</code></pre></div>
 
 
 
@@ -4651,7 +4651,7 @@ FROM rights CROSS JOIN UNNEST(rights.idarray) AS tmpTbl2(cellId)
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 10, 2024 19:16:11</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 11, 2024 00:47:00</span>
   </span>
 
     

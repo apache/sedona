@@ -4655,12 +4655,12 @@ If you are using Spark versions &gt;= 3.4, please replace the <code>3.0</code> i
 <p>You can also register everything by passing <code>--conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions</code> to <code>spark-submit</code> or <code>spark-shell</code>.</p>
 <h2 id="load-data-from-files">Load data from files<a class="headerlink" href="#load-data-from-files" title="Permanent link">&para;</a></h2>
 <p>Assume we have a WKT file, namely <code>usa-county.tsv</code>, at Path <code>/Download/usa-county.tsv</code> as follows:</p>
-<p><div class="highlight"><pre><span></span><code>POLYGON (..., ...)  Cuming County
+<div class="highlight"><pre><span></span><code>POLYGON (..., ...)  Cuming County
 POLYGON (..., ...)  Wahkiakum County
 POLYGON (..., ...)  De Baca County
 POLYGON (..., ...)  Lancaster County
 </code></pre></div>
-The file may have many other columns.</p>
+<p>The file may have many other columns.</p>
 <p>Use the following code to load the data and create a raw DataFrame:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Scala</label><label for="__tabbed_7_2">Java</label><label for="__tabbed_7_3">Python</label></div>
 <div class="tabbed-content">
@@ -4993,9 +4993,9 @@ can also be found in the example notebook available <a href="https://github.com/
 <p>The dataset used here is the Chicago crimes dataset, available <a href="https://github.com/apache/sedona/blob/sedona-1.5.0/spark/common/src/test/resources/Chicago_Crimes.csv">here</a></p>
 <h4 id="creating-a-heatmap-using-sedonapydeck">Creating a heatmap using SedonaPyDeck<a class="headerlink" href="#creating-a-heatmap-using-sedonapydeck" title="Permanent link">&para;</a></h4>
 <p>SedonaPyDeck exposes a create_heatmap API which can be used to visualize a heatmap out of the passed SedonaDataFrame containing points:</p>
-<p>Example:
+<p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">create_heatmap</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">crimes_df</span><span class="p">)</span>
-</code></pre></div></p>
+</code></pre></div>
 <p><img src="../../image/heatmap.gif" width="1000"></p>
 <p>The dataset used here is the Chicago crimes dataset, available <a href="https://github.com/apache/sedona/blob/sedona-1.5.0/spark/common/src/test/resources/Chicago_Crimes.csv">here</a></p>
 <h3 id="sedonakepler">SedonaKepler<a class="headerlink" href="#sedonakepler" title="Permanent link">&para;</a></h3>
@@ -5472,7 +5472,7 @@ case. Columns for the left and right user data must be provided.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">March 21, 2024 20:52:12</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 11, 2024 00:47:00</span>
   </span>
 
     

@@ -4383,13 +4383,13 @@
 <p>A generic SpatialRDD is not typed to a certain geometry type and open to more scenarios. It allows an input data file contains mixed types of geometries. For instance, a WKT file contains three types gemetries <mark>LineString</mark>, <mark>Polygon</mark> and <mark>MultiPolygon</mark>.</p>
 <h4 id="from-wktwkb">From WKT/WKB<a class="headerlink" href="#from-wktwkb" title="Permanent link">&para;</a></h4>
 <p>Geometries in a WKT and WKB file always occupy a single column no matter how many coordinates they have. Sedona provides <code>WktReader</code> and <code>WkbReader</code> to create generic SpatialRDD.</p>
-<p>Suppose we have a <code>checkin.tsv</code> WKT TSV file at Path <code>/Download/checkin.tsv</code> as follows:
+<p>Suppose we have a <code>checkin.tsv</code> WKT TSV file at Path <code>/Download/checkin.tsv</code> as follows:</p>
 <div class="highlight"><pre><span></span><code>POINT (-88.331492 32.324142)    hotel
 POINT (-88.175933 32.360763)    gas
 POINT (-88.388954 32.357073)    bar
 POINT (-88.221102 32.35078) restaurant
 </code></pre></div>
-This file has two columns and corresponding <mark>offsets</mark>(Column IDs) are 0, 1. Column 0 is the WKT string and Column 1 is the checkin business type.</p>
+<p>This file has two columns and corresponding <mark>offsets</mark>(Column IDs) are 0, 1. Column 0 is the WKT string and Column 1 is the checkin business type.</p>
 <p>Use the following code to create a SpatialRDD</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Scala</label><label for="__tabbed_1_2">Java</label><label for="__tabbed_1_3">Python</label></div>
 <div class="tabbed-content">
@@ -4506,21 +4506,25 @@ via <code>sedona.global.charset</code> system property before creating your Spar
 <p>To create a generic SpatialRDD from CSV, TSV, WKT, WKB and GeoJSON input formats, you can use SedonaSQL.</p>
 <p>We use checkin.csv CSV file as the example. You can create a generic SpatialRDD using the following steps:</p>
 <ol>
-<li>Load data in SedonaSQL.
+<li>Load data in SedonaSQL.</li>
+</ol>
 <div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;csv&quot;</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;header&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;false&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="n">csvPointInputLocation</span><span class="p">)</span>
 <span class="n">df</span><span class="p">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s">&quot;inputtable&quot;</span><span class="p">)</span>
-</code></pre></div></li>
-<li>Create a Geometry type column in SedonaSQL
+</code></pre></div>
+<ol>
+<li>Create a Geometry type column in SedonaSQL</li>
+</ol>
 <div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">spatialDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span>
 <span class="w">    </span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">        |SELECT ST_Point(CAST(inputtable._c0 AS Decimal(24,20)),CAST(inputtable._c1 AS Decimal(24,20))) AS checkin</span>
 <span class="s">        |FROM inputtable</span>
 <span class="s">    &quot;&quot;&quot;</span><span class="p">.</span><span class="n">stripMargin</span><span class="p">)</span>
-</code></pre></div></li>
-<li>Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD
-<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">spatialRDD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Adapter</span><span class="p">.</span><span class="n">toSpatialRdd</span><span class="p">(</span><span class="n">spatialDf</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;checkin&quot;</span><span class="p">)</span>
-</code></pre></div></li>
+</code></pre></div>
+<ol>
+<li>Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD</li>
 </ol>
+<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">spatialRDD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Adapter</span><span class="p">.</span><span class="n">toSpatialRdd</span><span class="p">(</span><span class="n">spatialDf</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;checkin&quot;</span><span class="p">)</span>
+</code></pre></div>
 <p>"checkin" is the name of the geometry column</p>
 <p>For WKT/WKB/GeoJSON data, please use <mark>ST_GeomFromWKT / ST_GeomFromWKB / ST_GeomFromGeoJSON</mark> instead.</p>
 <h2 id="transform-the-coordinate-reference-system">Transform the Coordinate Reference System<a class="headerlink" href="#transform-the-coordinate-reference-system" title="Permanent link">&para;</a></h2>
@@ -5311,7 +5315,7 @@ Find the superheroes within 10 miles of each city</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 10, 2024 19:16:11</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 11, 2024 00:47:00</span>
   </span>
 
     

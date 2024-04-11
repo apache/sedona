@@ -4013,17 +4013,19 @@
 <p>The detailed explanation is here: <a href="../../../tutorial/viz/">Visualize Spatial DataFrame/RDD</a>.</p>
 <ol>
 <li>Add Sedona-core, Sedona-SQL, Sedona-Viz into your project pom.xml or build.sbt</li>
-<li>Declare your Spark Session
+<li>Declare your Spark Session</li>
+</ol>
 <div class="highlight"><pre><span></span><code><span class="n">sparkSession</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">().</span>
 <span class="n">config</span><span class="p">(</span><span class="s">&quot;spark.serializer&quot;</span><span class="p">,</span><span class="s">&quot;org.apache.spark.serializer.KryoSerializer&quot;</span><span class="p">).</span>
 <span class="n">config</span><span class="p">(</span><span class="s">&quot;spark.kryo.registrator&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator&quot;</span><span class="p">).</span>
 <span class="n">master</span><span class="p">(</span><span class="s">&quot;local[*]&quot;</span><span class="p">).</span><span class="n">appName</span><span class="p">(</span><span class="s">&quot;mySedonaVizDemo&quot;</span><span class="p">).</span><span class="n">getOrCreate</span><span class="p">()</span>
-</code></pre></div></li>
-<li>Add the following lines after your SparkSession declaration:
+</code></pre></div>
+<ol>
+<li>Add the following lines after your SparkSession declaration:</li>
+</ol>
 <div class="highlight"><pre><span></span><code><span class="nc">SedonaSQLRegistrator</span><span class="p">.</span><span class="n">registerAll</span><span class="p">(</span><span class="n">sparkSession</span><span class="p">)</span>
 <span class="nc">SedonaVizRegistrator</span><span class="p">.</span><span class="n">registerAll</span><span class="p">(</span><span class="n">sparkSession</span><span class="p">)</span>
-</code></pre></div></li>
-</ol>
+</code></pre></div>
 <h2 id="regular-functions">Regular functions<a class="headerlink" href="#regular-functions" title="Permanent link">&para;</a></h2>
 <h3 id="st_colorize">ST_Colorize<a class="headerlink" href="#st_colorize" title="Permanent link">&para;</a></h3>
 <p>Introduction: Given the weight of a pixel, return the corresponding color. The weight can be the spatial aggregation of spatial objects or spatial observations such as temperature and humidity.</p>
@@ -4037,22 +4039,22 @@
 <p>Since: <code>v1.0.0</code></p>
 <h4 id="produce-various-colors-heat-map">Produce various colors - heat map<a class="headerlink" href="#produce-various-colors-heat-map" title="Permanent link">&para;</a></h4>
 <p>This function will normalize the weight according to the max weight among all pixels. Different pixel obtains different color.</p>
-<p>SQL Example
+<p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">pixels</span><span class="p">.</span><span class="n">px</span><span class="p">,</span><span class="w"> </span><span class="n">ST_Colorize</span><span class="p">(</span><span class="n">pixels</span><span class="p">.</span><span class="n">weight</span><span class="p">,</span><span class="w"> </span><span class="mi">999</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">color</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pixels</span>
-</code></pre></div></p>
+</code></pre></div>
 <h4 id="produce-uniform-colors-scatter-plot">Produce uniform colors - scatter plot<a class="headerlink" href="#produce-uniform-colors-scatter-plot" title="Permanent link">&para;</a></h4>
 <p>If a mandatory color name is put as the third input argument, this function will directly output this color, without considering the weights. In this case, every pixel will possess the same color.</p>
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">pixels</span><span class="p">.</span><span class="n">px</span><span class="p">,</span><span class="w"> </span><span class="n">ST_Colorize</span><span class="p">(</span><span class="n">pixels</span><span class="p">.</span><span class="n">weight</span><span class="p">,</span><span class="w"> </span><span class="mi">999</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;red&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">color</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pixels</span>
 </code></pre></div>
-<p>Here are some example color names can be entered:
+<p>Here are some example color names can be entered:</p>
 <div class="highlight"><pre><span></span><code>&quot;firebrick&quot;
 &quot;#aa38e0&quot;
 &quot;0x40A8CC&quot;
 &quot;rgba(112,36,228,0.9)&quot;
-</code></pre></div></p>
+</code></pre></div>
 <p>Please refer to <a href="https://static.javadoc.io/org.beryx/awt-color-factory/1.0.0/org/beryx/awt/color/ColorFactory.html">AWT Colors</a> for a list of pre-defined colors.</p>
 <h3 id="st_encodeimage">ST_EncodeImage<a class="headerlink" href="#st_encodeimage" title="Permanent link">&para;</a></h3>
 <p>Introduction: Return the base64 string representation of a Java PNG BufferedImage. This is specific for the server-client environment. For example, transfer the base64 string from GeoSparkViz to Apache Zeppelin.</p>
@@ -4115,7 +4117,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">March 4, 2024 06:47:59</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 11, 2024 00:47:00</span>
   </span>
 
     
