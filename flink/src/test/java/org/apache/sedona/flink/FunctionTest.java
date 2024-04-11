@@ -427,6 +427,15 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testLength2D() {
+        Table polygonTable = createPolygonTable(1);
+        Table resultTable = polygonTable.select(call(Functions.ST_Length2D.class.getSimpleName(), $(polygonColNames[0])));
+        assertNotNull(first(resultTable).getField(0));
+        double result = (double) first(resultTable).getField(0);
+        assertEquals(4, result, 0);
+    }
+
+    @Test
     public void testLengthSpheroid() {
         Table tbl = tableEnv.sqlQuery(
                 "SELECT ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 90 0, 0 0))'))");

@@ -793,6 +793,17 @@ def ST_Length(geometry: ColumnOrName) -> Column:
     return _call_st_function("ST_Length", geometry)
 
 @validate_argument_types
+def ST_Length2D(geometry: ColumnOrName) -> Column:
+    """Calculate the length of a linestring geometry.
+
+    :param geometry: Linestring geometry column to calculate length for.
+    :type geometry: ColumnOrName
+    :return: Length of geometry as a double column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_Length2D", geometry)
+
+@validate_argument_types
 def ST_LengthSpheroid(geometry: ColumnOrName) -> Column:
     """Calculate the perimeter of a geometry using WGS84 spheroid.
 

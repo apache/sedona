@@ -546,6 +546,15 @@ public class TestFunctions extends TestBase {
                 2.8284271247461903
         );
     }
+
+    @Test
+    public void test_ST_Length2D() {
+        registerUDF("ST_Length2D", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_Length2D(sedona.ST_GeomFromText('LINESTRING(0 0, 2 2)'))",
+                2.8284271247461903
+        );
+    }
     @Test
     public void test_ST_LineFromMultiPoint() {
         registerUDF("ST_LineFromMultiPoint", byte[].class);

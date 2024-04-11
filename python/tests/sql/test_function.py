@@ -214,6 +214,19 @@ class TestPredicateJoin(TestBase):
         function_df = self.spark.sql("select ST_Length(polygondf.countyshape) from polygondf")
         function_df.show()
 
+    def test_st_length2d(self):
+        polygon_wkt_df = self.spark.read.format("csv"). \
+            option("delimiter", "\t"). \
+            option("header", "false").load(mixed_wkt_geometry_input_location)
+
+        polygon_wkt_df.createOrReplaceTempView("polygontable")
+
+        polygon_df = self.spark.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+        polygon_df.createOrReplaceTempView("polygondf")
+
+        function_df = self.spark.sql("select ST_Length2D(polygondf.countyshape) from polygondf")
+        assert function_df.take(1)[0][0] == 1.6244272911181594
+
     def test_st_area(self):
         polygon_wkt_df = self.spark.read.format("csv"). \
             option("delimiter", "\t"). \

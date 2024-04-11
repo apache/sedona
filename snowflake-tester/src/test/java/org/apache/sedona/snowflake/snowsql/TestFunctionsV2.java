@@ -539,6 +539,15 @@ public class TestFunctionsV2
                 2.8284271247461903
         );
     }
+
+    @Test
+    public void test_ST_Length2D() {
+        registerUDFV2("ST_Length2D", String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_Length2D(ST_GeometryFromWKT('LINESTRING(0 0, 2 2)'))",
+                2.8284271247461903
+        );
+    }
     @Test
     public void test_ST_LineFromMultiPoint() {
         registerUDFV2("ST_LineFromMultiPoint", String.class);

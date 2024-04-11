@@ -700,6 +700,13 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static double ST_Length2D(byte[] geometry) {
+        return Functions.length(
+                GeometrySerde.deserialize(geometry)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static byte[] ST_LineFromMultiPoint(byte[] geometry) {
         return GeometrySerde.serialize(
                 Functions.lineFromMultiPoint(

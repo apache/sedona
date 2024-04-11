@@ -630,6 +630,13 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"})
+    public static double ST_Length2D(String geometry) {
+        return Functions.length(
+                GeometrySerde.deserGeoJson(geometry)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
     public static String ST_LineFromMultiPoint(String geometry) {
         return GeometrySerde.serGeoJson(

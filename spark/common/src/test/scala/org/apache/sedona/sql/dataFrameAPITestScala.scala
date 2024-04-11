@@ -408,6 +408,14 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_Length2D") {
+      val lineDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom")
+      val df = lineDf.select(ST_Length2D("geom"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Double]
+      val expectedResult = 1.0
+      assert(actualResult == expectedResult)
+    }
+
     it("Passed ST_Area") {
       val polygonDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS geom")
       val df = polygonDf.select(ST_Area("geom"))

@@ -78,6 +78,7 @@ object Catalog {
     function[ST_ShiftLongitude](),
     function[ST_Envelope](),
     function[ST_Length](),
+    function[ST_Length2D](),
     function[ST_Area](),
     function[ST_Centroid](),
     function[ST_Transform](true),
