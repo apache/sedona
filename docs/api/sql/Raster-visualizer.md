@@ -132,6 +132,7 @@ print(inputDf.selectExpr("RS_AsMatrix(RS_AddBandFromArray(RS_MakeEmptyRaster(1, 
 ```
 
 Output:
+
 ```sql
 | 1   3   4   0|
 | 2   9  10  11|

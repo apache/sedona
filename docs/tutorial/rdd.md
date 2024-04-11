@@ -31,12 +31,14 @@ A generic SpatialRDD is not typed to a certain geometry type and open to more sc
 Geometries in a WKT and WKB file always occupy a single column no matter how many coordinates they have. Sedona provides `WktReader ` and `WkbReader` to create generic SpatialRDD.
 
 Suppose we have a `checkin.tsv` WKT TSV file at Path `/Download/checkin.tsv` as follows:
+
 ```
 POINT (-88.331492 32.324142)	hotel
 POINT (-88.175933 32.360763)	gas
 POINT (-88.388954 32.357073)	bar
 POINT (-88.221102 32.35078)	restaurant
 ```
+
 This file has two columns and corresponding ==offsets==(Column IDs) are 0, 1. Column 0 is the WKT string and Column 1 is the checkin business type.
 
 Use the following code to create a SpatialRDD
@@ -176,11 +178,14 @@ To create a generic SpatialRDD from CSV, TSV, WKT, WKB and GeoJSON input formats
 We use checkin.csv CSV file as the example. You can create a generic SpatialRDD using the following steps:
 
 1. Load data in SedonaSQL.
+
 ```scala
 var df = sedona.read.format("csv").option("header", "false").load(csvPointInputLocation)
 df.createOrReplaceTempView("inputtable")
 ```
+
 2. Create a Geometry type column in SedonaSQL
+
 ```scala
 var spatialDf = sedona.sql(
 	"""
@@ -188,7 +193,9 @@ var spatialDf = sedona.sql(
    		|FROM inputtable
    	""".stripMargin)
 ```
+
 3. Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD
+
 ```scala
 var spatialRDD = Adapter.toSpatialRdd(spatialDf, "checkin")
 ```

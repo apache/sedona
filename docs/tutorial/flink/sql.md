@@ -1,6 +1,7 @@
 The page outlines the steps to manage spatial data using SedonaSQL. ==The example code is written in Java but also works for Scala==.
 
 SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:
+
 ```java
 Table myTable = tableEnv.sqlQuery("YOUR_SQL")
 ```
@@ -17,6 +18,7 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../../api/flink/Over
 ## Initiate Stream Environment
 
 Use the following code to initiate your `StreamExecutionEnvironment` at the beginning:
+
 ```java
 StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
@@ -142,6 +144,7 @@ This `ST_Transform` transform the CRS of these geometries from EPSG:4326 to EPSG
 For example, a Table that has coordinates in the US will become like this.
 
 Before the transformation:
+
 ```
 +----+--------------------------------+--------------------------------+
 | op |                     geom_point |                     name_point |
@@ -483,6 +486,7 @@ DataStream<Row> geomStream = text.map(new MapFunction<String, Row>() {
 ### Get Spatial Table
 
 Use TableEnv's fromDataStream function, with two column names `geom` and `geom_name`.
+
 ```java
 Table geomTable = sedona.fromDataStream(geomStream, "geom", "geom_name")
 ```

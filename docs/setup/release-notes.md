@@ -446,12 +446,15 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 * **Sedona Spark & Flink** Introduced a new entry point called SedonaContext to unify all Sedona entry points in different compute engines and deprecate old Sedona register entry points. Users no longer have to register Sedona kryo serializer and import many tedious Python classes.
     * **Sedona Spark**:
         * Scala:
+
         ```scala
         import org.apache.sedona.spark.SedonaContext
         val sedona = SedonaContext.create(SedonaContext.builder().master("local[*]").getOrCreate())
         sedona.sql("SELECT ST_GeomFromWKT(XXX) FROM")
         ```
+
         * Python:
+
         ```python
         from sedona.spark import *
 
@@ -463,7 +466,9 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
         sedona = SedonaContext.create(config)
         sedona.sql("SELECT ST_GeomFromWKT(XXX) FROM")
         ```
+
     * **Sedona Flink**:
+
     ```java
     import org.apache.sedona.flink.SedonaContext
     StreamTableEnvironment sedona = SedonaContext.create(env, tableEnv);
@@ -687,19 +692,19 @@ This version is a major release on Sedona 1.3.0 line and consists of 50 PRs. It 
 
 ### Highlights
 
-- [X] Sedona on Spark in this release is compiled against Spark 3.3.
-- [X] Sedona on Flink in this release is compiled against Flink 1.14.
-- [X] Scala 2.11 support is removed.
-- [X] Spark 2.X support is removed.
-- [X] Python 3.10 support is added.
-- [X] Aggregators in Flink are added
-- [X] Correctness fixes for corner cases in range join and distance join.
-- [X] Native GeoParquet read and write (../tutorial/sql.md#load-geoparquet).
+* [X] Sedona on Spark in this release is compiled against Spark 3.3.
+* [X] Sedona on Flink in this release is compiled against Flink 1.14.
+* [X] Scala 2.11 support is removed.
+* [X] Spark 2.X support is removed.
+* [X] Python 3.10 support is added.
+* [X] Aggregators in Flink are added
+* [X] Correctness fixes for corner cases in range join and distance join.
+* [X] Native GeoParquet read and write (../../tutorial/sql/#load-geoparquet).
     * `df = spark.read.format("geoparquet").option("fieldGeometry", "myGeometryColumn").load("PATH/TO/MYFILE.parquet")`
     * `df.write.format("geoparquet").save("PATH/TO/MYFILE.parquet")`
-- [X] DataFrame style API (../tutorial/sql.md#dataframe-style-api)
+* [X] DataFrame style API (../../tutorial/sql.md/#dataframe-style-api)
     * `df.select(ST_Point(min_value, max_value).as("point"))`
-- [X] Allow WKT format CRS in ST_Transform
+* [X] Allow WKT format CRS in ST_Transform
     * `ST_Transform(geom, "srcWktString", "tgtWktString")`
 
 ```yaml

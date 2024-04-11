@@ -8,10 +8,12 @@ This page is for Sedona PMC to publish Sedona releases.
 ## 0. Prepare an empty script file
 
 1. In your local Sedona Git repo under master branch, run
+
 ```bash
 echo '#!/bin/bash' > create-release.sh
 chmod 777 create-release.sh
 ```
+
 2. Use your favourite GUI text editor to open `create-release.sh`.
 3. Then keep copying the scripts on this web page to replace all content in this script file.
 4. Do NOT directly copy/paste the scripts to your terminal because a bug in `clipboard.js` will create link breaks in such case.
@@ -20,6 +22,7 @@ chmod 777 create-release.sh
 ## 1. Check ASF copyright in all file headers
 
 1. Run the following script:
+
 ```bash
 #!/bin/bash
 wget -q https://archive.apache.org/dist/creadur/apache-rat-0.15/apache-rat-0.15-bin.tar.gz
@@ -27,8 +30,10 @@ tar -xvf  apache-rat-0.15-bin.tar.gz
 git clone --shared --branch master https://github.com/apache/sedona.git sedona-src
 java -jar apache-rat-0.15/apache-rat-0.15.jar -d sedona-src > report.txt
 ```
+
 2. Read the generated report.txt file and make sure all source code files have ASF header.
 3. Delete the generated report and cloned files
+
 ```bash
 #!/bin/bash
 rm -rf apache-rat-0.15

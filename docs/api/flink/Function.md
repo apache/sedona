@@ -48,6 +48,7 @@ SELECT ST_3DDistance(ST_GeomFromText("POINT Z (0 0 -5)"),
 ```
 
 Output:
+
 ```
 1.7320508075688772
 ```
@@ -65,6 +66,7 @@ Format:
 Since: `v1.3.0`
 
 Example:
+
 ```sql
 SELECT ST_AddPoint(ST_GeomFromText("LINESTRING(0 0, 1 1, 1 0)"), ST_GeomFromText("Point(21 52)"), 1)
 
@@ -72,6 +74,7 @@ SELECT ST_AddPoint(ST_GeomFromText("Linestring(0 0, 1 1, 1 0)"), ST_GeomFromText
 ```
 
 Output:
+
 ```
 LINESTRING(0 0, 21 52, 1 1, 1 0)
 LINESTRING(0 0, 1 1, 1 0, 21 52)
@@ -222,6 +225,7 @@ SELECT ST_Area(ST_GeomFromText("POLYGON(0 0, 0 10, 10 10, 0 10, 0 0)"))
 ```
 
 Output:
+
 ```
 10
 ```
@@ -309,6 +313,7 @@ Format: `ST_AsEWKT (A: Geometry)`
 Since: `v1.2.1`
 
 Example:
+
 ```sql
 SELECT ST_AsEWKT(ST_SetSrid(ST_GeomFromWKT('POLYGON((0 0,0 1,1 1,1 0,0 0))'), 4326))
 ```
@@ -352,6 +357,7 @@ Format: `ST_AsGeoJSON (A: Geometry)`
 Since: `v1.3.0`
 
 Example:
+
 ```sql
 SELECT ST_AsGeoJSON(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
 ```
@@ -535,6 +541,7 @@ Format: `ST_BoundingDiagonal(geom: Geometry)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 SELECT ST_BoundingDiagonal(ST_GeomFromWKT(geom))
 ```
@@ -590,9 +597,11 @@ Format:
 ```
 ST_Buffer (A: Geometry, buffer: Double)
 ```
+
 ```
 ST_Buffer (A: Geometry, buffer: Double, useSpheroid: Boolean)
 ```
+
 ```
 ST_Buffer (A: Geometry, buffer: Double, useSpheroid: Boolean, bufferStyleParameters: String)
 ```
@@ -653,6 +662,7 @@ Format: `ST_Centroid (A: Geometry)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 SELECT ST_Centroid(ST_GeomFromWKT('MULTIPOINT(-1  0, -1 2, 7 8, 9 8, 10 6)'))
 ```
@@ -673,6 +683,7 @@ Format: `ST_ClosestPoint(g1: Geometry, g2: Geometry)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 SELECT ST_AsText( ST_ClosestPoint(g1, g2)) As ptwkt;
 ```
@@ -1040,6 +1051,7 @@ Format: `ST_Dump(geom: Geometry)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 SELECT ST_Dump(ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))'))
 ```
@@ -1334,11 +1346,13 @@ Default parameters: `tolerance: 1e-6, maxIter: 1000, failIfNotConverged: false`
 Since: `v1.4.1`
 
 Example:
+
 ```sql
 SELECT ST_GeometricMedian(ST_GeomFromWKT('MULTIPOINT((0 0), (1 1), (2 2), (200 200))'))
 ```
 
 Output:
+
 ```
 POINT (1.9761550281255005 1.9761550281255005)
 ```
@@ -1396,11 +1410,13 @@ Format: `ST_H3CellDistance(cell1: Long, cell2: Long)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 select ST_H3CellDistance(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[1], ST_H3CellIDs(ST_GeomFromWKT('POINT(1.23 1.59)'), 8, true)[1])
 ```
 
 Output:
+
 ```
 +----+----------------------+
 | op |               EXPR$0 |
@@ -1443,11 +1459,13 @@ Format: `ST_H3CellIDs(geom: geometry, level: Int, fullCover: true)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 SELECT ST_H3CellIDs(ST_GeomFromText('LINESTRING(1 3 4, 5 6 7)'), 6, true)
 ```
 
 Output:
+
 ```
 +----+--------------------------------+
 | op |                         EXPR$0 |
@@ -1470,11 +1488,13 @@ Format: `ST_H3KRing(cell: Long, k: Int, exactRing: Boolean)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 select ST_H3KRing(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[1], 1, false), ST_H3KRing(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[1], 1, true)
 ```
 
 Output:
+
 ```
 +----+--------------------------------+--------------------------------+
 | op |                         EXPR$0 |                         EXPR$1 |
@@ -1499,11 +1519,13 @@ Format: `ST_H3ToGeom(cells: Array[Long])`
 Since: `v1.6.0`
 
 Example:
+
 ```sql
 SELECT ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], 1, true))
 ```
 
 Output:
+
 ```
 [POLYGON ((1.0057629565405093 1.9984665139177547, 1.0037116327309097 2.0018325249140068, 0.999727799357053 2.001163270465665, 0.9977951427833316 1.997128228393235, 0.9998461908217928 1.993762152933182, 1.0038301712104316 1.9944311839965523, 1.0057629565405093 1.9984665139177547))]
 ```
@@ -1753,15 +1775,17 @@ true
 
 ## ST_IsValid
 
-Introduction: Test if a geometry is well formed. The function can be invoked with just the geometry or with an additional flag (from `v1.5.1`). The flag alters the validity checking behavior. The flags parameter is a bitfield with the following options:
+Introduction: Test if a geometry is well-formed. The function can be invoked with just the geometry or with an additional flag (from `v1.5.1`). The flag alters the validity checking behavior. The flags parameter is a bitfield with the following options:
 
 - 0 (default): Use usual OGC SFS (Simple Features Specification) validity semantics.
 - 1: "ESRI flag", Accepts certain self-touching rings as valid, which are considered invalid under OGC standards.
 
 Formats:
+
 ```
 ST_IsValid (A: Geometry)
 ```
+
 ```
 ST_IsValid (A: Geometry, flag: Integer)
 ```
@@ -1788,9 +1812,11 @@ Introduction: Returns text stating if the geometry is valid. If not, it provides
 - 1: "ESRI flag", Accepts certain self-touching rings as valid, which are considered invalid under OGC standards.
 
 Formats:
+
 ```
 ST_IsValidReason (A: Geometry)
 ```
+
 ```
 ST_IsValidReason (A: Geometry, flag: Integer)
 ```
@@ -1909,6 +1935,7 @@ SELECT ST_LineInterpolatePoint(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 19
 ```
 
 Output:
+
 ```
 POINT (51.5974135047432 76.5974135047432)
 ```
@@ -1929,6 +1956,7 @@ SELECT ST_LineLocatePoint(ST_GeomFromWKT('LINESTRING(0 0, 1 1, 2 2)'), ST_GeomFr
 ```
 
 Output:
+
 ```
 0.5
 ```
@@ -1945,6 +1973,7 @@ Format: `ST_LineMerge (A: Geometry)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 SELECT ST_LineMerge(ST_GeomFromWKT('MULTILINESTRING ((-29 -27, -30 -29.7, -45 -33), (-45 -33, -46 -32))'))
 ```
@@ -2058,6 +2087,7 @@ WITH linestring AS (
 ```
 
 Result:
+
 ```
 +------------------+------------------------+
 |st_makevalid(geom)|st_makevalid(geom, true)|
@@ -2390,6 +2420,7 @@ Example:
 SELECT ST_ReducePrecision(ST_GeomFromWKT('Point(0.1234567890123456789 0.1234567890123456789)')
     , 9)
 ```
+
 The new coordinates will only have 9 decimal places.
 
 Output:
@@ -2541,11 +2572,13 @@ Format: `ST_ShiftLongitude (geom: geometry)`
 Since: `v1.6.0`
 
 SQL example:
+
 ```SQL
 SELECT ST_ShiftLongitude(ST_GeomFromText('LINESTRING(177 10, 179 10, -179 10, -177 10)'))
 ```
 
 Output:
+
 ```sql
 LINESTRING(177 10, 179 10, 181 10, 183 10)
 ```
@@ -2652,12 +2685,14 @@ Format: `ST_SubDivide(geom: Geometry, maxVertices: Integer)`
 Since: `v1.5.0`
 
 Example:
+
 ```sql
 SELECT ST_SubDivide(ST_GeomFromText("POLYGON((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))"), 5)
 
 ```
 
 Output:
+
 ```
 [
     POLYGON((37.857142857142854 20, 35 10, 10 20, 37.857142857142854 20)),
@@ -2684,6 +2719,7 @@ SELECT ST_SubDivide(ST_GeomFromText("LINESTRING(0 0, 85 85, 100 100, 120 120, 21
 ```
 
 Output:
+
 ```
 [
     LINESTRING(0 0, 5 5)
@@ -3054,6 +3090,7 @@ Format: `ST_ZMax(geom: Geometry)`
 Since: `v1.3.1`
 
 Example:
+
 ```sql
 SELECT ST_ZMax(ST_GeomFromText('POLYGON((0 0 1, 1 1 1, 1 2 1, 1 1 1, 0 0 1))'))
 ```
