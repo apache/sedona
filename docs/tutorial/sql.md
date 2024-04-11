@@ -617,6 +617,7 @@ Example (referenced from overture notebook available via binder):
 ```python
 SedonaPyDeck.create_geometry_map(df_building, elevation_col='height')
 ```
+
 ![](../image/buildings.gif){: width="1000px"}
 
 !!!Tip

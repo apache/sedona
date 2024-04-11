@@ -16,13 +16,11 @@ We recommend Intellij IDEA with Scala plugin installed. Please make sure that th
 
 ![](../image/ide-java-2.png){: width="500px"}
 
-
 #### The IDE might show errors
 
 The IDE usually has trouble understanding the complex project structure in Sedona.
 
 ![](../image/ide-java-4.png)
-
 
 #### Fix errors by changing pom.xml
 
@@ -42,7 +40,6 @@ You need to comment out the following lines in `pom.xml` at the root folder, as 
 Make sure you reload the pom.xml or reload the maven project. The IDE will ask you to remove some modules. Please select `yes`.
 
 ![](../image/ide-java-5.png)
-
 
 #### The final project structure should be like this:
 

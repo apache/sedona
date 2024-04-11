@@ -631,7 +631,6 @@ Output:
 ![Original Linestring](../../image/linestring-og.png "Original Linestring"){: width="150px"}
 ![Original Linestring  with buffer on the left side](../../image/linestring-left-side.png "Original Linestring with buffer on the left side"){: width="150px"}
 
-
 Original Linestring &emsp; Left side buffed Linestring
 
 ## ST_BuildArea
