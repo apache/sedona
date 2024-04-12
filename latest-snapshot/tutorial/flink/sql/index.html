@@ -1873,9 +1873,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#5-optional-de-duplcate" class="md-nav__link">
+  <a href="#5-optional-de-duplicate" class="md-nav__link">
     <span class="md-ellipsis">
-      5. Optional: De-duplcate
+      5. Optional: De-duplicate
     </span>
   </a>
   
@@ -4141,9 +4141,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#5-optional-de-duplcate" class="md-nav__link">
+  <a href="#5-optional-de-duplicate" class="md-nav__link">
     <span class="md-ellipsis">
-      5. Optional: De-duplcate
+      5. Optional: De-duplicate
     </span>
   </a>
   
@@ -4273,10 +4273,10 @@
 <p>SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:</p>
 <div class="highlight"><pre><span></span><code><span class="n">Table</span><span class="w"> </span><span class="n">myTable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tableEnv</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">&quot;YOUR_SQL&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>Detailed SedonaSQL APIs are available here: <a href="../../../api/flink/Overview">SedonaSQL API</a></p>
+<p>Detailed SedonaSQL APIs are available here: <a href="../../../api/flink/Overview/">SedonaSQL API</a></p>
 <h2 id="set-up-dependencies">Set up dependencies<a class="headerlink" href="#set-up-dependencies" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Read <a href="../../../setup/maven-coordinates">Sedona Maven Central coordinates</a></li>
+<li>Read <a href="../../../setup/maven-coordinates/">Sedona Maven Central coordinates</a></li>
 <li>Add Sedona dependencies in build.sbt or pom.xml.</li>
 <li>Add <a href="https://nightlies.apache.org/flink/flink-docs-master/docs/dev/configuration/overview/">Flink dependencies</a> in build.sbt or pom.xml.</li>
 <li>Please see <a href="../../demo/">SQL example project</a></li>
@@ -4355,7 +4355,7 @@
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>SedonaSQL provides lots of functions to create a Geometry column, please read <a href="../../../api/flink/Constructor">SedonaSQL constructor API</a>.</p>
+<p>SedonaSQL provides lots of functions to create a Geometry column, please read <a href="../../../api/flink/Constructor/">SedonaSQL constructor API</a>.</p>
 </div>
 <h2 id="transform-the-coordinate-reference-system">Transform the Coordinate Reference System<a class="headerlink" href="#transform-the-coordinate-reference-system" title="Permanent link">&para;</a></h2>
 <p>Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in a Geometry column. The unit of all related distances in SedonaSQL is same as the unit of all geometries in a Geometry column.</p>
@@ -4417,7 +4417,7 @@
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Read <a href="../../../api/flink/Predicate">SedonaSQL Predicate API</a> to learn different spatial query predicates.</p>
+<p>Read <a href="../../../api/flink/Predicate/">SedonaSQL Predicate API</a> to learn different spatial query predicates.</p>
 </div>
 <h2 id="knn-query">KNN query<a class="headerlink" href="#knn-query" title="Permanent link">&para;</a></h2>
 <p>Use <mark>ST_Distance</mark> to calculate the distance and rank the distance.</p>
@@ -4443,7 +4443,7 @@
 <span class="k">FROM</span><span class="w"> </span><span class="n">rights</span>
 </code></pre></div>
 <h3 id="2-explode-id-array">2. Explode id array<a class="headerlink" href="#2-explode-id-array" title="Permanent link">&para;</a></h3>
-<p>The produced S2 ids are arrays of integers. We need to explode these Ids to multiple rows so later we can join two tables by ids.</p>
+<p>The produced S2 ids are arrays of integers. We need to explode these Ids to multiple rows, so later we can join two tables by ids.</p>
 <div class="highlight"><pre><span></span><code>SELECT id, geom, name, cellId
 FROM lefts CROSS JOIN UNNEST(lefts.idarray) AS tmpTbl1(cellId)
 </code></pre></div>
@@ -4457,7 +4457,7 @@ FROM rights CROSS JOIN UNNEST(rights.idarray) AS tmpTbl2(cellId)
 </code></pre></div>
 <h3 id="4-optional-refine-the-result">4. Optional: Refine the result<a class="headerlink" href="#4-optional-refine-the-result" title="Permanent link">&para;</a></h3>
 <p>Due to the nature of S2 Cellid, the equi-join results might have a few false-positives depending on the S2 level you choose. A smaller level indicates bigger cells, less exploded rows, but more false positives.</p>
-<p>To ensure the correctness, you can use one of the <a href="../../../api/Predicate/">Spatial Predicates</a> to filter out them. Use this query as the query in Step 3.</p>
+<p>To ensure the correctness, you can use one of the <a href="../../../api/sql/Predicate/">Spatial Predicates</a> to filter out them. Use this query as the query in Step 3.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">lcs</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">lcs_id</span><span class="p">,</span><span class="w"> </span><span class="n">lcs</span><span class="p">.</span><span class="n">geom</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">lcs_geom</span><span class="p">,</span><span class="w"> </span><span class="n">lcs</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">lcs_name</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">rcs_id</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">geom</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">rcs_geom</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">rcs_name</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">lcs</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">lcs</span><span class="p">.</span><span class="n">cellId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">cellId</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">ST_Contains</span><span class="p">(</span><span class="n">lcs</span><span class="p">.</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">geom</span><span class="p">)</span>
@@ -4467,7 +4467,7 @@ FROM rights CROSS JOIN UNNEST(rights.idarray) AS tmpTbl2(cellId)
 <p class="admonition-title">Tip</p>
 <p>You can skip this step if you don't need 100% accuracy and want faster query speed.</p>
 </div>
-<h3 id="5-optional-de-duplcate">5. Optional: De-duplcate<a class="headerlink" href="#5-optional-de-duplcate" title="Permanent link">&para;</a></h3>
+<h3 id="5-optional-de-duplicate">5. Optional: De-duplicate<a class="headerlink" href="#5-optional-de-duplicate" title="Permanent link">&para;</a></h3>
 <p>Due to the explode function used when we generate S2 Cell Ids, the resulting DataFrame may have several duplicate <lcs_geom, rcs_geom> matches. You can remove them by performing a GroupBy query.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">lcs_id</span><span class="p">,</span><span class="w"> </span><span class="n">rcs_id</span><span class="p">,</span><span class="w"> </span><span class="n">FIRST_VALUE</span><span class="p">(</span><span class="n">lcs_geom</span><span class="p">),</span><span class="w"> </span><span class="n">FIRST_VALUE</span><span class="p">(</span><span class="n">lcs_name</span><span class="p">),</span><span class="w"> </span><span class="k">first</span><span class="p">(</span><span class="n">rcs_geom</span><span class="p">),</span><span class="w"> </span><span class="k">first</span><span class="p">(</span><span class="n">rcs_name</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">joinresult</span>
@@ -4481,7 +4481,7 @@ FROM rights CROSS JOIN UNNEST(rights.idarray) AS tmpTbl2(cellId)
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If you are doing point-in-polygon join, this is not a problem and you can safely discard this issue. This issue only happens when you do polygon-polygon, polygon-linestring, linestring-linestring join.</p>
+<p>If you are doing point-in-polygon join, this is not a problem, and you can safely discard this issue. This issue only happens when you do polygon-polygon, polygon-linestring, linestring-linestring join.</p>
 </div>
 <h3 id="s2-for-distance-join">S2 for distance join<a class="headerlink" href="#s2-for-distance-join" title="Permanent link">&para;</a></h3>
 <p>This also works for distance join. You first need to use <code>ST_Buffer(geometry, distance)</code> to wrap one of your original geometry column. If your original geometry column contains points, this <code>ST_Buffer</code> will make them become circles with a radius of <code>distance</code>.</p>
@@ -4520,7 +4520,7 @@ FROM rights CROSS JOIN UNNEST(rights.idarray) AS tmpTbl2(cellId)
 4&gt; POLYGON ((7.5 7.5, 7.5 8.5, 8.5 8.5, 8.5 7.5, 7.5 7.5))
 </code></pre></div>
 <h3 id="store-non-spatial-attributes-in-geometries">Store non-spatial attributes in Geometries<a class="headerlink" href="#store-non-spatial-attributes-in-geometries" title="Permanent link">&para;</a></h3>
-<p>You can concatenate other non-spatial attributes and store them in Geometry's <code>userData</code> field so you can recover them later on. <code>userData</code> field can be any object type.</p>
+<p>You can concatenate other non-spatial attributes and store them in Geometry's <code>userData</code> field, so you can recover them later on. <code>userData</code> field can be any object type.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">org.locationtech.jts.geom.Geometry</span><span class="p">;</span>
 
 <span class="n">DataStream</span><span class="o">&lt;</span><span class="n">Geometry</span><span class="o">&gt;</span><span class="w"> </span><span class="n">geometries</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">geomStream</span><span class="p">.</span><span class="na">map</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">MapFunction</span><span class="o">&lt;</span><span class="n">Row</span><span class="p">,</span><span class="w"> </span><span class="n">Geometry</span><span class="o">&gt;</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
@@ -4651,7 +4651,7 @@ FROM rights CROSS JOIN UNNEST(rights.idarray) AS tmpTbl2(cellId)
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 11, 2024 00:47:00</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 12, 2024 03:02:34</span>
   </span>
 
     
@@ -4768,7 +4768,10 @@ FROM rights CROSS JOIN UNNEST(rights.idarray) AS tmpTbl2(cellId)
     
     
     
-    <a href="./community/discord-invite-form.html" target="_blank" rel="noopener" title="" class="md-social__link">
+      
+      
+    
+    <a href="https://share.hsforms.com/1Ndql_ZigTdmLlVQc_d1o4gqga4q" target="_blank" rel="noopener" title="share.hsforms.com" class="md-social__link">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M524.531 69.836a1.5 1.5 0 0 0-.764-.7A485.065 485.065 0 0 0 404.081 32.03a1.816 1.816 0 0 0-1.923.91 337.461 337.461 0 0 0-14.9 30.6 447.848 447.848 0 0 0-134.426 0 309.541 309.541 0 0 0-15.135-30.6 1.89 1.89 0 0 0-1.924-.91 483.689 483.689 0 0 0-119.688 37.107 1.712 1.712 0 0 0-.788.676C39.068 183.651 18.186 294.69 28.43 404.354a2.016 2.016 0 0 0 .765 1.375 487.666 487.666 0 0 0 146.825 74.189 1.9 1.9 0 0 0 2.063-.676A348.2 348.2 0 0 0 208.12 430.4a1.86 1.86 0 0 0-1.019-2.588 321.173 321.173 0 0 1-45.868-21.853 1.885 1.885 0 0 1-.185-3.126 251.047 251.047 0 0 0 9.109-7.137 1.819 1.819 0 0 1 1.9-.256c96.229 43.917 200.41 43.917 295.5 0a1.812 1.812 0 0 1 1.924.233 234.533 234.533 0 0 0 9.132 7.16 1.884 1.884 0 0 1-.162 3.126 301.407 301.407 0 0 1-45.89 21.83 1.875 1.875 0 0 0-1 2.611 391.055 391.055 0 0 0 30.014 48.815 1.864 1.864 0 0 0 2.063.7A486.048 486.048 0 0 0 610.7 405.729a1.882 1.882 0 0 0 .765-1.352c12.264-126.783-20.532-236.912-86.934-334.541ZM222.491 337.58c-28.972 0-52.844-26.587-52.844-59.239s23.409-59.241 52.844-59.241c29.665 0 53.306 26.82 52.843 59.239 0 32.654-23.41 59.241-52.843 59.241Zm195.38 0c-28.971 0-52.843-26.587-52.843-59.239s23.409-59.241 52.843-59.241c29.667 0 53.307 26.82 52.844 59.239 0 32.654-23.177 59.241-52.844 59.241Z"/></svg>
     </a>
   

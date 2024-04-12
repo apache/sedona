@@ -4469,7 +4469,7 @@
 
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Sedona uses 1-based indexing for all raster functions except <a href="../../api/sql/Raster-map-algebra">map algebra function</a>, which uses 0-based indexing.</p>
+<p>Sedona uses 1-based indexing for all raster functions except <a href="../../api/sql/Raster-map-algebra/">map algebra function</a>, which uses 0-based indexing.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -4496,7 +4496,7 @@
 </div>
 </div>
 </div>
-<p>Detailed SedonaSQL APIs are available here: <a href="../../api/sql/Overview">SedonaSQL API</a>. You can find example raster data in <a href="https://github.com/apache/sedona/blob/0eae42576c2588fe278f75cef3b17fee600eac90/spark/common/src/test/resources/raster/raster_with_no_data/test5.tiff">Sedona GitHub repo</a>.</p>
+<p>Detailed SedonaSQL APIs are available here: <a href="../../api/sql/Overview/">SedonaSQL API</a>. You can find example raster data in <a href="https://github.com/apache/sedona/blob/0eae42576c2588fe278f75cef3b17fee600eac90/spark/common/src/test/resources/raster/raster_with_no_data/test5.tiff">Sedona GitHub repo</a>.</p>
 <h2 id="set-up-dependencies">Set up dependencies<a class="headerlink" href="#set-up-dependencies" title="Permanent link">&para;</a></h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Scala/Java</label><label for="__tabbed_2_2">Python</label></div>
 <div class="tabbed-content">
@@ -4509,8 +4509,8 @@
 </div>
 <div class="tabbed-block">
 <ol>
-<li>Please read <a href="../../setup/install-python">Quick start</a> to install Sedona Python.</li>
-<li>This tutorial is based on <a href="../jupyter-notebook">Sedona SQL Jupyter Notebook example</a>. You can interact with Sedona Python Jupyter Notebook immediately on Binder. Click <a href="https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder"><img alt="Binder" src="https://mybinder.org/badge_logo.svg" /></a> to interact with Sedona Python Jupyter notebook immediately on Binder.</li>
+<li>Please read <a href="../../setup/install-python/">Quick start</a> to install Sedona Python.</li>
+<li>This tutorial is based on <a href="../jupyter-notebook/">Sedona SQL Jupyter Notebook example</a>. You can interact with Sedona Python Jupyter Notebook immediately on Binder. Click <a href="https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder"><img alt="Binder" src="https://mybinder.org/badge_logo.svg" /></a> to interact with Sedona Python Jupyter notebook immediately on Binder.</li>
 </ol>
 </div>
 </div>
@@ -4758,37 +4758,37 @@ If you are using Spark versions &gt;= 3.4, please replace the <code>3.0</code> i
 -13095781.645176
 4021226.584486
 </code></pre></div>
-<p>World files are used to georeference and geo-locate images by establishing an image-to-world coordinate transformation that assigns real-world geographic coordinates to the pixels of the image.</p>
+<p>World files are used to georeference and geolocate images by establishing an image-to-world coordinate transformation that assigns real-world geographic coordinates to the pixels of the image.</p>
 <h2 id="raster-manipulation">Raster Manipulation<a class="headerlink" href="#raster-manipulation" title="Permanent link">&para;</a></h2>
 <p>Since <code>v1.5.0</code> there have been many additions to manipulate raster data, we will show you a few example queries.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Read <a href="../../api/sql/Raster-operators">SedonaSQL Raster operators</a> to learn how you can use Sedona for raster manipulation.</p>
+<p>Read <a href="../../api/sql/Raster-operators/">SedonaSQL Raster operators</a> to learn how you can use Sedona for raster manipulation.</p>
 </div>
 <h3 id="coordinate-translation">Coordinate translation<a class="headerlink" href="#coordinate-translation" title="Permanent link">&para;</a></h3>
 <p>Sedona allows you to translate coordinates as per your needs. It can translate pixel locations to world coordinates and vice versa.</p>
 <h4 id="pixelaspoint">PixelAsPoint<a class="headerlink" href="#pixelaspoint" title="Permanent link">&para;</a></h4>
-<p>Use <a href="../../api/sql/Raster-operators#rs_pixelaspoint">RS_PixelAsPoint</a> to translate pixel coordinates to world location.</p>
+<p>Use <a href="../../api/sql/Raster-operators/#rs_pixelaspoint">RS_PixelAsPoint</a> to translate pixel coordinates to world location.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_PixelAsPoint</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="mi">450</span><span class="p">,</span><span class="w"> </span><span class="mi">400</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">rasterDf</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>POINT (-13063342 3992403.75)
 </code></pre></div>
 <h4 id="world-to-raster-coordinate">World to Raster Coordinate<a class="headerlink" href="#world-to-raster-coordinate" title="Permanent link">&para;</a></h4>
-<p>Use <a href="../../api/sql/Raster-operators#rs_worldtorastercoord">RS_WorldToRasterCoord</a> to translate world location to pixel coordinates. To just get X coordinate use <a href="../../api/sql/Raster-operators#rs_worldtorastercoordx">RS_WorldToRasterCoordX</a> and for just Y coordinate use <a href="../../api/sql/Raster-operators#rs_worldtorastercoordy">RS_WorldToRasterCoordY</a>.</p>
+<p>Use <a href="../../api/sql/Raster-operators/#rs_worldtorastercoord">RS_WorldToRasterCoord</a> to translate world location to pixel coordinates. To just get X coordinate use <a href="../../api/sql/Raster-operators/#rs_worldtorastercoordx">RS_WorldToRasterCoordX</a> and for just Y coordinate use <a href="../../api/sql/Raster-operators/#rs_worldtorastercoordy">RS_WorldToRasterCoordY</a>.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_WorldToRasterCoord</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="mi">3063342</span><span class="n">E7</span><span class="p">,</span><span class="w"> </span><span class="mi">3992403</span><span class="p">.</span><span class="mi">75</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>POINT (450 400)
 </code></pre></div>
 <h3 id="pixel-manipulation">Pixel Manipulation<a class="headerlink" href="#pixel-manipulation" title="Permanent link">&para;</a></h3>
-<p>Use <a href="../../api/sql/Raster-operators#rs_values">RS_Values</a> to fetch values for a specified array of Point Geometries. The coordinates in the point geometry are indicative of real-world location.</p>
+<p>Use <a href="../../api/sql/Raster-operators/#rs_values">RS_Values</a> to fetch values for a specified array of Point Geometries. The coordinates in the point geometry are indicative of real-world location.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_Values</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="nb">Array</span><span class="p">(</span><span class="n">ST_Point</span><span class="p">(</span><span class="o">-</span><span class="mi">13063342</span><span class="p">,</span><span class="w"> </span><span class="mi">3992403</span><span class="p">.</span><span class="mi">75</span><span class="p">),</span><span class="w"> </span><span class="n">ST_Point</span><span class="p">(</span><span class="o">-</span><span class="mi">13074192</span><span class="p">,</span><span class="w"> </span><span class="mi">3996020</span><span class="p">)))</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>[132.0, 148.0]
 </code></pre></div>
-<p>To change values over a grid or area defined by geometry, we will use <a href="../../api/sql/Raster-operators#rs_setvalues">RS_SetValues</a>.</p>
+<p>To change values over a grid or area defined by geometry, we will use <a href="../../api/sql/Raster-operators/#rs_setvalues">RS_SetValues</a>.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_SetValues</span><span class="p">(</span>
 <span class="w">        </span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">250</span><span class="p">,</span><span class="w"> </span><span class="mi">260</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
 <span class="w">        </span><span class="nb">Array</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="mi">26</span><span class="p">,</span><span class="w"> </span><span class="mi">28</span><span class="p">,</span><span class="w"> </span><span class="mi">37</span><span class="p">,</span><span class="w"> </span><span class="mi">43</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">66</span><span class="p">)</span>
@@ -4796,11 +4796,11 @@ If you are using Spark versions &gt;= 3.4, please replace the <code>3.0</code> i
 </code></pre></div>
 <p>Follow the links to get more information on how to use the functions appropriately.</p>
 <h3 id="band-manipulation">Band Manipulation<a class="headerlink" href="#band-manipulation" title="Permanent link">&para;</a></h3>
-<p>Sedona provides APIs to select specific bands from a raster image and create a new raster. For example, to select 2 bands from a raster, you can use the <a href="../../api/sql/Raster-operators#rs_band">RS_Band</a> API to retrieve the desired multi-band raster.</p>
+<p>Sedona provides APIs to select specific bands from a raster image and create a new raster. For example, to select 2 bands from a raster, you can use the <a href="../../api/sql/Raster-operators/#rs_band">RS_Band</a> API to retrieve the desired multi-band raster.</p>
 <p>Let's use a <a href="https://github.com/apache/sedona/blob/2a0b36989aa895c0781f9a10c907dd726506d0b7/spark/common/src/test/resources/raster_geotiff_color/FAA_UTM18N_NAD83.tif">multi-band raster</a> for this example. The process of loading and converting it to raster type is the same.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_Band</span><span class="p">(</span><span class="n">colorRaster</span><span class="p">,</span><span class="w"> </span><span class="nb">Array</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">))</span>
 </code></pre></div>
-<p>Let's say you have many single-banded rasters and want to add a band to the raster to perform <a href="#execute-map-algebra-operations">map algebra operations</a>. You can do so using <a href="../../api/sql/Raster-operators#rs_addband">RS_AddBand</a> Sedona function.</p>
+<p>Let's say you have many single-banded rasters and want to add a band to the raster to perform <a href="#execute-map-algebra-operations">map algebra operations</a>. You can do so using <a href="../../api/sql/Raster-operators/#rs_addband">RS_AddBand</a> Sedona function.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_AddBand</span><span class="p">(</span><span class="n">raster1</span><span class="p">,</span><span class="w"> </span><span class="n">raster2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span>
 </code></pre></div>
 <p>This will result in <code>raster1</code> having <code>raster2</code>'s specified band.</p>
@@ -4817,7 +4817,7 @@ If you are using Spark versions &gt;= 3.4, please replace the <code>3.0</code> i
 <p>where NIR is the near-infrared band and Red is the red band.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;out = (rast[3] - rast[0]) / (rast[3] + rast[0]);&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">ndvi</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
 </code></pre></div>
-<p>For more information please refer to <a href="../../api/sql/Raster-map-algebra">Map Algebra API</a>.</p>
+<p>For more information please refer to <a href="../../api/sql/Raster-map-algebra/">Map Algebra API</a>.</p>
 <h2 id="interoperability-between-raster-and-vector-data">Interoperability between raster and vector data<a class="headerlink" href="#interoperability-between-raster-and-vector-data" title="Permanent link">&para;</a></h2>
 <h3 id="geometry-as-raster">Geometry As Raster<a class="headerlink" href="#geometry-as-raster" title="Permanent link">&para;</a></h3>
 <p>Sedona allows you to rasterize a geometry by using <a href="../../api/sql/Raster-writer/#rs_asraster">RS_AsRaster</a>.</p>
@@ -4834,7 +4834,7 @@ If you are using Spark versions &gt;= 3.4, please replace the <code>3.0</code> i
 <p>The vector coordinates are buffed up to showcase the output, the real use case, may or may not match the example.</p>
 </div>
 <h3 id="spatial-range-query">Spatial range query<a class="headerlink" href="#spatial-range-query" title="Permanent link">&para;</a></h3>
-<p>Sedona provides raster predicates to do a range query using a geometry window, for example, let's use <a href="../../api/sql/Raster-operators#rs_intersects">RS_Intersects</a>.</p>
+<p>Sedona provides raster predicates to do a range query using a geometry window, for example, let's use <a href="../../api/sql/Raster-operators/#rs_intersects">RS_Intersects</a>.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">rast</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">rasterDf</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">RS_Intersect</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))&#39;</span><span class="p">))</span>
 </code></pre></div>
 <h3 id="spatial-join-query">Spatial join query<a class="headerlink" href="#spatial-join-query" title="Permanent link">&para;</a></h3>
@@ -4849,11 +4849,11 @@ If you are using Spark versions &gt;= 3.4, please replace the <code>3.0</code> i
 <h2 id="visualize-raster-images">Visualize raster images<a class="headerlink" href="#visualize-raster-images" title="Permanent link">&para;</a></h2>
 <p>Sedona provides APIs to visualize raster data in an image form.</p>
 <h3 id="base64-string">Base64 String<a class="headerlink" href="#base64-string" title="Permanent link">&para;</a></h3>
-<p>The <a href="../../api/sql/Raster-visualizer#rs_asbase64">RS_AsBase64</a> encodes the raster data as a Base64 string and can be visualized using <a href="https://base64-viewer.onrender.com/">online decoder</a>.</p>
+<p>The <a href="../../api/sql/Raster-visualizer/#rs_asbase64">RS_AsBase64</a> encodes the raster data as a Base64 string and can be visualized using <a href="https://base64-viewer.onrender.com/">online decoder</a>.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_AsBase64</span><span class="p">(</span><span class="n">rast</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">rasterDf</span>
 </code></pre></div>
 <h3 id="html-image">HTML Image<a class="headerlink" href="#html-image" title="Permanent link">&para;</a></h3>
-<p>The <a href="../../api/sql/Raster-visualizer#rs_asimage">RS_AsImage</a> returns an HTML image tag, that can be visualized using an HTML viewer or in Jupyter Notebook. For more information please click on the link.</p>
+<p>The <a href="../../api/sql/Raster-visualizer/#rs_asimage">RS_AsImage</a> returns an HTML image tag, that can be visualized using an HTML viewer or in Jupyter Notebook. For more information please click on the link.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_AsImage</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="mi">500</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">rasterDf</span>
 </code></pre></div>
 <p>The output looks like this:</p>
@@ -4867,25 +4867,25 @@ If you are using Spark versions &gt;= 3.4, please replace the <code>3.0</code> i
 <span class="o">|</span><span class="w"> </span><span class="mi">2</span><span class="w">   </span><span class="mi">9</span><span class="w">  </span><span class="mi">10</span><span class="w">  </span><span class="mi">11</span><span class="o">|</span>
 <span class="o">|</span><span class="w"> </span><span class="mi">3</span><span class="w">   </span><span class="mi">4</span><span class="w">   </span><span class="mi">5</span><span class="w">   </span><span class="mi">6</span><span class="o">|</span>
 </code></pre></div>
-<p>Please refer to <a href="../../api/sql/Raster-visualizer">Raster visualizer docs</a> to learn how to make the most of the visualizing APIs.</p>
+<p>Please refer to <a href="../../api/sql/Raster-visualizer/">Raster visualizer docs</a> to learn how to make the most of the visualizing APIs.</p>
 <h2 id="save-to-permanent-storage">Save to permanent storage<a class="headerlink" href="#save-to-permanent-storage" title="Permanent link">&para;</a></h2>
 <p>Sedona has APIs that can save an entire raster column to files in a specified location. Before saving, the raster type column needs to be converted to a binary format. Sedona provides several functions to convert a raster column into a binary column suitable for file storage. Once in binary format, the raster data can then be written to files on disk using the Sedona file storage APIs.</p>
 <div class="highlight"><pre><span></span><code>rasterDf.write.format(&quot;raster&quot;).option(&quot;rasterField&quot;, &quot;raster&quot;).option(&quot;fileExtension&quot;, &quot;.tiff&quot;).mode(SaveMode.Overwrite).save(dirPath)
 </code></pre></div>
 <p>Sedona has a few writer functions that create the binary DataFrame necessary for saving the raster images.</p>
 <h3 id="as-arc-grid">As Arc Grid<a class="headerlink" href="#as-arc-grid" title="Permanent link">&para;</a></h3>
-<p>Use <a href="../../api/sql/Raster-writer#rs_asarcgrid">RS_AsArcGrid</a> to get the binary Dataframe of the raster in Arc Grid format.</p>
+<p>Use <a href="../../api/sql/Raster-writer/#rs_asarcgrid">RS_AsArcGrid</a> to get the binary Dataframe of the raster in Arc Grid format.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_AsArcGrid</span><span class="p">(</span><span class="n">raster</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="as-geotiff">As GeoTiff<a class="headerlink" href="#as-geotiff" title="Permanent link">&para;</a></h3>
-<p>Use <a href="../../api/sql/Raster-writer#rs_asgeotiff">RS_AsGeoTiff</a> to get the binary Dataframe of the raster in GeoTiff format.</p>
+<p>Use <a href="../../api/sql/Raster-writer/#rs_asgeotiff">RS_AsGeoTiff</a> to get the binary Dataframe of the raster in GeoTiff format.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_AsGeoTiff</span><span class="p">(</span><span class="n">raster</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="as-png">As PNG<a class="headerlink" href="#as-png" title="Permanent link">&para;</a></h3>
-<p>Use <a href="../../api/sql/Raster-writer#rs_aspng">RS_AsPNG</a> to get the binary Dataframe of the raster in PNG format.</p>
+<p>Use <a href="../../api/sql/Raster-writer/#rs_aspng">RS_AsPNG</a> to get the binary Dataframe of the raster in PNG format.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_AsPNG</span><span class="p">(</span><span class="n">raster</span><span class="p">)</span>
 </code></pre></div>
-<p>Please refer to <a href="../../api/sql/Raster-writer">Raster writer docs</a> for more details.</p>
+<p>Please refer to <a href="../../api/sql/Raster-writer/">Raster writer docs</a> for more details.</p>
 <h2 id="collecting-raster-dataframes-and-working-with-them-locally-in-python">Collecting raster Dataframes and working with them locally in Python<a class="headerlink" href="#collecting-raster-dataframes-and-working-with-them-locally-in-python" title="Permanent link">&para;</a></h2>
 <p>Sedona allows collecting Dataframes with raster columns and working with them locally in Python since <code>v1.6.0</code>.
 The raster objects are represented as <code>SedonaRaster</code> objects in Python, which can be used to perform raster operations.</p>
@@ -4949,7 +4949,7 @@ objects yet. However, you can write a UDF that returns the band data as an array
 +--------------------+--------------------+--------------------+
 </code></pre></div>
 <h2 id="performance-optimization">Performance optimization<a class="headerlink" href="#performance-optimization" title="Permanent link">&para;</a></h2>
-<p>When working with large raster datasets, refer to the <a href="../storing-blobs-in-parquet">documentation on storing raster geometries in Parquet format</a> for recommendations to optimize performance.</p>
+<p>When working with large raster datasets, refer to the <a href="../storing-blobs-in-parquet/">documentation on storing raster geometries in Parquet format</a> for recommendations to optimize performance.</p>
 
 
 
@@ -4970,7 +4970,7 @@ objects yet. However, you can write a UDF that returns the band data as an array
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">March 22, 2024 03:05:15</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 12, 2024 03:02:34</span>
   </span>
 
     
@@ -5087,7 +5087,10 @@ objects yet. However, you can write a UDF that returns the band data as an array
     
     
     
-    <a href="./community/discord-invite-form.html" target="_blank" rel="noopener" title="" class="md-social__link">
+      
+      
+    
+    <a href="https://share.hsforms.com/1Ndql_ZigTdmLlVQc_d1o4gqga4q" target="_blank" rel="noopener" title="share.hsforms.com" class="md-social__link">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M524.531 69.836a1.5 1.5 0 0 0-.764-.7A485.065 485.065 0 0 0 404.081 32.03a1.816 1.816 0 0 0-1.923.91 337.461 337.461 0 0 0-14.9 30.6 447.848 447.848 0 0 0-134.426 0 309.541 309.541 0 0 0-15.135-30.6 1.89 1.89 0 0 0-1.924-.91 483.689 483.689 0 0 0-119.688 37.107 1.712 1.712 0 0 0-.788.676C39.068 183.651 18.186 294.69 28.43 404.354a2.016 2.016 0 0 0 .765 1.375 487.666 487.666 0 0 0 146.825 74.189 1.9 1.9 0 0 0 2.063-.676A348.2 348.2 0 0 0 208.12 430.4a1.86 1.86 0 0 0-1.019-2.588 321.173 321.173 0 0 1-45.868-21.853 1.885 1.885 0 0 1-.185-3.126 251.047 251.047 0 0 0 9.109-7.137 1.819 1.819 0 0 1 1.9-.256c96.229 43.917 200.41 43.917 295.5 0a1.812 1.812 0 0 1 1.924.233 234.533 234.533 0 0 0 9.132 7.16 1.884 1.884 0 0 1-.162 3.126 301.407 301.407 0 0 1-45.89 21.83 1.875 1.875 0 0 0-1 2.611 391.055 391.055 0 0 0 30.014 48.815 1.864 1.864 0 0 0 2.063.7A486.048 486.048 0 0 0 610.7 405.729a1.882 1.882 0 0 0 .765-1.352c12.264-126.783-20.532-236.912-86.934-334.541ZM222.491 337.58c-28.972 0-52.844-26.587-52.844-59.239s23.409-59.241 52.844-59.241c29.665 0 53.306 26.82 52.843 59.239 0 32.654-23.41 59.241-52.843 59.241Zm195.38 0c-28.971 0-52.843-26.587-52.843-59.239s23.409-59.241 52.843-59.241c29.667 0 53.307 26.82 52.844 59.239 0 32.654-23.177 59.241-52.844 59.241Z"/></svg>
     </a>
   
