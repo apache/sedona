@@ -10,17 +10,17 @@ We recommend Intellij IDEA with Scala plugin installed. Please make sure that th
 
 #### Choose `Open`
 
-<img src="../../image/ide-java-1.png"/>
+![](../image/ide-java-1.png)
 
 #### Go to the Sedona root folder (not a submodule folder) and choose `open`
 
-<img src="../../image/ide-java-2.png" style="width:500px;"/>
+![](../image/ide-java-2.png){: width="500px"}
 
 #### The IDE might show errors
 
 The IDE usually has trouble understanding the complex project structure in Sedona.
 
-<img src="../../image/ide-java-4.png"/>
+![](../image/ide-java-4.png)
 
 #### Fix errors by changing pom.xml
 
@@ -39,11 +39,11 @@ You need to comment out the following lines in `pom.xml` at the root folder, as 
 
 Make sure you reload the pom.xml or reload the maven project. The IDE will ask you to remove some modules. Please select `yes`.
 
-<img src="../../image/ide-java-5.png"/>
+![](../image/ide-java-5.png)
 
 #### The final project structure should be like this:
 
-<img src="../../image/ide-java-3.png" style="width:400px;"/>
+![](../image/ide-java-3.png){: width="400px"}
 
 ### Run unit tests
 
@@ -54,35 +54,35 @@ In a terminal, go to the Sedona root folder. Run `mvn clean install`. All tests 
     `mvn clean install` will compile Sedona with Spark 3.0 and Scala 2.12. If you have a different version of Spark in $SPARK_HOME, make sure to specify that using -Dspark command line arg.
     For example, to compile sedona with Spark 3.4 and Scala 2.12, use: `mvn clean install -Dspark=3.4 -Dscala=2.12`
 
-More details can be found on [Compile Sedona](../../setup/compile/)
+More details can be found on [Compile Sedona](../setup/compile.md)
 
 #### Run a single unit test
 
 In the IDE, right-click a test case and run this test case.
 
-<img src="../../image/ide-java-6.png" style="width:400px;"/>
+![](../image/ide-java-6.png){: width="400px"}
 
 The IDE might tell you that the PATH does not exist as follows:
 
-<img src="../../image/ide-java-7.png" style="width:600px;"/>
+![](../image/ide-java-7.png){: width="600px"}
 
 Go to `Edit Configuration`
 
-<img src="../../image/ide-java-8.png"/>
+![](../image/ide-java-8.png)
 
 Append the submodule folder to `Working Directory`. For example, `sedona/sql`.
 
-<img src="../../image/ide-java-9.png"/>
+![](../image/ide-java-9.png)
 
 Re-run the test case. Do NOT right click the test case to re-run. Instead, click the button as shown in the figure below.
 
-<img src="../../image/ide-java-10.png"/>
+![](../image/ide-java-10.png)
 
 ## Python developers
 
 #### Run all python tests
 
-To run all Python test cases, follow steps mentioned [here](../../setup/compile/#run-python-test).
+To run all Python test cases, follow steps mentioned [here](../setup/compile.md#run-python-test).
 
 #### Run all python tests in a single test file
 

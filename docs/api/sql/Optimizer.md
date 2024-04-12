@@ -179,7 +179,7 @@ Note: If the distance is an expression, it is only evaluated on the first argume
 
 ## Automatic broadcast index join
 
-When one table involved a spatial join query is smaller than a threshold, Sedona will automatically choose broadcast index join instead of Sedona optimized join. The current threshold is controlled by [sedona.join.autoBroadcastJoinThreshold](../Parameter) and set to the same as `spark.sql.autoBroadcastJoinThreshold`.
+When one table involved a spatial join query is smaller than a threshold, Sedona will automatically choose broadcast index join instead of Sedona optimized join. The current threshold is controlled by [sedona.join.autoBroadcastJoinThreshold](Parameter.md) and set to the same as `spark.sql.autoBroadcastJoinThreshold`.
 
 ## Raster join
 
@@ -213,7 +213,7 @@ Please use the following steps:
 
 ### 1. Generate S2 ids for both tables
 
-Use [ST_S2CellIds](../Function/#st_s2cellids) to generate cell IDs. Each geometry may produce one or more IDs.
+Use [ST_S2CellIds](Function.md#st_s2cellids) to generate cell IDs. Each geometry may produce one or more IDs.
 
 ```sql
 SELECT id, geom, name, explode(ST_S2CellIDs(geom, 15)) as cellId
@@ -238,7 +238,7 @@ FROM lcs JOIN rcs ON lcs.cellId = rcs.cellId
 
 Due to the nature of S2 Cellid, the equi-join results might have a few false-positives depending on the S2 level you choose. A smaller level indicates bigger cells, less exploded rows, but more false positives.
 
-To ensure the correctness, you can use one of the [Spatial Predicates](../Predicate/) to filter out them. Use this query instead of the query in Step 2.
+To ensure the correctness, you can use one of the [Spatial Predicates](Predicate.md) to filter out them. Use this query instead of the query in Step 2.
 
 ```sql
 SELECT lcs.id as lcs_id, lcs.geom as lcs_geom, lcs.name as lcs_name, rcs.id as rcs_id, rcs.geom as rcs_geom, rcs.name as rcs_name
@@ -319,7 +319,7 @@ Sedona supports spatial predicate push-down for GeoParquet files. When spatial f
 to determine if all data in the file will be discarded by the spatial predicate. This optimization could reduce the number of files scanned
 when the queried GeoParquet dataset was partitioned by spatial proximity.
 
-To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../../api/sql/Function/#st_geohash)) and then save as a GeoParquet file. An example is as follows:
+To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../../api/sql/Function.md#st_geohash)) and then save as a GeoParquet file. An example is as follows:
 
 ```
 SELECT col1, col2, geom, ST_GeoHash(geom, 5) as geohash
@@ -330,7 +330,7 @@ ORDER BY geohash
 The following figure is the visualization of a GeoParquet dataset. `bbox`es of all GeoParquet files were plotted as blue rectangles and the query window was plotted as a red rectangle. Sedona will only scan 1 of the 6 files to
 answer queries such as `SELECT * FROM geoparquet_dataset WHERE ST_Intersects(geom, <query window>)`, thus only part of the data covered by the light green rectangle needs to be scanned.
 
-![](../../image/geoparquet-pred-pushdown.png)
+![Visualization of a GeoParquet dataset](../../image/geoparquet-pred-pushdown.png "Visualization of a GeoParquet dataset")
 
 We can compare the metrics of querying the GeoParquet dataset with or without the spatial predicate and observe that querying with spatial predicate results in fewer number of rows scanned.
 

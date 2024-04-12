@@ -1,4 +1,4 @@
-<img style="float: left;" src="../../image/usrail.png" width="250">
-<img src="../../image/ustweet.png" width="250">
+![](../image/usrail.png){: width="250"}
+![](../image/ustweet.png){: width="250"}
 
-<img src="../../image/heatmapnycsmall.png" width="500">
+![](../image/heatmapnycsmall.png){: width="500px"}

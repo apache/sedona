@@ -556,8 +556,8 @@ SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10, 'quad_segs=2')
 
 Output:
 
-<img alt="Point buffer with 8 quadrant segments" src="../../../image/point-buffer-quad-8.png" width="100" height=""/>
-<img alt="Point buffer with 2 quadrant segments" src="../../../image/point-buffer-quad-2.png" width="100" height=""/>
+![Point buffer with 8 quadrant segments](../../image/point-buffer-quad-8.png "Point buffer with 8 quadrant segments"){: width="100px"}
+![Point buffer with 2 quadrant segments](../../image/point-buffer-quad-2.png "Point buffer with 2 quadrant segments"){: width="100px"}
 
 8 Segments &ensp; 2 Segments
 
@@ -569,8 +569,8 @@ SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(0 0, 50 70, 100 100)'), 10, 'side=le
 
 Output:
 
-<img alt="Original Linestring" src="../../../image/linestring-og.png" width="150"/>
-<img alt="Original Linestring with buffer on the left side" src="../../../image/linestring-left-side.png" width="150"/>
+![Original Linestring](../../image/linestring-og.png "Original Linestring"){: width="150px"}
+![Original Linestring with buffer on the left side](../../image/linestring-left-side.png "Original Linestring with buffer on the left side"){: width="150px"}
 
 Original Linestring &emsp; Left side buffed Linestring
 

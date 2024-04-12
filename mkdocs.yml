@@ -153,7 +153,7 @@ extra:
     - icon: fontawesome/brands/twitter
       link: 'https://twitter.com/ApacheSedona'
     - icon: fontawesome/brands/discord
-      link: './community/discord-invite-form.html'
+      link: 'https://share.hsforms.com/1Ndql_ZigTdmLlVQc_d1o4gqga4q'
   sedona:
     current_version: 1.5.1
     current_geotools: 1.5.1-28.2

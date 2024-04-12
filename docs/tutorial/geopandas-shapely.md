@@ -109,7 +109,7 @@ gdf.plot(
 
 To create Spark DataFrame based on mentioned Geometry types, please use <b> GeometryType </b> from  <b> sedona.sql.types </b> module. Converting works for list or tuple with shapely objects.
 
-Schema for target table with integer id and geometry type can be defined as follow:
+Schema for target table with integer id and geometry type can be defined as follows:
 
 ```python
 
@@ -126,7 +126,7 @@ schema = StructType(
 
 ```
 
-Also Spark DataFrame with geometry type can be converted to list of shapely objects with <b> collect </b> method.
+Also, Spark DataFrame with geometry type can be converted to list of shapely objects with <b> collect </b> method.
 
 ### Point example
 
@@ -335,5 +335,43 @@ gdf.show(1, False)
 +---+----------------------------------------------------------------------------------------------------------+
 |1  |MULTIPOLYGON (((0 0, 0 2, 2 2, 2 0, 0 0), (1 1, 1.5 1, 1.5 1.5, 1 1.5, 1 1)), ((0 0, 0 1, 1 1, 1 0, 0 0)))|
 +---+----------------------------------------------------------------------------------------------------------+
+
+```
+
+### GeometryCollection example
+
+```python3
+
+from shapely.geometry import GeometryCollection, Point, LineString, Polygon
+
+exterior_p1 = [(0, 0), (0, 2), (2, 2), (2, 0), (0, 0)]
+interior_p1 = [(1, 1), (1, 1.5), (1.5, 1.5), (1.5, 1), (1, 1)]
+exterior_p2 = [(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]
+
+geoms = [
+    Polygon(exterior_p1, [interior_p1]),
+    Polygon(exterior_p2),
+    Point(1, 1),
+    LineString([(0, 0), (1, 1), (2, 2)])
+]
+
+data = [
+    [1, GeometryCollection(geoms)]
+]
+
+gdf = sedona.createDataFrame(
+    data,
+    schema
+)
+
+gdf.show(1, False)
+```
+
+```
++---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|id |geom                                                                                                                                                                     |
++---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|1  |GEOMETRYCOLLECTION (POLYGON ((0 0, 0 2, 2 2, 2 0, 0 0), (1 1, 1 1.5, 1.5 1.5, 1.5 1, 1 1)), POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0)), POINT (1 1), LINESTRING (0 0, 1 1, 2 2))|
++---+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 ```
