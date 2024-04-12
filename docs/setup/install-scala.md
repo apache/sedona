@@ -35,7 +35,7 @@ Please refer to [Sedona Maven Central coordinates](maven-coordinates.md) to sele
 
 2. Download Sedona jars:
 	* Download the pre-compiled jars from [Sedona Releases](../download.md)
-	* Download / Git clone Sedona source code and compile the code by yourself (see [Compile Sedona](../compile))
+	* Download / Git clone Sedona source code and compile the code by yourself (see [Compile Sedona](compile.md))
 3. Run Spark shell with `--jars` option.
 
 ```
@@ -56,14 +56,14 @@ If you are using Spark 3.0 to 3.3, please use jars with filenames containing `3.
 
 ## Spark SQL shell
 
-Please see [Use Sedona in a pure SQL environment](../../tutorial/sql-pure-sql/)
+Please see [Use Sedona in a pure SQL environment](../tutorial/sql-pure-sql.md)
 
 ## Self-contained Spark projects
 
 A self-contained project allows you to create multiple Scala / Java files and write complex logics in one place. To use Sedona in your self-contained Spark project, you just need to add Sedona as a dependency in your pom.xml or build.sbt.
 
 1. To add Sedona as dependencies, please read [Sedona Maven Central coordinates](maven-coordinates.md)
-2. Use Sedona Template project to start: [Sedona Template Project](../../tutorial/demo/)
+2. Use Sedona Template project to start: [Sedona Template Project](../tutorial/demo.md)
 3. Compile your project using SBT. Make sure you obtain the fat jar which packages all dependencies.
 4. Submit your compiled fat jar to Spark cluster. Make sure you are in the root folder of Spark distribution. Then run the following command:
 

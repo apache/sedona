@@ -400,8 +400,8 @@ Then submit to CRAN using this [web form](https://xmpalantir.wu.ac.at/cransubmit
 ### Prepare the environment and doc folder
 
 1. Check out the {{ sedona_create_release.current_version }} Git tag on your local repo.
-2. Read [Compile documentation website](../../setup/compile) to set up your environment. But don't deploy anything yet.
-3. Add the download link to [Download page](../../download).
+2. Read [Compile documentation website](../setup/compile.md) to set up your environment. But don't deploy anything yet.
+3. Add the download link to [Download page](../download.md).
 4. Add the news to `docs/index.md`.
 
 ### Generate Javadoc and Scaladoc
