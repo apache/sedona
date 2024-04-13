@@ -54,7 +54,7 @@ Some of the key features of Apache Sedona include:
 
 These are some of the key features of Apache Sedona, but it may offer additional capabilities depending on the specific version and configuration.
 
-Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
+Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=docs/usecases) and play the interactive Sedona Python Jupyter Notebook immediately!
 
 ## When to use Sedona?
 
