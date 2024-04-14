@@ -1,8 +1,8 @@
 # Python Jupyter Notebook Examples
 
-Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
+Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=docs/usecases) and play the interactive Sedona Python Jupyter Notebook immediately!
 
-Sedona Python provides a number of [Jupyter Notebook examples](https://github.com/apache/sedona/blob/master/binder/).
+Sedona Python provides a number of [Jupyter Notebook examples](https://github.com/apache/sedona/blob/master/docs/usecases/).
 
 Please use the following steps to run Jupyter notebook with Pipenv on your machine
 
@@ -12,14 +12,14 @@ Please use the following steps to run Jupyter notebook with Pipenv on your machi
 4. Setup pipenv python version. Please use your desired Python version.
 
 ```bash
-cd binder
+cd docs/usecases
 pipenv --python 3.8
 ```
 
 5. Install dependencies
 
 ```bash
-cd binder
+cd docs/usecases
 pipenv install
 ```
 

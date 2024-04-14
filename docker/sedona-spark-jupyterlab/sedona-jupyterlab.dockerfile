@@ -51,9 +51,9 @@ RUN ${SEDONA_HOME}/docker/sedona.sh ${sedona_version} ${geotools_wrapper_version
 COPY docker/sedona-spark-jupyterlab/requirements.txt /opt/requirements.txt
 RUN pip3 install -r /opt/requirements.txt
 
-COPY binder/*.ipynb /opt/workspace/examples/
-COPY binder/*.py /opt/workspace/examples/
-COPY binder/data /opt/workspace/examples/data
+COPY docs/usecases/*.ipynb /opt/workspace/examples/
+COPY docs/usecases/*.py /opt/workspace/examples/
+COPY docs/usecases/data /opt/workspace/examples/data
 
 # Add the master IP address to all notebooks
 RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i 's/config = SedonaContext.builder()/config = SedonaContext.builder().master(\\"spark:\/\/localhost:7077\\")/' {} +
