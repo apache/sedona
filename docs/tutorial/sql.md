@@ -39,7 +39,7 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.
 === "Python"
 
 	1. Please read [Quick start](../setup/install-python.md) to install Sedona Python.
-	2. This tutorial is based on [Sedona SQL Jupyter Notebook example](jupyter-notebook.md). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) to interact with Sedona Python Jupyter notebook immediately on Binder.
+	2. This tutorial is based on [Sedona SQL Jupyter Notebook example](jupyter-notebook.md). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=docs/usecases) to interact with Sedona Python Jupyter notebook immediately on Binder.
 
 ## Create Sedona config
 
