@@ -167,7 +167,7 @@ LINESTRING (-71.1663 42.2614, -71.1667 42.2616)
 
 ## ST_GeomFromText
 
-Introduction: Construct a Geometry from WKT. Alias of  [ST_GeomFromWKT](#ST_GeomFromWKT)
+Introduction: Construct a Geometry from WKT. Alias of  [ST_GeomFromWKT](#st_geomfromwkt)
 
 Format:
 `ST_GeomFromText (Wkt: String)`
@@ -277,7 +277,7 @@ LINESTRING (1 2, 3 4)
 
 ## ST_LineStringFromText
 
-Introduction: Construct a LineString from Text, delimited by Delimiter (Optional). Alias of  [ST_LineFromText](#ST_LineFromText)
+Introduction: Construct a LineString from Text, delimited by Delimiter (Optional). Alias of  [ST_LineFromText](#st_linefromtext)
 
 Format: `ST_LineStringFromText (Text: String, Delimiter: Char)`
 
