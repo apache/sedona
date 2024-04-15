@@ -216,7 +216,7 @@ LINESTRING (-71.1663 42.2614, -71.1667 42.2616)
 
 ## ST_GeomFromText
 
-Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown). Alias of [ST_GeomFromWKT](#ST_GeomFromWKT)
+Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown). Alias of [ST_GeomFromWKT](#st_geomfromwkt)
 
 Format:
 

@@ -274,7 +274,7 @@ Introduction: Return the Extended Well-Known Binary representation of a geometry
 EWKB is an extended version of WKB which includes the SRID of the geometry.
 The format originated in PostGIS but is supported by many GIS tools.
 If the geometry is lacking SRID a WKB format is produced.
-[See ST_SetSRID](#ST_SetSRID)
+[See ST_SetSRID](#st_setsrid)
 It will ignore the M coordinate if present.
 
 Format: `ST_AsEWKB (A: Geometry)`
@@ -299,7 +299,7 @@ Introduction: Return the Extended Well-Known Text representation of a geometry.
 EWKT is an extended version of WKT which includes the SRID of the geometry.
 The format originated in PostGIS but is supported by many GIS tools.
 If the geometry is lacking SRID a WKT format is produced.
-[See ST_SetSRID](#ST_SetSRID)
+[See ST_SetSRID](#st_setsrid)
 It will support M coordinate if present since v1.5.0.
 
 Format: `ST_AsEWKT (A: Geometry)`
