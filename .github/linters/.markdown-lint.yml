@@ -50,6 +50,3 @@ MD045: false
 
 # code-block-style - Code block style
 MD046: false
-
-# link-fragments - Link fragments should be valid
-MD051: false
