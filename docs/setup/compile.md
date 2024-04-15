@@ -122,6 +122,7 @@ In short, you need to run:
 
 ```
 pip install mkdocs
+pip install mkdocs-jupyter
 pip install mkdocs-material
 pip install mkdocs-macros-plugin
 pip install mkdocs-git-revision-date-localized-plugin
