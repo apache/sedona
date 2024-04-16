@@ -1319,6 +1319,18 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertEquals(expectedGeomDefaultValue, wktWriter.write(actualGeomDefaultValue))
     }
 
+    it("Passed ST_Force3DZ") {
+      val lineDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 1, 1 0, 2 0)') AS geom")
+      val expectedGeom = "LINESTRING Z(0 1 2.3, 1 0 2.3, 2 0 2.3)"
+      val expectedGeomDefaultValue = "LINESTRING Z(0 1 0, 1 0 0, 2 0 0)"
+      val wktWriter = new WKTWriter(3)
+      val forcedGeom = lineDf.select(ST_Force3DZ("geom", 2.3)).take(1)(0).get(0).asInstanceOf[Geometry]
+      assertEquals(expectedGeom, wktWriter.write(forcedGeom))
+      val lineDfDefaultValue = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 1, 1 0, 2 0)') AS geom")
+      val actualGeomDefaultValue = lineDfDefaultValue.select(ST_Force3DZ("geom")).take(1)(0).get(0).asInstanceOf[Geometry]
+      assertEquals(expectedGeomDefaultValue, wktWriter.write(actualGeomDefaultValue))
+    }
+
     it("Passed ST_ForceCollection") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)') AS mpoint, ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))') AS poly")
       var actual = baseDf.select(ST_NumGeometries(ST_ForceCollection("mpoint"))).first().get(0)

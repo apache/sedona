@@ -1210,6 +1210,25 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geom", "zValue"}, argTypes = {"Geometry", "double"}, returnTypes = "Geometry")
+    public static String ST_Force3DZ(String geom, double zValue) {
+        return GeometrySerde.serGeoJson(
+                Functions.force3D(
+                        GeometrySerde.deserGeoJson(geom),
+                        zValue
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
+    public static String ST_Force3DZ(String geom) {
+        return GeometrySerde.serGeoJson(
+                Functions.force3D(
+                        GeometrySerde.deserGeoJson(geom)
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geom"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
     public static String ST_ForceCollection(String geom) {
         return GeometrySerde.serGeoJson(

@@ -999,6 +999,42 @@ Input: `LINESTRING EMPTY`
 
 Output: `LINESTRING EMPTY`
 
+## ST_Force3DZ
+
+Introduction: Forces the geometry into a 3-dimensional model so that all output representations will have X, Y and Z coordinates.
+An optionally given zValue is tacked onto the geometry if the geometry is 2-dimensional. Default value of zValue is 0.0
+If the given geometry is 3-dimensional, no change is performed on it.
+If the given geometry is empty, no change is performed on it. This function is an alias for [ST_Force3D](#st_force3d).
+
+!!!Note
+    Example output is after calling ST_AsText() on returned geometry, which adds Z for in the WKT for 3D geometries
+
+Format: `ST_Force3DZ(geometry: Geometry, zValue: Double)`
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force3DZ(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'), 2.3))
+```
+
+Output:
+
+```
+POLYGON Z((0 0 2, 0 5 2, 5 0 2, 0 0 2), (1 1 2, 3 1 2, 1 3 2, 1 1 2))
+```
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force3DZ(ST_GeomFromText('LINESTRING(0 1,1 0,2 0)'), 2.3))
+```
+
+Output:
+
+```
+LINESTRING Z(0 1 2.3, 1 0 2.3, 2 0 2.3)
+```
+
 ## ST_ForceCollection
 
 Introduction: This function converts the input geometry into a GeometryCollection, regardless of the original geometry type. If the input is a multipart geometry, such as a MultiPolygon or MultiLineString, it will be decomposed into a GeometryCollection containing each individual Polygon or LineString element from the original multipart geometry.

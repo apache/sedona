@@ -1285,6 +1285,20 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testForce3DZ() {
+        Integer expectedDims = 3;
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_Force3DZ(ST_GeomFromWKT('LINESTRING(0 1, 1 0, 2 0)'), 1.2) " +
+                "AS " + polygonColNames[0]);
+        Integer actual = (Integer) first(polyTable.select(call(Functions.ST_NDims.class.getSimpleName(), $(polygonColNames[0])))).getField(0);
+        assertEquals(expectedDims, actual);
+
+        polyTable = tableEnv.sqlQuery("SELECT ST_Force3DZ(ST_GeomFromWKT('LINESTRING(0 1, 1 0, 2 0)')) " +
+                "AS " + polygonColNames[0]);
+        actual = (Integer) first(polyTable.select(call(Functions.ST_NDims.class.getSimpleName(), $(polygonColNames[0])))).getField(0);
+        assertEquals(expectedDims, actual);
+    }
+
+    @Test
     public void testForceCollection() {
         int actual = (int) first(
                 tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)') AS geom").select(call(Functions.ST_ForceCollection.class.getSimpleName(), $("geom"))).as("geom")

@@ -1064,6 +1064,20 @@ public class TestFunctions extends TestBase {
     }
 
     @Test
+    public void test_ST_Force3DZ() {
+        registerUDF("ST_Force3DZ", byte[].class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_AsText(sedona.ST_Force3DZ(sedona.ST_GeomFromText('LINESTRING(0 1, 1 2, 2 1)')))",
+                "LINESTRING Z(0 1 0, 1 2 0, 2 1 0)"
+        );
+        registerUDF("ST_Force3DZ", byte[].class, double.class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_AsText(sedona.ST_Force3DZ(sedona.ST_GeomFromText('LINESTRING(0 1, 1 2, 2 1)'), 1))",
+                "LINESTRING Z(0 1 1, 1 2 1, 2 1 1)"
+        );
+    }
+
+    @Test
     public void test_ST_ForceCollection() {
         registerUDF("ST_ForceCollection", byte[].class);
         registerUDF("ST_NumGeometries", byte[].class);

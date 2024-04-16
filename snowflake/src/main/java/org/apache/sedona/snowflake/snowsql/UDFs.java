@@ -1414,6 +1414,31 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geom", "zValue"})
+    public static byte[] ST_Force3DZ(byte[] geom, double zValue) {
+        WKBWriter writer = new WKBWriter(3);
+        return GeometrySerde.serialize(
+                Functions.force3D(
+                        GeometrySerde.deserialize(
+                                writer.write(GeometrySerde.deserialize(geom))
+                        ),
+                        zValue
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom"})
+    public static byte[] ST_Force3DZ(byte[] geom) {
+        WKBWriter writer = new WKBWriter(3);
+        return GeometrySerde.serialize(
+                Functions.force3D(
+                        GeometrySerde.deserialize(
+                                writer.write(GeometrySerde.deserialize(geom))
+                        )
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geom"})
     public static byte[] ST_ForceCollection(byte[] geom) {
         return GeometrySerde.serialize(
