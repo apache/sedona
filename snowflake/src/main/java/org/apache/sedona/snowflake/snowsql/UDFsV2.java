@@ -1211,6 +1211,15 @@ public class UDFsV2
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geom"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
+    public static String ST_ForceCollection(String geom) {
+        return GeometrySerde.serGeoJson(
+                Functions.forceCollection(
+                        GeometrySerde.deserGeoJson(geom)
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
     public static String ST_ForcePolygonCW(String geom) {
         return GeometrySerde.serGeoJson(
                 Functions.forcePolygonCW(

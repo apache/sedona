@@ -1415,6 +1415,15 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geom"})
+    public static byte[] ST_ForceCollection(byte[] geom) {
+        return GeometrySerde.serialize(
+                Functions.forceCollection(
+                        GeometrySerde.deserialize(geom)
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom"})
     public static byte[] ST_ForcePolygonCW(byte[] geom) {
         return GeometrySerde.serialize(
                 Functions.forcePolygonCW(

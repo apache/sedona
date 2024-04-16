@@ -1552,6 +1552,16 @@ def ST_Force3D(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, floa
     return _call_st_function("ST_Force3D", args)
 
 @validate_argument_types
+def ST_ForceCollection(geometry: ColumnOrName) -> Column:
+    """
+    Converts a geometry to a geometry collection
+
+    :param geometry: Geometry column to change orientation
+    :return: a Geometry Collection
+    """
+    return _call_st_function("ST_ForceCollection", geometry)
+
+@validate_argument_types
 def ST_ForcePolygonCW(geometry: ColumnOrName) -> Column:
     """
     Returns

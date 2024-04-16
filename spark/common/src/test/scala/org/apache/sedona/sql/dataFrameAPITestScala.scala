@@ -1319,6 +1319,15 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertEquals(expectedGeomDefaultValue, wktWriter.write(actualGeomDefaultValue))
     }
 
+    it("Passed ST_ForceCollection") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)') AS mpoint, ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))') AS poly")
+      var actual = baseDf.select(ST_NumGeometries(ST_ForceCollection("mpoint"))).first().get(0)
+      assert(actual == 6)
+
+      actual = baseDf.select(ST_NumGeometries(ST_ForceCollection("poly"))).first().get(0)
+      assert(actual == 1)
+    }
+
     it("Passed ST_TriangulatePolygon") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (5 5, 5 8, 8 8, 8 5, 5 5))') as poly")
       val actual = baseDf.select(ST_AsText(ST_TriangulatePolygon("poly"))).first().getString(0)

@@ -1271,6 +1271,30 @@ Output:
 LINESTRING EMPTY
 ```
 
+## ST_ForceCollection
+
+Introduction: This function converts the input geometry into a GeometryCollection, regardless of the original geometry type. If the input is a multipart geometry, such as a MultiPolygon or MultiLineString, it will be decomposed into a GeometryCollection containing each individual Polygon or LineString element from the original multipart geometry.
+
+Format: `ST_ForceCollection(geom: Geometry)`
+
+Since: `vTBD`
+
+SQL Example
+
+```sql
+SELECT ST_ForceCollection(
+            ST_GeomFromWKT(
+                "MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)"
+    )
+)
+```
+
+Output:
+
+```
+GEOMETRYCOLLECTION (POINT (30 10), POINT (40 40), POINT (20 20), POINT (10 30), POINT (10 10), POINT (20 50))
+```
+
 ## ST_ForcePolygonCCW
 
 Introduction: For (Multi)Polygon geometries, this function sets the exterior ring orientation to counter-clockwise and interior rings to clockwise orientation. Non-polygonal geometries are returned unchanged.

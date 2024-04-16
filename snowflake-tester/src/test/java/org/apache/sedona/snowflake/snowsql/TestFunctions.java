@@ -1064,6 +1064,16 @@ public class TestFunctions extends TestBase {
     }
 
     @Test
+    public void test_ST_ForceCollection() {
+        registerUDF("ST_ForceCollection", byte[].class);
+        registerUDF("ST_NumGeometries", byte[].class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_NumGeometries(sedona.ST_ForceCollection(sedona.ST_GeomFromWKT('MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)')))",
+                6
+        );
+    }
+
+    @Test
     public void test_ST_ForcePolygonCW() {
         registerUDF("ST_ForcePolygonCW", byte[].class);
         verifySqlSingleRes(

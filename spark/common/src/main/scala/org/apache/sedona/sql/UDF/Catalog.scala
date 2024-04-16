@@ -188,6 +188,7 @@ object Catalog {
     function[ST_LengthSpheroid](),
     function[ST_NumPoints](),
     function[ST_Force3D](0.0),
+    function[ST_ForceCollection](),
     function[ST_NRings](),
     function[ST_Translate](0.0),
     function[ST_TriangulatePolygon](),

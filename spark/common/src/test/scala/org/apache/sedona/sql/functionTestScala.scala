@@ -2251,6 +2251,14 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
   }
 
+  it("Passed ST_ForceCollection") {
+    var actual = sparkSession.sql("SELECT ST_NumGeometries(ST_ForceCollection(ST_GeomFromWKT('MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)')))").first().get(0)
+    assert(actual == 6)
+
+    actual = sparkSession.sql("SELECT ST_NumGeometries(ST_ForceCollection(ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')))").first().get(0)
+    assert(actual == 1)
+  }
+
   it("should pass ST_NRings") {
     val geomTestCases = Map(
       ("'POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'") -> 1,

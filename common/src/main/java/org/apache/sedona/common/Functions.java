@@ -1535,6 +1535,18 @@ public class Functions {
         return GeomUtils.get3DGeom(geometry, 0.0);
     }
 
+    public static Geometry forceCollection(Geometry geom) {
+        return new GeometryFactory().createGeometryCollection(convertGeometryToArray(geom));
+    }
+
+    private static Geometry[] convertGeometryToArray(Geometry geom) {
+        Geometry[] array = new Geometry[geom.getNumGeometries()];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = geom.getGeometryN(i);
+        }
+        return array;
+    }
+
     public static Integer nRings(Geometry geometry) throws Exception {
         String geometryType = geometry.getGeometryType();
         if (!(geometry instanceof Polygon || geometry instanceof MultiPolygon)) {

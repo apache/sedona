@@ -1023,6 +1023,16 @@ public class TestFunctionsV2
     }
 
     @Test
+    public void test_ST_ForceCollection() {
+        registerUDFV2("ST_ForceCollection", String.class);
+        registerUDFV2("ST_NumGeometries", String.class);
+        verifySqlSingleRes(
+                "SELECT ST_NumGeometries(sedona.ST_ForceCollection(ST_GeomFromWKT('MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)')))",
+                6
+        );
+    }
+
+    @Test
     public void test_ST_ForcePolygonCW() {
         registerUDFV2("ST_ForcePolygonCW", String.class);
         verifySqlSingleRes(

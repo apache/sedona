@@ -1306,6 +1306,34 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void forceCollection() throws ParseException {
+        Geometry geom = Constructors.geomFromWKT("MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)", 0);
+        int actual = Functions.numGeometries(Functions.forceCollection(geom));
+        int expected = 6;
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("MULTIPOLYGON(((0 0 0,0 1 0,1 1 0,1 0 0,0 0 0)),((0 0 0,1 0 0,1 0 1,0 0 1,0 0 0)),((1 1 0,1 1 1,1 0 1,1 0 0,1 1 0)),((0 1 0,0 1 1,1 1 1,1 1 0,0 1 0)),((0 0 1,1 0 1,1 1 1,0 1 1,0 0 1)))", 0);
+        actual = Functions.numGeometries(Functions.forceCollection(geom));
+        expected = 5;
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("MULTILINESTRING ((10 10, 20 20, 30 30), (15 15, 25 25, 35 35))", 0);
+        actual = Functions.numGeometries(Functions.forceCollection(geom));
+        expected = 2;
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))", 0);
+        actual = Functions.numGeometries(Functions.forceCollection(geom));
+        expected = 1;
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("GEOMETRYCOLLECTION(POLYGON((0 0 1,0 5 1,5 0 1,0 0 1),(1 1 1,3 1 1,1 3 1,1 1 1)))",0);
+        String actualWKT = Functions.asWKT(Functions.forceCollection(geom));
+        String expectedWKT = "GEOMETRYCOLLECTION Z(POLYGON Z((0 0 1, 0 5 1, 5 0 1, 0 0 1), (1 1 1, 3 1 1, 1 3 1, 1 1 1)))";
+        assertEquals(expectedWKT, actualWKT);
+    }
+
+    @Test
     public void force3DObject3DDefaultValue() {
         int expectedDims = 3;
         Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray3d(0, 0, 0, 90, 0, 0, 0, 0, 0));
