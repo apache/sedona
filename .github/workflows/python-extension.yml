@@ -10,6 +10,7 @@ on:
       - 'spark-shaded/**'
       - 'pom.xml'
       - 'python/**'
+      - '.github/workflows/python-extension.yml'
   pull_request:
     branches:
       - '*'
@@ -19,6 +20,7 @@ on:
       - 'spark-shaded/**'
       - 'pom.xml'
       - 'python/**'
+      - '.github/workflows/python-extension.yml'
 
 permissions:
   contents: read
@@ -72,4 +74,4 @@ jobs:
       run: |
         cd python
         pipenv run python setup.py sdist
-        pipenv run python -m pip install dist/apache-sedona-*.tar.gz
+        pipenv run python -m pip install dist/*sedona-*.tar.gz
