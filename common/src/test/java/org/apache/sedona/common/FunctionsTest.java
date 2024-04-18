@@ -1019,6 +1019,54 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void pologonize() throws ParseException {
+        LineString line1 = GEOMETRY_FACTORY.createLineString(coordArray(180, 40, 30, 20, 20, 90));
+        LineString line2 = GEOMETRY_FACTORY.createLineString(coordArray(180, 40, 160, 160));
+        LineString line3 = GEOMETRY_FACTORY.createLineString(coordArray(80, 60, 120, 130, 150, 80));
+        LineString line4 = GEOMETRY_FACTORY.createLineString(coordArray(80, 60, 150, 80));
+        LineString line5 = GEOMETRY_FACTORY.createLineString(coordArray(20, 90, 70, 70, 80, 130));
+        LineString line6 = GEOMETRY_FACTORY.createLineString(coordArray(80, 130, 160, 160));
+        LineString line7 = GEOMETRY_FACTORY.createLineString(coordArray(20, 90, 20, 160, 70 ,190));
+        LineString line8 = GEOMETRY_FACTORY.createLineString(coordArray(70, 190, 80, 130));
+        LineString line9 = GEOMETRY_FACTORY.createLineString(coordArray(70, 190, 160, 160));
+
+        LineString line10 = GEOMETRY_FACTORY.createLineString(coordArray(0,0,0,1,0,2));
+        LineString line11 = GEOMETRY_FACTORY.createLineString(coordArray(4,2,4,1,4,0));
+        LineString line12 = GEOMETRY_FACTORY.createLineString(coordArray(4,0,3,0,2,0,1,0,0,0));
+        LineString line13 = GEOMETRY_FACTORY.createLineString(coordArray(2,0,2,1,2,2));
+        LineString line14 = GEOMETRY_FACTORY.createLineString(coordArray(2,2,2,3,2,4));
+        LineString line15 = GEOMETRY_FACTORY.createLineString(coordArray(0,2,1,2,2,2));
+        LineString line16 = GEOMETRY_FACTORY.createLineString(coordArray(2,2,3,2,4,2));
+        LineString line17 = GEOMETRY_FACTORY.createLineString(coordArray(0,2,1,3,2,4));
+        LineString line18 = GEOMETRY_FACTORY.createLineString(coordArray(2,4,3,3,4,2));
+
+        GeometryCollection geometryCollection1 = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {line1, line2, line3, line4, line5, line6, line7, line8, line9});
+        GeometryCollection geometryCollection2 = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {line10, line11, line12, line13, line14, line15, line16, line17, line18});
+        GeometryCollection geometryCollection3 = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {line10, line11, line12, line13, line15, line16});
+        GeometryCollection geometryCollection4 = GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {line13, line14, line15, line16, line17, line18});
+
+        Geometry expected1 = geomFromEWKT("GEOMETRYCOLLECTION (POLYGON ((20 90, 20 160, 70 190, 80 130, 70 70, 20 90)), POLYGON ((20 90, 70 70, 80 130, 160 160, 180 40, 30 20, 20 90), (80 60, 150 80, 120 130, 80 60)), POLYGON ((70 190, 160 160, 80 130, 70 190)), POLYGON ((80 60, 120 130, 150 80, 80 60)))");
+        Geometry result1 = Functions.polygonize(geometryCollection1);
+        result1.normalize();
+        assertEquals(expected1, result1);
+
+        Geometry expected2 = geomFromEWKT("GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 0 2, 1 2, 2 2, 3 2, 4 2, 4 1, 4 0, 3 0, 2 0, 1 0, 0 0)), POLYGON ((0 2, 1 3, 2 4, 2 3, 2 2, 1 2, 0 2)), POLYGON ((2 2, 2 3, 2 4, 3 3, 4 2, 3 2, 2 2)))");
+        Geometry result2 = Functions.polygonize(geometryCollection2);
+        result2.normalize();
+        assertEquals(expected2, result2);
+
+        Geometry expected3 = geomFromEWKT("GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 0 2, 1 2, 2 2, 3 2, 4 2, 4 1, 4 0, 3 0, 2 0, 1 0, 0 0)))");
+        Geometry result3 = Functions.polygonize(geometryCollection3);
+        result3.normalize();
+        assertEquals(expected3, result3);
+
+        Geometry expected4 = geomFromEWKT("GEOMETRYCOLLECTION (POLYGON ((0 2, 1 3, 2 4, 2 3, 2 2, 1 2, 0 2)), POLYGON ((2 2, 2 3, 2 4, 3 3, 4 2, 3 2, 2 2)))");
+        Geometry result4 = Functions.polygonize(geometryCollection4);
+        result4.normalize();
+        assertEquals(expected4, result4);
+    }
+
+    @Test
     public void spheroidLength() {
         Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
         assertEquals(0, Spheroid.length(point), 0.1);

@@ -123,6 +123,7 @@ public class Catalog {
                 new Functions.ST_LineSubstring(),
                 new Functions.ST_MakeLine(),
                 new Functions.ST_Polygon(),
+                new Functions.ST_Polygonize(),
                 new Functions.ST_MakePolygon(),
                 new Functions.ST_MakeValid(),
                 new Functions.ST_MinimumBoundingCircle(),

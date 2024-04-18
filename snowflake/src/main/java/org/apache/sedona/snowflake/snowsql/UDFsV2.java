@@ -810,6 +810,15 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
+    public static String ST_Polygonize(String geometry) {
+        return GeometrySerde.serGeoJson(
+                Functions.polygonize(
+                        GeometrySerde.deserGeoJson(geometry)
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "precisionScale"}, argTypes = {"Geometry", "int"}, returnTypes = "Geometry")
     public static String ST_PrecisionReduce(String geometry, int precisionScale) {
         return GeometrySerde.serGeoJson(

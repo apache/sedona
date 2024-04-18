@@ -399,6 +399,18 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(testtable.take(1)(0).get(0).asInstanceOf[Geometry].getSRID == 4326)
     }
 
+    it("Passed ST_Polygonize") {
+
+      val testtable = sparkSession.sql(
+        "SELECT ST_Polygonize(ST_GeomFromText('GEOMETRYCOLLECTION (LINESTRING (180 40, 30 20, 20 90), LINESTRING (180 40, 160 160), LINESTRING (80 60, 120 130, 150 80), LINESTRING (80 60, 150 80), LINESTRING (20 90, 70 70, 80 130), LINESTRING (80 130, 160 160), LINESTRING (20 90, 20 160, 70 190), LINESTRING (70 190, 80 130), LINESTRING (70 190, 160 160))'))"
+      )
+
+      val result = testtable.take(1)(0).get(0).asInstanceOf[Geometry]
+
+      result.normalize()
+      assert(result.toText()  == "GEOMETRYCOLLECTION (POLYGON ((20 90, 20 160, 70 190, 80 130, 70 70, 20 90)), POLYGON ((20 90, 70 70, 80 130, 160 160, 180 40, 30 20, 20 90), (80 60, 150 80, 120 130, 80 60)), POLYGON ((70 190, 160 160, 80 130, 70 190)), POLYGON ((80 60, 120 130, 150 80, 80 60)))")
+    }
+
     it("Passed ST_MakeValid On Invalid Polygon") {
 
       val df = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((1 5, 1 1, 3 3, 5 3, 7 1, 7 5, 5 3, 3 3, 1 5))') AS polygon")

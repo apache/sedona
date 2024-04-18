@@ -17,6 +17,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.planner.expressions.In;
+import org.apache.sedona.flink.expressions.Constructors;
 import org.apache.sedona.flink.expressions.Functions;
 import org.apache.sedona.flink.expressions.FunctionsGeoTools;
 import org.geotools.referencing.CRS;
@@ -28,6 +29,7 @@ import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import scala.collection.immutable.Stream;
 
 import java.util.Arrays;
 import java.util.List;
@@ -933,6 +935,16 @@ public class FunctionTest extends TestBase{
         Geometry result = (Geometry) first(table).getField(0);
         assertEquals("POLYGON ((0 0, 1 0, 1 1, 0 0))", result.toString());
         assertEquals(4236, result.getSRID());
+    }
+
+    @Test
+    public void testPolygonize() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromEWKT('GEOMETRYCOLLECTION (LINESTRING (180 40, 30 20, 20 90), LINESTRING (180 40, 160 160), LINESTRING (80 60, 120 130, 150 80), LINESTRING (80 60, 150 80), LINESTRING (20 90, 70 70, 80 130), LINESTRING (80 130, 160 160), LINESTRING (20 90, 20 160, 70 190), LINESTRING (70 190, 80 130), LINESTRING (70 190, 160 160))') AS geom");
+        table = table.select(call(Functions.ST_Polygonize.class.getSimpleName(), $("geom")));
+        Geometry result = (Geometry) first(table).getField(0);
+        result.normalize();
+        String expected = "GEOMETRYCOLLECTION (POLYGON ((20 90, 20 160, 70 190, 80 130, 70 70, 20 90)), POLYGON ((20 90, 70 70, 80 130, 160 160, 180 40, 30 20, 20 90), (80 60, 150 80, 120 130, 80 60)), POLYGON ((70 190, 160 160, 80 130, 70 190)), POLYGON ((80 60, 120 130, 150 80, 80 60)))";
+        assertEquals(expected, result.toString());
     }
 
     @Test

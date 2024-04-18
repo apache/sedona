@@ -140,6 +140,7 @@ object Catalog {
     function[ST_SubDivide](),
     function[ST_MakeLine](),
     function[ST_Polygon](),
+    function[ST_Polygonize](),
     function[ST_MakePolygon](null),
     function[ST_GeoHash](),
     function[ST_GeomFromGeoHash](null),
