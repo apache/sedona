@@ -2422,7 +2422,7 @@ Introduction: Generates a GeometryCollection composed of polygons that are forme
 
 Format: `ST_Polygonize(geom: Geometry)`
 
-Since: `vTBD`
+Since: `v1.6.0`
 
 Example:
 
