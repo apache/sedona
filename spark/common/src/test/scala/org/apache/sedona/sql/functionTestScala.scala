@@ -2292,6 +2292,24 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
   }
 
+  it("Should pass ST_Force3DM") {
+    val geomTestCases = Map(
+      ("'LINESTRING (0 1, 1 0, 2 0)'") -> ("'LINESTRING M(0 1 1, 1 0 1, 2 0 1)'", "'LINESTRING M(0 1 0, 1 0 0, 2 0 0)'"),
+      ("'LINESTRING M(0 1 3, 1 0 3, 2 0 3)'") -> ("'LINESTRING M(0 1 3, 1 0 3, 2 0 3)'", "'LINESTRING M(0 1 3, 1 0 3, 2 0 3)'"),
+      ("'LINESTRING EMPTY'") -> ("'LINESTRING EMPTY'", "'LINESTRING EMPTY'")
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"SELECT ST_AsText(ST_Force3DM(ST_GeomFromWKT($geom), 1)) AS geom, " + s"$expectedResult")
+      val dfDefaultValue = sparkSession.sql(s"SELECT ST_AsText(ST_Force3DM(ST_GeomFromWKT($geom))) AS geom, " + s"$expectedResult")
+      val actual = df.take(1)(0).get(0).asInstanceOf[String]
+      val expected = df.take(1)(0).get(1).asInstanceOf[GenericRowWithSchema].get(0).asInstanceOf[String]
+      val actualDefaultValue = dfDefaultValue.take(1)(0).get(0).asInstanceOf[String]
+      val expectedDefaultValue = dfDefaultValue.take(1)(0).get(1).asInstanceOf[GenericRowWithSchema].get(1).asInstanceOf[String]
+      assertEquals(expected, actual)
+      assertEquals(expectedDefaultValue, actualDefaultValue);
+    }
+  }
+
   it("Passed ST_ForceCollection") {
     var actual = sparkSession.sql("SELECT ST_NumGeometries(ST_ForceCollection(ST_GeomFromWKT('MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)')))").first().get(0)
     assert(actual == 6)

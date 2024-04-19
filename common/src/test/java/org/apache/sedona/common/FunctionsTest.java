@@ -1334,6 +1334,53 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void testForce3DM() throws ParseException {
+        Geometry geom = Constructors.geomFromWKT("POINT (1 2)",0);
+        String actual = Functions.asWKT(Functions.force3DM(geom, 5));
+        String expected = "POINT M(1 2 5)";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("MULTIPOINT ((1 2), (2 3))",0);
+        actual = Functions.asWKT(Functions.force3DM(geom, 5));
+        expected = "MULTIPOINT M((1 2 5), (2 3 5))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("LINESTRING (1 2, 2 3, 3 4)",0);
+        actual = Functions.asWKT(Functions.force3DM(geom, 5));
+        expected = "LINESTRING M(1 2 5, 2 3 5, 3 4 5)";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("MULTILINESTRING ((10 10, 20 20, 30 30), (15 15, 25 25, 35 35))",0);
+        actual = Functions.asWKT(Functions.force3DM(geom, 5));
+        expected = "MULTILINESTRING M((10 10 5, 20 20 5, 30 30 5), (15 15 5, 25 25 5, 35 35 5))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("LINEARRING (30 10, 40 40, 20 40, 10 20, 30 10)",0);
+        actual = Functions.asWKT(Functions.force3DM(geom, 5));
+        expected = "LINEARRING M(30 10 5, 40 40 5, 20 40 5, 10 20 5, 30 10 5)";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (4 4, 4 6, 6 6, 6 4, 4 4))",0);
+        actual = Functions.asWKT(Functions.force3DM(geom, 5));
+        expected = "POLYGON M((0 0 5, 10 0 5, 10 10 5, 0 10 5, 0 0 5), (4 4 5, 4 6 5, 6 6 5, 6 4 5, 4 4 5))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("MULTIPOLYGON (((30 10, 40 40, 20 40, 10 20, 30 10)), ((15 5, 10 20, 20 30, 15 5)))",0);
+        actual = Functions.asWKT(Functions.force3DM(geom, 5));
+        expected = "MULTIPOLYGON M(((30 10 5, 40 40 5, 20 40 5, 10 20 5, 30 10 5)), ((15 5 5, 10 20 5, 20 30 5, 15 5 5)))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (15 15, 25 25, 35 35), POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10)))",0);
+        actual = Functions.asWKT(Functions.force3DM(geom, 5));
+        expected = "GEOMETRYCOLLECTION M(POINT M(10 10 5), LINESTRING M(15 15 5, 25 25 5, 35 35 5), POLYGON M((30 10 5, 40 40 5, 20 40 5, 10 20 5, 30 10 5)))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("POLYGON M((0 0 3, 0 5 3, 5 0 3, 0 0 3), (1 1 3, 3 1 3, 1 3 3, 1 1 3))", 0);
+        Geometry actualGeom = Functions.force3DM(geom, 10);
+        assertTrue(Predicates.equals(geom, actualGeom));
+    }
+
+    @Test
     public void force3DObject3DDefaultValue() {
         int expectedDims = 3;
         Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray3d(0, 0, 0, 90, 0, 0, 0, 0, 0));

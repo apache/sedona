@@ -1327,6 +1327,17 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testForce3DM() {
+        Table geomTable = tableEnv.sqlQuery("SELECT ST_Force3DM(ST_GeomFromText('LINESTRING (1 2, 2 3, 3 4)')) AS geom");
+        Boolean actual = (Boolean) first(geomTable.select(call(Functions.ST_HasM.class.getSimpleName(), $("geom")))).getField(0);
+        assertEquals(Boolean.TRUE, actual);
+
+        geomTable = tableEnv.sqlQuery("SELECT ST_Force3DM(ST_GeomFromText('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (4 4, 4 6, 6 6, 6 4, 4 4))')) AS geom");
+        actual = (Boolean) first(geomTable.select(call(Functions.ST_HasM.class.getSimpleName(), $("geom")))).getField(0);
+        assertEquals(Boolean.TRUE, actual);
+    }
+
+    @Test
     public void testForceCollection() {
         int actual = (int) first(
                 tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)') AS geom").select(call(Functions.ST_ForceCollection.class.getSimpleName(), $("geom"))).as("geom")

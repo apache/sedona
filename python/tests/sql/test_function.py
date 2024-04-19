@@ -1468,6 +1468,11 @@ class TestPredicateJoin(TestBase):
         actual = actualDf.selectExpr("ST_NDims(geom)").take(1)[0][0]
         assert expected == actual
 
+    def test_force3DM(self):
+        actualDf = self.spark.sql("SELECT ST_Force3DM(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'), 1.1) AS geom")
+        actual = actualDf.selectExpr("ST_HasM(geom)").take(1)[0][0]
+        assert actual
+
     def test_force3DZ(self):
         expected = 3
         actualDf = self.spark.sql("SELECT ST_Force3DZ(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'), 1.1) AS geom")

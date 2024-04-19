@@ -1266,6 +1266,53 @@ Output:
 LINESTRING EMPTY
 ```
 
+## ST_Force3DM
+
+Introduction: Forces the geometry into XYM mode. Retains any existing M coordinate, but removes the Z coordinate if present. Assigns a default M value of 0.0 if `mValue` is not specified.
+
+!!!Note
+Example output is after calling ST_AsText() on returned geometry, which adds M for in the WKT.
+
+Format: `ST_Force3DM(geometry: Geometry, mValue: Double = 0.0)`
+
+Since: `vTDB`
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force3DM(ST_GeomFromText('POLYGON M((0 0 3,0 5 3,5 0 3,0 0 3),(1 1 3,3 1 3,1 3 3,1 1 3))'), 2.3))
+```
+
+Output:
+
+```
+POLYGON M((0 0 3, 0 5 3, 5 0 3, 0 0 3), (1 1 3, 3 1 3, 1 3 3, 1 1 3))
+```
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force3DM(ST_GeomFromText('LINESTRING(0 1,1 0,2 0)'), 2.3))
+```
+
+Output:
+
+```
+LINESTRING M(0 1 2.3, 1 0 2.3, 2 0 2.3)
+```
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force3DM(ST_GeomFromText('LINESTRING Z(0 1 3,1 0 3,2 0 3)'), 5))
+```
+
+Output:
+
+```
+LINESTRING M(0 1 5, 1 0 5, 2 0 5)
+```
+
 ## ST_Force3DZ
 
 Introduction: Forces the geometry into a 3-dimensional model so that all output representations will have X, Y and Z coordinates.

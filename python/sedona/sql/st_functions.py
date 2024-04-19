@@ -1575,6 +1575,17 @@ def ST_Force3D(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, floa
     return _call_st_function("ST_Force3D", args)
 
 @validate_argument_types
+def ST_Force3DM(geometry: ColumnOrName, mValue: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+    """
+    Return a geometry with a 3D coordinate of value 'mValue' forced upon it. No change happens if the geometry is already 3D
+    :param mValue: Optional value of m coordinate to be potentially added, default value is 0.0
+    :param geometry: Geometry column to make 3D
+    :return: 3D geometry with either already present m coordinate if any, or m coordinate with given mValue
+    """
+    args = (geometry, mValue)
+    return _call_st_function("ST_Force3DM", args)
+
+@validate_argument_types
 def ST_Force3DZ(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
     """
     Return a geometry with a 3D coordinate of value 'zValue' forced upon it. No change happens if the geometry is already 3D

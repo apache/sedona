@@ -427,6 +427,11 @@ object st_functions extends DataFrameAPI {
 
   def ST_Force3D(geometry: String, zValue: Double): Column = wrapExpression[ST_Force3D](geometry, zValue)
 
+  def ST_Force3DM(geometry: Column): Column = wrapExpression[ST_Force3DM](geometry, 0.0)
+  def ST_Force3DM(geometry: String): Column = wrapExpression[ST_Force3DM](geometry, 0.0)
+  def ST_Force3DM(geometry: Column, zValue: Column): Column = wrapExpression[ST_Force3DM](geometry, zValue)
+  def ST_Force3DM(geometry: String, zValue: Double): Column = wrapExpression[ST_Force3DM](geometry, zValue)
+
   def ST_Force3DZ(geometry: Column): Column = wrapExpression[ST_Force3DZ](geometry, 0.0)
   def ST_Force3DZ(geometry: String): Column = wrapExpression[ST_Force3DZ](geometry, 0.0)
   def ST_Force3DZ(geometry: Column, zValue: Column): Column = wrapExpression[ST_Force3DZ](geometry, zValue)
