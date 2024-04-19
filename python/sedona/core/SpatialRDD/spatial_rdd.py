@@ -191,6 +191,7 @@ class SpatialRDD:
         """
         return self._srdd.countWithoutDuplicatesSPRDD()
 
+    @property
     def fieldNames(self) -> List[str]:
         """
 
