@@ -1,0 +1,77 @@
+# https://github.com/actions/labeler
+root:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - '*'
+
+docs:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - docs/**/*
+              - docs-overrides/**/*
+              - README.md
+
+github-actions:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - .github/**/*
+
+licenses:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - licenses/**/*
+
+sedona-common:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - common/**/*
+
+sedona-docker:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - docker/**/*
+
+sedona-flink:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - flink/**/*
+              - flink-shaded/**/*
+
+sedona-python:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - python/**/*
+
+sedona-r:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - R/**/*
+
+sedona-snowflake:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - snowflake/**/*
+              - snowflake-tester/**/*
+
+sedona-spark:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - spark/**/*
+              - spark-shaded/**/*
+
+sedona-zeppelin:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - zeppelin/**/*
