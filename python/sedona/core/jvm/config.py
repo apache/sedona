@@ -187,10 +187,9 @@ class SparkJars:
 
         try:
             used_jar_files = java_spark_conf.get(value)
-        except Py4JJavaError as java_error:
-            error_message = "Failed to get the value of {} from SparkConf: {}".format(
-                value, java_error
-            )
+        except Py4JJavaError:
+            error_message = "Didn't find the value of {} from SparkConf".format(value)
+            logging.info(error_message)
 
         return used_jar_files, error_message
 
