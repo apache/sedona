@@ -626,7 +626,7 @@ Result:
 
 ## ST_ConcaveHull
 
-Introduction: Return the Concave Hull of polgyon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
+Introduction: Return the Concave Hull of polygon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
 
 Format: `ST_ConcaveHull (A:geometry, pctConvex:float)`
 
@@ -641,7 +641,7 @@ FROM polygondf
 
 ## ST_ConvexHull
 
-Introduction: Return the Convex Hull of polgyon A
+Introduction: Return the Convex Hull of polygon A
 
 Format: `ST_ConvexHull (A:geometry)`
 

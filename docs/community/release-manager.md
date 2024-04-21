@@ -40,7 +40,7 @@ JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}" exec "/usr/local/Cell
 
 ### 2. Prepare Secret GPG key
 
-1. Install GNUGPG if it was not installed before. On Mac: `brew install gnupg gnupg2`
+1. Install GNUPG if it was not installed before. On Mac: `brew install gnupg gnupg2`
 2. Generate a secret key. It must be RSA4096 (4096 bits long).
    * Run `gpg --full-generate-key`. If not work, run `gpg --default-new-key-algo rsa4096 --gen-key`
    * At the prompt, specify the kind of key you want: Select `RSA`, then press `enter`

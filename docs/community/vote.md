@@ -1,6 +1,6 @@
 # Vote a Sedona release
 
-This page is for Sedona community to vote a Sedona release. The script below is tested on MacOS.
+This page is for Sedona community to vote a Sedona release. The script below is tested on macOS.
 
 In order to vote a Sedona release, you must provide your checklist including the following minimum requirement:
 
