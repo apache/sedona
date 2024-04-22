@@ -3359,6 +3359,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#run-python-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Run Python tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#import-the-project_1" class="md-nav__link">
     <span class="md-ellipsis">
       Import the project
@@ -4010,6 +4019,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#run-python-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Run Python tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#import-the-project_1" class="md-nav__link">
     <span class="md-ellipsis">
       Import the project
@@ -4079,7 +4097,7 @@
 <h1 id="develop-sedona">Develop Sedona<a class="headerlink" href="#develop-sedona" title="Permanent link">&para;</a></h1>
 <h2 id="scalajava-developers">Scala/Java developers<a class="headerlink" href="#scalajava-developers" title="Permanent link">&para;</a></h2>
 <h3 id="ide">IDE<a class="headerlink" href="#ide" title="Permanent link">&para;</a></h3>
-<p>We recommend Intellij IDEA with Scala plugin installed. Please make sure that the IDE has JDK 1.8 set as project default.</p>
+<p>We recommend <a href="https://www.jetbrains.com/idea/">Intellij IDEA</a> with Scala plugin installed. Please make sure that the IDE has JDK 1.8 set as project default.</p>
 <h3 id="import-the-project">Import the project<a class="headerlink" href="#import-the-project" title="Permanent link">&para;</a></h3>
 <h4 id="choose-open">Choose <code>Open</code><a class="headerlink" href="#choose-open" title="Permanent link">&para;</a></h4>
 <p><img alt="" src="../../image/ide-java-1.png" /></p>
@@ -4088,7 +4106,7 @@
 <h4 id="the-ide-might-show-errors">The IDE might show errors<a class="headerlink" href="#the-ide-might-show-errors" title="Permanent link">&para;</a></h4>
 <p>The IDE usually has trouble understanding the complex project structure in Sedona.</p>
 <p><img alt="" src="../../image/ide-java-4.png" /></p>
-<h4 id="fix-errors-by-changing-pomxml">Fix errors by changing pom.xml<a class="headerlink" href="#fix-errors-by-changing-pomxml" title="Permanent link">&para;</a></h4>
+<h4 id="fix-errors-by-changing-pomxml">Fix errors by changing <code>pom.xml</code><a class="headerlink" href="#fix-errors-by-changing-pomxml" title="Permanent link">&para;</a></h4>
 <p>You need to comment out the following lines in <code>pom.xml</code> at the root folder, as follows. <mark>Remember that you should NOT submit this change to Sedona.</mark></p>
 <div class="highlight"><pre><span></span><code><span class="cm">&lt;!--    &lt;parent&gt;--&gt;</span>
 <span class="cm">&lt;!--        &lt;groupId&gt;org.apache&lt;/groupId&gt;--&gt;</span>
@@ -4097,8 +4115,8 @@
 <span class="cm">&lt;!--        &lt;relativePath /&gt;--&gt;</span>
 <span class="cm">&lt;!--    &lt;/parent&gt;--&gt;</span>
 </code></pre></div>
-<h4 id="reload-pomxml">Reload pom.xml<a class="headerlink" href="#reload-pomxml" title="Permanent link">&para;</a></h4>
-<p>Make sure you reload the pom.xml or reload the maven project. The IDE will ask you to remove some modules. Please select <code>yes</code>.</p>
+<h4 id="reload-pomxml">Reload <code>pom.xml</code><a class="headerlink" href="#reload-pomxml" title="Permanent link">&para;</a></h4>
+<p>Make sure you reload the <code>pom.xml</code> or reload the maven project. The IDE will ask you to remove some modules. Please select <code>yes</code>.</p>
 <p><img alt="" src="../../image/ide-java-5.png" /></p>
 <h4 id="the-final-project-structure-should-be-like-this">The final project structure should be like this:<a class="headerlink" href="#the-final-project-structure-should-be-like-this" title="Permanent link">&para;</a></h4>
 <p><img alt="" src="../../image/ide-java-3.png" width="400px" /></p>
@@ -4123,21 +4141,22 @@ For example, to compile sedona with Spark 3.4 and Scala 2.12, use: <code>mvn cle
 <p>Re-run the test case. Do NOT right-click the test case to re-run. Instead, click the button as shown in the figure below.</p>
 <p><img alt="" src="../../image/ide-java-10.png" /></p>
 <h2 id="python-developers">Python developers<a class="headerlink" href="#python-developers" title="Permanent link">&para;</a></h2>
-<h4 id="run-all-python-tests">Run all python tests<a class="headerlink" href="#run-all-python-tests" title="Permanent link">&para;</a></h4>
+<h3 id="ide_1">IDE<a class="headerlink" href="#ide_1" title="Permanent link">&para;</a></h3>
+<p>We recommend <a href="https://www.jetbrains.com/pycharm/">PyCharm</a>.</p>
+<h3 id="run-python-tests">Run Python tests<a class="headerlink" href="#run-python-tests" title="Permanent link">&para;</a></h3>
+<h4 id="run-all-python-tests">Run all Python tests<a class="headerlink" href="#run-all-python-tests" title="Permanent link">&para;</a></h4>
 <p>To run all Python test cases, follow steps mentioned <a href="../../setup/compile/#run-python-test">here</a>.</p>
-<h4 id="run-all-python-tests-in-a-single-test-file">Run all python tests in a single test file<a class="headerlink" href="#run-all-python-tests-in-a-single-test-file" title="Permanent link">&para;</a></h4>
-<p>To run a particular python test file, specify the path of the .py file to pipenv.</p>
+<h4 id="run-all-python-tests-in-a-single-test-file">Run all Python tests in a single test file<a class="headerlink" href="#run-all-python-tests-in-a-single-test-file" title="Permanent link">&para;</a></h4>
+<p>To run a particular Python test file, specify the path of the <code>.py</code> file to <code>pipenv</code>.</p>
 <p>For example, to run all tests in <code>test_function.py</code> located in <code>python/tests/sql/</code>, use: <code>pipenv run pytest tests/sql/test_function.py</code>.</p>
 <h4 id="run-a-single-test">Run a single test<a class="headerlink" href="#run-a-single-test" title="Permanent link">&para;</a></h4>
-<p>To run a particular test in a particular .py test file, specify <code>file_name::class_name::test_name</code> to the pytest command.</p>
-<p>For example, to run the test on ST_Contains function located in sql/test_predicate.py, use: <code>pipenv run pytest tests/sql/test_predicate.py::TestPredicate::test_st_contains</code></p>
-<h3 id="ide_1">IDE<a class="headerlink" href="#ide_1" title="Permanent link">&para;</a></h3>
-<p>We recommend PyCharm</p>
+<p>To run a particular test in a particular <code>.py</code> test file, specify <code>file_name::class_name::test_name</code> to the <code>pytest</code> command.</p>
+<p>For example, to run the test on <code>ST_Contains</code> function located in <code>sql/test_predicate.py</code>, use: <code>pipenv run pytest tests/sql/test_predicate.py::TestPredicate::test_st_contains</code></p>
 <h3 id="import-the-project_1">Import the project<a class="headerlink" href="#import-the-project_1" title="Permanent link">&para;</a></h3>
 <h2 id="r-developers">R developers<a class="headerlink" href="#r-developers" title="Permanent link">&para;</a></h2>
 <p>More details to come.</p>
 <h3 id="ide_2">IDE<a class="headerlink" href="#ide_2" title="Permanent link">&para;</a></h3>
-<p>We recommend RStudio</p>
+<p>We recommend <a href="https://posit.co/products/open-source/rstudio/">RStudio</a></p>
 <h3 id="import-the-project_2">Import the project<a class="headerlink" href="#import-the-project_2" title="Permanent link">&para;</a></h3>
 
 
@@ -4159,7 +4178,7 @@ For example, to compile sedona with Spark 3.4 and Scala 2.12, use: <code>mvn cle
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 22, 2024 00:02:08</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 22, 2024 17:28:27</span>
   </span>
 
     

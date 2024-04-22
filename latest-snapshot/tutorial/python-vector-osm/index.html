@@ -3862,7 +3862,7 @@ from datetime import date
 from pyspark.sql.functions import monotonically_increasing_id
 import json
 </code></pre></div>
-<h3 id="registering-spark-session-adding-node-executor-configurations-and-sedona-registrator">Registering spark session, adding node executor configurations and sedona registrator<a class="headerlink" href="#registering-spark-session-adding-node-executor-configurations-and-sedona-registrator" title="Permanent link">&para;</a></h3>
+<h2 id="registering-spark-session-adding-node-executor-configurations-and-sedona-registrator">Registering spark session, adding node executor configurations and sedona registrator<a class="headerlink" href="#registering-spark-session-adding-node-executor-configurations-and-sedona-registrator" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>spark = SparkSession.\
     builder.\
     appName(&quot;Overpass-API&quot;).\
@@ -3887,7 +3887,7 @@ import json
 SedonaRegistrator.registerAll(spark)
 sc = spark.sparkContext
 </code></pre></div>
-<h3 id="connecting-to-overpass-api-to-search-and-downloading-data-for-saving-into-hdfs">Connecting to Overpass API to search and downloading data for saving into HDFS<a class="headerlink" href="#connecting-to-overpass-api-to-search-and-downloading-data-for-saving-into-hdfs" title="Permanent link">&para;</a></h3>
+<h2 id="connecting-to-overpass-api-to-search-and-downloading-data-for-saving-into-hdfs">Connecting to Overpass API to search and downloading data for saving into HDFS<a class="headerlink" href="#connecting-to-overpass-api-to-search-and-downloading-data-for-saving-into-hdfs" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>import requests
 import json
 
@@ -3909,11 +3909,11 @@ file_name = &quot;foz_roads_osm.json&quot;
 hdfs.delete_file_dir(file_name)
 hdfs.create_file(file_name, json.dumps(data))
 </code></pre></div>
-<h3 id="connecting-spark-sedona-with-saved-hdfs-file">Connecting spark sedona with saved hdfs file<a class="headerlink" href="#connecting-spark-sedona-with-saved-hdfs-file" title="Permanent link">&para;</a></h3>
+<h2 id="connecting-spark-sedona-with-saved-hdfs-file">Connecting spark sedona with saved hdfs file<a class="headerlink" href="#connecting-spark-sedona-with-saved-hdfs-file" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>path = &quot;hdfs://776faf4d6a1e:8020/&quot;+file_name
 df = spark.read.json(path, multiLine = &quot;true&quot;)
 </code></pre></div>
-<h3 id="consulting-and-organizing-data-for-analysis">Consulting and organizing data for analysis<a class="headerlink" href="#consulting-and-organizing-data-for-analysis" title="Permanent link">&para;</a></h3>
+<h2 id="consulting-and-organizing-data-for-analysis">Consulting and organizing data for analysis<a class="headerlink" href="#consulting-and-organizing-data-for-analysis" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>from pyspark.sql.functions import explode, arrays_zip
 
 df.createOrReplaceTempView(&quot;df&quot;)
@@ -3988,7 +3988,7 @@ roads_tb.show(5)
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">January 1, 2024 09:17:53</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 22, 2024 17:28:27</span>
   </span>
 
     

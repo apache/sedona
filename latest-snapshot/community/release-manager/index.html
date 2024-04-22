@@ -3988,7 +3988,7 @@
 
 <h1 id="become-a-release-manager">Become a release manager<a class="headerlink" href="#become-a-release-manager" title="Permanent link">&para;</a></h1>
 <p>You only need to perform these steps if this is your first time being a release manager.</p>
-<h3 id="0-software-requirement">0. Software requirement<a class="headerlink" href="#0-software-requirement" title="Permanent link">&para;</a></h3>
+<h2 id="0-software-requirement">0. Software requirement<a class="headerlink" href="#0-software-requirement" title="Permanent link">&para;</a></h2>
 <ul>
 <li>JDK 8: <code>brew install openjdk@8</code></li>
 <li>Maven 3.X. Your Maven must point to JDK 8 (1.8). Check it by <code>mvn --version</code></li>
@@ -4012,7 +4012,7 @@ JAVA_HOME=&quot;${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}&quot; exec &quot;
 <ol>
 <li>Run <code>mvn --version</code> again. It should now point to JDK 8.</li>
 </ol>
-<h3 id="1-obtain-write-access-to-sedona-github-repo">1. Obtain Write Access to Sedona GitHub repo<a class="headerlink" href="#1-obtain-write-access-to-sedona-github-repo" title="Permanent link">&para;</a></h3>
+<h2 id="1-obtain-write-access-to-sedona-github-repo">1. Obtain Write Access to Sedona GitHub repo<a class="headerlink" href="#1-obtain-write-access-to-sedona-github-repo" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Verify you have a GitHub ID enabled with 2FA <a href="https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/">https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/</a></li>
 <li>Enter your GitHub ID into your Apache ID profile <a href="https://id.apache.org/">https://id.apache.org/</a></li>
@@ -4024,7 +4024,7 @@ JAVA_HOME=&quot;${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}&quot; exec &quot;
 <li>After accepting the GitHub Invitation, verify that you are a member of the team <a href="https://github.com/orgs/apache/teams/sedona-committers">https://github.com/orgs/apache/teams/sedona-committers</a></li>
 <li>Additionally, if you have been elected to the Sedona PMC, verify you are part of the LDAP Sedona PMC <a href="https://whimsy.apache.org/roster/pmc/sedona">https://whimsy.apache.org/roster/pmc/sedona</a></li>
 </ol>
-<h3 id="2-prepare-secret-gpg-key">2. Prepare Secret GPG key<a class="headerlink" href="#2-prepare-secret-gpg-key" title="Permanent link">&para;</a></h3>
+<h2 id="2-prepare-secret-gpg-key">2. Prepare Secret GPG key<a class="headerlink" href="#2-prepare-secret-gpg-key" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Install GNUPG if it was not installed before. On Mac: <code>brew install gnupg gnupg2</code></li>
 <li>Generate a secret key. It must be RSA4096 (4096 bits long).</li>
@@ -4042,7 +4042,7 @@ JAVA_HOME=&quot;${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}&quot; exec &quot;
 <li>There must be an empty line between <code>-----BEGIN PGP PUBLIC KEY BLOCK-----</code> and the actual key.</li>
 <li>Publish your armored key in major key servers: <a href="https://keyserver.pgp.com/">https://keyserver.pgp.com/</a></li>
 </ol>
-<h3 id="3-use-svn-to-update-keys">3. Use SVN to update KEYS<a class="headerlink" href="#3-use-svn-to-update-keys" title="Permanent link">&para;</a></h3>
+<h2 id="3-use-svn-to-update-keys">3. Use SVN to update KEYS<a class="headerlink" href="#3-use-svn-to-update-keys" title="Permanent link">&para;</a></h2>
 <p>Use SVN to append your armored PGP public key to the <code>KEYS</code> files
    * <a href="https://dist.apache.org/repos/dist/dev/sedona/KEYS">https://dist.apache.org/repos/dist/dev/sedona/KEYS</a>
    * <a href="https://dist.apache.org/repos/dist/release/sedona/KEYS">https://dist.apache.org/repos/dist/release/sedona/KEYS</a></p>
@@ -4066,12 +4066,12 @@ svn<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <div class="highlight"><pre><span></span><code>rm<span class="w"> </span>-rf<span class="w"> </span>sedona-dev
 rm<span class="w"> </span>-rf<span class="w"> </span>sedona-release
 </code></pre></div>
-<h3 id="4-add-gpg_tty-environment-variable">4. Add GPG_TTY environment variable<a class="headerlink" href="#4-add-gpg_tty-environment-variable" title="Permanent link">&para;</a></h3>
+<h2 id="4-add-gpg_tty-environment-variable">4. Add GPG_TTY environment variable<a class="headerlink" href="#4-add-gpg_tty-environment-variable" title="Permanent link">&para;</a></h2>
 <p>In your <code>~/.bashrc</code> file, add the following content. Then restart your terminal.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">GPG_TTY</span><span class="o">=</span><span class="k">$(</span>tty<span class="k">)</span>
 <span class="nb">export</span><span class="w"> </span>GPG_TTY
 </code></pre></div>
-<h3 id="5-get-github-personal-access-token-classic">5. Get GitHub personal access token (classic)<a class="headerlink" href="#5-get-github-personal-access-token-classic" title="Permanent link">&para;</a></h3>
+<h2 id="5-get-github-personal-access-token-classic">5. Get GitHub personal access token (classic)<a class="headerlink" href="#5-get-github-personal-access-token-classic" title="Permanent link">&para;</a></h2>
 <p>You need to create a GitHub personal access token (classic). You can follow the instruction on <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic">GitHub</a>.</p>
 <p>In short:</p>
 <ol>
@@ -4085,7 +4085,7 @@ rm<span class="w"> </span>-rf<span class="w"> </span>sedona-release
 <li>Click <code>Generate token</code>.</li>
 <li>Please save your token somewhere because we will use it in the next step.</li>
 </ol>
-<h3 id="6-set-up-credentials-for-maven">6. Set up credentials for Maven<a class="headerlink" href="#6-set-up-credentials-for-maven" title="Permanent link">&para;</a></h3>
+<h2 id="6-set-up-credentials-for-maven">6. Set up credentials for Maven<a class="headerlink" href="#6-set-up-credentials-for-maven" title="Permanent link">&para;</a></h2>
 <p>In your <code>~/.m2/settings.xml</code> file, add the following content. Please create this file or <code>.m2</code> folder if it does not exist.</p>
 <p>Please replace all capitalized text with your own ID and password.</p>
 <div class="highlight"><pre><span></span><code>&lt;settings&gt;
@@ -4139,7 +4139,7 @@ rm<span class="w"> </span>-rf<span class="w"> </span>sedona-release
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 22, 2024 00:02:08</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 22, 2024 17:28:27</span>
   </span>
 
     
