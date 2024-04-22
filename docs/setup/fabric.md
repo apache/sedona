@@ -34,7 +34,7 @@ Click the `Save` button and then click the `Publish` button to save and publish 
 
 1. Learn the Sedona jars you need from our [Sedona maven coordinate](maven-coordinates.md)
 2. Download the `sedona-spark-shaded` jars from [Maven Central](https://search.maven.org/search?q=g:org.apache.sedona). Please pay attention to the Spark version and Scala version of the jars. If you select Spark 3.4 in the Fabric environment, you should download the Sedona jars with Spark 3.4 and Scala 2.12 and the jar name should be like `sedona-spark-shaded-3.4_2.12-1.5.1.jar`.
-3. Download the `geotools-wrapper` jars from [Maven Central](https://search.maven.org/search?q=g:org.datasyslab). Please pay attention to the Sedona verions of the jar. If you select Sedona 1.5.1, you should download the `geotools-wrapper` jar with version 1.5.1 and the jar name should be like `geotools-wrapper-1.5.1-28.2.jar`.
+3. Download the `geotools-wrapper` jars from [Maven Central](https://search.maven.org/search?q=g:org.datasyslab). Please pay attention to the Sedona versions of the jar. If you select Sedona 1.5.1, you should download the `geotools-wrapper` jar with version 1.5.1 and the jar name should be like `geotools-wrapper-1.5.1-28.2.jar`.
 
 ## Step 7: Upload Sedona jars to the Fabric environment LakeHouse storage
 
@@ -86,4 +86,3 @@ sedona.sql("SELECT ST_GeomFromEWKT('SRID=4269;POINT(40.7128 -74.0060)')").show()
 If you see the output of the point, then the installation is successful.
 
 ![](../../image/fabric/fabric-9.png)
-
