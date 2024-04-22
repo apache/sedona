@@ -16,8 +16,11 @@ GeoSpark Perspective and Beyond"** is the full research paper that talks about t
 GeoSpark were evaluated by papers published on database top venues. It is worth noting that we do not have any collaboration with the authors.
 
 * SIGMOD 2020 paper ["Architecting a Query Compiler for Spatial Workloads"](https://dl.acm.org/doi/abs/10.1145/3318464.3389701) Ruby Y. Tahboub, Tiark  Rompf (Purdue University).
+
 > In Figure 16a, GeoSpark distance join query runs around 7x - 9x faster than Simba, a spatial extension on Spark, on 1 - 24 core machines.
+
 * PVLDB 2018 paper ["How Good Are Modern Spatial Analytics Systems?"](http://www.vldb.org/pvldb/vol11/p1661-pandey.pdf) Varun Pandey, Andreas Kipf, Thomas Neumann, Alfons Kemper (Technical University of Munich), quoted as follows:
+
 > GeoSpark comes close to a complete spatial analytics system. It also exhibits the best performance in most cases.
 
 ## Full publications
