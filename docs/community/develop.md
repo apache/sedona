@@ -4,7 +4,7 @@
 
 ### IDE
 
-We recommend Intellij IDEA with Scala plugin installed. Please make sure that the IDE has JDK 1.8 set as project default.
+We recommend [Intellij IDEA](https://www.jetbrains.com/idea/) with Scala plugin installed. Please make sure that the IDE has JDK 1.8 set as project default.
 
 ### Import the project
 
@@ -22,7 +22,7 @@ The IDE usually has trouble understanding the complex project structure in Sedon
 
 ![](../image/ide-java-4.png)
 
-#### Fix errors by changing pom.xml
+#### Fix errors by changing `pom.xml`
 
 You need to comment out the following lines in `pom.xml` at the root folder, as follows. ==Remember that you should NOT submit this change to Sedona.==
 
@@ -35,9 +35,9 @@ You need to comment out the following lines in `pom.xml` at the root folder, as 
 <!--    </parent>-->
 ```
 
-#### Reload pom.xml
+#### Reload `pom.xml`
 
-Make sure you reload the pom.xml or reload the maven project. The IDE will ask you to remove some modules. Please select `yes`.
+Make sure you reload the `pom.xml` or reload the maven project. The IDE will ask you to remove some modules. Please select `yes`.
 
 ![](../image/ide-java-5.png)
 
@@ -80,25 +80,27 @@ Re-run the test case. Do NOT right-click the test case to re-run. Instead, click
 
 ## Python developers
 
-#### Run all python tests
+### IDE
+
+We recommend [PyCharm](https://www.jetbrains.com/pycharm/).
+
+### Run Python tests
+
+#### Run all Python tests
 
 To run all Python test cases, follow steps mentioned [here](../setup/compile.md#run-python-test).
 
-#### Run all python tests in a single test file
+#### Run all Python tests in a single test file
 
-To run a particular python test file, specify the path of the .py file to pipenv.
+To run a particular Python test file, specify the path of the `.py` file to `pipenv`.
 
 For example, to run all tests in `test_function.py` located in `python/tests/sql/`, use: `pipenv run pytest tests/sql/test_function.py`.
 
 #### Run a single test
 
-To run a particular test in a particular .py test file, specify `file_name::class_name::test_name` to the pytest command.
+To run a particular test in a particular `.py` test file, specify `file_name::class_name::test_name` to the `pytest` command.
 
-For example, to run the test on ST_Contains function located in sql/test_predicate.py, use: `pipenv run pytest tests/sql/test_predicate.py::TestPredicate::test_st_contains`
-
-### IDE
-
-We recommend PyCharm
+For example, to run the test on `ST_Contains` function located in `sql/test_predicate.py`, use: `pipenv run pytest tests/sql/test_predicate.py::TestPredicate::test_st_contains`
 
 ### Import the project
 
@@ -108,6 +110,6 @@ More details to come.
 
 ### IDE
 
-We recommend RStudio
+We recommend [RStudio](https://posit.co/products/open-source/rstudio/)
 
 ### Import the project
