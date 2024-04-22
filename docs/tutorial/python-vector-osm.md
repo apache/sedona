@@ -20,7 +20,7 @@ from pyspark.sql.functions import monotonically_increasing_id
 import json
 ```
 
-### Registering spark session, adding node executor configurations and sedona registrator
+## Registering spark session, adding node executor configurations and sedona registrator
 
 ```
 spark = SparkSession.\
@@ -48,7 +48,7 @@ SedonaRegistrator.registerAll(spark)
 sc = spark.sparkContext
 ```
 
-### Connecting to Overpass API to search and downloading data for saving into HDFS
+## Connecting to Overpass API to search and downloading data for saving into HDFS
 
 ```
 import requests
@@ -74,14 +74,14 @@ hdfs.create_file(file_name, json.dumps(data))
 
 ```
 
-### Connecting spark sedona with saved hdfs file
+## Connecting spark sedona with saved hdfs file
 
 ```
 path = "hdfs://776faf4d6a1e:8020/"+file_name
 df = spark.read.json(path, multiLine = "true")
 ```
 
-### Consulting and organizing data for analysis
+## Consulting and organizing data for analysis
 
 ```
 from pyspark.sql.functions import explode, arrays_zip
