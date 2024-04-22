@@ -4380,7 +4380,7 @@
 <p>Typed SpatialRDD has been deprecated for a long time. We do NOT recommend it anymore.</p>
 </div>
 <h3 id="create-a-generic-spatialrdd">Create a generic SpatialRDD<a class="headerlink" href="#create-a-generic-spatialrdd" title="Permanent link">&para;</a></h3>
-<p>A generic SpatialRDD is not typed to a certain geometry type and open to more scenarios. It allows an input data file contains mixed types of geometries. For instance, a WKT file contains three types gemetries <mark>LineString</mark>, <mark>Polygon</mark> and <mark>MultiPolygon</mark>.</p>
+<p>A generic SpatialRDD is not typed to a certain geometry type and open to more scenarios. It allows an input data file contains mixed types of geometries. For instance, a WKT file contains three types geometries <mark>LineString</mark>, <mark>Polygon</mark> and <mark>MultiPolygon</mark>.</p>
 <h4 id="from-wktwkb">From WKT/WKB<a class="headerlink" href="#from-wktwkb" title="Permanent link">&para;</a></h4>
 <p>Geometries in a WKT and WKB file always occupy a single column no matter how many coordinates they have. Sedona provides <code>WktReader</code> and <code>WkbReader</code> to create generic SpatialRDD.</p>
 <p>Suppose we have a <code>checkin.tsv</code> WKT TSV file at Path <code>/Download/checkin.tsv</code> as follows:</p>
@@ -4601,7 +4601,7 @@ via <code>sedona.global.charset</code> system property before creating your Spar
 </div>
 <h2 id="write-a-spatial-range-query">Write a Spatial Range Query<a class="headerlink" href="#write-a-spatial-range-query" title="Permanent link">&para;</a></h2>
 <p>A spatial range query takes as input a range query window and an SpatialRDD and returns all geometries that have specified relationship with the query window.</p>
-<p>Assume you now have an SpatialRDD (typed or generic). You can use the following code to issue an Spatial Range Query on it.</p>
+<p>Assume you now have a SpatialRDD (typed or generic). You can use the following code to issue a Spatial Range Query on it.</p>
 <p><mark>spatialPredicate</mark> can be set to <code>SpatialPredicate.INTERSECTS</code> to return all geometries intersect with query window. Supported spatial predicates are:</p>
 <ul>
 <li><code>CONTAINS</code>: geometry is completely inside the query window</li>
@@ -4811,8 +4811,8 @@ Example:</p>
 </div>
 </div>
 <h2 id="write-a-spatial-knn-query">Write a Spatial KNN Query<a class="headerlink" href="#write-a-spatial-knn-query" title="Permanent link">&para;</a></h2>
-<p>A spatial K Nearnest Neighbor query takes as input a K, a query point and an SpatialRDD and finds the K geometries in the RDD which are the closest to he query point.</p>
-<p>Assume you now have an SpatialRDD (typed or generic). You can use the following code to issue an Spatial KNN Query on it.</p>
+<p>A spatial K Nearest Neighbor query takes as input a K, a query point and a SpatialRDD and finds the K geometries in the RDD which are the closest to the query point.</p>
+<p>Assume you now have a SpatialRDD (typed or generic). You can use the following code to issue a Spatial KNN Query on it.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Scala</label><label for="__tabbed_11_2">Java</label><label for="__tabbed_11_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -4934,7 +4934,7 @@ The list has K GeoData objects.</p>
 </div>
 <h2 id="write-a-spatial-join-query">Write a Spatial Join Query<a class="headerlink" href="#write-a-spatial-join-query" title="Permanent link">&para;</a></h2>
 <p>A spatial join query takes as input two Spatial RDD A and B. For each geometry in A, finds the geometries (from B) covered/intersected by it. A and B can be any geometry type and are not necessary to have the same geometry type.</p>
-<p>Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue an Spatial Join Query on them.</p>
+<p>Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue a Spatial Join Query on them.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Scala</label><label for="__tabbed_15_2">Java</label><label for="__tabbed_15_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -5136,7 +5136,7 @@ and jvm and in result operating on python object instead of native geometries.</
 </div>
 <p>A distance join query takes as input two Spatial RDD A and B and a distance. For each geometry in A, finds the geometries (from B) are within the given distance to it. A and B can be any geometry type and are not necessary to have the same geometry type. The unit of the distance is explained <a href="#transform-the-coordinate-reference-system">here</a>.</p>
 <p>If you don't want to transform your data and are ok with sacrificing the query accuracy, you can use an approximate degree value for distance. Please use <a href="https://lucidar.me/en/online-unit-converter-length-to-angle/convert-degrees-to-meters/#online-converter">this calculator</a>.</p>
-<p>Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue an Distance Join Query on them.</p>
+<p>Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue a Distance Join Query on them.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="20:3"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Scala</label><label for="__tabbed_20_2">Java</label><label for="__tabbed_20_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -5315,7 +5315,7 @@ Find the superheroes within 10 miles of each city</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 15, 2024 04:16:37</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 22, 2024 00:02:08</span>
   </span>
 
     
