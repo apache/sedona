@@ -2,7 +2,7 @@
 
 You only need to perform these steps if this is your first time being a release manager.
 
-### 0. Software requirement
+## 0. Software requirement
 
 * JDK 8: `brew install openjdk@8`
 * Maven 3.X. Your Maven must point to JDK 8 (1.8). Check it by `mvn --version`
@@ -28,7 +28,7 @@ JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}" exec "/usr/local/Cell
 
 5. Run `mvn --version` again. It should now point to JDK 8.
 
-### 1. Obtain Write Access to Sedona GitHub repo
+## 1. Obtain Write Access to Sedona GitHub repo
 
 1. Verify you have a GitHub ID enabled with 2FA https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/
 2. Enter your GitHub ID into your Apache ID profile https://id.apache.org/
@@ -38,7 +38,7 @@ JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}" exec "/usr/local/Cell
 4. After accepting the GitHub Invitation, verify that you are a member of the team https://github.com/orgs/apache/teams/sedona-committers
 5. Additionally, if you have been elected to the Sedona PMC, verify you are part of the LDAP Sedona PMC https://whimsy.apache.org/roster/pmc/sedona
 
-### 2. Prepare Secret GPG key
+## 2. Prepare Secret GPG key
 
 1. Install GNUPG if it was not installed before. On Mac: `brew install gnupg gnupg2`
 2. Generate a secret key. It must be RSA4096 (4096 bits long).
@@ -56,7 +56,7 @@ JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}" exec "/usr/local/Cell
    * There must be an empty line between `-----BEGIN PGP PUBLIC KEY BLOCK-----` and the actual key.
 3. Publish your armored key in major key servers: https://keyserver.pgp.com/
 
-### 3. Use SVN to update KEYS
+## 3. Use SVN to update KEYS
 
 Use SVN to append your armored PGP public key to the `KEYS` files
    * https://dist.apache.org/repos/dist/dev/sedona/KEYS
@@ -85,7 +85,7 @@ rm -rf sedona-dev
 rm -rf sedona-release
 ```
 
-### 4. Add GPG_TTY environment variable
+## 4. Add GPG_TTY environment variable
 
 In your `~/.bashrc` file, add the following content. Then restart your terminal.
 
@@ -94,7 +94,7 @@ GPG_TTY=$(tty)
 export GPG_TTY
 ```
 
-### 5. Get GitHub personal access token (classic)
+## 5. Get GitHub personal access token (classic)
 
 You need to create a GitHub personal access token (classic). You can follow the instruction on [GitHub](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic).
 
@@ -110,7 +110,7 @@ In short:
 8. Click `Generate token`.
 9. Please save your token somewhere because we will use it in the next step.
 
-### 6. Set up credentials for Maven
+## 6. Set up credentials for Maven
 
 In your `~/.m2/settings.xml` file, add the following content. Please create this file or `.m2` folder if it does not exist.
 
