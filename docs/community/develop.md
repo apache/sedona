@@ -74,7 +74,7 @@ Append the submodule folder to `Working Directory`. For example, `sedona/sql`.
 
 ![](../image/ide-java-9.png)
 
-Re-run the test case. Do NOT right click the test case to re-run. Instead, click the button as shown in the figure below.
+Re-run the test case. Do NOT right-click the test case to re-run. Instead, click the button as shown in the figure below.
 
 ![](../image/ide-java-10.png)
 

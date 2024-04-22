@@ -77,7 +77,7 @@ In this case, we will choose the option `Create Worksheet from SQL File`.
 
 ![](../../image/snowflake/snowflake-6.png)
 
-In the worksheet, choose `SEDONA_TEST` as the database, and `PUBLIC` as the schema. The SQL script should be in the worksheet. Then right click the worksheet and choose `Run All`. Snowflake will take 3 minutes to create Sedona's functions.
+In the worksheet, choose `SEDONA_TEST` as the database, and `PUBLIC` as the schema. The SQL script should be in the worksheet. Then right-click the worksheet and choose `Run All`. Snowflake will take 3 minutes to create Sedona's functions.
 
 ![](../../image/snowflake/snowflake-7.png)
 

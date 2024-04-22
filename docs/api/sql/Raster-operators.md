@@ -450,7 +450,7 @@ SELECT RS_GeoReferrence(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1,
 
 ### RS_GeoTransform
 
-Introduction: Returns an array of parameters that represent the GeoTranformation of the raster. The array contains the following values:
+Introduction: Returns an array of parameters that represent the GeoTransformation of the raster. The array contains the following values:
 
 - 0: pixel width along west-east axis (x axis)
 - 1: pixel height along north-south axis (y axis)

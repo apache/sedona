@@ -1,4 +1,4 @@
-We recommend Sedona-1.3.1-incuabting and above for EMR. In the tutorial, we use AWS Elastic MapReduce (EMR) 6.9.0. It has the following applications installed: Hadoop 3.3.3, JupyterEnterpriseGateway 2.6.0, Livy 0.7.1, Spark 3.3.0.
+We recommend Sedona-1.3.1-incubating and above for EMR. In the tutorial, we use AWS Elastic MapReduce (EMR) 6.9.0. It has the following applications installed: Hadoop 3.3.3, JupyterEnterpriseGateway 2.6.0, Livy 0.7.1, Spark 3.3.0.
 
 !!!tip
 	Wherobots Cloud provides a free tool to deploy Apache Sedona to AWS EMR. Please sign up [here](https://www.wherobots.services/).
@@ -33,11 +33,11 @@ sudo python3 -m pip install pydeck==0.8.0
 sudo python3 -m pip install attrs matplotlib descartes apache-sedona=={{ sedona.current_version }}
 ```
 
-When you create a EMR cluster, in the `bootstrap action`, specify the location of this script.
+When you create an EMR cluster, in the `bootstrap action`, specify the location of this script.
 
 ## Add software configuration
 
-When you create a EMR cluster, in the software configuration, add the following content:
+When you create an EMR cluster, in the software configuration, add the following content:
 
 ```bash
 [

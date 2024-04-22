@@ -24,7 +24,7 @@ Sedona-core provides three special SpatialRDDs: PointRDD, PolygonRDD, and LineSt
 
 ### Create a generic SpatialRDD
 
-A generic SpatialRDD is not typed to a certain geometry type and open to more scenarios. It allows an input data file contains mixed types of geometries. For instance, a WKT file contains three types gemetries ==LineString==, ==Polygon== and ==MultiPolygon==.
+A generic SpatialRDD is not typed to a certain geometry type and open to more scenarios. It allows an input data file contains mixed types of geometries. For instance, a WKT file contains three types geometries ==LineString==, ==Polygon== and ==MultiPolygon==.
 
 #### From WKT/WKB
 
@@ -295,7 +295,7 @@ To retrieve the UserData field, use the following code:
 
 A spatial range query takes as input a range query window and an SpatialRDD and returns all geometries that have specified relationship with the query window.
 
-Assume you now have an SpatialRDD (typed or generic). You can use the following code to issue an Spatial Range Query on it.
+Assume you now have a SpatialRDD (typed or generic). You can use the following code to issue a Spatial Range Query on it.
 
 ==spatialPredicate== can be set to `SpatialPredicate.INTERSECTS` to return all geometries intersect with query window. Supported spatial predicates are:
 
@@ -525,9 +525,9 @@ To utilize a spatial index in a spatial range query, use the following code:
 
 ## Write a Spatial KNN Query
 
-A spatial K Nearnest Neighbor query takes as input a K, a query point and an SpatialRDD and finds the K geometries in the RDD which are the closest to he query point.
+A spatial K Nearest Neighbor query takes as input a K, a query point and a SpatialRDD and finds the K geometries in the RDD which are the closest to the query point.
 
-Assume you now have an SpatialRDD (typed or generic). You can use the following code to issue an Spatial KNN Query on it.
+Assume you now have a SpatialRDD (typed or generic). You can use the following code to issue a Spatial KNN Query on it.
 
 === "Scala"
 
@@ -658,7 +658,7 @@ To utilize a spatial index in a spatial KNN query, use the following code:
 
 A spatial join query takes as input two Spatial RDD A and B. For each geometry in A, finds the geometries (from B) covered/intersected by it. A and B can be any geometry type and are not necessary to have the same geometry type.
 
-Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue an Spatial Join Query on them.
+Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue a Spatial Join Query on them.
 
 === "Scala"
 
@@ -878,7 +878,7 @@ A distance join query takes as input two Spatial RDD A and B and a distance. For
 
 If you don't want to transform your data and are ok with sacrificing the query accuracy, you can use an approximate degree value for distance. Please use [this calculator](https://lucidar.me/en/online-unit-converter-length-to-angle/convert-degrees-to-meters/#online-converter).
 
-Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue an Distance Join Query on them.
+Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue a Distance Join Query on them.
 
 === "Scala"
 
