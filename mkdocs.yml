@@ -23,7 +23,8 @@ nav:
         - Install on Wherobots: setup/wherobots.md
         - Install on Databricks: setup/databricks.md
         - Install on AWS EMR: setup/emr.md
-        - Set up Spark cluster: setup/cluster.md
+        - Install on Microsfot Fabric: setup/fabric.md
+        - Set up Spark cluster manually: setup/cluster.md
       - Install with Apache Flink:
         - Install Sedona Scala/Java: setup/flink/install-scala.md
       - Install with Snowflake:
@@ -196,4 +197,5 @@ plugins:
   - macros
   - git-revision-date-localized:
       type: datetime
-  - mkdocs-jupyter
+  - mkdocs-jupyter:
+            include_source: True
