@@ -1,8 +1,5 @@
 We recommend Sedona-1.3.1-incubating and above for EMR. In the tutorial, we use AWS Elastic MapReduce (EMR) 6.9.0. It has the following applications installed: Hadoop 3.3.3, JupyterEnterpriseGateway 2.6.0, Livy 0.7.1, Spark 3.3.0.
 
-!!!tip
-	Wherobots Cloud provides a free tool to deploy Apache Sedona to AWS EMR. Please sign up [here](https://www.wherobots.services/).
-
 This tutorial is tested on EMR on EC2 with EMR Studio (notebooks). EMR on EC2 uses YARN to manage resources.
 
 !!!note
