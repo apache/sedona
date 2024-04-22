@@ -47,7 +47,7 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
-    - name: Setup docker (missing on MacOS)
+    - name: Setup docker (missing on macOS)
       if: runner.os == 'macos'
       run: |
         brew install docker

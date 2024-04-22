@@ -350,7 +350,7 @@ Sedona implements over 200 geospatial vector and raster functions, which are muc
 * [ST_Multi](../../api/snowflake/vector-data/Function.md#st_multi)
 * [ST_NumGeometries](../../api/snowflake/vector-data/Function.md#st_numgeometries)
 * [ST_ReducePrecision](../../api/snowflake/vector-data/Function.md#st_reduceprecision)
-* [ST_SubdivdeExplode](../../api/snowflake/vector-data/Function.md#st_subdivideexplode)
+* [ST_SubdivideExplode](../../api/snowflake/vector-data/Function.md#st_subdivideexplode)
 
 You can click the links above to learn more about these functions. More functions can be found in [SedonaSQL API](../../api/snowflake/vector-data/Function.md).
 

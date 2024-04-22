@@ -41,7 +41,7 @@ A map config can be passed optionally to apply pre-apply customizations to the m
 
 ### **Adding SedonaDataFrame to a map object using SedonaKepler.add_df**
 
-SedonaKepler exposes a add_df API with the following signature:
+SedonaKepler exposes an add_df API with the following signature:
 
 ```python
 add_df(map, df: SedonaDataFrame, name: str='unnamed')

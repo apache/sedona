@@ -10,7 +10,7 @@ You need to install necessary packages if your system does not have them install
 
 ### Install sedona
 
-* Installing from PyPI repositories. You can find the latest Sedona Python on [PyPI](https://pypi.org/project/apache-sedona/). [There is an known issue in Sedona v1.0.1 and earlier versions](release-notes.md#known-issue).
+* Installing from PyPI repositories. You can find the latest Sedona Python on [PyPI](https://pypi.org/project/apache-sedona/). [There is a known issue in Sedona v1.0.1 and earlier versions](release-notes.md#known-issue).
 
 ```bash
 pip install apache-sedona
