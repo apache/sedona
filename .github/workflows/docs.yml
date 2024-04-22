@@ -53,7 +53,7 @@ jobs:
     - run: mkdocs build
     - run: git fetch origin website --depth=1
     - name: Deploy the doc to the website branch
-      if: ${{ github.event_name != 'pull_request' }}
+      if: ${{ github.event_name != 'pull_request' && github.repository == 'apache/sedona' }}
       run: mike deploy latest-snapshot -b website -p
     - run: mkdir staging
     - run: cp -r site/* staging/
