@@ -176,6 +176,6 @@ you should always run:
 
 Sometimes you might need to skip a hook to commit for example:
 
-`SKIP markdownlint git commit -m "foo"`
+`SKIP=markdownlint git commit -m "foo"`
 
 We have a Makefile in the repository root which has three pre-commit convenience commands.
