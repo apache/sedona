@@ -209,7 +209,7 @@ Apache Sedona provides different packages for each supported version of Spark.
 
 If you are using the Scala 2.13 builds of Spark, please use the corresponding packages for Scala 2.13, which are suffixed by `_2.13`.
 
-The optional GeoTools library is required if you want to use CRS transformation, ShapefileReader or GeoTiff reader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
+The optional GeoTools library is required if you want to use CRS transformation, ShapefileReader or GeoTiff reader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license, so we cannot package it in Sedona official release.
 
 !!! abstract "Sedona with Apache Spark and Scala 2.12"
 

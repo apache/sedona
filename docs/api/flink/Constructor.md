@@ -1,3 +1,53 @@
+## ST_GeomFromEWKT
+
+Introduction: Construct a Geometry from OGC Extended WKT
+
+Format:
+`ST_GeomFromEWKT (EWkt: String)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_AsText(ST_GeomFromEWKT('SRID=4269;POINT(40.7128 -74.0060)'))
+```
+
+Output:
+
+```
+POINT(40.7128 -74.006)
+```
+
+## ST_GeomFromGML
+
+Introduction: Construct a Geometry from GML.
+
+Format:
+`ST_GeomFromGML (gml: String)`
+
+Since: `v1.3.0`
+
+Example:
+
+```sql
+SELECT ST_GeomFromGML('
+    <gml:LineString srsName="EPSG:4269">
+    	<gml:coordinates>
+        	-71.16028,42.258729
+        	-71.160837,42.259112
+        	-71.161143,42.25932
+    	</gml:coordinates>
+    </gml:LineString>
+')
+```
+
+Output:
+
+```
+LINESTRING (-71.16028 42.258729, -71.160837 42.259112, -71.161143 42.25932)
+```
+
 ## ST_GeomFromGeoHash
 
 Introduction: Create Geometry from geohash string and optional precision
@@ -87,35 +137,6 @@ Output:
 POLYGON ((-87.621765 34.873444, -87.617535 34.873369, -87.62119 34.85053, -87.62144 34.865379, -87.621765 34.873444))
 ```
 
-## ST_GeomFromGML
-
-Introduction: Construct a Geometry from GML.
-
-Format:
-`ST_GeomFromGML (gml: String)`
-
-Since: `v1.3.0`
-
-Example:
-
-```sql
-SELECT ST_GeomFromGML('
-    <gml:LineString srsName="EPSG:4269">
-    	<gml:coordinates>
-        	-71.16028,42.258729
-        	-71.160837,42.259112
-        	-71.161143,42.25932
-    	</gml:coordinates>
-    </gml:LineString>
-')
-```
-
-Output:
-
-```
-LINESTRING (-71.16028 42.258729, -71.160837 42.259112, -71.161143 42.25932)
-```
-
 ## ST_GeomFromKML
 
 Introduction: Construct a Geometry from KML.
@@ -146,7 +167,7 @@ LINESTRING (-71.1663 42.2614, -71.1667 42.2616)
 
 ## ST_GeomFromText
 
-Introduction: Construct a Geometry from WKT. Alias of  [ST_GeomFromWKT](#ST_GeomFromWKT)
+Introduction: Construct a Geometry from WKT. Alias of  [ST_GeomFromWKT](#st_geomfromwkt)
 
 Format:
 `ST_GeomFromText (Wkt: String)`
@@ -207,6 +228,7 @@ Format:
 Since: `v1.2.1`
 
 Example:
+
 ```sql
 SELECT ST_GeomFromWKB(polygontable._c0) AS polygonshape
 FROM polygontable
@@ -222,28 +244,9 @@ Format:
 Since: `v1.2.0`
 
 Example:
+
 ```sql
 SELECT ST_GeomFromWKT('POINT(40.7128 -74.0060)')
-```
-
-Output:
-
-```
-POINT(40.7128 -74.006)
-```
-
-## ST_GeomFromEWKT
-
-Introduction: Construct a Geometry from OGC Extended WKT
-
-Format:
-`ST_GeomFromEWKT (EWkt: String)`
-
-Since: `v1.5.0`
-
-Example:
-```sql
-SELECT ST_AsText(ST_GeomFromEWKT('SRID=4269;POINT(40.7128 -74.0060)'))
 ```
 
 Output:
@@ -261,6 +264,7 @@ Format: `ST_LineFromText (Text: String)`
 Since: `v1.2.1`
 
 Example:
+
 ```sql
 SELECT ST_LineFromText('Linestring(1 2, 3 4)')
 ```
@@ -273,7 +277,7 @@ LINESTRING (1 2, 3 4)
 
 ## ST_LineStringFromText
 
-Introduction: Construct a LineString from Text, delimited by Delimiter (Optional). Alias of  [ST_LineFromText](#ST_LineFromText)
+Introduction: Construct a LineString from Text, delimited by Delimiter (Optional). Alias of  [ST_LineFromText](#st_linefromtext)
 
 Format: `ST_LineStringFromText (Text: String, Delimiter: Char)`
 
@@ -289,6 +293,46 @@ Output:
 
 ```
 LINESTRING (-74.0428197 40.6867969, -74.0421975 40.6921336, -74.050802 40.6912794)
+```
+
+## ST_MLineFromText
+
+Introduction: Construct a MultiLineString from Text and Optional SRID
+
+Format: `ST_MLineFromText (Text: String, Srid: Integer)`
+
+Since: `1.3.1`
+
+Example:
+
+```sql
+SELECT ST_MLineFromText('MULTILINESTRING((1 2, 3 4), (4 5, 6 7))')
+```
+
+Output:
+
+```
+MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))
+```
+
+## ST_MPolyFromText
+
+Introduction: Construct a MultiPolygon from Text and Optional SRID
+
+Format: `ST_MPolyFromText (Text: String, Srid: Integer)`
+
+Since: `1.3.1`
+
+Example:
+
+```sql
+SELECT ST_MPolyFromText('MULTIPOLYGON(((0 0 1,20 0 1,20 20 1,0 20 1,0 0 1),(5 5 3,5 7 3,7 7 3,7 5 3,5 5 3)))')
+```
+
+Output:
+
+```
+MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))
 ```
 
 ## ST_MakePoint
@@ -335,46 +379,6 @@ Output:
 POINT ZM (1.2345 2.3456 3.4567 4)
 ```
 
-## ST_MLineFromText
-
-Introduction: Construct a MultiLineString from Text and Optional SRID
-
-Format: `ST_MLineFromText (Text: String, Srid: Integer)`
-
-Since: `1.3.1`
-
-Example:
-
-```sql
-SELECT ST_MLineFromText('MULTILINESTRING((1 2, 3 4), (4 5, 6 7))')
-```
-
-Output:
-
-```
-MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))
-```
-
-## ST_MPolyFromText
-
-Introduction: Construct a MultiPolygon from Text and Optional SRID
-
-Format: `ST_MPolyFromText (Text: String, Srid: Integer)`
-
-Since: `1.3.1`
-
-Example:
-
-```sql
-SELECT ST_MPolyFromText('MULTIPOLYGON(((0 0 1,20 0 1,20 20 1,0 20 1,0 0 1),(5 5 3,5 7 3,7 7 3,7 5 3,5 5 3)))')
-```
-
-Output:
-
-```
-MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))
-```
-
 ## ST_Point
 
 Introduction: Construct a Point from X and Y
@@ -393,6 +397,26 @@ Output:
 
 ```
 POINT (1.2345 2.3456)
+```
+
+## ST_PointFromText
+
+Introduction: Construct a Point from Text, delimited by Delimiter
+
+Format: `ST_PointFromText (Text: String, Delimiter: Char)`
+
+Since: `v1.2.0`
+
+Example:
+
+```sql
+SELECT ST_PointFromText('40.7128,-74.0060', ',')
+```
+
+Output:
+
+```
+POINT (40.7128 -74.006)
 ```
 
 ## ST_PointZ
@@ -418,26 +442,6 @@ Output:
 
 ```
 POINT Z(1.2345 2.3456 3.4567)
-```
-
-## ST_PointFromText
-
-Introduction: Construct a Point from Text, delimited by Delimiter
-
-Format: `ST_PointFromText (Text: String, Delimiter: Char)`
-
-Since: `v1.2.0`
-
-Example:
-
-```sql
-SELECT ST_PointFromText('40.7128,-74.0060', ',')
-```
-
-Output:
-
-```
-POINT (40.7128 -74.006)
 ```
 
 ## ST_PolygonFromEnvelope

@@ -32,11 +32,13 @@ Format: `RS_PixelAsCentroids(raster: Raster, band: Integer)`
 Since: `v1.5.1`
 
 SQL Example
+
 ```sql
 SELECT ST_AsText(RS_PixelAsCentroids(raster, 1)) from rasters
 ```
 
 Output:
+
 ```
 [[POINT (-13065222 4021263.75),148.0,0,0], [POINT (-13065151 4021263.75),123.0,0,1], [POINT (-13065077 4021263.75),99.0,1,0], [POINT (-13065007 4021261.75),140.0,1,1]]
 ```
@@ -89,6 +91,7 @@ SELECT ST_AsText(RS_PixelAsPoint(raster, 2, 1)) from rasters
 ```
 
 Output:
+
 ```
 POINT (123.19, -12)
 ```
@@ -100,6 +103,7 @@ SELECT ST_AsText(RS_PixelAsPoint(raster, 6, 2)) from rasters
 ```
 
 Output:
+
 ```
 IndexOutOfBoundsException: Specified pixel coordinates (6, 2) do not lie in the raster
 ```
@@ -113,11 +117,13 @@ Format: `RS_PixelAsPoints(raster: Raster, band: Integer)`
 Since: `v1.5.1`
 
 SQL Example
+
 ```sql
 SELECT ST_AsText(RS_PixelAsPoints(raster, 1)) from rasters
 ```
 
 Output:
+
 ```
 [[POINT (-13065223 4021262.75),148.0,0,0], [POINT (-13065150 4021262.75),123.0,0,1], [POINT (-13065078 4021262.75),99.0,1,0], [POINT (-13065006 4021262.75),140.0,1,1]]
 ```
@@ -183,11 +189,13 @@ Format: `RS_PixelAsPolygons(raster: Raster, band: Integer)`
 Since: `v1.5.1`
 
 SQL Example
+
 ```sql
 SELECT ST_AsText(RS_PixelAsPolygons(raster, 1)) from rasters
 ```
 
 Output:
+
 ```
 [[POLYGON ((123.19000244140625 -12, 127.19000244140625 -12, 127.19000244140625 -16, 123.19000244140625 -16, 123.19000244140625 -12)),0.0,1,1],
 [POLYGON ((127.19000244140625 -12, 131.19000244140625 -12, 131.19000244140625 -16, 127.19000244140625 -16, 127.19000244140625 -12)),0.0,2,1],
@@ -294,6 +302,7 @@ inputDf.selectExpr("ST_AsText(RS_MinConvexHull(RS_AddBandFromArray(" +
 ```
 
 Output:
+
 ```sql
 +----------------------------------------+
 |minConvexHullAll                        |
@@ -312,6 +321,7 @@ inputDf.selectExpr("ST_AsText(RS_MinConvexHull(RS_AddBandFromArray(" +
 ```
 
 Output:
+
 ```sql
 +----------------------------------------+
 |minConvexHull1                          |
@@ -440,7 +450,7 @@ SELECT RS_GeoReferrence(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1,
 
 ### RS_GeoTransform
 
-Introduction: Returns an array of parameters that represent the GeoTranformation of the raster. The array contains the following values:
+Introduction: Returns an array of parameters that represent the GeoTransformation of the raster. The array contains the following values:
 
 - 0: pixel width along west-east axis (x axis)
 - 1: pixel height along north-south axis (y axis)
@@ -617,6 +627,7 @@ SELECT RS_ScaleY(raster) FROM rasters
 ```
 
 Output:
+
 ```
 -2
 ```
@@ -716,6 +727,7 @@ SELECT RS_Width(raster) FROM rasters
 ```
 
 Output:
+
 ```
 517
 ```
@@ -757,7 +769,7 @@ POINT (2 1)
 ```
 
 !!!Note
-    If the given geometry point is not in the same CRS as the given raster, the given geometry will be transformed to the given raster's CRS. You can use [ST_Transform](../Function/#st_transform) to transform the geometry beforehand.
+    If the given geometry point is not in the same CRS as the given raster, the given geometry will be transformed to the given raster's CRS. You can use [ST_Transform](Function.md#st_transform) to transform the geometry beforehand.
 
 ### RS_WorldToRasterCoordX
 
@@ -1280,6 +1292,7 @@ SELECT RS_Contains(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLY
 ```
 
 Output:
+
 ```
 +---------+---------+
 |rast_geom|rast_rast|
@@ -1295,9 +1308,9 @@ The convex hull of the raster is considered in the test.
 
 Rules for testing spatial relationship:
 
-* If the raster or geometry does not have a defined SRID, it is assumed to be in WGS84.
-* If both sides are in the same CRS, then perform the relationship test directly.
-* Otherwise, both sides will be transformed to WGS84 before the relationship test.
+- If the raster or geometry does not have a defined SRID, it is assumed to be in WGS84.
+- If both sides are in the same CRS, then perform the relationship test directly.
+- Otherwise, both sides will be transformed to WGS84 before the relationship test.
 
 Format:
 
@@ -1349,6 +1362,7 @@ SELECT RS_Within(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_GeomFromWKT('POLYGO
 ```
 
 Output:
+
 ```
 +---------+---------+
 |rast_geom|rast_rast|
@@ -1426,7 +1440,7 @@ Since: `v1.5.1`
 
 Original Raster:
 
-<img alt="Original raster" src="../../../image/original-raster-clip.png" width="400"/>
+![Original raster](../../image/original-raster-clip.png "Original raster"){: width="400px"}
 
 SQL Example
 
@@ -1440,7 +1454,7 @@ SELECT RS_Clip(
 
 Output:
 
-<img alt="Cropped raster" src="../../../image/cropped-raster.png" width="400"/>
+![Cropped raster](../../image/cropped-raster.png "Cropped raster"){: width="400px"}
 
 SQL Example
 
@@ -1454,7 +1468,7 @@ SELECT RS_Clip(
 
 Output:
 
-<img alt="Clipped raster" src="../../../image/clipped-raster.png" width="400"/>
+![Clipped raster](../../image/clipped-raster.png "Clipped raster"){: width="400px"}
 
 ### RS_Interpolate
 
@@ -1470,18 +1484,23 @@ Formats:
 ```sql
 RS_Interpolate(raster: Raster)
 ```
+
 ```sql
 RS_Interpolate(raster: Raster, power: Double)
 ```
+
 ```sql
 RS_Interpolate(raster: Raster, power: Double, mode: String)
 ```
+
 ```sql
 RS_Interpolate(raster: Raster, power: Double, mode: String, numPointsOrRadius: Double)
 ```
+
 ```sql
 RS_Interpolate(raster: Raster, power: Double, mode: String, numPointsOrRadius: Double, maxRadiusOrMinPoints: Double)
 ```
+
 ```sql
 RS_Interpolate(raster: Raster, power: Double, mode: String, numPointsOrRadius: Double, maxRadiusOrMinPoints: Double, band: Integer)
 ```
@@ -1509,8 +1528,8 @@ SELECT RS_Interpolate(raster, 1, 2.0, 'Variable', 12, 1000)
 
 Output (Shown as heatmap):
 
-<img alt="Original raster" src="../../../image/heatmap_Interpolate.png" width="400"/>
-<img alt="Interpolated raster" src="../../../image/heatmap_Interpolate2.png" width="400"/>
+![Original raster](../../image/heatmap_Interpolate.png "Original raster"){: width="400px"}
+![Interpolated raster](../../image/heatmap_Interpolate2.png "Interpolated raster"){: width="400px"}
 
 ### RS_MetaData
 
@@ -1559,21 +1578,27 @@ A Safety mode is triggered when `noDataValue` is not given. This sets `noDataVal
     Using a noDataValue that falls within the normalization range can lead to loss of valid data. If any data value within a raster band matches the specified noDataValue, it will be replaced and cannot be distinguished or recovered later. Exercise caution in selecting a noDataValue to avoid unintentional data alteration.
 
 Formats:
+
 ```
 RS_NormalizeAll (raster: Raster)
 ```
+
 ```
 RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double)
 ```
+
 ```
 RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double, normalizeAcrossBands: Boolean)
 ```
+
 ```
 RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double, normalizeAcrossBands: Boolean, noDataValue: Double)
 ```
+
 ```
 RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double, noDataValue: Double, minValue: Double, maxValue: Double)
 ```
+
 ```
 RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double, normalizeAcrossBands: Boolean, noDataValue: Double, minValue: Double, maxValue: Double )
 ```
@@ -1914,6 +1939,7 @@ The `dataType` parameter accepts one of the following strings.
     If the specified `dataType` is narrower than the original data type, the function will truncate the pixel values to fit the new data type range.
 
 Format:
+
 ```
 RS_SetPixelType(raster: Raster, dataType: String)
 ```
@@ -2260,9 +2286,9 @@ NODATA values. If raster band(s) do not have NODATA value(s) specified, one can 
 
 The returned records have the following schema:
 
-* `x`: The index of the tile along X axis (0-based).
-* `y`: The index of the tile along Y axis (0-based).
-* `tile`: The tile.
+- `x`: The index of the tile along X axis (0-based).
+- `y`: The index of the tile along Y axis (0-based).
+- `tile`: The tile.
 
 SQL example:
 
@@ -2359,6 +2385,7 @@ SELECT RS_AddBandFromArray(raster, RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTi
 ```
 
 Output:
+
 ```
 +--------------------+
 |              raster|
@@ -2401,6 +2428,7 @@ SELECT RS_MapAlgebra(rast, 'D', 'out = (rast[3] - rast[0]) / (rast[3] + rast[0])
 ```
 
 Output:
+
 ```
 +--------------------+
 |              raster|
@@ -2415,7 +2443,7 @@ Spark SQL Example for two raster input `RS_MapAlgebra`:
 RS_MapAlgebra(rast0, rast1, 'D', 'out = rast0[0] * 0.5 + rast1[0] * 0.5;', null)
 ```
 
-For more details and examples about `RS_MapAlgebra`, please refer to the [Map Algebra documentation](../Raster-map-algebra/).
+For more details and examples about `RS_MapAlgebra`, please refer to the [Map Algebra documentation](Raster-map-algebra.md).
 To learn how to write map algebra script, please refer to [Jiffle language summary](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle---language-summary).
 
 ## Map Algebra Operators

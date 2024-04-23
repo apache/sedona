@@ -32,7 +32,7 @@ Current Sedona PMC members are as follows:
 
 ## Become a committer
 
-To get started contributing to Sedona, learn [how to contribute](../rule) – anyone can submit patches, documentation and examples to the project.
+To get started contributing to Sedona, learn [how to contribute](rule.md) – anyone can submit patches, documentation and examples to the project.
 
 The PMC regularly adds new committers from the active contributors, based on their contributions to Sedona. The qualifications for new committers include:
 

@@ -6,9 +6,6 @@ You just need to install the Sedona jars and Sedona Python on Databricks using D
 
 We recommend Databricks 10.x+.
 
-!!!tip
-	Wherobots Cloud provides a free tool to deploy Apache Sedona to Databricks. Please sign up [here](https://www.wherobots.services/).
-
 * Sedona 1.0.1 & 1.1.0 is compiled against Spark 3.1 (~ Databricks DBR 9 LTS, DBR 7 is Spark 3.0)
 * Sedona 1.1.1, 1.2.0 are compiled against Spark 3.2 (~ DBR 10 & 11)
 * Sedona 1.2.1, 1.3.1, 1.4.0 are complied against Spark 3.3
@@ -28,12 +25,14 @@ This method cannot achieve the best performance of Sedona and does not work for 
 ### Install libraries
 
 1) From the Libraries tab install from Maven Coordinates
+
     ```
     org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }}
     org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
     ```
 
 2) For enabling python support, from the Libraries tab install from PyPI
+
     ```
     apache-sedona
     keplergl==0.3.2
@@ -45,12 +44,14 @@ This method cannot achieve the best performance of Sedona and does not work for 
 After you have installed the libraries and started the cluster, you can initialize the Sedona `ST_*` functions and types by running from your code:
 
 (scala)
+
 ```scala
 import org.apache.sedona.sql.utils.SedonaSQLRegistrator
 SedonaSQLRegistrator.registerAll(spark)
 ```
 
 (or python)
+
 ```python
 from sedona.register.geo_registrator import SedonaRegistrator
 SedonaRegistrator.registerAll(spark)
@@ -107,6 +108,7 @@ EOF
 ### Set up cluster config
 
 From your cluster configuration (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options` -> `Spark`) activate the Sedona functions and the kryo serializer by adding to the Spark Config
+
 ```
 spark.sql.extensions org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
 spark.serializer org.apache.spark.serializer.KryoSerializer
@@ -114,11 +116,13 @@ spark.kryo.registrator org.apache.sedona.core.serde.SedonaKryoRegistrator
 ```
 
 From your cluster configuration (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options` -> `Init Scripts`) add the newly created `Workspace` init script
+
 ```
 /Workspace/sedona/sedona-init.sh
 ```
 
 For enabling python support, from the Libraries tab install from PyPI
+
 ```
 apache-sedona=={{ sedona.current_version }}
 geopandas==0.11.1

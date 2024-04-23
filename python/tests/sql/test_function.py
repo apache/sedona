@@ -973,6 +973,30 @@ class TestPredicateJoin(TestBase):
         for actual, expected in result:
             assert actual == expected
 
+    def test_st_polygonize(self):
+        # Given
+        geometry_df = self.spark.createDataFrame(
+            [
+                # Adding only the input that will result in a non-null polygon
+                ["GEOMETRYCOLLECTION (LINESTRING (2 0, 2 1, 2 2), LINESTRING (2 2, 2 3, 2 4), LINESTRING (0 2, 1 2, 2 2), LINESTRING (2 2, 3 2, 4 2), LINESTRING (0 2, 1 3, 2 4), LINESTRING (2 4, 3 3, 4 2))", "GEOMETRYCOLLECTION (POLYGON ((0 2, 1 3, 2 4, 2 3, 2 2, 1 2, 0 2)), POLYGON ((2 2, 2 3, 2 4, 3 3, 4 2, 3 2, 2 2)))"]
+            ]
+        ).selectExpr("ST_GeomFromText(_1) AS geom", "_2 AS expected")
+
+        # When calling st_polygonize
+        geom_poly = geometry_df.withColumn("actual", expr("st_normalize(st_polygonize(geom))"))
+
+        # Then only based on closed linestring geom is created
+        geom_poly.filter("actual IS NOT NULL").selectExpr("ST_AsText(actual)", "expected"). \
+            show()
+        result = geom_poly.filter("actual IS NOT NULL").selectExpr("ST_AsText(actual)", "expected"). \
+            collect()
+
+        assert result.__len__() == 1
+
+        for actual, expected in result:
+            assert actual == expected
+
+
     def test_st_make_polygon(self):
         # Given
         geometry_df = self.spark.createDataFrame(

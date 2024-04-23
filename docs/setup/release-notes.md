@@ -140,6 +140,7 @@ Sedona 1.5.1 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.12, 
 
 ### Test
 
+<ul>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-410'>SEDONA-410</a>] -         pre-commit: check that scripts with shebangs are executable
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-412'>SEDONA-412</a>] -         pre-commit: add hook `end-of-file-fixer`
@@ -192,12 +193,12 @@ Sedona 1.5.0 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 **New features**
 
 * Add 18 more ST functions for vector data processing in Sedona Spark and Sedona Flink
-* Add 36 more RS functions in Sedona Spark to support [comprehensive raster data ETL and analytics](../../tutorial/raster/)
+* Add 36 more RS functions in Sedona Spark to support [comprehensive raster data ETL and analytics](../tutorial/raster.md)
 	* You can now directly join vector and raster datasets together
 	* Flexible map algebra equations: `SELECT RS_MapAlgebra(rast, 'D', 'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);') as ndvi FROM raster_table
 `
-* Add native support of [Uber H3 functions](../../api/sql/Function/#st_h3celldistance) in Sedona Spark and Sedona Flink.
-* Add SedonaKepler and SedonaPyDeck for [interactive map visualization](../../tutorial/sql/#visualize-query-results) on Sedona Spark.
+* Add native support of [Uber H3 functions](../api/sql/Function.md#st_h3celldistance) in Sedona Spark and Sedona Flink.
+* Add SedonaKepler and SedonaPyDeck for [interactive map visualization](../tutorial/sql.md#visualize-query-results) on Sedona Spark.
 
 ### Bug
 
@@ -429,7 +430,7 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 
 ### Highlights
 
-* [X] **Sedona Spark** More raster functions and bridge RasterUDT and Map Algebra operators. See [Raster based operators](../../api/sql/Raster-operators/#raster-based-operators) and [Raster to Map Algebra operators](../../api/sql/Raster-operators/#raster-to-map-algebra-operators).
+* [X] **Sedona Spark** More raster functions and bridge RasterUDT and Map Algebra operators. See [Raster based operators](../api/sql/Raster-operators.md#raster-based-operators) and [Raster to Map Algebra operators](../api/sql/Raster-operators.md#raster-to-map-algebra-operators).
 * [X] **Sedona Spark & Flink** Added geodesic / geography functions:
     * ST_DistanceSphere
     * ST_DistanceSpheroid
@@ -445,12 +446,15 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 * **Sedona Spark & Flink** Introduced a new entry point called SedonaContext to unify all Sedona entry points in different compute engines and deprecate old Sedona register entry points. Users no longer have to register Sedona kryo serializer and import many tedious Python classes.
     * **Sedona Spark**:
         * Scala:
+
         ```scala
         import org.apache.sedona.spark.SedonaContext
         val sedona = SedonaContext.create(SedonaContext.builder().master("local[*]").getOrCreate())
         sedona.sql("SELECT ST_GeomFromWKT(XXX) FROM")
         ```
+
         * Python:
+
         ```python
         from sedona.spark import *
 
@@ -462,7 +466,9 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
         sedona = SedonaContext.create(config)
         sedona.sql("SELECT ST_GeomFromWKT(XXX) FROM")
         ```
+
     * **Sedona Flink**:
+
     ```java
     import org.apache.sedona.flink.SedonaContext
     StreamTableEnvironment sedona = SedonaContext.create(env, tableEnv);
@@ -545,21 +551,21 @@ Sedona 1.4.0 is compiled against, Spark 3.3 / Flink 1.12, Java 8.
 ### Highlights
 
 * [X] **Sedona Spark & Flink** Serialize and deserialize geometries 3 - 7X faster
-* [X] **Sedona Spark & Flink** Google S2 based spatial join for fast approximate point-in-polygon join. See [Join query in Spark](../../api/sql/Optimizer/#google-s2-based-approximate-equi-join) and [Join query in Flink](../../tutorial/flink/sql/#join-query)
-* [X] **Sedona Spark** Pushdown spatial predicate on GeoParquet to reduce memory consumption by 10X: see [explanation](../../api/sql/Optimizer/#geoparquet)
+* [X] **Sedona Spark & Flink** Google S2 based spatial join for fast approximate point-in-polygon join. See [Join query in Spark](../api/sql/Optimizer.md#google-s2-based-approximate-equi-join) and [Join query in Flink](../tutorial/flink/sql.md#join-query)
+* [X] **Sedona Spark** Pushdown spatial predicate on GeoParquet to reduce memory consumption by 10X: see [explanation](../api/sql/Optimizer.md#Push-spatial-predicates-to-GeoParquet)
 * [X] **Sedona Spark** Automatically use broadcast index spatial join for small datasets
 * [X] **Sedona Spark** New RasterUDT added to Sedona GeoTiff reader.
 * [X] **Sedona Spark** A number of bug fixes and improvement to the Sedona R module.
 
 ### API change
 
-* **Sedona Spark & Flink** Packaging strategy changed. See [Maven Coordinate](../maven-coordinates). Please change your Sedona dependencies if needed. We recommend `sedona-spark-shaded-3.0_2.12-1.4.0` and `sedona-flink-shaded_2.12-1.4.0`
+* **Sedona Spark & Flink** Packaging strategy changed. See [Maven Coordinate](maven-coordinates.md). Please change your Sedona dependencies if needed. We recommend `sedona-spark-shaded-3.0_2.12-1.4.0` and `sedona-flink-shaded_2.12-1.4.0`
 * **Sedona Spark & Flink** GeoTools-wrapper version upgraded. Please use `geotools-wrapper-1.4.0-28.2`.
 
 ### Behavior change
 
 * **Sedona Flink** Sedona Flink no longer outputs any LinearRing type geometry. All LinearRing are changed to LineString.
-* **Sedona Spark** Join optimization strategy changed. Sedona no longer optimizes spatial join when use a spatial predicate together with a equijoin predicate. By default, it prefers equijoin whenever possible. SedonaConf adds a config option called `sedona.join.optimizationmode`, it can be configured as one of the following values:
+* **Sedona Spark** Join optimization strategy changed. Sedona no longer optimizes spatial join when use a spatial predicate together with an equijoin predicate. By default, it prefers equijoin whenever possible. SedonaConf adds a config option called `sedona.join.optimizationmode`, it can be configured as one of the following values:
 	* `all`: optimize all joins having spatial predicate in join conditions. This was the behavior of Apache Sedona prior to 1.4.0.
 	* `none`: disable spatial join optimization.
 	* `nonequi`: only enable spatial join optimization on non-equi joins. This is the default mode.
@@ -686,19 +692,19 @@ This version is a major release on Sedona 1.3.0 line and consists of 50 PRs. It 
 
 ### Highlights
 
-- [X] Sedona on Spark in this release is compiled against Spark 3.3.
-- [X] Sedona on Flink in this release is compiled against Flink 1.14.
-- [X] Scala 2.11 support is removed.
-- [X] Spark 2.X support is removed.
-- [X] Python 3.10 support is added.
-- [X] Aggregators in Flink are added
-- [X] Correctness fixes for corner cases in range join and distance join.
-- [X] Native GeoParquet read and write (../../tutorial/sql/#load-geoparquet).
+* [X] Sedona on Spark in this release is compiled against Spark 3.3.
+* [X] Sedona on Flink in this release is compiled against Flink 1.14.
+* [X] Scala 2.11 support is removed.
+* [X] Spark 2.X support is removed.
+* [X] Python 3.10 support is added.
+* [X] Aggregators in Flink are added
+* [X] Correctness fixes for corner cases in range join and distance join.
+* [X] Native GeoParquet read and write (../../tutorial/sql/#load-geoparquet).
     * `df = spark.read.format("geoparquet").option("fieldGeometry", "myGeometryColumn").load("PATH/TO/MYFILE.parquet")`
     * `df.write.format("geoparquet").save("PATH/TO/MYFILE.parquet")`
-- [X] DataFrame style API (../../tutorial/sql/#dataframe-style-api)
+* [X] DataFrame style API (../../tutorial/sql.md/#dataframe-style-api)
     * `df.select(ST_Point(min_value, max_value).as("point"))`
-- [X] Allow WKT format CRS in ST_Transform
+* [X] Allow WKT format CRS in ST_Transform
     * `ST_Transform(geom, "srcWktString", "tgtWktString")`
 
 ```yaml
@@ -1035,12 +1041,12 @@ Key dependency upgrade:
 
 Key dependency packaging strategy change:
 
-* JTS, GeoTools, jts2geojson are no longer packaged in Sedona jars. End users need to add them manually. See [here](../maven-coordinates).
+* JTS, GeoTools, jts2geojson are no longer packaged in Sedona jars. End users need to add them manually. See [here](maven-coordinates.md).
 
 Key compilation target change:
 
 * [SEDONA-3](https://issues.apache.org/jira/browse/SEDONA-3): Paths and class names have been changed to Apache Sedona
-* [SEDONA-7](https://issues.apache.org/jira/browse/SEDONA-7): build the source code for Spark 2.4, 3.0, Scala 2.11, 2.12, Python 3.7, 3.8, 3.9. See [here](../compile).
+* [SEDONA-7](https://issues.apache.org/jira/browse/SEDONA-7): build the source code for Spark 2.4, 3.0, Scala 2.11, 2.12, Python 3.7, 3.8, 3.9. See [here](compile.md).
 
 ### Sedona-core
 
@@ -1088,7 +1094,7 @@ API change: Drop the function which can generate SVG vector images because the r
 
 API/Behavior change:
 
-* Python-to-Sedona adapter is moved to a separate module. To use Sedona Python, see [here](../overview/#prepare-python-adapter-jar)
+* Python-to-Sedona adapter is moved to a separate module. To use Sedona Python, see [here](install-python.md)
 
 New function:
 

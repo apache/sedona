@@ -29,7 +29,6 @@ from sedona.core.enums.grid_type import GridTypeJvm, GridType
 from sedona.core.enums.index_type import IndexTypeJvm, IndexType
 from sedona.core.enums.spatial import SpatialType
 from sedona.core.geom.envelope import Envelope
-from sedona.core.jvm.config import since
 from sedona.core.jvm.translate import SedonaPythonConverter, JvmSedonaPythonConverter
 from sedona.utils.decorators import require
 from sedona.utils.jvm import JvmStorageLevel
@@ -193,7 +192,6 @@ class SpatialRDD:
         return self._srdd.countWithoutDuplicatesSPRDD()
 
     @property
-    @since("1.0.0")
     def fieldNames(self) -> List[str]:
         """
 

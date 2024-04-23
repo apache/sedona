@@ -34,12 +34,12 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.
 
 	1. Read [Sedona Maven Central coordinates](../setup/maven-coordinates.md) and add Sedona dependencies in build.sbt or pom.xml.
 	2. Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core_2.11), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql) in build.sbt or pom.xml.
-	3. Please see [SQL example project](../demo/)
+	3. Please see [SQL example project](demo.md)
 
 === "Python"
 
-	1. Please read [Quick start](../../setup/install-python) to install Sedona Python.
-	2. This tutorial is based on [Sedona SQL Jupyter Notebook example](../jupyter-notebook). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) to interact with Sedona Python Jupyter notebook immediately on Binder.
+	1. Please read [Quick start](../setup/install-python.md) to install Sedona Python.
+	2. This tutorial is based on [Sedona SQL Jupyter Notebook example](jupyter-notebook.md). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=docs/usecases) to interact with Sedona Python Jupyter notebook immediately on Binder.
 
 ## Create Sedona config
 
@@ -211,6 +211,7 @@ POLYGON (..., ...)	Wahkiakum County
 POLYGON (..., ...)	De Baca County
 POLYGON (..., ...)	Lancaster County
 ```
+
 The file may have many other columns.
 
 Use the following code to load the data and create a raw DataFrame:
@@ -332,7 +333,7 @@ This prevents Spark from interpreting the property and allows us to use the ST_G
 
 ## Load Shapefile and GeoJSON using SpatialRDD
 
-Shapefile and GeoJSON can be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](../rdd/#create-a-generic-spatialrdd) and [DataFrame <-> RDD](#convert-between-dataframe-and-spatialrdd).
+Shapefile and GeoJSON can be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](rdd.md#create-a-generic-spatialrdd) and [DataFrame <-> RDD](#convert-between-dataframe-and-spatialrdd).
 
 ## Load GeoParquet
 
@@ -587,7 +588,7 @@ SedonaPyDeck exposes APIs to create interactive map visualizations using [pydeck
 
 The following tutorial showcases the various maps that can be created using SedonaPyDeck, the datasets used to create these maps are publicly available.
 
-Each API exposed by SedonaPyDeck offers customization via optional arguments, details on all possible arguments can be found in the [API docs of SedonaPyDeck](../../api/sql/Visualization_SedonaPyDeck).
+Each API exposed by SedonaPyDeck offers customization via optional arguments, details on all possible arguments can be found in the [API docs of SedonaPyDeck](../api/sql/Visualization_SedonaPyDeck.md).
 
 #### Creating a Choropleth map using SedonaPyDeck
 
@@ -602,7 +603,7 @@ SedonaPyDeck.create_choropleth_map(df=groupedresult, plot_col='AirportCount')
 !!!Note
 	`plot_col` is a required argument informing SedonaPyDeck of the column name used to render the choropleth effect.
 
-<img src="../../image/choropleth.gif" width="1000">
+![](../image/choropleth.gif){: width="1000px"}
 
 The dataset used is available [here](https://github.com/apache/sedona/tree/4c5fa8333b2c61850d5664b878df9493c7915066/binder/data/ne_50m_airports) and
 can also be found in the example notebook available [here](https://github.com/apache/sedona/blob/4c5fa8333b2c61850d5664b878df9493c7915066/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)
@@ -617,7 +618,7 @@ Example (referenced from overture notebook available via binder):
 SedonaPyDeck.create_geometry_map(df_building, elevation_col='height')
 ```
 
-<img src="../../image/buildings.gif" width="1000">
+![](../image/buildings.gif){: width="1000px"}
 
 !!!Tip
 	`elevation_col` is an optional argument which can be used to render a 3D map. Pass the column with 'elevation' values for the geometries here.
@@ -632,7 +633,7 @@ Example:
 SedonaPyDeck.create_scatterplot_map(df=crimes_df)
 ```
 
-<img src="../../image/points.gif" width="1000">
+![](../image/points.gif){: width="1000px"}
 
 The dataset used here is the Chicago crimes dataset, available [here](https://github.com/apache/sedona/blob/sedona-1.5.0/spark/common/src/test/resources/Chicago_Crimes.csv)
 
@@ -641,11 +642,12 @@ The dataset used here is the Chicago crimes dataset, available [here](https://gi
 SedonaPyDeck exposes a create_heatmap API which can be used to visualize a heatmap out of the passed SedonaDataFrame containing points:
 
 Example:
+
 ```python
 SedonaPyDeck.create_heatmap(df=crimes_df)
 ```
 
-<img src="../../image/heatmap.gif" width="1000">
+![](../image/heatmap.gif){: width="1000px"}
 
 The dataset used here is the Chicago crimes dataset, available [here](https://github.com/apache/sedona/blob/sedona-1.5.0/spark/common/src/test/resources/Chicago_Crimes.csv)
 
@@ -669,12 +671,12 @@ Example (referenced from an example notebook via the binder):
 SedonaKepler.create_map(df=groupedresult, name="AirportCount")
 ```
 
-<img src="../../image/sedona_customization.gif" width="1000">
+![](../image/sedona_customization.gif){: width="1000px"}
 
 The dataset used is available [here](https://github.com/apache/sedona/tree/4c5fa8333b2c61850d5664b878df9493c7915066/binder/data/ne_50m_airports) and
 can also be found in the example notebook available [here](https://github.com/apache/sedona/blob/4c5fa8333b2c61850d5664b878df9493c7915066/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)
 
-Details on all the APIs available by SedonaKepler are listed in the [SedonaKepler API docs](../../api/sql/Visualization_SedonaKepler)
+Details on all the APIs available by SedonaKepler are listed in the [SedonaKepler API docs](../api/sql/Visualization_SedonaKepler.md)
 
 ## Create a User-Defined Function (UDF)
 
@@ -1005,7 +1007,7 @@ Due to the same reason, Sedona geoparquet reader and writer do NOT check the axi
 
 ## Sort then Save GeoParquet
 
-To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../../api/sql/Function/#st_geohash)) and then save as a GeoParquet file. An example is as follows:
+To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../api/sql/Function.md#st_geohash)) and then save as a GeoParquet file. An example is as follows:
 
 ```
 SELECT col1, col2, geom, ST_GeoHash(geom, 5) as geohash
@@ -1042,7 +1044,7 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 
 ### DataFrame to SpatialRDD
 
-Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](../../api/scaladoc/spark/org/apache/sedona/sql/utils/index.html)
+Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](../api/scaladoc/spark/org/apache/sedona/sql/utils/index.html)
 
 === "Scala"
 
@@ -1071,7 +1073,7 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Ple
 
 ### SpatialRDD to DataFrame
 
-Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html)
+Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](../api/javadoc/sql/org/apache/sedona/sql/utils/index.html)
 
 === "Scala"
 
@@ -1093,11 +1095,11 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Ple
 	spatialDf = Adapter.toDf(spatialRDD, sedona)
 	```
 
-All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](../rdd#read-other-attributes-in-an-spatialrdd)).
+All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](rdd.md#read-other-attributes-in-an-spatialrdd)).
 
 You may also manually specify a schema for the resulting DataFrame in case you require different column names or data
 types. Note that string schemas and not all data types are supported&mdash;please check the
-[Adapter Scaladoc](../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html) to confirm what is supported for your use
+[Adapter Scaladoc](../api/javadoc/sql/org/apache/sedona/sql/utils/index.html) to confirm what is supported for your use
 case. At least one column for the user data must be provided.
 
 === "Scala"
@@ -1162,11 +1164,11 @@ or you can use the attribute names directly from the input RDD
 	joinResultDf = Adapter.toDf(result_pair_rdd, leftRdd.fieldNames, rightRdd.fieldNames, spark)
 	```
 
-All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](../rdd#read-other-attributes-in-an-spatialrdd)).
+All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](rdd.md#read-other-attributes-in-an-spatialrdd)).
 
 You may also manually specify a schema for the resulting DataFrame in case you require different column names or data
 types. Note that string schemas and not all data types are supported&mdash;please check the
-[Adapter Scaladoc](../../api/javadoc/sql/org/apache/sedona/sql/utils/index.html) to confirm what is supported for your use
+[Adapter Scaladoc](../api/javadoc/sql/org/apache/sedona/sql/utils/index.html) to confirm what is supported for your use
 case. Columns for the left and right user data must be provided.
 
 === "Scala"

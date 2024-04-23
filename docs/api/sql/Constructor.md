@@ -44,6 +44,56 @@ Example:
 System.setProperty("sedona.global.charset", "utf8")
 ```
 
+## ST_GeomFromEWKT
+
+Introduction: Construct a Geometry from OGC Extended WKT
+
+Format:
+`ST_GeomFromEWKT (EWkt: String)`
+
+Since: `v1.5.0`
+
+SQL example:
+
+```sql
+SELECT ST_AsText(ST_GeomFromEWKT('SRID=4269;POINT(40.7128 -74.0060)'))
+```
+
+Output:
+
+```
+POINT(40.7128 -74.006)
+```
+
+## ST_GeomFromGML
+
+Introduction: Construct a Geometry from GML.
+
+Format:
+`ST_GeomFromGML (gml: String)`
+
+Since: `v1.3.0`
+
+SQL example:
+
+```sql
+SELECT ST_GeomFromGML('
+    <gml:LineString srsName="EPSG:4269">
+    	<gml:coordinates>
+        	-71.16028,42.258729
+        	-71.160837,42.259112
+        	-71.161143,42.25932
+    	</gml:coordinates>
+    </gml:LineString>
+')
+```
+
+Output:
+
+```
+LINESTRING (-71.16028 42.258729, -71.160837 42.259112, -71.161143 42.25932)
+```
+
 ## ST_GeomFromGeoHash
 
 Introduction: Create Geometry from geohash string and optional precision
@@ -136,35 +186,6 @@ POLYGON ((-87.621765 34.873444, -87.617535 34.873369, -87.62119 34.85053, -87.62
 !!!warning
 	The way that SedonaSQL reads GeoJSON is different from that in SparkSQL
 
-## ST_GeomFromGML
-
-Introduction: Construct a Geometry from GML.
-
-Format:
-`ST_GeomFromGML (gml: String)`
-
-Since: `v1.3.0`
-
-SQL example:
-
-```sql
-SELECT ST_GeomFromGML('
-    <gml:LineString srsName="EPSG:4269">
-    	<gml:coordinates>
-        	-71.16028,42.258729
-        	-71.160837,42.259112
-        	-71.161143,42.25932
-    	</gml:coordinates>
-    </gml:LineString>
-')
-```
-
-Output:
-
-```
-LINESTRING (-71.16028 42.258729, -71.160837 42.259112, -71.161143 42.25932)
-```
-
 ## ST_GeomFromKML
 
 Introduction: Construct a Geometry from KML.
@@ -195,7 +216,7 @@ LINESTRING (-71.1663 42.2614, -71.1667 42.2616)
 
 ## ST_GeomFromText
 
-Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown). Alias of [ST_GeomFromWKT](#ST_GeomFromWKT)
+Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown). Alias of [ST_GeomFromWKT](#st_geomfromwkt)
 
 Format:
 
@@ -281,26 +302,6 @@ Output:
 POINT(40.7128 -74.006)
 ```
 
-## ST_GeomFromEWKT
-
-Introduction: Construct a Geometry from OGC Extended WKT
-
-Format:
-`ST_GeomFromEWKT (EWkt: String)`
-
-Since: `v1.5.0`
-
-SQL example:
-```sql
-SELECT ST_AsText(ST_GeomFromEWKT('SRID=4269;POINT(40.7128 -74.0060)'))
-```
-
-Output:
-
-```
-POINT(40.7128 -74.006)
-```
-
 ## ST_LineFromText
 
 Introduction: Construct a Line from Wkt text
@@ -340,50 +341,6 @@ Output:
 
 ```
 LINESTRING (-74.0428197 40.6867969, -74.0421975 40.6921336, -74.050802 40.6912794)
-```
-
-## ST_MakePoint
-
-Introduction: Creates a 2D, 3D Z or 4D ZM Point geometry. Use ST_MakePointM to make points with XYM coordinates. Z and M values are optional.
-
-Format: `ST_MakePoint (X: Double, Y: Double, Z: Double, M: Double)`
-
-Since: `v1.5.0`
-
-Example:
-
-```sql
-SELECT ST_AsText(ST_MakePoint(1.2345, 2.3456));
-```
-
-Output:
-
-```
-POINT (1.2345 2.3456)
-```
-
-Example:
-
-```sql
-SELECT ST_AsText(ST_MakePoint(1.2345, 2.3456, 3.4567));
-```
-
-Output:
-
-```
-POINT Z (1.2345 2.3456 3.4567)
-```
-
-Example:
-
-```sql
-SELECT ST_AsText(ST_MakePoint(1.2345, 2.3456, 3.4567, 4));
-```
-
-Output:
-
-```
-POINT ZM (1.2345 2.3456 3.4567 4)
 ```
 
 ## ST_MLineFromText
@@ -434,6 +391,50 @@ Output:
 MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))
 ```
 
+## ST_MakePoint
+
+Introduction: Creates a 2D, 3D Z or 4D ZM Point geometry. Use ST_MakePointM to make points with XYM coordinates. Z and M values are optional.
+
+Format: `ST_MakePoint (X: Double, Y: Double, Z: Double, M: Double)`
+
+Since: `v1.5.0`
+
+Example:
+
+```sql
+SELECT ST_AsText(ST_MakePoint(1.2345, 2.3456));
+```
+
+Output:
+
+```
+POINT (1.2345 2.3456)
+```
+
+Example:
+
+```sql
+SELECT ST_AsText(ST_MakePoint(1.2345, 2.3456, 3.4567));
+```
+
+Output:
+
+```
+POINT Z (1.2345 2.3456 3.4567)
+```
+
+Example:
+
+```sql
+SELECT ST_AsText(ST_MakePoint(1.2345, 2.3456, 3.4567, 4));
+```
+
+Output:
+
+```
+POINT ZM (1.2345 2.3456 3.4567 4)
+```
+
 ## ST_Point
 
 Introduction: Construct a Point from X and Y
@@ -455,6 +456,26 @@ Output:
 
 ```
 POINT (1.2345 2.3456)
+```
+
+## ST_PointFromText
+
+Introduction: Construct a Point from Text, delimited by Delimiter
+
+Format: `ST_PointFromText (Text: String, Delimiter: Char)`
+
+Since: `v1.0.0`
+
+SQL Example
+
+```sql
+SELECT ST_PointFromText('40.7128,-74.0060', ',')
+```
+
+Output:
+
+```
+POINT (40.7128 -74.006)
 ```
 
 ## ST_PointZ
@@ -480,26 +501,6 @@ Output:
 
 ```
 POINT Z(1.2345 2.3456 3.4567)
-```
-
-## ST_PointFromText
-
-Introduction: Construct a Point from Text, delimited by Delimiter
-
-Format: `ST_PointFromText (Text: String, Delimiter: Char)`
-
-Since: `v1.0.0`
-
-SQL Example
-
-```sql
-SELECT ST_PointFromText('40.7128,-74.0060', ',')
-```
-
-Output:
-
-```
-POINT (40.7128 -74.006)
 ```
 
 ## ST_PolygonFromEnvelope

@@ -120,4 +120,4 @@ FROM raster_table) t
 ### Further Reading
 
 * [Jiffle language summary](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle---language-summary)
-* [Raster operators](../Raster-operators/)
+* [Raster operators](Raster-operators.md)

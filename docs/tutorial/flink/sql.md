@@ -1,22 +1,24 @@
 The page outlines the steps to manage spatial data using SedonaSQL. ==The example code is written in Java but also works for Scala==.
 
 SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:
+
 ```java
 Table myTable = tableEnv.sqlQuery("YOUR_SQL")
 ```
 
-Detailed SedonaSQL APIs are available here: [SedonaSQL API](../../../api/flink/Overview)
+Detailed SedonaSQL APIs are available here: [SedonaSQL API](../../api/flink/Overview.md)
 
 ## Set up dependencies
 
-1. Read [Sedona Maven Central coordinates](../../../setup/maven-coordinates)
+1. Read [Sedona Maven Central coordinates](../../setup/maven-coordinates.md)
 2. Add Sedona dependencies in build.sbt or pom.xml.
 3. Add [Flink dependencies](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/configuration/overview/) in build.sbt or pom.xml.
-4. Please see [SQL example project](../../demo/)
+4. Please see [SQL example project](../demo.md)
 
 ## Initiate Stream Environment
 
 Use the following code to initiate your `StreamExecutionEnvironment` at the beginning:
+
 ```java
 StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
@@ -117,7 +119,7 @@ The output will be like this:
 ```
 
 !!!note
-	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL constructor API](../../../api/flink/Constructor).
+	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL constructor API](../../api/flink/Constructor.md).
 
 ## Transform the Coordinate Reference System
 
@@ -137,11 +139,12 @@ The second EPSG code EPSG:3857 in `ST_Transform` is the target CRS of the geomet
 This `ST_Transform` transform the CRS of these geometries from EPSG:4326 to EPSG:3857. The details CRS information can be found on [EPSG.io](https://epsg.io/)
 
 !!!note
-	Read [SedonaSQL ST_Transform API](../../../api/flink/Function/#st_transform) to learn different spatial query predicates.
+	Read [SedonaSQL ST_Transform API](../../api/flink/Function.md#st_transform) to learn different spatial query predicates.
 
 For example, a Table that has coordinates in the US will become like this.
 
 Before the transformation:
+
 ```
 +----+--------------------------------+--------------------------------+
 | op |                     geom_point |                     name_point |
@@ -197,7 +200,7 @@ geomTable.execute().print()
 ```
 
 !!!note
-	Read [SedonaSQL Predicate API](../../../api/flink/Predicate) to learn different spatial query predicates.
+	Read [SedonaSQL Predicate API](../../api/flink/Predicate.md) to learn different spatial query predicates.
 
 ## KNN query
 
@@ -218,13 +221,13 @@ geomTable.execute().print()
 
 ## Join query
 
-This equi-join leverages Flink's internal equi-join algorithm. You can opt to skip the Sedona refinement step  by sacrificing query accuracy. A running example is in [SQL example project](../../demo/).
+This equi-join leverages Flink's internal equi-join algorithm. You can opt to skip the Sedona refinement step  by sacrificing query accuracy. A running example is in [SQL example project](../demo.md).
 
 Please use the following steps:
 
 ### 1. Generate S2 ids for both tables
 
-Use [ST_S2CellIds](../../../api/flink/Function/#st_s2cellids) to generate cell IDs. Each geometry may produce one or more IDs.
+Use [ST_S2CellIds](../../api/flink/Function.md#st_s2cellids) to generate cell IDs. Each geometry may produce one or more IDs.
 
 ```sql
 SELECT id, geom, name, ST_S2CellIDs(geom, 15) as idarray
@@ -238,7 +241,7 @@ FROM rights
 
 ### 2. Explode id array
 
-The produced S2 ids are arrays of integers. We need to explode these Ids to multiple rows so later we can join two tables by ids.
+The produced S2 ids are arrays of integers. We need to explode these Ids to multiple rows, so later we can join two tables by ids.
 
 ```
 SELECT id, geom, name, cellId
@@ -263,7 +266,7 @@ FROM lcs JOIN rcs ON lcs.cellId = rcs.cellId
 
 Due to the nature of S2 Cellid, the equi-join results might have a few false-positives depending on the S2 level you choose. A smaller level indicates bigger cells, less exploded rows, but more false positives.
 
-To ensure the correctness, you can use one of the [Spatial Predicates](../../../api/Predicate/) to filter out them. Use this query as the query in Step 3.
+To ensure the correctness, you can use one of the [Spatial Predicates](../../api/sql/Predicate.md) to filter out them. Use this query as the query in Step 3.
 
 ```sql
 SELECT lcs.id as lcs_id, lcs.geom as lcs_geom, lcs.name as lcs_name, rcs.id as rcs_id, rcs.geom as rcs_geom, rcs.name as rcs_name
@@ -276,7 +279,7 @@ As you see, compared to the query in Step 2, we added one more filter, which is 
 !!!tip
 	You can skip this step if you don't need 100% accuracy and want faster query speed.
 
-### 5. Optional: De-duplcate
+### 5. Optional: De-duplicate
 
 Due to the explode function used when we generate S2 Cell Ids, the resulting DataFrame may have several duplicate <lcs_geom, rcs_geom> matches. You can remove them by performing a GroupBy query.
 
@@ -297,7 +300,7 @@ GROUP BY (lcs_geom, rcs_geom)
 ```
 
 !!!note
-	If you are doing point-in-polygon join, this is not a problem and you can safely discard this issue. This issue only happens when you do polygon-polygon, polygon-linestring, linestring-linestring join.
+	If you are doing point-in-polygon join, this is not a problem, and you can safely discard this issue. This issue only happens when you do polygon-polygon, polygon-linestring, linestring-linestring join.
 
 ### S2 for distance join
 
@@ -355,7 +358,7 @@ The output will be
 
 ### Store non-spatial attributes in Geometries
 
-You can concatenate other non-spatial attributes and store them in Geometry's `userData` field so you can recover them later on. `userData` field can be any object type.
+You can concatenate other non-spatial attributes and store them in Geometry's `userData` field, so you can recover them later on. `userData` field can be any object type.
 
 ```java
 import org.locationtech.jts.geom.Geometry;
@@ -483,6 +486,7 @@ DataStream<Row> geomStream = text.map(new MapFunction<String, Row>() {
 ### Get Spatial Table
 
 Use TableEnv's fromDataStream function, with two column names `geom` and `geom_name`.
+
 ```java
 Table geomTable = sedona.fromDataStream(geomStream, "geom", "geom_name")
 ```

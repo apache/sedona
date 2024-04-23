@@ -54,7 +54,7 @@ Some of the key features of Apache Sedona include:
 
 These are some of the key features of Apache Sedona, but it may offer additional capabilities depending on the specific version and configuration.
 
-Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
+Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=docs/usecases) and play the interactive Sedona Python Jupyter Notebook immediately!
 
 ## When to use Sedona?
 
@@ -78,6 +78,7 @@ This example loads NYC taxi trip records and taxi zone information stored as .CS
 taxidf = sedona.read.format('csv').option("header","true").option("delimiter", ",").load("s3a://your-directory/data/nyc-taxi-data.csv")
 taxidf = taxidf.selectExpr('ST_Point(CAST(Start_Lon AS Decimal(24,20)), CAST(Start_Lat AS Decimal(24,20))) AS pickup', 'Trip_Pickup_DateTime', 'Payment_Type', 'Fare_Amt')
 ```
+
 ```python
 zoneDf = sedona.read.format('csv').option("delimiter", ",").load("s3a://your-directory/data/TIGER2018_ZCTA5.csv")
 zoneDf = zoneDf.selectExpr('ST_GeomFromWKT(_c0) as zone', '_c1 as zipcode')
@@ -122,6 +123,7 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
   ```
   pip install apache-sedona
   ```
+
 * To compile the source code, please refer to [Sedona website](https://sedona.apache.org/latest-snapshot/setup/compile/)
 
 * Modules in the source code

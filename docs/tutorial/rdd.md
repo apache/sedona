@@ -3,15 +3,15 @@ The page outlines the steps to create Spatial RDDs and run spatial queries using
 
 ## Set up dependencies
 
-Please refer to [Set up dependencies](../sql/#set-up-dependencies) to set up dependencies.
+Please refer to [Set up dependencies](sql.md#set-up-dependencies) to set up dependencies.
 
 ## Create Sedona config
 
-Please refer to [Create Sedona config](../sql/#create-sedona-config) to create a Sedona config.
+Please refer to [Create Sedona config](sql.md#create-sedona-config) to create a Sedona config.
 
 ## Initiate SedonaContext
 
-Please refer to [Initiate SedonaContext](../sql/#initiate-sedonacontext) to initiate a SedonaContext.
+Please refer to [Initiate SedonaContext](sql.md#initiate-sedonacontext) to initiate a SedonaContext.
 
 ## Create a SpatialRDD
 
@@ -24,19 +24,21 @@ Sedona-core provides three special SpatialRDDs: PointRDD, PolygonRDD, and LineSt
 
 ### Create a generic SpatialRDD
 
-A generic SpatialRDD is not typed to a certain geometry type and open to more scenarios. It allows an input data file contains mixed types of geometries. For instance, a WKT file contains three types gemetries ==LineString==, ==Polygon== and ==MultiPolygon==.
+A generic SpatialRDD is not typed to a certain geometry type and open to more scenarios. It allows an input data file contains mixed types of geometries. For instance, a WKT file contains three types geometries ==LineString==, ==Polygon== and ==MultiPolygon==.
 
 #### From WKT/WKB
 
 Geometries in a WKT and WKB file always occupy a single column no matter how many coordinates they have. Sedona provides `WktReader ` and `WkbReader` to create generic SpatialRDD.
 
 Suppose we have a `checkin.tsv` WKT TSV file at Path `/Download/checkin.tsv` as follows:
+
 ```
 POINT (-88.331492 32.324142)	hotel
 POINT (-88.175933 32.360763)	gas
 POINT (-88.388954 32.357073)	bar
 POINT (-88.221102 32.35078)	restaurant
 ```
+
 This file has two columns and corresponding ==offsets==(Column IDs) are 0, 1. Column 0 is the WKT string and Column 1 is the checkin business type.
 
 Use the following code to create a SpatialRDD
@@ -176,11 +178,14 @@ To create a generic SpatialRDD from CSV, TSV, WKT, WKB and GeoJSON input formats
 We use checkin.csv CSV file as the example. You can create a generic SpatialRDD using the following steps:
 
 1. Load data in SedonaSQL.
+
 ```scala
 var df = sedona.read.format("csv").option("header", "false").load(csvPointInputLocation)
 df.createOrReplaceTempView("inputtable")
 ```
+
 2. Create a Geometry type column in SedonaSQL
+
 ```scala
 var spatialDf = sedona.sql(
 	"""
@@ -188,7 +193,9 @@ var spatialDf = sedona.sql(
    		|FROM inputtable
    	""".stripMargin)
 ```
+
 3. Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD
+
 ```scala
 var spatialRDD = Adapter.toSpatialRdd(spatialDf, "checkin")
 ```
@@ -288,7 +295,7 @@ To retrieve the UserData field, use the following code:
 
 A spatial range query takes as input a range query window and an SpatialRDD and returns all geometries that have specified relationship with the query window.
 
-Assume you now have an SpatialRDD (typed or generic). You can use the following code to issue an Spatial Range Query on it.
+Assume you now have a SpatialRDD (typed or generic). You can use the following code to issue a Spatial Range Query on it.
 
 ==spatialPredicate== can be set to `SpatialPredicate.INTERSECTS` to return all geometries intersect with query window. Supported spatial predicates are:
 
@@ -518,9 +525,9 @@ To utilize a spatial index in a spatial range query, use the following code:
 
 ## Write a Spatial KNN Query
 
-A spatial K Nearnest Neighbor query takes as input a K, a query point and an SpatialRDD and finds the K geometries in the RDD which are the closest to he query point.
+A spatial K Nearest Neighbor query takes as input a K, a query point and a SpatialRDD and finds the K geometries in the RDD which are the closest to the query point.
 
-Assume you now have an SpatialRDD (typed or generic). You can use the following code to issue an Spatial KNN Query on it.
+Assume you now have a SpatialRDD (typed or generic). You can use the following code to issue a Spatial KNN Query on it.
 
 === "Scala"
 
@@ -651,7 +658,7 @@ To utilize a spatial index in a spatial KNN query, use the following code:
 
 A spatial join query takes as input two Spatial RDD A and B. For each geometry in A, finds the geometries (from B) covered/intersected by it. A and B can be any geometry type and are not necessary to have the same geometry type.
 
-Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue an Spatial Join Query on them.
+Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue a Spatial Join Query on them.
 
 === "Scala"
 
@@ -871,7 +878,7 @@ A distance join query takes as input two Spatial RDD A and B and a distance. For
 
 If you don't want to transform your data and are ok with sacrificing the query accuracy, you can use an approximate degree value for distance. Please use [this calculator](https://lucidar.me/en/online-unit-converter-length-to-angle/convert-degrees-to-meters/#online-converter).
 
-Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue an Distance Join Query on them.
+Assume you now have two SpatialRDDs (typed or generic). You can use the following code to issue a Distance Join Query on them.
 
 === "Scala"
 
@@ -930,9 +937,9 @@ Distance join can only accept `COVERED_BY` and `INTERSECTS` as spatial predicate
 
 The details of spatial partitioning in join query is [here](#use-spatial-partitioning).
 
-The details of using spatial indexes in join query is [here](#use-spatial-indexes_2).
+The details of using spatial indexes in join query is [here](#use-spatial-indexes-2).
 
-The output format of the distance join query is [here](#output-format_2).
+The output format of the distance join query is [here](#output-format-2).
 
 !!!note
 	Distance join query is equal to the following query in Spatial SQL:

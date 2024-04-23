@@ -2,7 +2,7 @@ Sedona offers some APIs to aid in easy visualization of a raster object.
 
 ## Image-based visualization
 
-Sedona offers APIs to visualize a raster in an image form. This API only works for rasters with byte data, and bands <= 4 (Grayscale - RGBA). You can check the data type of an existing raster by using [RS_BandPixelType](../Raster-operators/#rs_bandpixeltype) or create your own raster by passing 'B' while using [RS_MakeEmptyRaster](../Raster-loader/#rs_makeemptyraster).
+Sedona offers APIs to visualize a raster in an image form. This API only works for rasters with byte data, and bands <= 4 (Grayscale - RGBA). You can check the data type of an existing raster by using [RS_BandPixelType](Raster-operators.md#rs_bandpixeltype) or create your own raster by passing 'B' while using [RS_MakeEmptyRaster](Raster-loader.md#rs_makeemptyraster).
 
 ### RS_AsBase64
 
@@ -132,6 +132,7 @@ print(inputDf.selectExpr("RS_AsMatrix(RS_AddBandFromArray(RS_MakeEmptyRaster(1, 
 ```
 
 Output:
+
 ```sql
 | 1   3   4   0|
 | 2   9  10  11|

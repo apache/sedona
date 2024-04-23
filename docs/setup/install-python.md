@@ -1,4 +1,4 @@
-Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=binder) and play the interactive Sedona Python Jupyter Notebook immediately!
+Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=docs/usecases) and play the interactive Sedona Python Jupyter Notebook immediately!
 
 Apache Sedona extends pyspark functions which depends on libraries:
 
@@ -10,7 +10,7 @@ You need to install necessary packages if your system does not have them install
 
 ### Install sedona
 
-* Installing from PyPI repositories. You can find the latest Sedona Python on [PyPI](https://pypi.org/project/apache-sedona/). [There is an known issue in Sedona v1.0.1 and earlier versions](../release-notes/#known-issue).
+* Installing from PyPI repositories. You can find the latest Sedona Python on [PyPI](https://pypi.org/project/apache-sedona/). [There is a known issue in Sedona v1.0.1 and earlier versions](release-notes.md#known-issue).
 
 ```bash
 pip install apache-sedona
@@ -41,7 +41,7 @@ Sedona Python needs one additional jar file called `sedona-spark-shaded` or `sed
 You can get it using one of the following methods:
 
 1. If you run Sedona in Databricks, AWS EMR, or other cloud platform's notebook, use the `shaded jar`: Download [sedona-spark-shaded jar](https://repo.maven.apache.org/maven2/org/apache/sedona/) and [geotools-wrapper jar](https://repo.maven.apache.org/maven2/org/datasyslab/geotools-wrapper/) from Maven Central, and put them in SPARK_HOME/jars/ folder.
-2. If you run Sedona in an IDE or a local Jupyter notebook, use the `unshaded jar`. Call the [Maven Central coordinate](../maven-coordinates) in your python program. For example,
+2. If you run Sedona in an IDE or a local Jupyter notebook, use the `unshaded jar`. Call the [Maven Central coordinate](maven-coordinates.md) in your python program. For example,
 ==Sedona >= 1.4.1==
 
 ```python
@@ -91,4 +91,4 @@ export SPARK_HOME=~/Downloads/spark-3.0.1-bin-hadoop2.7
 export PYTHONPATH=$SPARK_HOME/python
 ```
 
-You can then play with [Sedona Python Jupyter notebook](../../tutorial/jupyter-notebook/).
+You can then play with [Sedona Python Jupyter notebook](../tutorial/jupyter-notebook.md).

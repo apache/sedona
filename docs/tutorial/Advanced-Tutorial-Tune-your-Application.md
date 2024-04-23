@@ -8,7 +8,7 @@ The versions of Sedona have three levels: X.X.X (i.e., 0.8.1)
 
 The first level means that this version contains big structure redesign which may bring big changes in APIs and performance.
 
-The second level (i.e., 0.8) indicates that this version contains significant performance enhancement, big new features and API changes. An old Sedona user who wants to pick this version needs to be careful about the API changes. Before you move to this version, please read [Sedona version release notes](../../setup/release-notes/) and make sure you are ready to accept the API changes.
+The second level (i.e., 0.8) indicates that this version contains significant performance enhancement, big new features and API changes. An old Sedona user who wants to pick this version needs to be careful about the API changes. Before you move to this version, please read [Sedona version release notes](../setup/release-notes.md) and make sure you are ready to accept the API changes.
 
 The third level (i.e., 0.8.1) tells that this version only contains bug fixes, some small new features and slight performance enhancement. This version will not contain any API changes. Moving to this version is safe. We highly suggest all Sedona users that stay at the same level move to the latest version in this level.
 
@@ -17,10 +17,13 @@ The third level (i.e., 0.8.1) tells that this version only contains bug fixes, s
 Sedona provides a number of constructors for each SpatialRDD (PointRDD, PolygonRDD and LineStringRDD). In general, you have two options to start with.
 
 1. Initialize a SpatialRDD from your data source such as HDFS and S3. A typical example is as follows:
+
 ```java
 public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData, Integer partitions, StorageLevel newLevel)
 ```
+
 2. Initialize a SpatialRDD from an existing RDD. A typical example is as follows:
+
 ```java
 public PointRDD(JavaRDD<Point> rawSpatialRDD, StorageLevel newLevel)
 ```
@@ -32,6 +35,7 @@ However, in some cases, you may know well about your datasets. If so, you can ma
 ```java
 public PointRDD(JavaSparkContext sparkContext, String InputLocation, Integer Offset, FileDataSplitter splitter, boolean carryInputData, Integer partitions, Envelope datasetBoundary, Integer approximateTotalCount) {
 ```
+
 Manually providing the dataset boundary and approximate total count helps Sedona avoiding several slow "Action"s during initialization.
 
 ## Cache the Spatial RDD that is repeatedly used

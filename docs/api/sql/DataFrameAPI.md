@@ -2,7 +2,7 @@ Sedona SQL functions can be used in a DataFrame style API similar to Spark funct
 
 The following objects contain the exposed functions: `org.apache.spark.sql.sedona_sql.expressions.st_functions`, `org.apache.spark.sql.sedona_sql.expressions.st_constructors`, `org.apache.spark.sql.sedona_sql.expressions.st_predicates`, and `org.apache.spark.sql.sedona_sql.expressions.st_aggregates`.
 
-Every functions can take all `Column` arguments. Additionally, overloaded forms can commonly take a mix of `String` and other Scala types (such as `Double`) as arguments.
+Every function can take all `Column` arguments. Additionally, overloaded forms can commonly take a mix of `String` and other Scala types (such as `Double`) as arguments.
 
 In general the following rules apply (although check the documentation of specific functions for any exceptions):
 
@@ -50,6 +50,7 @@ A short example of using this API (uses the `array_min` and `array_max` Spark fu
 	```
 
 The above code will generate the following dataframe:
+
 ```
 +-----------+
 |point      |
@@ -66,6 +67,7 @@ df = df.select(stc.ST_Point(1.0, 3.0).alias("point"))
 ```
 
 This will generate a dataframe with a constant point in a column:
+
 ```
 +-----------+
 |point      |

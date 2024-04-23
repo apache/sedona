@@ -85,6 +85,7 @@ gdf.plot(
 )
 
 ```
+
 <br>
 <br>
 
@@ -109,7 +110,7 @@ gdf.plot(
 
 To create Spark DataFrame based on mentioned Geometry types, please use <b> GeometryType </b> from  <b> sedona.sql.types </b> module. Converting works for list or tuple with shapely objects.
 
-Schema for target table with integer id and geometry type can be defined as follow:
+Schema for target table with integer id and geometry type can be defined as follows:
 
 ```python
 
@@ -126,7 +127,7 @@ schema = StructType(
 
 ```
 
-Also Spark DataFrame with geometry type can be converted to list of shapely objects with <b> collect </b> method.
+Also, Spark DataFrame with geometry type can be converted to list of shapely objects with <b> collect </b> method.
 
 ### Point example
 
@@ -338,7 +339,7 @@ gdf.show(1, False)
 
 ```
 
-### GeomeryCollection example
+### GeometryCollection example
 
 ```python3
 

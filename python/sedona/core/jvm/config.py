@@ -187,10 +187,9 @@ class SparkJars:
 
         try:
             used_jar_files = java_spark_conf.get(value)
-        except Py4JJavaError as java_error:
-            error_message = "Failed to get the value of {} from SparkConf: {}".format(
-                value, java_error
-            )
+        except Py4JJavaError:
+            error_message = "Didn't find the value of {} from SparkConf".format(value)
+            logging.info(error_message)
 
         return used_jar_files, error_message
 
@@ -200,7 +199,7 @@ class SedonaMeta:
     def get_version(cls, spark_jars: str) -> Optional[str]:
         # Find Spark version, Scala version and Sedona version.
         versions = findall(
-            r"sedona-(?:python-adapter|spark-shaded)-([^,\n]{3})_([^,\n]{4})-([^,\n]{5})",
+            r"sedona-(?:python-adapter|spark-shaded|spark)-([^,\n]{3})_([^,\n]{4})-([^,\n]{5})",
             spark_jars,
         )
         print(versions)

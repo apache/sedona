@@ -1,11 +1,13 @@
 SedonaKepler offers a number of APIs which aid in quick and interactive visualization of a geospatial data in a Jupyter notebook/lab environment.
 
 Inorder to start using SedonaKepler, simply import Sedona using:
+
 ```python
 from sedona.spark import *
 ```
 
 Alternatively it can also be imported using:
+
 ```python
 from sedona.maps.SedonaKepler import SedonaKepler
 ```
@@ -39,7 +41,7 @@ A map config can be passed optionally to apply pre-apply customizations to the m
 
 ### **Adding SedonaDataFrame to a map object using SedonaKepler.add_df**
 
-SedonaKepler exposes a add_df API with the following signature:
+SedonaKepler exposes an add_df API with the following signature:
 
 ```python
 add_df(map, df: SedonaDataFrame, name: str='unnamed')

@@ -23,7 +23,8 @@ nav:
         - Install on Wherobots: setup/wherobots.md
         - Install on Databricks: setup/databricks.md
         - Install on AWS EMR: setup/emr.md
-        - Set up Spark cluster: setup/cluster.md
+        - Install on Microsfot Fabric: setup/fabric.md
+        - Set up Spark cluster manually: setup/cluster.md
       - Install with Apache Flink:
         - Install Sedona Scala/Java: setup/flink/install-scala.md
       - Install with Snowflake:
@@ -50,7 +51,7 @@ nav:
       - Sedona with Apache Flink:
         - Spatial SQL app (Flink): tutorial/flink/sql.md
       - Sedona with Snowflake:
-        - Spatial SQL app (Flink): tutorial/snowflake/sql.md
+        - Spatial SQL app (Snowflake): tutorial/snowflake/sql.md
       - Examples:
           - Scala/Java: tutorial/demo.md
           - Python: tutorial/jupyter-notebook.md
@@ -110,10 +111,10 @@ nav:
         - Vote a release: community/vote.md
       - Publications: community/publication.md
     - Use cases:
-      - Use cases: usecases/usecases.md
-      - Spatially aggregate airports per country: https://nbviewer.org/github/apache/sedona/blob/master/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb" target="_blank
-      - Match foot traffic to Seattle coffee shops: https://nbviewer.org/github/jiayuasu/sigspatial-2021-cafe-analysis/blob/master/notebooks/Workshop_example.ipynb" target="_blank
-      - Raster image manipulation: https://nbviewer.org/github/johnymontana/raster-data-analysis-spatial-sql/blob/main/00-raster-data-analysis.ipynb" target="_blank
+      - Spatially aggregate airports per country: usecases/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb
+      - Match foot traffic to Seattle coffee shops: usecases/contrib/foot-traffic.ipynb
+      - Raster image manipulation: usecases/ApacheSedonaRaster.ipynb
+      - Read Overture Maps data: usecases/Sedona_OvertureMaps_GeoParquet.ipynb
     - Apache Software Foundation:
       - Foundation: asf/asf.md
       - License: https://www.apache.org/licenses/" target="_blank
@@ -153,7 +154,7 @@ extra:
     - icon: fontawesome/brands/twitter
       link: 'https://twitter.com/ApacheSedona'
     - icon: fontawesome/brands/discord
-      link: './community/discord-invite-form.html'
+      link: 'https://share.hsforms.com/1Ndql_ZigTdmLlVQc_d1o4gqga4q'
   sedona:
     current_version: 1.5.1
     current_geotools: 1.5.1-28.2
@@ -196,3 +197,5 @@ plugins:
   - macros
   - git-revision-date-localized:
       type: datetime
+  - mkdocs-jupyter:
+            include_source: True
