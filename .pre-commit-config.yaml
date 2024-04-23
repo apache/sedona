@@ -22,6 +22,7 @@ repos:
     rev: v4.5.0
     hooks:
       - id: check-ast
+      - id: check-builtin-literals
       - id: check-case-conflict
       # - id: check-docstring-first
       # - id: check-executables-have-shebangs
@@ -34,12 +35,17 @@ repos:
       - id: check-yaml
         exclude: ^mkdocs\.yml$
       - id: debug-statements
+      - id: destroyed-symlinks
       - id: detect-aws-credentials
         args: [--allow-missing-credentials]
       - id: detect-private-key
       - id: end-of-file-fixer
         exclude: \.svg$|^docs/image|^spark/common/src/test/resources
+      - id: file-contents-sorter
+        args: [--unique]
+        files: ^\.github/linters/codespell\.txt$
       - id: fix-byte-order-marker
+      - id: forbid-submodules
       - id: mixed-line-ending
         exclude: \.csv$
       - id: requirements-txt-fixer
