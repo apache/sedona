@@ -164,10 +164,11 @@ mike serve
 We run [pre-commit](https://pre-commit.com/) with GitHub Actions so installation on
 your local machine is currently optional.
 
-Before you can run the hooks, you need to have pre-commit installed.
-The hooks run when running `git commit`.
-Some of the hooks will auto fix the code after the hook fails whilst most will print error
-messages from the linters.
+The pre-commit [configuration file](https://github.com/apache/sedona/blob/master/.pre-commit-config.yaml)
+is in the repository root. Before you can run the hooks, you need to have pre-commit installed.
+
+The hooks run when running `git commit`. Some of the hooks will auto fix the code after the hook fails
+whilst most will print error messages from the linters.
 
 If you want to test all hooks against all files and when you are adding a new hook
 you should always run:
@@ -178,4 +179,4 @@ Sometimes you might need to skip a hook to commit for example:
 
 `SKIP=markdownlint git commit -m "foo"`
 
-We have a Makefile in the repository root which has three pre-commit convenience commands.
+We have a [Makefile](https://github.com/apache/sedona/blob/master/Makefile) in the repository root which has three pre-commit convenience commands.
