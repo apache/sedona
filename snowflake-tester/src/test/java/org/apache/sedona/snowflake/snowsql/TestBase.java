@@ -32,11 +32,13 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertArrayEquals;
 
@@ -51,6 +53,8 @@ public class TestBase extends TestCase {
     Logger logger = LoggerFactory.getLogger(TestBase.class);
 
     private static boolean jarUploaded = false;
+
+    String snowflake_db_name = generateRandomString(8);
 
     public void registerUDF(String functionName, Class<?> ... paramTypes) {
         try {
@@ -102,12 +106,13 @@ public class TestBase extends TestCase {
         buildDDLConfigs = new HashMap<>();
         buildDDLConfigs.put(Constants.SEDONA_VERSION, sedonaVersion);
         buildDDLConfigs.put(Constants.GEOTOOLS_VERSION, geotoolsVersion);
+        System.out.println("Using Snowflake DB: " + snowflake_db_name);
         // upload libraries
         if (!jarUploaded) {
             // drop then create db to make sure test env fresh
-            snowClient.executeQuery("drop database if exists " + System.getenv("SNOWFLAKE_DB"));
-            snowClient.executeQuery("create database " + System.getenv("SNOWFLAKE_DB"));
-            snowClient.executeQuery("use database " + System.getenv("SNOWFLAKE_DB"));
+            snowClient.executeQuery("drop database if exists " + snowflake_db_name);
+            snowClient.executeQuery("create database " + snowflake_db_name);
+            snowClient.executeQuery("use database " + snowflake_db_name);
             snowClient.executeQuery("create schema " + System.getenv("SNOWFLAKE_SCHEMA"));
             snowClient.executeQuery("use schema " + System.getenv("SNOWFLAKE_SCHEMA"));
             snowClient.executeQuery("CREATE STAGE ApacheSedona FILE_FORMAT = (COMPRESSION = NONE)");
@@ -118,7 +123,15 @@ public class TestBase extends TestCase {
         registerDependantUDFs();
     }
 
-    public void tearDown() {
+    public void tearDown()
+    {
+        try {
+            System.out.println("Dropping Snowflake DB: " + snowflake_db_name);
+            snowClient.executeQuery("drop database if exists " + snowflake_db_name);
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         if (snowClient != null) {
             try {
                 snowClient.close();
@@ -173,5 +186,25 @@ public class TestBase extends TestCase {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Generates a random string of a specified length.
+     *
+     * @param length The length of the random string.
+     * @return A random string consisting of alphabet letters only.
+     */
+    private static String generateRandomString(int length) {
+        // Generate a string of all letters
+        String chars = IntStream.concat(IntStream.rangeClosed('A', 'Z'), IntStream.rangeClosed('a', 'z'))
+                .mapToObj(c -> "" + (char) c)
+                .collect(Collectors.joining());
+
+        Random random = new Random();
+
+        // Build a random string from the full set of characters
+        return random.ints(length, 0, chars.length())
+                .mapToObj(i -> "" + chars.charAt(i)) // Correctly refer to character position
+                .collect(Collectors.joining());
     }
 }
