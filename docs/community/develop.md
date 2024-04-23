@@ -14,7 +14,7 @@ We recommend [Intellij IDEA](https://www.jetbrains.com/idea/) with Scala plugin 
 
 #### Go to the Sedona root folder (not a submodule folder) and choose `open`
 
-![](../image/ide-java-2.png){: width="500px"}
+![](../image/ide-java-2.png)
 
 #### The IDE might show errors
 
@@ -43,7 +43,7 @@ Make sure you reload the `pom.xml` or reload the maven project. The IDE will ask
 
 #### The final project structure should be like this:
 
-![](../image/ide-java-3.png){: width="400px"}
+![](../image/ide-java-3.png)
 
 ### Run unit tests
 
@@ -60,11 +60,11 @@ More details can be found on [Compile Sedona](../setup/compile.md)
 
 In the IDE, right-click a test case and run this test case.
 
-![](../image/ide-java-6.png){: width="400px"}
+![](../image/ide-java-6.png)
 
 The IDE might tell you that the PATH does not exist as follows:
 
-![](../image/ide-java-7.png){: width="600px"}
+![](../image/ide-java-7.png)
 
 Go to `Edit Configuration`
 
