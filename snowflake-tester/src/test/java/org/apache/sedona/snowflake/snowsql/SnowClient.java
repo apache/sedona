@@ -88,7 +88,7 @@ public class SnowClient {
         }
     }
 
-    public static SnowClient newFromEnv() throws SQLException {
+    public static SnowClient newFromEnv(String snowflake_db_name) throws SQLException {
         Properties prop = new Properties();
         // check auth method
         String authMethod = System.getenv("SNOWFLAKE_AUTH_METHOD");
@@ -96,7 +96,7 @@ public class SnowClient {
             prop.put("user", System.getenv("SNOWFLAKE_USER"));
             prop.put("password", System.getenv("SNOWFLAKE_PASSWORD"));
         }
-        prop.put("db", System.getenv("SNOWFLAKE_DB"));
+        prop.put("db", snowflake_db_name);
         prop.put("schema", System.getenv("SNOWFLAKE_SCHEMA"));
         prop.put("warehouse", System.getenv("SNOWFLAKE_WAREHOUSE"));
         prop.put("role", System.getenv("SNOWFLAKE_ROLE"));

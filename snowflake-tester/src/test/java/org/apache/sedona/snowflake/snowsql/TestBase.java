@@ -99,7 +99,7 @@ public class TestBase extends TestCase {
     }
 
     public void init() throws SQLException {
-        snowClient = SnowClient.newFromEnv();
+        snowClient = SnowClient.newFromEnv(snowflake_db_name);
         String sedonaVersion = System.getenv("SEDONA_VERSION");
         String geotoolsVersion = System.getenv("SNOWFLAKE_GEOTOOLS_VERSION");
         // init configs
