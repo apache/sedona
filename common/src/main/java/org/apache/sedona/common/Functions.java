@@ -1549,6 +1549,14 @@ public class Functions {
         return force3DM(geom, 0.0);
     }
 
+    public static Geometry force4D(Geometry geom, double zValue, double mValue) {
+        return GeometryForce4DTransformer.transform(geom, zValue, mValue);
+    }
+
+    public static Geometry force4D(Geometry geom) {
+        return force4D(geom, 0.0, 0.0);
+    }
+
     public static Geometry force3D(Geometry geometry, double zValue) {
         return GeomUtils.get3DGeom(geometry, zValue);
     }
