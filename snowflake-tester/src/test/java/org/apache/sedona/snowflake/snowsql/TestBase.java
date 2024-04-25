@@ -71,6 +71,23 @@ public class TestBase extends TestCase {
     }
 
     public void registerUDFV2(String functionName, Class<?> ... paramTypes) {
+        Constants.snowflakeTypeMap.replace("Geometry", "GEOMETRY");
+        try {
+            String ddl = UDFDDLGenerator.buildUDFDDL(UDFsV2.class.getMethod(
+                    functionName,
+                    paramTypes
+            ), buildDDLConfigs, "@ApacheSedona", false, "");
+            System.out.println(ddl);
+            ResultSet res = snowClient.executeQuery(ddl);
+            res.next();
+            assert res.getString(1).contains("successfully created");
+        } catch (SQLException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void registerUDFGeography(String functionName, Class<?> ... paramTypes) {
+        Constants.snowflakeTypeMap.replace("Geometry", "GEOGRAPHY");
         try {
             String ddl = UDFDDLGenerator.buildUDFDDL(UDFsV2.class.getMethod(
                     functionName,

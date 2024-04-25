@@ -85,6 +85,13 @@ public class UDFDDLGenerator {
                 ddlList.add(buildUDFDDL(method, configs, stageName, isNativeApp, appRoleName));
             }
         }
+        // Replace Geometry with GEOGRAPHY and generate DDL for UDFsV2 again
+        Constants.snowflakeTypeMap.replace("Geometry", "GEOGRAPHY");
+        for (Method method : udfV2Methods()) {
+            if (method.getModifiers() == (Modifier.PUBLIC | Modifier.STATIC)) {
+                ddlList.add(buildUDFDDL(method, configs, stageName, isNativeApp, appRoleName));
+            }
+        }
         return ddlList;
     }
 
