@@ -194,6 +194,6 @@ If you just want to run one hook for example just run the `markdownlint` hook:
 
 We have a [Makefile](https://github.com/apache/sedona/blob/master/Makefile) in the repository root which has four
 pre-commit convenience commands. For example to run [Make](https://en.wikipedia.org/wiki/Make_(software)) to check the
-spelling with lychee run:
+links with lychee run:
 
 `make checklinks`
