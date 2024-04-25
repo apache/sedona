@@ -54,7 +54,7 @@ public class TestBase extends TestCase {
 
     private static boolean jarUploaded = false;
 
-    String snowflake_db_name = generateRandomString(8);
+    private static String snowflake_db_name = null;
 
     public void registerUDF(String functionName, Class<?> ... paramTypes) {
         try {
@@ -106,9 +106,9 @@ public class TestBase extends TestCase {
         buildDDLConfigs = new HashMap<>();
         buildDDLConfigs.put(Constants.SEDONA_VERSION, sedonaVersion);
         buildDDLConfigs.put(Constants.GEOTOOLS_VERSION, geotoolsVersion);
-        System.out.println("Using Snowflake DB: " + snowflake_db_name);
         // upload libraries
         if (!jarUploaded) {
+            snowflake_db_name = generateRandomString(8);
             // drop then create db to make sure test env fresh
             snowClient.executeQuery("drop database if exists " + snowflake_db_name);
             snowClient.executeQuery("create database " + snowflake_db_name);
@@ -120,6 +120,11 @@ public class TestBase extends TestCase {
             snowClient.uploadFile(String.format("tmp/geotools-wrapper-%s.jar", geotoolsVersion), "ApacheSedona");
             jarUploaded = true;
         }
+        else {
+            snowClient.executeQuery("use database " + snowflake_db_name);
+            snowClient.executeQuery("use schema " + System.getenv("SNOWFLAKE_SCHEMA"));
+        }
+        System.out.println("Using Snowflake DB: " + snowflake_db_name);
         registerDependantUDFs();
     }
 
