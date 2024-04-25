@@ -1,4 +1,5 @@
-![](../image/usrail.png){: width="250"}
-![](../image/ustweet.png){: width="250"}
+![](../image/usrail.png)
 
-![](../image/heatmapnycsmall.png){: width="500px"}
+![](../image/ustweet.png)
+
+![](../image/heatmapnycsmall.png)

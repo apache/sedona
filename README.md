@@ -1,6 +1,4 @@
-<a href="https://sedona.apache.org/">
-  <img alt="Apache Sedona" src="docs/image/sedona_logo.png" width="500">
-</a>
+[![Apache Sedona](docs/image/sedona_logo.png)](https://sedona.apache.org/)
 
 [![Scala and Java build](https://github.com/apache/sedona/actions/workflows/java.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/java.yml) [![Python build](https://github.com/apache/sedona/actions/workflows/python.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/python.yml) [![R build](https://github.com/apache/sedona/actions/workflows/r.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/r.yml) [![Docker image build](https://github.com/apache/sedona/actions/workflows/docker-build.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docker-build.yml) [![Example project build](https://github.com/apache/sedona/actions/workflows/example.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/example.yml) [![Docs build](https://github.com/apache/sedona/actions/workflows/docs.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docs.yml)
 
@@ -38,7 +36,7 @@ Join the Sedona monthly community office hour: [Google Calendar](https://calenda
 
 Apache Sedona™ is a spatial computing engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as Apache Spark and Apache Flink. Sedona developers can express their spatial data processing tasks in Spatial SQL, Spatial Python or Spatial R. Internally, Sedona provides spatial data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
 
-<img alt="Sedona Ecosystem" src="docs/image/sedona-ecosystem.png" width="800" class="center">
+![](docs/image/sedona-ecosystem.png "Sedona Ecosystem")
 
 ### Features
 

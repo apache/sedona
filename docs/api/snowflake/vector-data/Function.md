@@ -459,8 +459,8 @@ SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10, false, 'quad_segs=2')
 
 Output:
 
-<img alt="Point buffer with 8 quadrant segments" src="../../../image/point-buffer-quad-8.png" width="100" height=""/>
-<img alt="Point buffer with 2 quadrant segments" src="../../../image/point-buffer-quad-2.png" width="100" height=""/>
+![Point buffer with 8 quadrant segments](../../../image/point-buffer-quad-8.png)
+![Point buffer with 2 quadrant segments](../../../image/point-buffer-quad-2.png)
 
 8 Segments &ensp; 2 Segments
 
@@ -472,8 +472,8 @@ SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(0 0, 50 70, 100 100)'), 10, false, '
 
 Output:
 
-<img alt="Original Linestring" src="../../../image/linestring-og.png" width="150"/>
-<img alt="Original Linestring with buffer on the left side" src="../../../image/linestring-left-side.png" width="150"/>
+![Original Linestring](../../../image/linestring-og.png "Original Linestring")
+![Original Linestring with buffer on the left side](../../../image/linestring-left-side.png "Original Linestring with buffer on the left side")
 
 Original Linestring &emsp; Left side buffed Linestring
 
@@ -2054,7 +2054,7 @@ Format: `ST_Snap(input: Geometry, reference: Geometry, tolerance: double)`
 
 Input geometry:
 
-<img width="250" src="../../../../image/st_snap/st-snap-base-example.png" title="ST_Snap Base example"/>
+![](../../../image/st_snap/st-snap-base-example.png "ST_Snap Base example")
 
 SQL Example:
 
@@ -2068,7 +2068,7 @@ SELECT ST_Snap(
 
 Output:
 
-<img width="250" src="../../../../image/st_snap/st-snap-applied.png" title="ST_Snap applied example"/>
+![](../../../image/st_snap/st-snap-applied.png "ST_Snap applied example")
 
 ```
 POLYGON ((236877.58 -6.61, 236878.29 -8.35, 236879.98 -8.33, 236879.72 -7.63, 236880.69 -6.81, 236877.58 -6.61), (236878.45 -7.01, 236878.43 -7.52, 236879.29 -7.5, 236878.63 -7.22, 236878.76 -6.89, 236878.45 -7.01))

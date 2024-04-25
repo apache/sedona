@@ -603,7 +603,7 @@ SedonaPyDeck.create_choropleth_map(df=groupedresult, plot_col='AirportCount')
 !!!Note
 	`plot_col` is a required argument informing SedonaPyDeck of the column name used to render the choropleth effect.
 
-![](../image/choropleth.gif){: width="1000px"}
+![](../image/choropleth.gif)
 
 The dataset used is available [here](https://github.com/apache/sedona/tree/4c5fa8333b2c61850d5664b878df9493c7915066/binder/data/ne_50m_airports) and
 can also be found in the example notebook available [here](https://github.com/apache/sedona/blob/4c5fa8333b2c61850d5664b878df9493c7915066/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)
@@ -618,7 +618,7 @@ Example (referenced from overture notebook available via binder):
 SedonaPyDeck.create_geometry_map(df_building, elevation_col='height')
 ```
 
-![](../image/buildings.gif){: width="1000px"}
+![](../image/buildings.gif)
 
 !!!Tip
 	`elevation_col` is an optional argument which can be used to render a 3D map. Pass the column with 'elevation' values for the geometries here.
@@ -633,7 +633,7 @@ Example:
 SedonaPyDeck.create_scatterplot_map(df=crimes_df)
 ```
 
-![](../image/points.gif){: width="1000px"}
+![](../image/points.gif)
 
 The dataset used here is the Chicago crimes dataset, available [here](https://github.com/apache/sedona/blob/sedona-1.5.0/spark/common/src/test/resources/Chicago_Crimes.csv)
 
@@ -647,7 +647,7 @@ Example:
 SedonaPyDeck.create_heatmap(df=crimes_df)
 ```
 
-![](../image/heatmap.gif){: width="1000px"}
+![](../image/heatmap.gif)
 
 The dataset used here is the Chicago crimes dataset, available [here](https://github.com/apache/sedona/blob/sedona-1.5.0/spark/common/src/test/resources/Chicago_Crimes.csv)
 
@@ -671,7 +671,7 @@ Example (referenced from an example notebook via the binder):
 SedonaKepler.create_map(df=groupedresult, name="AirportCount")
 ```
 
-![](../image/sedona_customization.gif){: width="1000px"}
+![](../image/sedona_customization.gif)
 
 The dataset used is available [here](https://github.com/apache/sedona/tree/4c5fa8333b2c61850d5664b878df9493c7915066/binder/data/ne_50m_airports) and
 can also be found in the example notebook available [here](https://github.com/apache/sedona/blob/4c5fa8333b2c61850d5664b878df9493c7915066/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)

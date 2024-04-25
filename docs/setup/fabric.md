@@ -4,31 +4,31 @@ This tutorial will guide you through the process of installing Sedona on Microso
 
 Go to the [Microsoft Fabric portal](https://app.fabric.microsoft.com/) and choose the `Data Engineering` option.
 
-![](../../image/fabric/fabric-1.png)
+![](../image/fabric/fabric-1.png)
 
 ## Step 2: Create a Microsoft Fabric Data Engineering environment
 
 On the left side, click `My Workspace` and then click `+ New` to create a new `Environment`. Let's name it `ApacheSedona`.
 
-![](../../image/fabric/fabric-2.png)
+![](../image/fabric/fabric-2.png)
 
 ## Step 3: Select the Apache Spark version
 
 In the `Environment` page, click the `Home` tab and select the appropriate version of Apache Spark. You will need this version to install the correct version of Apache Sedona.
 
-![](../../image/fabric/fabric-3.png)
+![](../image/fabric/fabric-3.png)
 
 ## Step 4: Install the Sedona Python package
 
 In the `Environment` page, click the `Public libraries` tab and then type in `apache-sedona`. Please select the appropriate version of Apache Sedona. The source is `PyPI`.
 
-![](../../image/fabric/fabric-4.png)
+![](../image/fabric/fabric-4.png)
 
 ## Step 5: Save and publish the environment
 
 Click the `Save` button and then click the `Publish` button to save and publish the environment. This will create the environment with the Apache Sedona Python package installed. The publishing process will take about 10 minutes.
 
-![](../../image/fabric/fabric-5.png)
+![](../image/fabric/fabric-5.png)
 
 ## Step 6: Download Sedona jars
 
@@ -48,15 +48,15 @@ abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e1
 abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e15f3695-af7e-47de-979e-473c3caa9f5b/Files/geotools-wrapper-1.5.1-28.2.jar
 ```
 
-![](../../image/fabric/fabric-6.png)
+![](../image/fabric/fabric-6.png)
 
-![](../../image/fabric/fabric-7.png)
+![](../image/fabric/fabric-7.png)
 
 ## Step 8: Start the notebook with the Sedona environment and install the jars
 
 In the notebook page, select the `ApacheSedona` environment you created before.
 
-![](../../image/fabric/fabric-8.png)
+![](../image/fabric/fabric-8.png)
 
 In the notebook, you can install the jars by running the following code. Please replace the `spark.jars` with the `ABFS` paths of the 2 jars you uploaded in the previous step.
 
@@ -85,4 +85,4 @@ sedona.sql("SELECT ST_GeomFromEWKT('SRID=4269;POINT(40.7128 -74.0060)')").show()
 
 If you see the output of the point, then the installation is successful.
 
-![](../../image/fabric/fabric-9.png)
+![](../image/fabric/fabric-9.png)
