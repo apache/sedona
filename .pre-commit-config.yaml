@@ -14,12 +14,12 @@ repos:
     rev: v2.2.6
     hooks:
       - id: codespell
-        name: Run codespell
+        name: run codespell
         description: Check spelling with codespell
         args: [--ignore-words=.github/linters/codespell.txt]
         exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-ast
       - id: check-builtin-literals
@@ -53,11 +53,18 @@ repos:
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
         exclude: ^docs-overrides/main\.html$|\.Rd$
+  - repo: https://github.com/lycheeverse/lychee.git
+    rev: v0.15.0
+    hooks:
+      - id: lychee
+        name: run lychee
+        args: [--config=.github/linters/lychee.toml]
+        files: \.md$
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.38.0
+    rev: v0.39.0
     hooks:
       - id: markdownlint
-        name: Run markdownlint
+        name: run markdownlint
         description: Check Markdown files with markdownlint
         args: [--config=.github/linters/.markdown-lint.yml]
         exclude: ^\.github/.*$

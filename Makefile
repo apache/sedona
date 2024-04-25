@@ -1,10 +1,14 @@
 check :
-	pre-commit run --all-files
+	SKIP=lychee pre-commit run --all-files
 .PHONY : check
 
 checkinstall :
 	pre-commit install
 .PHONY : checkinstall
+
+checklinks :
+	pre-commit run lychee --all-files
+.PHONY : checklinks
 
 checkupdate :
 	pre-commit autoupdate

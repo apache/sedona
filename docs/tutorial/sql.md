@@ -26,7 +26,7 @@ SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of 
 	myDataFrame.createOrReplaceTempView("spatialDf")
 	```
 
-Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.md). You can find example county data (i.e., `county_small.tsv`) in [Sedona GitHub repo](https://github.com/apache/sedona/tree/master/core/src/test/resources).
+Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.md). You can find example county data (i.e., `county_small.tsv`) in [Sedona GitHub repo](https://github.com/apache/sedona/tree/master/spark/common/src/test/resources).
 
 ## Set up dependencies
 
@@ -578,7 +578,7 @@ Sedona provides `SedonaPyDeck` and `SedonaKepler` wrappers, both of which expose
 
 Spatial query results can be visualized in a Jupyter lab/notebook environment using SedonaPyDeck.
 
-SedonaPyDeck exposes APIs to create interactive map visualizations using [pydeck](https://pydeck.gl/index.html#) based on [deck.gl](https://deck.gl/)
+SedonaPyDeck exposes APIs to create interactive map visualizations using [pydeck](https://pydeck.gl/) based on [deck.gl](https://deck.gl/)
 
 !!!Note
 	To use SedonaPyDeck, install sedona with the `pydeck-map` extra:

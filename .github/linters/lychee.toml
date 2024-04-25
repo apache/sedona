@@ -1,0 +1,13 @@
+exclude = ["docs/api/javadoc/sql/org/apache/sedona/sql/utils/index.html$",
+    "docs/api/scaladoc/spark/org/apache/sedona/sql/utils/index.html$",
+    "docs/javadoc/spark",
+    "docs/scaladoc/spark/org/apache/sedona/sql/utils/index.html$",
+    "spark://localhost:.*",
+    "https://issues.apache.org/jira.*",
+    "https://keyserver.pgp.com/.*",
+    "http://localhost:.*",
+    "https://whimsy.apache.org/officers/acreq.*",
+    "https://whimsy.apache.org/roster/pmc/sedona.*",
+    "https://www.datasyslab.net/",
+    "https://mvnrepository.com/.*",
+    "https://www.researchgate.net/figure/Relation-between-the-cartesian-axes-x-y-and-i-j-axes-of-the-pixels_fig3_313860913"]

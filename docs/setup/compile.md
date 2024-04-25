@@ -161,22 +161,39 @@ mike serve
 
 ## pre-commit
 
-We run [pre-commit](https://pre-commit.com/) with GitHub Actions so installation on
-your local machine is currently optional.
+We run [pre-commit](https://pre-commit.com/) with GitHub Actions so installation on your local machine is currently
+optional.
 
-The pre-commit [configuration file](https://github.com/apache/sedona/blob/master/.pre-commit-config.yaml)
-is in the repository root. Before you can run the hooks, you need to have pre-commit installed.
+The pre-commit [configuration file](https://github.com/apache/sedona/blob/master/.pre-commit-config.yaml) is in the
+repository root. Before you can run the hooks, you need to have pre-commit installed.
 
-The hooks run when running `git commit`. Some of the hooks will auto fix the code after the hook fails
-whilst most will print error messages from the linters.
-
-If you want to test all hooks against all files and when you are adding a new hook
-you should always run:
+The hooks run when running `git commit` and also from the command line with `pre-commit`. Some of the hooks will auto
+fix the code after the hooks fail whilst most will print error messages from the linters. If a hook fails the overall
+commit will fail, and you will need to fix the issues or problems and `git add` and git commit again. On git commit
+the hooks will run mostly only against modified files so if you want to test all hooks against all files and when you
+are adding a new hook you should always run:
 
 `pre-commit run --all-files`
 
-Sometimes you might need to skip a hook to commit for example:
+We are also using pre-commit to check our links with [lychee](https://github.com/lycheeverse/lychee). The lychee hook
+is not self-contained and requires a local lychee installation.
 
-`SKIP=markdownlint git commit -m "foo"`
+Sometimes you might need to skip a hook to commit because the hook is stopping you from committing or your computer
+might not have all the installation requirements for all the hooks. The `SKIP` variable is comma separated for two or
+more hooks:
 
-We have a [Makefile](https://github.com/apache/sedona/blob/master/Makefile) in the repository root which has three pre-commit convenience commands.
+`SKIP=lychee git commit -m "foo"`
+
+The same applies when running pre-commit:
+
+`SKIP=lychee pre-commit run --all-files`
+
+If you just want to run one hook for example just run the `markdownlint` hook:
+
+`pre-commit run markdownlint --all-files`
+
+We have a [Makefile](https://github.com/apache/sedona/blob/master/Makefile) in the repository root which has four
+pre-commit convenience commands. For example to run [Make](https://en.wikipedia.org/wiki/Make_(software)) to check the
+spelling with lychee run:
+
+`make checkspelling`
