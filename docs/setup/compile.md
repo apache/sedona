@@ -196,4 +196,4 @@ We have a [Makefile](https://github.com/apache/sedona/blob/master/Makefile) in t
 pre-commit convenience commands. For example to run [Make](https://en.wikipedia.org/wiki/Make_(software)) to check the
 spelling with lychee run:
 
-`make checkspelling`
+`make checklinks`
