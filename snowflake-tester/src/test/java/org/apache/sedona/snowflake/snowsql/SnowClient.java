@@ -96,7 +96,6 @@ public class SnowClient {
             prop.put("user", System.getenv("SNOWFLAKE_USER"));
             prop.put("password", System.getenv("SNOWFLAKE_PASSWORD"));
         }
-        prop.put("db", System.getenv("SNOWFLAKE_DB"));
         prop.put("schema", System.getenv("SNOWFLAKE_SCHEMA"));
         prop.put("warehouse", System.getenv("SNOWFLAKE_WAREHOUSE"));
         prop.put("role", System.getenv("SNOWFLAKE_ROLE"));

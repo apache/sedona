@@ -17,40 +17,20 @@
  * under the License.
  */
 
-package org.apache.sedona.core.enums;
+package org.apache.sedona.snowflake.snowsql;
 
-import java.io.Serializable;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-// TODO: Auto-generated Javadoc
-
-/**
- * The Enum IndexType.
- */
-public enum IndexType
-        implements Serializable
-{
-
-    /**
-     * The quadtree.
-     */
-    QUADTREE,
-
-    /**
-     * The rtree.
-     */
-    RTREE;
-
-    /**
-     * Gets the index type.
-     *
-     * @param str the str
-     * @return the index type
-     */
-    public static IndexType getIndexType(String str)
-    {
-        for (IndexType me : IndexType.values()) {
-            if (me.name().equalsIgnoreCase(str)) { return me; }
-        }
-        return null;
+@RunWith(SnowTestRunner.class)
+public class TestFunctionsGeography
+        extends TestBase {
+    @Test
+    public void test_GeometryType() {
+        registerUDFGeography("GeometryType", String.class);
+        verifySqlSingleRes(
+                "select sedona.GeometryType(ST_GeographyFromWKT('POINT(1 2)'))",
+                "POINT"
+        );
     }
 }
