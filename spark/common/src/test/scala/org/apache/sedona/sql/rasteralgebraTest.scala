@@ -22,7 +22,7 @@ import org.apache.sedona.common.raster.MapAlgebra
 import org.apache.sedona.common.utils.RasterUtils
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.{Row, SaveMode}
-import org.apache.spark.sql.functions.{col, collect_list, expr, lit, row_number}
+import org.apache.spark.sql.functions.{col, collect_list, expr, lit, monotonically_increasing_id, row_number}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.junit.Assert.{assertEquals, assertNotNull, assertNull, assertTrue}
 import org.locationtech.jts.geom.{Coordinate, Geometry}
@@ -1006,17 +1006,33 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_Union_Aggr") {
-      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
-        .union(sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
-          .union(sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")))
+      var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/sample_image_3.tiff")
+        .union(sparkSession.read.format("binaryFile").load(resourceFolder + "raster/sample_image_4.tiff")
+          .union(sparkSession.read.format("binaryFile").load(resourceFolder + "raster/sample_image_5.tiff")))
         .withColumn("raster", expr("RS_FromGeoTiff(content) as raster"))
+        .withColumn("metadata", expr("RS_MetaData(raster) as metadata"))
+        .withColumn("summary", expr("RS_SummaryStatsAll(raster) as summary"))
         .withColumn("index", row_number().over(Window.orderBy("raster")))
-        .selectExpr("raster", "index")
+        .selectExpr("raster", "index", "metadata", "summary")
+
+      df.show()
+      df.select("index", "metadata").show(false)
+      df.select("index", "summary").show(false)
 
       val dfTest = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
         .selectExpr("RS_FromGeoTiff(content) as raster")
 
       df = df.selectExpr("RS_Union_aggr(raster, index) as rasters")
+      df = df.withColumn("metadata", expr("RS_MetaData(rasters) as metadata"))
+      df = df.withColumn("summary1", expr("RS_SummaryStatsAll(rasters, 1) as summary1"))
+            .withColumn("summary2", expr("RS_SummaryStatsAll(rasters, 2) as summary2"))
+            .withColumn("summary3", expr("RS_SummaryStatsAll(rasters, 3) as summary3"))
+
+      df.show()
+      df.select("metadata").show(false)
+      df.select("summary1").show(false)
+      df.select("summary2").show(false)
+      df.select("summary3").show(false)
 
       val actualBands = df.selectExpr("RS_NumBands(rasters)").first().get(0)
       val expectedBands = 3
@@ -1025,6 +1041,80 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val actualMetadata = df.selectExpr("RS_Metadata(rasters)").first().getSeq(0).slice(0, 9)
       val expectedMetadata = dfTest.selectExpr("RS_Metadata(raster)").first().getSeq(0).slice(0, 9)
       assertTrue(expectedMetadata.equals(actualMetadata))
+    }
+
+    it("Create and Test Two Multi-Band Rasters Using RS_Union_Aggr") {
+      // Load the raster files multiple times and assign them unique indexes for specific multi-band rasters
+      var df = sparkSession.read.format("binaryFile")
+        .load(resourceFolder + "raster/sample_image_3.tiff")
+        .withColumn("raster", expr("RS_FromGeoTiff(content)"))
+        .withColumn("index", lit(1))  // All contributions to the first multi-band raster
+        .select("raster", "index")
+        .union(
+          sparkSession.read.format("binaryFile")
+            .load(resourceFolder + "raster/sample_image_4.tiff")
+            .withColumn("raster", expr("RS_FromGeoTiff(content)"))
+            .withColumn("index", lit(1))  // Also contributes to the first multi-band raster
+            .select("raster", "index")
+        )
+        .union(
+          sparkSession.read.format("binaryFile")
+            .load(resourceFolder + "raster/sample_image_4.tiff")
+            .withColumn("raster", expr("RS_FromGeoTiff(content)"))
+            .withColumn("index", lit(2))  // Contributions to the second multi-band raster
+            .select("raster", "index")
+        )
+        .union(
+          sparkSession.read.format("binaryFile")
+            .load(resourceFolder + "raster/sample_image_5.tiff")
+            .withColumn("raster", expr("RS_FromGeoTiff(content)"))
+            .withColumn("index", lit(2))  // Also contributes to the second multi-band raster
+            .select("raster", "index")
+        )
+      df = df.withColumn("meta", expr("RS_MetaData(raster)"))
+      df = df.withColumn("summary", expr("RS_SummaryStatsAll(raster)"))
+
+      df.show()
+      df.select("index", "meta").show(false)
+      df.select("index", "summary").show(false)
+
+      // Aggregate rasters based on their indexes to create two separate multi-band rasters
+      var aggregatedDF = df.groupBy("index")
+        .agg(expr("RS_Union_Aggr(raster, index) as multi_band_raster"))
+        .orderBy("index")
+      aggregatedDF = aggregatedDF.withColumn("meta", expr("RS_MetaData(multi_band_raster)"))
+      aggregatedDF = aggregatedDF.withColumn("summary1", expr("RS_SummaryStatsAll(multi_band_raster, 1)"))
+        .withColumn("summary2", expr("RS_SummaryStatsAll(multi_band_raster, 2)"))
+
+      aggregatedDF.show()
+//      aggregatedDF.select("index", "meta").show(false)
+      aggregatedDF.select("index", "summary1").show(false)
+      aggregatedDF.select("index", "summary2").show(false)
+
+      // Aggregate rasters based on their indexes to create two separate multi-band rasters
+      var aggregatedDF2 = aggregatedDF.selectExpr("RS_Union_Aggr(multi_band_raster, index) as raster")
+//      aggregatedDF2 = aggregatedDF2.withColumn("meta", expr("RS_MetaData(raster)"))
+      aggregatedDF2 = aggregatedDF2.withColumn("summary1", expr("RS_SummaryStatsALl(raster, 1)"))
+        .withColumn("summary2", expr("RS_SummaryStatsALl(raster, 2)"))
+        .withColumn("summary3", expr("RS_SummaryStatsALl(raster, 3)"))
+        .withColumn("summary4", expr("RS_SummaryStatsALl(raster, 4)"))
+
+      aggregatedDF2.show()
+//      aggregatedDF2.select("meta").show(false)
+      aggregatedDF2.select("summary1").show(false)
+      aggregatedDF2.select("summary2").show(false)
+      aggregatedDF2.select("summary3").show(false)
+      aggregatedDF2.select("summary4").show(false)
+
+      // Check the number of bands in each aggregated multi-band raster
+//      aggregatedDF.collect().foreach { row =>
+//        val index = row.getAs[Int]("index")
+//        val raster = row.getAs[GridCoverage2D]("multi_band_raster")
+//        val numBands = RasterUtils.getNumBands(raster)  // Assuming a function to fetch number of bands
+//        val expectedBands = if (index == 1) 2 else 2  // Expecting 2 bands in each since test1 and test2 are both considered for each index
+//        println(s"Index $index has $numBands bands, expected $expectedBands")
+//        assert(numBands == expectedBands)
+//      }
     }
 
     it("Passed RS_ZonalStats") {
