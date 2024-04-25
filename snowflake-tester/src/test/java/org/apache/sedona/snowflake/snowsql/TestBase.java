@@ -103,6 +103,7 @@ public class TestBase extends TestCase {
         buildDDLConfigs = new HashMap<>();
         buildDDLConfigs.put(Constants.SEDONA_VERSION, sedonaVersion);
         buildDDLConfigs.put(Constants.GEOTOOLS_VERSION, geotoolsVersion);
+        System.out.println("Using Snowflake DB: " + snowflake_db_name);
         // upload libraries
         if (!jarUploaded) {
             snowflake_db_name = "TMP_TESTDB_" + generateRandomString(8);
