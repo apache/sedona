@@ -54,7 +54,7 @@ public class TestBase extends TestCase {
 
     private static boolean jarUploaded = false;
 
-    String snowflake_db_name = generateRandomString(8);
+    private static String snowflake_db_name = null;
 
     public void registerUDF(String functionName, Class<?> ... paramTypes) {
         try {
@@ -62,7 +62,6 @@ public class TestBase extends TestCase {
                     functionName,
                     paramTypes
             ), buildDDLConfigs, "@ApacheSedona", false, "");
-            System.out.println(ddl);
             ResultSet res = snowClient.executeQuery(ddl);
             res.next();
             assert res.getString(1).contains("successfully created");
@@ -77,7 +76,6 @@ public class TestBase extends TestCase {
                     functionName,
                     paramTypes
             ), buildDDLConfigs, "@ApacheSedona", false, "");
-            System.out.println(ddl);
             ResultSet res = snowClient.executeQuery(ddl);
             res.next();
             assert res.getString(1).contains("successfully created");
@@ -89,7 +87,6 @@ public class TestBase extends TestCase {
     public void registerUDTF(Class<?> clz) {
         try {
             String ddl = UDTFDDLGenerator.buildUDTFDDL(clz, buildDDLConfigs, "@ApacheSedona", false, "");
-            System.out.println(ddl);
             ResultSet res = snowClient.executeQuery(ddl);
             res.next();
             assert res.getString(1).contains("successfully created");
@@ -109,6 +106,8 @@ public class TestBase extends TestCase {
         System.out.println("Using Snowflake DB: " + snowflake_db_name);
         // upload libraries
         if (!jarUploaded) {
+            snowflake_db_name = "TMP_TESTDB_" + generateRandomString(8);
+            System.out.println("Creating Snowflake DB: " + snowflake_db_name);
             // drop then create db to make sure test env fresh
             snowClient.executeQuery("drop database if exists " + snowflake_db_name);
             snowClient.executeQuery("create database " + snowflake_db_name);
@@ -120,6 +119,11 @@ public class TestBase extends TestCase {
             snowClient.uploadFile(String.format("tmp/geotools-wrapper-%s.jar", geotoolsVersion), "ApacheSedona");
             jarUploaded = true;
         }
+        else {
+            System.out.println("Using Snowflake DB: " + snowflake_db_name);
+            snowClient.executeQuery("use database " + snowflake_db_name);
+            snowClient.executeQuery("use schema " + System.getenv("SNOWFLAKE_SCHEMA"));
+        }
         registerDependantUDFs();
     }
 
@@ -128,6 +132,7 @@ public class TestBase extends TestCase {
         try {
             System.out.println("Dropping Snowflake DB: " + snowflake_db_name);
             snowClient.executeQuery("drop database if exists " + snowflake_db_name);
+            jarUploaded = false;
         }
         catch (SQLException e) {
             throw new RuntimeException(e);
