@@ -88,7 +88,7 @@ public class SnowClient {
         }
     }
 
-    public static SnowClient newFromEnv(String snowflake_db_name) throws SQLException {
+    public static SnowClient newFromEnv() throws SQLException {
         Properties prop = new Properties();
         // check auth method
         String authMethod = System.getenv("SNOWFLAKE_AUTH_METHOD");
