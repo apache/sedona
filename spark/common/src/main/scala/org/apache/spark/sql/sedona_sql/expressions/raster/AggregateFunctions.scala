@@ -19,9 +19,9 @@
 
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
+import org.apache.sedona.common.raster.serde.Serde
 import org.apache.sedona.common.raster.{RasterAccessors, RasterBandAccessors}
 import org.apache.sedona.common.utils.RasterUtils
-import org.apache.sedona.sql.utils.RasterSerializer
 import org.apache.spark.sql.Encoder
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.expressions.Aggregator
@@ -54,12 +54,14 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
     val rasterData = RasterUtils.getRaster(raster.getRenderedImage)
     val isIntegral = RasterUtils.isDataTypeIntegral(rasterData.getDataBuffer.getDataType)
 
+    // Serializing GridSampleDimension
+    val serializedBytes = Serde.serializeGridSampleDimension(raster.getSampleDimension(0))
+
     // Check and set dimensions based on the first raster in the buffer
     if (buffer.isEmpty) {
-      // Assume the first raster in the buffer sets the dimensions for all subsequent rasters
       val width = RasterAccessors.getWidth(raster)
       val height = RasterAccessors.getHeight(raster)
-      val referenceSerializedRaster = RasterSerializer.serialize(raster)
+      val referenceSerializedRaster = Serde.serialize(raster)
 
       buffer += BandData(
         if (isIntegral) rasterData.getSamples(0, 0, width, height, 0, null.asInstanceOf[Array[Int]]) else null,
@@ -67,10 +69,10 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
         input._2,
         isIntegral,
         referenceSerializedRaster,
-        RasterSerializer.serializeSampleDimension(raster.getSampleDimension(0))
+        serializedBytes
       )
     } else {
-      val referenceRaster = RasterSerializer.deserialize(buffer.head.serializedRaster)
+      val referenceRaster = Serde.deserialize(buffer.head.serializedRaster)
       val width = RasterAccessors.getWidth(referenceRaster)
       val height = RasterAccessors.getHeight(referenceRaster)
 
@@ -83,8 +85,8 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
         if (!isIntegral) rasterData.getSamples(0, 0, width, height, 0, null.asInstanceOf[Array[Double]]) else null,
         input._2,
         isIntegral,
-        RasterSerializer.serialize(raster),
-        RasterSerializer.serializeSampleDimension(raster.getSampleDimension(0))
+        Serde.serialize(raster),
+        serializedBytes
       )
     }
 
@@ -99,8 +101,7 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
   def finish(merged: ArrayBuffer[BandData]): GridCoverage2D = {
     val sortedMerged = merged.sortBy(_.index)
     val numBands = sortedMerged.length
-    // Assume the first raster in merged as the reference for dimensions and setup
-    val referenceRaster = RasterSerializer.deserialize(sortedMerged.head.serializedRaster)
+    val referenceRaster = Serde.deserialize(sortedMerged.head.serializedRaster)
     val width = RasterAccessors.getWidth(referenceRaster)
     val height = RasterAccessors.getHeight(referenceRaster)
     val dataTypeCode = RasterUtils.getRaster(referenceRaster.getRenderedImage).getDataBuffer.getDataType
@@ -108,7 +109,9 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
     val gridSampleDimensions: Array[GridSampleDimension] = new Array[GridSampleDimension](numBands)
 
     for ((bandData, idx) <- sortedMerged.zipWithIndex) {
-      gridSampleDimensions(idx) = RasterSerializer.deserializeSampleDimension(bandData.serializedSampleDimension)
+      // Deserializing GridSampleDimension
+      gridSampleDimensions(idx) =  Serde.deserializeGridSampleDimension(bandData.serializedSampleDimension)
+
       if(bandData.isIntegral)
         resultRaster.setSamples(0, 0, width, height, idx, bandData.bandInt)
       else
