@@ -109,7 +109,7 @@ class TestVisualization(TestBase):
 
         p_map = pdk.Deck(layers=[layer])
         sedona_pydeck_map = SedonaPyDeck.create_scatterplot_map(df=chicago_crimes_df)
-        assert self.isMapEqual(sedona_map=sedona_pydeck_map, pydeck_map=p_map) == True
+        assert self.isMapEqual(sedona_map=sedona_pydeck_map, pydeck_map=p_map)
 
     def testHeatmap(self):
         chicago_crimes_csv_df = self.spark.read.format("csv"). \
@@ -144,7 +144,7 @@ class TestVisualization(TestBase):
 
         p_map = pdk.Deck(layers=[layer])
         sedona_pydeck_map = SedonaPyDeck.create_heatmap(df=chicago_crimes_df)
-        assert self.isMapEqual(sedona_map=sedona_pydeck_map, pydeck_map=p_map) == True
+        assert self.isMapEqual(sedona_map=sedona_pydeck_map, pydeck_map=p_map)
 
     def isMapEqual(self, pydeck_map, sedona_map):
         sedona_dict = json.loads(sedona_map.to_json())
