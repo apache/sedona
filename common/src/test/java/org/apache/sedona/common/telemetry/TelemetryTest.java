@@ -26,6 +26,6 @@ public class TelemetryTest
     @Test
     public void testTelemetryCollector()
     {
-        assert TelemetryCollector.send("test", "java").contains("https://sedona.gateway.scarf.sh/java/test");
+        assert TelemetryCollector.send("test", "java").contains("https://sedona.gateway.scarf.sh/packages/java/test");
     }
 }

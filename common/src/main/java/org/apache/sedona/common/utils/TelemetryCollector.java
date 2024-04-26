@@ -24,7 +24,7 @@ import java.net.URLEncoder;
 
 public class TelemetryCollector {
 
-    private static final String BASE_URL = "https://sedona.gateway.scarf.sh/";
+    private static final String BASE_URL = "https://sedona.gateway.scarf.sh/packages/";
 
     public static String send(String engineName, String language) {
         HttpURLConnection conn = null;
