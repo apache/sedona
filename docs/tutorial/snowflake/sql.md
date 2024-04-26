@@ -28,9 +28,9 @@ POINT (-122.33 47.61)	Seattle
 POINT (-122.42 37.76)	San Francisco
 ```
 
-## Create a Geometry column
+## Create a Geometry/Geography column
 
-All geometrical operations in SedonaSQL are on Geometry type objects. Therefore, before any kind of queries, you need to create a Geometry type column on the table.
+All geometrical operations in SedonaSQL are on Geometry/Geography type objects. Therefore, before any kind of queries, you need to create a Geometry/Geography type column on the table.
 
 ```sql
 CREATE TABLE city_tbl_geom AS
@@ -51,6 +51,22 @@ To view the content of this column in a human-readable format, you can use `ST_A
 ```sql
 SELECT Sedona.ST_AsText(geom), city_name
 FROM city_tbl_geom
+```
+
+Alternatively, you can also create Snowflake native Geometry and Geography type columns. For example, you can create a Snowflake native Geometry type column as follows (note the function has no `SEDONA` prefix):
+
+```sql
+CREATE TABLE city_tbl_geom AS
+SELECT ST_GeometryFromWKT(wkt) AS geom, city_name
+FROM city_tbl
+```
+
+The following code creates a Snowflake native Geography type column (note the function has no `SEDONA` prefix):
+
+```sql
+CREATE TABLE city_tbl_geom AS
+SELECT ST_GeographyFromWKT(wkt) AS geom, city_name
+FROM city_tbl
 ```
 
 !!!note
@@ -226,7 +242,7 @@ WHERE ST_Within(pointdf.pointshape, polygondf.polygonshape)
 ## Distance join
 
 !!!warning
-	Sedona distance join in Snowflake does not trigger Sedona's optimized spatial join algorithm while Sedona Spark does. It uses Snowflake's default Cartesian join which is very slow. Therefore, it is recommended to use Sedona's S2-based join or Snowflake's native ST functions to do range join, which will trigger Snowflake's `GeoJoin` algorithm.
+	Sedona distance join in Snowflake does not trigger Sedona's optimized spatial join algorithm while Sedona Spark does. It uses Snowflake's default Cartesian join which is very slow. Therefore, it is recommended to use Sedona's S2-based join or Snowflake's native ST functions + native `Geography` type to do range join, which will trigger Snowflake's `GeoJoin` algorithm.
 
 Introduction: Find geometries from A and geometries from B such that the distance of each geometry pair is less or equal than a certain distance. It supports the planar Euclidean distance calculators `ST_Distance`, `ST_HausdorffDistance`, `ST_FrechetDistance` and the meter-based geodesic distance calculators `ST_DistanceSpheroid` and `ST_DistanceSphere`.
 
@@ -358,8 +374,8 @@ You can click the links above to learn more about these functions. More function
 
 Sedona can interoperate with Snowflake native functions seamlessly. There are two ways to do this:
 
-* Use Sedona functions to create a Geometry column, then use Snowflake native functions and Sedona functions to query the Geometry column.
-* Use Snowflake native functions to create a Geometry column, then use Snowflake native functions and Sedona functions to query the Geometry column.
+* Use `Sedona functions` to create a Geometry column, then use Snowflake native functions and Sedona functions to query it.
+* Use `Snowflake native functions` to create a Geometry/Geography column, then use Snowflake native functions and Sedona functions to query it.
 
 Now we will show you how to do this.
 
@@ -372,7 +388,7 @@ In this case, Sedona uses EWKB type as the input/output type for geometry. If yo
 In this example, `SEDONA.ST_X` is a Sedona function, `ST_GeommetryFromWkt` and `ST_AsEWKB` are Snowflake native functions.
 
 ```sql
-SELECT SEDONA.ST_X(ST_AsEWKB(ST_GeommetryFromWkt('POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'))) FROM {{geometry_table}};
+SELECT SEDONA.ST_X(ST_AsEWKB(ST_GeometryFromWkt('POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'))) FROM {{geometry_table}};
 ```
 
 #### From Sedona functions to Snowflake native functions
@@ -391,7 +407,7 @@ Sedona geometry constructors are more powerful than Snowflake native functions. 
 * WKB serialization is more efficient. If you need to use multiple Sedona functions, it is more efficient to use this method, which might bring in 2X performance improvement.
 * SRID information of geometries is preserved. The method below will lose SRID information.
 
-### Geometries created by Snowflake Geometry constructors
+### Geometry / Geography created by Snowflake Geometry / Geography constructors
 
 In this case, Sedona uses Snowflake native GEOMETRY/GEOGRAPHY type as the input/output type for geometry. The serialization format is GeoJSON string.
 

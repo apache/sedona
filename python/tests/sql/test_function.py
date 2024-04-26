@@ -844,10 +844,10 @@ class TestPredicateJoin(TestBase):
 
     def test_isPolygonCW(self):
         actual = self.spark.sql("SELECT ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))'))").take(1)[0][0]
-        assert actual == False
+        assert not actual
 
         actual = self.spark.sql("SELECT ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))").take(1)[0][0]
-        assert actual == True
+        assert actual
 
     def test_st_is_ring(self):
         result_and_expected = [
@@ -862,10 +862,10 @@ class TestPredicateJoin(TestBase):
 
     def test_isPolygonCCW(self):
         actual = self.spark.sql("SELECT ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))'))").take(1)[0][0]
-        assert actual == True
+        assert actual
 
         actual = self.spark.sql("SELECT ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))").take(1)[0][0]
-        assert actual == False
+        assert not actual
 
     def test_forcePolygonCCW(self):
         actualDf = self.spark.sql(

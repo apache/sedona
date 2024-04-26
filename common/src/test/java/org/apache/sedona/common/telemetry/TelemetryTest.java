@@ -16,41 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.sedona.common.telemetry;
 
-package org.apache.sedona.core.enums;
+import org.apache.sedona.common.utils.TelemetryCollector;
+import org.junit.Test;
 
-import java.io.Serializable;
-
-// TODO: Auto-generated Javadoc
-
-/**
- * The Enum IndexType.
- */
-public enum IndexType
-        implements Serializable
+public class TelemetryTest
 {
-
-    /**
-     * The quadtree.
-     */
-    QUADTREE,
-
-    /**
-     * The rtree.
-     */
-    RTREE;
-
-    /**
-     * Gets the index type.
-     *
-     * @param str the str
-     * @return the index type
-     */
-    public static IndexType getIndexType(String str)
+    @Test
+    public void testTelemetryCollector()
     {
-        for (IndexType me : IndexType.values()) {
-            if (me.name().equalsIgnoreCase(str)) { return me; }
-        }
-        return null;
+        assert TelemetryCollector.send("test", "java").contains("https://sedona.gateway.scarf.sh/packages/java/test");
     }
 }

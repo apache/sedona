@@ -452,15 +452,15 @@ SELECT RS_GeoReferrence(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1,
 
 Introduction: Returns an array of parameters that represent the GeoTransformation of the raster. The array contains the following values:
 
-- 0: pixel width along west-east axis (x axis)
-- 1: pixel height along north-south axis (y axis)
+- 0: pixel width along west-east axis (x-axis)
+- 1: pixel height along north-south axis (y-axis)
 - 2: Rotation of the raster
-- 3: Angular separation between x axis and y axis
+- 3: Angular separation between x-axis and y-axis
 - 4: X ordinate of upper-left coordinate
 - 5: Y ordinate of upper-left coordinate
 
 !!!note
-    Refer to [this image](https://www.researchgate.net/figure/Relation-between-the-cartesian-axes-x-y-and-i-j-axes-of-the-pixels_fig3_313860913) for a clear understanding between i & j axis and x & y axis.
+    Refer to [this image](https://www.researchgate.net/figure/Relation-between-the-cartesian-axes-x-y-and-i-j-axes-of-the-pixels_fig3_313860913) for a clear understanding between i & j axis and x & y-axis.
 
 Format: `RS_GeoTransform(raster: Raster)`
 
@@ -884,7 +884,7 @@ Output:
 
 ### RS_BandNoDataValue
 
-Introduction: Returns the no data value of the given band of the given raster. If no band is given, band 1 is assumed. The band parameter is 1-indexed. If there is no no data value associated with the given band, RS_BandNoDataValue returns null.
+Introduction: Returns the no data value of the given band of the given raster. If no band is given, band 1 is assumed. The band parameter is 1-indexed. If there is no data value associated with the given band, RS_BandNoDataValue returns null.
 
 !!!Note
     If the given band does not lie in the raster, RS_BandNoDataValue throws an IllegalArgumentException
@@ -1440,7 +1440,7 @@ Since: `v1.5.1`
 
 Original Raster:
 
-![Original raster](../../image/original-raster-clip.png "Original raster"){: width="400px"}
+![Original raster](../../image/original-raster-clip.png "Original raster")
 
 SQL Example
 
@@ -1454,7 +1454,7 @@ SELECT RS_Clip(
 
 Output:
 
-![Cropped raster](../../image/cropped-raster.png "Cropped raster"){: width="400px"}
+![Cropped raster](../../image/cropped-raster.png "Cropped raster")
 
 SQL Example
 
@@ -1468,7 +1468,7 @@ SELECT RS_Clip(
 
 Output:
 
-![Clipped raster](../../image/clipped-raster.png "Clipped raster"){: width="400px"}
+![Clipped raster](../../image/clipped-raster.png "Clipped raster")
 
 ### RS_Interpolate
 
@@ -1528,8 +1528,8 @@ SELECT RS_Interpolate(raster, 1, 2.0, 'Variable', 12, 1000)
 
 Output (Shown as heatmap):
 
-![Original raster](../../image/heatmap_Interpolate.png "Original raster"){: width="400px"}
-![Interpolated raster](../../image/heatmap_Interpolate2.png "Interpolated raster"){: width="400px"}
+![Original raster](../../image/heatmap_Interpolate.png "Original raster")
+![Interpolated raster](../../image/heatmap_Interpolate2.png "Interpolated raster")
 
 ### RS_MetaData
 
@@ -2009,7 +2009,7 @@ Since: `v1.5.0`
 The `colX`, `rowY`, and `bandIndex` are 1-indexed. If `keepNoData` is `true`, the pixels with NoData value will not be
 set to the corresponding value in `newValues`. The `newValues` should be provided in rows.
 
-The geometry variant of this function accepts all types of Geometries and it sets the `newValue` in the specified region under the `geom`.
+The geometry variant of this function accepts all types of Geometries, and it sets the `newValue` in the specified region under the `geom`.
 
 !!!note
     If the shape of `newValues` doesn't match with provided `width` and `height`, `IllegalArgumentException` is thrown.
