@@ -32,6 +32,8 @@ import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.RenderedImageAdapter;
 import java.awt.image.RenderedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
@@ -175,5 +177,20 @@ public class Serde {
             state.read(kryo, in);
             return state.restore();
         }
+    }
+
+    public static byte[] serializeGridSampleDimension(GridSampleDimension sampleDimension) {
+        Kryo kryo = kryos.get();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        Output output = new Output(baos);
+        kryo.writeClassAndObject(output, sampleDimension);
+        output.close();
+        return baos.toByteArray();
+    }
+
+    public static GridSampleDimension deserializeGridSampleDimension(byte[] data) {
+        Kryo kryo = kryos.get();
+        Input input = new Input(new ByteArrayInputStream(data));
+        return (GridSampleDimension) kryo.readClassAndObject(input);
     }
 }

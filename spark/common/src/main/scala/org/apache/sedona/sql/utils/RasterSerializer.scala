@@ -20,9 +20,7 @@
 package org.apache.sedona.sql.utils
 
 import org.apache.sedona.common.raster.serde.Serde
-import org.geotools.coverage.GridSampleDimension
 import org.geotools.coverage.grid.GridCoverage2D
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
 object RasterSerializer {
   /**
    * Given a raster returns array of bytes
@@ -42,19 +40,5 @@ object RasterSerializer {
    */
   def deserialize(value: Array[Byte]): GridCoverage2D = {
     Serde.deserialize(value);
-  }
-
-  def serializeSampleDimension(sampleDimension: GridSampleDimension): Array[Byte] = {
-    val bos = new ByteArrayOutputStream()
-    val oos = new ObjectOutputStream(bos)
-    oos.writeObject(sampleDimension)
-    oos.flush()
-    bos.toByteArray
-  }
-
-  def deserializeSampleDimension(bytes: Array[Byte]): GridSampleDimension = {
-    val bis = new ByteArrayInputStream(bytes)
-    val ois = new ObjectInputStream(bis)
-    ois.readObject().asInstanceOf[GridSampleDimension]
   }
 }
