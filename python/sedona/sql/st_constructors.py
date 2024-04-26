@@ -14,6 +14,8 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
+import inspect
+import sys
 
 from functools import partial
 from typing import Optional, Union
@@ -23,25 +25,9 @@ from pyspark.sql import Column
 from sedona.sql.dataframe_api import ColumnOrName, ColumnOrNameOrNumber, call_sedona_function, validate_argument_types
 
 
-__all__ = [
-    "ST_GeomFromGeoHash",
-    "ST_GeomFromGeoJSON",
-    "ST_GeomFromGML",
-    "ST_GeomFromKML",
-    "ST_GeomFromText",
-    "ST_GeomFromWKB",
-    "ST_GeomFromWKT",
-    "ST_GeomFromEWKT",
-    "ST_LineFromText",
-    "ST_LineStringFromText",
-    "ST_Point",
-    "ST_PointFromText",
-    "ST_MakePoint"
-    "ST_PolygonFromEnvelope",
-    "ST_PolygonFromText",
-    "ST_MLineFromText",
-    "ST_MPolyFromText"
-]
+# Automatically populate __all__
+__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
+           if inspect.isfunction(obj)]
 
 
 _call_constructor_function = partial(call_sedona_function, "st_constructors")
