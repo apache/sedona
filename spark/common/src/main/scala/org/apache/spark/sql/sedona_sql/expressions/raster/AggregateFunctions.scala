@@ -78,7 +78,6 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
       buffer
     }
 
-
   def merge(buffer1: ArrayBuffer[BandData], buffer2: ArrayBuffer[BandData]): ArrayBuffer[BandData] = {
     val combined = ArrayBuffer.concat(buffer1, buffer2)
     if (combined.map(_.index).distinct.length != combined.length) {
@@ -86,7 +85,6 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
     }
     combined
   }
-
 
   def finish(merged: ArrayBuffer[BandData]): GridCoverage2D = {
     val sortedMerged = merged.sortBy(_.index)
@@ -97,12 +95,12 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
       throw new IllegalArgumentException("Index should be in an arithmetic sequence.")
     }
 
-    val numBands = sortedMerged.length
+    val totalBands = sortedMerged.map(_.bandsData.length).sum
     val referenceRaster = Serde.deserialize(sortedMerged.head.serializedRaster)
     val width = RasterAccessors.getWidth(referenceRaster)
     val height = RasterAccessors.getHeight(referenceRaster)
     val dataTypeCode = RasterUtils.getRaster(referenceRaster.getRenderedImage).getDataBuffer.getDataType
-    val resultRaster: WritableRaster = RasterFactory.createBandedRaster(dataTypeCode, width, height, numBands, null)
+    val resultRaster: WritableRaster = RasterFactory.createBandedRaster(dataTypeCode, width, height, totalBands, null)
     val gridSampleDimensions = sortedMerged.flatMap(_.serializedSampleDimensions.map(Serde.deserializeGridSampleDimension)).toArray
 
     var currentBand = 0
@@ -112,7 +110,7 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
         currentBand += 1
       }
     }
-//    RasterUtils.create(resultRaster, referenceRaster.getGridGeometry, gridSampleDimensions)
+
     val noDataValue = RasterBandAccessors.getBandNoDataValue(referenceRaster)
     RasterUtils.clone(resultRaster, referenceRaster.getGridGeometry, gridSampleDimensions, referenceRaster, noDataValue, true)
   }
