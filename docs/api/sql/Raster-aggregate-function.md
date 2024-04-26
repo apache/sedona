@@ -1,9 +1,9 @@
 ## RS_Union_Aggr
 
-Introduction: Returns a raster containing bands by specified indexes from all rasters in the provided column. Extracts the first bands from each raster and combines them into the output raster based on the input index values.
+Introduction: Returns a raster containing bands by specified indexes from all rasters in the provided column. Combines all bands from each raster into the output raster. The order of bands in the resultant raster are based on the input index order.
 
 !!!Note
-    RS_Union_Aggr can take multiple banded rasters as input, but it would only extract the first band to the resulting raster. RS_Union_Aggr expects the following input, if not satisfied then will throw an IllegalArgumentException:
+    RS_Union_Aggr expects the following input, if not satisfied then will throw an IllegalArgumentException:
 
     - Indexes to be in an arithmetic sequence without any gaps.
     - Indexes to be unique and not repeated.
@@ -35,7 +35,7 @@ SELECT RS_Union_Aggr(raster, index) FROM raster_table
 
 Output:
 
-This output raster contains the first band of each raster in the `raster_table` at specified index.
+This output raster contains all bands of each raster in the `raster_table`.
 
 ```
 GridCoverage2D["geotiff_coverage", GeneralEnvel...
