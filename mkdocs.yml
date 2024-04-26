@@ -123,6 +123,7 @@ nav:
       - Thanks: https://www.apache.org/foundation/thanks.html" target="_blank
       - Security: https://www.apache.org/security/" target="_blank
       - Privacy: https://privacy.apache.org/policies/privacy-policy-public.html" target="_blank
+      - Telemetry: asf/telemetry.md
 repo_url: https://github.com/apache/sedona
 repo_name: apache/sedona
 theme:

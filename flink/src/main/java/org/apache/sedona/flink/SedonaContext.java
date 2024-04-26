@@ -23,6 +23,7 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.geometrySerde.GeometrySerde;
 import org.apache.sedona.common.geometrySerde.SpatialIndexSerde;
+import org.apache.sedona.common.utils.TelemetryCollector;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.LineString;
@@ -46,6 +47,7 @@ public class SedonaContext
      */
     public static StreamTableEnvironment create(StreamExecutionEnvironment env, StreamTableEnvironment tblEnv)
     {
+        TelemetryCollector.send("flink", "java");
         GeometrySerde serializer = new GeometrySerde();
         SpatialIndexSerde indexSerializer = new SpatialIndexSerde(serializer);
         env.getConfig().registerTypeWithKryoSerializer(Point.class, serializer);
