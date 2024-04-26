@@ -95,11 +95,23 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
 
 
   def merge(buffer1: ArrayBuffer[BandData], buffer2: ArrayBuffer[BandData]): ArrayBuffer[BandData] = {
-    ArrayBuffer.concat(buffer1, buffer2)
+    val combined = ArrayBuffer.concat(buffer1, buffer2)
+    if (combined.map(_.index).distinct.length != combined.length) {
+      throw new IllegalArgumentException("Indexes shouldn't be repeated.")
+    }
+    combined
   }
+
 
   def finish(merged: ArrayBuffer[BandData]): GridCoverage2D = {
     val sortedMerged = merged.sortBy(_.index)
+    if (sortedMerged.zipWithIndex.exists { case (band, idx) =>
+      if (idx > 0) (band.index - sortedMerged(idx - 1).index) != (sortedMerged(1).index - sortedMerged(0).index)
+      else false
+    }) {
+      throw new IllegalArgumentException("Index should be in an arithmetic sequence.")
+    }
+
     val numBands = sortedMerged.length
     val referenceRaster = Serde.deserialize(sortedMerged.head.serializedRaster)
     val width = RasterAccessors.getWidth(referenceRaster)
