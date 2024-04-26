@@ -21,6 +21,7 @@ package org.apache.sedona.sql.utils
 
 import org.apache.sedona.common.raster.serde.Serde
 import org.geotools.coverage.grid.GridCoverage2D
+
 object RasterSerializer {
   /**
    * Given a raster returns array of bytes
