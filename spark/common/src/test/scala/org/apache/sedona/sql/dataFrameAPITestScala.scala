@@ -246,6 +246,19 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_GeomCollFromText") {
+      val df = sparkSession.sql("SELECT 'GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))' as geom")
+      var actual = df.select(ST_GeomCollFromText("geom")).first().get(0).asInstanceOf[Geometry].toText
+      val expected = "GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))"
+      assert(expected == actual)
+
+      val actualGeom = df.select(ST_GeomCollFromText("geom", 4326)).first().get(0).asInstanceOf[Geometry]
+      actual = actualGeom.toText
+      assert(actual == expected)
+      val actualSrid = actualGeom.getSRID
+      assert(4326 == actualSrid)
+    }
+
     it("passed st_geomfromgeohash") {
       val df = sparkSession.sql("SELECT 's00twy01mt' AS geohash").select(ST_GeomFromGeoHash("geohash", 4))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()

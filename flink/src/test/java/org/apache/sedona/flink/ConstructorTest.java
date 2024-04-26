@@ -559,4 +559,24 @@ public class ConstructorTest extends TestBase{
         String expectedGeom = "MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))";
         assertEquals(expectedGeom, result);
     }
+
+    @Test
+    public void testGeomCollFromText() {
+        Table tbl = tableEnv.sqlQuery("SELECT 'GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90),POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))' AS coll, 4326 as srid");
+        String actualColl = first(
+                tbl.select(call(Constructors.ST_GeomCollFromText.class.getSimpleName(), $("coll")))
+        ).getFieldAs(0).toString();
+        String expectedColl = "GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))";
+        assertEquals(expectedColl, actualColl);
+
+        actualColl = first(
+                tbl.select(call(Constructors.ST_GeomCollFromText.class.getSimpleName(), $("coll"), $("srid")))
+        ).getFieldAs(0).toString();
+        assertEquals(expectedColl, actualColl);
+        int actualSrid = first(
+                tbl.select(call(Constructors.ST_GeomCollFromText.class.getSimpleName(), $("coll"), $("srid")))
+                        .as("geom").select(call(Functions.ST_SRID.class.getSimpleName(), $("geom")))
+        ).getFieldAs(0);
+        assertEquals(4326, actualSrid);
+    }
 }

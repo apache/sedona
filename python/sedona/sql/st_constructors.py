@@ -395,3 +395,18 @@ def ST_MLineFromText(wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = N
     args = (wkt) if srid is None else (wkt, srid)
 
     return _call_constructor_function("ST_MLineFromText", args)
+
+@validate_argument_types
+def ST_GeomCollFromText(wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None) -> Column:
+    """Generate GeometryCollection geometry from a GeometryCollection WKT representation.
+
+    :param wkt: GeometryCollection WKT string column to generate from.
+    :type wkt: ColumnOrName
+    :param srid: SRID for the geometry
+    :type srid: ColumnOrNameOrNumber
+    :return: GeometryCollection geometry generated from the wkt column.
+    :rtype: Column
+    """
+    args = (wkt) if srid is None else (wkt, srid)
+
+    return _call_constructor_function("ST_GeomCollFromText", args)

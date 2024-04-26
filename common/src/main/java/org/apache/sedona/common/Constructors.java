@@ -108,6 +108,14 @@ public class Constructors {
         return new WKTReader(geometryFactory).read(wkt);
     }
 
+    public static Geometry geomCollFromText(String wkt, int srid) throws ParseException {
+        if (wkt == null || !wkt.startsWith("GEOMETRYCOLLECTION")) {
+            return null;
+        }
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        return new WKTReader(geometryFactory).read(wkt);
+    }
+
 
     /**
      * Creates a point from the given coordinate.

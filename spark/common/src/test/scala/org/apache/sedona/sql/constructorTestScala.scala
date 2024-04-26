@@ -423,5 +423,18 @@ class constructorTestScala extends TestBaseScala {
       var mLineDf = sparkSession.sql("select ST_MPolyFromText('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))',4269)")
       assert(mLineDf.count() == 1)
     }
+
+    it("Passed ST_GeomCollFromText") {
+      val baseDf = sparkSession.sql("SELECT 'GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))' as geom, 4326 as srid")
+      var actual = baseDf.selectExpr("ST_GeomCollFromText(geom)").first().get(0).asInstanceOf[Geometry].toText
+      val expected = "GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))"
+      assert(expected.equals(actual))
+
+      val actualGeom = baseDf.selectExpr("ST_GeomCollFromText(geom, srid)").first().get(0).asInstanceOf[Geometry]
+      actual = actualGeom.toText
+      assert(expected.equals(actual))
+      val actualSrid = actualGeom.getSRID
+      assert(4326 == actualSrid)
+    }
   }
 }

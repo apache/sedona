@@ -99,6 +99,23 @@ public class ConstructorsTest {
     }
 
     @Test
+    public void geomCollFromText() throws ParseException {
+        assertNull(Constructors.geomCollFromText(null, 0));
+        assertNull(Constructors.geomCollFromText("MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))", 0));
+        Geometry geom = Constructors.geomCollFromText("GEOMETRYCOLLECTION (POINT (10 20),LINESTRING (30 40, 50 60, 70 80),POLYGON ((10 10, 20 20, 10 20, 10 10)))", 0);
+        assertEquals(0,geom.getSRID());
+        assertEquals("GEOMETRYCOLLECTION (POINT (10 20), LINESTRING (30 40, 50 60, 70 80), POLYGON ((10 10, 20 20, 10 20, 10 10)))",geom.toText());
+
+        geom = Constructors.geomCollFromText("GEOMETRYCOLLECTION (POINT (10 20),LINESTRING (30 40, 50 60, 70 80),POLYGON ((10 10, 20 20, 10 20, 10 10)))", 3306);
+        assertEquals(3306,geom.getSRID());
+        assertEquals("GEOMETRYCOLLECTION (POINT (10 20), LINESTRING (30 40, 50 60, 70 80), POLYGON ((10 10, 20 20, 10 20, 10 10)))"
+                ,geom.toText());
+
+        ParseException parseException = assertThrows(ParseException.class, () -> Constructors.geomCollFromText("GEOMETRYCOLLECTION (POLYGON(not valid))", 0));
+        assertEquals("Expected EMPTY or ( but found 'not' (line 1)", parseException.getMessage());
+    }
+
+    @Test
     public void point() {
         Geometry point = Constructors.point(1.0d, 2.0d);
 

@@ -70,6 +70,8 @@ test_configurations = [
     (stc.ST_PolygonFromEnvelope, ("minx", "miny", "maxx", "maxy"), "min_max_x_y", "", "POLYGON ((0 1, 0 3, 2 3, 2 1, 0 1))"),
     (stc.ST_PolygonFromEnvelope, (0.0, 1.0, 2.0, 3.0), "null", "", "POLYGON ((0 1, 0 3, 2 3, 2 1, 0 1))"),
     (stc.ST_PolygonFromText, ("multiple_point", lambda: f.lit(',')), "constructor", "", "POLYGON ((0 0, 1 0, 1 1, 0 0))"),
+    (stc.ST_GeomCollFromText, ("collection",), "constructor", "", "GEOMETRYCOLLECTION (POINT (1 1), LINESTRING (0 0, 1 1))"),
+    (stc.ST_GeomCollFromText, ("collection", 4326), "constructor", "ST_SRID(geom)", 4326),
 
     # functions
     (stf.GeometryType, ("line",), "linestring_geom", "", "LINESTRING"),
@@ -268,6 +270,8 @@ wrong_type_configurations = [
     (stc.ST_PolygonFromEnvelope, ("", "", "", None)),
     (stc.ST_PolygonFromText, (None, "")),
     (stc.ST_PolygonFromText, ("", None)),
+    (stc.ST_PolygonFromText, (None, None)),
+    (stc.ST_PolygonFromText, ("", None)),
 
     # functions
     (stf.ST_3DDistance, (None, "")),
@@ -444,6 +448,7 @@ class TestDataFrameAPI(TestBase):
         geojson = "{ \"type\": \"Feature\", \"properties\": { \"prop\": \"01\" }, \"geometry\": { \"type\": \"Point\", \"coordinates\": [ 0.0, 1.0 ] }},"
         gml_string = "<gml:LineString srsName=\"EPSG:4269\"><gml:coordinates>-71.16,42.25 -71.17,42.25 -71.18,42.25</gml:coordinates></gml:LineString>"
         kml_string = "<LineString><coordinates>-71.16,42.26 -71.17,42.26</coordinates></LineString>"
+        wktCollection = 'GEOMETRYCOLLECTION(POINT(1 1), LINESTRING(0 0, 1 1)))'
 
         if request.param == "constructor":
             return TestDataFrameAPI.spark.sql("SELECT null").selectExpr(
@@ -459,7 +464,8 @@ class TestDataFrameAPI(TestBase):
                 f"'{geojson}' AS geojson",
                 "'s00twy01mt' AS geohash",
                 f"'{gml_string}' AS gml",
-                f"'{kml_string}' AS kml"
+                f"'{kml_string}' AS kml",
+                f"'{wktCollection}' AS collection"
             )
         elif request.param == "point_geom":
             return TestDataFrameAPI.spark.sql("SELECT ST_Point(0.0, 1.0) AS point")

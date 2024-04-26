@@ -190,3 +190,16 @@ class TestConstructors(TestBase):
         input_df.createOrReplaceTempView("input_wkt")
         line_df = self.spark.sql("select ST_MPolyFromText(wkt) as geom from input_wkt")
         assert line_df.count() == 1
+
+    def test_geom_coll_from_text(self):
+        baseDf = self.spark.sql("SELECT 'GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))' as geom, 4326 as srid")
+        actual = baseDf.selectExpr("ST_AsText(ST_GeomCollFromText(geom))").take(1)[0][0]
+        expected = 'GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))'
+        assert expected == actual
+
+        actualGeom = baseDf.selectExpr("ST_GeomCollFromText(geom, srid) as geom")
+        actual = actualGeom.selectExpr("ST_AsText(geom)").take(1)[0][0]
+        assert expected == actual
+
+        actualSrid = actualGeom.selectExpr("ST_SRID(geom)").take(1)[0][0]
+        assert actualSrid == 4326
