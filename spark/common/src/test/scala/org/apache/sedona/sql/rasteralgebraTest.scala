@@ -1027,7 +1027,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertTrue(expectedMetadata.equals(actualMetadata))
     }
 
-    it("Create and Test Two Multi-Band Rasters Using RS_Union_Aggr") {
+    it("Passed multi-band RS_Union_Aggr") {
       var df = sparkSession.read.format("binaryFile")
         .load(resourceFolder + "raster/test4.tiff")
         .withColumn("raster", expr("RS_FromGeoTiff(content)"))
