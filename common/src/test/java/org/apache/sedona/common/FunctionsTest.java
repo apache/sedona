@@ -1042,6 +1042,11 @@ public class FunctionsTest extends TestBase {
         actual = Functions.asWKT(Functions.longestLine(geom1, geom2));
         expected = "LINESTRING Z(10 20 5, 50 60 20)";
         assertEquals(expected, actual);
+
+        geom1 = Constructors.geomFromWKT("POINT (0 0)", 0);
+        actual = Functions.asWKT(Functions.longestLine(geom1, geom1));
+        expected = "LINESTRING (0 0, 0 0)";
+        assertEquals(expected, actual);
     }
 
     @Test
