@@ -65,4 +65,3 @@ public class TelemetryCollector {
         return telemetrySubmitted;
     }
 }
-
