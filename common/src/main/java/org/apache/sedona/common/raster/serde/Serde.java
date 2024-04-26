@@ -183,7 +183,8 @@ public class Serde {
         Kryo kryo = kryos.get();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Output output = new Output(baos);
-        kryo.writeClassAndObject(output, sampleDimension);
+        GridSampleDimensionSerializer serializer = new GridSampleDimensionSerializer();
+        serializer.write(kryo, output, sampleDimension);
         output.close();
         return baos.toByteArray();
     }
@@ -191,6 +192,8 @@ public class Serde {
     public static GridSampleDimension deserializeGridSampleDimension(byte[] data) {
         Kryo kryo = kryos.get();
         Input input = new Input(new ByteArrayInputStream(data));
-        return (GridSampleDimension) kryo.readClassAndObject(input);
+        GridSampleDimensionSerializer serializer = new GridSampleDimensionSerializer();
+        return serializer.read(kryo, input, GridSampleDimension.class);
     }
+
 }
