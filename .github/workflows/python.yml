@@ -22,6 +22,7 @@ on:
 
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
+  DO_NOT_TRACK: true
 
 permissions:
   contents: read

@@ -60,7 +60,8 @@ sedona_initialize_spark_connection <- function(sc) {
     sc,
     "org.apache.sedona.sql.utils.SedonaSQLRegistrator",
     "registerAll",
-    spark_session(sc)
+    spark_session(sc),
+    "r"
   )
 
   # Instantiate all enum objects and store them immutably under
