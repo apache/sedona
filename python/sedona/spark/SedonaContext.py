@@ -35,7 +35,7 @@ class SedonaContext:
         """
         spark.sql("SELECT 1 as geom").count()
         PackageImporter.import_jvm_lib(spark._jvm)
-        spark._jvm.SedonaContext.create(spark._jsparkSession)
+        spark._jvm.SedonaContext.create(spark._jsparkSession, "python")
         return spark
 
     @classmethod
