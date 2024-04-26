@@ -14,6 +14,8 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
+import inspect
+import sys
 
 from functools import partial
 
@@ -23,11 +25,9 @@ from sedona.sql.dataframe_api import ColumnOrName, call_sedona_function, validat
 
 _call_aggregate_function = partial(call_sedona_function, "st_aggregates")
 
-__all__ = [
-    "ST_Envelope_Aggr",
-    "ST_Intersection_Aggr",
-    "ST_Union_Aggr",
-]
+# Automatically populate __all__
+__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
+           if inspect.isfunction(obj)]
 
 
 @validate_argument_types

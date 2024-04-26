@@ -14,6 +14,8 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
+import inspect
+import sys
 
 from functools import partial
 
@@ -23,18 +25,9 @@ from typing import Union
 from sedona.sql.dataframe_api import ColumnOrName, call_sedona_function, validate_argument_types
 
 
-__all__ = [
-    "ST_Contains",
-    "ST_Crosses",
-    "ST_Disjoint",
-    "ST_Equals",
-    "ST_Intersects",
-    "ST_OrderingEquals",
-    "ST_Overlaps",
-    "ST_Touches",
-    "ST_Within",
-    "ST_DWithin"
-]
+# Automatically populate __all__
+__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
+           if inspect.isfunction(obj)]
 
 
 _call_predicate_function = partial(call_sedona_function, "st_predicates")

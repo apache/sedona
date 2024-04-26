@@ -21,6 +21,11 @@ from pyspark.sql import functions as f, Row
 import pytest
 from shapely.geometry.base import BaseGeometry
 
+from sedona.sql.st_aggregates import *
+from sedona.sql.st_constructors import *
+from sedona.sql.st_functions import *
+from sedona.sql.st_predicates import *
+
 from sedona.sql import (
     st_aggregates as sta,
     st_constructors as stc,
