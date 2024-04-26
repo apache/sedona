@@ -19,16 +19,16 @@
 
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
-import org.apache.sedona.common.raster.RasterAccessors
+import org.apache.sedona.common.raster.serde.Serde
+import org.apache.sedona.common.raster.{RasterAccessors, RasterBandAccessors}
 import org.apache.sedona.common.utils.RasterUtils
-import org.apache.sedona.sql.utils.RasterSerializer
 import org.apache.spark.sql.Encoder
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.expressions.Aggregator
 import org.geotools.coverage.GridSampleDimension
 import org.geotools.coverage.grid.GridCoverage2D
 
-import java.awt.image.{DataBuffer, WritableRaster}
+import java.awt.image.WritableRaster
 import javax.media.jai.RasterFactory
 import scala.collection.mutable.ArrayBuffer
 
@@ -39,56 +39,71 @@ case class BandData(
                      var serializedSampleDimensions: Array[Array[Byte]]
                    )
 
+
 /**
- * RS_Union_Aggr aggregates all bands from each raster into a single multi-band raster.
+ * Return a raster containing bands at given indexes from all rasters in a given column
  */
-class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandData], GridCoverage2D] {
+class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandData], GridCoverage2D]  {
 
   def zero: ArrayBuffer[BandData] = ArrayBuffer[BandData]()
 
   def reduce(buffer: ArrayBuffer[BandData], input: (GridCoverage2D, Int)): ArrayBuffer[BandData] = {
-    val raster = input._1
-    val renderedImage = raster.getRenderedImage
-    val numBands = renderedImage.getSampleModel.getNumBands
-    val width = renderedImage.getWidth
-    val height = renderedImage.getHeight
+      val raster = input._1
+      val renderedImage = raster.getRenderedImage
+      val numBands = renderedImage.getSampleModel.getNumBands
+      val width = renderedImage.getWidth
+      val height = renderedImage.getHeight
 
-    // First check if this is the first raster to set dimensions or validate against existing dimensions
-    if (buffer.nonEmpty) {
-      val referenceRaster = RasterSerializer.deserialize(buffer.head.serializedRaster)
-      val refWidth = RasterAccessors.getWidth(referenceRaster)
-      val refHeight = RasterAccessors.getHeight(referenceRaster)
-      if (width != refWidth || height != refHeight) {
-        throw new IllegalArgumentException("All rasters must have the same dimensions")
+      // First check if this is the first raster to set dimensions or validate against existing dimensions
+      if (buffer.nonEmpty) {
+        val referenceRaster = Serde.deserialize(buffer.head.serializedRaster)
+        val refWidth = RasterAccessors.getWidth(referenceRaster)
+        val refHeight = RasterAccessors.getHeight(referenceRaster)
+        if (width != refWidth || height != refHeight) {
+          throw new IllegalArgumentException("All rasters must have the same dimensions")
+        }
       }
+
+      // Extract data for each band
+      val rasterData = renderedImage.getData
+      val bandsData = Array.ofDim[Double](numBands, width * height)
+      val serializedSampleDimensions = new Array[Array[Byte]](numBands)
+
+      for (band <- 0 until numBands) {
+        bandsData(band) = rasterData.getSamples(0, 0, width, height, band, new Array[Double](width * height))
+        serializedSampleDimensions(band) = Serde.serializeGridSampleDimension(raster.getSampleDimension(band))
+      }
+
+      buffer += BandData(bandsData, input._2, Serde.serialize(raster), serializedSampleDimensions)
+      buffer
     }
-
-    // Extract data for each band
-    val rasterData = renderedImage.getData
-    val bandsData = Array.ofDim[Double](numBands, width * height)
-    val serializedSampleDimensions = new Array[Array[Byte]](numBands)
-
-    for (band <- 0 until numBands) {
-      bandsData(band) = rasterData.getSamples(0, 0, width, height, band, new Array[Double](width * height))
-      serializedSampleDimensions(band) = RasterSerializer.serializeSampleDimension(raster.getSampleDimension(band))
-    }
-
-    buffer += BandData(bandsData, input._2, RasterSerializer.serialize(raster), serializedSampleDimensions)
-    buffer
-  }
 
 
   def merge(buffer1: ArrayBuffer[BandData], buffer2: ArrayBuffer[BandData]): ArrayBuffer[BandData] = {
-    ArrayBuffer.concat(buffer1, buffer2)
+    val combined = ArrayBuffer.concat(buffer1, buffer2)
+    if (combined.map(_.index).distinct.length != combined.length) {
+      throw new IllegalArgumentException("Indexes shouldn't be repeated.")
+    }
+    combined
   }
+
 
   def finish(merged: ArrayBuffer[BandData]): GridCoverage2D = {
     val sortedMerged = merged.sortBy(_.index)
-    val referenceRaster = RasterSerializer.deserialize(sortedMerged.head.serializedRaster)
+    if (sortedMerged.zipWithIndex.exists { case (band, idx) =>
+      if (idx > 0) (band.index - sortedMerged(idx - 1).index) != (sortedMerged(1).index - sortedMerged(0).index)
+      else false
+    }) {
+      throw new IllegalArgumentException("Index should be in an arithmetic sequence.")
+    }
+
+    val numBands = sortedMerged.length
+    val referenceRaster = Serde.deserialize(sortedMerged.head.serializedRaster)
     val width = RasterAccessors.getWidth(referenceRaster)
     val height = RasterAccessors.getHeight(referenceRaster)
-    val numTotalBands = sortedMerged.map(_.bandsData.length).sum
-    val resultRaster: WritableRaster = RasterFactory.createBandedRaster(DataBuffer.TYPE_DOUBLE, width, height, numTotalBands, null)
+    val dataTypeCode = RasterUtils.getRaster(referenceRaster.getRenderedImage).getDataBuffer.getDataType
+    val resultRaster: WritableRaster = RasterFactory.createBandedRaster(dataTypeCode, width, height, numBands, null)
+    val gridSampleDimensions = sortedMerged.flatMap(_.serializedSampleDimensions.map(Serde.deserializeGridSampleDimension)).toArray
 
     var currentBand = 0
     sortedMerged.foreach { bandData =>
@@ -97,11 +112,16 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
         currentBand += 1
       }
     }
-
-    val gridSampleDimensions = sortedMerged.flatMap(_.serializedSampleDimensions.map(RasterSerializer.deserializeSampleDimension)).toArray
-    RasterUtils.create(resultRaster, referenceRaster.getGridGeometry, gridSampleDimensions)
+//    RasterUtils.create(resultRaster, referenceRaster.getGridGeometry, gridSampleDimensions)
+    val noDataValue = RasterBandAccessors.getBandNoDataValue(referenceRaster)
+    RasterUtils.clone(resultRaster, referenceRaster.getGridGeometry, gridSampleDimensions, referenceRaster, noDataValue, true)
   }
 
-  override def outputEncoder: ExpressionEncoder[GridCoverage2D] = ExpressionEncoder()
-  override def bufferEncoder: Encoder[ArrayBuffer[BandData]] = ExpressionEncoder()
+  val serde = ExpressionEncoder[GridCoverage2D]
+
+  val bufferSerde = ExpressionEncoder[ArrayBuffer[BandData]]
+
+  def outputEncoder: ExpressionEncoder[GridCoverage2D] = serde
+
+  def bufferEncoder: Encoder[ArrayBuffer[BandData]] = bufferSerde
 }

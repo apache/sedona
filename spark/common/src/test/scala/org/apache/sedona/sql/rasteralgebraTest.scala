@@ -1019,7 +1019,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       df.select("index", "metadata").show(false)
       df.select("index", "summary").show(false)
 
-      val dfTest = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val dfTest = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/sample_image_3.tiff")
         .selectExpr("RS_FromGeoTiff(content) as raster")
 
       df = df.selectExpr("RS_Union_aggr(raster, index) as rasters")
