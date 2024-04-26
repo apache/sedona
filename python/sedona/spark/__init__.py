@@ -43,3 +43,7 @@ from sedona.spark.SedonaContext import SedonaContext
 from sedona.raster_utils.SedonaUtils import SedonaUtils
 from sedona.maps.SedonaKepler import SedonaKepler
 from sedona.maps.SedonaPyDeck import SedonaPyDeck
+from sedona.sql.st_aggregates import *
+from sedona.sql.st_constructors import *
+from sedona.sql.st_functions import *
+from sedona.sql.st_predicates import *
