@@ -1,6 +1,6 @@
 ## RS_Union_Aggr
 
-Introduction: Returns a raster containing bands by specified indexes from all rasters in the provided column. Combines all bands from each raster into the output raster. The order of bands in the resultant raster are based on the input index order.
+Introduction: This function combines multiple rasters into a single multiband raster by stacking the bands of each input raster sequentially. The function arranges the bands in the output raster according to the order specified by the index column in the input. It is typically used in scenarios where rasters are grouped by certain criteria (e.g., time or location) and an aggregated raster output is desired
 
 !!!Note
     RS_Union_Aggr expects the following input, if not satisfied then will throw an IllegalArgumentException:
@@ -15,22 +15,27 @@ Since: `v1.5.1`
 
 SQL Example
 
-Contents of `raster_table`.
-
 ```
-+------------------------------+-----+
-|                        raster|index|
-+------------------------------+-----+
-|GridCoverage2D["geotiff_cov...|    1|
-|GridCoverage2D["geotiff_cov...|    2|
-|GridCoverage2D["geotiff_cov...|    3|
-|GridCoverage2D["geotiff_cov...|    4|
-|GridCoverage2D["geotiff_cov...|    5|
-+------------------------------+-----+
+val windowSpec = Window.orderBy("timestamp")
+val indexedRasters = df.withColumn("index", row_number().over(windowSpec))
+
+indexedRasters.show()
 ```
 
 ```
-SELECT RS_Union_Aggr(raster, index) FROM raster_table
++-----+-------------------+------------------------------+
+|index|          timestamp|                        raster|
++-----+-------------------+------------------------------+
+|    1|2021-01-01T00:00:00|GridCoverage2D["geotiff_cov...|
+|    2|2021-01-02T00:00:00|GridCoverage2D["geotiff_cov...|
+|    3|2021-01-03T00:00:00|GridCoverage2D["geotiff_cov...|
+|    4|2021-01-04T00:00:00|GridCoverage2D["geotiff_cov...|
+|    5|2021-01-05T00:00:00|GridCoverage2D["geotiff_cov...|
++-----+-------------------+------------------------------+
+```
+
+```
+SELECT RS_Union_Aggr(raster, index) AS raster, RS_NumBands(raster) AS Num_Bands FROM raster_table
 ```
 
 Output:
@@ -38,5 +43,9 @@ Output:
 This output raster contains all bands of each raster in the `raster_table`.
 
 ```
-GridCoverage2D["geotiff_coverage", GeneralEnvel...
++--------------------+---------+
+|              raster|Num_Bands|
++--------------------+---------+
+|GridCoverage2D["g...|        5|
++--------------------+---------+
 ```
