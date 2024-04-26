@@ -1495,6 +1495,7 @@ def ST_VoronoiPolygons(geometry: ColumnOrName, tolerance: Optional[Union[ColumnO
     args = (geometry, tolerance, extendTo)
     return _call_st_function("ST_VoronoiPolygons", args)
 
+@validate_argument_types
 def ST_FrechetDistance(g1: ColumnOrName, g2: ColumnOrName) -> Column:
     """
     Computes discrete frechet distance between the two geometries.
@@ -1537,7 +1538,7 @@ def ST_Affine(geometry: ColumnOrName, a: Union[ColumnOrName, float], b: Union[Co
         args = (geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)
     return _call_st_function("ST_Affine", args)
 
-
+@validate_argument_types
 def ST_BoundingDiagonal(geometry: ColumnOrName) -> Column:
     """
     Returns a LineString with the min/max values of each dimension of the bounding box of the given geometry as its
