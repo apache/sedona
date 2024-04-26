@@ -2191,6 +2191,29 @@ Output:
 LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140.21046313888758)
 ```
 
+## ST_LongestLine
+
+Introduction: Returns the LineString geometry representing the maximum distance between any two points from the input geometries.
+
+Format: `ST_LongestLine(geom1: Geometry, geom2: Geometry)`
+
+Since: `vTBD`
+
+SQL Example:
+
+```sql
+SELECT ST_LongestLine(
+        ST_GeomFromText("POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"),
+        ST_GeomFromText("POLYGON ((10 20, 30 30, 40 20, 30 10, 10 20))")
+)
+```
+
+Output:
+
+```
+LINESTRING (40 40, 10 20)
+```
+
 ## ST_M
 
 Introduction: Returns M Coordinate of given Point, null otherwise.

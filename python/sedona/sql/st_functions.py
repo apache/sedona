@@ -882,6 +882,19 @@ def ST_LineSubstring(line_string: ColumnOrName, start_fraction: ColumnOrNameOrNu
     return _call_st_function("ST_LineSubstring", (line_string, start_fraction, end_fraction))
 
 @validate_argument_types
+def ST_LongestLine(geom1: ColumnOrName, geom2: ColumnOrName) -> Column:
+    """Compute the longest line between the two geometries
+
+    :param geom1:
+    :type geom1: ColumnOrName
+    :param geom2:
+    :type geom2: ColumnOrName
+    :return: Longest line between the two input geometries
+    :rtype: Column
+    """
+    return _call_st_function("ST_LongestLine", (geom1, geom2))
+
+@validate_argument_types
 def ST_HasZ(geom: ColumnOrName) -> Column:
     """Check whether geometry has Z coordinate
 

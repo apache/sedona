@@ -928,6 +928,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_LongestLine") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))') as geom")
+      val actual = baseDf.select(ST_LongestLine("geom", "geom")).first().get(0).asInstanceOf[Geometry].toText
+      val expected = "LINESTRING (180 180, 20 50)"
+      assert(expected.equals(actual))
+    }
+
     it("Passed ST_FlipCoordinates") {
       val baseDf = sparkSession.sql("SELECT ST_Point(0.0, 1.0) AS geom")
       val df = baseDf.select(ST_FlipCoordinates("geom"))

@@ -1636,6 +1636,27 @@ SQL example:
 SELECT ST_LineSubstring(ST_GeomFromWKT('LINESTRING(25 50, 100 125, 150 190)'), 0.333, 0.666) as Substring
 ```
 
+## ST_LongestLine
+
+Introduction: Returns the LineString geometry representing the maximum distance between any two points from the input geometries.
+
+Format: `ST_LongestLine(geom1: Geometry, geom2: Geometry)`
+
+SQL Example:
+
+```sql
+SELECT ST_LongestLine(
+        ST_GeomFromText("POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"),
+        ST_GeomFromText("POLYGON ((10 20, 30 30, 40 20, 30 10, 10 20))")
+)
+```
+
+Output:
+
+```
+LINESTRING (40 40, 10 20)
+```
+
 Output:
 
 ```

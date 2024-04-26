@@ -1013,6 +1013,38 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void longestLine() throws ParseException {
+        Geometry geom1 = Constructors.geomFromWKT("POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))", 0);
+        Geometry geom2 = Functions.buffer(Constructors.geomFromWKT("POINT (10.123456 -20.654321)", 0), 30);
+        String actual = Functions.asWKT(Functions.longestLine(geom1, geom2));
+        String expected = "LINESTRING (40 40, -1.3570469709526929 -48.37070697533861)";
+        assertEquals(expected, actual);
+
+        geom1 = Constructors.geomFromWKT("POLYGON ((190 150, 20 10, 160 70, 190 150))", 0);
+        geom2 = Constructors.geomFromWKT("POINT(80 160)", 0);
+        actual = Functions.asWKT(Functions.reducePrecision(Functions.longestLine(geom1, Functions.buffer(geom2, 30)), 8));
+        expected = "LINESTRING (20 10, 91.48050297 187.71638598)";
+        assertEquals(expected, actual);
+
+        geom1 = Constructors.geomFromWKT("POINT (160 40)", 0);
+        geom2 = Constructors.geomFromWKT("LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190)", 0);
+        actual = Functions.asWKT(Functions.longestLine(geom1, geom2));
+        expected = "LINESTRING (160 40, 130 190)";
+        assertEquals(expected, actual);
+
+        geom1 = Constructors.geomFromWKT("POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))", 0);
+        actual = Functions.asWKT(Functions.normalize(Functions.longestLine(geom1, geom1)));
+        expected = "LINESTRING (20 50, 180 180)";
+        assertEquals(expected, actual);
+
+        geom1 = Constructors.geomFromWKT("POINT Z (10 20 5)", 0);
+        geom2 = Constructors.geomFromWKT("POLYGON Z ((30 40 10, 40 50 15, 50 60 20, 30 40 10))", 0);
+        actual = Functions.asWKT(Functions.longestLine(geom1, geom2));
+        expected = "LINESTRING Z(10 20 5, 50 60 20)";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void makepolygonWithSRID() {
         Geometry lineString1 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 1, 1, 1, 0, 0, 0));
         Geometry actual1 = Functions.makepolygonWithSRID(lineString1, 4326);

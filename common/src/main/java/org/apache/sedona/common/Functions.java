@@ -1062,6 +1062,24 @@ public class Functions {
         return isExteriorRingCCW && isInteriorRingCCW;
     }
 
+    public static Geometry longestLine(Geometry geom1, Geometry geom2) {
+        double maxLength = 0;
+        Coordinate longestStart = null;
+        Coordinate longestEnd = null;
+
+        for (Coordinate coord1: geom1.getCoordinates()) {
+            for (Coordinate coord2: geom2.getCoordinates()) {
+                double length = coord1.distance(coord2);
+                if (length > maxLength) {
+                    maxLength = length;
+                    longestStart = coord1;
+                    longestEnd = coord2;
+                }
+            }
+        }
+        return geom1.getFactory().createLineString(new Coordinate[] {longestStart, longestEnd});
+    }
+
     public static Geometry difference(Geometry leftGeometry, Geometry rightGeometry) {
         boolean isIntersects = leftGeometry.intersects(rightGeometry);
         if (!isIntersects) {

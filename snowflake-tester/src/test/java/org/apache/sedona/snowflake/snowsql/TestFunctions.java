@@ -591,6 +591,15 @@ public class TestFunctions extends TestBase {
     }
 
     @Test
+    public void test_ST_LongestLine() {
+        registerUDF("ST_LongestLine", byte[].class, byte[].class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_AsText(sedona.ST_LongestLine(sedona.ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))'), sedona.ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))')))",
+                "LINESTRING (180 180, 20 50)"
+        );
+    }
+
+    @Test
     public void test_ST_MakeLine() {
         registerUDF("ST_MakeLine", byte[].class, byte[].class);
         verifySqlSingleRes(

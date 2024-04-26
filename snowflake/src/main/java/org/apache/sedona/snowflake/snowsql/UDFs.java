@@ -766,6 +766,17 @@ public class UDFs {
                 )
         );
     }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2"})
+    public static byte[] ST_LongestLine(byte[] geom1, byte[] geom2) {
+        return GeometrySerde.serialize(
+                Functions.longestLine(
+                        GeometrySerde.deserialize(geom1),
+                        GeometrySerde.deserialize(geom2)
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"point1", "point2"})
     public static byte[] ST_MakeLine(byte[] geom1, byte[] geom2) {
         return GeometrySerde.serialize(

@@ -221,6 +221,9 @@ object st_functions extends DataFrameAPI {
   def ST_LineSubstring(lineString: Column, startFraction: Column, endFraction: Column): Column = wrapExpression[ST_LineSubstring](lineString, startFraction, endFraction)
   def ST_LineSubstring(lineString: String, startFraction: Double, endFraction: Double): Column = wrapExpression[ST_LineSubstring](lineString, startFraction, endFraction)
 
+  def ST_LongestLine(geom1: Column, geom2: Column): Column = wrapExpression[ST_LongestLine](geom1, geom2)
+  def ST_LongestLine(geom1: String, geom2: String): Column = wrapExpression[ST_LongestLine](geom1, geom2)
+
   def ST_HasZ(geoms: Column): Column = wrapExpression[ST_HasZ](geoms)
   def ST_HasZ(geoms: String): Column = wrapExpression[ST_HasZ](geoms)
 
