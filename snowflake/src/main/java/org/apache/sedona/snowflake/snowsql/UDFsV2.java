@@ -748,6 +748,14 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2"}, argTypes = {"Geometry", "Geometry"})
+    public static double ST_MaxDistance(String geom1, String geom2) {
+        return Functions.maxDistance(
+                GeometrySerde.deserGeoJson(geom1),
+                GeometrySerde.deserGeoJson(geom2)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "quadrantSegments"}, argTypes = {"Geometry", "int"}, returnTypes = "Geometry")
     public static String ST_MinimumBoundingCircle(String geometry, int quadrantSegments) {
         return GeometrySerde.serGeoJson(

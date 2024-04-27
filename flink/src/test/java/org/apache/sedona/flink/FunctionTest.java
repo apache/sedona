@@ -1077,6 +1077,15 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testMaxDistnace() {
+        Table tbl = tableEnv.sqlQuery(
+                "SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))') as geom");
+        Double actual = (Double) first(tbl.select(call(Functions.ST_MaxDistance.class.getSimpleName(), $("geom"), $("geom")))).getField(0);
+        Double expected = 206.15528128088303;
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testMinimumBoundingCircle() {
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom");
         table = table.select(call(Functions.ST_MinimumBoundingCircle.class.getSimpleName(), $("geom")));

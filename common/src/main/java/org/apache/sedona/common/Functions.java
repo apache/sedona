@@ -1058,6 +1058,10 @@ public class Functions {
         return isExteriorRingCCW && isInteriorRingCCW;
     }
 
+    public static double maxDistance(Geometry geom1, Geometry geom2) {
+        return longestLine(geom1, geom2).getLength();
+    }
+
     public static Geometry longestLine(Geometry geom1, Geometry geom2) {
         double maxLength = - Double.MAX_VALUE;
         Coordinate longestStart = null;

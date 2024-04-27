@@ -809,6 +809,15 @@ public class UDFs {
                 Constructors.makePoint(x, y, z, m)
         );
     }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2"})
+    public static double ST_MaxDistance(byte[] geom1, byte[] geom2) {
+        return Functions.maxDistance(
+                GeometrySerde.deserialize(geom1),
+                GeometrySerde.deserialize(geom2)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"wkt", "srid"})
     public static byte[] ST_MLineFromText(String wkt, int srid) throws ParseException {
         return GeometrySerde.serialize(

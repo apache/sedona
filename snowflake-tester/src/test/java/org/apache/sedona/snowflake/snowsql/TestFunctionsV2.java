@@ -618,6 +618,16 @@ public class TestFunctionsV2
                 "MULTIPOLYGON(((1 5,3 3,1 1,1 5)),((5 3,7 5,7 1,5 3)))"
         );
     }
+
+    @Test
+    public void test_ST_MaxDistance() {
+        registerUDFV2("ST_MaxDistance", String.class, String.class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_MaxDistance(ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))'), ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))'))",
+                206.15528128088303
+        );
+    }
+
     @Test
     public void test_ST_MinimumBoundingCircle() {
         registerUDFV2("ST_MinimumBoundingCircle", String.class, int.class);

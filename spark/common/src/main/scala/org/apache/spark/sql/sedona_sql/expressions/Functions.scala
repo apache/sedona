@@ -855,6 +855,14 @@ case class ST_MakePolygon(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_MaxDistance(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.maxDistance _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_GeoHash(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.geohash _) {
 
