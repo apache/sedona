@@ -5,11 +5,13 @@ on:
     branches:
       - master
     paths:
+      - '.github/workflows/docker-build.yml'
       - 'docker/**'
   pull_request:
     branches:
       - '*'
     paths:
+      - '.github/workflows/docker-build.yml'
       - 'docker/**'
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
