@@ -12,7 +12,6 @@ We recommend Databricks 10.x+.
 * 1.4.1, 1.5.0 are complied against Spark 3.3, 3.4, 3.5
 
 > In Spark 3.2, `org.apache.spark.sql.catalyst.expressions.Generator` class added a field `nodePatterns`. Any SQL functions that rely on Generator class may have issues if compiled for a runtime with a differing spark version. For Sedona, those functions are:
->
 >    * ST_MakeValid
 >    * ST_SubDivideExplode
 

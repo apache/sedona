@@ -488,7 +488,6 @@ GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (0 5, 0 10))
 Introduction: Returns a homogeneous multi-geometry from a given geometry collection.
 
 The type numbers are:
-
 1. POINT
 2. LINESTRING
 3. POLYGON

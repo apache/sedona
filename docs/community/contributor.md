@@ -52,7 +52,6 @@ Current Sedona Committers are as follows:
 ## Nominate a committer or PMC member
 
 Steps are as follows:
-
 1. Call a vote (templates/committerVote.txt)
 2. Close the vote. If the result is positive, invite the new committer.
 
