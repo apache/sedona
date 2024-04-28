@@ -1,8 +1,115 @@
-!!!note
-	Support of Spark 2.X and Scala 2.11 was removed in Sedona 1.3.0+ although some parts of the source code might still be compatible. Sedona 1.3.0+ releases binary for both Scala 2.12 and 2.13.
-
 !!! note
 	Sedona Python currently only works with Shapely 1.x. If you use GeoPandas, please use <= GeoPandas `0.11.1`. GeoPandas > 0.11.1 will automatically install Shapely 2.0. If you use Shapely, please use <= `1.8.4`.
+
+## Sedona 1.5.2
+
+Sedona 1.5.2 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.12, Snowflake 7+, Java 8.
+
+This release is a maintenance release that includes bug fixes and minor improvements. No new features or major changes are added in this release.
+
+### Bug
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-470'>SEDONA-470</a>] -         Cannot distinguish between missing or null crs from the result of geoparquet.metadata
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-471'>SEDONA-471</a>] -         SedonaKepler cannot work with Uber H3 hex since 1.5.1
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-472'>SEDONA-472</a>] -         Adapter API no longer works with unshaded jar
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-473'>SEDONA-473</a>] -         cdm-core mistakenly becomes a compile dependency for sedona-spark-shaded
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-477'>SEDONA-477</a>] -         Avoid producing rasters with images having non-zero origins
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-494'>SEDONA-494</a>] -         Raster data source cannot write to HDFS
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-495'>SEDONA-495</a>] -         Raster data source uses shared FileSystem connections which lead to race condition
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-497'>SEDONA-497</a>] -         SpatialRDD read from multiple Shapefiles has incorrect fieldName property
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-500'>SEDONA-500</a>] -         Cannot correctly read data from directories containing multiple shapefiles
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-501'>SEDONA-501</a>] -         ST_Split maps to wrong Java-call
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-505'>SEDONA-505</a>] -         Treat geometry with SRID=0 as if it was in EPSG:4326 in various raster functions
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-507'>SEDONA-507</a>] -         RS_AsImage cannot visualize rasters with non-integral band data
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-510'>SEDONA-510</a>] -         geometry columns with snake_case names in GeoParquet files cannot be recognized as geometry column
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-511'>SEDONA-511</a>] -         geometry columns with snake_case names in GeoParquet files cannot be recognized as geometry column
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-519'>SEDONA-519</a>] -         ST_SubDivide (Snowflake) fails even on documentation example
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-520'>SEDONA-520</a>] -         Missing dependencies in Snowflake JAR
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-531'>SEDONA-531</a>] -         RDD spatial join in Python throws Not available error
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-534'>SEDONA-534</a>] -         Disable Python warning message of finding jars
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-545'>SEDONA-545</a>] -         Sedona Python DataFrame API fail due to missing commas
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-548'>SEDONA-548</a>] -         Fix Python Dataframe API Constructor registrations
+</li>
+</ul>
+
+### Improvement
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-474'>SEDONA-474</a>] -         Remove manipulation of warnings config
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-506'>SEDONA-506</a>] -         Add lenient mode for RS_ZonalStats and RS_ZonalStatsAll
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-512'>SEDONA-512</a>] -         Python serializer should report the object type in the error message
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-515'>SEDONA-515</a>] -         Add handling for noDataValues in RS_Resample
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-529'>SEDONA-529</a>] -         Add basic `EditorConfig` file
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-535'>SEDONA-535</a>] -         Add the pull request labeler
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-536'>SEDONA-536</a>] -         Add CODEOWNERS file
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-541'>SEDONA-541</a>] -         Allow concurrent snowflake testers
+</li>
+</ul>
+
+### Test
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-513'>SEDONA-513</a>] -         Add pre-commit hook `mixed-line-ending`
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-523'>SEDONA-523</a>] -         Add pre-commit hook `fix-byte-order-marker`
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-524'>SEDONA-524</a>] -         Clean up the `pre-commit` config
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-525'>SEDONA-525</a>] -         Add two more pre-commit hooks
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-528'>SEDONA-528</a>] -         Add `pre-commit` hook `check-yaml`
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-530'>SEDONA-530</a>] -         Add `pre-commit` hook `debug-statements`
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-537'>SEDONA-537</a>] -         Add pre-commit hook `requirements-txt-fixer`
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-538'>SEDONA-538</a>] -         Add four more pre-commit hooks
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-542'>SEDONA-542</a>] -         Add `pre-commit` hook `check-executables-have-shebangs`
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-544'>SEDONA-544</a>] -         Add `ruff-pre-commit` for `Python` linting
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-546'>SEDONA-546</a>] -         Python linting enable rule `E712`
+</li>
+</ul>
+
+<h2>        Task
+</h2>
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-469'>SEDONA-469</a>] -         Update Sedona docker and binder to use 1.5.1
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-496'>SEDONA-496</a>] -         Dependabot: reduce the open pull requests limit to 2
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-526'>SEDONA-526</a>] -         Upgrade `actions/setup-java` to `v4`
+</li>
+</ul>
 
 ## Sedona 1.5.1
 
@@ -678,6 +785,9 @@ This version is a minor release on Sedoma 1.3.0 line. It fixes a few critical bu
 
 * [SEDONA-194](https://issues.apache.org/jira/browse/SEDONA-194) - Merge org.datasyslab.sernetcdf into Sedona
 * [SEDONA-208](https://issues.apache.org/jira/browse/SEDONA-208) - Use Spark RuntimeConfig in SedonaConf
+
+!!!note
+	Support of Spark 2.X and Scala 2.11 was removed in Sedona 1.3.0+ although some parts of the source code might still be compatible. Sedona 1.3.0+ releases binary for both Scala 2.12 and 2.13.
 
 ## Sedona 1.3.0
 
