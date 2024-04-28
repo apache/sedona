@@ -15,6 +15,7 @@ Affine transformations can be represented as a matrix operation. In two-dimensio
 ```
 
 Here, `ScaleX, ScaleY, SkewX, SkewY, TranslationX,` and `TranslationY` are parameters that define the transformation:
+
 - `ScaleX` and `ScaleY` are scaling factors for the x and y axes, respectively.
 - `SkewX` and `SkewY` introduce shearing and are responsible for "skewing" the shape.
 - `TranslationX` and `TranslationY` are translation parameters that move the shape in the x and y directions, respectively.
