@@ -449,7 +449,16 @@ Output: `POINT(131.59149149528952 101.89887534906197)`
 
 ## ST_Collect
 
-Introduction: Returns MultiGeometry object based on a geometry column.
+Introduction:
+
+Build an appropriate `Geometry`, `MultiGeometry`, or `GeometryCollection` to contain the `Geometry`s in it. For example:
+
+- If `geomList` contains a single `Polygon`, the `Polygon` is returned.
+- If `geomList` contains several `Polygon`s, a `MultiPolygon` is returned.
+- If `geomList` contains some `Polygon`s and some `LineString`s, a `GeometryCollection` is returned.
+- If `geomList` is empty, an empty `GeometryCollection` is returned.
+
+Note that this method does not "flatten" Geometries in the input, and hence if any MultiGeometries are contained in the input, a GeometryCollection containing them will be returned.
 
 Format
 
@@ -458,39 +467,20 @@ Format
 Example:
 
 ```SQL
-SELECT ST_Collect(
-    tbl.geom) AS geom
+WITH src_tbl AS (
+    SELECT sedona.ST_GeomFromText('POINT (40 10)') AS geom
+    UNION
+    SELECT sedona.ST_GeomFromText('LINESTRING (0 5, 0 10)') AS geom
+)
+SELECT sedona.ST_AsText(collection)
+FROM src_tbl,
+     TABLE(sedona.ST_Collect(src_tbl.geom) OVER (PARTITION BY 1));
 ```
 
 Result:
 
 ```
-+---------------------------------------------------------------+
-|geom                                                           |
-+---------------------------------------------------------------+
-|MULTIPOINT ((21.427834 52.042576573), (45.342524 56.342354355))|
-+---------------------------------------------------------------+
-```
-
-Example:
-
-```SQL
-SELECT ST_Collect(
-    Array(
-        ST_GeomFromText('POINT(21.427834 52.042576573)'),
-        ST_GeomFromText('POINT(45.342524 56.342354355)')
-    )
-) AS geom
-```
-
-Result:
-
-```
-+---------------------------------------------------------------+
-|geom                                                           |
-+---------------------------------------------------------------+
-|MULTIPOINT ((21.427834 52.042576573), (45.342524 56.342354355))|
-+---------------------------------------------------------------+
+GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (0 5, 0 10))
 ```
 
 ## ST_CollectionExtract
@@ -699,17 +689,25 @@ Output: `544430.9411996207`
 
 ## ST_Dump
 
-Introduction: This is an aggregate function that takes a column of geometries as input, and returns a single GeometryCollection of all these geometries.
+Introduction: This function takes a GeometryCollection/Multi Geometry object and returns a set of geometries containing the individual geometries that make up the input geometry. The function is useful for breaking down a GeometryCollection/Multi Geometry into its constituent geometries.
 
 Format: `ST_Dump(geom: geometry)`
 
 SQL example:
 
 ```SQL
-SELECT ST_Dump(tbl.geom)
+SELECT sedona.ST_AsText(geom)
+FROM table(sedona.ST_Dump(sedona.ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))')));
 ```
 
-Output: `GeometryCollection ( (10 40), (40 30), (20 20), (30 10) )`
+Output:
+
+```
+POINT (10 40)
+POINT (40 30)
+POINT (20 20)
+POINT (30 10)
+```
 
 ## ST_DumpPoints
 
@@ -1434,7 +1432,14 @@ Format: `ST_MinimumBoundingRadius(geom: geometry)`
 SQL example:
 
 ```SQL
-SELECT ST_MinimumBoundingRadius(ST_GeomFromText('POLYGON((1 1,0 0, -1 1, 1 1))'))
+SELECT sedona.ST_AsText(center), radius
+FROM table(sedona.ST_MinimumBoundingRadius(sedona.ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))')))
+```
+
+Result:
+
+```
+POINT (0.5 0.5), 0.7071067811865476
 ```
 
 ## ST_Multi
