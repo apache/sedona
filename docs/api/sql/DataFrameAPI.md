@@ -39,14 +39,14 @@ A short example of using this API (uses the `array_min` and `array_max` Spark fu
 	```python3
 	from pyspark.sql import functions as f
 
-	from sedona.sql import st_constructors as stc
+	from sedona.spark import *
 
 	df = spark.sql("SELECT array(0.0, 1.0, 2.0) AS values")
 
 	min_value = f.array_min("values")
 	max_value = f.array_max("values")
 
-	df = df.select(stc.ST_Point(min_value, max_value).alias("point"))
+	df = df.select(ST_Point(min_value, max_value).alias("point"))
 	```
 
 The above code will generate the following dataframe:
@@ -63,7 +63,9 @@ Some functions will take native python values and infer them as literals.
 For example:
 
 ```python3
-df = df.select(stc.ST_Point(1.0, 3.0).alias("point"))
+from sedona.spark import *
+
+df = df.select(ST_Point(1.0, 3.0).alias("point"))
 ```
 
 This will generate a dataframe with a constant point in a column:

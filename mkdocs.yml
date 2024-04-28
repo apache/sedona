@@ -77,6 +77,7 @@ nav:
               - Raster operators: api/sql/Raster-operators.md
               - Raster map algebra: api/sql/Raster-map-algebra.md
               - Raster visualization: api/sql/Raster-visualizer.md
+              - Raster affine transformation: api/sql/Raster-affine-transformation.md
           - Parameter: api/sql/Parameter.md
         - RDD (core):
           - Scala/Java doc: api/java-api.md
