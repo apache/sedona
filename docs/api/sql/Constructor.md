@@ -35,13 +35,13 @@ spatialDf.printSchema()
 !!!warning
 	Please make sure you use ==ST_GeomFromWKT== to create Geometry type column otherwise that column cannot be used in SedonaSQL.
 
-If the file you are reading contains non-ASCII characters you'll need to explicitly set the encoding
-via `sedona.global.charset` system property before the call to `ShapefileReader.readToGeometryRDD`.
+If the file you are reading contains non-ASCII characters you'll need to explicitly set the Spark config before initializing the SparkSession, then you can use `ShapefileReader.readToGeometryRDD`.
 
 Example:
 
 ```scala
-System.setProperty("sedona.global.charset", "utf8")
+spark.driver.extraJavaOptions  -Dsedona.global.charset=utf8
+spark.executor.extraJavaOptions  -Dsedona.global.charset=utf8
 ```
 
 ## ST_GeomFromEWKT

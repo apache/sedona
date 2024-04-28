@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.spark
 
+import org.apache.sedona.common.utils.TelemetryCollector
 import org.apache.sedona.core.serde.SedonaKryoRegistrator
 import org.apache.sedona.sql.UDF.UdfRegistrator
 import org.apache.sedona.sql.UDT.UdtRegistrator
@@ -26,7 +27,10 @@ import org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoP
 import org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetector
 import org.apache.spark.sql.{SQLContext, SparkSession}
 
+import scala.annotation.StaticAnnotation
 import scala.util.Try
+
+class InternalApi(description: String = "This method is for internal use only and may change without notice.") extends StaticAnnotation
 
 object SedonaContext {
   def create(sqlContext: SQLContext): SQLContext = {
@@ -40,6 +44,12 @@ object SedonaContext {
     * @return
     */
   def create(sparkSession: SparkSession):SparkSession = {
+    create(sparkSession, "java")
+  }
+
+  @InternalApi
+  def create(sparkSession: SparkSession, language: String):SparkSession = {
+    TelemetryCollector.send("spark", language)
     if (!sparkSession.experimental.extraStrategies.exists(_.isInstanceOf[JoinQueryDetector])) {
       sparkSession.experimental.extraStrategies ++= Seq(new JoinQueryDetector(sparkSession))
     }

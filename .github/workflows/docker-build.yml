@@ -5,11 +5,13 @@ on:
     branches:
       - master
     paths:
+      - '.github/workflows/docker-build.yml'
       - 'docker/**'
   pull_request:
     branches:
       - '*'
     paths:
+      - '.github/workflows/docker-build.yml'
       - 'docker/**'
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
@@ -22,7 +24,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: ['ubuntu-latest', 'macos-latest']
+        os: ['ubuntu-latest', 'macos-12']
         include:
           - spark: 3.4.1
             sedona: 1.4.1

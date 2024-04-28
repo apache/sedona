@@ -247,6 +247,8 @@ Since: `v1.5.0`
 	```
 	If a raster is provided with anyone of these properties then IllegalArgumentException is thrown.
 
+For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
+
 SQL Example
 
 ```sql

@@ -14,6 +14,8 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
+import inspect
+import sys
 
 from functools import partial
 from typing import Optional, Union
@@ -23,25 +25,9 @@ from pyspark.sql import Column
 from sedona.sql.dataframe_api import ColumnOrName, ColumnOrNameOrNumber, call_sedona_function, validate_argument_types
 
 
-__all__ = [
-    "ST_GeomFromGeoHash",
-    "ST_GeomFromGeoJSON",
-    "ST_GeomFromGML",
-    "ST_GeomFromKML",
-    "ST_GeomFromText",
-    "ST_GeomFromWKB",
-    "ST_GeomFromWKT",
-    "ST_GeomFromEWKT",
-    "ST_LineFromText",
-    "ST_LineStringFromText",
-    "ST_Point",
-    "ST_PointFromText",
-    "ST_MakePoint"
-    "ST_PolygonFromEnvelope",
-    "ST_PolygonFromText",
-    "ST_MLineFromText",
-    "ST_MPolyFromText"
-]
+# Automatically populate __all__
+__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
+           if inspect.isfunction(obj)]
 
 
 _call_constructor_function = partial(call_sedona_function, "st_constructors")
@@ -98,7 +84,7 @@ def ST_GeomFromKML(kml_string: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_GeomFromText(wkt: ColumnOrName) -> Column:
+def ST_GeomFromText(wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None) -> Column:
     """Generate a geometry column from a Well-Known Text (WKT) string column.
     This is an alias of ST_GeomFromWKT.
 
@@ -107,7 +93,9 @@ def ST_GeomFromText(wkt: ColumnOrName) -> Column:
     :return: Geometry column representing the WKT string.
     :rtype: Column
     """
-    return _call_constructor_function("ST_GeomFromText", wkt)
+    args = (wkt) if srid is None else (wkt, srid)
+
+    return _call_constructor_function("ST_GeomFromText", args)
 
 
 @validate_argument_types
@@ -123,7 +111,7 @@ def ST_GeomFromWKB(wkb: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_GeomFromWKT(wkt: ColumnOrName) -> Column:
+def ST_GeomFromWKT(wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None) -> Column:
     """Generate a geometry column from a Well-Known Text (WKT) string column.
     This is an alias of ST_GeomFromText.
 
@@ -132,7 +120,9 @@ def ST_GeomFromWKT(wkt: ColumnOrName) -> Column:
     :return: Geometry column representing the WKT string.
     :rtype: Column
     """
-    return _call_constructor_function("ST_GeomFromWKT", wkt)
+    args = (wkt) if srid is None else (wkt, srid)
+
+    return _call_constructor_function("ST_GeomFromWKT", args)
 
 @validate_argument_types
 def ST_GeomFromEWKT(ewkt: ColumnOrName) -> Column:
@@ -275,7 +265,7 @@ def ST_PolygonFromText(coords: ColumnOrName, delimiter: ColumnOrName) -> Column:
     return _call_constructor_function("ST_PolygonFromText", (coords, delimiter))
 
 @validate_argument_types
-def ST_MPolyFromText(wkt: ColumnOrName) -> Column:
+def ST_MPolyFromText(wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None) -> Column:
     """Generate multiPolygon geometry from a multiPolygon WKT representation.
 
     :param wkt: multiPolygon WKT string column to generate from.
@@ -283,10 +273,12 @@ def ST_MPolyFromText(wkt: ColumnOrName) -> Column:
     :return: multiPolygon geometry generated from the wkt column.
     :rtype: Column
     """
-    return _call_constructor_function("ST_MPolyFromText", wkt)
+    args = (wkt) if srid is None else (wkt, srid)
+
+    return _call_constructor_function("ST_MPolyFromText", args)
 
 @validate_argument_types
-def ST_MLineFromText(wkt: ColumnOrName) -> Column:
+def ST_MLineFromText(wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None) -> Column:
     """Generate multiLineString geometry from a multiLineString WKT representation.
 
     :param wkt: multiLineString WKT string column to generate from.
@@ -294,4 +286,6 @@ def ST_MLineFromText(wkt: ColumnOrName) -> Column:
     :return: multiLineString geometry generated from the wkt column.
     :rtype: Column
     """
-    return _call_constructor_function("ST_MLineFromText", wkt)
+    args = (wkt) if srid is None else (wkt, srid)
+
+    return _call_constructor_function("ST_MLineFromText", args)

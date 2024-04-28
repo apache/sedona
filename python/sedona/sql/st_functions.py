@@ -14,6 +14,8 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
+import inspect
+import sys
 
 from functools import partial
 from typing import Optional, Union
@@ -23,123 +25,9 @@ from pyspark.sql import Column
 from sedona.sql.dataframe_api import call_sedona_function, ColumnOrName, ColumnOrNameOrNumber, validate_argument_types
 
 
-__all__ = [
-    "GeometryType",
-    "ST_3DDistance",
-    "ST_AddPoint",
-    "ST_Area",
-    "ST_AreaSpheroid",
-    "ST_AsBinary",
-    "ST_AsEWKB",
-    "ST_AsEWKT",
-    "ST_AsGeoJSON",
-    "ST_AsGML",
-    "ST_AsKML",
-    "ST_AsText",
-    "ST_Azimuth",
-    "ST_BestSRID",
-    "ST_Boundary",
-    "ST_Buffer",
-    "ST_BuildArea",
-    "ST_Centroid",
-    "ST_Collect",
-    "ST_CollectionExtract",
-    "ST_ClosestPoint",
-    "ST_ConcaveHull",
-    "ST_ConvexHull",
-    "ST_CrossesDateLine",
-    "ST_Difference",
-    "ST_Dimension",
-    "ST_Distance",
-    "ST_DistanceSphere",
-    "ST_DistanceSpheroid",
-    "ST_Dump",
-    "ST_DumpPoints",
-    "ST_EndPoint",
-    "ST_Envelope",
-    "ST_ExteriorRing",
-    "ST_FlipCoordinates",
-    "ST_Force_2D",
-    "ST_GeoHash",
-    "ST_GeometricMedian",
-    "ST_GeometryN",
-    "ST_GeometryType",
-    "ST_H3CellDistance",
-    "ST_H3CellIDs",
-    "ST_H3KRing",
-    "ST_H3ToGeom",
-    "ST_InteriorRingN",
-    "ST_Intersection",
-    "ST_IsClosed",
-    "ST_IsEmpty",
-    "ST_IsPolygonCW",
-    "ST_IsRing",
-    "ST_IsSimple",
-    "ST_IsValid",
-    "ST_IsValidReason",
-    "ST_Length",
-    "ST_LengthSpheroid",
-    "ST_LineFromMultiPoint",
-    "ST_LineInterpolatePoint",
-    "ST_LineLocatePoint",
-    "ST_LineMerge",
-    "ST_LineSubstring",
-    "ST_MakeLine",
-    "ST_Polygon"
-    "ST_Polygonize"
-    "ST_MakePolygon",
-    "ST_MakeValid",
-    "ST_MinimumBoundingCircle",
-    "ST_MinimumBoundingRadius",
-    "ST_Multi",
-    "ST_Normalize",
-    "ST_NPoints",
-    "ST_NDims",
-    "ST_NumGeometries",
-    "ST_NumInteriorRings",
-    "ST_PointN",
-    "ST_PointOnSurface",
-    "ST_ReducePrecision",
-    "ST_RemovePoint",
-    "ST_Reverse",
-    "ST_S2CellIDs",
-    "ST_S2ToGeom",
-    "ST_SetPoint",
-    "ST_SetSRID",
-    "ST_SRID",
-    "ST_Split",
-    "ST_StartPoint",
-    "ST_SubDivide",
-    "ST_SubDivideExplode",
-    "ST_SimplifyPreserveTopology",
-    "ST_SymDifference",
-    "ST_IsPolygonCCW",
-    "ST_ForcePolygonCCW",
-    "ST_Transform",
-    "ST_Union",
-    "ST_X",
-    "ST_XMax",
-    "ST_XMin",
-    "ST_Y",
-    "ST_YMax",
-    "ST_YMin",
-    "ST_Z",
-    "ST_ZMax",
-    "ST_ZMin",
-    "ST_NumPoints",
-    "ST_Force3D",
-    "ST_ForcePolygonCW",
-    "ST_NRings",
-    "ST_Translate",
-    "ST_VoronoiPolygons",
-    "ST_Angle",
-    "ST_Degrees",
-    "ST_FrechetDistance",
-    "ST_CoordDim",
-    "ST_IsCollection",
-    "ST_Affine",
-    "ST_BoundingDiagonal"
-]
+# Automatically populate __all__
+__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
+           if inspect.isfunction(obj)]
 
 
 _call_st_function = partial(call_sedona_function, "st_functions")
@@ -1607,6 +1495,7 @@ def ST_VoronoiPolygons(geometry: ColumnOrName, tolerance: Optional[Union[ColumnO
     args = (geometry, tolerance, extendTo)
     return _call_st_function("ST_VoronoiPolygons", args)
 
+@validate_argument_types
 def ST_FrechetDistance(g1: ColumnOrName, g2: ColumnOrName) -> Column:
     """
     Computes discrete frechet distance between the two geometries.
@@ -1649,7 +1538,7 @@ def ST_Affine(geometry: ColumnOrName, a: Union[ColumnOrName, float], b: Union[Co
         args = (geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)
     return _call_st_function("ST_Affine", args)
 
-
+@validate_argument_types
 def ST_BoundingDiagonal(geometry: ColumnOrName) -> Column:
     """
     Returns a LineString with the min/max values of each dimension of the bounding box of the given geometry as its

@@ -21,6 +21,11 @@ from pyspark.sql import functions as f, Row
 import pytest
 from shapely.geometry.base import BaseGeometry
 
+from sedona.sql.st_aggregates import *
+from sedona.sql.st_constructors import *
+from sedona.sql.st_functions import *
+from sedona.sql.st_predicates import *
+
 from sedona.sql import (
     st_aggregates as sta,
     st_constructors as stc,
@@ -38,12 +43,20 @@ test_configurations = [
     (stc.ST_GeomFromGML, ("gml",), "constructor", "", "LINESTRING (-71.16 42.25, -71.17 42.25, -71.18 42.25)"),
     (stc.ST_GeomFromKML, ("kml",), "constructor", "", "LINESTRING (-71.16 42.26, -71.17 42.26)"),
     (stc.ST_GeomFromText, ("wkt",), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
+    (stc.ST_GeomFromText, ("wkt",4326), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
     (stc.ST_GeomFromWKB, ("wkb",), "constructor", "ST_ReducePrecision(geom, 2)", "LINESTRING (-2.1 -0.35, -1.5 -0.67)"),
     (stc.ST_GeomFromWKT, ("wkt",), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
+    (stc.ST_GeomFromWKT, ("wkt",4326), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
     (stc.ST_GeomFromEWKT, ("ewkt",), "linestring_ewkt", "", "LINESTRING (1 2, 3 4)"),
     (stc.ST_LineFromText, ("wkt",), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
     (stc.ST_LineStringFromText, ("multiple_point", lambda: f.lit(',')), "constructor", "", "LINESTRING (0 0, 1 0, 1 1, 0 0)"),
     (stc.ST_Point, ("x", "y"), "constructor", "", "POINT (0 1)"),
+    (stc.ST_PointZ, ("x", "y", "z", 4326), "constructor", "", "POINT Z (0 1 2)"),
+    (stc.ST_PointZ, ("x", "y", "z"), "constructor", "", "POINT Z (0 1 2)"),
+    (stc.ST_MPolyFromText, ("mpoly",), "constructor", "" , "MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))"),
+    (stc.ST_MPolyFromText, ("mpoly", 4326), "constructor", "" , "MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))"),
+    (stc.ST_MLineFromText, ("mline", ), "constructor", "" , "MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))"),
+    (stc.ST_MLineFromText, ("mline", 4326), "constructor", "" , "MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))"),
     (stc.ST_PointFromText, ("single_point", lambda: f.lit(',')), "constructor", "", "POINT (0 1)"),
     (stc.ST_MakePoint, ("x", "y", "z"), "constructor", "", "POINT Z (0 1 2)"),
     (stc.ST_PolygonFromEnvelope, ("minx", "miny", "maxx", "maxy"), "min_max_x_y", "", "POLYGON ((0 1, 0 3, 2 3, 2 1, 0 1))"),
@@ -377,6 +390,8 @@ class TestDataFrameAPI(TestBase):
     @pytest.fixture
     def base_df(self, request):
         wkb = '0102000000020000000000000084d600c00000000080b5d6bf00000060e1eff7bf00000080075de5bf'
+        mpoly = 'MULTIPOLYGON(((0 0 ,20 0 ,20 20 ,0 20 ,0 0 ),(5 5 ,5 7 ,7 7 ,7 5 ,5 5)))'
+        mline = 'MULTILINESTRING((1 2, 3 4), (4 5, 6 7))'
         geojson = "{ \"type\": \"Feature\", \"properties\": { \"prop\": \"01\" }, \"geometry\": { \"type\": \"Point\", \"coordinates\": [ 0.0, 1.0 ] }},"
         gml_string = "<gml:LineString srsName=\"EPSG:4269\"><gml:coordinates>-71.16,42.25 -71.17,42.25 -71.18,42.25</gml:coordinates></gml:LineString>"
         kml_string = "<LineString><coordinates>-71.16,42.26 -71.17,42.26</coordinates></LineString>"
@@ -389,6 +404,8 @@ class TestDataFrameAPI(TestBase):
                 "'0.0,1.0' AS single_point",
                 "'0.0,0.0,1.0,0.0,1.0,1.0,0.0,0.0' AS multiple_point",
                 f"X'{wkb}' AS wkb",
+                f"'{mpoly}' AS mpoly",
+                f"'{mline}' AS mline",
                 f"'{geojson}' AS geojson",
                 "'s00twy01mt' AS geohash",
                 f"'{gml_string}' AS gml",
