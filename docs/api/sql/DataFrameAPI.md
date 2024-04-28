@@ -50,7 +50,6 @@ A short example of using this API (uses the `array_min` and `array_max` Spark fu
 	```
 
 The above code will generate the following dataframe:
-
 ```
 +-----------+
 |point      |
@@ -69,7 +68,6 @@ df = df.select(ST_Point(1.0, 3.0).alias("point"))
 ```
 
 This will generate a dataframe with a constant point in a column:
-
 ```
 +-----------+
 |point      |

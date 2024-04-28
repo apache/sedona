@@ -21,7 +21,6 @@ FROM city_tbl;
 ```
 
 Output:
-
 ```
 WKT	CITY_NAME
 POINT (-122.33 47.61)	Seattle
@@ -416,7 +415,6 @@ SELECT ST_AsEWKT(SEDONA.ST_SetSRID(ST_GeometryFromWKT('POINT(1 2)'), 4326))
 ```
 
 Output:
-
 ```
 SRID=0;POINT(1 2)
 ```

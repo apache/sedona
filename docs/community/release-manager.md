@@ -13,19 +13,15 @@ If your Maven (`mvn --version`) points to other JDK versions, you must change it
 1. Find all Java installed on your machine: `/usr/libexec/java_home -V`. You should see multiple JDK versions including JDK 8.
 2. Run `whereis mvn` to get the installation location of your Maven. The result is a symlink to the actual location.
 3. Open it in the terminal (with `sudo` if needed). It will be like this
-
 ```
 #!/bin/bash
 JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home)}" exec "/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn" "$@"
 ```
-
 4. Change `JAVA_HOME:-$(/usr/libexec/java_home)}` to `JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}`.  The resulting content will be like this:
-
 ```
 #!/bin/bash
 JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}" exec "/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn" "$@"
 ```
-
 5. Run `mvn --version` again. It should now point to JDK 8.
 
 ## 1. Obtain Write Access to Sedona GitHub repo
@@ -63,23 +59,18 @@ Use SVN to append your armored PGP public key to the `KEYS` files
    * https://dist.apache.org/repos/dist/release/sedona/KEYS
 
 1. Check out both KEYS files
-
 ```bash
 svn checkout https://dist.apache.org/repos/dist/dev/sedona/ sedona-dev --depth files
 svn checkout https://dist.apache.org/repos/dist/release/sedona/ sedona-release --depth files
 ```
-
 2. Use your favorite text editor to open `sedona-dev/KEYS` and `sedona-release/KEYS`.
 3. Paste your armored key to the end of both files. Note: There must be an empty line between `-----BEGIN PGP PUBLIC KEY BLOCK-----` and the actual key.
 4. Commit both KEYS. SVN might ask you to enter your ASF ID and password. Make sure you do it so SVN can always store your ID and password locally.
-
 ```bash
 svn commit -m "Update KEYS" sedona-dev/KEYS
 svn commit -m "Update KEYS" sedona-release/KEYS
 ```
-
 5. Then remove both svn folders
-
 ```bash
 rm -rf sedona-dev
 rm -rf sedona-release

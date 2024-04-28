@@ -25,14 +25,12 @@ This method cannot achieve the best performance of Sedona and does not work for 
 ### Install libraries
 
 1) From the Libraries tab install from Maven Coordinates
-
     ```
     org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }}
     org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
     ```
 
 2) For enabling python support, from the Libraries tab install from PyPI
-
     ```
     apache-sedona
     keplergl==0.3.2
@@ -44,14 +42,12 @@ This method cannot achieve the best performance of Sedona and does not work for 
 After you have installed the libraries and started the cluster, you can initialize the Sedona `ST_*` functions and types by running from your code:
 
 (scala)
-
 ```scala
 import org.apache.sedona.sql.utils.SedonaSQLRegistrator
 SedonaSQLRegistrator.registerAll(spark)
 ```
 
 (or python)
-
 ```python
 from sedona.register.geo_registrator import SedonaRegistrator
 SedonaRegistrator.registerAll(spark)
@@ -108,7 +104,6 @@ EOF
 ### Set up cluster config
 
 From your cluster configuration (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options` -> `Spark`) activate the Sedona functions and the kryo serializer by adding to the Spark Config
-
 ```
 spark.sql.extensions org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
 spark.serializer org.apache.spark.serializer.KryoSerializer
@@ -116,13 +111,11 @@ spark.kryo.registrator org.apache.sedona.core.serde.SedonaKryoRegistrator
 ```
 
 From your cluster configuration (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options` -> `Init Scripts`) add the newly created `Workspace` init script
-
 ```
 /Workspace/sedona/sedona-init.sh
 ```
 
 For enabling python support, from the Libraries tab install from PyPI
-
 ```
 apache-sedona=={{ sedona.current_version }}
 geopandas==0.11.1

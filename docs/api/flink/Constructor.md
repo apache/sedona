@@ -8,7 +8,6 @@ Format:
 Since: `v1.5.0`
 
 Example:
-
 ```sql
 SELECT ST_AsText(ST_GeomFromEWKT('SRID=4269;POINT(40.7128 -74.0060)'))
 ```
@@ -228,7 +227,6 @@ Format:
 Since: `v1.2.1`
 
 Example:
-
 ```sql
 SELECT ST_GeomFromWKB(polygontable._c0) AS polygonshape
 FROM polygontable
@@ -244,7 +242,6 @@ Format:
 Since: `v1.2.0`
 
 Example:
-
 ```sql
 SELECT ST_GeomFromWKT('POINT(40.7128 -74.0060)')
 ```
@@ -264,7 +261,6 @@ Format: `ST_LineFromText (Text: String)`
 Since: `v1.2.1`
 
 Example:
-
 ```sql
 SELECT ST_LineFromText('Linestring(1 2, 3 4)')
 ```

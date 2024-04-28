@@ -4,16 +4,13 @@ The detailed explanation is here: [Visualize Spatial DataFrame/RDD](../../tutori
 
 1. Add Sedona-core, Sedona-SQL, Sedona-Viz into your project pom.xml or build.sbt
 2. Declare your Spark Session
-
 ```scala
 sparkSession = SparkSession.builder().
 config("spark.serializer","org.apache.spark.serializer.KryoSerializer").
 config("spark.kryo.registrator", "org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator").
 master("local[*]").appName("mySedonaVizDemo").getOrCreate()
 ```
-
 3. Add the following lines after your SparkSession declaration:
-
 ```scala
 SedonaSQLRegistrator.registerAll(sparkSession)
 SedonaVizRegistrator.registerAll(sparkSession)
@@ -41,7 +38,6 @@ Since: `v1.0.0`
 This function will normalize the weight according to the max weight among all pixels. Different pixel obtains different color.
 
 SQL Example
-
 ```sql
 SELECT pixels.px, ST_Colorize(pixels.weight, 999) AS color
 FROM pixels
@@ -59,7 +55,6 @@ FROM pixels
 ```
 
 Here are some example color names can be entered:
-
 ```
 "firebrick"
 "#aa38e0"

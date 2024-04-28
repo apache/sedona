@@ -19,7 +19,6 @@ spark.sql(
 ```
 
 Then create an SQL paragraph to fetch the data
-
 ```sql
 %sql
 SELECT *
@@ -48,7 +47,6 @@ spark.sql(
 ```
 
 Then create an SQL paragraph to fetch the data
-
 ```sql
 %sql
 SELECT *, 'I am the map center!'

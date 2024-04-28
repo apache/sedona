@@ -52,7 +52,6 @@ Introduction: Find geometries from A and geometries from B such that the distanc
 Spark SQL Example for planar Euclidean distance:
 
 *Only consider ==fully within a certain distance==*
-
 ```sql
 SELECT *
 FROM pointdf1, pointdf2
@@ -72,7 +71,6 @@ WHERE ST_FrechetDistance(pointDf.pointshape, polygonDf.polygonshape) < 2
 ```
 
 *Consider ==intersects within a certain distance==*
-
 ```sql
 SELECT *
 FROM pointdf1, pointdf2
@@ -92,7 +90,6 @@ WHERE ST_FrechetDistance(pointDf.pointshape, polygonDf.polygonshape) <= 2
 ```
 
 Spark SQL Physical plan:
-
 ```
 == Physical Plan ==
 DistanceJoin pointshape1#12: geometry, pointshape2#33: geometry, 2.0, true
@@ -108,7 +105,6 @@ DistanceJoin pointshape1#12: geometry, pointshape2#33: geometry, 2.0, true
 Spark SQL Example for meter-based geodesic distance `ST_DistanceSpheroid` (works for `ST_DistanceSphere` too):
 
 *Less than a certain distance==*
-
 ```sql
 SELECT *
 FROM pointdf1, pointdf2
@@ -116,7 +112,6 @@ WHERE ST_DistanceSpheroid(pointdf1.pointshape1,pointdf2.pointshape2) < 2
 ```
 
 *Less than or equal to a certain distance==*
-
 ```sql
 SELECT *
 FROM pointdf1, pointdf2
@@ -146,7 +141,6 @@ pointDf.alias("pointDf").join(broadcast(polygonDf).alias("polygonDf"), expr("ST_
 ```
 
 Spark SQL Physical plan:
-
 ```
 == Physical Plan ==
 BroadcastIndexJoin pointshape#52: geometry, BuildRight, BuildRight, false ST_Contains(polygonshape#30, pointshape#52)
@@ -164,7 +158,6 @@ pointDf1.alias("pointDf1").join(broadcast(pointDf2).alias("pointDf2"), expr("ST_
 ```
 
 Spark SQL Physical plan:
-
 ```
 == Physical Plan ==
 BroadcastIndexJoin pointshape#52: geometry, BuildRight, BuildLeft, true, 2.0 ST_Distance(pointshape#52, pointshape#415) <= 2.0

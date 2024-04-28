@@ -444,15 +444,12 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 * **Sedona Spark & Flink** Introduced a new entry point called SedonaContext to unify all Sedona entry points in different compute engines and deprecate old Sedona register entry points. Users no longer have to register Sedona kryo serializer and import many tedious Python classes.
     * **Sedona Spark**:
         * Scala:
-
         ```scala
         import org.apache.sedona.spark.SedonaContext
         val sedona = SedonaContext.create(SedonaContext.builder().master("local[*]").getOrCreate())
         sedona.sql("SELECT ST_GeomFromWKT(XXX) FROM")
         ```
-
         * Python:
-
         ```python
         from sedona.spark import *
 
@@ -464,9 +461,7 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
         sedona = SedonaContext.create(config)
         sedona.sql("SELECT ST_GeomFromWKT(XXX) FROM")
         ```
-
     * **Sedona Flink**:
-
     ```java
     import org.apache.sedona.flink.SedonaContext
     StreamTableEnvironment sedona = SedonaContext.create(env, tableEnv);
