@@ -76,7 +76,6 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   val rasterDataLocation: String = resourceFolder + "raster/raster_with_no_data/test5.tiff"
   val buildingDataLocation: String = resourceFolder + "813_buildings_test.csv"
   val smallRasterDataLocation: String = resourceFolder + "raster/test1.tiff"
-  private val factory = new GeometryFactory()
   var hdfsURI: String = _
 
   override def beforeAll(): Unit = {
