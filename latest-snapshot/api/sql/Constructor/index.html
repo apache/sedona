@@ -2720,6 +2720,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Raster-affine-transformation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Raster affine transformation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -4259,10 +4280,10 @@
 <p class="admonition-title">Warning</p>
 <p>Please make sure you use <mark>ST_GeomFromWKT</mark> to create Geometry type column otherwise that column cannot be used in SedonaSQL.</p>
 </div>
-<p>If the file you are reading contains non-ASCII characters you'll need to explicitly set the encoding
-via <code>sedona.global.charset</code> system property before the call to <code>ShapefileReader.readToGeometryRDD</code>.</p>
+<p>If the file you are reading contains non-ASCII characters you'll need to explicitly set the Spark config before initializing the SparkSession, then you can use <code>ShapefileReader.readToGeometryRDD</code>.</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="nc">System</span><span class="p">.</span><span class="n">setProperty</span><span class="p">(</span><span class="s">&quot;sedona.global.charset&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;utf8&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">spark</span><span class="p">.</span><span class="n">driver</span><span class="p">.</span><span class="n">extraJavaOptions</span><span class="w">  </span><span class="o">-</span><span class="nc">Dsedona</span><span class="p">.</span><span class="n">global</span><span class="p">.</span><span class="n">charset</span><span class="o">=</span><span class="n">utf8</span>
+<span class="n">spark</span><span class="p">.</span><span class="n">executor</span><span class="p">.</span><span class="n">extraJavaOptions</span><span class="w">  </span><span class="o">-</span><span class="nc">Dsedona</span><span class="p">.</span><span class="n">global</span><span class="p">.</span><span class="n">charset</span><span class="o">=</span><span class="n">utf8</span>
 </code></pre></div>
 <h2 id="st_geomfromewkt">ST_GeomFromEWKT<a class="headerlink" href="#st_geomfromewkt" title="Permanent link">&para;</a></h2>
 <p>Introduction: Construct a Geometry from OGC Extended WKT</p>
@@ -4566,7 +4587,7 @@ Must use ST_AsEWKT function to print the Z coordinate.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 15, 2024 04:16:37</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 28, 2024 01:25:26</span>
   </span>
 
     

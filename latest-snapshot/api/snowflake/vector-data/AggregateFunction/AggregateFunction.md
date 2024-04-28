@@ -10,13 +10,20 @@ Format: `ST_Envelope_Aggr (A:geometryColumn)`
 SQL example:
 
 ```sql
-SELECT ST_Envelope_Aggr(ST_GeomFromText('MULTIPOINT(1.1 101.1,2.1 102.1,3.1 103.1,4.1 104.1,5.1 105.1,6.1 106.1,7.1 107.1,8.1 108.1,9.1 109.1,10.1 110.1)'))
+WITH src_tbl AS (
+    SELECT sedona.ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))') AS geom
+    UNION
+    SELECT sedona.ST_GeomFromText('POLYGON ((0.5 0.5, 0.5 1.5, 1.5 1.5, 1.5 0.5, 0.5 0.5))') AS geom
+)
+SELECT sedona.ST_AsText(envelope)
+FROM src_tbl,
+     TABLE(sedona.ST_Envelope_Aggr(src_tbl.geom) OVER (PARTITION BY 1));
 ```
 
 Output:
 
 ```
-POLYGON ((1.1 101.1, 1.1 120.1, 20.1 120.1, 20.1 101.1, 1.1 101.1))
+POLYGON ((0 0, 0 1.5, 1.5 1.5, 1.5 0, 0 0))
 ```
 
 ## ST_Intersection_Aggr
@@ -28,13 +35,20 @@ Format: `ST_Intersection_Aggr (A:geometryColumn)`
 SQL example:
 
 ```sql
-SELECT ST_Intersection_Aggr(ST_GeomFromText('MULTIPOINT(1.1 101.1,2.1 102.1,3.1 103.1,4.1 104.1,5.1 105.1,6.1 106.1,7.1 107.1,8.1 108.1,9.1 109.1,10.1 110.1)'))
+WITH src_tbl AS (
+    SELECT sedona.ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))') AS geom
+    UNION
+    SELECT sedona.ST_GeomFromText('POLYGON ((0.5 0.5, 0.5 1.5, 1.5 1.5, 1.5 0.5, 0.5 0.5))') AS geom
+)
+SELECT sedona.ST_AsText(intersected)
+FROM src_tbl,
+     TABLE(sedona.ST_Intersection_Aggr(src_tbl.geom) OVER (PARTITION BY 1));
 ```
 
 Output:
 
 ```
-MULTIPOINT ((1.1 101.1), (2.1 102.1), (3.1 103.1), (4.1 104.1), (5.1 105.1), (6.1 106.1), (7.1 107.1), (8.1 108.1), (9.1 109.1), (10.1 110.1))
+POLYGON ((0.5 1, 1 1, 1 0.5, 0.5 0.5, 0.5 1))
 ```
 
 ## ST_Union_Aggr
@@ -46,11 +60,18 @@ Format: `ST_Union_Aggr (A:geometryColumn)`
 SQL example:
 
 ```sql
-SELECT ST_Union_Aggr(ST_GeomFromText('MULTIPOINT(1.1 101.1,2.1 102.1,3.1 103.1,4.1 104.1,5.1 105.1,6.1 106.1,7.1 107.1,8.1 108.1,9.1 109.1,10.1 110.1)'))
+WITH src_tbl AS (
+    SELECT sedona.ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))') AS geom
+    UNION
+    SELECT sedona.ST_GeomFromText('POLYGON ((0.5 0.5, 0.5 1.5, 1.5 1.5, 1.5 0.5, 0.5 0.5))') AS geom
+)
+SELECT sedona.ST_AsText(unioned)
+FROM src_tbl,
+     TABLE(sedona.ST_Union_Aggr(src_tbl.geom) OVER (PARTITION BY 1));
 ```
 
 Output:
 
 ```
-MULTIPOINT ((1.1 101.1), (2.1 102.1), (3.1 103.1), (4.1 104.1), (5.1 105.1), (6.1 106.1), (7.1 107.1), (8.1 108.1), (9.1 109.1), (10.1 110.1))
+POLYGON ((0 0, 0 1, 0.5 1, 0.5 1.5, 1.5 1.5, 1.5 0.5, 1 0.5, 1 0, 0 0))
 ```

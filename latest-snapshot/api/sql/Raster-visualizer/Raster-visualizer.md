@@ -58,6 +58,9 @@ Output:
 Example:
 
 ```python
+from sedona.raster_utils.SedonaUtils import SedonaUtils
+# Or from sedona.spark import *
+
 df = sedona.read.format('binaryFile').load(DATA_DIR + 'raster.tiff').selectExpr("RS_FromGeoTiff(content) as raster")
 htmlDF = df.selectExpr("RS_AsImage(raster, 500) as raster_image")
 SedonaUtils.display_image(htmlDF)

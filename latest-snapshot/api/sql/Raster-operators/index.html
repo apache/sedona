@@ -3422,6 +3422,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Raster-affine-transformation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Raster affine transformation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -5850,6 +5871,7 @@ The created geometry representing the min convex hull has world coordinates of t
 <h2 id="raster-accessors">Raster Accessors<a class="headerlink" href="#raster-accessors" title="Permanent link">&para;</a></h2>
 <h3 id="rs_georeference">RS_GeoReference<a class="headerlink" href="#rs_georeference" title="Permanent link">&para;</a></h3>
 <p>Introduction: Returns the georeference metadata of raster as a string in GDAL or ESRI format. Default is GDAL if not specified.</p>
+<p>For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the <a href="../Raster-affine-transformation/">Affine Transformations</a> section.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>If you are using <code>show()</code> to display the output, it will show special characters as escape sequences. To get the expected behavior use the following code:</p>
@@ -6006,6 +6028,7 @@ UpperLeftY + ScaleY * 0.5
 <div class="highlight"><pre><span></span><code>UnsupportedOperationException(&quot;Only AffineTransform2D is supported&quot;)
 </code></pre></div></p>
 </div>
+<p>For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the <a href="../Raster-affine-transformation/">Affine Transformations</a> section.</p>
 <p>Format: <code>RS_ScaleX(raster: Raster)</code></p>
 <p>Since: <code>v1.5.0</code></p>
 <p>SQL Example</p>
@@ -6022,6 +6045,7 @@ UpperLeftY + ScaleY * 0.5
 <div class="highlight"><pre><span></span><code>UnsupportedOperationException(&quot;Only AffineTransform2D is supported&quot;)
 </code></pre></div></p>
 </div>
+<p>For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the <a href="../Raster-affine-transformation/">Affine Transformations</a> section.</p>
 <p>Format: <code>RS_ScaleY(raster: Raster)</code></p>
 <p>Since: <code>v1.5.0</code></p>
 <p>SQL Example</p>
@@ -6588,13 +6612,14 @@ If no <code>toRasterIndex</code> is provided, the new band is appended to the en
 <li>1: upper left y coordinate of the raster, in terms of CRS units</li>
 <li>2: width of the raster, in terms of pixels</li>
 <li>3: height of the raster, in terms of pixels</li>
-<li>4: width of a pixel, in terms of CRS units (scaleX)</li>
-<li>5: height of a pixel, in terms of CRS units (scaleY), may be negative</li>
+<li>4: ScaleX: the scaling factor in the x direction</li>
+<li>5: ScaleY: the scaling factor in the y direction</li>
 <li>6: skew in x direction (rotation x)</li>
 <li>7: skew in y direction (rotation y)</li>
 <li>8: srid of the raster</li>
 <li>9: number of bands</li>
 </ul>
+<p>For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the <a href="../Raster-affine-transformation/">Affine Transformations</a> section.</p>
 <p>Format: <code>RS_MetaData (raster: Raster)</code></p>
 <p>Since: <code>v1.4.1</code></p>
 <p>SQL Example</p>
@@ -6685,6 +6710,7 @@ georeferencing attributes (scaleX and scaleY).</p>
 <p class="admonition-title">Tip</p>
 <p>If you just want to resize or rescale an input raster, you can use RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, useScale: Boolean, algorithm: String)</p>
 </div>
+<p>For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the <a href="../Raster-affine-transformation/">Affine Transformations</a> section.</p>
 <p>Format:</p>
 <div class="highlight"><pre><span></span><code><span class="n">RS_Resample</span><span class="p">(</span><span class="n">raster</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">widthOrScale</span><span class="p">:</span><span class="w"> </span><span class="n">Double</span><span class="p">,</span><span class="w"> </span><span class="n">heightOrScale</span><span class="p">:</span><span class="w"> </span><span class="n">Double</span><span class="p">,</span><span class="w"> </span><span class="n">gridX</span><span class="p">:</span><span class="w"> </span><span class="n">Double</span><span class="p">,</span><span class="w"> </span><span class="n">gridY</span><span class="p">:</span><span class="w"> </span><span class="n">Double</span><span class="p">,</span><span class="w"> </span><span class="n">useScale</span><span class="p">:</span><span class="w"> </span><span class="nb">Boolean</span><span class="p">,</span><span class="w"> </span><span class="n">algorithm</span><span class="p">:</span><span class="w"> </span><span class="n">String</span><span class="p">)</span>
 </code></pre></div>
@@ -6783,6 +6809,7 @@ georeferencing attributes (scaleX and scaleY).</p>
 <h3 id="rs_setgeoreference">RS_SetGeoReference<a class="headerlink" href="#rs_setgeoreference" title="Permanent link">&para;</a></h3>
 <p>Introduction: Sets the Georeference information of an object in a single call. Accepts inputs in <code>GDAL</code> and <code>ESRI</code> format.
 Default format is <code>GDAL</code>. If all 6 parameters are not provided then will return null.</p>
+<p>For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the <a href="../Raster-affine-transformation/">Affine Transformations</a> section.</p>
 <p>Format:</p>
 <div class="highlight"><pre><span></span><code>RS_SetGeoReference(raster: Raster, geoRefCoord: String, format: String = &quot;GDAL&quot;)
 </code></pre></div>
@@ -7371,7 +7398,7 @@ To learn how to write map algebra script, please refer to <a href="https://githu
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 25, 2024 04:21:19</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 28, 2024 01:25:26</span>
   </span>
 
     

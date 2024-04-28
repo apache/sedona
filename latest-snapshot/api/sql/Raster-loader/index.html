@@ -2627,6 +2627,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Raster-affine-transformation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Raster affine transformation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -4112,16 +4133,17 @@ Accepts one of:<ol>
 <li>Height: The height of the raster in pixels.</li>
 <li>UpperleftX: The X coordinate of the upper left corner of the raster, in terms of the CRS units.</li>
 <li>UpperleftY: The Y coordinate of the upper left corner of the raster, in terms of the CRS units.</li>
-<li>ScaleX (pixel size on X): The size of the cells on the X axis, in terms of the CRS units.</li>
-<li>ScaleY (pixel size on Y): The size of the cells on the Y axis, in terms of the CRS units.</li>
-<li>SkewX: The skew of the raster on the X axis, in terms of the CRS units.</li>
-<li>SkewY: The skew of the raster on the Y axis, in terms of the CRS units.</li>
+<li>ScaleX: The scaling factor of the cells on the X axis</li>
+<li>ScaleY: The scaling factor of the cells on the Y axis</li>
+<li>SkewX: The skew of the raster on the X axis, effectively tilting them in the horizontal direction</li>
+<li>SkewY: The skew of the raster on the Y axis, effectively tilting them in the vertical direction</li>
 <li>SRID: The SRID of the raster. Use 0 if you want to use the default Cartesian coordinate system. Use 4326 if you want to use WGS84.</li>
 </ul>
+<p>For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the <a href="../Raster-affine-transformation/">Affine Transformations</a> section.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-</div>
 <p>If any other value than the accepted values for the bandDataType is provided, RS_MakeEmptyRaster defaults to double as the data type for the raster.</p>
+</div>
 <p>Spark SQL example 1 (with 2 bands):</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span>
 </code></pre></div>
@@ -4236,7 +4258,7 @@ NO2(time=2, z=2, lat=48, lon=80)
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 11, 2024 00:47:00</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 28, 2024 01:25:26</span>
   </span>
 
     
