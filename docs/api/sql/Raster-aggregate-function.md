@@ -16,6 +16,7 @@ Since: `v1.5.1`
 SQL Example:
 
 First, define a window specification that partitions by geographic location and orders by time. This will prepare your data by assigning an index to each raster based on its timestamp within each location group.
+
 ```
 val windowSpec = Window.partitionBy("geometry").orderBy("timestamp")
 val indexedRasters = df.withColumn("index", row_number().over(windowSpec))
@@ -24,6 +25,7 @@ indexedRasters.show()
 ```
 
 The indexed rasters will appear as follows, showing that each raster is tagged with a sequential index (ordered by timestamp) within its group (geometry).
+
 ```
 +-------------------+------------------------------+--------------+-----+
 |          timestamp|                        raster|      geometry|index|
@@ -43,6 +45,7 @@ The indexed rasters will appear as follows, showing that each raster is tagged w
 ```
 
 To create a stacked raster by grouping on geometry.
+
 ```
 SELECT geometry, RS_Union_Aggr(raster, index) AS raster, RS_NumBands(raster) AS Num_Bands
 FROM indexedRasters
