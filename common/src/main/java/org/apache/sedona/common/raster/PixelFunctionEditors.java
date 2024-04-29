@@ -19,14 +19,13 @@
 package org.apache.sedona.common.raster;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.geometry.DirectPosition2D;
+import org.geotools.geometry.Position2D;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.TransformException;
 
 import javax.media.jai.RasterFactory;
 import java.awt.*;
@@ -143,7 +142,7 @@ public class PixelFunctionEditors {
         if (geometryType.equalsIgnoreCase(Geometry.TYPENAME_POINT) || geometryType.equalsIgnoreCase(Geometry.TYPENAME_MULTIPOINT)) {
             Coordinate[] coordinates = geom.getCoordinates();
             for (Coordinate pointCoordinate: coordinates) {
-                int[] pointLocation = raster.getGridGeometry().worldToGrid(new DirectPosition2D(pointCoordinate.x, pointCoordinate.y)).getCoordinateValues();
+                int[] pointLocation = raster.getGridGeometry().worldToGrid(new Position2D(pointCoordinate.x, pointCoordinate.y)).getCoordinateValues();
                 double[] pixel = rasterCopied.getPixel(pointLocation[0], pointLocation[1], (double[]) null);
                 pixel[band - 1] = rasterizedGeomData.getPixel(0, 0, (double[]) null)[0];
                 rasterCopied.setPixel(pointLocation[0], pointLocation[1], pixel);
