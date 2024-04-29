@@ -106,7 +106,7 @@ jobs:
           if [ ${SPARK_VERSION:2:1} -gt "3" ]; then
             SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
           fi
-          mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4}
+          mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dgeotools
       - name: Run tests
         run: |
           if [[ "${SPARK_VERSION:0:3}" < "3.3" ]]; then
