@@ -25,8 +25,7 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
   }
 
   packages <- c(
-    "org.datasyslab:geotools-wrapper:1.5.1-28.2",
-    "edu.ucar:cdm-core:5.4.2"
+    "org.datasyslab:geotools-wrapper:1.5.2-28.2"
   )
   jars <- NULL
 
