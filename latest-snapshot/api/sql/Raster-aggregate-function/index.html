@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../../../image/sedona_logo_symbol.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.19">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.20">
     
     
       
@@ -3925,10 +3925,10 @@
   <h1>Raster aggregates</h1>
 
 <h2 id="rs_union_aggr">RS_Union_Aggr<a class="headerlink" href="#rs_union_aggr" title="Permanent link">&para;</a></h2>
-<p>Introduction: Returns a raster containing bands by specified indexes from all rasters in the provided column. Extracts the first bands from each raster and combines them into the output raster based on the input index values.</p>
+<p>Introduction: This function combines multiple rasters into a single multiband raster by stacking the bands of each input raster sequentially. The function arranges the bands in the output raster according to the order specified by the index column in the input. It is typically used in scenarios where rasters are grouped by certain criteria (e.g., time and/or location) and an aggregated raster output is desired.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>RS_Union_Aggr can take multiple banded rasters as input, but it would only extract the first band to the resulting raster. RS_Union_Aggr expects the following input, if not satisfied then will throw an IllegalArgumentException:</p>
+<p>RS_Union_Aggr expects the following input, if not satisfied then will throw an IllegalArgumentException:</p>
 <ul>
 <li>Indexes to be in an arithmetic sequence without any gaps.</li>
 <li>Indexes to be unique and not repeated.</li>
@@ -3937,23 +3937,55 @@
 </div>
 <p>Format: <code>RS_Union_Aggr(A: rasterColumn, B: indexColumn)</code></p>
 <p>Since: <code>v1.5.1</code></p>
-<p>SQL Example</p>
-<p>Contents of <code>raster_table</code>.</p>
-<div class="highlight"><pre><span></span><code>+------------------------------+-----+
-|                        raster|index|
-+------------------------------+-----+
-|GridCoverage2D[&quot;geotiff_cov...|    1|
-|GridCoverage2D[&quot;geotiff_cov...|    2|
-|GridCoverage2D[&quot;geotiff_cov...|    3|
-|GridCoverage2D[&quot;geotiff_cov...|    4|
-|GridCoverage2D[&quot;geotiff_cov...|    5|
-+------------------------------+-----+
+<p>SQL Example:</p>
+<p>First, we enrich the dataset with time-based grouping columns and index the rasters based on time intervals:</p>
+<div class="highlight"><pre><span></span><code>// Add yearly and quarterly time interval columns for grouping
+df = df
+ .withColumn(&quot;year&quot;, year($&quot;timestamp&quot;))
+ .withColumn(&quot;quarter&quot;, quarter($&quot;timestamp&quot;))
+
+// Define window specs for quarterly indexing within each geometry-year group
+windowSpecQuarter = Window.partitionBy(&quot;geometry&quot;, &quot;year&quot;, &quot;quarter&quot;).orderBy(&quot;timestamp&quot;)
+
+indexedDf = df.withColumn(&quot;index&quot;, row_number().over(windowSpecQuarter))
+
+indexedDf.show()
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>SELECT RS_Union_Aggr(raster, index) FROM raster_table
+<p>The indexed rasters will appear as follows, showing that each raster is tagged with a sequential index (ordered by timestamp) within its group (grouped by geometry, year and quarter).</p>
+<div class="highlight"><pre><span></span><code>+-------------------+-----------------------------+--------------+----+-------+-----+
+|timestamp          |raster                       |geometry      |year|quarter|index|
++-------------------+-----------------------------+--------------+----+-------+-----+
+|2021-01-10 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (72 120)|2021|1      |1    |
+|2021-01-25 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (72 120)|2021|1      |2    |
+|2021-02-15 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (72 120)|2021|1      |3    |
+|2021-03-15 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (72 120)|2021|1      |4    |
+|2021-03-25 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (72 120)|2021|1      |5    |
+|2021-04-10 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (84 132)|2021|2      |1    |
+|2021-04-22 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (84 132)|2021|2      |2    |
+|2021-05-15 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (84 132)|2021|2      |3    |
+|2021-05-20 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (84 132)|2021|2      |4    |
+|2021-05-29 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (84 132)|2021|2      |5    |
+|2021-06-10 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (84 132)|2021|2      |6    |
++-------------------+-----------------------------+------------- +----+-------+-----+
+</code></pre></div>
+<p>To create a stacked raster by grouping on geometry.</p>
+<div class="highlight"><pre><span></span><code>indexedDf.createOrReplaceTempView(&quot;indexedDf&quot;)
+
+sedona.sql(&#39;&#39;&#39;
+    SELECT geometry, year, quarter, RS_Union_Aggr(raster, index) AS aggregated_raster
+    FROM indexedDf
+    WHERE index &lt;= 4
+    GROUP BY geometry, year, quarter
+&#39;&#39;&#39;).show()
 </code></pre></div>
 <p>Output:</p>
-<p>This output raster contains the first band of each raster in the <code>raster_table</code> at specified index.</p>
-<div class="highlight"><pre><span></span><code>GridCoverage2D[&quot;geotiff_coverage&quot;, GeneralEnvel...
+<p>The query yields rasters grouped by geometry, year and quarter, each containing the first four time steps combined into a single multiband raster, where each band represents one time step.</p>
+<div class="highlight"><pre><span></span><code>+--------------+----+-------+--------------------+---------+
+|      geometry|year|quarter|              raster|Num_Bands|
++--------------+----+-------+--------------------+---------+
+|POINT (72 120)|2021|1      |GridCoverage2D[&quot;g...|        4|
+|POINT (84 132)|2021|2      |GridCoverage2D[&quot;g...|        4|
++--------------+----+-------+--------------------+---------+
 </code></pre></div>
 
 
@@ -3975,7 +4007,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 12, 2024 03:02:34</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 29, 2024 22:59:54</span>
   </span>
 
     

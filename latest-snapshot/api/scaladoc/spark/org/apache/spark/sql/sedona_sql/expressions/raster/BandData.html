@@ -604,7 +604,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">BandData</span><span class="params">(<span name="bandInt">bandInt: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="bandDouble">bandDouble: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="index">index: <span class="extype" name="scala.Int">Int</span></span>, <span name="isIntegral">isIntegral: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="serializedRaster">serializedRaster: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>, <span name="serializedSampleDimension">serializedSampleDimension: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">BandData</span><span class="params">(<span name="bandsData">bandsData: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="index">index: <span class="extype" name="scala.Int">Int</span></span>, <span name="serializedRaster">serializedRaster: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>, <span name="serializedSampleDimensions">serializedSampleDimensions: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
@@ -660,9 +660,9 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(bandInt:Array[Int],bandDouble:Array[Double],index:Int,isIntegral:Boolean,serializedRaster:Array[Byte],serializedSampleDimension:Array[Byte]):org.apache.spark.sql.sedona_sql.expressions.raster.BandData"></a><a id="&lt;init&gt;:BandData"></a>
+      <a id="&lt;init&gt;(bandsData:Array[Array[Double]],index:Int,serializedRaster:Array[Byte],serializedSampleDimensions:Array[Array[Byte]]):org.apache.spark.sql.sedona_sql.expressions.raster.BandData"></a><a id="&lt;init&gt;:BandData"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/BandData.html#&lt;init&gt;(bandInt:Array[Int],bandDouble:Array[Double],index:Int,isIntegral:Boolean,serializedRaster:Array[Byte],serializedSampleDimension:Array[Byte]):org.apache.spark.sql.sedona_sql.expressions.raster.BandData" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/BandData.html#&lt;init&gt;(bandsData:Array[Array[Double]],index:Int,serializedRaster:Array[Byte],serializedSampleDimensions:Array[Array[Byte]]):org.apache.spark.sql.sedona_sql.expressions.raster.BandData" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -671,7 +671,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">BandData</span><span class="params">(<span name="bandInt">bandInt: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="bandDouble">bandDouble: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="index">index: <span class="extype" name="scala.Int">Int</span></span>, <span name="isIntegral">isIntegral: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="serializedRaster">serializedRaster: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>, <span name="serializedSampleDimension">serializedSampleDimension: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>)</span>
+        <span class="name">BandData</span><span class="params">(<span name="bandsData">bandsData: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="index">index: <span class="extype" name="scala.Int">Int</span></span>, <span name="serializedRaster">serializedRaster: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>, <span name="serializedSampleDimensions">serializedSampleDimensions: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>)</span>
       </span>
       
       
@@ -749,10 +749,10 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData#bandDouble" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="bandDouble:Array[Double]"></a>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData#bandsData" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="bandsData:Array[Array[Double]]"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/BandData.html#bandDouble:Array[Double]" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/BandData.html#bandsData:Array[Array[Double]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -761,23 +761,7 @@
         <span class="kind">var</span>
       </span>
       <span class="symbol">
-        <span class="name">bandDouble</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Double">Double</span>]</span>
-      </span>
-      
-      
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData#bandInt" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="bandInt:Array[Int]"></a>
-      <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/BandData.html#bandInt:Array[Int]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">bandInt</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]</span>
+        <span class="name">bandsData</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Double">Double</span>]]</span>
       </span>
       
       
@@ -894,22 +878,6 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData#isIntegral" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="isIntegral:Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/BandData.html#isIntegral:Boolean" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">isIntegral</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -980,10 +948,10 @@
       </span>
       
       
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData#serializedSampleDimension" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="serializedSampleDimension:Array[Byte]"></a>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.BandData#serializedSampleDimensions" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="serializedSampleDimensions:Array[Array[Byte]]"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/BandData.html#serializedSampleDimension:Array[Byte]" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/BandData.html#serializedSampleDimensions:Array[Array[Byte]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -992,7 +960,7 @@
         <span class="kind">var</span>
       </span>
       <span class="symbol">
-        <span class="name">serializedSampleDimension</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>
+        <span class="name">serializedSampleDimensions</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>
       </span>
       
       

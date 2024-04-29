@@ -1,9 +1,9 @@
 ## RS_Union_Aggr
 
-Introduction: Returns a raster containing bands by specified indexes from all rasters in the provided column. Extracts the first bands from each raster and combines them into the output raster based on the input index values.
+Introduction: This function combines multiple rasters into a single multiband raster by stacking the bands of each input raster sequentially. The function arranges the bands in the output raster according to the order specified by the index column in the input. It is typically used in scenarios where rasters are grouped by certain criteria (e.g., time and/or location) and an aggregated raster output is desired.
 
 !!!Note
-    RS_Union_Aggr can take multiple banded rasters as input, but it would only extract the first band to the resulting raster. RS_Union_Aggr expects the following input, if not satisfied then will throw an IllegalArgumentException:
+    RS_Union_Aggr expects the following input, if not satisfied then will throw an IllegalArgumentException:
 
     - Indexes to be in an arithmetic sequence without any gaps.
     - Indexes to be unique and not repeated.
@@ -13,30 +13,66 @@ Format: `RS_Union_Aggr(A: rasterColumn, B: indexColumn)`
 
 Since: `v1.5.1`
 
-SQL Example
+SQL Example:
 
-Contents of `raster_table`.
-
-```
-+------------------------------+-----+
-|                        raster|index|
-+------------------------------+-----+
-|GridCoverage2D["geotiff_cov...|    1|
-|GridCoverage2D["geotiff_cov...|    2|
-|GridCoverage2D["geotiff_cov...|    3|
-|GridCoverage2D["geotiff_cov...|    4|
-|GridCoverage2D["geotiff_cov...|    5|
-+------------------------------+-----+
-```
+First, we enrich the dataset with time-based grouping columns and index the rasters based on time intervals:
 
 ```
-SELECT RS_Union_Aggr(raster, index) FROM raster_table
+// Add yearly and quarterly time interval columns for grouping
+df = df
+ .withColumn("year", year($"timestamp"))
+ .withColumn("quarter", quarter($"timestamp"))
+
+// Define window specs for quarterly indexing within each geometry-year group
+windowSpecQuarter = Window.partitionBy("geometry", "year", "quarter").orderBy("timestamp")
+
+indexedDf = df.withColumn("index", row_number().over(windowSpecQuarter))
+
+indexedDf.show()
+```
+
+The indexed rasters will appear as follows, showing that each raster is tagged with a sequential index (ordered by timestamp) within its group (grouped by geometry, year and quarter).
+
+```
++-------------------+-----------------------------+--------------+----+-------+-----+
+|timestamp          |raster                       |geometry      |year|quarter|index|
++-------------------+-----------------------------+--------------+----+-------+-----+
+|2021-01-10 00:00:00|GridCoverage2D["geotiff_co...|POINT (72 120)|2021|1      |1    |
+|2021-01-25 00:00:00|GridCoverage2D["geotiff_co...|POINT (72 120)|2021|1      |2    |
+|2021-02-15 00:00:00|GridCoverage2D["geotiff_co...|POINT (72 120)|2021|1      |3    |
+|2021-03-15 00:00:00|GridCoverage2D["geotiff_co...|POINT (72 120)|2021|1      |4    |
+|2021-03-25 00:00:00|GridCoverage2D["geotiff_co...|POINT (72 120)|2021|1      |5    |
+|2021-04-10 00:00:00|GridCoverage2D["geotiff_co...|POINT (84 132)|2021|2      |1    |
+|2021-04-22 00:00:00|GridCoverage2D["geotiff_co...|POINT (84 132)|2021|2      |2    |
+|2021-05-15 00:00:00|GridCoverage2D["geotiff_co...|POINT (84 132)|2021|2      |3    |
+|2021-05-20 00:00:00|GridCoverage2D["geotiff_co...|POINT (84 132)|2021|2      |4    |
+|2021-05-29 00:00:00|GridCoverage2D["geotiff_co...|POINT (84 132)|2021|2      |5    |
+|2021-06-10 00:00:00|GridCoverage2D["geotiff_co...|POINT (84 132)|2021|2      |6    |
++-------------------+-----------------------------+------------- +----+-------+-----+
+```
+
+To create a stacked raster by grouping on geometry.
+
+```
+indexedDf.createOrReplaceTempView("indexedDf")
+
+sedona.sql('''
+    SELECT geometry, year, quarter, RS_Union_Aggr(raster, index) AS aggregated_raster
+    FROM indexedDf
+    WHERE index <= 4
+    GROUP BY geometry, year, quarter
+''').show()
 ```
 
 Output:
 
-This output raster contains the first band of each raster in the `raster_table` at specified index.
+The query yields rasters grouped by geometry, year and quarter, each containing the first four time steps combined into a single multiband raster, where each band represents one time step.
 
 ```
-GridCoverage2D["geotiff_coverage", GeneralEnvel...
++--------------+----+-------+--------------------+---------+
+|      geometry|year|quarter|              raster|Num_Bands|
++--------------+----+-------+--------------------+---------+
+|POINT (72 120)|2021|1      |GridCoverage2D["g...|        4|
+|POINT (84 132)|2021|2      |GridCoverage2D["g...|        4|
++--------------+----+-------+--------------------+---------+
 ```
