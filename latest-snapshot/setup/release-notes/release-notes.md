@@ -9,6 +9,14 @@ Sedona 1.5.2 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.12, 
 
 This release is a maintenance release that includes bug fixes and minor improvements. No new features or major changes are added in this release.
 
+### New Contributors
+
+* @mpetazzoni made their first contribution in https://github.com/apache/sedona/pull/1216
+* @sebdiem made their first contribution in https://github.com/apache/sedona/pull/1217
+* @guilhem-dvr made their first contribution in https://github.com/apache/sedona/pull/1229
+* @niklas-petersen made their first contribution in https://github.com/apache/sedona/pull/1252
+* @mebrein made their first contribution in https://github.com/apache/sedona/pull/1334
+
 ### Bug
 
 <ul>
@@ -102,8 +110,8 @@ This release is a maintenance release that includes bug fixes and minor improvem
 </li>
 </ul>
 
-<h2>        Task
-</h2>
+### Task
+
 <ul>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-469'>SEDONA-469</a>] -         Update Sedona docker and binder to use 1.5.1
 </li>
@@ -735,8 +743,8 @@ When `sedona.join.optimizationmode` is configured as `nonequi`, it won't optimiz
 </li>
 </ul>
 
-<h2>        Improvement
-</h2>
+### Improvement
+
 <ul>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-205'>SEDONA-205</a>] -         Use BinaryType in GeometryUDT in Sedona Spark
 </li>
@@ -772,7 +780,7 @@ When `sedona.join.optimizationmode` is configured as `nonequi`, it won't optimiz
 
 ## Sedona 1.3.1
 
-This version is a minor release on Sedoma 1.3.0 line. It fixes a few critical bugs in 1.3.0. We suggest all 1.3.0 users to migrate to this version.
+This version is a minor release on Sedona 1.3.0 line. It fixes a few critical bugs in 1.3.0. We suggest all 1.3.0 users to migrate to this version.
 
 ### Bug fixes
 
@@ -818,7 +826,6 @@ This version is a major release on Sedona 1.3.0 line and consists of 50 PRs. It 
     * `ST_Transform(geom, "srcWktString", "tgtWktString")`
 
 ```yaml
-
 GEOGCS["WGS 84",
   DATUM["WGS_1984",
   SPHEROID["WGS 84",6378137,298.257223563,
@@ -829,7 +836,6 @@ GEOGCS["WGS 84",
   UNIT["degree",0.0174532925199433,
   AUTHORITY["EPSG","9122"]],
   AUTHORITY["EPSG","4326"]]
-
 ```
 
 ### Bug fixes
