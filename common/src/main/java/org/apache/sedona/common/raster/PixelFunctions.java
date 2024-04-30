@@ -21,7 +21,6 @@ package org.apache.sedona.common.raster;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
-import org.geotools.api.geometry.Position;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.Position2D;
@@ -277,7 +276,7 @@ public class PixelFunctions
                 result.add(null);
             } else {
                 Point point = ensurePoint(geom);
-                Position directPosition2D = new Position2D(point.getX(), point.getY()).getDirectPosition();
+                Point2D.Double directPosition2D = new Point2D.Double(point.getX(), point.getY());
                 try {
                     rasterGeom.evaluate(directPosition2D, pixelBuffer);
                     double pixel = pixelBuffer[band - 1];
