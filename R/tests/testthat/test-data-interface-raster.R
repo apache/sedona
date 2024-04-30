@@ -142,7 +142,7 @@ test_that("Passed RS_NumBands with raster", {
     ) %>%
     select(nbands) %>%
     collect()
-
+  print(a) # Debugging line to view the output before testing
   expect_equal(
     a %>% as.list(),
     list(nbands = c(1, 1, 4))
@@ -195,7 +195,7 @@ test_that("Passed RS_Values with raster", {
     ) %>%
     select(val) %>%
     collect()
-
+  print(a)
   expect_equal(
     a %>% as.list(),
     list(val = list(c(255, NA_real_), c(255, NA_real_), c(NA_real_, NA_real_)))
