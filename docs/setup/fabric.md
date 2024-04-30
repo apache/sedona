@@ -104,7 +104,7 @@ abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e1
 
 ![](../image/fabric/fabric-8.png)
 
-If use this option, the config files in your notebook should be
+If you use this option, the config files in your notebook should be
 
 ```python
 %%configure -f
