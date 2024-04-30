@@ -23,6 +23,8 @@ jobs:
       with:
         distribution: 'zulu'
         java-version: '11'
+    - name: Compile Source Code
+      run: mvn -q clean install -DskipTests
     - name: Compile ScalaDoc
       run: mvn scala:doc -pl spark/common && mkdir -p docs/api/scaladoc/spark && cp -r spark/common/target/site/scaladocs/* docs/api/scaladoc/spark
     - uses: actions/setup-python@v5
