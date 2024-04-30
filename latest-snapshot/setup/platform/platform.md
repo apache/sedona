@@ -1,4 +1,4 @@
-Sedona binary releases are compiled by Java 1.8 and Scala 2.11/2.12 and tested in the following environments:
+Sedona binary releases are compiled by Java 1.11 and Scala 2.12/2.13 and tested in the following environments:
 
 !!!warning
 	Support of Spark 2.X and Scala 2.11 was removed in Sedona 1.3.0+ although some parts of the source code might still be compatible. Sedona 1.3.0+ release binary for both Scala 2.12 and 2.13.
