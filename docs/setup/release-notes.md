@@ -310,8 +310,7 @@ Sedona 1.5.0 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 * Add 18 more ST functions for vector data processing in Sedona Spark and Sedona Flink
 * Add 36 more RS functions in Sedona Spark to support [comprehensive raster data ETL and analytics](../tutorial/raster.md)
 	* You can now directly join vector and raster datasets together
-	* Flexible map algebra equations: `SELECT RS_MapAlgebra(rast, 'D', 'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);') as ndvi FROM raster_table
-`
+	* Flexible map algebra equations: `SELECT RS_MapAlgebra(rast, 'D', 'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);') as ndvi FROM raster_table`
 * Add native support of [Uber H3 functions](../api/sql/Function.md#st_h3celldistance) in Sedona Spark and Sedona Flink.
 * Add SedonaKepler and SedonaPyDeck for [interactive map visualization](../tutorial/sql.md#visualize-query-results) on Sedona Spark.
 
@@ -585,9 +584,9 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
     * **Sedona Flink**:
 
     ```java
-    import org.apache.sedona.flink.SedonaContext
+    import org.apache.sedona.flink.SedonaContext;
     StreamTableEnvironment sedona = SedonaContext.create(env, tableEnv);
-    sedona.sqlQuery("SELECT ST_GeomFromWKT(XXX) FROM")
+    sedona.sqlQuery("SELECT ST_GeomFromWKT(XXX) FROM");
     ```
 
 ### Bug
@@ -932,7 +931,7 @@ New features:
 * [SEDONA-117](https://issues.apache.org/jira/browse/SEDONA-117): Add RS_AppendNormalizedDifference
 * [SEDONA-97](https://issues.apache.org/jira/browse/SEDONA-97): Add ST_Force_2D
 * [SEDONA-98](https://issues.apache.org/jira/browse/SEDONA-98): Add ST_IsEmpty
-* [SEDONA-116](https://issues.apache.org/jira/browse/SEDONA-116): Add ST_YMax and ST_Ymin
+* [SEDONA-116](https://issues.apache.org/jira/browse/SEDONA-116): Add ST_YMax and ST_YMin
 * [SEDONA-115](https://issues.apache.org/jira/browse/SEDONA-15): Add ST_XMax and ST_Min
 * [SEDONA-120](https://issues.apache.org/jira/browse/SEDONA-120): Add ST_BuildArea
 * [SEDONA-113](https://issues.apache.org/jira/browse/SEDONA-113): Add ST_PointN
@@ -949,7 +948,7 @@ New features:
 * [SEDONA-112](https://issues.apache.org/jira/browse/SEDONA-112): Add ST_AsEWKT
 * [SEDONA-97](https://issues.apache.org/jira/browse/SEDONA-97): Add ST_Force_2D
 * [SEDONA-98](https://issues.apache.org/jira/browse/SEDONA-98): Add ST_IsEmpty
-* [SEDONA-116](https://issues.apache.org/jira/browse/SEDONA-116): Add ST_YMax and ST_Ymin
+* [SEDONA-116](https://issues.apache.org/jira/browse/SEDONA-116): Add ST_YMax and ST_YMin
 * [SEDONA-115](https://issues.apache.org/jira/browse/SEDONA-15): Add ST_XMax and ST_Min
 * [SEDONA-120](https://issues.apache.org/jira/browse/SEDONA-120): Add ST_BuildArea
 * [SEDONA-113](https://issues.apache.org/jira/browse/SEDONA-113): Add ST_PointN
@@ -979,7 +978,7 @@ New features:
 * [SEDONA-4](https://issues.apache.org/jira/browse/SEDONA-4): Handle nulls in SQL functions
 * [SEDONA-65](https://issues.apache.org/jira/browse/SEDONA-65): Create ST_Difference function
 * [SEDONA-68](https://issues.apache.org/jira/browse/SEDONA-68) Add St_Collect function.
-* [SEDONA-82](https://issues.apache.org/jira/browse/SEDONA-82): Create ST_SymmDifference function
+* [SEDONA-82](https://issues.apache.org/jira/browse/SEDONA-82): Create ST_SymDifference function
 * [SEDONA-75](https://issues.apache.org/jira/browse/SEDONA-75): Add support for "3D" geometries: Preserve Z coordinates on geometries when serializing, ST_AsText, ST_Z, ST_3DDistance
 * [SEDONA-86](https://issues.apache.org/jira/browse/SEDONA-86): Support empty geometries in ST_AsBinary and ST_AsEWKB
 * [SEDONA-90](https://issues.apache.org/jira/browse/SEDONA-90): Add ST_Union
