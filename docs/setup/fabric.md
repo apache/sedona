@@ -24,19 +24,29 @@ In the `Environment` page, click the `Public libraries` tab and then type in `ap
 
 ![](../image/fabric/fabric-4.png)
 
-## Step 5: Save and publish the environment
+## Step 5: Set Spark properties
 
-Click the `Save` button and then click the `Publish` button to save and publish the environment. This will create the environment with the Apache Sedona Python package installed. The publishing process will take about 10 minutes.
+In the `Environment` page, click the `Spark properties` tab, then create the following 3 properties:
+
+- `spark.sql.extensions`: `org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions`
+- `spark.serializer`: `org.apache.spark.serializer.KryoSerializer`
+- `spark.kryo.registrator`: `org.apache.sedona.core.serde.SedonaKryoRegistrator`
 
 ![](../image/fabric/fabric-5.png)
 
-## Step 6: Download Sedona jars
+## Step 6: Save and publish the environment
+
+Click the `Save` button and then click the `Publish` button to save and publish the environment. This will create the environment with the Apache Sedona Python package installed. The publishing process will take about 10 minutes.
+
+![](../image/fabric/fabric-6.png)
+
+## Step 7: Download Sedona jars
 
 1. Learn the Sedona jars you need from our [Sedona maven coordinate](maven-coordinates.md)
 2. Download the `sedona-spark-shaded` jars from [Maven Central](https://search.maven.org/search?q=g:org.apache.sedona). Please pay attention to the Spark version and Scala version of the jars. If you select Spark 3.4 in the Fabric environment, you should download the Sedona jars with Spark 3.4 and Scala 2.12 and the jar name should be like `sedona-spark-shaded-3.4_2.12-1.5.1.jar`.
 3. Download the `geotools-wrapper` jars from [Maven Central](https://search.maven.org/search?q=g:org.datasyslab). Please pay attention to the Sedona versions of the jar. If you select Sedona 1.5.1, you should download the `geotools-wrapper` jar with version 1.5.1 and the jar name should be like `geotools-wrapper-1.5.1-28.2.jar`.
 
-## Step 7: Upload Sedona jars to the Fabric environment LakeHouse storage
+## Step 8: Upload Sedona jars to the Fabric environment LakeHouse storage
 
 In the notebook page, choose the `Explorer` and click the `LakeHouses` option. If you don't have a LakeHouse, you can create one. Then choose `Files` and upload the 2 jars you downloaded in the previous step.
 
@@ -48,15 +58,15 @@ abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e1
 abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e15f3695-af7e-47de-979e-473c3caa9f5b/Files/geotools-wrapper-1.5.1-28.2.jar
 ```
 
-![](../image/fabric/fabric-6.png)
-
 ![](../image/fabric/fabric-7.png)
 
-## Step 8: Start the notebook with the Sedona environment and install the jars
+![](../image/fabric/fabric-8.png)
+
+## Step 9: Start the notebook with the Sedona environment and install the jars
 
 In the notebook page, select the `ApacheSedona` environment you created before.
 
-![](../image/fabric/fabric-8.png)
+![](../image/fabric/fabric-9.png)
 
 In the notebook, you can install the jars by running the following code. Please replace the `spark.jars` with the `ABFS` paths of the 2 jars you uploaded in the previous step.
 
@@ -69,7 +79,7 @@ In the notebook, you can install the jars by running the following code. Please 
 }
 ```
 
-## Step 9: Verify the installation
+## Step 10: Verify the installation
 
 You can verify the installation by running the following code in the notebook.
 
@@ -85,4 +95,4 @@ sedona.sql("SELECT ST_GeomFromEWKT('SRID=4269;POINT(40.7128 -74.0060)')").show()
 
 If you see the output of the point, then the installation is successful.
 
-![](../image/fabric/fabric-9.png)
+![](../image/fabric/fabric-10.png)
