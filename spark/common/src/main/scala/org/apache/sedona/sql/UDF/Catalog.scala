@@ -180,6 +180,7 @@ object Catalog {
     function[ST_CollectionExtract](defaultArgs = null),
     function[ST_Normalize](),
     function[ST_LineFromMultiPoint](),
+    function[ST_MPointFromText](0),
     function[ST_MPolyFromText](0),
     function[ST_MLineFromText](0),
     function[ST_GeomCollFromText](0),

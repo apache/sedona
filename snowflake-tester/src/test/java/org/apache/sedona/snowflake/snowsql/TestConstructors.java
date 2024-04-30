@@ -202,6 +202,21 @@ public class TestConstructors extends TestBase{
     }
 
     @Test
+    public void test_ST_MPointFromText() {
+        registerUDF("ST_MPointFromText", String.class);
+        registerUDF("ST_SRID", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_MPointFromText('MULTIPOINT ((10 10), (20 20), (30 30))'))",
+                "MULTIPOINT ((10 10), (20 20), (30 30))"
+        );
+        registerUDF("ST_MPointFromText", String.class, int.class);
+        verifySqlSingleRes(
+                "select sedona.ST_SRID(sedona.ST_MPointFromText('MULTIPOINT ((10 10), (20 20), (30 30))',4269))",
+                4269
+        );
+    }
+
+    @Test
     public void test_ST_GeomCollFromText() {
         registerUDF("ST_GeomCollFromText", String.class);
         verifySqlSingleRes(

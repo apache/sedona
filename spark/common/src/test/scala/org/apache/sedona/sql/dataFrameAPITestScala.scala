@@ -246,6 +246,19 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_MPointFromText()") {
+      val df = sparkSession.sql("SELECT 'MULTIPOINT ((10 10), (20 20), (30 30))' as geom")
+      var actual = df.select(ST_MPointFromText("geom")).first().get(0).asInstanceOf[Geometry].toText
+      val expected = "MULTIPOINT ((10 10), (20 20), (30 30))"
+      assert(expected == actual)
+
+      val actualGeom = df.select(ST_MPointFromText("geom", 4326)).first().get(0).asInstanceOf[Geometry]
+      actual = actualGeom.toText
+      assert(actual == expected)
+      val actualSrid = actualGeom.getSRID
+      assert(4326 == actualSrid)
+    }
+
     it("Passed ST_GeomCollFromText") {
       val df = sparkSession.sql("SELECT 'GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))' as geom")
       var actual = df.select(ST_GeomCollFromText("geom")).first().get(0).asInstanceOf[Geometry].toText

@@ -99,6 +99,20 @@ public class ConstructorsTest {
     }
 
     @Test
+    public void mPointFromText() throws ParseException {
+        assertNull(Constructors.mPointFromText(null, 0));
+        assertNull(Constructors.mPointFromText("MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))", 0));
+        Geometry geom = Constructors.mPointFromText("MULTIPOINT ((10 10), (20 20), (30 30))", 0);
+        assertEquals(0,geom.getSRID());
+        assertEquals("MULTIPOINT ((10 10), (20 20), (30 30))",geom.toText());
+
+        geom = Constructors.mPointFromText("MULTIPOINT ((10 10), (20 20), (30 30))", 3306);
+        assertEquals(3306,geom.getSRID());
+        assertEquals("MULTIPOINT ((10 10), (20 20), (30 30))"
+                ,geom.toText());
+    }
+
+    @Test
     public void geomCollFromText() throws ParseException {
         assertNull(Constructors.geomCollFromText(null, 0));
         assertNull(Constructors.geomCollFromText("MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))", 0));

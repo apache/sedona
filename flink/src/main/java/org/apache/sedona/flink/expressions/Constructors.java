@@ -373,6 +373,17 @@ public class Constructors {
         }
     }
 
+    public static class ST_MPointFromText extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "String") String wkt, @DataTypeHint("Int") Integer srid) throws ParseException {
+            return org.apache.sedona.common.Constructors.mPointFromText(wkt, srid);
+        }
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "String") String wkt) throws ParseException {
+            return org.apache.sedona.common.Constructors.mPointFromText(wkt, 0);
+        }
+    }
+
     public static class ST_GeomCollFromText extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "String") String wkt, @DataTypeHint("Int") Integer srid) throws ParseException {

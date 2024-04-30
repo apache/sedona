@@ -45,6 +45,7 @@ public class Catalog {
                 new Constructors.ST_GeomFromGeoHash(),
                 new Constructors.ST_GeomFromGML(),
                 new Constructors.ST_GeomFromKML(),
+                new Constructors.ST_MPointFromText(),
                 new Constructors.ST_MPolyFromText(),
                 new Constructors.ST_MLineFromText(),
                 new Constructors.ST_GeomCollFromText(),

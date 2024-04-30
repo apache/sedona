@@ -430,6 +430,28 @@ Output:
 MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))
 ```
 
+## ST_MPointFromText
+
+Introduction: Constructs a MultiPoint from the WKT with the given SRID. If SRID is not provided then it defaults to 0. It returns `null` if the WKT is not a `MULTIPOINT`.
+
+Format:
+
+`ST_MPointFromText (Wkt: String)`
+
+`ST_MPointFromText (Wkt: String, srid: Integer)`
+
+SQL Example:
+
+```sql
+SELECT ST_MPointFromText('MULTIPOINT ((10 10), (20 20), (30 30))')
+```
+
+Output:
+
+```
+MULTIPOINT ((10 10), (20 20), (30 30))
+```
+
 ## ST_MPolyFromText
 
 Introduction: Construct a MultiPolygon from Wkt. If srid is not set, it defaults to 0 (unknown).

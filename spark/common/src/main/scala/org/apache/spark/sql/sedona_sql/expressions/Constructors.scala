@@ -455,6 +455,14 @@ case class ST_MLineFromText(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_MPointFromText(inputExpressions: Seq[Expression])
+  extends InferredExpression(Constructors.mPointFromText _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_GeomCollFromText(inputExpressions: Seq[Expression])
   extends InferredExpression(Constructors.geomCollFromText _) {
 
