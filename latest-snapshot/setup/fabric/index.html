@@ -1100,27 +1100,27 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-5-save-and-publish-the-environment" class="md-nav__link">
+  <a href="#step-5-set-spark-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 5: Save and publish the environment
+      Step 5: Set Spark properties
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-6-download-sedona-jars" class="md-nav__link">
+  <a href="#step-6-save-and-publish-the-environment" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 6: Download Sedona jars
+      Step 6: Save and publish the environment
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-7-upload-sedona-jars-to-the-fabric-environment-lakehouse-storage" class="md-nav__link">
+  <a href="#step-7-find-the-download-links-of-sedona-jars" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 7: Upload Sedona jars to the Fabric environment LakeHouse storage
+      Step 7: Find the download links of Sedona jars
     </span>
   </a>
   
@@ -1139,6 +1139,15 @@
   <a href="#step-9-verify-the-installation" class="md-nav__link">
     <span class="md-ellipsis">
       Step 9: Verify the installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optional-manually-upload-sedona-jars-to-the-fabric-environment-lakehouse-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional: manually upload Sedona jars to the Fabric environment LakeHouse storage
     </span>
   </a>
   
@@ -3994,27 +4003,27 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-5-save-and-publish-the-environment" class="md-nav__link">
+  <a href="#step-5-set-spark-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 5: Save and publish the environment
+      Step 5: Set Spark properties
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-6-download-sedona-jars" class="md-nav__link">
+  <a href="#step-6-save-and-publish-the-environment" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 6: Download Sedona jars
+      Step 6: Save and publish the environment
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-7-upload-sedona-jars-to-the-fabric-environment-lakehouse-storage" class="md-nav__link">
+  <a href="#step-7-find-the-download-links-of-sedona-jars" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 7: Upload Sedona jars to the Fabric environment LakeHouse storage
+      Step 7: Find the download links of Sedona jars
     </span>
   </a>
   
@@ -4033,6 +4042,15 @@
   <a href="#step-9-verify-the-installation" class="md-nav__link">
     <span class="md-ellipsis">
       Step 9: Verify the installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optional-manually-upload-sedona-jars-to-the-fabric-environment-lakehouse-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional: manually upload Sedona jars to the Fabric environment LakeHouse storage
     </span>
   </a>
   
@@ -4073,33 +4091,34 @@
 <h2 id="step-4-install-the-sedona-python-package">Step 4: Install the Sedona Python package<a class="headerlink" href="#step-4-install-the-sedona-python-package" title="Permanent link">&para;</a></h2>
 <p>In the <code>Environment</code> page, click the <code>Public libraries</code> tab and then type in <code>apache-sedona</code>. Please select the appropriate version of Apache Sedona. The source is <code>PyPI</code>.</p>
 <p><img alt="" src="../../image/fabric/fabric-4.png" /></p>
-<h2 id="step-5-save-and-publish-the-environment">Step 5: Save and publish the environment<a class="headerlink" href="#step-5-save-and-publish-the-environment" title="Permanent link">&para;</a></h2>
-<p>Click the <code>Save</code> button and then click the <code>Publish</code> button to save and publish the environment. This will create the environment with the Apache Sedona Python package installed. The publishing process will take about 10 minutes.</p>
+<h2 id="step-5-set-spark-properties">Step 5: Set Spark properties<a class="headerlink" href="#step-5-set-spark-properties" title="Permanent link">&para;</a></h2>
+<p>In the <code>Environment</code> page, click the <code>Spark properties</code> tab, then create the following 3 properties:</p>
+<ul>
+<li><code>spark.sql.extensions</code>: <code>org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions</code></li>
+<li><code>spark.serializer</code>: <code>org.apache.spark.serializer.KryoSerializer</code></li>
+<li><code>spark.kryo.registrator</code>: <code>org.apache.sedona.core.serde.SedonaKryoRegistrator</code></li>
+</ul>
 <p><img alt="" src="../../image/fabric/fabric-5.png" /></p>
-<h2 id="step-6-download-sedona-jars">Step 6: Download Sedona jars<a class="headerlink" href="#step-6-download-sedona-jars" title="Permanent link">&para;</a></h2>
+<h2 id="step-6-save-and-publish-the-environment">Step 6: Save and publish the environment<a class="headerlink" href="#step-6-save-and-publish-the-environment" title="Permanent link">&para;</a></h2>
+<p>Click the <code>Save</code> button and then click the <code>Publish</code> button to save and publish the environment. This will create the environment with the Apache Sedona Python package installed. The publishing process will take about 10 minutes.</p>
+<p><img alt="" src="../../image/fabric/fabric-6.png" /></p>
+<h2 id="step-7-find-the-download-links-of-sedona-jars">Step 7: Find the download links of Sedona jars<a class="headerlink" href="#step-7-find-the-download-links-of-sedona-jars" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Learn the Sedona jars you need from our <a href="../maven-coordinates/">Sedona maven coordinate</a></li>
-<li>Download the <code>sedona-spark-shaded</code> jars from <a href="https://search.maven.org/search?q=g:org.apache.sedona">Maven Central</a>. Please pay attention to the Spark version and Scala version of the jars. If you select Spark 3.4 in the Fabric environment, you should download the Sedona jars with Spark 3.4 and Scala 2.12 and the jar name should be like <code>sedona-spark-shaded-3.4_2.12-1.5.1.jar</code>.</li>
-<li>Download the <code>geotools-wrapper</code> jars from <a href="https://search.maven.org/search?q=g:org.datasyslab">Maven Central</a>. Please pay attention to the Sedona versions of the jar. If you select Sedona 1.5.1, you should download the <code>geotools-wrapper</code> jar with version 1.5.1 and the jar name should be like <code>geotools-wrapper-1.5.1-28.2.jar</code>.</li>
+<li>Find the <code>sedona-spark-shaded</code> jar from <a href="https://search.maven.org/search?q=g:org.apache.sedona">Maven Central</a>. Please pay attention to the Spark version and Scala version of the jars. If you select Spark 3.4 in the Fabric environment, you should download the Sedona jars with Spark 3.4 and Scala 2.12 and the jar name should be like <code>sedona-spark-shaded-3.4_2.12-1.5.1.jar</code>.</li>
+<li>Find the <code>geotools-wrapper</code> jar from <a href="https://search.maven.org/search?q=g:org.datasyslab">Maven Central</a>. Please pay attention to the Sedona versions of the jar. If you select Sedona 1.5.1, you should download the <code>geotools-wrapper</code> jar with version 1.5.1 and the jar name should be like <code>geotools-wrapper-1.5.1-28.2.jar</code>.</li>
 </ol>
-<h2 id="step-7-upload-sedona-jars-to-the-fabric-environment-lakehouse-storage">Step 7: Upload Sedona jars to the Fabric environment LakeHouse storage<a class="headerlink" href="#step-7-upload-sedona-jars-to-the-fabric-environment-lakehouse-storage" title="Permanent link">&para;</a></h2>
-<p>In the notebook page, choose the <code>Explorer</code> and click the <code>LakeHouses</code> option. If you don't have a LakeHouse, you can create one. Then choose <code>Files</code> and upload the 2 jars you downloaded in the previous step.</p>
-<p>After the upload, you should be able to see the 2 jars in the LakeHouse storage. Then please copy the <code>ABFS</code> paths of the 2 jars. In this example, the paths are</p>
-<div class="highlight"><pre><span></span><code>abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e15f3695-af7e-47de-979e-473c3caa9f5b/Files/sedona-spark-shaded-3.4_2.12-1.5.1.jar
-
-abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e15f3695-af7e-47de-979e-473c3caa9f5b/Files/geotools-wrapper-1.5.1-28.2.jar
+<p>The download links are like:</p>
+<div class="highlight"><pre><span></span><code>https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.4_2.12/1.5.1/sedona-spark-shaded-3.4_2.12-1.5.1.jar
+https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.5.1-28.2/geotools-wrapper-1.5.1-28.2.jar
 </code></pre></div>
-<p><img alt="" src="../../image/fabric/fabric-6.png" /></p>
-<p><img alt="" src="../../image/fabric/fabric-7.png" /></p>
 <h2 id="step-8-start-the-notebook-with-the-sedona-environment-and-install-the-jars">Step 8: Start the notebook with the Sedona environment and install the jars<a class="headerlink" href="#step-8-start-the-notebook-with-the-sedona-environment-and-install-the-jars" title="Permanent link">&para;</a></h2>
 <p>In the notebook page, select the <code>ApacheSedona</code> environment you created before.</p>
-<p><img alt="" src="../../image/fabric/fabric-8.png" /></p>
-<p>In the notebook, you can install the jars by running the following code. Please replace the <code>spark.jars</code> with the <code>ABFS</code> paths of the 2 jars you uploaded in the previous step.</p>
+<p><img alt="" src="../../image/fabric/fabric-9.png" /></p>
+<p>In the notebook, you can install the jars by running the following code. Please replace the <code>jars</code> with the download links of the 2 jars from the previous step.</p>
 <div class="highlight"><pre><span></span><code><span class="o">%%</span><span class="n">configure</span> <span class="o">-</span><span class="n">f</span>
 <span class="p">{</span>
-    <span class="s2">&quot;conf&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;spark.jars&quot;</span><span class="p">:</span> <span class="s2">&quot;abfss://XXX/Files/sedona-spark-shaded-3.4_2.12-1.5.1.jar,abfss://XXX/Files/geotools-wrapper-1.5.1-28.2.jar&quot;</span><span class="p">,</span>
-    <span class="p">}</span>
+    <span class="s2">&quot;jars&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.5.1-28.2/geotools-wrapper-1.5.1-28.2.jar&quot;</span><span class="p">,</span> <span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.4_2.12/1.5.1/sedona-spark-shaded-3.4_2.12-1.5.1.jar&quot;</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
 <h2 id="step-9-verify-the-installation">Step 9: Verify the installation<a class="headerlink" href="#step-9-verify-the-installation" title="Permanent link">&para;</a></h2>
@@ -4113,7 +4132,25 @@ abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e1
 <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT ST_GeomFromEWKT(&#39;SRID=4269;POINT(40.7128 -74.0060)&#39;)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>If you see the output of the point, then the installation is successful.</p>
-<p><img alt="" src="../../image/fabric/fabric-9.png" /></p>
+<p><img alt="" src="../../image/fabric/fabric-10.png" /></p>
+<h2 id="optional-manually-upload-sedona-jars-to-the-fabric-environment-lakehouse-storage">Optional: manually upload Sedona jars to the Fabric environment LakeHouse storage<a class="headerlink" href="#optional-manually-upload-sedona-jars-to-the-fabric-environment-lakehouse-storage" title="Permanent link">&para;</a></h2>
+<p>If your cluster has no internet access or you want to skip the slow on-the-fly download, you can manually upload the Sedona jars to the Fabric environment LakeHouse storage.</p>
+<p>In the notebook page, choose the <code>Explorer</code> and click the <code>LakeHouses</code> option. If you don't have a LakeHouse, you can create one. Then choose <code>Files</code> and upload the 2 jars you downloaded in the previous step.</p>
+<p>After the upload, you should be able to see the 2 jars in the LakeHouse storage. Then please copy the <code>ABFS</code> paths of the 2 jars. In this example, the paths are</p>
+<div class="highlight"><pre><span></span><code>abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e15f3695-af7e-47de-979e-473c3caa9f5b/Files/sedona-spark-shaded-3.4_2.12-1.5.1.jar
+
+abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e15f3695-af7e-47de-979e-473c3caa9f5b/Files/geotools-wrapper-1.5.1-28.2.jar
+</code></pre></div>
+<p><img alt="" src="../../image/fabric/fabric-7.png" /></p>
+<p><img alt="" src="../../image/fabric/fabric-8.png" /></p>
+<p>If you use this option, the config files in your notebook should be</p>
+<div class="highlight"><pre><span></span><code><span class="o">%%</span><span class="n">configure</span> <span class="o">-</span><span class="n">f</span>
+<span class="p">{</span>
+    <span class="s2">&quot;conf&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;spark.jars&quot;</span><span class="p">:</span> <span class="s2">&quot;abfss://XXX/Files/sedona-spark-shaded-3.4_2.12-1.5.1.jar,abfss://XXX/Files/geotools-wrapper-1.5.1-28.2.jar&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
 
 
 
@@ -4134,7 +4171,7 @@ abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e1
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 25, 2024 04:21:19</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 30, 2024 16:39:40</span>
   </span>
 
     
