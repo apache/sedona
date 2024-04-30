@@ -16,16 +16,16 @@ package org.apache.sedona.common.raster;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.utils.RasterUtils;
+import org.geotools.api.geometry.Position;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Assert;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.coverage.SampleDimensionType;
-import org.opengis.geometry.DirectPosition;
+import org.geotools.api.coverage.SampleDimensionType;
 import org.locationtech.jts.io.ParseException;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.TransformException;
 
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
@@ -415,8 +415,8 @@ public class RasterConstructorsTest
                     // Check that the pixel at the point translates to the same world coordinate as the corresponding
                     // pixel in the grid coverage
                     try {
-                        DirectPosition actualWorldCoord = tileRaster.getGridGeometry().gridToWorld(tileGridCoord);
-                        DirectPosition expectedWorldCoord = gridCoverage2D.getGridGeometry().gridToWorld(gridCoord);
+                        Position actualWorldCoord = tileRaster.getGridGeometry().gridToWorld(tileGridCoord);
+                        Position expectedWorldCoord = gridCoverage2D.getGridGeometry().gridToWorld(gridCoord);
                         Assert.assertEquals(expectedWorldCoord, actualWorldCoord);
                     } catch (TransformException e) {
                         throw new RuntimeException(e);

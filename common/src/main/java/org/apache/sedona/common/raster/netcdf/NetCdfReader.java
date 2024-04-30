@@ -21,8 +21,8 @@ package org.apache.sedona.common.raster.netcdf;
 import com.google.common.collect.ImmutableList;
 import org.apache.sedona.common.raster.RasterConstructors;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.datum.PixelInCell;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.datum.PixelInCell;
 import ucar.ma2.Array;
 import ucar.nc2.*;
 

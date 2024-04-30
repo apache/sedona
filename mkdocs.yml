@@ -80,7 +80,7 @@ nav:
               - Raster affine transformation: api/sql/Raster-affine-transformation.md
           - Parameter: api/sql/Parameter.md
         - RDD (core):
-          - Scala/Java doc: api/java-api.md
+          - Scala doc: api/java-api.md
         - Viz:
           - DataFrame/SQL: api/viz/sql.md
           - RDD: api/viz/java-api.md

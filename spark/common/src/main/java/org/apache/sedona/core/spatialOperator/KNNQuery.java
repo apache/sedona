@@ -26,8 +26,8 @@ import org.apache.sedona.core.knnJudgement.KnnJudgementUsingIndex;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.TransformException;
 
 import java.io.Serializable;
 import java.util.List;

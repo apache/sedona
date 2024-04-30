@@ -34,7 +34,7 @@ jobs:
         spark: [3.0.3, 3.1.2, 3.2.1, 3.3.0, 3.4.0, 3.5.0]
         hadoop: [3]
         scala: [2.12.15]
-        r: [oldrel, release]
+        r: [oldrel]
 
     env:
       SPARK_VERSION: ${{ matrix.spark }}
@@ -86,7 +86,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '8'
+          java-version: '11'
           cache: 'maven'
       - name: Get OS name
         id: os-name
@@ -106,7 +106,7 @@ jobs:
           if [ ${SPARK_VERSION:2:1} -gt "3" ]; then
             SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
           fi
-          mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4}
+          mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dgeotools
       - name: Run tests
         run: |
           if [[ "${SPARK_VERSION:0:3}" < "3.3" ]]; then

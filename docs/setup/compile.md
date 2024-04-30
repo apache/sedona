@@ -6,7 +6,7 @@
 
 Sedona Scala/Java code is a project with multiple modules. Each module is a Scala/Java mixed project which is managed by Apache Maven 3.
 
-* Make sure your Linux/Mac machine has Java 1.8, Apache Maven 3.3.1+, and Python3.7+. The compilation of Sedona is not tested on Windows machines.
+* Make sure your Linux/Mac machine has Java 1.11, Apache Maven 3.3.1+, and Python3.7+. The compilation of Sedona is not tested on Windows machines.
 
 To compile all modules, please make sure you are in the root folder of all modules. Then enter the following command in the terminal:
 
