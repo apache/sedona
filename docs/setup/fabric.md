@@ -40,46 +40,35 @@ Click the `Save` button and then click the `Publish` button to save and publish 
 
 ![](../image/fabric/fabric-6.png)
 
-## Step 7: Download Sedona jars
+## Step 7: Find the download links of Sedona jars
 
 1. Learn the Sedona jars you need from our [Sedona maven coordinate](maven-coordinates.md)
-2. Download the `sedona-spark-shaded` jars from [Maven Central](https://search.maven.org/search?q=g:org.apache.sedona). Please pay attention to the Spark version and Scala version of the jars. If you select Spark 3.4 in the Fabric environment, you should download the Sedona jars with Spark 3.4 and Scala 2.12 and the jar name should be like `sedona-spark-shaded-3.4_2.12-1.5.1.jar`.
-3. Download the `geotools-wrapper` jars from [Maven Central](https://search.maven.org/search?q=g:org.datasyslab). Please pay attention to the Sedona versions of the jar. If you select Sedona 1.5.1, you should download the `geotools-wrapper` jar with version 1.5.1 and the jar name should be like `geotools-wrapper-1.5.1-28.2.jar`.
+2. Find the `sedona-spark-shaded` jar from [Maven Central](https://search.maven.org/search?q=g:org.apache.sedona). Please pay attention to the Spark version and Scala version of the jars. If you select Spark 3.4 in the Fabric environment, you should download the Sedona jars with Spark 3.4 and Scala 2.12 and the jar name should be like `sedona-spark-shaded-3.4_2.12-1.5.1.jar`.
+3. Find the `geotools-wrapper` jar from [Maven Central](https://search.maven.org/search?q=g:org.datasyslab). Please pay attention to the Sedona versions of the jar. If you select Sedona 1.5.1, you should download the `geotools-wrapper` jar with version 1.5.1 and the jar name should be like `geotools-wrapper-1.5.1-28.2.jar`.
 
-## Step 8: Upload Sedona jars to the Fabric environment LakeHouse storage
+The download links are like:
 
-In the notebook page, choose the `Explorer` and click the `LakeHouses` option. If you don't have a LakeHouse, you can create one. Then choose `Files` and upload the 2 jars you downloaded in the previous step.
-
-After the upload, you should be able to see the 2 jars in the LakeHouse storage. Then please copy the `ABFS` paths of the 2 jars. In this example, the paths are
-
-```angular2html
-abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e15f3695-af7e-47de-979e-473c3caa9f5b/Files/sedona-spark-shaded-3.4_2.12-1.5.1.jar
-
-abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e15f3695-af7e-47de-979e-473c3caa9f5b/Files/geotools-wrapper-1.5.1-28.2.jar
+```
+https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.4_2.12/1.5.1/sedona-spark-shaded-3.4_2.12-1.5.1.jar
+https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.5.1-28.2/geotools-wrapper-1.5.1-28.2.jar
 ```
 
-![](../image/fabric/fabric-7.png)
-
-![](../image/fabric/fabric-8.png)
-
-## Step 9: Start the notebook with the Sedona environment and install the jars
+## Step 8: Start the notebook with the Sedona environment and install the jars
 
 In the notebook page, select the `ApacheSedona` environment you created before.
 
 ![](../image/fabric/fabric-9.png)
 
-In the notebook, you can install the jars by running the following code. Please replace the `spark.jars` with the `ABFS` paths of the 2 jars you uploaded in the previous step.
+In the notebook, you can install the jars by running the following code. Please replace the `jars` with the download links of the 2 jars from the previous step.
 
 ```python
 %%configure -f
 {
-    "conf": {
-        "spark.jars": "abfss://XXX/Files/sedona-spark-shaded-3.4_2.12-1.5.1.jar,abfss://XXX/Files/geotools-wrapper-1.5.1-28.2.jar",
-    }
+    "jars": ["https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.5.1-28.2/geotools-wrapper-1.5.1-28.2.jar", "https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.4_2.12/1.5.1/sedona-spark-shaded-3.4_2.12-1.5.1.jar"]
 }
 ```
 
-## Step 10: Verify the installation
+## Step 9: Verify the installation
 
 You can verify the installation by running the following code in the notebook.
 
@@ -96,3 +85,32 @@ sedona.sql("SELECT ST_GeomFromEWKT('SRID=4269;POINT(40.7128 -74.0060)')").show()
 If you see the output of the point, then the installation is successful.
 
 ![](../image/fabric/fabric-10.png)
+
+## Optional: manually upload Sedona jars to the Fabric environment LakeHouse storage
+
+If your cluster has no internet access or you want to skip the slow on-the-fly download, you can manually upload the Sedona jars to the Fabric environment LakeHouse storage.
+
+In the notebook page, choose the `Explorer` and click the `LakeHouses` option. If you don't have a LakeHouse, you can create one. Then choose `Files` and upload the 2 jars you downloaded in the previous step.
+
+After the upload, you should be able to see the 2 jars in the LakeHouse storage. Then please copy the `ABFS` paths of the 2 jars. In this example, the paths are
+
+```angular2html
+abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e15f3695-af7e-47de-979e-473c3caa9f5b/Files/sedona-spark-shaded-3.4_2.12-1.5.1.jar
+
+abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e15f3695-af7e-47de-979e-473c3caa9f5b/Files/geotools-wrapper-1.5.1-28.2.jar
+```
+
+![](../image/fabric/fabric-7.png)
+
+![](../image/fabric/fabric-8.png)
+
+If use this option, the config files in your notebook should be
+
+```python
+%%configure -f
+{
+    "conf": {
+        "spark.jars": "abfss://XXX/Files/sedona-spark-shaded-3.4_2.12-1.5.1.jar,abfss://XXX/Files/geotools-wrapper-1.5.1-28.2.jar",
+    }
+}
+```
