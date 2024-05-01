@@ -16,16 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.UDT
+package org.apache.sedona.sql.UDF
 
-import org.apache.spark.sql.types.UDTRegistration
-import org.locationtech.jts.geom.Geometry
-import org.locationtech.jts.index.SpatialIndex
+import org.apache.spark.sql.expressions.Aggregator
+import org.apache.spark.sql.sedona_sql.expressions.raster.{BandData, RS_Union_Aggr}
+import org.geotools.coverage.grid.GridCoverage2D
 
-object UdtRegistratorWrapper {
+import scala.collection.mutable.ArrayBuffer
 
-  def registerAll(): Unit = {
-    UDTRegistration.register(classOf[Geometry].getName, classOf[GeometryUDT].getName)
-    UDTRegistration.register(classOf[SpatialIndex].getName, classOf[IndexUDT].getName)
-  }
+object RasterUdafCatalog {
+  val rasterAggregateExpression: Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandData], GridCoverage2D] = new RS_Union_Aggr
 }

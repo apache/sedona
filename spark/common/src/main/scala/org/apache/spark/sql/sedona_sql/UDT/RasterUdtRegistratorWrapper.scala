@@ -19,13 +19,10 @@
 package org.apache.spark.sql.sedona_sql.UDT
 
 import org.apache.spark.sql.types.UDTRegistration
-import org.locationtech.jts.geom.Geometry
-import org.locationtech.jts.index.SpatialIndex
 
-object UdtRegistratorWrapper {
+object RasterUdtRegistratorWrapper {
 
-  def registerAll(): Unit = {
-    UDTRegistration.register(classOf[Geometry].getName, classOf[GeometryUDT].getName)
-    UDTRegistration.register(classOf[SpatialIndex].getName, classOf[IndexUDT].getName)
-  }
+    def registerAll(gridClassName: String): Unit = {
+      UDTRegistration.register(gridClassName, classOf[RasterUDT].getName)
+    }
 }
