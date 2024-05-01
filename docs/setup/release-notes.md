@@ -3,6 +3,120 @@
 
     If you use Sedona < 1.6.0, please use GeoPandas <= `0.11.1` since GeoPandas > 0.11.1 will automatically install Shapely 2.0. If you use Shapely, please use <= `1.8.5`.
 
+!!! warning
+	Sedona 1.6.0+ requires Java 11+ to compile and run. If you are using Java 8, please use Sedona <= 1.5.2.
+
+## Sedona 1.6.0
+
+Sedona 1.6.0 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.12, Snowflake 7+, Java 11.
+
+## New Contributors
+* @mpetazzoni made their first contribution in https://github.com/apache/sedona/pull/1216
+* @sebdiem made their first contribution in https://github.com/apache/sedona/pull/1217
+* @guilhem-dvr made their first contribution in https://github.com/apache/sedona/pull/1229
+* @niklas-petersen made their first contribution in https://github.com/apache/sedona/pull/1252
+* @mebrein made their first contribution in https://github.com/apache/sedona/pull/1334
+
+### Highlights
+
+* [X] Sedona is now compatible with Shapely 2.0 and GeoPandas 0.11.1+.
+* [X] Sedona now requires Java 11 to compile and run.
+* [X] Sedona added enhanced support for geography data. This includes
+    * ST_Buffer with spheroid distance
+    * ST_BestSRID to find the best SRID for a geometry
+    * ST_ShiftLongitude to shift the longitude of a geometry to mitigate the issue of crossing the date line
+    * ST_CrossesDateLine to check if a geometry crosses the date line
+    * ST_DWithin now supports spheroid distance
+* [X] **Sedona Spark** Sedona Raster allows RS_ReropjectMatch to wrap the extent of one raster to another raster, similar to [RasterArray.reproject_match function in rioxarray](https://corteva.github.io/rioxarray/html/rioxarray.html#rioxarray.raster_array.RasterArray.reproject_match)
+* [X] **Sedona Spark** Sedona Raster now supports Rasterio and NumPy UDF by `raster.as_numpy`, `raster.as_numpy_masked`, `raster.as_rasterio`. You can perform any native function from rasterio and numpy and run them in parallel. See the example below.
+```python
+from pyspark.sql.types import DoubleType
+
+def mean_udf(raster):
+	return float(raster.as_numpy().mean())
+
+sedona.udf.register("mean_udf", mean_udf, DoubleType())
+df_raster.withColumn("mean", expr("mean_udf(rast)")).show()
+```
+
+### Bug
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-532'>SEDONA-532</a>] - Sedona Spark SQL optimizer cannot optimize joins with complex conditions
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-543'>SEDONA-543</a>] - RS_Union_aggr gives referenceRaster is null error when run on cluster
+</li>
+</ul>
+
+### New Feature
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-467'>SEDONA-467</a>] - Add optimized join support for ST_DWithin
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-468'>SEDONA-468</a>] - Add provision to use spheroid distance in ST_DWithin
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-475'>SEDONA-475</a>] - Add RS_NormalizeAll to normalize all bands of a raster
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-480'>SEDONA-480</a>] - Implement ST_S2ToGeom
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-481'>SEDONA-481</a>] - Implements ST_Snap
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-484'>SEDONA-484</a>] - Implement ST_IsPolygonCW
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-488'>SEDONA-488</a>] - ST_Buffer with spheroid distance
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-498'>SEDONA-498</a>] - Add ST_BestSRID
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-499'>SEDONA-499</a>] - Add Spheroidal ST_Buffer
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-504'>SEDONA-504</a>] - Add ST_ShiftLongitude
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-508'>SEDONA-508</a>] - Add ST_CrossesDateLine
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-509'>SEDONA-509</a>] - Add Single Statistic RS_SummaryStats
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-514'>SEDONA-514</a>] - Add RS_SetPixelType
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-516'>SEDONA-516</a>] - Add RS_Interpolate
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-517'>SEDONA-517</a>] - Add RS_MakeRaster for constructing a new raster using given array data as band data
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-518'>SEDONA-518</a>] - Add RS_ReprojectMatch for wrapping the extent of one raster to another raster
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-522'>SEDONA-522</a>] - Add ST_Union with array of Geometry as input
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-533'>SEDONA-533</a>] - Implement ST_Polygonize
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-539'>SEDONA-539</a>] - Support Snowflake geography type
+</li>
+</ul>
+
+### Improvement
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-483'>SEDONA-483</a>] - Implements ST_IsPolygonCCW
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-493'>SEDONA-493</a>] - Update default behavior of RS_NormalizeAll
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-503'>SEDONA-503</a>] - Support Shapely 2.0 in PySpark binding
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-521'>SEDONA-521</a>] - Change ST_H3ToGeom Behavior
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-549'>SEDONA-549</a>] - RS_Union_aggr should support combining all bands in multi-band rasters
+</li>
+</ul>
+
+### Task
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-540'>SEDONA-540</a>] - Fix failed ST_Buffer and ST_Snap Snowflake tests
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-550'>SEDONA-550</a>] - Remove the version upper bound of Pandas, GeoPandas
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-551'>SEDONA-551</a>] - Upgrade GeoTools dependency to 31.0 for Apache SIS integration, Drop Java 8 support
+</li>
+</ul>
+
 ## Sedona 1.5.2
 
 Sedona 1.5.2 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.12, Snowflake 7+, Java 8.
