@@ -11,6 +11,7 @@
 Sedona 1.6.0 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.12, Snowflake 7+, Java 11.
 
 ## New Contributors
+
 * @mpetazzoni made their first contribution in https://github.com/apache/sedona/pull/1216
 * @sebdiem made their first contribution in https://github.com/apache/sedona/pull/1217
 * @guilhem-dvr made their first contribution in https://github.com/apache/sedona/pull/1229
@@ -29,6 +30,7 @@ Sedona 1.6.0 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.12, 
     * ST_DWithin now supports spheroid distance
 * [X] **Sedona Spark** Sedona Raster allows RS_ReropjectMatch to wrap the extent of one raster to another raster, similar to [RasterArray.reproject_match function in rioxarray](https://corteva.github.io/rioxarray/html/rioxarray.html#rioxarray.raster_array.RasterArray.reproject_match)
 * [X] **Sedona Spark** Sedona Raster now supports Rasterio and NumPy UDF by `raster.as_numpy`, `raster.as_numpy_masked`, `raster.as_rasterio`. You can perform any native function from rasterio and numpy and run them in parallel. See the example below.
+
 ```python
 from pyspark.sql.types import DoubleType
 
