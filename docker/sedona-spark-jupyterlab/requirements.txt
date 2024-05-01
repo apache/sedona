@@ -1,7 +1,7 @@
 attrs
 descartes
 fiona==1.8.22
-geopandas==0.11.1
+geopandas==0.14.4
 ipykernel
 ipywidgets
 jupyterlab==3.6.4
