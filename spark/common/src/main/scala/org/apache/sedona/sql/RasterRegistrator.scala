@@ -20,8 +20,7 @@ package org.apache.sedona.sql
 
 import org.apache.sedona.sql.UDF.RasterUdafCatalog
 import org.apache.spark.sql.catalyst.FunctionIdentifier
-import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
-import org.apache.spark.sql.types.UDTRegistration
+import org.apache.spark.sql.sedona_sql.UDT.RasterUdtRegistratorWrapper
 import org.apache.spark.sql.{SparkSession, functions}
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -43,7 +42,7 @@ object RasterRegistrator {
 
   def registerAll(sparkSession: SparkSession): Unit = {
     if (isGeoToolsAvailable) {
-      UDTRegistration.register(gridClassName, classOf[RasterUDT].getName)
+      RasterUdtRegistratorWrapper.registerAll(gridClassName)
       sparkSession.udf.register(RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName, functions.udaf(RasterUdafCatalog.rasterAggregateExpression))
     }
   }
