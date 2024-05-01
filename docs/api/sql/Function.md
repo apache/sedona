@@ -2507,7 +2507,7 @@ LINESTRING (3 6, 2 4, 1 2, 0 0)
 ## ST_S2CellIDs
 
 Introduction: Cover the geometry with Google S2 Cells, return the corresponding cell IDs with the given level.
-The level indicates the [size of cells](https://s2geometry.io/resources/s2cell_statistics.html). With a bigger level,
+The level indicates the [size of cells](http://s2geometry.io/resources/s2cell_statistics.html). With a bigger level,
 the cells will be smaller, the coverage will be more accurate, but the result size will be exponentially increasing.
 
 Format: `ST_S2CellIDs(geom: Geometry, level: Integer)`
