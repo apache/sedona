@@ -30,6 +30,10 @@ This release is a maintenance release that includes bug fixes and minor improvem
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-477'>SEDONA-477</a>] - Avoid producing rasters with images having non-zero origins
 </li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-478'>SEDONA-478</a>] - Sedona 1.5.1 context initialization fails without GeoTools coverage
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-479'>SEDONA-479</a>] - Fix RS_Normalize: Incorrect behavior for double arrays
+</li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-494'>SEDONA-494</a>] - Raster data source cannot write to HDFS
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-495'>SEDONA-495</a>] - Raster data source uses shared FileSystem connections which lead to race condition
