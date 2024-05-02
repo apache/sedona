@@ -15,6 +15,7 @@ package org.apache.sedona.common;
 
 import org.locationtech.jts.geom.*;
 import org.apache.sedona.common.sphere.Spheroid;
+import org.locationtech.jts.operation.relate.RelateOp;
 
 public class Predicates {
     public static boolean contains(Geometry leftGeometry, Geometry rightGeometry) {
@@ -63,4 +64,12 @@ public class Predicates {
         }
     }
 
+    public static String relate(Geometry leftGeometry, Geometry rightGeometry) {
+        return RelateOp.relate(leftGeometry, rightGeometry).toString();
+    }
+
+    public static boolean relate(Geometry leftGeometry, Geometry rightGeometry, String intersectionMatrix) {
+        String matrixFromGeom = relate(leftGeometry, rightGeometry);
+        return IntersectionMatrix.matches(matrixFromGeom, intersectionMatrix);
+    }
 }

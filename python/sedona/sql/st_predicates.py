@@ -143,6 +143,23 @@ def ST_Touches(a: ColumnOrName, b: ColumnOrName) -> Column:
     """
     return _call_predicate_function("ST_Touches", (a, b))
 
+@validate_argument_types
+def ST_Relate(a: ColumnOrName, b: ColumnOrName, intersectionMatrix: Optional[ColumnOrName] = None) -> Column:
+    """Check whether two geometries are related to each other.
+
+    :param a: One geometry column to check.
+    :type a: ColumnOrName
+    :param b: Other geometry column to check.
+    :type b: ColumnOrName
+    :param intersectionMatrix: intersectionMatrix column to check
+    :type intersectionMatrix: ColumnOrName
+    :return: True if a and b touch and False otherwise, as a boolean column.
+    :rtype: Column
+    """
+    args = (a, b) if intersectionMatrix is None else (a, b, intersectionMatrix)
+
+    return _call_predicate_function("ST_Relate", args)
+
 
 @validate_argument_types
 def ST_Within(a: ColumnOrName, b: ColumnOrName) -> Column:

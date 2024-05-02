@@ -214,6 +214,32 @@ public class Predicates {
         }
     }
 
+    public static class ST_Relate extends ScalarFunction {
+        /**
+         * Constructor for relation checking without duplicate removal
+         */
+        public ST_Relate() {
+        }
+
+        @DataTypeHint("String")
+        public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1, @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2)
+        {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            return org.apache.sedona.common.Predicates.relate(geom1, geom2);
+        }
+
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
+                           @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o2,
+                           @DataTypeHint("String") String IM)
+        {
+            Geometry geom1 = (Geometry) o1;
+            Geometry geom2 = (Geometry) o2;
+            return org.apache.sedona.common.Predicates.relate(geom1, geom2, IM);
+        }
+    }
+
     public static class ST_Touches
             extends ScalarFunction
     {

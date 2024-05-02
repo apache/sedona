@@ -132,6 +132,16 @@ public class PredicateTest extends TestBase{
     }
 
     @Test
+    public void testRelate() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (1 1, 5 5)') AS g1, ST_GeomFromWKT('POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))') as g2, '1010F0212' as im");
+        String actual = (String) first(table.select(call(Predicates.ST_Relate.class.getSimpleName(), $("g1"), $("g2")))).getField(0);
+        assertEquals("1010F0212", actual);
+
+        Boolean actualBoolean = (Boolean) first(table.select(call(Predicates.ST_Relate.class.getSimpleName(), $("g1"), $("g2"), $("im")))).getField(0);
+        assertEquals(true, actualBoolean);
+    }
+
+    @Test
     public void testDWithin() {
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (0 0)') as origin, ST_GeomFromWKT('POINT (1 0)') as p1");
         table = table.select(call(Predicates.ST_DWithin.class.getSimpleName(), $("origin"), $("p1"), 1));

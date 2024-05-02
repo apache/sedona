@@ -158,6 +158,54 @@ Output:
 true
 ```
 
+## ST_Relate
+
+Introduction: The first variant of the function computes and returns the [Dimensionally Extended 9-Intersection Model (DE-9IM)](https://en.wikipedia.org/wiki/DE-9IM) matrix string representing the spatial relationship between the two input geometry objects.
+
+The second variant of the function evaluates whether the two input geometries satisfy a specific spatial relationship defined by the provided `intersectionMatrix` pattern.
+
+!!!Note
+    It is important to note that this function is not optimized for use in spatial join operations. Certain DE-9IM relationships can hold true for geometries that do not intersect or are disjoint. As a result, it is recommended to utilize other dedicated spatial functions specifically optimized for spatial join processing.
+
+Format:
+
+`ST_Relate(geom1: Geometry, geom2: Geometry)`
+
+`ST_Relate(geom1: Geometry, geom2: Geometry, intersectionMatrix: String)`
+
+Since: `vTBD`
+
+SQL Example
+
+```sql
+SELECT ST_Relate(
+        ST_GeomFromWKT('LINESTRING (1 1, 5 5)'),
+        ST_GeomFromWKT('POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))')
+)
+```
+
+Output:
+
+```
+1010F0212
+```
+
+SQL Example
+
+```sql
+SELECT ST_Relate(
+        ST_GeomFromWKT('LINESTRING (1 1, 5 5)'),
+        ST_GeomFromWKT('POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))'),
+       "1010F0212"
+)
+```
+
+Output:
+
+```
+true
+```
+
 ## ST_Touches
 
 Introduction: Return true if A touches B

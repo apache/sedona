@@ -194,6 +194,15 @@ class predicateTestScala extends TestBaseScala {
       assert(!notCrosses.take(1)(0).get(0).asInstanceOf[Boolean])
     }
 
+    it("Passed ST_Relate") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (1 1, 5 5)') AS g1, ST_GeomFromWKT('POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))') as g2, '1010F0212' as im");
+      val actual = baseDf.selectExpr("ST_Relate(g1, g2)").first().get(0)
+      assert(actual.equals("1010F0212"))
+
+      val actualBoolean = baseDf.selectExpr("ST_Relate(g1, g2, im)").first().getBoolean(0)
+      assert(actualBoolean)
+    }
+
     it("Passed ST_Touches") {
       var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")

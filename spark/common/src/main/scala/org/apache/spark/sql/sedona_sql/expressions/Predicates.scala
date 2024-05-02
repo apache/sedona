@@ -200,6 +200,14 @@ case class ST_Touches(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Relate(inputExpressions: Seq[Expression])
+  extends InferredExpression(inferrableFunction3(Predicates.relate), inferrableFunction2(Predicates.relate)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
   * Test if leftGeometry is equal to rightGeometry
   *
