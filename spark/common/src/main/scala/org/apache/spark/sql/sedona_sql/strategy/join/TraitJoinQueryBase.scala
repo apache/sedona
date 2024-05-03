@@ -34,7 +34,7 @@ trait TraitJoinQueryBase {
                        leftShapeExpr: Expression,
                        rightRdd: RDD[UnsafeRow],
                        rightShapeExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) = {
-    if (leftShapeExpr.dataType.acceptsType(RasterUDT) || rightShapeExpr.dataType.acceptsType(RasterUDT)) {
+    if (leftShapeExpr.dataType.isInstanceOf[RasterUDT] || rightShapeExpr.dataType.isInstanceOf[RasterUDT]) {
       (toWGS84EnvelopeRDD(leftRdd, leftShapeExpr),
         toWGS84EnvelopeRDD(rightRdd, rightShapeExpr))
     } else {
@@ -60,7 +60,7 @@ trait TraitJoinQueryBase {
     // transformation for both sides. We use expanded WGS84 envelope as the joined geometries and perform a
     // coarse-grained spatial join.
     val spatialRdd = new SpatialRDD[Geometry]
-    val wgs84EnvelopeRdd = if (shapeExpression.dataType.acceptsType(RasterUDT)) {
+    val wgs84EnvelopeRdd = if (shapeExpression.dataType.isInstanceOf[RasterUDT]) {
       rdd.map { row =>
         val raster = RasterSerializer.deserialize(shapeExpression.eval(row).asInstanceOf[Array[Byte]])
         val shape = JoinedGeometryRaster.rasterToWGS84Envelope(raster)
