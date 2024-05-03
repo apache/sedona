@@ -19,6 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.sedona.sql.UDF.RasterUdafCatalog
+import org.apache.sedona.sql.utils.GeoToolsCoverageAvailability.{gridClassName, isGeoToolsAvailable}
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.sedona_sql.UDT.RasterUdtRegistratorWrapper
 import org.apache.spark.sql.{SparkSession, functions}
@@ -26,19 +27,6 @@ import org.slf4j.{Logger, LoggerFactory}
 
 object RasterRegistrator {
   val logger: Logger = LoggerFactory.getLogger(getClass)
-  private val gridClassName = "org.geotools.coverage.grid.GridCoverage2D"
-
-  // Helper method to check if GridCoverage2D is available
-  private def isGeoToolsAvailable: Boolean = {
-    try {
-      Class.forName(gridClassName, true, Thread.currentThread().getContextClassLoader)
-      true
-    } catch {
-      case _: ClassNotFoundException =>
-        logger.warn("Geotools was not found on the classpath. Raster operations will not be available.")
-        false
-    }
-  }
 
   def registerAll(sparkSession: SparkSession): Unit = {
     if (isGeoToolsAvailable) {
