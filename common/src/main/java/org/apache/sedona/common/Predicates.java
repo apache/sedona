@@ -72,4 +72,8 @@ public class Predicates {
         String matrixFromGeom = relate(leftGeometry, rightGeometry);
         return IntersectionMatrix.matches(matrixFromGeom, intersectionMatrix);
     }
+
+    public static boolean relateMatch(String matrix1, String matrix2) {
+        return IntersectionMatrix.matches(matrix1, matrix2);
+    }
 }

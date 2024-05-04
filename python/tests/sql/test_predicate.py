@@ -207,6 +207,10 @@ class TestPredicate(TestBase):
         actual = baseDf.selectExpr("ST_Relate(g1, g2, im)").take(1)[0][0]
         assert actual
 
+    def test_st_relate_match(self):
+        actual = self.spark.sql("SELECT ST_RelateMatch('101202FFF', 'TTTTTTFFF') ").take(1)[0][0]
+        assert actual
+
     def test_st_overlaps(self):
         test_table = self.spark.sql(
             "select ST_GeomFromWKT('POLYGON((2.5 2.5, 2.5 4.5, 4.5 4.5, 4.5 2.5, 2.5 2.5))') as a,ST_GeomFromWKT('POLYGON((4 4, 4 6, 6 6, 6 4, 4 4))') as b, ST_GeomFromWKT('POLYGON((5 5, 4 6, 6 6, 6 4, 5 5))') as c, ST_GeomFromWKT('POLYGON((5 5, 4 6, 6 6, 6 4, 5 5))') as d")

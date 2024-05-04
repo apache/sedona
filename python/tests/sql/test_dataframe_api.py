@@ -225,6 +225,7 @@ test_configurations = [
     (stp.ST_Touches, ("a", "b"), "touching_polys", "", True),
     (stp.ST_Relate, ("a", "b"), "touching_polys", "", "FF2F11212"),
     (stp.ST_Relate, ("a", "b", lambda: f.lit("FF2F11212")), "touching_polys", "", True),
+    (stp.ST_RelateMatch, (lambda: f.lit("101202FFF"), lambda: f.lit("TTTTTTFFF")), "touching_polys", "", True),
     (stp.ST_Within, (lambda: f.expr("ST_Point(0.5, 0.25)"), "geom"), "triangle_geom", "", True),
     (stp.ST_Covers, ("geom", lambda: f.expr("ST_Point(0.5, 0.25)")), "triangle_geom", "", True),
     (stp.ST_CoveredBy, (lambda: f.expr("ST_Point(0.5, 0.25)"), "geom"), "triangle_geom", "", True),
@@ -428,6 +429,8 @@ wrong_type_configurations = [
     (stp.ST_Touches, ("", None)),
     (stp.ST_Relate, (None, "")),
     (stp.ST_Relate, ("", None)),
+    (stp.ST_RelateMatch, (None, "")),
+    (stp.ST_RelateMatch, ("", None)),
     (stp.ST_Within, (None, "")),
     (stp.ST_Within, ("", None)),
 

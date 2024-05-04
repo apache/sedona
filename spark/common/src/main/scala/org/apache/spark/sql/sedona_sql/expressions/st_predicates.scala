@@ -51,6 +51,9 @@ object st_predicates extends DataFrameAPI {
   def ST_Relate(a: Column, b: Column, intersectionMatrix: Column): Column = wrapExpression[ST_Relate](a, b, intersectionMatrix)
   def ST_Relate(a: String, b: String, intersectionMatrix: String): Column = wrapExpression[ST_Relate](a, b, intersectionMatrix)
 
+  def ST_RelateMatch(a: Column, b: Column): Column = wrapExpression[ST_RelateMatch](a, b)
+  def ST_RelateMatch(a: String, b: String): Column = wrapExpression[ST_RelateMatch](a, b)
+
   def ST_Within(a: Column, b: Column): Column = wrapExpression[ST_Within](a, b)
   def ST_Within(a: String, b: String): Column = wrapExpression[ST_Within](a, b)
 

@@ -130,6 +130,15 @@ public class TestPredicates extends TestBase{
                 true
         );
     }
+
+    @Test
+    public void test_ST_RelateMatch() {
+        registerUDF("ST_RelateMatch", String.class, String.class);
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_RelateMatch('101202FFF', 'TTTTTTFFF')",
+                true
+        );
+    }
     @Test
     public void test_ST_Within() {
         registerUDF("ST_Within", byte[].class, byte[].class);

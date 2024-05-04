@@ -160,6 +160,19 @@ def ST_Relate(a: ColumnOrName, b: ColumnOrName, intersectionMatrix: Optional[Col
 
     return _call_predicate_function("ST_Relate", args)
 
+@validate_argument_types
+def ST_RelateMatch(matrix1: ColumnOrName, matrix2: ColumnOrName) -> Column:
+    """Check whether two DE-9IM are related to each other.
+
+    :param matrix1: One geometry column to check.
+    :type matrix1: ColumnOrName
+    :param matrix2: Other geometry column to check.
+    :type matrix2: ColumnOrName
+    :return: True if a and b touch and False otherwise, as a boolean column.
+    :rtype: Column
+    """
+    return _call_predicate_function("ST_RelateMatch", (matrix1, matrix2))
+
 
 @validate_argument_types
 def ST_Within(a: ColumnOrName, b: ColumnOrName) -> Column:

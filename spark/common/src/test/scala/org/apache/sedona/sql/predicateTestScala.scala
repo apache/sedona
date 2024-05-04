@@ -203,6 +203,11 @@ class predicateTestScala extends TestBaseScala {
       assert(actualBoolean)
     }
 
+    it("Passed ST_RelateMatch") {
+      val actual = sparkSession.sql("SELECT ST_RelateMatch('101202FFF', 'TTTTTTFFF')").first().getBoolean(0)
+      assert(actual)
+    }
+
     it("Passed ST_Touches") {
       var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")

@@ -1051,6 +1051,11 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"matrix1", "matrix2"}, argTypes = {"String", "String"})
+    public static boolean ST_RelateMatch(String matrix1, String matrix2) {
+        return Predicates.relateMatch(matrix1, matrix2);
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "sourceCRS", "targetCRS"}, argTypes = {"Geometry", "String", "String"}, returnTypes = "Geometry")
     public static String ST_Transform(String geometry, String sourceCRS, String targetCRS) {
         return GeometrySerde.serGeoJson(

@@ -119,6 +119,23 @@ public class PredicatesTest extends TestBase {
     }
 
     @Test
+    public void testRelateMatch() {
+        String matrix1 = "101202FFF";
+        String matrix2 = "TTTTTTFFF";
+        boolean actual = Predicates.relateMatch(matrix1, matrix2);
+        assertTrue(actual);
+
+        matrix2 = "TTFTTTFFF";
+        actual = Predicates.relateMatch(matrix1, matrix2);
+        assertFalse(actual);
+
+        matrix1 = "FF1FF0102";
+        matrix2 = "FF1F***02";
+        actual = Predicates.relateMatch(matrix1, matrix2);
+        assertTrue(actual);
+    }
+
+    @Test
     public void testCrossesDateLine() throws ParseException {
         Geometry geom1 = geomFromEWKT("LINESTRING(170 30, -170 30)");
         Geometry geom2 = geomFromEWKT("LINESTRING(-120 30, -130 40)");

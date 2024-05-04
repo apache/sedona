@@ -1264,6 +1264,11 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"matrix1", "matrix2"})
+    public static Boolean ST_RelateMatch(String matrix1, String matrix2) {
+        return Predicates.relateMatch(matrix1, matrix2);
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "sourceCRS", "targetCRS"})
     public static byte[] ST_Transform(byte[] geometry, String sourceCRS, String targetCRS) {
         return GeometrySerde.serialize(

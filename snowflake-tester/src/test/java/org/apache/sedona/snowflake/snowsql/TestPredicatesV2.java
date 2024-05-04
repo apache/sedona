@@ -134,6 +134,15 @@ public class TestPredicatesV2
     }
 
     @Test
+    public void test_ST_RelateMatch() {
+        registerUDFV2("ST_RelateMatch", String.class, String.class);
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_RelateMatch('101202FFF', 'TTTTTTFFF')",
+                true
+        );
+    }
+
+    @Test
     public void test_ST_Within() {
          registerUDFV2("ST_Within",  String.class,  String.class);
         verifySqlSingleRes(

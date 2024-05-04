@@ -1181,6 +1181,12 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualBoolean)
     }
 
+    it("Passed ST_RelateMatch") {
+      val baseDf = sparkSession.sql("SELECT '101202FFF' as matrix1, 'TTTTTTFFF' as matrix2")
+      val actual = baseDf.select(ST_RelateMatch("matrix1", "matrix2")).first().getBoolean(0)
+      assert(actual)
+    }
+
     it("Passed ST_Touches") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS a, ST_GeomFromWKT('POLYGON ((1 1, 1 0, 2 0, 1 1))') AS b")
       val df = baseDf.select(ST_Touches("a", "b"))

@@ -142,6 +142,13 @@ public class PredicateTest extends TestBase{
     }
 
     @Test
+    public void testRelateMatch() {
+        Table table = tableEnv.sqlQuery("SELECT '101202FFF' as matrix1, 'TTTTTTFFF' as matrix2");
+        Boolean actual = (Boolean) first(table.select(call(Predicates.ST_RelateMatch.class.getSimpleName(), $("matrix1"), $("matrix2")))).getField(0);
+        assertEquals(true, actual);
+    }
+
+    @Test
     public void testDWithin() {
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (0 0)') as origin, ST_GeomFromWKT('POINT (1 0)') as p1");
         table = table.select(call(Predicates.ST_DWithin.class.getSimpleName(), $("origin"), $("p1"), 1));

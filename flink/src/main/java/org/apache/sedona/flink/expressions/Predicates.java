@@ -240,6 +240,20 @@ public class Predicates {
         }
     }
 
+    public static class ST_RelateMatch extends ScalarFunction {
+        /**
+         * Constructor for relation checking without duplicate removal
+         */
+        public ST_RelateMatch() {
+        }
+
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint("String") String matrix1,
+                            @DataTypeHint("String") String matrix2) {
+            return org.apache.sedona.common.Predicates.relateMatch(matrix1, matrix2);
+        }
+    }
+
     public static class ST_Touches
             extends ScalarFunction
     {
