@@ -41,11 +41,7 @@ jobs:
         include:
           - spark: 3.5.0
             scala: 2.13.8
-            jdk: '8'
-            skipTests: ''
-          - spark: 3.5.0
-            scala: 2.12.15
-            jdk: '8'
+            jdk: '11'
             skipTests: ''
           - spark: 3.5.0
             scala: 2.12.15
@@ -53,11 +49,7 @@ jobs:
             skipTests: ''
           - spark: 3.4.0
             scala: 2.13.8
-            jdk: '8'
-            skipTests: ''
-          - spark: 3.4.0
-            scala: 2.12.15
-            jdk: '8'
+            jdk: '11'
             skipTests: ''
           - spark: 3.4.0
             scala: 2.12.15
@@ -65,19 +57,19 @@ jobs:
             skipTests: ''
           - spark: 3.3.0
             scala: 2.12.15
-            jdk: '8'
+            jdk: '11'
             skipTests: ''
           - spark: 3.2.3
             scala: 2.12.15
-            jdk: '8'
+            jdk: '11'
             skipTests: ''
           - spark: 3.1.2
             scala: 2.12.15
-            jdk: '8'
+            jdk: '11'
             skipTests: ''
           - spark: 3.0.3
             scala: 2.12.15
-            jdk: '8'
+            jdk: '11'
             skipTests: ''
 
     steps:

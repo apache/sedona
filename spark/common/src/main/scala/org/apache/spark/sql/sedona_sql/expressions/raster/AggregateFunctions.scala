@@ -33,12 +33,10 @@ import javax.media.jai.RasterFactory
 import scala.collection.mutable.ArrayBuffer
 
 case class BandData(
-                     var bandInt: Array[Int],
-                     var bandDouble: Array[Double],
+                     var bandsData: Array[Array[Double]],
                      var index: Int,
-                     var isIntegral: Boolean,
                      var serializedRaster: Array[Byte],
-                     var serializedSampleDimension: Array[Byte]
+                     var serializedSampleDimensions: Array[Array[Byte]]
                    )
 
 
@@ -50,49 +48,35 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
   def zero: ArrayBuffer[BandData] = ArrayBuffer[BandData]()
 
   def reduce(buffer: ArrayBuffer[BandData], input: (GridCoverage2D, Int)): ArrayBuffer[BandData] = {
-    val raster = input._1
-    val rasterData = RasterUtils.getRaster(raster.getRenderedImage)
-    val isIntegral = RasterUtils.isDataTypeIntegral(rasterData.getDataBuffer.getDataType)
+      val raster = input._1
+      val renderedImage = raster.getRenderedImage
+      val numBands = renderedImage.getSampleModel.getNumBands
+      val width = renderedImage.getWidth
+      val height = renderedImage.getHeight
 
-    // Serializing GridSampleDimension
-    val serializedBytes = Serde.serializeGridSampleDimension(raster.getSampleDimension(0))
-
-    // Check and set dimensions based on the first raster in the buffer
-    if (buffer.isEmpty) {
-      val width = RasterAccessors.getWidth(raster)
-      val height = RasterAccessors.getHeight(raster)
-      val referenceSerializedRaster = Serde.serialize(raster)
-
-      buffer += BandData(
-        if (isIntegral) rasterData.getSamples(0, 0, width, height, 0, null.asInstanceOf[Array[Int]]) else null,
-        if (!isIntegral) rasterData.getSamples(0, 0, width, height, 0, null.asInstanceOf[Array[Double]]) else null,
-        input._2,
-        isIntegral,
-        referenceSerializedRaster,
-        serializedBytes
-      )
-    } else {
-      val referenceRaster = Serde.deserialize(buffer.head.serializedRaster)
-      val width = RasterAccessors.getWidth(referenceRaster)
-      val height = RasterAccessors.getHeight(referenceRaster)
-
-      if (width != RasterAccessors.getWidth(raster) || height != RasterAccessors.getHeight(raster)) {
-        throw new IllegalArgumentException("All rasters must have the same dimensions")
+      // First check if this is the first raster to set dimensions or validate against existing dimensions
+      if (buffer.nonEmpty) {
+        val referenceRaster = Serde.deserialize(buffer.head.serializedRaster)
+        val refWidth = RasterAccessors.getWidth(referenceRaster)
+        val refHeight = RasterAccessors.getHeight(referenceRaster)
+        if (width != refWidth || height != refHeight) {
+          throw new IllegalArgumentException("All rasters must have the same dimensions")
+        }
       }
 
-      buffer += BandData(
-        if (isIntegral) rasterData.getSamples(0, 0, width, height, 0, null.asInstanceOf[Array[Int]]) else null,
-        if (!isIntegral) rasterData.getSamples(0, 0, width, height, 0, null.asInstanceOf[Array[Double]]) else null,
-        input._2,
-        isIntegral,
-        Serde.serialize(raster),
-        serializedBytes
-      )
+      // Extract data for each band
+      val rasterData = renderedImage.getData
+      val bandsData = Array.ofDim[Double](numBands, width * height)
+      val serializedSampleDimensions = new Array[Array[Byte]](numBands)
+
+      for (band <- 0 until numBands) {
+        bandsData(band) = rasterData.getSamples(0, 0, width, height, band, new Array[Double](width * height))
+        serializedSampleDimensions(band) = Serde.serializeGridSampleDimension(raster.getSampleDimension(band))
+      }
+
+      buffer += BandData(bandsData, input._2, Serde.serialize(raster), serializedSampleDimensions)
+      buffer
     }
-
-    buffer
-  }
-
 
   def merge(buffer1: ArrayBuffer[BandData], buffer2: ArrayBuffer[BandData]): ArrayBuffer[BandData] = {
     val combined = ArrayBuffer.concat(buffer1, buffer2)
@@ -101,7 +85,6 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
     }
     combined
   }
-
 
   def finish(merged: ArrayBuffer[BandData]): GridCoverage2D = {
     val sortedMerged = merged.sortBy(_.index)
@@ -112,22 +95,20 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
       throw new IllegalArgumentException("Index should be in an arithmetic sequence.")
     }
 
-    val numBands = sortedMerged.length
+    val totalBands = sortedMerged.map(_.bandsData.length).sum
     val referenceRaster = Serde.deserialize(sortedMerged.head.serializedRaster)
     val width = RasterAccessors.getWidth(referenceRaster)
     val height = RasterAccessors.getHeight(referenceRaster)
     val dataTypeCode = RasterUtils.getRaster(referenceRaster.getRenderedImage).getDataBuffer.getDataType
-    val resultRaster: WritableRaster = RasterFactory.createBandedRaster(dataTypeCode, width, height, numBands, null)
-    val gridSampleDimensions: Array[GridSampleDimension] = new Array[GridSampleDimension](numBands)
+    val resultRaster: WritableRaster = RasterFactory.createBandedRaster(dataTypeCode, width, height, totalBands, null)
+    val gridSampleDimensions = sortedMerged.flatMap(_.serializedSampleDimensions.map(Serde.deserializeGridSampleDimension)).toArray
 
-    for ((bandData, idx) <- sortedMerged.zipWithIndex) {
-      // Deserializing GridSampleDimension
-      gridSampleDimensions(idx) =  Serde.deserializeGridSampleDimension(bandData.serializedSampleDimension)
-
-      if(bandData.isIntegral)
-        resultRaster.setSamples(0, 0, width, height, idx, bandData.bandInt)
-      else
-        resultRaster.setSamples(0, 0, width, height, idx, bandData.bandDouble)
+    var currentBand = 0
+    sortedMerged.foreach { bandData =>
+      bandData.bandsData.foreach { band =>
+        resultRaster.setSamples(0, 0, width, height, currentBand, band)
+        currentBand += 1
+      }
     }
 
     val noDataValue = RasterBandAccessors.getBandNoDataValue(referenceRaster)

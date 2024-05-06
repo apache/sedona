@@ -22,7 +22,7 @@ import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Assert;
 import org.junit.Test;
-import org.opengis.referencing.FactoryException;
+import org.geotools.api.referencing.FactoryException;
 
 import java.awt.image.DataBuffer;
 import java.util.Random;

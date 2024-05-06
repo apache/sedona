@@ -22,6 +22,7 @@ import org.apache.sedona.common.raster.GeometryFunctions
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferrableRasterTypes._
 
 case class RS_ConvexHull(inputExpressions: Seq[Expression]) extends InferredExpression(GeometryFunctions.convexHull _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {

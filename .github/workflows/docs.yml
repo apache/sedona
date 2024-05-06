@@ -22,11 +22,11 @@ jobs:
       uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
-        java-version: '8'
-    - name: Compile JavaDoc
-      run: mvn -q clean install -DskipTests && mkdir -p docs/api/javadoc/spark && cp -r spark/common/target/apidocs/* docs/api/javadoc/spark/
+        java-version: '11'
+    - name: Compile Source Code
+      run: mvn -q clean install -DskipTests
     - name: Compile ScalaDoc
-      run: mvn scala:doc && mkdir -p docs/api/scaladoc/spark && cp -r spark/common/target/site/scaladocs/* docs/api/scaladoc/spark
+      run: mvn scala:doc -pl spark/common && mkdir -p docs/api/scaladoc/spark && cp -r spark/common/target/site/scaladocs/* docs/api/scaladoc/spark
     - uses: actions/setup-python@v5
       with:
         python-version: 3.x

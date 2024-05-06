@@ -21,7 +21,7 @@ package org.apache.sedona.common.raster;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
-import org.opengis.referencing.FactoryException;
+import org.geotools.api.referencing.FactoryException;
 
 import javax.imageio.ImageIO;
 import java.io.File;

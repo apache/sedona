@@ -26,6 +26,7 @@ import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferrableRasterTypes._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 import org.apache.spark.sql.sedona_sql.expressions.raster.implicits.RasterInputExpressionEnhancer
 import org.apache.spark.sql.types.{AbstractDataType, ArrayType, DataType, DoubleType, IntegerType, StructType}

@@ -28,7 +28,7 @@ import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.objenesis.strategy.StdInstantiatorStrategy;
-import org.opengis.referencing.operation.MathTransform;
+import org.geotools.api.referencing.operation.MathTransform;
 
 import javax.media.jai.RenderedImageAdapter;
 import java.awt.image.RenderedImage;
