@@ -421,6 +421,45 @@ public class ConstructorTest extends TestBase{
     }
 
     @Test
+    public void testLinestringFromWKB() throws DecoderException {
+        String hexWkb1 = "010200000003000000000000000000000000000000000000000000000000000040000000000000004000000000000010400000000000001040";
+        byte[] wkbLine1 = Hex.decodeHex(hexWkb1);
+        String hexWkb2 = "010200000003000000000000000000000000000000000000000000000000407f400000000000407f400000000000407f4000000000000059c0";
+        byte[] wkbLine2 = Hex.decodeHex(hexWkb2);
+        String hexWkb3 = "01030000000100000005000000000000000000e0bf000000000000e0bf000000000000e0bf000000000000e03f000000000000e03f000000000000e03f000000000000e03f000000000000e0bf000000000000e0bf000000000000e0bf";
+        byte[] wkbPolygon = Hex.decodeHex(hexWkb3);
+
+        List<Row> data1 = Arrays.asList(Row.of(wkbLine1), Row.of(wkbLine2), Row.of(wkbPolygon));
+        List<Row> data2 = Arrays.asList(Row.of(hexWkb1), Row.of(hexWkb2), Row.of(hexWkb3));
+
+        TypeInformation<?>[] colTypes1 = {PrimitiveArrayTypeInfo.BYTE_PRIMITIVE_ARRAY_TYPE_INFO};
+        TypeInformation<?>[] colTypes2 = {BasicTypeInfo.STRING_TYPE_INFO};
+        RowTypeInfo typeInfo1 = new RowTypeInfo(colTypes1, new String[]{"wkb"});
+        RowTypeInfo typeInfo2 = new RowTypeInfo(colTypes2, new String[]{"wkb"});
+
+        DataStream<Row> wkbDS1 = env.fromCollection(data1).returns(typeInfo1);
+        Table wkbTable1 = tableEnv.fromDataStream(wkbDS1, $("wkb"));
+
+        DataStream<Row> wkbDS2 = env.fromCollection(data2).returns(typeInfo2);
+        Table wkbTable2 = tableEnv.fromDataStream(wkbDS2, $("wkb"));
+
+        Table lineTable1 = wkbTable1.select(call(Constructors.ST_LinestringFromWKB.class.getSimpleName(), $("wkb")).as("point"));
+        Table lineTable2 = wkbTable2.select(call(Constructors.ST_LinestringFromWKB.class.getSimpleName(), $("wkb")).as("point"));
+
+        // Test with byte array
+        List<Row> results1 = TestBase.take(lineTable1, 3);
+        assertEquals("LINESTRING (0 0, 2 2, 4 4)", results1.get(0).getField(0).toString());
+        assertEquals("LINESTRING (0 0, 500 500, 500 -100)", results1.get(1).getField(0).toString());
+        assertNull(results1.get(2).getField(0));
+
+        // Test with hex string
+        List<Row> results2 = TestBase.take(lineTable2, 3);
+        assertEquals("LINESTRING (0 0, 2 2, 4 4)", results2.get(0).getField(0).toString());
+        assertEquals("LINESTRING (0 0, 500 500, 500 -100)", results2.get(1).getField(0).toString());
+        assertNull(results2.get(2).getField(0));
+    }
+
+    @Test
     public void testGeomFromEWKB()
     {
         byte[] wkb = new byte[]{1, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, -124, -42, 0, -64, 0, 0, 0, 0, -128, -75, -42, -65, 0, 0, 0, 96, -31, -17, -9, -65, 0, 0, 0, -128, 7, 93, -27, -65};

@@ -40,6 +40,7 @@ object Catalog {
     function[ST_PointFromText](),
     function[ST_PointFromWKB](),
     function[ST_LineFromWKB](),
+    function[ST_LinestringFromWKB](),
     function[ST_PolygonFromText](),
     function[ST_LineStringFromText](),
     function[ST_GeomFromText](0),

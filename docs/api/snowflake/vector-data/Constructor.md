@@ -363,24 +363,6 @@ Output:
 LINESTRING (1 2, 3 4)
 ```
 
-## ST_LineStringFromText
-
-Introduction: Construct a LineString from Text, delimited by Delimiter
-
-Format: `ST_LineStringFromText (Text:string, Delimiter:char)`
-
-SQL example:
-
-```sql
-SELECT ST_LineStringFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794', ',')
-```
-
-Output:
-
-```
-LINESTRING (-74.0428197 40.6867969, -74.0421975 40.6921336, -74.050802 40.6912794)
-```
-
 ## ST_LineFromWKB
 
 Introduction: Construct a LineString geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format.
@@ -402,6 +384,53 @@ Example:
 
 ```sql
 SELECT ST_LineFromWKB([01 02 00 00 00 02 00 00 00 00 00 00 00 84 D6 00 C0 00 00 00 00 80 B5 D6 BF 00 00 00 60 E1 EF F7 BF 00 00 00 80 07 5D E5 BF])
+```
+
+Output:
+
+```
+LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)
+```
+
+## ST_LineStringFromText
+
+Introduction: Construct a LineString from Text, delimited by Delimiter
+
+Format: `ST_LineStringFromText (Text:string, Delimiter:char)`
+
+SQL example:
+
+```sql
+SELECT ST_LineStringFromText('-74.0428197,40.6867969,-74.0421975,40.6921336,-74.0508020,40.6912794', ',')
+```
+
+Output:
+
+```
+LINESTRING (-74.0428197 40.6867969, -74.0421975 40.6921336, -74.050802 40.6912794)
+```
+
+## ST_LinestringFromWKB
+
+Introduction: Construct a LineString geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format and it is an alias of [ST_LineFromWKB](#st_linefromwkb).
+
+!!!Note
+    Returns null if geometry is not of type LineString.
+
+Format:
+
+`ST_LinestringFromWKB (Wkb: String)`
+
+`ST_LinestringFromWKB (Wkb: Binary)`
+
+`ST_LinestringFromWKB (Wkb: String, srid: Integer)`
+
+`ST_LinestringFromWKB (Wkb: Binary, srid: Integer)`
+
+Example:
+
+```sql
+SELECT ST_LinestringFromWKB([01 02 00 00 00 02 00 00 00 00 00 00 00 84 D6 00 C0 00 00 00 00 80 B5 D6 BF 00 00 00 60 E1 EF F7 BF 00 00 00 80 07 5D E5 BF])
 ```
 
 Output:
