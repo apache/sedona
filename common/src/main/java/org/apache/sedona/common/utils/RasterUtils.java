@@ -556,7 +556,7 @@ public class RasterUtils {
      * @param bandValues
      * @return
      */
-    public static GridCoverage2D copyRasterAndAppendBand(GridCoverage2D gridCoverage2D, Number[] bandValues, Double noDataValue) {
+    public static GridCoverage2D copyRasterAndAppendBand(GridCoverage2D gridCoverage2D, Object bandValues, Double noDataValue) {
         // Get the original image and its properties
         RenderedImage originalImage = gridCoverage2D.getRenderedImage();
         Raster raster = getRaster(originalImage);
@@ -565,17 +565,19 @@ public class RasterUtils {
         // Copy the raster data and append the new band values
         for (int i = 0; i < raster.getWidth(); i++) {
             for (int j = 0; j < raster.getHeight(); j++) {
-                if (bandValues instanceof Double[]) {
+                if (bandValues instanceof double[]) {
+                    double[] values = (double[]) bandValues;
                     double[] pixels = raster.getPixel(i, j, (double[]) null);
                     double[] copiedPixels = new double[pixels.length + 1];
                     System.arraycopy(pixels, 0, copiedPixels, 0, pixels.length);
-                    copiedPixels[pixels.length] = (double) bandValues[j * raster.getWidth() + i];
+                    copiedPixels[pixels.length] = values[j * raster.getWidth() + i];
                     wr.setPixel(i, j, copiedPixels);
-                } else if (bandValues instanceof Integer[]) {
+                } else if (bandValues instanceof int[]) {
+                    int[] values = (int[]) bandValues;
                     int[] pixels = raster.getPixel(i, j, (int[]) null);
                     int[] copiedPixels = new int[pixels.length + 1];
                     System.arraycopy(pixels, 0, copiedPixels, 0, pixels.length);
-                    copiedPixels[pixels.length] = (int) bandValues[j * raster.getWidth() + i];
+                    copiedPixels[pixels.length] = values[j * raster.getWidth() + i];
                     wr.setPixel(i, j, copiedPixels);
                 }
             }
@@ -594,11 +596,11 @@ public class RasterUtils {
         return clone(wr, gridCoverage2D.getGridGeometry(), sampleDimensions, gridCoverage2D, null, true);
     }
 
-    public static GridCoverage2D copyRasterAndAppendBand(GridCoverage2D gridCoverage2D, Number[] bandValues) {
+    public static GridCoverage2D copyRasterAndAppendBand(GridCoverage2D gridCoverage2D, Object bandValues) {
         return copyRasterAndAppendBand(gridCoverage2D, bandValues, null);
     }
 
-    public static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, Number[] bandValues, Double noDataValue, boolean removeNoDataIfNull) {
+    public static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, Object bandValues, Double noDataValue, boolean removeNoDataIfNull) {
         // Do not allow the band index to be out of bounds
         ensureBand(gridCoverage2D, bandIndex);
         // Get the original image and its properties
@@ -608,13 +610,15 @@ public class RasterUtils {
         // Copy the raster data and replace the band values
         for (int i = 0; i < raster.getWidth(); i++) {
             for (int j = 0; j < raster.getHeight(); j++) {
-                if (bandValues instanceof Double[]) {
+                if (bandValues instanceof double[]) {
+                    double[] values = (double[]) bandValues;
                     double[] bands = raster.getPixel(i, j, (double[]) null);
-                    bands[bandIndex - 1] = (double) bandValues[j * raster.getWidth() + i];
+                    bands[bandIndex - 1] = values[j * raster.getWidth() + i];
                     wr.setPixel(i, j, bands);
-                } else if (bandValues instanceof Integer[]) {
+                } else if (bandValues instanceof int[]) {
+                    int[] values = (int[]) bandValues;
                     int[] bands = raster.getPixel(i, j, (int[]) null);
-                    bands[bandIndex - 1] = (int) bandValues[j * raster.getWidth() + i];
+                    bands[bandIndex - 1] = values[j * raster.getWidth() + i];
                     wr.setPixel(i, j, bands);
                 }
             }
@@ -629,7 +633,7 @@ public class RasterUtils {
         return clone(wr, gridCoverage2D.getGridGeometry(), sampleDimensions, gridCoverage2D, null, true);
     }
 
-    public static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, Number[] bandValues) {
+    public static GridCoverage2D copyRasterAndReplaceBand(GridCoverage2D gridCoverage2D, int bandIndex, Object bandValues) {
         return copyRasterAndReplaceBand(gridCoverage2D, bandIndex, bandValues, null, false);
     }
 

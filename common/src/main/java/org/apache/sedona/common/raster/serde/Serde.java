@@ -32,8 +32,6 @@ import org.geotools.api.referencing.operation.MathTransform;
 
 import javax.media.jai.RenderedImageAdapter;
 import java.awt.image.RenderedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
@@ -178,22 +176,4 @@ public class Serde {
             return state.restore();
         }
     }
-
-    public static byte[] serializeGridSampleDimension(GridSampleDimension sampleDimension) {
-        Kryo kryo = kryos.get();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        Output output = new Output(baos);
-        GridSampleDimensionSerializer serializer = new GridSampleDimensionSerializer();
-        serializer.write(kryo, output, sampleDimension);
-        output.close();
-        return baos.toByteArray();
-    }
-
-    public static GridSampleDimension deserializeGridSampleDimension(byte[] data) {
-        Kryo kryo = kryos.get();
-        Input input = new Input(new ByteArrayInputStream(data));
-        GridSampleDimensionSerializer serializer = new GridSampleDimensionSerializer();
-        return serializer.read(kryo, input, GridSampleDimension.class);
-    }
-
 }
