@@ -2140,7 +2140,7 @@ RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster, ra
 RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster, raster5: Raster, raster6: Raster, raster7: Raster)
 ```
 
-Since: `v1.6.1`
+Since: `v1.6.0`
 
 SQL Example
 
