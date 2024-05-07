@@ -360,6 +360,10 @@ object st_functions extends DataFrameAPI {
   def ST_Transform(geometry: String, targetCRS: String): Column = wrapExpression[ST_Transform](geometry, targetCRS)
   def ST_Transform(geometry: Column, targetCRS: Column): Column = wrapExpression[ST_Transform](geometry, targetCRS)
 
+  def ST_SimplifyVW(geometry: Column, distanceTolerance: Column): Column = wrapExpression[ST_SimplifyVW](geometry, distanceTolerance)
+  def ST_SimplifyVW(geometry: String, distanceTolerance: Double): Column = wrapExpression[ST_SimplifyVW](geometry, distanceTolerance)
+
+
   def ST_Union(a: Column, b: Column): Column = wrapExpression[ST_Union](a, b)
   def ST_Union(a: String, b: String): Column = wrapExpression[ST_Union](a, b)
   def ST_Union(geoms: Column): Column = wrapExpression[ST_Union](geoms)

@@ -984,6 +984,16 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "distanceTolerance"}, argTypes = {"Geometry", "double"}, returnTypes = "Geometry")
+    public static String ST_SimplifyVW(String geometry, double distanceTolerance) {
+        return GeometrySerde.serGeoJson(
+                Functions.simplifyVW(
+                        GeometrySerde.deserGeoJson(geometry),
+                        distanceTolerance
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"input", "blade"}, argTypes = {"Geometry", "Geometry"}, returnTypes = "Geometry")
     public static String ST_Split(String input, String blade) {
         return GeometrySerde.serGeoJson(

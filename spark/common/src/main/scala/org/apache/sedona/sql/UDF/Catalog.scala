@@ -106,6 +106,7 @@ object Catalog {
     function[ST_AsHEXEWKB](),
     function[ST_AsGML](),
     function[ST_AsKML](),
+    function[ST_SimplifyVW](),
     function[ST_SRID](),
     function[ST_SetSRID](),
     function[ST_GeometryType](),

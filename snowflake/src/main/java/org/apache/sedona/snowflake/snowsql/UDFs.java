@@ -1226,6 +1226,16 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "distanceTolerance"})
+    public static byte[] ST_SimplifyVW(byte[] geometry, double distanceTolerance) {
+        return GeometrySerde.serialize(
+                Functions.simplifyVW(
+                        GeometrySerde.deserialize(geometry),
+                        distanceTolerance
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"input", "blade"})
     public static byte[] ST_Split(byte[] input, byte[] blade) {
         return GeometrySerde.serialize(

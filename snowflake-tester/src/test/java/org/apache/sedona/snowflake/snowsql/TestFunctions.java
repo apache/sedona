@@ -864,6 +864,16 @@ public class TestFunctions extends TestBase {
                 "POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))"
         );
     }
+
+    @Test
+    public void test_ST_SimplifyVW() {
+        registerUDF("ST_SimplifyVW", byte[].class, double.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_SimplifyVW(sedona.ST_GeomFromText('POLYGON((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33,46 34, 47 44, 35 36, 45 33, 43 19, 29 21, 29 22,35 26, 24 39, 8 25))'), 10))",
+                "POLYGON ((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33, 47 44, 35 36, 45 33, 43 19, 29 21, 35 26, 24 39, 8 25))"
+        );
+    }
+
     @Test
     public void test_ST_Split() {
         registerUDF("ST_Split", byte[].class, byte[].class);

@@ -44,6 +44,7 @@ import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.operation.valid.TopologyValidationError;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
+import org.locationtech.jts.simplify.VWSimplifier;
 import org.locationtech.jts.triangulate.polygon.ConstrainedDelaunayTriangulator;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
@@ -1241,6 +1242,13 @@ public class Functions {
     // create static function named simplifyPreserveTopology
     public static Geometry simplifyPreserveTopology(Geometry geometry, double distanceTolerance) {
         return TopologyPreservingSimplifier.simplify(geometry, distanceTolerance);
+    }
+
+    public static Geometry simplifyVW(Geometry geometry, double tolerance) {
+        // JTS squares the tolerance in its implementation, inorder to keep it consistent square rooting the input tolerance
+        // source: https://github.com/locationtech/jts/blob/7ef2b9d2e6f36ce5e7a787cff57bd18281e50826/modules/core/src/main/java/org/locationtech/jts/simplify/VWLineSimplifier.java#L41
+        tolerance = Math.sqrt(tolerance);
+        return VWSimplifier.simplify(geometry, tolerance);
     }
 
     public static String geometryType(Geometry geometry) {

@@ -1153,6 +1153,14 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testSimplifyVW() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 0.9, 1 1, 0 0))') AS geom");
+        table = table.select(call(Functions.ST_SimplifyPreserveTopology.class.getSimpleName(), $("geom"), 2));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("POLYGON ((0 0, 1 0, 1 1, 0 0))", result.toString());
+    }
+
+    @Test
     public void testSplit() {
         Table pointTable = tableEnv.sqlQuery("SELECT ST_Split(ST_GeomFromWKT('LINESTRING (0 0, 1.5 1.5, 2 2)'), ST_GeomFromWKT('MULTIPOINT (0.5 0.5, 1 1)'))");
         assertEquals("MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))", ((Geometry)first(pointTable).getField(0)).norm().toText());

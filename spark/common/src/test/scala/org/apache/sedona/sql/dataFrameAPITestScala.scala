@@ -696,6 +696,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_SimplifyVW") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(5 2, 3 8, 6 20, 7 25, 10 10)') AS geom")
+      val actual = baseDf.select(ST_SimplifyVW("geom", 30)).first().get(0).asInstanceOf[Geometry].toText
+      val expected = "LINESTRING (5 2, 7 25, 10 10)"
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_GeometryType") {
       val pointDf = sparkSession.sql("SELECT ST_Point(0.0, 0.0) AS geom")
       val df = pointDf.select(ST_GeometryType("geom"))

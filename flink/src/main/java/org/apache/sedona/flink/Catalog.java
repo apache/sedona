@@ -153,6 +153,7 @@ public class Catalog {
                 new Functions.ST_StartPoint(),
                 new Functions.ST_ShiftLongitude(),
                 new Functions.ST_SimplifyPreserveTopology(),
+                new Functions.ST_SimplifyVW(),
                 new Functions.ST_Split(),
                 new Functions.ST_Subdivide(),
                 new Functions.ST_SymDifference(),

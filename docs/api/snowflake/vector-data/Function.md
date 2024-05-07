@@ -2266,6 +2266,27 @@ SELECT ST_SimplifyPreserveTopology(polygondf.countyshape, 10.0)
 FROM polygondf
 ```
 
+## ST_SimplifyVW
+
+Introduction: This function simplifies the input geometry by applying the Visvalingam-Whyatt algorithm.
+
+!!!Note
+    The simplification may not preserve topology, potentially producing invalid geometries. Use [ST_SimplifyPreserveTopology](#st_simplifypreservetopology) to retain valid topology after simplification.
+
+Format: `ST_SimplifyVW(geom: Geometry, tolerance: Double)`
+
+SQL Example
+
+```sql
+SELECT ST_SimplifyVW(ST_GeomFromWKT('POLYGON((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33,46 34, 47 44, 35 36, 45 33, 43 19, 29 21, 29 22,35 26, 24 39, 8 25))'), 80)
+```
+
+Output:
+
+```
+POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 43 19, 24 39, 8 25))
+```
+
 ## ST_Snap
 
 Introduction: Snaps the vertices and segments of the `input` geometry to `reference` geometry within the specified `tolerance` distance. The `tolerance` parameter controls the maximum snap distance.

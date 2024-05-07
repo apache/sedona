@@ -1311,6 +1311,27 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void simplifyVW() throws ParseException {
+        Geometry geom = Constructors.geomFromEWKT("LINESTRING(5 2, 3 8, 6 20, 7 25, 10 10)");
+        String actual = Functions.simplifyVW(geom, 30).toString();
+        String expected = "LINESTRING (5 2, 7 25, 10 10)";
+        assertEquals(expected, actual);
+
+        actual = Functions.simplifyVW(geom, 10).toString();
+        expected = "LINESTRING (5 2, 3 8, 7 25, 10 10)";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("POLYGON((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33,46 34, 47 44, 35 36, 45 33, 43 19, 29 21, 29 22,35 26, 24 39, 8 25))");
+        actual = Functions.simplifyVW(geom, 10).toString();
+        expected = "POLYGON ((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33, 47 44, 35 36, 45 33, 43 19, 29 21, 35 26, 24 39, 8 25))";
+        assertEquals(expected, actual);
+
+        actual = Functions.simplifyVW(geom, 80).toString();
+        expected = "POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 43 19, 24 39, 8 25))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void force3DObject2D() {
         int expectedDims = 3;
         LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 1, 1, 0, 2, 0));

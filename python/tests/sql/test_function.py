@@ -896,6 +896,13 @@ class TestPredicateJoin(TestBase):
         actual = self.spark.sql("SELECT ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))").take(1)[0][0]
         assert actual
 
+    def test_st_simplify_vw(self):
+        basedf = self.spark.sql("SELECT ST_GeomFromWKT('LINESTRING(5 2, 3 8, 6 20, 7 25, 10 10)') as geom")
+        actual = basedf.selectExpr("ST_SimplifyVW(geom, 30)").take(1)[0][0].wkt
+        expected = "LINESTRING (5 2, 7 25, 10 10)"
+        assert expected == actual
+
+
     def test_st_is_ring(self):
         result_and_expected = [
             [self.calculate_st_is_ring("LINESTRING(0 0, 0 1, 1 0, 1 1, 0 0)"), False],
