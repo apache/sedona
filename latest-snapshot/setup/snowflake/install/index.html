@@ -4044,8 +4044,8 @@
 <h2 id="step-2-upload-sedonas-jar-files-to-the-stage">Step 2: Upload Sedona's JAR files to the stage<a class="headerlink" href="#step-2-upload-sedonas-jar-files-to-the-stage" title="Permanent link">&para;</a></h2>
 <p>You will need to download the following 2 JAR files:</p>
 <ul>
-<li>sedona-snowflake-1.5.1.jar: <a href="https://central.sonatype.com/artifact/org.apache.sedona/sedona-snowflake/versions">Sedona's Maven Central repository</a></li>
-<li>geotools-wrapper-1.5.1-28.2.jar: <a href="https://central.sonatype.com/artifact/org.datasyslab/geotools-wrapper/versions">GeoTools-wrapper's Maven Central repository</a></li>
+<li>sedona-snowflake-1.5.2.jar: <a href="https://central.sonatype.com/artifact/org.apache.sedona/sedona-snowflake/versions">Sedona's Maven Central repository</a></li>
+<li>geotools-wrapper-1.5.2-28.2.jar: <a href="https://central.sonatype.com/artifact/org.datasyslab/geotools-wrapper/versions">GeoTools-wrapper's Maven Central repository</a></li>
 </ul>
 <p>Then you can upload the 2 JAR files to the stage created in the previous step.</p>
 <p>After uploading the 2 JAR files, you should be able to see the 2 JAR files in the stage.</p>
@@ -4061,9 +4061,9 @@
 <h2 id="step-4-get-the-sql-script-for-creating-sedonas-functions">Step 4: Get the SQL script for creating Sedona's functions<a class="headerlink" href="#step-4-get-the-sql-script-for-creating-sedonas-functions" title="Permanent link">&para;</a></h2>
 <p>You will need to download <a href="../../../image/snowflake/sedona-snowflake.sql">sedona-snowflake.sql</a> to create Sedona's functions in the schema created in the previous step.</p>
 <p>You can also get this SQL script by running the following command:</p>
-<div class="highlight"><pre><span></span><code>java<span class="w"> </span>-jar<span class="w"> </span>sedona-snowflake-1.5.1.jar<span class="w"> </span>--geotools-version<span class="w"> </span><span class="m">1</span>.5.1-28.2<span class="w"> </span>&gt;<span class="w"> </span>sedona-snowflake.sql
+<div class="highlight"><pre><span></span><code>java<span class="w"> </span>-jar<span class="w"> </span>sedona-snowflake-1.5.2.jar<span class="w"> </span>--geotools-version<span class="w"> </span><span class="m">1</span>.5.2-28.2<span class="w"> </span>&gt;<span class="w"> </span>sedona-snowflake.sql
 </code></pre></div>
-<p>sedona-snowflake-1.5.1.jar is the JAR file downloaded in Step 2.</p>
+<p>sedona-snowflake-1.5.2.jar is the JAR file downloaded in Step 2.</p>
 <h2 id="step-5-run-the-sql-script-to-create-sedonas-functions">Step 5: Run the SQL script to create Sedona's functions<a class="headerlink" href="#step-5-run-the-sql-script-to-create-sedonas-functions" title="Permanent link">&para;</a></h2>
 <p>We will create a worksheet in the database created in the previous step, and run the SQL script to create Sedona's functions.</p>
 <p>In this case, we will choose the option <code>Create Worksheet from SQL File</code>.</p>
