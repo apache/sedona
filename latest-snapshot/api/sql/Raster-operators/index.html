@@ -3061,6 +3061,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#rs_union" class="md-nav__link">
+    <span class="md-ellipsis">
+      RS_Union
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#rs_value" class="md-nav__link">
     <span class="md-ellipsis">
       RS_Value
@@ -5320,6 +5329,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#rs_union" class="md-nav__link">
+    <span class="md-ellipsis">
+      RS_Union
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#rs_value" class="md-nav__link">
     <span class="md-ellipsis">
       RS_Value
@@ -6985,6 +7003,32 @@ set to the corresponding value in <code>newValues</code>. The <code>newValues</c
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>3857
 </code></pre></div>
+<h3 id="rs_union">RS_Union<a class="headerlink" href="#rs_union" title="Permanent link">&para;</a></h3>
+<p>Introduction: Returns a combined multi-band raster from 2 or more input Rasters. The order of bands in the resultant raster will be in the order of the input rasters. For example if <code>RS_Union</code> is called on two 2-banded raster, raster1 and raster2, the first 2 bands of the resultant 4-banded raster will be from raster1 and the last 2 from raster 2.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the provided input Rasters don't have same shape an IllegalArgumentException will be thrown.</p>
+</div>
+<p>Format:</p>
+<div class="highlight"><pre><span></span><code><span class="n">RS_Union</span><span class="w"> </span><span class="p">(</span><span class="n">raster1</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster2</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">RS_Union</span><span class="w"> </span><span class="p">(</span><span class="n">raster1</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster2</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster3</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">RS_Union</span><span class="w"> </span><span class="p">(</span><span class="n">raster1</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster2</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster3</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster4</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">RS_Union</span><span class="w"> </span><span class="p">(</span><span class="n">raster1</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster2</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster3</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster4</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster5</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">RS_Union</span><span class="w"> </span><span class="p">(</span><span class="n">raster1</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster2</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster3</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster4</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster5</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster6</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">RS_Union</span><span class="w"> </span><span class="p">(</span><span class="n">raster1</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster2</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster3</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster4</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster5</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster6</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">,</span><span class="w"> </span><span class="n">raster7</span><span class="p">:</span><span class="w"> </span><span class="n">Raster</span><span class="p">)</span>
+</code></pre></div>
+<p>Since: <code>v1.6.0</code></p>
+<p>SQL Example</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_Union</span><span class="p">(</span><span class="n">raster1</span><span class="p">,</span><span class="w"> </span><span class="n">raster2</span><span class="p">,</span><span class="w"> </span><span class="n">raster3</span><span class="p">,</span><span class="w"> </span><span class="n">raster4</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">rasters</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>GridCoverage2D[&quot;g...
+</code></pre></div>
 <h3 id="rs_value">RS_Value<a class="headerlink" href="#rs_value" title="Permanent link">&para;</a></h3>
 <p>Introduction: Returns the value at the given point in the raster. If no band number is specified it defaults to 1.</p>
 <div class="admonition note">
@@ -7398,7 +7442,7 @@ To learn how to write map algebra script, please refer to <a href="https://githu
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 28, 2024 01:25:26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 8, 2024 01:22:51</span>
   </span>
 
     

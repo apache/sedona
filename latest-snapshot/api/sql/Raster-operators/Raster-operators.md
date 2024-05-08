@@ -2107,6 +2107,53 @@ Output:
 3857
 ```
 
+### RS_Union
+
+Introduction: Returns a combined multi-band raster from 2 or more input Rasters. The order of bands in the resultant raster will be in the order of the input rasters. For example if `RS_Union` is called on two 2-banded raster, raster1 and raster2, the first 2 bands of the resultant 4-banded raster will be from raster1 and the last 2 from raster 2.
+
+!!!note
+    If the provided input Rasters don't have same shape an IllegalArgumentException will be thrown.
+
+Format:
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster)
+```
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster, raster3: Raster)
+```
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster)
+```
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster, raster5: Raster)
+```
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster, raster5: Raster, raster6: Raster)
+```
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster, raster5: Raster, raster6: Raster, raster7: Raster)
+```
+
+Since: `v1.6.0`
+
+SQL Example
+
+```sql
+SELECT RS_Union(raster1, raster2, raster3, raster4) FROM rasters
+```
+
+Output:
+
+```
+GridCoverage2D["g...
+```
+
 ### RS_Value
 
 Introduction: Returns the value at the given point in the raster. If no band number is specified it defaults to 1.
