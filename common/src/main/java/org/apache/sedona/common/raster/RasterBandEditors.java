@@ -171,6 +171,43 @@ public class RasterBandEditors {
         return addBand(toRaster, fromRaster, 1);
     }
 
+    public static GridCoverage2D rasterUnion(GridCoverage2D raster1, GridCoverage2D raster2, GridCoverage2D raster3, GridCoverage2D raster4, GridCoverage2D raster5, GridCoverage2D raster6, GridCoverage2D raster7) {
+        return rasterUnion(rasterUnion(raster1, raster2, raster3, raster4, raster5, raster6), raster7);
+    }
+
+    public static GridCoverage2D rasterUnion(GridCoverage2D raster1, GridCoverage2D raster2, GridCoverage2D raster3, GridCoverage2D raster4, GridCoverage2D raster5, GridCoverage2D raster6) {
+        return rasterUnion(rasterUnion(raster1, raster2, raster3, raster4, raster5), raster6);
+    }
+    public static GridCoverage2D rasterUnion(GridCoverage2D raster1, GridCoverage2D raster2, GridCoverage2D raster3, GridCoverage2D raster4, GridCoverage2D raster5) {
+        return rasterUnion(rasterUnion(raster1, raster2, raster3, raster4), raster5);
+    }
+
+    public static GridCoverage2D rasterUnion(GridCoverage2D raster1, GridCoverage2D raster2, GridCoverage2D raster3, GridCoverage2D raster4) {
+        return rasterUnion(rasterUnion(raster1, raster2, raster3), raster4);
+    }
+
+    public static GridCoverage2D rasterUnion(GridCoverage2D raster1, GridCoverage2D raster2, GridCoverage2D raster3) {
+        return rasterUnion(rasterUnion(raster1, raster2), raster3);
+    }
+
+    public static GridCoverage2D rasterUnion(GridCoverage2D raster1, GridCoverage2D raster2) {
+        // Ensure both rasters have the same dimensions
+        RasterUtils.isRasterSameShape(raster1, raster2);
+
+        int numBands1 = RasterAccessors.numBands(raster1);
+        int numBands2 = RasterAccessors.numBands(raster2);
+
+        // Start with raster1 as the initial result
+        GridCoverage2D result = raster1;
+
+        // Append each band from raster2 to the result
+        for (int bandIndex = 1; bandIndex <= numBands2; bandIndex++) {
+            result = addBand(result, raster2, bandIndex);
+        }
+
+        return result;
+    }
+
     /**
      * Check if the band index is either present or at the end of the raster
      * @param raster Raster to check

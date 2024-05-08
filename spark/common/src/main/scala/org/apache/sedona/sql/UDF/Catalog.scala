@@ -239,6 +239,7 @@ object Catalog {
     function[RS_AsPNG](),
     function[RS_Width](),
     function[RS_Height](),
+    function[RS_Union](),
     function[RS_UpperLeftX](),
     function[RS_UpperLeftY](),
     function[RS_ScaleX](),
