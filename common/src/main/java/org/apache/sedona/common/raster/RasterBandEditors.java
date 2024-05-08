@@ -135,16 +135,16 @@ public class RasterBandEditors {
         if (RasterUtils.isDataTypeIntegral(dataTypeCode)) {
             int[] bandValues = rasterData.getSamples(0, 0, width, height, fromBand - 1, (int[]) null);
             if (numBands + 1 == toRasterIndex) {
-                return RasterUtils.copyRasterAndAppendBand(toRaster, Arrays.stream(bandValues).boxed().toArray(Integer[]::new), noDataValue);
+                return RasterUtils.copyRasterAndAppendBand(toRaster, bandValues, noDataValue);
             } else {
-                return RasterUtils.copyRasterAndReplaceBand(toRaster, fromBand, Arrays.stream(bandValues).boxed().toArray(Integer[]::new), noDataValue, false);
+                return RasterUtils.copyRasterAndReplaceBand(toRaster, fromBand, bandValues, noDataValue, false);
             }
         } else {
             double[] bandValues = rasterData.getSamples(0, 0, width, height, fromBand - 1, (double[]) null);
             if (numBands + 1 == toRasterIndex) {
-                return RasterUtils.copyRasterAndAppendBand(toRaster, Arrays.stream(bandValues).boxed().toArray(Double[]::new), noDataValue);
+                return RasterUtils.copyRasterAndAppendBand(toRaster, bandValues, noDataValue);
             } else {
-                return RasterUtils.copyRasterAndReplaceBand(toRaster, fromBand, Arrays.stream(bandValues).boxed().toArray(Double[]::new), noDataValue, false);
+                return RasterUtils.copyRasterAndReplaceBand(toRaster, fromBand, bandValues, noDataValue, false);
             }
         }
     }

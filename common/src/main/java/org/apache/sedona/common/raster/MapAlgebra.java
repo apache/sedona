@@ -78,12 +78,11 @@ public class MapAlgebra
             throw new IllegalArgumentException("Band index is out of bounds. Must be between 1 and " + (numBands + 1) + ")");
         }
 
-        Double[] bandValuesClass = Arrays.stream(bandValues).boxed().toArray(Double[]::new);
         if (bandIndex == numBands + 1) {
-            return RasterUtils.copyRasterAndAppendBand(rasterGeom, bandValuesClass, noDataValue);
+            return RasterUtils.copyRasterAndAppendBand(rasterGeom, bandValues, noDataValue);
         }
         else {
-            return RasterUtils.copyRasterAndReplaceBand(rasterGeom, bandIndex, bandValuesClass, noDataValue, true);
+            return RasterUtils.copyRasterAndReplaceBand(rasterGeom, bandIndex, bandValues, noDataValue, true);
         }
     }
 
@@ -94,12 +93,11 @@ public class MapAlgebra
             throw new IllegalArgumentException("Band index is out of bounds. Must be between 1 and " + (numBands + 1) + ")");
         }
 
-        Double[] bandValuesClass = Arrays.stream(bandValues).boxed().toArray(Double[]::new);
         if (bandIndex == numBands + 1) {
-            return RasterUtils.copyRasterAndAppendBand(rasterGeom, bandValuesClass);
+            return RasterUtils.copyRasterAndAppendBand(rasterGeom, bandValues);
         }
         else {
-            return RasterUtils.copyRasterAndReplaceBand(rasterGeom, bandIndex, bandValuesClass);
+            return RasterUtils.copyRasterAndReplaceBand(rasterGeom, bandIndex, bandValues);
         }
     }
 
