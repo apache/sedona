@@ -19,7 +19,6 @@ JNAME=zulu17-ca-arm64
 
 ### on Databricks Runtime versions 11.2 - 13.0
 
-
 When you create a cluster, you can specify that the cluster uses JDK 11 (for both the driver and executor). To do this, add the following environment variable to `Advanced Options > Spark > Environment Variables`:
 
 ```

@@ -5,7 +5,6 @@ This tutorial is tested on EMR on EC2 with EMR Studio (notebooks). EMR on EC2 us
 !!!note
 	If you are using Spark 3.4+ and Scala 2.12, please use `sedona-spark-shaded-3.4_2.12`. Please pay attention to the Spark version postfix and Scala version postfix.
 
-
 ## JDK 11+ requirement
 
 Sedona 1.6.0+ requires JDK 11+ to run. For Amazon EMR 7.x, the default JVM is Java 17. For Amazon EMR 5.x and 6.x, the default JVM is Java 8 but you can configure the cluster to use Java 11 or Java 17. For more information, see [EMR JVM versions](https://docs.aws.amazon.com/emr/latest/ReleaseGuide/configuring-java8.html#configuring-java8-override-spark).
