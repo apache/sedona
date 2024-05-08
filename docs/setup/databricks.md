@@ -1,3 +1,37 @@
+
+## JDK 11+ requirement
+
+Sedona 1.6.0+ requires JDK 11+ to run. Databricks Runtime by default uses JDK 8. You can set up JDK 17 by following the instructions in the [Databricks documentation](https://docs.databricks.com/en/dev-tools/sdk-java.html#create-a-cluster-that-uses-jdk-17).
+
+### on Databricks Runtime versions 13.1 and above
+
+When you create a cluster, specify that the cluster uses JDK 17 for both the driver and executor by adding the following environment variable to `Advanced Options > Spark > Environment Variables`:
+
+```
+JNAME=zulu17-ca-amd64
+```
+
+If you are using ARM-based clusters (for example, AWS Graviton instances), use the following environment variable instead.
+
+```
+JNAME=zulu17-ca-arm64
+```
+
+### on Databricks Runtime versions 11.2 - 13.0
+
+
+When you create a cluster, you can specify that the cluster uses JDK 11 (for both the driver and executor). To do this, add the following environment variable to `Advanced Options > Spark > Environment Variables`:
+
+```
+JNAME=zulu11-ca-amd64
+```
+
+If you are using ARM-based clusters (for example, AWS Graviton instances), use the following environment variable instead.
+
+```
+JNAME=zulu11-ca-arm64
+```
+
 ## Community edition (free-tier)
 
 You just need to install the Sedona jars and Sedona Python on Databricks using Databricks default web UI. Then everything will work.

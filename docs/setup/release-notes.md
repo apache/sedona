@@ -4,7 +4,7 @@
     If you use Sedona < 1.6.0, please use GeoPandas <= `0.11.1` since GeoPandas > 0.11.1 will automatically install Shapely 2.0. If you use Shapely, please use <= `1.8.5`.
 
 !!! warning
-	Sedona 1.6.0+ requires Java 11+ to compile and run. If you are using Java 8, please use Sedona <= 1.5.2.
+	Sedona 1.6.0+ requires Java 11+ to compile and run. If you are using Java 8, please use Sedona < 1.6.0. To learn how to set up Java 11+ on different platforms, please refer to the Java 11+ requirement in the corresponding platform setup guide.
 
 ## Sedona 1.6.0
 
@@ -47,6 +47,8 @@ df_raster.withColumn("mean", expr("mean_udf(rast)")).show()
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-532'>SEDONA-532</a>] - Sedona Spark SQL optimizer cannot optimize joins with complex conditions
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-543'>SEDONA-543</a>] - RS_Union_aggr gives referenceRaster is null error when run on cluster
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-555'>SEDONA-555</a>] - Snowflake Native App should not always create a new role
 </li>
 </ul>
 
