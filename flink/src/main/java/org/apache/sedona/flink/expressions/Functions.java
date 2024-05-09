@@ -1046,6 +1046,23 @@ public class Functions {
         }
     }
 
+    public static class ST_SimplifyPolygonHull extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Double") Double vertexFactor,
+                             @DataTypeHint("Boolean") Boolean isOuter) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.simplifyPolygonHull(geom, vertexFactor, isOuter);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Double") Double vertexFactor) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.simplifyPolygonHull(geom, vertexFactor);
+        }
+    }
+
     public static class ST_Subdivide extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry[].class)
         public Geometry[] eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,

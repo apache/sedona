@@ -43,6 +43,7 @@ import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.operation.valid.TopologyValidationError;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
+import org.locationtech.jts.simplify.PolygonHullSimplifier;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.locationtech.jts.simplify.VWSimplifier;
 import org.locationtech.jts.triangulate.polygon.ConstrainedDelaunayTriangulator;
@@ -1249,6 +1250,14 @@ public class Functions {
         // source: https://github.com/locationtech/jts/blob/7ef2b9d2e6f36ce5e7a787cff57bd18281e50826/modules/core/src/main/java/org/locationtech/jts/simplify/VWLineSimplifier.java#L41
         tolerance = Math.sqrt(tolerance);
         return VWSimplifier.simplify(geometry, tolerance);
+    }
+
+    public static Geometry simplifyPolygonHull(Geometry geometry, double vertexFactor, boolean isOuter) {
+        return PolygonHullSimplifier.hull(geometry, isOuter, vertexFactor);
+    }
+
+    public static Geometry simplifyPolygonHull(Geometry geometry, double vertexFactor) {
+        return simplifyPolygonHull(geometry, vertexFactor, true);
     }
 
     public static String geometryType(Geometry geometry) {

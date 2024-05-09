@@ -703,6 +703,17 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertEquals(expected, actual)
     }
 
+    it("Passed ST_SimplifyPolygonHull") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((30 10, 40 40, 45 45, 20 40, 25 35, 10 20, 15 15, 30 10))') AS geom")
+      var actual = baseDf.select(ST_SimplifyPolygonHull("geom", 0.3, false)).first().get(0).asInstanceOf[Geometry].toText
+      var expected = "POLYGON ((30 10, 40 40, 10 20, 30 10))"
+      assertEquals(expected, actual)
+
+      actual = baseDf.select(ST_SimplifyPolygonHull("geom", 0.3)).first().get(0).asInstanceOf[Geometry].toText
+      expected = "POLYGON ((30 10, 15 15, 10 20, 20 40, 45 45, 30 10))"
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_GeometryType") {
       val pointDf = sparkSession.sql("SELECT ST_Point(0.0, 0.0) AS geom")
       val df = pointDf.select(ST_GeometryType("geom"))

@@ -1161,6 +1161,18 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testSimplifyPolygonHull() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((30 10, 40 40, 45 45, 20 40, 25 35, 10 20, 15 15, 30 10))') AS geom");
+        String actual = first(table.select(call(Functions.ST_SimplifyPolygonHull.class.getSimpleName(), $("geom"), 0.3, false))).getField(0).toString();
+        String expected = "POLYGON ((30 10, 40 40, 10 20, 30 10))";
+        assertEquals(expected, actual);
+
+        actual = first(table.select(call(Functions.ST_SimplifyPolygonHull.class.getSimpleName(), $("geom"), 0.3))).getField(0).toString();
+        expected = "POLYGON ((30 10, 15 15, 10 20, 20 40, 45 45, 30 10))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testSplit() {
         Table pointTable = tableEnv.sqlQuery("SELECT ST_Split(ST_GeomFromWKT('LINESTRING (0 0, 1.5 1.5, 2 2)'), ST_GeomFromWKT('MULTIPOINT (0.5 0.5, 1 1)'))");
         assertEquals("MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))", ((Geometry)first(pointTable).getField(0)).norm().toText());

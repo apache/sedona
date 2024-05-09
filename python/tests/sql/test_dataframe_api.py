@@ -192,6 +192,8 @@ test_configurations = [
     (stf.ST_ShiftLongitude, ("geom",), "triangle_geom", "", "POLYGON ((0 0, 1 0, 1 1, 0 0))"),
     (stf.ST_SimplifyPreserveTopology, ("geom", 0.2), "0.9_poly", "", "POLYGON ((0 0, 1 0, 1 1, 0 0))"),
     (stf.ST_SimplifyVW, ("geom", 0.1), "0.9_poly", "", "POLYGON ((0 0, 1 0, 1 1, 0 0))"),
+    (stf.ST_SimplifyPolygonHull, ("geom", 0.3, False), "polygon_unsimplified", "", "POLYGON ((30 10, 40 40, 10 20, 30 10))"),
+    (stf.ST_SimplifyPolygonHull, ("geom", 0.3), "polygon_unsimplified", "", "POLYGON ((30 10, 15 15, 10 20, 20 40, 45 45, 30 10))"),
     (stf.ST_Snap, ("poly", "line", 2.525), "poly_and_line", "" ,"POLYGON ((2.6 12.5, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 2.6 12.5))"),
     (stf.ST_Split, ("line", "points"), "multipoint_splitting_line", "", "MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))"),
     (stf.ST_SRID, ("point",), "point_geom", "", 0),
@@ -395,6 +397,8 @@ wrong_type_configurations = [
     (stf.ST_SimplifyPreserveTopology, ("", None)),
     (stf.ST_SimplifyVW, (None, 2)),
     (stf.ST_SimplifyVW, ("", None)),
+    (stf.ST_SimplifyPolygonHull, ("", None)),
+    (stf.ST_SimplifyPolygonHull, (None, None)),
     (stf.ST_Snap, (None, None, 12)),
     (stf.ST_SRID, (None,)),
     (stf.ST_StartPoint, (None,)),
@@ -518,6 +522,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 3 0, 3 3, 0 0), (1 1, 2 2, 2 1, 1 1))') AS geom")
         elif request.param == "0.9_poly":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 0.9, 1 1, 0 0))') AS geom")
+        elif request.param == "polygon_unsimplified":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((30 10, 40 40, 45 45, 20 40, 25 35, 10 20, 15 15, 30 10))') AS geom")
         elif request.param == "precision_reduce_point":
             return TestDataFrameAPI.spark.sql("SELECT ST_Point(0.12, 0.23) AS geom")
         elif request.param == "closed_linestring_geom":

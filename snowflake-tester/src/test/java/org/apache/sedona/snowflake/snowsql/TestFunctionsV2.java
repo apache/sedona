@@ -838,6 +838,20 @@ public class TestFunctionsV2
     }
 
     @Test
+    public void test_ST_SimplifyPolygonHull() {
+        registerUDFV2("ST_SimplifyPolygonHull", String.class, double.class, boolean.class);
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_SimplifyPolygonHull(ST_GeomFromText('POLYGON ((30 10, 40 40, 45 45, 20 40, 25 35, 10 20, 15 15, 30 10))'), 0.3, false))",
+                "POLYGON((30 10,40 40,10 20,30 10))"
+        );
+        registerUDFV2("ST_SimplifyPolygonHull", String.class, double.class);
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_SimplifyPolygonHull(ST_GeomFromText('POLYGON ((30 10, 40 40, 45 45, 20 40, 25 35, 10 20, 15 15, 30 10))'), 0.3))",
+                "POLYGON((30 10,15 15,10 20,20 40,45 45,30 10))"
+        );
+    }
+
+    @Test
     public void test_ST_Split() {
         registerUDFV2("ST_Split", String.class, String.class);
         verifySqlSingleRes(

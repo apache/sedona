@@ -363,6 +363,10 @@ object st_functions extends DataFrameAPI {
   def ST_SimplifyVW(geometry: Column, distanceTolerance: Column): Column = wrapExpression[ST_SimplifyVW](geometry, distanceTolerance)
   def ST_SimplifyVW(geometry: String, distanceTolerance: Double): Column = wrapExpression[ST_SimplifyVW](geometry, distanceTolerance)
 
+  def ST_SimplifyPolygonHull(geometry: Column, vertexFactor: Column): Column = wrapExpression[ST_SimplifyPolygonHull](geometry, vertexFactor)
+  def ST_SimplifyPolygonHull(geometry: String, vertexFactor: Double): Column = wrapExpression[ST_SimplifyPolygonHull](geometry, vertexFactor)
+  def ST_SimplifyPolygonHull(geometry: Column, vertexFactor: Column, isOuter: Column): Column = wrapExpression[ST_SimplifyPolygonHull](geometry, vertexFactor, isOuter)
+  def ST_SimplifyPolygonHull(geometry: String, vertexFactor: Double, isOuter: Boolean): Column = wrapExpression[ST_SimplifyPolygonHull](geometry, vertexFactor, isOuter)
 
   def ST_Union(a: Column, b: Column): Column = wrapExpression[ST_Union](a, b)
   def ST_Union(a: String, b: String): Column = wrapExpression[ST_Union](a, b)
