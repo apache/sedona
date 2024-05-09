@@ -48,8 +48,6 @@ df_raster.withColumn("mean", expr("mean_udf(rast)")).show()
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-543'>SEDONA-543</a>] - RS_Union_aggr gives referenceRaster is null error when run on cluster
 </li>
-<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-555'>SEDONA-555</a>] - Snowflake Native App should not always create a new role
-</li>
 </ul>
 
 ### New Feature
@@ -118,6 +116,21 @@ df_raster.withColumn("mean", expr("mean_udf(rast)")).show()
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-550'>SEDONA-550</a>] - Remove the version upper bound of Pandas, GeoPandas
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-551'>SEDONA-551</a>] - Upgrade GeoTools dependency to 31.0 for Apache SIS integration, Drop Java 8 support
+</li>
+</ul>
+
+## Sedona 1.5.3
+
+Sedona 1.5.3 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.12, Snowflake 7+, Java 8.
+
+This release is a maintenance release that includes one bug fix on top of Sedona 1.5.2. No new features or major changes are added in this release.
+
+### Bug
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-556'>SEDONA-556</a>] - Hidden requirement for geopandas in apache-sedona 1.5.2
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-555'>SEDONA-555</a>] - Snowflake Native App should not always create a new role
 </li>
 </ul>
 
