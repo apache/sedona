@@ -121,6 +121,19 @@ df_raster.withColumn("mean", expr("mean_udf(rast)")).show()
 </li>
 </ul>
 
+## Sedona 1.5.3
+
+Sedona 1.5.3 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.12, Snowflake 7+, Java 8.
+
+This release is a maintenance release that includes one bug fix on top of Sedona 1.5.2. No new features or major changes are added in this release.
+
+### Bug
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-556'>SEDONA-556</a>] - Hidden requirement for geopandas in apache-sedona 1.5.2
+</li>
+</ul>
+
 ## Sedona 1.5.2
 
 Sedona 1.5.2 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.12, Snowflake 7+, Java 8.
