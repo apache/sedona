@@ -1,0 +1,8 @@
+pandoc: 2.9.2.1
+pkgdown: 2.0.9
+pkgdown_sha: ~
+articles:
+  apache-sedona: apache-sedona.html
+  raster: raster.html
+last_built: 2024-05-01T05:05Z
+
