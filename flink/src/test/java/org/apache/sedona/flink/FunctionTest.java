@@ -317,6 +317,14 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testUnaryUnion() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTIPOLYGON(((0 10,0 30,20 30,20 10,0 10)),((10 0,10 20,30 20,30 0,10 0)))') AS geom");
+        String actual = first(table.select(call(Functions.ST_UnaryUnion.class.getSimpleName(), $("geom")))).getField(0).toString();
+        String expected = "POLYGON ((10 0, 10 10, 0 10, 0 30, 20 30, 20 20, 30 20, 30 0, 10 0))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testUnionArrayVariant() {
         Table polyTable = tableEnv.sqlQuery("SELECT ARRAY[ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((-2 1, 2 1, 2 4, -2 4, -2 1))')] as polys");
         String actual = first(polyTable.select(call(Functions.ST_Union.class.getSimpleName(), $("polys")))).getField(0).toString();

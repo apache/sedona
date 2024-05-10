@@ -177,6 +177,7 @@ public class Catalog {
                 new Functions.ST_ForcePolygonCCW(),
                 new Functions.ST_Translate(),
                 new Functions.ST_TriangulatePolygon(),
+                new Functions.ST_UnaryUnion(),
                 new Functions.ST_Union(),
                 new Functions.ST_VoronoiPolygons(),
                 new Functions.ST_FrechetDistance(),

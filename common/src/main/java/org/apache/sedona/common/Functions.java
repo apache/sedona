@@ -39,6 +39,7 @@ import org.locationtech.jts.operation.distance3d.Distance3DOp;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.overlay.snap.GeometrySnapper;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
+import org.locationtech.jts.operation.union.UnaryUnionOp;
 import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.operation.valid.TopologyValidationError;
@@ -1315,6 +1316,10 @@ public class Functions {
 
     public static Geometry union(Geometry[] geoms) {
         return GEOMETRY_FACTORY.createGeometryCollection(geoms).union();
+    }
+
+    public static Geometry unaryUnion(Geometry geom) {
+        return UnaryUnionOp.union(geom);
     }
 
     public static Geometry createMultiGeometryFromOneElement(Geometry geometry) {

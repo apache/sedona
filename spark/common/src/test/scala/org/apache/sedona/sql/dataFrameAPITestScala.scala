@@ -774,6 +774,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(expected.equals(actual))
     }
 
+    it("Passed ST_UnaryUnion") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('MULTIPOLYGON(((0 10,0 30,20 30,20 10,0 10)),((10 0,10 20,30 20,30 0,10 0)))') AS geom")
+      val actual = baseDf.select(ST_UnaryUnion("geom")).first().get(0).asInstanceOf[Geometry].toText
+      val expected = "POLYGON ((10 0, 10 10, 0 10, 0 30, 20 30, 20 20, 30 20, 30 0, 10 0))"
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_Azimuth") {
       val baseDf = sparkSession.sql("SELECT ST_Point(0.0, 0.0) AS a, ST_Point(1.0, 1.0) AS b")
       val df = baseDf.select(ST_Azimuth("a", "b"))

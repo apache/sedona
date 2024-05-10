@@ -1129,6 +1129,15 @@ public class UDFsV2
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
+    public static String ST_UnaryUnion(String geometry) {
+        return GeometrySerde.serGeoJson(
+                Functions.unaryUnion(
+                        GeometrySerde.deserGeoJson(geometry)
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
     public static String ST_VoronoiPolygons(String geometry) {
         return GeometrySerde.serGeoJson(
                 FunctionsGeoTools.voronoiPolygons(GeometrySerde.deserGeoJson(geometry), 0.0, null)

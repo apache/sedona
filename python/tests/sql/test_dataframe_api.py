@@ -208,6 +208,7 @@ test_configurations = [
     (stf.ST_TriangulatePolygon, ("geom",), "square_geom", "", "GEOMETRYCOLLECTION (POLYGON ((1 0, 1 1, 2 1, 1 0)), POLYGON ((2 1, 2 0, 1 0, 2 1)))"),
     (stf.ST_Union, ("a", "b"), "overlapping_polys", "", "POLYGON ((1 0, 0 0, 0 1, 1 1, 2 1, 3 1, 3 0, 2 0, 1 0))"),
     (stf.ST_Union, ("polys",), "array_polygons", "", "POLYGON ((2 3, 3 3, 3 -3, -3 -3, -3 3, -2 3, -2 4, 2 4, 2 3))"),
+    (stf.ST_UnaryUnion, ("geom",), "overlapping_mPolys", "", "POLYGON ((10 0, 10 10, 0 10, 0 30, 20 30, 20 20, 30 20, 30 0, 10 0))"),
     (stf.ST_VoronoiPolygons, ("geom",), "multipoint", "", "GEOMETRYCOLLECTION (POLYGON ((-1 -1, -1 2, 2 -1, -1 -1)), POLYGON ((-1 2, 2 2, 2 -1, -1 2)))"),
     (stf.ST_X, ("b",), "two_points", "", 3.0),
     (stf.ST_XMax, ("line",), "linestring_geom", "", 5.0),
@@ -420,6 +421,7 @@ wrong_type_configurations = [
     (stf.ST_TriangulatePolygon, (None,)),
     (stf.ST_Union, (None, "")),
     (stf.ST_Union, (None,)),
+    (stf.ST_UnaryUnion, (None,)),
     (stf.ST_X, (None,)),
     (stf.ST_XMax, (None,)),
     (stf.ST_XMin, (None,)),
@@ -521,6 +523,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((1 5, 1 1, 3 3, 5 3, 7 1, 7 5, 5 3, 3 3, 1 5))') AS geom")
         elif request.param == "overlapping_polys":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON((0 0, 2 0, 2 1, 0 1, 0 0))') AS a, ST_GeomFromWKT('POLYGON((1 0, 3 0, 3 1, 1 1, 1 0))') AS b")
+        elif request.param == "overlapping_mPolys":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('MULTIPOLYGON(((0 10,0 30,20 30,20 10,0 10)),((10 0,10 20,30 20,30 0,10 0)))') AS geom")
         elif request.param == "multipoint":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('MULTIPOINT ((0 0), (1 1))') AS geom")
         elif request.param == "geom_with_hole":
