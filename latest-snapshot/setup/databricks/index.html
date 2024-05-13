@@ -66,7 +66,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#jdk-11-requirement" class="md-skip">
+        <a href="#community-edition-free-tier" class="md-skip">
           Skip to content
         </a>
       
@@ -1020,39 +1020,6 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#jdk-11-requirement" class="md-nav__link">
-    <span class="md-ellipsis">
-      JDK 11+ requirement
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="JDK 11+ requirement">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#on-databricks-runtime-versions-131-and-above" class="md-nav__link">
-    <span class="md-ellipsis">
-      on Databricks Runtime versions 13.1 and above
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#on-databricks-runtime-versions-112-130" class="md-nav__link">
-    <span class="md-ellipsis">
-      on Databricks Runtime versions 11.2 - 13.0
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#community-edition-free-tier" class="md-nav__link">
@@ -4003,39 +3970,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#jdk-11-requirement" class="md-nav__link">
-    <span class="md-ellipsis">
-      JDK 11+ requirement
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="JDK 11+ requirement">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#on-databricks-runtime-versions-131-and-above" class="md-nav__link">
-    <span class="md-ellipsis">
-      on Databricks Runtime versions 13.1 and above
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#on-databricks-runtime-versions-112-130" class="md-nav__link">
-    <span class="md-ellipsis">
-      on Databricks Runtime versions 11.2 - 13.0
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#community-edition-free-tier" class="md-nav__link">
     <span class="md-ellipsis">
       Community edition (free-tier)
@@ -4150,22 +4084,6 @@
 
   <h1>Install on Databricks</h1>
 
-<h2 id="jdk-11-requirement">JDK 11+ requirement<a class="headerlink" href="#jdk-11-requirement" title="Permanent link">&para;</a></h2>
-<p>Sedona 1.6.0+ requires JDK 11+ to run. Databricks Runtime by default uses JDK 8. You can set up JDK 17 by following the instructions in the <a href="https://docs.databricks.com/en/dev-tools/sdk-java.html#create-a-cluster-that-uses-jdk-17">Databricks documentation</a>.</p>
-<h3 id="on-databricks-runtime-versions-131-and-above">on Databricks Runtime versions 13.1 and above<a class="headerlink" href="#on-databricks-runtime-versions-131-and-above" title="Permanent link">&para;</a></h3>
-<p>When you create a cluster, specify that the cluster uses JDK 17 for both the driver and executor by adding the following environment variable to <code>Advanced Options &gt; Spark &gt; Environment Variables</code>:</p>
-<div class="highlight"><pre><span></span><code>JNAME=zulu17-ca-amd64
-</code></pre></div>
-<p>If you are using ARM-based clusters (for example, AWS Graviton instances), use the following environment variable instead.</p>
-<div class="highlight"><pre><span></span><code>JNAME=zulu17-ca-arm64
-</code></pre></div>
-<h3 id="on-databricks-runtime-versions-112-130">on Databricks Runtime versions 11.2 - 13.0<a class="headerlink" href="#on-databricks-runtime-versions-112-130" title="Permanent link">&para;</a></h3>
-<p>When you create a cluster, you can specify that the cluster uses JDK 11 (for both the driver and executor). To do this, add the following environment variable to <code>Advanced Options &gt; Spark &gt; Environment Variables</code>:</p>
-<div class="highlight"><pre><span></span><code>JNAME=zulu11-ca-amd64
-</code></pre></div>
-<p>If you are using ARM-based clusters (for example, AWS Graviton instances), use the following environment variable instead.</p>
-<div class="highlight"><pre><span></span><code>JNAME=zulu11-ca-arm64
-</code></pre></div>
 <h2 id="community-edition-free-tier">Community edition (free-tier)<a class="headerlink" href="#community-edition-free-tier" title="Permanent link">&para;</a></h2>
 <p>You just need to install the Sedona jars and Sedona Python on Databricks using Databricks default web UI. Then everything will work.</p>
 <h2 id="advanced-editions">Advanced editions<a class="headerlink" href="#advanced-editions" title="Permanent link">&para;</a></h2>
@@ -4292,7 +4210,7 @@ pydeck==0.8.0
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 8, 2024 05:52:11</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 13, 2024 22:02:10</span>
   </span>
 
     

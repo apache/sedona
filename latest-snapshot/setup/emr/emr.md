@@ -5,43 +5,6 @@ This tutorial is tested on EMR on EC2 with EMR Studio (notebooks). EMR on EC2 us
 !!!note
 	If you are using Spark 3.4+ and Scala 2.12, please use `sedona-spark-shaded-3.4_2.12`. Please pay attention to the Spark version postfix and Scala version postfix.
 
-## JDK 11+ requirement
-
-Sedona 1.6.0+ requires JDK 11+ to run. For Amazon EMR 7.x, the default JVM is Java 17. For Amazon EMR 5.x and 6.x, the default JVM is Java 8 but you can configure the cluster to use Java 11 or Java 17. For more information, see [EMR JVM versions](https://docs.aws.amazon.com/emr/latest/ReleaseGuide/configuring-java8.html#configuring-java8-override-spark).
-
-When you use Spark with Amazon EMR releases 6.12 and higher, if you write a driver for submission in cluster mode, the driver uses Java 8, but you can set the environment so that the executors use Java 11 or 17. To override the JVM for Spark, AWS EMR recommends that you set both the Hadoop and Spark classifications.
-
-However, it is unclear that if the following will work on EMR below 6.12.
-
-```
-{
-"Classification": "hadoop-env",
-        "Configurations": [
-            {
-"Classification": "export",
-                "Configurations": [],
-                "Properties": {
-"JAVA_HOME": "/usr/lib/jvm/java-1.11.0"
-                }
-            }
-        ],
-        "Properties": {}
-    },
-    {
-"Classification": "spark-env",
-        "Configurations": [
-            {
-"Classification": "export",
-                "Configurations": [],
-                "Properties": {
-"JAVA_HOME": "/usr/lib/jvm/java-1.11.0"
-                }
-            }
-        ],
-        "Properties": {}
-    }
-```
-
 ## Prepare initialization script
 
 In your S3 bucket, add a script that has the following content:

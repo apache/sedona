@@ -66,7 +66,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#jdk-11-requirement" class="md-skip">
+        <a href="#prepare-initialization-script" class="md-skip">
           Skip to content
         </a>
       
@@ -1041,15 +1041,6 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#jdk-11-requirement" class="md-nav__link">
-    <span class="md-ellipsis">
-      JDK 11+ requirement
-    </span>
-  </a>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#prepare-initialization-script" class="md-nav__link">
@@ -3904,15 +3895,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#jdk-11-requirement" class="md-nav__link">
-    <span class="md-ellipsis">
-      JDK 11+ requirement
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#prepare-initialization-script" class="md-nav__link">
     <span class="md-ellipsis">
       Prepare initialization script
@@ -3958,37 +3940,6 @@
 <p class="admonition-title">Note</p>
 <p>If you are using Spark 3.4+ and Scala 2.12, please use <code>sedona-spark-shaded-3.4_2.12</code>. Please pay attention to the Spark version postfix and Scala version postfix.</p>
 </div>
-<h2 id="jdk-11-requirement">JDK 11+ requirement<a class="headerlink" href="#jdk-11-requirement" title="Permanent link">&para;</a></h2>
-<p>Sedona 1.6.0+ requires JDK 11+ to run. For Amazon EMR 7.x, the default JVM is Java 17. For Amazon EMR 5.x and 6.x, the default JVM is Java 8 but you can configure the cluster to use Java 11 or Java 17. For more information, see <a href="https://docs.aws.amazon.com/emr/latest/ReleaseGuide/configuring-java8.html#configuring-java8-override-spark">EMR JVM versions</a>.</p>
-<p>When you use Spark with Amazon EMR releases 6.12 and higher, if you write a driver for submission in cluster mode, the driver uses Java 8, but you can set the environment so that the executors use Java 11 or 17. To override the JVM for Spark, AWS EMR recommends that you set both the Hadoop and Spark classifications.</p>
-<p>However, it is unclear that if the following will work on EMR below 6.12.</p>
-<div class="highlight"><pre><span></span><code>{
-&quot;Classification&quot;: &quot;hadoop-env&quot;,
-        &quot;Configurations&quot;: [
-            {
-&quot;Classification&quot;: &quot;export&quot;,
-                &quot;Configurations&quot;: [],
-                &quot;Properties&quot;: {
-&quot;JAVA_HOME&quot;: &quot;/usr/lib/jvm/java-1.11.0&quot;
-                }
-            }
-        ],
-        &quot;Properties&quot;: {}
-    },
-    {
-&quot;Classification&quot;: &quot;spark-env&quot;,
-        &quot;Configurations&quot;: [
-            {
-&quot;Classification&quot;: &quot;export&quot;,
-                &quot;Configurations&quot;: [],
-                &quot;Properties&quot;: {
-&quot;JAVA_HOME&quot;: &quot;/usr/lib/jvm/java-1.11.0&quot;
-                }
-            }
-        ],
-        &quot;Properties&quot;: {}
-    }
-</code></pre></div>
 <h2 id="prepare-initialization-script">Prepare initialization script<a class="headerlink" href="#prepare-initialization-script" title="Permanent link">&para;</a></h2>
 <p>In your S3 bucket, add a script that has the following content:</p>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
@@ -4049,7 +4000,7 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 8, 2024 05:52:11</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 13, 2024 22:02:10</span>
   </span>
 
     
