@@ -32,7 +32,7 @@ import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.distance3d.Distance3DOp
-import org.geotools.api.referencing.FactoryException
+import org.opengis.referencing.FactoryException
 import org.scalatest.{GivenWhenThen, Matchers}
 import org.xml.sax.InputSource
 

@@ -23,7 +23,7 @@ import org.apache.sedona.common.raster.RasterTestBase;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.junit.Test;
-import org.geotools.api.referencing.FactoryException;
+import org.opengis.referencing.FactoryException;
 
 import java.io.File;
 import java.io.IOException;
