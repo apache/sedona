@@ -1,9 +1,5 @@
 This tutorial will guide you through the process of installing Sedona on Microsoft Fabric Synapse Data Engineering's Spark environment.
 
-## JDK 11+ requirement
-
-Sedona 1.6.0+ requires JDK 11+ to run. Microsoft Fabric Synapse Data Engineering 1.2+ uses JDK 11 by default so we recommend using Microsoft Fabric Synapse Data Engineering 1.2+. For more information, see [Apache Spark Runtimes in Fabric](https://learn.microsoft.com/en-us/fabric/data-engineering/runtime).
-
 ## Step 1: Open Microsoft Fabric Synapse Data Engineering
 
 Go to the [Microsoft Fabric portal](https://app.fabric.microsoft.com/) and choose the `Data Engineering` option.
