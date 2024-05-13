@@ -17,7 +17,7 @@ If you prefer to run the steps on your local machine, please read the steps belo
 ## Install necessary software
 
 1. GPG: On Mac `brew install gnupg gnupg2`. You can check in a terminal `gpg --version`.
-2. JDK 1.11. Your Mac might have many different Java versions installed. You can try to use it but not sure if it can pass. You can check in a terminal `java --version`.
+2. JDK 1.8 or 1.11. Your Mac might have many different Java versions installed. You can try to use it but not sure if it can pass. You can check in a terminal `java --version`.
 3. Apache Maven 3.3.1+. On Mac `brew install maven`. You can check it in a terminal `mvn -version`.
 4. Python3 installed on your machine. MacOS comes with Python3 by default. You can check in a terminal `python3 --version`.
 

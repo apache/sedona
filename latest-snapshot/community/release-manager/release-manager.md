@@ -4,13 +4,13 @@ You only need to perform these steps if this is your first time being a release 
 
 ## 0. Software requirement
 
-* JDK 11: `brew install openjdk@11`
-* Maven 3.X. Your Maven must point to JDK 11 (1.11). Check it by `mvn --version`
+* JDK 8: `brew install openjdk@8`
+* Maven 3.X. Your Maven must point to JDK 8 (1.8). Check it by `mvn --version`
 * Git and SVN
 
-If your Maven (`mvn --version`) points to other JDK versions, you must change it to JDK 11. Steps are as follows:
+If your Maven (`mvn --version`) points to other JDK versions, you must change it to JDK 8. Steps are as follows:
 
-1. Find all Java installed on your machine: `/usr/libexec/java_home -V`. You should see multiple JDK versions including JDK 11.
+1. Find all Java installed on your machine: `/usr/libexec/java_home -V`. You should see multiple JDK versions including JDK 8.
 2. Run `whereis mvn` to get the installation location of your Maven. The result is a symlink to the actual location.
 3. Open it in the terminal (with `sudo` if needed). It will be like this
 
@@ -19,14 +19,14 @@ If your Maven (`mvn --version`) points to other JDK versions, you must change it
 JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home)}" exec "/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn" "$@"
 ```
 
-4. Change `JAVA_HOME:-$(/usr/libexec/java_home)}` to `JAVA_HOME:-$(/usr/libexec/java_home -v 1.11)}`.  The resulting content will be like this:
+4. Change `JAVA_HOME:-$(/usr/libexec/java_home)}` to `JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}`.  The resulting content will be like this:
 
 ```
 #!/bin/bash
-JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 1.11)}" exec "/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn" "$@"
+JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}" exec "/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn" "$@"
 ```
 
-5. Run `mvn --version` again. It should now point to JDK 11.
+5. Run `mvn --version` again. It should now point to JDK 8.
 
 ## 1. Obtain Write Access to Sedona GitHub repo
 

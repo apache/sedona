@@ -1,4 +1,4 @@
-Sedona Flink binary releases are compiled by Java 1.11 and Scala 2.12, and tested in the following environments:
+Sedona Flink binary releases are compiled by Java 1.8 and Scala 2.12, and tested in the following environments:
 
 === "Sedona Scala/Java"
 

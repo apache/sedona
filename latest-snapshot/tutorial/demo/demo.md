@@ -18,7 +18,7 @@ The folder structure of this repository is as follows.
 Please make sure you have the following software installed on your local machine:
 
 * For Scala: Scala 2.12
-* For Java: JDK 1.11, Apache Maven 3
+* For Java: JDK 1.8, Apache Maven 3
 
 ### Compile
 
