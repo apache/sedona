@@ -149,6 +149,7 @@ public class Catalog {
                 new Functions.ST_MakePolygon(),
                 new Functions.ST_MakeValid(),
                 new Functions.ST_MaxDistance(),
+                new Functions.ST_MinimumClearance(),
                 new Functions.ST_MinimumBoundingCircle(),
                 new Functions.ST_MinimumBoundingRadius(),
                 new Functions.ST_Multi(),

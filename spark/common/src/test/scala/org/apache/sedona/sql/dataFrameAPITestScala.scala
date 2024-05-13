@@ -1014,6 +1014,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_MinimumClearance") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))') as geom")
+      val actual = baseDf.select(ST_MinimumClearance("geom")).first().get(0)
+      val expected = 0.5
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_MinimumBoundingCircle with default quadrantSegments") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom")
       val df = baseDf.select(ST_MinimumBoundingCircle("geom").as("geom")).selectExpr("ST_ReducePrecision(geom, 2)")

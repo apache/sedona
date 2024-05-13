@@ -756,6 +756,13 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"})
+    public static Double ST_MinimumClearance(String geometry) throws IOException {
+        return Functions.minimumClearance(
+                GeometrySerde.deserGeoJson(geometry)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "quadrantSegments"}, argTypes = {"Geometry", "int"}, returnTypes = "Geometry")
     public static String ST_MinimumBoundingCircle(String geometry, int quadrantSegments) {
         return GeometrySerde.serGeoJson(

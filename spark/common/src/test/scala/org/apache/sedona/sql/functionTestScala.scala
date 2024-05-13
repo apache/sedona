@@ -1669,6 +1669,13 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     assert(newY == oldX)
   }
 
+  it("Should pass ST_MinimumClearance") {
+    val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))') as geom")
+    val actual = baseDf.selectExpr("ST_MinimumClearance(geom)").first().get(0)
+    val expected = 0.5
+    assertEquals(expected, actual)
+  }
+
   it("Should pass ST_MinimumBoundingCircle") {
     Given("Sample geometry data frame")
     val geometryTable = Seq(

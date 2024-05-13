@@ -43,6 +43,7 @@ import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.operation.valid.TopologyValidationError;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
+import org.locationtech.jts.precision.MinimumClearance;
 import org.locationtech.jts.simplify.PolygonHullSimplifier;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.locationtech.jts.simplify.VWSimplifier;
@@ -861,6 +862,10 @@ public class Functions {
         double radius = minimumBoundingCircle.getRadius();
         Point centre = GEOMETRY_FACTORY.createPoint(coods);
         return Pair.of(centre, radius);
+    }
+
+    public static double minimumClearance(Geometry geometry) {
+        return MinimumClearance.getDistance(geometry);
     }
 
     public static Geometry lineSubString(Geometry geom, double fromFraction, double toFraction) {

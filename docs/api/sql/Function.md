@@ -2484,6 +2484,35 @@ Output:
 36.05551275463989
 ```
 
+## ST_MinimumClearance
+
+Introduction: The minimum clearance is a metric that quantifies a geometry's tolerance to changes in coordinate precision or vertex positions. It represents the maximum distance by which vertices can be adjusted without introducing invalidity to the geometry's structure. A larger minimum clearance value indicates greater robustness against such perturbations.
+
+For a geometry with a minimum clearance of `x`, the following conditions hold:
+
+- No two distinct vertices are separated by a distance less than `x`.
+- No vertex lies within a distance `x` from any line segment it is not an endpoint of.
+
+For geometries with no definable minimum clearance, such as single Point geometries or MultiPoint geometries where all points occupy the same location, the function returns `Double.MAX_VALUE`.
+
+Format: `ST_MinimumClearance(geometry: Geometry)`
+
+Since: `vTBD`
+
+SQL Example
+
+```sql
+SELECT ST_MinimumClearance(
+        ST_GeomFromWKT('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))')
+)
+```
+
+Output:
+
+```
+0.5
+```
+
 ## ST_MinimumBoundingCircle
 
 Introduction: Returns the smallest circle polygon that contains a geometry. The optional quadrantSegments parameter determines how many segments to use per quadrant and the default number of segments has been changed to 48 since v1.5.0.

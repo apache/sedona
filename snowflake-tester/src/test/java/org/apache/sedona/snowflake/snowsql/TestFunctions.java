@@ -673,6 +673,16 @@ public class TestFunctions extends TestBase {
                 "MULTIPOLYGON (((1 5, 3 3, 1 1, 1 5)), ((5 3, 7 5, 7 1, 5 3)))"
         );
     }
+
+    @Test
+    public void test_ST_MinimumClearance() {
+        registerUDF("ST_MinimumClearance", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_MinimumClearance(sedona.ST_GeomFromText('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))'))",
+                0.5
+        );
+    }
+
     @Test
     public void test_ST_MinimumBoundingCircle() {
         registerUDF("ST_MinimumBoundingCircle", byte[].class, int.class);

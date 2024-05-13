@@ -1086,6 +1086,14 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testMinimumClearance() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))') as geom");
+        Double actual = (Double) first(table.select(call(Functions.ST_MinimumClearance.class.getSimpleName(), $("geom")))).getField(0);
+        Double expected = 0.5;
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testMinimumBoundingCircle() {
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS geom");
         table = table.select(call(Functions.ST_MinimumBoundingCircle.class.getSimpleName(), $("geom")));

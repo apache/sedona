@@ -642,6 +642,11 @@ class TestPredicateJoin(TestBase):
 
         assert (empty_dataframe.count() == 0)
 
+    def test_st_minimum_clearance(self):
+        baseDf = self.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))') as geom")
+        actual = baseDf.selectExpr("ST_MinimumClearance(geom)").take(1)[0][0]
+        assert actual == 0.5
+
     def test_st_boundary(self):
         wkt_list = [
             "LINESTRING(1 1,0 0, -1 1)",
