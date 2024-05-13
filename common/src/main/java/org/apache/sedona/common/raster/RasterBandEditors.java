@@ -25,9 +25,9 @@ import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.processing.operation.Crop;
 import org.locationtech.jts.geom.Geometry;
-import org.geotools.api.parameter.ParameterValueGroup;
-import org.geotools.api.referencing.FactoryException;
-import org.geotools.api.referencing.operation.TransformException;
+import org.opengis.parameter.ParameterValueGroup;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.RasterFactory;
 import java.awt.geom.Point2D;

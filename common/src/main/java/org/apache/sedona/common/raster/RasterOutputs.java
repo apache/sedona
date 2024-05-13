@@ -25,9 +25,9 @@ import org.geotools.gce.arcgrid.ArcGridWriteParams;
 import org.geotools.gce.arcgrid.ArcGridWriter;
 import org.geotools.gce.geotiff.GeoTiffWriteParams;
 import org.geotools.gce.geotiff.GeoTiffWriter;
-import org.geotools.api.coverage.grid.GridCoverageWriter;
-import org.geotools.api.parameter.GeneralParameterValue;
-import org.geotools.api.parameter.ParameterValueGroup;
+import org.opengis.coverage.grid.GridCoverageWriter;
+import org.opengis.parameter.GeneralParameterValue;
+import org.opengis.parameter.ParameterValueGroup;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;

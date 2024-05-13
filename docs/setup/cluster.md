@@ -5,7 +5,7 @@ Download a Spark distribution from [Spark download page](http://spark.apache.org
 ## Preliminary
 
 1. Set up a password-less SSH on your cluster. Each master-worker pair should have bidirectional password-less SSH.
-2. Make sure you have installed JRE 1.11 or later.
+2. Make sure you have installed JRE 1.8 or later.
 3. Add the list of your workers' IP address in ./conf/slaves
 4. Besides the necessary Spark settings, you may need to add the following lines in the Spark configuration files to avoid Sedona memory errors:
 

@@ -27,8 +27,8 @@ import org.junit.Test;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.operation.buffer.BufferParameters;
-import org.geotools.api.referencing.FactoryException;
-import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import scala.collection.immutable.Stream;
 
 import java.util.Arrays;

@@ -24,8 +24,8 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
-import org.geotools.api.referencing.FactoryException;
-import org.geotools.api.referencing.operation.TransformException;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 import java.io.IOException;
 import java.util.Arrays;

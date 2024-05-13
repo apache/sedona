@@ -34,19 +34,20 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
-import org.geotools.geometry.Position2D;
+import org.geotools.geometry.DirectPosition2D;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.util.ClassChanger;
 import org.geotools.util.NumberRange;
 import org.locationtech.jts.geom.Geometry;
-import org.geotools.api.coverage.grid.GridEnvelope;
-import org.geotools.api.metadata.spatial.PixelOrientation;
-import org.geotools.api.referencing.FactoryException;
-import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
-import org.geotools.api.referencing.operation.MathTransform;
-import org.geotools.api.referencing.operation.TransformException;
-import org.geotools.api.util.InternationalString;
+import org.opengis.coverage.grid.GridEnvelope;
+import org.opengis.geometry.DirectPosition;
+import org.opengis.metadata.spatial.PixelOrientation;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
+import org.opengis.util.InternationalString;
 
 import javax.media.jai.RasterFactory;
 import javax.media.jai.RenderedImageAdapter;
@@ -417,9 +418,9 @@ public class RasterUtils {
         return raster.getGridGeometry().getGridToCRS2D(PixelOrientation.UPPER_LEFT).transform(gridCoordinates2D, null);
     }
     public static int[] getGridCoordinatesFromWorld(GridCoverage2D raster, double longitude, double latitude) throws TransformException {
-        Point2D directPosition2D = new Position2D(raster.getCoordinateReferenceSystem2D(), longitude, latitude);
-        Point2D worldCoord = raster.getGridGeometry().getCRSToGrid2D(PixelOrientation.UPPER_LEFT).transform(directPosition2D, null);
-        double[] coords = new double[] {worldCoord.getX(), worldCoord.getY()};
+        DirectPosition2D directPosition2D = new DirectPosition2D(raster.getCoordinateReferenceSystem2D(), longitude, latitude);
+        DirectPosition worldCoord = raster.getGridGeometry().getCRSToGrid2D(PixelOrientation.UPPER_LEFT).transform((DirectPosition) directPosition2D, null);
+        double[] coords = worldCoord.getCoordinate();
         int[] gridCoords = new int[] {(int) Math.floor(coords[0]), (int) Math.floor(coords[1])};
         return gridCoords;
     }

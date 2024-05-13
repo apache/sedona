@@ -27,6 +27,7 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.gce.arcgrid.ArcGridReader;
 import org.geotools.gce.geotiff.GeoTiffReader;
+import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.vector.VectorToRasterProcess;
@@ -35,13 +36,13 @@ import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.util.factory.Hints;
 import org.locationtech.jts.geom.Geometry;
-import org.geotools.api.feature.simple.SimpleFeature;
-import org.geotools.api.feature.simple.SimpleFeatureType;
-import org.geotools.api.metadata.spatial.PixelOrientation;
-import org.geotools.api.referencing.FactoryException;
-import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
-import org.geotools.api.referencing.datum.PixelInCell;
-import org.geotools.api.referencing.operation.MathTransform;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.metadata.spatial.PixelOrientation;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.datum.PixelInCell;
+import org.opengis.referencing.operation.MathTransform;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFiles;
 
@@ -175,25 +176,26 @@ public class RasterConstructors
             throw new IllegalArgumentException(String.format("SkewY %d of the raster is not zero.", metadata[7]));
         }
 
-        ReferencedEnvelope bound = null;
+        Envelope2D bound = null;
 
         if (useGeometryExtent) {
-            bound = ReferencedEnvelope.envelope(geom.getEnvelopeInternal(), raster.getCoordinateReferenceSystem2D());
+            bound = JTS.getEnvelope2D(geom.getEnvelopeInternal(), raster.getCoordinateReferenceSystem2D());
         } else {
-            bound = ReferencedEnvelope.create(raster.getEnvelope(), raster.getCoordinateReferenceSystem());
+            ReferencedEnvelope envelope = ReferencedEnvelope.create(raster.getEnvelope(), raster.getCoordinateReferenceSystem());
+            bound = JTS.getEnvelope2D(envelope, raster.getCoordinateReferenceSystem2D());
         }
 
         double scaleX = Math.abs(metadata[4]), scaleY = Math.abs(metadata[5]);
         int width = (int) bound.getWidth(), height = (int) bound.getHeight();
         if (width == 0 && height == 0) {
-            bound = ReferencedEnvelope.rect(bound.getCenterX() - scaleX * 0.5, bound.getCenterY() - scaleY * 0.5, scaleX, scaleY, bound.getCoordinateReferenceSystem());
+            bound = new Envelope2D(bound.getCoordinateReferenceSystem(), bound.getCenterX() - scaleX * 0.5, bound.getCenterY() - scaleY * 0.5, scaleX, scaleY);
             width = 1;
             height = 1;
         } else if (height == 0) {
-            bound = ReferencedEnvelope.rect(bound.getCenterX() - scaleX * 0.5, bound.getCenterY() - scaleY * 0.5, width, scaleY, bound.getCoordinateReferenceSystem());
+            bound = new Envelope2D(bound.getCoordinateReferenceSystem(), bound.getCenterX() - scaleX * 0.5, bound.getCenterY() - scaleY * 0.5, width, scaleY);
             height = 1;
         } else if (width == 0) {
-            bound = ReferencedEnvelope.rect(bound.getCenterX() - scaleX * 0.5, bound.getCenterY() - scaleY * 0.5, scaleX, height, bound.getCoordinateReferenceSystem());
+            bound = new Envelope2D(bound.getCoordinateReferenceSystem(), bound.getCenterX() - scaleX * 0.5, bound.getCenterY() - scaleY * 0.5, scaleX, height);
             width = 1;
         } else {
             // To preserve scale of reference raster
