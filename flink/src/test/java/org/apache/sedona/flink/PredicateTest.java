@@ -13,23 +13,17 @@
  */
 package org.apache.sedona.flink;
 
-import org.apache.calcite.runtime.Geometries;
 import org.apache.flink.table.api.Table;
-import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.flink.expressions.Predicates;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
-import static org.junit.Assert.assertThrows;
 
 public class PredicateTest extends TestBase{
 
-    private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
     @BeforeClass
     public static void onceExecutedBeforeAll() {
         initialize();
@@ -39,8 +33,9 @@ public class PredicateTest extends TestBase{
     public void testIntersects() {
         Table pointTable = createPointTable(testDataSize);
         String polygon = createPolygonWKT(testDataSize).get(0).getField(0).toString();
-        String expr = "ST_Intersects(ST_GeomFromWkt('" + polygon + "'), geom_point)";
-        Table result = pointTable.filter(expr);
+        Table result = pointTable.filter(
+            call("ST_Intersects",
+                call("ST_GeomFromWkt", polygon), $("geom_point")));
         assertEquals(1, count(result));
     }
 
@@ -48,8 +43,9 @@ public class PredicateTest extends TestBase{
     public void testDisjoint() {
         Table pointTable = createPointTable(testDataSize);
         String polygon = createPolygonWKT(testDataSize).get(0).getField(0).toString();
-        String expr = "ST_Disjoint(ST_GeomFromWkt('" + polygon + "'), geom_point)";
-        Table result = pointTable.filter(expr);
+        Table result = pointTable.filter(
+            call("ST_Disjoint",
+                call("ST_GeomFromWkt", polygon), $("geom_point")));
         assertEquals(999, count(result));
     }
 
@@ -57,8 +53,9 @@ public class PredicateTest extends TestBase{
     public void testContains() {
         Table pointTable = createPointTable(testDataSize);
         String polygon = createPolygonWKT(testDataSize).get(0).getField(0).toString();
-        String expr = "ST_Contains(ST_GeomFromWkt('" + polygon + "'), geom_point)";
-        Table result = pointTable.filter(expr);
+        Table result = pointTable.filter(
+            call("ST_Contains",
+                call("ST_GeomFromWkt", polygon), $("geom_point")));
         assertEquals(1, count(result));
     }
 
@@ -66,8 +63,9 @@ public class PredicateTest extends TestBase{
     public void testWithin() {
         Table pointTable = createPointTable(testDataSize);
         String polygon = createPolygonWKT(testDataSize).get(0).getField(0).toString();
-        String expr = "ST_Within(geom_point, ST_GeomFromWkt('" + polygon + "'))";
-        Table result = pointTable.filter(expr);
+        Table result = pointTable.filter(
+            call("ST_Within", $("geom_point"),
+                call("ST_GeomFromWkt", polygon)));
         assertEquals(1, count(result));
     }
 
@@ -75,8 +73,9 @@ public class PredicateTest extends TestBase{
     public void testCovers() {
         Table pointTable = createPointTable(testDataSize);
         String polygon = createPolygonWKT(testDataSize).get(0).getField(0).toString();
-        String expr = "ST_Covers(ST_GeomFromWkt('" + polygon + "'), geom_point)";
-        Table result = pointTable.filter(expr);
+        Table result = pointTable.filter(
+            call("ST_Covers",
+                call("ST_GeomFromWkt", polygon), $("geom_point")));
         assertEquals(1, count(result));
     }
 
@@ -84,8 +83,9 @@ public class PredicateTest extends TestBase{
     public void testCoveredBy() {
         Table pointTable = createPointTable(testDataSize);
         String polygon = createPolygonWKT(testDataSize).get(0).getField(0).toString();
-        String expr = "ST_CoveredBy(geom_point, ST_GeomFromWkt('" + polygon + "'))";
-        Table result = pointTable.filter(expr);
+        Table result = pointTable.filter(
+            call("ST_CoveredBy", $("geom_point"),
+                call("ST_GeomFromWkt", polygon)));
         assertEquals(1, count(result));
     }
 
@@ -109,8 +109,9 @@ public class PredicateTest extends TestBase{
     public void testOrderingEquals() {
         Table lineStringTable = createLineStringTable(testDataSize);
         String lineString = createLineStringWKT(testDataSize).get(0).getField(0).toString();
-        String expr = "ST_OrderingEquals(ST_GeomFromWkt('" + lineString + "'), geom_linestring)";
-        Table result = lineStringTable.filter(expr);
+        Table result = lineStringTable.filter(
+            call("ST_OrderingEquals",
+                call("ST_GeomFromWkt", lineString), $("geom_linestring")));
         assertEquals(1, count(result));
     }
 
