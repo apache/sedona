@@ -525,7 +525,7 @@
                         <failOnWarning>false</failOnWarning>
                         <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
                         <testSourceDirectory>${project.basedir}/src/test/scala</testSourceDirectory>
-                        <configLocation>${project.basedir}/../scalastyle_config.xml</configLocation>
+                        <configLocation>tools/maven/scalastyle_config.xml</configLocation>
                         <outputFile>${project.basedir}/target/scalastyle-output.xml</outputFile>
                         <outputEncoding>UTF-8</outputEncoding>
                     </configuration>
