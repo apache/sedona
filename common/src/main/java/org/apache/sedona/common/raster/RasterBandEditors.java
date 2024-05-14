@@ -25,9 +25,9 @@ import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.processing.operation.Crop;
 import org.locationtech.jts.geom.Geometry;
-import org.geotools.api.parameter.ParameterValueGroup;
-import org.geotools.api.referencing.FactoryException;
-import org.geotools.api.referencing.operation.TransformException;
+import org.opengis.parameter.ParameterValueGroup;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.RasterFactory;
 import java.awt.geom.Point2D;
@@ -135,16 +135,16 @@ public class RasterBandEditors {
         if (RasterUtils.isDataTypeIntegral(dataTypeCode)) {
             int[] bandValues = rasterData.getSamples(0, 0, width, height, fromBand - 1, (int[]) null);
             if (numBands + 1 == toRasterIndex) {
-                return RasterUtils.copyRasterAndAppendBand(toRaster, Arrays.stream(bandValues).boxed().toArray(Integer[]::new), noDataValue);
+                return RasterUtils.copyRasterAndAppendBand(toRaster, bandValues, noDataValue);
             } else {
-                return RasterUtils.copyRasterAndReplaceBand(toRaster, fromBand, Arrays.stream(bandValues).boxed().toArray(Integer[]::new), noDataValue, false);
+                return RasterUtils.copyRasterAndReplaceBand(toRaster, fromBand, bandValues, noDataValue, false);
             }
         } else {
             double[] bandValues = rasterData.getSamples(0, 0, width, height, fromBand - 1, (double[]) null);
             if (numBands + 1 == toRasterIndex) {
-                return RasterUtils.copyRasterAndAppendBand(toRaster, Arrays.stream(bandValues).boxed().toArray(Double[]::new), noDataValue);
+                return RasterUtils.copyRasterAndAppendBand(toRaster, bandValues, noDataValue);
             } else {
-                return RasterUtils.copyRasterAndReplaceBand(toRaster, fromBand, Arrays.stream(bandValues).boxed().toArray(Double[]::new), noDataValue, false);
+                return RasterUtils.copyRasterAndReplaceBand(toRaster, fromBand, bandValues, noDataValue, false);
             }
         }
     }
@@ -169,6 +169,43 @@ public class RasterBandEditors {
      */
     public static GridCoverage2D addBand(GridCoverage2D toRaster, GridCoverage2D fromRaster) {
         return addBand(toRaster, fromRaster, 1);
+    }
+
+    public static GridCoverage2D rasterUnion(GridCoverage2D raster1, GridCoverage2D raster2, GridCoverage2D raster3, GridCoverage2D raster4, GridCoverage2D raster5, GridCoverage2D raster6, GridCoverage2D raster7) {
+        return rasterUnion(rasterUnion(raster1, raster2, raster3, raster4, raster5, raster6), raster7);
+    }
+
+    public static GridCoverage2D rasterUnion(GridCoverage2D raster1, GridCoverage2D raster2, GridCoverage2D raster3, GridCoverage2D raster4, GridCoverage2D raster5, GridCoverage2D raster6) {
+        return rasterUnion(rasterUnion(raster1, raster2, raster3, raster4, raster5), raster6);
+    }
+    public static GridCoverage2D rasterUnion(GridCoverage2D raster1, GridCoverage2D raster2, GridCoverage2D raster3, GridCoverage2D raster4, GridCoverage2D raster5) {
+        return rasterUnion(rasterUnion(raster1, raster2, raster3, raster4), raster5);
+    }
+
+    public static GridCoverage2D rasterUnion(GridCoverage2D raster1, GridCoverage2D raster2, GridCoverage2D raster3, GridCoverage2D raster4) {
+        return rasterUnion(rasterUnion(raster1, raster2, raster3), raster4);
+    }
+
+    public static GridCoverage2D rasterUnion(GridCoverage2D raster1, GridCoverage2D raster2, GridCoverage2D raster3) {
+        return rasterUnion(rasterUnion(raster1, raster2), raster3);
+    }
+
+    public static GridCoverage2D rasterUnion(GridCoverage2D raster1, GridCoverage2D raster2) {
+        // Ensure both rasters have the same dimensions
+        RasterUtils.isRasterSameShape(raster1, raster2);
+
+        int numBands1 = RasterAccessors.numBands(raster1);
+        int numBands2 = RasterAccessors.numBands(raster2);
+
+        // Start with raster1 as the initial result
+        GridCoverage2D result = raster1;
+
+        // Append each band from raster2 to the result
+        for (int bandIndex = 1; bandIndex <= numBands2; bandIndex++) {
+            result = addBand(result, raster2, bandIndex);
+        }
+
+        return result;
     }
 
     /**

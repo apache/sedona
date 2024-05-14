@@ -5,11 +5,13 @@ on:
       - master
     paths:
       - 'examples/**'
+      - '.github/workflows/example.yml'
   pull_request:
     branches:
       - '*'
     paths:
       - 'examples/**'
+      - '.github/workflows/example.yml'
 
 permissions:
   contents: read

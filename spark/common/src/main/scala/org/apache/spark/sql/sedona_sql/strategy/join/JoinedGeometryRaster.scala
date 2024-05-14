@@ -20,13 +20,14 @@ package org.apache.spark.sql.sedona_sql.strategy.join
 
 import org.apache.sedona.common.FunctionsGeoTools
 import org.apache.sedona.common.utils.{CachedCRSTransformFinder, GeomUtils}
-import org.geotools.api.geometry.{BoundingBox, Bounds}
 import org.geotools.coverage.grid.GridCoverage2D
-import org.geotools.geometry.jts.{JTS, ReferencedEnvelope}
+import org.geotools.geometry.Envelope2D
+import org.geotools.geometry.jts.JTS
 import org.geotools.referencing.CRS
 import org.geotools.referencing.crs.{DefaultEngineeringCRS, DefaultGeographicCRS}
 import org.locationtech.jts.geom.{Envelope, Geometry}
-import org.geotools.api.referencing.crs.{CoordinateReferenceSystem, GeographicCRS}
+import org.opengis.geometry.BoundingBox
+import org.opengis.referencing.crs.{CoordinateReferenceSystem, GeographicCRS}
 
 object JoinedGeometryRaster {
   /**
@@ -57,13 +58,13 @@ object JoinedGeometryRaster {
       geom
     } else {
       val env = geom.getEnvelopeInternal
-      val envelope = ReferencedEnvelope.rect(env.getMinX, env.getMinY, env.getWidth, env.getHeight, null)
+      val envelope = new Envelope2D(null, env.getMinX, env.getMinY, env.getWidth, env.getHeight)
       val crs = FunctionsGeoTools.sridToCRS(srid)
       transformToWGS84Envelope(envelope, crs)
     }
   }
 
-  private def transformToWGS84Envelope(envelope: Bounds, crs: CoordinateReferenceSystem): Geometry = {
+  private def transformToWGS84Envelope(envelope: org.opengis.geometry.Envelope, crs: CoordinateReferenceSystem): Geometry = {
     // We use CRS.transform for envelopes to transform envelopes between different CRSs. This transformation function
     // could handle envelope crossing the anti-meridian and envelope near or covering poles correctly. We won't have
     // these cases properly handled if we transform the original geometries using JTS.transform.

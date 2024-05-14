@@ -1,7 +1,9 @@
 # Work with GeoPandas and Shapely
 
-!!!danger
-	Sedona < 1.6.0 only works with Shapely 1.x and GeoPandas <= `0.11.1`. If you want to use the latest Shapely and GeoPandas, please use Sedona >= 1.6.0.
+!!! note
+	Sedona before 1.6.0 only works with Shapely 1.x. If you want to work with Shapely 2.x, please use Sedona no earlier than 1.6.0.
+
+    If you use Sedona < 1.6.0, please use GeoPandas <= `0.11.1` since GeoPandas > 0.11.1 will automatically install Shapely 2.0. If you use Shapely, please use <= `1.8.5`.
 
 ## Interoperate with GeoPandas
 

@@ -81,7 +81,7 @@ public class DDLGenerator {
             }
             stageName = "";
             System.out.println("-- Generating DDL for Snowflake Native App");
-            System.out.println("CREATE APPLICATION ROLE " + appRoleName + ";");
+            System.out.println("CREATE APPLICATION ROLE IF NOT EXISTS " + appRoleName + ";");
             System.out.println("CREATE OR ALTER VERSIONED SCHEMA sedona;");
             System.out.println("GRANT USAGE ON SCHEMA sedona TO APPLICATION ROLE " + appRoleName + ";");
         }

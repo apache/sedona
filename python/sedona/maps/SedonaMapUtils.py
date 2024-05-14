@@ -15,8 +15,6 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-
-import geopandas as gpd
 import json
 from sedona.sql.types import GeometryType
 
@@ -38,6 +36,11 @@ class SedonaMapUtils:
         pandas_df = df.toPandas()
         if geometry_col is None:  # No geometry column found even after searching schema, return Pandas Dataframe
             return pandas_df
+        try:
+            import geopandas as gpd
+        except ImportError:
+            msg = "GeoPandas is missing. You can install it manually or via sedona[kepler-map] or sedona[pydeck-map]."
+            raise ImportError(msg) from None
         geo_df = gpd.GeoDataFrame(pandas_df, geometry=geometry_col)
         if geometry_col != "geometry" and rename is True:
             geo_df.rename_geometry("geometry", inplace=True)

@@ -15,8 +15,8 @@ package org.apache.sedona.flink.expressions;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.locationtech.jts.geom.Geometry;
-import org.geotools.api.referencing.FactoryException;
-import org.geotools.api.referencing.operation.TransformException;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 
 public class FunctionsGeoTools {

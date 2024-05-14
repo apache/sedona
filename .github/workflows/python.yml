@@ -10,6 +10,7 @@ on:
       - 'spark-shaded/**'
       - 'pom.xml'
       - 'python/**'
+      - '.github/workflows/python.yml'
   pull_request:
     branches:
       - '*'
@@ -19,6 +20,7 @@ on:
       - 'spark-shaded/**'
       - 'pom.xml'
       - 'python/**'
+      - '.github/workflows/python.yml'
 
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
@@ -97,7 +99,7 @@ jobs:
     - uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
-        java-version: '11'
+        java-version: '8'
     - uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python }}
