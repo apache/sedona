@@ -12,6 +12,7 @@ on:
       - 'flink-shaded/**'
       - 'snowflake/**'
       - 'pom.xml'
+      - '.github/workflows/java.yml'
   pull_request:
     branches:
       - '*'
@@ -23,6 +24,7 @@ on:
       - 'flink-shaded/**'
       - 'snowflake/**'
       - 'pom.xml'
+      - '.github/workflows/java.yml'
 
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
