@@ -10,6 +10,7 @@ on:
       - 'spark-shaded/**'
       - 'pom.xml'
       - 'python/**'
+      - '.github/workflows/python.yml'
   pull_request:
     branches:
       - '*'
@@ -19,6 +20,7 @@ on:
       - 'spark-shaded/**'
       - 'pom.xml'
       - 'python/**'
+      - '.github/workflows/python.yml'
 
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
