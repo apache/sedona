@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.apache.sedona.common.raster.RasterBandEditors.rasterUnion;
 import static org.junit.Assert.*;
 
 public class RasterBandEditorsTest extends RasterTestBase{
@@ -228,6 +229,87 @@ public class RasterBandEditorsTest extends RasterTestBase{
         actualValues = PixelFunctions.values(croppedRaster, points, 1).toArray(new Double[0]);
         expectedValues = new Double[] {0.0, 0.0, 0.0, 0.0, null};
         assertTrue(Arrays.equals(expectedValues, actualValues));
+    }
+
+    @Test
+    public void testRasterUnion() throws FactoryException {
+        double[][] rasterData1 = new double[][] {
+                {13, 80, 49, 15, 4, 46, 47, 94, 58, 37, 6, 22, 98, 26, 78, 66, 86, 79, 5, 65, 7, 12, 89, 67},
+                {37, 4, 5, 15, 60, 83, 24, 19, 23, 87, 98, 89, 59, 71, 42, 46, 0, 80, 27, 73, 66, 100, 78, 64},
+                {73, 39, 50, 13, 45, 21, 87, 38, 63, 22, 44, 6, 8, 24, 19, 10, 89, 3, 48, 28, 0, 71, 59, 11}
+        };
+        GridCoverage2D raster1 = RasterConstructors.makeNonEmptyRaster(3, "i", 4, 6, 1, -1, 1, -1, 0, 0, 0, rasterData1);
+
+        double[][] rasterData2 = new double[][] {
+                {35, 68, 56, 87, 49, 20, 73, 90, 45, 96, 52, 98, 2, 82, 88, 74, 77, 60, 5, 61, 81, 32, 9, 15},
+                {55, 49, 72, 10, 63, 94, 100, 83, 61, 47, 20, 15, 34, 46, 52, 11, 23, 98, 70, 67, 18, 39, 53, 91}
+        };
+        GridCoverage2D raster2 = RasterConstructors.makeNonEmptyRaster(2, "d", 4, 6, 1, -1, 1, -1, 0, 0, 0, rasterData2);
+
+        GridCoverage2D result = rasterUnion(raster1, raster2);
+        int actualNumBands = RasterAccessors.numBands(result);
+        int expectedNumBands = 5;
+        assertEquals(expectedNumBands, actualNumBands);
+
+        double[] actualBandValues = MapAlgebra.bandAsArray(result, 5);
+        double[] expectedBandValues = MapAlgebra.bandAsArray(raster2, 2);
+        assertArrayEquals(expectedBandValues, actualBandValues, 0.1d);
+
+        double[] actualMetadata = Arrays.stream(RasterAccessors.metadata(result), 0, 9).toArray();
+        double[] expectedMetadata = Arrays.stream(RasterAccessors.metadata(raster2), 0, 9).toArray();
+        assertArrayEquals(expectedMetadata, actualMetadata, 0.1d);
+
+        result = rasterUnion(raster1, raster2, raster1);
+        actualNumBands = RasterAccessors.numBands(result);
+        expectedNumBands = 8;
+        assertEquals(expectedNumBands, actualNumBands);
+
+        actualBandValues = MapAlgebra.bandAsArray(result, 7);
+        expectedBandValues = MapAlgebra.bandAsArray(raster1, 2);
+        assertArrayEquals(expectedBandValues, actualBandValues, 0.1d);
+
+        actualMetadata = Arrays.stream(RasterAccessors.metadata(result), 0, 9).toArray();
+        expectedMetadata = Arrays.stream(RasterAccessors.metadata(raster2), 0, 9).toArray();
+        assertArrayEquals(expectedMetadata, actualMetadata, 0.1d);
+
+        result = rasterUnion(raster1, raster2, raster1, raster2);
+        actualNumBands = RasterAccessors.numBands(result);
+        expectedNumBands = 10;
+        assertEquals(expectedNumBands, actualNumBands);
+
+        actualBandValues = MapAlgebra.bandAsArray(result, 9);
+        expectedBandValues = MapAlgebra.bandAsArray(raster2, 1);
+        assertArrayEquals(expectedBandValues, actualBandValues, 0.1d);
+
+        actualMetadata = Arrays.stream(RasterAccessors.metadata(result), 0, 9).toArray();
+        expectedMetadata = Arrays.stream(RasterAccessors.metadata(raster2), 0, 9).toArray();
+        assertArrayEquals(expectedMetadata, actualMetadata, 0.1d);
+
+        result = rasterUnion(raster1, raster2, raster1, raster2, raster1);
+        actualNumBands = RasterAccessors.numBands(result);
+        expectedNumBands = 13;
+        assertEquals(expectedNumBands, actualNumBands);
+
+        actualBandValues = MapAlgebra.bandAsArray(result, 13);
+        expectedBandValues = MapAlgebra.bandAsArray(raster1, 3);
+        assertArrayEquals(expectedBandValues, actualBandValues, 0.1d);
+
+        actualMetadata = Arrays.stream(RasterAccessors.metadata(result), 0, 9).toArray();
+        expectedMetadata = Arrays.stream(RasterAccessors.metadata(raster2), 0, 9).toArray();
+        assertArrayEquals(expectedMetadata, actualMetadata, 0.1d);
+
+        result = rasterUnion(raster1, raster2, raster1, raster2, raster1, raster2);
+        actualNumBands = RasterAccessors.numBands(result);
+        expectedNumBands = 15;
+        assertEquals(expectedNumBands, actualNumBands);
+
+        actualBandValues = MapAlgebra.bandAsArray(result, 14);
+        expectedBandValues = MapAlgebra.bandAsArray(raster2, 1);
+        assertArrayEquals(expectedBandValues, actualBandValues, 0.1d);
+
+        actualMetadata = Arrays.stream(RasterAccessors.metadata(result), 0, 9).toArray();
+        expectedMetadata = Arrays.stream(RasterAccessors.metadata(raster2), 0, 9).toArray();
+        assertArrayEquals(expectedMetadata, actualMetadata, 0.1d);
     }
 
     @Test

@@ -10,6 +10,7 @@ on:
       - 'spark-shaded/**'
       - 'pom.xml'
       - 'python/**'
+      - '.github/workflows/python-wheel.yml'
   pull_request:
     branches:
       - '*'

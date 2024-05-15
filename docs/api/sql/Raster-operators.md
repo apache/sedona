@@ -348,6 +348,8 @@ Provided band index 3 does not lie in the raster
 
 Introduction: Returns the georeference metadata of raster as a string in GDAL or ESRI format. Default is GDAL if not specified.
 
+For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
+
 !!!note
     If you are using `show()` to display the output, it will show special characters as escape sequences. To get the expected behavior use the following code:
 
@@ -585,11 +587,14 @@ Output:
 ### RS_ScaleX
 
 Introduction: Returns the pixel width of the raster in CRS units.
+
 !!!Note
     RS_ScaleX attempts to get an Affine transform on the grid in order to return scaleX (See [World File](https://en.wikipedia.org/wiki/World_file) for more details). If the transform on the geometry is not an Affine transform, RS_ScaleX will throw an UnsupportedException:
     ```
     UnsupportedOperationException("Only AffineTransform2D is supported")
     ```
+
+For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
 
 Format: `RS_ScaleX(raster: Raster)`
 
@@ -610,11 +615,14 @@ Output:
 ### RS_ScaleY
 
 Introduction: Returns the pixel height of the raster in CRS units.
+
 !!!Note
     RS_ScaleY attempts to get an Affine transform on the grid in order to return scaleX (See [World File](https://en.wikipedia.org/wiki/World_file) for more details). If the transform on the geometry is not an Affine transform, RS_ScaleY will throw an UnsupportedException:
     ```
     UnsupportedOperationException("Only AffineTransform2D is supported")
     ```
+
+For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
 
 Format: `RS_ScaleY(raster: Raster)`
 
@@ -1539,12 +1547,14 @@ Introduction: Returns the metadata of the raster as an array of double. The arra
 - 1: upper left y coordinate of the raster, in terms of CRS units
 - 2: width of the raster, in terms of pixels
 - 3: height of the raster, in terms of pixels
-- 4: width of a pixel, in terms of CRS units (scaleX)
-- 5: height of a pixel, in terms of CRS units (scaleY), may be negative
+- 4: ScaleX: the scaling factor in the x direction
+- 5: ScaleY: the scaling factor in the y direction
 - 6: skew in x direction (rotation x)
 - 7: skew in y direction (rotation y)
 - 8: srid of the raster
 - 9: number of bands
+
+For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
 
 Format: `RS_MetaData (raster: Raster)`
 
@@ -1688,6 +1698,9 @@ Following are valid values for the algorithm parameter (Case-insensitive):
 
 !!!Tip
     If you just want to resize or rescale an input raster, you can use RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, useScale: Boolean, algorithm: String)
+
+For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
+
 Format:
 
 ```sql
@@ -1829,6 +1842,8 @@ Output:
 
 Introduction: Sets the Georeference information of an object in a single call. Accepts inputs in `GDAL` and `ESRI` format.
 Default format is `GDAL`. If all 6 parameters are not provided then will return null.
+
+For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
 
 Format:
 
@@ -2090,6 +2105,53 @@ Output:
 
 ```
 3857
+```
+
+### RS_Union
+
+Introduction: Returns a combined multi-band raster from 2 or more input Rasters. The order of bands in the resultant raster will be in the order of the input rasters. For example if `RS_Union` is called on two 2-banded raster, raster1 and raster2, the first 2 bands of the resultant 4-banded raster will be from raster1 and the last 2 from raster 2.
+
+!!!note
+    If the provided input Rasters don't have same shape an IllegalArgumentException will be thrown.
+
+Format:
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster)
+```
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster, raster3: Raster)
+```
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster)
+```
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster, raster5: Raster)
+```
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster, raster5: Raster, raster6: Raster)
+```
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster, raster5: Raster, raster6: Raster, raster7: Raster)
+```
+
+Since: `v1.6.0`
+
+SQL Example
+
+```sql
+SELECT RS_Union(raster1, raster2, raster3, raster4) FROM rasters
+```
+
+Output:
+
+```
+GridCoverage2D["g...
 ```
 
 ### RS_Value

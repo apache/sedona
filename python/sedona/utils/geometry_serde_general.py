@@ -379,11 +379,11 @@ def serialize_multi_linestring(geom: MultiLineString) -> bytes:
 
     coord_type = CoordinateType.type_of(geom)
     lines = [[list(coord) for coord in ls.coords] for ls in linestrings]
-    line_lengths = [len(l) for l in lines]
+    line_lengths = [len(line) for line in lines]
     num_coords = sum(line_lengths)
 
     header = generate_header_bytes(GeometryTypeID.MULTILINESTRING, coord_type, num_coords)
-    coord_data = array.array('d', [c for l in lines for coord in l for c in coord]).tobytes()
+    coord_data = array.array('d', [c for line in lines for coord in line for c in coord]).tobytes()
     num_lines = struct.pack('i', len(lines))
     structure_data = array.array('i', line_lengths).tobytes()
 

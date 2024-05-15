@@ -21,6 +21,7 @@ package org.apache.spark.sql.sedona_sql.expressions.raster
 import org.apache.sedona.common.raster.RasterBandEditors
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferrableRasterTypes._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
 case class RS_SetBandNoDataValue(inputExpressions: Seq[Expression]) extends InferredExpression(
@@ -37,6 +38,15 @@ case class RS_AddBand(inputExpressions: Seq[Expression]) extends InferredExpress
   inferrableFunction4(RasterBandEditors.addBand),
   inferrableFunction3(RasterBandEditors.addBand),
   inferrableFunction2(RasterBandEditors.addBand)
+) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class RS_Union(inputExpressions: Seq[Expression]) extends InferredExpression(
+  inferrableFunction2(RasterBandEditors.rasterUnion), inferrableFunction3(RasterBandEditors.rasterUnion), inferrableFunction4(RasterBandEditors.rasterUnion),
+  inferrableFunction5(RasterBandEditors.rasterUnion), inferrableFunction6(RasterBandEditors.rasterUnion), inferrableFunction7(RasterBandEditors.rasterUnion)
 ) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

@@ -16,16 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.UDT
+package org.apache.sedona.sql.utils
 
-import org.apache.spark.sql.types.UDTRegistration
-import org.locationtech.jts.geom.Geometry
-import org.locationtech.jts.index.SpatialIndex
+import org.apache.sedona.sql.RasterRegistrator.logger
 
-object UdtRegistratorWrapper {
+/**
+ * A helper object to check if GeoTools GridCoverage2D is available on the classpath.
+ */
+object GeoToolsCoverageAvailability {
+  val gridClassName = "org.geotools.coverage.grid.GridCoverage2D"
 
-  def registerAll(): Unit = {
-    UDTRegistration.register(classOf[Geometry].getName, classOf[GeometryUDT].getName)
-    UDTRegistration.register(classOf[SpatialIndex].getName, classOf[IndexUDT].getName)
+  lazy val isGeoToolsAvailable: Boolean = {
+    try {
+      Class.forName(gridClassName, true, Thread.currentThread().getContextClassLoader)
+      true
+    } catch {
+      case _: ClassNotFoundException =>
+        logger.warn("Geotools was not found on the classpath. Raster operations will not be available.")
+        false
+    }
   }
 }

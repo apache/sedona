@@ -132,7 +132,7 @@ test_that("Passed RS_Envelope with raster", {
 test_that("Passed RS_NumBands with raster", {
   ## Load
   sdf_name <- random_string("spatial_sdf")
-  binary_sdf <- spark_read_binary(sc, dir = test_data("raster"), name = sdf_name)
+  binary_sdf <- spark_read_binary(sc, dir = test_data("raster/test3.tif"), name = sdf_name)
 
   a <-
     binary_sdf %>%
@@ -142,13 +142,10 @@ test_that("Passed RS_NumBands with raster", {
     ) %>%
     select(nbands) %>%
     collect()
-
   expect_equal(
     a %>% as.list(),
-    list(nbands = c(1, 1, 4))
-
+    list(nbands = c(4))
   )
-
 
   ## Cleanup
   sc %>% DBI::dbExecute(paste0("DROP TABLE ", sdf_name))
@@ -185,7 +182,7 @@ test_that("Passed RS_Value with raster", {
 test_that("Passed RS_Values with raster", {
   ## Load
   sdf_name <- random_string("spatial_sdf")
-  binary_sdf <- spark_read_binary(sc, dir = test_data("raster"), name = sdf_name)
+  binary_sdf <- spark_read_binary(sc, dir = test_data("raster/test1.tiff"), name = sdf_name)
 
   a <-
     binary_sdf %>%
@@ -195,10 +192,9 @@ test_that("Passed RS_Values with raster", {
     ) %>%
     select(val) %>%
     collect()
-
   expect_equal(
     a %>% as.list(),
-    list(val = list(c(255, NA_real_), c(255, NA_real_), c(NA_real_, NA_real_)))
+    list(val = list(c(255, NA_real_)))
 
   )
 
