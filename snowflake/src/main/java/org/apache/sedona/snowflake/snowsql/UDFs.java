@@ -921,6 +921,15 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static byte[] ST_MinimumClearanceLine(byte[] geometry) throws IOException {
+        return GeometrySerde.serialize(
+                Functions.minimumClearanceLine(
+                        GeometrySerde.deserialize(geometry)
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "quadrantSegments"})
     public static byte[] ST_MinimumBoundingCircle(byte[] geometry, int quadrantSegments) {
         return GeometrySerde.serialize(

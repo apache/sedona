@@ -269,6 +269,9 @@ object st_functions extends DataFrameAPI {
   def ST_MinimumClearance(geometry: Column): Column = wrapExpression[ST_MinimumClearance](geometry)
   def ST_MinimumClearance(geometry: String): Column = wrapExpression[ST_MinimumClearance](geometry)
 
+  def ST_MinimumClearanceLine(geometry: Column): Column = wrapExpression[ST_MinimumClearanceLine](geometry)
+  def ST_MinimumClearanceLine(geometry: String): Column = wrapExpression[ST_MinimumClearanceLine](geometry)
+
   def ST_MinimumBoundingCircle(geometry: Column): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6)
   def ST_MinimumBoundingCircle(geometry: String): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6)
   def ST_MinimumBoundingCircle(geometry: Column, quadrantSegments: Column): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, quadrantSegments)

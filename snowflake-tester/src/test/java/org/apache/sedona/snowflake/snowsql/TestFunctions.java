@@ -684,6 +684,14 @@ public class TestFunctions extends TestBase {
     }
 
     @Test
+    public void test_ST_MinimumClearanceLine() {
+        registerUDF("ST_MinimumClearanceLine", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_MinimumClearanceLine(sedona.ST_GeomFromText('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))')))",
+                "LINESTRING (64.5 16, 65 16)"
+        );
+    }
+    @Test
     public void test_ST_MinimumBoundingCircle() {
         registerUDF("ST_MinimumBoundingCircle", byte[].class, int.class);
         verifySqlSingleRes(

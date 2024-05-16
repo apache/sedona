@@ -1697,6 +1697,39 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void minimumClearanceLine() throws ParseException {
+        Geometry geometry = Constructors.geomFromEWKT("POLYGON ((0 0, 1 0, 1 1, 0.5 3.2e-4, 0 0))");
+        String actual = Functions.minimumClearanceLine(geometry).toText();
+        String expected = "LINESTRING (0.5 0.00032, 0.5 0)";
+        assertEquals(expected, actual);
+
+        geometry = Constructors.geomFromEWKT("POLYGON ((10 10, 20 20, 20.1 20.1, 30 25, 40 30, 50 40, 40 50, 30 45, 20 40, 10 30, 10 10))");
+        actual = Functions.minimumClearanceLine(geometry).toText();
+        expected = "LINESTRING (20 20, 20.1 20.1)";
+        assertEquals(expected, actual);
+
+        geometry = Constructors.geomFromEWKT("POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))");
+        actual = Functions.minimumClearanceLine(geometry).toText();
+        expected = "LINESTRING (64.5 16, 65 16)";
+        assertEquals(expected, actual);
+
+        geometry = Constructors.geomFromEWKT("POLYGON ((65.10498 18.625425, 62.182617 16.36231, 64.863281 16.40447, 62.006836 14.157882, 65.522461 14.008696, 65.10498 18.625425))");
+        actual = Functions.minimumClearanceLine(geometry).toText();
+        expected = "LINESTRING (64.863281 16.40447, 65.30222689577225 16.44416294526772)";
+        assertEquals(expected, actual);
+
+        geometry = Constructors.geomFromEWKT("MULTIPOINT(10 10, 20 20)");
+        actual = Functions.minimumClearanceLine(geometry).toText();
+        expected = "LINESTRING (20 20, 10 10)";
+        assertEquals(expected, actual);
+
+        geometry = Constructors.geomFromEWKT("POINT(10 10)");
+        actual = Functions.minimumClearanceLine(geometry).toText();
+        expected = "LINESTRING EMPTY";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void nRingsPolygonOnlyExternal() throws Exception {
         Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
         Integer expected = 1;

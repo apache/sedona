@@ -638,6 +638,15 @@ public class TestFunctionsV2
     }
 
     @Test
+    public void test_ST_MinimumClearanceLine() {
+        registerUDFV2("ST_MinimumClearanceLine", String.class);
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_MinimumClearanceLine(ST_GeomFromText('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))')))",
+                "LINESTRING(64.5 16,65 16)"
+        );
+    }
+
+    @Test
     public void test_ST_MinimumBoundingCircle() {
         registerUDFV2("ST_MinimumBoundingCircle", String.class, int.class);
         verifySqlSingleRes(

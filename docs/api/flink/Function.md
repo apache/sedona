@@ -2501,6 +2501,28 @@ Output:
 0.5
 ```
 
+## ST_MinimumClearanceLine
+
+Introduction: This function returns a two-point LineString geometry representing the minimum clearance distance of the input geometry. If the input geometry does not have a defined minimum clearance, such as for single Points or coincident MultiPoints, an empty LineString geometry is returned instead.
+
+Format: `ST_MinimumClearanceLine(geometry: Geometry)`
+
+Since: `vTBD`
+
+SQL Example:
+
+```sql
+SELECT ST_MinimumClearanceLine(
+        ST_GeomFromWKT('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))')
+)
+```
+
+Output:
+
+```
+LINESTRING (64.5 16, 65 16)
+```
+
 ## ST_MinimumBoundingCircle
 
 Introduction: Returns the smallest circle polygon that contains a geometry. The optional quadrantSegments parameter determines how many segments to use per quadrant and the default number of segments is 48.

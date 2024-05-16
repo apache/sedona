@@ -763,6 +763,15 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
+    public static String ST_MinimumClearanceLine(String geometry) {
+        return GeometrySerde.serGeoJson(
+                Functions.minimumClearanceLine(
+                        GeometrySerde.deserGeoJson(geometry)
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "quadrantSegments"}, argTypes = {"Geometry", "int"}, returnTypes = "Geometry")
     public static String ST_MinimumBoundingCircle(String geometry, int quadrantSegments) {
         return GeometrySerde.serGeoJson(

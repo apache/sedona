@@ -868,6 +868,10 @@ public class Functions {
         return MinimumClearance.getDistance(geometry);
     }
 
+    public static Geometry minimumClearanceLine(Geometry geometry) {
+        return MinimumClearance.getLine(geometry);
+    }
+
     public static Geometry lineSubString(Geometry geom, double fromFraction, double toFraction) {
         double length = geom.getLength();
         LengthIndexedLine indexedLine = new LengthIndexedLine(geom);
