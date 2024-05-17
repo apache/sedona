@@ -12,6 +12,11 @@ Alternatively it can also be imported using:
 from sedona.maps.SedonaPyDeck import SedonaPyDeck
 ```
 
+!!!Note
+    For more information on the optional parameters please visit [PyDeck docs](https://deckgl.readthedocs.io/en/latest/deck.html).
+
+    SedonaPyDeck assumes the map provider to be Mapbox when user selects 'salellite' option for `map_style`.
+
 Following are details on all the APIs exposed via SedonaPyDeck:
 
 ### **Geometry Map**
@@ -19,7 +24,7 @@ Following are details on all the APIs exposed via SedonaPyDeck:
 ```python
 def create_geometry_map(df, fill_color="[85, 183, 177, 255]", line_color="[85, 183, 177, 255]",
                    elevation_col=0, initial_view_state=None,
-                   map_style=None, map_provider=None):
+                   map_style=None, map_provider=None, api_keys=None):
 ```
 
 The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color polygons or point geometries in the map
@@ -35,7 +40,7 @@ More details on the parameters and their default values can be found on the PyDe
 
 ```python
 def create_choropleth_map(df, fill_color=None, plot_col=None, initial_view_state=None, map_style=None,
-						  map_provider=None, elevation_col=0)
+						  map_provider=None, api_keys=None, elevation_col=0)
 ```
 
 The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.
@@ -59,7 +64,8 @@ More details on the parameters and their default values can be found on the PyDe
 ### **Scatterplot**
 
 ```python
-def create_scatterplot_map(df, fill_color="[255, 140, 0]", radius_col=1, radius_min_pixels = 1, radius_max_pixels = 10, radius_scale=1, initial_view_state=None, map_style=None, map_provider=None)
+def create_scatterplot_map(df, fill_color="[255, 140, 0]", radius_col=1, radius_min_pixels = 1, radius_max_pixels = 10, radius_scale=1, initial_view_state=None,
+                           map_style=None, map_provider=None, api_keys=None)
 ```
 
 The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.
@@ -79,7 +85,7 @@ More details on the parameters and their default values can be found on the PyDe
 
 ```python
 def create_heatmap(df, color_range=None, weight=1, aggregation="SUM", initial_view_state=None, map_style=None,
-                map_provider=None)
+                map_provider=None, api_keys=None)
 ```
 
 The parameter `color_range` can be optionally given a list of RGB values, SedonaPyDeck by default uses `6-class YlOrRd` as color_range.
