@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../../image/sedona_logo_symbol.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.22">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.23">
     
     
       
@@ -26,7 +26,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.732c4fb1.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6543a935.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -3948,10 +3948,10 @@
 sudo<span class="w"> </span>mkdir<span class="w"> </span>/jars
 
 <span class="c1"># Download Sedona jar</span>
-sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/sedona-spark-shaded-3.0_2.12-1.5.2.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.0_2.12/1.5.2/sedona-spark-shaded-3.0_2.12-1.5.2.jar&quot;</span>
+sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/sedona-spark-shaded-3.0_2.12-1.6.0.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.0_2.12/1.6.0/sedona-spark-shaded-3.0_2.12-1.6.0.jar&quot;</span>
 
 <span class="c1"># Download GeoTools jar</span>
-sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/geotools-wrapper-1.5.2-28.2.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.5.2-28.2/geotools-wrapper-1.5.2-28.2.jar&quot;</span>
+sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/geotools-wrapper-1.6.0-28.2.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.6.0-28.2/geotools-wrapper-1.6.0-28.2.jar&quot;</span>
 
 <span class="c1"># Install necessary python libraries</span>
 sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>pandas
@@ -3959,7 +3959,7 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
 sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>geopandas
 sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="nv">keplergl</span><span class="o">==</span><span class="m">0</span>.3.2
 sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="nv">pydeck</span><span class="o">==</span><span class="m">0</span>.8.0
-sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>attrs<span class="w"> </span>matplotlib<span class="w"> </span>descartes<span class="w"> </span>apache-sedona<span class="o">==</span><span class="m">1</span>.5.2
+sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>attrs<span class="w"> </span>matplotlib<span class="w"> </span>descartes<span class="w"> </span>apache-sedona<span class="o">==</span><span class="m">1</span>.6.0
 </code></pre></div>
 <p>When you create an EMR cluster, in the <code>bootstrap action</code>, specify the location of this script.</p>
 <h2 id="add-software-configuration">Add software configuration<a class="headerlink" href="#add-software-configuration" title="Permanent link">&para;</a></h2>
@@ -3968,7 +3968,7 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
 <span class="w">  </span><span class="o">{</span>
 <span class="w">    </span><span class="s2">&quot;Classification&quot;</span>:<span class="s2">&quot;spark-defaults&quot;</span>,
 <span class="w">    </span><span class="s2">&quot;Properties&quot;</span>:<span class="o">{</span>
-<span class="w">      </span><span class="s2">&quot;spark.yarn.dist.jars&quot;</span>:<span class="w"> </span><span class="s2">&quot;/jars/sedona-spark-shaded-3.0_2.12-1.5.2.jar,/jars/geotools-wrapper-1.5.2-28.2.jar&quot;</span>,
+<span class="w">      </span><span class="s2">&quot;spark.yarn.dist.jars&quot;</span>:<span class="w"> </span><span class="s2">&quot;/jars/sedona-spark-shaded-3.0_2.12-1.6.0.jar,/jars/geotools-wrapper-1.6.0-28.2.jar&quot;</span>,
 <span class="w">      </span><span class="s2">&quot;spark.serializer&quot;</span>:<span class="w"> </span><span class="s2">&quot;org.apache.spark.serializer.KryoSerializer&quot;</span>,
 <span class="w">      </span><span class="s2">&quot;spark.kryo.registrator&quot;</span>:<span class="w"> </span><span class="s2">&quot;org.apache.sedona.core.serde.SedonaKryoRegistrator&quot;</span>,
 <span class="w">      </span><span class="s2">&quot;spark.sql.extensions&quot;</span>:<span class="w"> </span><span class="s2">&quot;org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions&quot;</span>
@@ -4139,7 +4139,7 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
     <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tabs", "navigation.top", "search.suggest", "search.highlight", "search.share", "navigation.footer"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.5cfa9459.min.js"></script>
+      <script src="../../assets/javascripts/bundle.ebd0bdb7.min.js"></script>
       
     
   </body>
