@@ -28,8 +28,8 @@ The parameter `line_color` can be given a list of RGB/RGBA values, or a string t
 
 The parameter `elevation_col` can be given a static elevation or elevation based on column values like `fill_color`, this only works for the polygon geometries in the map.
 
-Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the pydeck website as well by deck.gl [here](https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/geojson-layer.md)
+Optionally, parameters `initial_view_state`, `map_style`, `map_provider`, `api_keys` can be passed to configure the map as per user's liking.
+More details on the parameters and their default values can be found on the PyDeck website as well by deck.gl [here](https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/geojson-layer.md)
 
 ### **Choropleth Map**
 
@@ -53,8 +53,8 @@ SedonaPyDeck then creates a default color scheme based on the values of the colu
 
 The parameter `elevation_col` can be given a numeric or a string value (containing the column with/without operations on it) to set a 3D elevation to the plotted polygons if any.
 
-Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the pydeck website.
+Optionally, parameters `initial_view_state`, `map_style`, `map_provider`, `api_keys` can be passed to configure the map as per user's liking.
+More details on the parameters and their default values can be found on the PyDeck website.
 
 ### **Scatterplot**
 
@@ -72,8 +72,8 @@ The parameter `radius_max_pixels` can be given a numeric value that would set th
 
 The parameter `radius_scale` can be given a numeric value that sets a global radius multiplier for all points.
 
-Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the pydeck website as well by deck.gl [here](https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/scatterplot-layer.md)
+Optionally, parameters `initial_view_state`, `map_style`, `map_provider`, `api_keys` can be passed to configure the map as per user's liking.
+More details on the parameters and their default values can be found on the PyDeck website as well by deck.gl [here](https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/scatterplot-layer.md)
 
 ### **Heatmap**
 
@@ -91,5 +91,5 @@ By default, SedonaPyDeck assigns a weight of 1 to each point
 The parameter `aggregation` can be used to define aggregation strategy to use when aggregating heatmap to a lower resolution (zooming out).
 One of "MEAN" or "SUM" can be provided. By default, SedonaPyDeck uses "MEAN" as the aggregation strategy.
 
-Optionally, parameters `initial_view_state`, `map_style`, `map_provider` can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the pydeck website as well by deck.gl [here](https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/aggregation-layers/heatmap-layer.md)
+Optionally, parameters `initial_view_state`, `map_style`, `map_provider`, `api_keys` can be passed to configure the map as per user's liking.
+More details on the parameters and their default values can be found on the PyDeck website as well by deck.gl [here](https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/aggregation-layers/heatmap-layer.md)
