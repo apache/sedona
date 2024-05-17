@@ -107,8 +107,8 @@ class TestVisualization(TestBase):
             radius_scale=1
         )
 
-        p_map = pdk.Deck(layers=[layer])
-        sedona_pydeck_map = SedonaPyDeck.create_scatterplot_map(df=chicago_crimes_df)
+        p_map = pdk.Deck(layers=[layer], map_style='satellite', map_provider='google_maps')
+        sedona_pydeck_map = SedonaPyDeck.create_scatterplot_map(df=chicago_crimes_df, map_style='satellite', map_provider='google_maps')
         assert self.isMapEqual(sedona_map=sedona_pydeck_map, pydeck_map=p_map)
 
     def testHeatmap(self):
