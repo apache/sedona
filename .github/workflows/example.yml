@@ -44,26 +44,7 @@ jobs:
             sedona: '1.6.0'
             geotools: '1.6.0-28.2'
             java: '8'
-          - spark: '3.5.0'
-            spark-compat: '3.5'
-            sedona: '1.5.3'
-            geotools: '1.5.3-28.2'
-            java: '11'
-          - spark: '3.5.0'
-            spark-compat: '3.5'
-            sedona: '1.5.3'
-            geotools: '1.5.3-28.2'
-            java: '8'
-          - spark: '3.4.2'
-            spark-compat: '3.4'
-            sedona: '1.5.3'
-            geotools: '1.5.3-28.2'
-            java: '8'
-          - spark: '3.3.4'
-            spark-compat: '3.0'
-            sedona: '1.5.3'
-            geotools: '1.5.3-28.2'
-            java: '8'
+
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-java@v4
