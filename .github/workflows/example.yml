@@ -28,21 +28,29 @@ jobs:
             spark-compat: '3.5'
             sedona: '1.6.0'
             geotools: '1.6.0-28.2'
+            java: '11'
+          - spark: '3.5.0'
+            spark-compat: '3.5'
+            sedona: '1.6.0'
+            geotools: '1.6.0-28.2'
+            java: '8'
           - spark: '3.4.2'
             spark-compat: '3.4'
             sedona: '1.6.0'
             geotools: 1.6.0-28.2
+            java: '8'
           - spark: '3.3.4'
             spark-compat: '3.0'
             sedona: '1.6.0'
             geotools: '1.6.0-28.2'
+            java: '8'
 
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
-        java-version: '8'
+        java-version: ${{ matrix.java }}
     - run: sudo apt-get remove scala-library scala
     - run: sudo wget www.scala-lang.org/files/archive/scala-2.12.11.deb
     - run: sudo dpkg -i scala-2.12.11.deb
