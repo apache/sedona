@@ -21,6 +21,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.sedona.flink.SedonaContext;
 import org.apache.sedona.flink.SedonaFlinkRegistrator;
 import org.apache.sedona.flink.expressions.Constructors;
 
@@ -38,8 +39,7 @@ public class FlinkExample
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
-        SedonaFlinkRegistrator.registerType(env);
-        SedonaFlinkRegistrator.registerFunc(tableEnv);
+        SedonaContext.create(env, tableEnv);
 
         // Create a fake WKT string table source
         Table pointWktTable = Utils.createTextTable(env, tableEnv, Utils.createPointWKT(testDataSize), pointColNames);

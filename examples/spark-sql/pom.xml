@@ -39,7 +39,7 @@
         <spark.version>3.4.0</spark.version>
         <spark.compat.version>3.4</spark.compat.version>
         <scala.compat.version>2.12</scala.compat.version>
-        <sedona.version>1.5.1</sedona.version>
+        <sedona.version>1.6.0</sedona.version>
         <hadoop.version>3.3.4</hadoop.version>
     </properties>
 
