@@ -27,12 +27,15 @@ jobs:
           - spark: 3.5.0
             spark-compat: '3.5'
             sedona: 1.6.0
+            geotools: 1.6.0-28.2
           - spark: 3.4.2
             spark-compat: '3.4'
             sedona: 1.6.0
+            geotools: 1.6.0-28.2
           - spark: 3.3.4
             spark-compat: '3.0'
             sedona: 1.6.0
+            geotools: 1.6.0-28.2
 
     steps:
     - uses: actions/checkout@v4
