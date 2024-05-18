@@ -3987,20 +3987,25 @@
 <p>Alternatively it can also be imported using:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.maps.SedonaPyDeck</span> <span class="kn">import</span> <span class="n">SedonaPyDeck</span>
 </code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For more information on the optional parameters please visit <a href="https://deckgl.readthedocs.io/en/latest/deck.html">PyDeck docs</a>.</p>
+<p>SedonaPyDeck assumes the map provider to be Mapbox when user selects 'salellite' option for <code>map_style</code>.</p>
+</div>
 <p>Following are details on all the APIs exposed via SedonaPyDeck:</p>
 <h3 id="geometry-map"><strong>Geometry Map</strong><a class="headerlink" href="#geometry-map" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_geometry_map</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[85, 183, 177, 255]&quot;</span><span class="p">,</span> <span class="n">line_color</span><span class="o">=</span><span class="s2">&quot;[85, 183, 177, 255]&quot;</span><span class="p">,</span>
                    <span class="n">elevation_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                   <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                   <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 </code></pre></div>
 <p>The parameter <code>fill_color</code> can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color polygons or point geometries in the map</p>
 <p>The parameter <code>line_color</code> can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color the line geometries in the map.</p>
 <p>The parameter <code>elevation_col</code> can be given a static elevation or elevation based on column values like <code>fill_color</code>, this only works for the polygon geometries in the map.</p>
-<p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code> can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the pydeck website as well by deck.gl <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/geojson-layer.md">here</a></p>
+<p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code>, <code>api_keys</code> can be passed to configure the map as per user's liking.
+More details on the parameters and their default values can be found on the PyDeck website as well by deck.gl <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/geojson-layer.md">here</a></p>
 <h3 id="choropleth-map"><strong>Choropleth Map</strong><a class="headerlink" href="#choropleth-map" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_choropleth_map</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                          <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">elevation_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                          <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">elevation_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </code></pre></div>
 <p>The parameter <code>fill_color</code> can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.</p>
 <p>For example, all these are valid values of fill_color:</p>
@@ -4011,21 +4016,22 @@ More details on the parameters and their default values can be found on the pyde
 <p>Instead of giving a <code>fill_color</code> parameter, a 'plot_col' can be passed which specifies the column to decide the choropleth.
 SedonaPyDeck then creates a default color scheme based on the values of the column passed.</p>
 <p>The parameter <code>elevation_col</code> can be given a numeric or a string value (containing the column with/without operations on it) to set a 3D elevation to the plotted polygons if any.</p>
-<p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code> can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the pydeck website.</p>
+<p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code>, <code>api_keys</code> can be passed to configure the map as per user's liking.
+More details on the parameters and their default values can be found on the PyDeck website.</p>
 <h3 id="scatterplot"><strong>Scatterplot</strong><a class="headerlink" href="#scatterplot" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_scatterplot_map</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[255, 140, 0]&quot;</span><span class="p">,</span> <span class="n">radius_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">radius_min_pixels</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">radius_max_pixels</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">radius_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_scatterplot_map</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[255, 140, 0]&quot;</span><span class="p">,</span> <span class="n">radius_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">radius_min_pixels</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">radius_max_pixels</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">radius_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                           <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </code></pre></div>
 <p>The parameter <code>fill_color</code> can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.</p>
 <p>The parameter <code>radius_col</code> can be given a numeric value or a string value consisting of any operations on the column, in order to specify the radius of the plotted point.</p>
 <p>The parameter <code>radius_min_pixels</code> can be given a numeric value that would set the minimum radius in pixels. This can be used to prevent the plotted circle from getting too small when zoomed out.</p>
 <p>The parameter <code>radius_max_pixels</code> can be given a numeric value that would set the maximum radius in pixels. This can be used to prevent the circle from getting too big when zoomed in.</p>
 <p>The parameter <code>radius_scale</code> can be given a numeric value that sets a global radius multiplier for all points.</p>
-<p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code> can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the pydeck website as well by deck.gl <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/scatterplot-layer.md">here</a></p>
+<p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code>, <code>api_keys</code> can be passed to configure the map as per user's liking.
+More details on the parameters and their default values can be found on the PyDeck website as well by deck.gl <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/scatterplot-layer.md">here</a></p>
 <h3 id="heatmap"><strong>Heatmap</strong><a class="headerlink" href="#heatmap" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_heatmap</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">color_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">aggregation</span><span class="o">=</span><span class="s2">&quot;SUM&quot;</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+                <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </code></pre></div>
 <p>The parameter <code>color_range</code> can be optionally given a list of RGB values, SedonaPyDeck by default uses <code>6-class YlOrRd</code> as color_range.
 More examples can be found on <a href="https://colorbrewer2.org/#type=sequential&amp;scheme=YlOrRd&amp;n=6">colorbrewer</a></p>
@@ -4033,8 +4039,8 @@ More examples can be found on <a href="https://colorbrewer2.org/#type=sequential
 By default, SedonaPyDeck assigns a weight of 1 to each point</p>
 <p>The parameter <code>aggregation</code> can be used to define aggregation strategy to use when aggregating heatmap to a lower resolution (zooming out).
 One of "MEAN" or "SUM" can be provided. By default, SedonaPyDeck uses "MEAN" as the aggregation strategy.</p>
-<p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code> can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the pydeck website as well by deck.gl <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/aggregation-layers/heatmap-layer.md">here</a></p>
+<p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code>, <code>api_keys</code> can be passed to configure the map as per user's liking.
+More details on the parameters and their default values can be found on the PyDeck website as well by deck.gl <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/aggregation-layers/heatmap-layer.md">here</a></p>
 
 
 
@@ -4055,7 +4061,7 @@ More details on the parameters and their default values can be found on the pyde
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 11, 2024 00:47:00</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 18, 2024 05:26:46</span>
   </span>
 
     
