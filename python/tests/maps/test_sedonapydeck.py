@@ -49,8 +49,8 @@ class TestVisualization(TestBase):
             get_elevation=0,
             pickable=True
         )
-        p_map = pdk.Deck(layers=[choropleth_layer])
-        sedona_pydeck_map = SedonaPyDeck.create_choropleth_map(df=buildings_df, plot_col='confidence')
+        p_map = pdk.Deck(layers=[choropleth_layer], map_style='satellite', map_provider='mapbox')
+        sedona_pydeck_map = SedonaPyDeck.create_choropleth_map(df=buildings_df, plot_col='confidence', map_style='satellite')
         res = self.isMapEqual(sedona_map=sedona_pydeck_map, pydeck_map=p_map)
         assert res is True
 
@@ -107,8 +107,8 @@ class TestVisualization(TestBase):
             radius_scale=1
         )
 
-        p_map = pdk.Deck(layers=[layer])
-        sedona_pydeck_map = SedonaPyDeck.create_scatterplot_map(df=chicago_crimes_df)
+        p_map = pdk.Deck(layers=[layer], map_style='satellite', map_provider='google_maps')
+        sedona_pydeck_map = SedonaPyDeck.create_scatterplot_map(df=chicago_crimes_df, map_style='satellite', map_provider='google_maps')
         assert self.isMapEqual(sedona_map=sedona_pydeck_map, pydeck_map=p_map)
 
     def testHeatmap(self):
@@ -142,8 +142,8 @@ class TestVisualization(TestBase):
             get_weight=1
         )
 
-        p_map = pdk.Deck(layers=[layer])
-        sedona_pydeck_map = SedonaPyDeck.create_heatmap(df=chicago_crimes_df)
+        p_map = pdk.Deck(layers=[layer], map_style='satellite', map_provider='mapbox')
+        sedona_pydeck_map = SedonaPyDeck.create_heatmap(df=chicago_crimes_df, map_style='satellite')
         assert self.isMapEqual(sedona_map=sedona_pydeck_map, pydeck_map=p_map)
 
     def isMapEqual(self, pydeck_map, sedona_map):
