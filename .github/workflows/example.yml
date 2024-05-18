@@ -51,21 +51,6 @@ jobs:
       with:
         distribution: 'zulu'
         java-version: ${{ matrix.java }}
-    - run: sudo apt-get remove scala-library scala
-    - run: sudo wget www.scala-lang.org/files/archive/scala-2.12.11.deb
-    - run: sudo dpkg -i scala-2.12.11.deb
-    - run: scala -version
-    - run: echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
-    - run: sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823
-    - run: sudo apt-get update
-    - run: sudo apt-get install sbt
-    - name: Cache SBT
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.ivy2/cache
-          ~/.sbt
-        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
     - name: Cache Maven packages
       uses: actions/cache@v3
       with:
@@ -87,4 +72,4 @@ jobs:
         GEOTOOLS_VERSION: ${{ matrix.geotools }}
       run: |
         echo "Running Maven command: mvn clean install -Dgeotools.version=${GEOTOOLS_VERSION}"
-        (cd examples/flink-sql;mvn clean install -Dgeotools.version=${GEOTOOLS_VERSION};java -jar target/sedona-flink-example-1.0.0.jar)
+        (cd examples/flink-sql;mvn clean install;java -jar target/sedona-flink-example-1.0.0.jar)
