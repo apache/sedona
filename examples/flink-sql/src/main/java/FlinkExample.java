@@ -21,6 +21,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+
 import org.apache.sedona.flink.SedonaFlinkRegistrator;
 import org.apache.sedona.flink.expressions.Constructors;
 
@@ -43,17 +44,18 @@ public class FlinkExample
 
         // Create a fake WKT string table source
         Table pointWktTable = Utils.createTextTable(env, tableEnv, Utils.createPointWKT(testDataSize), pointColNames);
+
         // Create a geometry column
-        Table pointTable = pointWktTable.select(call(Constructors.ST_GeomFromWKT.class.getSimpleName(),
-                        $(pointColNames[0])).as(pointColNames[0]),
-                $(pointColNames[1]));
+        Table pointTable = pointWktTable.select(
+            call("ST_GeomFromWKT", $(pointColNames[0])).as(pointColNames[0]),
+            $(pointColNames[1]));
+
         // Create S2CellID
         pointTable = pointTable.select($(pointColNames[0]), $(pointColNames[1]),
                 call("ST_S2CellIDs", $(pointColNames[0]), 6).as("s2id_array"));
         // Explode s2id array
         tableEnv.createTemporaryView("pointTable", pointTable);
         pointTable = tableEnv.sqlQuery("SELECT geom_point, name_point, s2id_point FROM pointTable CROSS JOIN UNNEST(pointTable.s2id_array) AS tmpTbl1(s2id_point)");
-        pointTable.execute().print();
 
 
         // Create a fake WKT string table source
@@ -68,13 +70,16 @@ public class FlinkExample
         // Explode s2id array
         tableEnv.createTemporaryView("polygonTable", polygonTable);
         polygonTable = tableEnv.sqlQuery("SELECT geom_polygon, name_polygon, s2id_polygon FROM polygonTable CROSS JOIN UNNEST(polygonTable.s2id_array) AS tmpTbl2(s2id_polygon)");
-        polygonTable.execute().print();
+
+        // TODO: TableImpl.print() occurs EOF Exception due to https://issues.apache.org/jira/browse/FLINK-35406
+        // Use polygonTable.execute().print() when FLINK-35406 is fixed.
+        polygonTable.execute().collect().forEachRemaining(row -> System.out.println(row));
 
         // Join two tables by their S2 ids
         Table joinResult = pointTable.join(polygonTable).where($("s2id_point").isEqual($("s2id_polygon")));
         // Optional: remove false positives
-        joinResult = joinResult.where("ST_Contains(geom_polygon, geom_point)");
-        joinResult.execute().print();
+        joinResult = joinResult.where(call("ST_Contains", $("geom_polygon"), $("geom_point")));
+        joinResult.execute().collect().forEachRemaining(row -> System.out.println(row));
     }
 
 }
