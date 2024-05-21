@@ -19,12 +19,12 @@ repos:
         args: [--ignore-words=.github/linters/codespell.txt]
         exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.2
+    rev: v0.4.4
     hooks:
       - id: ruff
         args: [--config=.github/linters/ruff.toml, --fix]
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-ast
       - id: check-builtin-literals
@@ -57,7 +57,7 @@ repos:
         args: [--markdown-linebreak-ext=md]
         exclude: ^docs-overrides/main\.html$|\.Rd$
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.38.0
+    rev: v0.40.0
     hooks:
       - id: markdownlint
         name: Run markdownlint
