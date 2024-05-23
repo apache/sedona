@@ -18,20 +18,43 @@
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.apache.sedona</groupId>
-    <artifactId>sedona-parent</artifactId>
-    <version>1.6.0</version>
-  </parent>
 
+  <groupId>org.apache.sedona</groupId>
   <artifactId>sedona-examples</artifactId>
-  <name>Sedona : Examples : </name>
+  <version>1.6.0</version>
+  <name>Sedona : Examples</name>
   <packaging>pom</packaging>
 
   <modules>
     <module>flink-sql</module>
     <module>spark-sql</module>
   </modules>
+
+  <properties>
+    <log4j.version>2.17.2</log4j.version>
+    <slf4j.version>1.7.36</slf4j.version>
+    <geotools.version>28.2</geotools.version>
+    <flink.version>1.19.0</flink.version>
+    <scala.compat.version>2.12</scala.compat.version>
+  </properties>
+
+  <!-- add OSGeo Repositories for examples-->
+  <repositories>
+    <repository>
+      <id>osgeo</id>
+      <name>OSGeo Release Repository</name>
+      <url>https://repo.osgeo.org/repository/release/</url>
+      <snapshots><enabled>false</enabled></snapshots>
+      <releases><enabled>true</enabled></releases>
+    </repository>
+    <repository>
+      <id>osgeo-snapshot</id>
+      <name>OSGeo Snapshot Repository</name>
+      <url>https://repo.osgeo.org/repository/snapshot/</url>
+      <snapshots><enabled>true</enabled></snapshots>
+      <releases><enabled>false</enabled></releases>
+    </repository>
+  </repositories>
 
   <dependencies>
     <!-- Add a logging Framework, to make the examples produce -->

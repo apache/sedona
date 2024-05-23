@@ -732,7 +732,6 @@
                 <module>flink</module>
                 <module>flink-shaded</module>
                 <module>snowflake</module>
-                <module>examples</module>
             </modules>
         </profile>
         <profile>
