@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../../image/sedona_logo_symbol.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.23">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.24">
     
     
       
@@ -4857,8 +4857,8 @@ import geopandas as gpd</div>
     <span class="n">config</span><span class="p">(</span><span class="s2">"spark.hadoop.fs.s3a.aws.credentials.provider"</span><span class="p">,</span> <span class="s2">"org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider"</span><span class="p">)</span><span class="o">.</span> \
     <span class="n">config</span><span class="p">(</span><span class="s2">"fs.s3a.aws.credentials.provider"</span><span class="p">,</span> <span class="s2">"org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider"</span><span class="p">)</span><span class="o">.</span> \
     <span class="n">config</span><span class="p">(</span><span class="s1">'spark.jars.packages'</span><span class="p">,</span>
-           <span class="s1">'org.apache.sedona:sedona-spark-3.4_2.12:1.5.1,'</span>
-           <span class="s1">'org.datasyslab:geotools-wrapper:1.5.1-28.2,'</span>
+           <span class="s1">'org.apache.sedona:sedona-spark-3.4_2.12:1.6.0,'</span>
+           <span class="s1">'org.datasyslab:geotools-wrapper:1.6.0-28.2,'</span>
            <span class="s1">'uk.co.gresearch.spark:spark-extension_2.12:2.11.0-3.4'</span><span class="p">)</span><span class="o">.</span> \
     <span class="n">getOrCreate</span><span class="p">()</span>
 
@@ -4868,8 +4868,8 @@ import geopandas as gpd</div>
     config("spark.hadoop.fs.s3a.aws.credentials.provider", "org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider"). \
     config("fs.s3a.aws.credentials.provider", "org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider"). \
     config('spark.jars.packages',
-           'org.apache.sedona:sedona-spark-3.4_2.12:1.5.1,'
-           'org.datasyslab:geotools-wrapper:1.5.1-28.2,'
+           'org.apache.sedona:sedona-spark-3.4_2.12:1.6.0,'
+           'org.datasyslab:geotools-wrapper:1.6.0-28.2,'
            'uk.co.gresearch.spark:spark-extension_2.12:2.11.0-3.4'). \
     getOrCreate()
 
@@ -4886,29 +4886,28 @@ sedona = SedonaContext.create(config)</div>
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
 <pre>Warning: Ignoring non-Spark config property: fs.s3a.aws.credentials.provider
-https://artifacts.unidata.ucar.edu/repository/unidata-all added as a remote repository with the name: repo-1
-Ivy Default Cache set to: /root/.ivy2/cache
-The jars for the packages stored in: /root/.ivy2/jars
-org.apache.sedona#sedona-spark-3.4_2.12 added as a dependency
-org.datasyslab#geotools-wrapper added as a dependency
-uk.co.gresearch.spark#spark-extension_2.12 added as a dependency
-:: resolving dependencies :: org.apache.spark#spark-submit-parent-c4d888cc-a352-48f0-9927-791ecebcce11;1.0
-	confs: [default]
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>:: loading settings :: url = jar:file:/opt/spark/jars/ivy-2.5.1.jar!/org/apache/ivy/core/settings/ivysettings.xml
+<pre>:: loading settings :: url = jar:file:/home/jovyan/spark-3.4.2-bin-hadoop3/jars/ivy-2.5.1.jar!/org/apache/ivy/core/settings/ivysettings.xml
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>	found org.apache.sedona#sedona-spark-3.4_2.12;1.5.1 in central
-	found org.apache.sedona#sedona-common;1.5.1 in central
+<pre>Ivy Default Cache set to: /home/jovyan/.ivy2/cache
+The jars for the packages stored in: /home/jovyan/.ivy2/jars
+org.apache.sedona#sedona-spark-3.4_2.12 added as a dependency
+org.datasyslab#geotools-wrapper added as a dependency
+uk.co.gresearch.spark#spark-extension_2.12 added as a dependency
+:: resolving dependencies :: org.apache.spark#spark-submit-parent-32c6a229-d04d-446c-b16d-58a8e96cbc3f;1.0
+	confs: [default]
+	found org.apache.sedona#sedona-spark-3.4_2.12;1.6.0 in central
+	found org.apache.sedona#sedona-common;1.6.0 in central
 	found org.apache.commons#commons-math3;3.6.1 in central
 	found org.locationtech.jts#jts-core;1.19.0 in central
 	found org.wololo#jts2geojson;0.16.1 in central
@@ -4925,14 +4924,14 @@ uk.co.gresearch.spark#spark-extension_2.12 added as a dependency
 	found com.github.ben-manes.caffeine#caffeine;2.9.2 in central
 	found org.checkerframework#checker-qual;3.10.0 in central
 	found com.google.errorprone#error_prone_annotations;2.5.1 in central
-	found org.apache.sedona#sedona-spark-common-3.4_2.12;1.5.1 in central
+	found org.apache.sedona#sedona-spark-common-3.4_2.12;1.6.0 in central
 	found commons-lang#commons-lang;2.6 in central
 	found org.scala-lang.modules#scala-collection-compat_2.12;2.5.0 in central
 	found org.beryx#awt-color-factory;1.0.0 in central
-	found org.datasyslab#geotools-wrapper;1.5.1-28.2 in central
+	found org.datasyslab#geotools-wrapper;1.6.0-28.2 in central
 	found uk.co.gresearch.spark#spark-extension_2.12;2.11.0-3.4 in central
 	found com.github.scopt#scopt_2.12;4.1.0 in central
-:: resolution report :: resolve 280ms :: artifacts dl 8ms
+:: resolution report :: resolve 2297ms :: artifacts dl 105ms
 	:: modules in use:
 	com.github.ben-manes.caffeine#caffeine;2.9.2 from central in [default]
 	com.github.scopt#scopt_2.12;4.1.0 from central in [default]
@@ -4945,13 +4944,13 @@ uk.co.gresearch.spark#spark-extension_2.12 added as a dependency
 	commons-lang#commons-lang;2.6 from central in [default]
 	net.sf.geographiclib#GeographicLib-Java;1.52 from central in [default]
 	org.apache.commons#commons-math3;3.6.1 from central in [default]
-	org.apache.sedona#sedona-common;1.5.1 from central in [default]
-	org.apache.sedona#sedona-spark-3.4_2.12;1.5.1 from central in [default]
-	org.apache.sedona#sedona-spark-common-3.4_2.12;1.5.1 from central in [default]
+	org.apache.sedona#sedona-common;1.6.0 from central in [default]
+	org.apache.sedona#sedona-spark-3.4_2.12;1.6.0 from central in [default]
+	org.apache.sedona#sedona-spark-common-3.4_2.12;1.6.0 from central in [default]
 	org.beryx#awt-color-factory;1.0.0 from central in [default]
 	org.checkerframework#checker-qual;3.10.0 from central in [default]
 	org.codehaus.mojo#animal-sniffer-annotations;1.14 from central in [default]
-	org.datasyslab#geotools-wrapper;1.5.1-28.2 from central in [default]
+	org.datasyslab#geotools-wrapper;1.6.0-28.2 from central in [default]
 	org.locationtech.jts#jts-core;1.19.0 from central in [default]
 	org.locationtech.spatial4j#spatial4j;0.8 from central in [default]
 	org.scala-lang.modules#scala-collection-compat_2.12;2.5.0 from central in [default]
@@ -4966,13 +4965,13 @@ uk.co.gresearch.spark#spark-extension_2.12 added as a dependency
 	---------------------------------------------------------------------
 	|      default     |   25  |   0   |   0   |   2   ||   23  |   0   |
 	---------------------------------------------------------------------
-:: retrieving :: org.apache.spark#spark-submit-parent-c4d888cc-a352-48f0-9927-791ecebcce11
+:: retrieving :: org.apache.spark#spark-submit-parent-32c6a229-d04d-446c-b16d-58a8e96cbc3f
 	confs: [default]
-	0 artifacts copied, 23 already retrieved (0kB/5ms)
-24/01/20 23:15:20 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+	0 artifacts copied, 23 already retrieved (0kB/81ms)
+24/05/22 18:08:33 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
 Setting default log level to "WARN".
 To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
-</pre>
+                                                                                </pre>
 </div>
 </div>
 </div>
@@ -5129,7 +5128,7 @@ spatial_filter = "POLYGON ((-122.235128 47.650163, -122.233796 47.65162, -122.23
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>24/01/20 23:15:24 WARN MetricsConfig: Cannot locate configuration: tried hadoop-metrics2-s3a-file-system.properties,hadoop-metrics2.properties
+<pre>24/05/22 18:09:00 WARN MetricsConfig: Cannot locate configuration: tried hadoop-metrics2-s3a-file-system.properties,hadoop-metrics2.properties
 [Stage 5:&gt;                                                          (0 + 1) / 1]</pre>
 </div>
 </div>
@@ -5139,26 +5138,26 @@ spatial_filter = "POLYGON ((-122.235128 47.650163, -122.233796 47.65162, -122.23
 <pre>+--------------------+-----+----------+---------------+-----------------+------+-------+--------+-------+
 |            filename|block|blockStart|compressedBytes|uncompressedBytes|  rows|columns|  values|  nulls|
 +--------------------+-----+----------+---------------+-----------------+------+-------+--------+-------+
-|s3a://wherobots-p...|    1|         4|      132489370|        212295497|675704|     26|27013095|4170699|
-|s3a://wherobots-p...|    2| 132489374|       33009562|         51995284|168295|     26| 6727332|1039665|
-|s3a://wherobots-p...|    1|         4|      131748222|        207244630|658924|     26|26686490|4121025|
-|s3a://wherobots-p...|    2| 131748226|      131665990|        207128595|658924|     26|26681616|4123667|
-|s3a://wherobots-p...|    3| 263414216|      131697923|        207173797|658924|     26|26686185|4122635|
-|s3a://wherobots-p...|    4| 395112139|      128013214|        201361886|640397|     26|25932308|4002991|
-|s3a://wherobots-p...|    1|         4|      131748222|        207244630|658924|     26|26686490|4121025|
-|s3a://wherobots-p...|    2| 131748226|      131665990|        207128595|658924|     26|26681616|4123667|
-|s3a://wherobots-p...|    3| 263414216|      131697923|        207173797|658924|     26|26686185|4122635|
-|s3a://wherobots-p...|    4| 395112139|      128013214|        201361886|640397|     26|25932308|4002991|
-|s3a://wherobots-p...|    1|         4|      131748222|        207244630|658924|     26|26686490|4121025|
-|s3a://wherobots-p...|    2| 131748226|      131665990|        207128595|658924|     26|26681616|4123667|
-|s3a://wherobots-p...|    3| 263414216|      131697923|        207173797|658924|     26|26686185|4122635|
-|s3a://wherobots-p...|    4| 395112139|      128013214|        201361886|640397|     26|25932308|4002991|
-|s3a://wherobots-p...|    1|         4|      131738563|        217599597|677442|     26|27329024|4088909|
-|s3a://wherobots-p...|    2| 131738567|      132112948|        218210876|679198|     26|27405447|4099796|
-|s3a://wherobots-p...|    3| 263851515|       72665451|        119480256|373256|     26|15060504|2251382|
-|s3a://wherobots-p...|    1|         4|      131738563|        217599597|677442|     26|27329024|4088909|
-|s3a://wherobots-p...|    2| 131738567|      132112948|        218210876|679198|     26|27405447|4099796|
-|s3a://wherobots-p...|    3| 263851515|       72665451|        119480256|373256|     26|15060504|2251382|
+|s3a://wherobots-e...|    1|         4|      133401158|        212026494|672280|     26|25498425|3949559|
+|s3a://wherobots-e...|    2| 133401162|      117481155|        186628211|592107|     26|22456535|3480966|
+|s3a://wherobots-e...|    1|         4|      132009298|        217901239|739959|     26|28171336|4659055|
+|s3a://wherobots-e...|    2| 132009302|       27865148|         44972145|155610|     26| 5925253| 980001|
+|s3a://wherobots-e...|    1|         4|      131924175|        210390680|679198|     26|26835822|4204847|
+|s3a://wherobots-e...|    2| 131924179|      100376907|        159779330|516904|     26|20420533|3199442|
+|s3a://wherobots-e...|    1|         4|      133368917|        212391474|710100|     26|26798558|4480776|
+|s3a://wherobots-e...|    2| 133368921|       68844967|        109127771|366446|     26|13827983|2312016|
+|s3a://wherobots-e...|    1|         4|      133624141|        224974977|671721|     26|28791936|4047492|
+|s3a://wherobots-e...|    2| 133624145|       78353690|        131116926|393520|     26|16855422|2370775|
+|s3a://wherobots-e...|    1|         4|      132531884|        212087729|673983|     26|27189443|4181539|
+|s3a://wherobots-e...|    2| 132531888|       85813847|        136921776|436523|     26|17610252|2708624|
+|s3a://wherobots-e...|    1|         4|      132240373|        228506339|679198|     26|24892057|4556778|
+|s3a://wherobots-e...|    2| 132240377|       77948324|        134442494|400011|     26|14661020|2682371|
+|s3a://wherobots-e...|    1|         4|      133097687|        217681358|690100|     26|25177484|4427618|
+|s3a://wherobots-e...|    2| 133097691|       10383388|         16254438| 53363|     26| 1946918| 342463|
+|s3a://wherobots-e...|    1|         4|      132977557|        221242036|673983|     26|24519195|4518407|
+|s3a://wherobots-e...|    2| 132977561|       23099608|         37806057|116767|     26| 4246990| 782901|
+|s3a://wherobots-e...|    1|         4|      131748222|        207244630|658924|     26|26686490|4121025|
+|s3a://wherobots-e...|    2| 131748226|      131665990|        207128595|658924|     26|26681616|4123667|
 +--------------------+-----+----------+---------------+-----------------+------+-------+--------+-------+
 only showing top 20 rows
 
@@ -5218,7 +5217,7 @@ only showing top 20 rows
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>[Stage 6:====================================================&gt;(997 + 10) / 1012]</pre>
+<pre>                                                                                </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
@@ -5239,12 +5238,6 @@ only showing top 20 rows
  |-- geohash: string (nullable = true)
 
 </pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>                                                                                </pre>
 </div>
 </div>
 </div>
@@ -5283,36 +5276,36 @@ only showing top 20 rows
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>[Stage 9:=======================================&gt;                   (2 + 1) / 3]</pre>
+<pre>[Stage 8:&gt;                                                          (0 + 1) / 1]</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>+------------+--------------+------------------------------------------------------------------------------------------+-------+
-|version     |primary_column|columns                                                                                   |geohash|
-+------------+--------------+------------------------------------------------------------------------------------------+-------+
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-45.0, 45.0038534, -33.75027, 50.5347176], null}}            |g0     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-45.0, 33.8141064, -33.7678528, 39.3735873], null}}          |en     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [135.378685, -78.2065631, 145.546875, -73.1334471], null}}    |p4     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [101.4470901, -50.2472049, 112.3773706, -45.0773997], null}}  |nr     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [112.7343607, 11.25, 123.7499978, 16.8749], null}}            |wd     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [78.75, -33.6608961, 89.6400654, -28.1843664], null}}         |mf     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [80.15625, 78.9564349, 88.9382744, 84.1249732], null}}        |vy     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-146.25, 56.2921567, -135.0004853, 61.8691013], null}}       |bf     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-11.25, 39.37504, -2.12E-5, 44.9999908], null}}              |ez     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [48.51614, 84.6080623, 48.51614, 84.6080623], null}}          |vp     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [146.3126564, 0.0542566, 156.09375, 5.6159858], null}}        |x2     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [67.5, 61.8817, 78.7172, 67.488], null}}                      |ve     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-22.4986671, -22.4719545, -11.2554932, -16.9467365], null}}  |7s     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-134.8484052, 17.0052467, -123.7679812, 22.4397813], null}}  |95     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-146.25, -11.1931059, -135.0013733, -6.0916292], null}}      |2y     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-135.0, -83.8333, -124.4478565, -78.7677918], null}}         |11     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-44.8187256, -56.1774766, -34.1630816, -50.8584471], null}}  |5n     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-44.619453, -44.9958826, -33.7843399, -39.4124306], null}}   |70     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-112.2099566, -33.7316387, -101.2729317, -28.2008956], null}}|3d     |
-|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-33.2666016, -72.9196355, -22.6803555, -67.5007358], null}}  |57     |
-+------------+--------------+------------------------------------------------------------------------------------------+-------+
+<pre>+------------+--------------+-----------------------------------------------------------------------------------------+-------+
+|version     |primary_column|columns                                                                                  |geohash|
++------------+--------------+-----------------------------------------------------------------------------------------+-------+
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-45.0, -16.8737144, -33.7740679, -11.2501301], null}}       |7j     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-135.0, -83.8333, -124.4478565, -78.7677918], null}}        |11     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-145.546875, -66.4255372, -135.3419066, -62.6119407], null}}|0u     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-168.75, -27.8467506, -158.4935007, -22.5328537], null}}    |27     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [68.203125, -44.3395652, 78.3984375, -39.5638609], null}}    |m8     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [33.75, -16.8686782, 44.9838638, -11.2558997], null}}        |kv     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [78.75, -22.4083013, 89.99897, -16.968308], null}}           |mu     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [80.1560848, 73.5, 89.0321735, 78.1825871], null}}           |vv     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [158.3080636, 0.0, 168.7045937, 5.6247198], null}}           |x8     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [146.65, 67.614791, 156.863333, 72.0234111], null}}          |zk     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [56.25, -67.5, 67.2499575, -61.9483887], null}}              |jk     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [67.5, 67.518, 78.046875, 72.96], null}}                     |vs     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [135.0, 16.953941, 146.0742188, 22.4856433], null}}          |x5     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [90.0, 39.376772, 101.2495333, 44.9817729], null}}           |wp     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [101.25, 45.0, 112.493593, 50.6131607], null}}               |y2     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-67.5, -73.1167, -56.5362777, -67.5167], null}}             |4e     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-78.4263447, 61.90054, -67.6226755, 67.41667], null}}       |f7     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [-56.25, 22.5402227, -45.2120876, 28.1104459], null}}        |du     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [136.7578125, -84.8460811, 142.3828125, -84.3999669], null}} |p0     |
+|1.0.0-beta.1|geometry      |{geometry -&gt; {WKB, [Point], [90.8843994, -56.1702103, 101.16154, -50.6342525], null}}    |nn     |
++------------+--------------+-----------------------------------------------------------------------------------------+-------+
 only showing top 20 rows
 
 </pre>
@@ -5427,6 +5420,12 @@ only showing top 20 rows
 </pre>
 </div>
 </div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>                                                                                </pre>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -5488,8 +5487,8 @@ df_place = df_place.filter("ST_Contains(ST_GeomFromWKT('"+spatial_filter+"'), ge
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>CPU times: user 32 ms, sys: 6.48 ms, total: 38.5 ms
-Wall time: 10.6 s
+<pre>CPU times: user 861 ms, sys: 214 ms, total: 1.08 s
+Wall time: 3min 22s
 </pre>
 </div>
 </div>
@@ -5550,8 +5549,8 @@ map_place</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>CPU times: user 602 ms, sys: 96.3 ms, total: 698 ms
-Wall time: 1min 23s
+<pre>CPU times: user 1.9 s, sys: 244 ms, total: 2.14 s
+Wall time: 14min 52s
 </pre>
 </div>
 </div>
@@ -5575,8 +5574,8 @@ Wall time: 1min 23s
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f977d0cf-b74b-42fc-ae97-3ce9f9ece0d4">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=f977d0cf-b74b-42fc-ae97-3ce9f9ece0d4">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -5599,6 +5598,18 @@ Wall time: 1min 23s
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-12">df_place.select("id", "geometry", "categories.main").limit(1000).repartition(1) \
     .write.format("geoparquet").option("geoparquet.version", "1.0.0").option("geoparquet.crs", "").mode('overwrite').save("places.parquet")</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>                                                                                </pre>
 </div>
 </div>
 </div>
@@ -5651,6 +5662,12 @@ gdf</div>
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>                                                                                </pre>
+</div>
+</div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
 <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[13]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
@@ -5815,8 +5832,8 @@ df_building = df_building.limit(200_000)</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>CPU times: user 12.4 ms, sys: 2.26 ms, total: 14.6 ms
-Wall time: 6.07 s
+<pre>CPU times: user 474 ms, sys: 92.9 ms, total: 567 ms
+Wall time: 1min 48s
 </pre>
 </div>
 </div>
@@ -5869,24 +5886,18 @@ map_building</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>                                                                                </pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>CPU times: user 1.82 s, sys: 228 ms, total: 2.04 s
-Wall time: 5min 6s
+<pre>/srv/conda/envs/notebook/lib/python3.9/site-packages/jupyter_client/session.py:718: UserWarning: Message serialization failed with:
+Out of range float values are not JSON compliant
+Supporting this message is deprecated in jupyter-client 7, please make sure your message is JSON-compliant
+  content = self.pack(content)
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/usr/local/lib/python3.10/dist-packages/jupyter_client/session.py:718: UserWarning: Message serialization failed with:
-Out of range float values are not JSON compliant
-Supporting this message is deprecated in jupyter-client 7, please make sure your message is JSON-compliant
-  content = self.pack(content)
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>CPU times: user 3.91 s, sys: 590 ms, total: 4.5 s
+Wall time: 25min 30s
 </pre>
 </div>
 </div>
@@ -5968,8 +5979,8 @@ df_admin = df_admin.filter("ST_Contains(ST_GeomFromWKT('"+spatial_filter+"'), ge
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>CPU times: user 10.9 ms, sys: 4.18 ms, total: 15.1 ms
-Wall time: 4.12 s
+<pre>CPU times: user 272 ms, sys: 57.9 ms, total: 330 ms
+Wall time: 1min 1s
 </pre>
 </div>
 </div>
@@ -6024,14 +6035,14 @@ map_admin</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>[Stage 35:==================================================&gt;     (10 + 1) / 11]</pre>
+<pre>[Stage 34:==================================================&gt;     (10 + 1) / 11]</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>CPU times: user 62.9 ms, sys: 8.02 ms, total: 70.9 ms
-Wall time: 15 s
+<pre>CPU times: user 96.4 ms, sys: 37.9 ms, total: 134 ms
+Wall time: 4min 3s
 </pre>
 </div>
 </div>
@@ -6108,8 +6119,8 @@ df_locality = df_locality.filter("ST_Contains(ST_GeomFromWKT('"+spatial_filter+"
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>CPU times: user 11 ms, sys: 917 µs, total: 11.9 ms
-Wall time: 4.05 s
+<pre>CPU times: user 280 ms, sys: 59 ms, total: 339 ms
+Wall time: 1min 5s
 </pre>
 </div>
 </div>
@@ -6164,14 +6175,14 @@ map_locality</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>[Stage 38:====================================================&gt;   (14 + 1) / 15]</pre>
+<pre>[Stage 37:====================================================&gt;   (14 + 1) / 15]</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>CPU times: user 70.8 ms, sys: 14.6 ms, total: 85.4 ms
-Wall time: 22 s
+<pre>CPU times: user 130 ms, sys: 28.7 ms, total: 158 ms
+Wall time: 4min 47s
 </pre>
 </div>
 </div>
@@ -6259,8 +6270,8 @@ df_connector = df_connector.filter("ST_Contains(ST_GeomFromWKT('"+spatial_filter
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>CPU times: user 14.8 ms, sys: 8.02 ms, total: 22.8 ms
-Wall time: 5.92 s
+<pre>CPU times: user 409 ms, sys: 93.6 ms, total: 502 ms
+Wall time: 1min 42s
 </pre>
 </div>
 </div>
@@ -6273,7 +6284,7 @@ Wall time: 5.92 s
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [21]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [25]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
 <clipboard-copy for="cell-21">
@@ -6288,13 +6299,13 @@ Wall time: 5.92 s
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="o">%%</span><span class="n">time</span>
 
-<span class="n">map_connector</span> <span class="o">=</span> <span class="n">SedonaKepler</span><span class="o">.</span><span class="n">create_map</span><span class="p">(</span><span class="n">df_connector</span><span class="p">,</span> <span class="s2">"Connector"</span><span class="p">)</span>
+<span class="n">map_connector</span> <span class="o">=</span> <span class="n">SedonaKepler</span><span class="o">.</span><span class="n">create_map</span><span class="p">(</span><span class="n">df_connector</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"updatetime"</span><span class="p">),</span> <span class="s2">"Connector"</span><span class="p">)</span>
 
 <span class="n">map_connector</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-21">%%time
 
-map_connector = SedonaKepler.create_map(df_connector, "Connector")
+map_connector = SedonaKepler.create_map(df_connector.drop("updatetime"), "Connector")
 
 map_connector</div>
 </div>
@@ -6321,15 +6332,15 @@ map_connector</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>CPU times: user 1.64 s, sys: 146 ms, total: 1.79 s
-Wall time: 2min 42s
+<pre>CPU times: user 1.92 s, sys: 139 ms, total: 2.06 s
+Wall time: 9min 52s
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/usr/local/lib/python3.10/dist-packages/jupyter_client/session.py:718: UserWarning: Message serialization failed with:
+<pre>/srv/conda/envs/notebook/lib/python3.9/site-packages/jupyter_client/session.py:718: UserWarning: Message serialization failed with:
 Out of range float values are not JSON compliant
 Supporting this message is deprecated in jupyter-client 7, please make sure your message is JSON-compliant
   content = self.pack(content)
@@ -6407,8 +6418,8 @@ df_segment = df_segment.limit(200000)</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>CPU times: user 19 ms, sys: 3.48 ms, total: 22.5 ms
-Wall time: 6.13 s
+<pre>CPU times: user 502 ms, sys: 79.8 ms, total: 582 ms
+Wall time: 1min 45s
 </pre>
 </div>
 </div>
@@ -6421,7 +6432,7 @@ Wall time: 6.13 s
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [23]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [24]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
 <clipboard-copy for="cell-23">
@@ -6436,13 +6447,13 @@ Wall time: 6.13 s
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="o">%%</span><span class="n">time</span>
 
-<span class="n">map_segment</span> <span class="o">=</span> <span class="n">SedonaKepler</span><span class="o">.</span><span class="n">create_map</span><span class="p">(</span><span class="n">df_segment</span><span class="p">,</span> <span class="s2">"Segment"</span><span class="p">)</span>
+<span class="n">map_segment</span> <span class="o">=</span> <span class="n">SedonaKepler</span><span class="o">.</span><span class="n">create_map</span><span class="p">(</span><span class="n">df_segment</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"updatetime"</span><span class="p">),</span> <span class="s2">"Segment"</span><span class="p">)</span>
 
 <span class="n">map_segment</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-23">%%time
 
-map_segment = SedonaKepler.create_map(df_segment, "Segment")
+map_segment = SedonaKepler.create_map(df_segment.drop("updatetime"), "Segment")
 
 map_segment</div>
 </div>
@@ -6469,15 +6480,15 @@ map_segment</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>CPU times: user 1.74 s, sys: 124 ms, total: 1.86 s
-Wall time: 4min 53s
+<pre>CPU times: user 2.63 s, sys: 335 ms, total: 2.96 s
+Wall time: 15min 50s
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
-<pre>/usr/local/lib/python3.10/dist-packages/jupyter_client/session.py:718: UserWarning: Message serialization failed with:
+<pre>/srv/conda/envs/notebook/lib/python3.9/site-packages/jupyter_client/session.py:718: UserWarning: Message serialization failed with:
 Out of range float values are not JSON compliant
 Supporting this message is deprecated in jupyter-client 7, please make sure your message is JSON-compliant
   content = self.pack(content)
@@ -6548,7 +6559,7 @@ Supporting this message is deprecated in jupyter-client 7, please make sure your
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 19, 2024 07:09:18</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 23, 2024 06:17:36</span>
   </span>
 
     
@@ -6687,7 +6698,7 @@ Supporting this message is deprecated in jupyter-client 7, please make sure your
     <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tabs", "navigation.top", "search.suggest", "search.highlight", "search.share", "navigation.footer"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.ebd0bdb7.min.js"></script>
+      <script src="../../assets/javascripts/bundle.081f42fc.min.js"></script>
       
     
   </body>

@@ -1,8 +1,0 @@
-#!/bin/bash
-
-SPARK_HOME=$HOME/spark-3.4.0-bin-hadoop3
-export PATH=$SPARK_HOME/bin:$PATH
-export PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
-export PYSPARK_SUBMIT_ARGS="--master local[*] pyspark-shell"
-
-exec "$@"
