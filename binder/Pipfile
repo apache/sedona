@@ -1,3 +1,5 @@
+# REMIND: Please run `pipenv lock` to update Pipfile.lock after editing this file
+
 [[source]]
 name = "pypi"
 url = "https://pypi.org/simple"
