@@ -26,7 +26,7 @@ pydeck = "==0.8.0"
 ipywidgets = "*"
 jupyterlab-widgets = "==1.1.7"
 ipykernel = "*"
-jupyterlab = "==3.6.4"
+jupyterlab = "==3.6.7"
 pyspark-extension = "==2.11.0.3.4"
 
 [requires]
