@@ -23,26 +23,22 @@ geotools_wrapper_version=$2
 spark_version=$3
 spark_extension_version=$4
 
-lower_version=$(echo -e $spark_version"\n3.4" | sort -V | head -n1)
-if [ $lower_version = "3.4" ]; then
-    sedona_spark_version=3.4
-else
-    sedona_spark_version=3.0
+sedona_spark_version=3.0
+if [ ${spark_version:2:1} -gt "3" ]; then
+    sedona_spark_version=${spark_version:0:3}
 fi
 
 if [ $sedona_version = "latest" ]; then
     # Code to execute when SEDONA_VERSION is "latest"
     cp ${SEDONA_HOME}/spark-shaded/target/sedona-spark-shaded-*.jar ${SPARK_HOME}/jars/
-	cd ${SEDONA_HOME}/python;pip3 install shapely==1.8.4;pip3 install .
+	cd ${SEDONA_HOME}/python;pip3 install .
 else
     # Code to execute when SEDONA_VERSION is not "latest"
     # Download Sedona
 	curl https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-${sedona_spark_version}_2.12/${sedona_version}/sedona-spark-shaded-${sedona_spark_version}_2.12-${sedona_version}.jar -o $SPARK_HOME/jars/sedona-spark-shaded-${sedona_spark_version}_2.12-${sedona_version}.jar
 
 	# Install Sedona Python
-	pip3 install shapely==1.8.4
 	pip3 install apache-sedona==${sedona_version}
-
 fi
 
 # Download gresearch spark extension

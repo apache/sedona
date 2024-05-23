@@ -21,16 +21,14 @@ SPARK_VERSION=$1
 SEDONA_VERSION=$2
 BUILD_MODE=$3
 
-lower_version=$(echo -e ${SPARK_VERSION}"\n3.4" | sort -V | head -n1)
-if [ $lower_version = "3.4" ]; then
-    SEDONA_SPARK_VERSION=3.4
-else
-    SEDONA_SPARK_VERSION=3.0
+SEDONA_SPARK_VERSION=3.0
+if [ ${SPARK_VERSION:2:1} -gt "3" ]; then
+    SEDONA_SPARK_VERSION=${SPARK_VERSION:0:3}
 fi
 
 if [ "$SEDONA_VERSION" = "latest" ]; then
     # The compilation must take place outside Docker to avoid unnecessary maven packages
-    mvn clean install -DskipTests  -Dspark=${SEDONA_SPARK_VERSION} -Dgeotools -Dscala=2.12
+    mvn clean install -DskipTests -Dspark=${SEDONA_SPARK_VERSION} -Dscala=2.12
 fi
 
 # -- Building the image
@@ -40,7 +38,8 @@ if [ -z "$BUILD_MODE" ] || [ "$BUILD_MODE" = "local" ]; then
     docker build \
     --build-arg spark_version="${SPARK_VERSION}" \
     --build-arg sedona_version="${SEDONA_VERSION}" \
-    -f docker/sedona-spark-jupyterlab/sedona-jupyterlab.dockerfile \
+    --build-arg geotools_wrapper_version="${SEDONA_VERSION}-28.2" \
+    -f docker/sedona-spark-jupyterlab/sedona-jupyterlab.Dockerfile \
     -t apache/sedona:${SEDONA_VERSION} .
 else
     # If release, build the image for cross-platform
@@ -50,6 +49,7 @@ else
     --output type=registry \
     --build-arg spark_version="${SPARK_VERSION}" \
     --build-arg sedona_version="${SEDONA_VERSION}" \
-    -f docker/sedona-spark-jupyterlab/sedona-jupyterlab.dockerfile \
+    --build-arg geotools_wrapper_version="${SEDONA_VERSION}-28.2" \
+    -f docker/sedona-spark-jupyterlab/sedona-jupyterlab.Dockerfile \
     -t apache/sedona:${SEDONA_VERSION} .
 fi
