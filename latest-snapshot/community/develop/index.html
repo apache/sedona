@@ -3355,6 +3355,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#ide-configurations-when-using-java-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      IDE Configurations When Using Java 11
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -4036,6 +4045,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#ide-configurations-when-using-java-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      IDE Configurations When Using Java 11
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -4174,14 +4192,28 @@ For example, to compile sedona with Spark 3.4 and Scala 2.12, use: <code>mvn cle
 <h4 id="run-a-single-unit-test">Run a single unit test<a class="headerlink" href="#run-a-single-unit-test" title="Permanent link">&para;</a></h4>
 <p>In the IDE, right-click a test case and run this test case.</p>
 <p><img alt="" src="../../image/ide-java-6.png" /></p>
-<p>The IDE might tell you that the PATH does not exist as follows:</p>
+<p>When you run a test case written in Scala, the IDE might tell you that the "Path does not exist" as follows:</p>
 <p><img alt="" src="../../image/ide-java-7.png" /></p>
 <p>Go to <code>Edit Configuration</code></p>
 <p><img alt="" src="../../image/ide-java-8.png" /></p>
-<p>Append the submodule folder to <code>Working Directory</code>. For example, <code>sedona/sql</code>.</p>
+<p>Change the value of <code>Working Directory</code> to <code>$MODULE_WORKING_DIR$</code>.</p>
 <p><img alt="" src="../../image/ide-java-9.png" /></p>
 <p>Re-run the test case. Do NOT right-click the test case to re-run. Instead, click the button as shown in the figure below.</p>
 <p><img alt="" src="../../image/ide-java-10.png" /></p>
+<p>If you don't want to change the <code>Working Directory</code> configuration every time, you can change the default value of <code>Working Directory</code>
+in the <code>Run/Debug Configurations</code> window. Click <code>Edit configuration templates...</code> and change the value
+of <code>Working Directory</code> of ScalaTest to <code>$MODULE_WORKING_DIR$</code>.</p>
+<p><img alt="" src="../../image/ide-java-11.png" />
+<img alt="" src="../../image/ide-java-12.png" /></p>
+<p>Now newly created run configurations for ScalaTest will have the correct value set for <code>Working Directory</code>.</p>
+<h3 id="ide-configurations-when-using-java-11">IDE Configurations When Using Java 11<a class="headerlink" href="#ide-configurations-when-using-java-11" title="Permanent link">&para;</a></h3>
+<p>If you are using Java 11, you may encounter the following error when running tests:</p>
+<div class="highlight"><pre><span></span><code>/path/to/sedona/common/src/main/java/org/apache/sedona/common/geometrySerde/UnsafeGeometryBuffer.java
+package sun.misc does not exist
+sun.misc.Unsafe
+</code></pre></div>
+<p>You can fix this issue by disabling <code>Use '--release' option for cross-compilation</code> in the IDE settings.</p>
+<p><img alt="" src="../../image/ide-java-13.png" /></p>
 <h2 id="python-developers">Python developers<a class="headerlink" href="#python-developers" title="Permanent link">&para;</a></h2>
 <h3 id="ide_1">IDE<a class="headerlink" href="#ide_1" title="Permanent link">&para;</a></h3>
 <p>We recommend <a href="https://www.jetbrains.com/pycharm/">PyCharm</a>.</p>
@@ -4220,7 +4252,7 @@ For example, to compile sedona with Spark 3.4 and Scala 2.12, use: <code>mvn cle
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 13, 2024 20:58:34</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 24, 2024 20:35:32</span>
   </span>
 
     
