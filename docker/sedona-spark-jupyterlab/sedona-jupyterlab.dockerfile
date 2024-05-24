@@ -74,4 +74,4 @@ EXPOSE 4040
 WORKDIR ${SHARED_WORKSPACE}
 
 COPY docker/sedona-spark-jupyterlab/start.sh /opt/
-CMD /bin/bash /opt/start.sh
+CMD ["/bin/bash", "/opt/start.sh"]
