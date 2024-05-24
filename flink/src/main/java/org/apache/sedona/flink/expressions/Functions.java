@@ -1413,6 +1413,29 @@ public class Functions {
         }
     }
 
+    public static class ST_DelaunayTriangles extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint(value = "Double") Double tolerance,
+                             @DataTypeHint(value = "Integer") Integer flag) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.delaunayTriangle(geometry, tolerance, flag);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint(value = "Double") Double tolerance) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.delaunayTriangle(geometry, tolerance);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.delaunayTriangle(geometry);
+        }
+    }
+
     public static class ST_IsValidReason extends ScalarFunction {
         @DataTypeHint("String")
         public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {

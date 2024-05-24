@@ -1556,6 +1556,22 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testDelaunayTriangle() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTIPOLYGON (((10 10, 10 20, 20 20, 20 10, 10 10)),((25 10, 25 20, 35 20, 35 10, 25 10)))') AS geom");
+        String actual = ((Geometry) first(polyTable.select(call(Functions.ST_DelaunayTriangles.class.getSimpleName(), $("geom")))).getField(0)).toText();
+        String expected = "GEOMETRYCOLLECTION (POLYGON ((10 20, 10 10, 20 10, 10 20)), POLYGON ((10 20, 20 10, 20 20, 10 20)), POLYGON ((20 20, 20 10, 25 10, 20 20)), POLYGON ((20 20, 25 10, 25 20, 20 20)), POLYGON ((25 20, 25 10, 35 10, 25 20)), POLYGON ((25 20, 35 10, 35 20, 25 20)))";
+        assertEquals(expected, actual);
+
+        actual = ((Geometry) first(polyTable.select(call(Functions.ST_DelaunayTriangles.class.getSimpleName(), $("geom"), 20))).getField(0)).toText();
+        expected = "GEOMETRYCOLLECTION (POLYGON ((10 20, 10 10, 35 10, 10 20)))";
+        assertEquals(expected, actual);
+
+        actual = ((Geometry) first(polyTable.select(call(Functions.ST_DelaunayTriangles.class.getSimpleName(), $("geom"), 20, 1))).getField(0)).toText();
+        expected = "MULTILINESTRING ((10 20, 35 10), (10 10, 10 20), (10 10, 35 10))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testHausdorffDistance() {
         Table polyTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (0.0 1.0)') AS g1, ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)') AS g2");
         Table actualTable = polyTable.select(call(Functions.ST_HausdorffDistance.class.getSimpleName(), $("g1"), $("g2"), 0.4));

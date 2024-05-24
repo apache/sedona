@@ -356,6 +356,35 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static byte[] ST_DelaunayTriangles(byte[] geometry) {
+        return GeometrySerde.serialize(
+                Functions.delaunayTriangle(
+                        GeometrySerde.deserialize(geometry)
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "tolerance"})
+    public static byte[] ST_DelaunayTriangles(byte[] geometry, double tolerance) {
+        return GeometrySerde.serialize(
+                Functions.delaunayTriangle(
+                        GeometrySerde.deserialize(geometry),
+                        tolerance
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "tolerance", "flag"})
+    public static byte[] ST_DelaunayTriangles(byte[] geometry, double tolerance, int flag) {
+        return GeometrySerde.serialize(
+                Functions.delaunayTriangle(
+                        GeometrySerde.deserialize(geometry),
+                        tolerance, flag
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static Integer ST_Dimension(byte[] geometry) {
         return Functions.dimension(
                 GeometrySerde.deserialize(geometry)

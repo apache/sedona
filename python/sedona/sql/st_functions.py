@@ -1818,6 +1818,30 @@ def ST_Degrees(angleInRadian: Union[ColumnOrName, float]) -> Column:
     :return: Angle in Degrees
     """
     return _call_st_function("ST_Degrees", angleInRadian)
+
+@validate_argument_types
+def ST_DelaunayTriangles(geometry: ColumnOrName, tolerance: Optional[Union[ColumnOrName, float]] = None, flag: Optional[Union[ColumnOrName, int]] = None) -> Column:
+    """
+    Computes the Delaunay Triangles of the vertices of the input geometry.
+
+    :param geometry: Input geometry
+    :type geometry: ColumnOrName
+    :param tolerance:
+    :type tolerance: ColumnOrName or float
+    :param flag: Selects the output type
+    :type flag: ColumnOrName or int
+    :return: Delaunay triangles of the input geometry
+    :rtype: ColumnOrName
+    """
+
+    if flag is None and tolerance is None:
+        args = (geometry)
+    elif flag is None:
+        args = (geometry, tolerance)
+    else:
+        args = (geometry, tolerance, flag)
+    return _call_st_function("ST_DelaunayTriangles", args)
+
 @validate_argument_types
 def ST_HausdorffDistance(g1: ColumnOrName, g2: ColumnOrName, densityFrac: Optional[Union[ColumnOrName, float]] = -1) -> Column:
     """

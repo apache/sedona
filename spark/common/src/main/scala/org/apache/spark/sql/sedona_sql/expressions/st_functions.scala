@@ -530,6 +530,14 @@ object st_functions extends DataFrameAPI {
   def ST_Degrees(angleInRadian: Column): Column = wrapExpression[ST_Degrees](angleInRadian)
 
   def ST_Degrees(angleInRadian: Double): Column = wrapExpression[ST_Degrees](angleInRadian)
+
+  def ST_DelaunayTriangles(geometry: Column, tolerance: Column, flags: Column): Column = wrapExpression[ST_DelaunayTriangles](geometry, tolerance, flags)
+  def ST_DelaunayTriangles(geometry: String, tolerance: Double, flags: Integer): Column = wrapExpression[ST_DelaunayTriangles](geometry, tolerance, flags)
+  def ST_DelaunayTriangles(geometry: Column, tolerance: Column): Column = wrapExpression[ST_DelaunayTriangles](geometry, tolerance)
+  def ST_DelaunayTriangles(geometry: String, tolerance: Double): Column = wrapExpression[ST_DelaunayTriangles](geometry, tolerance)
+  def ST_DelaunayTriangles(geometry: Column): Column = wrapExpression[ST_DelaunayTriangles](geometry)
+  def ST_DelaunayTriangles(geometry: String): Column = wrapExpression[ST_DelaunayTriangles](geometry)
+
   def ST_HausdorffDistance(g1: Column, g2: Column) = wrapExpression[ST_HausdorffDistance](g1, g2, -1)
 
   def ST_HausdorffDistance(g1: String, g2: String) = wrapExpression[ST_HausdorffDistance](g1, g2, -1);
