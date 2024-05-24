@@ -44,7 +44,7 @@ get_latest_version_with_suffix() {
   METADATA_XML=$(curl -s $METADATA_URL)
 
   # Extract versions from the XML
-  VERSIONS=$(echo "$METADATA_XML" | grep -oP '(?<=<version>)[^<]+(?=</version>)')
+  VERSIONS=$(echo "$METADATA_XML" | grep -o '<version>[^<]*</version>' | awk -F'[<>]' '{print $3}')
 
   LATEST_VERSION=""
 
@@ -58,7 +58,6 @@ get_latest_version_with_suffix() {
   done
 
   if [[ -z $LATEST_VERSION ]]; then
-    echo "No version found with suffix $SUFFIX"
     exit 1
   else
     echo $LATEST_VERSION
@@ -73,6 +72,10 @@ fi
 GEOTOOLS_WRAPPER_VERSION="${SEDONA_VERSION}-${GEOTOOLS_VERSION}"
 if [ "$SEDONA_VERSION" = "latest" ]; then
     GEOTOOLS_WRAPPER_VERSION=$(get_latest_version_with_suffix "https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/" "$GEOTOOLS_VERSION")
+    if [ -z "$GEOTOOLS_WRAPPER_VERSION" ]; then
+        echo "No geotools-wrapper version with suffix $GEOTOOLS_VERSION"
+        exit 1
+    fi
     echo "Using latest geotools-wrapper version: $GEOTOOLS_WRAPPER_VERSION"
 
     # The compilation must take place outside Docker to avoid unnecessary maven packages
