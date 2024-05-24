@@ -36,8 +36,8 @@ jobs:
             sedona: 1.6.0
             geotools: 28.2
           - spark: 3.5.1
-            sedona: latest
-            geotools: auto
+            sedona: "latest"
+            geotools: "auto"
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -60,6 +60,10 @@ jobs:
       run: |
         brew install docker
         colima start
+        DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+        mkdir -p $DOCKER_CONFIG/cli-plugins
+        curl -SL https://github.com/docker/buildx/releases/download/v0.11.2/buildx-v0.11.2.darwin-arm64 -o $DOCKER_CONFIG/cli-plugins/docker-buildx
+        chmod +x $DOCKER_CONFIG/cli-plugins/docker-buildx
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         SEDONA_VERSION: ${{ matrix.sedona }}
