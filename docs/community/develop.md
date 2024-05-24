@@ -62,7 +62,7 @@ In the IDE, right-click a test case and run this test case.
 
 ![](../image/ide-java-6.png)
 
-The IDE might tell you that the PATH does not exist as follows:
+When you run a test case written in Scala, the IDE might tell you that the "Path does not exist" as follows:
 
 ![](../image/ide-java-7.png)
 
@@ -70,13 +70,36 @@ Go to `Edit Configuration`
 
 ![](../image/ide-java-8.png)
 
-Append the submodule folder to `Working Directory`. For example, `sedona/sql`.
+Change the value of `Working Directory` to `$MODULE_WORKING_DIR$`.
 
 ![](../image/ide-java-9.png)
 
 Re-run the test case. Do NOT right-click the test case to re-run. Instead, click the button as shown in the figure below.
 
 ![](../image/ide-java-10.png)
+
+If you don't want to change the `Working Directory` configuration every time, you can change the default value of `Working Directory`
+in the `Run/Debug Configurations` window. Click `Edit configuration templates...` and change the value
+of `Working Directory` of ScalaTest to `$MODULE_WORKING_DIR$`.
+
+![](../image/ide-java-11.png)
+![](../image/ide-java-12.png)
+
+Now newly created run configurations for ScalaTest will have the correct value set for `Working Directory`.
+
+### IDE Configurations When Using Java 11
+
+If you are using Java 11, you may encounter the following error when running tests:
+
+```
+/path/to/sedona/common/src/main/java/org/apache/sedona/common/geometrySerde/UnsafeGeometryBuffer.java
+package sun.misc does not exist
+sun.misc.Unsafe
+```
+
+You can fix this issue by disabling `Use '--release' option for cross-compilation` in the IDE settings.
+
+![](../image/ide-java-13.png)
 
 ## Python developers
 
