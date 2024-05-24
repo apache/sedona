@@ -73,14 +73,5 @@ EXPOSE 4040
 
 WORKDIR ${SHARED_WORKSPACE}
 
-
-
-CMD DRIVER_MEM=${DRIVER_MEM:-4g} && \
-    EXECUTOR_MEM=${EXECUTOR_MEM:-4g} && \
-    cp ${SPARK_HOME}/conf/spark-env.sh.template ${SPARK_HOME}/conf/spark-env.sh && \
-    echo "SPARK_WORKER_MEMORY=${EXECUTOR_MEM}" >> ${SPARK_HOME}/conf/spark-env.sh && \
-    echo "spark.driver.memory $DRIVER_MEM" >> ${SPARK_HOME}/conf/spark-defaults.conf && \
-    echo "spark.executor.memory $EXECUTOR_MEM" >> ${SPARK_HOME}/conf/spark-defaults.conf && \
-    service ssh start && \
-    ${SPARK_HOME}/sbin/start-all.sh && \
-    jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=
+COPY docker/sedona-spark-jupyterlab/start.sh /opt/
+CMD /bin/bash /opt/start.sh
