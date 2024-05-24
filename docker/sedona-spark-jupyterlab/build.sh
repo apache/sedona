@@ -22,9 +22,10 @@ SEDONA_VERSION=$2
 BUILD_MODE=$3
 GEOTOOLS_VERSION=${4:-auto}
 
-SEDONA_SPARK_VERSION=3.0
-if [ ${SPARK_VERSION:2:1} -gt "3" ]; then
-    SEDONA_SPARK_VERSION=${SPARK_VERSION:0:3}
+SEDONA_SPARK_VERSION=${SPARK_VERSION:0:3}
+if [ ${SPARK_VERSION:0:1} -eq "3" ] && [ ${SPARK_VERSION:2:1} -le "3" ]; then
+    # 3.0, 3.1, 3.2, 3.3
+    SEDONA_SPARK_VERSION=3.0
 fi
 
 # Function to compare two version numbers

@@ -23,9 +23,11 @@ geotools_wrapper_version=$2
 spark_version=$3
 spark_extension_version=$4
 
-sedona_spark_version=3.0
-if [ ${spark_version:2:1} -gt "3" ]; then
-    sedona_spark_version=${spark_version:0:3}
+spark_compat_version=${spark_version:0:3}
+sedona_spark_version=${spark_compat_version}
+if [ ${spark_version:0:1} -eq "3" ] && [ ${spark_version:2:1} -le "3" ]; then
+    # 3.0, 3.1, 3.2, 3.3
+    sedona_spark_version=3.0
 fi
 
 if [ $sedona_version = "latest" ]; then
@@ -42,10 +44,10 @@ else
 fi
 
 # Download gresearch spark extension
-curl https://repo1.maven.org/maven2/uk/co/gresearch/spark/spark-extension_2.12/${spark_extension_version}-${sedona_spark_version}/spark-extension_2.12-${spark_extension_version}-${sedona_spark_version}.jar -o $SPARK_HOME/jars/spark-extension_2.12-${spark_extension_version}-${sedona_spark_version}.jar
+curl https://repo1.maven.org/maven2/uk/co/gresearch/spark/spark-extension_2.12/${spark_extension_version}-${spark_compat_version}/spark-extension_2.12-${spark_extension_version}-${spark_compat_version}.jar -o $SPARK_HOME/jars/spark-extension_2.12-${spark_extension_version}-${spark_compat_version}.jar
 
 # Install Spark extension Python
-pip3 install pyspark-extension==${spark_extension_version}.${sedona_spark_version}
+pip3 install pyspark-extension==${spark_extension_version}.${spark_compat_version}
 
 # Download GeoTools jar
 curl https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/${geotools_wrapper_version}/geotools-wrapper-${geotools_wrapper_version}.jar -o $SPARK_HOME/jars/geotools-wrapper-${geotools_wrapper_version}.jar
