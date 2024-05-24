@@ -28,12 +28,16 @@ jobs:
         include:
           - spark: 3.5.1
             sedona: 1.6.0
+            geotools: 28.2
           - spark: 3.4.3
             sedona: 1.6.0
+            geotools: 28.2
           - spark: 3.3.4
             sedona: 1.6.0
+            geotools: 28.2
           - spark: 3.5.1
             sedona: latest
+            geotools: auto
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -59,4 +63,5 @@ jobs:
     - env:
         SPARK_VERSION: ${{ matrix.spark }}
         SEDONA_VERSION: ${{ matrix.sedona }}
-      run: ./docker/sedona-spark-jupyterlab/build.sh ${SPARK_VERSION} ${SEDONA_VERSION}
+        GEOTOOLS_VERSION: ${{ matrix.geotools }}
+      run: ./docker/sedona-spark-jupyterlab/build.sh ${SPARK_VERSION} ${SEDONA_VERSION} local ${GEOTOOLS_VERSION}

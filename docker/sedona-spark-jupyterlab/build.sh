@@ -20,13 +20,61 @@
 SPARK_VERSION=$1
 SEDONA_VERSION=$2
 BUILD_MODE=$3
+GEOTOOLS_VERSION=${4:-auto}
 
 SEDONA_SPARK_VERSION=3.0
 if [ ${SPARK_VERSION:2:1} -gt "3" ]; then
     SEDONA_SPARK_VERSION=${SPARK_VERSION:0:3}
 fi
 
+# Function to compare two version numbers
+version_gt() {
+  # Compare two version numbers
+  # Returns 0 if the first version is greater, 1 otherwise
+  [ "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1" ]
+}
+
+# Function to get the latest version of a Maven package
+get_latest_version_with_suffix() {
+  BASE_URL=$1
+  SUFFIX=$2
+
+  # Fetch the maven-metadata.xml file
+  METADATA_URL="${BASE_URL}maven-metadata.xml"
+  METADATA_XML=$(curl -s $METADATA_URL)
+
+  # Extract versions from the XML
+  VERSIONS=$(echo "$METADATA_XML" | grep -oP '(?<=<version>)[^<]+(?=</version>)')
+
+  LATEST_VERSION=""
+
+  # Filter versions that end with the specified suffix and find the largest one
+  for VERSION in $VERSIONS; do
+    if [[ $VERSION == *$SUFFIX ]]; then
+      if [[ -z $LATEST_VERSION ]] || version_gt $VERSION $LATEST_VERSION; then
+        LATEST_VERSION=$VERSION
+      fi
+    fi
+  done
+
+  if [[ -z $LATEST_VERSION ]]; then
+    echo "No version found with suffix $SUFFIX"
+    exit 1
+  else
+    echo $LATEST_VERSION
+  fi
+}
+
+if [ "$GEOTOOLS_VERSION" = "auto" ]; then
+    GEOTOOLS_VERSION=$(mvn help:evaluate -Dexpression=geotools.version -q -DforceStdout)
+    echo "GeoTools version inferred from pom.xml: $GEOTOOLS_VERSION"
+fi
+
+GEOTOOLS_WRAPPER_VERSION="${SEDONA_VERSION}-${GEOTOOLS_VERSION}"
 if [ "$SEDONA_VERSION" = "latest" ]; then
+    GEOTOOLS_WRAPPER_VERSION=$(get_latest_version_with_suffix "https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/" "$GEOTOOLS_VERSION")
+    echo "Using latest geotools-wrapper version: $GEOTOOLS_WRAPPER_VERSION"
+
     # The compilation must take place outside Docker to avoid unnecessary maven packages
     mvn clean install -DskipTests -Dspark=${SEDONA_SPARK_VERSION} -Dscala=2.12
 fi
@@ -35,11 +83,11 @@ fi
 
 if [ -z "$BUILD_MODE" ] || [ "$BUILD_MODE" = "local" ]; then
     # If local, build the image for the local environment
-    docker build \
+    docker buildx build \
     --build-arg spark_version="${SPARK_VERSION}" \
     --build-arg sedona_version="${SEDONA_VERSION}" \
-    --build-arg geotools_wrapper_version="${SEDONA_VERSION}-28.2" \
-    -f docker/sedona-spark-jupyterlab/sedona-jupyterlab.Dockerfile \
+    --build-arg geotools_wrapper_version="${GEOTOOLS_WRAPPER_VERSION}" \
+    -f docker/sedona-spark-jupyterlab/sedona-jupyterlab.dockerfile \
     -t apache/sedona:${SEDONA_VERSION} .
 else
     # If release, build the image for cross-platform
@@ -49,7 +97,7 @@ else
     --output type=registry \
     --build-arg spark_version="${SPARK_VERSION}" \
     --build-arg sedona_version="${SEDONA_VERSION}" \
-    --build-arg geotools_wrapper_version="${SEDONA_VERSION}-28.2" \
-    -f docker/sedona-spark-jupyterlab/sedona-jupyterlab.Dockerfile \
+    --build-arg geotools_wrapper_version="${GEOTOOLS_WRAPPER_VERSION}" \
+    -f docker/sedona-spark-jupyterlab/sedona-jupyterlab.dockerfile \
     -t apache/sedona:${SEDONA_VERSION} .
 fi
