@@ -96,7 +96,7 @@ trait TraitJoinQueryBase {
 
   def doSpatialPartitioning(dominantShapes: SpatialRDD[Geometry], followerShapes: SpatialRDD[Geometry],
                             numPartitions: Integer, sedonaConf: SedonaConf): Unit = {
-    if (dominantShapes.approximateTotalCount > 0) {
+    if (dominantShapes.approximateTotalCount > 0 && numPartitions > 0) {
       dominantShapes.spatialPartitioning(sedonaConf.getJoinGridType, numPartitions)
       followerShapes.spatialPartitioning(dominantShapes.getPartitioner)
     }
