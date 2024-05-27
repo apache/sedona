@@ -19,12 +19,12 @@
 
 package org.apache.sedona.sql
 
-import org.apache.spark.sql.Column
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{Column, DataFrame, Row}
 import org.apache.spark.sql.functions.{col, expr}
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors.ST_GeomFromText
 import org.apache.spark.sql.sedona_sql.strategy.join.{BroadcastIndexJoinExec, DistanceJoinExec, RangeJoinExec}
-import org.apache.spark.sql.types.IntegerType
+import org.apache.spark.sql.types.{IntegerType, StructField, StructType}
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTReader
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -182,6 +182,44 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     }
   }
 
+  describe("Spatial join should work with dataframe containing 0 partitions") {
+    val queries = Table("join queries",
+      "SELECT * FROM df1 JOIN dfEmpty WHERE ST_Intersects(df1.geom, dfEmpty.geom)",
+      "SELECT * FROM dfEmpty JOIN df1 WHERE ST_Intersects(df1.geom, dfEmpty.geom)",
+      "SELECT /*+ BROADCAST(df1) */ * FROM df1 JOIN dfEmpty WHERE ST_Intersects(df1.geom, dfEmpty.geom)",
+      "SELECT /*+ BROADCAST(dfEmpty) */ * FROM df1 JOIN dfEmpty WHERE ST_Intersects(df1.geom, dfEmpty.geom)",
+      "SELECT /*+ BROADCAST(df1) */ * FROM dfEmpty JOIN df1 WHERE ST_Intersects(df1.geom, dfEmpty.geom)",
+      "SELECT /*+ BROADCAST(dfEmpty) */ * FROM dfEmpty JOIN df1 WHERE ST_Intersects(df1.geom, dfEmpty.geom)")
+
+    forAll (queries) { query =>
+      it(s"Legacy join: $query") {
+        withConf(Map(spatialJoinPartitionSideConfKey -> "left")) {
+          val resultRows = sparkSession.sql(query).collect()
+          assert(resultRows.isEmpty)
+        }
+        withConf(Map(spatialJoinPartitionSideConfKey -> "right")) {
+          val resultRows = sparkSession.sql(query).collect()
+          assert(resultRows.isEmpty)
+        }
+      }
+    }
+
+    it("non-empty dataframe has lots of partitions") {
+      val df = sparkSession.range(0, 4).toDF("id").withColumn("geom", expr("ST_Point(id, id)")).repartition(10)
+      df.createOrReplaceTempView("df10parts")
+
+      val query = "SELECT * FROM df10parts JOIN dfEmpty WHERE ST_Intersects(df10parts.geom, dfEmpty.geom)";
+      withConf(Map(spatialJoinPartitionSideConfKey -> "left")) {
+        val resultRows = sparkSession.sql(query).collect()
+        assert(resultRows.isEmpty)
+      }
+      withConf(Map(spatialJoinPartitionSideConfKey -> "right")) {
+        val resultRows = sparkSession.sql(query).collect()
+        assert(resultRows.isEmpty)
+      }
+    }
+  }
+
   private def withOptimizationMode(mode: String)(body: => Unit) : Unit = {
     withConf(Map("sedona.join.optimizationmode" -> mode))(body)
   }
@@ -199,8 +237,13 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       .withColumn("geom", ST_GeomFromText(new Column("_c2")))
       .select("id", "geom")
       .withColumn("dist", expr("ST_Area(geom)"))
+    val emptyRdd = sparkSession.sparkContext.emptyRDD[Row]
+    val emptyDf = sparkSession.createDataFrame(emptyRdd, StructType(Seq(
+      StructField("id", IntegerType), StructField("geom", GeometryUDT)
+    )))
     df1.createOrReplaceTempView("df1")
     df2.createOrReplaceTempView("df2")
+    emptyDf.createOrReplaceTempView("dfEmpty")
     (df1, df2)
   }
 
