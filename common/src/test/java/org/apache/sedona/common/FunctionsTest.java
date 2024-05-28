@@ -370,6 +370,27 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void testM() throws ParseException {
+        Geometry geom = Constructors.geomFromWKT("POINT ZM(1 2 3 4)", 0);
+        double actual = Functions.m(geom);
+        double expected = 4;
+        assertEquals(expected, actual, FP_TOLERANCE2);
+
+        geom = Constructors.geomFromWKT("POINT M(1 2 3)", 0);
+        actual = Functions.m(geom);
+        expected = 3;
+        assertEquals(expected, actual, FP_TOLERANCE2);
+
+        geom = Constructors.geomFromWKT("POINT Z(1 2 3)", 0);
+        actual = Functions.m(geom);
+        assertTrue(Double.isNaN(actual));
+
+        geom = Constructors.geomFromWKT("LINESTRING ZM(1 2 3 4, 2 3 4 5)", 0);
+        Double actualRes = Functions.m(geom);
+        assertNull(actualRes);
+    }
+
+    @Test
     public void dimensionGeometry3D() {
         Point point3D = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 1));
         Integer actualResult = Functions.dimension(point3D);

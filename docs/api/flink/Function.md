@@ -2026,6 +2026,26 @@ Output:
 LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140.21046313888758)
 ```
 
+## ST_M
+
+Introduction: Returns M Coordinate of given Point, null otherwise.
+
+Format: `ST_M(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_M(ST_MakePoint(1, 2, 3, 4))
+```
+
+Output:
+
+```
+4.0
+```
+
 ## ST_MakeLine
 
 Introduction: Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error.

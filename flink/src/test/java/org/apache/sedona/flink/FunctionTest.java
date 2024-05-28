@@ -700,6 +700,13 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testM() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT ZM(1 2 3 4)') AS point");
+        double actual = (double) first(pointTable.select(call(Functions.ST_M.class.getSimpleName(), $("point")))).getField(0);
+        assertEquals(4, actual, FP_TOLERANCE);
+    }
+
+    @Test
     public void testZMax() {
         Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(1 3 4, 5 6 7)') AS " + polygonColNames[0]);
         polygonTable = polygonTable.select(call(Functions.ST_ZMax.class.getSimpleName(), $(polygonColNames[0])));

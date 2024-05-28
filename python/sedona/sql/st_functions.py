@@ -859,6 +859,18 @@ def ST_LineSubstring(line_string: ColumnOrName, start_fraction: ColumnOrNameOrNu
 
 
 @validate_argument_types
+def ST_M(geom: ColumnOrName) -> Column:
+    """Return the M coordinate of a point geometry.
+
+    :param point: Point geometry column to get the coordinate for.
+    :type point: ColumnOrName
+    :return: M coordinate of the point geometry as a double column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_M", geom)
+
+
+@validate_argument_types
 def ST_MakeLine(geom1: ColumnOrName, geom2: Optional[ColumnOrName] = None) -> Column:
     """Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error.
 

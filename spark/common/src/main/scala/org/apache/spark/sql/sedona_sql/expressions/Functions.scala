@@ -511,6 +511,14 @@ case class ST_MinimumBoundingCircle(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_M(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.m _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 
 /**
   * Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length.
