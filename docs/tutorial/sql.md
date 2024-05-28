@@ -411,7 +411,7 @@ This format is efficient for processing large datasets where each line is a sepa
 {"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]},"properties":{"prop0":"value2"}}
 ```
 
-By default, when `option` is not specified, WherobotsDB reads a GeoJSON file as a single line GeoJSON.
+By default, when `option` is not specified, Sedona reads a GeoJSON file as a single line GeoJSON.
 
 === "Python"
 
