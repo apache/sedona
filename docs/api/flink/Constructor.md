@@ -196,7 +196,7 @@ Format:
 
 `ST_GeomFromEWKB (Wkb: Binary)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example
 
