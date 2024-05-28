@@ -1361,6 +1361,15 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geom"})
+    public static byte[] ST_ForceRHR(byte[] geom) {
+        return GeometrySerde.serialize(
+                Functions.forcePolygonCW(
+                        GeometrySerde.deserialize(geom)
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom"})
     public static double ST_LengthSpheroid(byte[] geom) {
         return Spheroid.length(
                 GeometrySerde.deserialize(geom)

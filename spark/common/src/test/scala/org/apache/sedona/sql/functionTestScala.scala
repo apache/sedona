@@ -948,6 +948,13 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     assert(expected.equals(actual))
   }
 
+  it("Should pass ST_ForceRHR") {
+    val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))') as poly")
+    val actual = baseDf.selectExpr("ST_AsText(ST_ForceRHR(poly))").first().getString(0)
+    val expected = "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))"
+    assert(expected.equals(actual))
+  }
+
   it("Should pass ST_IsPolygonCW") {
     var actual = sparkSession.sql("SELECT ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))'))").first().getBoolean(0)
     assert(actual == false)

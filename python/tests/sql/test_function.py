@@ -1395,6 +1395,12 @@ class TestPredicateJoin(TestBase):
         expected = "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))"
         assert expected == actual
 
+    def test_forceRHR(self):
+        actualDf = self.spark.sql("SELECT ST_ForceRHR(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))')) AS polyCW")
+        actual = actualDf.selectExpr("ST_AsText(polyCW)").take(1)[0][0]
+        expected = "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))"
+        assert expected == actual
+
     def test_nRings(self):
         expected = 1
         actualDf = self.spark.sql("SELECT ST_GeomFromText('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))') AS geom")

@@ -1470,6 +1470,15 @@ def ST_ForcePolygonCW(geometry: ColumnOrName) -> Column:
     return _call_st_function("ST_ForcePolygonCW", geometry)
 
 @validate_argument_types
+def ST_ForceRHR(geometry: ColumnOrName) -> Column:
+    """
+    Returns
+    :param geometry: Geometry column to change orientation
+    :return: Clockwise oriented geometry
+    """
+    return _call_st_function("ST_ForceRHR", geometry)
+
+@validate_argument_types
 def ST_NRings(geometry: ColumnOrName) -> Column:
     """
     Returns the total number of rings in a Polygon or MultiPolygon. Compared to ST_NumInteriorRings, ST_NRings takes exterior rings into account as well.

@@ -1212,6 +1212,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertEquals(expectedGeomDefaultValue, wktWriter.write(actualGeomDefaultValue))
     }
 
+    it("Passed ST_ForceRHR") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))') AS poly")
+      val actual = baseDf.select(ST_AsText(ST_ForceRHR("poly"))).take(1)(0).get(0).asInstanceOf[String]
+      val expected = "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))"
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_ForcePolygonCW") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))') AS poly")
       val actual = baseDf.select(ST_AsText(ST_ForcePolygonCW("poly"))).take(1)(0).get(0).asInstanceOf[String]
