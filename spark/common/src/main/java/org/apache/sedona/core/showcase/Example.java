@@ -24,7 +24,7 @@ import org.apache.log4j.Logger;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
-import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileRDD;
+import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader;
 import org.apache.sedona.core.serde.SedonaKryoRegistrator;
 import org.apache.sedona.core.spatialOperator.JoinQuery;
 import org.apache.sedona.core.spatialOperator.KNNQuery;
@@ -40,6 +40,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.apache.sedona.core.spatialRDD.SpatialRDD;
 
 import java.io.Serializable;
 import java.util.List;
@@ -166,13 +167,13 @@ public class Example
         PointRDDSplitter = FileDataSplitter.CSV;
         PointRDDIndexType = IndexType.RTREE;
         PointRDDNumPartitions = 5;
-        PointRDDOffset = 0;
+        PointRDDOffset = 1;
 
         PolygonRDDInputLocation = resourceFolder + "primaryroads-polygon.csv";
         PolygonRDDSplitter = FileDataSplitter.CSV;
         PolygonRDDNumPartitions = 5;
         PolygonRDDStartOffset = 0;
-        PolygonRDDEndOffset = 8;
+        PolygonRDDEndOffset = 9;
 
         geometryFactory = new GeometryFactory();
         kNNQueryPoint = geometryFactory.createPoint(new Coordinate(-84.01, 34.01));
@@ -367,8 +368,8 @@ public class Example
     public static void testLoadShapefileIntoPolygonRDD()
             throws Exception
     {
-        ShapefileRDD shapefileRDD = new ShapefileRDD(sc, ShapeFileInputLocation);
-        PolygonRDD spatialRDD = new PolygonRDD(shapefileRDD.getPolygonRDD());
+        SpatialRDD shapefileRDD = ShapefileReader.readToGeometryRDD(sc, ShapeFileInputLocation);
+        PolygonRDD spatialRDD = new PolygonRDD(shapefileRDD.rawSpatialRDD);
         try {
             RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180, 180, -90, 90), false, false).count();
         }
