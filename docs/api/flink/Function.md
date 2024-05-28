@@ -2012,7 +2012,7 @@ Introduction: Returns M Coordinate of given Point, null otherwise.
 
 Format: `ST_M(geom: Geometry)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example
 
