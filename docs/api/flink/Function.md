@@ -2289,7 +2289,7 @@ Introduction: Returns number of interior rings of polygon geometries. It is an a
 
 Format: `ST_NumInteriorRing(geom: Geometry)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example
 
