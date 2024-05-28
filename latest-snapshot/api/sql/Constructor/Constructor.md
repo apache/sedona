@@ -116,6 +116,9 @@ POLYGON ((0.703125 0.87890625, 0.703125 1.0546875, 1.0546875 1.0546875, 1.054687
 
 ## ST_GeomFromGeoJSON
 
+!!!note
+	This method is not recommended. Please use [Sedona GeoJSON data source](../../tutorial/sql.md#load-geojson-data) to read GeoJSON files.
+
 Introduction: Construct a Geometry from GeoJson
 
 Format: `ST_GeomFromGeoJSON (GeoJson: String)`

@@ -1440,18 +1440,51 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#load-geojson-using-spark-json-data-source" class="md-nav__link">
+  <a href="#load-geojson-data" class="md-nav__link">
     <span class="md-ellipsis">
-      Load GeoJSON using Spark JSON Data Source
+      Load GeoJSON Data
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Load GeoJSON Data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key features
     </span>
   </a>
   
 </li>
+        
+          <li class="md-nav__item">
+  <a href="#load-multiline-geojson-featurecollection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Load MultiLine GeoJSON FeatureCollection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-single-line-geojson-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Load Single Line GeoJSON Features
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#load-shapefile-and-geojson-using-spatialrdd" class="md-nav__link">
+  <a href="#load-shapefile-using-spatialrdd" class="md-nav__link">
     <span class="md-ellipsis">
-      Load Shapefile and GeoJSON using SpatialRDD
+      Load Shapefile using SpatialRDD
     </span>
   </a>
   
@@ -1638,6 +1671,15 @@
   <a href="#save-to-permanent-storage" class="md-nav__link">
     <span class="md-ellipsis">
       Save to permanent storage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#save-as-geojson" class="md-nav__link">
+    <span class="md-ellipsis">
+      Save as GeoJSON
     </span>
   </a>
   
@@ -4242,18 +4284,51 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#load-geojson-using-spark-json-data-source" class="md-nav__link">
+  <a href="#load-geojson-data" class="md-nav__link">
     <span class="md-ellipsis">
-      Load GeoJSON using Spark JSON Data Source
+      Load GeoJSON Data
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Load GeoJSON Data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key features
     </span>
   </a>
   
 </li>
+        
+          <li class="md-nav__item">
+  <a href="#load-multiline-geojson-featurecollection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Load MultiLine GeoJSON FeatureCollection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#load-single-line-geojson-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Load Single Line GeoJSON Features
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#load-shapefile-and-geojson-using-spatialrdd" class="md-nav__link">
+  <a href="#load-shapefile-using-spatialrdd" class="md-nav__link">
     <span class="md-ellipsis">
-      Load Shapefile and GeoJSON using SpatialRDD
+      Load Shapefile using SpatialRDD
     </span>
   </a>
   
@@ -4440,6 +4515,15 @@
   <a href="#save-to-permanent-storage" class="md-nav__link">
     <span class="md-ellipsis">
       Save to permanent storage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#save-as-geojson" class="md-nav__link">
+    <span class="md-ellipsis">
+      Save as GeoJSON
     </span>
   </a>
   
@@ -4786,46 +4870,154 @@ POLYGON (..., ...)  Lancaster County
 <p class="admonition-title">Note</p>
 <p>SedonaSQL provides lots of functions to create a Geometry column, please read <a href="../../api/sql/Constructor/">SedonaSQL constructor API</a>.</p>
 </div>
-<h2 id="load-geojson-using-spark-json-data-source">Load GeoJSON using Spark JSON Data Source<a class="headerlink" href="#load-geojson-using-spark-json-data-source" title="Permanent link">&para;</a></h2>
-<p>Spark SQL's built-in JSON data source supports reading GeoJSON data.
-To ensure proper parsing of the geometry property, we can define a schema with the geometry property set to type 'string'.
-This prevents Spark from interpreting the property and allows us to use the ST_GeomFromGeoJSON function for accurate geometry parsing.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Scala</label><label for="__tabbed_8_2">Java</label><label for="__tabbed_8_3">Python</label></div>
+<h2 id="load-geojson-data">Load GeoJSON Data<a class="headerlink" href="#load-geojson-data" title="Permanent link">&para;</a></h2>
+<p>Since <code>v1.6.1</code>, Sedona supports reading GeoJSON files using the <code>geojson</code> data source. It is designed to handle JSON files that use <a href="https://datatracker.ietf.org/doc/html/rfc7946">GeoJSON format</a> for their geometries.</p>
+<p>This includes SpatioTemporal Asset Catalog (STAC) files, GeoJSON features, GeoJSON feature collections and other variations.
+The key functionality lies in the way 'geometry' fields are processed: these are specifically read as Sedona's <code>GeometryUDT</code> type, ensuring integration with Sedona's suite of spatial functions.</p>
+<h3 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Broad Support: The reader and writer are versatile, supporting all GeoJSON-formatted files, including STAC files, feature collections, and more.</li>
+<li>Geometry Transformation: When reading, fields named 'geometry' are automatically converted from GeoJSON format to Sedona's <code>GeometryUDT</code> type and vice versa when writing.</li>
+</ul>
+<h3 id="load-multiline-geojson-featurecollection">Load MultiLine GeoJSON FeatureCollection<a class="headerlink" href="#load-multiline-geojson-featurecollection" title="Permanent link">&para;</a></h3>
+<p>Suppose we have a GeoJSON FeatureCollection file as follows.
+This entire file is considered as a single GeoJSON FeatureCollection object.
+Multiline format is preferable for scenarios where files need to be human-readable or manually edited.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FeatureCollection&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;features&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Point&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;coordinates&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">102.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">]},</span>
+<span class="w">        </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;prop0&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;value0&quot;</span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LineString&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;coordinates&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">[</span><span class="mf">102.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">103.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">104.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">105.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">]</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;prop0&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;value1&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;prop1&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">           </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Polygon&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="nt">&quot;coordinates&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">             </span><span class="p">[</span><span class="w"> </span><span class="p">[</span><span class="mf">100.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">101.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">101.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">],</span>
+<span class="w">               </span><span class="p">[</span><span class="mf">100.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">100.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">]</span><span class="w"> </span><span class="p">]</span>
+<span class="w">             </span><span class="p">]</span>
+<span class="w">         </span><span class="p">},</span>
+<span class="w">         </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">           </span><span class="nt">&quot;prop0&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;value2&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="nt">&quot;prop1&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;this&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;that&quot;</span><span class="p">}</span>
+<span class="w">           </span><span class="p">}</span>
+<span class="w">         </span><span class="p">}</span>
+<span class="w">       </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Set the <code>multiLine</code> option to <code>True</code> to read multiline GeoJSON files.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Python</label><label for="__tabbed_8_2">Scala</label><label for="__tabbed_8_3">Java</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">schema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;type string, crs string, totalFeatures long, features array&lt;struct&lt;type string, geometry string, properties map&lt;string, string&gt;&gt;&gt;&quot;</span>
-<span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">schema</span><span class="p">(</span><span class="n">schema</span><span class="p">).</span><span class="n">json</span><span class="p">(</span><span class="n">geojson_path</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">&quot;explode(features) as features&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// Explode the envelope to get one feature per row.</span>
-<span class="w">    </span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="s">&quot;features.*&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// Unpack the features struct.</span>
-<span class="w">    </span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;geometry&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;ST_GeomFromGeoJSON(geometry)&quot;</span><span class="p">))</span><span class="w"> </span><span class="c1">// Convert the geometry string.</span>
-<span class="w">    </span><span class="p">.</span><span class="n">printSchema</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geojson&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;multiLine&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;PATH/TO/MYFILE.json&quot;</span><span class="p">)</span>
+ <span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;explode(features) as features&quot;</span><span class="p">)</span> <span class="c1"># Explode the envelope to get one feature per row.</span>
+ <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;features.*&quot;</span><span class="p">)</span> <span class="c1"># Unpack the features struct.</span>
+ <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;prop0&quot;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span><span class="s2">&quot;properties[&#39;prop0&#39;]&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;properties&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">String</span><span class="w"> </span><span class="n">schema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;type string, crs string, totalFeatures long, features array&lt;struct&lt;type string, geometry string, properties map&lt;string, string&gt;&gt;&gt;&quot;</span><span class="p">;</span>
-<span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">.</span><span class="na">schema</span><span class="p">(</span><span class="n">schema</span><span class="p">).</span><span class="na">json</span><span class="p">(</span><span class="n">geojson_path</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="na">selectExpr</span><span class="p">(</span><span class="s">&quot;explode(features) as features&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// Explode the envelope to get one feature per row.</span>
-<span class="w">    </span><span class="p">.</span><span class="na">select</span><span class="p">(</span><span class="s">&quot;features.*&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// Unpack the features struct.</span>
-<span class="w">    </span><span class="p">.</span><span class="na">withColumn</span><span class="p">(</span><span class="s">&quot;geometry&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;ST_GeomFromGeoJSON(geometry)&quot;</span><span class="p">))</span><span class="w"> </span><span class="c1">// Convert the geometry string.</span>
-<span class="w">    </span><span class="p">.</span><span class="na">printSchema</span><span class="p">();</span>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geojson&quot;</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;multiLine&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;PATH/TO/MYFILE.json&quot;</span><span class="p">)</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">parsedDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">&quot;explode(features) as features&quot;</span><span class="p">).</span><span class="n">select</span><span class="p">(</span><span class="s">&quot;features.*&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;prop0&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;properties[&#39;prop0&#39;]&quot;</span><span class="p">)).</span><span class="n">drop</span><span class="p">(</span><span class="s">&quot;properties&quot;</span><span class="p">).</span><span class="n">drop</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">)</span>
+
+<span class="n">parsedDf</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">parsedDf</span><span class="p">.</span><span class="n">printSchema</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">schema</span> <span class="o">=</span> <span class="s2">&quot;type string, crs string, totalFeatures long, features array&lt;struct&lt;type string, geometry string, properties map&lt;string, string&gt;&gt;&gt;&quot;</span><span class="p">;</span>
-<span class="p">(</span><span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">geojson_path</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;explode(features) as features&quot;</span><span class="p">)</span> <span class="c1"># Explode the envelope to get one feature per row.</span>
-    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;features.*&quot;</span><span class="p">)</span> <span class="c1"># Unpack the features struct.</span>
-    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span><span class="s2">&quot;ST_GeomFromGeoJSON(geometry)&quot;</span><span class="p">))</span> <span class="c1"># Convert the geometry string.</span>
-    <span class="o">.</span><span class="n">printSchema</span><span class="p">())</span>
+<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;geojson&quot;</span><span class="p">).</span><span class="na">option</span><span class="p">(</span><span class="s">&quot;multiLine&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">&quot;PATH/TO/MYFILE.json&quot;</span><span class="p">)</span>
+<span class="w"> </span><span class="p">.</span><span class="na">selectExpr</span><span class="p">(</span><span class="s">&quot;explode(features) as features&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// Explode the envelope to get one feature per row.</span>
+<span class="w"> </span><span class="p">.</span><span class="na">select</span><span class="p">(</span><span class="s">&quot;features.*&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// Unpack the features struct.</span>
+<span class="w"> </span><span class="p">.</span><span class="na">withColumn</span><span class="p">(</span><span class="s">&quot;prop0&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;properties[&#39;prop0&#39;]&quot;</span><span class="p">)).</span><span class="na">drop</span><span class="p">(</span><span class="s">&quot;properties&quot;</span><span class="p">).</span><span class="na">drop</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">)</span>
+
+<span class="n">df</span><span class="p">.</span><span class="na">show</span><span class="p">();</span>
+<span class="n">df</span><span class="p">.</span><span class="na">printSchema</span><span class="p">();</span>
 </code></pre></div>
 </div>
 </div>
 </div>
-<h2 id="load-shapefile-and-geojson-using-spatialrdd">Load Shapefile and GeoJSON using SpatialRDD<a class="headerlink" href="#load-shapefile-and-geojson-using-spatialrdd" title="Permanent link">&para;</a></h2>
-<p>Shapefile and GeoJSON can be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read <a href="../rdd/#create-a-generic-spatialrdd">Load SpatialRDD</a> and <a href="#convert-between-dataframe-and-spatialrdd">DataFrame &lt;-&gt; RDD</a>.</p>
+<p>The output is as follows:</p>
+<div class="highlight"><pre><span></span><code>+--------------------+------+
+|            geometry| prop0|
++--------------------+------+
+|     POINT (102 0.5)|value0|
+|LINESTRING (102 0...|value1|
+|POLYGON ((100 0, ...|value2|
++--------------------+------+
+
+root
+ |-- geometry: geometry (nullable = false)
+ |-- prop0: string (nullable = true)
+</code></pre></div>
+<h3 id="load-single-line-geojson-features">Load Single Line GeoJSON Features<a class="headerlink" href="#load-single-line-geojson-features" title="Permanent link">&para;</a></h3>
+<p>Suppose we have a single-line GeoJSON Features dataset as follows. Each line is a single GeoJSON Feature.
+This format is efficient for processing large datasets where each line is a separate, self-contained GeoJSON object.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="nt">&quot;geometry&quot;</span><span class="p">:{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Point&quot;</span><span class="p">,</span><span class="nt">&quot;coordinates&quot;</span><span class="p">:[</span><span class="mf">102.0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">]},</span><span class="nt">&quot;properties&quot;</span><span class="p">:{</span><span class="nt">&quot;prop0&quot;</span><span class="p">:</span><span class="s2">&quot;value0&quot;</span><span class="p">}}</span>
+<span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="nt">&quot;geometry&quot;</span><span class="p">:{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;LineString&quot;</span><span class="p">,</span><span class="nt">&quot;coordinates&quot;</span><span class="p">:[[</span><span class="mf">102.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">],[</span><span class="mf">103.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],[</span><span class="mf">104.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">],[</span><span class="mf">105.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]]},</span><span class="nt">&quot;properties&quot;</span><span class="p">:{</span><span class="nt">&quot;prop0&quot;</span><span class="p">:</span><span class="s2">&quot;value1&quot;</span><span class="p">}}</span>
+<span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="nt">&quot;geometry&quot;</span><span class="p">:{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Polygon&quot;</span><span class="p">,</span><span class="nt">&quot;coordinates&quot;</span><span class="p">:[[[</span><span class="mf">100.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">],[</span><span class="mf">101.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">],[</span><span class="mf">101.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],[</span><span class="mf">100.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],[</span><span class="mf">100.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">]]]},</span><span class="nt">&quot;properties&quot;</span><span class="p">:{</span><span class="nt">&quot;prop0&quot;</span><span class="p">:</span><span class="s2">&quot;value2&quot;</span><span class="p">}}</span>
+</code></pre></div>
+<p>By default, when <code>option</code> is not specified, Sedona reads a GeoJSON file as a single line GeoJSON.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Python</label><label for="__tabbed_9_2">Scala</label><label for="__tabbed_9_3">Java</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geojson&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;PATH/TO/MYFILE.json&quot;</span><span class="p">)</span>
+   <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;prop0&quot;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span><span class="s2">&quot;properties[&#39;prop0&#39;]&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;properties&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geojson&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;PATH/TO/MYFILE.json&quot;</span><span class="p">)</span>
+<span class="w">   </span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;prop0&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;properties[&#39;prop0&#39;]&quot;</span><span class="p">)).</span><span class="n">drop</span><span class="p">(</span><span class="s">&quot;properties&quot;</span><span class="p">).</span><span class="n">drop</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">)</span>
+
+<span class="n">df</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="n">printSchema</span><span class="p">()</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;geojson&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">&quot;PATH/TO/MYFILE.json&quot;</span><span class="p">)</span>
+<span class="w">   </span><span class="p">.</span><span class="na">withColumn</span><span class="p">(</span><span class="s">&quot;prop0&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;properties[&#39;prop0&#39;]&quot;</span><span class="p">)).</span><span class="na">drop</span><span class="p">(</span><span class="s">&quot;properties&quot;</span><span class="p">).</span><span class="na">drop</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">)</span>
+
+<span class="n">df</span><span class="p">.</span><span class="na">show</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="na">printSchema</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>The output is as follows:</p>
+<div class="highlight"><pre><span></span><code>+--------------------+------+
+|            geometry| prop0|
++--------------------+------+
+|     POINT (102 0.5)|value0|
+|LINESTRING (102 0...|value1|
+|POLYGON ((100 0, ...|value2|
++--------------------+------+
+
+root
+ |-- geometry: geometry (nullable = false)
+ |-- prop0: string (nullable = true)
+</code></pre></div>
+<h2 id="load-shapefile-using-spatialrdd">Load Shapefile using SpatialRDD<a class="headerlink" href="#load-shapefile-using-spatialrdd" title="Permanent link">&para;</a></h2>
+<p>Shapefile can be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read <a href="../rdd/#create-a-generic-spatialrdd">Load SpatialRDD</a> and <a href="#convert-between-dataframe-and-spatialrdd">DataFrame &lt;-&gt; RDD</a>.</p>
 <h2 id="load-geoparquet">Load GeoParquet<a class="headerlink" href="#load-geoparquet" title="Permanent link">&para;</a></h2>
 <p>Since v<code>1.3.0</code>, Sedona natively supports loading GeoParquet file. Sedona will infer geometry fields using the "geo" metadata in GeoParquet files.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Scala/Java</label><label for="__tabbed_9_2">Java</label><label for="__tabbed_9_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Scala/Java</label><label for="__tabbed_10_2">Java</label><label for="__tabbed_10_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
@@ -4864,7 +5056,7 @@ GeoParquet file reader on Databricks runtime.</p>
 <h3 id="inspect-geoparquet-metadata">Inspect GeoParquet metadata<a class="headerlink" href="#inspect-geoparquet-metadata" title="Permanent link">&para;</a></h3>
 <p>Since v<code>1.5.1</code>, Sedona provides a Spark SQL data source <code>"geoparquet.metadata"</code> for inspecting GeoParquet metadata. The resulting dataframe contains
 the "geo" metadata for each input file.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Scala/Java</label><label for="__tabbed_10_2">Java</label><label for="__tabbed_10_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Scala/Java</label><label for="__tabbed_11_2">Java</label><label for="__tabbed_11_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet.metadata&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
@@ -4907,7 +5099,7 @@ the "geo" metadata for each input file.</p>
 <p>The 'query' option in Spark SQL's JDBC data source can be used to convert geometry columns to a format that Sedona can interpret.
 This should work for most spatial JDBC data sources.
 For Postgis there is no need to add a query to convert geometry types since it's already using EWKB as it's wire format.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Scala</label><label for="__tabbed_11_2">Java</label><label for="__tabbed_11_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:3"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Scala</label><label for="__tabbed_12_2">Java</label><label for="__tabbed_12_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="c1">// For any JDBC data source, including Postgis.</span>
@@ -5082,7 +5274,7 @@ can also be found in the example notebook available <a href="https://github.com/
 <p>User-Defined Functions (UDFs) are user-created procedures that can perform operations on a single row of information. To cover almost all use cases, we will showcase 4 types of UDFs for a better understanding of how to use geometry with UDFs. Sedona's serializer deserializes the SQL geometry type to <a href="https://locationtech.github.io/jts/javadoc-1.18.0/org/locationtech/jts/geom/Geometry.html">JTS Geometry</a> (Scala/Java) or <a href="https://shapely.readthedocs.io/en/stable/geometry.html">Shapely Geometry</a> (Python). You can implement any custom logic using the rich ecosystem around these two libraries.</p>
 <h3 id="geometry-to-primitive">Geometry to primitive<a class="headerlink" href="#geometry-to-primitive" title="Permanent link">&para;</a></h3>
 <p>This UDF example takes a geometry type input and returns a primitive type output:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:3"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Scala</label><label for="__tabbed_12_2">Java</label><label for="__tabbed_12_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:3"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><input id="__tabbed_13_3" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Scala</label><label for="__tabbed_13_2">Java</label><label for="__tabbed_13_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">locationtech</span><span class="p">.</span><span class="nn">jts</span><span class="p">.</span><span class="nn">geom</span><span class="p">.</span><span class="nc">Geometry</span>
@@ -5133,7 +5325,7 @@ can also be found in the example notebook available <a href="https://github.com/
 </code></pre></div>
 <h3 id="geometry-to-geometry">Geometry to Geometry<a class="headerlink" href="#geometry-to-geometry" title="Permanent link">&para;</a></h3>
 <p>This UDF example takes a geometry type input and returns a geometry type output:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:3"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><input id="__tabbed_13_3" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Scala</label><label for="__tabbed_13_2">Java</label><label for="__tabbed_13_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:3"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Scala</label><label for="__tabbed_14_2">Java</label><label for="__tabbed_14_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">locationtech</span><span class="p">.</span><span class="nn">jts</span><span class="p">.</span><span class="nn">geom</span><span class="p">.</span><span class="nc">Geometry</span>
@@ -5185,7 +5377,7 @@ can also be found in the example notebook available <a href="https://github.com/
 </code></pre></div>
 <h3 id="geometry-primitive-to-geometry">Geometry, primitive to geometry<a class="headerlink" href="#geometry-primitive-to-geometry" title="Permanent link">&para;</a></h3>
 <p>This UDF example takes a geometry type input and a primitive type input and returns a geometry type output:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:3"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Scala</label><label for="__tabbed_14_2">Java</label><label for="__tabbed_14_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Scala</label><label for="__tabbed_15_2">Java</label><label for="__tabbed_15_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">locationtech</span><span class="p">.</span><span class="nn">jts</span><span class="p">.</span><span class="nn">geom</span><span class="p">.</span><span class="nc">Geometry</span>
@@ -5236,7 +5428,7 @@ can also be found in the example notebook available <a href="https://github.com/
 </code></pre></div>
 <h3 id="geometry-primitive-to-geometry-primitive">Geometry, primitive to Geometry, primitive<a class="headerlink" href="#geometry-primitive-to-geometry-primitive" title="Permanent link">&para;</a></h3>
 <p>This UDF example takes a geometry type input and a primitive type input and returns a geometry type and a primitive type output:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Scala</label><label for="__tabbed_15_2">Java</label><label for="__tabbed_15_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:3"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Scala</label><label for="__tabbed_16_2">Java</label><label for="__tabbed_16_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">locationtech</span><span class="p">.</span><span class="nn">jts</span><span class="p">.</span><span class="nn">geom</span><span class="p">.</span><span class="nc">Geometry</span>
@@ -5324,10 +5516,15 @@ can also be found in the example notebook available <a href="https://github.com/
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">countyshape</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
 </code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>ST_AsGeoJSON is also available. We would like to invite you to contribute more functions</p>
-</div>
+<h2 id="save-as-geojson">Save as GeoJSON<a class="headerlink" href="#save-as-geojson" title="Permanent link">&para;</a></h2>
+<p>Since <code>v1.6.1</code>, the GeoJSON data source in Sedona can be used to save a Spatial DataFrame to a single-line JSON file, with geometries written in GeoJSON format.</p>
+<div class="highlight"><pre><span></span><code>df.write.format(&quot;geojson&quot;).save(&quot;YOUR/PATH.json&quot;)
+</code></pre></div>
+<p>The structure of the generated file will be like this:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="nt">&quot;geometry&quot;</span><span class="p">:{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Point&quot;</span><span class="p">,</span><span class="nt">&quot;coordinates&quot;</span><span class="p">:[</span><span class="mf">102.0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">]},</span><span class="nt">&quot;properties&quot;</span><span class="p">:{</span><span class="nt">&quot;prop0&quot;</span><span class="p">:</span><span class="s2">&quot;value0&quot;</span><span class="p">}}</span>
+<span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="nt">&quot;geometry&quot;</span><span class="p">:{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;LineString&quot;</span><span class="p">,</span><span class="nt">&quot;coordinates&quot;</span><span class="p">:[[</span><span class="mf">102.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">],[</span><span class="mf">103.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],[</span><span class="mf">104.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">],[</span><span class="mf">105.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]]},</span><span class="nt">&quot;properties&quot;</span><span class="p">:{</span><span class="nt">&quot;prop0&quot;</span><span class="p">:</span><span class="s2">&quot;value1&quot;</span><span class="p">}}</span>
+<span class="p">{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="nt">&quot;geometry&quot;</span><span class="p">:{</span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Polygon&quot;</span><span class="p">,</span><span class="nt">&quot;coordinates&quot;</span><span class="p">:[[[</span><span class="mf">100.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">],[</span><span class="mf">101.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">],[</span><span class="mf">101.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],[</span><span class="mf">100.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],[</span><span class="mf">100.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">]]]},</span><span class="nt">&quot;properties&quot;</span><span class="p">:{</span><span class="nt">&quot;prop0&quot;</span><span class="p">:</span><span class="s2">&quot;value2&quot;</span><span class="p">}}</span>
+</code></pre></div>
 <h2 id="save-geoparquet">Save GeoParquet<a class="headerlink" href="#save-geoparquet" title="Permanent link">&para;</a></h2>
 <p>Since v<code>1.3.0</code>, Sedona natively supports writing GeoParquet file. GeoParquet can be saved as follows:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">).</span><span class="n">save</span><span class="p">(</span><span class="n">geoparquetoutputlocation</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;/GeoParquet_File_Name.parquet&quot;</span><span class="p">)</span>
@@ -5387,7 +5584,7 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 <h2 id="convert-between-dataframe-and-spatialrdd">Convert between DataFrame and SpatialRDD<a class="headerlink" href="#convert-between-dataframe-and-spatialrdd" title="Permanent link">&para;</a></h2>
 <h3 id="dataframe-to-spatialrdd">DataFrame to SpatialRDD<a class="headerlink" href="#dataframe-to-spatialrdd" title="Permanent link">&para;</a></h3>
 <p>Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read <a href="../../api/scaladoc/spark/org/apache/sedona/sql/utils/">Adapter Scaladoc</a></p>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:3"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Scala</label><label for="__tabbed_16_2">Java</label><label for="__tabbed_16_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:3"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Scala</label><label for="__tabbed_17_2">Java</label><label for="__tabbed_17_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">spatialRDD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Adapter</span><span class="p">.</span><span class="n">toSpatialRdd</span><span class="p">(</span><span class="n">spatialDf</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;usacounty&quot;</span><span class="p">)</span>
@@ -5412,7 +5609,7 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 </div>
 <h3 id="spatialrdd-to-dataframe">SpatialRDD to DataFrame<a class="headerlink" href="#spatialrdd-to-dataframe" title="Permanent link">&para;</a></h3>
 <p>Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read <a href="../api/javadoc/sql/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a></p>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:3"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Scala</label><label for="__tabbed_17_2">Java</label><label for="__tabbed_17_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:3"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><input id="__tabbed_18_3" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Scala</label><label for="__tabbed_18_2">Java</label><label for="__tabbed_18_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">spatialDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Adapter</span><span class="p">.</span><span class="n">toDf</span><span class="p">(</span><span class="n">spatialRDD</span><span class="p">,</span><span class="w"> </span><span class="n">sedona</span><span class="p">)</span>
@@ -5435,7 +5632,7 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 types. Note that string schemas and not all data types are supported&mdash;please check the
 <a href="../api/javadoc/sql/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a> to confirm what is supported for your use
 case. At least one column for the user data must be provided.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:1"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Scala</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:1"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Scala</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">schema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">StructType</span><span class="p">(</span><span class="nc">Array</span><span class="p">(</span>
@@ -5451,7 +5648,7 @@ case. At least one column for the user data must be provided.</p>
 </div>
 <h3 id="spatialpairrdd-to-dataframe">SpatialPairRDD to DataFrame<a class="headerlink" href="#spatialpairrdd-to-dataframe" title="Permanent link">&para;</a></h3>
 <p>PairRDD is the result of a spatial join query or distance join query. SedonaSQL DataFrame-RDD Adapter can convert the result to a DataFrame. But you need to provide the name of other attributes.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Scala</label><label for="__tabbed_19_2">Java</label><label for="__tabbed_19_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:3"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Scala</label><label for="__tabbed_20_2">Java</label><label for="__tabbed_20_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">joinResultDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Adapter</span><span class="p">.</span><span class="n">toDf</span><span class="p">(</span><span class="n">joinResultPairRDD</span><span class="p">,</span><span class="w"> </span><span class="nc">Seq</span><span class="p">(</span><span class="s">&quot;left_attribute1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;left_attribute2&quot;</span><span class="p">),</span><span class="w"> </span><span class="nc">Seq</span><span class="p">(</span><span class="s">&quot;right_attribute1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;right_attribute2&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">sedona</span><span class="p">)</span>
@@ -5474,7 +5671,7 @@ case. At least one column for the user data must be provided.</p>
 </div>
 </div>
 <p>or you can use the attribute names directly from the input RDD</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:3"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Scala</label><label for="__tabbed_20_2">Java</label><label for="__tabbed_20_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:3"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Scala</label><label for="__tabbed_21_2">Java</label><label for="__tabbed_21_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">scala</span><span class="p">.</span><span class="nn">collection</span><span class="p">.</span><span class="nc">JavaConversions</span><span class="p">.</span><span class="n">_</span>
@@ -5499,7 +5696,7 @@ case. At least one column for the user data must be provided.</p>
 types. Note that string schemas and not all data types are supported&mdash;please check the
 <a href="../api/javadoc/sql/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a> to confirm what is supported for your use
 case. Columns for the left and right user data must be provided.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:1"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Scala</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:1"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Scala</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">schema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">StructType</span><span class="p">(</span><span class="nc">Array</span><span class="p">(</span>
@@ -5535,7 +5732,7 @@ case. Columns for the left and right user data must be provided.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 25, 2024 04:21:19</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 28, 2024 07:26:13</span>
   </span>
 
     

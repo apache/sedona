@@ -4484,6 +4484,10 @@ POINT (-88.221102 32.35078) restaurant
 </div>
 </div>
 <h4 id="from-geojson">From GeoJSON<a class="headerlink" href="#from-geojson" title="Permanent link">&para;</a></h4>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Reading GeoJSON using SpatialRDD is not recommended. Please use <a href="../sql/#load-geojson-data">Sedona SQL and DataFrame API</a> to read GeoJSON files.</p>
+</div>
 <p>Geometries in GeoJSON is similar to WKT/WKB. However, a GeoJSON file must be beaked into multiple lines.</p>
 <p>Suppose we have a <code>polygon.json</code> GeoJSON file at Path <code>/Download/polygon.json</code> as follows:</p>
 <div class="highlight"><pre><span></span><code>{ &quot;type&quot;: &quot;Feature&quot;, &quot;properties&quot;: { &quot;STATEFP&quot;: &quot;01&quot;, &quot;COUNTYFP&quot;: &quot;077&quot;, &quot;TRACTCE&quot;: &quot;011501&quot;, &quot;BLKGRPCE&quot;: &quot;5&quot;, &quot;AFFGEOID&quot;: &quot;1500000US010770115015&quot;, &quot;GEOID&quot;: &quot;010770115015&quot;, &quot;NAME&quot;: &quot;5&quot;, &quot;LSAD&quot;: &quot;BG&quot;, &quot;ALAND&quot;: 6844991, &quot;AWATER&quot;: 32636 }, &quot;geometry&quot;: { &quot;type&quot;: &quot;Polygon&quot;, &quot;coordinates&quot;: [ [ [ -87.621765, 34.873444 ], [ -87.617535, 34.873369 ], [ -87.6123, 34.873337 ], [ -87.604049, 34.873303 ], [ -87.604033, 34.872316 ], [ -87.60415, 34.867502 ], [ -87.604218, 34.865687 ], [ -87.604409, 34.858537 ], [ -87.604018, 34.851336 ], [ -87.603716, 34.844829 ], [ -87.603696, 34.844307 ], [ -87.603673, 34.841884 ], [ -87.60372, 34.841003 ], [ -87.603879, 34.838423 ], [ -87.603888, 34.837682 ], [ -87.603889, 34.83763 ], [ -87.613127, 34.833938 ], [ -87.616451, 34.832699 ], [ -87.621041, 34.831431 ], [ -87.621056, 34.831526 ], [ -87.62112, 34.831925 ], [ -87.621603, 34.8352 ], [ -87.62158, 34.836087 ], [ -87.621383, 34.84329 ], [ -87.621359, 34.844438 ], [ -87.62129, 34.846387 ], [ -87.62119, 34.85053 ], [ -87.62144, 34.865379 ], [ -87.621765, 34.873444 ] ] ] } },
@@ -4587,7 +4591,7 @@ POINT (-88.221102 32.35078) restaurant
 <div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">spatialRDD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Adapter</span><span class="p">.</span><span class="n">toSpatialRdd</span><span class="p">(</span><span class="n">spatialDf</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;checkin&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>"checkin" is the name of the geometry column</p>
-<p>For WKT/WKB/GeoJSON data, please use <mark>ST_GeomFromWKT / ST_GeomFromWKB / ST_GeomFromGeoJSON</mark> instead.</p>
+<p>For WKT/WKB data, please use ==ST_GeomFromWKT / ST_GeomFromWKB == instead.</p>
 <h2 id="transform-the-coordinate-reference-system">Transform the Coordinate Reference System<a class="headerlink" href="#transform-the-coordinate-reference-system" title="Permanent link">&para;</a></h2>
 <p>Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in an SpatialRDD. The unit of all related distances in Sedona is same as the unit of all geometries in an SpatialRDD.</p>
 <p>By default, this function uses lon/lat order since <code>v1.5.0</code>. Before, it used lat/lon order. You can use <mark>spatialRDD.flipCoordinates</mark> to swap X and Y.</p>
@@ -5280,6 +5284,10 @@ Find the superheroes within 10 miles of each city</p>
 <div class="highlight"><pre><span></span><code><span class="n">objectRDD</span><span class="p">.</span><span class="n">saveAsWKB</span><span class="p">(</span><span class="s">&quot;hdfs://PATH&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h4 id="save-to-distributed-geojson-text-file">Save to distributed GeoJSON text file<a class="headerlink" href="#save-to-distributed-geojson-text-file" title="Permanent link">&para;</a></h4>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Saving GeoJSON using SpatialRDD is not recommended. Please use <a href="../sql/#save-as-geojson">Sedona SQL and DataFrame API</a> to write GeoJSON files.</p>
+</div>
 <p>Use the following code to save an SpatialRDD as a distributed GeoJSON text file:</p>
 <div class="highlight"><pre><span></span><code><span class="n">objectRDD</span><span class="p">.</span><span class="n">saveAsGeoJSON</span><span class="p">(</span><span class="s">&quot;hdfs://PATH&quot;</span><span class="p">)</span>
 </code></pre></div>
@@ -5376,7 +5384,7 @@ Find the superheroes within 10 miles of each city</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 28, 2024 01:25:26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 28, 2024 07:26:13</span>
   </span>
 
     
