@@ -76,6 +76,9 @@ Use the following code to create a SpatialRDD
 
 #### From GeoJSON
 
+!!!note
+	Reading GeoJSON using SpatialRDD is not recommended. Please use [Sedona SQL and DataFrame API](sql.md#load-geojson-data) to read GeoJSON files.
+
 Geometries in GeoJSON is similar to WKT/WKB. However, a GeoJSON file must be beaked into multiple lines.
 
 Suppose we have a `polygon.json` GeoJSON file at Path `/Download/polygon.json` as follows:
@@ -200,7 +203,7 @@ var spatialRDD = Adapter.toSpatialRdd(spatialDf, "checkin")
 
 "checkin" is the name of the geometry column
 
-For WKT/WKB/GeoJSON data, please use ==ST_GeomFromWKT / ST_GeomFromWKB / ST_GeomFromGeoJSON== instead.
+For WKT/WKB data, please use ==ST_GeomFromWKT / ST_GeomFromWKB == instead.
 
 ## Transform the Coordinate Reference System
 
@@ -977,6 +980,9 @@ objectRDD.saveAsWKB("hdfs://PATH")
 ```
 
 #### Save to distributed GeoJSON text file
+
+!!!note
+	Saving GeoJSON using SpatialRDD is not recommended. Please use [Sedona SQL and DataFrame API](sql.md#save-as-geojson) to write GeoJSON files.
 
 Use the following code to save an SpatialRDD as a distributed GeoJSON text file:
 
