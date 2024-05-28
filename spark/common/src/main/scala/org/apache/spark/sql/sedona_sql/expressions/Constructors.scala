@@ -156,6 +156,38 @@ case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_GeomFromEWKB(inputExpressions: Seq[Expression])
+  extends Expression with FoldableExpression with ImplicitCastInputTypes with CodegenFallback with UserDataGeneratator {
+  // This is an expression which takes one input expressions
+  assert(inputExpressions.length == 1)
+
+  override def nullable: Boolean = true
+
+  override def eval(inputRow: InternalRow): Any = {
+    (inputExpressions.head.eval(inputRow)) match {
+      case (geomString: UTF8String) => {
+        // Parse UTF-8 encoded wkb string
+        Constructors.geomFromText(geomString.toString, FileDataSplitter.WKB).toGenericArrayData
+      }
+      case (wkb: Array[Byte]) => {
+        // convert raw wkb byte array to geometry
+        Constructors.geomFromWKB(wkb).toGenericArrayData
+      }
+      case null => null
+    }
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(TypeCollection(StringType, BinaryType))
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
   * Return a Geometry from a GeoJSON string
   *

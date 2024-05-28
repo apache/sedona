@@ -123,6 +123,18 @@ class TestConstructors(TestBase):
         polygon_df.show(10)
         assert polygon_df.count() == 100
 
+    def test_st_geom_from_ewkb(self):
+        polygon_wkb_df = self.spark.read.format("csv"). \
+            option("delimiter", "\t"). \
+            option("header", "false"). \
+            load(mixed_wkb_geometry_input_location)
+
+        polygon_wkb_df.createOrReplaceTempView("polygontable")
+        polygon_wkb_df.show()
+        polygon_df = self.spark.sql("select ST_GeomFromEWKB(polygontable._c0) as countyshape from polygontable")
+        polygon_df.show(10)
+        assert polygon_df.count() == 100
+
     def test_st_geom_from_geojson(self):
         polygon_json_df = self.spark.read.format("csv").\
             option("delimiter", "\t").\

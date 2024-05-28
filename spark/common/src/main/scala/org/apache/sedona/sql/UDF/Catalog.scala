@@ -45,6 +45,7 @@ object Catalog {
     function[ST_GeomFromWKT](0),
     function[ST_GeomFromEWKT](),
     function[ST_GeomFromWKB](),
+    function[ST_GeomFromEWKB](),
     function[ST_GeomFromGeoJSON](),
     function[ST_GeomFromGML](),
     function[ST_GeomFromKML](),
