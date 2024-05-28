@@ -880,6 +880,13 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static Integer ST_NumInteriorRing(byte[] geometry) {
+        return Functions.numInteriorRings(
+                GeometrySerde.deserialize(geometry)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry"})
     public static boolean ST_OrderingEquals(byte[] leftGeometry, byte[] rightGeometry) {
         return Predicates.orderingEquals(

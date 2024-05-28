@@ -621,6 +621,14 @@ case class ST_NumInteriorRings(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_NumInteriorRing(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.numInteriorRings _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_AddPoint(inputExpressions: Seq[Expression])
   extends InferredExpression(inferrableFunction3(Functions.addPoint)) {
 

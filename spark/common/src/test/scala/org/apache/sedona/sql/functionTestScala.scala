@@ -1191,6 +1191,35 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       .collect().toList should contain theSameElementsAs List((2, 0), (11, 1))
   }
 
+  it("Should pass ST_NumInteriorRing") {
+    Given("Geometry DataFrame")
+    val geometryDf = Seq(
+      (1, "Point(21 52)"),
+      (2, "Polygon((0 0, 0 1, 1 1, 1 0, 0 0))"),
+      (3, "Linestring(0 0, 1 1, 1 0)"),
+      (4, "Linestring(0 0, 1 1, 1 0, 0 0)"),
+      (5, "MULTIPOINT ((10 40), (40 30), (20 20), (30 10))"),
+      (6, "MULTIPOLYGON (((30 20, 45 40, 10 40, 30 20)), ((15 5, 40 10, 10 20, 5 10, 15 5)))"),
+      (7, "MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10, 40 40))"),
+      (8, "MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10))"),
+      (9, "MULTILINESTRING ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))"),
+      (10, "GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40), POLYGON ((40 40, 20 45, 45 30, 40 40)))"),
+      (11, "POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))")
+    ).map({ case (index, wkt) => Tuple2(index, wktReader.read(wkt)) }).toDF("id", "geom")
+
+    When("Using ST_NumInteriorRing")
+    val numberOfInteriorRings = geometryDf.selectExpr(
+      "id", "ST_NumInteriorRing(geom) as num"
+    )
+
+    Then("Result should match with expected values")
+
+    numberOfInteriorRings
+      .filter("num is not null")
+      .as[(Int, Int)]
+      .collect().toList should contain theSameElementsAs List((2, 0), (11, 1))
+  }
+
   it("Should pass ST_AddPoint") {
     Given("Geometry df")
     val geometryDf = Seq(

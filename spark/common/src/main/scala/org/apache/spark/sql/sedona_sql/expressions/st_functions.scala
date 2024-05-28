@@ -265,6 +265,9 @@ object st_functions extends DataFrameAPI {
   def ST_NumInteriorRings(geometry: Column): Column = wrapExpression[ST_NumInteriorRings](geometry)
   def ST_NumInteriorRings(geometry: String): Column = wrapExpression[ST_NumInteriorRings](geometry)
 
+  def ST_NumInteriorRing(geometry: Column): Column = wrapExpression[ST_NumInteriorRing](geometry)
+  def ST_NumInteriorRing(geometry: String): Column = wrapExpression[ST_NumInteriorRing](geometry)
+
   def ST_PointN(geometry: Column, n: Column): Column = wrapExpression[ST_PointN](geometry, n)
   def ST_PointN(geometry: String, n: Int): Column = wrapExpression[ST_PointN](geometry, n)
 
