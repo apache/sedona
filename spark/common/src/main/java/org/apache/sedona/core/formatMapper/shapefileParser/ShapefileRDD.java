@@ -149,6 +149,9 @@ public class ShapefileRDD
                     throws Exception
             {
                 List<Point> result = new ArrayList<Point>();
+                if (spatialObject == null) {
+                    throw new Exception("[ShapefileRDD] the object is null");
+                }
                 if (spatialObject instanceof MultiPoint) {
                     MultiPoint multiObjects = (MultiPoint) spatialObject;
                     for (int i = 0; i < multiObjects.getNumGeometries(); i++) {
@@ -182,6 +185,9 @@ public class ShapefileRDD
                     throws Exception
             {
                 List<Polygon> result = new ArrayList<Polygon>();
+                if (spatialObject == null) {
+                    throw new Exception("[ShapefileRDD] the object is null");
+                }
                 if (spatialObject instanceof MultiPolygon) {
                     MultiPolygon multiObjects = (MultiPolygon) spatialObject;
                     for (int i = 0; i < multiObjects.getNumGeometries(); i++) {
@@ -215,6 +221,9 @@ public class ShapefileRDD
                     throws Exception
             {
                 List<LineString> result = new ArrayList<LineString>();
+                if (spatialObject == null) {
+                    throw new Exception("[ShapefileRDD] the object is null");
+                }
                 if (spatialObject instanceof MultiLineString) {
                     MultiLineString multiObjects = (MultiLineString) spatialObject;
                     for (int i = 0; i < multiObjects.getNumGeometries(); i++) {
