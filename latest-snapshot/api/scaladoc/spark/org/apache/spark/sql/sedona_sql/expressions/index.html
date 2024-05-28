@@ -467,6 +467,10 @@
                         <a href="ST_ForcePolygonCW.html" title="">ST_ForcePolygonCW</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="ST_ForceRHR.html" title=""></a>
+                        <a href="ST_ForceRHR.html" title="">ST_ForceRHR</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="ST_Force_2D.html" title=""></a>
                         <a href="ST_Force_2D.html" title="">ST_Force_2D</a>
                       </li><li class="current-entities indented6">
@@ -689,6 +693,10 @@
                         <span class="separator"></span>
                         <a class="class" href="ST_NumGeometries.html" title="Returns the number of Geometries."></a>
                         <a href="ST_NumGeometries.html" title="Returns the number of Geometries.">ST_NumGeometries</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="ST_NumInteriorRing.html" title=""></a>
+                        <a href="ST_NumInteriorRing.html" title="">ST_NumInteriorRing</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="ST_NumInteriorRings.html" title=""></a>
@@ -1911,6 +1919,22 @@ expressions are foldable, then the expression itself is foldable.
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_ForceRHR" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_ForceRHRextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_ForceRHR:ST_ForceRHR"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_ForceRHR.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ST_ForceRHR.html"><span class="name">ST_ForceRHR</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Force_2D" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_Force_2DextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_Force_2D:ST_Force_2D"></a>
       <span class="permalink">
@@ -2846,6 +2870,22 @@ See: http://lin-ear-th-inking.blogspot.com/2021/05/fixing-invalid-geometry-with-
       <p class="shortcomment cmt">Returns the number of Geometries.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the number of geometries,
 for single geometries will return 1</p><p>This method implements the SQL/MM specification. SQL-MM 3: 9.1.4
 </p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>Geometry</p></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_NumInteriorRing" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_NumInteriorRingextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_NumInteriorRing:ST_NumInteriorRing"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_NumInteriorRing.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ST_NumInteriorRing.html"><span class="name">ST_NumInteriorRing</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_NumInteriorRings" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_NumInteriorRingsextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_NumInteriorRings:ST_NumInteriorRings"></a>
       <span class="permalink">
