@@ -1258,6 +1258,15 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geom"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
+    public static String ST_TriangulatePolygon(String geom) {
+        return GeometrySerde.serGeoJson(
+                Functions.triangulatePolygon(
+                        GeometrySerde.deserGeoJson(geom)
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geom", "deltaX", "deltaY"}, argTypes = {"Geometry", "double", "double"}, returnTypes = "Geometry")
     public static String ST_Translate(String geom, double deltaX, double deltaY) {
         return GeometrySerde.serGeoJson(

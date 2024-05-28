@@ -1432,6 +1432,15 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geom"})
+    public static byte[] ST_TriangulatePolygon(byte[] geom) {
+        return GeometrySerde.serialize(
+                Functions.triangulatePolygon(
+                        GeometrySerde.deserialize(geom)
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geom", "deltaX", "deltaY"})
     public static byte[] ST_Translate(byte[] geom, double deltaX, double deltaY) {
         return GeometrySerde.serialize(

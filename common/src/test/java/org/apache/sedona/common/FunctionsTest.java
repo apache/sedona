@@ -777,6 +777,7 @@ public class FunctionsTest extends TestBase {
         assertEquals(expected, actual);
     }
 
+    @Test
     public void testForcePolygonCCW() throws ParseException {
         Geometry polyCW = Constructors.geomFromWKT("POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))", 0);
         String actual = Functions.asWKT(Functions.forcePolygonCCW(polyCW));
@@ -821,8 +822,9 @@ public class FunctionsTest extends TestBase {
 
         Geometry lineClosed = Constructors.geomFromWKT("LINESTRING (30 20, 20 25, 20 15, 30 20)", 0);
         assertFalse(Functions.isPolygonCW(lineClosed));
-      }
+    }
 
+    @Test
     public void testIsPolygonCCW() throws ParseException {
         Geometry polyCCW = Constructors.geomFromWKT("POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))", 0);
         assertTrue(Functions.isPolygonCCW(polyCCW));
@@ -838,6 +840,24 @@ public class FunctionsTest extends TestBase {
 
         Geometry lineClosed = Constructors.geomFromWKT("LINESTRING (30 20, 20 25, 20 15, 30 20)", 0);
         assertFalse(Functions.isPolygonCCW(lineClosed));
+    }
+
+    @Test
+    public void testTriangulatePolygon() throws ParseException {
+        Geometry geom = Constructors.geomFromWKT("POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (5 5, 5 8, 8 8, 8 5, 5 5))", 0);
+        String actual = Functions.asWKT(Functions.triangulatePolygon(geom));
+        String expected = "GEOMETRYCOLLECTION (POLYGON ((0 0, 0 10, 5 5, 0 0)), POLYGON ((5 8, 5 5, 0 10, 5 8)), POLYGON ((10 0, 0 0, 5 5, 10 0)), POLYGON ((10 10, 5 8, 0 10, 10 10)), POLYGON ((10 0, 5 5, 8 5, 10 0)), POLYGON ((5 8, 10 10, 8 8, 5 8)), POLYGON ((10 10, 10 0, 8 5, 10 10)), POLYGON ((8 5, 8 8, 10 10, 8 5)))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("MULTIPOLYGON (((0 0, 10 0, 10 10, 0 10, 0 0), (2 2, 2 8, 8 8, 8 2, 2 2)), ((4 4, 4 6, 6 6, 6 4, 4 4)), ((6 6, 6 8, 8 8, 8 6, 6 6)), ((3 3, 3 4, 4 4, 4 3, 3 3)), ((5 5, 5 6, 6 6, 6 5, 5 5)), ((7 7, 7 8, 8 8, 8 7, 7 7)))", 0);
+        actual = Functions.asWKT(Functions.triangulatePolygon(geom));
+        expected = "GEOMETRYCOLLECTION (POLYGON ((0 0, 0 10, 2 2, 0 0)), POLYGON ((2 8, 2 2, 0 10, 2 8)), POLYGON ((10 0, 0 0, 2 2, 10 0)), POLYGON ((8 8, 2 8, 0 10, 8 8)), POLYGON ((10 0, 2 2, 8 2, 10 0)), POLYGON ((8 8, 0 10, 10 10, 8 8)), POLYGON ((10 10, 10 0, 8 2, 10 10)), POLYGON ((8 2, 8 8, 10 10, 8 2)), POLYGON ((4 4, 4 6, 6 6, 4 4)), POLYGON ((6 6, 6 4, 4 4, 6 6)), POLYGON ((6 6, 6 8, 8 8, 6 6)), POLYGON ((8 8, 8 6, 6 6, 8 8)), POLYGON ((3 3, 3 4, 4 4, 3 3)), POLYGON ((4 4, 4 3, 3 3, 4 4)), POLYGON ((5 5, 5 6, 6 6, 5 5)), POLYGON ((6 6, 6 5, 5 5, 6 6)), POLYGON ((7 7, 7 8, 8 8, 7 7)), POLYGON ((8 8, 8 7, 7 7, 8 8)))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("POINT(0 1)", 0);
+        actual = Functions.asWKT(Functions.triangulatePolygon(geom));
+        expected = "GEOMETRYCOLLECTION EMPTY";
+        assertEquals(expected, actual);
     }
 
     @Test

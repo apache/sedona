@@ -1231,6 +1231,14 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testTriangulatePolygon() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_TriangulatePolygon(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (5 5, 5 8, 8 8, 8 5, 5 5))')) as poly");
+        String actual = (String) first(polyTable.select(call(Functions.ST_AsText.class.getSimpleName(), $("poly")))).getField(0);
+        String expected = "GEOMETRYCOLLECTION (POLYGON ((0 0, 0 10, 5 5, 0 0)), POLYGON ((5 8, 5 5, 0 10, 5 8)), POLYGON ((10 0, 0 0, 5 5, 10 0)), POLYGON ((10 10, 5 8, 0 10, 10 10)), POLYGON ((10 0, 5 5, 8 5, 10 0)), POLYGON ((5 8, 10 10, 8 8, 5 8)), POLYGON ((10 10, 10 0, 8 5, 10 10)), POLYGON ((8 5, 8 8, 10 10, 8 5)))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testForceRHR() {
         Table polyTable = tableEnv.sqlQuery("SELECT ST_ForceRHR(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))')) AS polyCW");
         String actual = (String) first(polyTable.select(call(Functions.ST_AsText.class.getSimpleName(), $("polyCW")))).getField(0);

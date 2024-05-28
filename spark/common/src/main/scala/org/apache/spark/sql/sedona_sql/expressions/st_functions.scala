@@ -418,6 +418,9 @@ object st_functions extends DataFrameAPI {
 
   def ST_Translate(geometry: String, deltaX: Double, deltaY: Double): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, 0.0)
 
+  def ST_TriangulatePolygon(geom: Column): Column = wrapExpression[ST_TriangulatePolygon](geom)
+  def ST_TriangulatePolygon(geom: String): Column = wrapExpression[ST_TriangulatePolygon](geom)
+
   def ST_VoronoiPolygons(geometry: Column, tolerance : Column, extendTo: Column): Column = wrapExpression[ST_VoronoiPolygons](geometry, tolerance, extendTo)
 
   def ST_VoronoiPolygons(geometry: String, tolerance : Double, extendTo: String): Column = wrapExpression[ST_VoronoiPolygons](geometry, tolerance, extendTo)

@@ -1173,6 +1173,13 @@ case class ST_Translate(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_TriangulatePolygon(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.triangulatePolygon _) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_VoronoiPolygons(inputExpressions: Seq[Expression])
   extends InferredExpression(nullTolerantInferrableFunction3(FunctionsGeoTools.voronoiPolygons)) with FoldableExpression {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
