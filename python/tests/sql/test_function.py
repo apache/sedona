@@ -781,7 +781,7 @@ class TestPredicateJoin(TestBase):
         is_closed_collected = [[*row] for row in is_closed]
         assert (is_closed_collected == expected_result)
 
-    def test_num_interior_ring(self):
+    def test_num_interior_rings(self):
         geometries = [
             (1, "Point(21 52)"),
             (2, "Polygon((0 0, 0 1, 1 1, 1 0, 0 0))"),
@@ -799,6 +799,27 @@ class TestPredicateJoin(TestBase):
         geometry_df = self.__wkt_pair_list_with_index_to_data_frame(geometries)
 
         number_of_interior_rings = geometry_df.selectExpr("index", "ST_NumInteriorRings(geom) as num")
+        collected_interior_rings = [[*row] for row in number_of_interior_rings.filter("num is not null").collect()]
+        assert (collected_interior_rings == [[2, 0], [11, 1]])
+
+    def test_num_interior_ring(self):
+        geometries = [
+            (1, "Point(21 52)"),
+            (2, "Polygon((0 0, 0 1, 1 1, 1 0, 0 0))"),
+            (3, "Linestring(0 0, 1 1, 1 0)"),
+            (4, "Linestring(0 0, 1 1, 1 0, 0 0)"),
+            (5, "MULTIPOINT ((10 40), (40 30), (20 20), (30 10))"),
+            (6, "MULTIPOLYGON (((30 20, 45 40, 10 40, 30 20)), ((15 5, 40 10, 10 20, 5 10, 15 5)))"),
+            (7, "MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10, 40 40))"),
+            (8, "MULTILINESTRING ((10 10, 20 20, 10 40, 10 10), (40 40, 30 30, 40 20, 30 10))"),
+            (9, "MULTILINESTRING ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))"),
+            (10,
+             "GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (10 10, 20 20, 10 40), POLYGON ((40 40, 20 45, 45 30, 40 40)))"),
+            (11, "POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))")]
+
+        geometry_df = self.__wkt_pair_list_with_index_to_data_frame(geometries)
+
+        number_of_interior_rings = geometry_df.selectExpr("index", "ST_NumInteriorRing(geom) as num")
         collected_interior_rings = [[*row] for row in number_of_interior_rings.filter("num is not null").collect()]
         assert (collected_interior_rings == [[2, 0], [11, 1]])
 
@@ -909,6 +930,11 @@ class TestPredicateJoin(TestBase):
 
         # Then
         assert subdivided.count() == 16
+
+    def test_st_m(self):
+        baseDf = self.spark.sql("SELECT ST_GeomFromWKT('POINT ZM (1 2 3 4)') AS point")
+        actual = baseDf.selectExpr("ST_M(point)").take(1)[0][0]
+        assert actual == 4.0
 
     def test_st_subdivide_explode_lateral(self):
         # Given
@@ -1370,6 +1396,12 @@ class TestPredicateJoin(TestBase):
 
     def test_forcePolygonCW(self):
         actualDf = self.spark.sql("SELECT ST_ForcePolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))')) AS polyCW")
+        actual = actualDf.selectExpr("ST_AsText(polyCW)").take(1)[0][0]
+        expected = "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))"
+        assert expected == actual
+
+    def test_forceRHR(self):
+        actualDf = self.spark.sql("SELECT ST_ForceRHR(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))')) AS polyCW")
         actual = actualDf.selectExpr("ST_AsText(polyCW)").take(1)[0][0]
         expected = "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))"
         assert expected == actual

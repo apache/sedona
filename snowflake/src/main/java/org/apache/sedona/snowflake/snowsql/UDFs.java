@@ -497,6 +497,11 @@ public class UDFs {
         return wkb;
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"wkb"})
+    public static byte[] ST_GeomFromEWKB(byte[] wkb) throws ParseException {
+        return wkb;
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"wkt", "srid"})
     public static byte[] ST_GeomFromWKT(String wkt, int srid) throws ParseException {
         return GeometrySerde.serialize(
@@ -870,6 +875,13 @@ public class UDFs {
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static Integer ST_NumInteriorRings(byte[] geometry) {
+        return Functions.numInteriorRings(
+                GeometrySerde.deserialize(geometry)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static Integer ST_NumInteriorRing(byte[] geometry) {
         return Functions.numInteriorRings(
                 GeometrySerde.deserialize(geometry)
         );
@@ -1343,6 +1355,15 @@ public class UDFs {
     public static byte[] ST_ForcePolygonCCW(byte[] geom) {
         return GeometrySerde.serialize(
                 Functions.forcePolygonCCW(
+                        GeometrySerde.deserialize(geom)
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom"})
+    public static byte[] ST_ForceRHR(byte[] geom) {
+        return GeometrySerde.serialize(
+                Functions.forcePolygonCW(
                         GeometrySerde.deserialize(geom)
                 )
         );

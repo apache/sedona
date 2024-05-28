@@ -48,6 +48,9 @@ object st_constructors extends DataFrameAPI {
   def ST_GeomFromWKB(wkb: Column): Column = wrapExpression[ST_GeomFromWKB](wkb)
   def ST_GeomFromWKB(wkb: String): Column = wrapExpression[ST_GeomFromWKB](wkb)
 
+  def ST_GeomFromEWKB(wkb: Column): Column = wrapExpression[ST_GeomFromEWKB](wkb)
+  def ST_GeomFromEWKB(wkb: String): Column = wrapExpression[ST_GeomFromEWKB](wkb)
+
   def ST_GeomFromWKT(wkt: Column): Column = wrapExpression[ST_GeomFromWKT](wkt, 0)
   def ST_GeomFromWKT(wkt: String): Column = wrapExpression[ST_GeomFromWKT](wkt, 0)
 

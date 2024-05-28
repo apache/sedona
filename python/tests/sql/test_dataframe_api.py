@@ -45,6 +45,7 @@ test_configurations = [
     (stc.ST_GeomFromText, ("wkt",), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
     (stc.ST_GeomFromText, ("wkt",4326), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
     (stc.ST_GeomFromWKB, ("wkb",), "constructor", "ST_ReducePrecision(geom, 2)", "LINESTRING (-2.1 -0.35, -1.5 -0.67)"),
+    (stc.ST_GeomFromEWKB, ("wkb",), "constructor", "ST_ReducePrecision(geom, 2)", "LINESTRING (-2.1 -0.35, -1.5 -0.67)"),
     (stc.ST_GeomFromWKT, ("wkt",), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
     (stc.ST_GeomFromWKT, ("wkt",4326), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
     (stc.ST_GeomFromEWKT, ("ewkt",), "linestring_ewkt", "", "LINESTRING (1 2, 3 4)"),
@@ -117,6 +118,7 @@ test_configurations = [
     (stf.ST_Force3D, ("point", 1.0), "point_geom", "", "POINT Z (0 1 1)"),
     (stf.ST_ForcePolygonCW, ("geom",), "geom_with_hole", "", "POLYGON ((0 0, 3 3, 3 0, 0 0), (1 1, 2 1, 2 2, 1 1))"),
     (stf.ST_ForcePolygonCCW, ("geom",), "geom_with_hole", "", "POLYGON ((0 0, 3 0, 3 3, 0 0), (1 1, 2 2, 2 1, 1 1))"),
+    (stf.ST_ForceRHR, ("geom",), "geom_with_hole", "", "POLYGON ((0 0, 3 3, 3 0, 0 0), (1 1, 2 1, 2 2, 1 1))"),
     (stf.ST_FrechetDistance, ("point", "line",), "point_and_line", "", 5.0990195135927845),
     (stf.ST_GeometricMedian, ("multipoint",), "multipoint_geom", "", "POINT (22.500002656424286 21.250001168173426)"),
     (stf.ST_GeometryN, ("geom", 0), "multipoint", "", "POINT (0 0)"),
@@ -141,6 +143,7 @@ test_configurations = [
     (stf.ST_LineLocatePoint, ("line", "point"), "line_and_point", "", 0.5),
     (stf.ST_LineMerge, ("geom",), "multiline_geom", "", "LINESTRING (0 0, 1 0, 1 1, 0 0)"),
     (stf.ST_LineSubstring, ("line", 0.5, 1.0), "linestring_geom", "", "LINESTRING (2.5 0, 3 0, 4 0, 5 0)"),
+    (stf.ST_M, ("point",), "4D_point", "", 4.0),
     (stf.ST_MakeValid, ("geom",), "invalid_geom", "", "MULTIPOLYGON (((1 5, 3 3, 1 1, 1 5)), ((5 3, 7 5, 7 1, 5 3)))"),
     (stf.ST_MakeLine, ("line1", "line2"), "two_lines", "", "LINESTRING (0 0, 1 1, 0 0, 3 2)"),
     (stf.ST_Polygon, ("geom", 4236), "closed_linestring_geom", "", "POLYGON ((0 0, 1 0, 1 1, 0 0))"),
@@ -155,6 +158,7 @@ test_configurations = [
     (stf.ST_NRings, ("geom",), "square_geom", "", 1),
     (stf.ST_NumGeometries, ("geom",), "multipoint", "", 2),
     (stf.ST_NumInteriorRings, ("geom",), "geom_with_hole", "", 1),
+    (stf.ST_NumInteriorRing, ("geom",), "geom_with_hole", "", 1),
     (stf.ST_NumPoints, ("line",), "linestring_geom", "", 6),
     (stf.ST_PointN, ("line", 2), "linestring_geom", "", "POINT (1 0)"),
     (stf.ST_PointOnSurface, ("line",), "linestring_geom", "", "POINT (2 0)"),
@@ -225,6 +229,7 @@ wrong_type_configurations = [
     (stc.ST_GeomFromKML, (None,)),
     (stc.ST_GeomFromText, (None,)),
     (stc.ST_GeomFromWKB, (None,)),
+    (stc.ST_GeomFromEWKB, (None,)),
     (stc.ST_GeomFromWKT, (None,)),
     (stc.ST_LineFromText, (None,)),
     (stc.ST_LineStringFromText, (None, "")),
@@ -279,6 +284,7 @@ wrong_type_configurations = [
     (stf.ST_Force_2D, (None,)),
     (stf.ST_ForcePolygonCW, (None,)),
     (stf.ST_ForcePolygonCCW, (None,)),
+    (stf.ST_ForceRHR, (None,)),
     (stf.ST_GeometryN, (None, 0)),
     (stf.ST_GeometryN, ("", None)),
     (stf.ST_GeometryN, ("", 0.0)),
@@ -306,6 +312,7 @@ wrong_type_configurations = [
     (stf.ST_LineSubstring, (None, 0.5, 1.0)),
     (stf.ST_LineSubstring, ("", None, 1.0)),
     (stf.ST_LineSubstring, ("", 0.5, None)),
+    (stf.ST_M, (None,)),
     (stf.ST_MakeValid, (None,)),
     (stf.ST_MakePolygon, (None,)),
     (stf.ST_MinimumBoundingCircle, (None,)),
@@ -315,6 +322,7 @@ wrong_type_configurations = [
     (stf.ST_NPoints, (None,)),
     (stf.ST_NumGeometries, (None,)),
     (stf.ST_NumInteriorRings, (None,)),
+    (stf.ST_NumInteriorRing, (None,)),
     (stf.ST_PointN, (None, 2)),
     (stf.ST_PointN, ("", None)),
     (stf.ST_PointN, ("", 2.0)),
@@ -431,6 +439,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS geom")
         elif request.param == "two_points":
             return TestDataFrameAPI.spark.sql("SELECT ST_PointZ(0.0, 0.0, 0.0) AS a, ST_PointZ(3.0, 0.0, 4.0) AS b")
+        elif request.param == "4D_point":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT ZM(1 2 3 4)') AS point")
         elif request.param == "invalid_geom":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((1 5, 1 1, 3 3, 5 3, 7 1, 7 5, 5 3, 3 3, 1 5))') AS geom")
         elif request.param == "overlapping_polys":

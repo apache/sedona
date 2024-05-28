@@ -179,6 +179,20 @@ public class Constructors {
 
     }
 
+    public static class ST_GeomFromEWKB extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String wkbString) throws ParseException {
+            return getGeometryByFileData(wkbString, FileDataSplitter.WKB);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("Bytes") byte[] wkb) throws ParseException {
+            WKBReader wkbReader = new WKBReader();
+            return wkbReader.read(wkb);
+        }
+
+    }
+
     public static class ST_GeomFromGeoJSON extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String geoJson) throws ParseException {

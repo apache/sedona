@@ -859,6 +859,18 @@ def ST_LineSubstring(line_string: ColumnOrName, start_fraction: ColumnOrNameOrNu
 
 
 @validate_argument_types
+def ST_M(geom: ColumnOrName) -> Column:
+    """Return the M coordinate of a point geometry.
+
+    :param point: Point geometry column to get the coordinate for.
+    :type point: ColumnOrName
+    :return: M coordinate of the point geometry as a double column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_M", geom)
+
+
+@validate_argument_types
 def ST_MakeLine(geom1: ColumnOrName, geom2: Optional[ColumnOrName] = None) -> Column:
     """Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error.
 
@@ -1023,6 +1035,17 @@ def ST_NumInteriorRings(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_NumInteriorRings", geometry)
+
+@validate_argument_types
+def ST_NumInteriorRing(geometry: ColumnOrName) -> Column:
+    """Return the number of interior rings contained in a polygon geometry.
+
+    :param geometry: Polygon geometry column to return for.
+    :type geometry: ColumnOrName
+    :return: Number of interior rings polygons contain as an integer column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_NumInteriorRing", geometry)
 
 
 @validate_argument_types
@@ -1468,6 +1491,15 @@ def ST_ForcePolygonCW(geometry: ColumnOrName) -> Column:
     :return: Clockwise oriented geometry
     """
     return _call_st_function("ST_ForcePolygonCW", geometry)
+
+@validate_argument_types
+def ST_ForceRHR(geometry: ColumnOrName) -> Column:
+    """
+    Returns
+    :param geometry: Geometry column to change orientation
+    :return: Clockwise oriented geometry
+    """
+    return _call_st_function("ST_ForceRHR", geometry)
 
 @validate_argument_types
 def ST_NRings(geometry: ColumnOrName) -> Column:
