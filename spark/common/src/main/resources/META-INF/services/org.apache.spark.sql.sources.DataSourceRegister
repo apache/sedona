@@ -1,1 +1,2 @@
 org.apache.spark.sql.sedona_sql.io.raster.RasterFileFormat
+org.apache.spark.sql.sedona_sql.io.geojson.GeoJSONFileFormat

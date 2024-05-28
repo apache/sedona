@@ -292,48 +292,176 @@ root
 !!!note
 	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL constructor API](../api/sql/Constructor.md).
 
-## Load GeoJSON using Spark JSON Data Source
+## Load GeoJSON Data
 
-Spark SQL's built-in JSON data source supports reading GeoJSON data.
-To ensure proper parsing of the geometry property, we can define a schema with the geometry property set to type 'string'.
-This prevents Spark from interpreting the property and allows us to use the ST_GeomFromGeoJSON function for accurate geometry parsing.
+Since `v1.6.1`, Sedona supports reading GeoJSON files using the `geojson` data source. It is designed to handle JSON files that use [GeoJSON format](https://datatracker.ietf.org/doc/html/rfc7946) for their geometries.
+
+This includes SpatioTemporal Asset Catalog (STAC) files, GeoJSON features, GeoJSON feature collections and other variations.
+The key functionality lies in the way 'geometry' fields are processed: these are specifically read as Sedona's `GeometryUDT` type, ensuring integration with Sedona's suite of spatial functions.
+
+### Key features
+
+- Broad Support: The reader and writer are versatile, supporting all GeoJSON-formatted files, including STAC files, feature collections, and more.
+- Geometry Transformation: When reading, fields named 'geometry' are automatically converted from GeoJSON format to Sedona's `GeometryUDT` type and vice versa when writing.
+
+### Load MultiLine GeoJSON FeatureCollection
+
+Suppose we have a GeoJSON FeatureCollection file as follows.
+This entire file is considered as a single GeoJSON FeatureCollection object.
+Multiline format is preferable for scenarios where files need to be human-readable or manually edited.
+
+```json
+{ "type": "FeatureCollection",
+    "features": [
+      { "type": "Feature",
+        "geometry": {"type": "Point", "coordinates": [102.0, 0.5]},
+        "properties": {"prop0": "value0"}
+        },
+      { "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [102.0, 0.0], [103.0, 1.0], [104.0, 0.0], [105.0, 1.0]
+            ]
+          },
+        "properties": {
+          "prop0": "value1",
+          "prop1": 0.0
+          }
+        },
+      { "type": "Feature",
+         "geometry": {
+           "type": "Polygon",
+           "coordinates": [
+             [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0],
+               [100.0, 1.0], [100.0, 0.0] ]
+             ]
+         },
+         "properties": {
+           "prop0": "value2",
+           "prop1": {"this": "that"}
+           }
+         }
+       ]
+}
+```
+
+Set the `multiLine` option to `True` to read multiline GeoJSON files.
+
+=== "Python"
+
+    ```python
+    df = sedona.read.format("geojson").option("multiLine", "true").load("PATH/TO/MYFILE.json")
+     .selectExpr("explode(features) as features") # Explode the envelope to get one feature per row.
+     .select("features.*") # Unpack the features struct.
+     .withColumn("prop0", f.expr("properties['prop0']")).drop("properties").drop("type")
+
+    df.show()
+    df.printSchema()
+    ```
+
+=== "Scala"
+
+    ```scala
+    val df = sedona.read.format("geojson").option("multiLine", "true").load("PATH/TO/MYFILE.json")
+    val parsedDf = df.selectExpr("explode(features) as features").select("features.*")
+            .withColumn("prop0", expr("properties['prop0']")).drop("properties").drop("type")
+
+    parsedDf.show()
+    parsedDf.printSchema()
+    ```
+
+=== "Java"
+
+    ```java
+    Dataset<Row> df = sedona.read.format("geojson").option("multiLine", "true").load("PATH/TO/MYFILE.json")
+     .selectExpr("explode(features) as features") // Explode the envelope to get one feature per row.
+     .select("features.*") // Unpack the features struct.
+     .withColumn("prop0", expr("properties['prop0']")).drop("properties").drop("type")
+
+    df.show();
+    df.printSchema();
+    ```
+
+The output is as follows:
+
+```
++--------------------+------+
+|            geometry| prop0|
++--------------------+------+
+|     POINT (102 0.5)|value0|
+|LINESTRING (102 0...|value1|
+|POLYGON ((100 0, ...|value2|
++--------------------+------+
+
+root
+ |-- geometry: geometry (nullable = false)
+ |-- prop0: string (nullable = true)
+
+```
+
+### Load Single Line GeoJSON Features
+
+Suppose we have a single-line GeoJSON Features dataset as follows. Each line is a single GeoJSON Feature.
+This format is efficient for processing large datasets where each line is a separate, self-contained GeoJSON object.
+
+```json
+{"type":"Feature","geometry":{"type":"Point","coordinates":[102.0,0.5]},"properties":{"prop0":"value0"}}
+{"type":"Feature","geometry":{"type":"LineString","coordinates":[[102.0,0.0],[103.0,1.0],[104.0,0.0],[105.0,1.0]]},"properties":{"prop0":"value1"}}
+{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]},"properties":{"prop0":"value2"}}
+```
+
+By default, when `option` is not specified, WherobotsDB reads a GeoJSON file as a single line GeoJSON.
+
+=== "Python"
+
+	```python
+	df = sedona.read.format("geojson").load("PATH/TO/MYFILE.json")
+	   .withColumn("prop0", f.expr("properties['prop0']")).drop("properties").drop("type")
+
+	df.show()
+	df.printSchema()
+	```
 
 === "Scala"
 
 	```scala
-	val schema = "type string, crs string, totalFeatures long, features array<struct<type string, geometry string, properties map<string, string>>>"
-	sedona.read.schema(schema).json(geojson_path)
-		.selectExpr("explode(features) as features") // Explode the envelope to get one feature per row.
-		.select("features.*") // Unpack the features struct.
-		.withColumn("geometry", expr("ST_GeomFromGeoJSON(geometry)")) // Convert the geometry string.
-		.printSchema()
+	val df = sedona.read.format("geojson").load("PATH/TO/MYFILE.json")
+	   .withColumn("prop0", expr("properties['prop0']")).drop("properties").drop("type")
+
+	df.show()
+	df.printSchema()
 	```
 
 === "Java"
 
 	```java
-	String schema = "type string, crs string, totalFeatures long, features array<struct<type string, geometry string, properties map<string, string>>>";
-	sedona.read.schema(schema).json(geojson_path)
-		.selectExpr("explode(features) as features") // Explode the envelope to get one feature per row.
-		.select("features.*") // Unpack the features struct.
-		.withColumn("geometry", expr("ST_GeomFromGeoJSON(geometry)")) // Convert the geometry string.
-		.printSchema();
+	Dataset<Row> df = sedona.read.format("geojson").load("PATH/TO/MYFILE.json")
+	   .withColumn("prop0", expr("properties['prop0']")).drop("properties").drop("type")
+
+	df.show()
+	df.printSchema()
 	```
 
-=== "Python"
+The output is as follows:
 
-	```python
-	schema = "type string, crs string, totalFeatures long, features array<struct<type string, geometry string, properties map<string, string>>>";
-	(sedona.read.json(geojson_path, schema=schema)
-		.selectExpr("explode(features) as features") # Explode the envelope to get one feature per row.
-		.select("features.*") # Unpack the features struct.
-		.withColumn("geometry", f.expr("ST_GeomFromGeoJSON(geometry)")) # Convert the geometry string.
-		.printSchema())
-	```
+```
++--------------------+------+
+|            geometry| prop0|
++--------------------+------+
+|     POINT (102 0.5)|value0|
+|LINESTRING (102 0...|value1|
+|POLYGON ((100 0, ...|value2|
++--------------------+------+
 
-## Load Shapefile and GeoJSON using SpatialRDD
+root
+ |-- geometry: geometry (nullable = false)
+ |-- prop0: string (nullable = true)
+```
 
-Shapefile and GeoJSON can be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](rdd.md#create-a-generic-spatialrdd) and [DataFrame <-> RDD](#convert-between-dataframe-and-spatialrdd).
+## Load Shapefile using SpatialRDD
+
+Shapefile can be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](rdd.md#create-a-generic-spatialrdd) and [DataFrame <-> RDD](#convert-between-dataframe-and-spatialrdd).
 
 ## Load GeoParquet
 
@@ -959,8 +1087,21 @@ SELECT ST_AsText(countyshape)
 FROM polygondf
 ```
 
-!!!note
-	ST_AsGeoJSON is also available. We would like to invite you to contribute more functions
+## Save as GeoJSON
+
+Since `v1.6.1`, the GeoJSON data source in Sedona can be used to save a Spatial DataFrame to a single-line JSON file, with geometries written in GeoJSON format.
+
+```sparksql
+df.write.format("geojson").save("YOUR/PATH.json")
+```
+
+The structure of the generated file will be like this:
+
+```json
+{"type":"Feature","geometry":{"type":"Point","coordinates":[102.0,0.5]},"properties":{"prop0":"value0"}}
+{"type":"Feature","geometry":{"type":"LineString","coordinates":[[102.0,0.0],[103.0,1.0],[104.0,0.0],[105.0,1.0]]},"properties":{"prop0":"value1"}}
+{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]},"properties":{"prop0":"value2"}}
+```
 
 ## Save GeoParquet
 
@@ -996,9 +1137,9 @@ df.write.format("geoparquet")
 
 The value of `geoparquet.crs` and `geoparquet.crs.<column_name>` can be one of the following:
 
-* `"null"`: Explicitly setting `crs` field to `null`. This is the default behavior.
-* `""` (empty string): Omit the `crs` field. This implies that the CRS is [OGC:CRS84](https://www.opengis.net/def/crs/OGC/1.3/CRS84) for CRS-aware implementations.
-* `"{...}"` (PROJJSON string): The `crs` field will be set as the PROJJSON object representing the Coordinate Reference System (CRS) of the geometry. You can find the PROJJSON string of a specific CRS from here: https://epsg.io/ (click the JSON option at the bottom of the page). You can also customize your PROJJSON string as needed.
+- `"null"`: Explicitly setting `crs` field to `null`. This is the default behavior.
+- `""` (empty string): Omit the `crs` field. This implies that the CRS is [OGC:CRS84](https://www.opengis.net/def/crs/OGC/1.3/CRS84) for CRS-aware implementations.
+- `"{...}"` (PROJJSON string): The `crs` field will be set as the PROJJSON object representing the Coordinate Reference System (CRS) of the geometry. You can find the PROJJSON string of a specific CRS from here: https://epsg.io/ (click the JSON option at the bottom of the page). You can also customize your PROJJSON string as needed.
 
 Please note that Sedona currently cannot set/get a projjson string to/from a CRS. Its geoparquet reader will ignore the projjson metadata and you will have to set your CRS via [`ST_SetSRID`](../api/sql/Function.md#st_setsrid) after reading the file.
 Its geoparquet writer will not leverage the SRID field of a geometry so you will have to always set the `geoparquet.crs` option manually when writing the file, if you want to write a meaningful CRS field.

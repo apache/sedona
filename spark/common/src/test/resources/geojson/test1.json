@@ -1,0 +1,39 @@
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          172.91173669923782,
+          1.3438851951615003
+        ],
+        [
+          172.95469614953714,
+          1.3438851951615003
+        ],
+        [
+          172.95469614953714,
+          1.3690476620161975
+        ],
+        [
+          172.91173669923782,
+          1.3690476620161975
+        ],
+        [
+          172.91173669923782,
+          1.3438851951615003
+        ]
+      ]
+    ]
+  },
+  "properties": {
+    "title": "Core Item",
+    "description": "A sample STAC Item that includes examples of all common metadata",
+    "start_datetime": "2020-12-11T22:38:32.125Z",
+    "end_datetime": "2020-12-11T22:38:32.327Z",
+    "created": "2020-12-12T01:48:13.725Z",
+    "gsd": 0.512
+  },
+  "assets": []
+}
