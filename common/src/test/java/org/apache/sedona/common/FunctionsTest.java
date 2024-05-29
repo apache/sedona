@@ -153,6 +153,26 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void lineFromWKB() throws Exception{
+        Geometry geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0));
+        byte[] wkbGeom = Functions.asWKB(geometry);
+        Geometry result = Constructors.lineFromWKB(wkbGeom);
+        assertNull(result);
+
+        geometry = GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 5.0, 5.0, 5.0, 2.0));
+        wkbGeom = Functions.asWKB(geometry);
+        result = Constructors.lineFromWKB(wkbGeom, 4326);
+        assertEquals(geometry, result);
+        assertEquals(4326, Objects.requireNonNull(result).getSRID());
+
+        geometry = GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5, 2.0, 2.0));
+        wkbGeom = Functions.asWKB(geometry);
+        result = Constructors.lineFromWKB(wkbGeom);
+        assertEquals(geometry, result);
+        assertEquals(0, Objects.requireNonNull(result).getSRID());
+    }
+
+    @Test
     public void splitLineStringByMultipoint() {
         LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 1.5, 1.5, 2.0, 2.0));
         MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0.5, 0.5, 1.0, 1.0));

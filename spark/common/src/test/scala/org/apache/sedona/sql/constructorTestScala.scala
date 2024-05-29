@@ -234,6 +234,19 @@ class constructorTestScala extends TestBaseScala {
       }
     }
 
+    it("Passed ST_GeometryFromText") {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      var polygonDf = sparkSession.sql("select ST_GeometryFromText(polygontable._c0, 4326) as countyshape from polygontable")
+      assert(polygonDf.count() == 100)
+      val nullGeom = sparkSession.sql("select ST_GeometryFromText(null)")
+      assert(nullGeom.first().isNullAt(0))
+      // Fail on wrong input type
+      intercept[Exception] {
+        sparkSession.sql("SELECT ST_GeometryFromText(0)").collect()
+      }
+    }
+
     it("Passed ST_GeomFromWKT multipolygon read as polygon bug") {
       val multipolygon =
         """'MULTIPOLYGON (((-97.143362 27.84948, -97.14051 27.849375, -97.13742 27.849375, -97.13647 27.851056, -97.136945 27.853788, -97.138728 27.855784, -97.141223 27.853158, -97.143362 27.84948)),
@@ -245,6 +258,47 @@ class constructorTestScala extends TestBaseScala {
            |SELECT ST_GeomFromWkt($multipolygon)
            |""".stripMargin)
       assert(wkt.first().getAs[Geometry](0).getGeometryType === "MultiPolygon")
+    }
+
+    it("Passed ST_LineFromWKB") {
+      val geometryDf = Seq(
+        "010200000003000000000000000000000000000000000000000000000000000840000000000000084000000000000010400000000000001040",
+        "0101000000000000000000F03F0000000000000040",
+        "01020000000300000000000000000000c000000000000000c000000000000010400000000000001040000000000000104000000000000000c0",
+        "0103000000010000000500000000000000000000000000000000000000000000000000f03f000000000000f03f0000000000001440000000000000f03f0000000000001440000000000000000000000000000000000000000000000000"
+      ).map(Tuple1.apply).toDF("wkb")
+
+      geometryDf.createOrReplaceTempView("wkbtable")
+
+      var validLineDf = sparkSession.sql("SELECT ST_LineFromWKB(wkbtable.wkb) FROM wkbtable")
+      var rows = validLineDf.collect()
+      assert(rows.length == 4)
+
+      var expectedPoints = Seq("LINESTRING (0 0, 3 3, 4 4)", null, "LINESTRING (-2 -2, 4 4, 4 -2)", null)
+      for (i <- rows.indices) {
+        if (expectedPoints(i) == null) {
+          assert(rows(i).isNullAt(0))
+        } else {
+          assert(rows(i).getAs[Geometry](0).toString == expectedPoints(i))
+        }
+      }
+
+      validLineDf = sparkSession.sql("SELECT ST_AsEWKT(ST_LineFromWKB(wkbtable.wkb, 4326)) FROM wkbtable")
+      rows = validLineDf.collect()
+      assert(rows.length == 4)
+
+      expectedPoints = Seq("SRID=4326;LINESTRING (0 0, 3 3, 4 4)", null, "SRID=4326;LINESTRING (-2 -2, 4 4, 4 -2)", null)
+      for (i <- rows.indices) {
+        if (expectedPoints(i) == null) {
+          assert(rows(i).isNullAt(0))
+        } else {
+          assert(rows(i).get(0).toString == expectedPoints(i))
+        }
+      }
+
+      intercept[Exception] {
+        sparkSession.sql("SELECT ST_LineFromWKB('invalid')").collect()
+      }
     }
 
     it("Passed ST_GeomFromWKB") {

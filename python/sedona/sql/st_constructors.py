@@ -97,6 +97,20 @@ def ST_GeomFromText(wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = No
 
     return _call_constructor_function("ST_GeomFromText", args)
 
+@validate_argument_types
+def ST_GeometryFromText(wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None) -> Column:
+    """Generate a geometry column from a Well-Known Text (WKT) string column.
+    This is an alias of ST_GeomFromWKT.
+
+    :param wkt: WKT string column to generate from.
+    :type wkt: ColumnOrName
+    :return: Geometry column representing the WKT string.
+    :rtype: Column
+    """
+    args = (wkt) if srid is None else (wkt, srid)
+
+    return _call_constructor_function("ST_GeometryFromText", args)
+
 
 @validate_argument_types
 def ST_GeomFromWKB(wkb: ColumnOrName) -> Column:
@@ -270,6 +284,20 @@ def ST_PointFromWKB(wkb: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = No
     """
     args = (wkb) if srid is None else (wkb, srid)
     return _call_constructor_function("ST_PointFromWKB", args)
+
+@validate_argument_types
+def ST_LineFromWKB(wkb: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None) -> Column:
+    """Generate a Line geometry column from a Well-Known Binary (WKB) binary column.
+
+    :param wkb: WKB binary column to generate from.
+    :type wkb: ColumnOrName
+    :param srid: SRID to be set for the geometry.
+    :type srid: ColumnOrNameOrNumber
+    :return: Geometry column representing the WKB binary.
+    :rtype: Column
+    """
+    args = (wkb) if srid is None else (wkb, srid)
+    return _call_constructor_function("ST_LineFromWKB", args)
 
 @validate_argument_types
 def ST_MakePoint(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, z: Optional[ColumnOrNameOrNumber] = None, m: Optional[ColumnOrNameOrNumber] = None) -> Column:

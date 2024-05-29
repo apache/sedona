@@ -140,6 +140,19 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("passed st_linefromwkb") {
+      val wkbSeq = Seq[Array[Byte]](Array[Byte](1, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, -124, -42, 0, -64, 0, 0, 0, 0, -128, -75, -42, -65, 0, 0, 0, 96, -31, -17, -9, -65, 0, 0, 0, -128, 7, 93, -27, -65))
+      val df = wkbSeq.toDF("wkb").select(ST_LineFromWKB("wkb"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expectedResult = "LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)"
+      assert(actualResult == expectedResult)
+
+      val wkbStringSeq = Seq("0102000000020000000000000084d600c00000000080b5d6bf00000060e1eff7bf00000080075de5bf")
+      val dfWithString = wkbStringSeq.toDF("wkb").select(ST_LineFromWKB("wkb"))
+      val actualStringResult = dfWithString.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      assert(actualStringResult == expectedResult)
+    }
+
     it("passed st_geomfromwkt") {
       val df = sparkSession.sql("SELECT 'POINT(0.0 1.0)' AS wkt").select(ST_GeomFromWKT("wkt"))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
@@ -159,6 +172,20 @@ class dataFrameAPITestScala extends TestBaseScala {
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry]
       assert(actualResult.toText == "POINT (0 1)")
       assert(actualResult.getSRID == 4269)
+    }
+
+    it("passed ST_GeometryFromText") {
+      val df = sparkSession.sql("SELECT 'POINT(0.0 1.0)' AS wkt").select(ST_GeometryFromText("wkt"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expectedResult = "POINT (0 1)"
+      assert(actualResult == expectedResult)
+    }
+
+    it("passed ST_GeometryFromText with srid") {
+      val df = sparkSession.sql("SELECT 'POINT(0.0 1.0)' AS wkt").select(ST_GeometryFromText("wkt", 4326))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry]
+      assert(actualResult.toText == "POINT (0 1)")
+      assert(actualResult.getSRID == 4326)
     }
 
     it("passed st_geomfromtext") {

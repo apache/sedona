@@ -79,6 +79,19 @@ public class Constructors {
         return geom;
     }
 
+    public  static Geometry lineFromWKB(byte[] wkb) throws ParseException {
+        return lineFromWKB(wkb, 0);
+    }
+
+    public static Geometry lineFromWKB(byte[] wkb, int srid) throws ParseException {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        Geometry geom =  new WKBReader(geometryFactory).read(wkb);
+        if (!(geom instanceof LineString)) {
+            return null;
+        }
+        return geom;
+    }
+
     public static Geometry mLineFromText(String wkt, int srid) throws ParseException {
         if (wkt == null || !wkt.startsWith("MULTILINESTRING")) {
             return null;

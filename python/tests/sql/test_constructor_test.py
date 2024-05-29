@@ -115,6 +115,19 @@ class TestConstructors(TestBase):
         polygon_df.show(10)
         assert polygon_df.count() == 100
 
+    def test_st_geometry_from_text(self):
+        polygon_wkt_df = self.spark.read.format("csv").\
+            option("delimiter", "\t").\
+            option("header", "false").\
+            load(mixed_wkt_geometry_input_location)
+
+        polygon_wkt_df.createOrReplaceTempView("polygontable")
+        polygon_df = self.spark.sql("select ST_GeometryFromText(polygontable._c0) as countyshape from polygontable")
+        assert polygon_df.count() == 100
+
+        polygon_df = self.spark.sql("select ST_GeomFromText(polygontable._c0, 4326) as countyshape from polygontable")
+        assert polygon_df.count() == 100
+
     def test_st_geom_from_wkb(self):
         polygon_wkb_df = self.spark.read.format("csv").\
             option("delimiter", "\t").\

@@ -45,6 +45,13 @@ object st_constructors extends DataFrameAPI {
 
   def ST_GeomFromText(wkt: String, srid: Int): Column = wrapExpression[ST_GeomFromText](wkt, srid)
 
+  def ST_GeometryFromText(wkt: Column): Column = wrapExpression[ST_GeometryFromText](wkt, 0)
+  def ST_GeometryFromText(wkt: String): Column = wrapExpression[ST_GeometryFromText](wkt, 0)
+
+  def ST_GeometryFromText(wkt: Column, srid: Column): Column = wrapExpression[ST_GeometryFromText](wkt, srid)
+
+  def ST_GeometryFromText(wkt: String, srid: Int): Column = wrapExpression[ST_GeometryFromText](wkt, srid)
+
   def ST_GeomFromWKB(wkb: Column): Column = wrapExpression[ST_GeomFromWKB](wkb)
   def ST_GeomFromWKB(wkb: String): Column = wrapExpression[ST_GeomFromWKB](wkb)
 
@@ -106,6 +113,12 @@ object st_constructors extends DataFrameAPI {
 
   def ST_PointFromWKB(wkb: Column, srid: Column): Column = wrapExpression[ST_PointFromWKB](wkb, srid)
   def ST_PointFromWKB(wkb: String, srid: Int): Column = wrapExpression[ST_PointFromWKB](wkb, srid)
+
+  def ST_LineFromWKB(wkb: Column): Column = wrapExpression[ST_LineFromWKB](wkb, 0)
+  def ST_LineFromWKB(wkb: String): Column = wrapExpression[ST_LineFromWKB](wkb, 0)
+
+  def ST_LineFromWKB(wkb: Column, srid: Column): Column = wrapExpression[ST_LineFromWKB](wkb, srid)
+  def ST_LineFromWKB(wkb: String, srid: Int): Column = wrapExpression[ST_LineFromWKB](wkb, srid)
 
   def ST_MakePoint(x: Column, y: Column): Column = wrapExpression[ST_MakePoint](x, y, null, null)
   def ST_MakePoint(x: String, y: String): Column = wrapExpression[ST_MakePoint](x, y, null, null)
