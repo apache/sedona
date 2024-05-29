@@ -86,6 +86,7 @@
         <spark.compat.version>3.0</spark.compat.version>
         <log4j.version>2.17.2</log4j.version>
 
+        <flink.version>1.19.0</flink.version>
         <slf4j.version>1.7.36</slf4j.version>
         <googles2.version>2.0.0</googles2.version>
         <uberh3.version>4.1.1</uberh3.version>
@@ -525,7 +526,7 @@
                         <failOnWarning>false</failOnWarning>
                         <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
                         <testSourceDirectory>${project.basedir}/src/test/scala</testSourceDirectory>
-                        <configLocation>${project.basedir}/../scalastyle_config.xml</configLocation>
+                        <configLocation>tools/maven/scalastyle_config.xml</configLocation>
                         <outputFile>${project.basedir}/target/scalastyle-output.xml</outputFile>
                         <outputEncoding>UTF-8</outputEncoding>
                     </configuration>
