@@ -143,4 +143,22 @@ public class ConstructorsTest {
         assertEquals(4326, point.getSRID());
         assertEquals("POINT Z(0 1 2)", Functions.asWKT(point));
     }
+
+    @Test
+    public void pointM() {
+        Geometry point = Constructors.pointM(0.0d, 1.0d, 2.0d, 4326);
+
+        assertTrue(point instanceof Point);
+        assertEquals(4326, point.getSRID());
+        assertEquals("SRID=4326;POINT ZM(0 1 0 2)", Functions.asEWKT(point));
+    }
+
+    @Test
+    public void pointZM() {
+        Geometry point = Constructors.pointZM(0.0d, 1.0d, 2.0d, 10.0, 4326);
+
+        assertTrue(point instanceof Point);
+        assertEquals(4326, point.getSRID());
+        assertEquals("POINT ZM(0 1 2 10)", Functions.asWKT(point));
+    }
 }

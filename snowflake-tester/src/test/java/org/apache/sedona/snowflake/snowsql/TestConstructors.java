@@ -89,6 +89,21 @@ public class TestConstructors extends TestBase{
                 "POINT (0 1)"
         );
     }
+
+    @Test
+    public void test_ST_PointFromWKB() {
+        registerUDF("ST_PointFromWKB", byte[].class);
+        registerUDF("ST_AsEWKT", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_PointFromWKB(ST_ASWKB(to_geometry('POINT (10.0 15.0)'))))",
+                "POINT (10 15)"
+        );
+        registerUDF("ST_PointFromWKB", byte[].class, int.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsEWKT(sedona.ST_PointFromWKB(ST_ASWKB(to_geometry('POINT (10.0 15.0)')), 4326))",
+                "SRID=4326;POINT (10 15)"
+        );
+    }
     @Test
     public void test_ST_GeomFromEWKB() {
         registerUDF("ST_GeomFromEWKB", byte[].class);

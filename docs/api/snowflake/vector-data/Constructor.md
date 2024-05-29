@@ -392,7 +392,7 @@ Introduction: Construct a Point from X and Y
 Format: `ST_Point (X:decimal, Y:decimal)`
 
 In `v1.4.0` an optional Z parameter was removed to be more consistent with other spatial SQL implementations.
-If you are upgrading from an older version of Sedona - please use ST_PointZ to create 3D points.
+If you are upgrading from an older version of Sedona - please use ST_PointZ or ST_PointZM to create 3D points.
 
 SQL example:
 
@@ -441,6 +441,35 @@ Output:
 
 ```
 POINT Z(1.2345 2.3456 3.4567)
+```
+
+## ST_PointFromWKB
+
+Introduction: Construct a Point geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format.
+
+!!!note
+    Returns null if geometry is not of type Point.
+
+Format:
+
+`ST_PointFromWKB (Wkb: String)`
+
+`ST_PointFromWKB (Wkb: Binary)`
+
+`ST_PointFromWKB (Wkb: String, srid: Integer)`
+
+`ST_PointFromWKB (Wkb: Binary, srid: Integer)`
+
+Example:
+
+```sql
+SELECT ST_PointFromWKB([01 01 00 00 00 00 00 00 00 00 00 24 40 00 00 00 00 00 00 2e 40])
+```
+
+Output:
+
+```
+POINT (10 15)
 ```
 
 ## ST_PolygonFromEnvelope

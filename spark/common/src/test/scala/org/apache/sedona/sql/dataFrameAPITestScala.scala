@@ -25,7 +25,7 @@ import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
 import org.apache.spark.sql.sedona_sql.expressions.st_functions._
 import org.apache.spark.sql.sedona_sql.expressions.st_predicates._
 import org.junit.Assert.{assertEquals, assertFalse, assertTrue}
-import org.locationtech.jts.geom.{Geometry, Polygon}
+import org.locationtech.jts.geom.{Geometry, Point, Polygon}
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.operation.buffer.BufferParameters
 
@@ -58,6 +58,14 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actual == 40.0)
     }
 
+    it("Passed st_pointm") {
+      val pointDf = sparkSession.sql("SELECT ST_PointM(1,2,100) as point1, ST_PointM(1,2,100,4326) as point2")
+      val point1 = pointDf.select(ST_AsEWKT("point1")).take(1)(0).getString(0)
+      val point2 = pointDf.select(ST_AsEWKT("point2")).take(1)(0).getString(0)
+      assertEquals("POINT ZM(1 2 0 100)", point1)
+      assertEquals("SRID=4326;POINT ZM(1 2 0 100)", point2)
+    }
+
     it("passed st_makepoint") {
       val df = sparkSession.sql("SELECT 0.0 AS x, 1.0 AS y, 2.0 AS z").select(ST_AsText(ST_MakePoint("x", "y", "z")))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[String]
@@ -70,6 +78,19 @@ class dataFrameAPITestScala extends TestBaseScala {
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POINT (0 1)"
       assert(actualResult == expectedResult)
+    }
+
+    it("passed st_pointfromwkb") {
+      val wkbSeq = Seq[Array[Byte]](Array[Byte](1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 64, 0, 0, 0, 0, 0, 0, 46, 64))
+      val df = wkbSeq.toDF("wkb").select(ST_PointFromWKB("wkb"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expectedResult = "POINT (10 15)"
+      assert(actualResult == expectedResult)
+
+      val wkbStringSeq = Seq("010100000000000000000024400000000000002E40")
+      val dfWithString = wkbStringSeq.toDF("wkb").select(ST_PointFromWKB("wkb"))
+      val actualStringResult = dfWithString.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      assert(actualStringResult == expectedResult)
     }
 
     it("passed st_polygonfromtext") {
@@ -1460,6 +1481,14 @@ class dataFrameAPITestScala extends TestBaseScala {
       val esriValidityTable = specialCaseTable.select(ST_IsValidReason($"geom", lit(1)))
       val esriValidityReason = esriValidityTable.take(1)(0).getString(0)
       assertEquals("Interior is disconnected at or near point (1.0, 1.0, NaN)", esriValidityReason)
+    }
+
+    it("Passed ST_PointZM") {
+      val pointDf = sparkSession.sql("SELECT ST_PointZM(1,2,3,100) as point1, ST_PointZM(1,2,3,100,4326) as point2")
+      val point1 = pointDf.select(ST_AsEWKT("point1")).take(1)(0).getString(0)
+      val point2 = pointDf.select(ST_AsEWKT("point2")).take(1)(0).getString(0)
+      assertEquals("POINT ZM(1 2 3 100)", point1)
+      assertEquals("SRID=4326;POINT ZM(1 2 3 100)", point2)
     }
   }
 }

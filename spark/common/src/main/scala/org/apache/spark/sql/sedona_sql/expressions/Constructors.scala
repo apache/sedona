@@ -188,6 +188,51 @@ case class ST_GeomFromEWKB(inputExpressions: Seq[Expression])
   }
 }
 
+
+case class ST_PointFromWKB(inputExpressions: Seq[Expression])
+  extends Expression with FoldableExpression with ImplicitCastInputTypes with CodegenFallback with UserDataGeneratator {
+
+  // Validate the number of input expressions (1 or 2)
+  assert(inputExpressions.length >= 1 && inputExpressions.length <= 2)
+
+  override def nullable: Boolean = true
+
+  override def eval(inputRow: InternalRow): Any = {
+    val wkb = inputExpressions.head.eval(inputRow)
+    val srid = if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow) else 0
+
+    wkb match {
+      case geomString: UTF8String =>
+        // Parse UTF-8 encoded WKB string
+        val geom = Constructors.pointFromText(geomString.toString, "wkb")
+        if (geom.getGeometryType == "Point") {
+          geom.setSRID(srid.asInstanceOf[Int])
+          geom.toGenericArrayData
+        } else {
+          null
+        }
+
+      case wkbArray: Array[Byte] =>
+        // Convert raw WKB byte array to geometry
+        Constructors.pointFromWKB(wkbArray, srid.asInstanceOf[Int]).toGenericArrayData
+
+      case _ => null
+    }
+  }
+
+  override def dataType: DataType = GeometryUDT
+
+  override def inputTypes: Seq[AbstractDataType] =
+    if (inputExpressions.length == 1) Seq(TypeCollection(StringType, BinaryType))
+    else Seq(TypeCollection(StringType, BinaryType), IntegerType)
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): ST_PointFromWKB = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
   * Return a Geometry from a GeoJSON string
   *
@@ -240,6 +285,27 @@ case class ST_Point(inputExpressions: Seq[Expression])
  */
 case class ST_PointZ(inputExpressions: Seq[Expression])
   extends InferredExpression(Constructors.pointZ _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Return a Point from X, Y, M and srid
+ *
+ * @param inputExpressions This function takes 4 parameter which are point x, y, m and srid (default 0).
+ */
+case class ST_PointM(inputExpressions: Seq[Expression])
+  extends InferredExpression(Constructors.pointM _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_PointZM(inputExpressions: Seq[Expression])
+  extends InferredExpression(Constructors.pointZM _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

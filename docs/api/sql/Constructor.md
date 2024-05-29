@@ -542,6 +542,87 @@ Output:
 POINT Z(1.2345 2.3456 3.4567)
 ```
 
+## ST_PointM
+
+Introduction: Construct a Point from X, Y and M and an optional srid. If srid is not set, it defaults to 0 (unknown).
+Must use ST_AsEWKT function to print the Z and M coordinates.
+
+Format:
+
+`ST_PointM (X: Double, Y: Double, M: Double)`
+
+`ST_PointM (X: Double, Y: Double, M: Double, srid: Integer)`
+
+Since: `v1.6.1`
+
+Example:
+
+```sql
+SELECT ST_AsEWKT(ST_PointM(1.2345, 2.3456, 3.4567))
+```
+
+Output:
+
+```
+POINT ZM(1.2345 2.3456 0 3.4567)
+```
+
+## ST_PointZM
+
+Introduction: Construct a Point from X, Y, Z, M and an optional srid. If srid is not set, it defaults to 0 (unknown).
+Must use ST_AsEWKT function to print the Z and M coordinates.
+
+Format:
+
+`ST_PointZM (X: Double, Y: Double, Z: Double, M: Double)`
+
+`ST_PointZM (X: Double, Y: Double, Z: Double, M: Double, srid: Integer)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_AsEWKT(ST_PointZM(1.2345, 2.3456, 3.4567, 100))
+```
+
+Output:
+
+```
+POINT ZM(1.2345 2.3456 3.4567, 100)
+```
+
+## ST_PointFromWKB
+
+Introduction: Construct a Point geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format.
+
+!!!note
+	Returns null if geometry is not of type Point.
+
+Format:
+
+`ST_PointFromWKB (Wkb: String)`
+
+`ST_PointFromWKB (Wkb: Binary)`
+
+`ST_PointFromWKB (Wkb: String, srid: Integer)`
+
+`ST_PointFromWKB (Wkb: Binary, srid: Integer)`
+
+Since: `v1.6.1`
+
+Example:
+
+```sql
+SELECT ST_PointFromWKB([01 01 00 00 00 00 00 00 00 00 00 24 40 00 00 00 00 00 00 2e 40])
+```
+
+Output:
+
+```
+POINT (10 15)
+```
+
 ## ST_PolygonFromEnvelope
 
 Introduction: Construct a Polygon from MinX, MinY, MaxX, MaxY.

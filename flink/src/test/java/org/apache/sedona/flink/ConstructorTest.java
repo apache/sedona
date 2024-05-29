@@ -15,6 +15,7 @@ package org.apache.sedona.flink;
 
 import org.apache.flink.table.api.Table;
 import org.apache.flink.types.Row;
+import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.sedona.flink.expressions.Constructors;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -31,14 +32,12 @@ import java.util.List;
 
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.PrimitiveArrayTypeInfo;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
-import org.apache.flink.streaming.api.datastream.DataStream;
 
 public class ConstructorTest extends TestBase{
 
@@ -97,6 +96,58 @@ public class ConstructorTest extends TestBase{
                 .getFieldAs(colNames[3]);
 
         assertEquals(5.0, result.getCoordinate().getZ(), 1e-6);
+    }
+
+    @Test
+    public void testPointM() {
+        List<Row> data = new ArrayList<>();
+        data.add(Row.of(2.0, 2.0, 5.0, "point"));
+        String[] colNames = new String[]{"x", "y", "m", "name_point"};
+
+        TypeInformation<?>[] colTypes = {
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.STRING_TYPE_INFO};
+        RowTypeInfo typeInfo = new RowTypeInfo(colTypes, colNames);
+        DataStream<Row> ds = env.fromCollection(data).returns(typeInfo);
+        Table pointTable = tableEnv.fromDataStream(ds);
+
+        Table geomTable = pointTable
+                .select(call(Constructors.ST_PointM.class.getSimpleName(), $(colNames[0]), $(colNames[1]), $(colNames[2]))
+                        .as(colNames[3]));
+
+        Point result = first(geomTable)
+                .getFieldAs(colNames[3]);
+
+        assertEquals(5.0, result.getCoordinate().getM(), 1e-6);
+    }
+
+    @Test
+    public void testPointZM() {
+        List<Row> data = new ArrayList<>();
+        data.add(Row.of(2.0, 2.0, 5.0, 100.0, "point"));
+        String[] colNames = new String[]{"x", "y", "z", "m", "name_point"};
+
+        TypeInformation<?>[] colTypes = {
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.STRING_TYPE_INFO};
+        RowTypeInfo typeInfo = new RowTypeInfo(colTypes, colNames);
+        DataStream<Row> ds = env.fromCollection(data).returns(typeInfo);
+        Table pointTable = tableEnv.fromDataStream(ds);
+
+        Table geomTable = pointTable
+                .select(call(Constructors.ST_PointZM.class.getSimpleName(), $(colNames[0]), $(colNames[1]), $(colNames[2]), $(colNames[3]))
+                        .as(colNames[4]));
+
+        Point result = first(geomTable)
+                .getFieldAs(colNames[4]);
+
+        assertEquals(5.0, result.getCoordinate().getZ(), 1e-6);
+        assertEquals(100.0, result.getCoordinate().getM(), 1e-6);
     }
 
     @Test
@@ -266,7 +317,50 @@ public class ConstructorTest extends TestBase{
 
         assertEquals(expectedGeom, result);
 
-       }
+    }
+
+    @Test
+    public void testPointFromWKB() throws Exception {
+        String hexWkb1 = "010100000000000000000000000000000000000000";
+        byte[] wkbPoint1 = org.apache.commons.codec.binary.Hex.decodeHex(hexWkb1);
+        String hexWkb2 = "010100000000000000000024400000000000002e40";
+        byte[] wkbPoint2 = org.apache.commons.codec.binary.Hex.decodeHex(hexWkb2);
+        String hexWkb3 = "01030000000100000005000000000000000000e0bf000000000000e0bf000000000000e0bf000000000000e03f000000000000e03f000000000000e03f000000000000e03f000000000000e0bf000000000000e0bf000000000000e0bf";
+        byte[] wkbPolygon = org.apache.commons.codec.binary.Hex.decodeHex(hexWkb3);
+
+        List<Row> data1 = new ArrayList<>();
+        data1.add(Row.of(wkbPoint1));
+        data1.add(Row.of(wkbPoint2));
+        data1.add(Row.of(wkbPolygon));
+
+        List<Row> data2 = new ArrayList<>();
+        data2.add(Row.of(hexWkb1));
+        data2.add(Row.of(hexWkb2));
+        data2.add(Row.of(hexWkb3));
+
+        TypeInformation<?>[] colTypes1 = {PrimitiveArrayTypeInfo.BYTE_PRIMITIVE_ARRAY_TYPE_INFO};
+        TypeInformation<?>[] colTypes2 = {BasicTypeInfo.STRING_TYPE_INFO};
+        RowTypeInfo typeInfo1 = new RowTypeInfo(colTypes1, new String[]{"wkb"});
+        RowTypeInfo typeInfo2 = new RowTypeInfo(colTypes2, new String[]{"wkb"});
+
+        DataStream<Row> wkbDS1 = env.fromCollection(data1).returns(typeInfo1);
+        DataStream<Row> wkbDS2 = env.fromCollection(data2).returns(typeInfo2);
+        Table wkbTable1 = tableEnv.fromDataStream(wkbDS1, $("wkb"));
+        Table wkbTable2 = tableEnv.fromDataStream(wkbDS2, $("wkb"));
+
+        Table pointTable1 = wkbTable1.select(call(Constructors.ST_PointFromWKB.class.getSimpleName(), $("wkb")).as("point"));
+        Table pointTable2 = wkbTable2.select(call(Constructors.ST_PointFromWKB.class.getSimpleName(), $("wkb")).as("point"));
+
+        List<Row> results1 = TestBase.take(pointTable1, 3);
+        assertEquals("POINT (0 0)", results1.get(0).getField(0).toString());
+        assertEquals("POINT (10 15)", results1.get(1).getField(0).toString());
+        assertNull(results1.get(2).getField(0));
+
+        List<Row> results2 = TestBase.take(pointTable2, 3);
+        assertEquals("POINT (0 0)", results2.get(0).getField(0).toString());
+        assertEquals("POINT (10 15)", results2.get(1).getField(0).toString());
+        assertNull(results2.get(2).getField(0));
+    }
 
     @Test
     public void testGeomFromEWKB()
