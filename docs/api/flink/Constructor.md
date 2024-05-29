@@ -348,7 +348,7 @@ Format:
 
 `ST_LineFromWKB (Wkb: Binary, srid: Integer)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 Example:
 
