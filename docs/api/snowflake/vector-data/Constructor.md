@@ -268,7 +268,7 @@ POINT(40.7128 -74.006)
 
 ## ST_GeometryFromText
 
-Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown). Alias of [ST_GeomFromWKT](#ST_GeomFromWKT)
+Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown). Alias of [ST_GeomFromWKT](#st_geomfromwkt)
 
 Format:
 
