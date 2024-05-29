@@ -114,6 +114,8 @@ object Catalog {
     function[ST_Boundary](),
     function[ST_HasM](),
     function[ST_M](),
+    function[ST_MMin](),
+    function[ST_MMax](),
     function[ST_MinimumBoundingRadius](),
     function[ST_MinimumBoundingCircle](BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6),
     function[ST_EndPoint](),

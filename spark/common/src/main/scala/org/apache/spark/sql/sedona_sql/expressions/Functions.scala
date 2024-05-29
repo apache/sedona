@@ -527,6 +527,21 @@ case class ST_M(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_MMin(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.mMin _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_MMax(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.mMax _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
 
 /**
   * Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length.

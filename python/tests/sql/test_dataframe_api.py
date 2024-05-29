@@ -148,6 +148,8 @@ test_configurations = [
     (stf.ST_LineSubstring, ("line", 0.5, 1.0), "linestring_geom", "", "LINESTRING (2.5 0, 3 0, 4 0, 5 0)"),
     (stf.ST_HasM, ("point",), "4D_point", "", True),
     (stf.ST_M, ("point",), "4D_point", "", 4.0),
+    (stf.ST_MMin, ("line",), "4D_line", "", -1.0),
+    (stf.ST_MMax, ("line",), "4D_line", "", 3.0),
     (stf.ST_MakeValid, ("geom",), "invalid_geom", "", "MULTIPOLYGON (((1 5, 3 3, 1 1, 1 5)), ((5 3, 7 5, 7 1, 5 3)))"),
     (stf.ST_MakeLine, ("line1", "line2"), "two_lines", "", "LINESTRING (0 0, 1 1, 0 0, 3 2)"),
     (stf.ST_Polygon, ("geom", 4236), "closed_linestring_geom", "", "POLYGON ((0 0, 1 0, 1 1, 0 0))"),
@@ -319,6 +321,8 @@ wrong_type_configurations = [
     (stf.ST_LineSubstring, ("", 0.5, None)),
     (stf.ST_HasM, (None,)),
     (stf.ST_M, (None,)),
+    (stf.ST_MMin, (None,)),
+    (stf.ST_MMax, (None,)),
     (stf.ST_MakeValid, (None,)),
     (stf.ST_MakePolygon, (None,)),
     (stf.ST_MinimumBoundingCircle, (None,)),
@@ -451,6 +455,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_PointZ(0.0, 0.0, 0.0) AS a, ST_PointZ(3.0, 0.0, 4.0) AS b")
         elif request.param == "4D_point":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POINT ZM(1 2 3 4)') AS point")
+        elif request.param == "4D_line":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('LINESTRING ZM(1 1 1 1, 2 2 2 2, 3 3 3 3, -1 -1 -1 -1)') AS line")
         elif request.param == "invalid_geom":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((1 5, 1 1, 3 3, 5 3, 7 1, 7 5, 5 3, 3 3, 1 5))') AS geom")
         elif request.param == "overlapping_polys":
