@@ -491,7 +491,7 @@ Format:
 
 `ST_PointM (X: Double, Y: Double, M: Double, srid: Integer)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 Example:
 
@@ -547,7 +547,7 @@ Format:
 
 `ST_PointFromWKB (Wkb: Binary, srid: Integer)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 Example:
 
