@@ -351,7 +351,7 @@ Format:
 
 `ST_GeometryFromText (Wkt: String, srid: Integer)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example
 
