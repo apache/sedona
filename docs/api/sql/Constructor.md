@@ -553,7 +553,7 @@ Format:
 
 `ST_PointZM (X: Double, Y: Double, Z: Double, M: Double, srid: Integer)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example
 
