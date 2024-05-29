@@ -456,6 +456,11 @@ public class Functions {
         return min == Double.MAX_VALUE ? null : min;
     }
 
+    public static boolean hasM(Geometry geom) {
+        Coordinate coord = geom.getCoordinate();
+        return !Double.isNaN(coord.getM());
+    }
+
     public static Geometry flipCoordinates(Geometry geometry) {
         GeomUtils.flipCoordinates(geometry);
         return geometry;

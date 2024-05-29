@@ -857,6 +857,17 @@ def ST_LineSubstring(line_string: ColumnOrName, start_fraction: ColumnOrNameOrNu
     """
     return _call_st_function("ST_LineSubstring", (line_string, start_fraction, end_fraction))
 
+@validate_argument_types
+def ST_HasM(geom: ColumnOrName) -> Column:
+    """Check whether geometry has M coordinate
+
+    :param geom: Geometry
+    :type geom: ColumnOrName
+    :return: True if geometry has M coordinate, else False
+    :rtype: Column
+    """
+    return _call_st_function("ST_HasM", geom)
+
 
 @validate_argument_types
 def ST_M(geom: ColumnOrName) -> Column:
