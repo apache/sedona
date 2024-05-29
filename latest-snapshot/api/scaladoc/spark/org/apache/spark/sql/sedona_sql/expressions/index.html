@@ -727,6 +727,14 @@
                         <a href="ST_PointFromText.html" title="Return a point from a string.">ST_PointFromText</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="ST_PointFromWKB.html" title=""></a>
+                        <a href="ST_PointFromWKB.html" title="">ST_PointFromWKB</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="ST_PointM.html" title="Return a Point from X, Y, M and srid"></a>
+                        <a href="ST_PointM.html" title="Return a Point from X, Y, M and srid">ST_PointM</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="ST_PointN.html" title="Returns the nth point in the geometry, provided it is a linestring"></a>
                         <a href="ST_PointN.html" title="Returns the nth point in the geometry, provided it is a linestring">ST_PointN</a>
                       </li><li class="current-entities indented6">
@@ -737,6 +745,10 @@
                         <span class="separator"></span>
                         <a class="class" href="ST_PointZ.html" title="Return a Point from X, Y, Z and srid"></a>
                         <a href="ST_PointZ.html" title="Return a Point from X, Y, Z and srid">ST_PointZ</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="ST_PointZM.html" title=""></a>
+                        <a href="ST_PointZM.html" title="">ST_PointZM</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="ST_Polygon.html" title=""></a>
@@ -3012,6 +3024,40 @@ for single geometries will return 1</p><p>This method implements the SQL/MM spec
       <p class="shortcomment cmt">Return a point from a string.</p><div class="fullcomment"><div class="comment cmt"><p>Return a point from a string. The string must be plain string and each coordinate must be separated by a delimiter.
 </p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes 2 parameters. The first parameter is the input geometry
                         string, the second parameter is the delimiter. String format should be similar to CSV/TSV</p></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_PointFromWKB" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_PointFromWKBextendsExpressionwithFoldableExpressionwithImplicitCastInputTypeswithCodegenFallbackwithUserDataGeneratatorwithProductwithSerializable"></a><a id="ST_PointFromWKB:ST_PointFromWKB"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_PointFromWKB.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ST_PointFromWKB.html"><span class="name">ST_PointFromWKB</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="FoldableExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression">FoldableExpression</a> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes">ImplicitCastInputTypes</span> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback">CodegenFallback</span> with <a href="UserDataGeneratator.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.UserDataGeneratator">UserDataGeneratator</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_PointM" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ST_PointMextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_PointM:ST_PointM"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_PointM.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Return a Point from X, Y, M and srid" href="ST_PointM.html"><span class="name">ST_PointM</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Return a Point from X, Y, M and srid
+</p><div class="fullcomment"><div class="comment cmt"><p>Return a Point from X, Y, M and srid
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes 4 parameter which are point x, y, m and srid (default 0).</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_PointN" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ST_PointNextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_PointN:ST_PointN"></a>
       <span class="permalink">
@@ -3065,6 +3111,22 @@ for single geometries will return 1</p><p>This method implements the SQL/MM spec
       <p class="shortcomment cmt">Return a Point from X, Y, Z and srid
 </p><div class="fullcomment"><div class="comment cmt"><p>Return a Point from X, Y, Z and srid
 </p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes 4 parameter which are point x, y, z and srid (default 0).</p></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_PointZM" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_PointZMextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_PointZM:ST_PointZM"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_PointZM.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ST_PointZM.html"><span class="name">ST_PointZM</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Polygon" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_PolygonextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_Polygon:ST_Polygon"></a>
       <span class="permalink">
