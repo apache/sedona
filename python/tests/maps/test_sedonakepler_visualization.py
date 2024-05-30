@@ -18,7 +18,7 @@
 from keplergl import KeplerGl
 from sedona.maps.SedonaKepler import SedonaKepler
 from tests.test_base import TestBase
-from tests import mixed_wkt_geometry_input_location
+from tests import mixed_wkt_geometry_input_location, world_map_raster_input_location
 from tests import csv_point_input_location
 import geopandas as gpd
 from pyspark.sql.functions import explode, hex
@@ -49,6 +49,15 @@ class TestVisualization(TestBase):
 
         assert sedona_kepler_map._repr_html_() == kepler_map._repr_html_()
         assert sedona_kepler_map.config == kepler_map.config
+
+    def test_df_with_raster(self):
+        df = self.spark.read.format("binaryFile").load(world_map_raster_input_location)
+        df = df.selectExpr("RS_FromGeoTiff(content) as raster", "ST_GeomFromWKT('POINT (1 1)') as point")
+
+        sedona_kepler = SedonaKepler.create_map(df=df, name="data_1")
+        actual = sedona_kepler.data
+        expected = {'data_1': {'index': [0], 'columns': ['geometry'], 'data': [['POINT (1.0000000000000000 1.0000000000000000)']]}}
+        assert actual == expected
 
     def test_df_addition(self):
         polygon_wkt_df = self.spark.read.format("csv"). \
