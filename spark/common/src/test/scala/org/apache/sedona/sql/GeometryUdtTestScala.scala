@@ -58,7 +58,16 @@ class GeometryUdtTestScala extends TestBaseScala with BeforeAndAfter {
     }
 
     it("Case object and new instance should be equals") {
-      assert(GeometryUDT.equals(new GeometryUDT))
+      assert(GeometryUDT == GeometryUDT)
+      val udt = new GeometryUDT
+      assert(udt.equals(udt))
+      assert(udt.equals(GeometryUDT))
+      assert(GeometryUDT.equals(udt))
+    }
+
+    it("hashCode should work correctly") {
+      val udt = new GeometryUDT
+      assert(udt.hashCode() == GeometryUDT.hashCode())
     }
   }
 
