@@ -57,6 +57,7 @@ object Catalog {
     function[ST_Point](),
     function[ST_Points](),
     function[ST_MakePoint](null, null),
+    function[ST_MakePointM](),
     function[ST_PointZ](0),
     function[ST_PointM](0),
     function[ST_PointZM](0),

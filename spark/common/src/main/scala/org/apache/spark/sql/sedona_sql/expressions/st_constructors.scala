@@ -132,6 +132,10 @@ object st_constructors extends DataFrameAPI {
   def ST_LinestringFromWKB(wkb: Column, srid: Column): Column = wrapExpression[ST_LinestringFromWKB](wkb, srid)
   def ST_LinestringFromWKB(wkb: String, srid: Int): Column = wrapExpression[ST_LinestringFromWKB](wkb, srid)
 
+  def ST_MakePointM(x: Column, y: Column, m: Column): Column = wrapExpression[ST_MakePointM](x, y, m)
+  def ST_MakePointM(x: String, y: String, m: String): Column = wrapExpression[ST_MakePointM](x, y, m)
+  def ST_MakePointM(x: Double, y: Double, m: Double): Column = wrapExpression[ST_MakePointM](x, y, m)
+
   def ST_MakePoint(x: Column, y: Column): Column = wrapExpression[ST_MakePoint](x, y, null, null)
   def ST_MakePoint(x: String, y: String): Column = wrapExpression[ST_MakePoint](x, y, null, null)
   def ST_MakePoint(x: Double, y: Double): Column = wrapExpression[ST_MakePoint](x, y, null, null)

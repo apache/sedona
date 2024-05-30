@@ -413,6 +413,14 @@ case class ST_PointZM(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_MakePointM(inputExpressions: Seq[Expression])
+  extends InferredExpression(Constructors.makePointM _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_MakePoint(inputExpressions: Seq[Expression])
   extends InferredExpression(nullTolerantInferrableFunction4(Constructors.makePoint)) {
 

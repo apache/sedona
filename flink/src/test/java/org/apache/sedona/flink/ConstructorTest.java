@@ -154,6 +154,32 @@ public class ConstructorTest extends TestBase{
     }
 
     @Test
+    public void testMakePointM() {
+        List<Row> data = new ArrayList<>();
+        data.add(Row.of(1.0, 2.0, 3.0, "pointM"));
+        String[] colNames = new String[]{"x", "y", "m", "name_point"};
+
+        TypeInformation<?>[] colTypes = {
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.STRING_TYPE_INFO};
+        RowTypeInfo typeInfo = new RowTypeInfo(colTypes, colNames);
+        DataStream<Row> ds = env.fromCollection(data).returns(typeInfo);
+        Table pointTable = tableEnv.fromDataStream(ds);
+
+        Table geomTable = pointTable
+                .select(call(Constructors.ST_MakePointM.class.getSimpleName(), $(colNames[0]), $(colNames[1]), $(colNames[2]))
+                        ).as(colNames[3]);
+
+        String result = (String) first(geomTable.select(call(Functions.ST_AsText.class.getSimpleName(), $(colNames[3]))))
+                .getField(0);
+
+        String expected = "POINT M(1 2 3)";
+        assertEquals(expected, result);
+    }
+
+    @Test
     public void testMakePoint() {
         List<Row> data = new ArrayList<>();
         data.add(Row.of(1.0, 2.0, "point"));

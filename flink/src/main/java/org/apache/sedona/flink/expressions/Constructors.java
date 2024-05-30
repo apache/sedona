@@ -88,6 +88,13 @@ public class Constructors {
         }
     }
 
+    public static class ST_MakePointM extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y, @DataTypeHint("Double") Double m) throws ParseException {
+            return org.apache.sedona.common.Constructors.makePointM(x, y, m);
+        }
+    }
+
     public static class ST_MakePoint extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y) throws ParseException {

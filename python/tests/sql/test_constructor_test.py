@@ -41,6 +41,20 @@ class TestConstructors(TestBase):
         point_df = self.spark.sql("SELECT ST_PointM(1.2345, 2.3456, 3.4567)")
         assert point_df.count() == 1
 
+    def test_st_makepointm(self):
+        point_csv_df = self.spark.read.format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").\
+            load(csv_point_input_location)
+
+        point_csv_df.createOrReplaceTempView("pointtable")
+
+        point_df = self.spark.sql("select ST_MakePointM(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20)), 2.0) as arealandmark from pointtable")
+        assert point_df.count() == 1000
+
+        point_df = self.spark.sql("SELECT ST_AsText(ST_MakePointM(1.2345, 2.3456, 3.4567))")
+        assert point_df.take(1)[0][0] == "POINT M(1.2345 2.3456 3.4567)"
+
     def test_st_makepoint(self):
         point_csv_df = self.spark.read.format("csv").\
             option("delimiter", ",").\

@@ -143,6 +143,11 @@ public class Constructors {
         return geometryFactory.createPoint(new Coordinate(x, y));
     }
 
+    public static Geometry makePointM(double x, double y, double m) {
+        GeometryFactory geometryFactory = new GeometryFactory();
+        return geometryFactory.createPoint(new CoordinateXYM(x, y, m));
+    }
+
     public static Geometry makePoint(Double x, Double y, Double z, Double m){
         GeometryFactory geometryFactory = new GeometryFactory();
         if (x == null || y == null) {

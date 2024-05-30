@@ -602,7 +602,7 @@ MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))
 
 ## ST_MakePoint
 
-Introduction: Creates a 2D, 3D Z or 4D ZM Point geometry. Use ST_MakePointM to make points with XYM coordinates. Z and M values are optional.
+Introduction: Creates a 2D, 3D Z or 4D ZM Point geometry. Use [ST_MakePointM](#st_makepointm) to make points with XYM coordinates. Z and M values are optional.
 
 Format: `ST_MakePoint (X: Double, Y: Double, Z: Double, M: Double)`
 
@@ -642,6 +642,26 @@ Output:
 
 ```
 POINT ZM (1.2345 2.3456 3.4567 4)
+```
+
+## ST_MakePointM
+
+Introduction: Creates a point with X, Y, and M coordinate. Use [ST_MakePoint](#st_makepoint) to make points with XY, XYZ, or XYZM coordinates.
+
+Format: `ST_MakePointM(x: Double, y: Double, m: Double)`
+
+Since: `vTBD`
+
+Example:
+
+```sql
+SELECT ST_MakePointM(1, 2, 3)
+```
+
+Output:
+
+```
+Point M(1 2 3)
 ```
 
 ## ST_Point

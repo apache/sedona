@@ -32,6 +32,7 @@ public class Catalog {
                 new Constructors.ST_LineFromWKB(),
                 new Constructors.ST_LinestringFromWKB(),
                 new Constructors.ST_MakePoint(),
+                new Constructors.ST_MakePointM(),
                 new Constructors.ST_LineStringFromText(),
                 new Constructors.ST_LineFromText(),
                 new Constructors.ST_PolygonFromText(),

@@ -329,6 +329,21 @@ def ST_LinestringFromWKB(wkb: ColumnOrName, srid: Optional[ColumnOrNameOrNumber]
     return _call_constructor_function("ST_LinestringFromWKB", args)
 
 @validate_argument_types
+def ST_MakePointM(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, m: ColumnOrNameOrNumber) -> Column:
+    """Generate 3D M Point geometry.
+
+        :param x: Either a number or numeric column representing the X coordinate of a point.
+        :type x: ColumnOrNameOrNumber
+        :param y: Either a number or numeric column representing the Y coordinate of a point.
+        :type y: ColumnOrNameOrNumber
+        :param m: Either a number or numeric column representing the M coordinate of a point
+        :type m: ColumnOrNameOrNumber
+        :return: Point geometry column generated from the coordinate values.
+        :rtype: Column
+        """
+    return _call_constructor_function("ST_MakePointM", (x, y, m))
+
+@validate_argument_types
 def ST_MakePoint(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, z: Optional[ColumnOrNameOrNumber] = None, m: Optional[ColumnOrNameOrNumber] = None) -> Column:
     """Generate a 2D, 3D Z or 4D ZM Point geometry. If z is None then a 2D point is generated.
     This function doesn't support M coordinates for creating a 4D ZM Point in Dataframe API.

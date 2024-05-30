@@ -151,6 +151,16 @@ public class ConstructorsTest {
     }
 
     @Test
+    public void makePointM() {
+        Geometry point = Constructors.makePointM(1, 2, 3);
+
+        assertTrue(point instanceof Point);
+        String actual = Functions.asWKT(point);
+        String expected = "POINT M(1 2 3)";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void point2d() {
         Geometry point = Constructors.makePoint(1.0d, 2.0d, null, null);
 
