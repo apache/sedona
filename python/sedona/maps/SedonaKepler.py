@@ -16,6 +16,7 @@
 #  under the License.
 
 from sedona.maps.SedonaMapUtils import SedonaMapUtils
+from sedona.sql.types import RasterType
 
 
 class SedonaKepler:
@@ -54,5 +55,10 @@ class SedonaKepler:
         :param name: [Optional] Name to assign to the dataframe, default name assigned is 'unnamed'
         :return: Does not return anything, adds df directly to the given map object
         """
+        schema = df.schema
+        for field in schema.fields:
+            if field.dataType == RasterType():
+                df = df.drop(field.name)
+
         geo_df = SedonaMapUtils.__convert_to_gdf_or_pdf__(df)
         kepler_map.add_data(geo_df, name=name)
