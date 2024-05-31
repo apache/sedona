@@ -573,6 +573,13 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testNumInteriorRing() {
+        Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('POLYGON((7 9,8 7,11 6,15 8,16 6,17 7,17 10,18 12,17 14,15 15,11 15,10 13,9 12,7 9),(9 9,10 10,11 11,11 10,10 8,9 9),(12 14,15 14,13 11,12 14))') AS polygon");
+        Table resultTable = polygonTable.select(call(Functions.ST_NumInteriorRing.class.getSimpleName(), $("polygon")));
+        assertEquals(2, first(resultTable).getField(0));
+    }
+
+    @Test
     public void testExteriorRing() {
         Table polygonTable = createPolygonTable(1);
         Table linearRingTable = polygonTable.select(call(Functions.ST_ExteriorRing.class.getSimpleName(), $(polygonColNames[0])));
@@ -690,6 +697,42 @@ public class FunctionTest extends TestBase{
         Table pointTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1.23 4.56 7.89)') AS " + pointColNames[0]);
         pointTable = pointTable.select(call(Functions.ST_Z.class.getSimpleName(), $(pointColNames[0])));
         assertEquals(7.89, first(pointTable).getField(0));
+    }
+
+    @Test
+    public void testHasM() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))') as poly");
+        boolean actual = (boolean) first(polyTable.select(call(Functions.ST_HasM.class.getSimpleName(), $("poly")))).getField(0);
+        assertTrue(actual);
+    }
+
+    @Test
+    public void testM() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT ZM(1 2 3 4)') AS point");
+        double actual = (double) first(pointTable.select(call(Functions.ST_M.class.getSimpleName(), $("point")))).getField(0);
+        assertEquals(4, actual, FP_TOLERANCE);
+    }
+
+    @Test
+    public void testMMin() {
+        Table lineTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING ZM(1 1 1 1, 2 2 2 2, 3 3 3 3, -1 -1 -1 -1)') AS line");
+        double actual = (double) first(lineTable.select(call(Functions.ST_MMin.class.getSimpleName(), $("line")))).getField(0);
+        assertEquals(-1.0, actual, FP_TOLERANCE);
+
+        lineTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(1 1, 2 2, 3 3, -1 -1)') AS line");
+        Double actualNull = (Double) first(lineTable.select(call(Functions.ST_MMin.class.getSimpleName(), $("line")))).getField(0);
+        assertNull(actualNull);
+    }
+
+    @Test
+    public void testMMax() {
+        Table lineTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING ZM(1 1 1 1, 2 2 2 2, 3 3 3 3, -1 -1 -1 -1)') AS line");
+        double actual = (double) first(lineTable.select(call(Functions.ST_MMax.class.getSimpleName(), $("line")))).getField(0);
+        assertEquals(3, actual, FP_TOLERANCE);
+
+        lineTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(1 1, 2 2, 3 3, -1 -1)') AS line");
+        Double actualNull = (Double) first(lineTable.select(call(Functions.ST_MMax.class.getSimpleName(), $("line")))).getField(0);
+        assertNull(actualNull);
     }
 
     @Test
@@ -1214,6 +1257,22 @@ public class FunctionTest extends TestBase{
         pointTable = pointTable.select(call(Functions.ST_NDims.class.getSimpleName(), $(polygonColNames[0])));
         Integer actual = (Integer) first(pointTable).getField(0);
         assertEquals(expectedDims, actual);
+    }
+
+    @Test
+    public void testTriangulatePolygon() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_TriangulatePolygon(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (5 5, 5 8, 8 8, 8 5, 5 5))')) as poly");
+        String actual = (String) first(polyTable.select(call(Functions.ST_AsText.class.getSimpleName(), $("poly")))).getField(0);
+        String expected = "GEOMETRYCOLLECTION (POLYGON ((0 0, 0 10, 5 5, 0 0)), POLYGON ((5 8, 5 5, 0 10, 5 8)), POLYGON ((10 0, 0 0, 5 5, 10 0)), POLYGON ((10 10, 5 8, 0 10, 10 10)), POLYGON ((10 0, 5 5, 8 5, 10 0)), POLYGON ((5 8, 10 10, 8 8, 5 8)), POLYGON ((10 10, 10 0, 8 5, 10 10)), POLYGON ((8 5, 8 8, 10 10, 8 5)))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testForceRHR() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_ForceRHR(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))')) AS polyCW");
+        String actual = (String) first(polyTable.select(call(Functions.ST_AsText.class.getSimpleName(), $("polyCW")))).getField(0);
+        String expected = "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))";
+        assertEquals(expected, actual);
     }
 
     @Test

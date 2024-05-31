@@ -17,11 +17,7 @@ import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.enums.GeometryType;
 import org.apache.sedona.common.utils.FormatUtils;
 import org.apache.sedona.common.utils.GeoHashDecoder;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.CoordinateXYZM;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKTReader;
@@ -68,6 +64,32 @@ public class Constructors {
 
     public static Geometry geomFromWKB(byte[] wkb) throws ParseException {
         return new WKBReader().read(wkb);
+    }
+
+    public  static Geometry pointFromWKB(byte[] wkb) throws ParseException {
+        return pointFromWKB(wkb, 0);
+    }
+
+    public static Geometry pointFromWKB(byte[] wkb, int srid) throws ParseException {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        Geometry geom =  new WKBReader(geometryFactory).read(wkb);
+        if (!(geom instanceof Point)) {
+            return null;
+        }
+        return geom;
+    }
+
+    public  static Geometry lineFromWKB(byte[] wkb) throws ParseException {
+        return lineFromWKB(wkb, 0);
+    }
+
+    public static Geometry lineFromWKB(byte[] wkb, int srid) throws ParseException {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        Geometry geom =  new WKBReader(geometryFactory).read(wkb);
+        if (!(geom instanceof LineString)) {
+            return null;
+        }
+        return geom;
     }
 
     public static Geometry mLineFromText(String wkt, int srid) throws ParseException {
@@ -134,6 +156,35 @@ public class Constructors {
     public static Geometry pointZ(double x, double y, double z, int srid) {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
         return geometryFactory.createPoint(new Coordinate(x, y, z));
+    }
+
+    /**
+     * Creates a point from the given coordinate.
+     *
+     * @param x the x value
+     * @param y the y value
+     * @param m the m value
+     * @param srid Set to 0 if unknown
+     * @return The point geometry
+     */
+    public static Geometry pointM(double x, double y, double m, int srid) {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        return geometryFactory.createPoint(new CoordinateXYZM(x, y, 0, m));
+    }
+
+    /**
+     * Creates a point from the given coordinate.
+     *
+     * @param x the x value
+     * @param y the y value
+     * @param z the z value
+     * @param m the m value
+     * @param srid Set to 0 if unknown
+     * @return The point geometry
+     */
+    public static Geometry pointZM(double x, double y, double z, double m, int srid) {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        return geometryFactory.createPoint(new CoordinateXYZM(x, y, z, m));
     }
 
     public static Geometry geomFromText(String geomString, String geomFormat, GeometryType geometryType) {

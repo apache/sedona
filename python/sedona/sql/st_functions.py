@@ -857,6 +857,51 @@ def ST_LineSubstring(line_string: ColumnOrName, start_fraction: ColumnOrNameOrNu
     """
     return _call_st_function("ST_LineSubstring", (line_string, start_fraction, end_fraction))
 
+@validate_argument_types
+def ST_HasM(geom: ColumnOrName) -> Column:
+    """Check whether geometry has M coordinate
+
+    :param geom: Geometry
+    :type geom: ColumnOrName
+    :return: True if geometry has M coordinate, else False
+    :rtype: Column
+    """
+    return _call_st_function("ST_HasM", geom)
+
+
+@validate_argument_types
+def ST_M(geom: ColumnOrName) -> Column:
+    """Return the M coordinate of a point geometry.
+
+    :param point: Point geometry column to get the coordinate for.
+    :type point: ColumnOrName
+    :return: M coordinate of the point geometry as a double column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_M", geom)
+
+@validate_argument_types
+def ST_MMin(geom: ColumnOrName) -> Column:
+    """Return the minimum M coordinate of a geometry.
+
+    :param geometry: Geometry column to get the minimum M coordinate from.
+    :type geometry: ColumnOrName
+    :return: Minimum M coordinate for the geometry as a double column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_MMin", geom)
+
+@validate_argument_types
+def ST_MMax(geom: ColumnOrName) -> Column:
+    """Return the maximum M coordinate of a geometry.
+
+    :param geometry: Geometry column to get the maximum M coordinate from.
+    :type geometry: ColumnOrName
+    :return: Minimum M coordinate for the geometry as a double column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_MMax", geom)
+
 
 @validate_argument_types
 def ST_MakeLine(geom1: ColumnOrName, geom2: Optional[ColumnOrName] = None) -> Column:
@@ -1023,6 +1068,17 @@ def ST_NumInteriorRings(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_NumInteriorRings", geometry)
+
+@validate_argument_types
+def ST_NumInteriorRing(geometry: ColumnOrName) -> Column:
+    """Return the number of interior rings contained in a polygon geometry.
+
+    :param geometry: Polygon geometry column to return for.
+    :type geometry: ColumnOrName
+    :return: Number of interior rings polygons contain as an integer column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_NumInteriorRing", geometry)
 
 
 @validate_argument_types
@@ -1303,6 +1359,17 @@ def ST_Transform(geometry: ColumnOrName, source_crs: ColumnOrName, target_crs: O
         args = (geometry, source_crs, target_crs, disable_error)
     return _call_st_function("ST_Transform", args)
 
+@validate_argument_types
+def ST_TriangulatePolygon(geom: ColumnOrName) -> Column:
+    """Computes the constrained Delaunay triangulation of polygons. Holes and Multipolygons are supported.
+
+    :param geom: (Multi)Polygon to be triangulated.
+    :type geom: ColumnOrName
+    :return: Triangulated Polygon as GeometryCollection of Polygons
+    :rtype: Column
+    """
+    return _call_st_function("ST_TriangulatePolygon", geom)
+
 
 @validate_argument_types
 def ST_Union(a: ColumnOrName, b: Optional[ColumnOrName] = None) -> Column:
@@ -1457,6 +1524,15 @@ def ST_ForcePolygonCW(geometry: ColumnOrName) -> Column:
     :return: Clockwise oriented geometry
     """
     return _call_st_function("ST_ForcePolygonCW", geometry)
+
+@validate_argument_types
+def ST_ForceRHR(geometry: ColumnOrName) -> Column:
+    """
+    Returns
+    :param geometry: Geometry column to change orientation
+    :return: Clockwise oriented geometry
+    """
+    return _call_st_function("ST_ForceRHR", geometry)
 
 @validate_argument_types
 def ST_NRings(geometry: ColumnOrName) -> Column:

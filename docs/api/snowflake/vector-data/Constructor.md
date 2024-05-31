@@ -178,6 +178,40 @@ Output:
 POINT(40.7128 -74.006)
 ```
 
+## ST_GeomFromEWKB
+
+Introduction: Construct a Geometry from EWKB string or Binary. This function is an alias of [ST_GeomFromWKB](#st_geomfromwkb).
+
+Format:
+
+`ST_GeomFromEWKB (Wkb: String)`
+
+`ST_GeomFromEWKB (Wkb: Binary)`
+
+SQL Example
+
+```sql
+SELECT ST_GeomFromEWKB([01 02 00 00 00 02 00 00 00 00 00 00 00 84 D6 00 C0 00 00 00 00 80 B5 D6 BF 00 00 00 60 E1 EF F7 BF 00 00 00 80 07 5D E5 BF])
+```
+
+Output:
+
+```
+LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)
+```
+
+SQL Example
+
+```sql
+SELECT ST_asEWKT(ST_GeomFromEWKB('01010000a0e6100000000000000000f03f000000000000f03f000000000000f03f'))
+```
+
+Output:
+
+```
+SRID=4326;POINT Z(1 1 1)
+```
+
 ## ST_GeomFromWKB
 
 Introduction: Construct a Geometry from WKB string or Binary. This function also supports EWKB format.
@@ -232,6 +266,28 @@ Output:
 POINT(40.7128 -74.006)
 ```
 
+## ST_GeometryFromText
+
+Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown). Alias of [ST_GeomFromWKT](#st_geomfromwkt)
+
+Format:
+
+`ST_GeometryFromText (Wkt: String)`
+
+`ST_GeometryFromText (Wkt: String, srid: Integer)`
+
+SQL Example
+
+```sql
+SELECT ST_GeometryFromText('POINT(40.7128 -74.0060)')
+```
+
+Output:
+
+```
+POINT(40.7128 -74.006)
+```
+
 ## ST_LineFromText
 
 Introduction: Construct a Line from Wkt text
@@ -267,6 +323,35 @@ Output:
 
 ```
 LINESTRING (-74.0428197 40.6867969, -74.0421975 40.6921336, -74.050802 40.6912794)
+```
+
+## ST_LineFromWKB
+
+Introduction: Construct a LineString geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format.
+
+!!!note
+    Returns null if geometry is not of type LineString.
+
+Format:
+
+`ST_LineFromWKB (Wkb: String)`
+
+`ST_LineFromWKB (Wkb: Binary)`
+
+`ST_LineFromWKB (Wkb: String, srid: Integer)`
+
+`ST_LineFromWKB (Wkb: Binary, srid: Integer)`
+
+Example:
+
+```sql
+SELECT ST_LineFromWKB([01 02 00 00 00 02 00 00 00 00 00 00 00 84 D6 00 C0 00 00 00 00 80 B5 D6 BF 00 00 00 60 E1 EF F7 BF 00 00 00 80 07 5D E5 BF])
+```
+
+Output:
+
+```
+LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)
 ```
 
 ## ST_MLineFromText
@@ -358,7 +443,7 @@ Introduction: Construct a Point from X and Y
 Format: `ST_Point (X:decimal, Y:decimal)`
 
 In `v1.4.0` an optional Z parameter was removed to be more consistent with other spatial SQL implementations.
-If you are upgrading from an older version of Sedona - please use ST_PointZ to create 3D points.
+If you are upgrading from an older version of Sedona - please use ST_PointZ or ST_PointZM to create 3D points.
 
 SQL example:
 
@@ -407,6 +492,35 @@ Output:
 
 ```
 POINT Z(1.2345 2.3456 3.4567)
+```
+
+## ST_PointFromWKB
+
+Introduction: Construct a Point geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format.
+
+!!!note
+    Returns null if geometry is not of type Point.
+
+Format:
+
+`ST_PointFromWKB (Wkb: String)`
+
+`ST_PointFromWKB (Wkb: Binary)`
+
+`ST_PointFromWKB (Wkb: String, srid: Integer)`
+
+`ST_PointFromWKB (Wkb: Binary, srid: Integer)`
+
+Example:
+
+```sql
+SELECT ST_PointFromWKB([01 01 00 00 00 00 00 00 00 00 00 24 40 00 00 00 00 00 00 2e 40])
+```
+
+Output:
+
+```
+POINT (10 15)
 ```
 
 ## ST_PolygonFromEnvelope

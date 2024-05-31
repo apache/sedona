@@ -212,6 +212,18 @@ object st_functions extends DataFrameAPI {
   def ST_LineSubstring(lineString: Column, startFraction: Column, endFraction: Column): Column = wrapExpression[ST_LineSubstring](lineString, startFraction, endFraction)
   def ST_LineSubstring(lineString: String, startFraction: Double, endFraction: Double): Column = wrapExpression[ST_LineSubstring](lineString, startFraction, endFraction)
 
+  def ST_HasM(geoms: Column): Column = wrapExpression[ST_HasM](geoms)
+  def ST_HasM(geoms: String): Column = wrapExpression[ST_HasM](geoms)
+
+  def ST_M(geoms: Column): Column = wrapExpression[ST_M](geoms)
+  def ST_M(geoms: String): Column = wrapExpression[ST_M](geoms)
+
+  def ST_MMin(geoms: Column): Column = wrapExpression[ST_MMin](geoms)
+  def ST_MMin(geoms: String): Column = wrapExpression[ST_MMin](geoms)
+
+  def ST_MMax(geoms: Column): Column = wrapExpression[ST_MMax](geoms)
+  def ST_MMax(geoms: String): Column = wrapExpression[ST_MMax](geoms)
+
   def ST_MakeLine(geoms: Column): Column = wrapExpression[ST_MakeLine](geoms)
   def ST_MakeLine(geoms: String): Column = wrapExpression[ST_MakeLine](geoms)
   def ST_MakeLine(geom1: Column, geom2: Column): Column = wrapExpression[ST_MakeLine](geom1, geom2)
@@ -264,6 +276,9 @@ object st_functions extends DataFrameAPI {
 
   def ST_NumInteriorRings(geometry: Column): Column = wrapExpression[ST_NumInteriorRings](geometry)
   def ST_NumInteriorRings(geometry: String): Column = wrapExpression[ST_NumInteriorRings](geometry)
+
+  def ST_NumInteriorRing(geometry: Column): Column = wrapExpression[ST_NumInteriorRing](geometry)
+  def ST_NumInteriorRing(geometry: String): Column = wrapExpression[ST_NumInteriorRing](geometry)
 
   def ST_PointN(geometry: Column, n: Column): Column = wrapExpression[ST_PointN](geometry, n)
   def ST_PointN(geometry: String, n: Int): Column = wrapExpression[ST_PointN](geometry, n)
@@ -397,6 +412,9 @@ object st_functions extends DataFrameAPI {
   def ST_ForcePolygonCW(geometry: Column): Column = wrapExpression[ST_ForcePolygonCW](geometry)
   def ST_ForcePolygonCW(geometry: String): Column = wrapExpression[ST_ForcePolygonCW](geometry)
 
+  def ST_ForceRHR(geometry: Column): Column = wrapExpression[ST_ForceRHR](geometry)
+  def ST_ForceRHR(geometry: String): Column = wrapExpression[ST_ForceRHR](geometry)
+
   def ST_NRings(geometry: Column): Column = wrapExpression[ST_NRings](geometry)
 
   def ST_NRings(geometry: String): Column = wrapExpression[ST_NRings](geometry)
@@ -408,6 +426,9 @@ object st_functions extends DataFrameAPI {
   def ST_Translate(geometry: Column, deltaX: Column, deltaY: Column): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, 0.0)
 
   def ST_Translate(geometry: String, deltaX: Double, deltaY: Double): Column = wrapExpression[ST_Translate](geometry, deltaX, deltaY, 0.0)
+
+  def ST_TriangulatePolygon(geom: Column): Column = wrapExpression[ST_TriangulatePolygon](geom)
+  def ST_TriangulatePolygon(geom: String): Column = wrapExpression[ST_TriangulatePolygon](geom)
 
   def ST_VoronoiPolygons(geometry: Column, tolerance : Column, extendTo: Column): Column = wrapExpression[ST_VoronoiPolygons](geometry, tolerance, extendTo)
 

@@ -1274,6 +1274,26 @@ Output:
 POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))
 ```
 
+## ST_ForceRHR
+
+Introduction: Sets the orientation of polygon vertex orderings to follow the Right-Hand-Rule convention. The exterior ring will have a clockwise winding order, while any interior rings are oriented counter-clockwise. This ensures the area bounded by the polygon falls on the right-hand side relative to the ring directions. The function is an alias for [ST_ForcePolygonCW](#st_forcepolygoncw).
+
+Format: `ST_ForceRHR(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_AsText(ST_ForceRHR(ST_GeomFromText('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))')))
+```
+
+Output:
+
+```
+POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))
+```
+
 ## ST_FrechetDistance
 
 Introduction: Computes and returns discrete [Frechet Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_distance) between the given two geometries,
@@ -1530,6 +1550,28 @@ Output:
 
 ```
 [POLYGON ((1.0057629565405093 1.9984665139177547, 1.0037116327309097 2.0018325249140068, 0.999727799357053 2.001163270465665, 0.9977951427833316 1.997128228393235, 0.9998461908217928 1.993762152933182, 1.0038301712104316 1.9944311839965523, 1.0057629565405093 1.9984665139177547))]
+```
+
+## ST_HasM
+
+Introduction: Checks for the presence of M coordinate values representing measures or linear references. Returns true if the input geometry includes an M coordinate, false otherwise.
+
+Format: `ST_HasM(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_HasM(
+        ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))')
+)
+```
+
+Output:
+
+```
+True
 ```
 
 ## ST_HausdorffDistance
@@ -2006,6 +2048,70 @@ Output:
 LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140.21046313888758)
 ```
 
+## ST_M
+
+Introduction: Returns M Coordinate of given Point, null otherwise.
+
+Format: `ST_M(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_M(ST_MakePoint(1, 2, 3, 4))
+```
+
+Output:
+
+```
+4.0
+```
+
+## ST_MMax
+
+Introduction: Returns M maxima of the given geometry or null if there is no M coordinate.
+
+Format: `ST_MMax(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_MMax(
+        ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))')
+)
+```
+
+Output:
+
+```
+4.0
+```
+
+## ST_MMin
+
+Introduction: Returns M minima of the given geometry or null if there is no M coordinate.
+
+Format: `ST_MMin(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_MMin(
+        ST_GeomFromWKT('LINESTRING ZM(1 1 1 1, 2 2 2 2, 3 3 3 3, -1 -1 -1 -1)')
+)
+```
+
+Output:
+
+```
+-1.0
+```
+
 ## ST_MakeLine
 
 Introduction: Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error.
@@ -2275,6 +2381,26 @@ Example
 
 ```sql
 SELECT ST_NumGeometries(ST_GeomFromWKT('LINESTRING (-29 -27, -30 -29.7, -45 -33)'))
+```
+
+Output:
+
+```
+1
+```
+
+## ST_NumInteriorRing
+
+Introduction: Returns number of interior rings of polygon geometries. It is an alias of [ST_NumInteriorRings](#st_numinteriorrings).
+
+Format: `ST_NumInteriorRing(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_NumInteriorRing(ST_GeomFromText('POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))'))
 ```
 
 Output:
@@ -2666,11 +2792,11 @@ Input geometry:
 SQL Example:
 
 ```sql
-SELECT ST_Snap(
-        ST_GeomFromWKT('POLYGON ((236877.58 -6.61, 236878.29 -8.35, 236879.98 -8.33, 236879.72 -7.63, 236880.35 -6.62, 236877.58 -6.61), (236878.45 -7.01, 236878.43 -7.52, 236879.29 -7.50, 236878.63 -7.22, 236878.76 -6.89, 236878.45 -7.01))') as poly,
-        ST_GeomFromWKT('LINESTRING (236880.53 -8.22, 236881.15 -7.68, 236880.69 -6.81)') as line,
-       ST_Distance(poly, line) * 1.01
-       )
+SELECT
+    ST_Snap(poly, line, ST_Distance(poly, line) * 1.01) AS polySnapped FROM (
+        SELECT ST_GeomFromWKT('POLYGON ((236877.58 -6.61, 236878.29 -8.35, 236879.98 -8.33, 236879.72 -7.63, 236880.35 -6.62, 236877.58 -6.61), (236878.45 -7.01, 236878.43 -7.52, 236879.29 -7.50, 236878.63 -7.22, 236878.76 -6.89, 236878.45 -7.01))') as poly,
+           ST_GeomFromWKT('LINESTRING (236880.53 -8.22, 236881.15 -7.68, 236880.69 -6.81)') as line
+)
 ```
 
 Output:
@@ -2893,6 +3019,28 @@ Output:
 
 ```
 POINT (-70.01 44.37)
+```
+
+## ST_TriangulatePolygon
+
+Introduction: Generates the constrained Delaunay triangulation for the input Polygon. The constrained Delaunay triangulation is a set of triangles created from the Polygon's vertices that covers the Polygon area precisely, while maximizing the combined interior angles across all triangles compared to other possible triangulations. This produces the highest quality triangulation representation of the Polygon geometry. The function returns a GeometryCollection of Polygon geometries comprising this optimized constrained Delaunay triangulation. Polygons with holes and MultiPolygon types are supported. For any other geometry type provided, such as Point, LineString, etc., an empty GeometryCollection will be returned.
+
+Format: `ST_TriangulatePolygon(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_TriangulatePolygon(
+        ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (5 5, 5 8, 8 8, 8 5, 5 5))')
+    )
+```
+
+Output:
+
+```
+GEOMETRYCOLLECTION (POLYGON ((0 0, 0 10, 5 5, 0 0)), POLYGON ((5 8, 5 5, 0 10, 5 8)), POLYGON ((10 0, 0 0, 5 5, 10 0)), POLYGON ((10 10, 5 8, 0 10, 10 10)), POLYGON ((10 0, 5 5, 8 5, 10 0)), POLYGON ((5 8, 10 10, 8 8, 5 8)), POLYGON ((10 10, 10 0, 8 5, 10 10)), POLYGON ((8 5, 8 8, 10 10, 8 5)))
 ```
 
 ## ST_Union

@@ -45,8 +45,18 @@ object st_constructors extends DataFrameAPI {
 
   def ST_GeomFromText(wkt: String, srid: Int): Column = wrapExpression[ST_GeomFromText](wkt, srid)
 
+  def ST_GeometryFromText(wkt: Column): Column = wrapExpression[ST_GeometryFromText](wkt, 0)
+  def ST_GeometryFromText(wkt: String): Column = wrapExpression[ST_GeometryFromText](wkt, 0)
+
+  def ST_GeometryFromText(wkt: Column, srid: Column): Column = wrapExpression[ST_GeometryFromText](wkt, srid)
+
+  def ST_GeometryFromText(wkt: String, srid: Int): Column = wrapExpression[ST_GeometryFromText](wkt, srid)
+
   def ST_GeomFromWKB(wkb: Column): Column = wrapExpression[ST_GeomFromWKB](wkb)
   def ST_GeomFromWKB(wkb: String): Column = wrapExpression[ST_GeomFromWKB](wkb)
+
+  def ST_GeomFromEWKB(wkb: Column): Column = wrapExpression[ST_GeomFromEWKB](wkb)
+  def ST_GeomFromEWKB(wkb: String): Column = wrapExpression[ST_GeomFromEWKB](wkb)
 
   def ST_GeomFromWKT(wkt: Column): Column = wrapExpression[ST_GeomFromWKT](wkt, 0)
   def ST_GeomFromWKT(wkt: String): Column = wrapExpression[ST_GeomFromWKT](wkt, 0)
@@ -77,6 +87,38 @@ object st_constructors extends DataFrameAPI {
   def ST_PointZ(x: String, y: String, z: String, srid: Column): Column = wrapExpression[ST_PointZ](x, y, z, srid)
 
   def ST_PointZ(x: Double, y: Double, z: Double, srid: Int): Column = wrapExpression[ST_PointZ](x, y, z, srid)
+
+  def ST_PointM(x: Column, y: Column, m: Column): Column = wrapExpression[ST_PointM](x, y, m, 0)
+  def ST_PointM(x: String, y: String, m: String): Column = wrapExpression[ST_PointM](x, y, m, 0)
+  def ST_PointM(x: Double, y: Double, m: Double): Column = wrapExpression[ST_PointM](x, y, m, 0)
+
+  def ST_PointM(x: Column, y: Column, m: Column, srid: Column): Column = wrapExpression[ST_PointM](x, y, m, srid)
+
+  def ST_PointM(x: String, y: String, m: String, srid: Column): Column = wrapExpression[ST_PointM](x, y, m, srid)
+
+  def ST_PointM(x: Double, y: Double, m: Double, srid: Int): Column = wrapExpression[ST_PointM](x, y, m, srid)
+
+  def ST_PointZM(x: Column, y: Column, z: Column, m: Column): Column = wrapExpression[ST_PointZM](x, y, z, m, 0)
+  def ST_PointZM(x: String, y: String, z: String, m: String): Column = wrapExpression[ST_PointZM](x, y, z, m, 0)
+  def ST_PointZM(x: Double, y: Double, z: Double, m: Double): Column = wrapExpression[ST_PointZM](x, y, z, m, 0)
+
+  def ST_PointZM(x: Column, y: Column, z: Column, m: Column, srid: Column): Column = wrapExpression[ST_PointZM](x, y, z, m, srid)
+
+  def ST_PointZM(x: String, y: String, z: String, m: String, srid: Column): Column = wrapExpression[ST_PointZM](x, y, z, m, srid)
+
+  def ST_PointZM(x: Double, y: Double, z: Double, m: Double, srid: Int): Column = wrapExpression[ST_PointZM](x, y, z, m, srid)
+
+  def ST_PointFromWKB(wkb: Column): Column = wrapExpression[ST_PointFromWKB](wkb, 0)
+  def ST_PointFromWKB(wkb: String): Column = wrapExpression[ST_PointFromWKB](wkb, 0)
+
+  def ST_PointFromWKB(wkb: Column, srid: Column): Column = wrapExpression[ST_PointFromWKB](wkb, srid)
+  def ST_PointFromWKB(wkb: String, srid: Int): Column = wrapExpression[ST_PointFromWKB](wkb, srid)
+
+  def ST_LineFromWKB(wkb: Column): Column = wrapExpression[ST_LineFromWKB](wkb, 0)
+  def ST_LineFromWKB(wkb: String): Column = wrapExpression[ST_LineFromWKB](wkb, 0)
+
+  def ST_LineFromWKB(wkb: Column, srid: Column): Column = wrapExpression[ST_LineFromWKB](wkb, srid)
+  def ST_LineFromWKB(wkb: String, srid: Int): Column = wrapExpression[ST_LineFromWKB](wkb, srid)
 
   def ST_MakePoint(x: Column, y: Column): Column = wrapExpression[ST_MakePoint](x, y, null, null)
   def ST_MakePoint(x: String, y: String): Column = wrapExpression[ST_MakePoint](x, y, null, null)

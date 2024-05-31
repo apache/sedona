@@ -687,6 +687,19 @@ public class TestFunctions extends TestBase {
         );
 
     }
+
+    @Test
+    public void test_ST_NumInteriorRing() {
+        registerUDF("ST_NumInteriorRing", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_NumInteriorRing(sedona.ST_GeomFromText('POLYGON((0 0 0,0 5 0,5 0 0,0 0 5),(1 1 0,3 1 0,1 3 0,1 1 0))'))",
+                1
+        );
+        verifySqlSingleRes(
+                "select sedona.ST_NumInteriorRing(sedona.ST_GeomFromText('POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'))",
+                0
+        );
+    }
     @Test
     public void test_ST_PointN() {
         registerUDF("ST_PointN", byte[].class, int.class);
@@ -1034,6 +1047,15 @@ public class TestFunctions extends TestBase {
     }
 
     @Test
+    public void test_ST_ForceRHR() {
+        registerUDF("ST_ForceRHR", byte[].class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_AsText(sedona.ST_ForceRHR(sedona.ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))')))",
+                "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))"
+        );
+    }
+
+    @Test
     public void test_ST_LengthSpheroid() {
         registerUDF("ST_LengthSpheroid", byte[].class);
         verifySqlSingleRes(
@@ -1089,6 +1111,15 @@ public class TestFunctions extends TestBase {
         verifySqlSingleRes(
                 "SELECT sedona.ST_NumPoints(sedona.ST_GeomFromText('LINESTRING(0 0, 1 1, 2 2)'))",
                 3
+        );
+    }
+
+    @Test
+    public void test_ST_TriangulatePolygon() {
+        registerUDF("ST_TriangulatePolygon", byte[].class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_AsText(sedona.ST_TriangulatePolygon(sedona.ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (5 5, 5 8, 8 8, 8 5, 5 5))')))",
+                "GEOMETRYCOLLECTION (POLYGON ((0 0, 0 10, 5 5, 0 0)), POLYGON ((5 8, 5 5, 0 10, 5 8)), POLYGON ((10 0, 0 0, 5 5, 10 0)), POLYGON ((10 10, 5 8, 0 10, 10 10)), POLYGON ((10 0, 5 5, 8 5, 10 0)), POLYGON ((5 8, 10 10, 8 8, 5 8)), POLYGON ((10 10, 10 0, 8 5, 10 10)), POLYGON ((8 5, 8 8, 10 10, 8 5)))"
         );
     }
 

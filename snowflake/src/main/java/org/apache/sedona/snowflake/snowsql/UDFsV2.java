@@ -766,6 +766,13 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"})
+    public static Integer ST_NumInteriorRing(String geometry) {
+        return Functions.numInteriorRings(
+                GeometrySerde.deserGeoJson(geometry)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry"}, argTypes = {"Geometry", "Geometry"})
     public static boolean ST_OrderingEquals(String leftGeometry, String rightGeometry) {
         return Predicates.orderingEquals(
@@ -1191,6 +1198,15 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geom"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
+    public static String ST_ForceRHR(String geom) {
+        return GeometrySerde.serGeoJson(
+                Functions.forcePolygonCW(
+                        GeometrySerde.deserGeoJson(geom)
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geom"}, argTypes = {"Geometry"})
     public static double ST_LengthSpheroid(String geom) {
         return Spheroid.length(
@@ -1239,6 +1255,15 @@ public class UDFsV2
     public static int ST_NumPoints(String geom) throws Exception {
         return Functions.numPoints(
                 GeometrySerde.deserGeoJson(geom)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
+    public static String ST_TriangulatePolygon(String geom) {
+        return GeometrySerde.serGeoJson(
+                Functions.triangulatePolygon(
+                        GeometrySerde.deserGeoJson(geom)
+                )
         );
     }
 

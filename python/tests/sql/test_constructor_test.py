@@ -37,6 +37,10 @@ class TestConstructors(TestBase):
         point_df = self.spark.sql("SELECT ST_PointZ(1.2345, 2.3456, 3.4567)")
         assert point_df.count() == 1
 
+    def test_st_point_m(self):
+        point_df = self.spark.sql("SELECT ST_PointM(1.2345, 2.3456, 3.4567)")
+        assert point_df.count() == 1
+
     def test_st_makepoint(self):
         point_csv_df = self.spark.read.format("csv").\
             option("delimiter", ",").\
@@ -111,6 +115,19 @@ class TestConstructors(TestBase):
         polygon_df.show(10)
         assert polygon_df.count() == 100
 
+    def test_st_geometry_from_text(self):
+        polygon_wkt_df = self.spark.read.format("csv").\
+            option("delimiter", "\t").\
+            option("header", "false").\
+            load(mixed_wkt_geometry_input_location)
+
+        polygon_wkt_df.createOrReplaceTempView("polygontable")
+        polygon_df = self.spark.sql("select ST_GeometryFromText(polygontable._c0) as countyshape from polygontable")
+        assert polygon_df.count() == 100
+
+        polygon_df = self.spark.sql("select ST_GeomFromText(polygontable._c0, 4326) as countyshape from polygontable")
+        assert polygon_df.count() == 100
+
     def test_st_geom_from_wkb(self):
         polygon_wkb_df = self.spark.read.format("csv").\
             option("delimiter", "\t").\
@@ -120,6 +137,18 @@ class TestConstructors(TestBase):
         polygon_wkb_df.createOrReplaceTempView("polygontable")
         polygon_wkb_df.show()
         polygon_df = self.spark.sql("select ST_GeomFromWKB(polygontable._c0) as countyshape from polygontable")
+        polygon_df.show(10)
+        assert polygon_df.count() == 100
+
+    def test_st_geom_from_ewkb(self):
+        polygon_wkb_df = self.spark.read.format("csv"). \
+            option("delimiter", "\t"). \
+            option("header", "false"). \
+            load(mixed_wkb_geometry_input_location)
+
+        polygon_wkb_df.createOrReplaceTempView("polygontable")
+        polygon_wkb_df.show()
+        polygon_df = self.spark.sql("select ST_GeomFromEWKB(polygontable._c0) as countyshape from polygontable")
         polygon_df.show(10)
         assert polygon_df.count() == 100
 

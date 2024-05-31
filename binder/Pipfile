@@ -1,3 +1,5 @@
+# REMIND: Please run `pipenv lock` to update Pipfile.lock after editing this file
+
 [[source]]
 name = "pypi"
 url = "https://pypi.org/simple"
@@ -11,12 +13,12 @@ mkdocs="*"
 pytest-cov = "*"
 
 [packages]
-pandas="1.3.5"
-shapely="==1.8.4"
-geopandas="==0.11.1"
-pyspark="==3.4.0"
+pandas="==1.5.3"
+shapely="==2.0.4"
+geopandas="==0.14.4"
+pyspark="==3.4.2"
 attrs="*"
-apache-sedona="==1.5.1"
+apache-sedona="==1.6.0"
 matplotlib = "*"
 descartes = "*"
 keplergl = "==0.3.2"

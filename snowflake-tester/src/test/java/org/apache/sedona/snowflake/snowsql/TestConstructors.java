@@ -81,11 +81,65 @@ public class TestConstructors extends TestBase{
                 "POINT (0 1)"
         );
     }
+
+    @Test
+    public void test_ST_GeometryFromText() {
+        registerUDF("ST_GeometryFromText", String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_GeometryFromText('POINT (0 1)'))",
+                "POINT (0 1)"
+        );
+        registerUDF("ST_GeometryFromText", String.class, int.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_GeometryFromText('POINT (0 1)', 4326))",
+                "POINT (0 1)"
+        );
+    }
+
     @Test
     public void test_ST_GeomFromWKB() {
         registerUDF("ST_GeomFromWKB", byte[].class);
         verifySqlSingleRes(
                 "select sedona.ST_AsText(sedona.ST_GeomFromWKB(ST_ASWKB(to_geometry('POINT (0.0 1.0)'))))",
+                "POINT (0 1)"
+        );
+    }
+
+    @Test
+    public void test_ST_PointFromWKB() {
+        registerUDF("ST_PointFromWKB", byte[].class);
+        registerUDF("ST_AsEWKT", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_PointFromWKB(ST_ASWKB(to_geometry('POINT (10.0 15.0)'))))",
+                "POINT (10 15)"
+        );
+        registerUDF("ST_PointFromWKB", byte[].class, int.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsEWKT(sedona.ST_PointFromWKB(ST_ASWKB(to_geometry('POINT (10.0 15.0)')), 4326))",
+                "SRID=4326;POINT (10 15)"
+        );
+    }
+
+    @Test
+    public void test_ST_LineFromWKB() {
+        registerUDF("ST_LineFromWKB", byte[].class);
+        registerUDF("ST_AsEWKT", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_LineFromWKB(ST_ASWKB(to_geometry('LINESTRING (0 0, 2 2, 4 4)'))))",
+                "LINESTRING (0 0, 2 2, 4 4)"
+        );
+        registerUDF("ST_LineFromWKB", byte[].class, int.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsEWKT(sedona.ST_LineFromWKB(ST_ASWKB(to_geometry('LINESTRING (0 0, 2 2, 4 4)')), 4326))",
+                "SRID=4326;LINESTRING (0 0, 2 2, 4 4)"
+        );
+    }
+
+    @Test
+    public void test_ST_GeomFromEWKB() {
+        registerUDF("ST_GeomFromEWKB", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_GeomFromEWKB(ST_ASWKB(to_geometry('POINT (0.0 1.0)'))))",
                 "POINT (0 1)"
         );
     }

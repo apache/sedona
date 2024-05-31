@@ -492,8 +492,27 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"wkt"})
+    public static byte[] ST_GeometryFromText(String geomString) throws ParseException {
+        return GeometrySerde.serialize(
+                Constructors.geomFromWKT(geomString, 0)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"wkt", "srid"})
+    public static byte[] ST_GeometryFromText(String geomString, int srid) throws ParseException {
+        return GeometrySerde.serialize(
+                Constructors.geomFromWKT(geomString, srid)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"wkb"})
     public static byte[] ST_GeomFromWKB(byte[] wkb) throws ParseException {
+        return wkb;
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"wkb"})
+    public static byte[] ST_GeomFromEWKB(byte[] wkb) throws ParseException {
         return wkb;
     }
 
@@ -875,6 +894,13 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static Integer ST_NumInteriorRing(byte[] geometry) {
+        return Functions.numInteriorRings(
+                GeometrySerde.deserialize(geometry)
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry"})
     public static boolean ST_OrderingEquals(byte[] leftGeometry, byte[] rightGeometry) {
         return Predicates.orderingEquals(
@@ -935,6 +961,34 @@ public class UDFs {
     public static byte[] ST_PointZ(double x, double y, double z, int srid) {
         return GeometrySerde.serialize(
                 Constructors.pointZ(x, y, z, srid)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"wkb"})
+    public static byte[] ST_PointFromWKB(byte[] wkb) throws ParseException {
+        return GeometrySerde.serialize(
+                Constructors.pointFromWKB(wkb, 0)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"wkb", "srid"})
+    public static byte[] ST_PointFromWKB(byte[] wkb, int srid) throws ParseException {
+        return GeometrySerde.serialize(
+                Constructors.pointFromWKB(wkb, srid)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"wkb"})
+    public static byte[] ST_LineFromWKB(byte[] wkb) throws ParseException {
+        return GeometrySerde.serialize(
+                Constructors.lineFromWKB(wkb, 0)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"wkb", "srid"})
+    public static byte[] ST_LineFromWKB(byte[] wkb, int srid) throws ParseException {
+        return GeometrySerde.serialize(
+                Constructors.lineFromWKB(wkb, srid)
         );
     }
 
@@ -1349,6 +1403,15 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geom"})
+    public static byte[] ST_ForceRHR(byte[] geom) {
+        return GeometrySerde.serialize(
+                Functions.forcePolygonCW(
+                        GeometrySerde.deserialize(geom)
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom"})
     public static double ST_LengthSpheroid(byte[] geom) {
         return Spheroid.length(
                 GeometrySerde.deserialize(geom)
@@ -1408,6 +1471,15 @@ public class UDFs {
     public static int ST_NumPoints(byte[] geom) throws Exception {
         return Functions.numPoints(
                 GeometrySerde.deserialize(geom)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom"})
+    public static byte[] ST_TriangulatePolygon(byte[] geom) {
+        return GeometrySerde.serialize(
+                Functions.triangulatePolygon(
+                        GeometrySerde.deserialize(geom)
+                )
         );
     }
 

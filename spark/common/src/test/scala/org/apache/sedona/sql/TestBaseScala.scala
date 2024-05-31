@@ -143,6 +143,19 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     }
   }
 
+  def withConf[T](conf: Map[String, String])(f: => T): T = {
+    val oldConf = conf.values.map(key => key -> sparkSession.conf.getOption(key))
+    conf.foreach{ case (key, value) => sparkSession.conf.set(key, value) }
+    try {
+      f
+    } finally {
+      oldConf.foreach { case (key, value) => value match {
+        case Some(v) => sparkSession.conf.set(key, v)
+        case None => sparkSession.conf.unset(key)
+      }}
+    }
+  }
+
   protected def bruteForceDistanceJoinCountSpheroid(sampleCount:Int, distance: Double): Int = {
     val input = buildPointLonLatDf.limit(sampleCount).collect()
     input.map(row => {

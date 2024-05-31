@@ -19,6 +19,7 @@
 package org.apache.spark.sql.sedona_sql.strategy.join
 
 import org.apache.sedona.core.enums.IndexType
+import org.apache.sedona.core.spatialRddTool.IndexBuilder
 
 import scala.jdk.CollectionConverters._
 import org.apache.spark.broadcast.Broadcast
@@ -28,6 +29,9 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Attribute, BindReferences, Expression, UnsafeRow}
 import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.sedona_sql.execution.SedonaUnaryExecNode
+import org.locationtech.jts.geom.Geometry
+
+import java.util.Collections
 
 
 case class SpatialIndexExec(child: SparkPlan,
@@ -60,7 +64,15 @@ case class SpatialIndexExec(child: SparkPlan,
     }
 
     spatialRDD.buildIndex(indexType, false)
-    sparkContext.broadcast(spatialRDD.indexedRawRDD.take(1).asScala.head).asInstanceOf[Broadcast[T]]
+    val spatialIndexes = spatialRDD.indexedRawRDD.take(1).asScala
+    val spatialIndex = if (spatialIndexes.nonEmpty) {
+      spatialIndexes.head
+    } else {
+      // The broadcasted dataframe contains 0 partition. In this case, we should provide an empty spatial index.
+      val indexBuilder = new IndexBuilder[Geometry](indexType)
+      indexBuilder.call(Collections.emptyIterator()).next()
+    }
+    sparkContext.broadcast(spatialIndex).asInstanceOf[Broadcast[T]]
   }
 
   protected def withNewChildInternal(newChild: SparkPlan): SparkPlan = {

@@ -1,12 +1,12 @@
-/target/
+target
 /.idea
-/*.iml
+*.iml
 /*.ipr
 /*.iws
 /.settings/
 /.classpath
 /.project
-/dependency-reduced-pom.xml
+dependency-reduced-pom.xml
 /bin/
 /doc/
 /conf/

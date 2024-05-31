@@ -41,6 +41,13 @@ class RasterUDT extends UserDefinedType[GridCoverage2D] {
   }
 
   override def userClass: Class[GridCoverage2D] = classOf[GridCoverage2D]
+
+  override def equals(other: Any): Boolean = other match {
+    case _: UserDefinedType[_] => other.isInstanceOf[RasterUDT]
+    case _ => false
+  }
+
+  override def hashCode(): Int = userClass.hashCode()
 }
 
 case object RasterUDT extends RasterUDT with Serializable

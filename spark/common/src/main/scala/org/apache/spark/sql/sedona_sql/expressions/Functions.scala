@@ -511,6 +511,37 @@ case class ST_MinimumBoundingCircle(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_HasM(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.hasM _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_M(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.m _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_MMin(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.mMin _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_MMax(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.mMax _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
 
 /**
   * Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length.
@@ -614,6 +645,14 @@ case class ST_IsClosed(inputExpressions: Seq[Expression])
 }
 
 case class ST_NumInteriorRings(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.numInteriorRings _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_NumInteriorRing(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.numInteriorRings _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -1123,6 +1162,13 @@ case class ST_ForcePolygonCW(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_ForceRHR(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.forcePolygonCW _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_NRings(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.nRings _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -1145,6 +1191,13 @@ case class ST_ForcePolygonCCW(inputExpressions: Seq[Expression])
 
 case class ST_Translate(inputExpressions: Seq[Expression])
   extends InferredExpression(inferrableFunction4(Functions.translate)) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_TriangulatePolygon(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.triangulatePolygon _) with FoldableExpression {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
