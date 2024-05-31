@@ -224,6 +224,11 @@ object st_functions extends DataFrameAPI {
   def ST_LongestLine(geom1: Column, geom2: Column): Column = wrapExpression[ST_LongestLine](geom1, geom2)
   def ST_LongestLine(geom1: String, geom2: String): Column = wrapExpression[ST_LongestLine](geom1, geom2)
 
+  def ST_LocateAlong(geom: Column, measure: Column, offset: Column): Column = wrapExpression[ST_LocateAlong](geom, measure, offset)
+  def ST_LocateAlong(geom: String, measure: Double, offset: Double): Column = wrapExpression[ST_LocateAlong](geom, measure, offset)
+  def ST_LocateAlong(geom: Column, measure: Column): Column = wrapExpression[ST_LocateAlong](geom, measure)
+  def ST_LocateAlong(geom: String, measure: Double): Column = wrapExpression[ST_LocateAlong](geom, measure)
+
   def ST_HasZ(geoms: Column): Column = wrapExpression[ST_HasZ](geoms)
   def ST_HasZ(geoms: String): Column = wrapExpression[ST_HasZ](geoms)
 

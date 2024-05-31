@@ -550,4 +550,100 @@ public class GeomUtils {
             return geom;
         }
     }
+
+    public static Geometry locateAlong(Geometry geometry, double measure, double offset) {
+        if (!isMeasuredGeometry(geometry)) {
+            throw new IllegalArgumentException("Input geometry is doesn't have a measure dimension");
+        }
+
+        if (geometry instanceof Point) {
+            return locateAlongPoint(geometry, measure, offset);
+        }
+        if (geometry instanceof MultiPoint) {
+            // iterating through Points in MultiPoint object
+            Point[] points = new Point[geometry.getNumGeometries()];
+            for (int i = 0; i < geometry.getNumGeometries(); i++) {
+                points[i] = locateAlongPoint(geometry.getGeometryN(i), measure, offset);
+            }
+            return geometry.getFactory().createMultiPoint(Arrays.stream(points).filter(Objects::nonNull).toArray(Point[]::new));
+        }
+        if (geometry instanceof LineString) {
+            return locateAlongLinestring(geometry, measure, offset);
+        }
+        if (geometry instanceof MultiLineString) {
+            // iterating through LineStrings in MultiLineString object
+            List<Point> points = new ArrayList<>();
+            for (int i = 0; i < geometry.getNumGeometries(); i++) {
+                MultiPoint mPoint = (MultiPoint) locateAlongLinestring(geometry.getGeometryN(i), measure, offset);
+                for (int j = 0; j < mPoint.getNumGeometries(); j++) {
+                    points.add((Point) mPoint.getGeometryN(j));
+                }
+            }
+
+            return geometry.getFactory().createMultiPoint(points.toArray(new Point[0]));
+        }
+
+        throw new IllegalArgumentException(String.format("%s geometry type not supported, supported types are: (Multi)Point and (Multi)LineString.", geometry.getGeometryType()));
+    }
+
+    private static Geometry locateAlongLinestring(Geometry geometry, double measure, double offset) {
+        Coordinate[] coordinates = geometry.getCoordinates();
+        CoordinateList coordinateList = new CoordinateList();
+
+        for (int i = 1; i < coordinates.length; i++) {
+            Coordinate coordinate1 = coordinates[i - 1];
+            Coordinate coordinate2 = coordinates[i];
+            CoordinateXYZM newCoordinate = new CoordinateXYZM();
+            double position;
+
+            double measure1 = coordinate1.getM(),
+                    measure2 = coordinate2.getM();
+
+            if ((measure < Math.min(measure1, measure2)) || (measure > Math.max(measure1, measure2))) {
+                continue;
+            }
+
+            if (measure1 == measure2) {
+                // If the measures are equal then there is no valid interpolation range
+                if (coordinate1.equals(coordinate2)) {
+                    newCoordinate.setX(coordinate1.getX());
+                    newCoordinate.setY(coordinate1.getY());
+                    newCoordinate.setZ(coordinate1.getZ());
+                    newCoordinate.setM(coordinate1.getM());
+                    coordinateList.add(newCoordinate, false);
+                    continue;
+                }
+                // the point will be in the midpoint of coordinate1 and coordinate2 as measure1 and measure2 are same
+                position = 0.5;
+            } else {
+                // calculate the interpolation factor / position
+                position = (measure - measure1) / (measure2 - measure1);
+            }
+
+            // apply linear interpolation to find the point along the line
+            newCoordinate.setX(coordinate1.x + (coordinate2.x - coordinate1.x) * position);
+            newCoordinate.setY(coordinate1.y + (coordinate2.y - coordinate1.y) * position);
+            newCoordinate.setZ(coordinate1.z + (coordinate2.z - coordinate1.z) * position);
+            newCoordinate.setM(measure);
+
+            if (offset != 0D) {
+                // calculate the angle of the line segment
+                double theta = Math.atan2(coordinate2.y - coordinate1.y, coordinate2.x - coordinate1.x);
+                // shift the coordinate left or right by the offset
+                // if the offset is positive then shift to left
+                // else the offset is negative then shift to right
+                newCoordinate.setX(newCoordinate.x - Math.sin(theta) * offset);
+                newCoordinate.setY(newCoordinate.y + Math.cos(theta) * offset);
+            }
+            coordinateList.add(newCoordinate, false);
+        }
+        return geometry.getFactory().createMultiPointFromCoords(Arrays.stream(coordinateList.toCoordinateArray()).filter(Objects::nonNull).toArray(Coordinate[]::new));
+    }
+
+    private static Point locateAlongPoint(Geometry geometry, double measure, double offset) {
+        if (measure == geometry.getCoordinate().getM()) {
+            return (Point) geometry;
+        }
+        return null;
+    }
 }

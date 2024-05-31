@@ -1644,6 +1644,17 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         "GEOMETRYCOLLECTION EMPTY")
   }
 
+  it("Should pass ST_LocateAlong") {
+    val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('MULTILINESTRING M((1 2 3, 3 4 2, 9 4 3),(1 2 3, 5 4 5))') AS geom")
+    var actual = baseDf.selectExpr("ST_AsText(ST_LocateAlong(geom, 2))").first().get(0)
+    var expected = "MULTIPOINT M((3 4 2))"
+    assertEquals(expected, actual)
+
+    actual = baseDf.selectExpr("ST_AsText(ST_LocateAlong(geom, 2, -3))").first().get(0)
+    expected = "MULTIPOINT M((5.121320343559642 1.8786796564403572 2), (3 1 2))"
+    assertEquals(expected, actual)
+  }
+
   it("Should pass ST_LongestLine") {
     val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))') as geom")
     val actual = baseDf.selectExpr("ST_LongestLine(geom, geom)").first().get(0).asInstanceOf[Geometry].toText

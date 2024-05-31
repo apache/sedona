@@ -590,7 +590,6 @@ public class TestFunctionsV2
                 "LINESTRING(45.173118104 45.743370112,50 20,90 80,112.975930502 49.365425998)"
         );
     }
-
     @Test
     public void test_ST_LongestLine() {
         registerUDFV2("ST_LongestLine", String.class, String.class);

@@ -2270,6 +2270,36 @@ Output:
 LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140.21046313888758)
 ```
 
+## ST_LocateAlong
+
+Introduction: This function computes Point or MultiPoint geometries representing locations along a measured input geometry (LineString or MultiLineString) corresponding to the provided measure value(s). Polygonal geometry inputs are not supported. The output points lie directly on the input line at the specified measure positions.
+
+Additionally, an optional `offset` parameter can shift the resulting points left or right from the input line. A positive offset displaces the points to the left side, while a negative value offsets them to the right side by the given distance.
+
+This allows identifying precise locations along a measured linear geometry based on supplied measure values, with the ability to offset the output points if needed.
+
+Format:
+
+`ST_LocateAlong(linear: Geometry, measure: Double, offset: Double)`
+
+`ST_LocateAlong(linear: Geometry, measure: Double)`
+
+Since: `vTBD`
+
+SQL Example:
+
+```sql
+SELECT ST_LocateAlong(
+        ST_GeomFromText('LINESTRING M (10 30 1, 50 50 1, 30 110 2, 70 90 2, 180 140 3, 130 190 3)')
+)
+```
+
+Output:
+
+```
+MULTIPOINT M((30 110 2), (50 100 2), (70 90 2))
+```
+
 ## ST_LongestLine
 
 Introduction: Returns the LineString geometry representing the maximum distance between any two points from the input geometries.

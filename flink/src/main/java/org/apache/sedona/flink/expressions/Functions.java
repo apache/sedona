@@ -354,6 +354,23 @@ public class Functions {
         }
     }
 
+    public static class ST_LocateAlong extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint(value = "Double") Double measure,
+                             @DataTypeHint(value = "Double") Double offset) {
+            Geometry linear = (Geometry) o;
+            return org.apache.sedona.common.Functions.locateAlong(linear, measure, offset);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint(value = "Double") Double measure) {
+            Geometry linear = (Geometry) o;
+            return org.apache.sedona.common.Functions.locateAlong(linear, measure);
+        }
+    }
+
     public static class ST_LongestLine extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object g1,

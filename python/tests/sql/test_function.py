@@ -1403,6 +1403,16 @@ class TestPredicateJoin(TestBase):
                 "select ST_AsText(ST_LineFromMultiPoint(ST_GeomFromText({})))".format(input_geom))
             assert line_geometry.take(1)[0][0] == expected_geom
 
+    def test_st_locate_along(self):
+        baseDf = self.spark.sql("SELECT ST_GeomFromWKT('MULTILINESTRING M((1 2 3, 3 4 2, 9 4 3),(1 2 3, 5 4 5))') as geom")
+        actual = baseDf.selectExpr("ST_AsText(ST_LocateAlong(geom, 2))").take(1)[0][0]
+        expected = "MULTIPOINT M((3 4 2))"
+        assert expected == actual
+
+        actual = baseDf.selectExpr("ST_AsText(ST_LocateAlong(geom, 2, -3))").take(1)[0][0]
+        expected = "MULTIPOINT M((5.121320343559642 1.8786796564403572 2), (3 1 2))"
+        assert expected == actual
+
     def test_st_longest_line(self):
         basedf = self.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))') as geom")
         actual = basedf.selectExpr("ST_AsText(ST_LongestLine(geom, geom))").take(1)[0][0]
