@@ -123,6 +123,19 @@ def ST_AsEWKB(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_AsEWKB", geometry)
 
+@validate_argument_types
+def ST_AsHEXEWKB(geometry: ColumnOrName, endian: Optional[ColumnOrName] = None) -> Column:
+    """Generate the Extended Well-Known Binary representation of a geometry as Hex string.
+
+    :param geometry: Geometry to generate EWKB for.
+    :type geometry: ColumnOrName
+    :return: Extended Well-Known Binary representation of geometry as Hex string.
+    :rtype: Column
+    """
+    args = (geometry) if endian is None else (geometry, endian)
+
+    return _call_st_function("ST_AsHEXEWKB", args)
+
 
 @validate_argument_types
 def ST_AsEWKT(geometry: ColumnOrName) -> Column:

@@ -105,6 +105,20 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static String ST_AsHEXEWKB(byte[] geometry) {
+        return Functions.asHexEWKB(
+                GeometrySerde.deserialize(geometry)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "endian"})
+    public static String ST_AsHEXEWKB(byte[] geometry, String endian) {
+        return Functions.asHexEWKB(
+                GeometrySerde.deserialize(geometry), endian
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static String ST_AsEWKT(byte[] geometry) {
         return Functions.asEWKT(
                 GeometrySerde.deserialize(geometry)

@@ -397,6 +397,38 @@ Output:
 1.0,1.0 8.0,1.0 8.0,8.0 1.0,8.0 1.0,1.0
 ```
 
+## ST_AsHEXEWKB
+
+Introduction: This function returns the input geometry encoded to a text representation in HEXEWKB format. The HEXEWKB encoding can use either little-endian (NDR) or big-endian (XDR) byte ordering. If no encoding is explicitly specified, the function defaults to using the little-endian (NDR) format.
+
+Format: `ST_AsHEXEWKB(geom: Geometry, endian: String = NDR)`
+
+Since: `vTBD`
+
+SQL Example
+
+```sql
+SELECT ST_AsHEXEWKB(ST_GeomFromWKT('POINT(1 2)'), 'XDR')
+```
+
+Output:
+
+```
+00000000013FF00000000000004000000000000000
+```
+
+SQL Example
+
+```sql
+SELECT ST_AsHEXEWKB(ST_GeomFromWKT('LINESTRING (30 20, 20 25, 20 15, 30 20)'))
+```
+
+Output:
+
+```
+0102000000040000000000000000003E4000000000000034400000000000003440000000000000394000000000000034400000000000002E400000000000003E400000000000003440
+```
+
 ## ST_AsKML
 
 Introduction: Return the [KML](https://www.ogc.org/standards/kml) string representation of a geometry

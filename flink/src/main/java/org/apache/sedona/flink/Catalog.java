@@ -96,6 +96,7 @@ public class Catalog {
                 new Functions.ST_ExteriorRing(),
                 new Functions.ST_AsEWKT(),
                 new Functions.ST_AsEWKB(),
+                new Functions.ST_AsHEXEWKB(),
                 new Functions.ST_AsText(),
                 new Functions.ST_AsBinary(),
                 new Functions.ST_AsGeoJSON(),

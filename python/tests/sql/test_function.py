@@ -1492,6 +1492,17 @@ class TestPredicateJoin(TestBase):
                                    "1, 2, 1, 2) AS geom")
         actual = actual_df.selectExpr("ST_AsText(geom)").take(1)[0][0]
         assert expected == actual
+
+    def test_st_ashexewkb(self):
+        expected = "0101000000000000000000F03F0000000000000040"
+        actual_df = self.spark.sql("SELECT ST_GeomFromText('POINT(1 2)') as point")
+        actual = actual_df.selectExpr("ST_AsHEXEWKB(point)").take(1)[0][0]
+        assert expected == actual
+
+        expected = "00000000013FF00000000000004000000000000000"
+        actual = actual_df.selectExpr("ST_AsHEXEWKB(point, 'XDR')").take(1)[0][0]
+        assert expected == actual
+
     def test_boundingDiagonal(self):
         expected = "LINESTRING (1 0, 2 1)"
         actual_df = self.spark.sql("SELECT ST_BoundingDiagonal(ST_GeomFromText('POLYGON ((1 0, 1 1, 2 1, 2 0, "

@@ -114,6 +114,23 @@ public class TestFunctionsV2
                 new byte[] {1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -16, 63, 0, 0, 0, 0, 0, 0, -16, 63}
         );
     }
+
+    @Test
+    public void test_ST_AsHEXEWKB() throws SQLException
+    {
+        registerUDFV2("ST_AsHEXEWKB", String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsHEXEWKB(ST_GeometryFromWKT('POINT(1 2)'))",
+                "0101000000000000000000F03F0000000000000040"
+        );
+
+        registerUDFV2("ST_AsHEXEWKB", String.class, String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsHEXEWKB(ST_GeometryFromWKT('POINT(1 2)'), 'XDR')",
+                "00000000013FF00000000000004000000000000000"
+        );
+    }
+
     @Test
     public void test_ST_AsEWKT() {
         registerUDFV2("ST_AsEWKT", String.class);

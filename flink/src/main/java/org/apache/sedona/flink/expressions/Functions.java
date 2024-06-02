@@ -515,6 +515,21 @@ public class Functions {
         }
     }
 
+    public static class ST_AsHEXEWKB extends ScalarFunction {
+        @DataTypeHint("String")
+        public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                           @DataTypeHint("String") String endian) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.asHexEWKB(geom, endian);
+        }
+
+        @DataTypeHint("String")
+        public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.asHexEWKB(geom);
+        }
+    }
+
     public static class ST_AsBinary extends ScalarFunction {
         @DataTypeHint("Bytes")
         public byte[] eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {

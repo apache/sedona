@@ -32,6 +32,7 @@ import org.locationtech.jts.algorithm.hull.ConcaveHull;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.geom.util.GeometryFixer;
+import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.gml2.GMLWriter;
 import org.locationtech.jts.io.kml.KMLWriter;
 import org.locationtech.jts.linearref.LengthIndexedLine;
@@ -551,6 +552,19 @@ public class Functions {
 
     public static byte[] asEWKB(Geometry geometry) {
         return GeomUtils.getEWKB(geometry);
+    }
+
+    public static String asHexEWKB(Geometry geom, String endian) {
+        if (endian.equalsIgnoreCase("NDR")) {
+            return GeomUtils.getHexEWKB(geom, ByteOrderValues.LITTLE_ENDIAN);
+        } else if (endian.equalsIgnoreCase("XDR")) {
+            return GeomUtils.getHexEWKB(geom, ByteOrderValues.BIG_ENDIAN);
+        }
+        throw new IllegalArgumentException("You must select either NDR (little-endian) or XDR (big-endian) as the endian format.");
+    }
+
+    public static String asHexEWKB(Geometry geom) {
+        return asHexEWKB(geom, "NDR");
     }
 
     public static byte[] asWKB(Geometry geometry) {
