@@ -114,6 +114,7 @@ object Catalog {
     function[ST_Snap](),
     function[ST_ClosestPoint](),
     function[ST_Boundary](),
+    function[ST_HasZ](),
     function[ST_HasM](),
     function[ST_M](),
     function[ST_MMin](),

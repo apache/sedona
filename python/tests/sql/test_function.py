@@ -931,6 +931,11 @@ class TestPredicateJoin(TestBase):
         # Then
         assert subdivided.count() == 16
 
+    def test_st_has_z(self):
+        baseDf = self.spark.sql("SELECT ST_GeomFromWKT('POLYGON Z ((30 10 5, 40 40 10, 20 40 15, 10 20 20, 30 10 5))') as poly")
+        actual = baseDf.selectExpr("ST_HasZ(poly)")
+        assert actual
+
     def test_st_has_m(self):
         baseDf = self.spark.sql("SELECT ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))') as poly")
         actual = baseDf.selectExpr("ST_HasM(poly)")

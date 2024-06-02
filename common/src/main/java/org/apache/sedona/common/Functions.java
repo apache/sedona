@@ -483,6 +483,11 @@ public class Functions {
         return !Double.isNaN(coord.getM());
     }
 
+    public static boolean hasZ(Geometry geom) {
+        Coordinate coord = geom.getCoordinate();
+        return !Double.isNaN(coord.getZ());
+    }
+
     public static Geometry flipCoordinates(Geometry geometry) {
         GeomUtils.flipCoordinates(geometry);
         return geometry;

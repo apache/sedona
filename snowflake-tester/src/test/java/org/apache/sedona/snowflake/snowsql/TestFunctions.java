@@ -192,10 +192,9 @@ public class TestFunctions extends TestBase {
         );
         registerUDF("ST_Buffer", byte[].class, double.class, boolean.class);
         registerUDF("ST_ReducePrecision", byte[].class, int.class);
-        registerUDF("ST_Area", byte[].class);
         verifySqlSingleRes(
-                "select sedona.ST_Area(sedona.ST_ReducePrecision(sedona.ST_GeomFromText(sedona.ST_AsText(sedona.ST_Buffer(sedona.ST_GeomFromText('LINESTRING(0.05 15, -0.05 15)'), 10000, true))), 8))",
-                0.04424254827358593
+                "select sedona.ST_AsText(sedona.ST_ReducePrecision(sedona.ST_Buffer(sedona.ST_GeomFromText('LINESTRING(5 15, -5 15)'), 100, true), 4))",
+                "POLYGON ((-5.0002 14.9991, -5.0003 14.9992, -5.0005 14.9993, -5.0006 14.9994, -5.0007 14.9995, -5.0008 14.9997, -5.0009 14.9998, -5.0009 15, -5.0009 15.0002, -5.0008 15.0003, -5.0007 15.0005, -5.0006 15.0006, -5.0005 15.0007, -5.0003 15.0008, -5.0002 15.0009, -5 15.0009, 5 15.0009, 5.0002 15.0009, 5.0003 15.0008, 5.0005 15.0007, 5.0006 15.0006, 5.0007 15.0005, 5.0008 15.0003, 5.0009 15.0002, 5.0009 15, 5.0009 14.9998, 5.0008 14.9997, 5.0007 14.9995, 5.0006 14.9994, 5.0005 14.9993, 5.0003 14.9992, 5.0002 14.9991, 5 14.9991, -5 14.9991, -5.0002 14.9991))"
         );
     }
 
@@ -406,6 +405,15 @@ public class TestFunctions extends TestBase {
         verifySqlSingleRes(
                 "select sedona.ST_GeometryType(sedona.ST_GeomFromText('POINT(1 2)'))",
                 "ST_Point"
+        );
+    }
+
+    @Test
+    public void test_ST_HasZ() {
+        registerUDF("ST_HasZ", byte[].class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_HasZ(sedona.ST_GeomFromText('POINT Z(1 2 3)'))",
+                true
         );
     }
 
@@ -831,7 +839,7 @@ public class TestFunctions extends TestBase {
     public void test_ST_Snap() {
         registerUDF("ST_Snap", byte[].class, byte[].class, double.class);
         verifySqlSingleRes(
-                "SELECT sedona.ST_AsText(sedona.ST_Snap(sedona.ST_GeomFromText('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))'), sedona.ST_GeomFromText('LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)'), 2.525))",
+                "SELECT sedona.ST_AsText(sedona.ST_Snap(sedona.ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))'), sedona.ST_GeomFromWKT('LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)'), 2.525))",
                 "POLYGON ((2.6 12.5, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 2.6 12.5))"
         );
     }

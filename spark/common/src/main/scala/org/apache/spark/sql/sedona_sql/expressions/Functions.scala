@@ -511,6 +511,14 @@ case class ST_MinimumBoundingCircle(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_HasZ(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.hasZ _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_HasM(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.hasM _) {
 

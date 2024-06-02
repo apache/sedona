@@ -1125,6 +1125,26 @@ SELECT ST_GeometryType(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_HasZ
+
+Introduction: Checks for the presence of Z coordinate values representing measures or linear references. Returns true if the input geometry includes an Z coordinate, false otherwise.
+
+Format: `ST_HasZ(geom: Geometry)`
+
+SQL Example
+
+```sql
+SELECT ST_HasZ(
+        ST_GeomFromWKT('LINESTRING Z (30 10 5, 40 40 10, 20 40 15, 10 20 20)')
+)
+```
+
+Output:
+
+```
+True
+```
+
 ## ST_HausdorffDistance
 
 Introduction: Returns a discretized (and hence approximate) [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance) between the given 2 geometries.

@@ -401,6 +401,15 @@ public class TestFunctionsV2
     }
 
     @Test
+    public void test_ST_HasZ() {
+        registerUDFV2("ST_HasZ", String.class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_HasZ(ST_GeomFromText('POINT Z(1 2 3)'))",
+                true
+        );
+    }
+
+    @Test
     public void test_ST_HausdorffDistance() {
         registerUDFV2("ST_HausdorffDistance", String.class, String.class);
         verifySqlSingleRes(
