@@ -3439,6 +3439,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#st_hasz" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_HasZ
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_hausdorffdistance" class="md-nav__link">
     <span class="md-ellipsis">
       ST_HausdorffDistance
@@ -5533,6 +5542,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#st_hasz" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_HasZ
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_hausdorffdistance" class="md-nav__link">
     <span class="md-ellipsis">
       ST_HausdorffDistance
@@ -7058,6 +7076,18 @@ means only keep the cells with distance exactly <code>k</code> from the original
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>True
 </code></pre></div>
+<h2 id="st_hasz">ST_HasZ<a class="headerlink" href="#st_hasz" title="Permanent link">&para;</a></h2>
+<p>Introduction: Checks for the presence of Z coordinate values representing measures or linear references. Returns true if the input geometry includes an Z coordinate, false otherwise.</p>
+<p>Format: <code>ST_HasZ(geom: Geometry)</code></p>
+<p>Since: <code>vTBD</code></p>
+<p>SQL Example</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_HasZ</span><span class="p">(</span>
+<span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING Z (30 10 5, 40 40 10, 20 40 15, 10 20 20)&#39;</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>True
+</code></pre></div>
 <h2 id="st_hausdorffdistance">ST_HausdorffDistance<a class="headerlink" href="#st_hausdorffdistance" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns a discretized (and hence approximate) <a href="https://en.wikipedia.org/wiki/Hausdorff_distance">Hausdorff distance</a> between the given 2 geometries.
 Optionally, a densityFraction parameter can be specified, which gives more accurate results by densifying segments before computing hausdorff distance between them.
@@ -8025,7 +8055,7 @@ You need to make sure that the input geometry is in lon/lat order. If the input 
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 29, 2024 05:53:56</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 2, 2024 06:40:22</span>
   </span>
 
     
