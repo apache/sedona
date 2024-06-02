@@ -2453,4 +2453,30 @@ public class FunctionsTest extends TestBase {
         String invalidReasonESRI = Functions.isValidReason(invalidGeom, ESRI_VALIDITY);
         assertEquals("Self-intersection at or near point (10.0, 20.0, NaN)", invalidReasonESRI);
     }
+
+    @Test
+    public void points() throws ParseException {
+        Geometry polygon = Constructors.geomFromEWKT("POLYGON ((0 0, 1 1, 5 1, 5 0, 1 0, 0 0))");
+        Geometry lineString = Constructors.geomFromEWKT("LINESTRING (0 0, 1 1, 2 2)");
+        Geometry point = Constructors.geomFromEWKT("POINT (0 0)");
+        Geometry multiPoint = Constructors.geomFromEWKT("MULTIPOINT ((0 0), (1 1), (2 2))");
+        Geometry multiLineString = Constructors.geomFromEWKT("MULTILINESTRING ((0 0, 1 1), (2 2, 3 3))");
+        Geometry multiPolygon = Constructors.geomFromEWKT("MULTIPOLYGON (((0 0, 1 1, 1 0, 0 0)), ((2 2, 3 3, 3 2, 2 2)))");
+        Geometry geometry3D = Constructors.geomFromEWKT("POLYGON Z ((0 0 1, 1 1 2, 2 2 3, 0 0 1))");
+
+        String result = Functions.asEWKT(Functions.points(polygon));
+        assertEquals("MULTIPOINT ((0 0), (1 1), (5 1), (5 0), (1 0), (0 0))", result);
+        result = Functions.asEWKT(Functions.points(lineString));
+        assertEquals("MULTIPOINT ((0 0), (1 1), (2 2))", result);
+        result = Functions.asEWKT(Functions.points(point));
+        assertEquals("MULTIPOINT ((0 0))", result);
+        result = Functions.asEWKT(Functions.points(multiPoint));
+        assertEquals("MULTIPOINT ((0 0), (1 1), (2 2))", result);
+        result = Functions.asEWKT(Functions.points(multiLineString));
+        assertEquals("MULTIPOINT ((0 0), (1 1), (2 2), (3 3))", result);
+        result = Functions.asEWKT(Functions.points(multiPolygon));
+        assertEquals("MULTIPOINT ((0 0), (1 1), (1 0), (0 0), (2 2), (3 3), (3 2), (2 2))", result);
+        String result1 = Functions.asEWKT(Functions.points(geometry3D));
+        assertEquals("MULTIPOINT Z((0 0 1), (1 1 2), (2 2 3), (0 0 1))", result1);
+    }
 }

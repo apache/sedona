@@ -678,6 +678,15 @@ public class TestFunctionsV2
     }
 
     @Test
+    public void test_ST_Points() {
+        registerUDFV2("ST_Points", String.class);
+        verifySqlSingleRes(
+                "select ST_AsEWKT(sedona.ST_Points(ST_GeometryFromWKT('LINESTRING(0 0, 0 1, 0 2, 0 3, 0 4)')))",
+                "SRID=0;MULTIPOINT((0 0),(0 1),(0 2),(0 3),(0 4))"
+        );
+    }
+
+    @Test
     public void test_ST_Polygon() {
         registerUDFV2("ST_Polygon", String.class, int.class);
         // GeoJSON spec does not contain SRID so the serialization process will lose SRID info

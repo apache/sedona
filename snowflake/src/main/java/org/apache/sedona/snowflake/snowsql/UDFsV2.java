@@ -815,6 +815,15 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
+    public static String ST_Points(String geometry) {
+        return GeometrySerde.serGeoJson(
+                Functions.points(
+                        GeometrySerde.deserGeoJson(geometry)
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "srid"}, argTypes = {"Geometry", "int"}, returnTypes = "Geometry")
     public static String ST_Polygon(String geometry, int srid) {
         return GeometrySerde.serGeoJson(

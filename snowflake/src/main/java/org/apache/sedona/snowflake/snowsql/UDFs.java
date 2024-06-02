@@ -999,6 +999,15 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static byte[] ST_Points(byte[] geometry) {
+        return GeometrySerde.serialize(
+                Functions.points(
+                        GeometrySerde.deserialize(geometry)
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "srid"})
     public static byte[] ST_Polygon(byte[] geometry, int srid) {
         return GeometrySerde.serialize(

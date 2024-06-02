@@ -929,6 +929,17 @@ def ST_MakeLine(geom1: ColumnOrName, geom2: Optional[ColumnOrName] = None) -> Co
     return _call_st_function("ST_MakeLine", args)
 
 @validate_argument_types
+def ST_Points(geometry: ColumnOrName) -> Column:
+    """Creates a MultiPoint geometry consisting of all the coordinates of the input geometry
+
+    :param geometry: input geometry.
+    :type geometry: ColumnOrName
+    :return: Multipoint geometry
+    :rtype: Column
+    """
+    return _call_st_function("ST_Points", (geometry))
+
+@validate_argument_types
 def ST_Polygon(line_string: ColumnOrName, srid: ColumnOrNameOrNumber) -> Column:
     """Create a polygon built from the given LineString and sets the spatial reference system from the srid.
 

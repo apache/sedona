@@ -1003,6 +1003,26 @@ class TestPredicateJoin(TestBase):
         for actual, expected in result:
             assert actual == expected
 
+    def test_st_points(self):
+        # Given
+        geometry_df = self.spark.createDataFrame(
+            [
+                # Adding only the input that will result in a non-null polygon
+                ["MULTILINESTRING ((0 0, 1 1), (2 2, 3 3))", "MULTIPOINT ((0 0), (1 1), (2 2), (3 3))"]
+            ]
+        ).selectExpr("ST_GeomFromText(_1) AS geom", "_2 AS expected")
+
+        # When calling st_points
+        geom_poly = geometry_df.withColumn("actual", expr("st_normalize(st_points(geom))"))
+
+        result = geom_poly.filter("actual IS NOT NULL").selectExpr("ST_AsText(actual)", "expected"). \
+            collect()
+
+        assert result.__len__() == 1
+
+        for actual, expected in result:
+            assert actual == expected
+
     def test_st_polygon(self):
         # Given
         geometry_df = self.spark.createDataFrame(
