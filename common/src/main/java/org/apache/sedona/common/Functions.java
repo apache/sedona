@@ -20,7 +20,9 @@ import com.uber.h3core.util.LatLng;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.sphere.Spheroid;
+import org.apache.sedona.common.subDivide.ExtentBasedGeometrySubDivider;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
+import org.apache.sedona.common.subDivide.SubdivideOptions;
 import org.apache.sedona.common.utils.*;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.Orientation;
@@ -975,7 +977,7 @@ public class Functions {
     }
 
     public static Geometry locateAlong(Geometry linear, double measure, double offset) {
-        return GeomUtils.locateAlong(linear, measure, offset);
+        return GeometryLocateAlongProcessor.processGeometry(linear, measure, offset);
     }
 
     public static Geometry locateAlong(Geometry linear, double measure) {
