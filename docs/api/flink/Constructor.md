@@ -591,7 +591,7 @@ Introduction: Creates a point with X, Y, and M coordinate. Use [ST_MakePoint](#s
 
 Format: `ST_MakePointM(x: Double, y: Double, m: Double)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 Example:
 
