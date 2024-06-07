@@ -1364,7 +1364,7 @@ Format:
 
 `ST_Force4D(geom: Geometry`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example
 
