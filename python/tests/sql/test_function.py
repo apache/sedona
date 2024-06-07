@@ -1468,6 +1468,20 @@ class TestPredicateJoin(TestBase):
         actual = actualDf.selectExpr("ST_NDims(geom)").take(1)[0][0]
         assert expected == actual
 
+    def test_force3DZ(self):
+        expected = 3
+        actualDf = self.spark.sql("SELECT ST_Force3DZ(ST_GeomFromText('LINESTRING(0 1, 1 0, 2 0)'), 1.1) AS geom")
+        actual = actualDf.selectExpr("ST_NDims(geom)").take(1)[0][0]
+        assert expected == actual
+
+    def test_st_force_collection(self):
+        basedf = self.spark.sql("SELECT ST_GeomFromWKT('MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)') AS mpoint, ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))') AS poly")
+        actual = basedf.selectExpr("ST_NumGeometries(ST_ForceCollection(mpoint))").take(1)[0][0]
+        assert actual == 6
+
+        actual = basedf.selectExpr("ST_NumGeometries(ST_ForceCollection(poly))").take(1)[0][0]
+        assert actual == 1
+
     def test_forcePolygonCW(self):
         actualDf = self.spark.sql("SELECT ST_ForcePolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))')) AS polyCW")
         actual = actualDf.selectExpr("ST_AsText(polyCW)").take(1)[0][0]

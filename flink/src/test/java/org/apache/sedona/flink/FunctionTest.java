@@ -1313,6 +1313,51 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testForce3DZ() {
+        Integer expectedDims = 3;
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_Force3DZ(ST_GeomFromWKT('LINESTRING(0 1, 1 0, 2 0)'), 1.2) " +
+                "AS " + polygonColNames[0]);
+        Integer actual = (Integer) first(polyTable.select(call(Functions.ST_NDims.class.getSimpleName(), $(polygonColNames[0])))).getField(0);
+        assertEquals(expectedDims, actual);
+
+        polyTable = tableEnv.sqlQuery("SELECT ST_Force3DZ(ST_GeomFromWKT('LINESTRING(0 1, 1 0, 2 0)')) " +
+                "AS " + polygonColNames[0]);
+        actual = (Integer) first(polyTable.select(call(Functions.ST_NDims.class.getSimpleName(), $(polygonColNames[0])))).getField(0);
+        assertEquals(expectedDims, actual);
+    }
+
+    @Test
+    public void testForceCollection() {
+        int actual = (int) first(
+                tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)') AS geom").select(call(Functions.ST_ForceCollection.class.getSimpleName(), $("geom"))).as("geom")
+                        .select(call(Functions.ST_NumGeometries.class.getSimpleName(), $("geom")))
+        ).getField(0);
+        int expected = 6;
+        assertEquals(expected, actual);
+
+        actual = (int) first(
+                tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTIPOLYGON(((0 0 0,0 1 0,1 1 0,1 0 0,0 0 0)),((0 0 0,1 0 0,1 0 1,0 0 1,0 0 0)),((1 1 0,1 1 1,1 0 1,1 0 0,1 1 0)),((0 1 0,0 1 1,1 1 1,1 1 0,0 1 0)),((0 0 1,1 0 1,1 1 1,0 1 1,0 0 1)))') AS geom").select(call(Functions.ST_ForceCollection.class.getSimpleName(), $("geom"))).as("geom")
+                        .select(call(Functions.ST_NumGeometries.class.getSimpleName(), $("geom")))
+        ).getField(0);
+        expected = 5;
+        assertEquals(expected, actual);
+
+        actual = (int) first(
+                tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTILINESTRING ((10 10, 20 20, 30 30), (15 15, 25 25, 35 35))') AS geom").select(call(Functions.ST_ForceCollection.class.getSimpleName(), $("geom"))).as("geom")
+                        .select(call(Functions.ST_NumGeometries.class.getSimpleName(), $("geom")))
+        ).getField(0);
+        expected = 2;
+        assertEquals(expected, actual);
+
+        actual = (int) first(
+                tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))') AS geom").select(call(Functions.ST_ForceCollection.class.getSimpleName(), $("geom"))).as("geom")
+                        .select(call(Functions.ST_NumGeometries.class.getSimpleName(), $("geom")))
+        ).getField(0);
+        expected = 1;
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testTriangulatePolygon() {
         Table polyTable = tableEnv.sqlQuery("SELECT ST_TriangulatePolygon(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (5 5, 5 8, 8 8, 8 5, 5 5))')) as poly");
         String actual = (String) first(polyTable.select(call(Functions.ST_AsText.class.getSimpleName(), $("poly")))).getField(0);

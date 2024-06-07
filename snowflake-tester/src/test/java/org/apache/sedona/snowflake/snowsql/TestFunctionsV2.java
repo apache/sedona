@@ -1032,6 +1032,30 @@ public class TestFunctionsV2
     }
 
     @Test
+    public void test_ST_Force3DZ() {
+        registerUDFV2("ST_Force3DZ", String.class);
+        verifySqlSingleRes(
+                "SELECT ST_AsText(sedona.ST_Force3DZ(ST_GeometryFromWKT('LINESTRING(0 1, 1 2, 2 1)')))",
+                "LINESTRINGZ(0 1 0,1 2 0,2 1 0)"
+        );
+        registerUDFV2("ST_Force3DZ", String.class, double.class);
+        verifySqlSingleRes(
+                "SELECT ST_AsText(sedona.ST_Force3DZ(ST_GeometryFromWKT('LINESTRING(0 1, 1 2, 2 1)'), 1))",
+                "LINESTRINGZ(0 1 1,1 2 1,2 1 1)"
+        );
+    }
+
+    @Test
+    public void test_ST_ForceCollection() {
+        registerUDFV2("ST_ForceCollection", String.class);
+        registerUDFV2("ST_NumGeometries", String.class);
+        verifySqlSingleRes(
+                "SELECT ST_NumGeometries(sedona.ST_ForceCollection(ST_GeomFromWKT('MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)')))",
+                6
+        );
+    }
+
+    @Test
     public void test_ST_ForcePolygonCW() {
         registerUDFV2("ST_ForcePolygonCW", String.class);
         verifySqlSingleRes(

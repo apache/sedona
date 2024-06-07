@@ -158,6 +158,8 @@ public class Catalog {
                 new Functions.ST_GeometricMedian(),
                 new Functions.ST_NumPoints(),
                 new Functions.ST_Force3D(),
+                new Functions.ST_Force3DZ(),
+                new Functions.ST_ForceCollection(),
                 new Functions.ST_ForcePolygonCW(),
                 new Functions.ST_ForceRHR(),
                 new Functions.ST_NRings(),
