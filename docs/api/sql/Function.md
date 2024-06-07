@@ -1277,7 +1277,7 @@ Introduction: This function converts the input geometry into a GeometryCollectio
 
 Format: `ST_ForceCollection(geom: Geometry)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example
 
