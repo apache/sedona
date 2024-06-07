@@ -3238,9 +3238,27 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#st_simplifypolygonhull" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_SimplifyPolygonHull
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_simplifypreservetopology" class="md-nav__link">
     <span class="md-ellipsis">
       ST_SimplifyPreserveTopology
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#st_simplifyvw" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_SimplifyVW
     </span>
   </a>
   
@@ -6195,9 +6213,27 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#st_simplifypolygonhull" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_SimplifyPolygonHull
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_simplifypreservetopology" class="md-nav__link">
     <span class="md-ellipsis">
       ST_SimplifyPreserveTopology
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#st_simplifyvw" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_SimplifyVW
     </span>
   </a>
   
@@ -8122,6 +8158,34 @@ the cells will be smaller, the coverage will be more accurate, but the result si
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code><span class="n">LINESTRING</span><span class="p">(</span><span class="mi">177</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">179</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">181</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">183</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
 </code></pre></div>
+<h2 id="st_simplifypolygonhull">ST_SimplifyPolygonHull<a class="headerlink" href="#st_simplifypolygonhull" title="Permanent link">&para;</a></h2>
+<p>Introduction: This function computes a topology-preserving simplified hull, either outer or inner, for a polygonal geometry input. An outer hull fully encloses the original geometry, while an inner hull lies entirely within. The result maintains the same structure as the input, including handling of MultiPolygons and holes, represented as a polygonal geometry formed from a subset of vertices.</p>
+<p>Vertex reduction is governed by the <code>vertexFactor</code> parameter ranging from 0 to 1, with lower values yielding simpler outputs with fewer vertices and reduced concavity. For both hull types, a <code>vertexFactor</code> of 1.0 returns the original geometry. Specifically, for outer hulls, 0.0 computes the convex hull; for inner hulls, 0.0 produces a triangular geometry.</p>
+<p>The simplification algorithm iteratively removes concave corners containing the least area until reaching the target vertex count. It preserves topology by preventing edge crossings, ensuring the output is a valid polygonal geometry in all cases.</p>
+<p>Format:</p>
+<div class="highlight"><pre><span></span><code>ST_SimplifyPolygonHull(geom: Geometry, vertexFactor: Double, isOuter: Boolean = true)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>ST_SimplifyPolygonHull(geom: Geometry, vertexFactor: Double)
+</code></pre></div>
+<p>Since: <code>v1.6.1</code></p>
+<p>SQL Example</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_SimplifyPolygonHull</span><span class="p">(</span>
+<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON ((30 10, 40 40, 45 45, 50 30, 55 25, 60 50, 65 45, 70 30, 75 20, 80 25, 70 10, 30 10))&#39;</span><span class="p">),</span>
+<span class="w">       </span><span class="mi">0</span><span class="p">.</span><span class="mi">4</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>POLYGON ((30 10, 40 40, 45 45, 60 50, 65 45, 80 25, 70 10, 30 10))
+</code></pre></div>
+<p>SQL Example</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_SimplifyPolygonHull</span><span class="p">(</span>
+<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON ((30 10, 40 40, 45 45, 50 30, 55 25, 60 50, 65 45, 70 30, 75 20, 80 25, 70 10, 30 10))&#39;</span><span class="p">),</span>
+<span class="w">       </span><span class="mi">0</span><span class="p">.</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="k">false</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>POLYGON ((30 10, 70 10, 60 50, 55 25, 30 10))
+</code></pre></div>
 <h2 id="st_simplifypreservetopology">ST_SimplifyPreserveTopology<a class="headerlink" href="#st_simplifypreservetopology" title="Permanent link">&para;</a></h2>
 <p>Introduction: Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
 and with the components having the same topological relationship.</p>
@@ -8132,6 +8196,20 @@ and with the components having the same topological relationship.</p>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))
+</code></pre></div>
+<h2 id="st_simplifyvw">ST_SimplifyVW<a class="headerlink" href="#st_simplifyvw" title="Permanent link">&para;</a></h2>
+<p>Introduction: This function simplifies the input geometry by applying the Visvalingam-Whyatt algorithm.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The simplification may not preserve topology, potentially producing invalid geometries. Use <a href="#st_simplifypreservetopology">ST_SimplifyPreserveTopology</a> to retain valid topology after simplification.</p>
+</div>
+<p>Format: <code>ST_SimplifyVW(geom: Geometry, tolerance: Double)</code></p>
+<p>Since: <code>v1.6.1</code></p>
+<p>SQL Example</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_SimplifyVW</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33,46 34, 47 44, 35 36, 45 33, 43 19, 29 21, 29 22,35 26, 24 39, 8 25))&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">80</span><span class="p">)</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 43 19, 24 39, 8 25))
 </code></pre></div>
 <h2 id="st_snap">ST_Snap<a class="headerlink" href="#st_snap" title="Permanent link">&para;</a></h2>
 <p>Introduction: Snaps the vertices and segments of the <code>input</code> geometry to <code>reference</code> geometry within the specified <code>tolerance</code> distance. The <code>tolerance</code> parameter controls the maximum snap distance.</p>
@@ -8543,7 +8621,7 @@ If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGO
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 7, 2024 20:17:50</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 7, 2024 21:43:34</span>
   </span>
 
     

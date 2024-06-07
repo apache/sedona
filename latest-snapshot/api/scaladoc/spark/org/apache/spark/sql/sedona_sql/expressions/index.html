@@ -895,8 +895,16 @@
                         <a href="ST_ShiftLongitude.html" title="">ST_ShiftLongitude</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="ST_SimplifyPolygonHull.html" title=""></a>
+                        <a href="ST_SimplifyPolygonHull.html" title="">ST_SimplifyPolygonHull</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="ST_SimplifyPreserveTopology.html" title="Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input, and with the components having the same topological relationship."></a>
                         <a href="ST_SimplifyPreserveTopology.html" title="Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input, and with the components having the same topological relationship.">ST_SimplifyPreserveTopology</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="ST_SimplifyVW.html" title=""></a>
+                        <a href="ST_SimplifyVW.html" title="">ST_SimplifyVW</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="ST_Snap.html" title=""></a>
@@ -3803,6 +3811,22 @@ for single geometries will return 1</p><p>This method implements the SQL/MM spec
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_SimplifyPolygonHull" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_SimplifyPolygonHullextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_SimplifyPolygonHull:ST_SimplifyPolygonHull"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_SimplifyPolygonHull.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ST_SimplifyPolygonHull.html"><span class="name">ST_SimplifyPolygonHull</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_SimplifyPreserveTopology" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ST_SimplifyPreserveTopologyextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_SimplifyPreserveTopology:ST_SimplifyPreserveTopology"></a>
       <span class="permalink">
@@ -3824,6 +3848,22 @@ and with the components having the same topological relationship.
 The simplification uses a maximum-distance difference algorithm similar to the Douglas-Peucker algorithm.
 </p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>first arg is geometry
                         second arg is distance tolerance for the simplification(all vertices in the simplified geometry will be within this distance of the original geometry)</p></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_SimplifyVW" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_SimplifyVWextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_SimplifyVW:ST_SimplifyVW"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_SimplifyVW.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ST_SimplifyVW.html"><span class="name">ST_SimplifyVW</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Snap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_SnapextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_Snap:ST_Snap"></a>
       <span class="permalink">
