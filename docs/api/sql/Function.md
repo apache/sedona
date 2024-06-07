@@ -1271,6 +1271,53 @@ Output:
 LINESTRING EMPTY
 ```
 
+## ST_Force3DM
+
+Introduction: Forces the geometry into XYM mode. Retains any existing M coordinate, but removes the Z coordinate if present. Assigns a default M value of 0.0 if `mValue` is not specified.
+
+!!!Note
+    Example output is after calling ST_AsText() on returned geometry, which adds M for in the WKT.
+
+Format: `ST_Force3DM(geometry: Geometry, mValue: Double = 0.0)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force3DM(ST_GeomFromText('POLYGON M((0 0 3,0 5 3,5 0 3,0 0 3),(1 1 3,3 1 3,1 3 3,1 1 3))'), 2.3))
+```
+
+Output:
+
+```
+POLYGON M((0 0 3, 0 5 3, 5 0 3, 0 0 3), (1 1 3, 3 1 3, 1 3 3, 1 1 3))
+```
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force3DM(ST_GeomFromText('LINESTRING(0 1,1 0,2 0)'), 2.3))
+```
+
+Output:
+
+```
+LINESTRING M(0 1 2.3, 1 0 2.3, 2 0 2.3)
+```
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force3DM(ST_GeomFromText('LINESTRING Z(0 1 3,1 0 3,2 0 3)'), 5))
+```
+
+Output:
+
+```
+LINESTRING M(0 1 5, 1 0 5, 2 0 5)
+```
+
 ## ST_Force3DZ
 
 Introduction: Forces the geometry into a 3-dimensional model so that all output representations will have X, Y and Z coordinates.
@@ -1307,6 +1354,45 @@ Output:
 
 ```
 LINESTRING Z(0 1 2.3, 1 0 2.3, 2 0 2.3)
+```
+
+## ST_Force4D
+
+Introduction: Converts the input geometry to 4D XYZM representation. Retains original Z and M values if present. Assigning 0.0 defaults if `mValue` and `zValue` aren't specified. The output contains X, Y, Z, and M coordinates. For geometries already in 4D form, the function returns the original geometry unmodified.
+
+!!!Note
+    Example output is after calling ST_AsText() on returned geometry, which adds Z for in the WKT for 3D geometries
+
+Format:
+
+`ST_Force4D(geom: Geometry, zValue: Double, mValue: Double)`
+
+`ST_Force4D(geom: Geometry`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force4D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'), 5, 10))
+```
+
+Output:
+
+```
+POLYGON ZM((0 0 2 10, 0 5 2 10, 5 0 2 10, 0 0 2 10), (1 1 2 10, 3 1 2 10, 1 3 2 10, 1 1 2 10))
+```
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force4D(ST_GeomFromText('LINESTRING(0 1,1 0,2 0)'), 3, 1))
+```
+
+Output:
+
+```
+LINESTRING ZM(0 1 3 1, 1 0 3 1, 2 0 3 1)
 ```
 
 ## ST_ForceCollection

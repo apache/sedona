@@ -1208,6 +1208,22 @@ case class ST_Force3DZ(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Force3DM(inputExpressions: Seq[Expression])
+  extends InferredExpression(inferrableFunction2(Functions.force3DM)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_Force4D(inputExpressions: Seq[Expression])
+  extends InferredExpression(inferrableFunction3(Functions.force4D), inferrableFunction1(Functions.force4D)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_ForceCollection(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.forceCollection _) {
 

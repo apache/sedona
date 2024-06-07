@@ -1101,6 +1101,22 @@ public class Functions {
         }
     }
 
+    public static class ST_Force3DM extends ScalarFunction {
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Double") Double zValue) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.force3DM(geometry, zValue);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.force3DM(geometry);
+        }
+    }
+
     public static class ST_Force3DZ extends ScalarFunction {
 
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
@@ -1114,6 +1130,22 @@ public class Functions {
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geometry = (Geometry) o;
             return org.apache.sedona.common.Functions.force3D(geometry);
+        }
+    }
+
+    public static class ST_Force4D extends ScalarFunction {
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Double") Double zValue, @DataTypeHint("Double") Double mValue) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.force4D(geometry, zValue, mValue);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.force4D(geometry);
         }
     }
 

@@ -1575,6 +1575,17 @@ def ST_Force3D(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, floa
     return _call_st_function("ST_Force3D", args)
 
 @validate_argument_types
+def ST_Force3DM(geometry: ColumnOrName, mValue: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+    """
+    Return a geometry with a 3D coordinate of value 'mValue' forced upon it. No change happens if the geometry is already 3D
+    :param mValue: Optional value of m coordinate to be potentially added, default value is 0.0
+    :param geometry: Geometry column to make 3D
+    :return: 3D geometry with either already present m coordinate if any, or m coordinate with given mValue
+    """
+    args = (geometry, mValue)
+    return _call_st_function("ST_Force3DM", args)
+
+@validate_argument_types
 def ST_Force3DZ(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
     """
     Return a geometry with a 3D coordinate of value 'zValue' forced upon it. No change happens if the geometry is already 3D
@@ -1584,6 +1595,20 @@ def ST_Force3DZ(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, flo
     """
     args = (geometry, zValue)
     return _call_st_function("ST_Force3DZ", args)
+
+@validate_argument_types
+def ST_Force4D(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, float]] = 0.0,
+               mValue: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+    """
+    Return a geometry with a 4D coordinate of value 'zValue' and mValue forced upon it. No change happens if the
+    geometry is already 4D, if geometry either has z or m, it will not change the existing z or m value.
+
+    :param zValue: Optional value of z coordinate to be potentially added, default value is 0.0
+    :param geometry: Geometry column to make 4D
+    :return: 4D geometry with either already 4D geom or z and m component provided by zValue and mValue respectively
+    """
+    args = (geometry, zValue, mValue)
+    return _call_st_function("ST_Force4D", args)
 
 @validate_argument_types
 def ST_ForceCollection(geometry: ColumnOrName) -> Column:

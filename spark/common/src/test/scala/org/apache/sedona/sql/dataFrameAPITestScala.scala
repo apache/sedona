@@ -1348,6 +1348,17 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertEquals(expectedGeomDefaultValue, wktWriter.write(actualGeomDefaultValue))
     }
 
+    it("Passed ST_Force3DM") {
+      val lineDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 1, 1 0, 2 0)') AS geom")
+      val expectedGeom = "LINESTRING M(0 1 2.3, 1 0 2.3, 2 0 2.3)"
+      val expectedGeomDefaultValue = "LINESTRING M(0 1 0, 1 0 0, 2 0 0)"
+      val forcedGeom = lineDf.select(ST_AsText(ST_Force3DM("geom", 2.3))).take(1)(0).get(0).asInstanceOf[String]
+      assertEquals(expectedGeom, forcedGeom)
+      val lineDfDefaultValue = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 1, 1 0, 2 0)') AS geom")
+      val actualGeomDefaultValue = lineDfDefaultValue.select(ST_AsText(ST_Force3DM("geom"))).take(1)(0).get(0).asInstanceOf[String]
+      assertEquals(expectedGeomDefaultValue, actualGeomDefaultValue)
+    }
+
     it("Passed ST_Force3DZ") {
       val lineDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 1, 1 0, 2 0)') AS geom")
       val expectedGeom = "LINESTRING Z(0 1 2.3, 1 0 2.3, 2 0 2.3)"
@@ -1358,6 +1369,17 @@ class dataFrameAPITestScala extends TestBaseScala {
       val lineDfDefaultValue = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 1, 1 0, 2 0)') AS geom")
       val actualGeomDefaultValue = lineDfDefaultValue.select(ST_Force3DZ("geom")).take(1)(0).get(0).asInstanceOf[Geometry]
       assertEquals(expectedGeomDefaultValue, wktWriter.write(actualGeomDefaultValue))
+    }
+
+    it("Passed ST_Force4D") {
+      val lineDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 1, 1 0, 2 0)') AS geom")
+      val expectedGeom = "LINESTRING ZM(0 1 4 4, 1 0 4 4, 2 0 4 4)"
+      val expectedGeomDefaultValue = "LINESTRING ZM(0 1 0 0, 1 0 0 0, 2 0 0 0)"
+      val forcedGeom = lineDf.select(ST_AsText(ST_Force4D("geom", 4, 4))).take(1)(0).get(0).asInstanceOf[String]
+      assertEquals(expectedGeom, forcedGeom)
+      val lineDfDefaultValue = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 1, 1 0, 2 0)') AS geom")
+      val actualGeomDefaultValue = lineDfDefaultValue.select(ST_AsText(ST_Force4D("geom"))).take(1)(0).get(0).asInstanceOf[String]
+      assertEquals(expectedGeomDefaultValue, actualGeomDefaultValue)
     }
 
     it("Passed ST_ForceCollection") {
