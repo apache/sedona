@@ -420,6 +420,12 @@ class TestPredicateJoin(TestBase):
         diff = self.spark.sql("select ST_Difference(a,b) from test_diff")
         assert diff.take(1)[0][0].wkt == "POLYGON EMPTY"
 
+    def test_st_delaunay_triangles(self):
+        baseDf = self.spark.sql("SELECT ST_GeomFromWKT('MULTIPOLYGON (((10 10, 10 20, 20 20, 20 10, 10 10)),((25 10, 25 20, 35 20, 35 10, 25 10)))') AS geom")
+        actual = baseDf.selectExpr("ST_DelaunayTriangles(geom)").take(1)[0][0].wkt
+        expected = "GEOMETRYCOLLECTION (POLYGON ((10 20, 10 10, 20 10, 10 20)), POLYGON ((10 20, 20 10, 20 20, 10 20)), POLYGON ((20 20, 20 10, 25 10, 20 20)), POLYGON ((20 20, 25 10, 25 20, 20 20)), POLYGON ((25 20, 25 10, 35 10, 25 20)), POLYGON ((25 20, 35 10, 35 20, 25 20)))"
+        assert expected == actual
+
     def test_st_sym_difference_part_of_right_overlaps_left(self):
         test_table = self.spark.sql(
             "select ST_GeomFromWKT('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))') as a,ST_GeomFromWKT('POLYGON ((0 -2, 2 -2, 2 0, 0 0, 0 -2))') as b")

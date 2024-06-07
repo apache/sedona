@@ -1287,6 +1287,25 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void delaunayTriangles() throws ParseException {
+        Geometry poly = Constructors.geomFromEWKT("POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))");
+        Geometry point = Constructors.geomFromEWKT("POINT (110 170)");
+        Geometry combined = Functions.union(poly, point);
+        String actual = Functions.delaunayTriangle(combined).toText();
+        String expected = "GEOMETRYCOLLECTION (POLYGON ((20 40, 125 100, 50 60, 20 40)), POLYGON ((20 40, 50 60, 110 170, 20 40)), POLYGON ((110 170, 50 60, 125 100, 110 170)), POLYGON ((110 170, 125 100, 175 150, 110 170)))";
+        assertEquals(expected, actual);
+
+        poly = Constructors.geomFromEWKT("MULTIPOLYGON (((10 10, 10 20, 20 20, 20 10, 10 10)),((25 10, 25 20, 35 20, 35 10, 25 10)))");
+        actual = Functions.delaunayTriangle(poly, 20).toText();
+        expected = "GEOMETRYCOLLECTION (POLYGON ((10 20, 10 10, 35 10, 10 20)))";
+        assertEquals(expected, actual);
+
+        actual = Functions.delaunayTriangle(poly, 0, 1).toText();
+        expected = "MULTILINESTRING ((25 20, 35 20), (20 20, 25 20), (10 20, 20 20), (10 10, 10 20), (10 10, 20 10), (20 10, 25 10), (25 10, 35 10), (35 10, 35 20), (25 20, 35 10), (25 10, 25 20), (20 20, 25 10), (20 10, 20 20), (10 20, 20 10))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void spheroidLength() {
         Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
         assertEquals(0, Spheroid.length(point), 0.1);

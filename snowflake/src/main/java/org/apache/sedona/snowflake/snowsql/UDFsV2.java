@@ -354,6 +354,35 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"}, argTypes = {"Geometry"}, returnTypes = "Geometry")
+    public static String ST_DelaunayTriangles(String geometry) {
+        return GeometrySerde.serGeoJson(
+                Functions.delaunayTriangle(
+                        GeometrySerde.deserGeoJson(geometry)
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "tolerance"}, argTypes = {"Geometry", "double"}, returnTypes = "Geometry")
+    public static String ST_DelaunayTriangles(String geometry, double tolerance) {
+        return GeometrySerde.serGeoJson(
+                Functions.delaunayTriangle(
+                        GeometrySerde.deserGeoJson(geometry),
+                        tolerance
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "tolerance", "flag"}, argTypes = {"Geometry", "double", "int"}, returnTypes = "Geometry")
+    public static String ST_DelaunayTriangles(String geometry, double tolerance, int flag) {
+        return GeometrySerde.serGeoJson(
+                Functions.delaunayTriangle(
+                        GeometrySerde.deserGeoJson(geometry),
+                        tolerance, flag
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry"}, argTypes = {"Geometry", "Geometry"}, returnTypes = "Geometry")
     public static String ST_Difference(String leftGeometry, String rightGeometry) {
         return GeometrySerde.serGeoJson(

@@ -1399,6 +1399,15 @@ case class ST_Degrees(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_DelaunayTriangles(inputExpressions: Seq[Expression])
+  extends InferredExpression(inferrableFunction3(Functions.delaunayTriangle),
+    inferrableFunction2(Functions.delaunayTriangle),
+    inferrableFunction1(Functions.delaunayTriangle)) with FoldableExpression {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
   * Return the number of ddimensions in geometry.
   *

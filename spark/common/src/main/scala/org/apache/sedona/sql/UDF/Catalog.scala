@@ -217,6 +217,7 @@ object Catalog {
     function[ST_BoundingDiagonal](),
     function[ST_Angle](),
     function[ST_Degrees](),
+    function[ST_DelaunayTriangles](),
     function[ST_HausdorffDistance](-1),
     function[ST_DWithin](),
     function[ST_IsValidReason](),

@@ -48,6 +48,7 @@ import org.locationtech.jts.precision.MinimumClearance;
 import org.locationtech.jts.simplify.PolygonHullSimplifier;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.locationtech.jts.simplify.VWSimplifier;
+import org.locationtech.jts.triangulate.DelaunayTriangulationBuilder;
 import org.locationtech.jts.triangulate.polygon.ConstrainedDelaunayTriangulator;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
@@ -403,7 +404,7 @@ public class Functions {
         Coordinate[] points = geometry.getCoordinates();
         double min = Double.MAX_VALUE;
         for(int i=0; i < points.length; i++){
-            if(java.lang.Double.isNaN(points[i].getM()))
+            if(Double.isNaN(points[i].getM()))
                 continue;
             min = Math.min(points[i].getM(), min);
         }
@@ -414,7 +415,7 @@ public class Functions {
         Coordinate[] points = geometry.getCoordinates();
         double max = - Double.MAX_VALUE;
         for (int i=0; i < points.length; i++) {
-            if(java.lang.Double.isNaN(points[i].getM()))
+            if(Double.isNaN(points[i].getM()))
                 continue;
             max = Math.max(points[i].getM(), max);
         }
@@ -461,7 +462,7 @@ public class Functions {
         Coordinate[] points = geometry.getCoordinates();
         double max = - Double.MAX_VALUE;
         for (int i=0; i < points.length; i++) {
-            if(java.lang.Double.isNaN(points[i].getZ()))
+            if(Double.isNaN(points[i].getZ()))
                 continue;
             max = Math.max(points[i].getZ(), max);
         }
@@ -472,7 +473,7 @@ public class Functions {
         Coordinate[] points = geometry.getCoordinates();
         double min = Double.MAX_VALUE;
         for(int i=0; i < points.length; i++){
-            if(java.lang.Double.isNaN(points[i].getZ()))
+            if(Double.isNaN(points[i].getZ()))
                 continue;
             min = Math.min(points[i].getZ(), min);
         }
@@ -590,13 +591,13 @@ public class Functions {
         Double y_cord = geom.getY();
         Double z_cord = geom.getZ();
         Double m_cord = geom.getM();
-        if(!java.lang.Double.isNaN(x_cord))
+        if(!Double.isNaN(x_cord))
             count_dimension++;
-        if(!java.lang.Double.isNaN(y_cord))
+        if(!Double.isNaN(y_cord))
             count_dimension++;
-        if(!java.lang.Double.isNaN(z_cord))
+        if(!Double.isNaN(z_cord))
             count_dimension++;
-        if(!java.lang.Double.isNaN(m_cord))
+        if(!Double.isNaN(m_cord))
             count_dimension++;
         return count_dimension;
     }
@@ -759,6 +760,27 @@ public class Functions {
         }
         catch (Exception e) {
             throw new IllegalArgumentException("ST_ClosestPoint doesn't support empty geometry object.");
+        }
+    }
+
+    public static Geometry delaunayTriangle(Geometry geometry) {
+        return delaunayTriangle(geometry, 0.0, 0);
+    }
+
+    public static Geometry delaunayTriangle(Geometry geometry, double tolerance) {
+        return delaunayTriangle(geometry, tolerance, 0);
+    }
+
+    public static Geometry delaunayTriangle(Geometry geometry, double tolerance, int flag) {
+        DelaunayTriangulationBuilder dTBuilder = new DelaunayTriangulationBuilder();
+        dTBuilder.setSites(geometry);
+        dTBuilder.setTolerance(tolerance);
+        if (flag == 0) {
+            return dTBuilder.getTriangles(geometry.getFactory());
+        } else if (flag == 1) {
+            return dTBuilder.getEdges(geometry.getFactory());
+        } else {
+            throw new IllegalArgumentException("Select a valid flag option (0 or 1).");
         }
     }
 

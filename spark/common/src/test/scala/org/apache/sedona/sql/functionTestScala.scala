@@ -2545,6 +2545,21 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
   }
 
+  it("Should pass ST_DelaunayTriangles") {
+    val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('MULTIPOLYGON (((10 10, 10 20, 20 20, 20 10, 10 10)),((25 10, 25 20, 35 20, 35 10, 25 10)))') AS geom")
+    var actual = baseDf.selectExpr("ST_DelaunayTriangles(geom)").first().get(0).asInstanceOf[Geometry].toText
+    var expected = "GEOMETRYCOLLECTION (POLYGON ((10 20, 10 10, 20 10, 10 20)), POLYGON ((10 20, 20 10, 20 20, 10 20)), POLYGON ((20 20, 20 10, 25 10, 20 20)), POLYGON ((20 20, 25 10, 25 20, 20 20)), POLYGON ((25 20, 25 10, 35 10, 25 20)), POLYGON ((25 20, 35 10, 35 20, 25 20)))"
+    assertEquals(expected, actual)
+
+    actual = baseDf.selectExpr("ST_DelaunayTriangles(geom, 20)").first().get(0).asInstanceOf[Geometry].toText
+    expected = "GEOMETRYCOLLECTION (POLYGON ((10 20, 10 10, 35 10, 10 20)))"
+    assertEquals(expected, actual)
+
+    actual = baseDf.selectExpr("ST_DelaunayTriangles(geom, 20, 1)").first().get(0).asInstanceOf[Geometry].toText
+    expected = "MULTILINESTRING ((10 20, 35 10), (10 10, 10 20), (10 10, 35 10))"
+    assertEquals(expected, actual)
+  }
+
   it ("should pass ST_Angle - 2 lines") {
     val geomTestCases = Map(
       ("'LINESTRING (0 0, 1 1)'", "'LINESTRING (0 0, 3 2)'") -> (0.19739555984988044, 11.309932474020195)

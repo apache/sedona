@@ -78,6 +78,7 @@ public class Catalog {
                 new Functions.ST_H3ToGeom(),
                 new Functions.ST_Dump(),
                 new Functions.ST_DumpPoints(),
+                new Functions.ST_DelaunayTriangles(),
                 new Functions.ST_EndPoint(),
                 new Functions.ST_GeometryType(),
                 new Functions.ST_Intersection(),

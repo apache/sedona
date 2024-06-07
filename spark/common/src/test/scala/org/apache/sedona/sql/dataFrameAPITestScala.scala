@@ -1699,6 +1699,21 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertEquals(expectedDegrees, actualDegrees, 1e-9)
     }
 
+    it("Should pass ST_DelaunayTriangles") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('MULTIPOLYGON (((10 10, 10 20, 20 20, 20 10, 10 10)),((25 10, 25 20, 35 20, 35 10, 25 10)))') AS geom")
+      var actual = baseDf.select(ST_DelaunayTriangles("geom")).first().get(0).asInstanceOf[Geometry].toText
+      var expected = "GEOMETRYCOLLECTION (POLYGON ((10 20, 10 10, 20 10, 10 20)), POLYGON ((10 20, 20 10, 20 20, 10 20)), POLYGON ((20 20, 20 10, 25 10, 20 20)), POLYGON ((20 20, 25 10, 25 20, 20 20)), POLYGON ((25 20, 25 10, 35 10, 25 20)), POLYGON ((25 20, 35 10, 35 20, 25 20)))"
+      assertEquals(expected, actual)
+
+      actual = baseDf.select(ST_DelaunayTriangles("geom", 20)).first().get(0).asInstanceOf[Geometry].toText
+      expected = "GEOMETRYCOLLECTION (POLYGON ((10 20, 10 10, 35 10, 10 20)))"
+      assertEquals(expected, actual)
+
+      actual = baseDf.select(ST_DelaunayTriangles("geom", 20, 1)).first().get(0).asInstanceOf[Geometry].toText
+      expected = "MULTILINESTRING ((10 20, 35 10), (10 10, 10 20), (10 10, 35 10))"
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_HausdorffDistance") {
       val polyDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((1 2, 2 1, 2 0, 4 1, 1 2))') AS g1, " +
         "ST_GeomFromWKT('MULTILINESTRING ((1 1, 2 1, 4 4, 5 5), (10 10, 11 11, 12 12, 14 14), (-11 -20, -11 -21, -15 -19))') AS g2")
