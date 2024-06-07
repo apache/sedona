@@ -2461,6 +2461,29 @@ Result:
 Be sure to check you code when upgrading. The previous implementation only worked for (multi)polygons and had a different interpretation of the second, boolean, argument.
 It would also sometimes return multiple geometries for a single geometry input.
 
+## ST_MaxDistance
+
+Introduction: Calculates and returns the length value representing the maximum distance between any two points across the input geometries. This function is an alias for `ST_LongestDistance`.
+
+Format: `ST_MaxDistance(geom1: Geometry, geom2: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_MaxDistance(
+        ST_GeomFromText("POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"),
+        ST_GeomFromText("POLYGON ((10 20, 30 30, 40 20, 30 10, 10 20))")
+)
+```
+
+Output:
+
+```
+36.05551275463989
+```
+
 ## ST_MinimumBoundingCircle
 
 Introduction: Returns the smallest circle polygon that contains a geometry. The optional quadrantSegments parameter determines how many segments to use per quadrant and the default number of segments has been changed to 48 since v1.5.0.

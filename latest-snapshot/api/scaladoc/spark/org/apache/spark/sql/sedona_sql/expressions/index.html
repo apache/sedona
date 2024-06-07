@@ -503,6 +503,10 @@
                         <a href="ST_GeoHash.html" title="">ST_GeoHash</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="ST_GeomCollFromText.html" title=""></a>
+                        <a href="ST_GeomCollFromText.html" title="">ST_GeomCollFromText</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="ST_GeomFromEWKB.html" title=""></a>
                         <a href="ST_GeomFromEWKB.html" title="">ST_GeomFromEWKB</a>
                       </li><li class="current-entities indented6">
@@ -699,6 +703,10 @@
                         <a href="ST_MMin.html" title="">ST_MMin</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="ST_MPointFromText.html" title=""></a>
+                        <a href="ST_MPointFromText.html" title="">ST_MPointFromText</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="ST_MPolyFromText.html" title="Return a Geometry from a WKT string"></a>
                         <a href="ST_MPolyFromText.html" title="Return a Geometry from a WKT string">ST_MPolyFromText</a>
                       </li><li class="current-entities indented6">
@@ -717,6 +725,10 @@
                         <span class="separator"></span>
                         <a class="class" href="ST_MakeValid.html" title="Given an invalid geometry, create a valid representation of the geometry."></a>
                         <a href="ST_MakeValid.html" title="Given an invalid geometry, create a valid representation of the geometry.">ST_MakeValid</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="ST_MaxDistance.html" title=""></a>
+                        <a href="ST_MaxDistance.html" title="">ST_MaxDistance</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="ST_MinimumBoundingCircle.html" title=""></a>
@@ -2147,6 +2159,22 @@ expressions are foldable, then the expression itself is foldable.
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeomCollFromText" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_GeomCollFromTextextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_GeomCollFromText:ST_GeomCollFromText"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_GeomCollFromText.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ST_GeomCollFromText.html"><span class="name">ST_GeomCollFromText</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeomFromEWKB" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_GeomFromEWKBextendsExpressionwithFoldableExpressionwithImplicitCastInputTypeswithCodegenFallbackwithUserDataGeneratatorwithProductwithSerializable"></a><a id="ST_GeomFromEWKB:ST_GeomFromEWKB"></a>
       <span class="permalink">
@@ -2966,6 +2994,22 @@ Second and third arguments are Double values between 0 and 1. This only works wi
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_MPointFromText" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_MPointFromTextextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_MPointFromText:ST_MPointFromText"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_MPointFromText.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ST_MPointFromText.html"><span class="name">ST_MPointFromText</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_MPolyFromText" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ST_MPolyFromTextextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_MPolyFromText:ST_MPolyFromText"></a>
       <span class="permalink">
@@ -3050,6 +3094,22 @@ Second and third arguments are Double values between 0 and 1. This only works wi
       <p class="shortcomment cmt">Given an invalid geometry, create a valid representation of the geometry.</p><div class="fullcomment"><div class="comment cmt"><p>Given an invalid geometry, create a valid representation of the geometry.
 See: http://lin-ear-th-inking.blogspot.com/2021/05/fixing-invalid-geometry-with-jts.html
 </p></div></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_MaxDistance" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_MaxDistanceextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_MaxDistance:ST_MaxDistance"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_MaxDistance.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ST_MaxDistance.html"><span class="name">ST_MaxDistance</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_MinimumBoundingCircle" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_MinimumBoundingCircleextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_MinimumBoundingCircle:ST_MinimumBoundingCircle"></a>
       <span class="permalink">

@@ -44,6 +44,66 @@ spark.driver.extraJavaOptions  -Dsedona.global.charset=utf8
 spark.executor.extraJavaOptions  -Dsedona.global.charset=utf8
 ```
 
+## ST_GeomCollFromText
+
+Introduction: Constructs a GeometryCollection from the WKT with the given SRID. If SRID is not provided then it defaults to 0. It returns `null` if the WKT is not a `GEOMETRYCOLLECTION`.
+
+Format:
+
+`ST_GeomCollFromText (Wkt: String)`
+
+`ST_GeomCollFromText (Wkt: String, srid: Integer)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_GeomCollFromText('GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))')
+```
+
+Output:
+
+```
+GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))
+```
+
+## ST_GeomFromEWKB
+
+Introduction: Construct a Geometry from EWKB string or Binary. This function is an alias of [ST_GeomFromWKB](#st_geomfromwkb).
+
+Format:
+
+`ST_GeomFromEWKB (Wkb: String)`
+
+`ST_GeomFromEWKB (Wkb: Binary)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_GeomFromEWKB([01 02 00 00 00 02 00 00 00 00 00 00 00 84 D6 00 C0 00 00 00 00 80 B5 D6 BF 00 00 00 60 E1 EF F7 BF 00 00 00 80 07 5D E5 BF])
+```
+
+Output:
+
+```
+LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)
+```
+
+SQL Example
+
+```sql
+SELECT ST_asEWKT(ST_GeomFromEWKB('01010000a0e6100000000000000000f03f000000000000f03f000000000000f03f'))
+```
+
+Output:
+
+```
+SRID=4326;POINT Z(1 1 1)
+```
+
 ## ST_GeomFromEWKT
 
 Introduction: Construct a Geometry from OGC Extended WKT
@@ -459,6 +519,30 @@ Output:
 
 ```
 MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))
+```
+
+## ST_MPointFromText
+
+Introduction: Constructs a MultiPoint from the WKT with the given SRID. If SRID is not provided then it defaults to 0. It returns `null` if the WKT is not a `MULTIPOINT`.
+
+Format:
+
+`ST_MPointFromText (Wkt: String)`
+
+`ST_MPointFromText (Wkt: String, srid: Integer)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_MPointFromText('MULTIPOINT ((10 10), (20 20), (30 30))')
+```
+
+Output:
+
+```
+MULTIPOINT ((10 10), (20 20), (30 30))
 ```
 
 ## ST_MPolyFromText

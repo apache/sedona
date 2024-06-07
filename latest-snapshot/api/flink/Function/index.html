@@ -3757,6 +3757,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#st_maxdistance" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_MaxDistance
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_minimumboundingcircle" class="md-nav__link">
     <span class="md-ellipsis">
       ST_MinimumBoundingCircle
@@ -5941,6 +5950,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#st_maxdistance" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_MaxDistance
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_minimumboundingcircle" class="md-nav__link">
     <span class="md-ellipsis">
       ST_MinimumBoundingCircle
@@ -7741,6 +7759,19 @@ Default is keepCollapsed=false.</p>
 |  LINESTRING EMPTY|             POINT (1 1)|
 +------------------+------------------------+
 </code></pre></div>
+<h2 id="st_maxdistance">ST_MaxDistance<a class="headerlink" href="#st_maxdistance" title="Permanent link">&para;</a></h2>
+<p>Introduction: Calculates and returns the length value representing the maximum distance between any two points across the input geometries. This function is an alias for <code>ST_LongestDistance</code>.</p>
+<p>Format: <code>ST_MaxDistance(geom1: Geometry, geom2: Geometry)</code></p>
+<p>Since: <code>v1.6.1</code></p>
+<p>SQL Example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_MaxDistance</span><span class="p">(</span>
+<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="ss">&quot;POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))&quot;</span><span class="p">),</span>
+<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="ss">&quot;POLYGON ((10 20, 30 30, 40 20, 30 10, 10 20))&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>36.05551275463989
+</code></pre></div>
 <h2 id="st_minimumboundingcircle">ST_MinimumBoundingCircle<a class="headerlink" href="#st_minimumboundingcircle" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns the smallest circle polygon that contains a geometry. The optional quadrantSegments parameter determines how many segments to use per quadrant and the default number of segments is 48.</p>
 <p>Format:</p>
@@ -8393,7 +8424,7 @@ You need to make sure that the input geometry is in lon/lat order. If the input 
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 7, 2024 17:49:06</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 7, 2024 20:17:50</span>
   </span>
 
     

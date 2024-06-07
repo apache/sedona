@@ -66,7 +66,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#st_geomfromewkt" class="md-skip">
+        <a href="#st_geomcollfromtext" class="md-skip">
           Skip to content
         </a>
       
@@ -3117,6 +3117,24 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#st_geomcollfromtext" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_GeomCollFromText
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#st_geomfromewkb" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_GeomFromEWKB
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_geomfromewkt" class="md-nav__link">
     <span class="md-ellipsis">
       ST_GeomFromEWKT
@@ -3171,7 +3189,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#st_geomfromewkb" class="md-nav__link">
+  <a href="#st_geomfromewkb_1" class="md-nav__link">
     <span class="md-ellipsis">
       ST_GeomFromEWKB
     </span>
@@ -3237,6 +3255,15 @@
   <a href="#st_mlinefromtext" class="md-nav__link">
     <span class="md-ellipsis">
       ST_MLineFromText
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#st_mpointfromtext" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_MPointFromText
     </span>
   </a>
   
@@ -4120,6 +4147,24 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#st_geomcollfromtext" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_GeomCollFromText
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#st_geomfromewkb" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_GeomFromEWKB
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_geomfromewkt" class="md-nav__link">
     <span class="md-ellipsis">
       ST_GeomFromEWKT
@@ -4174,7 +4219,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#st_geomfromewkb" class="md-nav__link">
+  <a href="#st_geomfromewkb_1" class="md-nav__link">
     <span class="md-ellipsis">
       ST_GeomFromEWKB
     </span>
@@ -4240,6 +4285,15 @@
   <a href="#st_mlinefromtext" class="md-nav__link">
     <span class="md-ellipsis">
       ST_MLineFromText
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#st_mpointfromtext" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_MPointFromText
     </span>
   </a>
   
@@ -4361,6 +4415,34 @@
 <p class="admonition-title">Note</p>
 <p>Please always keep the schema name <code>SEDONA</code> (e.g., <code>SEDONA.ST_GeomFromWKT</code>) when you use Sedona functions to avoid conflicting with Snowflake's built-in functions.</p>
 </div>
+<h2 id="st_geomcollfromtext">ST_GeomCollFromText<a class="headerlink" href="#st_geomcollfromtext" title="Permanent link">&para;</a></h2>
+<p>Introduction: Constructs a GeometryCollection from the WKT with the given SRID. If SRID is not provided then it defaults to 0. It returns <code>null</code> if the WKT is not a <code>GEOMETRYCOLLECTION</code>.</p>
+<p>Format:</p>
+<p><code>ST_GeomCollFromText (Wkt: String)</code></p>
+<p><code>ST_GeomCollFromText (Wkt: String, srid: Integer)</code></p>
+<p>SQL Example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomCollFromText</span><span class="p">(</span><span class="s1">&#39;GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))
+</code></pre></div>
+<h2 id="st_geomfromewkb">ST_GeomFromEWKB<a class="headerlink" href="#st_geomfromewkb" title="Permanent link">&para;</a></h2>
+<p>Introduction: Construct a Geometry from EWKB string or Binary. This function is an alias of <a href="#st_geomfromwkb">ST_GeomFromWKB</a>.</p>
+<p>Format:</p>
+<p><code>ST_GeomFromEWKB (Wkb: String)</code></p>
+<p><code>ST_GeomFromEWKB (Wkb: Binary)</code></p>
+<p>SQL Example</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromEWKB</span><span class="p">([</span><span class="mi">01</span><span class="w"> </span><span class="mi">02</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">02</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">84</span><span class="w"> </span><span class="n">D6</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="n">C0</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">80</span><span class="w"> </span><span class="n">B5</span><span class="w"> </span><span class="n">D6</span><span class="w"> </span><span class="n">BF</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">60</span><span class="w"> </span><span class="n">E1</span><span class="w"> </span><span class="n">EF</span><span class="w"> </span><span class="n">F7</span><span class="w"> </span><span class="n">BF</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">00</span><span class="w"> </span><span class="mi">80</span><span class="w"> </span><span class="mi">07</span><span class="w"> </span><span class="mi">5</span><span class="n">D</span><span class="w"> </span><span class="n">E5</span><span class="w"> </span><span class="n">BF</span><span class="p">])</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)
+</code></pre></div>
+<p>SQL Example</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_asEWKT</span><span class="p">(</span><span class="n">ST_GeomFromEWKB</span><span class="p">(</span><span class="s1">&#39;01010000a0e6100000000000000000f03f000000000000f03f000000000000f03f&#39;</span><span class="p">))</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>SRID=4326;POINT Z(1 1 1)
+</code></pre></div>
 <h2 id="st_geomfromewkt">ST_GeomFromEWKT<a class="headerlink" href="#st_geomfromewkt" title="Permanent link">&para;</a></h2>
 <p>Introduction: Construct a Geometry from OGC Extended WKT</p>
 <p>Format:
@@ -4478,7 +4560,7 @@
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>POINT(40.7128 -74.006)
 </code></pre></div>
-<h2 id="st_geomfromewkb">ST_GeomFromEWKB<a class="headerlink" href="#st_geomfromewkb" title="Permanent link">&para;</a></h2>
+<h2 id="st_geomfromewkb_1">ST_GeomFromEWKB<a class="headerlink" href="#st_geomfromewkb_1" title="Permanent link">&para;</a></h2>
 <p>Introduction: Construct a Geometry from EWKB string or Binary. This function is an alias of <a href="#st_geomfromwkb">ST_GeomFromWKB</a>.</p>
 <p>Format:</p>
 <p><code>ST_GeomFromEWKB (Wkb: String)</code></p>
@@ -4581,6 +4663,17 @@
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))
+</code></pre></div>
+<h2 id="st_mpointfromtext">ST_MPointFromText<a class="headerlink" href="#st_mpointfromtext" title="Permanent link">&para;</a></h2>
+<p>Introduction: Constructs a MultiPoint from the WKT with the given SRID. If SRID is not provided then it defaults to 0. It returns <code>null</code> if the WKT is not a <code>MULTIPOINT</code>.</p>
+<p>Format:</p>
+<p><code>ST_MPointFromText (Wkt: String)</code></p>
+<p><code>ST_MPointFromText (Wkt: String, srid: Integer)</code></p>
+<p>SQL Example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_MPointFromText</span><span class="p">(</span><span class="s1">&#39;MULTIPOINT ((10 10), (20 20), (30 30))&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>MULTIPOINT ((10 10), (20 20), (30 30))
 </code></pre></div>
 <h2 id="st_mpolyfromtext">ST_MPolyFromText<a class="headerlink" href="#st_mpolyfromtext" title="Permanent link">&para;</a></h2>
 <p>Introduction: Construct a MultiPolygon from Wkt. If srid is not set, it defaults to 0 (unknown).</p>
@@ -4717,7 +4810,7 @@ Must use ST_AsEWKT function to print the Z coordinate.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 7, 2024 07:27:36</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 7, 2024 20:17:39</span>
   </span>
 
     
