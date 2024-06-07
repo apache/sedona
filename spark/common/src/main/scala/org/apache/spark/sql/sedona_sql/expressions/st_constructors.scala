@@ -161,4 +161,14 @@ object st_constructors extends DataFrameAPI {
   def ST_MLineFromText(wkt: Column, srid: Column): Column = wrapExpression[ST_MLineFromText](wkt, srid)
 
   def ST_MLineFromText(wkt: String, srid: Int): Column = wrapExpression[ST_MLineFromText](wkt, srid)
+
+  def ST_GeomCollFromText(wkt: Column): Column = wrapExpression[ST_GeomCollFromText](wkt, 0)
+  def ST_GeomCollFromText(wkt: String): Column = wrapExpression[ST_GeomCollFromText](wkt, 0)
+  def ST_GeomCollFromText(wkt: Column, srid: Column): Column = wrapExpression[ST_GeomCollFromText](wkt, srid)
+  def ST_GeomCollFromText(wkt: String, srid: Int): Column = wrapExpression[ST_GeomCollFromText](wkt, srid)
+
+  def ST_MPointFromText(wkt: Column): Column = wrapExpression[ST_MPointFromText](wkt, 0)
+  def ST_MPointFromText(wkt: String): Column = wrapExpression[ST_MPointFromText](wkt, 0)
+  def ST_MPointFromText(wkt: Column, srid: Column): Column = wrapExpression[ST_MPointFromText](wkt, srid)
+  def ST_MPointFromText(wkt: String, srid: Int): Column = wrapExpression[ST_MPointFromText](wkt, srid)
 }

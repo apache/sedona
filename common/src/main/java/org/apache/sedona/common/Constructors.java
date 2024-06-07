@@ -92,6 +92,14 @@ public class Constructors {
         return geom;
     }
 
+    public static Geometry mPointFromText(String wkt, int srid) throws ParseException {
+        if (wkt == null || !wkt.startsWith("MULTIPOINT")) {
+            return null;
+        }
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        return new WKTReader(geometryFactory).read(wkt);
+    }
+
     public static Geometry mLineFromText(String wkt, int srid) throws ParseException {
         if (wkt == null || !wkt.startsWith("MULTILINESTRING")) {
             return null;
@@ -102,6 +110,14 @@ public class Constructors {
 
     public static Geometry mPolyFromText(String wkt, int srid) throws ParseException {
         if (wkt == null || !wkt.startsWith("MULTIPOLYGON")) {
+            return null;
+        }
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        return new WKTReader(geometryFactory).read(wkt);
+    }
+
+    public static Geometry geomCollFromText(String wkt, int srid) throws ParseException {
+        if (wkt == null || !wkt.startsWith("GEOMETRYCOLLECTION")) {
             return null;
         }
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);

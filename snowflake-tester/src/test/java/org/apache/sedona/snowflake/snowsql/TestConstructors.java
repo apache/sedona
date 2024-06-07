@@ -200,6 +200,35 @@ public class TestConstructors extends TestBase{
                 "MULTIPOLYGON (((1 2, 3 4, 5 6, 1 2)), ((7 8, 9 10, 11 12, 7 8)))"
         );
     }
+
+    @Test
+    public void test_ST_MPointFromText() {
+        registerUDF("ST_MPointFromText", String.class);
+        registerUDF("ST_SRID", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_MPointFromText('MULTIPOINT ((10 10), (20 20), (30 30))'))",
+                "MULTIPOINT ((10 10), (20 20), (30 30))"
+        );
+        registerUDF("ST_MPointFromText", String.class, int.class);
+        verifySqlSingleRes(
+                "select sedona.ST_SRID(sedona.ST_MPointFromText('MULTIPOINT ((10 10), (20 20), (30 30))',4269))",
+                4269
+        );
+    }
+
+    @Test
+    public void test_ST_GeomCollFromText() {
+        registerUDF("ST_GeomCollFromText", String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_GeomCollFromText('GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))'))",
+                "GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))"
+        );
+        registerUDF("ST_GeomCollFromText", String.class, int.class);
+        verifySqlSingleRes(
+                "select sedona.ST_SRID(sedona.ST_GeomCollFromText('GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))',4269))",
+                4269
+        );
+    }
     @Test
     public void test_ST_Point() {
         registerUDF("ST_Point", double.class, double.class);
