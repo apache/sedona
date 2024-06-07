@@ -400,7 +400,7 @@ Introduction: This function returns the input geometry encoded to a text represe
 
 Format: `ST_AsHEXEWKB(geom: Geometry, endian: String = NDR)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example
 
@@ -1618,7 +1618,7 @@ Introduction: Checks for the presence of Z coordinate values representing measur
 
 Format: `ST_HasZ(geom: Geometry)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example
 
@@ -2583,7 +2583,7 @@ Introduction: Returns a MultiPoint geometry consisting of all the coordinates of
 
 Format: `ST_Points(geom: Geometry)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example
 
