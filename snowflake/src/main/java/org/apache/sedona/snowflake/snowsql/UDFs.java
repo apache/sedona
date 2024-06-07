@@ -1240,6 +1240,37 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "distanceTolerance"})
+    public static byte[] ST_SimplifyVW(byte[] geometry, double distanceTolerance) {
+        return GeometrySerde.serialize(
+                Functions.simplifyVW(
+                        GeometrySerde.deserialize(geometry),
+                        distanceTolerance
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "vertexFactor", "isOuter"})
+    public static byte[] ST_SimplifyPolygonHull(byte[] geometry, double vertexFactor, boolean isOuter) {
+        return GeometrySerde.serialize(
+                Functions.simplifyPolygonHull(
+                        GeometrySerde.deserialize(geometry),
+                        vertexFactor,
+                        isOuter
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry", "vertexFactor"})
+    public static byte[] ST_SimplifyPolygonHull(byte[] geometry, double vertexFactor) {
+        return GeometrySerde.serialize(
+                Functions.simplifyPolygonHull(
+                        GeometrySerde.deserialize(geometry),
+                        vertexFactor
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"input", "blade"})
     public static byte[] ST_Split(byte[] input, byte[] blade) {
         return GeometrySerde.serialize(

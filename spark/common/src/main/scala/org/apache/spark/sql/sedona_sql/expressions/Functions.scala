@@ -346,6 +346,22 @@ case class ST_ReducePrecision(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_SimplifyVW(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.simplifyVW _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_SimplifyPolygonHull(inputExpressions: Seq[Expression])
+  extends InferredExpression(inferrableFunction2(Functions.simplifyPolygonHull), inferrableFunction3(Functions.simplifyPolygonHull)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_AsText(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.asWKT _) {
 

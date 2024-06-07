@@ -864,6 +864,30 @@ public class TestFunctions extends TestBase {
                 "POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))"
         );
     }
+
+    @Test
+    public void test_ST_SimplifyVW() {
+        registerUDF("ST_SimplifyVW", byte[].class, double.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_SimplifyVW(sedona.ST_GeomFromText('POLYGON((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33,46 34, 47 44, 35 36, 45 33, 43 19, 29 21, 29 22,35 26, 24 39, 8 25))'), 10))",
+                "POLYGON ((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33, 47 44, 35 36, 45 33, 43 19, 29 21, 35 26, 24 39, 8 25))"
+        );
+    }
+
+    @Test
+    public void test_ST_SimplifyPolygonHull() {
+        registerUDF("ST_SimplifyPolygonHull", byte[].class, double.class, boolean.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_SimplifyPolygonHull(sedona.ST_GeomFromText('POLYGON ((30 10, 40 40, 45 45, 20 40, 25 35, 10 20, 15 15, 30 10))'), 0.3, false))",
+                "POLYGON ((30 10, 40 40, 10 20, 30 10))"
+        );
+        registerUDF("ST_SimplifyPolygonHull", byte[].class, double.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_SimplifyPolygonHull(sedona.ST_GeomFromText('POLYGON ((30 10, 40 40, 45 45, 20 40, 25 35, 10 20, 15 15, 30 10))'), 0.3))",
+                "POLYGON ((30 10, 15 15, 10 20, 20 40, 45 45, 30 10))"
+        );
+    }
+
     @Test
     public void test_ST_Split() {
         registerUDF("ST_Split", byte[].class, byte[].class);

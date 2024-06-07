@@ -1311,6 +1311,61 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void simplifyVW() throws ParseException {
+        Geometry geom = Constructors.geomFromEWKT("LINESTRING(5 2, 3 8, 6 20, 7 25, 10 10)");
+        String actual = Functions.simplifyVW(geom, 30).toString();
+        String expected = "LINESTRING (5 2, 7 25, 10 10)";
+        assertEquals(expected, actual);
+
+        actual = Functions.simplifyVW(geom, 10).toString();
+        expected = "LINESTRING (5 2, 3 8, 7 25, 10 10)";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("POLYGON((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33,46 34, 47 44, 35 36, 45 33, 43 19, 29 21, 29 22,35 26, 24 39, 8 25))");
+        actual = Functions.simplifyVW(geom, 10).toString();
+        expected = "POLYGON ((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33, 47 44, 35 36, 45 33, 43 19, 29 21, 35 26, 24 39, 8 25))";
+        assertEquals(expected, actual);
+
+        actual = Functions.simplifyVW(geom, 80).toString();
+        expected = "POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 43 19, 24 39, 8 25))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void simplifyPolygonHull() throws ParseException {
+        Geometry geom = Constructors.geomFromEWKT("POLYGON ((131 158, 136 163, 161 165, 173 156, 179 148, 169 140, 186 144, 190 137, 185 131, 174 128, 174 124, 166 119, 158 121, 158 115, 165 107, 161 97, 166 88, 166 79, 158 57, 145 57, 112 53, 111 47, 93 43, 90 48, 88 40, 80 39, 68 32, 51 33, 40 31, 39 34, 49 38, 34 38, 25 34, 28 39, 36 40, 44 46, 24 41, 17 41, 14 46, 19 50, 33 54, 21 55, 13 52, 11 57, 22 60, 34 59, 41 68, 75 72, 62 77, 56 70, 46 72, 31 69, 46 76, 52 82, 47 84, 56 90, 66 90, 64 94, 56 91, 33 97, 36 100, 23 100, 22 107, 29 106, 31 112, 46 116, 36 118, 28 131, 53 132, 59 127, 62 131, 76 130, 80 135, 89 137, 87 143, 73 145, 80 150, 88 150, 85 157, 99 162, 116 158, 115 165, 123 165, 122 170, 134 164, 131 158))");
+        String actual = Functions.asWKT(Functions.simplifyPolygonHull(geom, 0.3, true));
+        String expected = "POLYGON ((161 165, 173 156, 186 144, 190 137, 185 131, 174 124, 166 119, 166 79, 158 57, 68 32, 40 31, 25 34, 17 41, 14 46, 11 57, 56 91, 33 97, 23 100, 22 107, 28 131, 80 135, 73 145, 85 157, 99 162, 122 170, 161 165))";
+        assertEquals(expected, actual);
+
+        actual = Functions.asWKT(Functions.simplifyPolygonHull(geom, 0.3));
+        assertEquals(expected, actual);
+
+        actual = Functions.asWKT(Functions.simplifyPolygonHull(geom, 0.3, false));
+        expected = "POLYGON ((131 158, 116 158, 99 162, 89 137, 76 130, 59 127, 28 131, 46 116, 36 100, 64 94, 75 72, 41 68, 33 54, 68 32, 90 48, 112 53, 145 57, 158 57, 161 97, 158 115, 158 121, 190 137, 169 140, 179 148, 161 165, 131 158))";
+        assertEquals(expected, actual);
+
+        actual = Functions.asWKT(Functions.simplifyPolygonHull(geom, 0.1, false));
+        expected = "POLYGON ((89 137, 36 100, 64 94, 75 72, 33 54, 112 53, 145 57, 161 165, 89 137))";
+        assertEquals(expected, actual);
+
+        actual = Functions.asWKT(Functions.simplifyPolygonHull(geom, 0.1));
+        expected = "POLYGON ((161 165, 173 156, 186 144, 190 137, 158 57, 68 32, 40 31, 25 34, 17 41, 14 46, 11 57, 22 107, 28 131, 85 157, 99 162, 122 170, 161 165))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("MULTIPOLYGON (((131 158, 136 163, 161 165, 173 156, 179 148, 169 140, 186 144, 190 137, 185 131, 174 128, 174 124, 166 119, 158 121, 158 115, 165 107, 161 97, 166 88, 166 79, 158 57, 145 57, 112 53, 111 47, 93 43, 90 48, 88 40, 80 39, 68 32, 51 33, 40 31, 39 34, 49 38, 34 38, 25 34, 28 39, 36 40, 44 46, 24 41, 17 41, 14 46, 19 50, 33 54, 21 55, 13 52, 11 57, 22 60, 34 59, 41 68, 75 72, 62 77, 56 70, 46 72, 31 69, 46 76, 52 82, 47 84, 56 90, 66 90, 64 94, 56 91, 33 97, 36 100, 23 100, 22 107, 29 106, 31 112, 46 116, 36 118, 28 131, 53 132, 59 127, 62 131, 76 130, 80 135, 89 137, 87 143, 73 145, 80 150, 88 150, 85 157, 99 162, 116 158, 115 165, 123 165, 122 170, 134 164, 131 158)))");
+        actual = Functions.asWKT(Functions.simplifyPolygonHull(geom, 0.3, true));
+        expected = "MULTIPOLYGON (((161 165, 173 156, 186 144, 190 137, 185 131, 174 124, 166 119, 166 79, 158 57, 68 32, 40 31, 25 34, 17 41, 14 46, 11 57, 56 91, 33 97, 23 100, 22 107, 28 131, 80 135, 73 145, 85 157, 99 162, 122 170, 161 165)))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("LINESTRING (10 10, 20 20, 30 30)");
+        Geometry finalGeom = geom;
+        assertThrows("Input geometry must be  polygonal", IllegalArgumentException.class, () -> {
+            Functions.simplifyPolygonHull(finalGeom, 0.1);
+        });
+    }
+
+    @Test
     public void force3DObject2D() {
         int expectedDims = 3;
         LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 1, 1, 0, 2, 0));

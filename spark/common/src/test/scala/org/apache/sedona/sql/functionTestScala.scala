@@ -655,6 +655,24 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(Hex.encodeHexString(df.first().get(0).asInstanceOf[Array[Byte]]) == s)
     }
 
+    it("Passed ST_SimplifyVW") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(5 2, 3 8, 6 20, 7 25, 10 10)') AS geom")
+      val actual = baseDf.selectExpr("ST_SimplifyVW(geom, 30)").first().get(0).asInstanceOf[Geometry].toText
+      val expected = "LINESTRING (5 2, 7 25, 10 10)"
+      assertEquals(expected, actual)
+    }
+
+    it("Passed ST_SimplifyPolygonHull") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((30 10, 40 40, 45 45, 20 40, 25 35, 10 20, 15 15, 30 10))') AS geom")
+      var actual = baseDf.selectExpr("ST_SimplifyPolygonHull(geom, 0.3, false)").first().get(0).asInstanceOf[Geometry].toText
+      var expected = "POLYGON ((30 10, 40 40, 10 20, 30 10))"
+      assertEquals(expected, actual)
+
+      actual = baseDf.selectExpr("ST_SimplifyPolygonHull(geom, 0.3)").first().get(0).asInstanceOf[Geometry].toText
+      expected = "POLYGON ((30 10, 15 15, 10 20, 20 40, 45 45, 30 10))"
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_NPoints") {
       var test = sparkSession.sql("SELECT ST_NPoints(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27 29.31,77.29 29.07)'))")
       assert(test.take(1)(0).get(0).asInstanceOf[Int] == 4)

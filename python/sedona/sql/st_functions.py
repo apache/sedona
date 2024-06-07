@@ -1373,6 +1373,34 @@ def ST_SimplifyPreserveTopology(geometry: ColumnOrName, distance_tolerance: Colu
     """
     return _call_st_function("ST_SimplifyPreserveTopology", (geometry, distance_tolerance))
 
+@validate_argument_types
+def ST_SimplifyVW(geometry: ColumnOrName, distance_tolerance: ColumnOrNameOrNumber) -> Column:
+    """Simplify a geometry using Visvalingam-Whyatt algorithm within a specified tolerance while preserving topological relationships.
+
+    :param geometry: Geometry column to simplify.
+    :type geometry: ColumnOrName
+    :param distance_tolerance: Tolerance for merging points together to simplify the geometry as either a number or numeric column.
+    :type distance_tolerance: ColumnOrNameOrNumber
+    :return: Simplified geometry as a geometry column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_SimplifyVW", (geometry, distance_tolerance))
+
+
+@validate_argument_types
+def ST_SimplifyPolygonHull(geometry: ColumnOrName, vertexFactor: ColumnOrNameOrNumber, isOuter: Optional[Union[ColumnOrName, bool]] = None) -> Column:
+    """Simplify a geometry using Visvalingam-Whyatt algorithm within a specified tolerance while preserving topological relationships.
+
+    :param geometry: Geometry column to simplify.
+    :type geometry: ColumnOrName
+    :param vertexFactor: Tolerance for merging points together to simplify the geometry as either a number or numeric column.
+    :type vertexFactor: ColumnOrNameOrNumber
+    :return: Simplified geometry as a geometry column.
+    :rtype: Column
+    """
+    args = (geometry, vertexFactor) if isOuter is None else (geometry, vertexFactor, isOuter)
+
+    return _call_st_function("ST_SimplifyPolygonHull", args)
 
 @validate_argument_types
 def ST_Split(input: ColumnOrName, blade: ColumnOrName) -> Column:
