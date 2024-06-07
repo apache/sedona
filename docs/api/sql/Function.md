@@ -1283,7 +1283,7 @@ If the given geometry is empty, no change is performed on it. This function is a
 
 Format: `ST_Force3DZ(geometry: Geometry, zValue: Double)`
 
-Since: `vTDB`
+Since: `v1.6.1`
 
 SQL Example
 
