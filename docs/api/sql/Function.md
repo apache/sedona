@@ -2497,7 +2497,7 @@ For geometries with no definable minimum clearance, such as single Point geometr
 
 Format: `ST_MinimumClearance(geometry: Geometry)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example
 
@@ -2519,7 +2519,7 @@ Introduction: This function returns a two-point LineString geometry representing
 
 Format: `ST_MinimumClearanceLine(geometry: Geometry)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example:
 
