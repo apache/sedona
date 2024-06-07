@@ -41,6 +41,20 @@ class TestConstructors(TestBase):
         point_df = self.spark.sql("SELECT ST_PointM(1.2345, 2.3456, 3.4567)")
         assert point_df.count() == 1
 
+    def test_st_makepointm(self):
+        point_csv_df = self.spark.read.format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").\
+            load(csv_point_input_location)
+
+        point_csv_df.createOrReplaceTempView("pointtable")
+
+        point_df = self.spark.sql("select ST_MakePointM(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20)), 2.0) as arealandmark from pointtable")
+        assert point_df.count() == 1000
+
+        point_df = self.spark.sql("SELECT ST_AsText(ST_MakePointM(1.2345, 2.3456, 3.4567))")
+        assert point_df.take(1)[0][0] == "POINT M(1.2345 2.3456 3.4567)"
+
     def test_st_makepoint(self):
         point_csv_df = self.spark.read.format("csv").\
             option("delimiter", ",").\
@@ -160,6 +174,17 @@ class TestConstructors(TestBase):
         polygon_df = self.spark.sql("select ST_GeomFromEWKB(polygontable._c0) as countyshape from polygontable")
         polygon_df.show(10)
         assert polygon_df.count() == 100
+
+    def test_st_linestring_from_wkb(self):
+        linestring_ba = self.spark.sql("select unhex('0102000000020000000000000084d600c00000000080b5d6bf00000060e1eff7bf00000080075de5bf') as wkb")
+        actual = linestring_ba.selectExpr("ST_AsText(ST_LineStringFromWKB(wkb))").take(1)[0][0]
+        expected = "LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)"
+        assert actual == expected
+
+        linestring_s = self.spark.sql("select '0102000000020000000000000084d600c00000000080b5d6bf00000060e1eff7bf00000080075de5bf' as wkb")
+        actual = linestring_s.selectExpr("ST_AsText(ST_LinestringFromWKB(wkb))").take(1)[0][0]
+        assert actual == expected
+
 
     def test_st_geom_from_geojson(self):
         polygon_json_df = self.spark.read.format("csv").\

@@ -52,6 +52,7 @@ test_configurations = [
     (stc.ST_GeomFromEWKT, ("ewkt",), "linestring_ewkt", "", "LINESTRING (1 2, 3 4)"),
     (stc.ST_LineFromText, ("wkt",), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
     (stc.ST_LineFromWKB, ("wkbLine",), "constructor", "ST_ReducePrecision(geom, 2)", "LINESTRING (-2.1 -0.35, -1.5 -0.67)"),
+    (stc.ST_LinestringFromWKB, ("wkbLine",), "constructor", "ST_ReducePrecision(geom, 2)", "LINESTRING (-2.1 -0.35, -1.5 -0.67)"),
     (stc.ST_LineStringFromText, ("multiple_point", lambda: f.lit(',')), "constructor", "", "LINESTRING (0 0, 1 0, 1 1, 0 0)"),
     (stc.ST_Point, ("x", "y"), "constructor", "", "POINT (0 1)"),
     (stc.ST_PointZ, ("x", "y", "z", 4326), "constructor", "", "POINT Z (0 1 2)"),
@@ -65,6 +66,7 @@ test_configurations = [
     (stc.ST_PointFromText, ("single_point", lambda: f.lit(',')), "constructor", "", "POINT (0 1)"),
     (stc.ST_PointFromWKB, ("wkbPoint",), "constructor", "", "POINT (10 15)"),
     (stc.ST_MakePoint, ("x", "y", "z"), "constructor", "", "POINT Z (0 1 2)"),
+    (stc.ST_MakePointM, ("x", "y", "z"), "constructor", "ST_AsText(geom)", "POINT M(0 1 2)"),
     (stc.ST_PolygonFromEnvelope, ("minx", "miny", "maxx", "maxy"), "min_max_x_y", "", "POLYGON ((0 1, 0 3, 2 3, 2 1, 0 1))"),
     (stc.ST_PolygonFromEnvelope, (0.0, 1.0, 2.0, 3.0), "null", "", "POLYGON ((0 1, 0 3, 2 3, 2 1, 0 1))"),
     (stc.ST_PolygonFromText, ("multiple_point", lambda: f.lit(',')), "constructor", "", "POLYGON ((0 0, 1 0, 1 1, 0 0))"),
@@ -253,6 +255,7 @@ wrong_type_configurations = [
     (stc.ST_GeomFromKML, (None,)),
     (stc.ST_GeomFromText, (None,)),
     (stc.ST_GeomFromWKB, (None,)),
+    (stc.ST_LinestringFromWKB, (None,)),
     (stc.ST_GeomFromEWKB, (None,)),
     (stc.ST_GeomFromWKT, (None,)),
     (stc.ST_GeometryFromText, (None,)),
@@ -275,6 +278,8 @@ wrong_type_configurations = [
     (stc.ST_PolygonFromText, ("", None)),
     (stc.ST_PolygonFromText, (None, None)),
     (stc.ST_PolygonFromText, ("", None)),
+    (stc.ST_MakePointM, (None, None, None)),
+    (stc.ST_MakePointM, (None, "", "")),
 
     # functions
     (stf.ST_3DDistance, (None, "")),

@@ -98,6 +98,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertEquals("SRID=4326;POINT ZM(1 2 0 100)", point2)
     }
 
+    it("passed ST_MakePointM") {
+      val df = sparkSession.sql("SELECT 0.0 AS x, 1.0 AS y, 2.0 AS m").select(ST_AsText(ST_MakePointM("x", "y", "m")))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[String]
+      val expectedResult = "POINT M(0 1 2)"
+      assert(actualResult == expectedResult)
+    }
+
     it("passed st_makepoint") {
       val df = sparkSession.sql("SELECT 0.0 AS x, 1.0 AS y, 2.0 AS z").select(ST_AsText(ST_MakePoint("x", "y", "z")))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[String]
@@ -155,6 +162,19 @@ class dataFrameAPITestScala extends TestBaseScala {
 
       val wkbStringSeq = Seq("0102000000020000000000000084d600c00000000080b5d6bf00000060e1eff7bf00000080075de5bf")
       val dfWithString = wkbStringSeq.toDF("wkb").select(ST_LineFromWKB("wkb"))
+      val actualStringResult = dfWithString.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      assert(actualStringResult == expectedResult)
+    }
+
+    it("passed st_linestringfromwkb") {
+      val wkbSeq = Seq[Array[Byte]](Array[Byte](1, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, -124, -42, 0, -64, 0, 0, 0, 0, -128, -75, -42, -65, 0, 0, 0, 96, -31, -17, -9, -65, 0, 0, 0, -128, 7, 93, -27, -65))
+      val df = wkbSeq.toDF("wkb").select(ST_LinestringFromWKB("wkb"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expectedResult = "LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)"
+      assert(actualResult == expectedResult)
+
+      val wkbStringSeq = Seq("0102000000020000000000000084d600c00000000080b5d6bf00000060e1eff7bf00000080075de5bf")
+      val dfWithString = wkbStringSeq.toDF("wkb").select(ST_LinestringFromWKB("wkb"))
       val actualStringResult = dfWithString.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       assert(actualStringResult == expectedResult)
     }

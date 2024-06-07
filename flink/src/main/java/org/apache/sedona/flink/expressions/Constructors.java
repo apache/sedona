@@ -88,6 +88,13 @@ public class Constructors {
         }
     }
 
+    public static class ST_MakePointM extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y, @DataTypeHint("Double") Double m) throws ParseException {
+            return org.apache.sedona.common.Constructors.makePointM(x, y, m);
+        }
+    }
+
     public static class ST_MakePoint extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y) throws ParseException {
@@ -269,6 +276,38 @@ public class Constructors {
                 return geometry;
             }
             return null;  // Return null if geometry is not a Point
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String wkbString, int srid) throws ParseException {
+            Geometry geometry = getGeometryByFileData(wkbString, FileDataSplitter.WKB);
+            if (geometry instanceof LineString) {
+                geometry.setSRID(srid);
+                return geometry;
+            }
+            return null;  // Return null if geometry is not a Linestring
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+        public Geometry eval(@DataTypeHint("Bytes") byte[] wkb) throws ParseException {
+            return org.apache.sedona.common.Constructors.lineFromWKB(wkb, 0);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+        public Geometry eval(@DataTypeHint("Bytes") byte[] wkb, int srid) throws ParseException {
+            return org.apache.sedona.common.Constructors.lineFromWKB(wkb, srid);
+        }
+    }
+
+    public static class ST_LinestringFromWKB extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String wkbString) throws ParseException {
+            Geometry geometry = getGeometryByFileData(wkbString, FileDataSplitter.WKB);
+            if (geometry instanceof LineString) {
+                geometry.setSRID(0);
+                return geometry;
+            }
+            return null;  // Return null if geometry is not a Linestring
         }
 
         @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
