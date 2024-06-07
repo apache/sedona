@@ -1626,6 +1626,13 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         "GEOMETRYCOLLECTION EMPTY")
   }
 
+  it("Should pass ST_LongestLine") {
+    val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))') as geom")
+    val actual = baseDf.selectExpr("ST_LongestLine(geom, geom)").first().get(0).asInstanceOf[Geometry].toText
+    val expected = "LINESTRING (180 180, 20 50)"
+    assert(expected.equals(actual))
+  }
+
   it("Should pass ST_FlipCoordinates") {
     val pointDF = createSamplePointDf(5, "geom")
     val oldX = pointDF.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinate.x

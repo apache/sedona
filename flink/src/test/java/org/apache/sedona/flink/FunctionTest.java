@@ -445,6 +445,16 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testLongestLine() {
+        Table tbl = tableEnv.sqlQuery(
+                "SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))') as geom1");
+        String actual = (String) first(tbl.select(call(Functions.ST_LongestLine.class.getSimpleName(), $("geom1"), $("geom1"))).as("geom")
+                .select(call(Functions.ST_AsText.class.getSimpleName(), $("geom")))).getField(0);
+        String expected = "LINESTRING (180 180, 20 50)";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testLineInterpolatePoint() {
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 2 0)') AS line");
         table = table.select(call(Functions.ST_LineInterpolatePoint.class.getSimpleName(), $("line"), 0.5));

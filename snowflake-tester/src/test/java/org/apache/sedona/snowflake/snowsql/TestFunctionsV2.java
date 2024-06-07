@@ -590,6 +590,16 @@ public class TestFunctionsV2
                 "LINESTRING(45.173118104 45.743370112,50 20,90 80,112.975930502 49.365425998)"
         );
     }
+
+    @Test
+    public void test_ST_LongestLine() {
+        registerUDFV2("ST_LongestLine", String.class, String.class);
+        verifySqlSingleRes(
+                "SELECT ST_AsText(sedona.ST_LongestLine(ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))'), ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))')))",
+                "LINESTRING(180 180,20 50)"
+        );
+    }
+
     @Test
     public void test_ST_MakePolygon() {
         registerUDFV2("ST_MakePolygon", String.class);

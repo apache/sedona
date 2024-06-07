@@ -684,6 +684,16 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2"}, argTypes = {"Geometry", "Geometry"}, returnTypes = "Geometry")
+    public static String ST_LongestLine(String geom1, String geom2) {
+        return GeometrySerde.serGeoJson(
+                Functions.longestLine(
+                        GeometrySerde.deserGeoJson(geom1),
+                        GeometrySerde.deserGeoJson(geom2)
+                )
+        );
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"point1", "point2"}, argTypes = {"Geometry", "Geometry"}, returnTypes = "Geometry")
     public static String ST_MakeLine(String geom1, String geom2) {
         return GeometrySerde.serGeoJson(
