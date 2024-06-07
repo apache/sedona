@@ -203,6 +203,9 @@ object st_functions extends DataFrameAPI {
   def ST_Length(geometry: Column): Column = wrapExpression[ST_Length](geometry)
   def ST_Length(geometry: String): Column = wrapExpression[ST_Length](geometry)
 
+  def ST_Length2D(geometry: Column): Column = wrapExpression[ST_Length2D](geometry)
+  def ST_Length2D(geometry: String): Column = wrapExpression[ST_Length2D](geometry)
+
   def ST_LineFromMultiPoint(geometry: Column): Column = wrapExpression[ST_LineFromMultiPoint](geometry)
   def ST_LineFromMultiPoint(geometry: String): Column = wrapExpression[ST_LineFromMultiPoint](geometry)
 

@@ -211,6 +211,19 @@ case class ST_Length(inputExpressions: Seq[Expression])
 }
 
 /**
+ * Return the length measurement of a Geometry
+ *
+ * @param inputExpressions
+ */
+case class ST_Length2D(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.length _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
   * Return the area measurement of a Geometry.
   *
   * @param inputExpressions

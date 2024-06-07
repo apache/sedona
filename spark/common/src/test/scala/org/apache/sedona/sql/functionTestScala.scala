@@ -173,6 +173,15 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(functionDf.count() > 0);
     }
 
+    it("Passed ST_Length2D") {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      var functionDf = sparkSession.sql("select ST_Length2D(polygondf.countyshape) from polygondf")
+      assert(functionDf.count() > 0);
+    }
+
     it("Passed ST_Area") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")

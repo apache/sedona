@@ -78,6 +78,7 @@ public class Catalog {
                 new Functions.ST_GeometryType(),
                 new Functions.ST_Intersection(),
                 new Functions.ST_Length(),
+                new Functions.ST_Length2D(),
                 new Functions.ST_LengthSpheroid(),
                 new Functions.ST_LineInterpolatePoint(),
                 new Functions.ST_LineLocatePoint(),
