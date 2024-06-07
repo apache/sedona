@@ -3060,7 +3060,7 @@ ST_SimplifyPolygonHull(geom: Geometry, vertexFactor: Double, isOuter: Boolean = 
 ST_SimplifyPolygonHull(geom: Geometry, vertexFactor: Double)
 ```
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example
 
