@@ -975,7 +975,7 @@ Format:
 
 `ST_DelaunayTriangles(geometry: Geometry, tolerance: Double, flag: Integer)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example
 
