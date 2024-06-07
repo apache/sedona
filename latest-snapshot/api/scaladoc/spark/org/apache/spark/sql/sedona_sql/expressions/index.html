@@ -683,6 +683,10 @@
                         <a href="ST_LineSubstring.html" title="Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length.">ST_LineSubstring</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="ST_LinestringFromWKB.html" title=""></a>
+                        <a href="ST_LinestringFromWKB.html" title="">ST_LinestringFromWKB</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="ST_LongestLine.html" title=""></a>
                         <a href="ST_LongestLine.html" title="">ST_LongestLine</a>
                       </li><li class="current-entities indented6">
@@ -717,6 +721,10 @@
                         <span class="separator"></span>
                         <a class="class" href="ST_MakePoint.html" title=""></a>
                         <a href="ST_MakePoint.html" title="">ST_MakePoint</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="ST_MakePointM.html" title=""></a>
+                        <a href="ST_MakePointM.html" title="">ST_MakePointM</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="ST_MakePolygon.html" title=""></a>
@@ -2920,6 +2928,22 @@ If the MultiLineString is can't be merged, the original multilinestring is retur
       <p class="shortcomment cmt">Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length.</p><div class="fullcomment"><div class="comment cmt"><p>Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length.
 Second and third arguments are Double values between 0 and 1. This only works with LINESTRINGs.
 </p></div></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_LinestringFromWKB" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_LinestringFromWKBextendsExpressionwithFoldableExpressionwithImplicitCastInputTypeswithCodegenFallbackwithUserDataGeneratatorwithProductwithSerializable"></a><a id="ST_LinestringFromWKB:ST_LinestringFromWKB"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_LinestringFromWKB.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ST_LinestringFromWKB.html"><span class="name">ST_LinestringFromWKB</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="FoldableExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression">FoldableExpression</a> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes">ImplicitCastInputTypes</span> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback">CodegenFallback</span> with <a href="UserDataGeneratator.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.UserDataGeneratator">UserDataGeneratator</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_LongestLine" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_LongestLineextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_LongestLine:ST_LongestLine"></a>
       <span class="permalink">
@@ -3065,6 +3089,22 @@ Second and third arguments are Double values between 0 and 1. This only works wi
       </span>
       <span class="symbol">
         <a title="" href="ST_MakePoint.html"><span class="name">ST_MakePoint</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_MakePointM" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_MakePointMextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_MakePointM:ST_MakePointM"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_MakePointM.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ST_MakePointM.html"><span class="name">ST_MakePointM</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       
