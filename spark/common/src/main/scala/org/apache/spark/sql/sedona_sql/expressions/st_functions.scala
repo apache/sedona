@@ -266,6 +266,12 @@ object st_functions extends DataFrameAPI {
   def ST_MaxDistance(geom1: Column, geom2: Column): Column = wrapExpression[ST_MaxDistance](geom1, geom2)
   def ST_MaxDistance(geom1: String, geom2: String): Column = wrapExpression[ST_MaxDistance](geom1, geom2)
 
+  def ST_MinimumClearance(geometry: Column): Column = wrapExpression[ST_MinimumClearance](geometry)
+  def ST_MinimumClearance(geometry: String): Column = wrapExpression[ST_MinimumClearance](geometry)
+
+  def ST_MinimumClearanceLine(geometry: Column): Column = wrapExpression[ST_MinimumClearanceLine](geometry)
+  def ST_MinimumClearanceLine(geometry: String): Column = wrapExpression[ST_MinimumClearanceLine](geometry)
+
   def ST_MinimumBoundingCircle(geometry: Column): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6)
   def ST_MinimumBoundingCircle(geometry: String): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6)
   def ST_MinimumBoundingCircle(geometry: Column, quadrantSegments: Column): Column = wrapExpression[ST_MinimumBoundingCircle](geometry, quadrantSegments)

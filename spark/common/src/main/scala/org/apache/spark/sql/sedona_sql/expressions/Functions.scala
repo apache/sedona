@@ -506,6 +506,21 @@ case class ST_Boundary(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_MinimumClearance(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.minimumClearance _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_MinimumClearanceLine(inputExpressions: Seq[Expression])
+  extends InferredExpression(Functions.minimumClearanceLine _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
 
 case class ST_MinimumBoundingRadius(inputExpressions: Seq[Expression])
   extends Expression with FoldableExpression with CodegenFallback {

@@ -1042,6 +1042,27 @@ def ST_MaxDistance(geom1: ColumnOrName, geom2: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_MaxDistance", (geom1, geom2))
 
+@validate_argument_types
+def ST_MinimumClearance(geometry: ColumnOrName) -> Column:
+    """Calculate the minimum clearance between two vertices
+
+    :param geometry: Geometry column
+    :type geometry: ColumnOrName
+    :return: Minimum Clearance between the geometries
+    :rtype: Column
+    """
+    return _call_st_function("ST_MinimumClearance", geometry)
+
+@validate_argument_types
+def ST_MinimumClearanceLine(geometry: ColumnOrName) -> Column:
+    """Calculate the minimum clearance Linestring between two vertices
+
+    :param geometry: Geometry column
+    :type geometry: ColumnOrName
+    :return: Minimum Clearance Linestring between the geometries
+    :rtype: Column
+    """
+    return _call_st_function("ST_MinimumClearanceLine", geometry)
 
 @validate_argument_types
 def ST_MinimumBoundingCircle(geometry: ColumnOrName, quadrant_segments: Optional[Union[ColumnOrName, int]] = None) -> Column:
