@@ -2197,7 +2197,7 @@ Introduction: Returns the LineString geometry representing the maximum distance 
 
 Format: `ST_LongestLine(geom1: Geometry, geom2: Geometry)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example:
 
