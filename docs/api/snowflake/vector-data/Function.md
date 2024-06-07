@@ -1466,6 +1466,7 @@ Introduction: Returns the perimeter of A. This function is an alias of [ST_Lengt
 Format: ST_Length2D (A:geometry)
 
 SQL example:
+
 ```SQL
 SELECT ST_Length2D(polygondf.countyshape)
 FROM polygondf
