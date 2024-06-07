@@ -54,7 +54,7 @@ Format:
 
 `ST_GeomCollFromText (Wkt: String, srid: Integer)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example:
 
@@ -78,7 +78,7 @@ Format:
 
 `ST_GeomFromEWKB (Wkb: Binary)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example
 
