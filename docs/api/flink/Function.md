@@ -1979,7 +1979,7 @@ Introduction: Returns the perimeter of A. This function is an alias of [ST_Lengt
 
 Format: ST_Length2D (A:geometry)
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 Example:
 
