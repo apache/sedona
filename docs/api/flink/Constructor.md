@@ -412,7 +412,7 @@ Format:
 
 `ST_LineFromWKB (Wkb: Binary, srid: Integer)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 Example:
 
@@ -463,7 +463,7 @@ Format:
 
 `ST_LinestringFromWKB (Wkb: Binary, srid: Integer)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 Example:
 
