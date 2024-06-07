@@ -53,6 +53,28 @@ Output:
 1.7320508075688772
 ```
 
+## ST_AddMeasure
+
+Introduction: Computes a new geometry with measure (M) values linearly interpolated between start and end points. For geometries lacking M dimensions, M values are added. Existing M values are overwritten by the new values. Applies only to LineString and MultiLineString inputs.
+
+Format: `ST_AddMeasure(geom: Geometry, measureStart: Double, measureEnd: Double)`
+
+Since: `vTBD`
+
+SQL Example:
+
+```sql
+SELECT ST_AsText(ST_AddMeasure(
+        ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)')
+))
+```
+
+Output:
+
+```
+LINESTRING M(0 0 10, 1 0 16, 2 0 22, 3 0 28, 4 0 34, 5 0 40)
+```
+
 ## ST_AddPoint
 
 Introduction: RETURN Linestring with additional point at the given index, if position is not available the point will be added at the end of line.

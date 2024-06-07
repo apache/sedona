@@ -955,6 +955,21 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testAddMeasure() {
+        Table baseTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (1 1, 2 2, 2 2, 3 3)') as line, " +
+                "ST_GeomFromWKT('MULTILINESTRING M((1 0 4, 2 0 4, 4 0 4),(1 0 4, 2 0 4, 4 0 4))') as mline");
+        String actual = (String) first(baseTable.select(call(Functions.ST_AddMeasure.class.getSimpleName(), $("line"),
+                1.0, 70.0)).as("geom").select(call(Functions.ST_AsText.class.getSimpleName(), $("geom")))).getField(0);
+        String expected = "LINESTRING M(1 1 1, 2 2 35.5, 2 2 35.5, 3 3 70)";
+        assertEquals(expected, actual);
+
+        actual = (String) first(baseTable.select(call(Functions.ST_AddMeasure.class.getSimpleName(), $("mline"),
+                10.0, 70.0)).as("geom").select(call(Functions.ST_AsText.class.getSimpleName(), $("geom")))).getField(0);
+        expected = "MULTILINESTRING M((1 0 10, 2 0 20, 4 0 40), (1 0 40, 2 0 50, 4 0 70))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testAddPoint() {
         Table pointTable = tableEnv.sqlQuery("SELECT ST_AddPoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1)'), ST_GeomFromWKT('POINT (2 2)'))");
         assertEquals("LINESTRING (0 0, 1 1, 2 2)", first(pointTable).getField(0).toString());

@@ -29,6 +29,10 @@ object st_functions extends DataFrameAPI {
   def ST_3DDistance(a: Column, b: Column): Column = wrapExpression[ST_3DDistance](a, b)
   def ST_3DDistance(a: String, b: String): Column = wrapExpression[ST_3DDistance](a, b)
 
+  def ST_AddMeasure(geom: Column, measureStart: Column, measureEnd: Column): Column = wrapExpression[ST_AddMeasure](geom, measureStart, measureEnd)
+  def ST_AddMeasure(geom: String, measureStart: Double, measureEnd: Double): Column = wrapExpression[ST_AddMeasure](geom, measureStart, measureEnd)
+  def ST_AddMeasure(geom: String, measureStart: String, measureEnd: String): Column = wrapExpression[ST_AddMeasure](geom, measureStart, measureEnd)
+
   def ST_AddPoint(lineString: Column, point: Column): Column = wrapExpression[ST_AddPoint](lineString, point, -1)
   def ST_AddPoint(lineString: String, point: String): Column = wrapExpression[ST_AddPoint](lineString, point, -1)
   def ST_AddPoint(lineString: Column, point: Column, index: Column): Column = wrapExpression[ST_AddPoint](lineString, point, index)

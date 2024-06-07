@@ -722,6 +722,15 @@ public class Functions {
         }
     }
 
+    public static class ST_AddMeasure extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
+                             @DataTypeHint(value = "Double") Double measureStart, @DataTypeHint(value = "Double") Double measureEnd) {
+            Geometry geom = (Geometry) o1;
+            return org.apache.sedona.common.Functions.addMeasure(geom, measureStart, measureEnd);
+        }
+    }
+
     public static class ST_AddPoint extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,

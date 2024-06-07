@@ -57,6 +57,20 @@ def ST_3DDistance(a: ColumnOrName, b: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_3DDistance", (a, b))
 
+@validate_argument_types
+def ST_AddMeasure(geom: ColumnOrName, measureStart: Union[ColumnOrName, float], measureEnd: Union[ColumnOrName, float]) -> Column:
+    """Interpolate measure values with the provided start and end points and return the result geometry.
+
+    :param geom: Geometry column to use in the calculation.
+    :type geom: ColumnOrName
+    :param measureStart: Start point for the measure.
+    :type measureStart: ColumnOrName
+    :param measureEnd: End point for the measure.
+    :type measureEnd: ColumnOrName
+    :return: Result geometry column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_AddMeasure", (geom, measureStart, measureEnd))
 
 @validate_argument_types
 def ST_AddPoint(line_string: ColumnOrName, point: ColumnOrName, index: Optional[Union[ColumnOrName, int]] = None) -> Column:

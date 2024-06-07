@@ -919,6 +919,22 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_AddMeasure") {
+      var baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (1 1, 2 2, 2 2, 3 3)') as line, ST_GeomFromWKT('MULTILINESTRING M((1 0 4, 2 0 4, 4 0 4),(1 0 4, 2 0 4, 4 0 4))') as mline")
+      var actual = baseDf.select(ST_AsText(ST_AddMeasure("line", 1, 70))).first().get(0)
+      var expected = "LINESTRING M(1 1 1, 2 2 35.5, 2 2 35.5, 3 3 70)"
+      assertEquals(expected, actual)
+
+      actual = baseDf.select(ST_AsText(ST_AddMeasure("mline", 10, 70))).first().get(0)
+      expected = "MULTILINESTRING M((1 0 10, 2 0 20, 4 0 40), (1 0 40, 2 0 50, 4 0 70))"
+      assertEquals(expected, actual)
+
+      baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('MULTILINESTRING M((1 0 4, 2 0 4, 4 0 4),(1 0 4, 2 0 4, 4 0 4))') as mline, 10.0 as measureRangeStart, 70.0 as measureRangeEnd")
+      actual = baseDf.select(ST_AsText(ST_AddMeasure("mline", "measureRangeEnd", "measureRangeStart"))).first().get(0)
+      expected = "MULTILINESTRING M((1 0 70, 2 0 60, 4 0 40), (1 0 40, 2 0 30, 4 0 10))"
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_AddPoint without index") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS line, ST_Point(1.0, 1.0) AS point")
       val df = baseDf.select(ST_AddPoint("line", "point"))

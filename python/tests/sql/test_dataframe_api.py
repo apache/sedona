@@ -78,6 +78,7 @@ test_configurations = [
     (stf.ST_3DDistance, ("a", "b"), "two_points", "", 5.0),
     (stf.ST_Affine, ("geom", 1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0), "square_geom", "", "POLYGON ((2 3, 4 5, 5 6, 3 4, 2 3))"),
     (stf.ST_Affine, ("geom", 1.0, 2.0, 1.0, 2.0, 1.0, 2.0,), "square_geom", "", "POLYGON ((2 3, 4 5, 5 6, 3 4, 2 3))"),
+    (stf.ST_AddMeasure, ("line", 10.0, 40.0), "linestring_geom", "ST_AsText(geom)", "LINESTRING M(0 0 10, 1 0 16, 2 0 22, 3 0 28, 4 0 34, 5 0 40)"),
     (stf.ST_AddPoint, ("line", lambda: f.expr("ST_Point(1.0, 1.0)")), "linestring_geom", "", "LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0, 1 1)"),
     (stf.ST_AddPoint, ("line", lambda: f.expr("ST_Point(1.0, 1.0)"), 1), "linestring_geom", "", "LINESTRING (0 0, 1 1, 1 0, 2 0, 3 0, 4 0, 5 0)"),
     (stf.ST_Angle, ("p1", "p2", "p3", "p4", ), "four_points", "", 0.4048917862850834),
@@ -287,6 +288,8 @@ wrong_type_configurations = [
     # functions
     (stf.ST_3DDistance, (None, "")),
     (stf.ST_3DDistance, ("", None)),
+    (stf.ST_AddMeasure, (None, None, None)),
+    (stf.ST_AddMeasure, ("", None, "")),
     (stf.ST_AddPoint, (None, "")),
     (stf.ST_AddPoint, ("", None)),
     (stf.ST_Area, (None,)),

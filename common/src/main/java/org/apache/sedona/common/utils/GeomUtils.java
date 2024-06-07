@@ -530,6 +530,76 @@ public class GeomUtils {
         return hausdorffDistanceObj.distance();
     }
 
+    public static Geometry addMeasure(Geometry geom, double measure_start, double measure_end) {
+        if (!(geom instanceof LineString) && !(geom instanceof MultiLineString)) {
+            throw new IllegalArgumentException("Geometry must be a LineString or MultiLineString.");
+        }
+
+        if (geom instanceof LineString) {
+            return addMeasure((LineString) geom, measure_start, measure_end);
+        } else { // MultiLineString
+            return addMeasure((MultiLineString) geom, measure_start, measure_end);
+        }
+    }
+
+    private static Geometry addMeasure(LineString geom, double measureStart, double measureEnd) {
+        Coordinate[] coordinates = geom.getCoordinates();
+        double totalLength = geom.getLength();
+        CoordinateList newCoordinates = new CoordinateList();
+
+        Coordinate c1 = coordinates[0];
+        double measure,
+                measureRange = measureEnd - measureStart;
+        int numCoordinates = coordinates.length;
+
+        for (int i = 0; i < numCoordinates; i++) {
+            Coordinate c2 = coordinates[i];
+            double length = c1.distance(c2);
+
+            if (totalLength > 0.0) {
+                measure = measureStart + measureRange * (length / totalLength);
+            } else if (totalLength == 0.0 && numCoordinates > 1) { // valid zero length LineStrings
+                measure = measureStart + measureRange * i / (numCoordinates - 1);
+            } else {
+                measure = 0.0;
+            }
+
+            CoordinateXYZM newCoordinate = new CoordinateXYZM(c2.getX(), c2.getY(), c2.getZ(), measure);
+            newCoordinates.add(newCoordinate);
+        }
+
+        return geom.getFactory().createLineString(newCoordinates.toCoordinateArray());
+    }
+
+    private static Geometry addMeasure(MultiLineString geom, double measureStart, double measureEnd) {
+        double totalLength = 0,
+                measureRange = measureEnd - measureStart;
+        for (int i = 0; i < geom.getNumGeometries(); i++) {
+            LineString linestring = (LineString) geom.getGeometryN(i);
+            if (linestring.getCoordinates().length > 1)
+                totalLength += linestring.getLength();
+        }
+        LineString[] newLineStrings = new LineString[geom.getNumGeometries()];
+        double length= 0;
+        for (int i = 0; i < geom.getNumGeometries(); i++) {
+            double subMeasureStart,
+                    subMeasureEnd,
+                    subLength = 0;
+            LineString lineString = (LineString) geom.getGeometryN(i);
+            if (lineString.getCoordinates().length > 1)
+                subLength = lineString.getCoordinates().length;
+
+            subMeasureStart = measureStart + measureRange * length / totalLength;
+            subMeasureEnd = measureStart + measureRange * (length + subLength) / totalLength;
+
+            newLineStrings[i] = (LineString) addMeasure(lineString, subMeasureStart, subMeasureEnd);
+
+            length += subLength;
+        }
+
+        return geom.getFactory().createMultiLineString(newLineStrings);
+    }
+
     public static Boolean isMeasuredGeometry(Geometry geom) {
         Coordinate coordinate = geom.getCoordinate();
         return !Double.isNaN(coordinate.getM());
