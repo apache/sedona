@@ -253,6 +253,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_PointFromGeoHash") {
+      val df = sparkSession.sql("SELECT 's00twy01mt' AS geohash").select(ST_PointFromGeoHash("geohash", 4))
+      val actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText
+      val expected = "POINT (0.87890625 0.966796875)"
+      assert(expected.equals(actual))
+    }
+
     it("passed st_geomfromgml") {
       val gmlString = "<gml:LineString srsName=\"EPSG:4269\"><gml:coordinates>-71.16028,42.258729 -71.160837,42.259112 -71.161143,42.25932</gml:coordinates></gml:LineString>"
       val df = sparkSession.sql(s"SELECT '$gmlString' AS gml").select(ST_GeomFromGML("gml"))

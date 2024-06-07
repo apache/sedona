@@ -46,6 +46,21 @@ def ST_GeomFromGeoHash(geohash: ColumnOrName, precision: Union[ColumnOrName, int
     """
     return _call_constructor_function("ST_GeomFromGeoHash", (geohash, precision))
 
+@validate_argument_types
+def ST_PointFromGeoHash(geohash: ColumnOrName, precision: Optional[Union[ColumnOrName, int]] = None) -> Column:
+    """Generate a point column from a geohash column at a specified precision.
+
+    :param geohash: Geohash string column to generate from.
+    :type geohash: ColumnOrName
+    :param precision: Geohash precision to use, either an integer or an integer column.
+    :type precision: Union[ColumnOrName, int]
+    :return: Point column representing the supplied geohash and precision level.
+    :rtype: Column
+    """
+    args = (geohash) if precision is None else (geohash, precision)
+
+    return _call_constructor_function("ST_PointFromGeoHash", args)
+
 
 @validate_argument_types
 def ST_GeomFromGeoJSON(geojson_string: ColumnOrName) -> Column:

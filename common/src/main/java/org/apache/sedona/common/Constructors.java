@@ -246,6 +246,10 @@ public class Constructors {
         }
     }
 
+    public static Geometry pointFromGeoHash(String geoHash, Integer precision) {
+        return geomFromGeoHash(geoHash, precision).getCentroid();
+    }
+
     public static Geometry geomFromGML(String gml) throws IOException, ParserConfigurationException, SAXException {
         return new GMLReader().read(gml, GEOMETRY_FACTORY);
     }

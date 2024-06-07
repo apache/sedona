@@ -115,6 +115,15 @@ class TestConstructors(TestBase):
         polygon_df.show(10)
         assert polygon_df.count() == 100
 
+    def test_st_point_from_geohash(self):
+        actual = self.spark.sql("select ST_AsText(ST_PointFromGeohash('9qqj7nmxncgyy4d0dbxqz0', 4))").take(1)[0][0]
+        expected = "POINT (-115.13671875 36.123046875)"
+        assert actual == expected
+
+        actual = self.spark.sql("select ST_AsText(ST_PointFromGeohash('9qqj7nmxncgyy4d0dbxqz0'))").take(1)[0][0]
+        expected = "POINT (-115.17281600000001 36.11464599999999)"
+        assert actual == expected
+
     def test_st_geometry_from_text(self):
         polygon_wkt_df = self.spark.read.format("csv").\
             option("delimiter", "\t").\

@@ -523,6 +523,43 @@ Output:
 POINT (10 15)
 ```
 
+## ST_PointZ
+
+Introduction: Construct a Point from X, Y and Z and an optional srid. If srid is not set, it defaults to 0 (unknown).
+Must use ST_AsEWKT function to print the Z coordinate.
+
+Format: `ST_PointZ (X:decimal, Y:decimal, Z:decimal)`
+
+Format: `ST_PointZ (X:decimal, Y:decimal, Z:decimal, srid:integer)`
+
+```sql
+SELECT ST_AsEWKT(ST_PointZ(1.2345, 2.3456, 3.4567))
+```
+
+Output:
+
+```
+POINT Z(1.2345 2.3456 3.4567)
+```
+
+## ST_PointFromGeoHash
+
+Introduction: Generates a Point geometry representing the center of the GeoHash cell defined by the input string. If `precision` is not specified, the full GeoHash precision is used. Providing a `precision` value limits the GeoHash characters used to determine the Point coordinates.
+
+Format: `ST_PointFromGeoHash(geoHash: String, precision: Integer)`
+
+SQL Example
+
+```sql
+SELECT ST_PointFromGeoHash('s00twy01mt', 4)
+```
+
+Output:
+
+```
+POINT (0.87890625 0.966796875)
+```
+
 ## ST_PolygonFromEnvelope
 
 Introduction: Construct a Polygon from MinX, MinY, MaxX, MaxY.

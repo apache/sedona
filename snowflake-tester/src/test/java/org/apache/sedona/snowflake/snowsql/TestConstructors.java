@@ -44,6 +44,21 @@ public class TestConstructors extends TestBase{
                 "POLYGON ((0.703125 0.87890625, 0.703125 1.0546875, 1.0546875 1.0546875, 1.0546875 0.87890625, 0.703125 0.87890625))"
         );
     }
+
+    @Test
+    public void test_ST_PointFromGeoHash() {
+        registerUDF("ST_PointFromGeoHash", String.class, Integer.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_PointFromGeoHash('s00twy01mt', 4))",
+                "POINT (0.87890625 0.966796875)"
+        );
+
+        registerUDF("ST_PointFromGeoHash", String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_PointFromGeoHash('s00twy01mt'))",
+                "POINT (0.9999972581863403 0.9999999403953552)"
+        );
+    }
     @Test
     public void test_ST_GeomFromGeoJSON() {
         registerUDF("ST_GeomFromGeoJSON", String.class);
