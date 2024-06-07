@@ -1392,6 +1392,12 @@ class TestPredicateJoin(TestBase):
         expected = "LINESTRING (180 180, 20 50)"
         assert expected == actual
 
+    def test_st_max_distance(self):
+        basedf = self.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))') as geom")
+        actual = basedf.selectExpr("ST_MaxDistance(geom, geom)").take(1)[0][0]
+        expected = 206.15528128088303
+        assert expected == actual
+
     def test_st_s2_cell_ids(self):
         test_cases = [
             "'POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'",

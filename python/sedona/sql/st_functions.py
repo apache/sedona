@@ -1029,6 +1029,19 @@ def ST_MakeValid(geometry: ColumnOrName, keep_collapsed: Optional[Union[ColumnOr
     args = (geometry,) if keep_collapsed is None else (geometry, keep_collapsed)
     return _call_st_function("ST_MakeValid", args)
 
+@validate_argument_types
+def ST_MaxDistance(geom1: ColumnOrName, geom2: ColumnOrName) -> Column:
+    """Calculate the maximum distance between two furthest points in the geometries
+
+    :param geom1:
+    :type geom1: ColumnOrName
+    :param geom2:
+    :type geom2: ColumnOrName
+    :return: Maximum distance between the geometries
+    :rtype: Column
+    """
+    return _call_st_function("ST_MaxDistance", (geom1, geom2))
+
 
 @validate_argument_types
 def ST_MinimumBoundingCircle(geometry: ColumnOrName, quadrant_segments: Optional[Union[ColumnOrName, int]] = None) -> Column:

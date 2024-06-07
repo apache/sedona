@@ -614,6 +614,15 @@ public class TestFunctions extends TestBase {
     }
 
     @Test
+    public void test_ST_MaxDistance() {
+        registerUDF("ST_MaxDistance", byte[].class, byte[].class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_MaxDistance(sedona.ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))'), sedona.ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))'))",
+                206.15528128088303
+        );
+    }
+
+    @Test
     public void test_ST_LineSubstring() {
         registerUDF("ST_LineSubstring", byte[].class, double.class, double.class);
         verifySqlSingleRes(
