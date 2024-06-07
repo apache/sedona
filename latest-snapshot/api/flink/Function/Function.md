@@ -1955,7 +1955,7 @@ gid  |                  validity_info
 
 ## ST_Length
 
-Introduction: Return the perimeter of A
+Introduction: Returns the perimeter of A.
 
 Format: `ST_Length (A: Geometry)`
 
@@ -1965,6 +1965,26 @@ Example:
 
 ```sql
 SELECT ST_Length(ST_GeomFromWKT('LINESTRING(38 16,38 50,65 50,66 16,38 16)'))
+```
+
+Output:
+
+```
+123.0147027033899
+```
+
+## ST_Length2D
+
+Introduction: Returns the perimeter of A. This function is an alias of [ST_Length](#st_length).
+
+Format: ST_Length2D (A:geometry)
+
+Since: `v1.6.1`
+
+Example:
+
+```SQL
+SELECT ST_Length2D(ST_GeomFromWKT('LINESTRING(38 16,38 50,65 50,66 16,38 16)'))
 ```
 
 Output:
@@ -3366,4 +3386,42 @@ Output:
 
 ```
 4.0
+```
+
+## ST_Zmflag
+
+Introduction: Returns a code indicating the Z and M coordinate dimensions present in the input geometry.
+
+Values are: 0 = 2D, 1 = 3D-M, 2 = 3D-Z, 3 = 4D.
+
+Format: `ST_Zmflag(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_Zmflag(
+        ST_GeomFromWKT('LINESTRING Z(1 2 3, 4 5 6)')
+)
+```
+
+Output:
+
+```
+2
+```
+
+SQL Example
+
+```sql
+SELECT ST_Zmflag(
+        ST_GeomFromWKT('POINT ZM(1 2 3 4)')
+)
+```
+
+Output:
+
+```
+3
 ```

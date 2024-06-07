@@ -623,6 +623,10 @@
                         <a href="ST_Length.html" title="Return the length measurement of a Geometry">ST_Length</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="ST_Length2D.html" title="Return the length measurement of a Geometry"></a>
+                        <a href="ST_Length2D.html" title="Return the length measurement of a Geometry">ST_Length2D</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="ST_LengthSpheroid.html" title=""></a>
                         <a href="ST_LengthSpheroid.html" title="">ST_LengthSpheroid</a>
                       </li><li class="current-entities indented6">
@@ -937,6 +941,10 @@
                         <span class="separator"></span>
                         <a class="class" href="ST_ZMin.html" title="Return the Z minima of the geometry."></a>
                         <a href="ST_ZMin.html" title="Return the Z minima of the geometry.">ST_ZMin</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="ST_Zmflag.html" title=""></a>
+                        <a href="ST_Zmflag.html" title="">ST_Zmflag</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="trait" href="SerdeAware.html" title=""></a>
@@ -2619,6 +2627,23 @@ If flag not specified, it defaults to OGC SFS validity semantics.
       
       <p class="shortcomment cmt">Return the length measurement of a Geometry
 </p>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Length2D" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_Length2DextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_Length2D:ST_Length2D"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Length2D.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Return the length measurement of a Geometry" href="ST_Length2D.html"><span class="name">ST_Length2D</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Return the length measurement of a Geometry
+</p>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_LengthSpheroid" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_LengthSpheroidextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_LengthSpheroid:ST_LengthSpheroid"></a>
       <span class="permalink">
@@ -3935,6 +3960,22 @@ The simplification uses a maximum-distance difference algorithm similar to the D
       
       <p class="shortcomment cmt">Return the Z minima of the geometry.</p><div class="fullcomment"><div class="comment cmt"><p>Return the Z minima of the geometry.
 </p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes a geometry and returns the minimum of all Z-coordinate values.</p></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Zmflag" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_ZmflagextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_Zmflag:ST_Zmflag"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Zmflag.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ST_Zmflag.html"><span class="name">ST_Zmflag</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.SerdeAware" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="SerdeAwareextendsAnyRef"></a><a id="SerdeAware:SerdeAware"></a>
       <span class="permalink">

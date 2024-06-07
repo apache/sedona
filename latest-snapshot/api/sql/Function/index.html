@@ -2851,6 +2851,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#st_length2d" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_Length2D
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_lengthspheroid" class="md-nav__link">
     <span class="md-ellipsis">
       ST_LengthSpheroid
@@ -3367,6 +3376,15 @@
   <a href="#st_zmin" class="md-nav__link">
     <span class="md-ellipsis">
       ST_ZMin
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#st_zmflag" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_Zmflag
     </span>
   </a>
   
@@ -5736,6 +5754,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#st_length2d" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_Length2D
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_lengthspheroid" class="md-nav__link">
     <span class="md-ellipsis">
       ST_LengthSpheroid
@@ -6252,6 +6279,15 @@
   <a href="#st_zmin" class="md-nav__link">
     <span class="md-ellipsis">
       ST_ZMin
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#st_zmflag" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_Zmflag
     </span>
   </a>
   
@@ -7391,11 +7427,21 @@ Collection types are the following:</p>
 5350 | Self-intersection at or near point (52.0, 5.0, NaN)
 </code></pre></div>
 <h2 id="st_length">ST_Length<a class="headerlink" href="#st_length" title="Permanent link">&para;</a></h2>
-<p>Introduction: Return the perimeter of A</p>
+<p>Introduction: Returns the perimeter of A.</p>
 <p>Format: <code>ST_Length (A: Geometry)</code></p>
 <p>Since: <code>v1.0.0</code></p>
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Length</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING(38 16,38 50,65 50,66 16,38 16)&#39;</span><span class="p">))</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>123.0147027033899
+</code></pre></div>
+<h2 id="st_length2d">ST_Length2D<a class="headerlink" href="#st_length2d" title="Permanent link">&para;</a></h2>
+<p>Introduction: Returns the perimeter of A. This function is an alias of <a href="#st_length">ST_Length</a>.</p>
+<p>Format: ST_Length2D (A:geometry)</p>
+<p>Since: <code>v1.6.1</code></p>
+<p>SQL Example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Length2D</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING(38 16,38 50,65 50,66 16,38 16)&#39;</span><span class="p">))</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>123.0147027033899
@@ -8237,6 +8283,27 @@ If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGO
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>4.0
 </code></pre></div>
+<h2 id="st_zmflag">ST_Zmflag<a class="headerlink" href="#st_zmflag" title="Permanent link">&para;</a></h2>
+<p>Introduction: Returns a code indicating the Z and M coordinate dimensions present in the input geometry.</p>
+<p>Values are: 0 = 2D, 1 = 3D-M, 2 = 3D-Z, 3 = 4D.</p>
+<p>Format: <code>ST_Zmflag(geom: Geometry)</code></p>
+<p>Since: <code>v1.6.1</code></p>
+<p>SQL Example</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Zmflag</span><span class="p">(</span>
+<span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING Z(1 2 3, 4 5 6)&#39;</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>2
+</code></pre></div>
+<p>SQL Example</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Zmflag</span><span class="p">(</span>
+<span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT ZM(1 2 3 4)&#39;</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>3
+</code></pre></div>
 
 
 
@@ -8257,7 +8324,7 @@ If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGO
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 7, 2024 07:27:36</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 7, 2024 07:38:30</span>
   </span>
 
     
