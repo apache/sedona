@@ -3712,6 +3712,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#st_locatealong" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_LocateAlong
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_longestline" class="md-nav__link">
     <span class="md-ellipsis">
       ST_LongestLine
@@ -5968,6 +5977,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#st_locatealong" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_LocateAlong
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_longestline" class="md-nav__link">
     <span class="md-ellipsis">
       ST_LongestLine
@@ -7819,6 +7837,22 @@ The first argument must be a LINESTRING, and the second argument is a POINT geom
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140.21046313888758)
 </code></pre></div>
+<h2 id="st_locatealong">ST_LocateAlong<a class="headerlink" href="#st_locatealong" title="Permanent link">&para;</a></h2>
+<p>Introduction: This function computes Point or MultiPoint geometries representing locations along a measured input geometry (LineString or MultiLineString) corresponding to the provided measure value(s). Polygonal geometry inputs are not supported. The output points lie directly on the input line at the specified measure positions.</p>
+<p>Additionally, an optional <code>offset</code> parameter can shift the resulting points left or right from the input line. A positive offset displaces the points to the left side, while a negative value offsets them to the right side by the given distance.</p>
+<p>This allows identifying precise locations along a measured linear geometry based on supplied measure values, with the ability to offset the output points if needed.</p>
+<p>Format:</p>
+<p><code>ST_LocateAlong(linear: Geometry, measure: Double, offset: Double)</code></p>
+<p><code>ST_LocateAlong(linear: Geometry, measure: Double)</code></p>
+<p>Since: <code>v1.6.1</code></p>
+<p>SQL Example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_LocateAlong</span><span class="p">(</span>
+<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING M (10 30 1, 50 50 1, 30 110 2, 70 90 2, 180 140 3, 130 190 3)&#39;</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>MULTIPOINT M((30 110 2), (50 100 2), (70 90 2))
+</code></pre></div>
 <h2 id="st_longestline">ST_LongestLine<a class="headerlink" href="#st_longestline" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns the LineString geometry representing the maximum distance between any two points from the input geometries.</p>
 <p>Format: <code>ST_LongestLine(geom1: Geometry, geom2: Geometry)</code></p>
@@ -8664,7 +8698,7 @@ You need to make sure that the input geometry is in lon/lat order. If the input 
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 7, 2024 22:14:18</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 7, 2024 22:19:30</span>
   </span>
 
     
