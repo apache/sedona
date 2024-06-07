@@ -1240,6 +1240,14 @@ case class ST_LengthSpheroid(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_LocateAlong(inputExpressions: Seq[Expression])
+  extends InferredExpression(inferrableFunction3(Functions.locateAlong), inferrableFunction2(Functions.locateAlong)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_LongestLine(inputExpressions: Seq[Expression])
   extends InferredExpression(Functions.longestLine _) {
 

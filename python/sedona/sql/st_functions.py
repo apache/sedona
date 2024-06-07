@@ -896,6 +896,22 @@ def ST_LineSubstring(line_string: ColumnOrName, start_fraction: ColumnOrNameOrNu
     return _call_st_function("ST_LineSubstring", (line_string, start_fraction, end_fraction))
 
 @validate_argument_types
+def ST_LocateAlong(geom: ColumnOrName, measure: Union[ColumnOrName, float], offset: Optional[Union[ColumnOrName, float]] = None) -> Column:
+    """return locations along a measure geometry that have the given measure value.
+
+    :param geom:
+    :type geom: ColumnOrName
+    :param measure:
+    :type measure: Union[ColumnOrName, float]
+    :param offset:
+    :type offset: Union[ColumnOrNameOrNumber, float]
+    :return: Locations along a measure geometry that have the given measure value.
+    :rtype: Column
+    """
+    args = (geom, measure) if offset is None else (geom, measure, offset)
+    return _call_st_function("ST_LocateAlong", args)
+
+@validate_argument_types
 def ST_LongestLine(geom1: ColumnOrName, geom2: ColumnOrName) -> Column:
     """Compute the longest line between the two geometries
 

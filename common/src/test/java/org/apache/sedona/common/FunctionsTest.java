@@ -2822,6 +2822,46 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void locateAlong() throws ParseException {
+        Geometry geom = Constructors.geomFromEWKT("MULTIPOINT M(1 2 3, 3 4 3, 9 4 3, 3 2 1, 1 2 3, 5 4 2)");
+        String actual = Functions.asWKT(Functions.locateAlong(geom, 3, 0));
+        String expected = "MULTIPOINT M((1 2 3), (3 4 3), (9 4 3), (1 2 3))";
+        assertEquals(expected, actual);
+
+        // offset doesn't affect Point or MultiPoint
+        actual = Functions.asWKT(Functions.locateAlong(geom, 3, 4));
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("LINESTRING M(1 2 3, 3 4 3, 5 4 2, 9 4 3)");
+        actual = Functions.asWKT(Functions.locateAlong(geom, 3, 0));
+        expected = "MULTIPOINT M((2 3 3), (3 4 3), (9 4 3))";
+        assertEquals(expected, actual);
+
+        actual = Functions.asWKT(Functions.locateAlong(geom, 3, 2));
+        expected = "MULTIPOINT M((0.5857864376269051 4.414213562373095 3), (3 6 3), (9 6 3))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("LINESTRING M(1 2 3, 3 4 3, 5 4 2, 5 4 2, 9 4 3)");
+        actual = Functions.asWKT(Functions.locateAlong(geom, 2, 0));
+        expected = "MULTIPOINT M((5 4 2))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("MULTILINESTRING M((1 2 3, 3 4 2, 9 4 3),(1 2 3, 5 4 5))");
+        actual = Functions.asWKT(Functions.locateAlong(geom, 2, 0));
+        expected = "MULTIPOINT M((3 4 2))";
+        assertEquals(expected, actual);
+
+        actual = Functions.asWKT(Functions.locateAlong(geom, 2, -3));
+        expected = "MULTIPOINT M((5.121320343559642 1.8786796564403572 2), (3 1 2))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("POLYGON M((0 0 1, 1 1 1, 5 1 1, 5 0 1, 1 0 1, 0 0 1))");
+        Geometry finalGeom = geom;
+        Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.locateAlong(finalGeom, 1));
+        assertEquals("Polygon geometry type not supported, supported types are: (Multi)Point and (Multi)LineString.", e.getMessage());
+    }
+
+    @Test
     public void isValidReason() {
         // Valid geometry
         Geometry validGeom = GEOMETRY_FACTORY.createPolygon(coordArray(30, 10, 40, 40, 20, 40, 10, 20, 30, 10));

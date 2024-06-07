@@ -1006,6 +1006,14 @@ public class Functions {
         return indexedLine.indexOf(point.getCoordinate()) / length;
     }
 
+    public static Geometry locateAlong(Geometry linear, double measure, double offset) {
+        return GeometryLocateAlongProcessor.processGeometry(linear, measure, offset);
+    }
+
+    public static Geometry locateAlong(Geometry linear, double measure) {
+        return locateAlong(linear, measure, 0);
+    }
+
     /**
      * Forces a Polygon/MultiPolygon to use counter-clockwise orientation for the exterior ring and a clockwise for the interior ring(s).
      * @param geom

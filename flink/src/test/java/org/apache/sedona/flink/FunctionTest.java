@@ -453,6 +453,20 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testLocateAlong() {
+        Table tbl = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTILINESTRING M((1 2 3, 3 4 2, 9 4 3),(1 2 3, 5 4 5))') AS geom");
+        String actual = (String) first(tbl.select(call(Functions.ST_LocateAlong.class.getSimpleName(), $("geom"), 2)).as("geom")
+                .select(call(Functions.ST_AsEWKT.class.getSimpleName(), $("geom")))).getField(0);
+        String expected = "MULTIPOINT M((3 4 2))";
+        assertEquals(expected, actual);
+
+        actual = (String) first(tbl.select(call(Functions.ST_LocateAlong.class.getSimpleName(), $("geom"), 2, -3)).as("geom")
+                .select(call(Functions.ST_AsEWKT.class.getSimpleName(), $("geom")))).getField(0);
+        expected = "MULTIPOINT M((5.121320343559642 1.8786796564403572 2), (3 1 2))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testLongestLine() {
         Table tbl = tableEnv.sqlQuery(
                 "SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))') as geom1");
