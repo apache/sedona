@@ -558,7 +558,7 @@ Introduction: Generates a Point geometry representing the center of the GeoHash 
 
 Format: `ST_PointFromGeoHash(geoHash: String, precision: Integer)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example
 
