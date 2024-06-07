@@ -3520,7 +3520,7 @@ Introduction: This variant of [ST_Union](#st_union) operates on a single geometr
 
 Format: `ST_UnaryUnion(geometry: Geometry)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example
 
