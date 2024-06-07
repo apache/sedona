@@ -87,6 +87,7 @@ object Catalog {
     function[ST_Intersection](),
     function[ST_Difference](),
     function[ST_SymDifference](),
+    function[ST_UnaryUnion](),
     function[ST_Union](),
     function[ST_IsValid](),
     function[ST_IsEmpty](),

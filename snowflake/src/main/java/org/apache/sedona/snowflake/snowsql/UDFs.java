@@ -1385,6 +1385,15 @@ public class UDFs {
     }
 
     @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+    public static byte[] ST_UnaryUnion(byte[] geometry) {
+        return GeometrySerde.serialize(
+                Functions.unaryUnion(
+                        GeometrySerde.deserialize(geometry)
+                )
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geometry"})
     public static byte[] ST_VoronoiPolygons(byte[] geometry) {
         return GeometrySerde.serialize(
                 FunctionsGeoTools.voronoiPolygons(GeometrySerde.deserialize(geometry), 0.0, null)

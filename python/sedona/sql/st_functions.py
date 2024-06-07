@@ -1470,6 +1470,16 @@ def ST_TriangulatePolygon(geom: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_TriangulatePolygon", geom)
 
+@validate_argument_types
+def ST_UnaryUnion(geom: ColumnOrName) -> Column:
+    """Calculate the unary union of a geometry
+
+        :param geom: Geometry to do union
+        :type geom: ColumnOrName
+        :return: Geometry representing the unary union of geom as a geometry column.
+        :rtype: Column
+        """
+    return _call_st_function("ST_UnaryUnion", geom)
 
 @validate_argument_types
 def ST_Union(a: ColumnOrName, b: Optional[ColumnOrName] = None) -> Column:

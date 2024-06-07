@@ -781,6 +781,13 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(symDiff.first().get(0) == null)
     }
 
+    it("Passed ST_UnaryUnion") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('MULTIPOLYGON(((0 10,0 30,20 30,20 10,0 10)),((10 0,10 20,30 20,30 0,10 0)))') AS geom")
+      val actual = baseDf.selectExpr("ST_UnaryUnion(geom)").first().get(0).asInstanceOf[Geometry].toText
+      val expected = "POLYGON ((10 0, 10 10, 0 10, 0 30, 20 30, 20 20, 30 20, 30 0, 10 0))"
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_Union - part of right overlaps left") {
 
       val testtable = sparkSession.sql("select ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') as a, ST_GeomFromWKT('POLYGON ((-2 1, 2 1, 2 4, -2 4, -2 1))') as b")

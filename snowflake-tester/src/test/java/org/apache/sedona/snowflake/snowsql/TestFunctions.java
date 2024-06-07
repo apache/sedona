@@ -955,6 +955,15 @@ public class TestFunctions extends TestBase {
     }
 
     @Test
+    public void test_ST_UnaryUnion() {
+        registerUDF("ST_UnaryUnion", byte[].class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(sedona.ST_UnaryUnion(sedona.ST_GeomFromText('MULTIPOLYGON(((0 10,0 30,20 30,20 10,0 10)),((10 0,10 20,30 20,30 0,10 0)))')))",
+                "POLYGON ((10 0, 10 10, 0 10, 0 30, 20 30, 20 20, 30 20, 30 0, 10 0))"
+        );
+    }
+
+    @Test
     public void test_ST_VoronoiPolygons() {
         registerUDF("ST_VoronoiPolygons", byte[].class);
         registerUDF("ST_VoronoiPolygons", byte[].class, double.class);

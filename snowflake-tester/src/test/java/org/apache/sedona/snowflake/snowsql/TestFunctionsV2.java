@@ -917,6 +917,15 @@ public class TestFunctionsV2
     }
 
     @Test
+    public void test_ST_UnaryUnion() {
+        registerUDFV2("ST_UnaryUnion", String.class);
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_UnaryUnion(ST_GeometryFromWKT('MULTILINESTRING ((10 10, 20 20, 30 30),(25 25, 35 35, 45 45),(40 40, 50 50, 60 60),(55 55, 65 65, 75 75))')))",
+                "MULTILINESTRING((10 10,20 20,25 25),(25 25,30 30),(30 30,35 35,40 40),(40 40,45 45),(45 45,50 50,55 55),(55 55,60 60),(60 60,65 65,75 75))"
+        );
+    }
+
+    @Test
     public void test_ST_VoronoiPolygons() {
         registerUDFV2("ST_VoronoiPolygons", String.class);
         registerUDFV2("ST_VoronoiPolygons", String.class, double.class);

@@ -368,6 +368,9 @@ object st_functions extends DataFrameAPI {
   def ST_SimplifyPolygonHull(geometry: Column, vertexFactor: Column, isOuter: Column): Column = wrapExpression[ST_SimplifyPolygonHull](geometry, vertexFactor, isOuter)
   def ST_SimplifyPolygonHull(geometry: String, vertexFactor: Double, isOuter: Boolean): Column = wrapExpression[ST_SimplifyPolygonHull](geometry, vertexFactor, isOuter)
 
+  def ST_UnaryUnion(geometry: Column): Column = wrapExpression[ST_UnaryUnion](geometry)
+  def ST_UnaryUnion(geometry: String): Column = wrapExpression[ST_UnaryUnion](geometry)
+
   def ST_Union(a: Column, b: Column): Column = wrapExpression[ST_Union](a, b)
   def ST_Union(a: String, b: String): Column = wrapExpression[ST_Union](a, b)
   def ST_Union(geoms: Column): Column = wrapExpression[ST_Union](geoms)

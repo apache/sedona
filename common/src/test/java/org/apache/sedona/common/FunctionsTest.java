@@ -725,7 +725,6 @@ public class FunctionsTest extends TestBase {
         long[] cellIds = new long[]{1152991873351024640L, 1153132610839379968L, 1153273348327735296L, 1153414085816090624L};
         Geometry[] polygons = Functions.s2ToGeom(cellIds);
         String actual = Functions.asWKT(Functions.union(polygons));
-        System.out.println(Arrays.toString(polygons));
         String expected = "POLYGON ((0.6014716838554667 -0.0000000000000254, 0.6014716838554158 -0.0000000000000254, -0.0000000000000254 -0.0000000000000254, -0.0000000000000254 0.6014385452363985, -0.0000000000000254 0.6014716838554667, -0.0000000000000254 1.2121321753162642, 0.6014716838554667 1.2121321753162642, 0.6014716838554667 1.2120654068310366, 1.2121321753162642 1.2120654068310366, 1.2121321753162642 0.6014385452364494, 1.2121321753162642 0.6013371003640015, 1.2121321753162642 -0.0000000000000254, 0.6014716838554667 -0.0000000000000254))";
         assertEquals(expected, actual);
 
@@ -743,7 +742,24 @@ public class FunctionsTest extends TestBase {
         actual = Functions.asWKT(Functions.union(mPoly));
         expected = "POLYGON ((0.6014716838554667 -0.0000000000000254, 0.6014716838554158 -0.0000000000000254, -0.0000000000000254 -0.0000000000000254, -0.0000000000000254 0.6014385452363985, -0.0000000000000254 0.6014716838554667, -0.0000000000000254 1.2121321753162642, 0.6014716838554667 1.2121321753162642, 0.6014716838554667 1.2120654068310366, 1.2121321753162642 1.2120654068310366, 1.2121321753162642 0.6014385452364494, 1.2121321753162642 0.6013371003640015, 1.2121321753162642 -0.0000000000000254, 0.6014716838554667 -0.0000000000000254))";
         assertEquals(expected, actual);
-        System.out.println(actual);
+    }
+
+    @Test
+    public void testUnaryUnion() throws ParseException {
+        Geometry geometry = Constructors.geomFromEWKT("MULTIPOLYGON(((0 10,0 30,20 30,20 10,0 10)),((10 0,10 20,30 20,30 0,10 0)))");
+        String actual = Functions.unaryUnion(geometry).toString();
+        String expected = "POLYGON ((10 0, 10 10, 0 10, 0 30, 20 30, 20 20, 30 20, 30 0, 10 0))";
+        assertEquals(expected, actual);
+
+        geometry = Constructors.geomFromEWKT("MULTILINESTRING ((10 10, 20 20, 30 30),(25 25, 35 35, 45 45),(40 40, 50 50, 60 60),(55 55, 65 65, 75 75))");
+        actual = Functions.unaryUnion(geometry).toString();
+        expected = "MULTILINESTRING ((10 10, 20 20, 25 25), (25 25, 30 30), (30 30, 35 35, 40 40), (40 40, 45 45), (45 45, 50 50, 55 55), (55 55, 60 60), (60 60, 65 65, 75 75))";
+        assertEquals(expected, actual);
+
+        geometry = Constructors.geomFromEWKT("GEOMETRYCOLLECTION (POINT (10 10),LINESTRING (20 20, 30 30),POLYGON ((25 25, 35 35, 35 35, 25 25)),MULTIPOINT (30 30, 40 40),MULTILINESTRING ((40 40, 50 50), (45 45, 55 55)),MULTIPOLYGON (((50 50, 60 60, 60 60, 50 50)), ((55 55, 65 65, 65 65, 55 55))))");
+        actual = Functions.unaryUnion(geometry).toString();
+        expected = "GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (20 20, 30 30), LINESTRING (40 40, 45 45), LINESTRING (45 45, 50 50), LINESTRING (50 50, 55 55))";
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -1940,7 +1956,6 @@ public class FunctionsTest extends TestBase {
         for (int[] testCase : testCases_special) {
             Geometry geom = GEOMETRY_FACTORY.createPoint(new Coordinate(testCase[0], testCase[1]));
             int actualEPSG = Functions.bestSRID(geom);
-            System.out.println("actualEPSG: "+actualEPSG);
             int expectedEPSG = testCase[2];
             assertEquals("Failed at coordinates (" + testCase[0] + ", " + testCase[1] + ")", expectedEPSG, actualEPSG);
         }

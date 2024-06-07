@@ -913,6 +913,14 @@ case class ST_SymDifference(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_UnaryUnion(inputExpressions: Seq[Expression])
+  extends InferredExpression(inferrableFunction1(Functions.unaryUnion)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
   * Return the union of geometry A and B
   *
