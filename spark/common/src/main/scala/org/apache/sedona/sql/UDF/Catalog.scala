@@ -112,6 +112,7 @@ object Catalog {
     function[ST_X](),
     function[ST_Y](),
     function[ST_Z](),
+    function[ST_Zmflag](),
     function[ST_StartPoint](),
     function[ST_Snap](),
     function[ST_ClosestPoint](),

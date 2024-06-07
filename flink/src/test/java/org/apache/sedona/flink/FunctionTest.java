@@ -710,6 +710,25 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testZmflag() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1 2)') AS geom");
+        int actual = (int) first(table.select(call(Functions.ST_Zmflag.class.getSimpleName(), $("geom")))).getField(0);
+        assertEquals(0, actual);
+
+        table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (1 2 3, 4 5 6)') AS geom");
+        actual = (int) first(table.select(call(Functions.ST_Zmflag.class.getSimpleName(), $("geom")))).getField(0);
+        assertEquals(2, actual);
+
+        table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON M((1 2 3, 3 4 3, 5 6 3, 3 4 3, 1 2 3))') AS geom");
+        actual = (int) first(table.select(call(Functions.ST_Zmflag.class.getSimpleName(), $("geom")))).getField(0);
+        assertEquals(1, actual);
+
+        table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTIPOLYGON ZM (((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1)), ((15 5 3 1, 20 10 6 2, 10 10 7 3, 15 5 3 1)))') AS geom");
+        actual = (int) first(table.select(call(Functions.ST_Zmflag.class.getSimpleName(), $("geom")))).getField(0);
+        assertEquals(3, actual);
+    }
+
+    @Test
     public void testHasZ() {
         Table polyTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))') as poly");
         boolean actual = (boolean) first(polyTable.select(call(Functions.ST_HasZ.class.getSimpleName(), $("poly")))).getField(0);

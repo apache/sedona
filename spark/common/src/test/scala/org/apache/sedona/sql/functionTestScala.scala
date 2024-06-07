@@ -951,6 +951,20 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
     }
 
+    it("Passed ST_Zmflag") {
+      var actual = sparkSession.sql("SELECT ST_Zmflag(ST_GeomFromWKT('POINT (1 2)'))").first().get(0)
+      assert(actual == 0)
+
+      actual = sparkSession.sql("SELECT ST_Zmflag(ST_GeomFromWKT('LINESTRING (1 2 3, 4 5 6)'))").first().get(0)
+      assert(actual == 2)
+
+      actual = sparkSession.sql("SELECT ST_Zmflag(ST_GeomFromWKT('POLYGON M((1 2 3, 3 4 3, 5 6 3, 3 4 3, 1 2 3))'))").first().get(0)
+      assert(actual == 1)
+
+      actual = sparkSession.sql("SELECT ST_Zmflag(ST_GeomFromWKT('MULTIPOLYGON ZM (((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1)), ((15 5 3 1, 20 10 6 2, 10 10 7 3, 15 5 3 1)))'))").first().get(0)
+      assert(actual == 3)
+    }
+
     it("Should pass ST_StartPoint function") {
       Given("Polygon Data Frame, Point DataFrame, LineString Data Frame")
 
