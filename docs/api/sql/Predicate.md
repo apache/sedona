@@ -247,7 +247,7 @@ Introduction: This function tests the relationship between two [Dimensionally Ex
 
 Format: `ST_RelateMatch(matrix1: String, matrix2: String)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example:
 
