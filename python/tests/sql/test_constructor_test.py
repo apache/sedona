@@ -41,6 +41,20 @@ class TestConstructors(TestBase):
         point_df = self.spark.sql("SELECT ST_PointM(1.2345, 2.3456, 3.4567)")
         assert point_df.count() == 1
 
+    def test_st_makepointm(self):
+        point_csv_df = self.spark.read.format("csv").\
+            option("delimiter", ",").\
+            option("header", "false").\
+            load(csv_point_input_location)
+
+        point_csv_df.createOrReplaceTempView("pointtable")
+
+        point_df = self.spark.sql("select ST_MakePointM(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20)), 2.0) as arealandmark from pointtable")
+        assert point_df.count() == 1000
+
+        point_df = self.spark.sql("SELECT ST_AsText(ST_MakePointM(1.2345, 2.3456, 3.4567))")
+        assert point_df.take(1)[0][0] == "POINT M(1.2345 2.3456 3.4567)"
+
     def test_st_makepoint(self):
         point_csv_df = self.spark.read.format("csv").\
             option("delimiter", ",").\
@@ -115,6 +129,15 @@ class TestConstructors(TestBase):
         polygon_df.show(10)
         assert polygon_df.count() == 100
 
+    def test_st_point_from_geohash(self):
+        actual = self.spark.sql("select ST_AsText(ST_PointFromGeohash('9qqj7nmxncgyy4d0dbxqz0', 4))").take(1)[0][0]
+        expected = "POINT (-115.13671875 36.123046875)"
+        assert actual == expected
+
+        actual = self.spark.sql("select ST_AsText(ST_PointFromGeohash('9qqj7nmxncgyy4d0dbxqz0'))").take(1)[0][0]
+        expected = "POINT (-115.17281600000001 36.11464599999999)"
+        assert actual == expected
+
     def test_st_geometry_from_text(self):
         polygon_wkt_df = self.spark.read.format("csv").\
             option("delimiter", "\t").\
@@ -152,6 +175,17 @@ class TestConstructors(TestBase):
         polygon_df.show(10)
         assert polygon_df.count() == 100
 
+    def test_st_linestring_from_wkb(self):
+        linestring_ba = self.spark.sql("select unhex('0102000000020000000000000084d600c00000000080b5d6bf00000060e1eff7bf00000080075de5bf') as wkb")
+        actual = linestring_ba.selectExpr("ST_AsText(ST_LineStringFromWKB(wkb))").take(1)[0][0]
+        expected = "LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)"
+        assert actual == expected
+
+        linestring_s = self.spark.sql("select '0102000000020000000000000084d600c00000000080b5d6bf00000060e1eff7bf00000080075de5bf' as wkb")
+        actual = linestring_s.selectExpr("ST_AsText(ST_LinestringFromWKB(wkb))").take(1)[0][0]
+        assert actual == expected
+
+
     def test_st_geom_from_geojson(self):
         polygon_json_df = self.spark.read.format("csv").\
             option("delimiter", "\t").\
@@ -181,3 +215,29 @@ class TestConstructors(TestBase):
         input_df.createOrReplaceTempView("input_wkt")
         line_df = self.spark.sql("select ST_MPolyFromText(wkt) as geom from input_wkt")
         assert line_df.count() == 1
+
+    def test_mpoint_from_text(self):
+        baseDf = self.spark.sql("SELECT 'MULTIPOINT ((10 10), (20 20), (30 30))' as geom, 4326 as srid")
+        actual = baseDf.selectExpr("ST_AsText(ST_MPointFromText(geom))").take(1)[0][0]
+        expected = 'MULTIPOINT ((10 10), (20 20), (30 30))'
+        assert expected == actual
+
+        actualGeom = baseDf.selectExpr("ST_MPointFromText(geom, srid) as geom")
+        actual = actualGeom.selectExpr("ST_AsText(geom)").take(1)[0][0]
+        assert expected == actual
+
+        actualSrid = actualGeom.selectExpr("ST_SRID(geom)").take(1)[0][0]
+        assert actualSrid == 4326
+
+    def test_geom_coll_from_text(self):
+        baseDf = self.spark.sql("SELECT 'GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))' as geom, 4326 as srid")
+        actual = baseDf.selectExpr("ST_AsText(ST_GeomCollFromText(geom))").take(1)[0][0]
+        expected = 'GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))'
+        assert expected == actual
+
+        actualGeom = baseDf.selectExpr("ST_GeomCollFromText(geom, srid) as geom")
+        actual = actualGeom.selectExpr("ST_AsText(geom)").take(1)[0][0]
+        assert expected == actual
+
+        actualSrid = actualGeom.selectExpr("ST_SRID(geom)").take(1)[0][0]
+        assert actualSrid == 4326

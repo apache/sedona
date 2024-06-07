@@ -92,6 +92,14 @@ public class Constructors {
         return geom;
     }
 
+    public static Geometry mPointFromText(String wkt, int srid) throws ParseException {
+        if (wkt == null || !wkt.startsWith("MULTIPOINT")) {
+            return null;
+        }
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        return new WKTReader(geometryFactory).read(wkt);
+    }
+
     public static Geometry mLineFromText(String wkt, int srid) throws ParseException {
         if (wkt == null || !wkt.startsWith("MULTILINESTRING")) {
             return null;
@@ -102,6 +110,14 @@ public class Constructors {
 
     public static Geometry mPolyFromText(String wkt, int srid) throws ParseException {
         if (wkt == null || !wkt.startsWith("MULTIPOLYGON")) {
+            return null;
+        }
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+        return new WKTReader(geometryFactory).read(wkt);
+    }
+
+    public static Geometry geomCollFromText(String wkt, int srid) throws ParseException {
+        if (wkt == null || !wkt.startsWith("GEOMETRYCOLLECTION")) {
             return null;
         }
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
@@ -125,6 +141,11 @@ public class Constructors {
         // See srid parameter discussion in https://issues.apache.org/jira/browse/SEDONA-234
         GeometryFactory geometryFactory = new GeometryFactory();
         return geometryFactory.createPoint(new Coordinate(x, y));
+    }
+
+    public static Geometry makePointM(double x, double y, double m) {
+        GeometryFactory geometryFactory = new GeometryFactory();
+        return geometryFactory.createPoint(new CoordinateXYM(x, y, m));
     }
 
     public static Geometry makePoint(Double x, Double y, Double z, Double m){
@@ -244,6 +265,10 @@ public class Constructors {
         } catch (GeoHashDecoder.InvalidGeoHashException e) {
             return null;
         }
+    }
+
+    public static Geometry pointFromGeoHash(String geoHash, Integer precision) {
+        return geomFromGeoHash(geoHash, precision).getCentroid();
     }
 
     public static Geometry geomFromGML(String gml) throws IOException, ParserConfigurationException, SAXException {

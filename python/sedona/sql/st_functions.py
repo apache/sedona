@@ -57,6 +57,20 @@ def ST_3DDistance(a: ColumnOrName, b: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_3DDistance", (a, b))
 
+@validate_argument_types
+def ST_AddMeasure(geom: ColumnOrName, measureStart: Union[ColumnOrName, float], measureEnd: Union[ColumnOrName, float]) -> Column:
+    """Interpolate measure values with the provided start and end points and return the result geometry.
+
+    :param geom: Geometry column to use in the calculation.
+    :type geom: ColumnOrName
+    :param measureStart: Start point for the measure.
+    :type measureStart: ColumnOrName
+    :param measureEnd: End point for the measure.
+    :type measureEnd: ColumnOrName
+    :return: Result geometry column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_AddMeasure", (geom, measureStart, measureEnd))
 
 @validate_argument_types
 def ST_AddPoint(line_string: ColumnOrName, point: ColumnOrName, index: Optional[Union[ColumnOrName, int]] = None) -> Column:
@@ -122,6 +136,19 @@ def ST_AsEWKB(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_AsEWKB", geometry)
+
+@validate_argument_types
+def ST_AsHEXEWKB(geometry: ColumnOrName, endian: Optional[ColumnOrName] = None) -> Column:
+    """Generate the Extended Well-Known Binary representation of a geometry as Hex string.
+
+    :param geometry: Geometry to generate EWKB for.
+    :type geometry: ColumnOrName
+    :return: Extended Well-Known Binary representation of geometry as Hex string.
+    :rtype: Column
+    """
+    args = (geometry) if endian is None else (geometry, endian)
+
+    return _call_st_function("ST_AsHEXEWKB", args)
 
 
 @validate_argument_types
@@ -780,6 +807,17 @@ def ST_Length(geometry: ColumnOrName) -> Column:
     return _call_st_function("ST_Length", geometry)
 
 @validate_argument_types
+def ST_Length2D(geometry: ColumnOrName) -> Column:
+    """Calculate the length of a linestring geometry.
+
+    :param geometry: Linestring geometry column to calculate length for.
+    :type geometry: ColumnOrName
+    :return: Length of geometry as a double column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_Length2D", geometry)
+
+@validate_argument_types
 def ST_LengthSpheroid(geometry: ColumnOrName) -> Column:
     """Calculate the perimeter of a geometry using WGS84 spheroid.
 
@@ -858,6 +896,46 @@ def ST_LineSubstring(line_string: ColumnOrName, start_fraction: ColumnOrNameOrNu
     return _call_st_function("ST_LineSubstring", (line_string, start_fraction, end_fraction))
 
 @validate_argument_types
+def ST_LocateAlong(geom: ColumnOrName, measure: Union[ColumnOrName, float], offset: Optional[Union[ColumnOrName, float]] = None) -> Column:
+    """return locations along a measure geometry that have the given measure value.
+
+    :param geom:
+    :type geom: ColumnOrName
+    :param measure:
+    :type measure: Union[ColumnOrName, float]
+    :param offset:
+    :type offset: Union[ColumnOrNameOrNumber, float]
+    :return: Locations along a measure geometry that have the given measure value.
+    :rtype: Column
+    """
+    args = (geom, measure) if offset is None else (geom, measure, offset)
+    return _call_st_function("ST_LocateAlong", args)
+
+@validate_argument_types
+def ST_LongestLine(geom1: ColumnOrName, geom2: ColumnOrName) -> Column:
+    """Compute the longest line between the two geometries
+
+    :param geom1:
+    :type geom1: ColumnOrName
+    :param geom2:
+    :type geom2: ColumnOrName
+    :return: Longest line between the two input geometries
+    :rtype: Column
+    """
+    return _call_st_function("ST_LongestLine", (geom1, geom2))
+
+@validate_argument_types
+def ST_HasZ(geom: ColumnOrName) -> Column:
+    """Check whether geometry has Z coordinate
+
+    :param geom: Geometry
+    :type geom: ColumnOrName
+    :return: True if geometry has Z coordinate, else False
+    :rtype: Column
+    """
+    return _call_st_function("ST_HasZ", geom)
+
+@validate_argument_types
 def ST_HasM(geom: ColumnOrName) -> Column:
     """Check whether geometry has M coordinate
 
@@ -918,6 +996,17 @@ def ST_MakeLine(geom1: ColumnOrName, geom2: Optional[ColumnOrName] = None) -> Co
     return _call_st_function("ST_MakeLine", args)
 
 @validate_argument_types
+def ST_Points(geometry: ColumnOrName) -> Column:
+    """Creates a MultiPoint geometry consisting of all the coordinates of the input geometry
+
+    :param geometry: input geometry.
+    :type geometry: ColumnOrName
+    :return: Multipoint geometry
+    :rtype: Column
+    """
+    return _call_st_function("ST_Points", (geometry))
+
+@validate_argument_types
 def ST_Polygon(line_string: ColumnOrName, srid: ColumnOrNameOrNumber) -> Column:
     """Create a polygon built from the given LineString and sets the spatial reference system from the srid.
 
@@ -970,6 +1059,40 @@ def ST_MakeValid(geometry: ColumnOrName, keep_collapsed: Optional[Union[ColumnOr
     args = (geometry,) if keep_collapsed is None else (geometry, keep_collapsed)
     return _call_st_function("ST_MakeValid", args)
 
+@validate_argument_types
+def ST_MaxDistance(geom1: ColumnOrName, geom2: ColumnOrName) -> Column:
+    """Calculate the maximum distance between two furthest points in the geometries
+
+    :param geom1:
+    :type geom1: ColumnOrName
+    :param geom2:
+    :type geom2: ColumnOrName
+    :return: Maximum distance between the geometries
+    :rtype: Column
+    """
+    return _call_st_function("ST_MaxDistance", (geom1, geom2))
+
+@validate_argument_types
+def ST_MinimumClearance(geometry: ColumnOrName) -> Column:
+    """Calculate the minimum clearance between two vertices
+
+    :param geometry: Geometry column
+    :type geometry: ColumnOrName
+    :return: Minimum Clearance between the geometries
+    :rtype: Column
+    """
+    return _call_st_function("ST_MinimumClearance", geometry)
+
+@validate_argument_types
+def ST_MinimumClearanceLine(geometry: ColumnOrName) -> Column:
+    """Calculate the minimum clearance Linestring between two vertices
+
+    :param geometry: Geometry column
+    :type geometry: ColumnOrName
+    :return: Minimum Clearance Linestring between the geometries
+    :rtype: Column
+    """
+    return _call_st_function("ST_MinimumClearanceLine", geometry)
 
 @validate_argument_types
 def ST_MinimumBoundingCircle(geometry: ColumnOrName, quadrant_segments: Optional[Union[ColumnOrName, int]] = None) -> Column:
@@ -1301,6 +1424,34 @@ def ST_SimplifyPreserveTopology(geometry: ColumnOrName, distance_tolerance: Colu
     """
     return _call_st_function("ST_SimplifyPreserveTopology", (geometry, distance_tolerance))
 
+@validate_argument_types
+def ST_SimplifyVW(geometry: ColumnOrName, distance_tolerance: ColumnOrNameOrNumber) -> Column:
+    """Simplify a geometry using Visvalingam-Whyatt algorithm within a specified tolerance while preserving topological relationships.
+
+    :param geometry: Geometry column to simplify.
+    :type geometry: ColumnOrName
+    :param distance_tolerance: Tolerance for merging points together to simplify the geometry as either a number or numeric column.
+    :type distance_tolerance: ColumnOrNameOrNumber
+    :return: Simplified geometry as a geometry column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_SimplifyVW", (geometry, distance_tolerance))
+
+
+@validate_argument_types
+def ST_SimplifyPolygonHull(geometry: ColumnOrName, vertexFactor: ColumnOrNameOrNumber, isOuter: Optional[Union[ColumnOrName, bool]] = None) -> Column:
+    """Simplify a geometry using Visvalingam-Whyatt algorithm within a specified tolerance while preserving topological relationships.
+
+    :param geometry: Geometry column to simplify.
+    :type geometry: ColumnOrName
+    :param vertexFactor: Tolerance for merging points together to simplify the geometry as either a number or numeric column.
+    :type vertexFactor: ColumnOrNameOrNumber
+    :return: Simplified geometry as a geometry column.
+    :rtype: Column
+    """
+    args = (geometry, vertexFactor) if isOuter is None else (geometry, vertexFactor, isOuter)
+
+    return _call_st_function("ST_SimplifyPolygonHull", args)
 
 @validate_argument_types
 def ST_Split(input: ColumnOrName, blade: ColumnOrName) -> Column:
@@ -1370,6 +1521,16 @@ def ST_TriangulatePolygon(geom: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_TriangulatePolygon", geom)
 
+@validate_argument_types
+def ST_UnaryUnion(geom: ColumnOrName) -> Column:
+    """Calculate the unary union of a geometry
+
+        :param geom: Geometry to do union
+        :type geom: ColumnOrName
+        :return: Geometry representing the unary union of geom as a geometry column.
+        :rtype: Column
+        """
+    return _call_st_function("ST_UnaryUnion", geom)
 
 @validate_argument_types
 def ST_Union(a: ColumnOrName, b: Optional[ColumnOrName] = None) -> Column:
@@ -1475,6 +1636,18 @@ def ST_Z(point: ColumnOrName) -> Column:
     return _call_st_function("ST_Z", point)
 
 @validate_argument_types
+def ST_Zmflag(geom: ColumnOrName) -> Column:
+    """Return the code indicating the ZM coordinate dimension of a geometry
+        2D = 0, 3D-M = 1, 3D-Z = 2, 4D = 3
+
+    :param geom: Geometry column
+    :type geom: ColumnOrName
+    :return: Code for coordinate dimension of the geometry as an integer column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_Zmflag", geom)
+
+@validate_argument_types
 def ST_ZMax(geometry: ColumnOrName) -> Column:
     """Return the maximum Z coordinate of a geometry.
 
@@ -1515,6 +1688,52 @@ def ST_Force3D(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, floa
     """
     args = (geometry, zValue)
     return _call_st_function("ST_Force3D", args)
+
+@validate_argument_types
+def ST_Force3DM(geometry: ColumnOrName, mValue: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+    """
+    Return a geometry with a 3D coordinate of value 'mValue' forced upon it. No change happens if the geometry is already 3D
+    :param mValue: Optional value of m coordinate to be potentially added, default value is 0.0
+    :param geometry: Geometry column to make 3D
+    :return: 3D geometry with either already present m coordinate if any, or m coordinate with given mValue
+    """
+    args = (geometry, mValue)
+    return _call_st_function("ST_Force3DM", args)
+
+@validate_argument_types
+def ST_Force3DZ(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+    """
+    Return a geometry with a 3D coordinate of value 'zValue' forced upon it. No change happens if the geometry is already 3D
+    :param zValue: Optional value of z coordinate to be potentially added, default value is 0.0
+    :param geometry: Geometry column to make 3D
+    :return: 3D geometry with either already present z coordinate if any, or zcoordinate with given zValue
+    """
+    args = (geometry, zValue)
+    return _call_st_function("ST_Force3DZ", args)
+
+@validate_argument_types
+def ST_Force4D(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, float]] = 0.0,
+               mValue: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+    """
+    Return a geometry with a 4D coordinate of value 'zValue' and mValue forced upon it. No change happens if the
+    geometry is already 4D, if geometry either has z or m, it will not change the existing z or m value.
+
+    :param zValue: Optional value of z coordinate to be potentially added, default value is 0.0
+    :param geometry: Geometry column to make 4D
+    :return: 4D geometry with either already 4D geom or z and m component provided by zValue and mValue respectively
+    """
+    args = (geometry, zValue, mValue)
+    return _call_st_function("ST_Force4D", args)
+
+@validate_argument_types
+def ST_ForceCollection(geometry: ColumnOrName) -> Column:
+    """
+    Converts a geometry to a geometry collection
+
+    :param geometry: Geometry column to change orientation
+    :return: a Geometry Collection
+    """
+    return _call_st_function("ST_ForceCollection", geometry)
 
 @validate_argument_types
 def ST_ForcePolygonCW(geometry: ColumnOrName) -> Column:
@@ -1660,6 +1879,30 @@ def ST_Degrees(angleInRadian: Union[ColumnOrName, float]) -> Column:
     :return: Angle in Degrees
     """
     return _call_st_function("ST_Degrees", angleInRadian)
+
+@validate_argument_types
+def ST_DelaunayTriangles(geometry: ColumnOrName, tolerance: Optional[Union[ColumnOrName, float]] = None, flag: Optional[Union[ColumnOrName, int]] = None) -> Column:
+    """
+    Computes the Delaunay Triangles of the vertices of the input geometry.
+
+    :param geometry: Input geometry
+    :type geometry: ColumnOrName
+    :param tolerance:
+    :type tolerance: ColumnOrName or float
+    :param flag: Selects the output type
+    :type flag: ColumnOrName or int
+    :return: Delaunay triangles of the input geometry
+    :rtype: ColumnOrName
+    """
+
+    if flag is None and tolerance is None:
+        args = (geometry)
+    elif flag is None:
+        args = (geometry, tolerance)
+    else:
+        args = (geometry, tolerance, flag)
+    return _call_st_function("ST_DelaunayTriangles", args)
+
 @validate_argument_types
 def ST_HausdorffDistance(g1: ColumnOrName, g2: ColumnOrName, densityFrac: Optional[Union[ColumnOrName, float]] = -1) -> Column:
     """

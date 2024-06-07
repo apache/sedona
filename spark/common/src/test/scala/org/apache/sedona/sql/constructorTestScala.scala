@@ -49,6 +49,14 @@ class constructorTestScala extends TestBaseScala {
       assert(pointDf.count() == 1)
     }
 
+    it("Passed ST_MakePointM") {
+      val pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable")
+
+      val pointDf = sparkSession.sql("select ST_MakePointM(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20)), 2.0) as arealandmark from pointtable")
+      assert(pointDf.count() == 1000)
+    }
+
     it("Passed ST_MakePoint") {
 
       var pointCsvDF = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(csvPointInputLocation)
@@ -221,6 +229,16 @@ class constructorTestScala extends TestBaseScala {
       assert(polygonDf.count() == 8)
     }
 
+    it("Passed ST_PointFromGeoHash") {
+      var actual = sparkSession.sql("SELECT ST_AsText(ST_PointFromGeoHash('9qqj7nmxncgyy4d0dbxqz0', 4))").first().get(0)
+      var expected = "POINT (-115.13671875 36.123046875)"
+      assert(expected.equals(actual))
+
+      actual = sparkSession.sql("SELECT ST_AsText(ST_PointFromGeoHash('9qqj7nmxncgyy4d0dbxqz0'))").first().get(0)
+      expected = "POINT (-115.17281600000001 36.11464599999999)"
+      assert(expected.equals(actual))
+    }
+
     it("Passed ST_GeomFromText") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
@@ -298,6 +316,47 @@ class constructorTestScala extends TestBaseScala {
 
       intercept[Exception] {
         sparkSession.sql("SELECT ST_LineFromWKB('invalid')").collect()
+      }
+    }
+
+    it("Passed ST_LinestringFromWKB") {
+      val geometryDf = Seq(
+        "010200000003000000000000000000000000000000000000000000000000000840000000000000084000000000000010400000000000001040",
+        "0101000000000000000000F03F0000000000000040",
+        "01020000000300000000000000000000c000000000000000c000000000000010400000000000001040000000000000104000000000000000c0",
+        "0103000000010000000500000000000000000000000000000000000000000000000000f03f000000000000f03f0000000000001440000000000000f03f0000000000001440000000000000000000000000000000000000000000000000"
+      ).map(Tuple1.apply).toDF("wkb")
+
+      geometryDf.createOrReplaceTempView("wkbtable")
+
+      var validLineDf = sparkSession.sql("SELECT ST_LinestringFromWKB(wkbtable.wkb) FROM wkbtable")
+      var rows = validLineDf.collect()
+      assert(rows.length == 4)
+
+      var expectedPoints = Seq("LINESTRING (0 0, 3 3, 4 4)", null, "LINESTRING (-2 -2, 4 4, 4 -2)", null)
+      for (i <- rows.indices) {
+        if (expectedPoints(i) == null) {
+          assert(rows(i).isNullAt(0))
+        } else {
+          assert(rows(i).getAs[Geometry](0).toString == expectedPoints(i))
+        }
+      }
+
+      validLineDf = sparkSession.sql("SELECT ST_AsEWKT(ST_LinestringFromWKB(wkbtable.wkb, 4326)) FROM wkbtable")
+      rows = validLineDf.collect()
+      assert(rows.length == 4)
+
+      expectedPoints = Seq("SRID=4326;LINESTRING (0 0, 3 3, 4 4)", null, "SRID=4326;LINESTRING (-2 -2, 4 4, 4 -2)", null)
+      for (i <- rows.indices) {
+        if (expectedPoints(i) == null) {
+          assert(rows(i).isNullAt(0))
+        } else {
+          assert(rows(i).get(0).toString == expectedPoints(i))
+        }
+      }
+
+      intercept[Exception] {
+        sparkSession.sql("SELECT ST_LinestringFromWKB('invalid')").collect()
       }
     }
 
@@ -412,6 +471,32 @@ class constructorTestScala extends TestBaseScala {
     it("Passed ST_MPolyFromText With Srid") {
       var mLineDf = sparkSession.sql("select ST_MPolyFromText('MULTIPOLYGON(((-70.916 42.1002,-70.9468 42.0946,-70.9765 42.0872 )))',4269)")
       assert(mLineDf.count() == 1)
+    }
+
+    it("Passed ST_MPointFromText") {
+      val baseDf = sparkSession.sql("SELECT 'MULTIPOINT ((10 10), (20 20), (30 30))' as geom, 4326 as srid")
+      var actual = baseDf.selectExpr("ST_MPointFromText(geom)").first().get(0).asInstanceOf[Geometry].toText
+      val expected = "MULTIPOINT ((10 10), (20 20), (30 30))"
+      assert(expected.equals(actual))
+
+      val actualGeom = baseDf.selectExpr("ST_MPointFromText(geom, srid)").first().get(0).asInstanceOf[Geometry]
+      actual = actualGeom.toText
+      assert(expected.equals(actual))
+      val actualSrid = actualGeom.getSRID
+      assert(4326 == actualSrid)
+    }
+
+    it("Passed ST_GeomCollFromText") {
+      val baseDf = sparkSession.sql("SELECT 'GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))' as geom, 4326 as srid")
+      var actual = baseDf.selectExpr("ST_GeomCollFromText(geom)").first().get(0).asInstanceOf[Geometry].toText
+      val expected = "GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))"
+      assert(expected.equals(actual))
+
+      val actualGeom = baseDf.selectExpr("ST_GeomCollFromText(geom, srid)").first().get(0).asInstanceOf[Geometry]
+      actual = actualGeom.toText
+      assert(expected.equals(actual))
+      val actualSrid = actualGeom.getSRID
+      assert(4326 == actualSrid)
     }
   }
 }

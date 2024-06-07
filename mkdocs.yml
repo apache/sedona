@@ -23,6 +23,7 @@ nav:
         - Install on Wherobots: setup/wherobots.md
         - Install on Databricks: setup/databricks.md
         - Install on AWS EMR: setup/emr.md
+        - Install on AWS Glue: setup/glue.md
         - Install on Microsoft Fabric: setup/fabric.md
         - Set up Spark cluster manually: setup/cluster.md
       - Install with Apache Flink:

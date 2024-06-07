@@ -114,6 +114,23 @@ public class TestFunctionsV2
                 new byte[] {1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -16, 63, 0, 0, 0, 0, 0, 0, -16, 63}
         );
     }
+
+    @Test
+    public void test_ST_AsHEXEWKB() throws SQLException
+    {
+        registerUDFV2("ST_AsHEXEWKB", String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsHEXEWKB(ST_GeometryFromWKT('POINT(1 2)'))",
+                "0101000000000000000000F03F0000000000000040"
+        );
+
+        registerUDFV2("ST_AsHEXEWKB", String.class, String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_AsHEXEWKB(ST_GeometryFromWKT('POINT(1 2)'), 'XDR')",
+                "00000000013FF00000000000004000000000000000"
+        );
+    }
+
     @Test
     public void test_ST_AsEWKT() {
         registerUDFV2("ST_AsEWKT", String.class);
@@ -303,6 +320,16 @@ public class TestFunctionsV2
                 "POLYGON((0 -3,-3 -3,-3 3,0 3,0 -3))"
         );
     }
+
+    @Test
+    public void test_ST_DelaunayTriangles() {
+        registerUDFV2("ST_DelaunayTriangles", String.class);
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_DelaunayTriangles(ST_GeomFromText('POLYGON ((10 10, 15 30, 20 25, 25 35, 30 20, 40 30, 50 10, 45 5, 35 15, 30 5, 25 15, 20 10, 15 20, 10 10))')))",
+                "GEOMETRYCOLLECTION(POLYGON((15 30,10 10,15 20,15 30)),POLYGON((15 30,15 20,20 25,15 30)),POLYGON((15 30,20 25,25 35,15 30)),POLYGON((25 35,20 25,30 20,25 35)),POLYGON((25 35,30 20,40 30,25 35)),POLYGON((40 30,30 20,35 15,40 30)),POLYGON((40 30,35 15,50 10,40 30)),POLYGON((50 10,35 15,45 5,50 10)),POLYGON((30 5,45 5,35 15,30 5)),POLYGON((30 5,35 15,25 15,30 5)),POLYGON((30 5,25 15,20 10,30 5)),POLYGON((30 5,20 10,10 10,30 5)),POLYGON((10 10,20 10,15 20,10 10)),POLYGON((15 20,20 10,25 15,15 20)),POLYGON((15 20,25 15,20 25,15 20)),POLYGON((20 25,25 15,30 20,20 25)),POLYGON((30 20,25 15,35 15,30 20)))"
+        );
+    }
+
     @Test
     public void test_ST_Dimension() {
         registerUDFV2("ST_Dimension", String.class);
@@ -397,6 +424,15 @@ public class TestFunctionsV2
         verifySqlSingleRes(
                 "select sedona.ST_GeometryType(ST_GeometryFromWKT('POINT(1 2)'))",
                 "ST_Point"
+        );
+    }
+
+    @Test
+    public void test_ST_HasZ() {
+        registerUDFV2("ST_HasZ", String.class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_HasZ(ST_GeomFromText('POINT Z(1 2 3)'))",
+                true
         );
     }
 
@@ -513,6 +549,15 @@ public class TestFunctionsV2
                 2.8284271247461903
         );
     }
+
+    @Test
+    public void test_ST_Length2D() {
+        registerUDFV2("ST_Length2D", String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_Length2D(ST_GeometryFromWKT('LINESTRING(0 0, 2 2)'))",
+                2.8284271247461903
+        );
+    }
     @Test
     public void test_ST_LineFromMultiPoint() {
         registerUDFV2("ST_LineFromMultiPoint", String.class);
@@ -556,6 +601,15 @@ public class TestFunctionsV2
         );
     }
     @Test
+    public void test_ST_LongestLine() {
+        registerUDFV2("ST_LongestLine", String.class, String.class);
+        verifySqlSingleRes(
+                "SELECT ST_AsText(sedona.ST_LongestLine(ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))'), ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))')))",
+                "LINESTRING(180 180,20 50)"
+        );
+    }
+
+    @Test
     public void test_ST_MakePolygon() {
         registerUDFV2("ST_MakePolygon", String.class);
         registerUDFV2("ST_MakePolygon", String.class, String.class);
@@ -573,6 +627,34 @@ public class TestFunctionsV2
                 "MULTIPOLYGON(((1 5,3 3,1 1,1 5)),((5 3,7 5,7 1,5 3)))"
         );
     }
+
+    @Test
+    public void test_ST_MaxDistance() {
+        registerUDFV2("ST_MaxDistance", String.class, String.class);
+        verifySqlSingleRes(
+                "SELECT sedona.ST_MaxDistance(ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))'), ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))'))",
+                206.15528128088303
+        );
+    }
+
+    @Test
+    public void test_ST_MinimumClearance() {
+        registerUDFV2("ST_MinimumClearance", String.class);
+        verifySqlSingleRes(
+                "select sedona.ST_MinimumClearance(ST_GeomFromText('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))'))",
+                0.5
+        );
+    }
+
+    @Test
+    public void test_ST_MinimumClearanceLine() {
+        registerUDFV2("ST_MinimumClearanceLine", String.class);
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_MinimumClearanceLine(ST_GeomFromText('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))')))",
+                "LINESTRING(64.5 16,65 16)"
+        );
+    }
+
     @Test
     public void test_ST_MinimumBoundingCircle() {
         registerUDFV2("ST_MinimumBoundingCircle", String.class, int.class);
@@ -665,6 +747,15 @@ public class TestFunctionsV2
         verifySqlSingleRes(
                 "select ST_AsText(sedona.ST_PointOnSurface(ST_GeometryFromWKT('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))')))",
                 "POINT(2.5 2.5)"
+        );
+    }
+
+    @Test
+    public void test_ST_Points() {
+        registerUDFV2("ST_Points", String.class);
+        verifySqlSingleRes(
+                "select ST_AsEWKT(sedona.ST_Points(ST_GeometryFromWKT('LINESTRING(0 0, 0 1, 0 2, 0 3, 0 4)')))",
+                "SRID=0;MULTIPOINT((0 0),(0 1),(0 2),(0 3),(0 4))"
         );
     }
 
@@ -763,6 +854,30 @@ public class TestFunctionsV2
                 "POLYGON((8 25,28 22,15 11,33 3,56 30,47 44,35 36,43 19,24 39,8 25))"
         );
     }
+
+    @Test
+    public void test_ST_SimplifyVW() {
+        registerUDFV2("ST_SimplifyVW", String.class, double.class);
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_SimplifyVW(ST_GeometryFromWKT('POLYGON((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33,46 34, 47 44, 35 36, 45 33, 43 19, 29 21, 29 22,35 26, 24 39, 8 25))'), 10))",
+                "POLYGON((8 25,28 22,28 20,15 11,33 3,56 30,46 33,47 44,35 36,45 33,43 19,29 21,35 26,24 39,8 25))"
+        );
+    }
+
+    @Test
+    public void test_ST_SimplifyPolygonHull() {
+        registerUDFV2("ST_SimplifyPolygonHull", String.class, double.class, boolean.class);
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_SimplifyPolygonHull(ST_GeomFromText('POLYGON ((30 10, 40 40, 45 45, 20 40, 25 35, 10 20, 15 15, 30 10))'), 0.3, false))",
+                "POLYGON((30 10,40 40,10 20,30 10))"
+        );
+        registerUDFV2("ST_SimplifyPolygonHull", String.class, double.class);
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_SimplifyPolygonHull(ST_GeomFromText('POLYGON ((30 10, 40 40, 45 45, 20 40, 25 35, 10 20, 15 15, 30 10))'), 0.3))",
+                "POLYGON((30 10,15 15,10 20,20 40,45 45,30 10))"
+        );
+    }
+
     @Test
     public void test_ST_Split() {
         registerUDFV2("ST_Split", String.class, String.class);
@@ -825,6 +940,15 @@ public class TestFunctionsV2
         verifySqlSingleRes(
                 "select ST_AsText(sedona.ST_Union(ST_GeometryFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeometryFromWKT('POLYGON ((-2 1, 2 1, 2 4, -2 4, -2 1))')))",
                 "POLYGON((2 3,3 3,3 -3,-3 -3,-3 3,-2 3,-2 4,2 4,2 3))"
+        );
+    }
+
+    @Test
+    public void test_ST_UnaryUnion() {
+        registerUDFV2("ST_UnaryUnion", String.class);
+        verifySqlSingleRes(
+                "select ST_AsText(sedona.ST_UnaryUnion(ST_GeometryFromWKT('MULTILINESTRING ((10 10, 20 20, 30 30),(25 25, 35 35, 45 45),(40 40, 50 50, 60 60),(55 55, 65 65, 75 75))')))",
+                "MULTILINESTRING((10 10,20 20,25 25),(25 25,30 30),(30 30,35 35,40 40),(40 40,45 45),(45 45,50 50,55 55),(55 55,60 60),(60 60,65 65,75 75))"
         );
     }
 
@@ -984,6 +1108,30 @@ public class TestFunctionsV2
         verifySqlSingleRes(
                 "SELECT ST_AsText(sedona.ST_Force3D(ST_GeometryFromWKT('LINESTRING(0 1, 1 2, 2 1)'), 1))",
                 "LINESTRINGZ(0 1 1,1 2 1,2 1 1)"
+        );
+    }
+
+    @Test
+    public void test_ST_Force3DZ() {
+        registerUDFV2("ST_Force3DZ", String.class);
+        verifySqlSingleRes(
+                "SELECT ST_AsText(sedona.ST_Force3DZ(ST_GeometryFromWKT('LINESTRING(0 1, 1 2, 2 1)')))",
+                "LINESTRINGZ(0 1 0,1 2 0,2 1 0)"
+        );
+        registerUDFV2("ST_Force3DZ", String.class, double.class);
+        verifySqlSingleRes(
+                "SELECT ST_AsText(sedona.ST_Force3DZ(ST_GeometryFromWKT('LINESTRING(0 1, 1 2, 2 1)'), 1))",
+                "LINESTRINGZ(0 1 1,1 2 1,2 1 1)"
+        );
+    }
+
+    @Test
+    public void test_ST_ForceCollection() {
+        registerUDFV2("ST_ForceCollection", String.class);
+        registerUDFV2("ST_NumGeometries", String.class);
+        verifySqlSingleRes(
+                "SELECT ST_NumGeometries(sedona.ST_ForceCollection(ST_GeomFromWKT('MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)')))",
+                6
         );
     }
 

@@ -116,6 +116,29 @@ public class TestPredicates extends TestBase{
                 true
         );
     }
+
+    @Test
+    public void test_ST_Relate() {
+        registerUDF("ST_Relate", byte[].class, byte[].class);
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_Relate(SEDONA.ST_GeomFromWKT('LINESTRING (1 1, 5 5)'), SEDONA.ST_GeomFromWKT('POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))'))",
+                "1010F0212"
+        );
+        registerUDF("ST_Relate", byte[].class, byte[].class, String.class);
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_Relate(SEDONA.ST_GeomFromWKT('LINESTRING (1 1, 5 5)'), SEDONA.ST_GeomFromWKT('POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))'), '1010F0212')",
+                true
+        );
+    }
+
+    @Test
+    public void test_ST_RelateMatch() {
+        registerUDF("ST_RelateMatch", String.class, String.class);
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_RelateMatch('101202FFF', 'TTTTTTFFF')",
+                true
+        );
+    }
     @Test
     public void test_ST_Within() {
         registerUDF("ST_Within", byte[].class, byte[].class);

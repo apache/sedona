@@ -134,6 +134,39 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void asHexEWKB() throws ParseException {
+        String[] geoms = {
+                "POINT(1 2)",
+                "LINESTRING (30 20, 20 25, 20 15, 30 20)",
+                "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (5 5, 5 8, 8 8, 8 5, 5 5))"
+
+        };
+        String[] expected = {
+                //NDR - little endian
+                "0101000000000000000000F03F0000000000000040",
+                "0102000000040000000000000000003E4000000000000034400000000000003440000000000000394000000000000034400000000000002E400000000000003E400000000000003440",
+                "010300000002000000050000000000000000000000000000000000000000000000000024400000000000000000000000000000244000000000000024400000000000000000000000000000244000000000000000000000000000000000050000000000000000001440000000000000144000000000000014400000000000002040000000000000204000000000000020400000000000002040000000000000144000000000000014400000000000001440",
+
+                // XDR - big endian
+                "00000000013FF00000000000004000000000000000",
+                "000000000200000004403E0000000000004034000000000000403400000000000040390000000000004034000000000000402E000000000000403E0000000000004034000000000000",
+                "000000000300000002000000050000000000000000000000000000000040240000000000000000000000000000402400000000000040240000000000000000000000000000402400000000000000000000000000000000000000000000000000054014000000000000401400000000000040140000000000004020000000000000402000000000000040200000000000004020000000000000401400000000000040140000000000004014000000000000"
+        };
+        testAsHexEWKB(geoms, expected);
+    }
+
+    public void testAsHexEWKB(String[] geoms, String[] expected) throws ParseException {
+        String[] endians = {"NDR", "XDR"};
+        int offset = 0;
+        for (String e: endians) {
+            for (int i = 0; i < geoms.length; i++) {
+                assertEquals(expected[i + offset], Functions.asHexEWKB(Constructors.geomFromWKT(geoms[i], 0), e));
+            }
+            offset = 3;
+        }
+    }
+
+    @Test
     public void pointFromWKB() throws Exception{
         Geometry geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0));
         byte[] wkbGeom = Functions.asWKB(geometry);
@@ -409,6 +442,21 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void hasZ() throws ParseException {
+        Geometry geom = Constructors.geomFromWKT("POINT ZM(1 2 3 4)", 0);
+        assertTrue(Functions.hasZ(geom));
+
+        geom = Constructors.geomFromWKT("POINT(1 2)", 0);
+        assertFalse(Functions.hasZ(geom));
+
+        geom = Constructors.geomFromWKT("POINT(34 25)", 0);
+        assertFalse(Functions.hasZ(geom));
+
+        geom = Constructors.geomFromWKT("POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))", 0);
+        assertTrue(Functions.hasZ(geom));
+    }
+
+    @Test
     public void hasM() throws ParseException {
         Geometry geom = Constructors.geomFromWKT("POINT ZM(1 2 3 4)", 0);
         assertTrue(Functions.hasM(geom));
@@ -677,7 +725,6 @@ public class FunctionsTest extends TestBase {
         long[] cellIds = new long[]{1152991873351024640L, 1153132610839379968L, 1153273348327735296L, 1153414085816090624L};
         Geometry[] polygons = Functions.s2ToGeom(cellIds);
         String actual = Functions.asWKT(Functions.union(polygons));
-        System.out.println(Arrays.toString(polygons));
         String expected = "POLYGON ((0.6014716838554667 -0.0000000000000254, 0.6014716838554158 -0.0000000000000254, -0.0000000000000254 -0.0000000000000254, -0.0000000000000254 0.6014385452363985, -0.0000000000000254 0.6014716838554667, -0.0000000000000254 1.2121321753162642, 0.6014716838554667 1.2121321753162642, 0.6014716838554667 1.2120654068310366, 1.2121321753162642 1.2120654068310366, 1.2121321753162642 0.6014385452364494, 1.2121321753162642 0.6013371003640015, 1.2121321753162642 -0.0000000000000254, 0.6014716838554667 -0.0000000000000254))";
         assertEquals(expected, actual);
 
@@ -695,7 +742,24 @@ public class FunctionsTest extends TestBase {
         actual = Functions.asWKT(Functions.union(mPoly));
         expected = "POLYGON ((0.6014716838554667 -0.0000000000000254, 0.6014716838554158 -0.0000000000000254, -0.0000000000000254 -0.0000000000000254, -0.0000000000000254 0.6014385452363985, -0.0000000000000254 0.6014716838554667, -0.0000000000000254 1.2121321753162642, 0.6014716838554667 1.2121321753162642, 0.6014716838554667 1.2120654068310366, 1.2121321753162642 1.2120654068310366, 1.2121321753162642 0.6014385452364494, 1.2121321753162642 0.6013371003640015, 1.2121321753162642 -0.0000000000000254, 0.6014716838554667 -0.0000000000000254))";
         assertEquals(expected, actual);
-        System.out.println(actual);
+    }
+
+    @Test
+    public void testUnaryUnion() throws ParseException {
+        Geometry geometry = Constructors.geomFromEWKT("MULTIPOLYGON(((0 10,0 30,20 30,20 10,0 10)),((10 0,10 20,30 20,30 0,10 0)))");
+        String actual = Functions.unaryUnion(geometry).toString();
+        String expected = "POLYGON ((10 0, 10 10, 0 10, 0 30, 20 30, 20 20, 30 20, 30 0, 10 0))";
+        assertEquals(expected, actual);
+
+        geometry = Constructors.geomFromEWKT("MULTILINESTRING ((10 10, 20 20, 30 30),(25 25, 35 35, 45 45),(40 40, 50 50, 60 60),(55 55, 65 65, 75 75))");
+        actual = Functions.unaryUnion(geometry).toString();
+        expected = "MULTILINESTRING ((10 10, 20 20, 25 25), (25 25, 30 30), (30 30, 35 35, 40 40), (40 40, 45 45), (45 45, 50 50, 55 55), (55 55, 60 60), (60 60, 65 65, 75 75))";
+        assertEquals(expected, actual);
+
+        geometry = Constructors.geomFromEWKT("GEOMETRYCOLLECTION (POINT (10 10),LINESTRING (20 20, 30 30),POLYGON ((25 25, 35 35, 35 35, 25 25)),MULTIPOINT (30 30, 40 40),MULTILINESTRING ((40 40, 50 50), (45 45, 55 55)),MULTIPOLYGON (((50 50, 60 60, 60 60, 50 50)), ((55 55, 65 65, 65 65, 55 55))))");
+        actual = Functions.unaryUnion(geometry).toString();
+        expected = "GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (20 20, 30 30), LINESTRING (40 40, 45 45), LINESTRING (45 45, 50 50), LINESTRING (50 50, 55 55))";
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -965,6 +1029,43 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void longestLine() throws ParseException {
+        Geometry geom1 = Constructors.geomFromWKT("POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))", 0);
+        Geometry geom2 = Functions.buffer(Constructors.geomFromWKT("POINT (10.123456 -20.654321)", 0), 30);
+        String actual = Functions.asWKT(Functions.longestLine(geom1, geom2));
+        String expected = "LINESTRING (40 40, -1.3570469709526929 -48.37070697533861)";
+        assertEquals(expected, actual);
+
+        geom1 = Constructors.geomFromWKT("POLYGON ((190 150, 20 10, 160 70, 190 150))", 0);
+        geom2 = Constructors.geomFromWKT("POINT(80 160)", 0);
+        actual = Functions.asWKT(Functions.reducePrecision(Functions.longestLine(geom1, Functions.buffer(geom2, 30)), 8));
+        expected = "LINESTRING (20 10, 91.48050297 187.71638598)";
+        assertEquals(expected, actual);
+
+        geom1 = Constructors.geomFromWKT("POINT (160 40)", 0);
+        geom2 = Constructors.geomFromWKT("LINESTRING (10 30, 50 50, 30 110, 70 90, 180 140, 130 190)", 0);
+        actual = Functions.asWKT(Functions.longestLine(geom1, geom2));
+        expected = "LINESTRING (160 40, 130 190)";
+        assertEquals(expected, actual);
+
+        geom1 = Constructors.geomFromWKT("POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))", 0);
+        actual = Functions.asWKT(Functions.normalize(Functions.longestLine(geom1, geom1)));
+        expected = "LINESTRING (20 50, 180 180)";
+        assertEquals(expected, actual);
+
+        geom1 = Constructors.geomFromWKT("POINT Z (10 20 5)", 0);
+        geom2 = Constructors.geomFromWKT("POLYGON Z ((30 40 10, 40 50 15, 50 60 20, 30 40 10))", 0);
+        actual = Functions.asWKT(Functions.longestLine(geom1, geom2));
+        expected = "LINESTRING Z(10 20 5, 50 60 20)";
+        assertEquals(expected, actual);
+
+        geom1 = Constructors.geomFromWKT("POINT (0 0)", 0);
+        actual = Functions.asWKT(Functions.longestLine(geom1, geom1));
+        expected = "LINESTRING (0 0, 0 0)";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void makepolygonWithSRID() {
         Geometry lineString1 = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 1, 1, 1, 0, 0, 0));
         Geometry actual1 = Functions.makepolygonWithSRID(lineString1, 4326);
@@ -1186,6 +1287,25 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void delaunayTriangles() throws ParseException {
+        Geometry poly = Constructors.geomFromEWKT("POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))");
+        Geometry point = Constructors.geomFromEWKT("POINT (110 170)");
+        Geometry combined = Functions.union(poly, point);
+        String actual = Functions.delaunayTriangle(combined).toText();
+        String expected = "GEOMETRYCOLLECTION (POLYGON ((20 40, 125 100, 50 60, 20 40)), POLYGON ((20 40, 50 60, 110 170, 20 40)), POLYGON ((110 170, 50 60, 125 100, 110 170)), POLYGON ((110 170, 125 100, 175 150, 110 170)))";
+        assertEquals(expected, actual);
+
+        poly = Constructors.geomFromEWKT("MULTIPOLYGON (((10 10, 10 20, 20 20, 20 10, 10 10)),((25 10, 25 20, 35 20, 35 10, 25 10)))");
+        actual = Functions.delaunayTriangle(poly, 20).toText();
+        expected = "GEOMETRYCOLLECTION (POLYGON ((10 20, 10 10, 35 10, 10 20)))";
+        assertEquals(expected, actual);
+
+        actual = Functions.delaunayTriangle(poly, 0, 1).toText();
+        expected = "MULTILINESTRING ((25 20, 35 20), (20 20, 25 20), (10 20, 20 20), (10 10, 10 20), (10 10, 20 10), (20 10, 25 10), (25 10, 35 10), (35 10, 35 20), (25 20, 35 10), (25 10, 25 20), (20 20, 25 10), (20 10, 20 20), (10 20, 20 10))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void spheroidLength() {
         Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
         assertEquals(0, Spheroid.length(point), 0.1);
@@ -1226,6 +1346,61 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void simplifyVW() throws ParseException {
+        Geometry geom = Constructors.geomFromEWKT("LINESTRING(5 2, 3 8, 6 20, 7 25, 10 10)");
+        String actual = Functions.simplifyVW(geom, 30).toString();
+        String expected = "LINESTRING (5 2, 7 25, 10 10)";
+        assertEquals(expected, actual);
+
+        actual = Functions.simplifyVW(geom, 10).toString();
+        expected = "LINESTRING (5 2, 3 8, 7 25, 10 10)";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("POLYGON((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33,46 34, 47 44, 35 36, 45 33, 43 19, 29 21, 29 22,35 26, 24 39, 8 25))");
+        actual = Functions.simplifyVW(geom, 10).toString();
+        expected = "POLYGON ((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33, 47 44, 35 36, 45 33, 43 19, 29 21, 35 26, 24 39, 8 25))";
+        assertEquals(expected, actual);
+
+        actual = Functions.simplifyVW(geom, 80).toString();
+        expected = "POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 43 19, 24 39, 8 25))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void simplifyPolygonHull() throws ParseException {
+        Geometry geom = Constructors.geomFromEWKT("POLYGON ((131 158, 136 163, 161 165, 173 156, 179 148, 169 140, 186 144, 190 137, 185 131, 174 128, 174 124, 166 119, 158 121, 158 115, 165 107, 161 97, 166 88, 166 79, 158 57, 145 57, 112 53, 111 47, 93 43, 90 48, 88 40, 80 39, 68 32, 51 33, 40 31, 39 34, 49 38, 34 38, 25 34, 28 39, 36 40, 44 46, 24 41, 17 41, 14 46, 19 50, 33 54, 21 55, 13 52, 11 57, 22 60, 34 59, 41 68, 75 72, 62 77, 56 70, 46 72, 31 69, 46 76, 52 82, 47 84, 56 90, 66 90, 64 94, 56 91, 33 97, 36 100, 23 100, 22 107, 29 106, 31 112, 46 116, 36 118, 28 131, 53 132, 59 127, 62 131, 76 130, 80 135, 89 137, 87 143, 73 145, 80 150, 88 150, 85 157, 99 162, 116 158, 115 165, 123 165, 122 170, 134 164, 131 158))");
+        String actual = Functions.asWKT(Functions.simplifyPolygonHull(geom, 0.3, true));
+        String expected = "POLYGON ((161 165, 173 156, 186 144, 190 137, 185 131, 174 124, 166 119, 166 79, 158 57, 68 32, 40 31, 25 34, 17 41, 14 46, 11 57, 56 91, 33 97, 23 100, 22 107, 28 131, 80 135, 73 145, 85 157, 99 162, 122 170, 161 165))";
+        assertEquals(expected, actual);
+
+        actual = Functions.asWKT(Functions.simplifyPolygonHull(geom, 0.3));
+        assertEquals(expected, actual);
+
+        actual = Functions.asWKT(Functions.simplifyPolygonHull(geom, 0.3, false));
+        expected = "POLYGON ((131 158, 116 158, 99 162, 89 137, 76 130, 59 127, 28 131, 46 116, 36 100, 64 94, 75 72, 41 68, 33 54, 68 32, 90 48, 112 53, 145 57, 158 57, 161 97, 158 115, 158 121, 190 137, 169 140, 179 148, 161 165, 131 158))";
+        assertEquals(expected, actual);
+
+        actual = Functions.asWKT(Functions.simplifyPolygonHull(geom, 0.1, false));
+        expected = "POLYGON ((89 137, 36 100, 64 94, 75 72, 33 54, 112 53, 145 57, 161 165, 89 137))";
+        assertEquals(expected, actual);
+
+        actual = Functions.asWKT(Functions.simplifyPolygonHull(geom, 0.1));
+        expected = "POLYGON ((161 165, 173 156, 186 144, 190 137, 158 57, 68 32, 40 31, 25 34, 17 41, 14 46, 11 57, 22 107, 28 131, 85 157, 99 162, 122 170, 161 165))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("MULTIPOLYGON (((131 158, 136 163, 161 165, 173 156, 179 148, 169 140, 186 144, 190 137, 185 131, 174 128, 174 124, 166 119, 158 121, 158 115, 165 107, 161 97, 166 88, 166 79, 158 57, 145 57, 112 53, 111 47, 93 43, 90 48, 88 40, 80 39, 68 32, 51 33, 40 31, 39 34, 49 38, 34 38, 25 34, 28 39, 36 40, 44 46, 24 41, 17 41, 14 46, 19 50, 33 54, 21 55, 13 52, 11 57, 22 60, 34 59, 41 68, 75 72, 62 77, 56 70, 46 72, 31 69, 46 76, 52 82, 47 84, 56 90, 66 90, 64 94, 56 91, 33 97, 36 100, 23 100, 22 107, 29 106, 31 112, 46 116, 36 118, 28 131, 53 132, 59 127, 62 131, 76 130, 80 135, 89 137, 87 143, 73 145, 80 150, 88 150, 85 157, 99 162, 116 158, 115 165, 123 165, 122 170, 134 164, 131 158)))");
+        actual = Functions.asWKT(Functions.simplifyPolygonHull(geom, 0.3, true));
+        expected = "MULTIPOLYGON (((161 165, 173 156, 186 144, 190 137, 185 131, 174 124, 166 119, 166 79, 158 57, 68 32, 40 31, 25 34, 17 41, 14 46, 11 57, 56 91, 33 97, 23 100, 22 107, 28 131, 80 135, 73 145, 85 157, 99 162, 122 170, 161 165)))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("LINESTRING (10 10, 20 20, 30 30)");
+        Geometry finalGeom = geom;
+        assertThrows("Input geometry must be  polygonal", IllegalArgumentException.class, () -> {
+            Functions.simplifyPolygonHull(finalGeom, 0.1);
+        });
+    }
+
+    @Test
     public void force3DObject2D() {
         int expectedDims = 3;
         LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 1, 1, 0, 2, 0));
@@ -1255,6 +1430,142 @@ public class FunctionsTest extends TestBase {
         WKTWriter wktWriter = new WKTWriter(GeomUtils.getDimension(line3D));
         assertEquals(wktWriter.write(line3D), wktWriter.write(forcedLine3D));
         assertEquals(expectedDims, Functions.nDims(forcedLine3D));
+    }
+
+    @Test
+    public void forceCollection() throws ParseException {
+        Geometry geom = Constructors.geomFromWKT("MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)", 0);
+        int actual = Functions.numGeometries(Functions.forceCollection(geom));
+        int expected = 6;
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("MULTIPOLYGON(((0 0 0,0 1 0,1 1 0,1 0 0,0 0 0)),((0 0 0,1 0 0,1 0 1,0 0 1,0 0 0)),((1 1 0,1 1 1,1 0 1,1 0 0,1 1 0)),((0 1 0,0 1 1,1 1 1,1 1 0,0 1 0)),((0 0 1,1 0 1,1 1 1,0 1 1,0 0 1)))", 0);
+        actual = Functions.numGeometries(Functions.forceCollection(geom));
+        expected = 5;
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("MULTILINESTRING ((10 10, 20 20, 30 30), (15 15, 25 25, 35 35))", 0);
+        actual = Functions.numGeometries(Functions.forceCollection(geom));
+        expected = 2;
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))", 0);
+        actual = Functions.numGeometries(Functions.forceCollection(geom));
+        expected = 1;
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("GEOMETRYCOLLECTION(POLYGON((0 0 1,0 5 1,5 0 1,0 0 1),(1 1 1,3 1 1,1 3 1,1 1 1)))",0);
+        String actualWKT = Functions.asWKT(Functions.forceCollection(geom));
+        String expectedWKT = "GEOMETRYCOLLECTION Z(POLYGON Z((0 0 1, 0 5 1, 5 0 1, 0 0 1), (1 1 1, 3 1 1, 1 3 1, 1 1 1)))";
+        assertEquals(expectedWKT, actualWKT);
+    }
+
+    @Test
+    public void testForce3DM() throws ParseException {
+        Geometry geom = Constructors.geomFromWKT("POINT (1 2)",0);
+        String actual = Functions.asWKT(Functions.force3DM(geom, 5));
+        String expected = "POINT M(1 2 5)";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("MULTIPOINT ((1 2), (2 3))",0);
+        actual = Functions.asWKT(Functions.force3DM(geom, 5));
+        expected = "MULTIPOINT M((1 2 5), (2 3 5))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("LINESTRING (1 2, 2 3, 3 4)",0);
+        actual = Functions.asWKT(Functions.force3DM(geom, 5));
+        expected = "LINESTRING M(1 2 5, 2 3 5, 3 4 5)";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("MULTILINESTRING ((10 10, 20 20, 30 30), (15 15, 25 25, 35 35))",0);
+        actual = Functions.asWKT(Functions.force3DM(geom, 5));
+        expected = "MULTILINESTRING M((10 10 5, 20 20 5, 30 30 5), (15 15 5, 25 25 5, 35 35 5))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("LINEARRING (30 10, 40 40, 20 40, 10 20, 30 10)",0);
+        actual = Functions.asWKT(Functions.force3DM(geom, 5));
+        expected = "LINEARRING M(30 10 5, 40 40 5, 20 40 5, 10 20 5, 30 10 5)";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (4 4, 4 6, 6 6, 6 4, 4 4))",0);
+        actual = Functions.asWKT(Functions.force3DM(geom, 5));
+        expected = "POLYGON M((0 0 5, 10 0 5, 10 10 5, 0 10 5, 0 0 5), (4 4 5, 4 6 5, 6 6 5, 6 4 5, 4 4 5))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("MULTIPOLYGON (((30 10, 40 40, 20 40, 10 20, 30 10)), ((15 5, 10 20, 20 30, 15 5)))",0);
+        actual = Functions.asWKT(Functions.force3DM(geom, 5));
+        expected = "MULTIPOLYGON M(((30 10 5, 40 40 5, 20 40 5, 10 20 5, 30 10 5)), ((15 5 5, 10 20 5, 20 30 5, 15 5 5)))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (15 15, 25 25, 35 35), POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10)))",0);
+        actual = Functions.asWKT(Functions.force3DM(geom, 5));
+        expected = "GEOMETRYCOLLECTION M(POINT M(10 10 5), LINESTRING M(15 15 5, 25 25 5, 35 35 5), POLYGON M((30 10 5, 40 40 5, 20 40 5, 10 20 5, 30 10 5)))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("POLYGON M((0 0 3, 0 5 3, 5 0 3, 0 0 3), (1 1 3, 3 1 3, 1 3 3, 1 1 3))", 0);
+        Geometry actualGeom = Functions.force3DM(geom, 10);
+        assertTrue(Predicates.equals(geom, actualGeom));
+    }
+
+    @Test
+    public void force4D() throws ParseException {
+        // testing all geom types
+        Geometry geom = Constructors.geomFromWKT("POINT (1 2)",0);
+        String actual = Functions.asWKT(Functions.force4D(geom,2, 5));
+        String expected = "POINT ZM(1 2 2 5)";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("MULTIPOINT ((1 2), (2 3))",0);
+        actual = Functions.asWKT(Functions.force4D(geom, 2, 5));
+        expected = "MULTIPOINT ZM((1 2 2 5), (2 3 2 5))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("LINESTRING (1 2, 2 3, 3 4)",0);
+        actual = Functions.asWKT(Functions.force4D(geom));
+        expected = "LINESTRING ZM(1 2 0 0, 2 3 0 0, 3 4 0 0)";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("MULTILINESTRING ((10 10, 20 20, 30 30), (15 15, 25 25, 35 35))",0);
+        actual = Functions.asWKT(Functions.force4D(geom, 3, 5));
+        expected = "MULTILINESTRING ZM((10 10 3 5, 20 20 3 5, 30 30 3 5), (15 15 3 5, 25 25 3 5, 35 35 3 5))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("LINEARRING (30 10, 40 40, 20 40, 10 20, 30 10)",0);
+        actual = Functions.asWKT(Functions.force4D(geom, 5, 5));
+        expected = "LINEARRING ZM(30 10 5 5, 40 40 5 5, 20 40 5 5, 10 20 5 5, 30 10 5 5)";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (4 4, 4 6, 6 6, 6 4, 4 4))",0);
+        actual = Functions.asWKT(Functions.force4D(geom));
+        expected = "POLYGON ZM((0 0 0 0, 10 0 0 0, 10 10 0 0, 0 10 0 0, 0 0 0 0), (4 4 0 0, 4 6 0 0, 6 6 0 0, 6 4 0 0, 4 4 0 0))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("MULTIPOLYGON (((30 10, 40 40, 20 40, 10 20, 30 10)), ((15 5, 10 20, 20 30, 15 5)))",0);
+        actual = Functions.asWKT(Functions.force4D(geom, 2, 5));
+        expected = "MULTIPOLYGON ZM(((30 10 2 5, 40 40 2 5, 20 40 2 5, 10 20 2 5, 30 10 2 5)), ((15 5 2 5, 10 20 2 5, 20 30 2 5, 15 5 2 5)))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromWKT("GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (15 15, 25 25, 35 35), POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10)))",0);
+        actual = Functions.asWKT(Functions.force4D(geom, 2, 5));
+        expected = "GEOMETRYCOLLECTION ZM(POINT ZM(10 10 2 5), LINESTRING ZM(15 15 2 5, 25 25 2 5, 35 35 2 5), POLYGON ZM((30 10 2 5, 40 40 2 5, 20 40 2 5, 10 20 2 5, 30 10 2 5)))";
+        assertEquals(expected, actual);
+
+        // return 4D input geom as is
+        geom = Constructors.geomFromWKT("POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))", 0);
+        Geometry actualGeom = Functions.force4D(geom, 10, 10);
+        assertTrue(Predicates.equals(geom, actualGeom));
+
+        // if input geom has z value, keep it and add m
+        geom = Constructors.geomFromWKT("LINESTRING Z(0 1 3, 1 0 3, 2 0 3)", 0);
+        actual = Functions.asWKT(Functions.force4D(geom, 10, 10));
+        expected = "LINESTRING ZM(0 1 3 10, 1 0 3 10, 2 0 3 10)";
+        assertEquals(expected, actual);
+
+        // if input geom has m value, keep it and add z
+        geom = Constructors.geomFromWKT("LINESTRING M(0 1 3, 1 0 3, 2 0 3)", 0);
+        actual = Functions.asWKT(Functions.force4D(geom, 10, 10));
+        expected = "LINESTRING ZM(0 1 10 3, 1 0 10 3, 2 0 10 3)";
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -1385,6 +1696,72 @@ public class FunctionsTest extends TestBase {
         Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 10, 10, 10, 10, 0, 0, 0));
         assertEquals("POINT (5 5)", Functions.minimumBoundingRadius(polygon).getLeft().toString());
         assertEquals(7.071067, Functions.minimumBoundingRadius(polygon).getRight(), 1e-6);
+    }
+
+    @Test
+    public void minimumClearance() throws ParseException {
+        Geometry geometry = Constructors.geomFromEWKT("POLYGON ((0 0, 1 0, 1 1, 0.5 3.2e-4, 0 0))");
+        double actual = Functions.minimumClearance(geometry);
+        double expected = 0.00032;
+        assertEquals(expected, actual, FP_TOLERANCE);
+
+        geometry = Constructors.geomFromEWKT("POLYGON ((10 10, 20 20, 20.1 20.1, 30 25, 40 30, 50 40, 40 50, 30 45, 20 40, 10 30, 10 10))");
+        actual = Functions.minimumClearance(geometry);
+        expected = 0.14142135623731153;
+        assertEquals(expected, actual, FP_TOLERANCE);
+
+        geometry = Constructors.geomFromEWKT("POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))");
+        actual = Functions.minimumClearance(geometry);
+        expected = 0.5;
+        assertEquals(expected, actual, FP_TOLERANCE2);
+
+        geometry = Constructors.geomFromEWKT("POLYGON ((65.10498 18.625425, 62.182617 16.36231, 64.863281 16.40447, 62.006836 14.157882, 65.522461 14.008696, 65.10498 18.625425))");
+        actual = Functions.minimumClearance(geometry);
+        expected = 0.4407369162202361;
+        assertEquals(expected, actual, FP_TOLERANCE);
+
+        geometry = Constructors.geomFromEWKT("MULTIPOINT(10 10, 20 20)");
+        actual = Functions.minimumClearance(geometry);
+        expected = 14.142135623730951;
+        assertEquals(expected, actual, FP_TOLERANCE);
+
+        geometry = Constructors.geomFromEWKT("POINT(10 10)");
+        actual = Functions.minimumClearance(geometry);
+        expected = Double.MAX_VALUE;
+        assertEquals(expected, actual, FP_TOLERANCE2);
+    }
+
+    @Test
+    public void minimumClearanceLine() throws ParseException {
+        Geometry geometry = Constructors.geomFromEWKT("POLYGON ((0 0, 1 0, 1 1, 0.5 3.2e-4, 0 0))");
+        String actual = Functions.minimumClearanceLine(geometry).toText();
+        String expected = "LINESTRING (0.5 0.00032, 0.5 0)";
+        assertEquals(expected, actual);
+
+        geometry = Constructors.geomFromEWKT("POLYGON ((10 10, 20 20, 20.1 20.1, 30 25, 40 30, 50 40, 40 50, 30 45, 20 40, 10 30, 10 10))");
+        actual = Functions.minimumClearanceLine(geometry).toText();
+        expected = "LINESTRING (20 20, 20.1 20.1)";
+        assertEquals(expected, actual);
+
+        geometry = Constructors.geomFromEWKT("POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))");
+        actual = Functions.minimumClearanceLine(geometry).toText();
+        expected = "LINESTRING (64.5 16, 65 16)";
+        assertEquals(expected, actual);
+
+        geometry = Constructors.geomFromEWKT("POLYGON ((65.10498 18.625425, 62.182617 16.36231, 64.863281 16.40447, 62.006836 14.157882, 65.522461 14.008696, 65.10498 18.625425))");
+        actual = Functions.minimumClearanceLine(geometry).toText();
+        expected = "LINESTRING (64.863281 16.40447, 65.30222689577225 16.44416294526772)";
+        assertEquals(expected, actual);
+
+        geometry = Constructors.geomFromEWKT("MULTIPOINT(10 10, 20 20)");
+        actual = Functions.minimumClearanceLine(geometry).toText();
+        expected = "LINESTRING (20 20, 10 10)";
+        assertEquals(expected, actual);
+
+        geometry = Constructors.geomFromEWKT("POINT(10 10)");
+        actual = Functions.minimumClearanceLine(geometry).toText();
+        expected = "LINESTRING EMPTY";
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -1664,7 +2041,6 @@ public class FunctionsTest extends TestBase {
         for (int[] testCase : testCases_special) {
             Geometry geom = GEOMETRY_FACTORY.createPoint(new Coordinate(testCase[0], testCase[1]));
             int actualEPSG = Functions.bestSRID(geom);
-            System.out.println("actualEPSG: "+actualEPSG);
             int expectedEPSG = testCase[2];
             assertEquals("Failed at coordinates (" + testCase[0] + ", " + testCase[1] + ")", expectedEPSG, actualEPSG);
         }
@@ -2257,6 +2633,22 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void testZmFlag() throws ParseException {
+        int _2D = 0, _3DM = 1, _3DZ = 2, _4D = 3;
+        Geometry geom = Constructors.geomFromWKT("POINT (1 2)", 0);
+        assertEquals(_2D, Functions.zmFlag(geom));
+
+        geom = Constructors.geomFromWKT("LINESTRING (1 2 3, 4 5 6)", 0);
+        assertEquals(_3DZ, Functions.zmFlag(geom));
+
+        geom = Constructors.geomFromWKT("POLYGON M((1 2 3, 3 4 3, 5 6 3, 3 4 3, 1 2 3))", 0);
+        assertEquals(_3DM, Functions.zmFlag(geom));
+
+        geom = Constructors.geomFromWKT("MULTIPOLYGON ZM (((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1)), ((15 5 3 1, 20 10 6 2, 10 10 7 3, 15 5 3 1)))", 0);
+        assertEquals(_4D, Functions.zmFlag(geom));
+    }
+
+    @Test
     public void hausdorffDistanceDefaultGeom2D() throws Exception {
         Polygon polygon1 = GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 1, 1, 1, 2, 2, 1, 5, 2, 0, 1, 1, 0, 1));
         Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray3d(4, 0, 4, 6, 1, 4, 6, 4, 9, 6, 1, 3, 4, 0, 4));
@@ -2369,6 +2761,24 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void testAddMeasure() throws ParseException {
+        Geometry geom = Constructors.geomFromEWKT("LINESTRING (1 1, 2 2, 2 2, 3 3)");
+        String actual = Functions.asWKT(Functions.addMeasure(geom, 1, 70));
+        String expected = "LINESTRING M(1 1 1, 2 2 35.5, 2 2 35.5, 3 3 70)";
+        assertEquals(expected, actual);
+
+        actual = Functions.asWKT(Functions.addMeasure(geom, 1, 2));
+        expected = "LINESTRING M(1 1 1, 2 2 1.5, 2 2 1.5, 3 3 2)";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("MULTILINESTRING M((1 0 4, 2 0 4, 4 0 4),(1 0 4, 2 0 4, 4 0 4))");
+        actual = Functions.asWKT(Functions.addMeasure(geom, 1, 70));
+        expected = "MULTILINESTRING M((1 0 1, 2 0 12.5, 4 0 35.5), (1 0 35.5, 2 0 47, 4 0 70))";
+        assertEquals(expected, actual);
+
+    }
+
+    @Test
     public void voronoiPolygons() {
         MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0, 0, 2, 2));
         Geometry actual1 = FunctionsGeoTools.voronoiPolygons(multiPoint, 0, null);
@@ -2412,6 +2822,46 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void locateAlong() throws ParseException {
+        Geometry geom = Constructors.geomFromEWKT("MULTIPOINT M(1 2 3, 3 4 3, 9 4 3, 3 2 1, 1 2 3, 5 4 2)");
+        String actual = Functions.asWKT(Functions.locateAlong(geom, 3, 0));
+        String expected = "MULTIPOINT M((1 2 3), (3 4 3), (9 4 3), (1 2 3))";
+        assertEquals(expected, actual);
+
+        // offset doesn't affect Point or MultiPoint
+        actual = Functions.asWKT(Functions.locateAlong(geom, 3, 4));
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("LINESTRING M(1 2 3, 3 4 3, 5 4 2, 9 4 3)");
+        actual = Functions.asWKT(Functions.locateAlong(geom, 3, 0));
+        expected = "MULTIPOINT M((2 3 3), (3 4 3), (9 4 3))";
+        assertEquals(expected, actual);
+
+        actual = Functions.asWKT(Functions.locateAlong(geom, 3, 2));
+        expected = "MULTIPOINT M((0.5857864376269051 4.414213562373095 3), (3 6 3), (9 6 3))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("LINESTRING M(1 2 3, 3 4 3, 5 4 2, 5 4 2, 9 4 3)");
+        actual = Functions.asWKT(Functions.locateAlong(geom, 2, 0));
+        expected = "MULTIPOINT M((5 4 2))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("MULTILINESTRING M((1 2 3, 3 4 2, 9 4 3),(1 2 3, 5 4 5))");
+        actual = Functions.asWKT(Functions.locateAlong(geom, 2, 0));
+        expected = "MULTIPOINT M((3 4 2))";
+        assertEquals(expected, actual);
+
+        actual = Functions.asWKT(Functions.locateAlong(geom, 2, -3));
+        expected = "MULTIPOINT M((5.121320343559642 1.8786796564403572 2), (3 1 2))";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("POLYGON M((0 0 1, 1 1 1, 5 1 1, 5 0 1, 1 0 1, 0 0 1))");
+        Geometry finalGeom = geom;
+        Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.locateAlong(finalGeom, 1));
+        assertEquals("Polygon geometry type not supported, supported types are: (Multi)Point and (Multi)LineString.", e.getMessage());
+    }
+
+    @Test
     public void isValidReason() {
         // Valid geometry
         Geometry validGeom = GEOMETRY_FACTORY.createPolygon(coordArray(30, 10, 40, 40, 20, 40, 10, 20, 30, 10));
@@ -2437,5 +2887,31 @@ public class FunctionsTest extends TestBase {
 
         String invalidReasonESRI = Functions.isValidReason(invalidGeom, ESRI_VALIDITY);
         assertEquals("Self-intersection at or near point (10.0, 20.0, NaN)", invalidReasonESRI);
+    }
+
+    @Test
+    public void points() throws ParseException {
+        Geometry polygon = Constructors.geomFromEWKT("POLYGON ((0 0, 1 1, 5 1, 5 0, 1 0, 0 0))");
+        Geometry lineString = Constructors.geomFromEWKT("LINESTRING (0 0, 1 1, 2 2)");
+        Geometry point = Constructors.geomFromEWKT("POINT (0 0)");
+        Geometry multiPoint = Constructors.geomFromEWKT("MULTIPOINT ((0 0), (1 1), (2 2))");
+        Geometry multiLineString = Constructors.geomFromEWKT("MULTILINESTRING ((0 0, 1 1), (2 2, 3 3))");
+        Geometry multiPolygon = Constructors.geomFromEWKT("MULTIPOLYGON (((0 0, 1 1, 1 0, 0 0)), ((2 2, 3 3, 3 2, 2 2)))");
+        Geometry geometry3D = Constructors.geomFromEWKT("POLYGON Z ((0 0 1, 1 1 2, 2 2 3, 0 0 1))");
+
+        String result = Functions.asEWKT(Functions.points(polygon));
+        assertEquals("MULTIPOINT ((0 0), (1 1), (5 1), (5 0), (1 0), (0 0))", result);
+        result = Functions.asEWKT(Functions.points(lineString));
+        assertEquals("MULTIPOINT ((0 0), (1 1), (2 2))", result);
+        result = Functions.asEWKT(Functions.points(point));
+        assertEquals("MULTIPOINT ((0 0))", result);
+        result = Functions.asEWKT(Functions.points(multiPoint));
+        assertEquals("MULTIPOINT ((0 0), (1 1), (2 2))", result);
+        result = Functions.asEWKT(Functions.points(multiLineString));
+        assertEquals("MULTIPOINT ((0 0), (1 1), (2 2), (3 3))", result);
+        result = Functions.asEWKT(Functions.points(multiPolygon));
+        assertEquals("MULTIPOINT ((0 0), (1 1), (1 0), (0 0), (2 2), (3 3), (3 2), (2 2))", result);
+        String result1 = Functions.asEWKT(Functions.points(geometry3D));
+        assertEquals("MULTIPOINT Z((0 0 1), (1 1 2), (2 2 3), (0 0 1))", result1);
     }
 }

@@ -154,6 +154,32 @@ public class ConstructorTest extends TestBase{
     }
 
     @Test
+    public void testMakePointM() {
+        List<Row> data = new ArrayList<>();
+        data.add(Row.of(1.0, 2.0, 3.0, "pointM"));
+        String[] colNames = new String[]{"x", "y", "m", "name_point"};
+
+        TypeInformation<?>[] colTypes = {
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.DOUBLE_TYPE_INFO,
+                BasicTypeInfo.STRING_TYPE_INFO};
+        RowTypeInfo typeInfo = new RowTypeInfo(colTypes, colNames);
+        DataStream<Row> ds = env.fromCollection(data).returns(typeInfo);
+        Table pointTable = tableEnv.fromDataStream(ds);
+
+        Table geomTable = pointTable
+                .select(call(Constructors.ST_MakePointM.class.getSimpleName(), $(colNames[0]), $(colNames[1]), $(colNames[2]))
+                        ).as(colNames[3]);
+
+        String result = (String) first(geomTable.select(call(Functions.ST_AsText.class.getSimpleName(), $(colNames[3]))))
+                .getField(0);
+
+        String expected = "POINT M(1 2 3)";
+        assertEquals(expected, result);
+    }
+
+    @Test
     public void testMakePoint() {
         List<Row> data = new ArrayList<>();
         data.add(Row.of(1.0, 2.0, "point"));
@@ -421,6 +447,45 @@ public class ConstructorTest extends TestBase{
     }
 
     @Test
+    public void testLinestringFromWKB() throws DecoderException {
+        String hexWkb1 = "010200000003000000000000000000000000000000000000000000000000000040000000000000004000000000000010400000000000001040";
+        byte[] wkbLine1 = Hex.decodeHex(hexWkb1);
+        String hexWkb2 = "010200000003000000000000000000000000000000000000000000000000407f400000000000407f400000000000407f4000000000000059c0";
+        byte[] wkbLine2 = Hex.decodeHex(hexWkb2);
+        String hexWkb3 = "01030000000100000005000000000000000000e0bf000000000000e0bf000000000000e0bf000000000000e03f000000000000e03f000000000000e03f000000000000e03f000000000000e0bf000000000000e0bf000000000000e0bf";
+        byte[] wkbPolygon = Hex.decodeHex(hexWkb3);
+
+        List<Row> data1 = Arrays.asList(Row.of(wkbLine1), Row.of(wkbLine2), Row.of(wkbPolygon));
+        List<Row> data2 = Arrays.asList(Row.of(hexWkb1), Row.of(hexWkb2), Row.of(hexWkb3));
+
+        TypeInformation<?>[] colTypes1 = {PrimitiveArrayTypeInfo.BYTE_PRIMITIVE_ARRAY_TYPE_INFO};
+        TypeInformation<?>[] colTypes2 = {BasicTypeInfo.STRING_TYPE_INFO};
+        RowTypeInfo typeInfo1 = new RowTypeInfo(colTypes1, new String[]{"wkb"});
+        RowTypeInfo typeInfo2 = new RowTypeInfo(colTypes2, new String[]{"wkb"});
+
+        DataStream<Row> wkbDS1 = env.fromCollection(data1).returns(typeInfo1);
+        Table wkbTable1 = tableEnv.fromDataStream(wkbDS1, $("wkb"));
+
+        DataStream<Row> wkbDS2 = env.fromCollection(data2).returns(typeInfo2);
+        Table wkbTable2 = tableEnv.fromDataStream(wkbDS2, $("wkb"));
+
+        Table lineTable1 = wkbTable1.select(call(Constructors.ST_LinestringFromWKB.class.getSimpleName(), $("wkb")).as("point"));
+        Table lineTable2 = wkbTable2.select(call(Constructors.ST_LinestringFromWKB.class.getSimpleName(), $("wkb")).as("point"));
+
+        // Test with byte array
+        List<Row> results1 = TestBase.take(lineTable1, 3);
+        assertEquals("LINESTRING (0 0, 2 2, 4 4)", results1.get(0).getField(0).toString());
+        assertEquals("LINESTRING (0 0, 500 500, 500 -100)", results1.get(1).getField(0).toString());
+        assertNull(results1.get(2).getField(0));
+
+        // Test with hex string
+        List<Row> results2 = TestBase.take(lineTable2, 3);
+        assertEquals("LINESTRING (0 0, 2 2, 4 4)", results2.get(0).getField(0).toString());
+        assertEquals("LINESTRING (0 0, 500 500, 500 -100)", results2.get(1).getField(0).toString());
+        assertNull(results2.get(2).getField(0));
+    }
+
+    @Test
     public void testGeomFromEWKB()
     {
         byte[] wkb = new byte[]{1, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, -124, -42, 0, -64, 0, 0, 0, 0, -128, -75, -42, -65, 0, 0, 0, 96, -31, -17, -9, -65, 0, 0, 0, -128, 7, 93, -27, -65};
@@ -461,6 +526,19 @@ public class ConstructorTest extends TestBase{
         String expectedGeom = "POLYGON ((-180 -39.375, -180 -33.75, -168.75 -33.75, -168.75 -39.375, -180 -39.375))";
 
         assertEquals(expectedGeom, result);
+    }
+
+    @Test
+    public void testPointFromGeoHash() {
+        String actual = first(tableEnv.sqlQuery("SELECT 's00twy01mt' as geohash")
+                .select(call(Constructors.ST_PointFromGeoHash.class.getSimpleName(),
+                        $("geohash"), 4))).getField(0).toString();
+        assertEquals("POINT (0.87890625 0.966796875)", actual);
+
+        actual = first(tableEnv.sqlQuery("SELECT 's00twy01mt' as geohash")
+                .select(call(Constructors.ST_PointFromGeoHash.class.getSimpleName(),
+                        $("geohash")))).getField(0).toString();
+        assertEquals("POINT (0.9999972581863403 0.9999999403953552)", actual);
     }
 
     @Test
@@ -545,5 +623,45 @@ public class ConstructorTest extends TestBase{
                 .toString();
         String expectedGeom = "MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))";
         assertEquals(expectedGeom, result);
+    }
+
+    @Test
+    public void testMPointFromText() {
+        Table tbl = tableEnv.sqlQuery("SELECT 'MULTIPOINT ((10 10), (20 20), (30 30))' AS coll, 4326 as srid");
+        String actualColl = first(
+                tbl.select(call(Constructors.ST_MPointFromText.class.getSimpleName(), $("coll")))
+        ).getFieldAs(0).toString();
+        String expectedColl = "MULTIPOINT ((10 10), (20 20), (30 30))";
+        assertEquals(expectedColl, actualColl);
+
+        actualColl = first(
+                tbl.select(call(Constructors.ST_MPointFromText.class.getSimpleName(), $("coll"), $("srid")))
+        ).getFieldAs(0).toString();
+        assertEquals(expectedColl, actualColl);
+        int actualSrid = first(
+                tbl.select(call(Constructors.ST_MPointFromText.class.getSimpleName(), $("coll"), $("srid")))
+                        .as("geom").select(call(Functions.ST_SRID.class.getSimpleName(), $("geom")))
+        ).getFieldAs(0);
+        assertEquals(4326, actualSrid);
+    }
+
+    @Test
+    public void testGeomCollFromText() {
+        Table tbl = tableEnv.sqlQuery("SELECT 'GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90),POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))' AS coll, 4326 as srid");
+        String actualColl = first(
+                tbl.select(call(Constructors.ST_GeomCollFromText.class.getSimpleName(), $("coll")))
+        ).getFieldAs(0).toString();
+        String expectedColl = "GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))";
+        assertEquals(expectedColl, actualColl);
+
+        actualColl = first(
+                tbl.select(call(Constructors.ST_GeomCollFromText.class.getSimpleName(), $("coll"), $("srid")))
+        ).getFieldAs(0).toString();
+        assertEquals(expectedColl, actualColl);
+        int actualSrid = first(
+                tbl.select(call(Constructors.ST_GeomCollFromText.class.getSimpleName(), $("coll"), $("srid")))
+                        .as("geom").select(call(Functions.ST_SRID.class.getSimpleName(), $("geom")))
+        ).getFieldAs(0);
+        assertEquals(4326, actualSrid);
     }
 }

@@ -21,17 +21,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
-import org.apache.sedona.common.utils.GeomUtils;
-import org.apache.sedona.common.utils.GeometryGeoHashEncoder;
-import org.apache.sedona.common.utils.GeometrySplitter;
-import org.apache.sedona.common.utils.H3Utils;
-import org.apache.sedona.common.utils.S2Utils;
+import org.apache.sedona.common.utils.*;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.algorithm.hull.ConcaveHull;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.geom.util.GeometryFixer;
+import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.gml2.GMLWriter;
 import org.locationtech.jts.io.kml.KMLWriter;
 import org.locationtech.jts.linearref.LengthIndexedLine;
@@ -42,11 +39,16 @@ import org.locationtech.jts.operation.distance3d.Distance3DOp;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.overlay.snap.GeometrySnapper;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
+import org.locationtech.jts.operation.union.UnaryUnionOp;
 import org.locationtech.jts.operation.valid.IsSimpleOp;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.operation.valid.TopologyValidationError;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
+import org.locationtech.jts.precision.MinimumClearance;
+import org.locationtech.jts.simplify.PolygonHullSimplifier;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
+import org.locationtech.jts.simplify.VWSimplifier;
+import org.locationtech.jts.triangulate.DelaunayTriangulationBuilder;
 import org.locationtech.jts.triangulate.polygon.ConstrainedDelaunayTriangulator;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
@@ -402,7 +404,7 @@ public class Functions {
         Coordinate[] points = geometry.getCoordinates();
         double min = Double.MAX_VALUE;
         for(int i=0; i < points.length; i++){
-            if(java.lang.Double.isNaN(points[i].getM()))
+            if(Double.isNaN(points[i].getM()))
                 continue;
             min = Math.min(points[i].getM(), min);
         }
@@ -413,7 +415,7 @@ public class Functions {
         Coordinate[] points = geometry.getCoordinates();
         double max = - Double.MAX_VALUE;
         for (int i=0; i < points.length; i++) {
-            if(java.lang.Double.isNaN(points[i].getM()))
+            if(Double.isNaN(points[i].getM()))
                 continue;
             max = Math.max(points[i].getM(), max);
         }
@@ -460,7 +462,7 @@ public class Functions {
         Coordinate[] points = geometry.getCoordinates();
         double max = - Double.MAX_VALUE;
         for (int i=0; i < points.length; i++) {
-            if(java.lang.Double.isNaN(points[i].getZ()))
+            if(Double.isNaN(points[i].getZ()))
                 continue;
             max = Math.max(points[i].getZ(), max);
         }
@@ -471,7 +473,7 @@ public class Functions {
         Coordinate[] points = geometry.getCoordinates();
         double min = Double.MAX_VALUE;
         for(int i=0; i < points.length; i++){
-            if(java.lang.Double.isNaN(points[i].getZ()))
+            if(Double.isNaN(points[i].getZ()))
                 continue;
             min = Math.min(points[i].getZ(), min);
         }
@@ -481,6 +483,11 @@ public class Functions {
     public static boolean hasM(Geometry geom) {
         Coordinate coord = geom.getCoordinate();
         return !Double.isNaN(coord.getM());
+    }
+
+    public static boolean hasZ(Geometry geom) {
+        Coordinate coord = geom.getCoordinate();
+        return !Double.isNaN(coord.getZ());
     }
 
     public static Geometry flipCoordinates(Geometry geometry) {
@@ -548,6 +555,19 @@ public class Functions {
         return GeomUtils.getEWKB(geometry);
     }
 
+    public static String asHexEWKB(Geometry geom, String endian) {
+        if (endian.equalsIgnoreCase("NDR")) {
+            return GeomUtils.getHexEWKB(geom, ByteOrderValues.LITTLE_ENDIAN);
+        } else if (endian.equalsIgnoreCase("XDR")) {
+            return GeomUtils.getHexEWKB(geom, ByteOrderValues.BIG_ENDIAN);
+        }
+        throw new IllegalArgumentException("You must select either NDR (little-endian) or XDR (big-endian) as the endian format.");
+    }
+
+    public static String asHexEWKB(Geometry geom) {
+        return asHexEWKB(geom, "NDR");
+    }
+
     public static byte[] asWKB(Geometry geometry) {
         return GeomUtils.getWKB(geometry);
     }
@@ -571,13 +591,13 @@ public class Functions {
         Double y_cord = geom.getY();
         Double z_cord = geom.getZ();
         Double m_cord = geom.getM();
-        if(!java.lang.Double.isNaN(x_cord))
+        if(!Double.isNaN(x_cord))
             count_dimension++;
-        if(!java.lang.Double.isNaN(y_cord))
+        if(!Double.isNaN(y_cord))
             count_dimension++;
-        if(!java.lang.Double.isNaN(z_cord))
+        if(!Double.isNaN(z_cord))
             count_dimension++;
-        if(!java.lang.Double.isNaN(m_cord))
+        if(!Double.isNaN(m_cord))
             count_dimension++;
         return count_dimension;
     }
@@ -743,6 +763,45 @@ public class Functions {
         }
     }
 
+    public static Geometry delaunayTriangle(Geometry geometry) {
+        return delaunayTriangle(geometry, 0.0, 0);
+    }
+
+    public static Geometry delaunayTriangle(Geometry geometry, double tolerance) {
+        return delaunayTriangle(geometry, tolerance, 0);
+    }
+
+    public static Geometry delaunayTriangle(Geometry geometry, double tolerance, int flag) {
+        DelaunayTriangulationBuilder dTBuilder = new DelaunayTriangulationBuilder();
+        dTBuilder.setSites(geometry);
+        dTBuilder.setTolerance(tolerance);
+        if (flag == 0) {
+            return dTBuilder.getTriangles(geometry.getFactory());
+        } else if (flag == 1) {
+            return dTBuilder.getEdges(geometry.getFactory());
+        } else {
+            throw new IllegalArgumentException("Select a valid flag option (0 or 1).");
+        }
+    }
+
+    public static int zmFlag(Geometry geom) {
+        Coordinate coords = geom.getCoordinate();
+        boolean hasZ = !Double.isNaN(coords.getZ());
+        boolean hasM = !Double.isNaN(coords.getM());
+        if (hasM && hasZ) {
+            // geom is 4D
+            return 3;
+        } else if (hasZ) {
+            // geom is 3D-Z
+            return 2;
+        } else if (hasM) {
+            // geom is 3D-M
+            return 1;
+        }
+        // geom is 2D
+        return 0;
+    }
+
     public static Geometry concaveHull(Geometry geometry, double pctConvex, boolean allowHoles){
         ConcaveHull concave_hull = new ConcaveHull(geometry);
         concave_hull.setMaximumEdgeLengthRatio(pctConvex);
@@ -826,6 +885,14 @@ public class Functions {
         double radius = minimumBoundingCircle.getRadius();
         Point centre = GEOMETRY_FACTORY.createPoint(coods);
         return Pair.of(centre, radius);
+    }
+
+    public static double minimumClearance(Geometry geometry) {
+        return MinimumClearance.getDistance(geometry);
+    }
+
+    public static Geometry minimumClearanceLine(Geometry geometry) {
+        return MinimumClearance.getLine(geometry);
     }
 
     public static Geometry lineSubString(Geometry geom, double fromFraction, double toFraction) {
@@ -939,6 +1006,14 @@ public class Functions {
         return indexedLine.indexOf(point.getCoordinate()) / length;
     }
 
+    public static Geometry locateAlong(Geometry linear, double measure, double offset) {
+        return GeometryLocateAlongProcessor.processGeometry(linear, measure, offset);
+    }
+
+    public static Geometry locateAlong(Geometry linear, double measure) {
+        return locateAlong(linear, measure, 0);
+    }
+
     /**
      * Forces a Polygon/MultiPolygon to use counter-clockwise orientation for the exterior ring and a clockwise for the interior ring(s).
      * @param geom
@@ -1023,6 +1098,32 @@ public class Functions {
         }
 
         return isExteriorRingCCW && isInteriorRingCCW;
+    }
+
+    public static Geometry addMeasure(Geometry geom, double measure_start, double measure_end) {
+        return GeomUtils.addMeasure(geom, measure_start, measure_end);
+    }
+
+    public static double maxDistance(Geometry geom1, Geometry geom2) {
+        return longestLine(geom1, geom2).getLength();
+    }
+
+    public static Geometry longestLine(Geometry geom1, Geometry geom2) {
+        double maxLength = - Double.MAX_VALUE;
+        Coordinate longestStart = null;
+        Coordinate longestEnd = null;
+
+        for (Coordinate coord1: geom1.getCoordinates()) {
+            for (Coordinate coord2: geom2.getCoordinates()) {
+                double length = coord1.distance(coord2);
+                if (length > maxLength) {
+                    maxLength = length;
+                    longestStart = coord1;
+                    longestEnd = coord2;
+                }
+            }
+        }
+        return geom1.getFactory().createLineString(new Coordinate[] {longestStart, longestEnd});
     }
 
     public static Geometry difference(Geometry leftGeometry, Geometry rightGeometry) {
@@ -1188,6 +1289,21 @@ public class Functions {
         return TopologyPreservingSimplifier.simplify(geometry, distanceTolerance);
     }
 
+    public static Geometry simplifyVW(Geometry geometry, double tolerance) {
+        // JTS squares the tolerance in its implementation, inorder to keep it consistent square rooting the input tolerance
+        // source: https://github.com/locationtech/jts/blob/7ef2b9d2e6f36ce5e7a787cff57bd18281e50826/modules/core/src/main/java/org/locationtech/jts/simplify/VWLineSimplifier.java#L41
+        tolerance = Math.sqrt(tolerance);
+        return VWSimplifier.simplify(geometry, tolerance);
+    }
+
+    public static Geometry simplifyPolygonHull(Geometry geometry, double vertexFactor, boolean isOuter) {
+        return PolygonHullSimplifier.hull(geometry, isOuter, vertexFactor);
+    }
+
+    public static Geometry simplifyPolygonHull(Geometry geometry, double vertexFactor) {
+        return simplifyPolygonHull(geometry, vertexFactor, true);
+    }
+
     public static String geometryType(Geometry geometry) {
         return "ST_" + geometry.getGeometryType();
     }
@@ -1243,6 +1359,10 @@ public class Functions {
 
     public static Geometry union(Geometry[] geoms) {
         return GEOMETRY_FACTORY.createGeometryCollection(geoms).union();
+    }
+
+    public static Geometry unaryUnion(Geometry geom) {
+        return UnaryUnionOp.union(geom);
     }
 
     public static Geometry createMultiGeometryFromOneElement(Geometry geometry) {
@@ -1508,12 +1628,40 @@ public class Functions {
         return geometry.getNumPoints();
     }
 
+    public static Geometry force3DM(Geometry geom, double mValue) {
+        return GeometryForce3DMTransformer.transform(geom, mValue);
+    }
+
+    public static Geometry force3DM(Geometry geom) {
+        return force3DM(geom, 0.0);
+    }
+
+    public static Geometry force4D(Geometry geom, double zValue, double mValue) {
+        return GeometryForce4DTransformer.transform(geom, zValue, mValue);
+    }
+
+    public static Geometry force4D(Geometry geom) {
+        return force4D(geom, 0.0, 0.0);
+    }
+
     public static Geometry force3D(Geometry geometry, double zValue) {
         return GeomUtils.get3DGeom(geometry, zValue);
     }
 
     public static Geometry force3D(Geometry geometry) {
         return GeomUtils.get3DGeom(geometry, 0.0);
+    }
+
+    public static Geometry forceCollection(Geometry geom) {
+        return new GeometryFactory().createGeometryCollection(convertGeometryToArray(geom));
+    }
+
+    private static Geometry[] convertGeometryToArray(Geometry geom) {
+        Geometry[] array = new Geometry[geom.getNumGeometries()];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = geom.getGeometryN(i);
+        }
+        return array;
     }
 
     public static Integer nRings(Geometry geometry) throws Exception {
@@ -1727,5 +1875,24 @@ public class Functions {
         } else {
             return GEOMETRY_FACTORY.createGeometryCollection(null);
         }
+    }
+
+    /**
+     * Creates a MultiPoint containing all coordinates of the given geometry.
+     * Duplicates, M and Z coordinates are preserved.
+     *
+     * @param geometry The input geometry
+     * @return A MultiPoint geometry
+     */
+    public static Geometry points(Geometry geometry) {
+        if (geometry == null) {
+            return null;
+        }
+
+        // Extracting all coordinates from the geometry
+        Coordinate[] coordinates = geometry.getCoordinates();
+
+        // Creating a MultiPoint from the extracted coordinates
+        return GEOMETRY_FACTORY.createMultiPointFromCoords(coordinates);
     }
 }

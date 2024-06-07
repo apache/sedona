@@ -317,6 +317,14 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testUnaryUnion() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTIPOLYGON(((0 10,0 30,20 30,20 10,0 10)),((10 0,10 20,30 20,30 0,10 0)))') AS geom");
+        String actual = first(table.select(call(Functions.ST_UnaryUnion.class.getSimpleName(), $("geom")))).getField(0).toString();
+        String expected = "POLYGON ((10 0, 10 10, 0 10, 0 30, 20 30, 20 20, 30 20, 30 0, 10 0))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testUnionArrayVariant() {
         Table polyTable = tableEnv.sqlQuery("SELECT ARRAY[ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((-2 1, 2 1, 2 4, -2 4, -2 1))')] as polys");
         String actual = first(polyTable.select(call(Functions.ST_Union.class.getSimpleName(), $("polys")))).getField(0).toString();
@@ -427,12 +435,45 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testLength2D() {
+        Table polygonTable = createPolygonTable(1);
+        Table resultTable = polygonTable.select(call(Functions.ST_Length2D.class.getSimpleName(), $(polygonColNames[0])));
+        assertNotNull(first(resultTable).getField(0));
+        double result = (double) first(resultTable).getField(0);
+        assertEquals(4, result, 0);
+    }
+
+    @Test
     public void testLengthSpheroid() {
         Table tbl = tableEnv.sqlQuery(
                 "SELECT ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 90 0, 0 0))'))");
         Double expected = 20037508.342789244;
         Double actual = (Double) first(tbl).getField(0);
         assertEquals(expected, actual, 0.1);
+    }
+
+    @Test
+    public void testLocateAlong() {
+        Table tbl = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTILINESTRING M((1 2 3, 3 4 2, 9 4 3),(1 2 3, 5 4 5))') AS geom");
+        String actual = (String) first(tbl.select(call(Functions.ST_LocateAlong.class.getSimpleName(), $("geom"), 2)).as("geom")
+                .select(call(Functions.ST_AsEWKT.class.getSimpleName(), $("geom")))).getField(0);
+        String expected = "MULTIPOINT M((3 4 2))";
+        assertEquals(expected, actual);
+
+        actual = (String) first(tbl.select(call(Functions.ST_LocateAlong.class.getSimpleName(), $("geom"), 2, -3)).as("geom")
+                .select(call(Functions.ST_AsEWKT.class.getSimpleName(), $("geom")))).getField(0);
+        expected = "MULTIPOINT M((5.121320343559642 1.8786796564403572 2), (3 1 2))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testLongestLine() {
+        Table tbl = tableEnv.sqlQuery(
+                "SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))') as geom1");
+        String actual = (String) first(tbl.select(call(Functions.ST_LongestLine.class.getSimpleName(), $("geom1"), $("geom1"))).as("geom")
+                .select(call(Functions.ST_AsText.class.getSimpleName(), $("geom")))).getField(0);
+        String expected = "LINESTRING (180 180, 20 50)";
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -613,6 +654,16 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testAsHEXEWKB() {
+        Table pointTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1 2)') AS point");
+        String result = (String) first(pointTable.select(call(Functions.ST_AsHEXEWKB.class.getSimpleName(), $("point"), "XDR"))).getField(0);
+        assertEquals("00000000013FF00000000000004000000000000000", result);
+
+        result = (String) first(pointTable.select(call(Functions.ST_AsHEXEWKB.class.getSimpleName(), $("point")))).getField(0);
+        assertEquals("0101000000000000000000F03F0000000000000040", result);
+    }
+
+    @Test
     public void testAsBinary() {
         Table polygonTable = createPolygonTable(testDataSize);
         polygonTable = polygonTable.select(call(Functions.ST_AsBinary.class.getSimpleName(), $(polygonColNames[0])));
@@ -697,6 +748,32 @@ public class FunctionTest extends TestBase{
         Table pointTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1.23 4.56 7.89)') AS " + pointColNames[0]);
         pointTable = pointTable.select(call(Functions.ST_Z.class.getSimpleName(), $(pointColNames[0])));
         assertEquals(7.89, first(pointTable).getField(0));
+    }
+
+    @Test
+    public void testZmflag() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POINT (1 2)') AS geom");
+        int actual = (int) first(table.select(call(Functions.ST_Zmflag.class.getSimpleName(), $("geom")))).getField(0);
+        assertEquals(0, actual);
+
+        table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (1 2 3, 4 5 6)') AS geom");
+        actual = (int) first(table.select(call(Functions.ST_Zmflag.class.getSimpleName(), $("geom")))).getField(0);
+        assertEquals(2, actual);
+
+        table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON M((1 2 3, 3 4 3, 5 6 3, 3 4 3, 1 2 3))') AS geom");
+        actual = (int) first(table.select(call(Functions.ST_Zmflag.class.getSimpleName(), $("geom")))).getField(0);
+        assertEquals(1, actual);
+
+        table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTIPOLYGON ZM (((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1)), ((15 5 3 1, 20 10 6 2, 10 10 7 3, 15 5 3 1)))') AS geom");
+        actual = (int) first(table.select(call(Functions.ST_Zmflag.class.getSimpleName(), $("geom")))).getField(0);
+        assertEquals(3, actual);
+    }
+
+    @Test
+    public void testHasZ() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))') as poly");
+        boolean actual = (boolean) first(polyTable.select(call(Functions.ST_HasZ.class.getSimpleName(), $("poly")))).getField(0);
+        assertTrue(actual);
     }
 
     @Test
@@ -900,6 +977,21 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testAddMeasure() {
+        Table baseTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (1 1, 2 2, 2 2, 3 3)') as line, " +
+                "ST_GeomFromWKT('MULTILINESTRING M((1 0 4, 2 0 4, 4 0 4),(1 0 4, 2 0 4, 4 0 4))') as mline");
+        String actual = (String) first(baseTable.select(call(Functions.ST_AddMeasure.class.getSimpleName(), $("line"),
+                1.0, 70.0)).as("geom").select(call(Functions.ST_AsText.class.getSimpleName(), $("geom")))).getField(0);
+        String expected = "LINESTRING M(1 1 1, 2 2 35.5, 2 2 35.5, 3 3 70)";
+        assertEquals(expected, actual);
+
+        actual = (String) first(baseTable.select(call(Functions.ST_AddMeasure.class.getSimpleName(), $("mline"),
+                10.0, 70.0)).as("geom").select(call(Functions.ST_AsText.class.getSimpleName(), $("geom")))).getField(0);
+        expected = "MULTILINESTRING M((1 0 10, 2 0 20, 4 0 40), (1 0 40, 2 0 50, 4 0 70))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testAddPoint() {
         Table pointTable = tableEnv.sqlQuery("SELECT ST_AddPoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1)'), ST_GeomFromWKT('POINT (2 2)'))");
         assertEquals("LINESTRING (0 0, 1 1, 2 2)", first(pointTable).getField(0).toString());
@@ -970,6 +1062,14 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testPoints() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 1, 5 1, 5 0, 1 0, 0 0))') AS polygon");
+        table = table.select(call(Functions.ST_Points.class.getSimpleName(), $("polygon")));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("MULTIPOINT ((0 0), (1 1), (5 1), (5 0), (1 0), (0 0))", result.toString());
+    }
+
+    @Test
     public void testPolygon() {
         Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)') AS line");
         table = table.select(call(Functions.ST_Polygon.class.getSimpleName(), $("line"), 4236));
@@ -1011,6 +1111,31 @@ public class FunctionTest extends TestBase{
         table = table.select(call(Functions.ST_MakeValid.class.getSimpleName(), $("polygon")));
         Geometry result = (Geometry) first(table).getField(0);
         assertEquals("MULTIPOLYGON (((1 5, 3 3, 1 1, 1 5)), ((5 3, 7 5, 7 1, 5 3)))", result.toString());
+    }
+
+    @Test
+    public void testMaxDistnace() {
+        Table tbl = tableEnv.sqlQuery(
+                "SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))') as geom");
+        Double actual = (Double) first(tbl.select(call(Functions.ST_MaxDistance.class.getSimpleName(), $("geom"), $("geom")))).getField(0);
+        Double expected = 206.15528128088303;
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testMinimumClearance() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))') as geom");
+        Double actual = (Double) first(table.select(call(Functions.ST_MinimumClearance.class.getSimpleName(), $("geom")))).getField(0);
+        Double expected = 0.5;
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testMinimumClearanceLine() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))') as geom");
+        String actual = ((Geometry) first(table.select(call(Functions.ST_MinimumClearanceLine.class.getSimpleName(), $("geom")))).getField(0)).toText();
+        String expected = "LINESTRING (64.5 16, 65 16)";
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -1078,6 +1203,26 @@ public class FunctionTest extends TestBase{
         table = table.select(call(Functions.ST_SimplifyPreserveTopology.class.getSimpleName(), $("geom"), 0.2));
         Geometry result = (Geometry) first(table).getField(0);
         assertEquals("POLYGON ((0 0, 1 0, 1 1, 0 0))", result.toString());
+    }
+
+    @Test
+    public void testSimplifyVW() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 0.9, 1 1, 0 0))') AS geom");
+        table = table.select(call(Functions.ST_SimplifyPreserveTopology.class.getSimpleName(), $("geom"), 2));
+        Geometry result = (Geometry) first(table).getField(0);
+        assertEquals("POLYGON ((0 0, 1 0, 1 1, 0 0))", result.toString());
+    }
+
+    @Test
+    public void testSimplifyPolygonHull() {
+        Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((30 10, 40 40, 45 45, 20 40, 25 35, 10 20, 15 15, 30 10))') AS geom");
+        String actual = first(table.select(call(Functions.ST_SimplifyPolygonHull.class.getSimpleName(), $("geom"), 0.3, false))).getField(0).toString();
+        String expected = "POLYGON ((30 10, 40 40, 10 20, 30 10))";
+        assertEquals(expected, actual);
+
+        actual = first(table.select(call(Functions.ST_SimplifyPolygonHull.class.getSimpleName(), $("geom"), 0.3))).getField(0).toString();
+        expected = "POLYGON ((30 10, 15 15, 10 20, 20 40, 45 45, 30 10))";
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -1260,6 +1405,75 @@ public class FunctionTest extends TestBase{
     }
 
     @Test
+    public void testForce3DZ() {
+        Integer expectedDims = 3;
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_Force3DZ(ST_GeomFromWKT('LINESTRING(0 1, 1 0, 2 0)'), 1.2) " +
+                "AS " + polygonColNames[0]);
+        Integer actual = (Integer) first(polyTable.select(call(Functions.ST_NDims.class.getSimpleName(), $(polygonColNames[0])))).getField(0);
+        assertEquals(expectedDims, actual);
+
+        polyTable = tableEnv.sqlQuery("SELECT ST_Force3DZ(ST_GeomFromWKT('LINESTRING(0 1, 1 0, 2 0)')) " +
+                "AS " + polygonColNames[0]);
+        actual = (Integer) first(polyTable.select(call(Functions.ST_NDims.class.getSimpleName(), $(polygonColNames[0])))).getField(0);
+        assertEquals(expectedDims, actual);
+    }
+
+    @Test
+    public void testForce3DM() {
+        Table geomTable = tableEnv.sqlQuery("SELECT ST_Force3DM(ST_GeomFromText('LINESTRING (1 2, 2 3, 3 4)')) AS geom");
+        Boolean actual = (Boolean) first(geomTable.select(call(Functions.ST_HasM.class.getSimpleName(), $("geom")))).getField(0);
+        assertEquals(Boolean.TRUE, actual);
+
+        geomTable = tableEnv.sqlQuery("SELECT ST_Force3DM(ST_GeomFromText('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (4 4, 4 6, 6 6, 6 4, 4 4))')) AS geom");
+        actual = (Boolean) first(geomTable.select(call(Functions.ST_HasM.class.getSimpleName(), $("geom")))).getField(0);
+        assertEquals(Boolean.TRUE, actual);
+    }
+
+    @Test
+    public void testForce4D() {
+        Table geomTable = tableEnv.sqlQuery("SELECT ST_Force4D(ST_GeomFromText('LINESTRING (1 2, 2 3, 3 4)')) AS geom");
+        String actual = (String) first(geomTable.select(call(Functions.ST_AsText.class.getSimpleName(), $("geom")))).getField(0);
+        String expected = "LINESTRING ZM(1 2 0 0, 2 3 0 0, 3 4 0 0)";
+        assertEquals(expected, actual);
+
+        geomTable = tableEnv.sqlQuery("SELECT ST_Force4D(ST_GeomFromText('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (4 4, 4 6, 6 6, 6 4, 4 4))')) AS geom");
+        actual = (String) first(geomTable.select(call(Functions.ST_AsText.class.getSimpleName(), $("geom")))).getField(0);
+        expected = "POLYGON ZM((0 0 0 0, 10 0 0 0, 10 10 0 0, 0 10 0 0, 0 0 0 0), (4 4 0 0, 4 6 0 0, 6 6 0 0, 6 4 0 0, 4 4 0 0))";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testForceCollection() {
+        int actual = (int) first(
+                tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)') AS geom").select(call(Functions.ST_ForceCollection.class.getSimpleName(), $("geom"))).as("geom")
+                        .select(call(Functions.ST_NumGeometries.class.getSimpleName(), $("geom")))
+        ).getField(0);
+        int expected = 6;
+        assertEquals(expected, actual);
+
+        actual = (int) first(
+                tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTIPOLYGON(((0 0 0,0 1 0,1 1 0,1 0 0,0 0 0)),((0 0 0,1 0 0,1 0 1,0 0 1,0 0 0)),((1 1 0,1 1 1,1 0 1,1 0 0,1 1 0)),((0 1 0,0 1 1,1 1 1,1 1 0,0 1 0)),((0 0 1,1 0 1,1 1 1,0 1 1,0 0 1)))') AS geom").select(call(Functions.ST_ForceCollection.class.getSimpleName(), $("geom"))).as("geom")
+                        .select(call(Functions.ST_NumGeometries.class.getSimpleName(), $("geom")))
+        ).getField(0);
+        expected = 5;
+        assertEquals(expected, actual);
+
+        actual = (int) first(
+                tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTILINESTRING ((10 10, 20 20, 30 30), (15 15, 25 25, 35 35))') AS geom").select(call(Functions.ST_ForceCollection.class.getSimpleName(), $("geom"))).as("geom")
+                        .select(call(Functions.ST_NumGeometries.class.getSimpleName(), $("geom")))
+        ).getField(0);
+        expected = 2;
+        assertEquals(expected, actual);
+
+        actual = (int) first(
+                tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))') AS geom").select(call(Functions.ST_ForceCollection.class.getSimpleName(), $("geom"))).as("geom")
+                        .select(call(Functions.ST_NumGeometries.class.getSimpleName(), $("geom")))
+        ).getField(0);
+        expected = 1;
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testTriangulatePolygon() {
         Table polyTable = tableEnv.sqlQuery("SELECT ST_TriangulatePolygon(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (5 5, 5 8, 8 8, 8 5, 5 5))')) as poly");
         String actual = (String) first(polyTable.select(call(Functions.ST_AsText.class.getSimpleName(), $("poly")))).getField(0);
@@ -1392,6 +1606,22 @@ public class FunctionTest extends TestBase{
         Double actual = (Double) first(polyTable).getField(0);
         assertEquals(expected, actual, 1e-9);
 
+    }
+
+    @Test
+    public void testDelaunayTriangle() {
+        Table polyTable = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('MULTIPOLYGON (((10 10, 10 20, 20 20, 20 10, 10 10)),((25 10, 25 20, 35 20, 35 10, 25 10)))') AS geom");
+        String actual = ((Geometry) first(polyTable.select(call(Functions.ST_DelaunayTriangles.class.getSimpleName(), $("geom")))).getField(0)).toText();
+        String expected = "GEOMETRYCOLLECTION (POLYGON ((10 20, 10 10, 20 10, 10 20)), POLYGON ((10 20, 20 10, 20 20, 10 20)), POLYGON ((20 20, 20 10, 25 10, 20 20)), POLYGON ((20 20, 25 10, 25 20, 20 20)), POLYGON ((25 20, 25 10, 35 10, 25 20)), POLYGON ((25 20, 35 10, 35 20, 25 20)))";
+        assertEquals(expected, actual);
+
+        actual = ((Geometry) first(polyTable.select(call(Functions.ST_DelaunayTriangles.class.getSimpleName(), $("geom"), 20))).getField(0)).toText();
+        expected = "GEOMETRYCOLLECTION (POLYGON ((10 20, 10 10, 35 10, 10 20)))";
+        assertEquals(expected, actual);
+
+        actual = ((Geometry) first(polyTable.select(call(Functions.ST_DelaunayTriangles.class.getSimpleName(), $("geom"), 20, 1))).getField(0)).toText();
+        expected = "MULTILINESTRING ((10 20, 35 10), (10 10, 10 20), (10 10, 35 10))";
+        assertEquals(expected, actual);
     }
 
     @Test

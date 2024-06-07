@@ -77,6 +77,65 @@ public class PredicatesTest extends TestBase {
     }
 
     @Test
+    public void testRelateString() throws ParseException {
+        Geometry geom1 = geomFromEWKT("POINT(1 2)");
+        Geometry geom2 = Functions.buffer(geomFromEWKT("POINT(1 2)"), 2);
+        String actual = Predicates.relate(geom1, geom2);
+        assertEquals("0FFFFF212", actual);
+
+        geom1 = geomFromEWKT("LINESTRING(1 2, 3 4)");
+        geom2 = geomFromEWKT("LINESTRING(5 6, 7 8)");
+        actual = Predicates.relate(geom1, geom2);
+        assertEquals("FF1FF0102", actual);
+
+        geom1 = geomFromEWKT("LINESTRING (1 1, 5 5)");
+        geom2 = geomFromEWKT("POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))");
+        actual = Predicates.relate(geom1, geom2);
+        assertEquals("1010F0212", actual);
+    }
+
+    @Test
+    public void testRelateBoolean() throws ParseException {
+        Geometry geom1 = geomFromEWKT("POINT(1 2)");
+        Geometry geom2 = Functions.buffer(geomFromEWKT("POINT(1 2)"), 2);
+        boolean actual = Predicates.relate(geom1, geom2, "0FFFFF212");
+        assertTrue(actual);
+
+        actual = Predicates.relate(geom1, geom2, "0F0FFF212");
+        assertFalse(actual);
+
+        geom1 = geomFromEWKT("LINESTRING(1 2, 3 4)");
+        geom2 = geomFromEWKT("LINESTRING(5 6, 7 8)");
+        actual = Predicates.relate(geom1, geom2, "FF1F***02");
+        assertTrue(actual);
+
+        actual = Predicates.relate(geom1, geom2, "FF10***02");
+        assertFalse(actual);
+
+        geom1 = geomFromEWKT("LINESTRING (1 1, 5 5)");
+        geom2 = geomFromEWKT("POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))");
+        actual = Predicates.relate(geom1, geom2, "1010F0212");
+        assertTrue(actual);
+    }
+
+    @Test
+    public void testRelateMatch() {
+        String matrix1 = "101202FFF";
+        String matrix2 = "TTTTTTFFF";
+        boolean actual = Predicates.relateMatch(matrix1, matrix2);
+        assertTrue(actual);
+
+        matrix2 = "TTFTTTFFF";
+        actual = Predicates.relateMatch(matrix1, matrix2);
+        assertFalse(actual);
+
+        matrix1 = "FF1FF0102";
+        matrix2 = "FF1F***02";
+        actual = Predicates.relateMatch(matrix1, matrix2);
+        assertTrue(actual);
+    }
+
+    @Test
     public void testCrossesDateLine() throws ParseException {
         Geometry geom1 = geomFromEWKT("LINESTRING(170 30, -170 30)");
         Geometry geom2 = geomFromEWKT("LINESTRING(-120 30, -130 40)");

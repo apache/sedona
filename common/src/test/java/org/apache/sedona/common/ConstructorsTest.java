@@ -99,12 +99,65 @@ public class ConstructorsTest {
     }
 
     @Test
+    public void mPointFromText() throws ParseException {
+        assertNull(Constructors.mPointFromText(null, 0));
+        assertNull(Constructors.mPointFromText("MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))", 0));
+        Geometry geom = Constructors.mPointFromText("MULTIPOINT ((10 10), (20 20), (30 30))", 0);
+        assertEquals(0,geom.getSRID());
+        assertEquals("MULTIPOINT ((10 10), (20 20), (30 30))",geom.toText());
+
+        geom = Constructors.mPointFromText("MULTIPOINT ((10 10), (20 20), (30 30))", 3306);
+        assertEquals(3306,geom.getSRID());
+        assertEquals("MULTIPOINT ((10 10), (20 20), (30 30))"
+                ,geom.toText());
+    }
+
+    @Test
+    public void geomCollFromText() throws ParseException {
+        assertNull(Constructors.geomCollFromText(null, 0));
+        assertNull(Constructors.geomCollFromText("MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))", 0));
+        Geometry geom = Constructors.geomCollFromText("GEOMETRYCOLLECTION (POINT (10 20),LINESTRING (30 40, 50 60, 70 80),POLYGON ((10 10, 20 20, 10 20, 10 10)))", 0);
+        assertEquals(0,geom.getSRID());
+        assertEquals("GEOMETRYCOLLECTION (POINT (10 20), LINESTRING (30 40, 50 60, 70 80), POLYGON ((10 10, 20 20, 10 20, 10 10)))",geom.toText());
+
+        geom = Constructors.geomCollFromText("GEOMETRYCOLLECTION (POINT (10 20),LINESTRING (30 40, 50 60, 70 80),POLYGON ((10 10, 20 20, 10 20, 10 10)))", 3306);
+        assertEquals(3306,geom.getSRID());
+        assertEquals("GEOMETRYCOLLECTION (POINT (10 20), LINESTRING (30 40, 50 60, 70 80), POLYGON ((10 10, 20 20, 10 20, 10 10)))"
+                ,geom.toText());
+
+        ParseException parseException = assertThrows(ParseException.class, () -> Constructors.geomCollFromText("GEOMETRYCOLLECTION (POLYGON(not valid))", 0));
+        assertEquals("Expected EMPTY or ( but found 'not' (line 1)", parseException.getMessage());
+    }
+
+    @Test
     public void point() {
         Geometry point = Constructors.point(1.0d, 2.0d);
 
         assertTrue(point instanceof Point);
         assertEquals(0, point.getSRID());
         assertEquals("POINT (1 2)", point.toText());
+    }
+
+    @Test
+    public void pointFromGeoHash() {
+        String point = Functions.asWKT(Constructors.pointFromGeoHash("9qqj7nmxncgyy4d0dbxqz0", 4));
+        assertEquals("POINT (-115.13671875 36.123046875)", point);
+
+        point = Functions.asWKT(Constructors.pointFromGeoHash("9qqj7nmxncgyy4d0dbxqz0", null));
+        assertEquals("POINT (-115.17281600000001 36.11464599999999)", point);
+
+        point = Functions.asWKT(Constructors.pointFromGeoHash("9qqj7nmxncgyy4d0dbxqz0", 1));
+        assertEquals("POINT (-112.5 22.5)", point);
+    }
+
+    @Test
+    public void makePointM() {
+        Geometry point = Constructors.makePointM(1, 2, 3);
+
+        assertTrue(point instanceof Point);
+        String actual = Functions.asWKT(point);
+        String expected = "POINT M(1 2 3)";
+        assertEquals(expected, actual);
     }
 
     @Test

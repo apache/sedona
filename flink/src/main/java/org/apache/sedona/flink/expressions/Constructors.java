@@ -88,6 +88,13 @@ public class Constructors {
         }
     }
 
+    public static class ST_MakePointM extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y, @DataTypeHint("Double") Double m) throws ParseException {
+            return org.apache.sedona.common.Constructors.makePointM(x, y, m);
+        }
+    }
+
     public static class ST_MakePoint extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("Double") Double x, @DataTypeHint("Double") Double y) throws ParseException {
@@ -292,6 +299,38 @@ public class Constructors {
         }
     }
 
+    public static class ST_LinestringFromWKB extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String wkbString) throws ParseException {
+            Geometry geometry = getGeometryByFileData(wkbString, FileDataSplitter.WKB);
+            if (geometry instanceof LineString) {
+                geometry.setSRID(0);
+                return geometry;
+            }
+            return null;  // Return null if geometry is not a Linestring
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String wkbString, int srid) throws ParseException {
+            Geometry geometry = getGeometryByFileData(wkbString, FileDataSplitter.WKB);
+            if (geometry instanceof LineString) {
+                geometry.setSRID(srid);
+                return geometry;
+            }
+            return null;  // Return null if geometry is not a Linestring
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+        public Geometry eval(@DataTypeHint("Bytes") byte[] wkb) throws ParseException {
+            return org.apache.sedona.common.Constructors.lineFromWKB(wkb, 0);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+        public Geometry eval(@DataTypeHint("Bytes") byte[] wkb, int srid) throws ParseException {
+            return org.apache.sedona.common.Constructors.lineFromWKB(wkb, srid);
+        }
+    }
+
     public static class ST_GeomFromGeoJSON extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint("String") String geoJson) throws ParseException {
@@ -313,6 +352,20 @@ public class Constructors {
         public Geometry eval(@DataTypeHint("String") String value)
                 throws ParseException, GeoHashDecoder.InvalidGeoHashException
         {
+            return eval(value, null);
+        }
+    }
+
+    public static class ST_PointFromGeoHash extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String value,
+                             @DataTypeHint("Int") Integer precision) {
+            // The default precision is the geohash length. Otherwise, use the precision given by the user
+            return org.apache.sedona.common.Constructors.pointFromGeoHash(value, precision);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint("String") String value) {
             return eval(value, null);
         }
     }
@@ -356,6 +409,28 @@ public class Constructors {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "String") String wkt) throws ParseException {
             return org.apache.sedona.common.Constructors.mLineFromText(wkt, 0);
+        }
+    }
+
+    public static class ST_MPointFromText extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "String") String wkt, @DataTypeHint("Int") Integer srid) throws ParseException {
+            return org.apache.sedona.common.Constructors.mPointFromText(wkt, srid);
+        }
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "String") String wkt) throws ParseException {
+            return org.apache.sedona.common.Constructors.mPointFromText(wkt, 0);
+        }
+    }
+
+    public static class ST_GeomCollFromText extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "String") String wkt, @DataTypeHint("Int") Integer srid) throws ParseException {
+            return org.apache.sedona.common.Constructors.geomCollFromText(wkt, srid);
+        }
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "String") String wkt) throws ParseException {
+            return org.apache.sedona.common.Constructors.geomCollFromText(wkt, 0);
         }
     }
 

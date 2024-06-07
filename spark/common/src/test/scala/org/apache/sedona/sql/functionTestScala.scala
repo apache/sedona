@@ -173,6 +173,15 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(functionDf.count() > 0);
     }
 
+    it("Passed ST_Length2D") {
+      var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
+      polygonWktDf.createOrReplaceTempView("polygontable")
+      var polygonDf = sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+      polygonDf.createOrReplaceTempView("polygondf")
+      var functionDf = sparkSession.sql("select ST_Length2D(polygondf.countyshape) from polygondf")
+      assert(functionDf.count() > 0);
+    }
+
     it("Passed ST_Area") {
       var polygonWktDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(mixedWktGeometryInputLocation)
       polygonWktDf.createOrReplaceTempView("polygontable")
@@ -385,6 +394,12 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(!testtable.take(1)(0).get(1).asInstanceOf[Boolean])
     }
 
+    it("Passed ST_HasZ") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON Z ((30 10 5, 40 40 10, 20 40 15, 10 20 20, 30 10 5))') as poly")
+      val actual = baseDf.selectExpr("ST_HasZ(poly)").first().getBoolean(0)
+      assert(actual)
+    }
+
     it("Passed ST_HasM") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))') as poly")
       val actual = baseDf.selectExpr("ST_HasM(poly)").first().getBoolean(0)
@@ -429,6 +444,18 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       val row = testtable.take(1)(0)
       assert(row.get(0).asInstanceOf[Geometry].toText.equals("LINESTRING (1 2, 3 4)"))
       assert(row.get(1).asInstanceOf[Geometry].toText.equals("LINESTRING (5 6, 7 8, 9 10)"))
+    }
+
+    it("Passed ST_Points") {
+
+      val testtable = sparkSession.sql(
+        "SELECT ST_Points(ST_GeomFromText('MULTIPOLYGON (((0 0, 1 1, 1 0, 0 0)), ((2 2, 3 3, 3 2, 2 2)))'))"
+      )
+
+      val result = testtable.take(1)(0).get(0).asInstanceOf[Geometry]
+
+      result.normalize()
+      assert(result.toText()  == "MULTIPOINT ((0 0), (0 0), (1 0), (1 1), (2 2), (2 2), (3 2), (3 3))")
     }
 
     it("Passed ST_Polygon") {
@@ -611,10 +638,39 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assert(Hex.encodeHexString(df.first().get(0).asInstanceOf[Array[Byte]]) == s)
     }
 
+    it("Passed ST_AsHEXEWKB") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT(1 2)') as point")
+      var actual = baseDf.selectExpr("ST_AsHEXEWKB(point)").first().get(0)
+      var expected = "0101000000000000000000F03F0000000000000040"
+      assert(expected.equals(actual))
+
+      actual = baseDf.selectExpr("ST_AsHEXEWKB(point, 'XDR')").first().get(0)
+      expected = "00000000013FF00000000000004000000000000000"
+      assert(expected.equals(actual))
+    }
+
     it("Passed ST_AsEWKB empty geometry") {
       val df = sparkSession.sql("SELECT ST_AsEWKB(ST_SetSrid(ST_GeomFromWKT('POINT EMPTY'), 3021))")
       val s = "0101000020cd0b0000000000000000f87f000000000000f87f"
       assert(Hex.encodeHexString(df.first().get(0).asInstanceOf[Array[Byte]]) == s)
+    }
+
+    it("Passed ST_SimplifyVW") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(5 2, 3 8, 6 20, 7 25, 10 10)') AS geom")
+      val actual = baseDf.selectExpr("ST_SimplifyVW(geom, 30)").first().get(0).asInstanceOf[Geometry].toText
+      val expected = "LINESTRING (5 2, 7 25, 10 10)"
+      assertEquals(expected, actual)
+    }
+
+    it("Passed ST_SimplifyPolygonHull") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((30 10, 40 40, 45 45, 20 40, 25 35, 10 20, 15 15, 30 10))') AS geom")
+      var actual = baseDf.selectExpr("ST_SimplifyPolygonHull(geom, 0.3, false)").first().get(0).asInstanceOf[Geometry].toText
+      var expected = "POLYGON ((30 10, 40 40, 10 20, 30 10))"
+      assertEquals(expected, actual)
+
+      actual = baseDf.selectExpr("ST_SimplifyPolygonHull(geom, 0.3)").first().get(0).asInstanceOf[Geometry].toText
+      expected = "POLYGON ((30 10, 15 15, 10 20, 20 40, 45 45, 30 10))"
+      assertEquals(expected, actual)
     }
 
     it("Passed ST_NPoints") {
@@ -723,6 +779,13 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       testtable.createOrReplaceTempView("sym_table")
       val symDiff = sparkSession.sql("select ST_SymDifference(a,null) from sym_table")
       assert(symDiff.first().get(0) == null)
+    }
+
+    it("Passed ST_UnaryUnion") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('MULTIPOLYGON(((0 10,0 30,20 30,20 10,0 10)),((10 0,10 20,30 20,30 0,10 0)))') AS geom")
+      val actual = baseDf.selectExpr("ST_UnaryUnion(geom)").first().get(0).asInstanceOf[Geometry].toText
+      val expected = "POLYGON ((10 0, 10 10, 0 10, 0 30, 20 30, 20 20, 30 20, 30 0, 10 0))"
+      assertEquals(expected, actual)
     }
 
     it("Passed ST_Union - part of right overlaps left") {
@@ -920,6 +983,20 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       And("Polygon count should be 0")
       polygons.length shouldBe 0
 
+    }
+
+    it("Passed ST_Zmflag") {
+      var actual = sparkSession.sql("SELECT ST_Zmflag(ST_GeomFromWKT('POINT (1 2)'))").first().get(0)
+      assert(actual == 0)
+
+      actual = sparkSession.sql("SELECT ST_Zmflag(ST_GeomFromWKT('LINESTRING (1 2 3, 4 5 6)'))").first().get(0)
+      assert(actual == 2)
+
+      actual = sparkSession.sql("SELECT ST_Zmflag(ST_GeomFromWKT('POLYGON M((1 2 3, 3 4 3, 5 6 3, 3 4 3, 1 2 3))'))").first().get(0)
+      assert(actual == 1)
+
+      actual = sparkSession.sql("SELECT ST_Zmflag(ST_GeomFromWKT('MULTIPOLYGON ZM (((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1)), ((15 5 3 1, 20 10 6 2, 10 10 7 3, 15 5 3 1)))'))").first().get(0)
+      assert(actual == 3)
     }
 
     it("Should pass ST_StartPoint function") {
@@ -1268,6 +1345,17 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       .collect().toList should contain theSameElementsAs List((2, 0), (11, 1))
   }
 
+  it("Should pass ST_AddMeasure") {
+    val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (1 1, 2 2, 2 2, 3 3)') as line, ST_GeomFromWKT('MULTILINESTRING M((1 0 4, 2 0 4, 4 0 4),(1 0 4, 2 0 4, 4 0 4))') as mline")
+    var actual = baseDf.selectExpr("ST_AsText(ST_AddMeasure(line, 1, 70))").first().get(0)
+    var expected = "LINESTRING M(1 1 1, 2 2 35.5, 2 2 35.5, 3 3 70)"
+    assertEquals(expected, actual)
+
+    actual = baseDf.selectExpr("ST_AsText(ST_AddMeasure(mline, 10, 70))").first().get(0)
+    expected = "MULTILINESTRING M((1 0 10, 2 0 20, 4 0 40), (1 0 40, 2 0 50, 4 0 70))"
+    assertEquals(expected, actual)
+  }
+
   it("Should pass ST_AddPoint") {
     Given("Geometry df")
     val geometryDf = Seq(
@@ -1574,6 +1662,31 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
         "GEOMETRYCOLLECTION EMPTY")
   }
 
+  it("Should pass ST_LocateAlong") {
+    val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('MULTILINESTRING M((1 2 3, 3 4 2, 9 4 3),(1 2 3, 5 4 5))') AS geom")
+    var actual = baseDf.selectExpr("ST_AsText(ST_LocateAlong(geom, 2))").first().get(0)
+    var expected = "MULTIPOINT M((3 4 2))"
+    assertEquals(expected, actual)
+
+    actual = baseDf.selectExpr("ST_AsText(ST_LocateAlong(geom, 2, -3))").first().get(0)
+    expected = "MULTIPOINT M((5.121320343559642 1.8786796564403572 2), (3 1 2))"
+    assertEquals(expected, actual)
+  }
+
+  it("Should pass ST_LongestLine") {
+    val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))') as geom")
+    val actual = baseDf.selectExpr("ST_LongestLine(geom, geom)").first().get(0).asInstanceOf[Geometry].toText
+    val expected = "LINESTRING (180 180, 20 50)"
+    assert(expected.equals(actual))
+  }
+
+  it("Should pass ST_MaxDistance") {
+    val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))') as geom")
+    val actual = baseDf.selectExpr("ST_MaxDistance(geom, geom)").first().get(0)
+    val expected = 206.15528128088303
+    assert(expected == actual)
+  }
+
   it("Should pass ST_FlipCoordinates") {
     val pointDF = createSamplePointDf(5, "geom")
     val oldX = pointDF.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinate.x
@@ -1583,6 +1696,20 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     val newY = newDf.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinate.y
     assert(newX == oldY)
     assert(newY == oldX)
+  }
+
+  it("Should pass ST_MinimumClearance") {
+    val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))') as geom")
+    val actual = baseDf.selectExpr("ST_MinimumClearance(geom)").first().get(0)
+    val expected = 0.5
+    assertEquals(expected, actual)
+  }
+
+  it("Should pass ST_MinimumClearanceLine") {
+    val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))') as geom")
+    val actual = baseDf.selectExpr("ST_MinimumClearanceLine(geom)").first().get(0).asInstanceOf[Geometry].toText
+    val expected = "LINESTRING (64.5 16, 65 16)"
+    assertEquals(expected, actual)
   }
 
   it("Should pass ST_MinimumBoundingCircle") {
@@ -2222,6 +2349,68 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
     }
   }
 
+  it("Should pass ST_'Force3DZ'") {
+    val geomTestCases = Map(
+      ("'LINESTRING (0 1, 1 0, 2 0)'") -> ("'LINESTRING Z(0 1 1, 1 0 1, 2 0 1)'", "'LINESTRING Z(0 1 0, 1 0 0, 2 0 0)'"),
+      ("'LINESTRING Z(0 1 3, 1 0 3, 2 0 3)'") -> ("'LINESTRING Z(0 1 3, 1 0 3, 2 0 3)'", "'LINESTRING Z(0 1 3, 1 0 3, 2 0 3)'"),
+      ("'LINESTRING EMPTY'") -> ("'LINESTRING EMPTY'", "'LINESTRING EMPTY'")
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"SELECT ST_AsText(ST_Force3DZ(ST_GeomFromWKT($geom), 1)) AS geom, " + s"$expectedResult")
+      val dfDefaultValue = sparkSession.sql(s"SELECT ST_AsText(ST_Force3DZ(ST_GeomFromWKT($geom))) AS geom, " + s"$expectedResult")
+      val actual = df.take(1)(0).get(0).asInstanceOf[String]
+      val expected = df.take(1)(0).get(1).asInstanceOf[GenericRowWithSchema].get(0).asInstanceOf[String]
+      val actualDefaultValue = dfDefaultValue.take(1)(0).get(0).asInstanceOf[String]
+      val expectedDefaultValue = dfDefaultValue.take(1)(0).get(1).asInstanceOf[GenericRowWithSchema].get(1).asInstanceOf[String]
+      assertEquals(expected, actual)
+      assertEquals(expectedDefaultValue, actualDefaultValue);
+    }
+  }
+
+  it("Should pass ST_Force3DM") {
+    val geomTestCases = Map(
+      ("'LINESTRING (0 1, 1 0, 2 0)'") -> ("'LINESTRING M(0 1 1, 1 0 1, 2 0 1)'", "'LINESTRING M(0 1 0, 1 0 0, 2 0 0)'"),
+      ("'LINESTRING M(0 1 3, 1 0 3, 2 0 3)'") -> ("'LINESTRING M(0 1 3, 1 0 3, 2 0 3)'", "'LINESTRING M(0 1 3, 1 0 3, 2 0 3)'"),
+      ("'LINESTRING EMPTY'") -> ("'LINESTRING EMPTY'", "'LINESTRING EMPTY'")
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"SELECT ST_AsText(ST_Force3DM(ST_GeomFromWKT($geom), 1)) AS geom, " + s"$expectedResult")
+      val dfDefaultValue = sparkSession.sql(s"SELECT ST_AsText(ST_Force3DM(ST_GeomFromWKT($geom))) AS geom, " + s"$expectedResult")
+      val actual = df.take(1)(0).get(0).asInstanceOf[String]
+      val expected = df.take(1)(0).get(1).asInstanceOf[GenericRowWithSchema].get(0).asInstanceOf[String]
+      val actualDefaultValue = dfDefaultValue.take(1)(0).get(0).asInstanceOf[String]
+      val expectedDefaultValue = dfDefaultValue.take(1)(0).get(1).asInstanceOf[GenericRowWithSchema].get(1).asInstanceOf[String]
+      assertEquals(expected, actual)
+      assertEquals(expectedDefaultValue, actualDefaultValue);
+    }
+  }
+
+  it("Should pass ST_Force4D") {
+    val geomTestCases = Map(
+      ("'LINESTRING (0 1, 1 0, 2 0)'") -> ("'LINESTRING ZM(0 1 1 1, 1 0 1 1, 2 0 1 1)'", "'LINESTRING ZM(0 1 0 0, 1 0 0 0, 2 0 0 0)'"),
+      ("'LINESTRING ZM(0 1 3 2, 1 0 3 2, 2 0 3 2)'") -> ("'LINESTRING ZM(0 1 3 2, 1 0 3 2, 2 0 3 2)'", "'LINESTRING ZM(0 1 3 2, 1 0 3 2, 2 0 3 2)'"),
+      ("'LINESTRING EMPTY'") -> ("'LINESTRING EMPTY'", "'LINESTRING EMPTY'")
+    )
+    for (((geom), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"SELECT ST_AsText(ST_Force4D(ST_GeomFromWKT($geom), 1, 1)) AS geom, " + s"$expectedResult")
+      val dfDefaultValue = sparkSession.sql(s"SELECT ST_AsText(ST_Force4D(ST_GeomFromWKT($geom))) AS geom, " + s"$expectedResult")
+      val actual = df.take(1)(0).get(0).asInstanceOf[String]
+      val expected = df.take(1)(0).get(1).asInstanceOf[GenericRowWithSchema].get(0).asInstanceOf[String]
+      val actualDefaultValue = dfDefaultValue.take(1)(0).get(0).asInstanceOf[String]
+      val expectedDefaultValue = dfDefaultValue.take(1)(0).get(1).asInstanceOf[GenericRowWithSchema].get(1).asInstanceOf[String]
+      assertEquals(expected, actual)
+      assertEquals(expectedDefaultValue, actualDefaultValue);
+    }
+  }
+
+  it("Passed ST_ForceCollection") {
+    var actual = sparkSession.sql("SELECT ST_NumGeometries(ST_ForceCollection(ST_GeomFromWKT('MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)')))").first().get(0)
+    assert(actual == 6)
+
+    actual = sparkSession.sql("SELECT ST_NumGeometries(ST_ForceCollection(ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')))").first().get(0)
+    assert(actual == 1)
+  }
+
   it("should pass ST_NRings") {
     val geomTestCases = Map(
       ("'POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'") -> 1,
@@ -2376,6 +2565,21 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       assertEquals(expectedRadian, actualRadian, 1e-9)
       assertEquals(expectedDegrees, actualDegrees, 1e-9)
     }
+  }
+
+  it("Should pass ST_DelaunayTriangles") {
+    val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('MULTIPOLYGON (((10 10, 10 20, 20 20, 20 10, 10 10)),((25 10, 25 20, 35 20, 35 10, 25 10)))') AS geom")
+    var actual = baseDf.selectExpr("ST_DelaunayTriangles(geom)").first().get(0).asInstanceOf[Geometry].toText
+    var expected = "GEOMETRYCOLLECTION (POLYGON ((10 20, 10 10, 20 10, 10 20)), POLYGON ((10 20, 20 10, 20 20, 10 20)), POLYGON ((20 20, 20 10, 25 10, 20 20)), POLYGON ((20 20, 25 10, 25 20, 20 20)), POLYGON ((25 20, 25 10, 35 10, 25 20)), POLYGON ((25 20, 35 10, 35 20, 25 20)))"
+    assertEquals(expected, actual)
+
+    actual = baseDf.selectExpr("ST_DelaunayTriangles(geom, 20)").first().get(0).asInstanceOf[Geometry].toText
+    expected = "GEOMETRYCOLLECTION (POLYGON ((10 20, 10 10, 35 10, 10 20)))"
+    assertEquals(expected, actual)
+
+    actual = baseDf.selectExpr("ST_DelaunayTriangles(geom, 20, 1)").first().get(0).asInstanceOf[Geometry].toText
+    expected = "MULTILINESTRING ((10 20, 35 10), (10 10, 10 20), (10 10, 35 10))"
+    assertEquals(expected, actual)
   }
 
   it ("should pass ST_Angle - 2 lines") {

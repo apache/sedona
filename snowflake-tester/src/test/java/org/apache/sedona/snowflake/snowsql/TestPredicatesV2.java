@@ -117,6 +117,31 @@ public class TestPredicatesV2
                 true
         );
     }
+
+    @Test
+    public void test_ST_Relate() {
+        registerUDFV2("ST_Relate",  String.class,  String.class);
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_Relate( ST_GeometryFromWKT('LINESTRING (1 1, 5 5)'),  ST_GeometryFromWKT('POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))'))",
+                "1010F0212"
+        );
+
+        registerUDFV2("ST_Relate",  String.class,  String.class, String.class);
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_Relate( ST_GeometryFromWKT('LINESTRING (1 1, 5 5)'),  ST_GeometryFromWKT('POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))'), '1010F0212')",
+                true
+        );
+    }
+
+    @Test
+    public void test_ST_RelateMatch() {
+        registerUDFV2("ST_RelateMatch", String.class, String.class);
+        verifySqlSingleRes(
+                "SELECT SEDONA.ST_RelateMatch('101202FFF', 'TTTTTTFFF')",
+                true
+        );
+    }
+
     @Test
     public void test_ST_Within() {
          registerUDFV2("ST_Within",  String.class,  String.class);

@@ -320,6 +320,14 @@ public class Functions {
         }
     }
 
+    public static class ST_Length2D extends ScalarFunction {
+        @DataTypeHint("Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.length(geom);
+        }
+    }
+
     public static class ST_LengthSpheroid extends ScalarFunction {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
@@ -343,6 +351,33 @@ public class Functions {
             Geometry geom = (Geometry) o;
             Geometry point = (Geometry) p;
             return org.apache.sedona.common.Functions.lineLocatePoint(geom, point);
+        }
+    }
+
+    public static class ST_LocateAlong extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint(value = "Double") Double measure,
+                             @DataTypeHint(value = "Double") Double offset) {
+            Geometry linear = (Geometry) o;
+            return org.apache.sedona.common.Functions.locateAlong(linear, measure, offset);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint(value = "Double") Double measure) {
+            Geometry linear = (Geometry) o;
+            return org.apache.sedona.common.Functions.locateAlong(linear, measure);
+        }
+    }
+
+    public static class ST_LongestLine extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object g1,
+                             @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object g2) {
+            Geometry geom1 = (Geometry) g1;
+            Geometry geom2 = (Geometry) g2;
+            return org.apache.sedona.common.Functions.longestLine(geom1, geom2);
         }
     }
 
@@ -515,6 +550,21 @@ public class Functions {
         }
     }
 
+    public static class ST_AsHEXEWKB extends ScalarFunction {
+        @DataTypeHint("String")
+        public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                           @DataTypeHint("String") String endian) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.asHexEWKB(geom, endian);
+        }
+
+        @DataTypeHint("String")
+        public String eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.asHexEWKB(geom);
+        }
+    }
+
     public static class ST_AsBinary extends ScalarFunction {
         @DataTypeHint("Bytes")
         public byte[] eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
@@ -584,6 +634,14 @@ public class Functions {
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.z(geom);
+        }
+    }
+
+    public static class ST_Zmflag extends ScalarFunction {
+        @DataTypeHint("Integer")
+        public Integer eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.zmFlag(geom);
         }
     }
 
@@ -681,6 +739,15 @@ public class Functions {
         }
     }
 
+    public static class ST_AddMeasure extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
+                             @DataTypeHint(value = "Double") Double measureStart, @DataTypeHint(value = "Double") Double measureEnd) {
+            Geometry geom = (Geometry) o1;
+            return org.apache.sedona.common.Functions.addMeasure(geom, measureStart, measureEnd);
+        }
+    }
+
     public static class ST_AddPoint extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
@@ -757,6 +824,14 @@ public class Functions {
         }
     }
 
+    public static class ST_HasZ extends ScalarFunction {
+        @DataTypeHint("Boolean")
+        public Boolean eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.hasZ(geom);
+        }
+    }
+
     public static class ST_M extends  ScalarFunction {
         @DataTypeHint("Double")
         public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
@@ -813,6 +888,14 @@ public class Functions {
         }
     }
 
+    public static class ST_Points extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1) {
+            Geometry geom = (Geometry) o1;
+            return org.apache.sedona.common.Functions.points(geom);
+        }
+    }
+
     public static class ST_Polygon extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o1,
@@ -842,6 +925,32 @@ public class Functions {
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geom = (Geometry) o;
             return org.apache.sedona.common.Functions.makeValid(geom, false);
+        }
+    }
+
+    public static class ST_MaxDistance extends ScalarFunction {
+        @DataTypeHint(value = "Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object g1,
+                             @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object g2) {
+            Geometry geom1 = (Geometry) g1;
+            Geometry geom2 = (Geometry) g2;
+            return org.apache.sedona.common.Functions.maxDistance(geom1, geom2);
+        }
+    }
+
+    public static class ST_MinimumClearance extends ScalarFunction {
+        @DataTypeHint(value = "Double")
+        public Double eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.minimumClearance(geometry);
+        }
+    }
+
+    public static class ST_MinimumClearanceLine extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.minimumClearanceLine(geometry);
         }
     }
 
@@ -970,6 +1079,32 @@ public class Functions {
         }
     }
 
+    public static class ST_SimplifyVW extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Double") Double distanceTolerance) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.simplifyVW(geom, distanceTolerance);
+        }
+    }
+
+    public static class ST_SimplifyPolygonHull extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Double") Double vertexFactor,
+                             @DataTypeHint("Boolean") Boolean isOuter) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.simplifyPolygonHull(geom, vertexFactor, isOuter);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Double") Double vertexFactor) {
+            Geometry geom = (Geometry) o;
+            return org.apache.sedona.common.Functions.simplifyPolygonHull(geom, vertexFactor);
+        }
+    }
+
     public static class ST_Subdivide extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry[].class)
         public Geometry[] eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
@@ -1054,6 +1189,62 @@ public class Functions {
         }
     }
 
+    public static class ST_Force3DM extends ScalarFunction {
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Double") Double zValue) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.force3DM(geometry, zValue);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.force3DM(geometry);
+        }
+    }
+
+    public static class ST_Force3DZ extends ScalarFunction {
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Double") Double zValue) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.force3D(geometry, zValue);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.force3D(geometry);
+        }
+    }
+
+    public static class ST_Force4D extends ScalarFunction {
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint("Double") Double zValue, @DataTypeHint("Double") Double mValue) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.force4D(geometry, zValue, mValue);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.force4D(geometry);
+        }
+    }
+
+    public static class ST_ForceCollection extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.forceCollection(geometry);
+        }
+    }
+
     public static class ST_ForcePolygonCW extends ScalarFunction {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
@@ -1115,6 +1306,14 @@ public class Functions {
         public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
             Geometry geometry = (Geometry) o;
             return org.apache.sedona.common.Functions.triangulatePolygon(geometry);
+        }
+    }
+
+    public static class ST_UnaryUnion extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.unaryUnion(geometry);
         }
     }
 
@@ -1261,6 +1460,29 @@ public class Functions {
         public Double eval(@DataTypeHint("Double") Double angleInRadian) {
             return org.apache.sedona.common.Functions.degrees(angleInRadian);
 
+        }
+    }
+
+    public static class ST_DelaunayTriangles extends ScalarFunction {
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint(value = "Double") Double tolerance,
+                             @DataTypeHint(value = "Integer") Integer flag) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.delaunayTriangle(geometry, tolerance, flag);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+                             @DataTypeHint(value = "Double") Double tolerance) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.delaunayTriangle(geometry, tolerance);
+        }
+
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        public Geometry eval(@DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o) {
+            Geometry geometry = (Geometry) o;
+            return org.apache.sedona.common.Functions.delaunayTriangle(geometry);
         }
     }
 
