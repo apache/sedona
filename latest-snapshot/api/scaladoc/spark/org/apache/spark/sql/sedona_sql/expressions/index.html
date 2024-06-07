@@ -747,6 +747,14 @@
                         <a href="ST_MinimumBoundingRadius.html" title="">ST_MinimumBoundingRadius</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="ST_MinimumClearance.html" title=""></a>
+                        <a href="ST_MinimumClearance.html" title="">ST_MinimumClearance</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="ST_MinimumClearanceLine.html" title=""></a>
+                        <a href="ST_MinimumClearanceLine.html" title="">ST_MinimumClearanceLine</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="ST_Multi.html" title=""></a>
                         <a href="ST_Multi.html" title="">ST_Multi</a>
                       </li><li class="current-entities indented6">
@@ -945,6 +953,10 @@
                         <span class="separator"></span>
                         <a class="class" href="ST_TriangulatePolygon.html" title=""></a>
                         <a href="ST_TriangulatePolygon.html" title="">ST_TriangulatePolygon</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="ST_UnaryUnion.html" title=""></a>
+                        <a href="ST_UnaryUnion.html" title="">ST_UnaryUnion</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="ST_Union.html" title="Return the union of geometry A and B"></a>
@@ -3198,6 +3210,38 @@ See: http://lin-ear-th-inking.blogspot.com/2021/05/fixing-invalid-geometry-with-
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_MinimumClearance" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_MinimumClearanceextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_MinimumClearance:ST_MinimumClearance"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_MinimumClearance.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ST_MinimumClearance.html"><span class="name">ST_MinimumClearance</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_MinimumClearanceLine" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_MinimumClearanceLineextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_MinimumClearanceLine:ST_MinimumClearanceLine"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_MinimumClearanceLine.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ST_MinimumClearanceLine.html"><span class="name">ST_MinimumClearanceLine</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Multi" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_MultiextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_Multi:ST_Multi"></a>
       <span class="permalink">
@@ -4024,6 +4068,22 @@ The simplification uses a maximum-distance difference algorithm similar to the D
       </span>
       <span class="symbol">
         <a title="" href="ST_TriangulatePolygon.html"><span class="name">ST_TriangulatePolygon</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <a href="FoldableExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression">FoldableExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_UnaryUnion" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_UnaryUnionextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_UnaryUnion:ST_UnaryUnion"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_UnaryUnion.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ST_UnaryUnion.html"><span class="name">ST_UnaryUnion</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       

@@ -1786,6 +1786,53 @@ Output:
 36.05551275463989
 ```
 
+## ST_MinimumClearance
+
+Introduction: The minimum clearance is a metric that quantifies a geometry's tolerance to changes in coordinate precision or vertex positions. It represents the maximum distance by which vertices can be adjusted without introducing invalidity to the geometry's structure. A larger minimum clearance value indicates greater robustness against such perturbations.
+
+For a geometry with a minimum clearance of `x`, the following conditions hold:
+
+- No two distinct vertices are separated by a distance less than `x`.
+- No vertex lies within a distance `x` from any line segment it is not an endpoint of.
+
+For geometries with no definable minimum clearance, such as single Point geometries or MultiPoint geometries where all points occupy the same location, the function returns `Double.MAX_VALUE`.
+
+Format: `ST_MinimumClearance(geometry: Geometry)`
+
+SQL Example
+
+```sql
+SELECT ST_MinimumClearance(
+        ST_GeomFromWKT('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))')
+)
+```
+
+Output:
+
+```
+0.5
+```
+
+## ST_MinimumClearanceLine
+
+Introduction: This function returns a two-point LineString geometry representing the minimum clearance distance of the input geometry. If the input geometry does not have a defined minimum clearance, such as for single Points or coincident MultiPoints, an empty LineString geometry is returned instead.
+
+Format: `ST_MinimumClearanceLine(geometry: Geometry)`
+
+SQL Example:
+
+```sql
+SELECT ST_MinimumClearanceLine(
+        ST_GeomFromWKT('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))')
+)
+```
+
+Output:
+
+```
+LINESTRING (64.5 16, 65 16)
+```
+
 ## ST_MinimumBoundingCircle
 
 Introduction: Returns the smallest circle polygon that contains a geometry.
@@ -2555,6 +2602,24 @@ Output:
 
 ```
 GEOMETRYCOLLECTION (POLYGON ((0 0, 0 10, 5 5, 0 0)), POLYGON ((5 8, 5 5, 0 10, 5 8)), POLYGON ((10 0, 0 0, 5 5, 10 0)), POLYGON ((10 10, 5 8, 0 10, 10 10)), POLYGON ((10 0, 5 5, 8 5, 10 0)), POLYGON ((5 8, 10 10, 8 8, 5 8)), POLYGON ((10 10, 10 0, 8 5, 10 10)), POLYGON ((8 5, 8 8, 10 10, 8 5)))
+```
+
+## ST_UnaryUnion
+
+Introduction: This variant of [ST_Union](#st_union) operates on a single geometry input. The input geometry can be a simple Geometry type, a MultiGeometry, or a GeometryCollection. The function calculates the geometric union across all components and elements within the provided geometry object.
+
+Format: `ST_UnaryUnion(geometry: Geometry)`
+
+SQL Example
+
+```sql
+SELECT ST_UnaryUnion(ST_GeomFromWKT('MULTIPOLYGON(((0 10,0 30,20 30,20 10,0 10)),((10 0,10 20,30 20,30 0,10 0)))'))
+```
+
+Output:
+
+```
+POLYGON ((10 0, 10 10, 0 10, 0 30, 20 30, 20 20, 30 20, 30 0, 10 0))
 ```
 
 ## ST_Union
