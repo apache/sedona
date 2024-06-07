@@ -3247,6 +3247,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#st_delaunaytriangles" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_DelaunayTriangles
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_difference" class="md-nav__link">
     <span class="md-ellipsis">
       ST_Difference
@@ -5485,6 +5494,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#st_delaunaytriangles" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_DelaunayTriangles
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_difference" class="md-nav__link">
     <span class="md-ellipsis">
       ST_Difference
@@ -7084,6 +7102,26 @@ It will throw an exception indicates illegal argument if one of the params is an
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>11.309932474020195
 </code></pre></div>
+<h2 id="st_delaunaytriangles">ST_DelaunayTriangles<a class="headerlink" href="#st_delaunaytriangles" title="Permanent link">&para;</a></h2>
+<p>Introduction: This function computes the <a href="https://en.wikipedia.org/wiki/Delaunay_triangulation">Delaunay triangulation</a> for the set of vertices in the input geometry. An optional <code>tolerance</code> parameter allows snapping nearby input vertices together prior to triangulation and can improve robustness in certain scenarios by handling near-coincident vertices. The default for  <code>tolerance</code> is 0. The Delaunay triangulation geometry is bounded by the convex hull of the input vertex set.</p>
+<p>The output geometry representation depends on the provided <code>flag</code>:</p>
+<ul>
+<li><code>0</code> - a GeometryCollection of triangular Polygons (default option)</li>
+<li><code>1</code> - a MultiLinestring of the edges of the triangulation</li>
+</ul>
+<p>Format:</p>
+<p><code>ST_DelaunayTriangles(geometry: Geometry)</code></p>
+<p><code>ST_DelaunayTriangles(geometry: Geometry, tolerance: Double)</code></p>
+<p><code>ST_DelaunayTriangles(geometry: Geometry, tolerance: Double, flag: Integer)</code></p>
+<p>Since: <code>v1.6.1</code></p>
+<p>SQL Example</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_DelaunayTriangles</span><span class="p">(</span>
+<span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON ((10 10, 15 30, 20 25, 25 35, 30 20, 40 30, 50 10, 45 5, 35 15, 30 5, 25 15, 20 10, 15 20, 10 10))&#39;</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>GEOMETRYCOLLECTION (POLYGON ((15 30, 10 10, 15 20, 15 30)), POLYGON ((15 30, 15 20, 20 25, 15 30)), POLYGON ((15 30, 20 25, 25 35, 15 30)), POLYGON ((25 35, 20 25, 30 20, 25 35)), POLYGON ((25 35, 30 20, 40 30, 25 35)), POLYGON ((40 30, 30 20, 35 15, 40 30)), POLYGON ((40 30, 35 15, 50 10, 40 30)), POLYGON ((50 10, 35 15, 45 5, 50 10)), POLYGON ((30 5, 45 5, 35 15, 30 5)), POLYGON ((30 5, 35 15, 25 15, 30 5)), POLYGON ((30 5, 25 15, 20 10, 30 5)), POLYGON ((30 5, 20 10, 10 10, 30 5)), POLYGON ((10 10, 20 10, 15 20, 10 10)), POLYGON ((15 20, 20 10, 25 15, 15 20)), POLYGON ((15 20, 25 15, 20 25, 15 20)), POLYGON ((20 25, 25 15, 30 20, 20 25)), POLYGON ((30 20, 25 15, 35 15, 30 20)))
+</code></pre></div>
 <h2 id="st_difference">ST_Difference<a class="headerlink" href="#st_difference" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the difference between geometry A and B (return part of geometry A that does not intersect geometry B)</p>
 <p>Format: <code>ST_Difference (A: Geometry, B: Geometry)</code></p>
@@ -8596,7 +8634,7 @@ You need to make sure that the input geometry is in lon/lat order. If the input 
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 7, 2024 22:06:17</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 7, 2024 22:08:12</span>
   </span>
 
     
