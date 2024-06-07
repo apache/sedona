@@ -2284,7 +2284,7 @@ Format:
 
 `ST_LocateAlong(linear: Geometry, measure: Double)`
 
-Since: `vTBD`
+Since: `v1.6.1`
 
 SQL Example:
 
