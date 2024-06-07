@@ -91,6 +91,8 @@ object Catalog {
     function[ST_ReducePrecision](),
     function[ST_Equals](),
     function[ST_Touches](),
+    function[ST_Relate](),
+    function[ST_RelateMatch](),
     function[ST_Overlaps](),
     function[ST_Crosses](),
     function[ST_CrossesDateLine](),

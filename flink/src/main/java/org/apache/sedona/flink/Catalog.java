@@ -200,6 +200,8 @@ public class Catalog {
                 new Predicates.ST_OrderingEquals(),
                 new Predicates.ST_Overlaps(),
                 new Predicates.ST_Touches(),
+                new Predicates.ST_Relate(),
+                new Predicates.ST_RelateMatch(),
                 new Predicates.ST_DWithin()
         };
     }

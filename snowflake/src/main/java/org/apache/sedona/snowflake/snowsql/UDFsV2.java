@@ -1042,6 +1042,28 @@ public class UDFsV2
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry"}, argTypes = {"Geometry", "Geometry"}, returnTypes = "String")
+    public static String ST_Relate(String leftGeometry, String rightGeometry) {
+        return Predicates.relate(
+                GeometrySerde.deserGeoJson(leftGeometry),
+                GeometrySerde.deserGeoJson(rightGeometry)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2", "intersectionMatrix"}, argTypes = {"Geometry", "Geometry", "String"})
+    public static boolean ST_Relate(String geom1, String geom2, String intersectionMatrix) {
+        return Predicates.relate(
+                GeometrySerde.deserGeoJson(geom1),
+                GeometrySerde.deserGeoJson(geom2),
+                intersectionMatrix
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"matrix1", "matrix2"}, argTypes = {"String", "String"})
+    public static boolean ST_RelateMatch(String matrix1, String matrix2) {
+        return Predicates.relateMatch(matrix1, matrix2);
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "sourceCRS", "targetCRS"}, argTypes = {"Geometry", "String", "String"}, returnTypes = "Geometry")
     public static String ST_Transform(String geometry, String sourceCRS, String targetCRS) {
         return GeometrySerde.serGeoJson(

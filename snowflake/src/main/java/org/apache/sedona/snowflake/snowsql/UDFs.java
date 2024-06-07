@@ -1284,6 +1284,28 @@ public class UDFs {
         );
     }
 
+    @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry"})
+    public static String ST_Relate(byte[] leftGeometry, byte[] rightGeometry) {
+        return Predicates.relate(
+                GeometrySerde.deserialize(leftGeometry),
+                GeometrySerde.deserialize(rightGeometry)
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2", "intersectionMatrix"})
+    public static Boolean ST_Relate(byte[] geom1, byte[] geom2, String intersectionMatrix) {
+        return Predicates.relate(
+                GeometrySerde.deserialize(geom1),
+                GeometrySerde.deserialize(geom2),
+                intersectionMatrix
+        );
+    }
+
+    @UDFAnnotations.ParamMeta(argNames = {"matrix1", "matrix2"})
+    public static Boolean ST_RelateMatch(String matrix1, String matrix2) {
+        return Predicates.relateMatch(matrix1, matrix2);
+    }
+
     @UDFAnnotations.ParamMeta(argNames = {"geometry", "sourceCRS", "targetCRS"})
     public static byte[] ST_Transform(byte[] geometry, String sourceCRS, String targetCRS) {
         return GeometrySerde.serialize(
