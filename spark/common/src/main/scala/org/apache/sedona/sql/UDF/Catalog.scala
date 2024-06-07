@@ -148,6 +148,7 @@ object Catalog {
     function[ST_IsCollection](),
     function[ST_NumInteriorRings](),
     function[ST_NumInteriorRing](),
+    function[ST_AddMeasure](),
     function[ST_AddPoint](-1),
     function[ST_RemovePoint](-1),
     function[ST_SetPoint](),

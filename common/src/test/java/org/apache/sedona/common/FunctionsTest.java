@@ -2761,6 +2761,24 @@ public class FunctionsTest extends TestBase {
     }
 
     @Test
+    public void testAddMeasure() throws ParseException {
+        Geometry geom = Constructors.geomFromEWKT("LINESTRING (1 1, 2 2, 2 2, 3 3)");
+        String actual = Functions.asWKT(Functions.addMeasure(geom, 1, 70));
+        String expected = "LINESTRING M(1 1 1, 2 2 35.5, 2 2 35.5, 3 3 70)";
+        assertEquals(expected, actual);
+
+        actual = Functions.asWKT(Functions.addMeasure(geom, 1, 2));
+        expected = "LINESTRING M(1 1 1, 2 2 1.5, 2 2 1.5, 3 3 2)";
+        assertEquals(expected, actual);
+
+        geom = Constructors.geomFromEWKT("MULTILINESTRING M((1 0 4, 2 0 4, 4 0 4),(1 0 4, 2 0 4, 4 0 4))");
+        actual = Functions.asWKT(Functions.addMeasure(geom, 1, 70));
+        expected = "MULTILINESTRING M((1 0 1, 2 0 12.5, 4 0 35.5), (1 0 35.5, 2 0 47, 4 0 70))";
+        assertEquals(expected, actual);
+
+    }
+
+    @Test
     public void voronoiPolygons() {
         MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0, 0, 2, 2));
         Geometry actual1 = FunctionsGeoTools.voronoiPolygons(multiPoint, 0, null);

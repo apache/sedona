@@ -1345,6 +1345,17 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
       .collect().toList should contain theSameElementsAs List((2, 0), (11, 1))
   }
 
+  it("Should pass ST_AddMeasure") {
+    val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (1 1, 2 2, 2 2, 3 3)') as line, ST_GeomFromWKT('MULTILINESTRING M((1 0 4, 2 0 4, 4 0 4),(1 0 4, 2 0 4, 4 0 4))') as mline")
+    var actual = baseDf.selectExpr("ST_AsText(ST_AddMeasure(line, 1, 70))").first().get(0)
+    var expected = "LINESTRING M(1 1 1, 2 2 35.5, 2 2 35.5, 3 3 70)"
+    assertEquals(expected, actual)
+
+    actual = baseDf.selectExpr("ST_AsText(ST_AddMeasure(mline, 10, 70))").first().get(0)
+    expected = "MULTILINESTRING M((1 0 10, 2 0 20, 4 0 40), (1 0 40, 2 0 50, 4 0 70))"
+    assertEquals(expected, actual)
+  }
+
   it("Should pass ST_AddPoint") {
     Given("Geometry df")
     val geometryDf = Seq(

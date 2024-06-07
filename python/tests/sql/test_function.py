@@ -871,6 +871,16 @@ class TestPredicateJoin(TestBase):
         collected_interior_rings = [[*row] for row in number_of_interior_rings.filter("num is not null").collect()]
         assert (collected_interior_rings == [[2, 0], [11, 1]])
 
+    def test_st_add_measure(self):
+        baseDf = self.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (1 1, 2 2, 2 2, 3 3)') as line, ST_GeomFromWKT('MULTILINESTRING M((1 0 4, 2 0 4, 4 0 4),(1 0 4, 2 0 4, 4 0 4))') as mline")
+        actual = baseDf.selectExpr("ST_AsText(ST_AddMeasure(line, 1, 70))").first()[0]
+        expected = "LINESTRING M(1 1 1, 2 2 35.5, 2 2 35.5, 3 3 70)"
+        assert expected == actual
+
+        actual = baseDf.selectExpr("ST_AsText(ST_AddMeasure(mline, 10, 70))").first()[0]
+        expected = "MULTILINESTRING M((1 0 10, 2 0 20, 4 0 40), (1 0 40, 2 0 50, 4 0 70))"
+        assert expected == actual
+
     def test_st_add_point(self):
         geometry = [
             ("Point(21 52)", "Point(21 52)"),

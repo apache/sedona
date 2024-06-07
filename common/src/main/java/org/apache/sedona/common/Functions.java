@@ -1092,6 +1092,10 @@ public class Functions {
         return isExteriorRingCCW && isInteriorRingCCW;
     }
 
+    public static Geometry addMeasure(Geometry geom, double measure_start, double measure_end) {
+        return GeomUtils.addMeasure(geom, measure_start, measure_end);
+    }
+
     public static double maxDistance(Geometry geom1, Geometry geom2) {
         return longestLine(geom1, geom2).getLength();
     }
