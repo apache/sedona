@@ -178,29 +178,19 @@ public class RasterConstructors
 
         Envelope2D bound = null;
 
+        int width, height;
         if (useGeometryExtent) {
             bound = JTS.getEnvelope2D(geom.getEnvelopeInternal(), raster.getCoordinateReferenceSystem2D());
+            double scaleX = Math.abs(metadata[4]), scaleY = Math.abs(metadata[5]);
+            width = Math.max((int) Math.ceil(bound.getWidth() / scaleX), 1);
+            height = Math.max((int) Math.ceil(bound.getHeight() / scaleY), 1);
+            bound = new Envelope2D(bound.getCoordinateReferenceSystem(), bound.getMinX(), bound.getMinY(), width * scaleX, height * scaleY);
         } else {
             ReferencedEnvelope envelope = ReferencedEnvelope.create(raster.getEnvelope(), raster.getCoordinateReferenceSystem());
             bound = JTS.getEnvelope2D(envelope, raster.getCoordinateReferenceSystem2D());
-        }
-
-        double scaleX = Math.abs(metadata[4]), scaleY = Math.abs(metadata[5]);
-        int width = (int) bound.getWidth(), height = (int) bound.getHeight();
-        if (width == 0 && height == 0) {
-            bound = new Envelope2D(bound.getCoordinateReferenceSystem(), bound.getCenterX() - scaleX * 0.5, bound.getCenterY() - scaleY * 0.5, scaleX, scaleY);
-            width = 1;
-            height = 1;
-        } else if (height == 0) {
-            bound = new Envelope2D(bound.getCoordinateReferenceSystem(), bound.getCenterX() - scaleX * 0.5, bound.getCenterY() - scaleY * 0.5, width, scaleY);
-            height = 1;
-        } else if (width == 0) {
-            bound = new Envelope2D(bound.getCoordinateReferenceSystem(), bound.getCenterX() - scaleX * 0.5, bound.getCenterY() - scaleY * 0.5, scaleX, height);
-            width = 1;
-        } else {
-            // To preserve scale of reference raster
-            width = (int) (width / scaleX);
-            height = (int) (height / scaleY);
+            GridEnvelope2D gridRange = raster.getGridGeometry().getGridRange2D();
+            width = gridRange.width;
+            height = gridRange.height;
         }
 
         VectorToRasterProcess rasterProcess = new VectorToRasterProcess();

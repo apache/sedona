@@ -86,11 +86,11 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
 
         double actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sum", false);
-        double expected = 1.0690406E7;
+        double expected = 1.0719726E7;
         assertEquals(expected, actual, 0d);
 
         actual = RasterBandAccessors.getZonalStats(raster, geom, 2, "mean", false);
-        expected = 220.6062;
+        expected = 220.7527;
         assertEquals(expected, actual, FP_TOLERANCE);
 
         actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "count");
@@ -98,7 +98,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         assertEquals(expected, actual, 0.1d);
 
         actual = RasterBandAccessors.getZonalStats(raster, geom, 3, "variance", false);
-        expected = 13554.5057;
+        expected = 13549.6263;
         assertEquals(expected, actual, FP_TOLERANCE);
 
         actual = RasterBandAccessors.getZonalStats(raster, geom, "max");
@@ -110,7 +110,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         assertEquals(expected, actual, 1E-1);
 
         actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sd", false);
-        expected = 92.1327;
+        expected = 92.1500;
         assertEquals(expected, actual, FP_TOLERANCE);
 
         geom = Constructors.geomFromWKT("POLYGON ((-77.96672569800863073 37.91971182746296876, -77.9688630154902711 37.89620133516485367, -77.93936803424354309 37.90517806858776595, -77.96672569800863073 37.91971182746296876))", 0);
@@ -166,7 +166,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         Geometry geom = Constructors.geomFromWKT(polygon, 3857);
 
         double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false);
-        double[] expected = new double[] {184792.0, 1.0690406E7, 57.8510, 0.0, 0.0, 92.1327, 8488.4480, 0.0, 255.0};
+        double[] expected = new double[] {184792.0, 1.0719726E7, 58.00968656653401, 0.0, 0.0, 92.15004748703687, 8491.631251863151, 0.0, 255.0};
         assertArrayEquals(expected, actual, FP_TOLERANCE);
 
         geom = Constructors.geomFromWKT("POLYGON ((-77.96672569800863073 37.91971182746296876, -77.9688630154902711 37.89620133516485367, -77.93936803424354309 37.90517806858776595, -77.96672569800863073 37.91971182746296876))", 0);
