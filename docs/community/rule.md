@@ -18,6 +18,8 @@ Code contributions should include the following:
 
 Code contributions must include an Apache 2.0 license header at the top of each file.
 
+Please run `mvn spotless:apply` to format the code before making a pull request. If you've modified code for a specific spark version (for example, source files in spark/spark-3.5/), please add additional Maven CLI arguments to format that code: `mvn spotless:apply -Dscala=2.12 -Dspark=3.5`.
+
 ## Develop a document contribution
 
 Documentation contributions should satisfy the following requirements:
