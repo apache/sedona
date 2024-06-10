@@ -1169,19 +1169,19 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster", "ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))', 26918) as geom")
       var actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'sum', true)").first().get(0)
-      assertEquals(1.0690406E7, actual)
+      assertEquals(1.0719726E7, actual)
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'count', false)").first().get(0)
       assertEquals(184792.0, actual)
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mean', false)").first().get(0)
-      assertEquals(57.851021689230684, actual)
+      assertEquals(58.00968656653401, actual)
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'variance')").first().get(0)
-      assertEquals(8488.448098819916, actual)
+      assertEquals(8491.631251863151, actual)
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 'sd')").first().get(0)
-      assertEquals(92.13277429243035, actual)
+      assertEquals(92.15004748703687, actual)
 
       // Test with a polygon in EPSG:4326
       actual = df.selectExpr("RS_ZonalStats(raster, ST_GeomFromWKT('POLYGON ((-77.96672569800863073 37.91971182746296876, -77.9688630154902711 37.89620133516485367, -77.93936803424354309 37.90517806858776595, -77.96672569800863073 37.91971182746296876))'), 1, 'mean', false)").first().get(0)
@@ -1215,7 +1215,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster", "ST_GeomFromWKT('POLYGON ((-8673439.6642 4572993.5327, -8673155.5737 4563873.2099, -8701890.3259 4562931.7093, -8682522.8735 4572703.8908, -8673439.6642 4572993.5327))', 3857) as geom")
       val actual = df.selectExpr("RS_ZonalStatsAll(raster, geom, 1, true)").first().get(0)
-      val expected = Seq(184792.0, 1.0690406E7, 57.851021689230684, 0.0, 0.0, 92.13277429243035, 8488.448098819916, 0.0, 255.0)
+      val expected = Seq(184792.0, 1.0719726E7, 58.00968656653401, 0.0, 0.0, 92.15004748703687, 8491.631251863151, 0.0, 255.0)
       assertTrue(expected.equals(actual))
 
       // Test with a polygon that does not intersect the raster in lenient mode
