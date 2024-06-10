@@ -16,7 +16,7 @@
 #  under the License.
 
 import math
-from pyspark.sql import DataFrame
+from pyspark.sql import DataFrame, Row
 from pyspark.sql.functions import col
 from pyspark.sql.functions import explode, expr
 from pyspark.sql.types import StructType, StructField, IntegerType
@@ -309,6 +309,18 @@ class TestPredicateJoin(TestBase):
         test_table.createOrReplaceTempView("testtable")
         intersects = self.spark.sql("select ST_Intersection(a,b) from testtable")
         assert intersects.take(1)[0][0].wkt == "POLYGON EMPTY"
+
+    def test_st_is_valid_detail(self):
+        baseDf = self.spark.sql("SELECT ST_GeomFromText('POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0))') AS geom")
+        actual = baseDf.selectExpr("ST_IsValidDetail(geom)").first()[0]
+        expected = Row(valid=True, reason=None, location=None)
+        assert expected == actual
+
+        baseDf = self.spark.sql("SELECT ST_GeomFromText('POLYGON ((0 0, 2 0, 1 1, 2 2, 0 2, 1 1, 0 0))') AS geom")
+        actual = baseDf.selectExpr("ST_IsValidDetail(geom)").first()[0]
+        expected = Row(valid=False, reason="Ring Self-intersection at or near point (1.0, 1.0, NaN)", location=
+        self.spark.sql("SELECT ST_GeomFromText('POINT (1 1)')").first()[0])
+        assert expected == actual
 
     def test_st_is_valid(self):
         test_table = self.spark.sql(

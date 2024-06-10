@@ -19,6 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.commons.codec.binary.Hex
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions.{array, col, element_at, lit}
 import org.apache.spark.sql.sedona_sql.expressions.st_aggregates._
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
@@ -1766,6 +1767,27 @@ class dataFrameAPITestScala extends TestBaseScala {
       val df = pointDf.select(ST_DWithin("origin", "point", 2.0))
       val actual = df.head()(0).asInstanceOf[Boolean]
       assertTrue(actual)
+    }
+
+    it("Passed ST_IsValidDetail") {
+      // Valid Geometry
+      var baseDf = sparkSession.sql("SELECT ST_GeomFromText('POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0))') AS geom")
+      var actual = baseDf.select(ST_IsValidDetail($"geom")).first().getAs[Row](0)
+      var expected = Row(true, null, null)
+      assert(expected.equals(actual))
+
+      // Geometry that is invalid under both OGC and ESRI standards, but with different reasons
+      baseDf = sparkSession.sql("SELECT ST_GeomFromText('POLYGON ((0 0, 2 0, 1 1, 2 2, 0 2, 1 1, 0 0))') AS geom")
+
+      // Test with OGC flag (OGC_SFS_VALIDITY = 0)
+      actual = baseDf.select(ST_IsValidDetail("geom", 0)).first().getAs[Row](0)
+      expected = Row(false, "Ring Self-intersection at or near point (1.0, 1.0, NaN)", sparkSession.sql("SELECT ST_GeomFromText('POINT (1 1)')").first().get(0).asInstanceOf[Geometry])
+      assert(expected.equals(actual))
+
+      // Test with ESRI flag (ESRI_VALIDITY = 1)
+      actual = baseDf.select(ST_IsValidDetail($"geom", lit(1))).first().getAs[Row](0)
+      expected = Row(false, "Interior is disconnected at or near point (1.0, 1.0, NaN)", sparkSession.sql("SELECT ST_GeomFromText('POINT (1 1)')").first().get(0).asInstanceOf[Geometry])
+      assert(expected.equals(actual))
     }
 
     it("Passed ST_IsValidReason") {

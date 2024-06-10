@@ -19,7 +19,7 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.Column
-import org.apache.spark.sql.sedona_sql.expressions.collect.{ST_Collect}
+import org.apache.spark.sql.sedona_sql.expressions.collect.ST_Collect
 import org.locationtech.jts.operation.buffer.BufferParameters
 
 object st_functions extends DataFrameAPI {
@@ -203,6 +203,13 @@ object st_functions extends DataFrameAPI {
 
   def ST_IsValidReason(geometry: Column, flag: Column): Column = wrapExpression[ST_IsValidReason](geometry, flag)
   def ST_IsValidReason(geometry: String, flag: Integer): Column = wrapExpression[ST_IsValidReason](geometry, flag)
+
+  def ST_IsValidDetail(geometry: Column, flag: Column): Column = wrapExpression[ST_IsValidDetail](geometry, flag)
+  def ST_IsValidDetail(geometry: String, flag: Integer): Column = wrapExpression[ST_IsValidDetail](geometry, flag)
+  def ST_IsValidDetail(geometry: String, flag: String): Column = wrapExpression[ST_IsValidDetail](geometry, flag)
+  def ST_IsValidDetail(geometry: Column): Column = wrapExpression[ST_IsValidDetail](geometry)
+  def ST_IsValidDetail(geometry: String): Column = wrapExpression[ST_IsValidDetail](geometry)
+
 
   def ST_Length(geometry: Column): Column = wrapExpression[ST_Length](geometry)
   def ST_Length(geometry: String): Column = wrapExpression[ST_Length](geometry)

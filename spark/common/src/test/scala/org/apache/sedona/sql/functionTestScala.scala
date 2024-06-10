@@ -2670,6 +2670,33 @@ class functionTestScala extends TestBaseScala with Matchers with GeometrySample 
 
   }
 
+  it("Should pass ST_IsValidDetail") {
+    val testData = Seq(
+      (5330, "POLYGON ((0 0, 3 3, 0 3, 3 0, 0 0))"),
+      (5340, "POLYGON ((100 100, 300 300, 100 300, 300 100, 100 100))"),
+      (5350, "POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (20 20, 20 30, 30 30, 30 20, 20 20))"),
+      (5360, "LINESTRING (220227 150406, 2220227 150407, 222020 150410)")
+    )
+
+    var df = sparkSession.createDataFrame(testData).toDF("gid", "wkt")
+      .select($"gid", expr("ST_GeomFromWKT(wkt) as geom"))
+
+    val expectedResults = Map(
+      5330 -> Row(false, "Self-intersection at or near point (1.5, 1.5, NaN)", sparkSession.sql("SELECT ST_GeomFromWKT('POINT (1.5 1.5)')").first().get(0).asInstanceOf[Geometry]),
+      5340 -> Row(false, "Self-intersection at or near point (200.0, 200.0, NaN)", sparkSession.sql("SELECT ST_GeomFromWKT('POINT (200 200)')").first().get(0).asInstanceOf[Geometry]),
+      5350 -> Row(false, "Hole lies outside shell at or near point (20.0, 20.0)", sparkSession.sql("SELECT ST_GeomFromWKT('POINT (20 20)')").first().get(0).asInstanceOf[Geometry]),
+      5360 -> Row(true, null, null)
+    )
+
+    df = df.selectExpr("gid", "ST_IsValidDetail(geom) as validDetail")
+
+    df.collect().foreach{ row =>
+      val gid = row.getAs[Int]("gid")
+      val validDetailRow = row.getAs[Row]("validDetail")
+      assert(expectedResults(gid).equals(validDetailRow))
+    }
+  }
+
   it ("ST_IsValidReason should provide reasons for invalid geometries") {
     val testData = Seq(
       (5330, "POLYGON ((0 0, 3 3, 0 3, 3 0, 0 0))"),
