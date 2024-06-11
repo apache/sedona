@@ -32,11 +32,6 @@ public class ValidDetail {
         this.location = location;
     }
 
-    @Override
-    public String toString() {
-        return String.format("Valid: %b\nReason: %s\nLocation: %s", valid, reason, Functions.asWKT(location));
-    }
-
     public boolean equals(ValidDetail other) {
         return this.valid == other.valid &&
                 (this.reason == null &&
