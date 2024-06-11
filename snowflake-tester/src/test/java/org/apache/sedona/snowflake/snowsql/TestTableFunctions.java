@@ -51,6 +51,25 @@ public class TestTableFunctions extends TestBase{
                 Constructors.geomFromWKT("POLYGON ((0.5 1, 1 1, 1 0.5, 0.5 0.5, 0.5 1))", 0)
         );
     }
+
+    @Test
+    public void test_ST_IsValidDetail() {
+        registerUDTF(ST_IsValidDetail.class);
+        verifySqlSingleRes(
+                "select reason from table(sedona.ST_IsValidDetail(sedona.ST_GeomFromText('POLYGON ((30 10, 40 40, 20 40, 30 10, 10 20, 30 10))'), 0))",
+                "Ring Self-intersection at or near point (30.0, 10.0, NaN)"
+        );
+        verifySqlSingleRes(
+                "select valid from table(sedona.ST_IsValidDetail(sedona.ST_GeomFromText('POLYGON ((30 10, 40 40, 20 40, 30 10, 10 20, 30 10))'), 0))",
+                false
+        );
+        verifySqlSingleRes(
+                "select sedona.ST_AsText(location) from table(sedona.ST_IsValidDetail(sedona.ST_GeomFromText('POLYGON ((30 10, 40 40, 20 40, 30 10, 10 20, 30 10))'), 0))",
+                "POINT (30 10)"
+        );
+
+    }
+
     @Test
     public void test_ST_SubDivideExplode() {
         registerUDTF(ST_SubDivideExplode.class);

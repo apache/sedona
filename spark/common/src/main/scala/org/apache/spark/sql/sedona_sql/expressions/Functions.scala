@@ -20,9 +20,11 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.{Functions, FunctionsGeoTools}
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
+import org.apache.sedona.common.utils.ValidDetail
+import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.expressions.{Expression, Generator}
+import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, Generator}
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
@@ -30,6 +32,7 @@ import org.apache.spark.sql.types._
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom._
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.unsafe.types.UTF8String
 
 /**
   * Return the distance between two geometries.
@@ -288,6 +291,53 @@ case class ST_MakeValid(inputExpressions: Seq[Expression])
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
+}
+
+case class ST_IsValidDetail(children: Seq[Expression])
+  extends Expression with ExpectsInputTypes with CodegenFallback {
+
+  private val nArgs = children.length
+
+  override def inputTypes: Seq[AbstractDataType] = {
+    if (nArgs == 2) {
+      Seq(GeometryUDT, IntegerType)
+    } else if (nArgs == 1) {
+      Seq(GeometryUDT)
+    } else {
+      throw new IllegalArgumentException(s"Invalid number of arguments: $nArgs")
+    }
+  }
+
+  override def eval(input: InternalRow): Any = {
+    val geometry = children.head.toGeometry(input)
+    var validDetail: ValidDetail = null
+    if (nArgs == 1) {
+      validDetail = Functions.isValidDetail(geometry)
+    } else if (nArgs == 2) {
+      val flag = children(1).eval(input).asInstanceOf[Int]
+      validDetail = Functions.isValidDetail(geometry, flag)
+    } else {
+      throw new IllegalArgumentException(s"Invalid number of arguments: $nArgs")
+    }
+
+    if (validDetail.location == null) {
+      return InternalRow.fromSeq(Seq(validDetail.valid, null, null))
+    }
+
+    val serLocation = GeometrySerializer.serialize(validDetail.location)
+    InternalRow.fromSeq(Seq(validDetail.valid, UTF8String.fromString(validDetail.reason), serLocation))
+  }
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
+    copy(children = newChildren)
+  }
+
+  override def nullable: Boolean = true
+
+  override def dataType: DataType = new StructType()
+    .add("valid", BooleanType, nullable = false)
+    .add("reason", StringType, nullable = true)
+    .add("location", GeometryUDT, nullable = true)
 }
 
 /**

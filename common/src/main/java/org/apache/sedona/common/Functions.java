@@ -1828,11 +1828,7 @@ public class Functions {
         return GeomUtils.getHausdorffDistance(g1, g2, -1);
     }
 
-    public static String isValidReason(Geometry geom) {
-        return isValidReason(geom, OGC_SFS_VALIDITY);
-    }
-
-    public static String isValidReason(Geometry geom, int flag) {
+    private static IsValidOp getIsValidOpObject(Geometry geom, int flag) {
         IsValidOp isValidOp = new IsValidOp(geom);
 
         // Set the validity model based on flags
@@ -1841,6 +1837,33 @@ public class Functions {
         } else {
             isValidOp.setSelfTouchingRingFormingHoleValid(false);
         }
+        return isValidOp;
+    }
+
+    public static ValidDetail isValidDetail(Geometry geom) {
+        return isValidDetail(geom, OGC_SFS_VALIDITY);
+    }
+
+    public static ValidDetail isValidDetail(Geometry geom, int flag) {
+        IsValidOp isValidOp = getIsValidOpObject(geom, flag);
+
+        if (isValidOp.isValid()) {
+            return new ValidDetail(true, null, null);
+        } else {
+            TopologyValidationError error = isValidOp.getValidationError();
+            String reason = error.toString();
+            Geometry location = geom.getFactory().createPoint(error.getCoordinate());
+            return new ValidDetail(false, reason, location);
+        }
+    }
+
+    public static String isValidReason(Geometry geom) {
+        return isValidReason(geom, OGC_SFS_VALIDITY);
+    }
+
+    public static String isValidReason(Geometry geom, int flag) {
+        IsValidOp isValidOp = getIsValidOpObject(geom, flag);
+
 
         if (isValidOp.isValid()) {
             return "Valid Geometry";

@@ -28,6 +28,7 @@ public class UDTFDDLGenerator {
             ST_MinimumBoundingRadius.class,
             ST_Intersection_Aggr.class,
             ST_SubDivideExplode.class,
+            ST_IsValidDetail.class,
             ST_Envelope_Aggr.class,
             ST_Union_Aggr.class,
             ST_Collect.class,

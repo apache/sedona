@@ -20,6 +20,7 @@ import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.common.utils.S2Utils;
+import org.apache.sedona.common.utils.ValidDetail;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.projection.ProjectionException;
 import org.junit.Test;
@@ -2859,6 +2860,44 @@ public class FunctionsTest extends TestBase {
         Geometry finalGeom = geom;
         Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.locateAlong(finalGeom, 1));
         assertEquals("Polygon geometry type not supported, supported types are: (Multi)Point and (Multi)LineString.", e.getMessage());
+    }
+
+    @Test
+    public void isValidDetail() throws ParseException {
+        // Valid geometry
+        Geometry validGeom = GEOMETRY_FACTORY.createPolygon(coordArray(30, 10, 40, 40, 20, 40, 10, 20, 30, 10));
+        ValidDetail actualValidDetail = Functions.isValidDetail(validGeom);
+        ValidDetail expectedValidDetail = new ValidDetail(true, null, null);
+        assertTrue(expectedValidDetail.equals(actualValidDetail));
+
+        Integer OGC_SFS_VALIDITY = 0;
+        Integer ESRI_VALIDITY = 1;
+
+        actualValidDetail = Functions.isValidDetail(validGeom, OGC_SFS_VALIDITY);
+        assertTrue(expectedValidDetail.equals(actualValidDetail));
+
+        actualValidDetail = Functions.isValidDetail(validGeom, ESRI_VALIDITY);
+        assertTrue(expectedValidDetail.equals(actualValidDetail));
+
+        // Invalid geometry (self-intersection)
+        Geometry invalidGeom = GEOMETRY_FACTORY.createPolygon(coordArray(30, 10, 40, 40, 20, 40, 30, 10, 10, 20, 30, 10));
+        actualValidDetail = Functions.isValidDetail(invalidGeom);
+        expectedValidDetail = new ValidDetail(false,
+                "Ring Self-intersection at or near point (30.0, 10.0, NaN)",
+                Constructors.geomFromEWKT("POINT (30 10)"));
+        assertTrue(expectedValidDetail.equals(actualValidDetail));
+
+        actualValidDetail = Functions.isValidDetail(invalidGeom, OGC_SFS_VALIDITY);
+        expectedValidDetail = new ValidDetail(false,
+                "Ring Self-intersection at or near point (30.0, 10.0, NaN)",
+                Constructors.geomFromEWKT("POINT (30 10)"));
+        assertTrue(expectedValidDetail.equals(actualValidDetail));
+
+        actualValidDetail = Functions.isValidDetail(invalidGeom, ESRI_VALIDITY);
+        expectedValidDetail = new ValidDetail(false,
+                "Self-intersection at or near point (10.0, 20.0, NaN)",
+                Constructors.geomFromEWKT("POINT (10 20)"));
+        assertTrue(expectedValidDetail.equals(actualValidDetail));
     }
 
     @Test
