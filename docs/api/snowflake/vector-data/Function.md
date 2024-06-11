@@ -1497,16 +1497,18 @@ The flags parameter is a bitfield with the following options:
 - 0: Use usual OGC SFS (Simple Features Specification) validity semantics.
 - 1: "ESRI flag", Accepts certain self-touching rings as valid, which are considered invalid under OGC standards.
 
-Formats:
+Format:
 
 ```sql
-ST_IsValidDetail(geom: Geometry, flag: Integer)
+SELECT valid, reason, Sedonm.ST_AsText(location) AS location
+FROM table(Sedona.ST_IsValidDetail(geom: Geometry, flag: Integer))
 ```
 
 SQL Example:
 
 ```sql
-SELECT ST_IsValidDetail(ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 30 10, 10 20, 30 10))'))
+SELECT valid, reason, Sedonm.ST_AsText(location) AS location
+     FROM table(Sedona.ST_IsValidDetail(Sedona.ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 30 10, 10 20, 30 10))'), 0))
 ```
 
 Output:
