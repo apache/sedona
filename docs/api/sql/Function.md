@@ -2143,7 +2143,11 @@ SELECT ST_IsValidDetail(ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 30 10, 10
 Output:
 
 ```
-{false, Ring Self-intersection at or near point (30.0, 10.0, NaN), POINT (30 10)}
++-----+---------------------------------------------------------+-------------+
+|valid|reason                                                   |location     |
++-----+---------------------------------------------------------+-------------+
+|false|Ring Self-intersection at or near point (30.0, 10.0, NaN)|POINT (30 10)|
++-----+---------------------------------------------------------+-------------+
 ```
 
 ## ST_IsValidReason

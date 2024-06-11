@@ -21,6 +21,8 @@ package org.apache.sedona.common.utils;
 import org.apache.sedona.common.Functions;
 import org.locationtech.jts.geom.Geometry;
 
+import java.util.Objects;
+
 public class ValidDetail {
     public final boolean valid;
     public final String reason;
@@ -34,9 +36,7 @@ public class ValidDetail {
 
     public boolean equals(ValidDetail other) {
         return this.valid == other.valid &&
-                (this.reason == null &&
-                this.location == null) ||
-                (this.reason.equals(other.reason) &&
-                this.location.equals(other.location));
+                Objects.equals(this.reason, other.reason) &&
+                Objects.equals(this.location, other.location);
     }
 }
