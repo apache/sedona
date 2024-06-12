@@ -32,7 +32,8 @@ object GeoToolsCoverageAvailability {
       true
     } catch {
       case _: ClassNotFoundException =>
-        logger.warn("Geotools was not found on the classpath. Raster operations will not be available.")
+        logger.warn(
+          "Geotools was not found on the classpath. Raster operations will not be available.")
         false
     }
   }

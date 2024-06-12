@@ -16,41 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.enums;
 
 import java.io.Serializable;
 
 // TODO: Auto-generated Javadoc
 
-/**
- * The Enum IndexType.
- */
-public enum IndexType
-        implements Serializable
-{
+/** The Enum IndexType. */
+public enum IndexType implements Serializable {
 
-    /**
-     * The quadtree.
-     */
-    QUADTREE,
+  /** The quadtree. */
+  QUADTREE,
 
-    /**
-     * The rtree.
-     */
-    RTREE;
+  /** The rtree. */
+  RTREE;
 
-    /**
-     * Gets the index type.
-     *
-     * @param str the str
-     * @return the index type
-     */
-    public static IndexType getIndexType(String str)
-    {
-        for (IndexType me : IndexType.values()) {
-            if (me.name().equalsIgnoreCase(str)) { return me; }
-        }
-        return null;
+  /**
+   * Gets the index type.
+   *
+   * @param str the str
+   * @return the index type
+   */
+  public static IndexType getIndexType(String str) {
+    for (IndexType me : IndexType.values()) {
+      if (me.name().equalsIgnoreCase(str)) {
+        return me;
+      }
     }
+    return null;
+  }
 }

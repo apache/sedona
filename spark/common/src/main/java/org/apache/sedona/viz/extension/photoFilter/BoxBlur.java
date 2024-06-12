@@ -22,25 +22,20 @@ import org.apache.sedona.viz.core.PhotoFilter;
 
 // TODO: Auto-generated Javadoc
 
-/**
- * The Class BoxBlur.
- */
-public class BoxBlur
-        extends PhotoFilter
-{
+/** The Class BoxBlur. */
+public class BoxBlur extends PhotoFilter {
 
-    /**
-     * Instantiates a new box blur.
-     *
-     * @param filterRadius the filter radius
-     */
-    public BoxBlur(int filterRadius)
-    {
-        super(filterRadius);
-        for (int x = -filterRadius; x <= filterRadius; x++) {
-            for (int y = -filterRadius; y <= filterRadius; y++) {
-                convolutionMatrix[x + filterRadius][y + filterRadius] = 1.0 / this.convolutionMatrix.length;
-            }
-        }
+  /**
+   * Instantiates a new box blur.
+   *
+   * @param filterRadius the filter radius
+   */
+  public BoxBlur(int filterRadius) {
+    super(filterRadius);
+    for (int x = -filterRadius; x <= filterRadius; x++) {
+      for (int y = -filterRadius; y <= filterRadius; y++) {
+        convolutionMatrix[x + filterRadius][y + filterRadius] = 1.0 / this.convolutionMatrix.length;
+      }
     }
+  }
 }

@@ -18,25 +18,23 @@
  */
 package org.apache.sedona.common.utils;
 
-import org.apache.sedona.common.Functions;
+import java.util.Objects;
 import org.locationtech.jts.geom.Geometry;
 
-import java.util.Objects;
-
 public class ValidDetail {
-    public final boolean valid;
-    public final String reason;
-    public final Geometry location;
+  public final boolean valid;
+  public final String reason;
+  public final Geometry location;
 
-    public ValidDetail(boolean valid, String reason, Geometry location) {
-        this.valid = valid;
-        this.reason = reason;
-        this.location = location;
-    }
+  public ValidDetail(boolean valid, String reason, Geometry location) {
+    this.valid = valid;
+    this.reason = reason;
+    this.location = location;
+  }
 
-    public boolean equals(ValidDetail other) {
-        return this.valid == other.valid &&
-                Objects.equals(this.reason, other.reason) &&
-                Objects.equals(this.location, other.location);
-    }
+  public boolean equals(ValidDetail other) {
+    return this.valid == other.valid
+        && Objects.equals(this.reason, other.reason)
+        && Objects.equals(this.location, other.location);
+  }
 }

@@ -16,35 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.formatMapper.shapefileParser.shapes;
 
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.Serializable;
 
-public class ShapeKey
-        implements Serializable
-{
+public class ShapeKey implements Serializable {
 
-    /**
-     * record id
-     */
-    Long index = 0l;
+  /** record id */
+  Long index = 0l;
 
-    public void write(DataOutput dataOutput)
-            throws IOException
-    {
-        dataOutput.writeLong(index);
-    }
+  public void write(DataOutput dataOutput) throws IOException {
+    dataOutput.writeLong(index);
+  }
 
-    public long getIndex()
-    {
-        return index;
-    }
+  public long getIndex() {
+    return index;
+  }
 
-    public void setIndex(long _index)
-    {
-        index = _index;
-    }
+  public void setIndex(long _index) {
+    index = _index;
+  }
 }

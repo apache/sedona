@@ -20,7 +20,8 @@ package org.apache.spark.sql.sedona_sql.io.raster
 
 import org.apache.spark.sql.catalyst.util.CaseInsensitiveMap
 
-private[io] class RasterOptions(@transient private val parameters: CaseInsensitiveMap[String]) extends Serializable {
+private[io] class RasterOptions(@transient private val parameters: CaseInsensitiveMap[String])
+    extends Serializable {
   def this(parameters: Map[String, String]) = this(CaseInsensitiveMap(parameters))
 
   // The file format of the raster image

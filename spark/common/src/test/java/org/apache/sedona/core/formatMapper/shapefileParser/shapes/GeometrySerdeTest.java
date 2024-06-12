@@ -16,82 +16,72 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.formatMapper.shapefileParser.shapes;
+
+import static org.junit.Assert.assertTrue;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.sedona.common.utils.GeomUtils;
+import java.io.ByteArrayOutputStream;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.geometrySerde.GeometrySerde;
+import org.apache.sedona.common.utils.GeomUtils;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
-import java.io.ByteArrayOutputStream;
+public class GeometrySerdeTest {
+  private final Kryo kryo = new Kryo();
+  private final WKTReader wktReader = new WKTReader();
 
-import static org.junit.Assert.assertTrue;
+  @Test
+  public void test() throws Exception {
+    test("POINT (1.3 4.5)");
+    test("MULTIPOINT ((1 1), (1.3 4.5), (5.2 999))");
+    test("LINESTRING (1 1, 1.3 4.5, 5.2 999)");
+    test("MULTILINESTRING ((1 1, 1.3 4.5, 5.2 999), (0 0, 0 1))");
+    test("POLYGON ((0 0, 0 1, 1 1, 1 0.4, 0 0))");
+    test("POLYGON ((0 0, 0 1, 1 1, 1 0.4, 0 0), (0.2 0.2, 0.5 0.2, 0.5 0.5, 0.2 0.5, 0.2 0.2))");
+    test(
+        "MULTIPOLYGON (((0 0, 0 1, 1 1, 1 0.4, 0 0)), "
+            + "((0 0, 0 1, 1 1, 1 0.4, 0 0), (0.2 0.2, 0.5 0.2, 0.5 0.5, 0.2 0.5, 0.2 0.2)))");
+    test("GEOMETRYCOLLECTION (POINT(4 6), LINESTRING(4 6,7 10))");
+  }
 
-public class GeometrySerdeTest
-{
-    private final Kryo kryo = new Kryo();
-    private final WKTReader wktReader = new WKTReader();
+  private void test(String wkt) throws Exception {
+    Geometry geometry = parseWkt(wkt);
+    assertTrue(GeomUtils.equalsExactGeom(geometry, serde(geometry)));
 
-    @Test
-    public void test()
-            throws Exception
-    {
-        test("POINT (1.3 4.5)");
-        test("MULTIPOINT ((1 1), (1.3 4.5), (5.2 999))");
-        test("LINESTRING (1 1, 1.3 4.5, 5.2 999)");
-        test("MULTILINESTRING ((1 1, 1.3 4.5, 5.2 999), (0 0, 0 1))");
-        test("POLYGON ((0 0, 0 1, 1 1, 1 0.4, 0 0))");
-        test("POLYGON ((0 0, 0 1, 1 1, 1 0.4, 0 0), (0.2 0.2, 0.5 0.2, 0.5 0.5, 0.2 0.5, 0.2 0.2))");
-        test("MULTIPOLYGON (((0 0, 0 1, 1 1, 1 0.4, 0 0)), " +
-                "((0 0, 0 1, 1 1, 1 0.4, 0 0), (0.2 0.2, 0.5 0.2, 0.5 0.5, 0.2 0.5, 0.2 0.2)))");
-        test("GEOMETRYCOLLECTION (POINT(4 6), LINESTRING(4 6,7 10))");
+    geometry.setUserData("This is a test");
+    assertTrue(GeomUtils.equalsExactGeom(geometry, serde(geometry)));
+
+    if (geometry instanceof GeometryCollection) {
+      return;
     }
 
-    private void test(String wkt)
-            throws Exception
-    {
-        Geometry geometry = parseWkt(wkt);
-        assertTrue(GeomUtils.equalsExactGeom(geometry, serde(geometry)));
+    Circle circle = new Circle(geometry, 1.2);
+    assertTrue(GeomUtils.equalsExactGeom(circle, serde(circle)));
+  }
 
-        geometry.setUserData("This is a test");
-        assertTrue(GeomUtils.equalsExactGeom(geometry, serde(geometry)));
+  private Geometry parseWkt(String wkt) throws ParseException {
+    return wktReader.read(wkt);
+  }
 
-        if (geometry instanceof GeometryCollection) {
-            return;
-        }
+  private Geometry serde(Geometry input) {
+    byte[] ser = serialize(input);
+    return kryo.readObject(new Input(ser), input.getClass());
+  }
 
-        Circle circle = new Circle(geometry, 1.2);
-        assertTrue(GeomUtils.equalsExactGeom(circle, serde(circle)));
-    }
+  private byte[] serialize(Geometry input) {
+    kryo.register(input.getClass(), new GeometrySerde());
 
-    private Geometry parseWkt(String wkt)
-            throws ParseException
-    {
-        return wktReader.read(wkt);
-    }
-
-    private Geometry serde(Geometry input)
-    {
-        byte[] ser = serialize(input);
-        return kryo.readObject(new Input(ser), input.getClass());
-    }
-
-    private byte[] serialize(Geometry input)
-    {
-        kryo.register(input.getClass(), new GeometrySerde());
-
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        Output output = new Output(bos);
-        kryo.writeObject(output, input);
-        output.close();
-        return bos.toByteArray();
-    }
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    Output output = new Output(bos);
+    kryo.writeObject(output, input);
+    output.close();
+    return bos.toByteArray();
+  }
 }

@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.python.wrapper.translation
 
 import org.apache.sedona.common.geometryObjects.Circle
@@ -25,7 +24,6 @@ import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKBReader
 
 import java.nio.ByteBuffer
-
 
 private[python] class PythonGeometrySerializer extends Serializable {
 
@@ -54,8 +52,7 @@ private[python] class PythonGeometrySerializer extends Serializable {
       val geom = reader.read(values.slice(offset + 8, values.length))
       val radius = ByteBuffer.wrap(values.slice(offset, offset + 8)).getDouble()
       new Circle(geom, radius)
-    }
-    else if (isCircle == 0) {
+    } else if (isCircle == 0) {
       reader.read(values.slice(offset, values.length))
     } else {
       throw SerializationException("Can not deserialize object")

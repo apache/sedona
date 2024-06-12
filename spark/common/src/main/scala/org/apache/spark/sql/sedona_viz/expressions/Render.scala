@@ -30,7 +30,9 @@ import org.apache.spark.sql.types.{ArrayType, DataType, IntegerType, StructType}
 case class ST_Render() extends UserDefinedAggregateFunction with Logging {
   // This is the input fields for your aggregate function.
   override def inputSchema: org.apache.spark.sql.types.StructType = new StructType()
-    .add("Pixel", new PixelUDT).add("Color", IntegerType).add("Zoom Level", IntegerType, nullable = true)
+    .add("Pixel", new PixelUDT)
+    .add("Color", IntegerType)
+    .add("Zoom Level", IntegerType, nullable = true)
 
   override def bufferSchema: StructType = new StructType()
     .add("ColorArray", ArrayType(IntegerType, containsNull = false))
@@ -71,8 +73,8 @@ case class ST_Render() extends UserDefinedAggregateFunction with Logging {
     xArray = xArray :+ inputPixel.getX.intValue() % truncatedResX.intValue()
     yArray = yArray :+ reversedY.intValue() % truncatedResY.intValue()
 
-    assert(truncatedResX>0)
-    assert(truncatedResY>0)
+    assert(truncatedResX > 0)
+    assert(truncatedResY > 0)
     buffer(0) = colorArray
     buffer(1) = xArray
     buffer(2) = yArray

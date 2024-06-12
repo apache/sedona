@@ -16,22 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.python.wrapper.translation
 
 import org.apache.sedona.python.wrapper.utils.implicits.IntImplicit
 import org.apache.spark.api.java.JavaRDD
 import org.locationtech.jts.geom.Geometry
 
-private[python] case class GeometryRddConverter[T <: Geometry](spatialRDD: JavaRDD[T],
-                                                               geometrySerializer: PythonGeometrySerializer) extends RDDToPythonConverter {
+private[python] case class GeometryRddConverter[T <: Geometry](
+    spatialRDD: JavaRDD[T],
+    geometrySerializer: PythonGeometrySerializer)
+    extends RDDToPythonConverter {
 
   override def translateToPython: JavaRDD[Array[Byte]] = {
-    spatialRDD.rdd.map[Array[Byte]](geom => {
-      val typeBuffer = 0.toByteArray()
-      val sizeBuffer = 0.toByteArray()
-      typeBuffer ++ geometrySerializer.serialize(geom) ++ sizeBuffer
-    }).toJavaRDD()
+    spatialRDD.rdd
+      .map[Array[Byte]](geom => {
+        val typeBuffer = 0.toByteArray()
+        val sizeBuffer = 0.toByteArray()
+        typeBuffer ++ geometrySerializer.serialize(geom) ++ sizeBuffer
+      })
+      .toJavaRDD()
   }
 
 }

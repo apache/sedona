@@ -16,14 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.python.wrapper.adapters
 
 import org.apache.sedona.core.spatialRDD.{LineStringRDD, PointRDD, PolygonRDD, SpatialRDD}
 import org.apache.spark.api.java.{JavaRDD, JavaSparkContext}
 import org.locationtech.jts.geom.{Geometry, LineString, Point, Polygon}
 import org.locationtech.jts.index.SpatialIndex
-
 
 object SpatialObjectLoaderAdapter {
   def loadPointSpatialRDD(sc: JavaSparkContext, path: String): PointRDD = {

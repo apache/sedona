@@ -1,20 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.spark.sql.sedona_sql.io.geojson
 
 import com.fasterxml.jackson.core._
@@ -32,14 +33,15 @@ import org.locationtech.jts.io.WKTWriter
 import java.io.Writer
 
 /**
- * `GeoJSONJacksonGenerator` is taken from [[JacksonGenerator]] with slight modifications to write rows as
- * GeoJSON Feature objects. It handles geometry columns properly and wrap all other columns in `properties` column.
+ * `GeoJSONJacksonGenerator` is taken from [[JacksonGenerator]] with slight modifications to write
+ * rows as GeoJSON Feature objects. It handles geometry columns properly and wrap all other
+ * columns in `properties` column.
  */
 private[sql] class GeoJSONJacksonGenerator(
-  schema: StructType,
-  geometryColumnName: String,
-  writer: Writer,
-  options: JSONOptions) {
+    schema: StructType,
+    geometryColumnName: String,
+    writer: Writer,
+    options: JSONOptions) {
   // A `ValueWriter` is responsible for writing a field of an `InternalRow` to appropriate
   // JSON data. Here we are using `SpecializedGetters` rather than `InternalRow` so that
   // we can directly access data in `ArrayData` without the help of `SpecificMutableRow`.
@@ -52,7 +54,8 @@ private[sql] class GeoJSONJacksonGenerator(
   // If there is a field named `properties` and it is a struct or map, we will write all fields to top-level
   // of the GeoJSON, otherwise we'll wrap all fields in `properties` field.
   private val hasPropertiesField = schema.fields.exists { field =>
-    field.name == "properties" && (field.dataType.isInstanceOf[StructType] || field.dataType.isInstanceOf[MapType])
+    field.name == "properties" && (field.dataType.isInstanceOf[StructType] || field.dataType
+      .isInstanceOf[MapType])
   }
 
   private val gen = {
@@ -83,36 +86,28 @@ private[sql] class GeoJSONJacksonGenerator(
 
   private def makeWriter(dataType: DataType, name: String): ValueWriter = dataType match {
     case NullType =>
-      (row: SpecializedGetters, ordinal: Int) =>
-        gen.writeNull()
+      (row: SpecializedGetters, ordinal: Int) => gen.writeNull()
 
     case BooleanType =>
-      (row: SpecializedGetters, ordinal: Int) =>
-        gen.writeBoolean(row.getBoolean(ordinal))
+      (row: SpecializedGetters, ordinal: Int) => gen.writeBoolean(row.getBoolean(ordinal))
 
     case ByteType =>
-      (row: SpecializedGetters, ordinal: Int) =>
-        gen.writeNumber(row.getByte(ordinal))
+      (row: SpecializedGetters, ordinal: Int) => gen.writeNumber(row.getByte(ordinal))
 
     case ShortType =>
-      (row: SpecializedGetters, ordinal: Int) =>
-        gen.writeNumber(row.getShort(ordinal))
+      (row: SpecializedGetters, ordinal: Int) => gen.writeNumber(row.getShort(ordinal))
 
     case IntegerType =>
-      (row: SpecializedGetters, ordinal: Int) =>
-        gen.writeNumber(row.getInt(ordinal))
+      (row: SpecializedGetters, ordinal: Int) => gen.writeNumber(row.getInt(ordinal))
 
     case LongType =>
-      (row: SpecializedGetters, ordinal: Int) =>
-        gen.writeNumber(row.getLong(ordinal))
+      (row: SpecializedGetters, ordinal: Int) => gen.writeNumber(row.getLong(ordinal))
 
     case FloatType =>
-      (row: SpecializedGetters, ordinal: Int) =>
-        gen.writeNumber(row.getFloat(ordinal))
+      (row: SpecializedGetters, ordinal: Int) => gen.writeNumber(row.getFloat(ordinal))
 
     case DoubleType =>
-      (row: SpecializedGetters, ordinal: Int) =>
-        gen.writeNumber(row.getDouble(ordinal))
+      (row: SpecializedGetters, ordinal: Int) => gen.writeNumber(row.getDouble(ordinal))
 
     case StringType =>
       (row: SpecializedGetters, ordinal: Int) =>
@@ -133,8 +128,7 @@ private[sql] class GeoJSONJacksonGenerator(
         gen.writeString(row.getInterval(ordinal).toString)
 
     case BinaryType =>
-      (row: SpecializedGetters, ordinal: Int) =>
-        gen.writeBinary(row.getBinary(ordinal))
+      (row: SpecializedGetters, ordinal: Int) => gen.writeBinary(row.getBinary(ordinal))
 
     case dt: DecimalType =>
       (row: SpecializedGetters, ordinal: Int) =>
@@ -157,15 +151,16 @@ private[sql] class GeoJSONJacksonGenerator(
 
     case GeometryUDT =>
       // We'll only write non-primary geometry columns here, we'll write it as WKT to properties object.
-      (row: SpecializedGetters, ordinal: Int) => {
-        val geom = GeometryUDT.deserialize(row.getBinary(ordinal))
-        val wkt = wktWriter.write(geom)
-        gen.writeString(wkt)
-      }
+      (row: SpecializedGetters, ordinal: Int) =>
+        {
+          val geom = GeometryUDT.deserialize(row.getBinary(ordinal))
+          val wkt = wktWriter.write(geom)
+          gen.writeString(wkt)
+        }
 
-    // For UDT values, they should be in the SQL type's corresponding value type.
-    // We should not see values in the user-defined class at here.
-    // For example, VectorUDT's SQL type is an array of double. So, we should expect that v is
+      // For UDT values, they should be in the SQL type's corresponding value type.
+      // We should not see values in the user-defined class at here.
+      // For example, VectorUDT's SQL type is an array of double. So, we should expect that v is
     // an ArrayData at here, instead of a Vector.
     case t: UserDefinedType[_] =>
       makeWriter(t.sqlType, name)
@@ -173,8 +168,9 @@ private[sql] class GeoJSONJacksonGenerator(
     case _ =>
       (row: SpecializedGetters, ordinal: Int) =>
         val v = row.get(ordinal, dataType)
-        throw new IllegalArgumentException(s"Unsupported dataType: ${dataType.catalogString} " +
-          s"with value $v")
+        throw new IllegalArgumentException(
+          s"Unsupported dataType: ${dataType.catalogString} " +
+            s"with value $v")
   }
 
   private def writeObject(f: => Unit): Unit = {
@@ -183,7 +179,11 @@ private[sql] class GeoJSONJacksonGenerator(
     gen.writeEndObject()
   }
 
-  private def writeFields(name: String, row: InternalRow, schema: StructType, fieldWriters: Seq[ValueWriter]): Unit = {
+  private def writeFields(
+      name: String,
+      row: InternalRow,
+      schema: StructType,
+      fieldWriters: Seq[ValueWriter]): Unit = {
     var i = 0
     while (i < row.numFields) {
       val field = schema(i)
@@ -221,8 +221,7 @@ private[sql] class GeoJSONJacksonGenerator(
     gen.writeEndArray()
   }
 
-  private def writeArrayData(
-    array: ArrayData, fieldWriter: ValueWriter): Unit = {
+  private def writeArrayData(array: ArrayData, fieldWriter: ValueWriter): Unit = {
     var i = 0
     while (i < array.numElements()) {
       if (!array.isNullAt(i)) {
@@ -234,8 +233,7 @@ private[sql] class GeoJSONJacksonGenerator(
     }
   }
 
-  private def writeMapData(
-    map: MapData, mapType: MapType, fieldWriter: ValueWriter): Unit = {
+  private def writeMapData(map: MapData, mapType: MapType, fieldWriter: ValueWriter): Unit = {
     val keyArray = map.keyArray()
     val valueArray = map.valueArray()
     var i = 0
@@ -253,10 +251,11 @@ private[sql] class GeoJSONJacksonGenerator(
   def close(): Unit = gen.close()
 
   /**
-   * Transforms a single `InternalRow` to JSON object using Jackson.
-   * This api calling will be validated through accessing `rootFieldWriters`.
+   * Transforms a single `InternalRow` to JSON object using Jackson. This api calling will be
+   * validated through accessing `rootFieldWriters`.
    *
-   * @param row The row to convert
+   * @param row
+   *   The row to convert
    */
   def write(row: InternalRow): Unit = {
     currentGeoJsonString = None
@@ -266,20 +265,12 @@ private[sql] class GeoJSONJacksonGenerator(
 
     if (hasPropertiesField) {
       // Write all fields as top-level fields
-      writeFields(
-        name = "",
-        fieldWriters = rootFieldWriters,
-        row = row,
-        schema = schema)
+      writeFields(name = "", fieldWriters = rootFieldWriters, row = row, schema = schema)
     } else {
       // Wrap all fields in `properties` field
       gen.writeFieldName("properties")
       gen.writeStartObject()
-      writeFields(
-        name = "",
-        fieldWriters = rootFieldWriters,
-        row = row,
-        schema = schema)
+      writeFields(name = "", fieldWriters = rootFieldWriters, row = row, schema = schema)
       gen.writeEndObject()
     }
 

@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
 import org.apache.sedona.common.raster.RasterPredicates
@@ -30,10 +29,11 @@ import org.apache.spark.sql.types.{AbstractDataType, BooleanType, DataType}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.locationtech.jts.geom.Geometry
 
-abstract class RS_Predicate extends Expression
-  with FoldableExpression
-  with ExpectsInputTypes
-  with NullIntolerant {
+abstract class RS_Predicate
+    extends Expression
+    with FoldableExpression
+    with ExpectsInputTypes
+    with NullIntolerant {
   def inputExpressions: Seq[Expression]
 
   override def toString: String = s" **${this.getClass.getName}**  "
@@ -41,7 +41,8 @@ abstract class RS_Predicate extends Expression
   override def nullable: Boolean = children.exists(_.nullable)
 
   override def inputTypes: Seq[AbstractDataType] = if (inputExpressions.length != 2) {
-    throw new IllegalArgumentException(s"Expected exactly 2 inputs, but got ${inputExpressions.length}")
+    throw new IllegalArgumentException(
+      s"Expected exactly 2 inputs, but got ${inputExpressions.length}")
   } else {
     val leftType = inputExpressions.head.dataType
     val rightType = inputExpressions(1).dataType
@@ -49,7 +50,8 @@ abstract class RS_Predicate extends Expression
       case (_: RasterUDT, _: GeometryUDT) => Seq(RasterUDT, GeometryUDT)
       case (_: GeometryUDT, _: RasterUDT) => Seq(GeometryUDT, RasterUDT)
       case (_: RasterUDT, _: RasterUDT) => Seq(RasterUDT, RasterUDT)
-      case _ => throw new IllegalArgumentException(s"Unsupported input types: $leftType, $rightType")
+      case _ =>
+        throw new IllegalArgumentException(s"Unsupported input types: $leftType, $rightType")
     }
   }
 
@@ -98,7 +100,8 @@ abstract class RS_Predicate extends Expression
 }
 
 case class RS_Intersects(inputExpressions: Seq[Expression])
-  extends RS_Predicate with CodegenFallback {
+    extends RS_Predicate
+    with CodegenFallback {
 
   override def evalRasterGeom(leftRaster: GridCoverage2D, rightGeometry: Geometry): Boolean = {
     RasterPredicates.rsIntersects(leftRaster, rightGeometry)
@@ -116,7 +119,8 @@ case class RS_Intersects(inputExpressions: Seq[Expression])
 }
 
 case class RS_Contains(inputExpressions: Seq[Expression])
-  extends RS_Predicate with CodegenFallback {
+    extends RS_Predicate
+    with CodegenFallback {
 
   override def evalRasterGeom(leftRaster: GridCoverage2D, rightGeometry: Geometry): Boolean = {
     RasterPredicates.rsContains(leftRaster, rightGeometry)
@@ -134,7 +138,8 @@ case class RS_Contains(inputExpressions: Seq[Expression])
 }
 
 case class RS_Within(inputExpressions: Seq[Expression])
-  extends RS_Predicate with CodegenFallback {
+    extends RS_Predicate
+    with CodegenFallback {
 
   override def evalRasterGeom(leftRaster: GridCoverage2D, rightGeometry: Geometry): Boolean = {
     RasterPredicates.rsWithin(leftRaster, rightGeometry)

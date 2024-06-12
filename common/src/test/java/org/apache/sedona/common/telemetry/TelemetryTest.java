@@ -21,11 +21,10 @@ package org.apache.sedona.common.telemetry;
 import org.apache.sedona.common.utils.TelemetryCollector;
 import org.junit.Test;
 
-public class TelemetryTest
-{
-    @Test
-    public void testTelemetryCollector()
-    {
-        assert TelemetryCollector.send("test", "java").contains("https://sedona.gateway.scarf.sh/packages/java/test");
-    }
+public class TelemetryTest {
+  @Test
+  public void testTelemetryCollector() {
+    assert TelemetryCollector.send("test", "java")
+        .contains("https://sedona.gateway.scarf.sh/packages/java/test");
+  }
 }

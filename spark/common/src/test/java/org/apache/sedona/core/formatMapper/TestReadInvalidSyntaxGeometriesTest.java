@@ -16,51 +16,48 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.formatMapper;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.IOException;
 import org.apache.sedona.core.TestBase;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
+public class TestReadInvalidSyntaxGeometriesTest extends TestBase {
 
-import static org.junit.Assert.assertEquals;
+  public static String invalidSyntaxGeoJsonGeomWithFeatureProperty = null;
 
-public class TestReadInvalidSyntaxGeometriesTest
-        extends TestBase
-{
+  @BeforeClass
+  public static void onceExecutedBeforeAll() throws IOException {
+    initialize(GeoJsonIOTest.class.getName());
+    invalidSyntaxGeoJsonGeomWithFeatureProperty =
+        TestReadInvalidSyntaxGeometriesTest.class
+            .getClassLoader()
+            .getResource("invalidSyntaxGeometriesJson.json")
+            .getPath();
+  }
 
-    public static String invalidSyntaxGeoJsonGeomWithFeatureProperty = null;
+  @AfterClass
+  public static void tearDown() throws Exception {
+    sc.stop();
+  }
 
-    @BeforeClass
-    public static void onceExecutedBeforeAll()
-            throws IOException
-    {
-        initialize(GeoJsonIOTest.class.getName());
-        invalidSyntaxGeoJsonGeomWithFeatureProperty = TestReadInvalidSyntaxGeometriesTest.class.getClassLoader().getResource("invalidSyntaxGeometriesJson.json").getPath();
-    }
-
-    @AfterClass
-    public static void tearDown()
-            throws Exception
-    {
-        sc.stop();
-    }
-
-    /**
-     * Test correctness of parsing geojson file
-     *
-     * @throws IOException
-     */
-    @Test
-    public void testReadToGeometryRDD()
-            throws IOException
-    {
-        // would crash with java.lang.IllegalArgumentException: Points of LinearRing do not form a closed linestring if Invalid syntax is not skipped
-        SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, invalidSyntaxGeoJsonGeomWithFeatureProperty, false, true);
-        assertEquals(geojsonRDD.rawSpatialRDD.count(), 1);
-    }
+  /**
+   * Test correctness of parsing geojson file
+   *
+   * @throws IOException
+   */
+  @Test
+  public void testReadToGeometryRDD() throws IOException {
+    // would crash with java.lang.IllegalArgumentException: Points of LinearRing do not form a
+    // closed linestring if Invalid syntax is not skipped
+    SpatialRDD geojsonRDD =
+        GeoJsonReader.readToGeometryRDD(
+            sc, invalidSyntaxGeoJsonGeomWithFeatureProperty, false, true);
+    assertEquals(geojsonRDD.rawSpatialRDD.count(), 1);
+  }
 }

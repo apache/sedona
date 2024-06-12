@@ -1,20 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.spark.sql.sedona_sql.io.geojson
 
 import org.apache.hadoop.conf.Configuration
@@ -34,16 +35,16 @@ import org.apache.spark.sql.types._
 import org.apache.spark.util.SerializableConfiguration
 
 /**
- * This is taken from [[org.apache.spark.sql.execution.datasources.json.JsonFileFormat]] with slight modification to
- * support GeoJSON and read/write geometry values.
+ * This is taken from [[org.apache.spark.sql.execution.datasources.json.JsonFileFormat]] with
+ * slight modification to support GeoJSON and read/write geometry values.
  */
 class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
   override val shortName: String = "geojson"
 
   override def isSplitable(
-    sparkSession: SparkSession,
-    options: Map[String, String],
-    path: Path): Boolean = {
+      sparkSession: SparkSession,
+      options: Map[String, String],
+      path: Path): Boolean = {
     val parsedOptions = new JSONOptionsInRead(
       options,
       sparkSession.sessionState.conf.sessionLocalTimeZone,
@@ -53,9 +54,9 @@ class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
   }
 
   override def inferSchema(
-    sparkSession: SparkSession,
-    options: Map[String, String],
-    files: Seq[FileStatus]): Option[StructType] = {
+      sparkSession: SparkSession,
+      options: Map[String, String],
+      files: Seq[FileStatus]): Option[StructType] = {
 
     val parsedOptions = new JSONOptionsInRead(
       options,
@@ -63,8 +64,8 @@ class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
       sparkSession.sessionState.conf.columnNameOfCorruptRecord)
 
     // Use existing logic to infer the full schema first
-    val fullSchemaOption = JsonDataSource(parsedOptions).inferSchema(
-      sparkSession, files, parsedOptions)
+    val fullSchemaOption =
+      JsonDataSource(parsedOptions).inferSchema(sparkSession, files, parsedOptions)
 
     fullSchemaOption.map { fullSchema =>
       // Replace 'geometry' field type with GeometryUDT
@@ -74,10 +75,10 @@ class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
   }
 
   override def prepareWrite(
-    sparkSession: SparkSession,
-    job: Job,
-    options: Map[String, String],
-    dataSchema: StructType): OutputWriterFactory = {
+      sparkSession: SparkSession,
+      job: Job,
+      options: Map[String, String],
+      dataSchema: StructType): OutputWriterFactory = {
 
     val conf = job.getConfiguration
     val parsedOptions = new JSONOptions(
@@ -88,19 +89,23 @@ class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
       CompressionCodecs.setCodecConfiguration(conf, codec)
     }
     val geometryColumnName = options.getOrElse("geometry.column", "geometry")
-    SparkCompatUtil.findNestedField(dataSchema, geometryColumnName.split('.'), resolver = SQLConf.get.resolver) match {
+    SparkCompatUtil.findNestedField(
+      dataSchema,
+      geometryColumnName.split('.'),
+      resolver = SQLConf.get.resolver) match {
       case Some(StructField(_, dataType, _, _)) =>
         if (!dataType.acceptsType(GeometryUDT)) {
           throw new IllegalArgumentException(s"$geometryColumnName is not a geometry column")
         }
-      case None => throw new IllegalArgumentException(s"Column $geometryColumnName not found in the schema")
+      case None =>
+        throw new IllegalArgumentException(s"Column $geometryColumnName not found in the schema")
     }
 
     new OutputWriterFactory {
       override def newInstance(
-        path: String,
-        dataSchema: StructType,
-        context: TaskAttemptContext): OutputWriter = {
+          path: String,
+          dataSchema: StructType,
+          context: TaskAttemptContext): OutputWriter = {
         new GeoJSONOutputWriter(path, parsedOptions, dataSchema, geometryColumnName, context)
       }
 
@@ -111,13 +116,13 @@ class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
   }
 
   override def buildReader(
-    sparkSession: SparkSession,
-    dataSchema: StructType,
-    partitionSchema: StructType,
-    requiredSchema: StructType,
-    filters: Seq[Filter],
-    options: Map[String, String],
-    hadoopConf: Configuration): PartitionedFile => Iterator[InternalRow] = {
+      sparkSession: SparkSession,
+      dataSchema: StructType,
+      partitionSchema: StructType,
+      requiredSchema: StructType,
+      filters: Seq[Filter],
+      options: Map[String, String],
+      hadoopConf: Configuration): PartitionedFile => Iterator[InternalRow] = {
 
     val broadcastedHadoopConf =
       sparkSession.sparkContext.broadcast(new SerializableConfiguration(hadoopConf))
@@ -146,17 +151,14 @@ class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
         allowArrayAsStructs = true)
       val dataSource = JsonDataSource(parsedOptions)
 
-      dataSource.readFile(
-        broadcastedHadoopConf.value.value,
-        file,
-        parser,
-        actualSchema).map(row => {
-        val newRow = GeoJSONUtils.convertGeoJsonToGeometry(row, alteredSchema)
-        newRow
-      })
+      dataSource
+        .readFile(broadcastedHadoopConf.value.value, file, parser, actualSchema)
+        .map(row => {
+          val newRow = GeoJSONUtils.convertGeoJsonToGeometry(row, alteredSchema)
+          newRow
+        })
     }
   }
-
 
   override def toString: String = "GEOJSON"
 

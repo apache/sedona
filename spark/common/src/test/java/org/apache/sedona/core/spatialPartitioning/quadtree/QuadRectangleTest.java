@@ -18,36 +18,33 @@
  */
 package org.apache.sedona.core.spatialPartitioning.quadtree;
 
-import org.junit.Test;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class QuadRectangleTest
-{
+import org.junit.Test;
 
-    @Test
-    public void testContains()
-    {
-        QuadRectangle r1 = makeRect(0, 0, 10, 10);
-        QuadRectangle r2 = makeRect(0, 0, 10, 10);
+public class QuadRectangleTest {
 
-        // contains rectangle
-        assertTrue(r1.contains(r2));
+  @Test
+  public void testContains() {
+    QuadRectangle r1 = makeRect(0, 0, 10, 10);
+    QuadRectangle r2 = makeRect(0, 0, 10, 10);
 
-        // contains point
-        assertTrue(r1.contains(makeRect(5, 5, 0, 0)));
+    // contains rectangle
+    assertTrue(r1.contains(r2));
 
-        // doesn't contain rectangle
-        QuadRectangle r3 = makeRect(0, 0, 11, 10);
-        assertFalse(r1.contains(r3));
+    // contains point
+    assertTrue(r1.contains(makeRect(5, 5, 0, 0)));
 
-        // doesn't contain point
-        assertFalse(r1.contains(makeRect(5, 12, 0, 0)));
-    }
+    // doesn't contain rectangle
+    QuadRectangle r3 = makeRect(0, 0, 11, 10);
+    assertFalse(r1.contains(r3));
 
-    private QuadRectangle makeRect(double x, double y, double width, double height)
-    {
-        return new QuadRectangle(x, y, width, height);
-    }
+    // doesn't contain point
+    assertFalse(r1.contains(makeRect(5, 12, 0, 0)));
+  }
+
+  private QuadRectangle makeRect(double x, double y, double width, double height) {
+    return new QuadRectangle(x, y, width, height);
+  }
 }

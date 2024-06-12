@@ -25,20 +25,20 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 public class CRSSerializerTest {
-    @Test
-    public void testCRSSerializer() throws FactoryException {
-        CoordinateReferenceSystem crs = CRS.decode("EPSG:32607");
-        byte[] serializedCRS = CRSSerializer.serialize(crs);
-        CoordinateReferenceSystem deserializedCRS = CRSSerializer.deserialize(serializedCRS);
-        Assert.assertTrue(CRS.equalsIgnoreMetadata(crs, deserializedCRS));
-    }
+  @Test
+  public void testCRSSerializer() throws FactoryException {
+    CoordinateReferenceSystem crs = CRS.decode("EPSG:32607");
+    byte[] serializedCRS = CRSSerializer.serialize(crs);
+    CoordinateReferenceSystem deserializedCRS = CRSSerializer.deserialize(serializedCRS);
+    Assert.assertTrue(CRS.equalsIgnoreMetadata(crs, deserializedCRS));
+  }
 
-    @Test
-    public void testCRSSerializerWithoutCache() throws FactoryException {
-        CoordinateReferenceSystem crs = CRS.decode("EPSG:32607");
-        byte[] serializedCRS = CRSSerializer.serialize(crs);
-        CRSSerializer.invalidateCache();
-        CoordinateReferenceSystem deserializedCRS = CRSSerializer.deserialize(serializedCRS);
-        Assert.assertTrue(CRS.equalsIgnoreMetadata(crs, deserializedCRS));
-    }
+  @Test
+  public void testCRSSerializerWithoutCache() throws FactoryException {
+    CoordinateReferenceSystem crs = CRS.decode("EPSG:32607");
+    byte[] serializedCRS = CRSSerializer.serialize(crs);
+    CRSSerializer.invalidateCache();
+    CoordinateReferenceSystem deserializedCRS = CRSSerializer.deserialize(serializedCRS);
+    Assert.assertTrue(CRS.equalsIgnoreMetadata(crs, deserializedCRS));
+  }
 }

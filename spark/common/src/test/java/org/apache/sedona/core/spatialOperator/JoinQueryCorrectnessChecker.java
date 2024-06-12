@@ -18,6 +18,15 @@
  */
 package org.apache.sedona.core.spatialOperator;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.apache.sedona.core.TestBase;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
@@ -39,463 +48,418 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import scala.Tuple2;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 @RunWith(Parameterized.class)
-public class JoinQueryCorrectnessChecker
-        extends TestBase
-{
+public class JoinQueryCorrectnessChecker extends TestBase {
 
-    private static final GeometryFactory geometryFactory = new GeometryFactory();
-    /**
-     * The test polygon window set.
-     */
-    public static List<Polygon> testPolygonWindowSet;
-    /**
-     * The test inside polygon set.
-     */
-    public static List<Polygon> testInsidePolygonSet;
-    /**
-     * The test overlapped polygon set.
-     */
-    public static List<Polygon> testOverlappedPolygonSet;
-    /**
-     * The test outside polygon set.
-     */
-    public static List<Polygon> testOutsidePolygonSet;
-    /**
-     * The test inside line string set.
-     */
-    public static List<LineString> testInsideLineStringSet;
-    /**
-     * The test overlapped line string set.
-     */
-    public static List<LineString> testOverlappedLineStringSet;
-    /**
-     * The test outside line string set.
-     */
-    public static List<LineString> testOutsideLineStringSet;
-    /**
-     * The test inside point set.
-     */
-    public static List<Point> testInsidePointSet;
-    /**
-     * The test on boundary point set.
-     */
-    public static List<Point> testOnBoundaryPointSet;
-    /**
-     * The test outside point set.
-     */
-    public static List<Point> testOutsidePointSet;
-    private final GridType gridType;
+  private static final GeometryFactory geometryFactory = new GeometryFactory();
+  /** The test polygon window set. */
+  public static List<Polygon> testPolygonWindowSet;
+  /** The test inside polygon set. */
+  public static List<Polygon> testInsidePolygonSet;
+  /** The test overlapped polygon set. */
+  public static List<Polygon> testOverlappedPolygonSet;
+  /** The test outside polygon set. */
+  public static List<Polygon> testOutsidePolygonSet;
+  /** The test inside line string set. */
+  public static List<LineString> testInsideLineStringSet;
+  /** The test overlapped line string set. */
+  public static List<LineString> testOverlappedLineStringSet;
+  /** The test outside line string set. */
+  public static List<LineString> testOutsideLineStringSet;
+  /** The test inside point set. */
+  public static List<Point> testInsidePointSet;
+  /** The test on boundary point set. */
+  public static List<Point> testOnBoundaryPointSet;
+  /** The test outside point set. */
+  public static List<Point> testOutsidePointSet;
 
-    public JoinQueryCorrectnessChecker(GridType gridType)
-    {
-        this.gridType = gridType;
-    }
+  private final GridType gridType;
 
-    @Parameterized.Parameters
-    public static Collection testParams()
-    {
-        return Arrays.asList(new Object[][] {
-                {GridType.QUADTREE},
-                {GridType.KDBTREE},
+  public JoinQueryCorrectnessChecker(GridType gridType) {
+    this.gridType = gridType;
+  }
+
+  @Parameterized.Parameters
+  public static Collection testParams() {
+    return Arrays.asList(
+        new Object[][] {
+          {GridType.QUADTREE}, {GridType.KDBTREE},
         });
+  }
+
+  /** Once executed before all. */
+  @BeforeClass
+  public static void onceExecutedBeforeAll() {
+    initialize(JoinQueryCorrectnessChecker.class.getSimpleName());
+
+    // Define the user data saved in window objects and data objects
+    testPolygonWindowSet = new ArrayList<>();
+    testInsidePolygonSet = new ArrayList<>();
+    testOverlappedPolygonSet = new ArrayList<>();
+    testOutsidePolygonSet = new ArrayList<>();
+
+    testInsideLineStringSet = new ArrayList<>();
+    testOverlappedLineStringSet = new ArrayList<>();
+    testOutsideLineStringSet = new ArrayList<>();
+
+    testInsidePointSet = new ArrayList<>();
+    testOnBoundaryPointSet = new ArrayList<>();
+    testOutsidePointSet = new ArrayList<>();
+
+    // Generate all test data
+
+    // Generate test windows. Each window is a 5 by 5 rectangle-style polygon.
+    // All data is uniformly distributed in a 10 by 10 window space.
+
+    for (int baseX = 0; baseX < 100; baseX += 10) {
+      for (int baseY = 0; baseY < 100; baseY += 10) {
+        String id = baseX + ":" + baseY;
+        String a = "a:" + id;
+        String b = "b:" + id;
+
+        testPolygonWindowSet.add(wrap(makeSquare(baseX, baseY, 5), a));
+        testPolygonWindowSet.add(wrap(makeSquare(baseX, baseY, 5), b));
+
+        // Polygons
+        testInsidePolygonSet.add(wrap(makeSquare(baseX + 2, baseY + 2, 2), a));
+        testInsidePolygonSet.add(wrap(makeSquare(baseX + 2, baseY + 2, 2), b));
+
+        testOverlappedPolygonSet.add(wrap(makeSquare(baseX + 3, baseY + 3, 3), a));
+        testOverlappedPolygonSet.add(wrap(makeSquare(baseX + 3, baseY + 3, 3), b));
+
+        testOutsidePolygonSet.add(wrap(makeSquare(baseX + 6, baseY + 6, 3), a));
+        testOutsidePolygonSet.add(wrap(makeSquare(baseX + 6, baseY + 6, 3), b));
+
+        // LineStrings
+        testInsideLineStringSet.add(wrap(makeSquareLine(baseX + 2, baseY + 2, 2), a));
+        testInsideLineStringSet.add(wrap(makeSquareLine(baseX + 2, baseY + 2, 2), b));
+
+        testOverlappedLineStringSet.add(wrap(makeSquareLine(baseX + 3, baseY + 3, 3), a));
+        testOverlappedLineStringSet.add(wrap(makeSquareLine(baseX + 3, baseY + 3, 3), b));
+
+        testOutsideLineStringSet.add(wrap(makeSquareLine(baseX + 6, baseY + 6, 3), a));
+        testOutsideLineStringSet.add(wrap(makeSquareLine(baseX + 6, baseY + 6, 3), b));
+
+        // Points
+        testInsidePointSet.add(wrap(makePoint(baseX + 2.5, baseY + 2.5), a));
+        testInsidePointSet.add(wrap(makePoint(baseX + 2.5, baseY + 2.5), b));
+
+        testOnBoundaryPointSet.add(wrap(makePoint(baseX + 5, baseY + 5), a));
+        testOnBoundaryPointSet.add(wrap(makePoint(baseX + 5, baseY + 5), b));
+
+        testOutsidePointSet.add(wrap(makePoint(baseX + 6, baseY + 6), a));
+        testOutsidePointSet.add(wrap(makePoint(baseX + 6, baseY + 6), b));
+      }
     }
+  }
 
-    /**
-     * Once executed before all.
-     */
-    @BeforeClass
-    public static void onceExecutedBeforeAll()
-    {
-        initialize(JoinQueryCorrectnessChecker.class.getSimpleName());
+  /** Tear down. */
+  @AfterClass
+  public static void TearDown() {
+    sc.stop();
+  }
 
-        // Define the user data saved in window objects and data objects
-        testPolygonWindowSet = new ArrayList<>();
-        testInsidePolygonSet = new ArrayList<>();
-        testOverlappedPolygonSet = new ArrayList<>();
-        testOutsidePolygonSet = new ArrayList<>();
+  private static Polygon makeSquare(double minX, double minY, double side) {
+    Coordinate[] coordinates = new Coordinate[5];
+    coordinates[0] = new Coordinate(minX, minY);
+    coordinates[1] = new Coordinate(minX + side, minY);
+    coordinates[2] = new Coordinate(minX + side, minY + side);
+    coordinates[3] = new Coordinate(minX, minY + side);
+    coordinates[4] = coordinates[0];
 
-        testInsideLineStringSet = new ArrayList<>();
-        testOverlappedLineStringSet = new ArrayList<>();
-        testOutsideLineStringSet = new ArrayList<>();
+    return geometryFactory.createPolygon(coordinates);
+  }
 
-        testInsidePointSet = new ArrayList<>();
-        testOnBoundaryPointSet = new ArrayList<>();
-        testOutsidePointSet = new ArrayList<>();
+  private static LineString makeSquareLine(double minX, double minY, double side) {
+    Coordinate[] coordinates = new Coordinate[3];
+    coordinates[0] = new Coordinate(minX, minY);
+    coordinates[1] = new Coordinate(minX + side, minY);
+    coordinates[2] = new Coordinate(minX + side, minY + side);
 
-        // Generate all test data
+    return geometryFactory.createLineString(coordinates);
+  }
 
-        // Generate test windows. Each window is a 5 by 5 rectangle-style polygon.
-        // All data is uniformly distributed in a 10 by 10 window space.
+  private static Point makePoint(double x, double y) {
+    return geometryFactory.createPoint(new Coordinate(x, y));
+  }
 
-        for (int baseX = 0; baseX < 100; baseX += 10) {
-            for (int baseY = 0; baseY < 100; baseY += 10) {
-                String id = baseX + ":" + baseY;
-                String a = "a:" + id;
-                String b = "b:" + id;
+  private static <T extends Geometry> T wrap(T geometry, Object userData) {
+    geometry.setUserData(userData);
+    return geometry;
+  }
 
-                testPolygonWindowSet.add(wrap(makeSquare(baseX, baseY, 5), a));
-                testPolygonWindowSet.add(wrap(makeSquare(baseX, baseY, 5), b));
+  private <T extends Geometry, U extends Geometry> void prepareRDDs(
+      SpatialRDD<T> objectRDD, SpatialRDD<U> windowRDD) throws Exception {
+    objectRDD.rawSpatialRDD.repartition(4);
+    objectRDD.spatialPartitioning(gridType);
+    objectRDD.buildIndex(IndexType.RTREE, true);
+    windowRDD.spatialPartitioning(objectRDD.getPartitioner());
+  }
 
-                // Polygons
-                testInsidePolygonSet.add(wrap(makeSquare(baseX + 2, baseY + 2, 2), a));
-                testInsidePolygonSet.add(wrap(makeSquare(baseX + 2, baseY + 2, 2), b));
+  /**
+   * Test inside point join correctness.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testInsidePointJoinCorrectness() throws Exception {
+    PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+    PointRDD objectRDD = new PointRDD(sc.parallelize(testInsidePointSet));
+    prepareRDDs(objectRDD, windowRDD);
 
-                testOverlappedPolygonSet.add(wrap(makeSquare(baseX + 3, baseY + 3, 3), a));
-                testOverlappedPolygonSet.add(wrap(makeSquare(baseX + 3, baseY + 3, 3), b));
+    List<Tuple2<Polygon, List<Point>>> result =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
+    verifyJoinResults(result);
 
-                testOutsidePolygonSet.add(wrap(makeSquare(baseX + 6, baseY + 6, 3), a));
-                testOutsidePolygonSet.add(wrap(makeSquare(baseX + 6, baseY + 6, 3), b));
+    List<Tuple2<Polygon, List<Point>>> resultNoIndex =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, false).collect();
+    verifyJoinResults(resultNoIndex);
+  }
 
-                // LineStrings
-                testInsideLineStringSet.add(wrap(makeSquareLine(baseX + 2, baseY + 2, 2), a));
-                testInsideLineStringSet.add(wrap(makeSquareLine(baseX + 2, baseY + 2, 2), b));
+  /**
+   * Test on boundary point join correctness.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testOnBoundaryPointJoinCorrectness() throws Exception {
+    PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+    PointRDD objectRDD = new PointRDD(sc.parallelize(testOnBoundaryPointSet));
+    prepareRDDs(objectRDD, windowRDD);
 
-                testOverlappedLineStringSet.add(wrap(makeSquareLine(baseX + 3, baseY + 3, 3), a));
-                testOverlappedLineStringSet.add(wrap(makeSquareLine(baseX + 3, baseY + 3, 3), b));
+    List<Tuple2<Polygon, List<Point>>> result =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
+    verifyJoinResults(result);
 
-                testOutsideLineStringSet.add(wrap(makeSquareLine(baseX + 6, baseY + 6, 3), a));
-                testOutsideLineStringSet.add(wrap(makeSquareLine(baseX + 6, baseY + 6, 3), b));
+    List<Tuple2<Polygon, List<Point>>> resultNoIndex =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, false).collect();
+    verifyJoinResults(resultNoIndex);
+  }
 
-                // Points
-                testInsidePointSet.add(wrap(makePoint(baseX + 2.5, baseY + 2.5), a));
-                testInsidePointSet.add(wrap(makePoint(baseX + 2.5, baseY + 2.5), b));
+  /**
+   * Test outside point join correctness.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testOutsidePointJoinCorrectness() throws Exception {
+    PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+    PointRDD objectRDD = new PointRDD(sc.parallelize(testOutsidePointSet));
+    prepareRDDs(objectRDD, windowRDD);
 
-                testOnBoundaryPointSet.add(wrap(makePoint(baseX + 5, baseY + 5), a));
-                testOnBoundaryPointSet.add(wrap(makePoint(baseX + 5, baseY + 5), b));
+    List<Tuple2<Polygon, List<Point>>> result =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
+    assertEquals(0, result.size());
 
-                testOutsidePointSet.add(wrap(makePoint(baseX + 6, baseY + 6), a));
-                testOutsidePointSet.add(wrap(makePoint(baseX + 6, baseY + 6), b));
-            }
-        }
+    List<Tuple2<Polygon, List<Point>>> resultNoIndex =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, false).collect();
+    assertEquals(0, resultNoIndex.size());
+  }
+
+  /**
+   * Test inside line string join correctness.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testInsideLineStringJoinCorrectness() throws Exception {
+    PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+    LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(testInsideLineStringSet));
+    prepareRDDs(objectRDD, windowRDD);
+
+    List<Tuple2<Polygon, List<LineString>>> result =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
+    verifyJoinResults(result);
+
+    List<Tuple2<Polygon, List<LineString>>> resultNoIndex =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, false).collect();
+    verifyJoinResults(resultNoIndex);
+  }
+
+  /**
+   * Test overlapped line string join correctness.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testOverlappedLineStringJoinCorrectness() throws Exception {
+    PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+    LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(testOverlappedLineStringSet));
+    prepareRDDs(objectRDD, windowRDD);
+
+    List<Tuple2<Polygon, List<LineString>>> result =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, true).collect();
+    verifyJoinResults(result);
+
+    List<Tuple2<Polygon, List<LineString>>> resultNoIndex =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, true).collect();
+    verifyJoinResults(resultNoIndex);
+  }
+
+  /**
+   * Test outside line string join correctness.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testOutsideLineStringJoinCorrectness() throws Exception {
+    PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+    LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(testOutsideLineStringSet));
+    prepareRDDs(objectRDD, windowRDD);
+
+    List<Tuple2<Polygon, List<LineString>>> result =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
+    assertEquals(0, result.size());
+
+    List<Tuple2<Polygon, List<LineString>>> resultNoIndex =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, false).collect();
+    assertEquals(0, resultNoIndex.size());
+  }
+
+  /**
+   * Test inside polygon join correctness.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testInsidePolygonJoinCorrectness() throws Exception {
+    PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+    PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testInsidePolygonSet));
+    prepareRDDs(objectRDD, windowRDD);
+
+    List<Tuple2<Polygon, List<Polygon>>> result =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
+    verifyJoinResults(result);
+
+    List<Tuple2<Polygon, List<Polygon>>> resultNoIndex =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, false).collect();
+    verifyJoinResults(resultNoIndex);
+  }
+
+  /**
+   * Test overlapped polygon join correctness.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testOverlappedPolygonJoinCorrectness() throws Exception {
+    PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+    PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testOverlappedPolygonSet));
+    prepareRDDs(objectRDD, windowRDD);
+
+    List<Tuple2<Polygon, List<Polygon>>> result =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, true).collect();
+    verifyJoinResults(result);
+
+    List<Tuple2<Polygon, List<Polygon>>> resultNoIndex =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, true).collect();
+    verifyJoinResults(resultNoIndex);
+  }
+
+  private <U extends Geometry, T extends Geometry> void verifyJoinResults(
+      List<Tuple2<U, List<T>>> result) {
+    assertEquals(200, result.size());
+    for (Tuple2<U, List<T>> tuple : result) {
+      U window = tuple._1;
+      List<T> objects = tuple._2;
+      String windowUserData = (String) window.getUserData();
+
+      String[] tokens = windowUserData.split(":", 2);
+      String prefix = tokens[0];
+      String id = tokens[1];
+
+      assertTrue(prefix.equals("a") || prefix.equals("b"));
+      assertEquals(2, objects.size());
+
+      final Set<String> objectIds = new HashSet<>();
+      for (T object : objects) {
+        objectIds.add((String) object.getUserData());
+      }
+
+      assertEquals(new HashSet(Arrays.asList("a:" + id, "b:" + id)), objectIds);
     }
+  }
 
-    /**
-     * Tear down.
-     */
-    @AfterClass
-    public static void TearDown()
-    {
-        sc.stop();
-    }
+  /**
+   * Test outside polygon join correctness.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testOutsidePolygonJoinCorrectness() throws Exception {
+    PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+    PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testOutsidePolygonSet));
+    prepareRDDs(objectRDD, windowRDD);
 
-    private static Polygon makeSquare(double minX, double minY, double side)
-    {
-        Coordinate[] coordinates = new Coordinate[5];
-        coordinates[0] = new Coordinate(minX, minY);
-        coordinates[1] = new Coordinate(minX + side, minY);
-        coordinates[2] = new Coordinate(minX + side, minY + side);
-        coordinates[3] = new Coordinate(minX, minY + side);
-        coordinates[4] = coordinates[0];
+    List<Tuple2<Polygon, List<Polygon>>> result =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
+    assertEquals(0, result.size());
 
-        return geometryFactory.createPolygon(coordinates);
-    }
+    List<Tuple2<Polygon, List<Polygon>>> resultNoIndex =
+        JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, false).collect();
+    assertEquals(0, resultNoIndex.size());
+  }
 
-    private static LineString makeSquareLine(double minX, double minY, double side)
-    {
-        Coordinate[] coordinates = new Coordinate[3];
-        coordinates[0] = new Coordinate(minX, minY);
-        coordinates[1] = new Coordinate(minX + side, minY);
-        coordinates[2] = new Coordinate(minX + side, minY + side);
+  /**
+   * Test inside polygon distance join correctness.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testInsidePolygonDistanceJoinCorrectness() throws Exception {
+    PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+    CircleRDD windowRDD = new CircleRDD(centerGeometryRDD, 0.1);
+    PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testInsidePolygonSet));
+    prepareRDDs(objectRDD, windowRDD);
 
-        return geometryFactory.createLineString(coordinates);
-    }
+    List<Tuple2<Geometry, List<Polygon>>> result =
+        JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true, false).collect();
+    verifyJoinResults(result);
 
-    private static Point makePoint(double x, double y)
-    {
-        return geometryFactory.createPoint(new Coordinate(x, y));
-    }
+    List<Tuple2<Geometry, List<Polygon>>> resultNoIndex =
+        JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, false, false).collect();
+    verifyJoinResults(resultNoIndex);
+  }
 
-    private static <T extends Geometry> T wrap(T geometry, Object userData)
-    {
-        geometry.setUserData(userData);
-        return geometry;
-    }
+  /**
+   * Test overlapped polygon distance join correctness.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testOverlappedPolygonDistanceJoinCorrectness() throws Exception {
+    PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+    CircleRDD windowRDD = new CircleRDD(centerGeometryRDD, 0.1);
+    PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testOverlappedPolygonSet));
+    prepareRDDs(objectRDD, windowRDD);
 
-    private <T extends Geometry, U extends Geometry> void prepareRDDs(SpatialRDD<T> objectRDD,
-            SpatialRDD<U> windowRDD)
-            throws Exception
-    {
-        objectRDD.rawSpatialRDD.repartition(4);
-        objectRDD.spatialPartitioning(gridType);
-        objectRDD.buildIndex(IndexType.RTREE, true);
-        windowRDD.spatialPartitioning(objectRDD.getPartitioner());
-    }
+    List<Tuple2<Geometry, List<Polygon>>> result =
+        JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true, true).collect();
+    verifyJoinResults(result);
 
-    /**
-     * Test inside point join correctness.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testInsidePointJoinCorrectness()
-            throws Exception
-    {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
-        PointRDD objectRDD = new PointRDD(sc.parallelize(testInsidePointSet));
-        prepareRDDs(objectRDD, windowRDD);
+    List<Tuple2<Geometry, List<Polygon>>> resultNoIndex =
+        JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, false, true).collect();
+    verifyJoinResults(resultNoIndex);
+  }
 
-        List<Tuple2<Polygon, List<Point>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
-        verifyJoinResults(result);
+  /**
+   * Test outside polygon distance join correctness.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testOutsidePolygonDistanceJoinCorrectness() throws Exception {
+    PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
+    CircleRDD windowRDD = new CircleRDD(centerGeometryRDD, 0.1);
+    PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testOutsidePolygonSet));
+    prepareRDDs(objectRDD, windowRDD);
 
-        List<Tuple2<Polygon, List<Point>>> resultNoIndex = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, false).collect();
-        verifyJoinResults(resultNoIndex);
-    }
+    List<Tuple2<Geometry, List<Polygon>>> result =
+        JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true, true).collect();
+    assertEquals(0, result.size());
 
-    /**
-     * Test on boundary point join correctness.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testOnBoundaryPointJoinCorrectness()
-            throws Exception
-    {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
-        PointRDD objectRDD = new PointRDD(sc.parallelize(testOnBoundaryPointSet));
-        prepareRDDs(objectRDD, windowRDD);
-
-        List<Tuple2<Polygon, List<Point>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
-        verifyJoinResults(result);
-
-        List<Tuple2<Polygon, List<Point>>> resultNoIndex = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, false).collect();
-        verifyJoinResults(resultNoIndex);
-    }
-
-    /**
-     * Test outside point join correctness.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testOutsidePointJoinCorrectness()
-            throws Exception
-    {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
-        PointRDD objectRDD = new PointRDD(sc.parallelize(testOutsidePointSet));
-        prepareRDDs(objectRDD, windowRDD);
-
-        List<Tuple2<Polygon, List<Point>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
-        assertEquals(0, result.size());
-
-        List<Tuple2<Polygon, List<Point>>> resultNoIndex = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, false).collect();
-        assertEquals(0, resultNoIndex.size());
-    }
-
-    /**
-     * Test inside line string join correctness.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testInsideLineStringJoinCorrectness()
-            throws Exception
-    {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
-        LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(testInsideLineStringSet));
-        prepareRDDs(objectRDD, windowRDD);
-
-        List<Tuple2<Polygon, List<LineString>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
-        verifyJoinResults(result);
-
-        List<Tuple2<Polygon, List<LineString>>> resultNoIndex = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, false).collect();
-        verifyJoinResults(resultNoIndex);
-    }
-
-    /**
-     * Test overlapped line string join correctness.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testOverlappedLineStringJoinCorrectness()
-            throws Exception
-    {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
-        LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(testOverlappedLineStringSet));
-        prepareRDDs(objectRDD, windowRDD);
-
-        List<Tuple2<Polygon, List<LineString>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, true).collect();
-        verifyJoinResults(result);
-
-        List<Tuple2<Polygon, List<LineString>>> resultNoIndex = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, true).collect();
-        verifyJoinResults(resultNoIndex);
-    }
-
-    /**
-     * Test outside line string join correctness.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testOutsideLineStringJoinCorrectness()
-            throws Exception
-    {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
-        LineStringRDD objectRDD = new LineStringRDD(sc.parallelize(testOutsideLineStringSet));
-        prepareRDDs(objectRDD, windowRDD);
-
-        List<Tuple2<Polygon, List<LineString>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
-        assertEquals(0, result.size());
-
-        List<Tuple2<Polygon, List<LineString>>> resultNoIndex = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, false).collect();
-        assertEquals(0, resultNoIndex.size());
-    }
-
-    /**
-     * Test inside polygon join correctness.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testInsidePolygonJoinCorrectness()
-            throws Exception
-    {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
-        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testInsidePolygonSet));
-        prepareRDDs(objectRDD, windowRDD);
-
-        List<Tuple2<Polygon, List<Polygon>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
-        verifyJoinResults(result);
-
-        List<Tuple2<Polygon, List<Polygon>>> resultNoIndex = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, false).collect();
-        verifyJoinResults(resultNoIndex);
-    }
-
-    /**
-     * Test overlapped polygon join correctness.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testOverlappedPolygonJoinCorrectness()
-            throws Exception
-    {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
-        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testOverlappedPolygonSet));
-        prepareRDDs(objectRDD, windowRDD);
-
-        List<Tuple2<Polygon, List<Polygon>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, true).collect();
-        verifyJoinResults(result);
-
-        List<Tuple2<Polygon, List<Polygon>>> resultNoIndex = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, true).collect();
-        verifyJoinResults(resultNoIndex);
-    }
-
-    private <U extends Geometry, T extends Geometry> void verifyJoinResults(List<Tuple2<U, List<T>>> result)
-    {
-        assertEquals(200, result.size());
-        for (Tuple2<U, List<T>> tuple : result) {
-            U window = tuple._1;
-            List<T> objects = tuple._2;
-            String windowUserData = (String) window.getUserData();
-
-            String[] tokens = windowUserData.split(":", 2);
-            String prefix = tokens[0];
-            String id = tokens[1];
-
-            assertTrue(prefix.equals("a") || prefix.equals("b"));
-            assertEquals(2, objects.size());
-
-            final Set<String> objectIds = new HashSet<>();
-            for (T object : objects) {
-                objectIds.add((String) object.getUserData());
-            }
-
-            assertEquals(new HashSet(Arrays.asList("a:" + id, "b:" + id)), objectIds);
-        }
-    }
-
-    /**
-     * Test outside polygon join correctness.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testOutsidePolygonJoinCorrectness()
-            throws Exception
-    {
-        PolygonRDD windowRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
-        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testOutsidePolygonSet));
-        prepareRDDs(objectRDD, windowRDD);
-
-        List<Tuple2<Polygon, List<Polygon>>> result = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, true, false).collect();
-        assertEquals(0, result.size());
-
-        List<Tuple2<Polygon, List<Polygon>>> resultNoIndex = JoinQuery.SpatialJoinQuery(objectRDD, windowRDD, false, false).collect();
-        assertEquals(0, resultNoIndex.size());
-    }
-
-    /**
-     * Test inside polygon distance join correctness.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testInsidePolygonDistanceJoinCorrectness()
-            throws Exception
-    {
-        PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
-        CircleRDD windowRDD = new CircleRDD(centerGeometryRDD, 0.1);
-        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testInsidePolygonSet));
-        prepareRDDs(objectRDD, windowRDD);
-
-        List<Tuple2<Geometry, List<Polygon>>> result = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true, false).collect();
-        verifyJoinResults(result);
-
-        List<Tuple2<Geometry, List<Polygon>>> resultNoIndex = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, false, false).collect();
-        verifyJoinResults(resultNoIndex);
-    }
-
-    /**
-     * Test overlapped polygon distance join correctness.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testOverlappedPolygonDistanceJoinCorrectness()
-            throws Exception
-    {
-        PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
-        CircleRDD windowRDD = new CircleRDD(centerGeometryRDD, 0.1);
-        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testOverlappedPolygonSet));
-        prepareRDDs(objectRDD, windowRDD);
-
-        List<Tuple2<Geometry, List<Polygon>>> result = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true, true).collect();
-        verifyJoinResults(result);
-
-        List<Tuple2<Geometry, List<Polygon>>> resultNoIndex = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, false, true).collect();
-        verifyJoinResults(resultNoIndex);
-    }
-
-    /**
-     * Test outside polygon distance join correctness.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testOutsidePolygonDistanceJoinCorrectness()
-            throws Exception
-    {
-        PolygonRDD centerGeometryRDD = new PolygonRDD(sc.parallelize(testPolygonWindowSet));
-        CircleRDD windowRDD = new CircleRDD(centerGeometryRDD, 0.1);
-        PolygonRDD objectRDD = new PolygonRDD(sc.parallelize(testOutsidePolygonSet));
-        prepareRDDs(objectRDD, windowRDD);
-
-        List<Tuple2<Geometry, List<Polygon>>> result = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, true, true).collect();
-        assertEquals(0, result.size());
-
-        List<Tuple2<Geometry, List<Polygon>>> resultNoIndex = JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, false, true).collect();
-        assertEquals(0, resultNoIndex.size());
-    }
+    List<Tuple2<Geometry, List<Polygon>>> resultNoIndex =
+        JoinQuery.DistanceJoinQuery(objectRDD, windowRDD, false, true).collect();
+    assertEquals(0, resultNoIndex.size());
+  }
 }

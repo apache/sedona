@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.python.wrapper
 
-final case class SerializationException(private val message: String = "",
-                                        private val cause: Throwable = None.orNull)
-  extends Exception(message, cause)
+final case class SerializationException(
+    private val message: String = "",
+    private val cause: Throwable = None.orNull)
+    extends Exception(message, cause)

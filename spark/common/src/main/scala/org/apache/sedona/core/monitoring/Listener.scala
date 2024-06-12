@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.monitoring
 
 import org.apache.spark.scheduler.{SparkListener, SparkListenerStageCompleted, SparkListenerTaskEnd}
@@ -57,28 +56,34 @@ class Listener extends SparkListener {
 
       val buildCounts: Map[Int, Long] = getCounter("buildCount").asInstanceOf[Map[Int, Long]]
       val streamCounts: Map[Int, Long] = getCounter("streamCount").asInstanceOf[Map[Int, Long]]
-      val candidateCounts: Map[Int, Long] = getCounter("candidateCount").asInstanceOf[Map[Int, Long]]
+      val candidateCounts: Map[Int, Long] =
+        getCounter("candidateCount").asInstanceOf[Map[Int, Long]]
       val resultCounts: Map[Int, Long] = getCounter("resultCount").asInstanceOf[Map[Int, Long]]
 
       val stats: List[(Int, Long, Long, Long, Long, Long)] =
-        buildCounts.map {
-          case (partitionId, buildCount) => {
-            val streamCount: Long = streamCounts.getOrElse(partitionId, -1)
-            val candidateCount: Long = candidateCounts.getOrElse(partitionId, -1)
-            val resultCount: Long = resultCounts.getOrElse(partitionId, -1)
-            val cpuTime: Long = taskCpuTime.getOrElse((stageId, partitionId), -1)
-            (partitionId, buildCount, streamCount, candidateCount, resultCount, cpuTime)
+        buildCounts
+          .map {
+            case (partitionId, buildCount) => {
+              val streamCount: Long = streamCounts.getOrElse(partitionId, -1)
+              val candidateCount: Long = candidateCounts.getOrElse(partitionId, -1)
+              val resultCount: Long = resultCounts.getOrElse(partitionId, -1)
+              val cpuTime: Long = taskCpuTime.getOrElse((stageId, partitionId), -1)
+              (partitionId, buildCount, streamCount, candidateCount, resultCount, cpuTime)
+            }
           }
-        }.toList.sortBy {
-          case (_, _, _, _, _, cpuTime) => cpuTime
-        }
+          .toList
+          .sortBy { case (_, _, _, _, _, cpuTime) =>
+            cpuTime
+          }
 
       Console.out.println("Spatial join is complete. Execution statistics:")
-      Console.out.println("Partition\t CPU Time (s)\tBuild ##\tStream ##\tCandidates ##\tResults ##")
+      Console.out.println(
+        "Partition\t CPU Time (s)\tBuild ##\tStream ##\tCandidates ##\tResults ##")
       stats.foreach {
         case (partitionId, buildCount, streamCount, candidateCount, resultCount, cpuTime) =>
-          Console.out.println(f"$partitionId% 10d\t${cpuTime / 1000}% 10d" +
-            f"$buildCount% 10d\t$streamCount% 10d\t$candidateCount% 10d\t$resultCount% 10d")
+          Console.out.println(
+            f"$partitionId% 10d\t${cpuTime / 1000}% 10d" +
+              f"$buildCount% 10d\t$streamCount% 10d\t$candidateCount% 10d\t$resultCount% 10d")
       }
     }
   }

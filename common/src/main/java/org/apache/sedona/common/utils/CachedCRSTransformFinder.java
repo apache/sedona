@@ -30,52 +30,56 @@ import org.opengis.referencing.operation.MathTransform;
  * in the CRS.findTransform method.
  */
 public class CachedCRSTransformFinder {
-    private CachedCRSTransformFinder() {}
+  private CachedCRSTransformFinder() {}
 
-    private static class CRSPair {
-        private final CoordinateReferenceSystem sourceCRS;
-        private final CoordinateReferenceSystem targetCRS;
-        private final int hashCode;
+  private static class CRSPair {
+    private final CoordinateReferenceSystem sourceCRS;
+    private final CoordinateReferenceSystem targetCRS;
+    private final int hashCode;
 
-        public CRSPair(CoordinateReferenceSystem sourceCRS, CoordinateReferenceSystem targetCRS) {
-            this.sourceCRS = sourceCRS;
-            this.targetCRS = targetCRS;
-            this.hashCode = sourceCRS.hashCode() * 31 + targetCRS.hashCode();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof CRSPair)) {
-                return false;
-            }
-            CRSPair other = (CRSPair) obj;
-            // Here we use == instead of equals deliberately because CRS objects will be heavily reused
-            // throughout the system. Different rasters with same CRS definition will have a high probability
-            // of using the same CRS object.
-            //
-            // There are cases where two CRS objects are equal but not the same object. In this case, the
-            // CRS.findTransform method will look up its internal cache using the equals() method, which is pretty
-            // slow. This CachedCRSTransformFinder will accelerate the cases where there are multiple (but not too many)
-            // equivalent CRS objects. Typically, there could be 2 equivalent CRS objects: one created from looking up
-            // the EPSG database, and the other created from deserializing the CRS object.
-            return sourceCRS == other.sourceCRS && targetCRS == other.targetCRS;
-        }
-
-        @Override
-        public int hashCode() {
-            return hashCode;
-        }
+    public CRSPair(CoordinateReferenceSystem sourceCRS, CoordinateReferenceSystem targetCRS) {
+      this.sourceCRS = sourceCRS;
+      this.targetCRS = targetCRS;
+      this.hashCode = sourceCRS.hashCode() * 31 + targetCRS.hashCode();
     }
 
-    private static final LoadingCache<CRSPair, MathTransform> crsTransformCache = Caffeine.newBuilder()
-            .maximumSize(1000)
-            .build(CachedCRSTransformFinder::doFindTransform);
-
-    public static MathTransform findTransform(CoordinateReferenceSystem sourceCRS, CoordinateReferenceSystem targetCRS) {
-        return crsTransformCache.get(new CRSPair(sourceCRS, targetCRS));
+    @Override
+    public boolean equals(Object obj) {
+      if (!(obj instanceof CRSPair)) {
+        return false;
+      }
+      CRSPair other = (CRSPair) obj;
+      // Here we use == instead of equals deliberately because CRS objects will be heavily reused
+      // throughout the system. Different rasters with same CRS definition will have a high
+      // probability
+      // of using the same CRS object.
+      //
+      // There are cases where two CRS objects are equal but not the same object. In this case, the
+      // CRS.findTransform method will look up its internal cache using the equals() method, which
+      // is pretty
+      // slow. This CachedCRSTransformFinder will accelerate the cases where there are multiple (but
+      // not too many)
+      // equivalent CRS objects. Typically, there could be 2 equivalent CRS objects: one created
+      // from looking up
+      // the EPSG database, and the other created from deserializing the CRS object.
+      return sourceCRS == other.sourceCRS && targetCRS == other.targetCRS;
     }
 
-    private static MathTransform doFindTransform(CRSPair crsPair) throws FactoryException {
-        return CRS.findMathTransform(crsPair.sourceCRS, crsPair.targetCRS, true);
+    @Override
+    public int hashCode() {
+      return hashCode;
     }
+  }
+
+  private static final LoadingCache<CRSPair, MathTransform> crsTransformCache =
+      Caffeine.newBuilder().maximumSize(1000).build(CachedCRSTransformFinder::doFindTransform);
+
+  public static MathTransform findTransform(
+      CoordinateReferenceSystem sourceCRS, CoordinateReferenceSystem targetCRS) {
+    return crsTransformCache.get(new CRSPair(sourceCRS, targetCRS));
+  }
+
+  private static MathTransform doFindTransform(CRSPair crsPair) throws FactoryException {
+    return CRS.findMathTransform(crsPair.sourceCRS, crsPair.targetCRS, true);
+  }
 }

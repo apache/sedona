@@ -16,26 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.enums;
 
 import java.io.Serializable;
 
 /**
- * The enumerator type of JoinQuery JoinBuildSide. Each join query has two sides, left shape and right shape.
- * The join side decides which side the spatial index is built on. The other side will be streamed out.
+ * The enumerator type of JoinQuery JoinBuildSide. Each join query has two sides, left shape and
+ * right shape. The join side decides which side the spatial index is built on. The other side will
+ * be streamed out.
  */
-public enum JoinBuildSide
-        implements Serializable
-{
-    LEFT,
-    RIGHT;
+public enum JoinBuildSide implements Serializable {
+  LEFT,
+  RIGHT;
 
-    public static JoinBuildSide getBuildSide(String str)
-    {
-        for (JoinBuildSide me : JoinBuildSide.values()) {
-            if (me.name().equalsIgnoreCase(str)) { return me; }
-        }
-        return null;
+  public static JoinBuildSide getBuildSide(String str) {
+    for (JoinBuildSide me : JoinBuildSide.values()) {
+      if (me.name().equalsIgnoreCase(str)) {
+        return me;
+      }
     }
+    return null;
+  }
 }

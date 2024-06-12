@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 package org.apache.spark.sql.sedona_sql.io.raster
 
 import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
@@ -34,18 +32,19 @@ import java.util.UUID
 private[spark] class RasterFileFormat extends FileFormat with DataSourceRegister {
 
   override def inferSchema(
-                            sparkSession: SparkSession,
-                            options: Map[String, String],
-                            files: Seq[FileStatus]): Option[StructType] = {
-    throw new UnsupportedOperationException("Please use 'binaryFile' data source to reading raster files")
+      sparkSession: SparkSession,
+      options: Map[String, String],
+      files: Seq[FileStatus]): Option[StructType] = {
+    throw new UnsupportedOperationException(
+      "Please use 'binaryFile' data source to reading raster files")
     None
   }
 
   override def prepareWrite(
-                             sparkSession: SparkSession,
-                             job: Job,
-                             options: Map[String, String],
-                             dataSchema: StructType): OutputWriterFactory = {
+      sparkSession: SparkSession,
+      job: Job,
+      options: Map[String, String],
+      dataSchema: StructType): OutputWriterFactory = {
     val rasterOptions = new RasterOptions(options)
     if (!isValidRasterSchema(dataSchema)) {
       throw new IllegalArgumentException("Invalid Raster DataFrame Schema")
@@ -54,7 +53,10 @@ private[spark] class RasterFileFormat extends FileFormat with DataSourceRegister
     new OutputWriterFactory {
       override def getFileExtension(context: TaskAttemptContext): String = ""
 
-      override def newInstance(path: String, dataSchema: StructType, context: TaskAttemptContext): OutputWriter = {
+      override def newInstance(
+          path: String,
+          dataSchema: StructType,
+          context: TaskAttemptContext): OutputWriter = {
         new RasterFileWriter(path, rasterOptions, dataSchema, context)
       }
     }
@@ -76,13 +78,17 @@ private[spark] class RasterFileFormat extends FileFormat with DataSourceRegister
 }
 
 // class for writing raster images
-private class RasterFileWriter(savePath: String,
-                               rasterOptions: RasterOptions,
-                                dataSchema: StructType,
-                                context: TaskAttemptContext) extends OutputWriter {
+private class RasterFileWriter(
+    savePath: String,
+    rasterOptions: RasterOptions,
+    dataSchema: StructType,
+    context: TaskAttemptContext)
+    extends OutputWriter {
 
   private val hfs = FileSystem.newInstance(new Path(savePath).toUri, context.getConfiguration)
-  private val rasterFieldIndex = if (rasterOptions.rasterField.isEmpty) getRasterFieldIndex else dataSchema.fieldIndex(rasterOptions.rasterField.get)
+  private val rasterFieldIndex =
+    if (rasterOptions.rasterField.isEmpty) getRasterFieldIndex
+    else dataSchema.fieldIndex(rasterOptions.rasterField.get)
 
   private def getRasterFieldIndex: Int = {
     val schemaFields: StructType = dataSchema
@@ -107,7 +113,7 @@ private class RasterFileWriter(savePath: String,
       out.write(rasterRaw)
       out.close()
     } catch {
-      case e@(_: IOException) =>
+      case e @ (_: IOException) =>
         // TODO Auto-generated catch block
         e.printStackTrace()
     }
@@ -121,7 +127,10 @@ private class RasterFileWriter(savePath: String,
     savePath
   }
 
-  private def getRasterFilePath(row: InternalRow, schema: StructType, rasterOptions: RasterOptions): String = {
+  private def getRasterFilePath(
+      row: InternalRow,
+      schema: StructType,
+      rasterOptions: RasterOptions): String = {
     // If the output path is not provided, generate a random UUID as the file name
     var rasterFilePath = UUID.randomUUID().toString
     if (rasterOptions.rasterPathField.isDefined) {
@@ -129,7 +138,8 @@ private class RasterFileWriter(savePath: String,
       // If the output path field is provided, but the value is null, generate a random UUID as the file name
       if (rasterFilePathRaw != null) {
         // remove the extension if exists
-        if (rasterFilePathRaw.contains(".")) rasterFilePath = rasterFilePathRaw.substring(0, rasterFilePathRaw.lastIndexOf("."))
+        if (rasterFilePathRaw.contains("."))
+          rasterFilePath = rasterFilePathRaw.substring(0, rasterFilePathRaw.lastIndexOf("."))
         else rasterFilePath = rasterFilePathRaw
       }
     }

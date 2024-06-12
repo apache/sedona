@@ -1,20 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.spark.sql.execution.datasources.parquet
 
 import org.apache.parquet.column.Dictionary
@@ -44,7 +45,7 @@ import scala.collection.mutable.ArrayBuffer
 /**
  * A [[ParquetRowConverter]] is used to convert Parquet records into Catalyst [[InternalRow]]s.
  * Since Catalyst `StructType` is also a Parquet record, this converter can be used as root
- * converter.  Take the following Parquet type as an example:
+ * converter. Take the following Parquet type as an example:
  * {{{
  *   message root {
  *     required int32 f1;
@@ -56,41 +57,49 @@ import scala.collection.mutable.ArrayBuffer
  * }}}
  * 5 converters will be created:
  *
- * - a root [[ParquetRowConverter]] for [[org.apache.parquet.schema.MessageType]] `root`,
- * which contains:
- *   - a [[ParquetPrimitiveConverter]] for required
- *   [[org.apache.parquet.schema.OriginalType.INT_32]] field `f1`, and
- *   - a nested [[ParquetRowConverter]] for optional [[GroupType]] `f2`, which contains:
+ *   - a root [[ParquetRowConverter]] for [[org.apache.parquet.schema.MessageType]] `root`, which
+ *     contains:
  *     - a [[ParquetPrimitiveConverter]] for required
- *     [[org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName.DOUBLE]] field `f21`, and
- *     - a [[ParquetStringConverter]] for optional [[org.apache.parquet.schema.OriginalType.UTF8]]
- *     string field `f22`
+ *       [[org.apache.parquet.schema.OriginalType.INT_32]] field `f1`, and
+ *     - a nested [[ParquetRowConverter]] for optional [[GroupType]] `f2`, which contains:
+ *       - a [[ParquetPrimitiveConverter]] for required
+ *         [[org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName.DOUBLE]] field `f21`, and
+ *       - a [[ParquetStringConverter]] for optional
+ *         [[org.apache.parquet.schema.OriginalType.UTF8]] string field `f22`
  *
  * When used as a root converter, [[NoopUpdater]] should be used since root converters don't have
  * any "parent" container.
  *
- * @param schemaConverter A utility converter used to convert Parquet types to Catalyst types.
- * @param parquetType Parquet schema of Parquet records
- * @param catalystType Spark SQL schema that corresponds to the Parquet record type. User-defined
- *        types other than [[GeometryUDT]] should have been expanded.
- * @param convertTz the optional time zone to convert to int96 data
- * @param datetimeRebaseSpec the specification of rebasing date/timestamp from Julian to Proleptic
- *                           Gregorian calendar: mode + optional original time zone
- * @param int96RebaseSpec the specification of rebasing INT96 timestamp from Julian to Proleptic
- *                        Gregorian calendar
- * @param parameters Options for reading GeoParquet files. For example, if legacyMode is enabled or not.
- * @param updater An updater which propagates converted field values to the parent container
+ * @param schemaConverter
+ *   A utility converter used to convert Parquet types to Catalyst types.
+ * @param parquetType
+ *   Parquet schema of Parquet records
+ * @param catalystType
+ *   Spark SQL schema that corresponds to the Parquet record type. User-defined types other than
+ *   [[GeometryUDT]] should have been expanded.
+ * @param convertTz
+ *   the optional time zone to convert to int96 data
+ * @param datetimeRebaseSpec
+ *   the specification of rebasing date/timestamp from Julian to Proleptic Gregorian calendar:
+ *   mode + optional original time zone
+ * @param int96RebaseSpec
+ *   the specification of rebasing INT96 timestamp from Julian to Proleptic Gregorian calendar
+ * @param parameters
+ *   Options for reading GeoParquet files. For example, if legacyMode is enabled or not.
+ * @param updater
+ *   An updater which propagates converted field values to the parent container
  */
 private[parquet] class GeoParquetRowConverter(
-                                            schemaConverter: GeoParquetToSparkSchemaConverter,
-                                            parquetType: GroupType,
-                                            catalystType: StructType,
-                                            convertTz: Option[ZoneId],
-                                            datetimeRebaseSpec: RebaseSpec,
-                                            int96RebaseSpec: RebaseSpec,
-                                            parameters: Map[String, String],
-                                            updater: ParentContainerUpdater)
-  extends ParquetGroupConverter(updater) with Logging {
+    schemaConverter: GeoParquetToSparkSchemaConverter,
+    parquetType: GroupType,
+    catalystType: StructType,
+    convertTz: Option[ZoneId],
+    datetimeRebaseSpec: RebaseSpec,
+    int96RebaseSpec: RebaseSpec,
+    parameters: Map[String, String],
+    updater: ParentContainerUpdater)
+    extends ParquetGroupConverter(updater)
+    with Logging {
 
   assert(
     parquetType.getFieldCount <= catalystType.length,
@@ -103,13 +112,13 @@ private[parquet] class GeoParquetRowConverter(
      """.stripMargin)
 
   assert(
-    !catalystType.existsRecursively(t => !t.isInstanceOf[GeometryUDT] && t.isInstanceOf[UserDefinedType[_]]),
+    !catalystType.existsRecursively(t =>
+      !t.isInstanceOf[GeometryUDT] && t.isInstanceOf[UserDefinedType[_]]),
     s"""User-defined types in Catalyst schema should have already been expanded:
        |${catalystType.prettyJson}
      """.stripMargin)
 
-  logDebug(
-    s"""Building row converter for the following schema:
+  logDebug(s"""Building row converter for the following schema:
        |
        |Parquet form:
        |$parquetType
@@ -118,7 +127,7 @@ private[parquet] class GeoParquetRowConverter(
      """.stripMargin)
 
   /**
-   * Updater used together with field converters within a [[ParquetRowConverter]].  It propagates
+   * Updater used together with field converters within a [[ParquetRowConverter]]. It propagates
    * converted filed values to the `ordinal`-th cell in `currentRow`.
    */
   private final class RowUpdater(row: InternalRow, ordinal: Int) extends ParentContainerUpdater {
@@ -139,14 +148,14 @@ private[parquet] class GeoParquetRowConverter(
    */
   def currentRecord: InternalRow = currentRow
 
-  private val dateRebaseFunc = DataSourceUtils.createDateRebaseFuncInRead(
-    datetimeRebaseSpec.mode, "Parquet")
+  private val dateRebaseFunc =
+    DataSourceUtils.createDateRebaseFuncInRead(datetimeRebaseSpec.mode, "Parquet")
 
-  private val timestampRebaseFunc = DataSourceUtils.createTimestampRebaseFuncInRead(
-    datetimeRebaseSpec, "Parquet")
+  private val timestampRebaseFunc =
+    DataSourceUtils.createTimestampRebaseFuncInRead(datetimeRebaseSpec, "Parquet")
 
-  private val int96RebaseFunc = DataSourceUtils.createTimestampRebaseFuncInRead(
-    int96RebaseSpec, "Parquet INT96")
+  private val int96RebaseFunc =
+    DataSourceUtils.createTimestampRebaseFuncInRead(int96RebaseSpec, "Parquet INT96")
 
   // Converters for each field.
   private[this] val fieldConverters: Array[Converter with HasParentContainerUpdater] = {
@@ -198,9 +207,9 @@ private[parquet] class GeoParquetRowConverter(
    * `catalystType`. Converted values are handled by `updater`.
    */
   private def newConverter(
-                            parquetType: Type,
-                            catalystType: DataType,
-                            updater: ParentContainerUpdater): Converter with HasParentContainerUpdater = {
+      parquetType: Type,
+      catalystType: DataType,
+      updater: ParentContainerUpdater): Converter with HasParentContainerUpdater = {
 
     catalystType match {
       case BooleanType | IntegerType | LongType | FloatType | DoubleType | BinaryType =>
@@ -217,7 +226,10 @@ private[parquet] class GeoParquetRowConverter(
           }
         } else {
           if (GeoParquetUtils.isLegacyMode(parameters)) {
-            new ParquetArrayConverter(parquetType.asGroupType(), ArrayType(ByteType, containsNull = false), updater) {
+            new ParquetArrayConverter(
+              parquetType.asGroupType(),
+              ArrayType(ByteType, containsNull = false),
+              updater) {
               override def end(): Unit = {
                 val wkbReader = new WKBReader()
                 val byteArray = currentArray.map(_.asInstanceOf[Byte]).toArray
@@ -261,8 +273,8 @@ private[parquet] class GeoParquetRowConverter(
 
       // For BINARY and FIXED_LEN_BYTE_ARRAY backed decimals
       case t: DecimalType
-        if parquetType.asPrimitiveType().getPrimitiveTypeName == FIXED_LEN_BYTE_ARRAY ||
-          parquetType.asPrimitiveType().getPrimitiveTypeName == BINARY =>
+          if parquetType.asPrimitiveType().getPrimitiveTypeName == FIXED_LEN_BYTE_ARRAY ||
+            parquetType.asPrimitiveType().getPrimitiveTypeName == BINARY =>
         new ParquetBinaryDictionaryAwareDecimalConverter(t.precision, t.scale, updater)
 
       case t: DecimalType =>
@@ -296,7 +308,8 @@ private[parquet] class GeoParquetRowConverter(
           override def addBinary(value: Binary): Unit = {
             val julianMicros = ParquetRowConverter.binaryToSQLTimestamp(value)
             val gregorianMicros = int96RebaseFunc(julianMicros)
-            val adjTime = convertTz.map(DateTimeUtils.convertTz(gregorianMicros, _, ZoneOffset.UTC))
+            val adjTime = convertTz
+              .map(DateTimeUtils.convertTz(gregorianMicros, _, ZoneOffset.UTC))
               .getOrElse(gregorianMicros)
             updater.setLong(adjTime)
           }
@@ -347,7 +360,7 @@ private[parquet] class GeoParquetRowConverter(
             // `updater` is NOT a RowUpdater, implying that the parent container a map or array.
             new ParentContainerUpdater {
               override def set(value: Any): Unit = {
-                updater.set(value.asInstanceOf[SpecificInternalRow].copy())  // deep copy
+                updater.set(value.asInstanceOf[SpecificInternalRow].copy()) // deep copy
               }
             }
           }
@@ -373,7 +386,7 @@ private[parquet] class GeoParquetRowConverter(
    * Parquet converter for strings. A dictionary is used to minimize string decoding cost.
    */
   private final class ParquetStringConverter(updater: ParentContainerUpdater)
-    extends ParquetPrimitiveConverter(updater) {
+      extends ParquetPrimitiveConverter(updater) {
 
     private var expandedDictionary: Array[UTF8String] = null
 
@@ -404,8 +417,10 @@ private[parquet] class GeoParquetRowConverter(
    * Parquet converter for fixed-precision decimals.
    */
   private abstract class ParquetDecimalConverter(
-                                                  precision: Int, scale: Int, updater: ParentContainerUpdater)
-    extends ParquetPrimitiveConverter(updater) {
+      precision: Int,
+      scale: Int,
+      updater: ParentContainerUpdater)
+      extends ParquetPrimitiveConverter(updater) {
 
     protected var expandedDictionary: Array[Decimal] = _
 
@@ -447,8 +462,10 @@ private[parquet] class GeoParquetRowConverter(
   }
 
   private class ParquetIntDictionaryAwareDecimalConverter(
-                                                           precision: Int, scale: Int, updater: ParentContainerUpdater)
-    extends ParquetDecimalConverter(precision, scale, updater) {
+      precision: Int,
+      scale: Int,
+      updater: ParentContainerUpdater)
+      extends ParquetDecimalConverter(precision, scale, updater) {
 
     override def setDictionary(dictionary: Dictionary): Unit = {
       this.expandedDictionary = Array.tabulate(dictionary.getMaxId + 1) { id =>
@@ -458,8 +475,10 @@ private[parquet] class GeoParquetRowConverter(
   }
 
   private class ParquetLongDictionaryAwareDecimalConverter(
-                                                            precision: Int, scale: Int, updater: ParentContainerUpdater)
-    extends ParquetDecimalConverter(precision, scale, updater) {
+      precision: Int,
+      scale: Int,
+      updater: ParentContainerUpdater)
+      extends ParquetDecimalConverter(precision, scale, updater) {
 
     override def setDictionary(dictionary: Dictionary): Unit = {
       this.expandedDictionary = Array.tabulate(dictionary.getMaxId + 1) { id =>
@@ -469,8 +488,10 @@ private[parquet] class GeoParquetRowConverter(
   }
 
   private class ParquetBinaryDictionaryAwareDecimalConverter(
-                                                              precision: Int, scale: Int, updater: ParentContainerUpdater)
-    extends ParquetDecimalConverter(precision, scale, updater) {
+      precision: Int,
+      scale: Int,
+      updater: ParentContainerUpdater)
+      extends ParquetDecimalConverter(precision, scale, updater) {
 
     override def setDictionary(dictionary: Dictionary): Unit = {
       this.expandedDictionary = Array.tabulate(dictionary.getMaxId + 1) { id =>
@@ -480,7 +501,7 @@ private[parquet] class GeoParquetRowConverter(
   }
 
   /**
-   * Parquet converter for arrays.  Spark SQL arrays are represented as Parquet lists.  Standard
+   * Parquet converter for arrays. Spark SQL arrays are represented as Parquet lists. Standard
    * Parquet lists are represented as a 3-level group annotated by `LIST`:
    * {{{
    *   <list-repetition> group <name> (LIST) {            <-- parquetSchema points here
@@ -491,16 +512,18 @@ private[parquet] class GeoParquetRowConverter(
    * }}}
    * The `parquetSchema` constructor argument points to the outermost group.
    *
-   * However, before this representation is standardized, some Parquet libraries/tools also use some
-   * non-standard formats to represent list-like structures.  Backwards-compatibility rules for
-   * handling these cases are described in Parquet format spec.
+   * However, before this representation is standardized, some Parquet libraries/tools also use
+   * some non-standard formats to represent list-like structures. Backwards-compatibility rules
+   * for handling these cases are described in Parquet format spec.
    *
-   * @see https://github.com/apache/parquet-format/blob/master/LogicalTypes.md#lists
+   * @see
+   *   https://github.com/apache/parquet-format/blob/master/LogicalTypes.md#lists
    */
-  private class ParquetArrayConverter(parquetSchema: GroupType,
-                                      catalystSchema: ArrayType,
-                                      updater: ParentContainerUpdater)
-    extends ParquetGroupConverter(updater) {
+  private class ParquetArrayConverter(
+      parquetSchema: GroupType,
+      catalystSchema: ArrayType,
+      updater: ParentContainerUpdater)
+      extends ParquetGroupConverter(updater) {
 
     protected[this] val currentArray: mutable.ArrayBuffer[Any] = ArrayBuffer.empty[Any]
 
@@ -540,9 +563,12 @@ private[parquet] class GeoParquetRowConverter(
       if (DataType.equalsIgnoreCompatibleNullability(guessedElementType, elementType)) {
         // If the repeated field corresponds to the element type, creates a new converter using the
         // type of the repeated field.
-        newConverter(repeatedType, elementType, new ParentContainerUpdater {
-          override def set(value: Any): Unit = currentArray += value
-        })
+        newConverter(
+          repeatedType,
+          elementType,
+          new ParentContainerUpdater {
+            override def set(value: Any): Unit = currentArray += value
+          })
       } else {
         // If the repeated field corresponds to the syntactic group in the standard 3-level Parquet
         // LIST layout, creates a new converter using the only child field of the repeated field.
@@ -559,14 +585,17 @@ private[parquet] class GeoParquetRowConverter(
 
     /** Array element converter */
     private final class ElementConverter(parquetType: Type, catalystType: DataType)
-      extends GroupConverter {
+        extends GroupConverter {
 
       private var currentElement: Any = _
 
       private[this] val converter =
-        newConverter(parquetType, catalystType, new ParentContainerUpdater {
-          override def set(value: Any): Unit = currentElement = value
-        })
+        newConverter(
+          parquetType,
+          catalystType,
+          new ParentContainerUpdater {
+            override def set(value: Any): Unit = currentElement = value
+          })
 
       override def getConverter(fieldIndex: Int): Converter = converter
 
@@ -578,10 +607,10 @@ private[parquet] class GeoParquetRowConverter(
 
   /** Parquet converter for maps */
   private final class ParquetMapConverter(
-                                           parquetType: GroupType,
-                                           catalystType: MapType,
-                                           updater: ParentContainerUpdater)
-    extends ParquetGroupConverter(updater) {
+      parquetType: GroupType,
+      catalystType: MapType,
+      updater: ParentContainerUpdater)
+      extends ParquetGroupConverter(updater) {
 
     private[this] val currentKeys = ArrayBuffer.empty[Any]
     private[this] val currentValues = ArrayBuffer.empty[Any]
@@ -614,11 +643,11 @@ private[parquet] class GeoParquetRowConverter(
 
     /** Parquet converter for key-value pairs within the map. */
     private final class KeyValueConverter(
-                                           parquetKeyType: Type,
-                                           parquetValueType: Type,
-                                           catalystKeyType: DataType,
-                                           catalystValueType: DataType)
-      extends GroupConverter {
+        parquetKeyType: Type,
+        parquetValueType: Type,
+        catalystKeyType: DataType,
+        catalystValueType: DataType)
+        extends GroupConverter {
 
       private var currentKey: Any = _
 
@@ -626,14 +655,20 @@ private[parquet] class GeoParquetRowConverter(
 
       private[this] val converters = Array(
         // Converter for keys
-        newConverter(parquetKeyType, catalystKeyType, new ParentContainerUpdater {
-          override def set(value: Any): Unit = currentKey = value
-        }),
+        newConverter(
+          parquetKeyType,
+          catalystKeyType,
+          new ParentContainerUpdater {
+            override def set(value: Any): Unit = currentKey = value
+          }),
 
         // Converter for values
-        newConverter(parquetValueType, catalystValueType, new ParentContainerUpdater {
-          override def set(value: Any): Unit = currentValue = value
-        }))
+        newConverter(
+          parquetValueType,
+          catalystValueType,
+          new ParentContainerUpdater {
+            override def set(value: Any): Unit = currentValue = value
+          }))
 
       override def getConverter(fieldIndex: Int): Converter = converters(fieldIndex)
 
@@ -664,10 +699,12 @@ private[parquet] class GeoParquetRowConverter(
    * of required primitives values.
    */
   private final class RepeatedPrimitiveConverter(
-                                                  parquetType: Type,
-                                                  catalystType: DataType,
-                                                  parentUpdater: ParentContainerUpdater)
-    extends PrimitiveConverter with RepeatedConverter with HasParentContainerUpdater {
+      parquetType: Type,
+      catalystType: DataType,
+      parentUpdater: ParentContainerUpdater)
+      extends PrimitiveConverter
+      with RepeatedConverter
+      with HasParentContainerUpdater {
 
     val updater: ParentContainerUpdater = newArrayUpdater(parentUpdater)
 
@@ -683,7 +720,8 @@ private[parquet] class GeoParquetRowConverter(
 
     override def setDictionary(dict: Dictionary): Unit = elementConverter.setDictionary(dict)
     override def hasDictionarySupport: Boolean = elementConverter.hasDictionarySupport
-    override def addValueFromDictionary(id: Int): Unit = elementConverter.addValueFromDictionary(id)
+    override def addValueFromDictionary(id: Int): Unit =
+      elementConverter.addValueFromDictionary(id)
   }
 
   /**
@@ -691,10 +729,12 @@ private[parquet] class GeoParquetRowConverter(
    * required struct values.
    */
   private final class RepeatedGroupConverter(
-                                              parquetType: Type,
-                                              catalystType: DataType,
-                                              parentUpdater: ParentContainerUpdater)
-    extends GroupConverter with HasParentContainerUpdater with RepeatedConverter {
+      parquetType: Type,
+      catalystType: DataType,
+      parentUpdater: ParentContainerUpdater)
+      extends GroupConverter
+      with HasParentContainerUpdater
+      with RepeatedConverter {
 
     val updater: ParentContainerUpdater = newArrayUpdater(parentUpdater)
 

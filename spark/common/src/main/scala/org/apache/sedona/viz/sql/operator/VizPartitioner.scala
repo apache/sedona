@@ -32,19 +32,29 @@ import scala.collection.mutable.ArrayBuffer
 object VizPartitioner {
 
   /**
-    * Partition the data frame to many pieces. Each partition has two partition ids.
-    * Primary id is the uniform map tile id and secondary id is the non-uniformed partition id.
-    * The generated DataFrame guarantees that rows with the same secondary ids are in the partition.
-    * But each partition may contain rows with different secondary ids.
-    *
-    * @param dataFrame
-    * @param zoomLevel
-    * @param spatialColName
-    * @param boundary
-    * @return
-    */
-  def apply(dataFrame: DataFrame, zoomLevel: Int, spatialColName: String, boundary: Envelope): DataFrame = {
-    val samples = dataFrame.sample(false, 0.01).select(spatialColName).collect().map(f => f.getAs[Pixel](0).getEnvelopeInternal).toList.asJava
+   * Partition the data frame to many pieces. Each partition has two partition ids. Primary id is
+   * the uniform map tile id and secondary id is the non-uniformed partition id. The generated
+   * DataFrame guarantees that rows with the same secondary ids are in the partition. But each
+   * partition may contain rows with different secondary ids.
+   *
+   * @param dataFrame
+   * @param zoomLevel
+   * @param spatialColName
+   * @param boundary
+   * @return
+   */
+  def apply(
+      dataFrame: DataFrame,
+      zoomLevel: Int,
+      spatialColName: String,
+      boundary: Envelope): DataFrame = {
+    val samples = dataFrame
+      .sample(false, 0.01)
+      .select(spatialColName)
+      .collect()
+      .map(f => f.getAs[Pixel](0).getEnvelopeInternal)
+      .toList
+      .asJava
     val numberParts = Math.pow(4, zoomLevel * 1.0).intValue()
 
     // Prepare the secondary partitioner
@@ -61,7 +71,9 @@ object VizPartitioner {
     })
     var partitionedDf = dataFrame
     // Append new primary and secondary partition IDs if they don't exist
-    if (!existPrimaryIdCol && !existSecondaryIdCol) partitionedDf = dataFrame.withColumn(Conf.PrimaryPID, lit("")).withColumn(Conf.SecondaryPID, lit(""))
+    if (!existPrimaryIdCol && !existSecondaryIdCol)
+      partitionedDf =
+        dataFrame.withColumn(Conf.PrimaryPID, lit("")).withColumn(Conf.SecondaryPID, lit(""))
     val rddWithPID = partitionedDf.rdd.mapPartitions(iterator => {
       var list = new ArrayBuffer[Row]()
       while (iterator.hasNext) {
@@ -83,7 +95,9 @@ object VizPartitioner {
       list.iterator
     })
     val dfWithPID = partitionedDf.sparkSession.createDataFrame(rddWithPID, partitionedDf.schema)
-    dfWithPID.repartition(dfWithPID.select(Conf.SecondaryPID).distinct().count().toInt, expr(Conf.SecondaryPID))
+    dfWithPID.repartition(
+      dfWithPID.select(Conf.SecondaryPID).distinct().count().toInt,
+      expr(Conf.SecondaryPID))
     //      .sortWithinPartitions(Conf.SecondaryPID)
   }
 }

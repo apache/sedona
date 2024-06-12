@@ -321,16 +321,12 @@ object Catalog {
     function[RS_Resample](),
     function[RS_ReprojectMatch]("nearestneighbor"),
     function[RS_FromNetCDF](),
-    function[RS_NetCDFInfo]()
-  )
+    function[RS_NetCDFInfo]())
 
-  val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(
-    new ST_Union_Aggr,
-    new ST_Envelope_Aggr,
-    new ST_Intersection_Aggr
-  )
+  val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] =
+    Seq(new ST_Union_Aggr, new ST_Envelope_Aggr, new ST_Intersection_Aggr)
 
-  private def function[T <: Expression : ClassTag](defaultArgs: Any *): FunctionDescription = {
+  private def function[T <: Expression: ClassTag](defaultArgs: Any*): FunctionDescription = {
     val classTag = implicitly[ClassTag[T]]
     val constructor = classTag.runtimeClass.getConstructor(classOf[Seq[Expression]])
     val functionName = classTag.runtimeClass.getSimpleName
@@ -346,19 +342,22 @@ object Catalog {
         case e: ExpectsInputTypes =>
           val numParameters = e.inputTypes.size
           val numArguments = expressions.size
-          if (numParameters == numArguments) expr else {
+          if (numParameters == numArguments) expr
+          else {
             val numUnspecifiedArgs = numParameters - numArguments
             if (numUnspecifiedArgs > 0) {
               if (numUnspecifiedArgs <= defaultArgs.size) {
-                val args = expressions ++ defaultArgs.takeRight(numUnspecifiedArgs).map(Literal(_))
+                val args =
+                  expressions ++ defaultArgs.takeRight(numUnspecifiedArgs).map(Literal(_))
                 constructor.newInstance(args).asInstanceOf[T]
               } else {
                 throw new IllegalArgumentException(s"function $functionName takes at least " +
                   s"${numParameters - defaultArgs.size} argument(s), $numArguments argument(s) specified")
               }
             } else {
-              throw new IllegalArgumentException(s"function $functionName takes at most " +
-                s"$numParameters argument(s), $numArguments argument(s) specified")
+              throw new IllegalArgumentException(
+                s"function $functionName takes at most " +
+                  s"$numParameters argument(s), $numArguments argument(s) specified")
             }
           }
         case _ => expr

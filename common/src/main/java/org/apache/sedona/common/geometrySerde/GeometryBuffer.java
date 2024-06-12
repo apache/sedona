@@ -16,44 +16,43 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.common.geometrySerde;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
 
 interface GeometryBuffer {
-    CoordinateType getCoordinateType();
+  CoordinateType getCoordinateType();
 
-    void setCoordinateType(CoordinateType coordinateType);
+  void setCoordinateType(CoordinateType coordinateType);
 
-    int getLength();
+  int getLength();
 
-    void mark(int offset);
+  void mark(int offset);
 
-    int getMark();
+  int getMark();
 
-    void putByte(int offset, byte value);
+  void putByte(int offset, byte value);
 
-    byte getByte(int offset);
+  byte getByte(int offset);
 
-    void putBytes(int offset, byte[] bytes);
+  void putBytes(int offset, byte[] bytes);
 
-    void getBytes(byte[] bytes, int offset, int length);
+  void getBytes(byte[] bytes, int offset, int length);
 
-    void putInt(int offset, int value);
+  void putInt(int offset, int value);
 
-    int getInt(int offset);
+  int getInt(int offset);
 
-    void putCoordinate(int offset, Coordinate coordinate);
+  void putCoordinate(int offset, Coordinate coordinate);
 
-    CoordinateSequence getCoordinate(int offset);
+  CoordinateSequence getCoordinate(int offset);
 
-    void putCoordinates(int offset, CoordinateSequence coordinates);
+  void putCoordinates(int offset, CoordinateSequence coordinates);
 
-    CoordinateSequence getCoordinates(int offset, int numCoordinates);
+  CoordinateSequence getCoordinates(int offset, int numCoordinates);
 
-    GeometryBuffer slice(int offset);
+  GeometryBuffer slice(int offset);
 
-    byte[] toByteArray();
+  byte[] toByteArray();
 }

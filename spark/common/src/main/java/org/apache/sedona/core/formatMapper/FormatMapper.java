@@ -16,66 +16,67 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.formatMapper;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.enums.GeometryType;
 import org.apache.sedona.common.utils.FormatUtils;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.locationtech.jts.geom.Geometry;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+public class FormatMapper<T extends Geometry> extends FormatUtils
+    implements FlatMapFunction<Iterator<String>, T> {
 
-public class FormatMapper<T extends Geometry>
-        extends FormatUtils implements FlatMapFunction<Iterator<String>, T>
-{
+  /**
+   * Instantiates a new format mapper.
+   *
+   * @param startOffset the start offset
+   * @param endOffset the end offset
+   * @param splitter the splitter
+   * @param carryInputData the carry input data
+   * @param geometryType
+   */
+  public FormatMapper(
+      int startOffset,
+      int endOffset,
+      FileDataSplitter splitter,
+      boolean carryInputData,
+      GeometryType geometryType) {
+    super(startOffset, endOffset, splitter, carryInputData, geometryType);
+  }
 
-    /**
-     * Instantiates a new format mapper.
-     *
-     * @param startOffset    the start offset
-     * @param endOffset      the end offset
-     * @param splitter       the splitter
-     * @param carryInputData the carry input data
-     * @param geometryType
-     */
-    public FormatMapper(int startOffset, int endOffset, FileDataSplitter splitter, boolean carryInputData, GeometryType geometryType) {
-        super(startOffset, endOffset, splitter, carryInputData, geometryType);
+  /**
+   * Instantiates a new format mapper. This is extensively used in SedonaSQL.
+   *
+   * @param splitter
+   * @param carryInputData
+   */
+  public FormatMapper(FileDataSplitter splitter, boolean carryInputData) {
+    super(splitter, carryInputData);
+  }
+
+  /**
+   * This format mapper is used in SedonaSQL.
+   *
+   * @param splitter
+   * @param carryInputData
+   * @param geometryType
+   */
+  public FormatMapper(
+      FileDataSplitter splitter, boolean carryInputData, GeometryType geometryType) {
+    super(splitter, carryInputData, geometryType);
+  }
+
+  @Override
+  public Iterator<T> call(Iterator<String> stringIterator) throws Exception {
+    List<T> result = new ArrayList<>();
+    while (stringIterator.hasNext()) {
+      String line = stringIterator.next();
+      addGeometry(readGeometry(line), result);
     }
-
-    /**
-     * Instantiates a new format mapper. This is extensively used in SedonaSQL.
-     *
-     * @param splitter
-     * @param carryInputData
-     */
-    public FormatMapper(FileDataSplitter splitter, boolean carryInputData) {
-        super(splitter, carryInputData);
-    }
-
-    /**
-     * This format mapper is used in SedonaSQL.
-     *
-     * @param splitter
-     * @param carryInputData
-     * @param geometryType
-     */
-    public FormatMapper(FileDataSplitter splitter, boolean carryInputData, GeometryType geometryType) {
-        super(splitter, carryInputData, geometryType);
-    }
-
-    @Override
-    public Iterator<T> call(Iterator<String> stringIterator)
-            throws Exception
-    {
-        List<T> result = new ArrayList<>();
-        while (stringIterator.hasNext()) {
-            String line = stringIterator.next();
-            addGeometry(readGeometry(line), result);
-        }
-        return result.iterator();
-    }
+    return result.iterator();
+  }
 }

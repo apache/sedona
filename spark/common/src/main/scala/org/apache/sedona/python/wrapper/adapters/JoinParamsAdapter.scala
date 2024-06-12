@@ -16,14 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.python.wrapper.adapters
 
 import org.apache.sedona.core.enums.{IndexType, JoinBuildSide}
 import org.apache.sedona.core.spatialOperator.JoinQuery.JoinParams
 
 object JoinParamsAdapter {
-  def createJoinParams(useIndex: Boolean = true, considerBoundaryIntersection: Boolean = false, indexType: String, joinBuildSide: String): JoinParams = {
+  def createJoinParams(
+      useIndex: Boolean = true,
+      considerBoundaryIntersection: Boolean = false,
+      indexType: String,
+      joinBuildSide: String): JoinParams = {
     val buildSide = JoinBuildSide.getBuildSide(joinBuildSide)
     val currIndexType = IndexType.getIndexType(indexType)
     new JoinParams(useIndex, considerBoundaryIntersection, currIndexType, buildSide)

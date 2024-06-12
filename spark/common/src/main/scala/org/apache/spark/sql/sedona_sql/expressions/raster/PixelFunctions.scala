@@ -33,30 +33,36 @@ import org.apache.spark.sql.types.{AbstractDataType, ArrayType, DataType, Double
 
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 
-case class RS_Value(inputExpressions: Seq[Expression]) extends InferredExpression(
-  inferrableFunction2(PixelFunctions.value), inferrableFunction3(PixelFunctions.value), inferrableFunction4(PixelFunctions.value)
-) {
+case class RS_Value(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction2(PixelFunctions.value),
+      inferrableFunction3(PixelFunctions.value),
+      inferrableFunction4(PixelFunctions.value)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-case class RS_PixelAsPoint(inputExpressions: Seq[Expression]) extends InferredExpression(PixelFunctions.getPixelAsPoint _) {
+case class RS_PixelAsPoint(inputExpressions: Seq[Expression])
+    extends InferredExpression(PixelFunctions.getPixelAsPoint _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
 case class RS_PixelAsPoints(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with ExpectsInputTypes {
+    extends Expression
+    with CodegenFallback
+    with ExpectsInputTypes {
 
   override def nullable: Boolean = true
 
-  override def dataType: DataType = ArrayType(new StructType()
-    .add("geom", GeometryUDT)
-    .add("value", DoubleType)
-    .add("x", IntegerType)
-    .add("y", IntegerType))
+  override def dataType: DataType = ArrayType(
+    new StructType()
+      .add("geom", GeometryUDT)
+      .add("value", DoubleType)
+      .add("x", IntegerType)
+      .add("y", IntegerType))
 
   override def eval(input: InternalRow): Any = {
     val rasterGeom = inputExpressions(0).toRaster(input)
@@ -68,7 +74,8 @@ case class RS_PixelAsPoints(inputExpressions: Seq[Expression])
       val pixelRecords = PixelFunctions.getPixelAsPoints(rasterGeom, band)
       val rows = pixelRecords.map { pixelRecord =>
         val serializedGeom = GeometrySerializer.serialize(pixelRecord.geom)
-        val rowArray = Array[Any](serializedGeom, pixelRecord.value, pixelRecord.colX, pixelRecord.rowY)
+        val rowArray =
+          Array[Any](serializedGeom, pixelRecord.value, pixelRecord.colX, pixelRecord.rowY)
         InternalRow.fromSeq(rowArray)
       }
       new GenericArrayData(rows.toArray)
@@ -84,24 +91,26 @@ case class RS_PixelAsPoints(inputExpressions: Seq[Expression])
   override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, IntegerType)
 }
 
-
-
-case class RS_PixelAsPolygon(inputExpressions: Seq[Expression]) extends InferredExpression(PixelFunctions.getPixelAsPolygon _) {
+case class RS_PixelAsPolygon(inputExpressions: Seq[Expression])
+    extends InferredExpression(PixelFunctions.getPixelAsPolygon _) {
   protected def withNewChildrenInternal(newChilren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChilren)
   }
 }
 
 case class RS_PixelAsPolygons(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with ExpectsInputTypes {
+    extends Expression
+    with CodegenFallback
+    with ExpectsInputTypes {
 
   override def nullable: Boolean = true
 
-  override def dataType: DataType = ArrayType(new StructType()
-    .add("geom", GeometryUDT)
-    .add("value", DoubleType)
-    .add("x", IntegerType)
-    .add("y", IntegerType))
+  override def dataType: DataType = ArrayType(
+    new StructType()
+      .add("geom", GeometryUDT)
+      .add("value", DoubleType)
+      .add("x", IntegerType)
+      .add("y", IntegerType))
 
   override def eval(input: InternalRow): Any = {
     val rasterGeom = inputExpressions(0).toRaster(input)
@@ -113,7 +122,8 @@ case class RS_PixelAsPolygons(inputExpressions: Seq[Expression])
       val pixelRecords = PixelFunctions.getPixelAsPolygons(rasterGeom, band)
       val rows = pixelRecords.map { pixelRecord =>
         val serializedGeom = GeometrySerializer.serialize(pixelRecord.geom)
-        val rowArray = Array[Any](serializedGeom, pixelRecord.value, pixelRecord.colX, pixelRecord.rowY)
+        val rowArray =
+          Array[Any](serializedGeom, pixelRecord.value, pixelRecord.colX, pixelRecord.rowY)
         InternalRow.fromSeq(rowArray)
       }
       new GenericArrayData(rows.toArray)
@@ -122,29 +132,34 @@ case class RS_PixelAsPolygons(inputExpressions: Seq[Expression])
 
   override def children: Seq[Expression] = inputExpressions
 
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): RS_PixelAsPolygons = {
+  protected def withNewChildrenInternal(
+      newChildren: IndexedSeq[Expression]): RS_PixelAsPolygons = {
     copy(inputExpressions = newChildren)
   }
 
   override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, IntegerType)
 }
 
-case class RS_PixelAsCentroid(inputExpressions: Seq[Expression]) extends InferredExpression(PixelFunctions.getPixelAsCentroid _) {
+case class RS_PixelAsCentroid(inputExpressions: Seq[Expression])
+    extends InferredExpression(PixelFunctions.getPixelAsCentroid _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
 case class RS_PixelAsCentroids(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with ExpectsInputTypes {
+    extends Expression
+    with CodegenFallback
+    with ExpectsInputTypes {
 
   override def nullable: Boolean = true
 
-  override def dataType: DataType = ArrayType(new StructType()
-    .add("geom", GeometryUDT)
-    .add("value", DoubleType)
-    .add("x", IntegerType)
-    .add("y", IntegerType))
+  override def dataType: DataType = ArrayType(
+    new StructType()
+      .add("geom", GeometryUDT)
+      .add("value", DoubleType)
+      .add("x", IntegerType)
+      .add("y", IntegerType))
 
   override def eval(input: InternalRow): Any = {
     val rasterGeom = inputExpressions(0).toRaster(input)
@@ -156,7 +171,8 @@ case class RS_PixelAsCentroids(inputExpressions: Seq[Expression])
       val pixelRecords = PixelFunctions.getPixelAsCentroids(rasterGeom, band)
       val rows = pixelRecords.map { pixelRecord =>
         val serializedGeom = GeometrySerializer.serialize(pixelRecord.geom)
-        val rowArray = Array[Any](serializedGeom, pixelRecord.value, pixelRecord.colX, pixelRecord.rowY)
+        val rowArray =
+          Array[Any](serializedGeom, pixelRecord.value, pixelRecord.colX, pixelRecord.rowY)
         InternalRow.fromSeq(rowArray)
       }
       new GenericArrayData(rows.toArray)
@@ -165,16 +181,19 @@ case class RS_PixelAsCentroids(inputExpressions: Seq[Expression])
 
   override def children: Seq[Expression] = inputExpressions
 
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): RS_PixelAsCentroids = {
+  protected def withNewChildrenInternal(
+      newChildren: IndexedSeq[Expression]): RS_PixelAsCentroids = {
     copy(inputExpressions = newChildren)
   }
 
   override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, IntegerType)
 }
 
-case class RS_Values(inputExpressions: Seq[Expression]) extends InferredExpression(
-  inferrableFunction2(PixelFunctions.values), inferrableFunction3(PixelFunctions.values), inferrableFunction4(PixelFunctions.values)
-) {
+case class RS_Values(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction2(PixelFunctions.values),
+      inferrableFunction3(PixelFunctions.values),
+      inferrableFunction4(PixelFunctions.values)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
