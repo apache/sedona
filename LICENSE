@@ -207,7 +207,8 @@ for text of these licenses.
 
 Apache 2.0 License
 --------------------------------------
-scalastyle_config.xml (copied from https://github.com/scalastyle/scalastyle/blob/master/lib/scalastyle_config.xml)
+tools/maven/scalastyle_config.xml (copied from https://github.com/scalastyle/scalastyle/blob/master/lib/scalastyle_config.xml)
+tools/maven/scalafmt.conf (copied from https://github.com/apache/spark/blob/master/dev/.scalafmt.conf)
 
 BSD 2-Clause License
 --------------------------------------

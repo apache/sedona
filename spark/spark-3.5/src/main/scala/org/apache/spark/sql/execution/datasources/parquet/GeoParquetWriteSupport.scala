@@ -1,20 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.spark.sql.execution.datasources.parquet
 
 import org.apache.hadoop.conf.Configuration
@@ -50,12 +51,12 @@ import scala.collection.mutable
 
 /**
  * A Parquet [[WriteSupport]] implementation that writes Catalyst [[InternalRow]]s as Parquet
- * messages.  This class can write Parquet data in two modes:
+ * messages. This class can write Parquet data in two modes:
  *
- *  - Standard mode: Parquet data are written in standard format defined in parquet-format spec.
- *  - Legacy mode: Parquet data are written in legacy format compatible with Spark 1.4 and prior.
+ *   - Standard mode: Parquet data are written in standard format defined in parquet-format spec.
+ *   - Legacy mode: Parquet data are written in legacy format compatible with Spark 1.4 and prior.
  *
- * This behavior can be controlled by SQL option `spark.sql.parquet.writeLegacyFormat`.  The value
+ * This behavior can be controlled by SQL option `spark.sql.parquet.writeLegacyFormat`. The value
  * of this option is propagated to this class by the `init()` method and its Hadoop configuration
  * argument.
  */
@@ -87,20 +88,20 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
   private val decimalBuffer =
     new Array[Byte](Decimal.minBytesForPrecision(DecimalType.MAX_PRECISION))
 
-  private val datetimeRebaseMode = LegacyBehaviorPolicy.withName(
-    SQLConf.get.getConf(SQLConf.PARQUET_REBASE_MODE_IN_WRITE))
+  private val datetimeRebaseMode =
+    LegacyBehaviorPolicy.withName(SQLConf.get.getConf(SQLConf.PARQUET_REBASE_MODE_IN_WRITE))
 
-  private val dateRebaseFunc = DataSourceUtils.createDateRebaseFuncInWrite(
-    datetimeRebaseMode, "Parquet")
+  private val dateRebaseFunc =
+    DataSourceUtils.createDateRebaseFuncInWrite(datetimeRebaseMode, "Parquet")
 
-  private val timestampRebaseFunc = DataSourceUtils.createTimestampRebaseFuncInWrite(
-    datetimeRebaseMode, "Parquet")
+  private val timestampRebaseFunc =
+    DataSourceUtils.createTimestampRebaseFuncInWrite(datetimeRebaseMode, "Parquet")
 
-  private val int96RebaseMode = LegacyBehaviorPolicy.withName(
-    SQLConf.get.getConf(SQLConf.PARQUET_INT96_REBASE_MODE_IN_WRITE))
+  private val int96RebaseMode =
+    LegacyBehaviorPolicy.withName(SQLConf.get.getConf(SQLConf.PARQUET_INT96_REBASE_MODE_IN_WRITE))
 
-  private val int96RebaseFunc = DataSourceUtils.createTimestampRebaseFuncInWrite(
-    int96RebaseMode, "Parquet INT96")
+  private val int96RebaseFunc =
+    DataSourceUtils.createTimestampRebaseFuncInWrite(int96RebaseMode, "Parquet INT96")
 
   // A mapping from geometry field ordinal to bounding box. According to the geoparquet specification,
   // "Geometry columns MUST be at the root of the schema", so we don't need to worry about geometry
@@ -126,9 +127,11 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       SQLConf.ParquetOutputTimestampType.withName(configuration.get(key))
     }
 
-    this.rootFieldWriters = schema.zipWithIndex.map { case (field, ordinal) =>
-      makeWriter(field.dataType, Some(ordinal))
-    }.toArray[ValueWriter]
+    this.rootFieldWriters = schema.zipWithIndex
+      .map { case (field, ordinal) =>
+        makeWriter(field.dataType, Some(ordinal))
+      }
+      .toArray[ValueWriter]
 
     if (geometryColumnInfoMap.isEmpty) {
       throw new RuntimeException("No geometry column found in the schema")
@@ -157,8 +160,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
     val sparkSqlParquetRowMetadata = GeoParquetWriteSupport.getSparkSqlParquetRowMetadata(schema)
     val metadata = Map(
       SPARK_VERSION_METADATA_KEY -> SPARK_VERSION_SHORT,
-      ParquetReadSupport.SPARK_METADATA_KEY -> sparkSqlParquetRowMetadata
-    ) ++ {
+      ParquetReadSupport.SPARK_METADATA_KEY -> sparkSqlParquetRowMetadata) ++ {
       if (datetimeRebaseMode == LegacyBehaviorPolicy.LEGACY) {
         Some("org.apache.spark.legacyDateTime" -> "")
       } else {
@@ -172,8 +174,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       }
     }
 
-    logInfo(
-      s"""Initialized Parquet WriteSupport with Catalyst schema:
+    logInfo(s"""Initialized Parquet WriteSupport with Catalyst schema:
          |${schema.prettyJson}
          |and corresponding Parquet message type:
          |$messageType
@@ -195,7 +196,11 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         val columnName = schema.fields(ordinal).name
         val geometryTypes = columnInfo.seenGeometryTypes.toSeq
         val bbox = if (geometryTypes.nonEmpty) {
-          Seq(columnInfo.bbox.minX, columnInfo.bbox.minY, columnInfo.bbox.maxX, columnInfo.bbox.maxY)
+          Seq(
+            columnInfo.bbox.minX,
+            columnInfo.bbox.minY,
+            columnInfo.bbox.maxX,
+            columnInfo.bbox.maxY)
         } else Seq(0.0, 0.0, 0.0, 0.0)
         val crs = geoParquetColumnCrsMap.getOrElse(columnName, defaultGeoParquetCrs)
         columnName -> GeometryFieldMetaData("WKB", geometryTypes, bbox, crs)
@@ -214,7 +219,9 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
   }
 
   private def writeFields(
-    row: InternalRow, schema: StructType, fieldWriters: Array[ValueWriter]): Unit = {
+      row: InternalRow,
+      schema: StructType,
+      fieldWriters: Array[ValueWriter]): Unit = {
     var i = 0
     while (i < row.numFields) {
       if (!row.isNullAt(i)) {
@@ -233,8 +240,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
           recordConsumer.addBoolean(row.getBoolean(ordinal))
 
       case ByteType =>
-        (row: SpecializedGetters, ordinal: Int) =>
-          recordConsumer.addInteger(row.getByte(ordinal))
+        (row: SpecializedGetters, ordinal: Int) => recordConsumer.addInteger(row.getByte(ordinal))
 
       case ShortType =>
         (row: SpecializedGetters, ordinal: Int) =>
@@ -245,16 +251,13 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
           recordConsumer.addInteger(dateRebaseFunc(row.getInt(ordinal)))
 
       case IntegerType =>
-        (row: SpecializedGetters, ordinal: Int) =>
-          recordConsumer.addInteger(row.getInt(ordinal))
+        (row: SpecializedGetters, ordinal: Int) => recordConsumer.addInteger(row.getInt(ordinal))
 
       case LongType =>
-        (row: SpecializedGetters, ordinal: Int) =>
-          recordConsumer.addLong(row.getLong(ordinal))
+        (row: SpecializedGetters, ordinal: Int) => recordConsumer.addLong(row.getLong(ordinal))
 
       case FloatType =>
-        (row: SpecializedGetters, ordinal: Int) =>
-          recordConsumer.addFloat(row.getFloat(ordinal))
+        (row: SpecializedGetters, ordinal: Int) => recordConsumer.addFloat(row.getFloat(ordinal))
 
       case DoubleType =>
         (row: SpecializedGetters, ordinal: Int) =>
@@ -579,10 +582,10 @@ object GeoParquetWriteSupport {
   }
 
   class GeometryColumnBoundingBox(
-    var minX: Double = Double.PositiveInfinity,
-    var minY: Double = Double.PositiveInfinity,
-    var maxX: Double = Double.NegativeInfinity,
-    var maxY: Double = Double.NegativeInfinity) {
+      var minX: Double = Double.PositiveInfinity,
+      var minY: Double = Double.PositiveInfinity,
+      var maxX: Double = Double.NegativeInfinity,
+      var maxY: Double = Double.NegativeInfinity) {
     def update(geom: Geometry): Unit = {
       val env = geom.getEnvelopeInternal
       minX = math.min(minX, env.getMinX)

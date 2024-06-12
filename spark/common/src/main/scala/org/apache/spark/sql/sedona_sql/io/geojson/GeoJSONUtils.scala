@@ -1,20 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.spark.sql.sedona_sql.io.geojson
 
 import org.apache.sedona.common.Constructors.geomFromText
@@ -26,7 +27,6 @@ import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 
-
 object GeoJSONUtils {
 
   def updateGeometrySchema(schema: StructType, datatype: DataType): StructType = {
@@ -35,7 +35,11 @@ object GeoJSONUtils {
         StructField("geometry", datatype, nullable, metadata)
       case StructField(name, dataType: StructType, nullable, metadata) =>
         StructField(name, updateGeometrySchema(dataType, datatype), nullable, metadata)
-      case StructField(name, ArrayType(elementType: StructType, containsNull), nullable, metadata) =>
+      case StructField(
+            name,
+            ArrayType(elementType: StructType, containsNull),
+            nullable,
+            metadata) =>
         val updatedElementType = updateGeometrySchema(elementType, datatype)
         StructField(name, ArrayType(updatedElementType, containsNull), nullable, metadata)
       case other => other
@@ -52,9 +56,14 @@ object GeoJSONUtils {
     asGeoJson(geometry)
   }
 
-  def handleArray(row: InternalRow, index: Int, elementType: DataType, toGeometry: Boolean): ArrayData = {
+  def handleArray(
+      row: InternalRow,
+      index: Int,
+      elementType: DataType,
+      toGeometry: Boolean): ArrayData = {
     val arrayData = row.getArray(index)
-    if (arrayData == null || arrayData.numElements() == 0) return new GenericArrayData(Seq.empty[Any])
+    if (arrayData == null || arrayData.numElements() == 0)
+      return new GenericArrayData(Seq.empty[Any])
 
     elementType match {
       case structType: StructType =>
@@ -93,7 +102,6 @@ object GeoJSONUtils {
 
     InternalRow.fromSeq(newValues)
   }
-
 
   def convertGeoJsonToGeometry(row: InternalRow, schema: StructType): InternalRow = {
     val newValues = new Array[Any](schema.fields.length)

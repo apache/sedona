@@ -25,24 +25,30 @@ import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode
 
 /**
-  * ST_Contains(left, right) - left contains right
-  * or
-  * ST_Intersects(left, right) - left and right intersect
-  *
-  * @param left       left side of the join
-  * @param right      right side of the join
-  * @param leftShape  expression for the first argument of spatialPredicate
-  * @param rightShape expression for the second argument of spatialPredicate
-  * @param spatialPredicate spatial predicate as join condition
-  * @param extraCondition extra join condition other than spatialPredicate
-  */
-case class RangeJoinExec(left: SparkPlan,
-                         right: SparkPlan,
-                         leftShape: Expression,
-                         rightShape: Expression,
-                         spatialPredicate: SpatialPredicate,
-                         extraCondition: Option[Expression] = None)
-  extends SedonaBinaryExecNode
+ * ST_Contains(left, right) - left contains right or ST_Intersects(left, right) - left and right
+ * intersect
+ *
+ * @param left
+ *   left side of the join
+ * @param right
+ *   right side of the join
+ * @param leftShape
+ *   expression for the first argument of spatialPredicate
+ * @param rightShape
+ *   expression for the second argument of spatialPredicate
+ * @param spatialPredicate
+ *   spatial predicate as join condition
+ * @param extraCondition
+ *   extra join condition other than spatialPredicate
+ */
+case class RangeJoinExec(
+    left: SparkPlan,
+    right: SparkPlan,
+    leftShape: Expression,
+    rightShape: Expression,
+    spatialPredicate: SpatialPredicate,
+    extraCondition: Option[Expression] = None)
+    extends SedonaBinaryExecNode
     with TraitJoinQueryExec
     with Logging {
 

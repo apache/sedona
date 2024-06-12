@@ -23,8 +23,13 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 
-class TestCalculatingGeoHash extends AnyFunSuite with Matchers with TableDrivenPropertyChecks with FunctionsHelper{
-  for ((statement: String, inputGeometry: String, precision: Int, geoHash: Option[String]) <- Fixtures.geometriesToCalculateGeoHash) {
+class TestCalculatingGeoHash
+    extends AnyFunSuite
+    with Matchers
+    with TableDrivenPropertyChecks
+    with FunctionsHelper {
+  for ((statement: String, inputGeometry: String, precision: Int, geoHash: Option[String]) <-
+      Fixtures.geometriesToCalculateGeoHash) {
     test("it calculate geohash for " + statement) {
       Fixtures.calculateGeoHash(wktReader.read(inputGeometry), precision) shouldBe geoHash
     }

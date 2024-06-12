@@ -16,57 +16,51 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp;
 
+import java.io.IOException;
 import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 
-import java.io.IOException;
+public class PolyLineParser extends ShapeParser {
 
-public class PolyLineParser
-        extends ShapeParser
-{
+  /**
+   * create a parser that can abstract a MultiPolyline from input source with given GeometryFactory.
+   *
+   * @param geometryFactory the geometry factory
+   */
+  public PolyLineParser(GeometryFactory geometryFactory) {
+    super(geometryFactory);
+  }
 
-    /**
-     * create a parser that can abstract a MultiPolyline from input source with given GeometryFactory.
-     *
-     * @param geometryFactory the geometry factory
-     */
-    public PolyLineParser(GeometryFactory geometryFactory)
-    {
-        super(geometryFactory);
+  /**
+   * abstract a Polyline shape.
+   *
+   * @param reader the reader
+   * @return the geometry
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  public Geometry parseShape(ShapeReader reader) {
+    reader.skip(4 * ShapeFileConst.DOUBLE_LENGTH);
+    int numParts = reader.readInt();
+    int numPoints = reader.readInt();
+
+    int[] offsets = readOffsets(reader, numParts, numPoints);
+
+    LineString[] lines = new LineString[numParts];
+    for (int i = 0; i < numParts; ++i) {
+      int readScale = offsets[i + 1] - offsets[i];
+      CoordinateSequence csString = readCoordinates(reader, readScale);
+      lines[i] = geometryFactory.createLineString(csString);
     }
 
-    /**
-     * abstract a Polyline shape.
-     *
-     * @param reader the reader
-     * @return the geometry
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    @Override
-    public Geometry parseShape(ShapeReader reader)
-    {
-        reader.skip(4 * ShapeFileConst.DOUBLE_LENGTH);
-        int numParts = reader.readInt();
-        int numPoints = reader.readInt();
-
-        int[] offsets = readOffsets(reader, numParts, numPoints);
-
-        LineString[] lines = new LineString[numParts];
-        for (int i = 0; i < numParts; ++i) {
-            int readScale = offsets[i + 1] - offsets[i];
-            CoordinateSequence csString = readCoordinates(reader, readScale);
-            lines[i] = geometryFactory.createLineString(csString);
-        }
-
-        if (numParts == 1) {
-            return lines[0];
-        }
-
-        return geometryFactory.createMultiLineString(lines);
+    if (numParts == 1) {
+      return lines[0];
     }
+
+    return geometryFactory.createMultiLineString(lines);
+  }
 }

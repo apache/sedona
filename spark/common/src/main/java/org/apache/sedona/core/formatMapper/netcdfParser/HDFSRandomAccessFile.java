@@ -16,13 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-/*
- * The following content is directly copied from SciSpark project which is under Apache License.
- * SciSpark project is hosted on GitHub: https://github.com/SciSpark/SciSpark
- */
 package org.apache.sedona.core.formatMapper.netcdfParser;
 
+import java.io.IOException;
+import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.channels.WritableByteChannel;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
@@ -30,91 +29,70 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import ucar.unidata.io.RandomAccessFile;
 
-import java.io.IOException;
-import java.net.URI;
-import java.nio.ByteBuffer;
-import java.nio.channels.WritableByteChannel;
+public class HDFSRandomAccessFile extends RandomAccessFile {
 
-public class HDFSRandomAccessFile
-        extends RandomAccessFile
-{
+  protected URI fsURI;
+  protected Path filePath;
+  protected FSDataInputStream hfile;
+  protected FileStatus fileStatus;
 
-    protected URI fsURI;
-    protected Path filePath;
-    protected FSDataInputStream hfile;
-    protected FileStatus fileStatus;
+  public HDFSRandomAccessFile(String fileSystemURI, String location) throws IOException {
+    this(fileSystemURI, location, RandomAccessFile.defaultBufferSize);
+  }
 
-    public HDFSRandomAccessFile(String fileSystemURI, String location)
-            throws IOException
-    {
-        this(fileSystemURI, location, RandomAccessFile.defaultBufferSize);
+  public HDFSRandomAccessFile(String fileSystemURI, String location, int bufferSize)
+      throws IOException {
+    super(bufferSize);
+    fsURI = URI.create(fileSystemURI);
+    filePath = new Path(location);
+    this.location = location;
+    if (RandomAccessFile.debugLeaks) {
+      RandomAccessFile.openFiles.add(location);
     }
 
-    public HDFSRandomAccessFile(String fileSystemURI, String location, int bufferSize)
-            throws IOException
-    {
-        super(bufferSize);
-        fsURI = URI.create(fileSystemURI);
-        filePath = new Path(location);
-        this.location = location;
-        if (RandomAccessFile.debugLeaks) {
-            RandomAccessFile.openFiles.add(location);
-        }
+    FileSystem fs = FileSystem.get(fsURI, new Configuration());
+    hfile = fs.open(filePath);
 
-        FileSystem fs = FileSystem.get(fsURI, new Configuration());
-        hfile = fs.open(filePath);
+    fileStatus = fs.getFileStatus(filePath);
+  }
 
-        fileStatus = fs.getFileStatus(filePath);
+  @Override
+  public void flush() {}
+
+  @Override
+  public synchronized void close() throws IOException {
+    super.close();
+    hfile.close();
+  }
+
+  public long getLastModified() {
+    return fileStatus.getModificationTime();
+  }
+
+  @Override
+  public long length() throws IOException {
+    return fileStatus.getLen();
+  }
+
+  @Override
+  protected int read_(long pos, byte[] b, int offset, int len) throws IOException {
+    int n = hfile.read(pos, b, offset, len);
+    return n;
+  }
+
+  @Override
+  public long readToByteChannel(WritableByteChannel dest, long offset, long nbytes)
+      throws IOException {
+    long need = nbytes;
+    byte[] buf = new byte[4096];
+
+    hfile.seek(offset);
+    int count = 0;
+    while (need > 0 && count != -1) {
+      need -= count;
+      dest.write(ByteBuffer.wrap(buf, 0, count));
+      count = hfile.read(buf, 0, 4096);
     }
-
-    @Override
-    public void flush()
-    {
-
-    }
-
-    @Override
-    public synchronized void close()
-            throws IOException
-    {
-        super.close();
-        hfile.close();
-    }
-
-    public long getLastModified()
-    {
-        return fileStatus.getModificationTime();
-    }
-
-    @Override
-    public long length()
-            throws IOException
-    {
-        return fileStatus.getLen();
-    }
-
-    @Override
-    protected int read_(long pos, byte[] b, int offset, int len)
-            throws IOException
-    {
-        int n = hfile.read(pos, b, offset, len);
-        return n;
-    }
-
-    @Override
-    public long readToByteChannel(WritableByteChannel dest, long offset, long nbytes)
-            throws IOException
-    {
-        long need = nbytes;
-        byte[] buf = new byte[4096];
-
-        hfile.seek(offset);
-        int count = 0;
-        while (need > 0 && count != -1) {
-            need -= count;
-            dest.write(ByteBuffer.wrap(buf, 0, count));
-            count = hfile.read(buf, 0, 4096);
-        }
-        return nbytes - need;
-    }
+    return nbytes - need;
+  }
 }

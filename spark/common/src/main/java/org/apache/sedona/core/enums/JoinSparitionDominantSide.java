@@ -16,20 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.enums;
 
-public enum JoinSparitionDominantSide
-{
-    LEFT,
-    RIGHT,
-    NONE;
+public enum JoinSparitionDominantSide {
+  LEFT,
+  RIGHT,
+  NONE;
 
-    public static JoinSparitionDominantSide getJoinSparitionDominantSide(String str)
-    {
-        for (JoinSparitionDominantSide me : JoinSparitionDominantSide.values()) {
-            if (me.name().equalsIgnoreCase(str)) { return me; }
-        }
-        return null;
+  public static JoinSparitionDominantSide getJoinSparitionDominantSide(String str) {
+    for (JoinSparitionDominantSide me : JoinSparitionDominantSide.values()) {
+      if (me.name().equalsIgnoreCase(str)) {
+        return me;
+      }
     }
+    return null;
+  }
 }

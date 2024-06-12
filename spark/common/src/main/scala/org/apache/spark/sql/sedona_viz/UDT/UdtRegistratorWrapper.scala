@@ -24,7 +24,9 @@ import org.apache.spark.sql.types.UDTRegistration
 
 object UdtRegistratorWrapper {
   def registerAll(): Unit = {
-    UDTRegistration.register(classOf[ImageSerializableWrapper].getName, classOf[ImageWrapperUDT].getName)
+    UDTRegistration.register(
+      classOf[ImageSerializableWrapper].getName,
+      classOf[ImageWrapperUDT].getName)
     UDTRegistration.register(classOf[Pixel].getName, classOf[PixelUDT].getName)
   }
 }

@@ -1,18 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.spark.sql.execution.datasources.parquet
 
@@ -25,9 +27,9 @@ import scala.language.existentials
 
 object GeoParquetUtils {
   def inferSchema(
-                   sparkSession: SparkSession,
-                   parameters: Map[String, String],
-                   files: Seq[FileStatus]): Option[StructType] = {
+      sparkSession: SparkSession,
+      parameters: Map[String, String],
+      files: Seq[FileStatus]): Option[StructType] = {
     val parquetOptions = new ParquetOptions(parameters, sparkSession.sessionState.conf)
     val shouldMergeSchemas = parquetOptions.mergeSchema
     val mergeRespectSummaries = sparkSession.sessionState.conf.isParquetSchemaRespectSummaries
@@ -58,53 +60,61 @@ object GeoParquetUtils {
   }
 
   case class FileTypes(
-                        data: Seq[FileStatus],
-                        metadata: Seq[FileStatus],
-                        commonMetadata: Seq[FileStatus])
+      data: Seq[FileStatus],
+      metadata: Seq[FileStatus],
+      commonMetadata: Seq[FileStatus])
 
   private def splitFiles(allFiles: Seq[FileStatus]): FileTypes = {
     val leaves = allFiles.toArray.sortBy(_.getPath.toString)
 
     FileTypes(
       data = leaves.filterNot(f => isSummaryFile(f.getPath)),
-      metadata =
-        leaves.filter(_.getPath.getName == ParquetFileWriter.PARQUET_METADATA_FILE),
+      metadata = leaves.filter(_.getPath.getName == ParquetFileWriter.PARQUET_METADATA_FILE),
       commonMetadata =
         leaves.filter(_.getPath.getName == ParquetFileWriter.PARQUET_COMMON_METADATA_FILE))
   }
 
   private def isSummaryFile(file: Path): Boolean = {
     file.getName == ParquetFileWriter.PARQUET_COMMON_METADATA_FILE ||
-      file.getName == ParquetFileWriter.PARQUET_METADATA_FILE
+    file.getName == ParquetFileWriter.PARQUET_METADATA_FILE
   }
 
   /**
-   * Legacy mode option is for reading Parquet files written by old versions of Apache Sedona (<= 1.3.1-incubating).
-   * Such files are actually not GeoParquet files and do not have GeoParquet file metadata. Geometry fields were
-   * encoded as list of bytes and stored as group type in Parquet files. The Definition of GeometryUDT before 1.4.0 was:
+   * Legacy mode option is for reading Parquet files written by old versions of Apache Sedona (<=
+   * 1.3.1-incubating). Such files are actually not GeoParquet files and do not have GeoParquet
+   * file metadata. Geometry fields were encoded as list of bytes and stored as group type in
+   * Parquet files. The Definition of GeometryUDT before 1.4.0 was:
    * {{{
    *  case class GeometryUDT extends UserDefinedType[Geometry] {
    *  override def sqlType: DataType = ArrayType(ByteType, containsNull = false)
    *  // ...
-   *  }}}
-   * Since 1.4.0, the sqlType of GeometryUDT is changed to BinaryType. This is a breaking change for reading old Parquet
-   * files. To read old Parquet files, users need to use "geoparquet" format and set legacyMode to true.
-   * @param parameters user provided parameters for reading GeoParquet files using `.option()` method, e.g.
-   *                   `spark.read.format("geoparquet").option("legacyMode", "true").load("path")`
-   * @return true if legacyMode is set to true, false otherwise
+   * }}}
+   * Since 1.4.0, the sqlType of GeometryUDT is changed to BinaryType. This is a breaking change
+   * for reading old Parquet files. To read old Parquet files, users need to use "geoparquet"
+   * format and set legacyMode to true.
+   * @param parameters
+   *   user provided parameters for reading GeoParquet files using `.option()` method, e.g.
+   *   `spark.read.format("geoparquet").option("legacyMode", "true").load("path")`
+   * @return
+   *   true if legacyMode is set to true, false otherwise
    */
   def isLegacyMode(parameters: Map[String, String]): Boolean =
     parameters.getOrElse("legacyMode", "false").toBoolean
 
   /**
-   * Parse GeoParquet file metadata from Parquet file metadata. Legacy parquet files do not contain GeoParquet file
-   * metadata, so we'll simply return an empty GeoParquetMetaData object when legacy mode is enabled.
-   * @param keyValueMetaData Parquet file metadata
-   * @param parameters user provided parameters for reading GeoParquet files
-   * @return GeoParquetMetaData object
+   * Parse GeoParquet file metadata from Parquet file metadata. Legacy parquet files do not
+   * contain GeoParquet file metadata, so we'll simply return an empty GeoParquetMetaData object
+   * when legacy mode is enabled.
+   * @param keyValueMetaData
+   *   Parquet file metadata
+   * @param parameters
+   *   user provided parameters for reading GeoParquet files
+   * @return
+   *   GeoParquetMetaData object
    */
-  def parseGeoParquetMetaData(keyValueMetaData: java.util.Map[String, String],
-                              parameters: Map[String, String]): GeoParquetMetaData = {
+  def parseGeoParquetMetaData(
+      keyValueMetaData: java.util.Map[String, String],
+      parameters: Map[String, String]): GeoParquetMetaData = {
     val isLegacyMode = GeoParquetUtils.isLegacyMode(parameters)
     GeoParquetMetaData.parseKeyValueMetaData(keyValueMetaData).getOrElse {
       if (isLegacyMode) {

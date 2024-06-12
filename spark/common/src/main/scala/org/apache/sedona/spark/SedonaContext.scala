@@ -31,7 +31,9 @@ import org.apache.spark.sql.{SQLContext, SparkSession}
 import scala.annotation.StaticAnnotation
 import scala.util.Try
 
-class InternalApi(description: String = "This method is for internal use only and may change without notice.") extends StaticAnnotation
+class InternalApi(
+    description: String = "This method is for internal use only and may change without notice.")
+    extends StaticAnnotation
 
 object SedonaContext {
   def create(sqlContext: SQLContext): SQLContext = {
@@ -40,22 +42,24 @@ object SedonaContext {
   }
 
   /**
-    * This is the entry point of the entire Sedona system
-    * @param sparkSession
-    * @return
-    */
-  def create(sparkSession: SparkSession):SparkSession = {
+   * This is the entry point of the entire Sedona system
+   * @param sparkSession
+   * @return
+   */
+  def create(sparkSession: SparkSession): SparkSession = {
     create(sparkSession, "java")
   }
 
   @InternalApi
-  def create(sparkSession: SparkSession, language: String):SparkSession = {
+  def create(sparkSession: SparkSession, language: String): SparkSession = {
     TelemetryCollector.send("spark", language)
     if (!sparkSession.experimental.extraStrategies.exists(_.isInstanceOf[JoinQueryDetector])) {
       sparkSession.experimental.extraStrategies ++= Seq(new JoinQueryDetector(sparkSession))
     }
-    if (!sparkSession.experimental.extraOptimizations.exists(_.isInstanceOf[SpatialFilterPushDownForGeoParquet])) {
-      sparkSession.experimental.extraOptimizations ++= Seq(new SpatialFilterPushDownForGeoParquet(sparkSession))
+    if (!sparkSession.experimental.extraOptimizations.exists(
+        _.isInstanceOf[SpatialFilterPushDownForGeoParquet])) {
+      sparkSession.experimental.extraOptimizations ++= Seq(
+        new SpatialFilterPushDownForGeoParquet(sparkSession))
     }
     addGeoParquetToSupportNestedFilterSources(sparkSession)
     RasterRegistrator.registerAll(sparkSession)
@@ -65,24 +69,30 @@ object SedonaContext {
   }
 
   /**
-    * This method adds the basic Sedona configurations to the SparkSession
-    * Usually the user does not need to call this method directly
-    * This is only needed when the user needs to manually configure Sedona
-    * @return
-    */
+   * This method adds the basic Sedona configurations to the SparkSession Usually the user does
+   * not need to call this method directly This is only needed when the user needs to manually
+   * configure Sedona
+   * @return
+   */
   def builder(): SparkSession.Builder = {
-    SparkSession.builder().config("spark.serializer", classOf[KryoSerializer].getName).
-      config("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName)
+    SparkSession
+      .builder()
+      .config("spark.serializer", classOf[KryoSerializer].getName)
+      .config("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName)
   }
 
   private def addGeoParquetToSupportNestedFilterSources(session: SparkSession): Unit = {
     // File formats that support nested predicate pushdown is configured by
     // spark.sql.optimizer.nestedPredicatePushdown.supportedFileSources, which is a comma-separated list of data source
     // names. We need to append "geoparquet" to the list to enable nested predicate pushdown for GeoParquet.
-    val sources = Try(session.conf.get("spark.sql.optimizer.nestedPredicatePushdown.supportedFileSources")).getOrElse("")
+    val sources =
+      Try(session.conf.get("spark.sql.optimizer.nestedPredicatePushdown.supportedFileSources"))
+        .getOrElse("")
     if (!sources.contains("geoparquet")) {
       val newSources = if (sources.isEmpty) "geoparquet" else sources + ",geoparquet"
-      session.conf.set("spark.sql.optimizer.nestedPredicatePushdown.supportedFileSources", newSources)
+      session.conf.set(
+        "spark.sql.optimizer.nestedPredicatePushdown.supportedFileSources",
+        newSources)
     }
   }
 }

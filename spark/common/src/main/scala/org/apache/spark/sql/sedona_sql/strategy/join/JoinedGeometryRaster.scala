@@ -30,11 +30,14 @@ import org.opengis.geometry.BoundingBox
 import org.opengis.referencing.crs.{CoordinateReferenceSystem, GeographicCRS}
 
 object JoinedGeometryRaster {
+
   /**
    * Convert the given raster to an envelope in WGS84 CRS.
    *
-   * @param raster the raster to convert
-   * @return the envelope in WGS84 CRS
+   * @param raster
+   *   the raster to convert
+   * @return
+   *   the envelope in WGS84 CRS
    */
   def rasterToWGS84Envelope(raster: GridCoverage2D): Geometry = {
     val crs = raster.getCoordinateReferenceSystem
@@ -49,8 +52,10 @@ object JoinedGeometryRaster {
   /**
    * Convert the given geometry to an envelope in WGS84 CRS.
    *
-   * @param geom the geometry to convert
-   * @return the envelope in WGS84 CRS
+   * @param geom
+   *   the geometry to convert
+   * @return
+   *   the envelope in WGS84 CRS
    */
   def geometryToWGS84Envelope(geom: Geometry): Geometry = {
     val srid = geom.getSRID
@@ -64,7 +69,9 @@ object JoinedGeometryRaster {
     }
   }
 
-  private def transformToWGS84Envelope(envelope: org.opengis.geometry.Envelope, crs: CoordinateReferenceSystem): Geometry = {
+  private def transformToWGS84Envelope(
+      envelope: org.opengis.geometry.Envelope,
+      crs: CoordinateReferenceSystem): Geometry = {
     // We use CRS.transform for envelopes to transform envelopes between different CRSs. This transformation function
     // could handle envelope crossing the anti-meridian and envelope near or covering poles correctly. We won't have
     // these cases properly handled if we transform the original geometries using JTS.transform.

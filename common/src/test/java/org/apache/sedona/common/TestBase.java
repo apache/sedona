@@ -21,19 +21,20 @@ package org.apache.sedona.common;
 import org.locationtech.jts.geom.Coordinate;
 
 public class TestBase {
-    public Coordinate[] coordArray(double... coordValues) {
-        Coordinate[] coords = new Coordinate[(int)(coordValues.length / 2)];
-        for (int i = 0; i < coordValues.length; i += 2) {
-            coords[(int)(i / 2)] = new Coordinate(coordValues[i], coordValues[i+1]);
-        }
-        return coords;
+  public Coordinate[] coordArray(double... coordValues) {
+    Coordinate[] coords = new Coordinate[(int) (coordValues.length / 2)];
+    for (int i = 0; i < coordValues.length; i += 2) {
+      coords[(int) (i / 2)] = new Coordinate(coordValues[i], coordValues[i + 1]);
     }
+    return coords;
+  }
 
-    public Coordinate[] coordArray3d(double... coordValues) {
-        Coordinate[] coords = new Coordinate[(int)(coordValues.length / 3)];
-        for (int i = 0; i < coordValues.length; i += 3) {
-            coords[(int)(i / 3)] = new Coordinate(coordValues[i], coordValues[i+1], coordValues[i+2]);
-        }
-        return coords;
+  public Coordinate[] coordArray3d(double... coordValues) {
+    Coordinate[] coords = new Coordinate[(int) (coordValues.length / 3)];
+    for (int i = 0; i < coordValues.length; i += 3) {
+      coords[(int) (i / 3)] =
+          new Coordinate(coordValues[i], coordValues[i + 1], coordValues[i + 2]);
     }
+    return coords;
+  }
 }

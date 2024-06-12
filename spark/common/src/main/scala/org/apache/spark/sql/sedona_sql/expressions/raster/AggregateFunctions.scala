@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
 import org.apache.sedona.common.raster.{RasterAccessors, RasterBandAccessors}
@@ -31,20 +30,19 @@ import java.awt.image.WritableRaster
 import javax.media.jai.RasterFactory
 import scala.collection.mutable.ArrayBuffer
 
-case class BandData(
-  index: Int,
-  width: Int,
-  height: Int,
-  serializedRaster: Array[Byte])
+case class BandData(index: Int, width: Int, height: Int, serializedRaster: Array[Byte])
 
 /**
  * Return a raster containing bands at given indexes from all rasters in a given column
  */
-class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandData], GridCoverage2D]  {
+class RS_Union_Aggr
+    extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandData], GridCoverage2D] {
 
   def zero: ArrayBuffer[BandData] = ArrayBuffer[BandData]()
 
-  def reduce(buffer: ArrayBuffer[BandData], input: (GridCoverage2D, Int)): ArrayBuffer[BandData] = {
+  def reduce(
+      buffer: ArrayBuffer[BandData],
+      input: (GridCoverage2D, Int)): ArrayBuffer[BandData] = {
     val (raster, index) = input
     val renderedImage = raster.getRenderedImage
     val width = renderedImage.getWidth
@@ -65,7 +63,9 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
     buffer
   }
 
-  def merge(buffer1: ArrayBuffer[BandData], buffer2: ArrayBuffer[BandData]): ArrayBuffer[BandData] = {
+  def merge(
+      buffer1: ArrayBuffer[BandData],
+      buffer2: ArrayBuffer[BandData]): ArrayBuffer[BandData] = {
     if (buffer1.nonEmpty && buffer2.nonEmpty) {
       if (buffer1.head.width != buffer2.head.width || buffer1.head.height != buffer2.head.height) {
         throw new IllegalArgumentException("All rasters must have the same dimensions")
@@ -81,9 +81,11 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
   def finish(merged: ArrayBuffer[BandData]): GridCoverage2D = {
     val sortedMerged = merged.sortBy(_.index)
     if (sortedMerged.zipWithIndex.exists { case (band, idx) =>
-      if (idx > 0) (band.index - sortedMerged(idx - 1).index) != (sortedMerged(1).index - sortedMerged(0).index)
-      else false
-    }) {
+        if (idx > 0)
+          (band.index - sortedMerged(idx - 1).index) != (sortedMerged(1).index - sortedMerged(
+            0).index)
+        else false
+      }) {
       throw new IllegalArgumentException("Index should be in an arithmetic sequence.")
     }
 
@@ -94,18 +96,24 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
       val referenceRaster = rasters.head
       val width = RasterAccessors.getWidth(referenceRaster)
       val height = RasterAccessors.getHeight(referenceRaster)
-      val dataTypeCode = RasterUtils.getRaster(referenceRaster.getRenderedImage).getDataBuffer.getDataType
-      val resultRaster: WritableRaster = RasterFactory.createBandedRaster(dataTypeCode, width, height, totalBands, null)
+      val dataTypeCode =
+        RasterUtils.getRaster(referenceRaster.getRenderedImage).getDataBuffer.getDataType
+      val resultRaster: WritableRaster =
+        RasterFactory.createBandedRaster(dataTypeCode, width, height, totalBands, null)
 
       var currentBand = 0
       rasters.foreach { raster =>
         var bandIndex = 0
         while (bandIndex < raster.getNumSampleDimensions) {
           if (RasterUtils.isDataTypeIntegral(dataTypeCode)) {
-            val band = RasterUtils.getRaster(raster.getRenderedImage).getSamples(0, 0, width, height, bandIndex, new Array[Int](width * height))
+            val band = RasterUtils
+              .getRaster(raster.getRenderedImage)
+              .getSamples(0, 0, width, height, bandIndex, new Array[Int](width * height))
             resultRaster.setSamples(0, 0, width, height, currentBand, band)
           } else {
-            val band = RasterUtils.getRaster(raster.getRenderedImage).getSamples(0, 0, width, height, bandIndex, new Array[Double](width * height))
+            val band = RasterUtils
+              .getRaster(raster.getRenderedImage)
+              .getSamples(0, 0, width, height, bandIndex, new Array[Double](width * height))
             resultRaster.setSamples(0, 0, width, height, currentBand, band)
           }
           currentBand += 1
@@ -114,7 +122,13 @@ class RS_Union_Aggr extends Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandDa
       }
 
       val noDataValue = RasterBandAccessors.getBandNoDataValue(referenceRaster)
-      RasterUtils.clone(resultRaster, referenceRaster.getGridGeometry, gridSampleDimensions, referenceRaster, noDataValue, false)
+      RasterUtils.clone(
+        resultRaster,
+        referenceRaster.getGridGeometry,
+        gridSampleDimensions,
+        referenceRaster,
+        noDataValue,
+        false)
     } finally {
       rasters.foreach(_.dispose(true))
     }

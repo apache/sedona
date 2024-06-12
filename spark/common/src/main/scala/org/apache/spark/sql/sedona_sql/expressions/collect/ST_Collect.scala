@@ -18,7 +18,6 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions.collect
 
-
 import org.apache.sedona.common.Functions
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback

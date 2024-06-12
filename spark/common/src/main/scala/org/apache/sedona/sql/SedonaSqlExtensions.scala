@@ -21,7 +21,6 @@ package org.apache.sedona.sql
 import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.sql.SparkSessionExtensions
 
-
 class SedonaSqlExtensions extends (SparkSessionExtensions => Unit) {
   def apply(e: SparkSessionExtensions): Unit = {
     e.injectCheckRule(spark => {

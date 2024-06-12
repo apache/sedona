@@ -22,74 +22,60 @@ import java.io.Serializable;
 
 // TODO: Auto-generated Javadoc
 
-/**
- * The Enum ColorizeOption.
- */
-public enum ColorizeOption
-        implements Serializable
-{
+/** The Enum ColorizeOption. */
+public enum ColorizeOption implements Serializable {
 
-    /**
-     * The earthobservation.
-     */
-    EARTHOBSERVATION("EARTHOBSERVATION"),
+  /** The earthobservation. */
+  EARTHOBSERVATION("EARTHOBSERVATION"),
 
-    /**
-     * The spatialaggregation.
-     */
-    SPATIALAGGREGATION("spatialaggregation"),
+  /** The spatialaggregation. */
+  SPATIALAGGREGATION("spatialaggregation"),
 
-    /**
-     * The normal.
-     */
-    NORMAL("normal");
+  /** The normal. */
+  NORMAL("normal");
 
-    /**
-     * The type name.
-     */
-    private String typeName = "normal";
+  /** The type name. */
+  private String typeName = "normal";
 
-    /**
-     * Instantiates a new colorize option.
-     *
-     * @param typeName the type name
-     */
-    ColorizeOption(String typeName)
-    {
-        this.setTypeName(typeName);
+  /**
+   * Instantiates a new colorize option.
+   *
+   * @param typeName the type name
+   */
+  ColorizeOption(String typeName) {
+    this.setTypeName(typeName);
+  }
+
+  /**
+   * Gets the colorize option.
+   *
+   * @param str the str
+   * @return the colorize option
+   */
+  public static ColorizeOption getColorizeOption(String str) {
+    for (ColorizeOption me : ColorizeOption.values()) {
+      if (me.name().equalsIgnoreCase(str)) {
+        return me;
+      }
     }
+    return null;
+  }
 
-    /**
-     * Gets the colorize option.
-     *
-     * @param str the str
-     * @return the colorize option
-     */
-    public static ColorizeOption getColorizeOption(String str)
-    {
-        for (ColorizeOption me : ColorizeOption.values()) {
-            if (me.name().equalsIgnoreCase(str)) { return me; }
-        }
-        return null;
-    }
+  /**
+   * Gets the type name.
+   *
+   * @return the type name
+   */
+  public String getTypeName() {
+    return typeName;
+  }
 
-    /**
-     * Gets the type name.
-     *
-     * @return the type name
-     */
-    public String getTypeName()
-    {
-        return typeName;
-    }
-
-    /**
-     * Sets the type name.
-     *
-     * @param typeName the new type name
-     */
-    public void setTypeName(String typeName)
-    {
-        this.typeName = typeName;
-    }
+  /**
+   * Sets the type name.
+   *
+   * @param typeName the new type name
+   */
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
+  }
 }

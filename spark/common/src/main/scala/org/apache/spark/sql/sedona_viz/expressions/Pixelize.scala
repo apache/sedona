@@ -36,25 +36,46 @@ import org.locationtech.jts.geom._
 import scala.jdk.CollectionConverters._
 
 case class ST_Pixelize(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with Logging {
+    extends Expression
+    with CodegenFallback
+    with Logging {
   assert(inputExpressions.length <= 5)
   override def toString: String = s" **${ST_Pixelize.getClass.getName}**  "
 
   override def eval(input: InternalRow): Any = {
-    val inputGeometry = GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[Array[Byte]])
+    val inputGeometry =
+      GeometrySerializer.deserialize(inputExpressions(0).eval(input).asInstanceOf[Array[Byte]])
     val resolutionX = inputExpressions(1).eval(input).asInstanceOf[Integer]
     val resolutionY = inputExpressions(2).eval(input).asInstanceOf[Integer]
-    val boundary = GeometrySerializer.deserialize(inputExpressions(3).eval(input).asInstanceOf[Array[Byte]]).getEnvelopeInternal
+    val boundary = GeometrySerializer
+      .deserialize(inputExpressions(3).eval(input).asInstanceOf[Array[Byte]])
+      .getEnvelopeInternal
     val reverseCoordinate = false
     val pixels = inputGeometry match {
       case geometry: LineString => {
-        RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, inputGeometry.asInstanceOf[LineString], reverseCoordinate)
+        RasterizationUtils.FindPixelCoordinates(
+          resolutionX,
+          resolutionY,
+          boundary,
+          inputGeometry.asInstanceOf[LineString],
+          reverseCoordinate)
       }
       case geometry: Polygon => {
-        RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, inputGeometry.asInstanceOf[Polygon], reverseCoordinate)
+        RasterizationUtils.FindPixelCoordinates(
+          resolutionX,
+          resolutionY,
+          boundary,
+          inputGeometry.asInstanceOf[Polygon],
+          reverseCoordinate)
       }
       case geometry: Point => {
-        RasterizationUtils.FindPixelCoordinates(resolutionX, resolutionY, boundary, inputGeometry.asInstanceOf[Point], ColorizeOption.NORMAL, reverseCoordinate)
+        RasterizationUtils.FindPixelCoordinates(
+          resolutionX,
+          resolutionY,
+          boundary,
+          inputGeometry.asInstanceOf[Point],
+          ColorizeOption.NORMAL,
+          reverseCoordinate)
       }
       case geometry: MultiLineString => {
         var manyPixels =
@@ -118,15 +139,18 @@ case class ST_Pixelize(inputExpressions: Seq[Expression])
     }
     assert(pixels.size() > 0)
 
-    return new GenericArrayData(pixels.asScala.map(f=> {
-      val out = new ByteArrayOutputStream()
-      val kryo = new Kryo()
-      val pixelSerializer = new PixelSerializer()
-      val output = new Output(out)
-      pixelSerializer.write(kryo, output, f._1)
-      output.close()
-      new GenericArrayData(out.toByteArray)
-    }).toArray)
+    return new GenericArrayData(
+      pixels.asScala
+        .map(f => {
+          val out = new ByteArrayOutputStream()
+          val kryo = new Kryo()
+          val pixelSerializer = new PixelSerializer()
+          val output = new Output(out)
+          pixelSerializer.write(kryo, output, f._1)
+          output.close()
+          new GenericArrayData(out.toByteArray)
+        })
+        .toArray)
   }
   override def dataType: DataType = ArrayType(new PixelUDT)
   override def children: Seq[Expression] = inputExpressions

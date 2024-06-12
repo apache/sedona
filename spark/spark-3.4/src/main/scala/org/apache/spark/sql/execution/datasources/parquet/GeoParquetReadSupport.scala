@@ -1,20 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.spark.sql.execution.datasources.parquet
 
 import org.apache.hadoop.conf.Configuration
@@ -39,28 +40,30 @@ import scala.collection.JavaConverters._
  * [[InternalRow]]s.
  *
  * The API interface of [[ReadSupport]] is a little bit over complicated because of historical
- * reasons.  In older versions of parquet-mr (say 1.6.0rc3 and prior), [[ReadSupport]] need to be
- * instantiated and initialized twice on both driver side and executor side.  The [[init()]] method
- * is for driver side initialization, while [[prepareForRead()]] is for executor side.  However,
- * starting from parquet-mr 1.6.0, it's no longer the case, and [[ReadSupport]] is only instantiated
- * and initialized on executor side.  So, theoretically, now it's totally fine to combine these two
- * methods into a single initialization method.  The only reason (I could think of) to still have
- * them here is for parquet-mr API backwards-compatibility.
+ * reasons. In older versions of parquet-mr (say 1.6.0rc3 and prior), [[ReadSupport]] need to be
+ * instantiated and initialized twice on both driver side and executor side. The [[init()]] method
+ * is for driver side initialization, while [[prepareForRead()]] is for executor side. However,
+ * starting from parquet-mr 1.6.0, it's no longer the case, and [[ReadSupport]] is only
+ * instantiated and initialized on executor side. So, theoretically, now it's totally fine to
+ * combine these two methods into a single initialization method. The only reason (I could think
+ * of) to still have them here is for parquet-mr API backwards-compatibility.
  *
- * Due to this reason, we no longer rely on [[ReadContext]] to pass requested schema from [[init()]]
- * to [[prepareForRead()]], but use a private `var` for simplicity.
+ * Due to this reason, we no longer rely on [[ReadContext]] to pass requested schema from
+ * [[init()]] to [[prepareForRead()]], but use a private `var` for simplicity.
  */
-class GeoParquetReadSupport (override val convertTz: Option[ZoneId],
-                             enableVectorizedReader: Boolean,
-                             datetimeRebaseMode: LegacyBehaviorPolicy.Value,
-                             int96RebaseMode: LegacyBehaviorPolicy.Value,
-                             parameters: Map[String, String])
-  extends ParquetReadSupport with Logging {
+class GeoParquetReadSupport(
+    override val convertTz: Option[ZoneId],
+    enableVectorizedReader: Boolean,
+    datetimeRebaseMode: LegacyBehaviorPolicy.Value,
+    int96RebaseMode: LegacyBehaviorPolicy.Value,
+    parameters: Map[String, String])
+    extends ParquetReadSupport
+    with Logging {
   private var catalystRequestedSchema: StructType = _
 
   /**
    * Called on executor side before [[prepareForRead()]] and instantiating actual Parquet record
-   * readers.  Responsible for figuring out Parquet requested schema used for column pruning.
+   * readers. Responsible for figuring out Parquet requested schema used for column pruning.
    */
   override def init(context: InitContext): ReadContext = {
     val conf = context.getConfiguration
@@ -70,15 +73,20 @@ class GeoParquetReadSupport (override val convertTz: Option[ZoneId],
       StructType.fromString(schemaString)
     }
 
-    val caseSensitive = conf.getBoolean(SQLConf.CASE_SENSITIVE.key,
-      SQLConf.CASE_SENSITIVE.defaultValue.get)
-    val schemaPruningEnabled = conf.getBoolean(SQLConf.NESTED_SCHEMA_PRUNING_ENABLED.key,
+    val caseSensitive =
+      conf.getBoolean(SQLConf.CASE_SENSITIVE.key, SQLConf.CASE_SENSITIVE.defaultValue.get)
+    val schemaPruningEnabled = conf.getBoolean(
+      SQLConf.NESTED_SCHEMA_PRUNING_ENABLED.key,
       SQLConf.NESTED_SCHEMA_PRUNING_ENABLED.defaultValue.get)
-    val useFieldId = conf.getBoolean(SQLConf.PARQUET_FIELD_ID_READ_ENABLED.key,
+    val useFieldId = conf.getBoolean(
+      SQLConf.PARQUET_FIELD_ID_READ_ENABLED.key,
       SQLConf.PARQUET_FIELD_ID_READ_ENABLED.defaultValue.get)
     val parquetFileSchema = context.getFileSchema
-    val parquetClippedSchema = ParquetReadSupport.clipParquetSchema(parquetFileSchema,
-      catalystRequestedSchema, caseSensitive, useFieldId)
+    val parquetClippedSchema = ParquetReadSupport.clipParquetSchema(
+      parquetFileSchema,
+      catalystRequestedSchema,
+      caseSensitive,
+      useFieldId)
 
     // We pass two schema to ParquetRecordMaterializer:
     // - parquetRequestedSchema: the schema of the file data we want to read
@@ -88,7 +96,8 @@ class GeoParquetReadSupport (override val convertTz: Option[ZoneId],
       // Parquet-MR reader requires that parquetRequestedSchema include only those fields present
       // in the underlying parquetFileSchema. Therefore, we intersect the parquetClippedSchema
       // with the parquetFileSchema
-      GeoParquetReadSupport.intersectParquetGroups(parquetClippedSchema, parquetFileSchema)
+      GeoParquetReadSupport
+        .intersectParquetGroups(parquetClippedSchema, parquetFileSchema)
         .map(groupType => new MessageType(groupType.getName, groupType.getFields))
         .getOrElse(ParquetSchemaConverter.EMPTY_MESSAGE)
     } else {
@@ -109,16 +118,17 @@ class GeoParquetReadSupport (override val convertTz: Option[ZoneId],
        """.stripMargin)
     new ReadContext(parquetRequestedSchema, Map.empty[String, String].asJava)
   }
+
   /**
    * Called on executor side after [[init()]], before instantiating actual Parquet record readers.
    * Responsible for instantiating [[RecordMaterializer]], which is used for converting Parquet
    * records to Catalyst [[InternalRow]]s.
    */
   override def prepareForRead(
-                               conf: Configuration,
-                               keyValueMetaData: JMap[String, String],
-                               fileSchema: MessageType,
-                               readContext: ReadContext): RecordMaterializer[InternalRow] = {
+      conf: Configuration,
+      keyValueMetaData: JMap[String, String],
+      fileSchema: MessageType,
+      readContext: ReadContext): RecordMaterializer[InternalRow] = {
     val parquetRequestedSchema = readContext.getRequestedSchema
     new GeoParquetRecordMaterializer(
       parquetRequestedSchema,
@@ -134,13 +144,14 @@ class GeoParquetReadSupport (override val convertTz: Option[ZoneId],
 object GeoParquetReadSupport extends Logging {
 
   /**
-   * Computes the structural intersection between two Parquet group types.
-   * This is used to create a requestedSchema for ReadContext of Parquet-MR reader.
-   * Parquet-MR reader does not support the nested field access to non-existent field
-   * while parquet library does support to read the non-existent field by regular field access.
+   * Computes the structural intersection between two Parquet group types. This is used to create
+   * a requestedSchema for ReadContext of Parquet-MR reader. Parquet-MR reader does not support
+   * the nested field access to non-existent field while parquet library does support to read the
+   * non-existent field by regular field access.
    */
   private def intersectParquetGroups(
-                                      groupType1: GroupType, groupType2: GroupType): Option[GroupType] = {
+      groupType1: GroupType,
+      groupType2: GroupType): Option[GroupType] = {
     val fields =
       groupType1.getFields.asScala
         .filter(field => groupType2.containsField(field.getName))
@@ -169,9 +180,7 @@ object GeoParquetReadSupport extends Logging {
           t.copy(elementType = expand(t.elementType))
 
         case t: MapType =>
-          t.copy(
-            keyType = expand(t.keyType),
-            valueType = expand(t.valueType))
+          t.copy(keyType = expand(t.keyType), valueType = expand(t.valueType))
 
         case t: StructType =>
           val expandedFields = t.fields.map(f => f.copy(dataType = expand(f.dataType)))

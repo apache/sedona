@@ -16,13 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.python.wrapper.translation
 
 import org.apache.sedona.python.wrapper.utils.implicits.{GeometryEnhancer, IntImplicit}
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKBWriter
-
 
 case class GeometrySerializer(geometry: Geometry) {
 

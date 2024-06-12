@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.python.wrapper.adapters
 
 import net.razorvine.pickle.Unpickler
@@ -30,11 +29,14 @@ object EnvelopeAdapter {
     val arrBytes = bytes.map(x => x.toByte)
     val unpickler = new Unpickler
     val pythonEnvelopes = unpickler.loads(arrBytes).asInstanceOf[java.util.ArrayList[_]].toArray
-    pythonEnvelopes.map(pythonEnvelope => new Envelope(
-      pythonEnvelope.asInstanceOf[ClassDict].get("minx").asInstanceOf[Double],
-      pythonEnvelope.asInstanceOf[ClassDict].get("maxx").asInstanceOf[Double],
-      pythonEnvelope.asInstanceOf[ClassDict].get("miny").asInstanceOf[Double],
-      pythonEnvelope.asInstanceOf[ClassDict].get("maxy").asInstanceOf[Double]
-    )).toList.asJava
+    pythonEnvelopes
+      .map(pythonEnvelope =>
+        new Envelope(
+          pythonEnvelope.asInstanceOf[ClassDict].get("minx").asInstanceOf[Double],
+          pythonEnvelope.asInstanceOf[ClassDict].get("maxx").asInstanceOf[Double],
+          pythonEnvelope.asInstanceOf[ClassDict].get("miny").asInstanceOf[Double],
+          pythonEnvelope.asInstanceOf[ClassDict].get("maxy").asInstanceOf[Double]))
+      .toList
+      .asJava
   }
 }

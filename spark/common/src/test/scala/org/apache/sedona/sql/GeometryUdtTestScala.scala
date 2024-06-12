@@ -54,7 +54,11 @@ class GeometryUdtTestScala extends TestBaseScala with BeforeAndAfter {
     }
 
     it("Should be able to render and parse JSON schema") {
-      assert(DataType.fromJson(dataFrame.schema.json).asInstanceOf[StructType].equals(dataFrame.schema))
+      assert(
+        DataType
+          .fromJson(dataFrame.schema.json)
+          .asInstanceOf[StructType]
+          .equals(dataFrame.schema))
     }
 
     it("Case object and new instance should be equals") {

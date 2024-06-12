@@ -18,6 +18,9 @@
  */
 package org.apache.sedona.core.utils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.sedona.common.enums.FileDataSplitter;
@@ -35,168 +38,139 @@ import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 // TODO: Auto-generated Javadoc
 
-/**
- * The Class CRSTransformationTest.
- */
-public class CRSTransformationTest
-{
+/** The Class CRSTransformationTest. */
+public class CRSTransformationTest {
 
-    /**
-     * The sc.
-     */
-    public static JavaSparkContext sc;
+  /** The sc. */
+  public static JavaSparkContext sc;
 
-    /**
-     * The prop.
-     */
-    static Properties prop;
+  /** The prop. */
+  static Properties prop;
 
-    /**
-     * The input.
-     */
-    static InputStream input;
+  /** The input. */
+  static InputStream input;
 
-    /**
-     * The Input location.
-     */
-    static String InputLocation;
+  /** The Input location. */
+  static String InputLocation;
 
-    /**
-     * The offset.
-     */
-    static Integer offset;
+  /** The offset. */
+  static Integer offset;
 
-    /**
-     * The splitter.
-     */
-    static FileDataSplitter splitter;
+  /** The splitter. */
+  static FileDataSplitter splitter;
 
-    /**
-     * The index type.
-     */
-    static IndexType indexType;
+  /** The index type. */
+  static IndexType indexType;
 
-    /**
-     * The num partitions.
-     */
-    static Integer numPartitions;
+  /** The num partitions. */
+  static Integer numPartitions;
 
-    /**
-     * The query envelope.
-     */
-    static Envelope queryEnvelope;
+  /** The query envelope. */
+  static Envelope queryEnvelope;
 
-    /**
-     * The loop times.
-     */
-    static int loopTimes;
+  /** The loop times. */
+  static int loopTimes;
 
-    /**
-     * The query point.
-     */
-    static Point queryPoint;
+  /** The query point. */
+  static Point queryPoint;
 
-    /**
-     * The grid type.
-     */
-    static GridType gridType;
+  /** The grid type. */
+  static GridType gridType;
 
-    /**
-     * The Input location query polygon.
-     */
-    static String InputLocationQueryPolygon;
+  /** The Input location query polygon. */
+  static String InputLocationQueryPolygon;
 
-    /**
-     * The top K.
-     */
-    static int topK;
+  /** The top K. */
+  static int topK;
 
-    /**
-     * Sets the up before class.
-     *
-     * @throws Exception the exception
-     */
-    @BeforeClass
-    public static void setUpBeforeClass()
-            throws Exception
-    {
-        SparkConf conf = new SparkConf().setAppName("PointRange").setMaster("local[2]");
-        sc = new JavaSparkContext(conf);
-        Logger.getLogger("org").setLevel(Level.WARN);
-        Logger.getLogger("akka").setLevel(Level.WARN);
-        prop = new Properties();
-        input = CRSTransformationTest.class.getClassLoader().getResourceAsStream("crs.test.properties");
+  /**
+   * Sets the up before class.
+   *
+   * @throws Exception the exception
+   */
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    SparkConf conf = new SparkConf().setAppName("PointRange").setMaster("local[2]");
+    sc = new JavaSparkContext(conf);
+    Logger.getLogger("org").setLevel(Level.WARN);
+    Logger.getLogger("akka").setLevel(Level.WARN);
+    prop = new Properties();
+    input = CRSTransformationTest.class.getClassLoader().getResourceAsStream("crs.test.properties");
 
-        offset = 0;
-        splitter = null;
-        indexType = null;
-        numPartitions = 0;
-        GeometryFactory fact = new GeometryFactory();
+    offset = 0;
+    splitter = null;
+    indexType = null;
+    numPartitions = 0;
+    GeometryFactory fact = new GeometryFactory();
+    try {
+      // load a properties file
+      prop.load(input);
+      // There is a field in the property file, you can edit your own file location there.
+      // InputLocation = prop.getProperty("inputLocation");
+      InputLocation =
+          "file://"
+              + CRSTransformationTest.class
+                  .getClassLoader()
+                  .getResource(prop.getProperty("inputLocation"))
+                  .getPath();
+      InputLocationQueryPolygon =
+          "file://"
+              + CRSTransformationTest.class
+                  .getClassLoader()
+                  .getResource(prop.getProperty("queryPolygonSet"))
+                  .getPath();
+      offset = Integer.parseInt(prop.getProperty("offset"));
+      splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
+      gridType = GridType.getGridType(prop.getProperty("gridType"));
+      indexType = IndexType.getIndexType(prop.getProperty("indexType"));
+      numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
+      queryEnvelope = new Envelope(-90.01, -80.01, 30.01, 40.01);
+      loopTimes = 1;
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    } finally {
+      if (input != null) {
         try {
-            // load a properties file
-            prop.load(input);
-            // There is a field in the property file, you can edit your own file location there.
-            // InputLocation = prop.getProperty("inputLocation");
-            InputLocation = "file://" + CRSTransformationTest.class.getClassLoader().getResource(prop.getProperty("inputLocation")).getPath();
-            InputLocationQueryPolygon = "file://" + CRSTransformationTest.class.getClassLoader().getResource(prop.getProperty("queryPolygonSet")).getPath();
-            offset = Integer.parseInt(prop.getProperty("offset"));
-            splitter = FileDataSplitter.getFileDataSplitter(prop.getProperty("splitter"));
-            gridType = GridType.getGridType(prop.getProperty("gridType"));
-            indexType = IndexType.getIndexType(prop.getProperty("indexType"));
-            numPartitions = Integer.parseInt(prop.getProperty("numPartitions"));
-            queryEnvelope = new Envelope(-90.01, -80.01, 30.01, 40.01);
-            loopTimes = 1;
+          input.close();
+        } catch (IOException e) {
+          e.printStackTrace();
         }
-        catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        finally {
-            if (input != null) {
-                try {
-                    input.close();
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        queryPoint = fact.createPoint(new Coordinate(34.01, -84.01));
-        topK = 100;
+      }
     }
 
-    /**
-     * Tear down.
-     *
-     * @throws Exception the exception
-     */
-    @AfterClass
-    public static void tearDown()
-            throws Exception
-    {
-        sc.stop();
-    }
+    queryPoint = fact.createPoint(new Coordinate(34.01, -84.01));
+    topK = 100;
+  }
 
-    /**
-     * Test spatial range query.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testSpatialRangeQuery()
-            throws Exception
-    {
-        PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true);
-        spatialRDD.flipCoordinates();
-        spatialRDD.CRSTransform( "epsg:4326", "epsg:3005");
-        long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).count();
-        assert resultSize == 3127;
-        assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).take(10).get(1).getUserData().toString() != null;
-    }
+  /**
+   * Tear down.
+   *
+   * @throws Exception the exception
+   */
+  @AfterClass
+  public static void tearDown() throws Exception {
+    sc.stop();
+  }
+
+  /**
+   * Test spatial range query.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testSpatialRangeQuery() throws Exception {
+    PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true);
+    spatialRDD.flipCoordinates();
+    spatialRDD.CRSTransform("epsg:4326", "epsg:3005");
+    long resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false).count();
+    assert resultSize == 3127;
+    assert RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, false, false)
+            .take(10)
+            .get(1)
+            .getUserData()
+            .toString()
+        != null;
+  }
 }

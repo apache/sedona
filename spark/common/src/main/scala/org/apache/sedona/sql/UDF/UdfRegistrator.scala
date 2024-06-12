@@ -32,10 +32,10 @@ object UdfRegistrator {
       sparkSession.sessionState.functionRegistry.registerFunction(
         functionIdentifier,
         expressionInfo,
-        functionBuilder
-      )
+        functionBuilder)
     }
-Catalog.aggregateExpressions.foreach(f => sparkSession.udf.register(f.getClass.getSimpleName, functions.udaf(f))) // SPARK3 anchor
+    Catalog.aggregateExpressions.foreach(f =>
+      sparkSession.udf.register(f.getClass.getSimpleName, functions.udaf(f))) // SPARK3 anchor
 //Catalog.aggregateExpressions_UDAF.foreach(f => sparkSession.udf.register(f.getClass.getSimpleName, f)) // SPARK2 anchor
   }
 
@@ -43,7 +43,10 @@ Catalog.aggregateExpressions.foreach(f => sparkSession.udf.register(f.getClass.g
     Catalog.expressions.foreach { case (functionIdentifier, _, _) =>
       sparkSession.sessionState.functionRegistry.dropFunction(functionIdentifier)
     }
-Catalog.aggregateExpressions.foreach(f => sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(f.getClass.getSimpleName))) // SPARK3 anchor
+    Catalog.aggregateExpressions.foreach(f =>
+      sparkSession.sessionState.functionRegistry.dropFunction(
+        FunctionIdentifier(f.getClass.getSimpleName)
+      )) // SPARK3 anchor
 //Catalog.aggregateExpressions_UDAF.foreach(f => sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(f.getClass.getSimpleName))) // SPARK2 anchor
   }
 }

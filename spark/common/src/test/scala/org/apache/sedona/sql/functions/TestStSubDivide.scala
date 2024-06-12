@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.sql.functions
 
 import org.apache.sedona.common.subDivide.GeometrySubDivider
@@ -28,22 +27,33 @@ import org.scalatest.prop.{TableDrivenPropertyChecks, TableFor3, TableFor4}
 import java.io.{FileInputStream, InputStream}
 import scala.io.Source
 
+class TestStSubDivide
+    extends AnyFunSuite
+    with Matchers
+    with TableDrivenPropertyChecks
+    with FunctionsHelper {
 
-class TestStSubDivide extends AnyFunSuite with Matchers with TableDrivenPropertyChecks with FunctionsHelper {
-
-
-  for ((statement: String, inputGeometry: String, maxVertices: Int, outPutGeometry: Seq[String]) <- Fixtures.testPolygons) {
+  for ((
+      statement: String,
+      inputGeometry: String,
+      maxVertices: Int,
+      outPutGeometry: Seq[String]) <- Fixtures.testPolygons) {
     test("it should return subdivide geometry when input geometry is " + statement) {
-      Fixtures.subDivideGeometry(inputGeometry, maxVertices).map(geom => geometryToWkt(geom)) should contain theSameElementsAs outPutGeometry
+      Fixtures
+        .subDivideGeometry(inputGeometry, maxVertices)
+        .map(geom => geometryToWkt(geom)) should contain theSameElementsAs outPutGeometry
     }
   }
 
-  for ((statement: String, inputGeometry: String, maxVertices: Int) <- Fixtures.geometriesWithNumberOfVerticesLowerThanThreshold) {
-    test("it should return empty sequence when number of vertices is lower than threshold" + statement) {
-      Fixtures.subDivideGeometry(inputGeometry, maxVertices).map(geom => geometryToWkt(geom)) should contain theSameElementsAs Seq()
+  for ((statement: String, inputGeometry: String, maxVertices: Int) <-
+      Fixtures.geometriesWithNumberOfVerticesLowerThanThreshold) {
+    test(
+      "it should return empty sequence when number of vertices is lower than threshold" + statement) {
+      Fixtures
+        .subDivideGeometry(inputGeometry, maxVertices)
+        .map(geom => geometryToWkt(geom)) should contain theSameElementsAs Seq()
     }
   }
-
 
   object Fixtures {
 
@@ -51,23 +61,26 @@ class TestStSubDivide extends AnyFunSuite with Matchers with TableDrivenProperty
 
     private val geometries: Seq[(String, String, Int, Seq[String])] = {
 
-      val input = loadResourceFile(resourceFolder + "subdivide/subdivide_input_geometries.txt").map(
-        line => line.split(";")
-      ).map(elements => (elements.head, elements(1), elements(2), elements(3).toInt))
+      val input = loadResourceFile(resourceFolder + "subdivide/subdivide_input_geometries.txt")
+        .map(line => line.split(";"))
+        .map(elements => (elements.head, elements(1), elements(2), elements(3).toInt))
         .sortBy(_._1)
 
-      val expected = loadResourceFile(resourceFolder + "subdivide/subdivide_expected_result.txt").map(
-        line => line.split(";")
-      ).map(elements => (elements.head, elements(1)))
+      val expected = loadResourceFile(resourceFolder + "subdivide/subdivide_expected_result.txt")
+        .map(line => line.split(";"))
+        .map(elements => (elements.head, elements(1)))
 
       val expectedGrouped = expected.groupBy(_._1)
 
-      expectedGrouped.map{
-        case (key, group) => (key, group.map(_._2))
-      }.toSeq.sortBy(_._1).zip(input)
-        .map{
-          case ((_, resultGeom), (_, testName, inputGeom, subdivisionVertices)) =>
-            (testName, inputGeom, subdivisionVertices, resultGeom)
+      expectedGrouped
+        .map { case (key, group) =>
+          (key, group.map(_._2))
+        }
+        .toSeq
+        .sortBy(_._1)
+        .zip(input)
+        .map { case ((_, resultGeom), (_, testName, inputGeom, subdivisionVertices)) =>
+          (testName, inputGeom, subdivisionVertices, resultGeom)
         }
 
     }
@@ -81,13 +94,10 @@ class TestStSubDivide extends AnyFunSuite with Matchers with TableDrivenProperty
       ("geometryType", "inputWkt", "numberOfVertices"),
       ("point", "POINT(4 43)", GeometrySubDivider.minMaxVertices - 1),
       ("polygon", "POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))", GeometrySubDivider.minMaxVertices - 1),
-      ("linestring", "LINESTRING(1 1, 2 2, 3 2)", GeometrySubDivider.minMaxVertices - 1)
-    )
+      ("linestring", "LINESTRING(1 1, 2 2, 3 2)", GeometrySubDivider.minMaxVertices - 1))
 
-    val testPolygons: TableFor4[String, String, Int, Seq[String]] = Table(
-      ("statement", "input", "maxVertices", "output"),
-      geometries:_*
-    )
+    val testPolygons: TableFor4[String, String, Int, Seq[String]] =
+      Table(("statement", "input", "maxVertices", "output"), geometries: _*)
 
     def subDivideGeometry(wkt: String, maxVertices: Int): Seq[Geometry] =
       subDivideGeometry(readGeometry(wkt), maxVertices)
@@ -95,6 +105,5 @@ class TestStSubDivide extends AnyFunSuite with Matchers with TableDrivenProperty
     def subDivideGeometry(geom: Geometry, maxVertices: Int): Seq[Geometry] =
       GeometrySubDivider.subDivide(geom, maxVertices)
   }
-
 
 }

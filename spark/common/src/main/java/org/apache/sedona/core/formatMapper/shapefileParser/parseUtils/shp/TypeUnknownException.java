@@ -16,25 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp;
 
 // TODO: Auto-generated Javadoc
 
-/**
- * The Class TypeUnknownException.
- */
-public class TypeUnknownException
-        extends RuntimeException
-{
+/** The Class TypeUnknownException. */
+public class TypeUnknownException extends RuntimeException {
 
-    /**
-     * create an exception indicates that the shape type number we get from .shp file is valid
-     *
-     * @param typeID the type ID
-     */
-    public TypeUnknownException(int typeID)
-    {
-        super("Unknown shape type " + ShapeType.getType(typeID).name());
-    }
+  /**
+   * create an exception indicates that the shape type number we get from .shp file is valid
+   *
+   * @param typeID the type ID
+   */
+  public TypeUnknownException(int typeID) {
+    super("Unknown shape type " + ShapeType.getType(typeID).name());
+  }
 }

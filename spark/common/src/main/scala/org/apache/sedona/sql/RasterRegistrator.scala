@@ -31,13 +31,16 @@ object RasterRegistrator {
   def registerAll(sparkSession: SparkSession): Unit = {
     if (isGeoToolsAvailable) {
       RasterUdtRegistratorWrapper.registerAll(gridClassName)
-      sparkSession.udf.register(RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName, functions.udaf(RasterUdafCatalog.rasterAggregateExpression))
+      sparkSession.udf.register(
+        RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName,
+        functions.udaf(RasterUdafCatalog.rasterAggregateExpression))
     }
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
     if (isGeoToolsAvailable) {
-      sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName))
+      sparkSession.sessionState.functionRegistry.dropFunction(
+        FunctionIdentifier(RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName))
     }
   }
 }

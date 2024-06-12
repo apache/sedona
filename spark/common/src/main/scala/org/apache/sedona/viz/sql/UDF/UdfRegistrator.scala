@@ -35,17 +35,19 @@ object UdfRegistrator {
         f.getClass.getCanonicalName,
         functionIdentifier.database.orNull,
         functionIdentifier.funcName)
-      sparkSession.sessionState.functionRegistry.registerFunction(
-        functionIdentifier,
-        expressionInfo,
-        f
-      )
+      sparkSession.sessionState.functionRegistry
+        .registerFunction(functionIdentifier, expressionInfo, f)
     })
-    Catalog.aggregateExpressions.foreach(f => sparkSession.udf.register(f.getClass.getSimpleName, f))
+    Catalog.aggregateExpressions.foreach(f =>
+      sparkSession.udf.register(f.getClass.getSimpleName, f))
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
-    Catalog.expressions.foreach(f => sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(f.getClass.getSimpleName.dropRight(1))))
-    Catalog.aggregateExpressions.foreach(f => sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(f.getClass.getSimpleName)))
+    Catalog.expressions.foreach(f =>
+      sparkSession.sessionState.functionRegistry.dropFunction(
+        FunctionIdentifier(f.getClass.getSimpleName.dropRight(1))))
+    Catalog.aggregateExpressions.foreach(f =>
+      sparkSession.sessionState.functionRegistry.dropFunction(
+        FunctionIdentifier(f.getClass.getSimpleName)))
   }
 }
