@@ -472,8 +472,9 @@
         <span class="name">hasNextBase</span><span class="params">(<span name="buildShapes">buildShapes: <span class="extype" name="java.util.List">List</span>[_ &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>, <span name="streamShapes">streamShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[_ &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       
-      <p class="shortcomment cmt">Iterator model for the nest loop join.</p><div class="fullcomment"><div class="comment cmt"><p>Iterator model for the nest loop join.
-It checks if there is a next match and populate it to the result.</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.joinJudgement">joinJudgement</a>] </dd><dt>Definition Classes</dt><dd>JudgementBase</dd></dl></div>
+      <p class="shortcomment cmt">Iterator model for the nest loop join.</p><div class="fullcomment"><div class="comment cmt"><p>Iterator model for the nest loop join. It checks if there is a next match and populate it to
+the result.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.joinJudgement">joinJudgement</a>] </dd><dt>Definition Classes</dt><dd>JudgementBase</dd></dl></div>
     </li><li name="org.apache.sedona.core.joinJudgement.JudgementBase#hasNextBase" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hasNextBase(spatialIndex:org.locationtech.jts.index.SpatialIndex,streamShapes:java.util.Iterator[_&lt;:org.locationtech.jts.geom.Geometry],buildLeft:Boolean):Boolean"></a><a id="hasNextBase(SpatialIndex,Iterator[_&lt;:Geometry],Boolean):Boolean"></a>
       <span class="permalink">
@@ -489,8 +490,9 @@ It checks if there is a next match and populate it to the result.</p></div><dl c
         <span class="name">hasNextBase</span><span class="params">(<span name="spatialIndex">spatialIndex: <span class="extype" name="org.locationtech.jts.index.SpatialIndex">SpatialIndex</span></span>, <span name="streamShapes">streamShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[_ &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>, <span name="buildLeft">buildLeft: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       
-      <p class="shortcomment cmt">Iterator model for the index-based join.</p><div class="fullcomment"><div class="comment cmt"><p>Iterator model for the index-based join.
-It checks if there is a next match and populate it to the result.</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.joinJudgement">joinJudgement</a>] </dd><dt>Definition Classes</dt><dd>JudgementBase</dd></dl></div>
+      <p class="shortcomment cmt">Iterator model for the index-based join.</p><div class="fullcomment"><div class="comment cmt"><p>Iterator model for the index-based join. It checks if there is a next match and populate it to
+the result.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.joinJudgement">joinJudgement</a>] </dd><dt>Definition Classes</dt><dd>JudgementBase</dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
@@ -525,9 +527,9 @@ It checks if there is a next match and populate it to the result.</p></div><dl c
         <span class="name">initPartition</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Looks up the extent of the current partition.</p><div class="fullcomment"><div class="comment cmt"><p>Looks up the extent of the current partition. If found, <code>match</code> method will
-activate the logic to avoid emitting duplicate join results from multiple partitions.</p><p>Must be called before processing a partition. Must be called from the
-same instance that will be used to process the partition.
+      <p class="shortcomment cmt">Looks up the extent of the current partition.</p><div class="fullcomment"><div class="comment cmt"><p>Looks up the extent of the current partition. If found, <code>match</code> method will activate the logic
+to avoid emitting duplicate join results from multiple partitions.</p><p>Must be called before processing a partition. Must be called from the same instance that
+will be used to process the partition.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.joinJudgement">joinJudgement</a>] </dd><dt>Definition Classes</dt><dd>JudgementBase</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -592,10 +594,10 @@ same instance that will be used to process the partition.
         <span class="name">nextBase</span><span class="params">(<span name="buildShapes">buildShapes: <span class="extype" name="java.util.List">List</span>[_ &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>, <span name="streamShapes">streamShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[_ &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>)</span><span class="result">: <span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.LeftIndexLookupJudgement.U">U</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.LeftIndexLookupJudgement.T">T</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Iterator model for the nest loop join.</p><div class="fullcomment"><div class="comment cmt"><p>Iterator model for the nest loop join.
-It returns 1 pair in the current batch.
-Each batch contains a list of pairs of geometries that satisfy the join condition.
-The current batch is the result of the current stream shape against all the build shapes.</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.joinJudgement">joinJudgement</a>] </dd><dt>Definition Classes</dt><dd>JudgementBase</dd></dl></div>
+      <p class="shortcomment cmt">Iterator model for the nest loop join.</p><div class="fullcomment"><div class="comment cmt"><p>Iterator model for the nest loop join. It returns 1 pair in the current batch. Each batch
+contains a list of pairs of geometries that satisfy the join condition. The current batch is
+the result of the current stream shape against all the build shapes.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.joinJudgement">joinJudgement</a>] </dd><dt>Definition Classes</dt><dd>JudgementBase</dd></dl></div>
     </li><li name="org.apache.sedona.core.joinJudgement.JudgementBase#nextBase" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="nextBase(spatialIndex:org.locationtech.jts.index.SpatialIndex,streamShapes:java.util.Iterator[_&lt;:org.locationtech.jts.geom.Geometry],buildLeft:Boolean):org.apache.commons.lang3.tuple.Pair[U,T]"></a><a id="nextBase(SpatialIndex,Iterator[_&lt;:Geometry],Boolean):Pair[U,T]"></a>
       <span class="permalink">
@@ -611,10 +613,10 @@ The current batch is the result of the current stream shape against all the buil
         <span class="name">nextBase</span><span class="params">(<span name="spatialIndex">spatialIndex: <span class="extype" name="org.locationtech.jts.index.SpatialIndex">SpatialIndex</span></span>, <span name="streamShapes">streamShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[_ &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>, <span name="buildLeft">buildLeft: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.LeftIndexLookupJudgement.U">U</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.LeftIndexLookupJudgement.T">T</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Iterator model for the index-based join.</p><div class="fullcomment"><div class="comment cmt"><p>Iterator model for the index-based join.
-It returns 1 pair in the current batch.
-Each batch contains a list of pairs of geometries that satisfy the join condition.
-The current batch is the result of the current stream shape against all the build shapes.</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.joinJudgement">joinJudgement</a>] </dd><dt>Definition Classes</dt><dd>JudgementBase</dd></dl></div>
+      <p class="shortcomment cmt">Iterator model for the index-based join.</p><div class="fullcomment"><div class="comment cmt"><p>Iterator model for the index-based join. It returns 1 pair in the current batch. Each batch
+contains a list of pairs of geometries that satisfy the join condition. The current batch is
+the result of the current stream shape against all the build shapes.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.joinJudgement">joinJudgement</a>] </dd><dt>Definition Classes</dt><dd>JudgementBase</dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">

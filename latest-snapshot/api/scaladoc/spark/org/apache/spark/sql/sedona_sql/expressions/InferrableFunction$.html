@@ -1179,7 +1179,13 @@
         <span class="name">allowRightNull</span><span class="tparams">[<span name="R">R</span>, <span name="A1">A1</span>, <span name="A2">A2</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction.allowRightNull.A1">A1</span>, <span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction.allowRightNull.A2">A2</span>) ⇒ <span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction.allowRightNull.R">R</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="typeTag">typeTag: <span class="extype" name="scala.reflect.api.TypeTags.TypeTag">scala.reflect.api.JavaUniverse.TypeTag</span>[(<span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction.allowRightNull.A1">A1</span>, <span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction.allowRightNull.A2">A2</span>) ⇒ <span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction.allowRightNull.R">R</span>]</span>)</span><span class="result">: <a href="InferrableFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction">InferrableFunction</a></span>
       </span>
       
-      <p class="shortcomment cmt">A variant of binary inferred expression which allows the second argument to be null.</p><div class="fullcomment"><div class="comment cmt"><p>A variant of binary inferred expression which allows the second argument to be null.</p></div><dl class="paramcmts block"><dt class="tparam">R</dt><dd class="cmt"><p>Return type of the function.</p></dd><dt class="tparam">A1</dt><dd class="cmt"><p>Type of the first argument.</p></dd><dt class="tparam">A2</dt><dd class="cmt"><p>Type of the second argument.</p></dd><dt class="param">f</dt><dd class="cmt"><p>Function to be wrapped as a catalyst expression.</p></dd><dt class="param">typeTag</dt><dd class="cmt"><p>Type tag of the function.</p></dd><dt>returns</dt><dd class="cmt"><p>InferrableFunction.</p></dd></dl></div>
+      <p class="shortcomment cmt">A variant of binary inferred expression which allows the second argument to be null.</p><div class="fullcomment"><div class="comment cmt"><p>A variant of binary inferred expression which allows the second argument to be null.</p></div><dl class="paramcmts block"><dt class="tparam">R</dt><dd class="cmt"><p>
+  Return type of the function.</p></dd><dt class="tparam">A1</dt><dd class="cmt"><p>
+  Type of the first argument.</p></dd><dt class="tparam">A2</dt><dd class="cmt"><p>
+  Type of the second argument.</p></dd><dt class="param">f</dt><dd class="cmt"><p>
+  Function to be wrapped as a catalyst expression.</p></dd><dt class="param">typeTag</dt><dd class="cmt"><p>
+  Type tag of the function.</p></dd><dt>returns</dt><dd class="cmt"><p>
+  InferrableFunction.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply(typeTag:reflect.runtime.universe.TypeTag[_],evaluatorBuilder:Array[org.apache.spark.sql.catalyst.InternalRow=&gt;Any]=&gt;(org.apache.spark.sql.catalyst.InternalRow=&gt;Any)):org.apache.spark.sql.sedona_sql.expressions.InferrableFunction"></a><a id="apply(scala.reflect.api.JavaUniverse.TypeTag[_],(Array[(InternalRow)⇒Any])⇒(InternalRow)⇒Any):InferrableFunction"></a>
       <span class="permalink">
@@ -1195,7 +1201,12 @@
         <span class="name">apply</span><span class="params">(<span name="typeTag">typeTag: <span class="extype" name="scala.reflect.api.TypeTags.TypeTag">scala.reflect.api.JavaUniverse.TypeTag</span>[_]</span>, <span name="evaluatorBuilder">evaluatorBuilder: (<span class="extype" name="scala.Array">Array</span>[(<span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span>) ⇒ <span class="extype" name="scala.Any">Any</span>]) ⇒ (<span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span>) ⇒ <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <a href="InferrableFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction">InferrableFunction</a></span>
       </span>
       
-      <p class="shortcomment cmt">Infer input types and return type from a type tag, and construct builder for argument extractors.</p><div class="fullcomment"><div class="comment cmt"><p>Infer input types and return type from a type tag, and construct builder for argument extractors.</p></div><dl class="paramcmts block"><dt class="param">typeTag</dt><dd class="cmt"><p>Type tag of the function.</p></dd><dt class="param">evaluatorBuilder</dt><dd class="cmt"><p>Builder for the evaluator.</p></dd><dt>returns</dt><dd class="cmt"><p>InferrableFunction.</p></dd></dl></div>
+      <p class="shortcomment cmt">Infer input types and return type from a type tag, and construct builder for argument
+extractors.</p><div class="fullcomment"><div class="comment cmt"><p>Infer input types and return type from a type tag, and construct builder for argument
+extractors.</p></div><dl class="paramcmts block"><dt class="param">typeTag</dt><dd class="cmt"><p>
+  Type tag of the function.</p></dd><dt class="param">evaluatorBuilder</dt><dd class="cmt"><p>
+  Builder for the evaluator.</p></dd><dt>returns</dt><dd class="cmt"><p>
+  InferrableFunction.</p></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">

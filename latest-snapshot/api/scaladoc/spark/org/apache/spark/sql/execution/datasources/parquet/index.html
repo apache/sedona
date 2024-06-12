@@ -275,8 +275,9 @@
         <a title="Trait of GeoParquetFileFormat defines a method for spatial predicate push down." href="GeoParquetFileFormatBase.html"><span class="name">GeoParquetFileFormatBase</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.datasources.FileFormat">FileFormat</span> with <span class="extype" name="org.apache.spark.sql.sources.DataSourceRegister">DataSourceRegister</span></span>
       </span>
       
-      <p class="shortcomment cmt">Trait of GeoParquetFileFormat defines a method for spatial predicate push down.</p><div class="fullcomment"><div class="comment cmt"><p>Trait of GeoParquetFileFormat defines a method for spatial predicate push down. The actual implementations
-of GeoParquetFileFormat are in the sql/spark-3.x submodule for specific Spark minor versions.
+      <p class="shortcomment cmt">Trait of GeoParquetFileFormat defines a method for spatial predicate push down.</p><div class="fullcomment"><div class="comment cmt"><p>Trait of GeoParquetFileFormat defines a method for spatial predicate push down. The actual
+implementations of GeoParquetFileFormat are in the sql/spark-3.x submodule for specific Spark
+minor versions.
 </p></div></div>
     </li><li name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetMetaData" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="GeoParquetMetaDataextendsProductwithSerializable"></a><a id="GeoParquetMetaData:GeoParquetMetaData"></a>
@@ -293,7 +294,10 @@ of GeoParquetFileFormat are in the sql/spark-3.x submodule for specific Spark mi
         <a title="A case class that holds the metadata of GeoParquet file" href="GeoParquetMetaData.html"><span class="name">GeoParquetMetaData</span></a><span class="params">(<span name="version">version: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="primaryColumn">primaryColumn: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columns">columns: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="GeometryFieldMetaData.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.GeometryFieldMetaData">GeometryFieldMetaData</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">A case class that holds the metadata of GeoParquet file</p><div class="fullcomment"><div class="comment cmt"><p>A case class that holds the metadata of GeoParquet file</p></div><dl class="paramcmts block"><dt class="param">version</dt><dd class="cmt"><p>The version identifier for the GeoParquet specification.</p></dd><dt class="param">primaryColumn</dt><dd class="cmt"><p>The name of the &quot;primary&quot; geometry column.</p></dd><dt class="param">columns</dt><dd class="cmt"><p>Metadata about geometry columns.</p></dd></dl></div>
+      <p class="shortcomment cmt">A case class that holds the metadata of GeoParquet file</p><div class="fullcomment"><div class="comment cmt"><p>A case class that holds the metadata of GeoParquet file</p></div><dl class="paramcmts block"><dt class="param">version</dt><dd class="cmt"><p>
+  The version identifier for the GeoParquet specification.</p></dd><dt class="param">primaryColumn</dt><dd class="cmt"><p>
+  The name of the &quot;primary&quot; geometry column.</p></dd><dt class="param">columns</dt><dd class="cmt"><p>
+  Metadata about geometry columns.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="GeoParquetSpatialFilterextendsAnyRef"></a><a id="GeoParquetSpatialFilter:GeoParquetSpatialFilter"></a>
       <span class="permalink">
@@ -309,8 +313,8 @@ of GeoParquetFileFormat are in the sql/spark-3.x submodule for specific Spark mi
         <a title="Filters containing spatial predicates such as ST_Within(geom, ST_GeomFromText(...)) will be converted to GeoParquetSpatialFilter and get pushed down to GeoParquetFileFormat by org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet." href="GeoParquetSpatialFilter.html"><span class="name">GeoParquetSpatialFilter</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       
-      <p class="shortcomment cmt">Filters containing spatial predicates such as <code>ST_Within(geom, ST_GeomFromText(...))</code> will be converted
-to <a href="GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a> and get pushed down to <span class="extype" name="GeoParquetFileFormat">GeoParquetFileFormat</span> by
+      <p class="shortcomment cmt">Filters containing spatial predicates such as <code>ST_Within(geom, ST_GeomFromText(...))</code> will be
+converted to <a href="GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a> and get pushed down to <span class="extype" name="GeoParquetFileFormat">GeoParquetFileFormat</span> by
 <a href="../../../sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html" class="extype" name="org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet">org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet</a>.</p>
     </li><li name="org.apache.spark.sql.execution.datasources.parquet.GeometryFieldMetaData" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="GeometryFieldMetaDataextendsProductwithSerializable"></a><a id="GeometryFieldMetaData:GeometryFieldMetaData"></a>
@@ -327,8 +331,12 @@ to <a href="GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.
         <a title="A case class that holds the metadata of geometry column in GeoParquet metadata" href="GeometryFieldMetaData.html"><span class="name">GeometryFieldMetaData</span></a><span class="params">(<span name="encoding">encoding: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="geometryTypes">geometryTypes: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="bbox">bbox: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="crs">crs: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.json4s.JValue">JValue</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">A case class that holds the metadata of geometry column in GeoParquet metadata</p><div class="fullcomment"><div class="comment cmt"><p>A case class that holds the metadata of geometry column in GeoParquet metadata</p></div><dl class="paramcmts block"><dt class="param">encoding</dt><dd class="cmt"><p>Name of the geometry encoding format. Currently only &quot;WKB&quot; is supported</p></dd><dt class="param">geometryTypes</dt><dd class="cmt"><p>The geometry types of all geometries, or an empty array if they are not known.</p></dd><dt class="param">bbox</dt><dd class="cmt"><p>Bounding Box of the geometries in the file, formatted according to RFC 7946, section 5.</p></dd><dt class="param">crs</dt><dd class="cmt"><p>The CRS of the geometries in the file. None if crs metadata is absent, Some(JNull) if crs is null,
-           Some(value) if the crs is present and not null.</p></dd></dl></div>
+      <p class="shortcomment cmt">A case class that holds the metadata of geometry column in GeoParquet metadata</p><div class="fullcomment"><div class="comment cmt"><p>A case class that holds the metadata of geometry column in GeoParquet metadata</p></div><dl class="paramcmts block"><dt class="param">encoding</dt><dd class="cmt"><p>
+  Name of the geometry encoding format. Currently only &quot;WKB&quot; is supported</p></dd><dt class="param">geometryTypes</dt><dd class="cmt"><p>
+  The geometry types of all geometries, or an empty array if they are not known.</p></dd><dt class="param">bbox</dt><dd class="cmt"><p>
+  Bounding Box of the geometries in the file, formatted according to RFC 7946, section 5.</p></dd><dt class="param">crs</dt><dd class="cmt"><p>
+  The CRS of the geometries in the file. None if crs metadata is absent, Some(JNull) if crs is
+  null, Some(value) if the crs is present and not null.</p></dd></dl></div>
     </li></ol>
             </div>
 

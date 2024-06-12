@@ -502,8 +502,8 @@
         <span class="name">matches</span><span class="params">(<span name="expr">expr: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="plan">plan: <span class="extype" name="org.apache.spark.sql.catalyst.plans.logical.LogicalPlan">LogicalPlan</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       
-      <p class="shortcomment cmt">Returns true if specified expression has at least one reference and all its references
-map to the output of the specified plan.</p>
+      <p class="shortcomment cmt">Returns true if specified expression has at least one reference and all its references map to
+the output of the specified plan.</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -573,11 +573,13 @@ map to the output of the specified plan.</p>
         <span class="name">splitConjunctivePredicates</span><span class="params">(<span name="condition">condition: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>)</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">This is a polyfill for running on Spark 3.0 while compiling against Spark 3.3.</p><div class="fullcomment"><div class="comment cmt"><p>This is a polyfill for running on Spark 3.0 while compiling against Spark 3.3. We'd really like to mixin
-<code>PredicateHelper</code> here, but the class hierarchy of <code>PredicateHelper</code> has changed between Spark 3.0 and 3.3 so
-it would raise <code>java.lang.ClassNotFoundException: org.apache.spark.sql.catalyst.expressions.AliasHelper</code>
-at runtime on Spark 3.0.
-</p></div><dl class="paramcmts block"><dt class="param">condition</dt><dd class="cmt"><p>filter condition to split</p></dd><dt>returns</dt><dd class="cmt"><p>A list of conjunctive conditions</p></dd></dl></div>
+      <p class="shortcomment cmt">This is a polyfill for running on Spark 3.0 while compiling against Spark 3.3.</p><div class="fullcomment"><div class="comment cmt"><p>This is a polyfill for running on Spark 3.0 while compiling against Spark 3.3. We'd really
+like to mixin <code>PredicateHelper</code> here, but the class hierarchy of <code>PredicateHelper</code> has
+changed between Spark 3.0 and 3.3 so it would raise <code>java.lang.ClassNotFoundException:
+org.apache.spark.sql.catalyst.expressions.AliasHelper</code> at runtime on Spark 3.0.
+</p></div><dl class="paramcmts block"><dt class="param">condition</dt><dd class="cmt"><p>
+  filter condition to split</p></dd><dt>returns</dt><dd class="cmt"><p>
+  A list of conjunctive conditions</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

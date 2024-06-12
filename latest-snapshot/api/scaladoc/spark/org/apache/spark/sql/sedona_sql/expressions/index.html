@@ -1203,8 +1203,8 @@
         <a title="Make expression foldable by constant folding optimizer." href="FoldableExpression.html"><span class="name">FoldableExpression</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>
       </span>
       
-      <p class="shortcomment cmt">Make expression foldable by constant folding optimizer.</p><div class="fullcomment"><div class="comment cmt"><p>Make expression foldable by constant folding optimizer. If all children
-expressions are foldable, then the expression itself is foldable.
+      <p class="shortcomment cmt">Make expression foldable by constant folding optimizer.</p><div class="fullcomment"><div class="comment cmt"><p>Make expression foldable by constant folding optimizer. If all children expressions are
+foldable, then the expression itself is foldable.
 </p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.GeometryType" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GeometryTypeextendsInferredExpressionwithFoldableExpressionwithProductwithSerializable"></a><a id="GeometryType:GeometryType"></a>
@@ -1590,7 +1590,8 @@ expressions are foldable, then the expression itself is foldable.
         <a title="Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance." href="ST_Buffer.html"><span class="name">ST_Buffer</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance.</p>
+      <p class="shortcomment cmt">Returns a geometry/geography that represents all points whose distance from this
+Geometry/geography is less than or equal to distance.</p>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_BuildArea" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_BuildAreaextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_BuildArea:ST_BuildArea"></a>
       <span class="permalink">
@@ -1606,7 +1607,8 @@ expressions are foldable, then the expression itself is foldable.
         <a title="Returns the areal geometry formed by the constituent linework of the input geometry assuming all inner geometries represent holes" href="ST_BuildArea.html"><span class="name">ST_BuildArea</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Returns the areal geometry formed by the constituent linework of the input geometry assuming all inner geometries represent holes
+      <p class="shortcomment cmt">Returns the areal geometry formed by the constituent linework of the input geometry assuming
+all inner geometries represent holes
 </p>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Centroid" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_CentroidextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_Centroid:ST_Centroid"></a>
@@ -1902,7 +1904,8 @@ expressions are foldable, then the expression itself is foldable.
       </span>
       
       <p class="shortcomment cmt">Return the distance between two geometries.</p><div class="fullcomment"><div class="comment cmt"><p>Return the distance between two geometries.
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes two geometries and calculates the distance between two objects.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  This function takes two geometries and calculates the distance between two objects.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_DistanceSphere" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_DistanceSphereextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_DistanceSphere:ST_DistanceSphere"></a>
       <span class="permalink">
@@ -2066,7 +2069,8 @@ expressions are foldable, then the expression itself is foldable.
       </span>
       
       <p class="shortcomment cmt">Returns a version of the given geometry with X and Y axis flipped.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a version of the given geometry with X and Y axis flipped.
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>Geometry</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  Geometry</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Force3D" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_Force3DextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_Force3D:ST_Force3D"></a>
       <span class="permalink">
@@ -2292,7 +2296,9 @@ expressions are foldable, then the expression itself is foldable.
       
       <p class="shortcomment cmt">Return a Geometry from a OGC Extended WKT string
 </p><div class="fullcomment"><div class="comment cmt"><p>Return a Geometry from a OGC Extended WKT string
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes a geometry string. The string format must be OGC Extended Well-Known text (EWKT) representation.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  This function takes a geometry string. The string format must be OGC Extended Well-Known text
+  (EWKT) representation.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeomFromGML" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_GeomFromGMLextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_GeomFromGML:ST_GeomFromGML"></a>
       <span class="permalink">
@@ -2342,7 +2348,9 @@ expressions are foldable, then the expression itself is foldable.
       
       <p class="shortcomment cmt">Return a Geometry from a GeoJSON string
 </p><div class="fullcomment"><div class="comment cmt"><p>Return a Geometry from a GeoJSON string
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes 1 parameter which is the geometry string. The string format must be GeoJson.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  This function takes 1 parameter which is the geometry string. The string format must be
+  GeoJson.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeomFromKML" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_GeomFromKMLextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_GeomFromKML:ST_GeomFromKML"></a>
       <span class="permalink">
@@ -2376,7 +2384,8 @@ expressions are foldable, then the expression itself is foldable.
       
       <p class="shortcomment cmt">Return a Geometry from a WKT string
 </p><div class="fullcomment"><div class="comment cmt"><p>Return a Geometry from a WKT string
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes a geometry string and a srid. The string format must be WKT.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  This function takes a geometry string and a srid. The string format must be WKT.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeomFromWKB" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ST_GeomFromWKBextendsExpressionwithFoldableExpressionwithImplicitCastInputTypeswithCodegenFallbackwithUserDataGeneratatorwithProductwithSerializable"></a><a id="ST_GeomFromWKB:ST_GeomFromWKB"></a>
       <span class="permalink">
@@ -2394,7 +2403,9 @@ expressions are foldable, then the expression itself is foldable.
       
       <p class="shortcomment cmt">Return a Geometry from a WKB string
 </p><div class="fullcomment"><div class="comment cmt"><p>Return a Geometry from a WKB string
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes 1 parameter which is the utf-8 encoded geometry wkb string or the binary wkb array.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  This function takes 1 parameter which is the utf-8 encoded geometry wkb string or the binary
+  wkb array.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeomFromWKT" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ST_GeomFromWKTextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_GeomFromWKT:ST_GeomFromWKT"></a>
       <span class="permalink">
@@ -2412,7 +2423,8 @@ expressions are foldable, then the expression itself is foldable.
       
       <p class="shortcomment cmt">Return a Geometry from a WKT string
 </p><div class="fullcomment"><div class="comment cmt"><p>Return a Geometry from a WKT string
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes a geometry string and a srid. The string format must be WKT.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  This function takes a geometry string and a srid. The string format must be WKT.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeometricMedian" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ST_GeometricMedianextendsInferredExpressionwithFoldableExpressionwithProductwithSerializable"></a><a id="ST_GeometricMedian:ST_GeometricMedian"></a>
       <span class="permalink">
@@ -2428,9 +2440,12 @@ expressions are foldable, then the expression itself is foldable.
         <a title="Returns a POINT Computes the approximate geometric median of a MultiPoint geometry using the Weiszfeld algorithm." href="ST_GeometricMedian.html"><span class="name">ST_GeometricMedian</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <a href="FoldableExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression">FoldableExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Returns a POINT Computes the approximate geometric median of a MultiPoint geometry using the Weiszfeld algorithm.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a POINT Computes the approximate geometric median of a MultiPoint geometry using the Weiszfeld algorithm.
-The geometric median provides a centrality measure that is less sensitive to outlier points than the centroid.
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>Geometry</p></dd></dl></div>
+      <p class="shortcomment cmt">Returns a POINT Computes the approximate geometric median of a MultiPoint geometry using the
+Weiszfeld algorithm.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a POINT Computes the approximate geometric median of a MultiPoint geometry using the
+Weiszfeld algorithm. The geometric median provides a centrality measure that is less sensitive
+to outlier points than the centroid.
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  Geometry</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeometryFromText" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ST_GeometryFromTextextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_GeometryFromText:ST_GeometryFromText"></a>
       <span class="permalink">
@@ -2447,7 +2462,8 @@ The geometric median provides a centrality measure that is less sensitive to out
       </span>
       
       <p class="shortcomment cmt">Return a Geometry from a WKT string.</p><div class="fullcomment"><div class="comment cmt"><p>Return a Geometry from a WKT string. Alias to ST_GeomFromWKT
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes a geometry string and a srid. The string format must be WKT.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  This function takes a geometry string and a srid. The string format must be WKT.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeometryN" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_GeometryNextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_GeometryN:ST_GeometryN"></a>
       <span class="permalink">
@@ -2819,9 +2835,10 @@ The geometric median provides a centrality measure that is less sensitive to out
         <a title="Returns a text description of the validity of the geometry considering the specified flags." href="ST_IsValidReason.html"><span class="name">ST_IsValidReason</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Returns a text description of the validity of the geometry considering the specified flags.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a text description of the validity of the geometry considering the specified flags.
-If flag not specified, it defaults to OGC SFS validity semantics.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A string describing the validity of the geometry.</p></dd></dl></div>
+      <p class="shortcomment cmt">Returns a text description of the validity of the geometry considering the specified flags.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a text description of the validity of the geometry considering the specified flags. If
+flag not specified, it defaults to OGC SFS validity semantics.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>
+  A string describing the validity of the geometry.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Length" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_LengthextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_Length:ST_Length"></a>
       <span class="permalink">
@@ -2904,7 +2921,8 @@ If flag not specified, it defaults to OGC SFS validity semantics.
         <a title="Return a line from a string." href="ST_LineFromText.html"><span class="name">ST_LineFromText</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Return a line from a string.</p><div class="fullcomment"><div class="comment cmt"><p>Return a line from a string. The string must be plain string and each coordinate must be separated by a delimiter.
+      <p class="shortcomment cmt">Return a line from a string.</p><div class="fullcomment"><div class="comment cmt"><p>Return a line from a string. The string must be plain string and each coordinate must be
+separated by a delimiter.
 </p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_LineFromWKB" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_LineFromWKBextendsExpressionwithFoldableExpressionwithImplicitCastInputTypeswithCodegenFallbackwithUserDataGeneratatorwithProductwithSerializable"></a><a id="ST_LineFromWKB:ST_LineFromWKB"></a>
@@ -2937,9 +2955,9 @@ If flag not specified, it defaults to OGC SFS validity semantics.
         <a title="Returns a point interpolated along a line." href="ST_LineInterpolatePoint.html"><span class="name">ST_LineInterpolatePoint</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Returns a point interpolated along a line.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a point interpolated along a line. First argument must be a LINESTRING.
-Second argument is a Double between 0 and 1 representing fraction of
-total linestring length the point has to be located.
+      <p class="shortcomment cmt">Returns a point interpolated along a line.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a point interpolated along a line. First argument must be a LINESTRING. Second argument
+is a Double between 0 and 1 representing fraction of total linestring length the point has to
+be located.
 </p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_LineLocatePoint" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_LineLocatePointextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_LineLocatePoint:ST_LineLocatePoint"></a>
@@ -2956,8 +2974,8 @@ total linestring length the point has to be located.
         <a title="Returns a float between 0 and 1 representing the location of the closest point on a LineString to the given Point, as a fraction of 2d line length." href="ST_LineLocatePoint.html"><span class="name">ST_LineLocatePoint</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Returns a float between 0 and 1 representing the location of the closest point on a LineString to the given Point,
-as a fraction of 2d line length.</p>
+      <p class="shortcomment cmt">Returns a float between 0 and 1 representing the location of the closest point on a LineString
+to the given Point, as a fraction of 2d line length.</p>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_LineMerge" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ST_LineMergeextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_LineMerge:ST_LineMerge"></a>
       <span class="permalink">
@@ -2974,9 +2992,10 @@ as a fraction of 2d line length.</p>
       </span>
       
       <p class="shortcomment cmt">Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.
-Only works for MultiLineString. Using other geometry will return GEOMETRYCOLLECTION EMPTY
-If the MultiLineString is can't be merged, the original multilinestring is returned
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>Geometry</p></dd></dl></div>
+Only works for MultiLineString. Using other geometry will return GEOMETRYCOLLECTION EMPTY If
+the MultiLineString is can't be merged, the original multilinestring is returned
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  Geometry</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_LineStringFromText" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ST_LineStringFromTextextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_LineStringFromText:ST_LineStringFromText"></a>
       <span class="permalink">
@@ -2992,7 +3011,8 @@ If the MultiLineString is can't be merged, the original multilinestring is retur
         <a title="Return a linestring from a string." href="ST_LineStringFromText.html"><span class="name">ST_LineStringFromText</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Return a linestring from a string.</p><div class="fullcomment"><div class="comment cmt"><p>Return a linestring from a string. The string must be plain string and each coordinate must be separated by a delimiter.
+      <p class="shortcomment cmt">Return a linestring from a string.</p><div class="fullcomment"><div class="comment cmt"><p>Return a linestring from a string. The string must be plain string and each coordinate must be
+separated by a delimiter.
 </p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_LineSubstring" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ST_LineSubstringextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_LineSubstring:ST_LineSubstring"></a>
@@ -3009,8 +3029,10 @@ If the MultiLineString is can't be merged, the original multilinestring is retur
         <a title="Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length." href="ST_LineSubstring.html"><span class="name">ST_LineSubstring</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length.</p><div class="fullcomment"><div class="comment cmt"><p>Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length.
-Second and third arguments are Double values between 0 and 1. This only works with LINESTRINGs.
+      <p class="shortcomment cmt">Return a linestring being a substring of the input one starting and ending at the given
+fractions of total 2d length.</p><div class="fullcomment"><div class="comment cmt"><p>Return a linestring being a substring of the input one starting and ending at the given
+fractions of total 2d length. Second and third arguments are Double values between 0 and 1.
+This only works with LINESTRINGs.
 </p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_LinestringFromWKB" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_LinestringFromWKBextendsExpressionwithFoldableExpressionwithImplicitCastInputTypeswithCodegenFallbackwithUserDataGeneratatorwithProductwithSerializable"></a><a id="ST_LinestringFromWKB:ST_LinestringFromWKB"></a>
@@ -3093,7 +3115,8 @@ Second and third arguments are Double values between 0 and 1. This only works wi
       
       <p class="shortcomment cmt">Return a Geometry from a WKT string
 </p><div class="fullcomment"><div class="comment cmt"><p>Return a Geometry from a WKT string
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes a geometry string and a srid. The string format must be WKT.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  This function takes a geometry string and a srid. The string format must be WKT.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_MMax" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_MMaxextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_MMax:ST_MMax"></a>
       <span class="permalink">
@@ -3159,7 +3182,8 @@ Second and third arguments are Double values between 0 and 1. This only works wi
       
       <p class="shortcomment cmt">Return a Geometry from a WKT string
 </p><div class="fullcomment"><div class="comment cmt"><p>Return a Geometry from a WKT string
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes a geometry string and a srid. The string format must be WKT.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  This function takes a geometry string and a srid. The string format must be WKT.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_MakeLine" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_MakeLineextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_MakeLine:ST_MakeLine"></a>
       <span class="permalink">
@@ -3239,8 +3263,8 @@ Second and third arguments are Double values between 0 and 1. This only works wi
         <a title="Given an invalid geometry, create a valid representation of the geometry." href="ST_MakeValid.html"><span class="name">ST_MakeValid</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Given an invalid geometry, create a valid representation of the geometry.</p><div class="fullcomment"><div class="comment cmt"><p>Given an invalid geometry, create a valid representation of the geometry.
-See: http://lin-ear-th-inking.blogspot.com/2021/05/fixing-invalid-geometry-with-jts.html
+      <p class="shortcomment cmt">Given an invalid geometry, create a valid representation of the geometry.</p><div class="fullcomment"><div class="comment cmt"><p>Given an invalid geometry, create a valid representation of the geometry. See:
+http://lin-ear-th-inking.blogspot.com/2021/05/fixing-invalid-geometry-with-jts.html
 </p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_MaxDistance" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_MaxDistanceextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_MaxDistance:ST_MaxDistance"></a>
@@ -3417,9 +3441,10 @@ See: http://lin-ear-th-inking.blogspot.com/2021/05/fixing-invalid-geometry-with-
         <a title="Returns the number of Geometries." href="ST_NumGeometries.html"><span class="name">ST_NumGeometries</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Returns the number of Geometries.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the number of geometries,
-for single geometries will return 1</p><p>This method implements the SQL/MM specification. SQL-MM 3: 9.1.4
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>Geometry</p></dd></dl></div>
+      <p class="shortcomment cmt">Returns the number of Geometries.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the
+number of geometries, for single geometries will return 1</p><p>This method implements the SQL/MM specification. SQL-MM 3: 9.1.4
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  Geometry</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_NumInteriorRing" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_NumInteriorRingextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_NumInteriorRing:ST_NumInteriorRing"></a>
       <span class="permalink">
@@ -3519,7 +3544,8 @@ for single geometries will return 1</p><p>This method implements the SQL/MM spec
       
       <p class="shortcomment cmt">Return a Point from X and Y
 </p><div class="fullcomment"><div class="comment cmt"><p>Return a Point from X and Y
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes 2 parameter which are point x, y.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  This function takes 2 parameter which are point x, y.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_PointFromGeoHash" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_PointFromGeoHashextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_PointFromGeoHash:ST_PointFromGeoHash"></a>
       <span class="permalink">
@@ -3551,9 +3577,11 @@ for single geometries will return 1</p><p>This method implements the SQL/MM spec
         <a title="Return a point from a string." href="ST_PointFromText.html"><span class="name">ST_PointFromText</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Return a point from a string.</p><div class="fullcomment"><div class="comment cmt"><p>Return a point from a string. The string must be plain string and each coordinate must be separated by a delimiter.
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes 2 parameters. The first parameter is the input geometry
-                        string, the second parameter is the delimiter. String format should be similar to CSV/TSV</p></dd></dl></div>
+      <p class="shortcomment cmt">Return a point from a string.</p><div class="fullcomment"><div class="comment cmt"><p>Return a point from a string. The string must be plain string and each coordinate must be
+separated by a delimiter.
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  This function takes 2 parameters. The first parameter is the input geometry string, the
+  second parameter is the delimiter. String format should be similar to CSV/TSV</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_PointFromWKB" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_PointFromWKBextendsExpressionwithFoldableExpressionwithImplicitCastInputTypeswithCodegenFallbackwithUserDataGeneratatorwithProductwithSerializable"></a><a id="ST_PointFromWKB:ST_PointFromWKB"></a>
       <span class="permalink">
@@ -3587,7 +3615,8 @@ for single geometries will return 1</p><p>This method implements the SQL/MM spec
       
       <p class="shortcomment cmt">Return a Point from X, Y, M and srid
 </p><div class="fullcomment"><div class="comment cmt"><p>Return a Point from X, Y, M and srid
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes 4 parameter which are point x, y, m and srid (default 0).</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  This function takes 4 parameter which are point x, y, m and srid (default 0).</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_PointN" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ST_PointNextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_PointN:ST_PointN"></a>
       <span class="permalink">
@@ -3605,7 +3634,8 @@ for single geometries will return 1</p><p>This method implements the SQL/MM spec
       
       <p class="shortcomment cmt">Returns the nth point in the geometry, provided it is a linestring
 </p><div class="fullcomment"><div class="comment cmt"><p>Returns the nth point in the geometry, provided it is a linestring
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>sequence of 2 input arguments, a geometry and a value 'n'</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  sequence of 2 input arguments, a geometry and a value 'n'</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_PointOnSurface" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ST_PointOnSurfaceextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_PointOnSurface:ST_PointOnSurface"></a>
       <span class="permalink">
@@ -3622,7 +3652,8 @@ for single geometries will return 1</p><p>This method implements the SQL/MM spec
       </span>
       
       <p class="shortcomment cmt">Returns a POINT guaranteed to lie on the surface.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a POINT guaranteed to lie on the surface.
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>Geometry</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  Geometry</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_PointZ" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ST_PointZextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_PointZ:ST_PointZ"></a>
       <span class="permalink">
@@ -3640,7 +3671,8 @@ for single geometries will return 1</p><p>This method implements the SQL/MM spec
       
       <p class="shortcomment cmt">Return a Point from X, Y, Z and srid
 </p><div class="fullcomment"><div class="comment cmt"><p>Return a Point from X, Y, Z and srid
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes 4 parameter which are point x, y, z and srid (default 0).</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  This function takes 4 parameter which are point x, y, z and srid (default 0).</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_PointZM" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_PointZMextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_PointZM:ST_PointZM"></a>
       <span class="permalink">
@@ -3721,7 +3753,8 @@ for single geometries will return 1</p><p>This method implements the SQL/MM spec
         <a title="Return a polygon from a string." href="ST_PolygonFromText.html"><span class="name">ST_PolygonFromText</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Return a polygon from a string.</p><div class="fullcomment"><div class="comment cmt"><p>Return a polygon from a string. The string must be plain string and each coordinate must be separated by a delimiter.
+      <p class="shortcomment cmt">Return a polygon from a string.</p><div class="fullcomment"><div class="comment cmt"><p>Return a polygon from a string. The string must be plain string and each coordinate must be
+separated by a delimiter.
 </p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Polygonize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_PolygonizeextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_Polygonize:ST_Polygonize"></a>
@@ -3772,8 +3805,10 @@ for single geometries will return 1</p><p>This method implements the SQL/MM spec
       
       <p class="shortcomment cmt">Reduce the precision of the given geometry to the given number of decimal places
 </p><div class="fullcomment"><div class="comment cmt"><p>Reduce the precision of the given geometry to the given number of decimal places
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>The first arg is a geom and the second arg is an integer scale, specifying the number of decimal places of the new coordinate. The last decimal place will
-                        be rounded to the nearest number.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  The first arg is a geom and the second arg is an integer scale, specifying the number of
+  decimal places of the new coordinate. The last decimal place will be rounded to the nearest
+  number.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Relate" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_RelateextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_Relate:ST_Relate"></a>
       <span class="permalink">
@@ -3966,12 +4001,15 @@ for single geometries will return 1</p><p>This method implements the SQL/MM spec
         <a title="Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input, and with the components having the same topological relationship." href="ST_SimplifyPreserveTopology.html"><span class="name">ST_SimplifyPreserveTopology</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
-and with the components having the same topological relationship.</p><div class="fullcomment"><div class="comment cmt"><p>Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
-and with the components having the same topological relationship.
-The simplification uses a maximum-distance difference algorithm similar to the Douglas-Peucker algorithm.
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>first arg is geometry
-                        second arg is distance tolerance for the simplification(all vertices in the simplified geometry will be within this distance of the original geometry)</p></dd></dl></div>
+      <p class="shortcomment cmt">Simplifies a geometry and ensures that the result is a valid geometry having the same dimension
+and number of components as the input, and with the components having the same topological
+relationship.</p><div class="fullcomment"><div class="comment cmt"><p>Simplifies a geometry and ensures that the result is a valid geometry having the same dimension
+and number of components as the input, and with the components having the same topological
+relationship. The simplification uses a maximum-distance difference algorithm similar to the
+Douglas-Peucker algorithm.
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  first arg is geometry second arg is distance tolerance for the simplification(all vertices in
+  the simplified geometry will be within this distance of the original geometry)</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_SimplifyVW" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_SimplifyVWextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_SimplifyVW:ST_SimplifyVW"></a>
       <span class="permalink">
@@ -4019,7 +4057,8 @@ The simplification uses a maximum-distance difference algorithm similar to the D
         <a title="Returns a multi-geometry that is the result of splitting the input geometry by the blade geometry" href="ST_Split.html"><span class="name">ST_Split</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Returns a multi-geometry that is the result of splitting the input geometry by the blade geometry
+      <p class="shortcomment cmt">Returns a multi-geometry that is the result of splitting the input geometry by the blade
+geometry
 </p>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_StartPoint" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_StartPointextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_StartPoint:ST_StartPoint"></a>
@@ -4118,7 +4157,8 @@ The simplification uses a maximum-distance difference algorithm similar to the D
         <a title="Given a geometry, sourceEPSGcode, and targetEPSGcode, convert the geometry's Spatial Reference System / Coordinate Reference System." href="ST_Transform.html"><span class="name">ST_Transform</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Given a geometry, sourceEPSGcode, and targetEPSGcode, convert the geometry's Spatial Reference System / Coordinate Reference System.</p>
+      <p class="shortcomment cmt">Given a geometry, sourceEPSGcode, and targetEPSGcode, convert the geometry's Spatial Reference
+System / Coordinate Reference System.</p>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Translate" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_TranslateextendsInferredExpressionwithFoldableExpressionwithProductwithSerializable"></a><a id="ST_Translate:ST_Translate"></a>
       <span class="permalink">
@@ -4362,7 +4402,8 @@ The simplification uses a maximum-distance difference algorithm similar to the D
       </span>
       
       <p class="shortcomment cmt">Return the Z maxima of the geometry.</p><div class="fullcomment"><div class="comment cmt"><p>Return the Z maxima of the geometry.
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes a geometry and returns the maximum of all Z-coordinate values.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  This function takes a geometry and returns the maximum of all Z-coordinate values.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_ZMin" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ST_ZMinextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_ZMin:ST_ZMin"></a>
       <span class="permalink">
@@ -4379,7 +4420,8 @@ The simplification uses a maximum-distance difference algorithm similar to the D
       </span>
       
       <p class="shortcomment cmt">Return the Z minima of the geometry.</p><div class="fullcomment"><div class="comment cmt"><p>Return the Z minima of the geometry.
-</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>This function takes a geometry and returns the minimum of all Z-coordinate values.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  This function takes a geometry and returns the minimum of all Z-coordinate values.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Zmflag" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_ZmflagextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_Zmflag:ST_Zmflag"></a>
       <span class="permalink">
@@ -4484,8 +4526,9 @@ The simplification uses a maximum-distance difference algorithm similar to the D
         <a title="Implicit conversions from Java/Scala functions to InferrableFunction." href="InferrableFunctionConverter$.html"><span class="name">InferrableFunctionConverter</span></a>
       </span>
       
-      <p class="shortcomment cmt">Implicit conversions from Java/Scala functions to <a href="InferrableFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction">InferrableFunction</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Implicit conversions from Java/Scala functions to <a href="InferrableFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction">InferrableFunction</a>. This should be used in conjunction with
-<a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> to make wrapping Java/Scala functions as catalyst expressions much easier.
+      <p class="shortcomment cmt">Implicit conversions from Java/Scala functions to <a href="InferrableFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction">InferrableFunction</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Implicit conversions from Java/Scala functions to <a href="InferrableFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction">InferrableFunction</a>. This should be used
+in conjunction with <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> to make wrapping Java/Scala functions as catalyst
+expressions much easier.
 </p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.InferrableRasterTypes" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="InferrableRasterTypes"></a><a id="InferrableRasterTypes:InferrableRasterTypes"></a>

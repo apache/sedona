@@ -539,10 +539,14 @@
         <span class="name">toDf</span><span class="params">(<span name="spatialPairRDD">spatialPairRDD: <span class="extype" name="org.apache.spark.api.java.JavaPairRDD">JavaPairRDD</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>, <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>, <span name="schema">schema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="sparkSession">sparkSession: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result">: <a href="../../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>
       </span>
       
-      <p class="shortcomment cmt">Convert a JavaPairRDD to DataFrame with a specified schema.</p><div class="fullcomment"><div class="comment cmt"><p>Convert a JavaPairRDD to DataFrame with a specified schema.</p><p>The schema is expected to follow the format:
-  [left geometry, (left user data columns), right geometry, (right user data columns)]</p><p>Note that the schema _must_ provide columns for left and right user data, even if they do not exist in the
-original data.</p><p>Also note that some complex types, such as <code>MapType</code>, and schemas as strings are not supported.
-</p></div><dl class="paramcmts block"><dt class="param">schema</dt><dd class="cmt"><p>Desired output schema</p></dd><dt class="param">sparkSession</dt><dd class="cmt"><p>Spark session</p></dd><dt>returns</dt><dd class="cmt"><p>Spatial pair RDD as a DataFrame with the desired schema</p></dd></dl></div>
+      <p class="shortcomment cmt">Convert a JavaPairRDD to DataFrame with a specified schema.</p><div class="fullcomment"><div class="comment cmt"><p>Convert a JavaPairRDD to DataFrame with a specified schema.</p><p>The schema is expected to follow the format: [left geometry, (left user data columns), right
+geometry, (right user data columns)]</p><p>Note that the schema _must_ provide columns for left and right user data, even if they do not
+exist in the original data.</p><p>Also note that some complex types, such as <code>MapType</code>, and schemas as strings are not
+supported.
+</p></div><dl class="paramcmts block"><dt class="param">schema</dt><dd class="cmt"><p>
+  Desired output schema</p></dd><dt class="param">sparkSession</dt><dd class="cmt"><p>
+  Spark session</p></dd><dt>returns</dt><dd class="cmt"><p>
+  Spatial pair RDD as a DataFrame with the desired schema</p></dd></dl></div>
     </li><li name="org.apache.sedona.sql.utils.Adapter#toDf" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="toDf(spatialPairRDD:org.apache.spark.api.java.JavaPairRDD[org.locationtech.jts.geom.Geometry,org.locationtech.jts.geom.Geometry],leftFieldnames:Seq[String],rightFieldNames:Seq[String],sparkSession:org.apache.spark.sql.SparkSession):org.apache.spark.sql.DataFrame"></a><a id="toDf(JavaPairRDD[Geometry,Geometry],Seq[String],Seq[String],SparkSession):DataFrame"></a>
       <span class="permalink">
@@ -591,7 +595,12 @@ original data.</p><p>Also note that some complex types, such as <code>MapType</c
       </span>
       
       <p class="shortcomment cmt">Convert a spatial RDD to DataFrame with a given schema.</p><div class="fullcomment"><div class="comment cmt"><p>Convert a spatial RDD to DataFrame with a given schema.
-</p></div><dl class="paramcmts block"><dt class="tparam">T</dt><dd class="cmt"><p>Geometry</p></dd><dt class="param">spatialRDD</dt><dd class="cmt"><p>Spatial RDD</p></dd><dt class="param">schema</dt><dd class="cmt"><p>Desired schema</p></dd><dt class="param">sparkSession</dt><dd class="cmt"><p>Spark Session</p></dd><dt>returns</dt><dd class="cmt"><p>DataFrame with the specified schema</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="tparam">T</dt><dd class="cmt"><p>
+  Geometry</p></dd><dt class="param">spatialRDD</dt><dd class="cmt"><p>
+  Spatial RDD</p></dd><dt class="param">schema</dt><dd class="cmt"><p>
+  Desired schema</p></dd><dt class="param">sparkSession</dt><dd class="cmt"><p>
+  Spark Session</p></dd><dt>returns</dt><dd class="cmt"><p>
+  DataFrame with the specified schema</p></dd></dl></div>
     </li><li name="org.apache.sedona.sql.utils.Adapter#toDf" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="toDf[T&lt;:org.locationtech.jts.geom.Geometry](spatialRDD:org.apache.sedona.core.spatialRDD.SpatialRDD[T],fieldNames:Seq[String],sparkSession:org.apache.spark.sql.SparkSession):org.apache.spark.sql.DataFrame"></a><a id="toDf[T&lt;:Geometry](SpatialRDD[T],Seq[String],SparkSession):DataFrame"></a>
       <span class="permalink">
@@ -656,7 +665,9 @@ original data.</p><p>Also note that some complex types, such as <code>MapType</c
         <span class="name">toSpatialRdd</span><span class="params">(<span name="dataFrame">dataFrame: <a href="../../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>, <span name="geometryColId">geometryColId: <span class="extype" name="scala.Int">Int</span></span>, <span name="fieldNames">fieldNames: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="../../core/spatialRDD/SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Convert a Spatial DF to a Spatial RDD with a list of user-supplied col names (except geom col).</p><div class="fullcomment"><div class="comment cmt"><p>Convert a Spatial DF to a Spatial RDD with a list of user-supplied col names (except geom col). The geometry column can be at any place in the DF.
+      <p class="shortcomment cmt">Convert a Spatial DF to a Spatial RDD with a list of user-supplied col names (except geom
+col).</p><div class="fullcomment"><div class="comment cmt"><p>Convert a Spatial DF to a Spatial RDD with a list of user-supplied col names (except geom
+col). The geometry column can be at any place in the DF.
 </p></div></div>
     </li><li name="org.apache.sedona.sql.utils.Adapter#toSpatialRdd" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toSpatialRdd(dataFrame:org.apache.spark.sql.DataFrame,geometryFieldName:String,fieldNames:Seq[String]):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]"></a><a id="toSpatialRdd(DataFrame,String,Seq[String]):SpatialRDD[Geometry]"></a>
@@ -673,7 +684,9 @@ original data.</p><p>Also note that some complex types, such as <code>MapType</c
         <span class="name">toSpatialRdd</span><span class="params">(<span name="dataFrame">dataFrame: <a href="../../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>, <span name="geometryFieldName">geometryFieldName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="fieldNames">fieldNames: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="../../core/spatialRDD/SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Convert a Spatial DF to a Spatial RDD with a list of user-supplied col names (except geom col).</p><div class="fullcomment"><div class="comment cmt"><p>Convert a Spatial DF to a Spatial RDD with a list of user-supplied col names (except geom col). The geometry column can be at any place in the DF.
+      <p class="shortcomment cmt">Convert a Spatial DF to a Spatial RDD with a list of user-supplied col names (except geom
+col).</p><div class="fullcomment"><div class="comment cmt"><p>Convert a Spatial DF to a Spatial RDD with a list of user-supplied col names (except geom
+col). The geometry column can be at any place in the DF.
 </p></div></div>
     </li><li name="org.apache.sedona.sql.utils.Adapter#toSpatialRdd" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toSpatialRdd(dataFrame:org.apache.spark.sql.DataFrame,geometryFieldName:String):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]"></a><a id="toSpatialRdd(DataFrame,String):SpatialRDD[Geometry]"></a>

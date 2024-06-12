@@ -273,21 +273,15 @@
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Provides methods to efficiently serialize and deserialize geometry types
-using shapefile format developed by ESRI. Does not serialize user data
-attached to the geometry.</p><p>Supports Point, LineString, Polygon, MultiPoint, MultiLineString and
-MultiPolygon types.</p><p>Compatible with the family of <code><a href="ShapeReader.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader">ShapeReader</a></code> classes.</p><p>First byte contains <code><span class="extype" name="ShapeType#id">ShapeType#id</span></code>. The rest is type specific.
-Point: 8 bytes for X coordinate, followed by 8 bytes for Y coordinate.
-LineString is serialized as MultiLineString.
-MultiLineString: 16 bytes for envelope, 4 bytes for the number of line strings,
-4 bytes for total number of vertices, 16 * num-vertices for
-XY coordinates of all the vertices.
-Polygons is serialized as MultiPolygon.
-MultiPolygon: 16 bytes for envelope, 4 bytes for the total number of exterior and
-interior rings of all polygons, 4 bytes for total number of vertices,
-16 * num-vertices for XY coordinates of all the vertices. The vertices
-are written one polygon at a time, exterior ring first, followed by
-interior rings.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Provides methods to efficiently serialize and deserialize geometry types using shapefile format
+developed by ESRI. Does not serialize user data attached to the geometry.</p><p>Supports Point, LineString, Polygon, MultiPoint, MultiLineString and MultiPolygon types.</p><p>Compatible with the family of <code><a href="ShapeReader.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader">ShapeReader</a></code> classes.</p><p>First byte contains <code><span class="extype" name="ShapeType#id">ShapeType#id</span></code>. The rest is type specific. Point: 8 bytes for X
+coordinate, followed by 8 bytes for Y coordinate. LineString is serialized as MultiLineString.
+MultiLineString: 16 bytes for envelope, 4 bytes for the number of line strings, 4 bytes for total
+number of vertices, 16 * num-vertices for XY coordinates of all the vertices. Polygons is
+serialized as MultiPolygon. MultiPolygon: 16 bytes for envelope, 4 bytes for the total number of
+exterior and interior rings of all polygons, 4 bytes for total number of vertices, 16 *
+num-vertices for XY coordinates of all the vertices. The vertices are written one polygon at a
+time, exterior ring first, followed by interior rings.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes

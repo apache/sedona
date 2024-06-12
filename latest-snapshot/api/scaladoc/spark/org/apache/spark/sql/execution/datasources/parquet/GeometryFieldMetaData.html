@@ -225,8 +225,12 @@
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A case class that holds the metadata of geometry column in GeoParquet metadata</p></div><dl class="paramcmts block"><dt class="param">encoding</dt><dd class="cmt"><p>Name of the geometry encoding format. Currently only &quot;WKB&quot; is supported</p></dd><dt class="param">geometryTypes</dt><dd class="cmt"><p>The geometry types of all geometries, or an empty array if they are not known.</p></dd><dt class="param">bbox</dt><dd class="cmt"><p>Bounding Box of the geometries in the file, formatted according to RFC 7946, section 5.</p></dd><dt class="param">crs</dt><dd class="cmt"><p>The CRS of the geometries in the file. None if crs metadata is absent, Some(JNull) if crs is null,
-           Some(value) if the crs is present and not null.</p></dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A case class that holds the metadata of geometry column in GeoParquet metadata</p></div><dl class="paramcmts block"><dt class="param">encoding</dt><dd class="cmt"><p>
+  Name of the geometry encoding format. Currently only &quot;WKB&quot; is supported</p></dd><dt class="param">geometryTypes</dt><dd class="cmt"><p>
+  The geometry types of all geometries, or an empty array if they are not known.</p></dd><dt class="param">bbox</dt><dd class="cmt"><p>
+  Bounding Box of the geometries in the file, formatted according to RFC 7946, section 5.</p></dd><dt class="param">crs</dt><dd class="cmt"><p>
+  The CRS of the geometries in the file. None if crs metadata is absent, Some(JNull) if crs is
+  null, Some(value) if the crs is present and not null.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -291,8 +295,12 @@
         <span class="name">GeometryFieldMetaData</span><span class="params">(<span name="encoding">encoding: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="geometryTypes">geometryTypes: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="bbox">bbox: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="crs">crs: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.json4s.JValue">JValue</span>] = <span class="symbol">None</span></span>)</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">encoding</dt><dd class="cmt"><p>Name of the geometry encoding format. Currently only &quot;WKB&quot; is supported</p></dd><dt class="param">geometryTypes</dt><dd class="cmt"><p>The geometry types of all geometries, or an empty array if they are not known.</p></dd><dt class="param">bbox</dt><dd class="cmt"><p>Bounding Box of the geometries in the file, formatted according to RFC 7946, section 5.</p></dd><dt class="param">crs</dt><dd class="cmt"><p>The CRS of the geometries in the file. None if crs metadata is absent, Some(JNull) if crs is null,
-           Some(value) if the crs is present and not null.</p></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">encoding</dt><dd class="cmt"><p>
+  Name of the geometry encoding format. Currently only &quot;WKB&quot; is supported</p></dd><dt class="param">geometryTypes</dt><dd class="cmt"><p>
+  The geometry types of all geometries, or an empty array if they are not known.</p></dd><dt class="param">bbox</dt><dd class="cmt"><p>
+  Bounding Box of the geometries in the file, formatted according to RFC 7946, section 5.</p></dd><dt class="param">crs</dt><dd class="cmt"><p>
+  The CRS of the geometries in the file. None if crs metadata is absent, Some(JNull) if crs is
+  null, Some(value) if the crs is present and not null.</p></dd></dl></div>
     </li></ol>
             </div>
 

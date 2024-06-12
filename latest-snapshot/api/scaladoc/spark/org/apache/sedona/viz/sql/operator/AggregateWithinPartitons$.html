@@ -321,13 +321,14 @@
         <span class="name">apply</span><span class="params">(<span name="dataFrame">dataFrame: <a href="../../../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>, <span name="keyCol">keyCol: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="valueCol">valueCol: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="aggFunc">aggFunc: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../../../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>
       </span>
       
-      <p class="shortcomment cmt">Run aggregation within each partition without incurring a data shuffle.</p><div class="fullcomment"><div class="comment cmt"><p>Run aggregation within each partition without incurring a data shuffle. Currently support three aggregates, sum, count, avg.
-If the aggregate func is count, this function doesn't require a value column. If the aggregate func is sum and avg, it will require
-a value column. They are same as the regular aggregation SQL</p><p>SELECT pixel, COUNT(*)
-FROM t GROUP BY pixel</p><p>SELECT pixel, AVG(weight)
-FROM t GROUP BY pixel</p><p>SELECT pixel, AVG(weight)
-FROM t GROUP BY pixel
-</p></div><dl class="paramcmts block"><dt class="param">keyCol</dt><dd class="cmt"><p>GroupBy key</p></dd><dt class="param">valueCol</dt><dd class="cmt"><p>Aggregate value</p></dd><dt class="param">aggFunc</dt><dd class="cmt"><p>Aggregate function</p></dd></dl></div>
+      <p class="shortcomment cmt">Run aggregation within each partition without incurring a data shuffle.</p><div class="fullcomment"><div class="comment cmt"><p>Run aggregation within each partition without incurring a data shuffle. Currently support
+three aggregates, sum, count, avg. If the aggregate func is count, this function doesn't
+require a value column. If the aggregate func is sum and avg, it will require a value column.
+They are same as the regular aggregation SQL</p><p>SELECT pixel, COUNT(*) FROM t GROUP BY pixel</p><p>SELECT pixel, AVG(weight) FROM t GROUP BY pixel</p><p>SELECT pixel, AVG(weight) FROM t GROUP BY pixel
+</p></div><dl class="paramcmts block"><dt class="param">keyCol</dt><dd class="cmt"><p>
+  GroupBy key</p></dd><dt class="param">valueCol</dt><dd class="cmt"><p>
+  Aggregate value</p></dd><dt class="param">aggFunc</dt><dd class="cmt"><p>
+  Aggregate function</p></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">

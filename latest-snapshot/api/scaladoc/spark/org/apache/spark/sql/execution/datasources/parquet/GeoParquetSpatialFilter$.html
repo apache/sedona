@@ -310,9 +310,12 @@
         <a title="Spatial predicate pushed down to GeoParquet data source." href="GeoParquetSpatialFilter$$LeafFilter.html"><span class="name">LeafFilter</span></a><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="predicateType">predicateType: <a href="../../../../../sedona/core/spatialOperator/SpatialPredicate.html" class="extype" name="org.apache.sedona.core.spatialOperator.SpatialPredicate">SpatialPredicate</a></span>, <span name="queryWindow">queryWindow: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>)</span><span class="result"> extends <a href="GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Spatial predicate pushed down to GeoParquet data source.</p><div class="fullcomment"><div class="comment cmt"><p>Spatial predicate pushed down to GeoParquet data source. We'll use the bbox in column metadata to prune
-unrelated files.
-</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>name of filtered geometry column</p></dd><dt class="param">predicateType</dt><dd class="cmt"><p>type of spatial predicate, should be one of COVERS and INTERSECTS</p></dd><dt class="param">queryWindow</dt><dd class="cmt"><p>query window</p></dd></dl></div>
+      <p class="shortcomment cmt">Spatial predicate pushed down to GeoParquet data source.</p><div class="fullcomment"><div class="comment cmt"><p>Spatial predicate pushed down to GeoParquet data source. We'll use the bbox in column
+metadata to prune unrelated files.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>
+  name of filtered geometry column</p></dd><dt class="param">predicateType</dt><dd class="cmt"><p>
+  type of spatial predicate, should be one of COVERS and INTERSECTS</p></dd><dt class="param">queryWindow</dt><dd class="cmt"><p>
+  query window</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter.OrFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="OrFilterextendsGeoParquetSpatialFilterwithProductwithSerializable"></a><a id="OrFilter:OrFilter"></a>
       <span class="permalink">

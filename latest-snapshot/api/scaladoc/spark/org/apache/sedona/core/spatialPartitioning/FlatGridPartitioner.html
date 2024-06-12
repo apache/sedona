@@ -187,8 +187,8 @@
                         <a href="KDBTreePartitioner.html" title="">KDBTreePartitioner</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="PartitioningUtils.html" title="Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not use this file except in compliance with the License."></a>
-                        <a href="PartitioningUtils.html" title="Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not use this file except in compliance with the License.">PartitioningUtils</a>
+                        <a class="class" href="PartitioningUtils.html" title=""></a>
+                        <a href="PartitioningUtils.html" title="">PartitioningUtils</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="class" href="QuadTreePartitioner.html" title=""></a>
@@ -341,8 +341,8 @@
         <span class="name">placeObject</span><span class="tparams">[<span name="T">T &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>]</span><span class="params">(<span name="spatialObject">spatialObject: <span class="extype" name="org.apache.sedona.core.spatialPartitioning.SpatialPartitioner.placeObject.T">T</span></span>)</span><span class="result">: <span class="extype" name="java.util.Iterator">Iterator</span>[(<span class="extype" name="java.lang.Integer">Integer</span>, <span class="extype" name="org.apache.sedona.core.spatialPartitioning.SpatialPartitioner.placeObject.T">T</span>)]</span>
       </span>
       
-      <p class="shortcomment cmt">Given a geometry, returns a list of partitions it overlaps.</p><div class="fullcomment"><div class="comment cmt"><p>Given a geometry, returns a list of partitions it overlaps.</p><p>For points, returns exactly one partition as long as grid type is non-overlapping.
-For other geometry types or for overlapping grid types, may return multiple partitions.
+      <p class="shortcomment cmt">Given a geometry, returns a list of partitions it overlaps.</p><div class="fullcomment"><div class="comment cmt"><p>Given a geometry, returns a list of partitions it overlaps.</p><p>For points, returns exactly one partition as long as grid type is non-overlapping. For other
+geometry types or for overlapping grid types, may return multiple partitions.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SpatialPartitioner.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.SpatialPartitioner">SpatialPartitioner</a></dd></dl></div>
     </li></ol>
             </div>
@@ -688,12 +688,13 @@ For other geometry types or for overlapping grid types, may return multiple part
         <span class="name">numPartitions</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <p class="shortcomment cmt">Equal and Hilbert partitioning methods have necessary properties to support de-dup.</p><div class="fullcomment"><div class="comment cmt"><p>Equal and Hilbert partitioning methods have necessary properties to support de-dup.
-These methods provide non-overlapping partition extents and not require overflow
-partition as they cover full extent of the RDD. However, legacy
-SpatialRDD.spatialPartitioning(otherGrids) method doesn't preserve the grid type
-making it impossible to reliably detect whether partitioning allows efficient de-dup or not.</p><p>TODO Figure out how to remove SpatialRDD.spatialPartitioning(otherGrids) API. Perhaps,
-make the implementation no-op and fold the logic into JoinQuery, RangeQuery and KNNQuery APIs.
+      <p class="shortcomment cmt">Equal and Hilbert partitioning methods have necessary properties to support de-dup.</p><div class="fullcomment"><div class="comment cmt"><p>Equal and Hilbert partitioning methods have necessary properties to support de-dup. These
+methods provide non-overlapping partition extents and not require overflow partition as they
+cover full extent of the RDD. However, legacy SpatialRDD.spatialPartitioning(otherGrids)
+method doesn't preserve the grid type making it impossible to reliably detect whether
+partitioning allows efficient de-dup or not.</p><p>TODO Figure out how to remove SpatialRDD.spatialPartitioning(otherGrids) API. Perhaps,
+make the implementation no-op and fold the logic into JoinQuery, RangeQuery and KNNQuery
+APIs.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.sedona.core.spatialPartitioning.FlatGridPartitioner">FlatGridPartitioner</a> → Partitioner</dd><dt>Annotations</dt><dd>
                 <span class="name">@Override</span><span class="args">()</span>
               

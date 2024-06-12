@@ -265,10 +265,21 @@
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Distance joins requires matching geometries to be in the same partition, despite not necessarily overlapping.
-To create an overlap and guarantee matching geometries end up in the same partition, the left geometry is expanded
-before partitioning. It's the logical equivalent of:</p><p>select * from a join b on ST_Distance(a.geom, b.geom) &lt;= 1</p><p>becomes</p><p>select * from a join b on ST_Intersects(ST_Envelope(ST_Buffer(a.geom, 1)), b.geom) and ST_Distance(a.geom, b.geom) &lt;= 1
-</p></div><dl class="paramcmts block"><dt class="param">left</dt><dd class="cmt"><p>left side of the join</p></dd><dt class="param">right</dt><dd class="cmt"><p>right side of the join</p></dd><dt class="param">leftShape</dt><dd class="cmt"><p>expression for the first argument of spatialPredicate</p></dd><dt class="param">rightShape</dt><dd class="cmt"><p>expression for the second argument of spatialPredicate</p></dd><dt class="param">distance</dt><dd class="cmt"><p>- ST_Distance(left, right) &lt;= distance. Distance can be literal or a computation over 'left' or 'right'.</p></dd><dt class="param">distanceBoundToLeft</dt><dd class="cmt"><p>whether distance expression references attributes from left relation or right relation</p></dd><dt class="param">spatialPredicate</dt><dd class="cmt"><p>spatial predicate as join condition</p></dd><dt class="param">extraCondition</dt><dd class="cmt"><p>extra join condition other than spatialPredicate</p></dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Distance joins requires matching geometries to be in the same partition, despite not
+necessarily overlapping. To create an overlap and guarantee matching geometries end up in the
+same partition, the left geometry is expanded before partitioning. It's the logical equivalent
+of:</p><p>select * from a join b on ST_Distance(a.geom, b.geom) &lt;= 1</p><p>becomes</p><p>select * from a join b on ST_Intersects(ST_Envelope(ST_Buffer(a.geom, 1)), b.geom) and
+ST_Distance(a.geom, b.geom) &lt;= 1
+</p></div><dl class="paramcmts block"><dt class="param">left</dt><dd class="cmt"><p>
+  left side of the join</p></dd><dt class="param">right</dt><dd class="cmt"><p>
+  right side of the join</p></dd><dt class="param">leftShape</dt><dd class="cmt"><p>
+  expression for the first argument of spatialPredicate</p></dd><dt class="param">rightShape</dt><dd class="cmt"><p>
+  expression for the second argument of spatialPredicate</p></dd><dt class="param">distance</dt><dd class="cmt"><p>
+  \- ST_Distance(left, right) &lt;= distance. Distance can be literal or a computation over 'left'
+  or 'right'.</p></dd><dt class="param">distanceBoundToLeft</dt><dd class="cmt"><p>
+  whether distance expression references attributes from left relation or right relation</p></dd><dt class="param">spatialPredicate</dt><dd class="cmt"><p>
+  spatial predicate as join condition</p></dd><dt class="param">extraCondition</dt><dd class="cmt"><p>
+  extra join condition other than spatialPredicate</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -333,7 +344,16 @@ before partitioning. It's the logical equivalent of:</p><p>select * from a join 
         <span class="name">DistanceJoinExec</span><span class="params">(<span name="left">left: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="right">right: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="leftShape">leftShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="rightShape">rightShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="distance">distance: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="distanceBoundToLeft">distanceBoundToLeft: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="spatialPredicate">spatialPredicate: <a href="../../../../../sedona/core/spatialOperator/SpatialPredicate.html" class="extype" name="org.apache.sedona.core.spatialOperator.SpatialPredicate">SpatialPredicate</a></span>, <span name="isGeography">isGeography: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="extraCondition">extraCondition: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>)</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">left</dt><dd class="cmt"><p>left side of the join</p></dd><dt class="param">right</dt><dd class="cmt"><p>right side of the join</p></dd><dt class="param">leftShape</dt><dd class="cmt"><p>expression for the first argument of spatialPredicate</p></dd><dt class="param">rightShape</dt><dd class="cmt"><p>expression for the second argument of spatialPredicate</p></dd><dt class="param">distance</dt><dd class="cmt"><p>- ST_Distance(left, right) &lt;= distance. Distance can be literal or a computation over 'left' or 'right'.</p></dd><dt class="param">distanceBoundToLeft</dt><dd class="cmt"><p>whether distance expression references attributes from left relation or right relation</p></dd><dt class="param">spatialPredicate</dt><dd class="cmt"><p>spatial predicate as join condition</p></dd><dt class="param">extraCondition</dt><dd class="cmt"><p>extra join condition other than spatialPredicate</p></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">left</dt><dd class="cmt"><p>
+  left side of the join</p></dd><dt class="param">right</dt><dd class="cmt"><p>
+  right side of the join</p></dd><dt class="param">leftShape</dt><dd class="cmt"><p>
+  expression for the first argument of spatialPredicate</p></dd><dt class="param">rightShape</dt><dd class="cmt"><p>
+  expression for the second argument of spatialPredicate</p></dd><dt class="param">distance</dt><dd class="cmt"><p>
+  \- ST_Distance(left, right) &lt;= distance. Distance can be literal or a computation over 'left'
+  or 'right'.</p></dd><dt class="param">distanceBoundToLeft</dt><dd class="cmt"><p>
+  whether distance expression references attributes from left relation or right relation</p></dd><dt class="param">spatialPredicate</dt><dd class="cmt"><p>
+  spatial predicate as join condition</p></dd><dt class="param">extraCondition</dt><dd class="cmt"><p>
+  extra join condition other than spatialPredicate</p></dd></dl></div>
     </li></ol>
             </div>
 
