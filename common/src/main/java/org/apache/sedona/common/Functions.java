@@ -1032,7 +1032,7 @@ public class Functions {
     LinearRing exteriorRing = geom.getExteriorRing();
     boolean isExteriorRingCW = !Orientation.isCCW(exteriorRing.getCoordinateSequence());
 
-    if (geom.getNumInteriorRing() == 0 ) {
+    if (geom.getNumInteriorRing() == 0) {
       return isExteriorRingCW;
     }
 
@@ -1145,7 +1145,7 @@ public class Functions {
     LinearRing exteriorRing = geom.getExteriorRing();
     boolean isExteriorRingCCW = Orientation.isCCW(exteriorRing.getCoordinateSequence());
 
-    if (geom.getNumInteriorRing() == 0 ) {
+    if (geom.getNumInteriorRing() == 0) {
       return isExteriorRingCCW;
     }
 
