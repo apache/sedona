@@ -1020,6 +1020,11 @@ public class FunctionsTest extends TestBase {
         "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))";
     assertEquals(expected, actual);
 
+    polyCCW = Constructors.geomFromWKT("POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35))", 0);
+    actual = Functions.asWKT(Functions.forcePolygonCCW(polyCCW));
+    expected = "POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35))";
+    assertEquals(expected, actual);
+
     // both exterior ring and interior ring are counter-clockwise
     polyCCW =
         Constructors.geomFromWKT(
@@ -1062,6 +1067,11 @@ public class FunctionsTest extends TestBase {
         "POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35), (30 20, 20 15, 20 25, 30 20))";
     assertEquals(expected, actual);
 
+    polyCW = Constructors.geomFromWKT("POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35))", 0);
+    actual = Functions.asWKT(Functions.forcePolygonCCW(polyCW));
+    expected = "POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35))";
+    assertEquals(expected, actual);
+
     // both exterior ring and interior ring are counter-clockwise
     polyCW =
         Constructors.geomFromWKT(
@@ -1101,6 +1111,9 @@ public class FunctionsTest extends TestBase {
             "POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))", 0);
     assertFalse(Functions.isPolygonCW(polyCCW));
 
+    polyCCW = Constructors.geomFromWKT("POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35))", 0);
+    assertFalse(Functions.isPolygonCW(polyCCW));
+
     Geometry polyCW =
         Constructors.geomFromWKT(
             "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))", 0);
@@ -1124,6 +1137,9 @@ public class FunctionsTest extends TestBase {
     Geometry polyCCW =
         Constructors.geomFromWKT(
             "POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))", 0);
+    assertTrue(Functions.isPolygonCCW(polyCCW));
+
+    polyCCW = Constructors.geomFromWKT("POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35))", 0);
     assertTrue(Functions.isPolygonCCW(polyCCW));
 
     Geometry polyCW =
