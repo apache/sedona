@@ -1,16 +1,20 @@
-/**
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.spark.sql.execution.datasources.parquet
 
@@ -39,29 +43,34 @@ import org.apache.spark.unsafe.types.UTF8String
  * Some utility function to convert Spark data source filters to Parquet filters.
  */
 class GeoParquetFilters(
-                      schema: MessageType,
-                      pushDownDate: Boolean,
-                      pushDownTimestamp: Boolean,
-                      pushDownDecimal: Boolean,
-                      pushDownStartWith: Boolean,
-                      pushDownInFilterThreshold: Int,
-                      caseSensitive: Boolean) {
+    schema: MessageType,
+    pushDownDate: Boolean,
+    pushDownTimestamp: Boolean,
+    pushDownDecimal: Boolean,
+    pushDownStartWith: Boolean,
+    pushDownInFilterThreshold: Int,
+    caseSensitive: Boolean) {
   // A map which contains parquet field name and data type, if predicate push down applies.
   //
   // Each key in `nameToParquetField` represents a column; `dots` are used as separators for
   // nested columns. If any part of the names contains `dots`, it is quoted to avoid confusion.
   // See `org.apache.spark.sql.connector.catalog.quote` for implementation details.
-  private val nameToParquetField : Map[String, ParquetPrimitiveField] = {
+  private val nameToParquetField: Map[String, ParquetPrimitiveField] = {
     // Recursively traverse the parquet schema to get primitive fields that can be pushed-down.
     // `parentFieldNames` is used to keep track of the current nested level when traversing.
     def getPrimitiveFields(
-                            fields: Seq[Type],
-                            parentFieldNames: Array[String] = Array.empty): Seq[ParquetPrimitiveField] = {
+        fields: Seq[Type],
+        parentFieldNames: Array[String] = Array.empty): Seq[ParquetPrimitiveField] = {
       fields.flatMap {
         case p: PrimitiveType =>
-          Some(ParquetPrimitiveField(fieldNames = parentFieldNames :+ p.getName,
-            fieldType = ParquetSchemaType(p.getOriginalType,
-              p.getPrimitiveTypeName, p.getTypeLength, p.getDecimalMetadata)))
+          Some(
+            ParquetPrimitiveField(
+              fieldNames = parentFieldNames :+ p.getName,
+              fieldType = ParquetSchemaType(
+                p.getOriginalType,
+                p.getPrimitiveTypeName,
+                p.getTypeLength,
+                p.getDecimalMetadata)))
         // Note that when g is a `Struct`, `g.getOriginalType` is `null`.
         // When g is a `Map`, `g.getOriginalType` is `MAP`.
         // When g is a `List`, `g.getOriginalType` is `LIST`.
@@ -84,10 +93,10 @@ class GeoParquetFilters(
       // mode, just skip pushdown for these fields, they will trigger Exception when reading,
       // See: SPARK-25132.
       val dedupPrimitiveFields =
-      primitiveFields
-        .groupBy(_._1.toLowerCase(Locale.ROOT))
-        .filter(_._2.size == 1)
-        .mapValues(_.head._2)
+        primitiveFields
+          .groupBy(_._1.toLowerCase(Locale.ROOT))
+          .filter(_._2.size == 1)
+          .mapValues(_.head._2)
       CaseInsensitiveMap(dedupPrimitiveFields.toMap)
     }
   }
@@ -95,18 +104,20 @@ class GeoParquetFilters(
   /**
    * Holds a single primitive field information stored in the underlying parquet file.
    *
-   * @param fieldNames a field name as an array of string multi-identifier in parquet file
-   * @param fieldType field type related info in parquet file
+   * @param fieldNames
+   *   a field name as an array of string multi-identifier in parquet file
+   * @param fieldType
+   *   field type related info in parquet file
    */
   private case class ParquetPrimitiveField(
-                                            fieldNames: Array[String],
-                                            fieldType: ParquetSchemaType)
+      fieldNames: Array[String],
+      fieldType: ParquetSchemaType)
 
   private case class ParquetSchemaType(
-                                        originalType: OriginalType,
-                                        primitiveTypeName: PrimitiveTypeName,
-                                        length: Int,
-                                        decimalMetadata: DecimalMetadata)
+      originalType: OriginalType,
+      primitiveTypeName: PrimitiveTypeName,
+      length: Int,
+      decimalMetadata: DecimalMetadata)
 
   private val ParquetBooleanType = ParquetSchemaType(null, BOOLEAN, 0, null)
   private val ParquetByteType = ParquetSchemaType(INT_8, INT32, 0, null)
@@ -156,14 +167,15 @@ class GeoParquetFilters(
     millis.asInstanceOf[JLong]
   }
 
-  private val makeEq:
-    PartialFunction[ParquetSchemaType, (Array[String], Any) => FilterPredicate] = {
+  private val makeEq
+      : PartialFunction[ParquetSchemaType, (Array[String], Any) => FilterPredicate] = {
     case ParquetBooleanType =>
       (n: Array[String], v: Any) => FilterApi.eq(booleanColumn(n), v.asInstanceOf[JBoolean])
     case ParquetByteType | ParquetShortType | ParquetIntegerType =>
-      (n: Array[String], v: Any) => FilterApi.eq(
-        intColumn(n),
-        Option(v).map(_.asInstanceOf[Number].intValue.asInstanceOf[Integer]).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.eq(
+          intColumn(n),
+          Option(v).map(_.asInstanceOf[Number].intValue.asInstanceOf[Integer]).orNull)
     case ParquetLongType =>
       (n: Array[String], v: Any) => FilterApi.eq(longColumn(n), v.asInstanceOf[JLong])
     case ParquetFloatType =>
@@ -173,48 +185,53 @@ class GeoParquetFilters(
 
     // Binary.fromString and Binary.fromByteArray don't accept null values
     case ParquetStringType =>
-      (n: Array[String], v: Any) => FilterApi.eq(
-        binaryColumn(n),
-        Option(v).map(s => Binary.fromString(s.asInstanceOf[String])).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.eq(
+          binaryColumn(n),
+          Option(v).map(s => Binary.fromString(s.asInstanceOf[String])).orNull)
     case ParquetBinaryType =>
-      (n: Array[String], v: Any) => FilterApi.eq(
-        binaryColumn(n),
-        Option(v).map(b => Binary.fromReusedByteArray(v.asInstanceOf[Array[Byte]])).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.eq(
+          binaryColumn(n),
+          Option(v).map(b => Binary.fromReusedByteArray(v.asInstanceOf[Array[Byte]])).orNull)
     case ParquetDateType if pushDownDate =>
-      (n: Array[String], v: Any) => FilterApi.eq(
-        intColumn(n),
-        Option(v).map(date => dateToDays(date).asInstanceOf[Integer]).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.eq(
+          intColumn(n),
+          Option(v).map(date => dateToDays(date).asInstanceOf[Integer]).orNull)
     case ParquetTimestampMicrosType if pushDownTimestamp =>
-      (n: Array[String], v: Any) => FilterApi.eq(
-        longColumn(n),
-        Option(v).map(timestampToMicros).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.eq(longColumn(n), Option(v).map(timestampToMicros).orNull)
     case ParquetTimestampMillisType if pushDownTimestamp =>
-      (n: Array[String], v: Any) => FilterApi.eq(
-        longColumn(n),
-        Option(v).map(timestampToMillis).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.eq(longColumn(n), Option(v).map(timestampToMillis).orNull)
 
     case ParquetSchemaType(DECIMAL, INT32, _, _) if pushDownDecimal =>
-      (n: Array[String], v: Any) => FilterApi.eq(
-        intColumn(n),
-        Option(v).map(d => decimalToInt32(d.asInstanceOf[JBigDecimal])).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.eq(
+          intColumn(n),
+          Option(v).map(d => decimalToInt32(d.asInstanceOf[JBigDecimal])).orNull)
     case ParquetSchemaType(DECIMAL, INT64, _, _) if pushDownDecimal =>
-      (n: Array[String], v: Any) => FilterApi.eq(
-        longColumn(n),
-        Option(v).map(d => decimalToInt64(d.asInstanceOf[JBigDecimal])).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.eq(
+          longColumn(n),
+          Option(v).map(d => decimalToInt64(d.asInstanceOf[JBigDecimal])).orNull)
     case ParquetSchemaType(DECIMAL, FIXED_LEN_BYTE_ARRAY, length, _) if pushDownDecimal =>
-      (n: Array[String], v: Any) => FilterApi.eq(
-        binaryColumn(n),
-        Option(v).map(d => decimalToByteArray(d.asInstanceOf[JBigDecimal], length)).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.eq(
+          binaryColumn(n),
+          Option(v).map(d => decimalToByteArray(d.asInstanceOf[JBigDecimal], length)).orNull)
   }
 
-  private val makeNotEq:
-    PartialFunction[ParquetSchemaType, (Array[String], Any) => FilterPredicate] = {
+  private val makeNotEq
+      : PartialFunction[ParquetSchemaType, (Array[String], Any) => FilterPredicate] = {
     case ParquetBooleanType =>
       (n: Array[String], v: Any) => FilterApi.notEq(booleanColumn(n), v.asInstanceOf[JBoolean])
     case ParquetByteType | ParquetShortType | ParquetIntegerType =>
-      (n: Array[String], v: Any) => FilterApi.notEq(
-        intColumn(n),
-        Option(v).map(_.asInstanceOf[Number].intValue.asInstanceOf[Integer]).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.notEq(
+          intColumn(n),
+          Option(v).map(_.asInstanceOf[Number].intValue.asInstanceOf[Integer]).orNull)
     case ParquetLongType =>
       (n: Array[String], v: Any) => FilterApi.notEq(longColumn(n), v.asInstanceOf[JLong])
     case ParquetFloatType =>
@@ -223,42 +240,46 @@ class GeoParquetFilters(
       (n: Array[String], v: Any) => FilterApi.notEq(doubleColumn(n), v.asInstanceOf[JDouble])
 
     case ParquetStringType =>
-      (n: Array[String], v: Any) => FilterApi.notEq(
-        binaryColumn(n),
-        Option(v).map(s => Binary.fromString(s.asInstanceOf[String])).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.notEq(
+          binaryColumn(n),
+          Option(v).map(s => Binary.fromString(s.asInstanceOf[String])).orNull)
     case ParquetBinaryType =>
-      (n: Array[String], v: Any) => FilterApi.notEq(
-        binaryColumn(n),
-        Option(v).map(b => Binary.fromReusedByteArray(v.asInstanceOf[Array[Byte]])).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.notEq(
+          binaryColumn(n),
+          Option(v).map(b => Binary.fromReusedByteArray(v.asInstanceOf[Array[Byte]])).orNull)
     case ParquetDateType if pushDownDate =>
-      (n: Array[String], v: Any) => FilterApi.notEq(
-        intColumn(n),
-        Option(v).map(date => dateToDays(date).asInstanceOf[Integer]).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.notEq(
+          intColumn(n),
+          Option(v).map(date => dateToDays(date).asInstanceOf[Integer]).orNull)
     case ParquetTimestampMicrosType if pushDownTimestamp =>
-      (n: Array[String], v: Any) => FilterApi.notEq(
-        longColumn(n),
-        Option(v).map(timestampToMicros).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.notEq(longColumn(n), Option(v).map(timestampToMicros).orNull)
     case ParquetTimestampMillisType if pushDownTimestamp =>
-      (n: Array[String], v: Any) => FilterApi.notEq(
-        longColumn(n),
-        Option(v).map(timestampToMillis).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.notEq(longColumn(n), Option(v).map(timestampToMillis).orNull)
 
     case ParquetSchemaType(DECIMAL, INT32, _, _) if pushDownDecimal =>
-      (n: Array[String], v: Any) => FilterApi.notEq(
-        intColumn(n),
-        Option(v).map(d => decimalToInt32(d.asInstanceOf[JBigDecimal])).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.notEq(
+          intColumn(n),
+          Option(v).map(d => decimalToInt32(d.asInstanceOf[JBigDecimal])).orNull)
     case ParquetSchemaType(DECIMAL, INT64, _, _) if pushDownDecimal =>
-      (n: Array[String], v: Any) => FilterApi.notEq(
-        longColumn(n),
-        Option(v).map(d => decimalToInt64(d.asInstanceOf[JBigDecimal])).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.notEq(
+          longColumn(n),
+          Option(v).map(d => decimalToInt64(d.asInstanceOf[JBigDecimal])).orNull)
     case ParquetSchemaType(DECIMAL, FIXED_LEN_BYTE_ARRAY, length, _) if pushDownDecimal =>
-      (n: Array[String], v: Any) => FilterApi.notEq(
-        binaryColumn(n),
-        Option(v).map(d => decimalToByteArray(d.asInstanceOf[JBigDecimal], length)).orNull)
+      (n: Array[String], v: Any) =>
+        FilterApi.notEq(
+          binaryColumn(n),
+          Option(v).map(d => decimalToByteArray(d.asInstanceOf[JBigDecimal], length)).orNull)
   }
 
-  private val makeLt:
-    PartialFunction[ParquetSchemaType, (Array[String], Any) => FilterPredicate] = {
+  private val makeLt
+      : PartialFunction[ParquetSchemaType, (Array[String], Any) => FilterPredicate] = {
     case ParquetByteType | ParquetShortType | ParquetIntegerType =>
       (n: Array[String], v: Any) =>
         FilterApi.lt(intColumn(n), v.asInstanceOf[Number].intValue.asInstanceOf[Integer])
@@ -294,8 +315,8 @@ class GeoParquetFilters(
         FilterApi.lt(binaryColumn(n), decimalToByteArray(v.asInstanceOf[JBigDecimal], length))
   }
 
-  private val makeLtEq:
-    PartialFunction[ParquetSchemaType, (Array[String], Any) => FilterPredicate] = {
+  private val makeLtEq
+      : PartialFunction[ParquetSchemaType, (Array[String], Any) => FilterPredicate] = {
     case ParquetByteType | ParquetShortType | ParquetIntegerType =>
       (n: Array[String], v: Any) =>
         FilterApi.ltEq(intColumn(n), v.asInstanceOf[Number].intValue.asInstanceOf[Integer])
@@ -331,8 +352,8 @@ class GeoParquetFilters(
         FilterApi.ltEq(binaryColumn(n), decimalToByteArray(v.asInstanceOf[JBigDecimal], length))
   }
 
-  private val makeGt:
-    PartialFunction[ParquetSchemaType, (Array[String], Any) => FilterPredicate] = {
+  private val makeGt
+      : PartialFunction[ParquetSchemaType, (Array[String], Any) => FilterPredicate] = {
     case ParquetByteType | ParquetShortType | ParquetIntegerType =>
       (n: Array[String], v: Any) =>
         FilterApi.gt(intColumn(n), v.asInstanceOf[Number].intValue.asInstanceOf[Integer])
@@ -368,8 +389,8 @@ class GeoParquetFilters(
         FilterApi.gt(binaryColumn(n), decimalToByteArray(v.asInstanceOf[JBigDecimal], length))
   }
 
-  private val makeGtEq:
-    PartialFunction[ParquetSchemaType, (Array[String], Any) => FilterPredicate] = {
+  private val makeGtEq
+      : PartialFunction[ParquetSchemaType, (Array[String], Any) => FilterPredicate] = {
     case ParquetByteType | ParquetShortType | ParquetIntegerType =>
       (n: Array[String], v: Any) =>
         FilterApi.gtEq(intColumn(n), v.asInstanceOf[Number].intValue.asInstanceOf[Integer])
@@ -411,8 +432,8 @@ class GeoParquetFilters(
   }
 
   private def convertibleFiltersHelper(
-                                        predicate: sources.Filter,
-                                        canPartialPushDown: Boolean): Option[sources.Filter] = {
+      predicate: sources.Filter,
+      canPartialPushDown: Boolean): Option[sources.Filter] = {
     predicate match {
       case sources.And(left, right) =>
         val leftResultOptional = convertibleFiltersHelper(left, canPartialPushDown)
@@ -490,15 +511,17 @@ class GeoParquetFilters(
   }
 
   /**
-   * @param predicate the input filter predicates. Not all the predicates can be pushed down.
-   * @param canPartialPushDownConjuncts whether a subset of conjuncts of predicates can be pushed
-   *                                    down safely. Pushing ONLY one side of AND down is safe to
-   *                                    do at the top level or none of its ancestors is NOT and OR.
-   * @return the Parquet-native filter predicates that are eligible for pushdown.
+   * @param predicate
+   *   the input filter predicates. Not all the predicates can be pushed down.
+   * @param canPartialPushDownConjuncts
+   *   whether a subset of conjuncts of predicates can be pushed down safely. Pushing ONLY one
+   *   side of AND down is safe to do at the top level or none of its ancestors is NOT and OR.
+   * @return
+   *   the Parquet-native filter predicates that are eligible for pushdown.
    */
   private def createFilterHelper(
-                                  predicate: sources.Filter,
-                                  canPartialPushDownConjuncts: Boolean): Option[FilterPredicate] = {
+      predicate: sources.Filter,
+      canPartialPushDownConjuncts: Boolean): Option[FilterPredicate] = {
     // NOTE:
     //
     // For any comparison operator `cmp`, both `a cmp NULL` and `NULL cmp a` evaluate to `NULL`,
@@ -516,38 +539,48 @@ class GeoParquetFilters(
 
     predicate match {
       case sources.IsNull(name) if canMakeFilterOn(name, null) =>
-        makeEq.lift(nameToParquetField(name).fieldType)
+        makeEq
+          .lift(nameToParquetField(name).fieldType)
           .map(_(nameToParquetField(name).fieldNames, null))
       case sources.IsNotNull(name) if canMakeFilterOn(name, null) =>
-        makeNotEq.lift(nameToParquetField(name).fieldType)
+        makeNotEq
+          .lift(nameToParquetField(name).fieldType)
           .map(_(nameToParquetField(name).fieldNames, null))
 
       case sources.EqualTo(name, value) if canMakeFilterOn(name, value) =>
-        makeEq.lift(nameToParquetField(name).fieldType)
+        makeEq
+          .lift(nameToParquetField(name).fieldType)
           .map(_(nameToParquetField(name).fieldNames, value))
       case sources.Not(sources.EqualTo(name, value)) if canMakeFilterOn(name, value) =>
-        makeNotEq.lift(nameToParquetField(name).fieldType)
+        makeNotEq
+          .lift(nameToParquetField(name).fieldType)
           .map(_(nameToParquetField(name).fieldNames, value))
 
       case sources.EqualNullSafe(name, value) if canMakeFilterOn(name, value) =>
-        makeEq.lift(nameToParquetField(name).fieldType)
+        makeEq
+          .lift(nameToParquetField(name).fieldType)
           .map(_(nameToParquetField(name).fieldNames, value))
       case sources.Not(sources.EqualNullSafe(name, value)) if canMakeFilterOn(name, value) =>
-        makeNotEq.lift(nameToParquetField(name).fieldType)
+        makeNotEq
+          .lift(nameToParquetField(name).fieldType)
           .map(_(nameToParquetField(name).fieldNames, value))
 
       case sources.LessThan(name, value) if canMakeFilterOn(name, value) =>
-        makeLt.lift(nameToParquetField(name).fieldType)
+        makeLt
+          .lift(nameToParquetField(name).fieldType)
           .map(_(nameToParquetField(name).fieldNames, value))
       case sources.LessThanOrEqual(name, value) if canMakeFilterOn(name, value) =>
-        makeLtEq.lift(nameToParquetField(name).fieldType)
+        makeLtEq
+          .lift(nameToParquetField(name).fieldType)
           .map(_(nameToParquetField(name).fieldNames, value))
 
       case sources.GreaterThan(name, value) if canMakeFilterOn(name, value) =>
-        makeGt.lift(nameToParquetField(name).fieldType)
+        makeGt
+          .lift(nameToParquetField(name).fieldType)
           .map(_(nameToParquetField(name).fieldNames, value))
       case sources.GreaterThanOrEqual(name, value) if canMakeFilterOn(name, value) =>
-        makeGtEq.lift(nameToParquetField(name).fieldType)
+        makeGtEq
+          .lift(nameToParquetField(name).fieldType)
           .map(_(nameToParquetField(name).fieldNames, value))
 
       case sources.And(lhs, rhs) =>
@@ -595,17 +628,22 @@ class GeoParquetFilters(
         createFilterHelper(pred, canPartialPushDownConjuncts = false)
           .map(FilterApi.not)
 
-      case sources.In(name, values) if canMakeFilterOn(name, values.head)
-        && values.distinct.length <= pushDownInFilterThreshold =>
-        values.distinct.flatMap { v =>
-          makeEq.lift(nameToParquetField(name).fieldType)
-            .map(_(nameToParquetField(name).fieldNames, v))
-        }.reduceLeftOption(FilterApi.or)
+      case sources.In(name, values)
+          if canMakeFilterOn(name, values.head)
+            && values.distinct.length <= pushDownInFilterThreshold =>
+        values.distinct
+          .flatMap { v =>
+            makeEq
+              .lift(nameToParquetField(name).fieldType)
+              .map(_(nameToParquetField(name).fieldNames, v))
+          }
+          .reduceLeftOption(FilterApi.or)
 
       case sources.StringStartsWith(name, prefix)
-        if pushDownStartWith && canMakeFilterOn(name, prefix) =>
+          if pushDownStartWith && canMakeFilterOn(name, prefix) =>
         Option(prefix).map { v =>
-          FilterApi.userDefined(binaryColumn(nameToParquetField(name).fieldNames),
+          FilterApi.userDefined(
+            binaryColumn(nameToParquetField(name).fieldNames),
             new UserDefinedPredicate[Binary] with Serializable {
               private val strToBinary = Binary.fromReusedByteArray(v.getBytes)
               private val size = strToBinary.length
@@ -615,7 +653,7 @@ class GeoParquetFilters(
                 val max = statistics.getMax
                 val min = statistics.getMin
                 comparator.compare(max.slice(0, math.min(size, max.length)), strToBinary) < 0 ||
-                  comparator.compare(min.slice(0, math.min(size, min.length)), strToBinary) > 0
+                comparator.compare(min.slice(0, math.min(size, min.length)), strToBinary) > 0
               }
 
               override def inverseCanDrop(statistics: Statistics[Binary]): Boolean = {
@@ -623,15 +661,15 @@ class GeoParquetFilters(
                 val max = statistics.getMax
                 val min = statistics.getMin
                 comparator.compare(max.slice(0, math.min(size, max.length)), strToBinary) == 0 &&
-                  comparator.compare(min.slice(0, math.min(size, min.length)), strToBinary) == 0
+                comparator.compare(min.slice(0, math.min(size, min.length)), strToBinary) == 0
               }
 
               override def keep(value: Binary): Boolean = {
-                value != null && UTF8String.fromBytes(value.getBytes).startsWith(
-                  UTF8String.fromBytes(strToBinary.getBytes))
+                value != null && UTF8String
+                  .fromBytes(value.getBytes)
+                  .startsWith(UTF8String.fromBytes(strToBinary.getBytes))
               }
-            }
-          )
+            })
         }
 
       case _ => None

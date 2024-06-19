@@ -780,6 +780,23 @@ def ST_IsValid(geometry: ColumnOrName, flag: Optional[Union[ColumnOrName, int]] 
     return _call_st_function("ST_IsValid", args)
 
 @validate_argument_types
+def ST_IsValidDetail(geometry: ColumnOrName, flag: Optional[Union[ColumnOrName, int]] = None) -> Column:
+    """
+    Return a row of valid, reason and location. valid defines the validity of geometry, reason defines the
+    reason why it is not valid and location defines the location where it is not valid
+    If the geometry is valid then it will return null for reason and location
+
+    :param geometry: Geometry column to validate.
+    :type geometry: ColumnOrName
+    :param flag: Optional flag to modify behavior of the validity check.
+    :type flag: Optional[Union[ColumnOrName, int]]
+    :return: Row of valid, reason and location
+    :rtype: Column
+    """
+    args = (geometry,) if flag is None else (geometry, flag)
+    return _call_st_function("ST_IsValidDetail", args)
+
+@validate_argument_types
 def ST_IsValidReason(geometry: ColumnOrName, flag: Optional[Union[ColumnOrName, int]] = None) -> Column:
     """
     Provides a text description of why a geometry is not valid or states that it is valid.

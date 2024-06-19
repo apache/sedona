@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.python.wrapper.adapters
 
 import net.razorvine.pickle.Unpickler
@@ -31,24 +30,30 @@ object PythonRddToJavaRDDAdapter extends GeomSerializer {
   }
 
   private def translateToJava(pythonRDD: JavaRDD[Array[Byte]]): JavaRDD[Geometry] = {
-    JavaRDD.fromRDD(pythonRDD.rdd.mapPartitions { iter =>
-      iter.flatMap { row =>
-        val unpickler = new Unpickler
-        val obj = unpickler.loads(row)
-        obj match {
-          case _ => obj.asInstanceOf[java.util.ArrayList[_]].toArray.map(
-            classDict => {
-              val geoData = classDict.asInstanceOf[ClassDict]
-              val geom = geoData.asInstanceOf[ClassDict].get("geom")
-              val userData = geoData.asInstanceOf[ClassDict].get("userData")
-              val geometryInstance = geometrySerializer.deserialize(geom.asInstanceOf[Array[Byte]])
-              geometryInstance.setUserData(userData)
-              geometryInstance
+    JavaRDD.fromRDD(
+      pythonRDD.rdd
+        .mapPartitions { iter =>
+          iter.flatMap { row =>
+            val unpickler = new Unpickler
+            val obj = unpickler.loads(row)
+            obj match {
+              case _ =>
+                obj
+                  .asInstanceOf[java.util.ArrayList[_]]
+                  .toArray
+                  .map(classDict => {
+                    val geoData = classDict.asInstanceOf[ClassDict]
+                    val geom = geoData.asInstanceOf[ClassDict].get("geom")
+                    val userData = geoData.asInstanceOf[ClassDict].get("userData")
+                    val geometryInstance =
+                      geometrySerializer.deserialize(geom.asInstanceOf[Array[Byte]])
+                    geometryInstance.setUserData(userData)
+                    geometryInstance
+                  })
             }
-          )
+          }
         }
-      }
-    }.toJavaRDD())
+        .toJavaRDD())
   }
 
   def deserializeToPolygonRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[Polygon] = {

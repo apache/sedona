@@ -16,20 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.python.wrapper.translation
 
 import org.apache.sedona.python.wrapper.utils.implicits.IntImplicit
 import org.locationtech.jts.geom.Geometry
 
-case class GeometrySeqToPythonConverter(spatialData: Seq[Geometry],
-                                        geometrySerializer: PythonGeometrySerializer) {
+case class GeometrySeqToPythonConverter(
+    spatialData: Seq[Geometry],
+    geometrySerializer: PythonGeometrySerializer) {
 
   def translateToPython: Array[Array[Byte]] = {
     val sizeBuffer = 0.toByteArray()
 
-    spatialData.toArray.map(
-      geometry => geometrySerializer.serialize(geometry.asInstanceOf[Geometry]) ++ sizeBuffer
-    )
+    spatialData.toArray.map(geometry =>
+      geometrySerializer.serialize(geometry.asInstanceOf[Geometry]) ++ sizeBuffer)
   }
 }

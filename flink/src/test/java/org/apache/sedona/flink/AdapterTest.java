@@ -18,6 +18,11 @@
  */
 package org.apache.sedona.flink;
 
+import static org.apache.flink.table.api.Expressions.$;
+import static org.apache.flink.table.api.Expressions.call;
+import static org.junit.Assert.assertEquals;
+
+import java.util.List;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.types.Row;
@@ -25,36 +30,31 @@ import org.apache.sedona.flink.expressions.Constructors;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.List;
+public class AdapterTest extends TestBase {
+  @BeforeClass
+  public static void onceExecutedBeforeAll() {
+    initialize();
+  }
 
-import static org.apache.flink.table.api.Expressions.$;
-import static org.apache.flink.table.api.Expressions.call;
-import static org.junit.Assert.assertEquals;
-
-public class AdapterTest extends TestBase
-{
-    @BeforeClass
-    public static void onceExecutedBeforeAll() {
-        initialize();
-    }
-
-    @Test
-    public void testTableToDS()
-            throws Exception
-    {
-        List<Row> data = createPolygonWKT(testDataSize);
-        Table wktTable = createTextTable(data, polygonColNames);
-        Table geomTable = wktTable.select(call(Constructors.ST_GeomFromWKT.class.getSimpleName(),
-                        $(polygonColNames[0])).as(polygonColNames[0]),
-                $(polygonColNames[1]));
-        Row result = last(geomTable);
-        assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
-        // GeomTable to GeomDS
-        DataStream<Row> geomStream = tableEnv.toDataStream(geomTable);
-        assertEquals(data.get(0).getField(0).toString(), geomStream.executeAndCollect(1).get(0).getField(0).toString());
-        // GeomDS to GeomTable
-        geomTable = tableEnv.fromDataStream(geomStream);
-        result = last(geomTable);
-        assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
-    }
+  @Test
+  public void testTableToDS() throws Exception {
+    List<Row> data = createPolygonWKT(testDataSize);
+    Table wktTable = createTextTable(data, polygonColNames);
+    Table geomTable =
+        wktTable.select(
+            call(Constructors.ST_GeomFromWKT.class.getSimpleName(), $(polygonColNames[0]))
+                .as(polygonColNames[0]),
+            $(polygonColNames[1]));
+    Row result = last(geomTable);
+    assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
+    // GeomTable to GeomDS
+    DataStream<Row> geomStream = tableEnv.toDataStream(geomTable);
+    assertEquals(
+        data.get(0).getField(0).toString(),
+        geomStream.executeAndCollect(1).get(0).getField(0).toString());
+    // GeomDS to GeomTable
+    geomTable = tableEnv.fromDataStream(geomStream);
+    result = last(geomTable);
+    assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
+  }
 }

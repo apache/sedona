@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.python.wrapper.adapters
 
 import org.apache.sedona.core.spatialRDD.SpatialRDD
@@ -24,9 +23,10 @@ import org.apache.spark.api.java.JavaRDD
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.index.SpatialIndex
 
-
 object RawJvmIndexRDDAdapter {
-  def setRawIndexRDD(spatialRDD: SpatialRDD[Geometry], indexRDD: JavaRDD[SpatialIndex]): Boolean = {
+  def setRawIndexRDD(
+      spatialRDD: SpatialRDD[Geometry],
+      indexRDD: JavaRDD[SpatialIndex]): Boolean = {
     spatialRDD.indexedRawRDD = indexRDD
     true
   }

@@ -16,13 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.python.wrapper.translation
 
 import org.apache.sedona.common.geometryObjects.Circle
 import org.apache.sedona.python.wrapper.utils.implicits.{DoubleImplicit, GeometryEnhancer, IntImplicit}
 import org.locationtech.jts.io.WKBWriter
-
 
 case class CircleSerializer(geometry: Circle) {
   private val isCircle = Array(1.toByte)
@@ -34,7 +32,8 @@ case class CircleSerializer(geometry: Circle) {
     val userDataLengthArray = userDataBinary.length.toByteArray()
     val serializedGeomLength = serializedGeom.length.toByteArray()
     val radius = geometry.getRadius.toDouble
-    isCircle ++ serializedGeomLength ++ userDataLengthArray ++ serializedGeom ++ userDataBinary ++ radius.toByteArray()
+    isCircle ++ serializedGeomLength ++ userDataLengthArray ++ serializedGeom ++ userDataBinary ++ radius
+      .toByteArray()
   }
 
 }

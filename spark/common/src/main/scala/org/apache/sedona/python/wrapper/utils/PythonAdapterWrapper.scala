@@ -27,18 +27,29 @@ import org.locationtech.jts.geom.Geometry
 import scala.jdk.CollectionConverters._
 
 object PythonAdapterWrapper {
-  def toSpatialRdd(df: DataFrame, geometryColumn: String, fieldNames: java.util.List[String]): SpatialRDD[Geometry] = {
+  def toSpatialRdd(
+      df: DataFrame,
+      geometryColumn: String,
+      fieldNames: java.util.List[String]): SpatialRDD[Geometry] = {
     Adapter.toSpatialRdd(df, geometryColumn, fieldNames.asScala.toSeq)
   }
 
-  def toDf[T <: Geometry](spatialRDD: SpatialRDD[T], fieldNames: java.util.ArrayList[String], sparkSession: SparkSession): DataFrame = {
+  def toDf[T <: Geometry](
+      spatialRDD: SpatialRDD[T],
+      fieldNames: java.util.ArrayList[String],
+      sparkSession: SparkSession): DataFrame = {
     Adapter.toDf(spatialRDD, fieldNames.asScala.toSeq, sparkSession)
   }
 
-  def toDf(spatialPairRDD: JavaPairRDD[Geometry, Geometry],
-           leftFieldnames: java.util.ArrayList[String],
-           rightFieldNames: java.util.ArrayList[String],
-           sparkSession: SparkSession): DataFrame = {
-    Adapter.toDf(spatialPairRDD, leftFieldnames.asScala.toSeq, rightFieldNames.asScala.toSeq, sparkSession)
+  def toDf(
+      spatialPairRDD: JavaPairRDD[Geometry, Geometry],
+      leftFieldnames: java.util.ArrayList[String],
+      rightFieldNames: java.util.ArrayList[String],
+      sparkSession: SparkSession): DataFrame = {
+    Adapter.toDf(
+      spatialPairRDD,
+      leftFieldnames.asScala.toSeq,
+      rightFieldNames.asScala.toSeq,
+      sparkSession)
   }
 }

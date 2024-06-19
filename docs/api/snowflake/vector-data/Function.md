@@ -1486,6 +1486,41 @@ Output:
 false
 ```
 
+## ST_IsValidDetail
+
+Introduction: Returns a row, containing a boolean `valid` stating if a geometry is valid, a string `reason` stating why it is invalid and a geometry `location` pointing out where it is invalid.
+
+This function is a combination of [ST_IsValid](#st_isvalid) and [ST_IsValidReason](#st_isvalidreason).
+
+The flags parameter is a bitfield with the following options:
+
+- 0: Use usual OGC SFS (Simple Features Specification) validity semantics.
+- 1: "ESRI flag", Accepts certain self-touching rings as valid, which are considered invalid under OGC standards.
+
+Format:
+
+```sql
+SELECT valid, reason, Sedonm.ST_AsText(location) AS location
+FROM table(Sedona.ST_IsValidDetail(geom: Geometry, flag: Integer))
+```
+
+SQL Example:
+
+```sql
+SELECT valid, reason, Sedonm.ST_AsText(location) AS location
+     FROM table(Sedona.ST_IsValidDetail(Sedona.ST_GeomFromWKT('POLYGON ((30 10, 40 40, 20 40, 30 10, 10 20, 30 10))'), 0))
+```
+
+Output:
+
+```
++-----+---------------------------------------------------------+-------------+
+|valid|reason                                                   |location     |
++-----+---------------------------------------------------------+-------------+
+|false|Ring Self-intersection at or near point (30.0, 10.0, NaN)|POINT (30 10)|
++-----+---------------------------------------------------------+-------------+
+```
+
 ## ST_IsValidReason
 
 Introduction: Returns text stating if the geometry is valid. If not, it provides a reason why it is invalid. The function can be invoked with just the geometry or with an additional flag. The flag alters the validity checking behavior. The flags parameter is a bitfield with the following options:

@@ -16,20 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.formatMapper;
 
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.locationtech.jts.geom.Geometry;
 
-class RddReader
-{
-    public static SpatialRDD<Geometry> createSpatialRDD(JavaRDD rawTextRDD, FormatMapper<Geometry> formatMapper)
-    {
-        SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
-        spatialRDD.rawSpatialRDD = rawTextRDD.mapPartitions(formatMapper);
-        spatialRDD.fieldNames = formatMapper.readPropertyNames(rawTextRDD.take(1).get(0).toString());
-        return spatialRDD;
-    }
+class RddReader {
+  public static SpatialRDD<Geometry> createSpatialRDD(
+      JavaRDD rawTextRDD, FormatMapper<Geometry> formatMapper) {
+    SpatialRDD spatialRDD = new SpatialRDD<Geometry>();
+    spatialRDD.rawSpatialRDD = rawTextRDD.mapPartitions(formatMapper);
+    spatialRDD.fieldNames = formatMapper.readPropertyNames(rawTextRDD.take(1).get(0).toString());
+    return spatialRDD;
+  }
 }

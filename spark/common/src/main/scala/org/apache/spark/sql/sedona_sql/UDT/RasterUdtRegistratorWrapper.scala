@@ -22,7 +22,7 @@ import org.apache.spark.sql.types.UDTRegistration
 
 object RasterUdtRegistratorWrapper {
 
-    def registerAll(gridClassName: String): Unit = {
-      UDTRegistration.register(gridClassName, classOf[RasterUDT].getName)
-    }
+  def registerAll(gridClassName: String): Unit = {
+    UDTRegistration.register(gridClassName, classOf[RasterUDT].getName)
+  }
 }

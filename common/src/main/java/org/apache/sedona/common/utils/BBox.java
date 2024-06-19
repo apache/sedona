@@ -24,37 +24,38 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 
 public class BBox {
-    double startLon;
-    double endLon;
-    double startLat;
-    double endLat;
+  double startLon;
+  double endLon;
+  double startLat;
+  double endLat;
 
-    static GeometryFactory geometryFactory = new GeometryFactory();
+  static GeometryFactory geometryFactory = new GeometryFactory();
 
-    public BBox(double startLon, double endLon, double startLat, double endLat) {
-        this.startLon = startLon;
-        this.endLon = endLon;
-        this.startLat = startLat;
-        this.endLat = endLat;
-    }
+  public BBox(double startLon, double endLon, double startLat, double endLat) {
+    this.startLon = startLon;
+    this.endLon = endLon;
+    this.startLat = startLat;
+    this.endLat = endLat;
+  }
 
-    public BBox(BBox other) {
-        this(other.startLon, other.endLon, other.startLat, other.endLat);
-    }
+  public BBox(BBox other) {
+    this(other.startLon, other.endLon, other.startLat, other.endLat);
+  }
 
-    public Point getCentroid() {
-        double lon = this.startLon + ((this.startLon + this.endLon)/2);
-        double lat = this.startLat + ((this.startLat + this.endLat)/2);
-        return geometryFactory.createPoint(new Coordinate(lon, lat));
-    }
+  public Point getCentroid() {
+    double lon = this.startLon + ((this.startLon + this.endLon) / 2);
+    double lat = this.startLat + ((this.startLat + this.endLat) / 2);
+    return geometryFactory.createPoint(new Coordinate(lon, lat));
+  }
 
-    public Polygon toPolygon() {
-        return geometryFactory.createPolygon(new Coordinate[] {
-            new Coordinate(this.startLon, this.startLat),
-            new Coordinate(this.startLon, this.endLat),
-            new Coordinate(this.endLon, this.endLat),
-            new Coordinate(this.endLon, this.startLat),
-            new Coordinate(this.startLon, this.startLat)
+  public Polygon toPolygon() {
+    return geometryFactory.createPolygon(
+        new Coordinate[] {
+          new Coordinate(this.startLon, this.startLat),
+          new Coordinate(this.startLon, this.endLat),
+          new Coordinate(this.endLon, this.endLat),
+          new Coordinate(this.endLon, this.startLat),
+          new Coordinate(this.startLon, this.startLat)
         });
-    }
+  }
 }

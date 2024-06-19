@@ -35,12 +35,17 @@ import scala.reflect.runtime.universe.typeOf
 
 /**
  * This is the base class for wrapping Java/Scala functions as a catalyst expression in Spark SQL.
- * @param fSeq The functions to be wrapped. Subclasses can simply pass a function to this constructor,
- *          and the function will be converted to [[InferrableFunction]] by [[InferrableFunctionConverter]]
- *          automatically.
+ * @param fSeq
+ *   The functions to be wrapped. Subclasses can simply pass a function to this constructor, and
+ *   the function will be converted to [[InferrableFunction]] by [[InferrableFunctionConverter]]
+ *   automatically.
  */
-abstract class InferredExpression(fSeq: InferrableFunction *)
-  extends Expression with ImplicitCastInputTypes with SerdeAware with CodegenFallback with FoldableExpression
+abstract class InferredExpression(fSeq: InferrableFunction*)
+    extends Expression
+    with ImplicitCastInputTypes
+    with SerdeAware
+    with CodegenFallback
+    with FoldableExpression
     with Serializable {
 
   def inputExpressions: Seq[Expression]
@@ -51,9 +56,12 @@ abstract class InferredExpression(fSeq: InferrableFunction *)
     // If there are multiple overloaded functions, find the one with the same number of arguments as the input
     // expressions. Please note that the Catalog won't be able to handle default arguments in this case. We'll
     // move default argument handling from Catalog to this class in the future.
-    case _ => fSeq.find(f => f.sparkInputTypes.size == inputExpressions.size) match {
+    case _ =>
+      fSeq.find(f => f.sparkInputTypes.size == inputExpressions.size) match {
         case Some(f) => f
-        case None => throw new IllegalArgumentException(s"No overloaded function ${getClass.getName} has ${inputExpressions.size} arguments")
+        case None =>
+          throw new IllegalArgumentException(
+            s"No overloaded function ${getClass.getName} has ${inputExpressions.size} arguments")
       }
   }
 
@@ -117,65 +125,61 @@ object InferrableType {
 
 object InferredTypes {
   def buildArgumentExtractor(t: Type): Expression => InternalRow => Any = {
-    if (t =:= typeOf[Geometry]) {
-      expr => input => expr.toGeometry(input)
-    } else if (t =:= typeOf[Array[Geometry]]) {
-      expr => input => expr.toGeometryArray(input)
+    if (t =:= typeOf[Geometry]) { expr => input =>
+      expr.toGeometry(input)
+    } else if (t =:= typeOf[Array[Geometry]]) { expr => input =>
+      expr.toGeometryArray(input)
     } else if (InferredRasterExpression.isRasterType(t)) {
       InferredRasterExpression.rasterExtractor
-    } else if (t =:= typeOf[Array[Double]]) {
-      expr => input => expr.eval(input).asInstanceOf[ArrayData].toDoubleArray()
-    } else if (t =:= typeOf[String]) {
-      expr => input => expr.asString(input)
-    } else if (t =:= typeOf[Array[Long]]) {
-      expr => input => expr.eval(input).asInstanceOf[ArrayData].toLongArray()
-    } else if (t =:= typeOf[Array[Int]]) {
-      expr => input => expr.eval(input).asInstanceOf[ArrayData] match {
+    } else if (t =:= typeOf[Array[Double]]) { expr => input =>
+      expr.eval(input).asInstanceOf[ArrayData].toDoubleArray()
+    } else if (t =:= typeOf[String]) { expr => input =>
+      expr.asString(input)
+    } else if (t =:= typeOf[Array[Long]]) { expr => input =>
+      expr.eval(input).asInstanceOf[ArrayData].toLongArray()
+    } else if (t =:= typeOf[Array[Int]]) { expr => input =>
+      expr.eval(input).asInstanceOf[ArrayData] match {
         case null => null
         case arrayData: ArrayData => arrayData.toIntArray()
       }
-    } else if (t =:= typeOf[java.util.List[Geometry]]) {
-      expr => input => expr.toGeometryList(input)
-    } else if (t =:= typeOf[java.util.List[java.lang.Double]]) {
-      expr => input => expr.toDoubleList(input)
-    } else {
-      expr => input => expr.eval(input)
+    } else if (t =:= typeOf[java.util.List[Geometry]]) { expr => input =>
+      expr.toGeometryList(input)
+    } else if (t =:= typeOf[java.util.List[java.lang.Double]]) { expr => input =>
+      expr.toDoubleList(input)
+    } else { expr => input =>
+      expr.eval(input)
     }
   }
   def buildSerializer(t: Type): Any => Any = {
-    if (t =:= typeOf[Geometry]) {
-      output =>
-        if (output != null) {
-          output.asInstanceOf[Geometry].toGenericArrayData
-        } else {
-          null
-        }
+    if (t =:= typeOf[Geometry]) { output =>
+      if (output != null) {
+        output.asInstanceOf[Geometry].toGenericArrayData
+      } else {
+        null
+      }
     } else if (InferredRasterExpression.isRasterType(t)) {
       InferredRasterExpression.rasterSerializer
-    } else if (t =:= typeOf[String]) {
-      output =>
-        if (output != null) {
-          UTF8String.fromString(output.asInstanceOf[String])
-        } else {
-          null
-        }
+    } else if (t =:= typeOf[String]) { output =>
+      if (output != null) {
+        UTF8String.fromString(output.asInstanceOf[String])
+      } else {
+        null
+      }
     } else if (t =:= typeOf[Array[java.lang.Long]] || t =:= typeOf[Array[Long]] ||
-      t =:= typeOf[Array[Double]]) {
-      output =>
-        if (output != null) {
-          ArrayData.toArrayData(output)
-        } else {
-          null
-        }
-    }else if (t =:= typeOf[java.util.List[java.lang.Double]]) {
-      output =>
-        if (output != null) {
-          ArrayData.toArrayData(output.asInstanceOf[java.util.List[java.lang.Double]].map(elem => elem))
-        }else {
-          null
-        }
-    }
-    else if (t =:= typeOf[Array[Geometry]] || t =:= typeOf[java.util.List[Geometry]]) {
+      t =:= typeOf[Array[Double]]) { output =>
+      if (output != null) {
+        ArrayData.toArrayData(output)
+      } else {
+        null
+      }
+    } else if (t =:= typeOf[java.util.List[java.lang.Double]]) { output =>
+      if (output != null) {
+        ArrayData.toArrayData(
+          output.asInstanceOf[java.util.List[java.lang.Double]].map(elem => elem))
+      } else {
+        null
+      }
+    } else if (t =:= typeOf[Array[Geometry]] || t =:= typeOf[java.util.List[Geometry]]) {
       output =>
         if (output != null) {
           ArrayData.toArrayData(output.asInstanceOf[Array[Geometry]].map(_.toGenericArrayData))
@@ -184,15 +188,14 @@ object InferredTypes {
         }
     } else if (InferredRasterExpression.isRasterArrayType(t)) {
       InferredRasterExpression.rasterArraySerializer
-    } else if (t =:= typeOf[Option[Boolean]]) {
-      output =>
-        if (output != null) {
-          output.asInstanceOf[Option[Boolean]].orNull
-        } else {
-          null
-        }
-    } else {
-      output => output
+    } else if (t =:= typeOf[Option[Boolean]]) { output =>
+      if (output != null) {
+        output.asInstanceOf[Option[Boolean]].orNull
+      } else {
+        null
+      }
+    } else { output =>
+      output
     }
   }
 
@@ -235,60 +238,85 @@ object InferredTypes {
   }
 }
 
-case class InferrableFunction(sparkInputTypes: Seq[AbstractDataType],
-                              sparkReturnType: DataType,
-                              serializer: Any => Any,
-                              argExtractorBuilders: Seq[Expression => InternalRow => Any],
-                              evaluatorBuilder: Array[InternalRow => Any] => InternalRow => Any) {
+case class InferrableFunction(
+    sparkInputTypes: Seq[AbstractDataType],
+    sparkReturnType: DataType,
+    serializer: Any => Any,
+    argExtractorBuilders: Seq[Expression => InternalRow => Any],
+    evaluatorBuilder: Array[InternalRow => Any] => InternalRow => Any) {
   def buildExtractors(expressions: Seq[Expression]): Array[InternalRow => Any] = {
-    argExtractorBuilders.zipAll(expressions, null, null).flatMap {
-      case (null, _) => None
-      case (builder, expr) => Some(builder(expr))
-    }.toArray
+    argExtractorBuilders
+      .zipAll(expressions, null, null)
+      .flatMap {
+        case (null, _) => None
+        case (builder, expr) => Some(builder(expr))
+      }
+      .toArray
   }
 }
 
 object InferrableFunction {
+
   /**
-   * Infer input types and return type from a type tag, and construct builder for argument extractors.
-   * @param typeTag Type tag of the function.
-   * @param evaluatorBuilder Builder for the evaluator.
-   * @return InferrableFunction.
+   * Infer input types and return type from a type tag, and construct builder for argument
+   * extractors.
+   * @param typeTag
+   *   Type tag of the function.
+   * @param evaluatorBuilder
+   *   Builder for the evaluator.
+   * @return
+   *   InferrableFunction.
    */
-  def apply(typeTag: TypeTag[_], evaluatorBuilder: Array[InternalRow => Any] => InternalRow => Any): InferrableFunction = {
+  def apply(
+      typeTag: TypeTag[_],
+      evaluatorBuilder: Array[InternalRow => Any] => InternalRow => Any): InferrableFunction = {
     val argTypes = typeTag.tpe.typeArgs.init
     val returnType = typeTag.tpe.typeArgs.last
     val sparkInputTypes: Seq[AbstractDataType] = argTypes.map(InferredTypes.inferSparkType)
     val sparkReturnType: DataType = InferredTypes.inferSparkType(returnType)
     val serializer = InferredTypes.buildSerializer(returnType)
     val argExtractorBuilders = argTypes.map(InferredTypes.buildArgumentExtractor)
-    InferrableFunction(sparkInputTypes, sparkReturnType, serializer, argExtractorBuilders, evaluatorBuilder)
+    InferrableFunction(
+      sparkInputTypes,
+      sparkReturnType,
+      serializer,
+      argExtractorBuilders,
+      evaluatorBuilder)
   }
 
   /**
    * A variant of binary inferred expression which allows the second argument to be null.
-   * @param f Function to be wrapped as a catalyst expression.
-   * @param typeTag Type tag of the function.
-   * @tparam R Return type of the function.
-   * @tparam A1 Type of the first argument.
-   * @tparam A2 Type of the second argument.
-   * @return InferrableFunction.
+   * @param f
+   *   Function to be wrapped as a catalyst expression.
+   * @param typeTag
+   *   Type tag of the function.
+   * @tparam R
+   *   Return type of the function.
+   * @tparam A1
+   *   Type of the first argument.
+   * @tparam A2
+   *   Type of the second argument.
+   * @return
+   *   InferrableFunction.
    */
-  def allowRightNull[R, A1, A2](f: (A1, A2) => R)(implicit typeTag: TypeTag[(A1, A2) => R]): InferrableFunction = {
-    apply(typeTag, extractors => {
-      val func = f.asInstanceOf[(Any, Any) => Any]
-      val extractor1 = extractors(0)
-      val extractor2 = extractors(1)
-      input => {
-        val arg1 = extractor1(input)
-        val arg2 = extractor2(input)
-        if (arg1 != null) {
-          func(arg1, arg2)
-        } else {
-          null
+  def allowRightNull[R, A1, A2](f: (A1, A2) => R)(implicit
+      typeTag: TypeTag[(A1, A2) => R]): InferrableFunction = {
+    apply(
+      typeTag,
+      extractors => {
+        val func = f.asInstanceOf[(Any, Any) => Any]
+        val extractor1 = extractors(0)
+        val extractor2 = extractors(1)
+        input => {
+          val arg1 = extractor1(input)
+          val arg2 = extractor2(input)
+          if (arg1 != null) {
+            func(arg1, arg2)
+          } else {
+            null
+          }
         }
-      }
-    })
+      })
   }
 
 }

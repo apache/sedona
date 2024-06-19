@@ -22,26 +22,30 @@ import org.apache.sedona.common.geometrySerde
 import org.locationtech.jts.geom.Geometry
 
 /**
-  * SerDe using the WKB reader and writer objects
-  */
+ * SerDe using the WKB reader and writer objects
+ */
 object GeometrySerializer {
 
   /**
-    * Given a geometry returns array of bytes
-    *
-    * @param geometry JTS geometry
-    * @return Array of bites represents this geometry
-    */
+   * Given a geometry returns array of bytes
+   *
+   * @param geometry
+   *   JTS geometry
+   * @return
+   *   Array of bites represents this geometry
+   */
   def serialize(geometry: Geometry): Array[Byte] = {
     geometrySerde.GeometrySerializer.serialize(geometry)
   }
 
   /**
-    * Given ArrayData returns Geometry
-    *
-    * @param value ArrayData
-    * @return JTS geometry
-    */
+   * Given ArrayData returns Geometry
+   *
+   * @param value
+   *   ArrayData
+   * @return
+   *   JTS geometry
+   */
   def deserialize(value: Array[Byte]): Geometry = {
     geometrySerde.GeometrySerializer.deserialize(value)
   }

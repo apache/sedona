@@ -25,5 +25,7 @@ import org.geotools.coverage.grid.GridCoverage2D
 import scala.collection.mutable.ArrayBuffer
 
 object RasterUdafCatalog {
-  val rasterAggregateExpression: Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandData], GridCoverage2D] = new RS_Union_Aggr
+  val rasterAggregateExpression
+      : Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandData], GridCoverage2D] =
+    new RS_Union_Aggr
 }

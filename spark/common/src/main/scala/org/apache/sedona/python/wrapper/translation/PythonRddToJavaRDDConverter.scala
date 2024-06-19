@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.python.wrapper.translation
 
 import net.razorvine.pickle.Unpickler
@@ -24,7 +23,8 @@ import net.razorvine.pickle.objects.ClassDict
 import org.apache.spark.api.java.JavaRDD
 import org.locationtech.jts.geom.{Geometry, LineString, Point, Polygon}
 
-private[python] case class PythonRddToJavaRDDConverter(geometrySerializer: PythonGeometrySerializer) {
+private[python] case class PythonRddToJavaRDDConverter(
+    geometrySerializer: PythonGeometrySerializer) {
 
   def deserializeToPointRawRDD(javaRDD: JavaRDD[Array[Byte]]): JavaRDD[Point] = {
     translateToJava(javaRDD).asInstanceOf[JavaRDD[Point]]
@@ -39,21 +39,27 @@ private[python] case class PythonRddToJavaRDDConverter(geometrySerializer: Pytho
   }
 
   private def translateToJava(pythonRDD: JavaRDD[Array[Byte]]): JavaRDD[Geometry] = {
-    JavaRDD.fromRDD(pythonRDD.rdd.mapPartitions { iter =>
-      iter.flatMap { row =>
-        val unpickler = new Unpickler
-        val obj = unpickler.loads(row)
-        obj match {
-          case _ => obj.asInstanceOf[java.util.ArrayList[_]].toArray.map(
-            classDict => {
-              val geoData = classDict.asInstanceOf[ClassDict]
-              val geom = geoData.asInstanceOf[ClassDict].get("geom")
-              val geometryInstance = geometrySerializer.deserialize(geom.asInstanceOf[Array[Byte]])
-              geometryInstance
+    JavaRDD.fromRDD(
+      pythonRDD.rdd
+        .mapPartitions { iter =>
+          iter.flatMap { row =>
+            val unpickler = new Unpickler
+            val obj = unpickler.loads(row)
+            obj match {
+              case _ =>
+                obj
+                  .asInstanceOf[java.util.ArrayList[_]]
+                  .toArray
+                  .map(classDict => {
+                    val geoData = classDict.asInstanceOf[ClassDict]
+                    val geom = geoData.asInstanceOf[ClassDict].get("geom")
+                    val geometryInstance =
+                      geometrySerializer.deserialize(geom.asInstanceOf[Array[Byte]])
+                    geometryInstance
+                  })
             }
-          )
+          }
         }
-      }
-    }.toJavaRDD())
+        .toJavaRDD())
   }
 }

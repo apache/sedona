@@ -16,50 +16,41 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.formatMapper;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.IOException;
 import org.apache.sedona.core.TestBase;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
+public class WkbReadTest extends TestBase {
+  public static String wkbGeometries = null;
 
-import static org.junit.Assert.assertEquals;
+  @BeforeClass
+  public static void onceExecutedBeforeAll() throws IOException {
+    initialize(WktReaderTest.class.getName());
+    wkbGeometries =
+        WktReaderTest.class.getClassLoader().getResource("county_small_wkb.tsv").getPath();
+  }
 
-public class WkbReadTest
-        extends TestBase
-{
-    public static String wkbGeometries = null;
+  @AfterClass
+  public static void tearDown() throws Exception {
+    sc.stop();
+  }
 
-    @BeforeClass
-    public static void onceExecutedBeforeAll()
-            throws IOException
-    {
-        initialize(WktReaderTest.class.getName());
-        wkbGeometries = WktReaderTest.class.getClassLoader().getResource("county_small_wkb.tsv").getPath();
-    }
-
-    @AfterClass
-    public static void tearDown()
-            throws Exception
-    {
-        sc.stop();
-    }
-
-    /**
-     * Test correctness of parsing geojson file
-     *
-     * @throws IOException
-     */
-    @Test
-    public void testReadToGeometryRDD()
-            throws IOException
-    {
-        // load geojson with our tool
-        SpatialRDD wkbRDD = WkbReader.readToGeometryRDD(sc, wkbGeometries, 0, true, false);
-        assertEquals(wkbRDD.rawSpatialRDD.count(), 103);
-    }
+  /**
+   * Test correctness of parsing geojson file
+   *
+   * @throws IOException
+   */
+  @Test
+  public void testReadToGeometryRDD() throws IOException {
+    // load geojson with our tool
+    SpatialRDD wkbRDD = WkbReader.readToGeometryRDD(sc, wkbGeometries, 0, true, false);
+    assertEquals(wkbRDD.rawSpatialRDD.count(), 103);
+  }
 }

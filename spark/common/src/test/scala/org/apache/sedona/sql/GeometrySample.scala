@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.sql
 
 import org.apache.spark.sql.{Dataset, Row}
@@ -24,7 +23,6 @@ import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTReader
 
 import java.io.{FileInputStream, InputStream}
-
 
 trait GeometrySample {
   self: TestBaseScala =>
@@ -62,9 +60,7 @@ trait GeometrySample {
   }
 
   private def loadFromWktStrings(geometries: List[String]): List[Geometry] = {
-    geometries.map(
-      geometryWKT => wktReader.read(geometryWKT)
-    )
+    geometries.map(geometryWKT => wktReader.read(geometryWKT))
   }
 
   private def loadResourceFile(fileName: String): List[String] = {

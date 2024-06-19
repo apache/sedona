@@ -16,14 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.utils;
 
-public class TimeUtils
-{
+public class TimeUtils {
 
-    public static long elapsedSince(long startTime)
-    {
-        return System.currentTimeMillis() - startTime;
-    }
+  public static long elapsedSince(long startTime) {
+    return System.currentTimeMillis() - startTime;
+  }
 }

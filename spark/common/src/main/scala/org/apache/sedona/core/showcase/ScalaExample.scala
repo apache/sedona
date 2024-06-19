@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.showcase
 
 import org.apache.log4j.{Level, Logger}
@@ -31,10 +30,9 @@ import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
 import org.locationtech.jts.geom.{Coordinate, Envelope, GeometryFactory}
 
-
 /**
-  * The Class ScalaExample.
-  */
+ * The Class ScalaExample.
+ */
 object ScalaExample extends App {
 
   val conf = new SparkConf().setAppName("SedonaRunnableExample").setMaster("local[2]")
@@ -78,43 +76,51 @@ object ScalaExample extends App {
   sc.stop()
   System.out.println("All DEMOs passed!")
 
-
   /**
-    * Test spatial range query.
-    *
-    * @throws Exception the exception
-    */
+   * Test spatial range query.
+   *
+   * @throws Exception
+   *   the exception
+   */
   def testSpatialRangeQuery() {
-    val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true)
+    val objectRDD =
+      new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true)
     objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY)
     for (i <- 1 to eachQueryLoopTimes) {
-      val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, SpatialPredicate.COVERED_BY, false).count
+      val resultSize = RangeQuery
+        .SpatialRangeQuery(objectRDD, rangeQueryWindow, SpatialPredicate.COVERED_BY, false)
+        .count
     }
   }
 
-
   /**
-    * Test spatial range query using index.
-    *
-    * @throws Exception the exception
-    */
+   * Test spatial range query using index.
+   *
+   * @throws Exception
+   *   the exception
+   */
   def testSpatialRangeQueryUsingIndex() {
-    val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true)
+    val objectRDD =
+      new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true)
     objectRDD.buildIndex(PointRDDIndexType, false)
     objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY)
     for (i <- 1 to eachQueryLoopTimes) {
-      val resultSize = RangeQuery.SpatialRangeQuery(objectRDD, rangeQueryWindow, SpatialPredicate.COVERED_BY, true).count
+      val resultSize = RangeQuery
+        .SpatialRangeQuery(objectRDD, rangeQueryWindow, SpatialPredicate.COVERED_BY, true)
+        .count
     }
 
   }
 
   /**
-    * Test spatial knn query.
-    *
-    * @throws Exception the exception
-    */
+   * Test spatial knn query.
+   *
+   * @throws Exception
+   *   the exception
+   */
   def testSpatialKnnQuery() {
-    val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true)
+    val objectRDD =
+      new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true)
     objectRDD.rawSpatialRDD.persist(StorageLevel.MEMORY_ONLY)
     for (i <- 1 to eachQueryLoopTimes) {
       val result = KNNQuery.SpatialKnnQuery(objectRDD, kNNQueryPoint, 1000, false)
@@ -122,12 +128,14 @@ object ScalaExample extends App {
   }
 
   /**
-    * Test spatial knn query using index.
-    *
-    * @throws Exception the exception
-    */
+   * Test spatial knn query using index.
+   *
+   * @throws Exception
+   *   the exception
+   */
   def testSpatialKnnQueryUsingIndex() {
-    val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true)
+    val objectRDD =
+      new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true)
     objectRDD.buildIndex(PointRDDIndexType, false)
     objectRDD.indexedRawRDD.persist(StorageLevel.MEMORY_ONLY)
     for (i <- 1 to eachQueryLoopTimes) {
@@ -136,13 +144,21 @@ object ScalaExample extends App {
   }
 
   /**
-    * Test spatial join query.
-    *
-    * @throws Exception the exception
-    */
+   * Test spatial join query.
+   *
+   * @throws Exception
+   *   the exception
+   */
   def testSpatialJoinQuery() {
-    val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
-    val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true)
+    val queryWindowRDD = new PolygonRDD(
+      sc,
+      PolygonRDDInputLocation,
+      PolygonRDDStartOffset,
+      PolygonRDDEndOffset,
+      PolygonRDDSplitter,
+      true)
+    val objectRDD =
+      new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true)
 
     objectRDD.spatialPartitioning(joinQueryPartitioningType)
     queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
@@ -150,18 +166,28 @@ object ScalaExample extends App {
     objectRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY)
     queryWindowRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY)
     for (i <- 1 to eachQueryLoopTimes) {
-      val resultSize = JoinQuery.SpatialJoinQuery(objectRDD, queryWindowRDD, false, SpatialPredicate.INTERSECTS).count
+      val resultSize = JoinQuery
+        .SpatialJoinQuery(objectRDD, queryWindowRDD, false, SpatialPredicate.INTERSECTS)
+        .count
     }
   }
 
   /**
-    * Test spatial join query using index.
-    *
-    * @throws Exception the exception
-    */
+   * Test spatial join query using index.
+   *
+   * @throws Exception
+   *   the exception
+   */
   def testSpatialJoinQueryUsingIndex() {
-    val queryWindowRDD = new PolygonRDD(sc, PolygonRDDInputLocation, PolygonRDDStartOffset, PolygonRDDEndOffset, PolygonRDDSplitter, true)
-    val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true)
+    val queryWindowRDD = new PolygonRDD(
+      sc,
+      PolygonRDDInputLocation,
+      PolygonRDDStartOffset,
+      PolygonRDDEndOffset,
+      PolygonRDDSplitter,
+      true)
+    val objectRDD =
+      new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true)
 
     objectRDD.spatialPartitioning(joinQueryPartitioningType)
     queryWindowRDD.spatialPartitioning(objectRDD.getPartitioner)
@@ -172,17 +198,21 @@ object ScalaExample extends App {
     queryWindowRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY)
 
     for (i <- 1 to eachQueryLoopTimes) {
-      val resultSize = JoinQuery.SpatialJoinQuery(objectRDD, queryWindowRDD, true, SpatialPredicate.COVERED_BY).count()
+      val resultSize = JoinQuery
+        .SpatialJoinQuery(objectRDD, queryWindowRDD, true, SpatialPredicate.COVERED_BY)
+        .count()
     }
   }
 
   /**
-    * Test spatial join query.
-    *
-    * @throws Exception the exception
-    */
+   * Test spatial join query.
+   *
+   * @throws Exception
+   *   the exception
+   */
   def testDistanceJoinQuery() {
-    val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true)
+    val objectRDD =
+      new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true)
     val queryWindowRDD = new CircleRDD(objectRDD, 0.1)
 
     objectRDD.spatialPartitioning(GridType.QUADTREE)
@@ -192,17 +222,21 @@ object ScalaExample extends App {
     queryWindowRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY)
 
     for (i <- 1 to eachQueryLoopTimes) {
-      val resultSize = JoinQuery.DistanceJoinQuery(objectRDD, queryWindowRDD, false, SpatialPredicate.INTERSECTS).count()
+      val resultSize = JoinQuery
+        .DistanceJoinQuery(objectRDD, queryWindowRDD, false, SpatialPredicate.INTERSECTS)
+        .count()
     }
   }
 
   /**
-    * Test spatial join query using index.
-    *
-    * @throws Exception the exception
-    */
+   * Test spatial join query using index.
+   *
+   * @throws Exception
+   *   the exception
+   */
   def testDistanceJoinQueryUsingIndex() {
-    val objectRDD = new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true)
+    val objectRDD =
+      new PointRDD(sc, PointRDDInputLocation, PointRDDOffset, PointRDDSplitter, true)
     val queryWindowRDD = new CircleRDD(objectRDD, 0.1)
 
     objectRDD.spatialPartitioning(GridType.QUADTREE)
@@ -214,7 +248,9 @@ object ScalaExample extends App {
     queryWindowRDD.spatialPartitionedRDD.persist(StorageLevel.MEMORY_ONLY)
 
     for (i <- 1 to eachQueryLoopTimes) {
-      val resultSize = JoinQuery.DistanceJoinQuery(objectRDD, queryWindowRDD, true, SpatialPredicate.INTERSECTS).count
+      val resultSize = JoinQuery
+        .DistanceJoinQuery(objectRDD, queryWindowRDD, true, SpatialPredicate.INTERSECTS)
+        .count
     }
   }
 
@@ -223,7 +259,13 @@ object ScalaExample extends App {
     val shapefileRDD = new ShapefileRDD(sc, ShapeFileInputLocation)
     val spatialRDD = new PolygonRDD(shapefileRDD.getPolygonRDD)
     try
-      RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180, 180, -90, 90), SpatialPredicate.COVERED_BY, false).count
+      RangeQuery
+        .SpatialRangeQuery(
+          spatialRDD,
+          new Envelope(-180, 180, -90, 90),
+          SpatialPredicate.COVERED_BY,
+          false)
+        .count
     catch {
       case e: Exception =>
         // TODO Auto-generated catch block

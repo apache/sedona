@@ -21,7 +21,6 @@ package org.apache.sedona.viz.sql
 import org.apache.sedona.viz.sql.utils.SedonaVizRegistrator
 import org.apache.spark.sql.SparkSessionExtensions
 
-
 class SedonaVizExtensions extends (SparkSessionExtensions => Unit) {
   def apply(e: SparkSessionExtensions): Unit = {
     e.injectCheckRule(spark => {

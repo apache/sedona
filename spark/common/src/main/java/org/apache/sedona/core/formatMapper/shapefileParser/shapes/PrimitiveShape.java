@@ -16,9 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.formatMapper.shapefileParser.shapes;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.nio.ByteBuffer;
 import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeParser;
 import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReaderFactory;
 import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
@@ -26,59 +28,42 @@ import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.TypeUn
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.nio.ByteBuffer;
+public class PrimitiveShape implements Serializable {
 
-public class PrimitiveShape
-        implements Serializable
-{
+  /** primitive bytes of one record copied from .shp file */
+  private final byte[] primitiveRecord;
 
-    /**
-     * primitive bytes of one record copied from .shp file
-     */
-    private final byte[] primitiveRecord;
+  /** shape type */
+  private final ShapeType shapeType;
 
-    /**
-     * shape type
-     */
-    private final ShapeType shapeType;
+  /** attributes of record extracted from .dbf file */
+  private String attributes = null;
 
-    /**
-     * attributes of record extracted from .dbf file
-     */
-    private String attributes = null;
+  public PrimitiveShape(ShpRecord record) {
+    this.primitiveRecord = record.getBytes().getBytes();
+    this.shapeType = ShapeType.getType(record.getTypeID());
+  }
 
-    public PrimitiveShape(ShpRecord record)
-    {
-        this.primitiveRecord = record.getBytes().getBytes();
-        this.shapeType = ShapeType.getType(record.getTypeID());
+  public byte[] getPrimitiveRecord() {
+    return primitiveRecord;
+  }
+
+  public String getAttributes() {
+    return attributes;
+  }
+
+  public void setAttributes(String attributes) {
+    this.attributes = attributes;
+  }
+
+  public Geometry getShape(GeometryFactory geometryFactory)
+      throws IOException, TypeUnknownException {
+    ShapeParser parser = shapeType.getParser(geometryFactory);
+    ByteBuffer shapeBuffer = ByteBuffer.wrap(primitiveRecord);
+    Geometry shape = parser.parseShape(ShapeReaderFactory.fromByteBuffer(shapeBuffer));
+    if (attributes != null) {
+      shape.setUserData(attributes);
     }
-
-    public byte[] getPrimitiveRecord()
-    {
-        return primitiveRecord;
-    }
-
-    public String getAttributes()
-    {
-        return attributes;
-    }
-
-    public void setAttributes(String attributes)
-    {
-        this.attributes = attributes;
-    }
-
-    public Geometry getShape(GeometryFactory geometryFactory)
-            throws IOException, TypeUnknownException
-    {
-        ShapeParser parser = shapeType.getParser(geometryFactory);
-        ByteBuffer shapeBuffer = ByteBuffer.wrap(primitiveRecord);
-        Geometry shape = parser.parseShape(ShapeReaderFactory.fromByteBuffer(shapeBuffer));
-        if (attributes != null) {
-            shape.setUserData(attributes);
-        }
-        return shape;
-    }
+    return shape;
+  }
 }
