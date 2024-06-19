@@ -727,6 +727,31 @@ public class Functions {
     return isValidOp.isValid();
   }
 
+  public static boolean isValidTrajectory(Geometry geom) {
+    if (!(geom.getClass().getSimpleName().equals("LineString"))) {
+      System.out.println("NOTICE: Geometry is not a LINESTRING");
+      return false;
+    }
+
+    if (!Functions.hasM(geom)) {
+      System.out.println("NOTICE: Line does not have M dimension.");
+      return false;
+    }
+
+    double measure = -1 * Double.MAX_VALUE;
+    Coordinate[] coordinates = geom.getCoordinates();
+    for (int i = 0; i < geom.getNumPoints(); i++) {
+      if (coordinates[i].getM() <= measure) {
+        System.out.printf(
+            "NOTICE: Measure of vertex %d (%f) not bigger than measure of vertex %d (%f)%n",
+            i, coordinates[i].getM(), i - 1, measure);
+        return false;
+      }
+      measure = coordinates[i].getM();
+    }
+    return true;
+  }
+
   public static Geometry addPoint(Geometry linestring, Geometry point) {
     return addPoint(linestring, point, -1);
   }

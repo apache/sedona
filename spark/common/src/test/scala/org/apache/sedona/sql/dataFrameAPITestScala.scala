@@ -2073,6 +2073,17 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertTrue(actual)
     }
 
+    it("Should pass ST_IsValidTrajectory") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromText('LINESTRING M (0 0 1, 0 1 2)') as geom1, ST_GeomFromText('LINESTRING M (0 0 1, 0 1 1)') as geom2")
+      var actual =
+        baseDf.select(ST_IsValidTrajectory("geom1")).first().get(0).asInstanceOf[Boolean]
+      assertTrue("Valid", actual)
+
+      actual = baseDf.select(ST_IsValidTrajectory("geom2")).first().get(0).asInstanceOf[Boolean]
+      assertFalse("Not valid", actual)
+    }
+
     it("Passed ST_IsValidDetail") {
       // Valid Geometry
       var baseDf = sparkSession.sql(

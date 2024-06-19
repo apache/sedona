@@ -136,6 +136,7 @@ public class Catalog {
       new Functions.ST_IsPolygonCW(),
       new Functions.ST_IsRing(),
       new Functions.ST_IsSimple(),
+      new Functions.ST_IsValidTrajectory(),
       new Functions.ST_IsValid(),
       new Functions.ST_Normalize(),
       new Functions.ST_AddMeasure(),

@@ -237,6 +237,11 @@ object st_functions extends DataFrameAPI {
   def ST_IsSimple(geometry: Column): Column = wrapExpression[ST_IsSimple](geometry)
   def ST_IsSimple(geometry: String): Column = wrapExpression[ST_IsSimple](geometry)
 
+  def ST_IsValidTrajectory(geometry: Column): Column =
+    wrapExpression[ST_IsValidTrajectory](geometry)
+  def ST_IsValidTrajectory(geometry: String): Column =
+    wrapExpression[ST_IsValidTrajectory](geometry)
+
   def ST_IsValid(geometry: Column): Column = wrapExpression[ST_IsValid](geometry)
   def ST_IsValid(geometry: String): Column = wrapExpression[ST_IsValid](geometry)
 
