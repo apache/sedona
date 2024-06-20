@@ -2442,6 +2442,28 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testIsValidTrajectory() {
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromText('LINESTRING M (0 0 1, 0 1 2)') as geom1, ST_GeomFromText('LINESTRING M (0 0 1, 0 1 1)') as geom2");
+    boolean result =
+        (boolean)
+            first(
+                    table.select(
+                        call(Functions.ST_IsValidTrajectory.class.getSimpleName(), $("geom1"))))
+                .getField(0);
+    assertTrue(result);
+
+    result =
+        (boolean)
+            first(
+                    table.select(
+                        call(Functions.ST_IsValidTrajectory.class.getSimpleName(), $("geom2"))))
+                .getField(0);
+    assertFalse(result);
+  }
+
+  @Test
   public void testIsValidReason() {
     // Test with an invalid geometry (bow-tie polygon)
     String bowTieWKT = "POLYGON ((100 200, 100 100, 200 200, 200 100, 100 200))";
