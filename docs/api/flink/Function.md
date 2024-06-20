@@ -2178,6 +2178,20 @@ Output:
 true
 ```
 
+SQL Example:
+
+```sql
+SELECT ST_IsValidTrajectory(
+               ST_GeomFromText('LINESTRING M (0 0 1, 0 1 0)')
+)
+```
+
+Output:
+
+```sql
+false
+```
+
 ## ST_Length
 
 Introduction: Returns the perimeter of A.
