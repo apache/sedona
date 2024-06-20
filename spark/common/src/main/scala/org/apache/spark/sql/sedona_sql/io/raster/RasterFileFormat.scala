@@ -85,7 +85,7 @@ private class RasterFileWriter(
     context: TaskAttemptContext)
     extends OutputWriter {
 
-  private val hfs = FileSystem.newInstance(new Path(savePath).toUri, context.getConfiguration)
+  private val hfs = (new Path(savePath)).getFileSystem(context.getConfiguration)
   private val rasterFieldIndex =
     if (rasterOptions.rasterField.isEmpty) getRasterFieldIndex
     else dataSchema.fieldIndex(rasterOptions.rasterField.get)
@@ -119,9 +119,7 @@ private class RasterFileWriter(
     }
   }
 
-  override def close(): Unit = {
-    hfs.close()
-  }
+  override def close(): Unit = {}
 
   def path(): String = {
     savePath
