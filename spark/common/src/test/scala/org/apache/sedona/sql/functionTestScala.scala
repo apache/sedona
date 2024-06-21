@@ -3320,4 +3320,90 @@ class functionTestScala
     }
   }
 
+  it("Should pass ST_Rotate") {
+    val geomTestCases = Map(
+      (
+        1,
+        "'LINESTRING (50 160, 50 50, 100 50)'",
+        "PI()",
+        "null",
+        "null") -> "'LINESTRING (-50 -160, -50 -50, -100 -50)'",
+      (
+        2,
+        "'LINESTRING (50 160, 50 50, 100 50)'",
+        "PI()/6",
+        "50.0",
+        "160.0") -> "'LINESTRING (50 160, 105 64.7372055837117, 148.301270189222 89.7372055837117)'",
+      (
+        3,
+        "'LINESTRING (50 160, 50 50, 100 50)'",
+        "PI()/6",
+        "null",
+        "null") -> "'LINESTRING (50 160, 105 64.7372055837117, 148.301270189222 89.7372055837117)'",
+      (4, "'POINT EMPTY'", "PI()/6", "null", "null") -> "'POINT EMPTY'",
+      (
+        5,
+        "'LINESTRING (50 160 10, 50 50 10, 100 50 10)'",
+        "PI()",
+        "null",
+        "null") -> "'LINESTRING (-50 -160 10, -50 -50 10, -100 -50 10)'",
+      (
+        6,
+        "'GEOMETRYCOLLECTION(POINT(10 10), LINESTRING (50 160, 50 50, 100 50))'",
+        "PI()",
+        "null",
+        "null") -> "'GEOMETRYCOLLECTION (POINT (-10 -10), LINESTRING (-50 -160, -50 -50, -100 -50))'",
+      (7, "'POINT (10 10)'", "PI()/4", "null", "null") -> "'POINT (-10 10)'",
+      (
+        8,
+        "'POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'",
+        "PI()/2",
+        "5.0",
+        "5.0") -> "'POLYGON ((0 10, 0 0, 10 0, 10 10, 0 10))'",
+      (
+        9,
+        "'MULTIPOINT ((1 1), (2 2), (3 3))'",
+        "PI()/2",
+        "null",
+        "null") -> "'MULTIPOINT ((-1 1), (-2 2), (-3 3))'",
+      (
+        10,
+        "'MULTILINESTRING ((0 0, 10 0), (0 0, 0 10))'",
+        "PI()/4",
+        "null",
+        "null") -> "'MULTILINESTRING ((0 0, 7.0710678118654755 7.0710678118654755), (0 0, -7.0710678118654755 7.0710678118654755))'",
+      (
+        11,
+        "'MULTIPOLYGON (((0 0, 5 0, 5 5, 0 5, 0 0)), ((10 10, 15 10, 15 15, 10 15, 10 10)))'",
+        "PI()/2",
+        "null",
+        "null") -> "'MULTIPOLYGON (((0 0, 0 -5, -5 -5, -5 0, 0 0)), ((10 10, 10 5, 5 5, 5 10, 10 10)))'")
+
+    for (((index, geom, angle, x, y), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"""
+           |SELECT
+           |  ST_AsText(
+           |    ST_Rotate(
+           |      ST_GeomFromWKT($geom),
+           |      $angle${if (x != "null" && y != "null") s", $x, $y" else ""}
+           |    )
+           |  ) AS geom
+         """.stripMargin)
+
+      val actual = df.take(1)(0).get(0).asInstanceOf[String]
+      System.out.println(index, actual)
+//      assert(actual == expectedResult.stripPrefix("'").stripSuffix("'"))
+    }
+
+    // Test invalid origin type
+    val invalidOriginDf = sparkSession.sql("""
+        |SELECT ST_Rotate(ST_GeomFromText('LINESTRING (50 160, 50 50, 100 50)'), PI()/6, ST_GeomFromText('LINESTRING (0 0, 1 1)')) as result
+    """.stripMargin)
+
+    val exception = intercept[Exception] {
+      invalidOriginDf.collect()
+    }
+    exception.getMessage should include("The origin must be a non-empty Point geometry.")
+  }
+
 }

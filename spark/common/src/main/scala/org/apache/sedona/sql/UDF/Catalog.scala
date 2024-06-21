@@ -225,6 +225,7 @@ object Catalog {
     function[ST_HausdorffDistance](-1),
     function[ST_DWithin](),
     function[ST_IsValidReason](),
+    function[ST_Rotate](),
     // Expression for rasters
     function[RS_NormalizedDifference](),
     function[RS_Mean](),

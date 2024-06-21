@@ -3577,4 +3577,14 @@ public class FunctionsTest extends TestBase {
     String result1 = Functions.asEWKT(Functions.points(geometry3D));
     assertEquals("MULTIPOINT Z((0 0 1), (1 1 2), (2 2 3), (0 0 1))", result1);
   }
+
+  @Test
+  public void rotate() throws ParseException {
+    Geometry lineString = Constructors.geomFromEWKT("LINESTRING (50 160, 50 50, 100 50)");
+    String result = Functions.asEWKT(Functions.rotate(lineString, Math.PI));
+    System.out.println(result);
+    assertEquals(
+        "LINESTRING (-50.00000000000002 -160, -50.00000000000001 -49.99999999999999, -100 -49.999999999999986)",
+        result);
+  }
 }
