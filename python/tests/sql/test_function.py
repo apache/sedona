@@ -322,6 +322,14 @@ class TestPredicateJoin(TestBase):
         self.spark.sql("SELECT ST_GeomFromText('POINT (1 1)')").first()[0])
         assert expected == actual
 
+    def test_st_is_valid_trajectory(self):
+        baseDf = self.spark.sql("SELECT ST_GeomFromText('LINESTRING M (0 0 1, 0 1 2)') as geom1, ST_GeomFromText('LINESTRING M (0 0 1, 0 1 1)') as geom2")
+        actual = baseDf.selectExpr("ST_IsValidTrajectory(geom1)").first()[0]
+        assert actual
+
+        actual = baseDf.selectExpr("ST_IsValidTrajectory(geom2)").first()[0]
+        assert not actual
+
     def test_st_is_valid(self):
         test_table = self.spark.sql(
             "SELECT ST_IsValid(ST_GeomFromWKT('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0), (15 15, 15 20, 20 20, 20 15, 15 15))')) AS a, " +

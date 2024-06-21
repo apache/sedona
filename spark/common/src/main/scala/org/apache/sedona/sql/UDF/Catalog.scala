@@ -90,6 +90,7 @@ object Catalog {
     function[ST_UnaryUnion](),
     function[ST_Union](),
     function[ST_IsValidDetail](),
+    function[ST_IsValidTrajectory](),
     function[ST_IsValid](),
     function[ST_IsEmpty](),
     function[ST_ReducePrecision](),

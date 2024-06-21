@@ -1,0 +1,11 @@
+---
+# https://yamllint.readthedocs.io/en/stable/
+extends: default
+
+rules:
+  colons: disable
+  comments: disable
+  comments-indentation: disable
+  document-start: disable
+  line-length: disable
+  truthy: false
