@@ -28,7 +28,6 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: true
@@ -37,7 +36,6 @@ jobs:
         hadoop: [3]
         scala: [2.12.15]
         r: [oldrel, release]
-
     env:
       SPARK_VERSION: ${{ matrix.spark }}
       HADOOP_VERSION: ${{ matrix.hadoop }}

@@ -11,7 +11,7 @@ repos:
       - id: identity
       - id: check-hooks-apply
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.6
+    rev: v2.3.0
     hooks:
       - id: codespell
         name: Run codespell
@@ -19,12 +19,12 @@ repos:
         args: [--ignore-words=.github/linters/codespell.txt]
         exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases|^tools/maven/scalafmt
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.2
+    rev: v0.4.10
     hooks:
       - id: ruff
         args: [--config=.github/linters/ruff.toml, --fix]
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-ast
       - id: check-builtin-literals
@@ -57,7 +57,7 @@ repos:
         args: [--markdown-linebreak-ext=md]
         exclude: ^docs-overrides/main\.html$|\.Rd$
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.38.0
+    rev: v0.41.0
     hooks:
       - id: markdownlint
         name: Run markdownlint
@@ -66,3 +66,13 @@ repos:
         exclude: ^\.github/.*$
         types: [markdown]
         files: \.(md|mdown|markdown)$
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        name: Run yamllint
+        description: Check YAML files with yamllint
+        args: [--strict, -c=.github/linters/.yaml-lint.yml]
+        exclude: ^mkdocs\.yml$
+        types: [yaml]
+        files: \.ya?ml$
