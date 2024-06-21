@@ -16,21 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.snowflake.snowsql;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(SnowTestRunner.class)
-public class TestFunctionsGeography
-        extends TestBase {
-    @Test
-    public void test_GeometryType() {
-        registerUDFGeography("GeometryType", String.class);
-        verifySqlSingleRes(
-                "select sedona.GeometryType(ST_GeographyFromWKT('POINT(1 2)'))",
-                "POINT"
-        );
-    }
+public class TestFunctionsGeography extends TestBase {
+  @Test
+  public void test_GeometryType() {
+    registerUDFGeography("GeometryType", String.class);
+    verifySqlSingleRes("select sedona.GeometryType(ST_GeographyFromWKT('POINT(1 2)'))", "POINT");
+  }
 }
