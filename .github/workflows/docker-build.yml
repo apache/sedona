@@ -40,30 +40,29 @@ jobs:
     defaults:
       run:
         shell: bash
-
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-java@v4
-      with:
-        distribution: 'zulu'
-        java-version: 11
-    - name: Cache Maven packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
-    - name: Setup docker (missing on macOS)
-      if: runner.os == 'macos'
-      run: |
-        brew install docker
-        colima start
-        DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
-        mkdir -p $DOCKER_CONFIG/cli-plugins
-        curl -SL https://github.com/docker/buildx/releases/download/v0.14.1/buildx-v0.14.1.darwin-amd64 -o $DOCKER_CONFIG/cli-plugins/docker-buildx
-        chmod +x $DOCKER_CONFIG/cli-plugins/docker-buildx
-    - env:
-        SPARK_VERSION: ${{ matrix.spark }}
-        SEDONA_VERSION: ${{ matrix.sedona }}
-        GEOTOOLS_VERSION: ${{ matrix.geotools }}
-      run: ./docker/sedona-spark-jupyterlab/build.sh ${SPARK_VERSION} ${SEDONA_VERSION} local ${GEOTOOLS_VERSION}
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: 11
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Setup docker (missing on macOS)
+        if: runner.os == 'macos'
+        run: |
+          brew install docker
+          colima start
+          DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+          mkdir -p $DOCKER_CONFIG/cli-plugins
+          curl -SL https://github.com/docker/buildx/releases/download/v0.14.1/buildx-v0.14.1.darwin-amd64 -o $DOCKER_CONFIG/cli-plugins/docker-buildx
+          chmod +x $DOCKER_CONFIG/cli-plugins/docker-buildx
+      - env:
+          SPARK_VERSION: ${{ matrix.spark }}
+          SEDONA_VERSION: ${{ matrix.sedona }}
+          GEOTOOLS_VERSION: ${{ matrix.geotools }}
+        run: ./docker/sedona-spark-jupyterlab/build.sh ${SPARK_VERSION} ${SEDONA_VERSION} local ${GEOTOOLS_VERSION}
