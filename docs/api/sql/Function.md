@@ -2201,6 +2201,42 @@ gid  |                  validity_info
 
 ```
 
+## ST_IsValidTrajectory
+
+Introduction: This function checks if a geometry is a valid trajectory representation. For a trajectory to be considered valid, it must be a LineString that includes measure (M) values. The key requirement is that the M values increase from one vertex to the next as you move along the line.
+
+Format: `ST_IsValidTrajectory(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_IsValidTrajectory(
+               ST_GeomFromText('LINESTRING M (0 0 1, 0 1 2)')
+)
+```
+
+Output:
+
+```
+true
+```
+
+SQL Example:
+
+```sql
+SELECT ST_IsValidTrajectory(
+               ST_GeomFromText('LINESTRING M (0 0 1, 0 1 0)')
+)
+```
+
+Output:
+
+```sql
+false
+```
+
 ## ST_Length
 
 Introduction: Returns the perimeter of A.

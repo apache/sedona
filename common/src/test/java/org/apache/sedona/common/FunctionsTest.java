@@ -3512,6 +3512,21 @@ public class FunctionsTest extends TestBase {
     assertTrue(expected.equals(actual));
   }
 
+    @Test
+    public void test() throws ParseException {
+        Geometry geom = Constructors.geomFromEWKT("MULTILINESTRING M ((0 0 1,0 1 2), (0 0 1,0 1 2))");
+        boolean actual = Functions.isValidTrajectory(geom);
+        assertFalse(actual);
+
+        geom = Constructors.geomFromEWKT("LINESTRING M (0 0 1, 0 1 2)");
+        actual = Functions.isValidTrajectory(geom);
+        assertTrue(actual);
+
+        geom = Constructors.geomFromEWKT("LINESTRING M (0 0 1, 0 1 1)");
+        actual = Functions.isValidTrajectory(geom);
+        assertFalse(actual);
+    }
+
   @Test
   public void isValidDetail() throws ParseException {
     // Valid geometry

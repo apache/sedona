@@ -352,6 +352,14 @@ case class ST_IsValidDetail(children: Seq[Expression])
     .add("location", GeometryUDT, nullable = true)
 }
 
+case class ST_IsValidTrajectory(inputExpressions: Seq[Expression])
+    extends InferredExpression(inferrableFunction1(Functions.isValidTrajectory)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
  * Test if Geometry is valid.
  *

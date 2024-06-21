@@ -729,6 +729,26 @@ public class Functions {
     return isValidOp.isValid();
   }
 
+  public static boolean isValidTrajectory(Geometry geom) {
+    if (!(geom.getClass().getSimpleName().equals("LineString"))) {
+      return false;
+    }
+
+    if (!Functions.hasM(geom)) {
+      return false;
+    }
+
+    double measure = -1 * Double.MAX_VALUE;
+    Coordinate[] coordinates = geom.getCoordinates();
+    for (int i = 0; i < geom.getNumPoints(); i++) {
+      if (coordinates[i].getM() <= measure) {
+        return false;
+      }
+      measure = coordinates[i].getM();
+    }
+    return true;
+  }
+
   public static Geometry addPoint(Geometry linestring, Geometry point) {
     return addPoint(linestring, point, -1);
   }

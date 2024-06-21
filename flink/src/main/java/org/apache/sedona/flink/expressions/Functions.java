@@ -1842,6 +1842,16 @@ public class Functions {
     }
   }
 
+  public static class ST_IsValidTrajectory extends ScalarFunction {
+    @DataTypeHint("Boolean")
+    public Boolean eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o) {
+      Geometry geometry = (Geometry) o;
+      return org.apache.sedona.common.Functions.isValidTrajectory(geometry);
+    }
+  }
+
   public static class ST_IsValidReason extends ScalarFunction {
     @DataTypeHint("String")
     public String eval(

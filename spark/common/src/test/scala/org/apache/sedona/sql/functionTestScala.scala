@@ -25,7 +25,7 @@ import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Row}
 import org.geotools.referencing.CRS
-import org.junit.Assert.{assertEquals, assertTrue}
+import org.junit.Assert.{assertEquals, assertFalse, assertTrue}
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon}
 import org.locationtech.jts.io.WKTWriter
@@ -3247,6 +3247,17 @@ class functionTestScala
         .asInstanceOf[Geometry],
       45.165845650018)
     assertTrue(actual.equals(expected))
+  }
+
+  it("Should pass ST_IsValidTrajectory") {
+    val baseDf = sparkSession.sql(
+      "SELECT ST_GeomFromText('LINESTRING M (0 0 1, 0 1 2)') as geom1, ST_GeomFromText('LINESTRING M (0 0 1, 0 1 1)') as geom2")
+    var actual =
+      baseDf.selectExpr("ST_IsValidTrajectory(geom1)").first().get(0).asInstanceOf[Boolean]
+    assertTrue("Valid", actual)
+
+    actual = baseDf.selectExpr("ST_IsValidTrajectory(geom2)").first().get(0).asInstanceOf[Boolean]
+    assertFalse("Not valid", actual)
   }
 
   it("Should pass ST_IsValidDetail") {
