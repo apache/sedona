@@ -18,13 +18,12 @@
  */
 package org.apache.sedona.snowflake.snowsql.udtfs;
 
+import java.util.stream.Stream;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.InscribedCircle;
 import org.apache.sedona.snowflake.snowsql.GeometrySerde;
 import org.apache.sedona.snowflake.snowsql.annotations.UDTFAnnotations;
 import org.locationtech.jts.io.ParseException;
-
-import java.util.stream.Stream;
 
 @UDTFAnnotations.TabularFunc(
     name = "ST_MaximumInscribedCircle",
@@ -50,7 +49,8 @@ public class ST_MaximumInscribedCircle {
   public ST_MaximumInscribedCircle() {}
 
   public Stream<OutputRow> process(byte[] geometry) throws ParseException {
-    InscribedCircle inscribedCircle = Functions.maximumInscribedCircle(GeometrySerde.deserialize(geometry));
+    InscribedCircle inscribedCircle =
+        Functions.maximumInscribedCircle(GeometrySerde.deserialize(geometry));
 
     return Stream.of(new OutputRow(inscribedCircle));
   }

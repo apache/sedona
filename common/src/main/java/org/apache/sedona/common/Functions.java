@@ -954,7 +954,8 @@ public class Functions {
     double radius;
 
     // All non-polygonal geometries use LargestEmptyCircle
-    if (!geometry.getClass().getSimpleName().equals("Polygon") && !geometry.getClass().getSimpleName().equals("MultiPolygon")) {
+    if (!geometry.getClass().getSimpleName().equals("Polygon")
+        && !geometry.getClass().getSimpleName().equals("MultiPolygon")) {
       LargestEmptyCircle largestEmptyCircle = new LargestEmptyCircle(geometry, tolerance);
       center = largestEmptyCircle.getCenter();
       nearest = largestEmptyCircle.getRadiusPoint();
