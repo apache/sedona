@@ -797,6 +797,19 @@ def ST_IsValidDetail(geometry: ColumnOrName, flag: Optional[Union[ColumnOrName, 
     return _call_st_function("ST_IsValidDetail", args)
 
 @validate_argument_types
+def ST_IsValidTrajectory(geometry: ColumnOrName) -> Column:
+    """
+    Tests if a geometry encodes a valid trajectory. A valid trajectory is represented as a LINESTRING with measures
+    (M values). The measure values must increase from each vertex to the next.
+
+    :param geometry: Geometry column to validate.
+    :type geometry: ColumnOrName
+    :return: True if the geometry is valid trajectory and False otherwise as a boolean column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_IsValidTrajectory", (geometry))
+
+@validate_argument_types
 def ST_IsValidReason(geometry: ColumnOrName, flag: Optional[Union[ColumnOrName, int]] = None) -> Column:
     """
     Provides a text description of why a geometry is not valid or states that it is valid.
