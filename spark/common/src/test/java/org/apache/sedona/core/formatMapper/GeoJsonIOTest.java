@@ -166,7 +166,7 @@ public class GeoJsonIOTest extends TestBase {
 
   /** Test correctness of parsing geojson file including id */
   @Test
-  public void testReadToIncludIdRDD() throws IOException {
+  public void testReadToIncludeIdRDD() throws IOException {
     SpatialRDD geojsonRDD = GeoJsonReader.readToGeometryRDD(sc, geoJsonContainsId, true, false);
     assertEquals(geojsonRDD.rawSpatialRDD.count(), 1);
     assertEquals(geojsonRDD.fieldNames.size(), 3);

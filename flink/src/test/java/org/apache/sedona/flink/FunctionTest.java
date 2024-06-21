@@ -168,7 +168,7 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
-  public void testShiftLogitude() {
+  public void testShiftLongitude() {
     String actual =
         (String)
             first(
@@ -1524,7 +1524,7 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
-  public void testMaxDistnace() {
+  public void testMaxDistance() {
     Table tbl =
         tableEnv.sqlQuery(
             "SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 99 77.5, 90 140, 60 140))') as geom");
