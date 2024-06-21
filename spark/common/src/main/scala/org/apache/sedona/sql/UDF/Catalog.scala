@@ -169,6 +169,7 @@ object Catalog {
     function[ST_Polygon](),
     function[ST_Polygonize](),
     function[ST_MakePolygon](null),
+    function[ST_MaximumInscribedCircle](),
     function[ST_MaxDistance](),
     function[ST_GeoHash](),
     function[ST_GeomFromGeoHash](null),

@@ -1076,6 +1076,18 @@ def ST_MakeValid(geometry: ColumnOrName, keep_collapsed: Optional[Union[ColumnOr
     args = (geometry,) if keep_collapsed is None else (geometry, keep_collapsed)
     return _call_st_function("ST_MakeValid", args)
 
+
+@validate_argument_types
+def ST_MaximumInscribedCircle(geometry: ColumnOrName) -> Column:
+    """Finds the largest circle that is contained within a geometry, or which does not overlap any lines and points
+
+        :param geometry:
+        :type geometry: ColumnOrName
+        :return: Row of center point, nearest point and radius
+        :rtype: Column
+        """
+    return _call_st_function("ST_MaximumInscribedCircle", geometry)
+
 @validate_argument_types
 def ST_MaxDistance(geom1: ColumnOrName, geom2: ColumnOrName) -> Column:
     """Calculate the maximum distance between two furthest points in the geometries

@@ -29,6 +29,7 @@ import org.apache.sedona.snowflake.snowsql.udtfs.*;
 
 public class UDTFDDLGenerator {
   public static final Class[] udtfClz = {
+    ST_MaximumInscribedCircle.class,
     ST_MinimumBoundingRadius.class,
     ST_Intersection_Aggr.class,
     ST_SubDivideExplode.class,

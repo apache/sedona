@@ -356,6 +356,11 @@ object st_functions extends DataFrameAPI {
   def ST_MakeValid(geometry: String, keepCollapsed: Boolean): Column =
     wrapExpression[ST_MakeValid](geometry, keepCollapsed)
 
+  def ST_MaximumInscribedCircle(geometry: Column): Column =
+    wrapExpression[ST_MaximumInscribedCircle](geometry)
+  def ST_MaximumInscribedCircle(geometry: String): Column =
+    wrapExpression[ST_MaximumInscribedCircle](geometry)
+
   def ST_MaxDistance(geom1: Column, geom2: Column): Column =
     wrapExpression[ST_MaxDistance](geom1, geom2)
   def ST_MaxDistance(geom1: String, geom2: String): Column =

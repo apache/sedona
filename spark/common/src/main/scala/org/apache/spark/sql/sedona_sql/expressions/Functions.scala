@@ -20,7 +20,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.{Functions, FunctionsGeoTools}
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
-import org.apache.sedona.common.utils.ValidDetail
+import org.apache.sedona.common.utils.{InscribedCircle, ValidDetail}
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
@@ -964,6 +964,32 @@ case class ST_MakePolygon(inputExpressions: Seq[Expression])
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
+}
+
+case class ST_MaximumInscribedCircle(children: Seq[Expression])
+    extends Expression
+    with CodegenFallback {
+
+  override def eval(input: InternalRow): Any = {
+    val geometry = children.head.toGeometry(input)
+    var inscribedCircle: InscribedCircle = null
+    inscribedCircle = Functions.maximumInscribedCircle(geometry)
+
+    val serCenter = GeometrySerializer.serialize(inscribedCircle.center)
+    val serNearest = GeometrySerializer.serialize(inscribedCircle.nearest)
+    InternalRow.fromSeq(Seq(serCenter, serNearest, inscribedCircle.radius))
+  }
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
+    copy(children = newChildren)
+  }
+
+  override def nullable: Boolean = true
+
+  override def dataType: DataType = new StructType()
+    .add("center", GeometryUDT, nullable = false)
+    .add("nearest", GeometryUDT, nullable = false)
+    .add("radius", DoubleType, nullable = false)
 }
 
 case class ST_MaxDistance(inputExpressions: Seq[Expression])

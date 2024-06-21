@@ -33,6 +33,8 @@ import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.*;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.Orientation;
+import org.locationtech.jts.algorithm.construct.LargestEmptyCircle;
+import org.locationtech.jts.algorithm.construct.MaximumInscribedCircle;
 import org.locationtech.jts.algorithm.hull.ConcaveHull;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
@@ -919,6 +921,32 @@ public class Functions {
       }
     }
     return circle;
+  }
+
+  public static InscribedCircle maximumInscribedCircle(Geometry geometry) {
+    // Calculating the tolerance
+    Envelope envelope = geometry.getEnvelopeInternal();
+    double width = envelope.getWidth(), height = envelope.getHeight(), size, tolerance;
+    size = Math.max(width, height);
+    tolerance = size / 1000.0;
+
+    Geometry center, nearest;
+    double radius;
+
+    // All non-polygonal geometries use LargestEmptyCircle
+    if (!geometry.getClass().getSimpleName().equals("Polygon") && !geometry.getClass().getSimpleName().equals("MultiPolygon")) {
+      LargestEmptyCircle largestEmptyCircle = new LargestEmptyCircle(geometry, tolerance);
+      center = largestEmptyCircle.getCenter();
+      nearest = largestEmptyCircle.getRadiusPoint();
+      radius = largestEmptyCircle.getRadiusLine().getLength();
+      return new InscribedCircle(center, nearest, radius);
+    }
+
+    MaximumInscribedCircle maximumInscribedCircle = new MaximumInscribedCircle(geometry, tolerance);
+    center = maximumInscribedCircle.getCenter();
+    nearest = maximumInscribedCircle.getRadiusPoint();
+    radius = maximumInscribedCircle.getRadiusLine().getLength();
+    return new InscribedCircle(center, nearest, radius);
   }
 
   public static Pair<Geometry, Double> minimumBoundingRadius(Geometry geometry) {
