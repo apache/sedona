@@ -2073,6 +2073,25 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertTrue(actual)
     }
 
+    it("Should pass ST_MaximumInscribedCircle") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 50 90, 90 140, 60 140))') AS geom")
+      val actual: Row = baseDf.select(ST_MaximumInscribedCircle("geom")).first().getAs[Row](0)
+      val expected = Row(
+        sparkSession
+          .sql("SELECT ST_GeomFromWKT('POINT (96.953125 76.328125)')")
+          .first()
+          .get(0)
+          .asInstanceOf[Geometry],
+        sparkSession
+          .sql("SELECT ST_GeomFromWKT('POINT (140 90)')")
+          .first()
+          .get(0)
+          .asInstanceOf[Geometry],
+        45.165845650018)
+      assertTrue(actual.equals(expected))
+    }
+
     it("Should pass ST_IsValidTrajectory") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromText('LINESTRING M (0 0 1, 0 1 2)') as geom1, ST_GeomFromText('LINESTRING M (0 0 1, 0 1 1)') as geom2")

@@ -2621,6 +2621,38 @@ Result:
 Be sure to check you code when upgrading. The previous implementation only worked for (multi)polygons and had a different interpretation of the second, boolean, argument.
 It would also sometimes return multiple geometries for a single geometry input.
 
+## ST_MaximumInscribedCircle
+
+Introduction: Finds the largest circle that is contained within a (multi)polygon, or which does not overlap any lines and points. Returns a row with fields:
+
+- `center` - center point of the circle
+- `nearest` - nearest point from the center of the circle
+- `radius` - radius of the circle
+
+For polygonal geometries, the function inscribes the circle within the boundary rings, treating internal rings as additional constraints. When processing linear and point inputs, the algorithm inscribes the circle within the convex hull of the input, utilizing the input lines and points as additional boundary constraints.
+
+Format: `ST_MaximumInscribedCircle(geometry: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT inscribedCircle.* FROM (
+    SELECT ST_MaximumIncribedCircle(ST_GeomFromWKT('POLYGON ((62.11 19.68, 60.79 17.20, 61.30 15.96, 62.11 16.08, 65.93 16.95, 66.20 20.61, 63.08 21.43, 64.48 18.70, 62.11 19.68))')) AS inscribedCircle
+)
+```
+
+Output:
+
+```
++---------------------------------------------+-------------------------------------------+------------------+
+|center                                       |nearest                                    |radius            |
++---------------------------------------------+-------------------------------------------+------------------+
+|POINT (62.794975585937514 17.774780273437496)|POINT (63.36773534817729 19.15992378007859)|1.4988916836219184|
++---------------------------------------------+-------------------------------------------+------------------+
+```
+
 ## ST_MaxDistance
 
 Introduction: Calculates and returns the length value representing the maximum distance between any two points across the input geometries. This function is an alias for `ST_LongestDistance`.

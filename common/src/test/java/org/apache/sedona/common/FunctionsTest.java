@@ -28,10 +28,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
-import org.apache.sedona.common.utils.GeomUtils;
-import org.apache.sedona.common.utils.H3Utils;
-import org.apache.sedona.common.utils.S2Utils;
-import org.apache.sedona.common.utils.ValidDetail;
+import org.apache.sedona.common.utils.*;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.projection.ProjectionException;
 import org.junit.Test;
@@ -3457,6 +3454,62 @@ public class FunctionsTest extends TestBase {
     assertEquals(
         "Polygon geometry type not supported, supported types are: (Multi)Point and (Multi)LineString.",
         e.getMessage());
+  }
+
+  @Test
+  public void maximumInscribedCircle() throws ParseException {
+    Geometry geom =
+        Constructors.geomFromEWKT(
+            "POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 50 90, 90 140, 60 140))");
+    InscribedCircle actual = Functions.maximumInscribedCircle(geom);
+    InscribedCircle expected =
+        new InscribedCircle(
+            Constructors.geomFromEWKT("POINT (96.953125 76.328125)"),
+            Constructors.geomFromEWKT("POINT (140 90)"),
+            45.165846);
+    assertTrue(expected.equals(actual));
+
+    geom =
+        Constructors.geomFromEWKT(
+            "MULTILINESTRING ((59.5 17, 65 17), (60 16.5, 66 12), (65 12, 69 17))");
+    actual = Functions.maximumInscribedCircle(geom);
+    expected =
+        new InscribedCircle(
+            Constructors.geomFromEWKT("POINT (65.0419921875 15.1005859375)"),
+            Constructors.geomFromEWKT("POINT (65 17)"),
+            1.8998781);
+    assertTrue(expected.equals(actual));
+
+    geom =
+        Constructors.geomFromEWKT(
+            "MULTIPOINT ((60.8 15.5), (63.2 16.3), (63 14), (67.4 14.8), (66.3 18.4), (65. 13.), (67.5 16.9), (64.2 18))");
+    actual = Functions.maximumInscribedCircle(geom);
+    expected =
+        new InscribedCircle(
+            Constructors.geomFromEWKT("POINT (65.44062499999998 15.953124999999998)"),
+            Constructors.geomFromEWKT("POINT (67.5 16.9)"),
+            2.2666269);
+    assertTrue(expected.equals(actual));
+
+    geom = Constructors.geomFromEWKT("MULTIPOINT ((60.8 15.5), (63.2 16.3))");
+    actual = Functions.maximumInscribedCircle(geom);
+    expected =
+        new InscribedCircle(
+            Constructors.geomFromEWKT("POINT (60.8 15.5)"),
+            Constructors.geomFromEWKT("POINT (60.8 15.5)"),
+            0.0);
+    assertTrue(expected.equals(actual));
+
+    geom =
+        Constructors.geomFromEWKT(
+            "GEOMETRYCOLLECTION (POINT (60.8 15.5), POINT (63.2 16.3), POINT (63 14), POINT (67.4 14.8), POINT (66.3 18.4), POINT (65 13), POINT (67.5 16.9), POINT (64.2 18))");
+    actual = Functions.maximumInscribedCircle(geom);
+    expected =
+        new InscribedCircle(
+            Constructors.geomFromEWKT("POINT (65.44062499999998 15.953124999999998)"),
+            Constructors.geomFromEWKT("POINT (67.5 16.9)"),
+            2.2666269);
+    assertTrue(expected.equals(actual));
   }
 
   @Test
