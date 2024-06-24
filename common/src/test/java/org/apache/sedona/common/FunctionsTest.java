@@ -3582,9 +3582,21 @@ public class FunctionsTest extends TestBase {
   public void rotate() throws ParseException {
     Geometry lineString = Constructors.geomFromEWKT("LINESTRING (50 160, 50 50, 100 50)");
     String result = Functions.asEWKT(Functions.rotate(lineString, Math.PI));
-    System.out.println(result);
     assertEquals(
         "LINESTRING (-50.00000000000002 -160, -50.00000000000001 -49.99999999999999, -100 -49.999999999999986)",
+        result);
+
+    lineString = Constructors.geomFromEWKT("LINESTRING (0 0, 1 0, 1 1, 0 0)");
+    Geometry originPoint = Constructors.geomFromEWKT("POINT (0 0)");
+    result = Functions.asEWKT(Functions.rotate(lineString, 10, originPoint));
+    assertEquals(
+        "LINESTRING (0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0)",
+        result);
+
+    lineString = Constructors.geomFromEWKT("LINESTRING (0 0, 1 0, 1 1, 0 0)");
+    result = Functions.asEWKT(Functions.rotate(lineString, 10, 0, 0));
+    assertEquals(
+        "LINESTRING (0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0)",
         result);
   }
 }
