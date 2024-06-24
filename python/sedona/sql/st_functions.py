@@ -1969,7 +1969,7 @@ def ST_IsCollection(geometry: ColumnOrName) -> Column:
     return _call_st_function("ST_IsCollection", geometry)
 
 @validate_argument_types
-def ST_Rotate(geom: ColumnOrName, angle: Union[ColumnOrName, float], originPoint: ColumnOrName = None, originX: Union[ColumnOrName, float] = None, originY: Union[ColumnOrName, float] = None] = None) -> Column:
+def ST_Rotate(geom: ColumnOrName, angle: Union[ColumnOrName, float], originPoint: ColumnOrName = None, originX: Union[ColumnOrName, float] = None, originY: Union[ColumnOrName, float] = None) -> Column:
     """return a counter-clockwise rotated geometry along the origin.
 
     :param geom:
