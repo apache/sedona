@@ -3084,6 +3084,35 @@ Output:
 LINESTRING(0 0, 1 0)
 ```
 
+## ST_Rotate
+
+Introduction: Rotates a geometry by a specified angle in radians counter-clockwise around a given origin point. The origin for rotation can be specified as either a POINT geometry or x and y coordinates. If the origin is not specified, the geometry is rotated around POINT(0 0).
+
+!!!note
+    This function retains the z-index for 3D geometries and is compatible with Circular Strings, Curves, Polyhedral surfaces, Triangles, and Triangulated Irregular Network (TIN) surfaces.
+
+Formats;
+
+`ST_Rotate (geometry: Geometry, angle: Double)`
+
+`ST_Rotate (geometry: Geometry, angle: Double, originX: Double, originY: Double)`
+
+`ST_Rotate (geometry: Geometry, angle: Double, pointOrigin: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_Rotate(ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 0))'), 10, 0, 0)
+```
+
+Output:
+
+```
+SRID=4326;POLYGON ((0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0))
+```
+
 ## ST_S2CellIDs
 
 Introduction: Cover the geometry with Google S2 Cells, return the corresponding cell IDs with the given level.
