@@ -3058,6 +3058,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#st_maximuminscribedcircle" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_MaximumInscribedCircle
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_maxdistance" class="md-nav__link">
     <span class="md-ellipsis">
       ST_MaxDistance
@@ -6105,6 +6114,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#st_maximuminscribedcircle" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_MaximumInscribedCircle
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_maxdistance" class="md-nav__link">
     <span class="md-ellipsis">
       ST_MaxDistance
@@ -8085,6 +8103,28 @@ Default is keepCollapsed=false.</p>
 </div>
 <p>Be sure to check you code when upgrading. The previous implementation only worked for (multi)polygons and had a different interpretation of the second, boolean, argument.
 It would also sometimes return multiple geometries for a single geometry input.</p>
+<h2 id="st_maximuminscribedcircle">ST_MaximumInscribedCircle<a class="headerlink" href="#st_maximuminscribedcircle" title="Permanent link">&para;</a></h2>
+<p>Introduction: Finds the largest circle that is contained within a (multi)polygon, or which does not overlap any lines and points. Returns a row with fields:</p>
+<ul>
+<li><code>center</code> - center point of the circle</li>
+<li><code>nearest</code> - nearest point from the center of the circle</li>
+<li><code>radius</code> - radius of the circle</li>
+</ul>
+<p>For polygonal geometries, the function inscribes the circle within the boundary rings, treating internal rings as additional constraints. When processing linear and point inputs, the algorithm inscribes the circle within the convex hull of the input, utilizing the input lines and points as additional boundary constraints.</p>
+<p>Format: <code>ST_MaximumInscribedCircle(geometry: Geometry)</code></p>
+<p>Since: <code>v1.6.1</code></p>
+<p>SQL Example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">inscribedCircle</span><span class="p">.</span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_MaximumIncribedCircle</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON ((62.11 19.68, 60.79 17.20, 61.30 15.96, 62.11 16.08, 65.93 16.95, 66.20 20.61, 63.08 21.43, 64.48 18.70, 62.11 19.68))&#39;</span><span class="p">))</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">inscribedCircle</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>+---------------------------------------------+-------------------------------------------+------------------+
+|center                                       |nearest                                    |radius            |
++---------------------------------------------+-------------------------------------------+------------------+
+|POINT (62.794975585937514 17.774780273437496)|POINT (63.36773534817729 19.15992378007859)|1.4988916836219184|
++---------------------------------------------+-------------------------------------------+------------------+
+</code></pre></div>
 <h2 id="st_maxdistance">ST_MaxDistance<a class="headerlink" href="#st_maxdistance" title="Permanent link">&para;</a></h2>
 <p>Introduction: Calculates and returns the length value representing the maximum distance between any two points across the input geometries. This function is an alias for <code>ST_LongestDistance</code>.</p>
 <p>Format: <code>ST_MaxDistance(geom1: Geometry, geom2: Geometry)</code></p>
@@ -8897,7 +8937,7 @@ If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGO
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 20, 2024 22:45:08</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 24, 2024 06:59:02</span>
   </span>
 
     
