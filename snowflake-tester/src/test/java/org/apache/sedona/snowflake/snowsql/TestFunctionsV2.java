@@ -1119,4 +1119,20 @@ public class TestFunctionsV2 extends TestBase {
         "SELECT ST_AsText(sedona.ST_Translate(ST_GeometryFromWKT('POINT(1 3)'), 1, 2))",
         "POINT(2 5)");
   }
+
+  @Test
+  public void test_ST_Rotate() {
+    registerUDFV2("ST_Rotate", String.class, double.class);
+    verifySqlSingleRes(
+            "select ST_AsText(sedona.ST_Rotate(ST_GeometryFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)'), 10))",
+            "LINESTRING (0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0)");
+    registerUDFV2("ST_Rotate", String.class, double.class, String.class);
+    verifySqlSingleRes(
+            "select ST_AsText(sedona.ST_Rotate(ST_GeometryFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)'), 10, ST_GeometryFromWKT('POINT (0 0)')))",
+            "LINESTRING (0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0)");
+    registerUDFV2("ST_Rotate", String.class, double.class, double.class, double.class);
+    verifySqlSingleRes(
+            "select ST_AsText(sedona.ST_Rotate(ST_GeometryFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)'), 10, 0, 0))",
+            "LINESTRING (0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0)");
+  }
 }
