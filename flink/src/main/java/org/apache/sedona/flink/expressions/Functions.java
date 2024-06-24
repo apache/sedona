@@ -1869,4 +1869,38 @@ public class Functions {
       return org.apache.sedona.common.Functions.isValidReason(geom, flag);
     }
   }
+
+  public static class ST_Rotate extends ScalarFunction {
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o1,
+        @DataTypeHint(value = "Double") Double angle) {
+      Geometry geom1 = (Geometry) o1;
+      return org.apache.sedona.common.Functions.rotate(geom1, angle);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o1,
+        @DataTypeHint(value = "Double") Double angle,
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o2) {
+      Geometry geom1 = (Geometry) o1;
+      Geometry geom2 = (Geometry) o2;
+      return org.apache.sedona.common.Functions.rotate(geom1, angle, geom2);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o1,
+        @DataTypeHint(value = "Double") Double angle,
+        @DataTypeHint(value = "Double") Double originX,
+        @DataTypeHint(value = "Double") Double originY) {
+      Geometry geom1 = (Geometry) o1;
+      return org.apache.sedona.common.Functions.rotate(geom1, angle, originX, originY);
+    }
+  }
 }
