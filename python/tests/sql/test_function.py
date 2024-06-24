@@ -310,6 +310,16 @@ class TestPredicateJoin(TestBase):
         intersects = self.spark.sql("select ST_Intersection(a,b) from testtable")
         assert intersects.take(1)[0][0].wkt == "POLYGON EMPTY"
 
+    def test_st_maximum_inscribed_circle(self):
+        baseDf = self.spark.sql("SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 50 90, 90 140, 60 140))') AS geom")
+        actual = baseDf.selectExpr("ST_MaximumInscribedCircle(geom)").take(1)[0][0]
+        center = actual.center.wkt
+        assert center == "POINT (96.953125 76.328125)"
+        nearest = actual.nearest.wkt
+        assert nearest == "POINT (140 90)"
+        radius = actual.radius
+        assert radius == 45.165845650018
+
     def test_st_is_valid_detail(self):
         baseDf = self.spark.sql("SELECT ST_GeomFromText('POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0))') AS geom")
         actual = baseDf.selectExpr("ST_IsValidDetail(geom)").first()[0]
