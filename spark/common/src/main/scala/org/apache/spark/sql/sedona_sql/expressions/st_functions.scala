@@ -442,6 +442,21 @@ object st_functions extends DataFrameAPI {
   def ST_Reverse(geometry: Column): Column = wrapExpression[ST_Reverse](geometry)
   def ST_Reverse(geometry: String): Column = wrapExpression[ST_Reverse](geometry)
 
+  def ST_Rotate(geometry: Column, angle: Column): Column =
+    wrapExpression[ST_Rotate](geometry, angle)
+  def ST_Rotate(geometry: String, angle: Double): Column =
+    wrapExpression[ST_Rotate](geometry, angle)
+
+  def ST_Rotate(geometry: Column, angle: Column, pointOrigin: Column): Column =
+    wrapExpression[ST_Rotate](geometry, angle, pointOrigin)
+  def ST_Rotate(geometry: String, angle: Double, pointOrigin: String): Column =
+    wrapExpression[ST_Rotate](geometry, angle, pointOrigin)
+
+  def ST_Rotate(geometry: Column, angle: Column, originX: Column, originY: Column): Column =
+    wrapExpression[ST_Rotate](geometry, angle, originX, originY)
+  def ST_Rotate(geometry: String, angle: Double, originX: Double, originY: Double): Column =
+    wrapExpression[ST_Rotate](geometry, angle, originX, originY)
+
   def ST_S2CellIDs(geometry: Column, level: Column): Column =
     wrapExpression[ST_S2CellIDs](geometry, level)
 

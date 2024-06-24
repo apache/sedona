@@ -2155,5 +2155,24 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertEquals("POINT ZM(1 2 3 100)", point1)
       assertEquals("SRID=4326;POINT ZM(1 2 3 100)", point2)
     }
+
+    it("Passed ST_Rotate") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0))') AS geom1, ST_GeomFromText('POINT (2 2)') AS geom2")
+      var actual = baseDf.select(ST_AsEWKT(ST_Rotate("geom1", Math.PI))).first().get(0)
+      var expected =
+        "SRID=4326;POLYGON ((0 0, -2 0.0000000000000002, -2.0000000000000004 -1.9999999999999998, -0.0000000000000002 -2, -1.0000000000000002 -0.9999999999999999, 0 0))"
+      assert(expected.equals(actual))
+
+      actual = baseDf.select(ST_AsEWKT(ST_Rotate("geom1", 50, "geom2"))).first().get(0)
+      expected =
+        "SRID=4326;POLYGON ((-0.4546817643920842 0.5948176504236309, 1.4752502925921425 0.0700679430157733, 2 2, 0.0700679430157733 2.5247497074078575, 0.7726591178039579 1.2974088252118154, -0.4546817643920842 0.5948176504236309))"
+      assert(expected.equals(actual))
+
+      actual = baseDf.select(ST_AsEWKT(ST_Rotate("geom1", 50, 2, 2))).first().get(0)
+      expected =
+        "SRID=4326;POLYGON ((-0.4546817643920842 0.5948176504236309, 1.4752502925921425 0.0700679430157733, 2 2, 0.0700679430157733 2.5247497074078575, 0.7726591178039579 1.2974088252118154, -0.4546817643920842 0.5948176504236309))"
+      assert(expected.equals(actual))
+    }
   }
 }
