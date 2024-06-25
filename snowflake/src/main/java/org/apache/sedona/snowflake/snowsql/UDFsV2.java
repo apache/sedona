@@ -1440,14 +1440,16 @@ public class UDFsV2 {
 
   @UDFAnnotations.ParamMeta(
       argNames = {"geom", "angle"},
-      argTypes = {"Geometry", "double"})
+      argTypes = {"Geometry", "double"},
+      returnTypes = "Geometry")
   public static String ST_Rotate(String geom, double angle) {
     return GeometrySerde.serGeoJson(Functions.rotate(GeometrySerde.deserGeoJson(geom), angle));
   }
 
   @UDFAnnotations.ParamMeta(
       argNames = {"geom", "angle", "pointOrigin"},
-      argTypes = {"Geometry", "double", "Geometry"})
+      argTypes = {"Geometry", "double", "Geometry"},
+      returnTypes = "Geometry")
   public static String ST_Rotate(String geom, double angle, String pointOrigin) {
     return GeometrySerde.serGeoJson(
         Functions.rotate(
@@ -1456,7 +1458,8 @@ public class UDFsV2 {
 
   @UDFAnnotations.ParamMeta(
       argNames = {"geom", "angle", "originX", "originY"},
-      argTypes = {"Geometry", "double", "double", "double"})
+      argTypes = {"Geometry", "double", "double", "double"},
+      returnTypes = "Geometry")
   public static String ST_Rotate(String geom, double angle, double originX, double originY) {
     return GeometrySerde.serGeoJson(
         Functions.rotate(GeometrySerde.deserGeoJson(geom), angle, originX, originY));
