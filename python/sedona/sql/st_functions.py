@@ -1994,4 +1994,4 @@ def ST_Rotate(geometry: ColumnOrName, angle: Union[ColumnOrName, float], originX
     else:
         args = (geometry, angle)
 
-    return _call_st_function("ST_Rotate", *args)
+    return _call_st_function("ST_Rotate", args)
