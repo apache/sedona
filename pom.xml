@@ -608,10 +608,14 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <sourcepath>src/main/scala</sourcepath>
+                        </configuration>
                     </execution>
                 </executions>
                 <configuration>
-                    <failOnError>false</failOnError>
+<!--                    <failOnError>false</failOnError>-->
                     <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
             </plugin>
