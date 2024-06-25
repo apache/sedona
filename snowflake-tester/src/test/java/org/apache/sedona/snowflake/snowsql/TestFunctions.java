@@ -1167,15 +1167,15 @@ public class TestFunctions extends TestBase {
 
   @Test
   public void test_ST_Rotate() {
-    registerUDF("ST_Rotate", byte[].class, float.class);
+    registerUDF("ST_Rotate", byte[].class, double.class);
     verifySqlSingleRes(
         "SELECT sedona.ST_AsText(sedona.ST_Rotate(sedona.ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)'), 10))",
         "LINESTRING (0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0)");
-    registerUDF("ST_Rotate", byte[].class, float.class, byte[].class);
+    registerUDF("ST_Rotate", byte[].class, double.class, byte[].class);
     verifySqlSingleRes(
         "SELECT sedona.ST_AsText(sedona.ST_Rotate(sedona.ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)'), 10, sedona.ST_GeomFromWKT('POINT (0 0)')))",
         "LINESTRING (0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0)");
-    registerUDF("ST_Rotate", byte[].class, float.class, float.class, float.class);
+    registerUDF("ST_Rotate", byte[].class, double.class, double.class, double.class);
     verifySqlSingleRes(
         "SELECT sedona.ST_AsText(sedona.ST_Rotate(sedona.ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)'), 10, 0, 0))",
         "LINESTRING (0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0)");
