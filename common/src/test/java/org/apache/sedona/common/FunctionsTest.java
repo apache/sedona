@@ -3587,8 +3587,8 @@ public class FunctionsTest extends TestBase {
         result);
 
     lineString = Constructors.geomFromEWKT("LINESTRING (0 0, 1 0, 1 1, 0 0)");
-    Geometry originPoint = Constructors.geomFromEWKT("POINT (0 0)");
-    result = Functions.asEWKT(Functions.rotate(lineString, 10, originPoint));
+    Geometry pointOrigin = Constructors.geomFromEWKT("POINT (0 0)");
+    result = Functions.asEWKT(Functions.rotate(lineString, 10, pointOrigin));
     assertEquals(
         "LINESTRING (0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0)",
         result);

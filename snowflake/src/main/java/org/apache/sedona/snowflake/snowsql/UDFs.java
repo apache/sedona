@@ -1220,11 +1220,11 @@ public class UDFs {
     return GeometrySerde.serialize(Functions.rotate(GeometrySerde.deserialize(geom), angle));
   }
 
-  @UDFAnnotations.ParamMeta(argNames = {"geom", "angle", "originPoint"})
-  public static byte[] ST_Rotate(byte[] geom, double angle, byte[] originPoint) {
+  @UDFAnnotations.ParamMeta(argNames = {"geom", "angle", "pointOrigin"})
+  public static byte[] ST_Rotate(byte[] geom, double angle, byte[] pointOrigin) {
     return GeometrySerde.serialize(
         Functions.rotate(
-            GeometrySerde.deserialize(geom), angle, GeometrySerde.deserialize(originPoint)));
+            GeometrySerde.deserialize(geom), angle, GeometrySerde.deserialize(pointOrigin)));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom", "angle", "originX", "originY"})
