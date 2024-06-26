@@ -9,6 +9,7 @@ org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp
 org.apache.sedona.core.formatMapper.shapefileParser.shapes
 org.apache.sedona.core.joinJudgement
 org.apache.sedona.core.knnJudgement
+org.apache.sedona.core.monitoring
 org.apache.sedona.core.rangeJudgement
 org.apache.sedona.core.serde
 org.apache.sedona.core.showcase
