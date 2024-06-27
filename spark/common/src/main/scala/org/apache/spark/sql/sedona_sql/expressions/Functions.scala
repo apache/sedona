@@ -1604,3 +1604,13 @@ case class ST_IsValidReason(inputExpressions: Seq[Expression])
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
     copy(inputExpressions = newChildren)
 }
+
+case class ST_Rotate(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction2(Functions.rotate),
+      inferrableFunction3(Functions.rotate),
+      inferrableFunction4(Functions.rotate)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
+    copy(inputExpressions = newChildren)
+}

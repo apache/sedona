@@ -3339,4 +3339,94 @@ class functionTestScala
     }
   }
 
+  it("Should pass ST_Rotate") {
+    val geomTestCases = Map(
+      (
+        1,
+        "'LINESTRING (50 160, 50 50, 100 50)'",
+        "PI()",
+        "null",
+        "null") -> "'LINESTRING (-50.00000000000002 -160, -50.00000000000001 -49.99999999999999, -100 -49.999999999999986)'",
+      (
+        2,
+        "'LINESTRING (50 160, 50 50, 100 50)'",
+        "PI()/6",
+        "50.0",
+        "160.0") -> "'LINESTRING (50 160, 104.99999999999999 64.73720558371174, 148.30127018922192 89.73720558371173)'",
+      (
+        3,
+        "'SRID=4326;LINESTRING (50 160, 50 50, 100 50)'",
+        "PI()/6",
+        "null",
+        "null") -> "'SRID=4326;LINESTRING (-36.69872981077805 163.5640646055102, 18.301270189221942 68.30127018922194, 61.60254037844388 93.30127018922192)'",
+      (4, "'POINT EMPTY'", "PI()/6", "null", "null") -> "'POINT EMPTY'",
+      (
+        5,
+        "'LINESTRING (50 160 10, 50 50 10, 100 50 10)'",
+        "PI()",
+        "null",
+        "null") -> "'LINESTRING Z(-50.00000000000002 -160 10, -50.00000000000001 -49.99999999999999 10, -100 -49.999999999999986 10)'",
+      (
+        6,
+        "'SRID=4326;GEOMETRYCOLLECTION(POINT(10 10), LINESTRING (50 160, 50 50, 100 50))'",
+        "PI()",
+        "null",
+        "null") -> "'SRID=4326;GEOMETRYCOLLECTION (POINT (-10.000000000000002 -9.999999999999998), LINESTRING (-50.00000000000002 -160, -50.00000000000001 -49.99999999999999, -100 -49.999999999999986))'",
+      (
+        7,
+        "'POINT (10 10)'",
+        "PI()/4",
+        "null",
+        "null") -> "'POINT (0.0000000000000009 14.142135623730951)'",
+      (
+        8,
+        "'SRID=0;POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'",
+        "PI()/2",
+        "5.0",
+        "5.0") -> "'POLYGON ((10 -0.0000000000000003, 10 10, 0 10, 0 0.0000000000000003, 10 -0.0000000000000003))'",
+      (
+        9,
+        "'MULTIPOINT ((1 1), (2 2), (3 3))'",
+        "PI()/2",
+        "null",
+        "null") -> "'MULTIPOINT ((-0.9999999999999999 1), (-1.9999999999999998 2), (-3 3))'",
+      (
+        10,
+        "'MULTILINESTRING ((0 0, 10 0), (0 0, 0 10))'",
+        "PI()/4",
+        "null",
+        "null") -> "'MULTILINESTRING ((0 0, 7.0710678118654755 7.071067811865475), (0 0, -7.071067811865475 7.0710678118654755))'",
+      (
+        11,
+        "'MULTIPOLYGON (((0 0, 5 0, 5 5, 0 5, 0 0)), ((10 10, 15 10, 15 15, 10 15, 10 10)))'",
+        "PI()/2",
+        "null",
+        "null") -> "'MULTIPOLYGON (((0 0, 0.0000000000000003 5, -5 5, -5 0.0000000000000003, 0 0)), ((-10 10, -9.999999999999998 15, -14.999999999999998 15.000000000000002, -15 10.000000000000002, -10 10)))'")
+
+    for (((index, geom, angle, x, y), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"""
+           |SELECT
+           |  ST_AsEWKT(
+           |    ST_Rotate(
+           |      ST_GeomFromEWKT($geom),
+           |      $angle${if (x != "null" && y != "null") s", $x, $y" else ""}
+           |    )
+           |  ) AS geom
+         """.stripMargin)
+
+      val actual = df.take(1)(0).get(0).asInstanceOf[String]
+      assert(actual == expectedResult.stripPrefix("'").stripSuffix("'"))
+    }
+
+    // Test invalid origin type
+    val invalidOriginDf = sparkSession.sql("""
+        |SELECT ST_Rotate(ST_GeomFromText('LINESTRING (50 160, 50 50, 100 50)'), PI()/6, ST_GeomFromText('LINESTRING (0 0, 1 1)')) as result
+    """.stripMargin)
+
+    val exception = intercept[Exception] {
+      invalidOriginDf.collect()
+    }
+    exception.getMessage should include("The origin must be a non-empty Point geometry.")
+  }
+
 }

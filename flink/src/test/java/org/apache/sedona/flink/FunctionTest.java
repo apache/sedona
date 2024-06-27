@@ -2505,4 +2505,49 @@ public class FunctionTest extends TestBase {
         esriValidityReason); // Expecting an error related to interior disconnection as per ESRI
     // standards
   }
+
+  @Test
+  public void testRotate() {
+    Table tbl =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromEWKT('POLYGON ((0 0, 2 0, 1 1, 2 2, 0 2, 1 1, 0 0))') AS geom1, ST_GeomFromEWKT('POINT (2 0)') AS geom2");
+    String actual =
+        (String)
+            first(
+                    tbl.select(call(Functions.ST_Rotate.class.getSimpleName(), $("geom1"), Math.PI))
+                        .as("geom")
+                        .select(call(Functions.ST_AsEWKT.class.getSimpleName(), $("geom"))))
+                .getField(0);
+    String expected =
+        "POLYGON ((0 0, -2 0.0000000000000002, -1.0000000000000002 -0.9999999999999999, -2.0000000000000004 -1.9999999999999998, -0.0000000000000002 -2, -1.0000000000000002 -0.9999999999999999, 0 0))";
+    assertEquals(expected, actual);
+
+    actual =
+        (String)
+            first(
+                    tbl.select(
+                            call(
+                                Functions.ST_Rotate.class.getSimpleName(),
+                                $("geom1"),
+                                50,
+                                $("geom2")))
+                        .as("geom")
+                        .select(call(Functions.ST_AsEWKT.class.getSimpleName(), $("geom"))))
+                .getField(0);
+    expected =
+        "POLYGON ((0.0700679430157733 0.5247497074078575, 2 0, 1.2974088252118154 1.227340882196042, 2.5247497074078575 1.9299320569842267, 0.5948176504236309 2.454681764392084, 1.2974088252118154 1.227340882196042, 0.0700679430157733 0.5247497074078575))";
+    assertEquals(expected, actual);
+
+    actual =
+        (String)
+            first(
+                    tbl.select(
+                            call(Functions.ST_Rotate.class.getSimpleName(), $("geom1"), 50, 2, 0))
+                        .as("geom")
+                        .select(call(Functions.ST_AsEWKT.class.getSimpleName(), $("geom"))))
+                .getField(0);
+    expected =
+        "POLYGON ((0.0700679430157733 0.5247497074078575, 2 0, 1.2974088252118154 1.227340882196042, 2.5247497074078575 1.9299320569842267, 0.5948176504236309 2.454681764392084, 1.2974088252118154 1.227340882196042, 0.0700679430157733 0.5247497074078575))";
+    assertEquals(expected, actual);
+  }
 }

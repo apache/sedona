@@ -38,6 +38,7 @@ import org.locationtech.jts.algorithm.construct.MaximumInscribedCircle;
 import org.locationtech.jts.algorithm.hull.ConcaveHull;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
+import org.locationtech.jts.geom.util.AffineTransformation;
 import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.gml2.GMLWriter;
@@ -2100,5 +2101,60 @@ public class Functions {
 
     // Creating a MultiPoint from the extracted coordinates
     return GEOMETRY_FACTORY.createMultiPointFromCoords(coordinates);
+  }
+
+  /**
+   * Rotates a geometry by a given angle in radians.
+   *
+   * @param geometry The input geometry to rotate.
+   * @param angle The angle in radians to rotate the geometry.
+   * @return The rotated geometry.
+   */
+  public static Geometry rotate(Geometry geometry, double angle) {
+    if (geometry == null || geometry.isEmpty()) {
+      return geometry;
+    }
+    AffineTransformation rotation = AffineTransformation.rotationInstance(angle);
+    return rotation.transform(geometry);
+  }
+
+  /**
+   * Rotates a geometry by a given angle in radians around a given origin point (x, y).
+   *
+   * @param geometry The input geometry to rotate.
+   * @param angle The angle in radians to rotate the geometry.
+   * @param originX The x coordinate of the origin point around which to rotate.
+   * @param originY The y coordinate of the origin point around which to rotate.
+   * @return The rotated geometry.
+   */
+  public static Geometry rotate(Geometry geometry, double angle, double originX, double originY) {
+    if (geometry == null || geometry.isEmpty()) {
+      return geometry;
+    }
+    AffineTransformation rotation = AffineTransformation.rotationInstance(angle, originX, originY);
+    return rotation.transform(geometry);
+  }
+
+  /**
+   * Rotates a geometry by a given angle in radians around a given origin point.
+   *
+   * @param geometry The input geometry to rotate.
+   * @param angle The angle in radians to rotate the geometry.
+   * @param pointOrigin The origin point around which to rotate.
+   * @return The rotated geometry.
+   * @throws IllegalArgumentException if the pointOrigin is not a Point geometry.
+   */
+  public static Geometry rotate(Geometry geometry, double angle, Geometry pointOrigin) {
+    if (geometry == null || geometry.isEmpty()) {
+      return geometry;
+    }
+    if (pointOrigin == null || pointOrigin.isEmpty() || !(pointOrigin instanceof Point)) {
+      throw new IllegalArgumentException("The origin must be a non-empty Point geometry.");
+    }
+    Point origin = (Point) pointOrigin;
+    double originX = origin.getX();
+    double originY = origin.getY();
+    AffineTransformation rotation = AffineTransformation.rotationInstance(angle, originX, originY);
+    return rotation.transform(geometry);
   }
 }
