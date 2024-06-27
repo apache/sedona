@@ -3088,9 +3088,6 @@ LINESTRING(0 0, 1 0)
 
 Introduction: Rotates a geometry by a specified angle in radians counter-clockwise around a given origin point. The origin for rotation can be specified as either a POINT geometry or x and y coordinates. If the origin is not specified, the geometry is rotated around POINT(0 0).
 
-!!!note
-    This function retains the z-index for 3D geometries and is compatible with Circular Strings, Curves, Polyhedral surfaces, Triangles, and Triangulated Irregular Network (TIN) surfaces.
-
 Formats;
 
 `ST_Rotate (geometry: Geometry, angle: Double)`
