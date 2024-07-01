@@ -21,16 +21,16 @@ Geotools Jar: [Maven Central](https://repo1.maven.org/maven2/org/datasyslab/geot
 
 ## Configure Glue Job
 
-Once you have your jar links, you can configure your Glue job to use them, as well as the apache-sedona python
+Once you have your jar links, you can configure your Glue job to use them, as well as the apache-sedona Python
 package. How you do this varies slightly between the notebook and the script job types.
 
 !!!note
-    Always ensure that the Sedona version of the jars and the python package match.
+    Always ensure that the Sedona version of the jars and the Python package match.
 
 ### Notebook Job
 
 Add the following cell magics before starting your sparkContext or glueContext. The first points to the jars,
-and the second installs the Sedona python package directly from pip.
+and the second installs the Sedona Python package directly from pip.
 
 ```python
 # Sedona Config
@@ -78,7 +78,7 @@ sedona.sql("SELECT ST_POINT(1., 2.) as geom").show()
 Glue also calls these Scripts. From your job's page, navigate to the "Job details" tab. At the bottom of the page expand
 the "Advanced properties" section. In the "Dependent JARs path" field, add the paths to the jars, separated by a comma.
 
-To add the Sedona python package, navigate to the "Job Parameters" section and add a new parameter with the key
+To add the Sedona Python package, navigate to the "Job Parameters" section and add a new parameter with the key
 `--additional-python-modules` and the value `apache-sedona=={{ sedona.current_version }}`.
 
 To confirm the installation add the follow code to the script:
