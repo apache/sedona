@@ -413,12 +413,12 @@ public class RasterBandEditors {
         RasterUtils.isDataTypeIntegral(
             RasterUtils.getDataTypeCode(RasterBandAccessors.getBandType(raster, band)));
 
+    double noDataValue;
     if (isDataTypeIntegral) {
-      double noDataValue = Integer.MIN_VALUE;
-      return clip(raster, band, geometry, noDataValue, true);
+      noDataValue = Integer.MIN_VALUE;
     } else {
-      double noDataValue = Double.MIN_VALUE;
-      return clip(raster, band, geometry, noDataValue, true);
+      noDataValue = Double.MIN_VALUE;
     }
+    return clip(raster, band, geometry, noDataValue, true);
   }
 }
