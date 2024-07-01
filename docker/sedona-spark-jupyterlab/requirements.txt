@@ -10,4 +10,4 @@ jupyterlab==3.6.4
 jupyterlab-widgets==1.1.7
 keplergl==0.3.2
 matplotlib
-pydeck==0.8.0
+pydeck==0.9.1
