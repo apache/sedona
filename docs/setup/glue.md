@@ -12,7 +12,7 @@ You will need to point your glue job to the Sedona and Geotools jars. We recomme
 
 Sedona Jar: [Maven Central](https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.0_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar)
 
-Geotools Jar: [Maven Central](https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_version }}-28.2/geotools-wrapper-{{ sedona.current_version }}-28.2.jar)
+Geotools Jar: [Maven Central](https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_geotools }}/geotools-wrapper-{{ sedona.current_geotools }}.jar)
 
 !!!note
     If you use Sedona 1.3.1-incubating, please use `sedona-python-adpater-3.0_2.12` jar in the content above, instead
@@ -34,7 +34,7 @@ and the second installs the Sedona Python package directly from pip.
 
 ```python
 # Sedona Config
-%extra_jars https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.0_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar, https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_version }}-28.2/geotools-wrapper-{{ sedona.current_version }}-28.2.jar
+%extra_jars https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.0_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar, https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_geotools }}/geotools-wrapper-{{ sedona.current_geotools }}.jar
 %additional_python_modules apache-sedona=={{ sedona.current_version }}
 ```
 
@@ -47,7 +47,7 @@ If you are using the example notebook from glue, the first cell should now look 
 %number_of_workers 5
 
 # Sedona Config
-%extra_jars https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.0_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar, https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_version }}-28.2/geotools-wrapper-{{ sedona.current_version }}-28.2.jar
+%extra_jars https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.0_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar, https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_geotools }}/geotools-wrapper-{{ sedona.current_geotools }}.jar
 %additional_python_modules apache-sedona=={{ sedona.current_version }}
 
 
