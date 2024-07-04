@@ -550,7 +550,7 @@ public class RasterUtils {
     // Note that:
     // In Sedona vector, we do not perform implicit CRS transform. Everything must be done
     // explicitly via ST_Transform
-    // In Sedona raster, we do implicit CRS transform if the raster has a CRS. If the the SRID of
+    // In Sedona raster, we do implicit CRS transform if the raster has a CRS. If the SRID of
     // the geometry is 0, we assume it is 4326.
     if (geomSRID == 0) {
       geomSRID = 4326;
