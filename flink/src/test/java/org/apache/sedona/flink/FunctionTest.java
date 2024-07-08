@@ -394,7 +394,7 @@ public class FunctionTest extends TestBase {
     Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(1 1, 2 2, 3 3)') AS geom");
     table = table.select(call(Functions.ST_GeometryType.class.getSimpleName(), $("geom")));
     String result = (String) first(table).getField(0);
-    assertEquals("ST_LineString", result.toString());
+    assertEquals("ST_LineString", result);
   }
 
   @Test
