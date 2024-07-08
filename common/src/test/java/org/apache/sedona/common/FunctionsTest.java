@@ -3170,7 +3170,7 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void closestPointGeomtryCollection() {
+  public void closestPointGeometryCollection() {
     LineString line = GEOMETRY_FACTORY.createLineString(coordArray(2, 0, 0, 2));
     Geometry[] geometry =
         new Geometry[] {
