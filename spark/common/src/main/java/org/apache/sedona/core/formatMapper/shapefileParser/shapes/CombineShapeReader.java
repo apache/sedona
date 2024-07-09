@@ -86,7 +86,7 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
                 paths[i], fileSplit.getOffset(i), fileSplit.getLength(i), fileSplit.getLocations());
       }
     }
-    // if shape file doesn't exists, throw an IOException
+    // if shape file doesn't exist, throw an IOException
     if (shpSplit == null) {
       throw new IOException("Can't find .shp file.");
     } else {

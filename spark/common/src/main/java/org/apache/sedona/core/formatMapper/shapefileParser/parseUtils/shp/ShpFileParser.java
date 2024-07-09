@@ -35,7 +35,7 @@ public class ShpFileParser implements Serializable, ShapeFileConst {
   private long remainLength = 0;
 
   /**
-   * create a new shape file parser with a input source that is instance of DataInputStream
+   * create a new shape file parser with an input source that is instance of DataInputStream
    *
    * @param inputStream
    */
