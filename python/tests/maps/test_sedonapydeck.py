@@ -71,7 +71,7 @@ class TestVisualization(TestBase):
             auto_highlight=True,
             get_fill_color="[85, 183, 177, 255]",
             opacity=0.4,
-            stroked=False,
+            stroked=True,
             extruded=True,
             get_elevation='confidence * 10',
             pickable=True,
