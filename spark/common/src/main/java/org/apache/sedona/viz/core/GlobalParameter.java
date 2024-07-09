@@ -260,7 +260,7 @@ public class GlobalParameter implements Serializable {
 
   private boolean updateIndirectParameters() {
     this.partitionsOnSingleAxis = (int) Math.sqrt(Math.pow(4, this.minTreeLevel));
-    if (this.useUserSuppliedResolution == false) {
+    if (!this.useUserSuppliedResolution) {
       this.partitionIntervalX = 256;
       this.partitionIntervalY = 256;
       this.resolutionX = partitionsOnSingleAxis * 256;
