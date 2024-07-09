@@ -99,7 +99,7 @@ public class GeometryFunctionsTest extends RasterTestBase {
   }
 
   @Test
-  public void testMinConvexHullRectange() throws FactoryException, TransformException {
+  public void testMinConvexHullRectangle() throws FactoryException, TransformException {
     GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(2, 5, 3, 0, 0, 1, -1, 0, 0, 0);
     double[] values1 = new double[] {0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0};
     double[] values2 = new double[] {0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0};

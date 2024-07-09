@@ -105,7 +105,7 @@ public class TestBase {
     return data;
   }
 
-  static List<Point> creatPoint(int size) {
+  static List<Point> createPoint(int size) {
     List<Point> data = new ArrayList<>();
     GeometryFactory geomFact = new GeometryFactory();
     for (int i = 0; i < size; i++) {
