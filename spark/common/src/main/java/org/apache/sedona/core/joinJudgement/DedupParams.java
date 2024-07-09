@@ -24,7 +24,7 @@ import java.util.Objects;
 import org.locationtech.jts.geom.Envelope;
 
 /**
- * Contains information necessary to activate de-dup logic in sub-classes of {@link JudgementBase}.
+ * Contains information necessary to activate de-dup logic in subclasses of {@link JudgementBase}.
  */
 public final class DedupParams implements Serializable {
   private final List<Envelope> partitionExtents;
