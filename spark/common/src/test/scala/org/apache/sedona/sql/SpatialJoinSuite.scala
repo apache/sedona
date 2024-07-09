@@ -102,13 +102,15 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     }
   }
 
-  describe("Sedona-SQL Spatial Join Test with SELECT *") {
+  describe("Sedona-SQL Spatial Join Test with SELECT * and SELECT COUNT(*)") {
     val joinConditions = Table(
       "join condition",
       "ST_Contains(df1.geom, df2.geom)",
       "ST_Contains(df2.geom, df1.geom)",
       "ST_Distance(df1.geom, df2.geom) < 1.0",
-      "ST_Distance(df2.geom, df1.geom) < 1.0")
+      "ST_Distance(df2.geom, df1.geom) < 1.0",
+      "ST_Distance(df1.geom, df2.geom) < df1.dist",
+      "ST_Distance(df1.geom, df2.geom) < df2.dist")
 
     forAll(joinConditions) { joinCondition =>
       it(s"should SELECT * in join query with $joinCondition produce correct result") {
@@ -117,6 +119,16 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
         val result = resultAll.map(row => (row.getInt(0), row.getInt(3))).sorted
         val expected = buildExpectedResult(joinCondition)
         assert(result.nonEmpty)
+        assert(result === expected)
+      }
+
+      it(s"should SELECT COUNT(*) in join query with $joinCondition produce correct result") {
+        val result = sparkSession
+          .sql(s"SELECT COUNT(*) FROM df1 JOIN df2 ON $joinCondition")
+          .collect()
+          .head
+          .getLong(0)
+        val expected = buildExpectedResult(joinCondition).length
         assert(result === expected)
       }
 
@@ -132,6 +144,17 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       }
 
       it(
+        s"should SELECT COUNT(*) in join query with $joinCondition produce correct result, broadcast the left side") {
+        val result = sparkSession
+          .sql(s"SELECT /*+ BROADCAST(df1) */ COUNT(*) FROM df1 JOIN df2 ON $joinCondition")
+          .collect()
+          .head
+          .getLong(0)
+        val expected = buildExpectedResult(joinCondition).length
+        assert(result === expected)
+      }
+
+      it(
         s"should SELECT * in join query with $joinCondition produce correct result, broadcast the right side") {
         val resultAll = sparkSession
           .sql(s"SELECT /*+ BROADCAST(df2) */ * FROM df1 JOIN df2 ON $joinCondition")
@@ -139,6 +162,17 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
         val result = resultAll.map(row => (row.getInt(0), row.getInt(3))).sorted
         val expected = buildExpectedResult(joinCondition)
         assert(result.nonEmpty)
+        assert(result === expected)
+      }
+
+      it(
+        s"should SELECT COUNT(*) in join query with $joinCondition produce correct result, broadcast the right side") {
+        val result = sparkSession
+          .sql(s"SELECT /*+ BROADCAST(df2) */ COUNT(*) FROM df1 JOIN df2 ON $joinCondition")
+          .collect()
+          .head
+          .getLong(0)
+        val expected = buildExpectedResult(joinCondition).length
         assert(result === expected)
       }
     }
@@ -192,7 +226,7 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     }
   }
 
-  describe("Spatial join should work with dataframe containing 0 partitions") {
+  describe("Spatial join should work with dataframe containing various number of partitions") {
     val queries = Table(
       "join queries",
       "SELECT * FROM df1 JOIN dfEmpty WHERE ST_Intersects(df1.geom, dfEmpty.geom)",
@@ -203,7 +237,7 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       "SELECT /*+ BROADCAST(dfEmpty) */ * FROM dfEmpty JOIN df1 WHERE ST_Intersects(df1.geom, dfEmpty.geom)")
 
     forAll(queries) { query =>
-      it(s"Legacy join: $query") {
+      it(s"empty dataframes: $query") {
         withConf(Map(spatialJoinPartitionSideConfKey -> "left")) {
           val resultRows = sparkSession.sql(query).collect()
           assert(resultRows.isEmpty)
