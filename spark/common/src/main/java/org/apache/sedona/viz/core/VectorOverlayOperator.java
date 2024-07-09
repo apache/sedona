@@ -68,7 +68,7 @@ public class VectorOverlayOperator {
    */
   public boolean JoinImage(JavaPairRDD<Integer, String> distributedFontImage) throws Exception {
     logger.info("[Sedona-Viz][JoinImage][Start]");
-    if (this.generateDistributedImage == false) {
+    if (!this.generateDistributedImage) {
       throw new Exception(
           "[OverlayOperator][JoinImage] The back image is not distributed. Please don't use distributed format.");
     }
@@ -101,7 +101,7 @@ public class VectorOverlayOperator {
    */
   public boolean JoinImage(List<String> frontVectorImage) throws Exception {
     logger.info("[Sedona-VizViz][JoinImage][Start]");
-    if (this.generateDistributedImage == true) {
+    if (this.generateDistributedImage) {
       throw new Exception(
           "[OverlayOperator][JoinImage] The back image is distributed. Please don't use centralized format.");
     }
