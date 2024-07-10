@@ -510,6 +510,14 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "numPoints"},
+      argTypes = {"Geometry", "int"})
+  public static String ST_GeneratePoints(String geometry, int numPoints) {
+    return GeometrySerde.serGeoJson(
+        Functions.generatePoints(GeometrySerde.deserGeoJson(geometry), numPoints));
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geometry", "precision"},
       argTypes = {"Geometry", "int"})
   public static String ST_GeoHash(String geometry, int precision) {

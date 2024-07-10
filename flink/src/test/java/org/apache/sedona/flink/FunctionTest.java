@@ -2143,6 +2143,31 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testGeneratePoints() {
+    Table polyTable =
+        tableEnv.sqlQuery(
+            "SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(50 50,150 150,150 50)'), 10, false, 'endcap=round join=round') AS geom");
+    Geometry actual =
+        (Geometry)
+            first(
+                    polyTable.select(
+                        call(Functions.ST_GeneratePoints.class.getSimpleName(), $("geom"), 15)))
+                .getField(0);
+    assertEquals(actual.getNumGeometries(), 15);
+
+    polyTable =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromWKT('MULTIPOLYGON (((10 0, 10 10, 20 10, 20 0, 10 0)), ((50 0, 50 10, 70 10, 70 0, 50 0)))') AS geom");
+    actual =
+        (Geometry)
+            first(
+                    polyTable.select(
+                        call(Functions.ST_GeneratePoints.class.getSimpleName(), $("geom"), 30)))
+                .getField(0);
+    assertEquals(actual.getNumGeometries(), 30);
+  }
+
+  @Test
   public void testNRings() {
     Integer expected = 1;
     Table pointTable =

@@ -1549,6 +1549,16 @@ public class Functions {
     }
   }
 
+  public static class ST_GeneratePoints extends ScalarFunction {
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint(value = "Integer") Integer numPoints) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.generatePoints(geom, numPoints);
+    }
+  }
+
   public static class ST_NRings extends ScalarFunction {
     @DataTypeHint(value = "Integer")
     public int eval(

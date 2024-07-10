@@ -1606,6 +1606,15 @@ class TestPredicateJoin(TestBase):
         expected = "POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))"
         assert expected == actual
 
+    def test_generate_points(self):
+        actual = self.spark.sql("SELECT ST_NumGeometries(ST_GeneratePoints(ST_Buffer(ST_GeomFromWKT('LINESTRING(50 50,150 150,150 50)'), 10, false, 'endcap=round join=round'), 15))")\
+        .first()[0]
+        assert actual == 15
+
+        actual = self.spark.sql("SELECT ST_NumGeometries(ST_GeneratePoints(ST_GeomFromWKT('MULTIPOLYGON (((10 0, 10 10, 20 10, 20 0, 10 0)), ((50 0, 50 10, 70 10, 70 0, 50 0)))'), 30))")\
+        .first()[0]
+        assert actual == 30
+
     def test_nRings(self):
         expected = 1
         actualDf = self.spark.sql("SELECT ST_GeomFromText('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))') AS geom")

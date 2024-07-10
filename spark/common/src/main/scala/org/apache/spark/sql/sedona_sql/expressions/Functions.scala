@@ -1435,6 +1435,13 @@ case class ST_ForceRHR(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_GeneratePoints(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.generatePoints _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_NRings(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.nRings _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {

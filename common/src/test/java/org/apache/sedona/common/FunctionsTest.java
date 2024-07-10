@@ -2113,6 +2113,20 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void generatePoints() throws ParseException {
+    Geometry geom = Constructors.geomFromEWKT("LINESTRING(50 50,150 150,150 50)");
+    Geometry actual =
+        Functions.generatePoints(Functions.buffer(geom, 10, false, "endcap=round join=round"), 12);
+    assertEquals(actual.getNumGeometries(), 12);
+
+    geom =
+        Constructors.geomFromEWKT(
+            "MULTIPOLYGON (((10 0, 10 10, 20 10, 20 0, 10 0)), ((50 0, 50 10, 70 10, 70 0, 50 0)))");
+    actual = Functions.generatePoints(geom, 30);
+    assertEquals(actual.getNumGeometries(), 30);
+  }
+
+  @Test
   public void nRingsPolygonOnlyExternal() throws Exception {
     Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
     Integer expected = 1;

@@ -1557,6 +1557,32 @@ Output:
 5.0990195135927845
 ```
 
+## ST_GeneratePoints
+
+Introduction: Generates a specified quantity of pseudo-random points within the boundaries of the provided polygonal geometry.
+
+Format: `ST_GeneratePoints(geom: Geometry, numPoints: Integer)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_GeneratePoints(
+        ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))'), 4
+)
+```
+
+Output:
+
+!!!Note
+    Due to the pseudo-random nature of point generation, the output of this function will vary between executions and may not match any provided examples.
+
+
+```
+MULTIPOINT ((0.2393028905520183 0.9721563442837837), (0.3805848547053376 0.7546556656982678), (0.0950295778200995 0.2494334895495989), (0.4133520939987385 0.3447046312451945))
+```
+
 ## ST_GeoHash
 
 Introduction: Returns GeoHash of the geometry with given precision

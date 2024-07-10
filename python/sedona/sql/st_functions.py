@@ -549,6 +549,19 @@ def ST_Force_2D(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_GeneratePoints(geometry: ColumnOrName, numPoints: Union[ColumnOrName, int]) -> Column:
+    """Generate random points in given geometry.
+
+    :param geometry: Geometry column to hash.
+    :type geometry: ColumnOrName
+    :param numPoints: Precision level to hash geometry at, given as an integer or an integer column.
+    :type numPoints: Union[ColumnOrName, int]
+    :return: Generate random points in given geometry
+    :rtype: Column
+    """
+    return _call_st_function("ST_GeneratePoints", (geometry, numPoints))
+
+@validate_argument_types
 def ST_GeoHash(geometry: ColumnOrName, precision: Union[ColumnOrName, int]) -> Column:
     """Return the geohash of a geometry column at a given precision level.
 

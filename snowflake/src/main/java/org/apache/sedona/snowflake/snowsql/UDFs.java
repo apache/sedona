@@ -366,6 +366,12 @@ public class UDFs {
     return GeometrySerde.serialize(Functions.force2D(GeometrySerde.deserialize(geometry)));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "numPoints"})
+  public static byte[] ST_GeneratePoints(byte[] geometry, int numPoints) {
+    return GeometrySerde.serialize(
+        Functions.generatePoints(GeometrySerde.deserialize(geometry), numPoints));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "precision"})
   public static String ST_GeoHash(byte[] geometry, int precision) {
     return Functions.geohash(GeometrySerde.deserialize(geometry), precision);

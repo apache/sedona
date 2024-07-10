@@ -213,6 +213,7 @@ object Catalog {
     function[ST_Force3DZ](0.0),
     function[ST_Force4D](),
     function[ST_ForceCollection](),
+    function[ST_GeneratePoints](),
     function[ST_NRings](),
     function[ST_Translate](0.0),
     function[ST_TriangulatePolygon](),
