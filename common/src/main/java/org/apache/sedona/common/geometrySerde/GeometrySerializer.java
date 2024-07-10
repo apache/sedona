@@ -20,6 +20,7 @@ package org.apache.sedona.common.geometrySerde;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.CoordinateSequenceFactory;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -30,11 +31,15 @@ import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory;
 import org.locationtech.jts.io.WKBConstants;
 
 public class GeometrySerializer {
   private static final Coordinate NULL_COORDINATE = new Coordinate(Double.NaN, Double.NaN);
-  private static final GeometryFactory FACTORY = new GeometryFactory();
+  private static final PrecisionModel PRECISION_MODEL = new PrecisionModel();
+  private static final CoordinateSequenceFactory COORDINATE_SEQUENCE_FACTORY =
+      CoordinateArraySequenceFactory.instance();
 
   public static byte[] serialize(Geometry geometry) {
     GeometryBuffer buffer;
@@ -65,6 +70,10 @@ public class GeometrySerializer {
   }
 
   public static Geometry deserialize(GeometryBuffer buffer) {
+    return deserialize(buffer, null);
+  }
+
+  public static Geometry deserialize(GeometryBuffer buffer, GeometryFactory factory) {
     checkBufferSize(buffer, 8);
     int preambleByte = buffer.getByte(0) & 0xFF;
     int wkbType = preambleByte >> 4;
@@ -78,25 +87,28 @@ public class GeometrySerializer {
       int srid0 = buffer.getByte(3) & 0xFF;
       srid = (srid2 | srid1 | srid0);
     }
-    return deserialize(buffer, wkbType, srid);
+    if (factory == null) {
+      factory = createGeometryFactory(srid);
+    }
+    return deserialize(buffer, wkbType, factory);
   }
 
-  private static Geometry deserialize(GeometryBuffer buffer, int wkbType, int srid) {
+  private static Geometry deserialize(GeometryBuffer buffer, int wkbType, GeometryFactory factory) {
     switch (wkbType) {
       case WKBConstants.wkbPoint:
-        return deserializePoint(buffer, srid);
+        return deserializePoint(buffer, factory);
       case WKBConstants.wkbMultiPoint:
-        return deserializeMultiPoint(buffer, srid);
+        return deserializeMultiPoint(buffer, factory);
       case WKBConstants.wkbLineString:
-        return deserializeLineString(buffer, srid);
+        return deserializeLineString(buffer, factory);
       case WKBConstants.wkbMultiLineString:
-        return deserializeMultiLineString(buffer, srid);
+        return deserializeMultiLineString(buffer, factory);
       case WKBConstants.wkbPolygon:
-        return deserializePolygon(buffer, srid);
+        return deserializePolygon(buffer, factory);
       case WKBConstants.wkbMultiPolygon:
-        return deserializeMultiPolygon(buffer, srid);
+        return deserializeMultiPolygon(buffer, factory);
       case WKBConstants.wkbGeometryCollection:
-        return deserializeGeometryCollection(buffer, srid);
+        return deserializeGeometryCollection(buffer, factory);
       default:
         throw new IllegalArgumentException(
             "Cannot deserialize buffer containing unknown geometry type ID: " + wkbType);
@@ -116,21 +128,20 @@ public class GeometrySerializer {
     return buffer;
   }
 
-  private static Point deserializePoint(GeometryBuffer buffer, int srid) {
+  private static Point deserializePoint(GeometryBuffer buffer, GeometryFactory factory) {
     CoordinateType coordType = buffer.getCoordinateType();
     int numCoordinates = getBoundedInt(buffer, 4);
     Point point;
     if (numCoordinates == 0) {
-      point = FACTORY.createPoint();
+      point = factory.createPoint();
       buffer.mark(8);
     } else {
       int bufferSize = 8 + coordType.bytes;
       checkBufferSize(buffer, bufferSize);
       CoordinateSequence coordinates = buffer.getCoordinate(8);
-      point = FACTORY.createPoint(coordinates);
+      point = factory.createPoint(coordinates);
       buffer.mark(bufferSize);
     }
-    point.setSRID(srid);
     return point;
   }
 
@@ -158,7 +169,7 @@ public class GeometrySerializer {
     return buffer;
   }
 
-  private static MultiPoint deserializeMultiPoint(GeometryBuffer buffer, int srid) {
+  private static MultiPoint deserializeMultiPoint(GeometryBuffer buffer, GeometryFactory factory) {
     CoordinateType coordType = buffer.getCoordinateType();
     int numPoints = getBoundedInt(buffer, 4);
     int bufferSize = 8 + numPoints * coordType.bytes;
@@ -168,16 +179,13 @@ public class GeometrySerializer {
       CoordinateSequence coordinates = buffer.getCoordinate(8 + i * coordType.bytes);
       Coordinate coordinate = coordinates.getCoordinate(0);
       if (Double.isNaN(coordinate.x)) {
-        points[i] = FACTORY.createPoint();
+        points[i] = factory.createPoint();
       } else {
-        points[i] = FACTORY.createPoint(coordinates);
+        points[i] = factory.createPoint(coordinates);
       }
-      points[i].setSRID(srid);
     }
     buffer.mark(bufferSize);
-    MultiPoint multiPoint = FACTORY.createMultiPoint(points);
-    multiPoint.setSRID(srid);
-    return multiPoint;
+    return factory.createMultiPoint(points);
   }
 
   private static GeometryBuffer serializeLineString(LineString lineString) {
@@ -200,16 +208,14 @@ public class GeometrySerializer {
     return buffer;
   }
 
-  private static LineString deserializeLineString(GeometryBuffer buffer, int srid) {
+  private static LineString deserializeLineString(GeometryBuffer buffer, GeometryFactory factory) {
     CoordinateType coordType = buffer.getCoordinateType();
     int numCoordinates = getBoundedInt(buffer, 4);
     int bufferSize = 8 + numCoordinates * coordType.bytes;
     checkBufferSize(buffer, bufferSize);
     CoordinateSequence coordinates = buffer.getCoordinates(8, numCoordinates);
     buffer.mark(bufferSize);
-    LineString lineString = FACTORY.createLineString(coordinates);
-    lineString.setSRID(srid);
-    return lineString;
+    return factory.createLineString(coordinates);
   }
 
   private static GeometryBuffer serializeMultiLineString(MultiLineString multiLineString) {
@@ -226,7 +232,8 @@ public class GeometrySerializer {
             multiLineString.getSRID(),
             bufferSize,
             numCoordinates);
-    GeomPartSerializer serializer = new GeomPartSerializer(buffer, coordsOffset, numOffset);
+    GeomPartSerializer serializer =
+        new GeomPartSerializer(buffer, coordsOffset, numOffset, multiLineString.getFactory());
     serializer.writeInt(numLineStrings);
     for (int k = 0; k < numLineStrings; k++) {
       LineString ls = (LineString) multiLineString.getGeometryN(k);
@@ -236,24 +243,23 @@ public class GeometrySerializer {
     return buffer;
   }
 
-  private static MultiLineString deserializeMultiLineString(GeometryBuffer buffer, int srid) {
+  private static MultiLineString deserializeMultiLineString(
+      GeometryBuffer buffer, GeometryFactory factory) {
     CoordinateType coordType = buffer.getCoordinateType();
     int numCoordinates = getBoundedInt(buffer, 4);
     int coordsOffset = 8;
     int numOffset = 8 + numCoordinates * coordType.bytes;
-    GeomPartSerializer serializer = new GeomPartSerializer(buffer, coordsOffset, numOffset);
+    GeomPartSerializer serializer =
+        new GeomPartSerializer(buffer, coordsOffset, numOffset, factory);
     int numLineStrings = serializer.checkedReadBoundedInt();
     serializer.checkRemainingIntsAtLeast(numLineStrings);
     LineString[] lineStrings = new LineString[numLineStrings];
     for (int k = 0; k < numLineStrings; k++) {
       LineString ls = serializer.readLineString();
-      ls.setSRID(srid);
       lineStrings[k] = ls;
     }
     serializer.markEndOfBuffer();
-    MultiLineString multiLineString = FACTORY.createMultiLineString(lineStrings);
-    multiLineString.setSRID(srid);
-    return multiLineString;
+    return factory.createMultiLineString(lineStrings);
   }
 
   private static GeometryBuffer serializePolygon(Polygon polygon) {
@@ -272,27 +278,26 @@ public class GeometrySerializer {
     GeometryBuffer buffer =
         createGeometryBuffer(
             WKBConstants.wkbPolygon, coordType, polygon.getSRID(), bufferSize, numCoordinates);
-    GeomPartSerializer serializer = new GeomPartSerializer(buffer, coordsOffset, numRingsOffset);
+    GeomPartSerializer serializer =
+        new GeomPartSerializer(buffer, coordsOffset, numRingsOffset, polygon.getFactory());
     serializer.write(polygon);
     assert bufferSize == serializer.intsOffset;
     return buffer;
   }
 
-  private static Polygon deserializePolygon(GeometryBuffer buffer, int srid) {
+  private static Polygon deserializePolygon(GeometryBuffer buffer, GeometryFactory factory) {
     CoordinateType coordType = buffer.getCoordinateType();
     int numCoordinates = getBoundedInt(buffer, 4);
     if (numCoordinates == 0) {
       buffer.mark(8);
-      Polygon polygon = FACTORY.createPolygon();
-      polygon.setSRID(srid);
-      return polygon;
+      return factory.createPolygon();
     }
     int coordsOffset = 8;
     int numRingsOffset = 8 + numCoordinates * coordType.bytes;
-    GeomPartSerializer serializer = new GeomPartSerializer(buffer, coordsOffset, numRingsOffset);
+    GeomPartSerializer serializer =
+        new GeomPartSerializer(buffer, coordsOffset, numRingsOffset, factory);
     Polygon polygon = serializer.readPolygon();
     serializer.markEndOfBuffer();
-    polygon.setSRID(srid);
     return polygon;
   }
 
@@ -319,7 +324,8 @@ public class GeometrySerializer {
             multiPolygon.getSRID(),
             bufferSize,
             numCoordinates);
-    GeomPartSerializer serializer = new GeomPartSerializer(buffer, coordsOffset, numPolygonsOffset);
+    GeomPartSerializer serializer =
+        new GeomPartSerializer(buffer, coordsOffset, numPolygonsOffset, multiPolygon.getFactory());
     serializer.writeInt(numPolygons);
     for (int k = 0; k < numPolygons; k++) {
       Polygon polygon = (Polygon) multiPolygon.getGeometryN(k);
@@ -329,23 +335,22 @@ public class GeometrySerializer {
     return buffer;
   }
 
-  private static MultiPolygon deserializeMultiPolygon(GeometryBuffer buffer, int srid) {
+  private static MultiPolygon deserializeMultiPolygon(
+      GeometryBuffer buffer, GeometryFactory factory) {
     CoordinateType coordType = buffer.getCoordinateType();
     int numCoordinates = getBoundedInt(buffer, 4);
     int coordsOffset = 8;
     int numPolygonsOffset = 8 + numCoordinates * coordType.bytes;
-    GeomPartSerializer serializer = new GeomPartSerializer(buffer, coordsOffset, numPolygonsOffset);
+    GeomPartSerializer serializer =
+        new GeomPartSerializer(buffer, coordsOffset, numPolygonsOffset, factory);
     int numPolygons = serializer.checkedReadBoundedInt();
     Polygon[] polygons = new Polygon[numPolygons];
     for (int k = 0; k < numPolygons; k++) {
       Polygon polygon = serializer.readPolygon();
-      polygon.setSRID(srid);
       polygons[k] = polygon;
     }
     serializer.markEndOfBuffer();
-    MultiPolygon multiPolygon = FACTORY.createMultiPolygon(polygons);
-    multiPolygon.setSRID(srid);
-    return multiPolygon;
+    return factory.createMultiPolygon(polygons);
   }
 
   private static GeometryBuffer serializeGeometryCollection(GeometryCollection geometryCollection) {
@@ -383,28 +388,24 @@ public class GeometrySerializer {
     return buffer;
   }
 
-  private static GeometryCollection deserializeGeometryCollection(GeometryBuffer buffer, int srid) {
+  private static GeometryCollection deserializeGeometryCollection(
+      GeometryBuffer buffer, GeometryFactory factory) {
     int numGeometries = getBoundedInt(buffer, 4);
     if (numGeometries == 0) {
       buffer.mark(8);
-      GeometryCollection geometryCollection = FACTORY.createGeometryCollection();
-      geometryCollection.setSRID(srid);
-      return geometryCollection;
+      return factory.createGeometryCollection();
     }
     Geometry[] geometries = new Geometry[numGeometries];
     int offset = 8;
     for (int k = 0; k < numGeometries; k++) {
       GeometryBuffer geomBuffer = buffer.slice(offset);
-      Geometry geometry = deserialize(geomBuffer);
+      Geometry geometry = deserialize(geomBuffer, factory);
       int geomLength = alignedOffset(geomBuffer.getMark());
-      geometry.setSRID(srid);
       geometries[k] = geometry;
       offset += geomLength;
     }
     buffer.mark(offset);
-    GeometryCollection geometryCollection = FACTORY.createGeometryCollection(geometries);
-    geometryCollection.setSRID(srid);
-    return geometryCollection;
+    return factory.createGeometryCollection(geometries);
   }
 
   private static GeometryBuffer createGeometryBuffer(
@@ -475,33 +476,40 @@ public class GeometrySerializer {
     return (offset + 7) & ~7;
   }
 
+  private static GeometryFactory createGeometryFactory(int srid) {
+    return new GeometryFactory(PRECISION_MODEL, srid, COORDINATE_SEQUENCE_FACTORY);
+  }
+
   static class GeomPartSerializer {
     final GeometryBuffer buffer;
     int coordsOffset;
     final int coordsEndOffset;
     int intsOffset;
+    final GeometryFactory factory;
 
-    GeomPartSerializer(GeometryBuffer buffer, int coordsOffset, int intsOffset) {
+    GeomPartSerializer(
+        GeometryBuffer buffer, int coordsOffset, int intsOffset, GeometryFactory factory) {
       this.buffer = buffer;
       this.coordsOffset = coordsOffset;
       this.coordsEndOffset = intsOffset;
       this.intsOffset = intsOffset;
+      this.factory = factory;
     }
 
     LineString readLineString() {
       CoordinateSequence coordinates = readCoordinates();
-      return FACTORY.createLineString(coordinates);
+      return factory.createLineString(coordinates);
     }
 
     LinearRing readRing() {
       CoordinateSequence coordinates = readCoordinates();
-      return FACTORY.createLinearRing(coordinates);
+      return factory.createLinearRing(coordinates);
     }
 
     Polygon readPolygon() {
       int numRings = checkedReadBoundedInt();
       if (numRings == 0) {
-        return FACTORY.createPolygon();
+        return factory.createPolygon();
       }
       checkRemainingIntsAtLeast(numRings);
       int numInteriorRings = numRings - 1;
@@ -510,7 +518,7 @@ public class GeometrySerializer {
       for (int k = 0; k < numInteriorRings; k++) {
         holes[k] = readRing();
       }
-      return FACTORY.createPolygon(shell, holes);
+      return factory.createPolygon(shell, holes);
     }
 
     CoordinateSequence readCoordinates() {
