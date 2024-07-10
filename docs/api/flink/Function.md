@@ -1573,7 +1573,6 @@ Output:
 !!!Note
     Due to the pseudo-random nature of point generation, the output of this function will vary between executions and may not match any provided examples.
 
-
 ```
 MULTIPOINT ((0.2393028905520183 0.9721563442837837), (0.3805848547053376 0.7546556656982678), (0.0950295778200995 0.2494334895495989), (0.4133520939987385 0.3447046312451945))
 ```
