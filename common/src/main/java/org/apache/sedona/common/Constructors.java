@@ -66,14 +66,14 @@ public class Constructors {
   }
 
   public static Geometry geomFromWKB(byte[] wkb) throws ParseException {
-    return geomFromWKB(wkb, 0);
+    return geomFromWKB(wkb, -1);
   }
 
   public static Geometry geomFromWKB(byte[] wkb, int SRID) throws ParseException {
     Geometry geom = new WKBReader().read(wkb);
-    if (geom.getFactory().getSRID() != geom.getSRID() || (SRID != 0 && geom.getSRID() != SRID)) {
+    if (geom.getFactory().getSRID() != geom.getSRID() || (SRID >= 0 && geom.getSRID() != SRID)) {
       // Make sure that the geometry and the geometry factory have the correct SRID
-      if (SRID == 0) {
+      if (SRID < 0) {
         SRID = geom.getSRID();
       }
       return Functions.setSRID(geom, SRID);
@@ -83,7 +83,7 @@ public class Constructors {
   }
 
   public static Geometry pointFromWKB(byte[] wkb) throws ParseException {
-    return pointFromWKB(wkb, 0);
+    return pointFromWKB(wkb, -1);
   }
 
   public static Geometry pointFromWKB(byte[] wkb, int srid) throws ParseException {
@@ -95,7 +95,7 @@ public class Constructors {
   }
 
   public static Geometry lineFromWKB(byte[] wkb) throws ParseException {
-    return lineFromWKB(wkb, 0);
+    return lineFromWKB(wkb, -1);
   }
 
   public static Geometry lineFromWKB(byte[] wkb, int srid) throws ParseException {

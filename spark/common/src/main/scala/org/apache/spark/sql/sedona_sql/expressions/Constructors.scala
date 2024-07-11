@@ -235,15 +235,15 @@ case class ST_LineFromWKB(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     val wkb = inputExpressions.head.eval(inputRow)
     val srid =
-      if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow).asInstanceOf[Int] else 0
+      if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow).asInstanceOf[Int]
+      else -1
 
     wkb match {
       case geomString: UTF8String =>
         // Parse UTF-8 encoded WKB string
         val geom = Constructors.lineStringFromText(geomString.toString, "wkb")
         if (geom.getGeometryType == "LineString") {
-          val geomWithSRID = Functions.setSRID(geom, srid)
-          geomWithSRID.toGenericArrayData
+          (if (srid != -1) Functions.setSRID(geom, srid) else geom).toGenericArrayData
         } else {
           null
         }
@@ -284,15 +284,15 @@ case class ST_LinestringFromWKB(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     val wkb = inputExpressions.head.eval(inputRow)
     val srid =
-      if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow).asInstanceOf[Int] else 0
+      if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow).asInstanceOf[Int]
+      else -1
 
     wkb match {
       case geomString: UTF8String =>
         // Parse UTF-8 encoded WKB string
         val geom = Constructors.lineStringFromText(geomString.toString, "wkb")
         if (geom.getGeometryType == "LineString") {
-          val geomWithSRID = Functions.setSRID(geom, srid)
-          geomWithSRID.toGenericArrayData
+          (if (srid != -1) Functions.setSRID(geom, srid) else geom).toGenericArrayData
         } else {
           null
         }
@@ -333,15 +333,15 @@ case class ST_PointFromWKB(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     val wkb = inputExpressions.head.eval(inputRow)
     val srid =
-      if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow).asInstanceOf[Int] else 0
+      if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow).asInstanceOf[Int]
+      else -1
 
     wkb match {
       case geomString: UTF8String =>
         // Parse UTF-8 encoded WKB string
         val geom = Constructors.pointFromText(geomString.toString, "wkb")
         if (geom.getGeometryType == "Point") {
-          val geomWithSRID = Functions.setSRID(geom, srid)
-          geomWithSRID.toGenericArrayData
+          (if (srid != -1) Functions.setSRID(geom, srid) else geom).toGenericArrayData
         } else {
           null
         }

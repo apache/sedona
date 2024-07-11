@@ -102,6 +102,10 @@ public class ConstructorsTest {
     assertEquals(geom, result);
     assertEquals(3000, result.getSRID());
     assertEquals(3000, result.getFactory().getSRID());
+    result = Constructors.geomFromWKB(wkb, 0);
+    assertEquals(geom, result);
+    assertEquals(0, result.getSRID());
+    assertEquals(0, result.getFactory().getSRID());
   }
 
   @Test

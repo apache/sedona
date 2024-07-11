@@ -27,7 +27,6 @@ import org.apache.sedona.common.utils.FormatUtils;
 import org.apache.sedona.common.utils.GeoHashDecoder;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.gml2.GMLReader;
 import org.locationtech.jts.io.kml.KMLReader;
 
@@ -280,8 +279,7 @@ public class Constructors {
 
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(@DataTypeHint("Bytes") byte[] wkb) throws ParseException {
-      WKBReader wkbReader = new WKBReader();
-      return wkbReader.read(wkb);
+      return org.apache.sedona.common.Constructors.geomFromWKB(wkb);
     }
   }
 
@@ -293,8 +291,7 @@ public class Constructors {
 
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(@DataTypeHint("Bytes") byte[] wkb) throws ParseException {
-      WKBReader wkbReader = new WKBReader();
-      return wkbReader.read(wkb);
+      return org.apache.sedona.common.Constructors.geomFromWKB(wkb);
     }
   }
 
@@ -320,7 +317,7 @@ public class Constructors {
 
     @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
     public Geometry eval(@DataTypeHint("Bytes") byte[] wkb) throws ParseException {
-      return org.apache.sedona.common.Constructors.pointFromWKB(wkb, 0);
+      return org.apache.sedona.common.Constructors.pointFromWKB(wkb);
     }
 
     @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
@@ -351,7 +348,7 @@ public class Constructors {
 
     @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
     public Geometry eval(@DataTypeHint("Bytes") byte[] wkb) throws ParseException {
-      return org.apache.sedona.common.Constructors.lineFromWKB(wkb, 0);
+      return org.apache.sedona.common.Constructors.lineFromWKB(wkb);
     }
 
     @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
@@ -382,7 +379,7 @@ public class Constructors {
 
     @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
     public Geometry eval(@DataTypeHint("Bytes") byte[] wkb) throws ParseException {
-      return org.apache.sedona.common.Constructors.lineFromWKB(wkb, 0);
+      return org.apache.sedona.common.Constructors.lineFromWKB(wkb);
     }
 
     @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
