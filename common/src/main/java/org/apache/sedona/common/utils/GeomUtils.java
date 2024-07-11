@@ -22,6 +22,7 @@ import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 
 import java.nio.ByteOrder;
 import java.util.*;
+import org.apache.sedona.common.Functions;
 import org.locationtech.jts.algorithm.Angle;
 import org.locationtech.jts.algorithm.distance.DiscreteFrechetDistance;
 import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
@@ -259,7 +260,9 @@ public class GeomUtils {
     Geometry outputGeom = unaryUnionOp.union();
     if (outputGeom != null) {
       outputGeom.normalize();
-      outputGeom.setSRID(srid);
+      if (outputGeom.getSRID() != srid) {
+        outputGeom = Functions.setSRID(outputGeom, srid);
+      }
     }
     return outputGeom;
   }

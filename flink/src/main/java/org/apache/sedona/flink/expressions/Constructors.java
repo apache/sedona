@@ -20,6 +20,7 @@ package org.apache.sedona.flink.expressions;
 
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
+import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.enums.GeometryType;
 import org.apache.sedona.common.utils.FormatUtils;
@@ -302,7 +303,6 @@ public class Constructors {
     public Geometry eval(@DataTypeHint("String") String wkbString) throws ParseException {
       Geometry geometry = getGeometryByFileData(wkbString, FileDataSplitter.WKB);
       if (geometry instanceof Point) {
-        geometry.setSRID(0);
         return geometry;
       }
       return null; // Return null if geometry is not a Point
@@ -312,7 +312,7 @@ public class Constructors {
     public Geometry eval(@DataTypeHint("String") String wkbString, int srid) throws ParseException {
       Geometry geometry = getGeometryByFileData(wkbString, FileDataSplitter.WKB);
       if (geometry instanceof Point) {
-        geometry.setSRID(srid);
+        geometry = Functions.setSRID(geometry, srid);
         return geometry;
       }
       return null; // Return null if geometry is not a Point
@@ -334,7 +334,6 @@ public class Constructors {
     public Geometry eval(@DataTypeHint("String") String wkbString) throws ParseException {
       Geometry geometry = getGeometryByFileData(wkbString, FileDataSplitter.WKB);
       if (geometry instanceof LineString) {
-        geometry.setSRID(0);
         return geometry;
       }
       return null; // Return null if geometry is not a Point
@@ -344,7 +343,7 @@ public class Constructors {
     public Geometry eval(@DataTypeHint("String") String wkbString, int srid) throws ParseException {
       Geometry geometry = getGeometryByFileData(wkbString, FileDataSplitter.WKB);
       if (geometry instanceof LineString) {
-        geometry.setSRID(srid);
+        geometry = Functions.setSRID(geometry, srid);
         return geometry;
       }
       return null; // Return null if geometry is not a Linestring
@@ -366,7 +365,6 @@ public class Constructors {
     public Geometry eval(@DataTypeHint("String") String wkbString) throws ParseException {
       Geometry geometry = getGeometryByFileData(wkbString, FileDataSplitter.WKB);
       if (geometry instanceof LineString) {
-        geometry.setSRID(0);
         return geometry;
       }
       return null; // Return null if geometry is not a Linestring
@@ -376,7 +374,7 @@ public class Constructors {
     public Geometry eval(@DataTypeHint("String") String wkbString, int srid) throws ParseException {
       Geometry geometry = getGeometryByFileData(wkbString, FileDataSplitter.WKB);
       if (geometry instanceof LineString) {
-        geometry.setSRID(srid);
+        geometry = Functions.setSRID(geometry, srid);
         return geometry;
       }
       return null; // Return null if geometry is not a Linestring

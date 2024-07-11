@@ -1548,6 +1548,10 @@ public class Functions {
 
   public static Geometry makePolygon(Geometry shell, Geometry[] holes) {
     GeometryFactory factory = shell.getFactory();
+    return makePolygon(shell, holes, factory);
+  }
+
+  public static Geometry makePolygon(Geometry shell, Geometry[] holes, GeometryFactory factory) {
     try {
       if (holes != null) {
         LinearRing[] interiorRings =
@@ -1581,11 +1585,9 @@ public class Functions {
   }
 
   public static Geometry makepolygonWithSRID(Geometry lineString, Integer srid) {
-    Geometry geom = makePolygon(lineString, null);
-    if (geom != null) {
-      geom.setSRID(srid);
-    }
-    return geom;
+    GeometryFactory factory =
+        (srid != null) ? new GeometryFactory(new PrecisionModel(), srid) : lineString.getFactory();
+    return makePolygon(lineString, null, factory);
   }
 
   public static Geometry createMultiGeometry(Geometry[] geometries) {
@@ -1898,9 +1900,7 @@ public class Functions {
               "Median failed to converge within %.1E after %d iterations.", tolerance, maxIter));
     boolean is3d = !Double.isNaN(geometry.getCoordinate().z);
     if (!is3d) median.z = Double.NaN;
-    Point point = factory.createPoint(median);
-    point.setSRID(geometry.getSRID());
-    return point;
+    return factory.createPoint(median);
   }
 
   public static Geometry geometricMedian(Geometry geometry, double tolerance, int maxIter)

@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.sedona.common.Constructors
+import org.apache.sedona.common.{Constructors, Functions}
 import org.apache.sedona.common.enums.FileDataSplitter
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
@@ -234,22 +234,23 @@ case class ST_LineFromWKB(inputExpressions: Seq[Expression])
 
   override def eval(inputRow: InternalRow): Any = {
     val wkb = inputExpressions.head.eval(inputRow)
-    val srid = if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow) else 0
+    val srid =
+      if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow).asInstanceOf[Int] else 0
 
     wkb match {
       case geomString: UTF8String =>
         // Parse UTF-8 encoded WKB string
         val geom = Constructors.lineStringFromText(geomString.toString, "wkb")
         if (geom.getGeometryType == "LineString") {
-          geom.setSRID(srid.asInstanceOf[Int])
-          geom.toGenericArrayData
+          val geomWithSRID = Functions.setSRID(geom, srid)
+          geomWithSRID.toGenericArrayData
         } else {
           null
         }
 
       case wkbArray: Array[Byte] =>
         // Convert raw WKB byte array to geometry
-        Constructors.lineFromWKB(wkbArray, srid.asInstanceOf[Int]).toGenericArrayData
+        Constructors.lineFromWKB(wkbArray, srid).toGenericArrayData
 
       case _ => null
     }
@@ -282,22 +283,23 @@ case class ST_LinestringFromWKB(inputExpressions: Seq[Expression])
 
   override def eval(inputRow: InternalRow): Any = {
     val wkb = inputExpressions.head.eval(inputRow)
-    val srid = if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow) else 0
+    val srid =
+      if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow).asInstanceOf[Int] else 0
 
     wkb match {
       case geomString: UTF8String =>
         // Parse UTF-8 encoded WKB string
         val geom = Constructors.lineStringFromText(geomString.toString, "wkb")
         if (geom.getGeometryType == "LineString") {
-          geom.setSRID(srid.asInstanceOf[Int])
-          geom.toGenericArrayData
+          val geomWithSRID = Functions.setSRID(geom, srid)
+          geomWithSRID.toGenericArrayData
         } else {
           null
         }
 
       case wkbArray: Array[Byte] =>
         // Convert raw WKB byte array to geometry
-        Constructors.lineFromWKB(wkbArray, srid.asInstanceOf[Int]).toGenericArrayData
+        Constructors.lineFromWKB(wkbArray, srid).toGenericArrayData
 
       case _ => null
     }
@@ -330,22 +332,23 @@ case class ST_PointFromWKB(inputExpressions: Seq[Expression])
 
   override def eval(inputRow: InternalRow): Any = {
     val wkb = inputExpressions.head.eval(inputRow)
-    val srid = if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow) else 0
+    val srid =
+      if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow).asInstanceOf[Int] else 0
 
     wkb match {
       case geomString: UTF8String =>
         // Parse UTF-8 encoded WKB string
         val geom = Constructors.pointFromText(geomString.toString, "wkb")
         if (geom.getGeometryType == "Point") {
-          geom.setSRID(srid.asInstanceOf[Int])
-          geom.toGenericArrayData
+          val geomWithSRID = Functions.setSRID(geom, srid)
+          geomWithSRID.toGenericArrayData
         } else {
           null
         }
 
       case wkbArray: Array[Byte] =>
         // Convert raw WKB byte array to geometry
-        Constructors.pointFromWKB(wkbArray, srid.asInstanceOf[Int]).toGenericArrayData
+        Constructors.pointFromWKB(wkbArray, srid).toGenericArrayData
 
       case _ => null
     }

@@ -72,6 +72,7 @@ public class Constructors {
   public static Geometry geomFromWKB(byte[] wkb, int SRID) throws ParseException {
     Geometry geom = new WKBReader().read(wkb);
     if (geom.getFactory().getSRID() != geom.getSRID() || (SRID != 0 && geom.getSRID() != SRID)) {
+      // Make sure that the geometry and the geometry factory have the correct SRID
       if (SRID == 0) {
         SRID = geom.getSRID();
       }
