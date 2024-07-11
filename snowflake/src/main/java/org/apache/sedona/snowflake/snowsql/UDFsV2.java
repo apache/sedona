@@ -511,7 +511,8 @@ public class UDFsV2 {
 
   @UDFAnnotations.ParamMeta(
       argNames = {"geometry", "numPoints"},
-      argTypes = {"Geometry", "int"})
+      argTypes = {"Geometry", "int"},
+      returnTypes = "Geometry")
   public static String ST_GeneratePoints(String geometry, int numPoints) {
     return GeometrySerde.serGeoJson(
         Functions.generatePoints(GeometrySerde.deserGeoJson(geometry), numPoints));
