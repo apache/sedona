@@ -20,7 +20,6 @@ package org.apache.sedona.common.geometrySerde;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
-import org.locationtech.jts.geom.CoordinateSequenceFactory;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -32,14 +31,11 @@ import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.PrecisionModel;
-import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory;
 import org.locationtech.jts.io.WKBConstants;
 
 public class GeometrySerializer {
   private static final Coordinate NULL_COORDINATE = new Coordinate(Double.NaN, Double.NaN);
   private static final PrecisionModel PRECISION_MODEL = new PrecisionModel();
-  private static final CoordinateSequenceFactory COORDINATE_SEQUENCE_FACTORY =
-      CoordinateArraySequenceFactory.instance();
 
   public static byte[] serialize(Geometry geometry) {
     GeometryBuffer buffer;
@@ -477,7 +473,7 @@ public class GeometrySerializer {
   }
 
   private static GeometryFactory createGeometryFactory(int srid) {
-    return new GeometryFactory(PRECISION_MODEL, srid, COORDINATE_SEQUENCE_FACTORY);
+    return new GeometryFactory(PRECISION_MODEL, srid);
   }
 
   static class GeomPartSerializer {

@@ -27,8 +27,6 @@ public class PivotFinder {
 
   private static final double DBL_MAX = Double.MAX_VALUE;
 
-  private static GeometryFactory geometryFactory = new GeometryFactory();
-
   public static double findPivot(
       Geometry geom, boolean splitOrdinate, double center, int numberOfVertices) {
     double pivot = DBL_MAX;
@@ -41,6 +39,7 @@ public class PivotFinder {
       // if the shell is too small, use the largest hole
       if (numberOfVertices >= 2 * lwPoly.getExteriorRing().getNumPoints()) {
         // find the hole with the largest area and assign to ringtotrim
+        GeometryFactory geometryFactory = geom.getFactory();
         double maxArea = geometryFactory.createPolygon(lwPoly.getExteriorRing()).getArea();
         for (int i = 0; i < lwPoly.getNumInteriorRing(); i++) {
           LinearRing curHole = lwPoly.getInteriorRingN(i);

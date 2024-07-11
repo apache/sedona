@@ -554,7 +554,7 @@ class functionTestScala
     it("Passed ST_MMax") {
       var baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('LINESTRING ZM(1 1 1 1, 2 2 2 2, 3 3 3 3, -1 -1 -1 -1)') as line")
-      val actual = baseDf.selectExpr("ST_MMax(line)").first().getDouble(0)
+      var actual = baseDf.selectExpr("ST_MMax(line)").first().getDouble(0)
       assert(actual == 3.0)
 
       baseDf =
@@ -562,11 +562,11 @@ class functionTestScala
       val actualNull = baseDf.selectExpr("ST_MMax(line)").first().get(0)
       assert(actualNull == null)
 
-      print(
-        sparkSession
-          .sql("SELECT ST_MMax(ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))'))")
-          .first()
-          .get(0))
+      actual = sparkSession
+        .sql("SELECT ST_MMax(ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))'))")
+        .first()
+        .getDouble(0)
+      assert(actual == 4.0)
     }
 
     it("Passed ST_MakeLine") {

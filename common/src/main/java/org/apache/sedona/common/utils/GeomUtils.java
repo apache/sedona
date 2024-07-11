@@ -26,7 +26,6 @@ import org.locationtech.jts.algorithm.Angle;
 import org.locationtech.jts.algorithm.distance.DiscreteFrechetDistance;
 import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
 import org.locationtech.jts.geom.*;
-import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTWriter;
@@ -147,13 +146,13 @@ public class GeomUtils {
       return null;
     }
 
-    Coordinate[] nthCoordinate = new Coordinate[1];
+    Coordinate coordinate;
     if (n > 0) {
-      nthCoordinate[0] = lineString.getCoordinates()[n - 1];
+      coordinate = lineString.getCoordinates()[n - 1];
     } else {
-      nthCoordinate[0] = lineString.getCoordinates()[p + n];
+      coordinate = lineString.getCoordinates()[p + n];
     }
-    return new Point(new CoordinateArraySequence(nthCoordinate), lineString.getFactory());
+    return lineString.getFactory().createPoint(coordinate);
   }
 
   public static Geometry getExteriorRing(Geometry geometry) {
@@ -218,7 +217,7 @@ public class GeomUtils {
 
   public static Geometry get2dGeom(Geometry geom) {
     Coordinate[] coordinates = geom.getCoordinates();
-    GeometryFactory geometryFactory = new GeometryFactory();
+    GeometryFactory geometryFactory = geom.getFactory();
     CoordinateSequence sequence =
         geometryFactory.getCoordinateSequenceFactory().create(coordinates);
     if (sequence.getDimension() > 2) {

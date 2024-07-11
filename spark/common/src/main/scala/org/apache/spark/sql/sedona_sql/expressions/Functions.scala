@@ -606,8 +606,6 @@ case class ST_MinimumBoundingRadius(inputExpressions: Seq[Expression])
 
   override def nullable: Boolean = true
 
-  private val geometryFactory = new GeometryFactory()
-
   override def eval(input: InternalRow): Any = {
     val expr = inputExpressions(0)
     val geometry = expr match {
@@ -623,7 +621,7 @@ case class ST_MinimumBoundingRadius(inputExpressions: Seq[Expression])
 
   private def getMinimumBoundingRadius(geom: Geometry): InternalRow = {
     val minimumBoundingCircle = new MinimumBoundingCircle(geom)
-    val centerPoint = geometryFactory.createPoint(minimumBoundingCircle.getCentre)
+    val centerPoint = geom.getFactory.createPoint(minimumBoundingCircle.getCentre)
     InternalRow(centerPoint.toGenericArrayData, minimumBoundingCircle.getRadius)
   }
 
