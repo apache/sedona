@@ -2827,7 +2827,7 @@ class functionTestScala
     }
   }
 
-  it("Should pass ST_'Force3DZ'") {
+  it("Should pass ST_Force3DZ") {
     val geomTestCases = Map(
       ("'LINESTRING (0 1, 1 0, 2 0)'") -> ("'LINESTRING Z(0 1 1, 1 0 1, 2 0 1)'", "'LINESTRING Z(0 1 0, 1 0 0, 2 0 0)'"),
       ("'LINESTRING Z(0 1 3, 1 0 3, 2 0 3)'") -> ("'LINESTRING Z(0 1 3, 1 0 3, 2 0 3)'", "'LINESTRING Z(0 1 3, 1 0 3, 2 0 3)'"),

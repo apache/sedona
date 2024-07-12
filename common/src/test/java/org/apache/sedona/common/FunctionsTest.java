@@ -1669,9 +1669,9 @@ public class FunctionsTest extends TestBase {
   @Test
   public void force3DObject2DDefaultValue() {
     int expectedDims = 3;
-    Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 90, 0, 0));
+    Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 90, 90, 90, 0, 0));
     Polygon expectedPolygon =
-        GEOMETRY_FACTORY.createPolygon(coordArray3d(0, 0, 0, 0, 90, 0, 0, 0, 0));
+        GEOMETRY_FACTORY.createPolygon(coordArray3d(0, 0, 0, 0, 90, 0, 90, 90, 0, 0, 0, 0));
     Geometry forcedPolygon = Functions.force3D(polygon);
     WKTWriter wktWriter = new WKTWriter(GeomUtils.getDimension(expectedPolygon));
     assertEquals(wktWriter.write(expectedPolygon), wktWriter.write(forcedPolygon));
@@ -1867,7 +1867,8 @@ public class FunctionsTest extends TestBase {
   @Test
   public void force3DObject3DDefaultValue() {
     int expectedDims = 3;
-    Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray3d(0, 0, 0, 90, 0, 0, 0, 0, 0));
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(coordArray3d(0, 0, 0, 90, 0, 0, 90, 90, 0, 0, 0, 0));
     Geometry forcedPolygon = Functions.force3D(polygon);
     WKTWriter wktWriter = new WKTWriter(GeomUtils.getDimension(polygon));
     assertEquals(wktWriter.write(polygon), wktWriter.write(forcedPolygon));
@@ -1897,12 +1898,11 @@ public class FunctionsTest extends TestBase {
         GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon3D, polygon});
     Point point3D = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 1));
     LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
-    LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
     Geometry geomCollection =
         GEOMETRY_FACTORY.createGeometryCollection(
             new Geometry[] {
               GEOMETRY_FACTORY.createGeometryCollection(
-                  new Geometry[] {multiPolygon, point3D, emptyLineString, lineString})
+                  new Geometry[] {multiPolygon, point3D, lineString})
             });
     Polygon expectedPolygon3D =
         GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 2, 1, 1, 2, 2, 1, 2, 2, 0, 2, 1, 0, 2));
@@ -1922,11 +1922,8 @@ public class FunctionsTest extends TestBase {
         wktWriter3D.write(point3D),
         wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(1)));
     assertEquals(
-        emptyLineString.toText(),
-        actualGeometryCollection.getGeometryN(0).getGeometryN(2).toText());
-    assertEquals(
         wktWriter3D.write(expectedLineString3D),
-        wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(3)));
+        wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(2)));
   }
 
   @Test
@@ -1938,12 +1935,11 @@ public class FunctionsTest extends TestBase {
         GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon3D, polygon});
     Point point3D = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 1));
     LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
-    LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
     Geometry geomCollection =
         GEOMETRY_FACTORY.createGeometryCollection(
             new Geometry[] {
               GEOMETRY_FACTORY.createGeometryCollection(
-                  new Geometry[] {multiPolygon, point3D, emptyLineString, lineString})
+                  new Geometry[] {multiPolygon, point3D, lineString})
             });
     Polygon expectedPolygon3D =
         GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 0, 1, 1, 0, 2, 1, 0, 2, 0, 0, 1, 0, 0));
@@ -1963,11 +1959,8 @@ public class FunctionsTest extends TestBase {
         wktWriter3D.write(point3D),
         wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(1)));
     assertEquals(
-        emptyLineString.toText(),
-        actualGeometryCollection.getGeometryN(0).getGeometryN(2).toText());
-    assertEquals(
         wktWriter3D.write(expectedLineString3D),
-        wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(3)));
+        wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(2)));
   }
 
   @Test

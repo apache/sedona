@@ -1793,11 +1793,11 @@ public class Functions {
   }
 
   public static Geometry force3D(Geometry geometry, double zValue) {
-    return GeomUtils.get3DGeom(geometry, zValue);
+    return GeometryForce3DTransformer.transform(geometry, zValue);
   }
 
   public static Geometry force3D(Geometry geometry) {
-    return GeomUtils.get3DGeom(geometry, 0.0);
+    return GeometryForce3DTransformer.transform(geometry, 0.0);
   }
 
   public static Geometry forceCollection(Geometry geom) {
