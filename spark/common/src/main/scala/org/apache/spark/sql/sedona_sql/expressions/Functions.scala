@@ -1446,7 +1446,7 @@ case class ST_GeneratePoints(inputExpressions: Seq[Expression], randomSeed: Opti
 
   def this(inputExpressions: Seq[Expression]) = this(inputExpressions, Some(0L))
 
-  override def seedExpression: Expression = randomSeed.map(Literal.apply).getOrElse(Literal(0L))
+  def seedExpression: Expression = randomSeed.map(Literal.apply).getOrElse(Literal(0L))
 
   @transient private[this] var random: Random = _
 
