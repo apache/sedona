@@ -56,7 +56,6 @@ import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.operation.valid.TopologyValidationError;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.locationtech.jts.precision.MinimumClearance;
-import org.locationtech.jts.shape.random.RandomPointsBuilder;
 import org.locationtech.jts.simplify.PolygonHullSimplifier;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.locationtech.jts.simplify.VWSimplifier;
@@ -1813,11 +1812,15 @@ public class Functions {
     return array;
   }
 
-  public static Geometry generatePoints(Geometry geom, int numPoints) {
-    RandomPointsBuilder pointsBuilder = new RandomPointsBuilder(geom.getFactory());
+  public static Geometry generatePoints(Geometry geom, int numPoints, int seed) {
+    RandomPointsBuilderSeed pointsBuilder = new RandomPointsBuilderSeed(geom.getFactory(), seed);
     pointsBuilder.setExtent(geom);
     pointsBuilder.setNumPoints(numPoints);
     return pointsBuilder.getGeometry();
+  }
+
+  public static Geometry generatePoints(Geometry geom, int numPoints) {
+    return generatePoints(geom, numPoints, 0);
   }
 
   public static Integer nRings(Geometry geometry) throws Exception {

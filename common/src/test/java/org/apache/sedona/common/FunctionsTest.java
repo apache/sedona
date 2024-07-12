@@ -2114,10 +2114,20 @@ public class FunctionsTest extends TestBase {
 
   @Test
   public void generatePoints() throws ParseException {
-    Geometry geom = Constructors.geomFromEWKT("LINESTRING(50 50,150 150,150 50)");
+    Geometry geom = Constructors.geomFromEWKT("LINESTRING(50 50,10 10,10 50)");
+
     Geometry actual =
         Functions.generatePoints(Functions.buffer(geom, 10, false, "endcap=round join=round"), 12);
     assertEquals(actual.getNumGeometries(), 12);
+
+    actual =
+        Functions.reducePrecision(
+            Functions.generatePoints(
+                Functions.buffer(geom, 10, false, "endcap=round join=round"), 5, 100),
+            5);
+    String expected =
+        "MULTIPOINT ((40.02957 46.70645), (37.11646 37.38582), (14.2051 29.23363), (40.82533 31.47273), (28.16839 34.16338))";
+    assertEquals(expected, actual.toString());
 
     geom =
         Constructors.geomFromEWKT(
