@@ -1444,9 +1444,9 @@ case class ST_GeneratePoints(inputExpressions: Seq[Expression], randomSeed: Opti
     with CodegenFallback
     with ExpressionWithRandomSeed {
 
-  def this(inputExpressions: Seq[Expression]) = this(inputExpressions, None)
+  def this(inputExpressions: Seq[Expression]) = this(inputExpressions, Some(0L))
 
-  def seedExpression: Expression = randomSeed.map(Literal.apply).getOrElse(Literal(0L))
+  override def seedExpression: Expression = randomSeed.map(Literal.apply).getOrElse(Literal(0L))
 
   @transient private[this] var random: Random = _
 
@@ -1482,6 +1482,9 @@ case class ST_GeneratePoints(inputExpressions: Seq[Expression], randomSeed: Opti
       throw new IllegalArgumentException(s"Invalid number of arguments: $nArgs")
     }
   }
+
+  override lazy val resolved: Boolean =
+    childrenResolved && checkInputDataTypes().isSuccess && randomSeed.isDefined
 
   override def children: Seq[Expression] = inputExpressions
 

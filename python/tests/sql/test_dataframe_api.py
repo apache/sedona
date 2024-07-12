@@ -138,6 +138,7 @@ test_configurations = [
     (stf.ST_FrechetDistance, ("point", "line",), "point_and_line", "", 5.0990195135927845),
     (stf.ST_GeometricMedian, ("multipoint",), "multipoint_geom", "", "POINT (22.500002656424286 21.250001168173426)"),
     (stf.ST_GeneratePoints, ("geom", 15), "square_geom", "ST_NumGeometries(geom)", 15),
+    (stf.ST_GeneratePoints, ("geom", 15, 100), "square_geom", "ST_NumGeometries(geom)", 15),
     (stf.ST_GeometryN, ("geom", 0), "multipoint", "", "POINT (0 0)"),
     (stf.ST_GeometryType, ("point",), "point_geom", "", "ST_Point"),
     (stf.ST_HausdorffDistance, ("point", "line",), "point_and_line", "", 5.0990195135927845),

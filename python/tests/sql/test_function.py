@@ -1611,6 +1611,11 @@ class TestPredicateJoin(TestBase):
         .first()[0]
         assert actual == 15
 
+        actual = self.spark.sql(
+            "SELECT ST_NumGeometries(ST_GeneratePoints(ST_Buffer(ST_GeomFromWKT('LINESTRING(50 50,150 150,150 50)'), 10, false, 'endcap=round join=round'), 15, 100))") \
+            .first()[0]
+        assert actual == 15
+
         actual = self.spark.sql("SELECT ST_NumGeometries(ST_GeneratePoints(ST_GeomFromWKT('MULTIPOLYGON (((10 0, 10 10, 20 10, 20 0, 10 0)), ((50 0, 50 10, 70 10, 70 0, 50 0)))'), 30))")\
         .first()[0]
         assert actual == 30
