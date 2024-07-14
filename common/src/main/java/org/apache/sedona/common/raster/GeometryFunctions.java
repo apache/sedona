@@ -24,7 +24,6 @@ import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.Envelope2D;
 import org.locationtech.jts.geom.*;
-import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
@@ -110,16 +109,13 @@ public class GeometryFunctions {
             raster, minX,
             maxY + 1); // need bottom left coordinate, which is upper left of y + 1 pixel
     return geometryFactory.createPolygon(
-        new LinearRing(
-            new CoordinateArraySequence(
-                new Coordinate[] {
-                  convertToCoordinate(worldUpperLeft),
-                  convertToCoordinate(worldUpperRight),
-                  convertToCoordinate(worldLowerRight),
-                  convertToCoordinate(worldLowerLeft),
-                  convertToCoordinate(worldUpperLeft)
-                }),
-            geometryFactory));
+        new Coordinate[] {
+          convertToCoordinate(worldUpperLeft),
+          convertToCoordinate(worldUpperRight),
+          convertToCoordinate(worldLowerRight),
+          convertToCoordinate(worldLowerLeft),
+          convertToCoordinate(worldUpperLeft)
+        });
   }
 
   private static Coordinate convertToCoordinate(Point2D point) {

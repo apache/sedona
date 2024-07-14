@@ -21,6 +21,7 @@ package org.apache.sedona.common.simplify;
 import org.apache.commons.lang3.ArrayUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 
 public class LineStringSimplifier extends BaseSimplifier {
 
@@ -28,6 +29,7 @@ public class LineStringSimplifier extends BaseSimplifier {
     Coordinate[] simplified =
         CoordinatesSimplifier.simplifyInPlace(geom.getCoordinates(), epsilon, 2);
 
+    GeometryFactory geometryFactory = geom.getFactory();
     if (simplified.length == 1) {
       if (preserveCollapsed)
         return geometryFactory.createLineString(ArrayUtils.addAll(simplified, simplified));

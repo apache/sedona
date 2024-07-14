@@ -27,7 +27,6 @@ import org.geotools.geometry.jts.JTS;
 import org.locationtech.jts.geom.*;
 
 public class GeometrySubDivider {
-  private static GeometryFactory geometryFactory = new GeometryFactory();
 
   private static final double FP_TOLERANCE = 1e-12;
 
