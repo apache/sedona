@@ -32,7 +32,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
 import org.apache.spark.sql.execution.datasources.DataSourceUtils
-import org.apache.spark.sql.execution.datasources.parquet.GeoParquetMetaData.{GEOPARQUET_CRS_KEY, GEOPARQUET_VERSION_KEY, VERSION}
+import org.apache.spark.sql.execution.datasources.parquet.GeoParquetMetaData.{GEOPARQUET_COVERING_KEY, GEOPARQUET_CRS_KEY, GEOPARQUET_VERSION_KEY, VERSION, createCoveringColumnMetadata}
 import org.apache.spark.sql.execution.datasources.parquet.GeoParquetWriteSupport.GeometryColumnInfo
 import org.apache.spark.sql.internal.{LegacyBehaviorPolicy, SQLConf}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
@@ -111,6 +111,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
   private var geoParquetVersion: Option[String] = None
   private var defaultGeoParquetCrs: Option[JValue] = None
   private val geoParquetColumnCrsMap: mutable.Map[String, Option[JValue]] = mutable.Map.empty
+  private val geoParquetColumnCoveringMap: mutable.Map[String, Covering] = mutable.Map.empty
 
   override def init(configuration: Configuration): WriteContext = {
     val schemaString = configuration.get(ParquetWriteSupport.SPARK_ROW_SCHEMA)
@@ -153,6 +154,23 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       Option(configuration.get(GEOPARQUET_CRS_KEY + "." + name)).foreach {
         case "" => geoParquetColumnCrsMap.put(name, None)
         case crs: String => geoParquetColumnCrsMap.put(name, Some(parse(crs)))
+      }
+    }
+    Option(configuration.get(GEOPARQUET_COVERING_KEY)).foreach { coveringColumnName =>
+      if (geometryColumnInfoMap.size > 1) {
+        throw new IllegalArgumentException(
+          s"$GEOPARQUET_COVERING_KEY is ambiguous when there are multiple geometry columns." +
+            s"Please specify $GEOPARQUET_COVERING_KEY.<columnName> for configured geometry column.")
+      }
+      val geometryColumnName = schema(geometryColumnInfoMap.keys.head).name
+      val covering = createCoveringColumnMetadata(coveringColumnName, schema)
+      geoParquetColumnCoveringMap.put(geometryColumnName, covering)
+    }
+    geometryColumnInfoMap.keys.map(schema(_).name).foreach { name =>
+      Option(configuration.get(GEOPARQUET_COVERING_KEY + "." + name)).foreach {
+        coveringColumnName =>
+          val covering = createCoveringColumnMetadata(coveringColumnName, schema)
+          geoParquetColumnCoveringMap.put(name, covering)
       }
     }
 
@@ -203,7 +221,8 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
             columnInfo.bbox.maxY)
         } else Seq(0.0, 0.0, 0.0, 0.0)
         val crs = geoParquetColumnCrsMap.getOrElse(columnName, defaultGeoParquetCrs)
-        columnName -> GeometryFieldMetaData("WKB", geometryTypes, bbox, crs)
+        val covering = geoParquetColumnCoveringMap.get(columnName)
+        columnName -> GeometryFieldMetaData("WKB", geometryTypes, bbox, crs, covering)
       }.toMap
       val geoParquetMetadata = GeoParquetMetaData(geoParquetVersion, primaryColumn, columns)
       val geoParquetMetadataJson = GeoParquetMetaData.toJson(geoParquetMetadata)
