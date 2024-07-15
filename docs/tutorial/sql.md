@@ -1111,6 +1111,8 @@ Since v`1.3.0`, Sedona natively supports writing GeoParquet file. GeoParquet can
 df.write.format("geoparquet").save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
 ```
 
+### CRS Metadata
+
 Since v`1.5.1`, Sedona supports writing GeoParquet files with custom GeoParquet spec version and crs.
 The default GeoParquet spec version is `1.0.0` and the default crs is `null`. You can specify the GeoParquet spec version and crs as follows:
 
@@ -1145,6 +1147,24 @@ Please note that Sedona currently cannot set/get a projjson string to/from a CRS
 Its geoparquet writer will not leverage the SRID field of a geometry so you will have to always set the `geoparquet.crs` option manually when writing the file, if you want to write a meaningful CRS field.
 
 Due to the same reason, Sedona geoparquet reader and writer do NOT check the axis order (lon/lat or lat/lon) and assume they are handled by the users themselves when writing / reading the files. You can always use [`ST_FlipCoordinates`](../api/sql/Function.md#st_flipcoordinates) to swap the axis order of your geometries.
+
+### Covering Metadata
+
+Since `v1.6.1`, Sedona supports writing the `covering` field to geometry column metadata. The `covering` field specifies a bounding box column to help accelerate spatial data retrieval. The bounding box column should be a top-level struct column containing float or double `xmin`, `ymin`, `xmax`, `ymax` columns. If the DataFrame you are writing has such columns, you can specify `.option("geoparquet.covering.<geometryColumnName>", "<coveringColumnName>")` option to write `covering` metadata to GeoParquet files:
+
+```scala
+df.write.format("geoparquet")
+		.option("geoparquet.covering.geometry", "bbox")
+		.save("/path/to/saved_geoparquet.parquet")
+```
+
+If the DataFrame has only one geometry column, you can simply specify the `geoparquet.covering` option and omit the geometry column name:
+
+```scala
+df.write.format("geoparquet")
+		.option("geoparquet.covering", "bbox")
+		.save("/path/to/saved_geoparquet.parquet")
+```
 
 ## Sort then Save GeoParquet
 
