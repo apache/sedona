@@ -1150,7 +1150,7 @@ Due to the same reason, Sedona geoparquet reader and writer do NOT check the axi
 
 ### Covering Metadata
 
-Since `v1.6.1`, Sedona supports writing the `covering` field to geometry column metadata. The `covering` field specifies a bounding box column to help accelerate spatial data retrieval. The bounding box column should be a top-level struct column containing float or double `xmin`, `ymin`, `xmax`, `ymax` columns. If the DataFrame you are writing has such columns, you can specify `.option("geoparquet.covering.<geometryColumnName>", "<coveringColumnName>")` option to write `covering` metadata to GeoParquet files:
+Since `v1.6.1`, Sedona supports writing the [`covering` field](https://github.com/opengeospatial/geoparquet/blob/v1.1.0/format-specs/geoparquet.md#covering) to geometry column metadata. The `covering` field specifies a bounding box column to help accelerate spatial data retrieval. The bounding box column should be a top-level struct column containing `xmin`, `ymin`, `xmax`, `ymax` columns. If the DataFrame you are writing contains such columns, you can specify `.option("geoparquet.covering.<geometryColumnName>", "<coveringColumnName>")` option to write `covering` metadata to GeoParquet files:
 
 ```scala
 df.write.format("geoparquet")
