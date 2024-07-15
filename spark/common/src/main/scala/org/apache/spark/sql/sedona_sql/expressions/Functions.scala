@@ -20,7 +20,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.{Functions, FunctionsGeoTools}
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
-import org.apache.sedona.common.utils.{InscribedCircle, ValidDetail}
+import org.apache.sedona.common.utils.{InscribedCircle, RandomPointsBuilderSeed, ValidDetail}
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
@@ -33,6 +33,7 @@ import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom._
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.unsafe.types.UTF8String
+import org.apache.spark.util.Utils
 
 import scala.util.Random
 
@@ -1437,36 +1438,36 @@ case class ST_ForceRHR(inputExpressions: Seq[Expression])
   }
 }
 
-case class ST_GeneratePoints(inputExpressions: Seq[Expression], randomSeed: Option[Long] = None)
+case class ST_GeneratePoints(inputExpressions: Seq[Expression], randomSeed: Long)
     extends Expression
-    with Nondeterministic
-    with ExpectsInputTypes
     with CodegenFallback
+    with ExpectsInputTypes
+    with Nondeterministic
     with ExpressionWithRandomSeed {
 
-  def this(inputExpressions: Seq[Expression]) = this(inputExpressions, Some(0L))
+  def this(inputExpressions: Seq[Expression]) = this(inputExpressions, Utils.random.nextLong())
 
-  def seedExpression: Expression = randomSeed.map(Literal.apply).getOrElse(Literal(0L))
+  override def seedExpression: Expression = Literal(randomSeed)
 
   @transient private[this] var random: Random = _
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
 
   private val nArgs = children.length
 
   override protected def initializeInternal(partitionIndex: Int): Unit = random = new Random(
-    randomSeed.getOrElse(0L) + partitionIndex)
+    randomSeed + partitionIndex)
 
   override protected def evalInternal(input: InternalRow): Any = {
     val geom = children.head.toGeometry(input)
     val numPoints = children(1).eval(input).asInstanceOf[Int]
-    if (nArgs == 3) {
+    val randomPointsBuilder = if (nArgs == 3) {
       val seed = children(2).eval(input).asInstanceOf[Int]
-      return GeometrySerializer.serialize(Functions.generatePoints(geom, numPoints, seed))
+      new RandomPointsBuilderSeed(geom.getFactory, seed)
+    } else {
+      new RandomPointsBuilderSeed(geom.getFactory, 0)
     }
-    GeometrySerializer.serialize(Functions.generatePoints(geom, numPoints))
+    randomPointsBuilder.setExtent(geom)
+    randomPointsBuilder.setNumPoints(numPoints)
+    GeometrySerializer.serialize(randomPointsBuilder.getGeometry)
   }
 
   override def nullable: Boolean = true
@@ -1483,12 +1484,13 @@ case class ST_GeneratePoints(inputExpressions: Seq[Expression], randomSeed: Opti
     }
   }
 
-  override lazy val resolved: Boolean =
-    childrenResolved && checkInputDataTypes().isSuccess && randomSeed.isDefined
+  override def withNewSeed(seed: Long): ST_GeneratePoints = copy(randomSeed = seed)
 
   override def children: Seq[Expression] = inputExpressions
 
-  override def withNewSeed(seed: Long): ST_GeneratePoints = copy(randomSeed = Some(seed))
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
 }
 
 case class ST_NRings(inputExpressions: Seq[Expression])

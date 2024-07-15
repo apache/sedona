@@ -23,15 +23,14 @@ import org.locationtech.jts.geom.*;
 import org.locationtech.jts.shape.random.RandomPointsBuilder;
 
 public class RandomPointsBuilderSeed extends RandomPointsBuilder {
-  double seed;
-  int counter = 0;
+  long seed;
   Random rand;
 
-  public RandomPointsBuilderSeed(GeometryFactory geometryFactory, double seed) {
+  public RandomPointsBuilderSeed(GeometryFactory geometryFactory, long seed) {
     super(geometryFactory);
     this.seed = seed;
     if (seed > 0) {
-      this.rand = new Random((long) seed);
+      this.rand = new Random(seed);
       return;
     }
     this.rand = new Random();
@@ -39,7 +38,6 @@ public class RandomPointsBuilderSeed extends RandomPointsBuilder {
 
   @Override
   protected Coordinate createRandomCoord(Envelope env) {
-    counter++;
     double x = env.getMinX() + env.getWidth() * rand.nextDouble();
     double y = env.getMinY() + env.getHeight() * rand.nextDouble();
     return createCoord(x, y);
