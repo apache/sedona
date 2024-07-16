@@ -1166,6 +1166,13 @@ df.write.format("geoparquet")
 		.save("/path/to/saved_geoparquet.parquet")
 ```
 
+If the DataFrame does not have a covering column, you can construct one using Sedona's SQL functions:
+
+```scala
+val df_bbox = df.withColumn("bbox", expr("struct(ST_XMin(geometry) AS xmin, ST_YMin(geometry) AS ymin, ST_XMax(geometry) AS xmax, ST_YMax(geometry) AS ymax)"))
+df_bbox.write.format("geoparquet").option("geoparquet.covering.geometry", "bbox").save("/path/to/saved_geoparquet.parquet")
+```
+
 ## Sort then Save GeoParquet
 
 To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../api/sql/Function.md#st_geohash)) and then save as a GeoParquet file. An example is as follows:
