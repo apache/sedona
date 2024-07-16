@@ -135,5 +135,18 @@ class GeoParquetMetadataTests extends TestBaseScala with BeforeAndAfterAll {
       assert(!metadata.containsKey("geom_column2"))
       assert(!metadata.containsKey("geom_column_2"))
     }
+
+    it("Read GeoParquet with covering metadata") {
+      val dfMeta = sparkSession.read
+        .format("geoparquet.metadata")
+        .load(geoparquetdatalocation + "/example-1.1.0.parquet")
+      val row = dfMeta.collect()(0)
+      val metadata = row.getJavaMap(row.fieldIndex("columns")).get("geometry").asInstanceOf[Row]
+      val covering = metadata.getAs[String]("covering")
+      assert(covering.nonEmpty)
+      Seq("bbox", "xmin", "ymin", "xmax", "ymax").foreach { key =>
+        assert(covering contains key)
+      }
+    }
   }
 }
