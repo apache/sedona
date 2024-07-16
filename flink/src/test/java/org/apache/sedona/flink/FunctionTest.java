@@ -2146,7 +2146,7 @@ public class FunctionTest extends TestBase {
   public void testGeneratePoints() {
     Table polyTable =
         tableEnv.sqlQuery(
-            "SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(50 50,150 150,150 50)'), 10, false, 'endcap=round join=round') AS geom");
+            "SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(50 50,10 10,10 50)'), 10, false, 'endcap=round join=round') AS geom");
     Geometry actual =
         (Geometry)
             first(
@@ -2154,6 +2154,24 @@ public class FunctionTest extends TestBase {
                         call(Functions.ST_GeneratePoints.class.getSimpleName(), $("geom"), 15)))
                 .getField(0);
     assertEquals(actual.getNumGeometries(), 15);
+
+    actual =
+        (Geometry)
+            first(
+                    polyTable
+                        .select(
+                            call(
+                                Functions.ST_GeneratePoints.class.getSimpleName(),
+                                $("geom"),
+                                5,
+                                100L))
+                        .as("geom")
+                        .select(
+                            call(Functions.ST_ReducePrecision.class.getSimpleName(), $("geom"), 5)))
+                .getField(0);
+    String expected =
+        "MULTIPOINT ((40.02957 46.70645), (37.11646 37.38582), (14.2051 29.23363), (40.82533 31.47273), (28.16839 34.16338))";
+    assertEquals(expected, actual.toString());
 
     polyTable =
         tableEnv.sqlQuery(

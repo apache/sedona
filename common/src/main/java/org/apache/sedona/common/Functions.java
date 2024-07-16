@@ -1812,7 +1812,7 @@ public class Functions {
     return array;
   }
 
-  public static Geometry generatePoints(Geometry geom, int numPoints, int seed) {
+  public static Geometry generatePoints(Geometry geom, int numPoints, long seed) {
     RandomPointsBuilderSeed pointsBuilder = new RandomPointsBuilderSeed(geom.getFactory(), seed);
     pointsBuilder.setExtent(geom);
     pointsBuilder.setNumPoints(numPoints);
