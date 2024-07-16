@@ -383,6 +383,8 @@ public class TestFunctionsV2 extends TestBase {
     verifySqlSingleRes(
         "select sedona.ST_NumGeometries(sedona.ST_GeneratePoints(ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'), 15))",
         15);
+
+    registerUDFV2("ST_GeneratePoints", String.class, int.class, long.class);
     verifySqlSingleRes(
         "select sedona.ST_NumGeometries(sedona.ST_GeneratePoints(ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'), 15, 100))",
         15);
