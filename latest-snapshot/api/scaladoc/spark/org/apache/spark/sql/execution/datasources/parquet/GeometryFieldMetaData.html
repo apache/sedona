@@ -183,6 +183,14 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.spark.sql.execution.datasources">datasources</a></dd></dl></div>
     </li><li class="current-entities indented7">
                         <span class="separator"></span>
+                        <a class="class" href="Covering.html" title=""></a>
+                        <a href="Covering.html" title="">Covering</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="CoveringBBox.html" title=""></a>
+                        <a href="CoveringBBox.html" title="">CoveringBBox</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
                         <a class="trait" href="GeoParquetFileFormatBase.html" title="Trait of GeoParquetFileFormat defines a method for spatial predicate push down."></a>
                         <a href="GeoParquetFileFormatBase.html" title="Trait of GeoParquetFileFormat defines a method for spatial predicate push down.">GeoParquetFileFormatBase</a>
                       </li><li class="current-entities indented7">
@@ -220,7 +228,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">GeometryFieldMetaData</span><span class="params">(<span name="encoding">encoding: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="geometryTypes">geometryTypes: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="bbox">bbox: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="crs">crs: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.json4s.JValue">JValue</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">GeometryFieldMetaData</span><span class="params">(<span name="encoding">encoding: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="geometryTypes">geometryTypes: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="bbox">bbox: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="crs">crs: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.json4s.JValue">JValue</span>] = <span class="symbol">None</span></span>, <span name="covering">covering: <span class="extype" name="scala.Option">Option</span>[<a href="Covering.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.Covering">Covering</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
@@ -230,7 +238,8 @@
   The geometry types of all geometries, or an empty array if they are not known.</p></dd><dt class="param">bbox</dt><dd class="cmt"><p>
   Bounding Box of the geometries in the file, formatted according to RFC 7946, section 5.</p></dd><dt class="param">crs</dt><dd class="cmt"><p>
   The CRS of the geometries in the file. None if crs metadata is absent, Some(JNull) if crs is
-  null, Some(value) if the crs is present and not null.</p></dd></dl><div class="toggleContainer block">
+  null, Some(value) if the crs is present and not null.</p></dd><dt class="param">covering</dt><dd class="cmt"><p>
+  Object containing bounding box column names to help accelerate spatial data retrieval</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -281,9 +290,9 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="org.apache.spark.sql.execution.datasources.parquet.GeometryFieldMetaData#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(encoding:String,geometryTypes:Seq[String],bbox:Seq[Double],crs:Option[org.json4s.JValue]):org.apache.spark.sql.execution.datasources.parquet.GeometryFieldMetaData"></a><a id="&lt;init&gt;:GeometryFieldMetaData"></a>
+      <a id="&lt;init&gt;(encoding:String,geometryTypes:Seq[String],bbox:Seq[Double],crs:Option[org.json4s.JValue],covering:Option[org.apache.spark.sql.execution.datasources.parquet.Covering]):org.apache.spark.sql.execution.datasources.parquet.GeometryFieldMetaData"></a><a id="&lt;init&gt;:GeometryFieldMetaData"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/parquet/GeometryFieldMetaData.html#&lt;init&gt;(encoding:String,geometryTypes:Seq[String],bbox:Seq[Double],crs:Option[org.json4s.JValue]):org.apache.spark.sql.execution.datasources.parquet.GeometryFieldMetaData" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/parquet/GeometryFieldMetaData.html#&lt;init&gt;(encoding:String,geometryTypes:Seq[String],bbox:Seq[Double],crs:Option[org.json4s.JValue],covering:Option[org.apache.spark.sql.execution.datasources.parquet.Covering]):org.apache.spark.sql.execution.datasources.parquet.GeometryFieldMetaData" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -292,7 +301,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">GeometryFieldMetaData</span><span class="params">(<span name="encoding">encoding: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="geometryTypes">geometryTypes: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="bbox">bbox: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="crs">crs: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.json4s.JValue">JValue</span>] = <span class="symbol">None</span></span>)</span>
+        <span class="name">GeometryFieldMetaData</span><span class="params">(<span name="encoding">encoding: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="geometryTypes">geometryTypes: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="bbox">bbox: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="crs">crs: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.json4s.JValue">JValue</span>] = <span class="symbol">None</span></span>, <span name="covering">covering: <span class="extype" name="scala.Option">Option</span>[<a href="Covering.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.Covering">Covering</a>] = <span class="symbol">None</span></span>)</span>
       </span>
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">encoding</dt><dd class="cmt"><p>
@@ -300,7 +309,8 @@
   The geometry types of all geometries, or an empty array if they are not known.</p></dd><dt class="param">bbox</dt><dd class="cmt"><p>
   Bounding Box of the geometries in the file, formatted according to RFC 7946, section 5.</p></dd><dt class="param">crs</dt><dd class="cmt"><p>
   The CRS of the geometries in the file. None if crs metadata is absent, Some(JNull) if crs is
-  null, Some(value) if the crs is present and not null.</p></dd></dl></div>
+  null, Some(value) if the crs is present and not null.</p></dd><dt class="param">covering</dt><dd class="cmt"><p>
+  Object containing bounding box column names to help accelerate spatial data retrieval</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -415,6 +425,22 @@
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.parquet.GeometryFieldMetaData#covering" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="covering:Option[org.apache.spark.sql.execution.datasources.parquet.Covering]"></a><a id="covering:Option[Covering]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/parquet/GeometryFieldMetaData.html#covering:Option[org.apache.spark.sql.execution.datasources.parquet.Covering]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">covering</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<a href="Covering.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.Covering">Covering</a>]</span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.execution.datasources.parquet.GeometryFieldMetaData#crs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="crs:Option[org.json4s.JValue]"></a><a id="crs:Option[JValue]"></a>
       <span class="permalink">

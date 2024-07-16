@@ -183,6 +183,14 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.spark.sql.execution.datasources">datasources</a></dd></dl></div>
     </li><li class="current-entities indented7">
                         <span class="separator"></span>
+                        <a class="class" href="Covering.html" title=""></a>
+                        <a href="Covering.html" title="">Covering</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="CoveringBBox.html" title=""></a>
+                        <a href="CoveringBBox.html" title="">CoveringBBox</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
                         <a class="trait" href="GeoParquetFileFormatBase.html" title="Trait of GeoParquetFileFormat defines a method for spatial predicate push down."></a>
                         <a href="GeoParquetFileFormatBase.html" title="Trait of GeoParquetFileFormat defines a method for spatial predicate push down.">GeoParquetFileFormatBase</a>
                       </li><li class="current-entities indented7">
@@ -332,6 +340,27 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetMetaData#GEOPARQUET_COVERING_KEY" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="GEOPARQUET_COVERING_KEY:String"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/parquet/GeoParquetMetaData$.html#GEOPARQUET_COVERING_KEY:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">GEOPARQUET_COVERING_KEY</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Configuration key prefix for setting the covering columns of the geometries in GeoParquet
+column metadata.</p><div class="fullcomment"><div class="comment cmt"><p>Configuration key prefix for setting the covering columns of the geometries in GeoParquet
+column metadata. The configuration key for geometry column named <code>x</code> is
+<code>geoparquet.covering.x</code>. If the parquet file contains only one geometry column, we can omit
+the column name and use <code>geoparquet.covering</code> directly.
+</p></div></div>
     </li><li name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetMetaData#GEOPARQUET_CRS_KEY" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="GEOPARQUET_CRS_KEY:String"></a>
       <span class="permalink">
@@ -422,6 +451,22 @@ is applied to all geometry columns in the file.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetMetaData#createCoveringColumnMetadata" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="createCoveringColumnMetadata(coveringColumnName:String,schema:org.apache.spark.sql.types.StructType):org.apache.spark.sql.execution.datasources.parquet.Covering"></a><a id="createCoveringColumnMetadata(String,StructType):Covering"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/parquet/GeoParquetMetaData$.html#createCoveringColumnMetadata(coveringColumnName:String,schema:org.apache.spark.sql.types.StructType):org.apache.spark.sql.execution.datasources.parquet.Covering" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">createCoveringColumnMetadata</span><span class="params">(<span name="coveringColumnName">coveringColumnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="schema">schema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>)</span><span class="result">: <a href="Covering.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.Covering">Covering</a></span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">

@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../../image/sedona_logo_symbol.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.28">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.29">
     
     
       
@@ -26,7 +26,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.6543a935.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.76a95c52.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -1712,6 +1712,30 @@
       Save GeoParquet
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Save GeoParquet">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#crs-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      CRS Metadata
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#covering-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      Covering Metadata
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -4557,6 +4581,30 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Save GeoParquet">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#crs-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      CRS Metadata
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#covering-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      Covering Metadata
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -5550,6 +5598,7 @@ can also be found in the example notebook available <a href="https://github.com/
 <p>Since v<code>1.3.0</code>, Sedona natively supports writing GeoParquet file. GeoParquet can be saved as follows:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">).</span><span class="n">save</span><span class="p">(</span><span class="n">geoparquetoutputlocation</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;/GeoParquet_File_Name.parquet&quot;</span><span class="p">)</span>
 </code></pre></div>
+<h3 id="crs-metadata">CRS Metadata<a class="headerlink" href="#crs-metadata" title="Permanent link">&para;</a></h3>
 <p>Since v<code>1.5.1</code>, Sedona supports writing GeoParquet files with custom GeoParquet spec version and crs.
 The default GeoParquet spec version is <code>1.0.0</code> and the default crs is <code>null</code>. You can specify the GeoParquet spec version and crs as follows:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">projjson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{...}&quot;</span><span class="w"> </span><span class="c1">// PROJJSON string for all geometry columns</span>
@@ -5577,6 +5626,21 @@ For example, <code>g0</code> and <code>g1</code> are two geometry columns in the
 <p>Please note that Sedona currently cannot set/get a projjson string to/from a CRS. Its geoparquet reader will ignore the projjson metadata and you will have to set your CRS via <a href="../../api/sql/Function/#st_setsrid"><code>ST_SetSRID</code></a> after reading the file.
 Its geoparquet writer will not leverage the SRID field of a geometry so you will have to always set the <code>geoparquet.crs</code> option manually when writing the file, if you want to write a meaningful CRS field.</p>
 <p>Due to the same reason, Sedona geoparquet reader and writer do NOT check the axis order (lon/lat or lat/lon) and assume they are handled by the users themselves when writing / reading the files. You can always use <a href="../../api/sql/Function/#st_flipcoordinates"><code>ST_FlipCoordinates</code></a> to swap the axis order of your geometries.</p>
+<h3 id="covering-metadata">Covering Metadata<a class="headerlink" href="#covering-metadata" title="Permanent link">&para;</a></h3>
+<p>Since <code>v1.6.1</code>, Sedona supports writing the <a href="https://github.com/opengeospatial/geoparquet/blob/v1.1.0/format-specs/geoparquet.md#covering"><code>covering</code> field</a> to geometry column metadata. The <code>covering</code> field specifies a bounding box column to help accelerate spatial data retrieval. The bounding box column should be a top-level struct column containing <code>xmin</code>, <code>ymin</code>, <code>xmax</code>, <code>ymax</code> columns. If the DataFrame you are writing contains such columns, you can specify <code>.option("geoparquet.covering.&lt;geometryColumnName&gt;", "&lt;coveringColumnName&gt;")</code> option to write <code>covering</code> metadata to GeoParquet files:</p>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.covering.geometry&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bbox&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/path/to/saved_geoparquet.parquet&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>If the DataFrame has only one geometry column, you can simply specify the <code>geoparquet.covering</code> option and omit the geometry column name:</p>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.covering&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bbox&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/path/to/saved_geoparquet.parquet&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>If the DataFrame does not have a covering column, you can construct one using Sedona's SQL functions:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df_bbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;bbox&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;struct(ST_XMin(geometry) AS xmin, ST_YMin(geometry) AS ymin, ST_XMax(geometry) AS xmax, ST_YMax(geometry) AS ymax)&quot;</span><span class="p">))</span>
+<span class="n">df_bbox</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.covering.geometry&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bbox&quot;</span><span class="p">).</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/path/to/saved_geoparquet.parquet&quot;</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="sort-then-save-geoparquet">Sort then Save GeoParquet<a class="headerlink" href="#sort-then-save-geoparquet" title="Permanent link">&para;</a></h2>
 <p>To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see <a href="../../api/sql/Function/#st_geohash">ST_GeoHash</a>) and then save as a GeoParquet file. An example is as follows:</p>
 <div class="highlight"><pre><span></span><code>SELECT col1, col2, geom, ST_GeoHash(geom, 5) as geohash
@@ -5753,7 +5817,7 @@ case. Columns for the left and right user data must be provided.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 28, 2024 07:26:13</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">July 16, 2024 04:30:30</span>
   </span>
 
     

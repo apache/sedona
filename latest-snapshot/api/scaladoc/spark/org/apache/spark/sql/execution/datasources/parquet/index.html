@@ -183,6 +183,14 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.spark.sql.execution.datasources">datasources</a></dd></dl></div>
     </li><li class="current-entities indented7">
                         <span class="separator"></span>
+                        <a class="class" href="Covering.html" title=""></a>
+                        <a href="Covering.html" title="">Covering</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="CoveringBBox.html" title=""></a>
+                        <a href="CoveringBBox.html" title="">CoveringBBox</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
                         <a class="trait" href="GeoParquetFileFormatBase.html" title="Trait of GeoParquetFileFormat defines a method for spatial predicate push down."></a>
                         <a href="GeoParquetFileFormatBase.html" title="Trait of GeoParquetFileFormat defines a method for spatial predicate push down.">GeoParquetFileFormatBase</a>
                       </li><li class="current-entities indented7">
@@ -260,7 +268,39 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetFileFormatBase" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+              <ol><li name="org.apache.spark.sql.execution.datasources.parquet.Covering" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CoveringextendsProductwithSerializable"></a><a id="Covering:Covering"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/parquet/Covering.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Covering.html"><span class="name">Covering</span></a><span class="params">(<span name="bbox">bbox: <a href="CoveringBBox.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.CoveringBBox">CoveringBBox</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.parquet.CoveringBBox" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CoveringBBoxextendsProductwithSerializable"></a><a id="CoveringBBox:CoveringBBox"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/parquet/CoveringBBox.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="CoveringBBox.html"><span class="name">CoveringBBox</span></a><span class="params">(<span name="xmin">xmin: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="ymin">ymin: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="zmin">zmin: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>, <span name="xmax">xmax: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="ymax">ymax: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="zmax">zmax: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetFileFormatBase" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="GeoParquetFileFormatBaseextendsFileFormatwithDataSourceRegister"></a><a id="GeoParquetFileFormatBase:GeoParquetFileFormatBase"></a>
       <span class="permalink">
       <a href="../../../../../../../org/apache/spark/sql/execution/datasources/parquet/GeoParquetFileFormatBase.html" title="Permalink">
@@ -328,7 +368,7 @@ converted to <a href="GeoParquetSpatialFilter.html" class="extype" name="org.apa
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A case class that holds the metadata of geometry column in GeoParquet metadata" href="GeometryFieldMetaData.html"><span class="name">GeometryFieldMetaData</span></a><span class="params">(<span name="encoding">encoding: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="geometryTypes">geometryTypes: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="bbox">bbox: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="crs">crs: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.json4s.JValue">JValue</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a title="A case class that holds the metadata of geometry column in GeoParquet metadata" href="GeometryFieldMetaData.html"><span class="name">GeometryFieldMetaData</span></a><span class="params">(<span name="encoding">encoding: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="geometryTypes">geometryTypes: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="bbox">bbox: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="crs">crs: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.json4s.JValue">JValue</span>] = <span class="symbol">None</span></span>, <span name="covering">covering: <span class="extype" name="scala.Option">Option</span>[<a href="Covering.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.Covering">Covering</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       <p class="shortcomment cmt">A case class that holds the metadata of geometry column in GeoParquet metadata</p><div class="fullcomment"><div class="comment cmt"><p>A case class that holds the metadata of geometry column in GeoParquet metadata</p></div><dl class="paramcmts block"><dt class="param">encoding</dt><dd class="cmt"><p>
@@ -336,7 +376,8 @@ converted to <a href="GeoParquetSpatialFilter.html" class="extype" name="org.apa
   The geometry types of all geometries, or an empty array if they are not known.</p></dd><dt class="param">bbox</dt><dd class="cmt"><p>
   Bounding Box of the geometries in the file, formatted according to RFC 7946, section 5.</p></dd><dt class="param">crs</dt><dd class="cmt"><p>
   The CRS of the geometries in the file. None if crs metadata is absent, Some(JNull) if crs is
-  null, Some(value) if the crs is present and not null.</p></dd></dl></div>
+  null, Some(value) if the crs is present and not null.</p></dd><dt class="param">covering</dt><dd class="cmt"><p>
+  Object containing bounding box column names to help accelerate spatial data retrieval</p></dd></dl></div>
     </li></ol>
             </div>
 
