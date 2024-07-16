@@ -149,14 +149,14 @@ public class ShapefileReaderTest extends TestBase {
     final Iterator<String> featureIterator = featureTexts.iterator();
 
     PolygonRDD spatialRDD = ShapefileReader.readToPolygonRDD(sc, inputLocation);
-    SpatialRDD<Geometry> geomeryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
+    SpatialRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
 
     long count =
         RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180, 180, -90, 90), false, false)
             .count();
     assertEquals(spatialRDD.rawSpatialRDD.count(), count);
 
-    for (Geometry geometry : geomeryRDD.rawSpatialRDD.collect()) {
+    for (Geometry geometry : geometryRDD.rawSpatialRDD.collect()) {
       assertEquals(featureIterator.next(), geometry.toText());
     }
   }
@@ -180,13 +180,13 @@ public class ShapefileReaderTest extends TestBase {
     features.close();
     final Iterator<String> featureIterator = featureTexts.iterator();
     LineStringRDD spatialRDD = ShapefileReader.readToLineStringRDD(sc, inputLocation);
-    SpatialRDD<Geometry> geomeryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
+    SpatialRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
     long count =
         RangeQuery.SpatialRangeQuery(spatialRDD, new Envelope(-180, 180, -90, 90), false, false)
             .count();
     assertEquals(spatialRDD.rawSpatialRDD.count(), count);
 
-    for (Geometry geometry : geomeryRDD.rawSpatialRDD.collect()) {
+    for (Geometry geometry : geometryRDD.rawSpatialRDD.collect()) {
       assertEquals(featureIterator.next(), geometry.toText());
     }
   }
@@ -240,8 +240,8 @@ public class ShapefileReaderTest extends TestBase {
     features.close();
     final Iterator<String> featureIterator = featureTexts.iterator();
     PointRDD spatialRDD = ShapefileReader.readToPointRDD(sc, inputLocation);
-    SpatialRDD<Geometry> geomeryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
-    for (Geometry geometry : geomeryRDD.rawSpatialRDD.collect()) {
+    SpatialRDD<Geometry> geometryRDD = ShapefileReader.readToGeometryRDD(sc, inputLocation);
+    for (Geometry geometry : geometryRDD.rawSpatialRDD.collect()) {
       assertEquals(featureIterator.next(), geometry.toText());
     }
   }

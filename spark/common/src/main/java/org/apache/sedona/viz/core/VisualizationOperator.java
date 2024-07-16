@@ -314,7 +314,7 @@ public abstract class VisualizationOperator implements Serializable {
       throws Exception {
     logger.info("[Sedona-VizViz][ApplyPhotoFilter][Start]");
     if (this.parallelPhotoFilter) {
-      if (this.hasBeenSpatialPartitioned == false) {
+      if (!this.hasBeenSpatialPartitioned) {
         this.spatialPartitioningWithDuplicates();
         this.hasBeenSpatialPartitioned = true;
       }
@@ -568,8 +568,8 @@ public abstract class VisualizationOperator implements Serializable {
    */
   protected boolean RenderImage(JavaSparkContext sparkContext) throws Exception {
     logger.info("[Sedona-VizViz][RenderImage][Start]");
-    if (this.parallelRenderImage == true) {
-      if (this.hasBeenSpatialPartitioned == false) {
+    if (this.parallelRenderImage) {
+      if (!this.hasBeenSpatialPartitioned) {
         this.spatialPartitioningWithoutDuplicates();
         this.hasBeenSpatialPartitioned = true;
       }
@@ -618,7 +618,7 @@ public abstract class VisualizationOperator implements Serializable {
                 }
               });
       // logger.debug("[Sedona-VizViz][Render]output count "+this.distributedRasterImage.count());
-    } else if (this.parallelRenderImage == false) {
+    } else if (!this.parallelRenderImage) {
       // Draw full size image in parallel
       this.distributedRasterImage =
           this.distributedRasterColorMatrix.mapPartitionsToPair(

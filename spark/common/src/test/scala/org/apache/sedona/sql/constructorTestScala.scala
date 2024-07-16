@@ -177,6 +177,17 @@ class constructorTestScala extends TestBaseScala {
         }
       }
 
+      val ewkb = "0020000001000007D03FF00000000000004000000000000000"
+      var geom = sparkSession.sql(s"SELECT ST_PointFromWKB('$ewkb')").first().getAs[Geometry](0)
+      assert(geom.toString == "POINT (1 2)")
+      assert(geom.getSRID == 2000)
+      geom = sparkSession.sql(s"SELECT ST_PointFromWKB('$ewkb', 1000)").first().getAs[Geometry](0)
+      assert(geom.toString == "POINT (1 2)")
+      assert(geom.getSRID == 1000)
+      geom = sparkSession.sql(s"SELECT ST_PointFromWKB('$ewkb', 0)").first().getAs[Geometry](0)
+      assert(geom.toString == "POINT (1 2)")
+      assert(geom.getSRID == 0)
+
       intercept[Exception] {
         sparkSession.sql("SELECT ST_PointFromWKB('invalid')").collect()
       }

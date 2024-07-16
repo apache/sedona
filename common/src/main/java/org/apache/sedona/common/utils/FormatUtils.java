@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.*;
+import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.enums.GeometryType;
 import org.locationtech.jts.geom.*;
@@ -208,7 +209,12 @@ public class FormatUtils<T extends Geometry> implements Serializable {
     // For some unknown reasons, the wkb reader cannot be used in transient variable like the wkt
     // reader.
     WKBReader wkbReader = new WKBReader();
-    final Geometry geometry = wkbReader.read(aux);
+    Geometry geometry = wkbReader.read(aux);
+    if (geometry.getSRID() != geometry.getFactory().getSRID()) {
+      // Make sure that the geometry factory has the correct SRID when the parsed WKB
+      // contains a non-zero SRID (EWKB)
+      geometry = Functions.setSRID(geometry, geometry.getSRID());
+    }
     handleNonSpatialDataToGeometry(geometry, Arrays.asList(columns));
 
     return geometry;

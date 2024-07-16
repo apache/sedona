@@ -27,7 +27,6 @@ import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryComponentFilter;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.GeometryFilter;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
@@ -54,7 +53,7 @@ public class Circle extends Geometry {
    * @param givenRadius the given radius
    */
   public Circle(Geometry centerGeometry, Double givenRadius) {
-    super(new GeometryFactory(centerGeometry.getPrecisionModel()));
+    super(centerGeometry.getFactory());
     this.centerGeometry = centerGeometry;
     Envelope centerGeometryMBR = this.centerGeometry.getEnvelopeInternal();
     this.centerPoint =

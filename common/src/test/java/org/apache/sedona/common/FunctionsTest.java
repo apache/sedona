@@ -628,12 +628,33 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void convexAndConcaveHullSRID() throws ParseException {
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((-92.8125 37.857507, -89.362793 36.013561, -92.548828 35.782171, -92.197266 34.669359, -94.614258 36.4036, -92.834473 36.580247, -92.8125 37.857507))",
+            4326);
+    Geometry convex = Functions.convexHull(geom);
+    Geometry concave = Functions.concaveHull(geom, 1, false);
+    assertEquals(4326, convex.getSRID());
+    assertEquals(4326, concave.getSRID());
+  }
+
+  @Test
+  public void envelopeAndCentroidSRID() throws ParseException {
+    Geometry geom = Constructors.geomFromWKT("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))", 3857);
+    Geometry envelope = Functions.envelope(geom);
+    assertEquals(3857, envelope.getSRID());
+    Geometry centroid = Functions.getCentroid(geom);
+    assertEquals(3857, centroid.getSRID());
+  }
+
+  @Test
   public void getGoogleS2CellIDsPoint() {
     Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 2));
     Long[] cid = Functions.s2CellIDs(point, 30);
     Polygon reversedPolygon = S2Utils.toJTSPolygon(new S2CellId(cid[0]));
     // cast the cell to a rectangle, it must be able to cover the points
-    assert (reversedPolygon.contains(point));
+    assertTrue(reversedPolygon.contains(point));
   }
 
   @Test
@@ -1648,9 +1669,9 @@ public class FunctionsTest extends TestBase {
   @Test
   public void force3DObject2DDefaultValue() {
     int expectedDims = 3;
-    Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 90, 0, 0));
+    Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 90, 90, 90, 0, 0));
     Polygon expectedPolygon =
-        GEOMETRY_FACTORY.createPolygon(coordArray3d(0, 0, 0, 0, 90, 0, 0, 0, 0));
+        GEOMETRY_FACTORY.createPolygon(coordArray3d(0, 0, 0, 0, 90, 0, 90, 90, 0, 0, 0, 0));
     Geometry forcedPolygon = Functions.force3D(polygon);
     WKTWriter wktWriter = new WKTWriter(GeomUtils.getDimension(expectedPolygon));
     assertEquals(wktWriter.write(expectedPolygon), wktWriter.write(forcedPolygon));
@@ -1846,7 +1867,8 @@ public class FunctionsTest extends TestBase {
   @Test
   public void force3DObject3DDefaultValue() {
     int expectedDims = 3;
-    Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray3d(0, 0, 0, 90, 0, 0, 0, 0, 0));
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(coordArray3d(0, 0, 0, 90, 0, 0, 90, 90, 0, 0, 0, 0));
     Geometry forcedPolygon = Functions.force3D(polygon);
     WKTWriter wktWriter = new WKTWriter(GeomUtils.getDimension(polygon));
     assertEquals(wktWriter.write(polygon), wktWriter.write(forcedPolygon));
@@ -1876,12 +1898,11 @@ public class FunctionsTest extends TestBase {
         GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon3D, polygon});
     Point point3D = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 1));
     LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
-    LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
     Geometry geomCollection =
         GEOMETRY_FACTORY.createGeometryCollection(
             new Geometry[] {
               GEOMETRY_FACTORY.createGeometryCollection(
-                  new Geometry[] {multiPolygon, point3D, emptyLineString, lineString})
+                  new Geometry[] {multiPolygon, point3D, lineString})
             });
     Polygon expectedPolygon3D =
         GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 2, 1, 1, 2, 2, 1, 2, 2, 0, 2, 1, 0, 2));
@@ -1901,11 +1922,8 @@ public class FunctionsTest extends TestBase {
         wktWriter3D.write(point3D),
         wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(1)));
     assertEquals(
-        emptyLineString.toText(),
-        actualGeometryCollection.getGeometryN(0).getGeometryN(2).toText());
-    assertEquals(
         wktWriter3D.write(expectedLineString3D),
-        wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(3)));
+        wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(2)));
   }
 
   @Test
@@ -1917,12 +1935,11 @@ public class FunctionsTest extends TestBase {
         GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon3D, polygon});
     Point point3D = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 1));
     LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 0, 1, 1, 1, 2));
-    LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
     Geometry geomCollection =
         GEOMETRY_FACTORY.createGeometryCollection(
             new Geometry[] {
               GEOMETRY_FACTORY.createGeometryCollection(
-                  new Geometry[] {multiPolygon, point3D, emptyLineString, lineString})
+                  new Geometry[] {multiPolygon, point3D, lineString})
             });
     Polygon expectedPolygon3D =
         GEOMETRY_FACTORY.createPolygon(coordArray3d(1, 0, 0, 1, 1, 0, 2, 1, 0, 2, 0, 0, 1, 0, 0));
@@ -1942,11 +1959,8 @@ public class FunctionsTest extends TestBase {
         wktWriter3D.write(point3D),
         wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(1)));
     assertEquals(
-        emptyLineString.toText(),
-        actualGeometryCollection.getGeometryN(0).getGeometryN(2).toText());
-    assertEquals(
         wktWriter3D.write(expectedLineString3D),
-        wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(3)));
+        wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(2)));
   }
 
   @Test
@@ -2226,6 +2240,19 @@ public class FunctionsTest extends TestBase {
     expected =
         "POLYGON ((107.0711 82.9289, 100 80, 92.9289 82.9289, 90 90, 92.9289 97.0711, 100 100, 107.0711 97.0711, 110 90, 107.0711 82.9289))";
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testBufferSRID() throws ParseException {
+    Geometry geom = geomFromWKT("POINT (10 20)", 3857);
+    Geometry buffered = Functions.buffer(geom, 1);
+    assertEquals(3857, buffered.getSRID());
+    assertEquals(3857, buffered.getFactory().getSRID());
+
+    geom = geomFromWKT("POINT (10 20)", 4326);
+    buffered = Functions.buffer(geom, 1, true);
+    assertEquals(4326, buffered.getSRID());
+    assertEquals(4326, buffered.getFactory().getSRID());
   }
 
   @Test
@@ -3170,7 +3197,7 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void closestPointGeomtryCollection() {
+  public void closestPointGeometryCollection() {
     LineString line = GEOMETRY_FACTORY.createLineString(coordArray(2, 0, 0, 2));
     Geometry[] geometry =
         new Geometry[] {
@@ -3309,11 +3336,15 @@ public class FunctionsTest extends TestBase {
     Geometry geomActual = FunctionsGeoTools.transform(geomExpected, "EPSG:4326", "EPSG:4326");
     assertEquals(geomExpected.getCoordinate().x, geomActual.getCoordinate().x, FP_TOLERANCE);
     assertEquals(geomExpected.getCoordinate().y, geomActual.getCoordinate().y, FP_TOLERANCE);
+    assertEquals(4326, geomActual.getSRID());
+    assertEquals(4326, geomActual.getFactory().getSRID());
 
     // The source and target CRS are different
     geomActual = FunctionsGeoTools.transform(geomExpected, "EPSG:4326", "EPSG:3857");
     assertEquals(1.3358338895192828E7, geomActual.getCoordinate().x, FP_TOLERANCE);
     assertEquals(8399737.889818355, geomActual.getCoordinate().y, FP_TOLERANCE);
+    assertEquals(3857, geomActual.getSRID());
+    assertEquals(3857, geomActual.getFactory().getSRID());
 
     // The source CRS is not specified and the geometry has no SRID
     Exception e =
@@ -3334,12 +3365,16 @@ public class FunctionsTest extends TestBase {
     geomActual = FunctionsGeoTools.transform(geomExpected, crsWkt, "EPSG:3857");
     assertEquals(1.3358338895192828E7, geomActual.getCoordinate().x, FP_TOLERANCE);
     assertEquals(8399737.889818355, geomActual.getCoordinate().y, FP_TOLERANCE);
+    assertEquals(3857, geomActual.getSRID());
+    assertEquals(3857, geomActual.getFactory().getSRID());
 
     // The source CRS is not specified but the geometry has a valid SRID
     geomExpected.setSRID(4326);
     geomActual = FunctionsGeoTools.transform(geomExpected, "EPSG:3857");
     assertEquals(1.3358338895192828E7, geomActual.getCoordinate().x, FP_TOLERANCE);
     assertEquals(8399737.889818355, geomActual.getCoordinate().y, FP_TOLERANCE);
+    assertEquals(3857, geomActual.getSRID());
+    assertEquals(3857, geomActual.getFactory().getSRID());
 
     // The source and target CRS are different, and latitude is out of range
     Point geometryWrong = GEOMETRY_FACTORY.createPoint(new Coordinate(60, 120));

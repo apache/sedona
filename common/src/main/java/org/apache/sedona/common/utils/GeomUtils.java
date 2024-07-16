@@ -22,11 +22,11 @@ import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 
 import java.nio.ByteOrder;
 import java.util.*;
+import org.apache.sedona.common.Functions;
 import org.locationtech.jts.algorithm.Angle;
 import org.locationtech.jts.algorithm.distance.DiscreteFrechetDistance;
 import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
 import org.locationtech.jts.geom.*;
-import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTWriter;
@@ -147,13 +147,13 @@ public class GeomUtils {
       return null;
     }
 
-    Coordinate[] nthCoordinate = new Coordinate[1];
+    Coordinate coordinate;
     if (n > 0) {
-      nthCoordinate[0] = lineString.getCoordinates()[n - 1];
+      coordinate = lineString.getCoordinates()[n - 1];
     } else {
-      nthCoordinate[0] = lineString.getCoordinates()[p + n];
+      coordinate = lineString.getCoordinates()[p + n];
     }
-    return new Point(new CoordinateArraySequence(nthCoordinate), lineString.getFactory());
+    return lineString.getFactory().createPoint(coordinate);
   }
 
   public static Geometry getExteriorRing(Geometry geometry) {
@@ -218,7 +218,7 @@ public class GeomUtils {
 
   public static Geometry get2dGeom(Geometry geom) {
     Coordinate[] coordinates = geom.getCoordinates();
-    GeometryFactory geometryFactory = new GeometryFactory();
+    GeometryFactory geometryFactory = geom.getFactory();
     CoordinateSequence sequence =
         geometryFactory.getCoordinateSequenceFactory().create(coordinates);
     if (sequence.getDimension() > 2) {
@@ -260,7 +260,9 @@ public class GeomUtils {
     Geometry outputGeom = unaryUnionOp.union();
     if (outputGeom != null) {
       outputGeom.normalize();
-      outputGeom.setSRID(srid);
+      if (outputGeom.getSRID() != srid) {
+        outputGeom = Functions.setSRID(outputGeom, srid);
+      }
     }
     return outputGeom;
   }
@@ -444,19 +446,6 @@ public class GeomUtils {
       geometries[i] = geom.getGeometryN(i);
     }
     return geometries;
-  }
-
-  public static Geometry get3DGeom(Geometry geometry, double zValue) {
-    Coordinate[] coordinates = geometry.getCoordinates();
-    if (coordinates.length == 0) return geometry;
-    for (int i = 0; i < coordinates.length; i++) {
-      boolean is3d = !Double.isNaN(coordinates[i].z);
-      if (!is3d) {
-        coordinates[i].setZ(zValue);
-      }
-    }
-    geometry.geometryChanged();
-    return geometry;
   }
 
   public static int getPolygonNumRings(Polygon polygon) {

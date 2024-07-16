@@ -412,7 +412,7 @@ public class RasterBandEditorsTest extends RasterTestBase {
     assertArrayEquals(expectedBandValues, actualBandValues, 0.1d);
 
     // test preservation of original raster
-    // remove last index as that's number of bands and they wouldn't be equal
+    // remove last index as that's number of bands, and they wouldn't be equal
     double[] actualMetadata = Arrays.stream(RasterAccessors.metadata(actualRaster), 0, 9).toArray();
     double[] expectedMetadata = Arrays.stream(RasterAccessors.metadata(toRaster), 0, 9).toArray();
     assertArrayEquals(expectedMetadata, actualMetadata, 0.1d);
@@ -438,7 +438,7 @@ public class RasterBandEditorsTest extends RasterTestBase {
     assertArrayEquals(expectedBandValues, actualBandValues, 0.1d);
 
     // test preservation of original raster
-    // remove last index as that's number of bands and they wouldn't be equal
+    // remove last index as that's number of bands, and they wouldn't be equal
     double[] actualMetadata = Arrays.stream(RasterAccessors.metadata(actualRaster), 0, 9).toArray();
     double[] expectedMetadata = Arrays.stream(RasterAccessors.metadata(toRaster), 0, 9).toArray();
     assertArrayEquals(expectedMetadata, actualMetadata, 0.1d);
@@ -464,7 +464,7 @@ public class RasterBandEditorsTest extends RasterTestBase {
     assertArrayEquals(expectedBandValues, actualBandValues, 0.1d);
 
     // test preservation of original raster
-    // remove last index as that's number of bands and they wouldn't be equal
+    // remove last index as that's number of bands, and they wouldn't be equal
     double[] actualMetadata = Arrays.stream(RasterAccessors.metadata(actualRaster), 0, 9).toArray();
     double[] expectedMetadata = Arrays.stream(RasterAccessors.metadata(toRaster), 0, 9).toArray();
     assertArrayEquals(expectedMetadata, actualMetadata, 0.1d);

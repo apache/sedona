@@ -257,9 +257,9 @@ public class RasterAccessors {
    *
    * @param raster the raster
    * @return double[] with the following values: 0: upperLeftX: upper left x 1: upperLeftY: upper
-   *     left y 2: width: number of pixels on x axis 3: height: number of pixels on y axis 4:
-   *     scaleX: pixel width 5: scaleY: pixel height 6: skewX: skew on x axis 7: skewY: skew on y
-   *     axis 8: srid 9: numBands
+   *     left y 2: width: number of pixels on x-axis 3: height: number of pixels on y-axis 4:
+   *     scaleX: pixel width 5: scaleY: pixel height 6: skewX: skew on x-axis 7: skewY: skew on
+   *     y-axis 8: srid 9: numBands
    * @throws FactoryException
    */
   public static double[] metadata(GridCoverage2D raster) throws FactoryException {

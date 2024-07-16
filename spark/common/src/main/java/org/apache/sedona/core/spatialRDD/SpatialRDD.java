@@ -342,7 +342,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
    */
   public void buildIndex(final IndexType indexType, boolean buildIndexOnSpatialPartitionedRDD)
       throws Exception {
-    if (buildIndexOnSpatialPartitionedRDD == false) {
+    if (!buildIndexOnSpatialPartitionedRDD) {
       // This index is built on top of unpartitioned SRDD
       this.indexedRawRDD = this.rawSpatialRDD.mapPartitions(new IndexBuilder(indexType));
     } else {

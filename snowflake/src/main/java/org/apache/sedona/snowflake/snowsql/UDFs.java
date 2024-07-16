@@ -789,7 +789,7 @@ public class UDFs {
 
   @UDFAnnotations.ParamMeta(argNames = {"wkb"})
   public static byte[] ST_PointFromWKB(byte[] wkb) throws ParseException {
-    return GeometrySerde.serialize(Constructors.pointFromWKB(wkb, 0));
+    return GeometrySerde.serialize(Constructors.pointFromWKB(wkb));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"wkb", "srid"})
@@ -799,7 +799,7 @@ public class UDFs {
 
   @UDFAnnotations.ParamMeta(argNames = {"wkb"})
   public static byte[] ST_LineFromWKB(byte[] wkb) throws ParseException {
-    return GeometrySerde.serialize(Constructors.lineFromWKB(wkb, 0));
+    return GeometrySerde.serialize(Constructors.lineFromWKB(wkb));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"wkb", "srid"})
@@ -809,7 +809,7 @@ public class UDFs {
 
   @UDFAnnotations.ParamMeta(argNames = {"wkb"})
   public static byte[] ST_LinestringFromWKB(byte[] wkb) throws ParseException {
-    return GeometrySerde.serialize(Constructors.lineFromWKB(wkb, 0));
+    return GeometrySerde.serialize(Constructors.lineFromWKB(wkb));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"wkb", "srid"})

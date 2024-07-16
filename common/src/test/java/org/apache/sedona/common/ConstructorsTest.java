@@ -22,9 +22,12 @@ import static org.junit.Assert.*;
 
 import org.apache.sedona.common.utils.GeomUtils;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBWriter;
 
 public class ConstructorsTest {
 
@@ -64,6 +67,45 @@ public class ConstructorsTest {
     ParseException invalid =
         assertThrows(ParseException.class, () -> Constructors.geomFromEWKT("not valid"));
     assertEquals("Unknown geometry type: NOT (line 1)", invalid.getMessage());
+  }
+
+  @Test
+  public void geomFromWKB() throws ParseException {
+    GeometryFactory factory = new GeometryFactory();
+    Geometry geom = factory.createPoint(new Coordinate(1, 2));
+
+    // Test WKB without SRID
+    WKBWriter wkbWriter = new WKBWriter();
+    byte[] wkb = wkbWriter.write(geom);
+    Geometry result = Constructors.geomFromWKB(wkb);
+    assertEquals(geom, result);
+    assertEquals(0, result.getSRID());
+    assertEquals(0, result.getFactory().getSRID());
+
+    // Test specifying SRID
+    result = Constructors.geomFromWKB(wkb, 1000);
+    assertEquals(geom, result);
+    assertEquals(1000, result.getSRID());
+    assertEquals(1000, result.getFactory().getSRID());
+
+    // Test EWKB with SRID
+    wkbWriter = new WKBWriter(2, true);
+    geom.setSRID(2000);
+    wkb = wkbWriter.write(geom);
+    result = Constructors.geomFromWKB(wkb);
+    assertEquals(geom, result);
+    assertEquals(2000, result.getSRID());
+    assertEquals(2000, result.getFactory().getSRID());
+
+    // Test overriding SRID
+    result = Constructors.geomFromWKB(wkb, 3000);
+    assertEquals(geom, result);
+    assertEquals(3000, result.getSRID());
+    assertEquals(3000, result.getFactory().getSRID());
+    result = Constructors.geomFromWKB(wkb, 0);
+    assertEquals(geom, result);
+    assertEquals(0, result.getSRID());
+    assertEquals(0, result.getFactory().getSRID());
   }
 
   @Test

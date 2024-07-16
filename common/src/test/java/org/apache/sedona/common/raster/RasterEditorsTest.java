@@ -4185,7 +4185,7 @@ public class RasterEditorsTest extends RasterTestBase {
         } else {
           // Should match with values retrieved from source raster. The transformed raster may not
           // have the
-          // same grid as the source raster so we need to fetch some nearby values from the source
+          // same grid as the source raster, so we need to fetch some nearby values from the source
           // raster and
           // see if any of them matches the transformed value. Please note that this requires us to
           // use the

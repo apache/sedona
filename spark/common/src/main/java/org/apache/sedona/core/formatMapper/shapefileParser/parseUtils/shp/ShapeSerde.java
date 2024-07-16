@@ -41,7 +41,7 @@ import org.locationtech.jts.geom.Polygon;
  * <p>First byte contains {@link ShapeType#id}. The rest is type specific. Point: 8 bytes for X
  * coordinate, followed by 8 bytes for Y coordinate. LineString is serialized as MultiLineString.
  * MultiLineString: 16 bytes for envelope, 4 bytes for the number of line strings, 4 bytes for total
- * number of vertices, 16 * num-vertices for XY coordinates of all the vertices. Polygons is
+ * number of vertices, 16 * num-vertices for XY coordinates of all the vertices. Polygons are
  * serialized as MultiPolygon. MultiPolygon: 16 bytes for envelope, 4 bytes for the total number of
  * exterior and interior rings of all polygons, 4 bytes for total number of vertices, 16 *
  * num-vertices for XY coordinates of all the vertices. The vertices are written one polygon at a

@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.execution.datasources.parquet
 
+import org.apache.spark.sql.types.{DoubleType, FloatType, StructType}
 import org.json4s.jackson.JsonMethods.parse
 import org.json4s.jackson.compactJson
 import org.json4s.{DefaultFormats, Extraction, JField, JNothing, JNull, JObject, JValue}
@@ -33,12 +34,25 @@ import org.json4s.{DefaultFormats, Extraction, JField, JNothing, JNull, JObject,
  * @param crs
  *   The CRS of the geometries in the file. None if crs metadata is absent, Some(JNull) if crs is
  *   null, Some(value) if the crs is present and not null.
+ * @param covering
+ *   Object containing bounding box column names to help accelerate spatial data retrieval
  */
 case class GeometryFieldMetaData(
     encoding: String,
     geometryTypes: Seq[String],
     bbox: Seq[Double],
-    crs: Option[JValue] = None)
+    crs: Option[JValue] = None,
+    covering: Option[Covering] = None)
+
+case class Covering(bbox: CoveringBBox)
+
+case class CoveringBBox(
+    xmin: Seq[String],
+    ymin: Seq[String],
+    zmin: Option[Seq[String]],
+    xmax: Seq[String],
+    ymax: Seq[String],
+    zmax: Option[Seq[String]])
 
 /**
  * A case class that holds the metadata of GeoParquet file
@@ -55,9 +69,9 @@ case class GeoParquetMetaData(
     columns: Map[String, GeometryFieldMetaData])
 
 object GeoParquetMetaData {
-  // We're conforming to version 1.0.0 of the GeoParquet specification, please refer to
-  // https://geoparquet.org/releases/v1.0.0/ for more details.
-  val VERSION = "1.0.0"
+  // We're conforming to version 1.1.0 of the GeoParquet specification, please refer to
+  // https://geoparquet.org/releases/v1.1.0/ for more details.
+  val VERSION = "1.1.0"
 
   /**
    * Configuration key for overriding the version field in GeoParquet file metadata.
@@ -69,6 +83,14 @@ object GeoParquetMetaData {
    * is applied to all geometry columns in the file.
    */
   val GEOPARQUET_CRS_KEY = "geoparquet.crs"
+
+  /**
+   * Configuration key prefix for setting the covering columns of the geometries in GeoParquet
+   * column metadata. The configuration key for geometry column named `x` is
+   * `geoparquet.covering.x`. If the parquet file contains only one geometry column, we can omit
+   * the column name and use `geoparquet.covering` directly.
+   */
+  val GEOPARQUET_COVERING_KEY = "geoparquet.covering"
 
   def parseKeyValueMetaData(
       keyValueMetaData: java.util.Map[String, String]): Option[GeoParquetMetaData] = {
@@ -113,5 +135,63 @@ object GeoParquetMetaData {
       case field: Any => field
     }
     compactJson(serializedGeoObject)
+  }
+
+  def createCoveringColumnMetadata(coveringColumnName: String, schema: StructType): Covering = {
+    val coveringColumnIndex = schema.fieldIndex(coveringColumnName)
+    schema(coveringColumnIndex).dataType match {
+      case coveringColumnType: StructType =>
+        coveringColumnTypeToCovering(coveringColumnName, coveringColumnType)
+      case _ =>
+        throw new IllegalArgumentException(
+          s"Covering column $coveringColumnName is not a struct type")
+    }
+  }
+
+  private def coveringColumnTypeToCovering(
+      coveringColumnName: String,
+      coveringColumnType: StructType): Covering = {
+    def validateField(fieldName: String): Unit = {
+      val index = coveringColumnType.fieldIndex(fieldName)
+      val fieldType = coveringColumnType(index).dataType
+      if (fieldType != FloatType && fieldType != DoubleType) {
+        throw new IllegalArgumentException(
+          s"`$fieldName` in covering column `$coveringColumnName` is not float or double type")
+      }
+    }
+    // We only validate the existence and types of the fields here. Although the order of the fields is required to be
+    // xmin, ymin, [zmin], xmax, ymax, [zmax] (see https://github.com/opengeospatial/geoparquet/pull/202), but we don't
+    // validate it. The requirement on user provided covering column is quite lenient, it is up to the user to provide
+    // the covering column strictly follow the ordering requirement.
+    validateField("xmin")
+    validateField("ymin")
+    validateField("xmax")
+    validateField("ymax")
+    coveringColumnType.find(_.name == "zmin") match {
+      case Some(_) =>
+        validateField("zmin")
+        validateField("zmax")
+        Covering(
+          CoveringBBox(
+            Seq(coveringColumnName, "xmin"),
+            Seq(coveringColumnName, "ymin"),
+            Some(Seq(coveringColumnName, "zmin")),
+            Seq(coveringColumnName, "xmax"),
+            Seq(coveringColumnName, "ymax"),
+            Some(Seq(coveringColumnName, "zmax"))))
+      case None =>
+        if (coveringColumnType.fieldNames.contains("zmax")) {
+          throw new IllegalArgumentException(
+            s"zmax should not present in covering column `$coveringColumnName` since zmin is not present")
+        }
+        Covering(
+          CoveringBBox(
+            Seq(coveringColumnName, "xmin"),
+            Seq(coveringColumnName, "ymin"),
+            None,
+            Seq(coveringColumnName, "xmax"),
+            Seq(coveringColumnName, "ymax"),
+            None))
+    }
   }
 }

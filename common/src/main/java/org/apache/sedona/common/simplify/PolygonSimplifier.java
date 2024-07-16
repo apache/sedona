@@ -18,12 +18,11 @@
  */
 package org.apache.sedona.common.simplify;
 
-import static org.apache.sedona.common.simplify.BaseSimplifier.geometryFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Polygon;
 
@@ -32,6 +31,7 @@ public class PolygonSimplifier {
     LinearRing exteriorRing = geom.getExteriorRing();
     int minPointsExternal = preserveCollapsed ? 4 : 0;
 
+    GeometryFactory geometryFactory = geom.getFactory();
     LinearRing simplifiedExterior =
         geometryFactory.createLinearRing(
             CoordinatesSimplifier.simplifyInPlace(

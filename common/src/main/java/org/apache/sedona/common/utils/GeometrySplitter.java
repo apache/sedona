@@ -51,7 +51,7 @@ public final class GeometrySplitter {
   /**
    * Split input geometry by the blade geometry. Input geometry can be lineal (LineString or
    * MultiLineString) or polygonal (Polygon or MultiPolygon). A GeometryCollection can also be used
-   * as an input but it must be homogeneous. For lineal geometry refer to the {@link
+   * as an input, but it must be homogeneous. For lineal geometry refer to the {@link
    * splitLines(Geometry, Geometry) splitLines} method for restrictions on the blade. Refer to
    * {@link splitPolygons(Geometry, Geometry) splitPolygons} for restrictions on the blade for
    * polygonal input geometry.
@@ -272,7 +272,7 @@ public final class GeometrySplitter {
     // avoid candidate polygons that are impossible
     Geometry bladeWithinPolygons = blade.intersection(polygons);
 
-    // a union will node all of the lines at intersections
+    // a union will node all the lines at intersections
     // these nodes are required for Polygonizer to work correctly
     Geometry totalLineWork = polygons.getBoundary().union(bladeWithinPolygons);
 

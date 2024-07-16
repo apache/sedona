@@ -24,7 +24,7 @@ Following are details on all the APIs exposed via SedonaPyDeck:
 ```python
 def create_geometry_map(df, fill_color="[85, 183, 177, 255]", line_color="[85, 183, 177, 255]",
                    elevation_col=0, initial_view_state=None,
-                   map_style=None, map_provider=None, api_keys=None):
+                   map_style=None, map_provider=None, api_keys=None, stroked=True):
 ```
 
 The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color polygons or point geometries in the map
@@ -33,6 +33,8 @@ The parameter `line_color` can be given a list of RGB/RGBA values, or a string t
 
 The parameter `elevation_col` can be given a static elevation or elevation based on column values like `fill_color`, this only works for the polygon geometries in the map.
 
+The parameter `stroked` determines whether to draw an outline around polygons and points, accepts a boolean value. For more information, please refer to this [documentation of deck.gl](https://deck.gl/docs/api-reference/layers/geojson-layer#:~:text=%27circle%27.-,stroked,-(boolean%2C%20optional)).
+
 Optionally, parameters `initial_view_state`, `map_style`, `map_provider`, `api_keys` can be passed to configure the map as per user's liking.
 More details on the parameters and their default values can be found on the PyDeck website as well by deck.gl [here](https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/geojson-layer.md)
 
@@ -40,10 +42,12 @@ More details on the parameters and their default values can be found on the PyDe
 
 ```python
 def create_choropleth_map(df, fill_color=None, plot_col=None, initial_view_state=None, map_style=None,
-						  map_provider=None, api_keys=None, elevation_col=0)
+						  map_provider=None, api_keys=None, elevation_col=0, stroked=True)
 ```
 
 The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.
+
+The parameter `stroked` determines whether to draw an outline around polygons and points, accepts a boolean value. For more information please refer to this [documentation of deck.gl](https://deck.gl/docs/api-reference/layers/geojson-layer#:~:text=%27circle%27.-,stroked,-(boolean%2C%20optional)).
 
 For example, all these are valid values of fill_color:
 

@@ -35,6 +35,7 @@ import org.apache.spark.sql.sources.Filter
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.SerializableConfiguration
+import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods.{compact, render}
 
 case class GeoParquetMetadataPartitionReaderFactory(
@@ -74,13 +75,18 @@ object GeoParquetMetadataPartitionReaderFactory {
     val row = GeoParquetMetaData.parseKeyValueMetaData(metadata) match {
       case Some(geo) =>
         val geoColumnsMap = geo.columns.map { case (columnName, columnMetadata) =>
+          implicit val formats: org.json4s.Formats = DefaultFormats
+          import org.json4s.jackson.Serialization
           val columnMetadataFields: Array[Any] = Array(
             UTF8String.fromString(columnMetadata.encoding),
             new GenericArrayData(columnMetadata.geometryTypes.map(UTF8String.fromString).toArray),
             new GenericArrayData(columnMetadata.bbox.toArray),
             columnMetadata.crs
               .map(projjson => UTF8String.fromString(compact(render(projjson))))
-              .getOrElse(UTF8String.fromString("")))
+              .getOrElse(UTF8String.fromString("")),
+            columnMetadata.covering
+              .map(covering => UTF8String.fromString(Serialization.write(covering)))
+              .orNull)
           val columnMetadataStruct = new GenericInternalRow(columnMetadataFields)
           UTF8String.fromString(columnName) -> columnMetadataStruct
         }

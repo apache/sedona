@@ -16,6 +16,9 @@
 #  under the License.
 
 from types import ModuleType
+
+from pyspark.sql.types import FloatType, DoubleType, IntegerType, LongType, DecimalType, ShortType, ByteType
+
 from sedona.maps.SedonaMapUtils import SedonaMapUtils
 
 
@@ -24,7 +27,7 @@ class SedonaPyDeck:
     # User Facing APIs
     @classmethod
     def create_choropleth_map(cls, df, fill_color=None, plot_col=None, initial_view_state=None, map_style=None,
-                              map_provider=None, elevation_col=0, api_keys=None):
+                              map_provider=None, elevation_col=0, api_keys=None, stroked=True):
         """
         Create a pydeck map with a choropleth layer added
         :param elevation_col: Optional elevation for the polygons
@@ -38,6 +41,14 @@ class SedonaPyDeck:
         :param api_keys: Optional dictionary of API keys for Map providers
         :return: A pydeck Map object with choropleth layer added:
         """
+
+        for field in df.schema.fields:
+            if field.name == plot_col and field.dataType not in [IntegerType(), FloatType(), DoubleType(), LongType(),
+                                                                 DecimalType(), ShortType(), ByteType()]:
+                message = (f"'{field.name}' must be of numeric type. \nIf you are importing data from csv set "
+                           f"'inferSchema' option as true")
+                raise TypeError(message) from None
+
         pdk = _try_import_pydeck()
 
         if initial_view_state is None:
@@ -56,7 +67,7 @@ class SedonaPyDeck:
             get_fill_color=fill_color,
             opacity=1.0,
             get_elevation=elevation_col,
-            stroked=False,
+            stroked=stroked,
             extruded=True,
             wireframe=True,
             pickable=True
@@ -68,7 +79,7 @@ class SedonaPyDeck:
     @classmethod
     def create_geometry_map(cls, df, fill_color="[85, 183, 177, 255]", line_color="[85, 183, 177, 255]",
                             elevation_col=0, initial_view_state=None,
-                            map_style=None, map_provider=None, api_keys=None):
+                            map_style=None, map_provider=None, api_keys=None, stroked=True):
         """
         Create a pydeck map with a GeoJsonLayer added for plotting given geometries.
         :param line_color:
@@ -92,7 +103,7 @@ class SedonaPyDeck:
         #         line_color = "[237, 119, 79]"
 
         layer = SedonaPyDeck._create_fat_layer_(gdf, fill_color=fill_color, elevation_col=elevation_col,
-                                                line_color=line_color)
+                                                line_color=line_color, stroked=stroked)
 
         if initial_view_state is None:
             initial_view_state = pdk.data_utils.compute_view(gdf['coordinate_array_sedona'])
@@ -229,7 +240,7 @@ class SedonaPyDeck:
             lambda val: list(SedonaMapUtils.__extract_coordinate__(val[geometry_col], type_list)), axis=1)
 
     @classmethod
-    def _create_fat_layer_(cls, gdf, fill_color, line_color, elevation_col):
+    def _create_fat_layer_(cls, gdf, fill_color, line_color, elevation_col, stroked):
         pdk = _try_import_pydeck()
         layer = pdk.Layer(
             'GeoJsonLayer',  # `type` positional argument is here
@@ -237,7 +248,7 @@ class SedonaPyDeck:
             auto_highlight=True,
             get_fill_color=fill_color,
             opacity=0.4,
-            stroked=False,
+            stroked=stroked,
             extruded=True,
             get_elevation=elevation_col,
             get_line_color=line_color,

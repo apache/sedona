@@ -62,7 +62,7 @@ public class RangeQuery implements Serializable {
                   spatialRDD.getTargetEpgsgCode());
     }
 
-    if (useIndex == true) {
+    if (useIndex) {
       if (spatialRDD.indexedRawRDD == null) {
         throw new Exception(
             "[RangeQuery][SpatialRangeQuery] Index doesn't exist. Please build index on rawSpatialRDD.");

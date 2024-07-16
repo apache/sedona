@@ -132,7 +132,7 @@ class TestGeometrySimplify
         false,
         0.0),
       (
-        "multpoint with duplicated points",
+        "multipoint with duplicated points",
         "MULTIPOINT ((10 40), (40 30), (20 20), (30 10), (30 10))",
         "MULTIPOINT ((10 40), (40 30), (20 20), (30 10), (30 10))",
         false,
