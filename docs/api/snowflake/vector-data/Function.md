@@ -1165,9 +1165,13 @@ Output:
 
 ## ST_GeneratePoints
 
-Introduction: Generates a specified quantity of pseudo-random points within the boundaries of the provided polygonal geometry.
+Introduction: Generates a specified quantity of pseudo-random points within the boundaries of the provided polygonal geometry. When `seed` is either zero or not defined then output will be random.
 
-Format: `ST_GeneratePoints(geom: Geometry, numPoints: Integer)`
+Format:
+
+`ST_GeneratePoints(geom: Geometry, numPoints: Integer, seed: Long = 0)`
+
+`ST_GeneratePoints(geom: Geometry, numPoints: Integer)`
 
 SQL Example:
 
