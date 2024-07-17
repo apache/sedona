@@ -30,6 +30,7 @@ class TestVisualization(TestBase):
         buildings_csv_df = self.spark.read.format("csv"). \
             option("delimiter", ","). \
             option("header", "true"). \
+            option("inferSchema", "true"). \
             load(google_buildings_input_location)
         buildings_csv_df.createOrReplaceTempView("buildings_table")
         buildings_df = self.spark.sql(
@@ -43,7 +44,7 @@ class TestVisualization(TestBase):
             auto_highlight=True,
             get_fill_color=fill_color,
             opacity=1.0,
-            stroked=False,
+            stroked=True,
             extruded=True,
             wireframe=True,
             get_elevation=0,
@@ -70,7 +71,7 @@ class TestVisualization(TestBase):
             auto_highlight=True,
             get_fill_color="[85, 183, 177, 255]",
             opacity=0.4,
-            stroked=False,
+            stroked=True,
             extruded=True,
             get_elevation='confidence * 10',
             pickable=True,

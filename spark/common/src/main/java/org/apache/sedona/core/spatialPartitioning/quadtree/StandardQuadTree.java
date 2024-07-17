@@ -39,7 +39,7 @@ public class StandardQuadTree<T> extends PartitioningUtils implements Serializab
   public static final int REGION_NE = 1;
   public static final int REGION_SW = 2;
   public static final int REGION_SE = 3;
-  // Maximum number of items in any given zone. When reached, a zone is sub-divided.
+  // Maximum number of items in any given zone. When reached, a zone is subdivided.
   private final int maxItemsPerZone;
   private final int maxLevel;
   private final int level;
@@ -48,7 +48,7 @@ public class StandardQuadTree<T> extends PartitioningUtils implements Serializab
   // current rectangle zone
   private final QuadRectangle zone;
   private int nodeNum = 0;
-  // the four sub regions,
+  // the four sub-regions,
   // may be null if not needed
   private StandardQuadTree<T>[] regions;
 
@@ -224,7 +224,7 @@ public class StandardQuadTree<T> extends PartitioningUtils implements Serializab
   /**
    * Traverses the tree top-down breadth-first and calls the visitor for each node. Stops traversing
    * if a call to Visitor.visit returns false. lineage will memorize the traversal path for each
-   * nodes
+   * node
    */
   private void traverseWithTrace(VisitorWithLineage<T> visitor, String lineage) {
     if (!visitor.visit(this, lineage)) {

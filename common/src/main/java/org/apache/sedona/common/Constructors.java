@@ -66,16 +66,28 @@ public class Constructors {
   }
 
   public static Geometry geomFromWKB(byte[] wkb) throws ParseException {
-    return new WKBReader().read(wkb);
+    return geomFromWKB(wkb, -1);
+  }
+
+  public static Geometry geomFromWKB(byte[] wkb, int SRID) throws ParseException {
+    Geometry geom = new WKBReader().read(wkb);
+    if (geom.getFactory().getSRID() != geom.getSRID() || (SRID >= 0 && geom.getSRID() != SRID)) {
+      // Make sure that the geometry and the geometry factory have the correct SRID
+      if (SRID < 0) {
+        SRID = geom.getSRID();
+      }
+      return Functions.setSRID(geom, SRID);
+    } else {
+      return geom;
+    }
   }
 
   public static Geometry pointFromWKB(byte[] wkb) throws ParseException {
-    return pointFromWKB(wkb, 0);
+    return pointFromWKB(wkb, -1);
   }
 
   public static Geometry pointFromWKB(byte[] wkb, int srid) throws ParseException {
-    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
-    Geometry geom = new WKBReader(geometryFactory).read(wkb);
+    Geometry geom = geomFromWKB(wkb, srid);
     if (!(geom instanceof Point)) {
       return null;
     }
@@ -83,12 +95,11 @@ public class Constructors {
   }
 
   public static Geometry lineFromWKB(byte[] wkb) throws ParseException {
-    return lineFromWKB(wkb, 0);
+    return lineFromWKB(wkb, -1);
   }
 
   public static Geometry lineFromWKB(byte[] wkb, int srid) throws ParseException {
-    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
-    Geometry geom = new WKBReader(geometryFactory).read(wkb);
+    Geometry geom = geomFromWKB(wkb, srid);
     if (!(geom instanceof LineString)) {
       return null;
     }
@@ -141,17 +152,15 @@ public class Constructors {
    */
   public static Geometry point(double x, double y) {
     // See srid parameter discussion in https://issues.apache.org/jira/browse/SEDONA-234
-    GeometryFactory geometryFactory = new GeometryFactory();
-    return geometryFactory.createPoint(new Coordinate(x, y));
+    return GEOMETRY_FACTORY.createPoint(new Coordinate(x, y));
   }
 
   public static Geometry makePointM(double x, double y, double m) {
-    GeometryFactory geometryFactory = new GeometryFactory();
-    return geometryFactory.createPoint(new CoordinateXYM(x, y, m));
+    return GEOMETRY_FACTORY.createPoint(new CoordinateXYM(x, y, m));
   }
 
   public static Geometry makePoint(Double x, Double y, Double z, Double m) {
-    GeometryFactory geometryFactory = new GeometryFactory();
+    GeometryFactory geometryFactory = GEOMETRY_FACTORY;
     if (x == null || y == null) {
       return null;
     }

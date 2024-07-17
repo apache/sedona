@@ -216,7 +216,7 @@ The newly created DataFrame can be written to disk again but must be under a dif
 
 Introduction: Converts a Geometry to a Raster dataset. Defaults to using `1.0` for cell `value` and `null` for `noDataValue` if not provided. Supports all geometry types.
 The `pixelType` argument defines data type of the output raster. This can be one of the following, D (double), F (float), I (integer), S (short), US (unsigned short) or B (byte).
-The `useGeomeryExtent` argument defines the extent of the resultant raster. When set to `true`, it corresponds to the extent of `geom`, and when set to false, it corresponds to the extent of `raster`. Default value is `true` if not set.
+The `useGeometryExtent` argument defines the extent of the resultant raster. When set to `true`, it corresponds to the extent of `geom`, and when set to false, it corresponds to the extent of `raster`. Default value is `true` if not set.
 Format:
 
 ```

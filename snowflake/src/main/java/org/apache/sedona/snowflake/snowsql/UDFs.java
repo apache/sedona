@@ -789,7 +789,7 @@ public class UDFs {
 
   @UDFAnnotations.ParamMeta(argNames = {"wkb"})
   public static byte[] ST_PointFromWKB(byte[] wkb) throws ParseException {
-    return GeometrySerde.serialize(Constructors.pointFromWKB(wkb, 0));
+    return GeometrySerde.serialize(Constructors.pointFromWKB(wkb));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"wkb", "srid"})
@@ -799,7 +799,7 @@ public class UDFs {
 
   @UDFAnnotations.ParamMeta(argNames = {"wkb"})
   public static byte[] ST_LineFromWKB(byte[] wkb) throws ParseException {
-    return GeometrySerde.serialize(Constructors.lineFromWKB(wkb, 0));
+    return GeometrySerde.serialize(Constructors.lineFromWKB(wkb));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"wkb", "srid"})
@@ -809,7 +809,7 @@ public class UDFs {
 
   @UDFAnnotations.ParamMeta(argNames = {"wkb"})
   public static byte[] ST_LinestringFromWKB(byte[] wkb) throws ParseException {
-    return GeometrySerde.serialize(Constructors.lineFromWKB(wkb, 0));
+    return GeometrySerde.serialize(Constructors.lineFromWKB(wkb));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"wkb", "srid"})
@@ -1213,5 +1213,23 @@ public class UDFs {
   public static byte[] ST_Translate(byte[] geom, double deltaX, double deltaY, double deltaZ) {
     return GeometrySerde.serialize(
         Functions.translate(GeometrySerde.deserialize(geom), deltaX, deltaY, deltaZ));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geom", "angle"})
+  public static byte[] ST_Rotate(byte[] geom, double angle) {
+    return GeometrySerde.serialize(Functions.rotate(GeometrySerde.deserialize(geom), angle));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geom", "angle", "pointOrigin"})
+  public static byte[] ST_Rotate(byte[] geom, double angle, byte[] pointOrigin) {
+    return GeometrySerde.serialize(
+        Functions.rotate(
+            GeometrySerde.deserialize(geom), angle, GeometrySerde.deserialize(pointOrigin)));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geom", "angle", "originX", "originY"})
+  public static byte[] ST_Rotate(byte[] geom, double angle, double originX, double originY) {
+    return GeometrySerde.serialize(
+        Functions.rotate(GeometrySerde.deserialize(geom), angle, originX, originY));
   }
 }

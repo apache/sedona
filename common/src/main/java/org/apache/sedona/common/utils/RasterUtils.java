@@ -544,13 +544,12 @@ public class RasterUtils {
   public static Geometry convertCRSIfNeeded(
       Geometry geometry, CoordinateReferenceSystem targetCRS) {
     int geomSRID = geometry.getSRID();
-    // If the geometry has a SRID and it is not the same as the raster CRS, we need to transform the
-    // geometry
-    // to the raster CRS.
+    // If the geometry has a SRID, and it is not the same as the raster CRS, we need to transform
+    // the geometry to the raster CRS.
     // Note that:
     // In Sedona vector, we do not perform implicit CRS transform. Everything must be done
     // explicitly via ST_Transform
-    // In Sedona raster, we do implicit CRS transform if the raster has a CRS. If the the SRID of
+    // In Sedona raster, we do implicit CRS transform if the raster has a CRS. If the SRID of
     // the geometry is 0, we assume it is 4326.
     if (geomSRID == 0) {
       geomSRID = 4326;
@@ -635,7 +634,7 @@ public class RasterUtils {
   }
 
   public static boolean isDataTypeIntegral(int dataTypeCode) {
-    // returns true if the datatype code refers to an int-like datatype (int, short, etc)
+    // returns true if the datatype code refers to an int-like datatype (int, short, etc.)
     switch (dataTypeCode) {
       case 3: // int
       case 0: // byte

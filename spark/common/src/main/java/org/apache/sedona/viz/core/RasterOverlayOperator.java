@@ -71,7 +71,7 @@ public class RasterOverlayOperator {
   public boolean JoinImage(JavaPairRDD<Integer, ImageSerializableWrapper> distributedFontImage)
       throws Exception {
     logger.info("[Sedona-Viz][JoinImage][Start]");
-    if (this.generateDistributedImage == false) {
+    if (!this.generateDistributedImage) {
       throw new Exception(
           "[OverlayOperator][JoinImage] The back image is not distributed. Please don't use distributed format.");
     }
@@ -101,11 +101,11 @@ public class RasterOverlayOperator {
                         imagePair._2._1.iterator();
                     Iterator<ImageSerializableWrapper> frontImageIterator =
                         imagePair._2._2.iterator();
-                    if (backImageIterator.hasNext() == false) {
+                    if (!backImageIterator.hasNext()) {
                       throw new Exception(
                           "[OverlayOperator][JoinImage] The back image iterator didn't get any image partitions.");
                     }
-                    if (frontImageIterator.hasNext() == false) {
+                    if (!frontImageIterator.hasNext()) {
                       throw new Exception(
                           "[OverlayOperator][JoinImage] The front image iterator didn't get any image partitions.");
                     }
@@ -139,7 +139,7 @@ public class RasterOverlayOperator {
    * @throws Exception the exception
    */
   public boolean JoinImage(BufferedImage frontRasterImage) throws Exception {
-    if (this.generateDistributedImage == true) {
+    if (this.generateDistributedImage) {
       throw new Exception(
           "[OverlayOperator][JoinImage] The back image is distributed. Please don't use centralized format.");
     }

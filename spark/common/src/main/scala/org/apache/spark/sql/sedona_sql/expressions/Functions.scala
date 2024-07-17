@@ -607,8 +607,6 @@ case class ST_MinimumBoundingRadius(inputExpressions: Seq[Expression])
 
   override def nullable: Boolean = true
 
-  private val geometryFactory = new GeometryFactory()
-
   override def eval(input: InternalRow): Any = {
     val expr = inputExpressions(0)
     val geometry = expr match {
@@ -624,7 +622,7 @@ case class ST_MinimumBoundingRadius(inputExpressions: Seq[Expression])
 
   private def getMinimumBoundingRadius(geom: Geometry): InternalRow = {
     val minimumBoundingCircle = new MinimumBoundingCircle(geom)
-    val centerPoint = geometryFactory.createPoint(minimumBoundingCircle.getCentre)
+    val centerPoint = geom.getFactory.createPoint(minimumBoundingCircle.getCentre)
     InternalRow(centerPoint.toGenericArrayData, minimumBoundingCircle.getRadius)
   }
 
@@ -1601,6 +1599,16 @@ case class ST_IsValidReason(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction2(Functions.isValidReason),
       inferrableFunction1(Functions.isValidReason)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
+    copy(inputExpressions = newChildren)
+}
+
+case class ST_Rotate(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction2(Functions.rotate),
+      inferrableFunction3(Functions.rotate),
+      inferrableFunction4(Functions.rotate)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
     copy(inputExpressions = newChildren)

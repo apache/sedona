@@ -45,7 +45,7 @@ public class BoundBox implements Serializable {
     this.bounds = otherbox.copyBounds();
   }
 
-  /** construct a initial boundBox with all value 0 */
+  /** construct an initial boundBox with all value 0 */
   public BoundBox() {
     bounds = new double[8];
   }

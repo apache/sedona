@@ -57,6 +57,7 @@ public class GeometryCollectionSimplifier extends BaseSimplifier {
             .map(Geometry::getGeometryType)
             .distinct()
             .toArray(String[]::new);
+    GeometryFactory geometryFactory = geom.getFactory();
     if (distinctGeometries.length == 1) {
       switch (distinctGeometries[0]) {
         case Geometry.TYPENAME_LINESTRING:

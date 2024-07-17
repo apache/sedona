@@ -392,12 +392,10 @@ public class RasterBandAccessors {
 
     DescriptiveStatistics stats = null;
 
-    if (pixelData == null) {
-      stats = new DescriptiveStatistics(pixels);
-    } else {
+    if (pixelData != null) {
       pixels = pixelData.stream().mapToDouble(d -> d).toArray();
-      stats = new DescriptiveStatistics(pixels);
     }
+    stats = new DescriptiveStatistics(pixels);
 
     StandardDeviation sd = new StandardDeviation(false);
 

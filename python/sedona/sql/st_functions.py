@@ -1979,3 +1979,31 @@ def ST_IsCollection(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_IsCollection", geometry)
+
+
+@validate_argument_types
+def ST_Rotate(geometry: ColumnOrName, angle: Union[ColumnOrName, float], originX: Union[ColumnOrName, float] = None,
+              originY: Union[ColumnOrName, float] = None, pointOrigin: ColumnOrName = None) -> Column:
+    """Return a counter-clockwise rotated geometry along the specified origin.
+
+    :param geometry: Geometry column or name.
+    :type geometry: ColumnOrName
+    :param angle: Rotation angle in radians.
+    :type angle: Union[ColumnOrName, float]
+    :param originX: Optional x-coordinate of the origin.
+    :type originX: Union[ColumnOrName, float]
+    :param originY: Optional y-coordinate of the origin.
+    :type originY: Union[ColumnOrName, float]
+    :param pointOrigin: Optional origin point for rotation.
+    :type pointOrigin: ColumnOrName
+    :return: Returns the rotated geometry.
+    :rtype: Column
+    """
+    if pointOrigin is not None:
+        args = (geometry, angle, pointOrigin)
+    elif originX is not None and originY is not None:
+        args = (geometry, angle, originX, originY)
+    else:
+        args = (geometry, angle)
+
+    return _call_st_function("ST_Rotate", args)

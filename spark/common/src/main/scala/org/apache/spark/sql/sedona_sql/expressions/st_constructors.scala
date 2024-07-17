@@ -143,22 +143,22 @@ object st_constructors extends DataFrameAPI {
   def ST_PointZM(x: Double, y: Double, z: Double, m: Double, srid: Int): Column =
     wrapExpression[ST_PointZM](x, y, z, m, srid)
 
-  def ST_PointFromWKB(wkb: Column): Column = wrapExpression[ST_PointFromWKB](wkb, 0)
-  def ST_PointFromWKB(wkb: String): Column = wrapExpression[ST_PointFromWKB](wkb, 0)
+  def ST_PointFromWKB(wkb: Column): Column = wrapExpression[ST_PointFromWKB](wkb)
+  def ST_PointFromWKB(wkb: String): Column = wrapExpression[ST_PointFromWKB](wkb)
 
   def ST_PointFromWKB(wkb: Column, srid: Column): Column =
     wrapExpression[ST_PointFromWKB](wkb, srid)
   def ST_PointFromWKB(wkb: String, srid: Int): Column = wrapExpression[ST_PointFromWKB](wkb, srid)
 
-  def ST_LineFromWKB(wkb: Column): Column = wrapExpression[ST_LineFromWKB](wkb, 0)
-  def ST_LineFromWKB(wkb: String): Column = wrapExpression[ST_LineFromWKB](wkb, 0)
+  def ST_LineFromWKB(wkb: Column): Column = wrapExpression[ST_LineFromWKB](wkb)
+  def ST_LineFromWKB(wkb: String): Column = wrapExpression[ST_LineFromWKB](wkb)
 
   def ST_LineFromWKB(wkb: Column, srid: Column): Column =
     wrapExpression[ST_LineFromWKB](wkb, srid)
   def ST_LineFromWKB(wkb: String, srid: Int): Column = wrapExpression[ST_LineFromWKB](wkb, srid)
 
-  def ST_LinestringFromWKB(wkb: Column): Column = wrapExpression[ST_LinestringFromWKB](wkb, 0)
-  def ST_LinestringFromWKB(wkb: String): Column = wrapExpression[ST_LinestringFromWKB](wkb, 0)
+  def ST_LinestringFromWKB(wkb: Column): Column = wrapExpression[ST_LinestringFromWKB](wkb)
+  def ST_LinestringFromWKB(wkb: String): Column = wrapExpression[ST_LinestringFromWKB](wkb)
   def ST_LinestringFromWKB(wkb: Column, srid: Column): Column =
     wrapExpression[ST_LinestringFromWKB](wkb, srid)
   def ST_LinestringFromWKB(wkb: String, srid: Int): Column =

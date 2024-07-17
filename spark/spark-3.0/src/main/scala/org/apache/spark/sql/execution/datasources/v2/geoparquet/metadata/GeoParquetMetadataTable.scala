@@ -56,7 +56,8 @@ object GeoParquetMetadataTable {
       StructField("encoding", StringType, nullable = true),
       StructField("geometry_types", ArrayType(StringType), nullable = true),
       StructField("bbox", ArrayType(DoubleType), nullable = true),
-      StructField("crs", StringType, nullable = true)))
+      StructField("crs", StringType, nullable = true),
+      StructField("covering", StringType, nullable = true)))
 
   private val columnsType = MapType(StringType, columnMetadataType, valueContainsNull = false)
 

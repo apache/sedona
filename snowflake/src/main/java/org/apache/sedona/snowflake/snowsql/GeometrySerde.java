@@ -19,6 +19,7 @@
 package org.apache.sedona.snowflake.snowsql;
 
 import java.util.Arrays;
+import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.utils.FormatUtils;
@@ -27,7 +28,6 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKBReader;
 
 public class GeometrySerde {
 
@@ -51,7 +51,7 @@ public class GeometrySerde {
 
   public static Geometry deserialize(byte[] bytes) {
     try {
-      return new WKBReader().read(bytes);
+      return Constructors.geomFromWKB(bytes);
     } catch (ParseException e) {
       String msg =
           String.format(

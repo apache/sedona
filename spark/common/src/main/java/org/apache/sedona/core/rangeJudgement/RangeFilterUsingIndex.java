@@ -52,7 +52,7 @@ public class RangeFilterUsingIndex<U extends Geometry, T extends Geometry> exten
    */
   @Override
   public Iterator<T> call(Iterator<SpatialIndex> treeIndexes) throws Exception {
-    assert treeIndexes.hasNext() == true;
+    assert treeIndexes.hasNext();
     SpatialIndex treeIndex = treeIndexes.next();
     List<T> results = new ArrayList<T>();
     List<T> tempResults = treeIndex.query(this.queryGeometry.getEnvelopeInternal());

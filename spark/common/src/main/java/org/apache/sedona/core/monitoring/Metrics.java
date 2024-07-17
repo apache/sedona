@@ -16,15 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.core.monitoring
+package org.apache.sedona.core.monitoring;
 
-import org.apache.spark.SparkContext
-import org.apache.spark.util.LongAccumulator
+import org.apache.spark.SparkContext;
+import org.apache.spark.util.LongAccumulator;
 
-object Metrics {
-  def createMetric(sc: SparkContext, name: String): LongAccumulator = {
-    val acc = new LongAccumulator()
-    sc.register(acc, "sedona.spatialjoin." + name)
-    acc
+public class Metrics {
+
+  public static LongAccumulator createMetric(SparkContext sc, String name) {
+    LongAccumulator acc = new LongAccumulator();
+    sc.register(acc, "sedona.spatialjoin." + name);
+    return acc;
   }
 }

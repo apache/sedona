@@ -72,7 +72,7 @@ case class DistanceJoinExec(
     with TraitJoinQueryExec
     with Logging {
 
-  private val boundRadius = if (distanceBoundToLeft) {
+  private lazy val boundRadius = if (distanceBoundToLeft) {
     BindReferences.bindReference(distance, left.output)
   } else {
     BindReferences.bindReference(distance, right.output)

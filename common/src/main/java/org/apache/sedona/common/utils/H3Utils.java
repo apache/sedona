@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Polygon;
 
@@ -265,7 +264,7 @@ public class H3Utils {
             cells.addAll(
                 polygonToCells(
                     (Polygon)
-                        (new GeometryFactory()
+                        (line.getFactory()
                             .createLineString(new Coordinate[] {cs, ce})
                             .getEnvelope()),
                     level,

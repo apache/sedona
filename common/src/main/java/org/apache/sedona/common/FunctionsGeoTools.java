@@ -18,24 +18,24 @@
  */
 package org.apache.sedona.common;
 
+import java.util.Set;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.geotools.util.factory.Hints;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.operation.buffer.BufferOp;
 import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.locationtech.jts.triangulate.VoronoiDiagramBuilder;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
+import org.opengis.referencing.ReferenceIdentifier;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 public class FunctionsGeoTools {
-  private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
   public static Geometry transform(Geometry geometry, String targetCRS)
       throws FactoryException, TransformException {
@@ -82,11 +82,39 @@ public class FunctionsGeoTools {
       }
     }
     CoordinateReferenceSystem sourceCRS = parseCRSString(sourceCRScode);
+    int targetSRID = crsToSRID(targetCRS);
     // If sourceCRS and targetCRS are equal, return the geometry unchanged
     if (!CRS.equalsIgnoreMetadata(sourceCRS, targetCRS)) {
       MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, lenient);
-      return JTS.transform(geometry, transform);
-    } else return geometry;
+      Geometry transformed = JTS.transform(geometry, transform);
+      transformed = Functions.setSRID(transformed, targetSRID);
+      transformed.setUserData(geometry.getUserData());
+      return transformed;
+    } else {
+      if (geometry.getSRID() != targetSRID) {
+        Geometry transformed = Functions.setSRID(geometry, targetSRID);
+        transformed.setUserData(geometry.getUserData());
+        return transformed;
+      } else {
+        return geometry;
+      }
+    }
+  }
+
+  /**
+   * Get the SRID of a CRS. We use the EPSG code of the CRS if available.
+   *
+   * @param crs CoordinateReferenceSystem
+   * @return SRID
+   */
+  public static int crsToSRID(CoordinateReferenceSystem crs) {
+    Set<ReferenceIdentifier> crsIds = crs.getIdentifiers();
+    for (ReferenceIdentifier crsId : crsIds) {
+      if ("EPSG".equals(crsId.getCodeSpace())) {
+        return Integer.parseInt(crsId.getCode());
+      }
+    }
+    return 0;
   }
 
   /**
@@ -138,7 +166,7 @@ public class FunctionsGeoTools {
       e.expandBy(Math.max(e.getWidth(), e.getHeight()));
       builder.setClipEnvelope(e);
     }
-    return builder.getDiagram(FunctionsGeoTools.GEOMETRY_FACTORY);
+    return builder.getDiagram(geom.getFactory());
   }
 
   public static Geometry bufferSpheroid(Geometry geometry, double radius, BufferParameters params)
@@ -152,7 +180,7 @@ public class FunctionsGeoTools {
     if (Functions.crossesDateLine(geometry)) {
       Functions.shiftLongitude(geometry);
     }
-    //        geometry = (Predicates.crossesDateLine(geometry)) ? Functions.shiftLongitude(geometry)
+    // geometry = (Predicates.crossesDateLine(geometry)) ? Functions.shiftLongitude(geometry)
     // : geometry;
 
     // If originalCRS is not set, use WGS84 as the originalCRS for transformation
@@ -169,7 +197,6 @@ public class FunctionsGeoTools {
       int backTransformCRSCode = (originalCRS == 0) ? WGS84CRS : originalCRS;
       Geometry bufferedResult =
           transform(bufferedGeometry, targetCRSCode, "EPSG:" + backTransformCRSCode);
-      bufferedResult.setSRID(backTransformCRSCode);
 
       // Normalize longitudes between -180 and 180
       Functions.normalizeLongitude(bufferedResult);

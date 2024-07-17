@@ -73,6 +73,5 @@ repos:
         name: Run yamllint
         description: Check YAML files with yamllint
         args: [--strict, -c=.github/linters/.yaml-lint.yml]
-        exclude: ^mkdocs\.yml$
         types: [yaml]
         files: \.ya?ml$
