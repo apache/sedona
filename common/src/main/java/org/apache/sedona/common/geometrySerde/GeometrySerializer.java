@@ -55,7 +55,11 @@ public class GeometrySerializer {
     } else if (geometry instanceof GeometryCollection) {
       buffer = serializeGeometryCollection((GeometryCollection) geometry);
     } else if (geometry instanceof FaultyGeometry) {
-      return serialize(((FaultyGeometry) geometry).getGeometry());
+      throw new UnsupportedOperationException(
+          "FaultyGeometry returned with error message: "
+              + ((FaultyGeometry) geometry).getErrorMessage()
+              + " for geometry: "
+              + geometry);
     } else {
       throw new UnsupportedOperationException(
           "Geometry type is not supported: " + geometry.getClass().getSimpleName());

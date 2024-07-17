@@ -2197,11 +2197,17 @@ class dataFrameAPITestScala extends TestBaseScala {
     it("Returning geometry with errors on ST_Rotate") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0))') AS geom1, ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))') AS geom2")
-      val row = baseDf.select(ST_Rotate("geom1", 50, "geom2")).take(1).mkString("")
+
+      // Use intercept to assert that an exception is thrown
+      val exception = intercept[Exception] {
+        baseDf.select(ST_Rotate("geom1", 50, "geom2")).take(1)
+      }
+      // Check the exception message
+      assert(exception.getMessage.contains(
+        "FaultyGeometry returned with error message: The origin must be a non-empty Point geometry. for geometry: POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0)) - The origin must be a non-empty Point geometry."))
+
       val rowWithError =
         baseDf.select(ST_AsEWKT(ST_Rotate("geom1", 50, "geom2"))).take(1).mkString("")
-
-      assertEquals("[POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))]", row)
       assertEquals(
         "[[ERROR]The origin must be a non-empty Point geometry. SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))]",
         rowWithError)
