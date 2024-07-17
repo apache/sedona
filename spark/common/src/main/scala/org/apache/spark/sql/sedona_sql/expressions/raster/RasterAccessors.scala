@@ -96,13 +96,6 @@ case class RS_Rotation(inputExpressions: Seq[Expression])
   }
 }
 
-case class RS_GeoTransform(inputExpressions: Seq[Expression])
-    extends InferredExpression(RasterAccessors.getGeoTransform _) {
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
 case class RS_SkewX(inputExpressions: Seq[Expression])
     extends InferredExpression(RasterAccessors.getSkewX _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {

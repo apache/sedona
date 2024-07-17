@@ -107,6 +107,10 @@ case class RS_SummaryStatsAll(inputExpressions: Seq[Expression])
       null
     } else {
       val summaryStatsAll = RasterBandAccessors.getSummaryStatsAll(rasterGeom, band, noData)
+
+      if (summaryStatsAll == null) {
+        return null
+      }
       // Create an InternalRow with the summaryStatsAll
       InternalRow.fromSeq(summaryStatsAll.map(_.asInstanceOf[Any]))
     }
@@ -208,4 +212,48 @@ case class RS_ZonalStatsAll(inputExpressions: Seq[Expression])
       Seq(RasterUDT, GeometryUDT)
     }
   }
+}
+
+case class RS_GeoTransform(inputExpressions: Seq[Expression])
+    extends Expression
+    with CodegenFallback
+    with ExpectsInputTypes {
+
+  override def nullable: Boolean = true
+
+  override def dataType: DataType = StructType(
+    Seq(
+      StructField("magnitudeI", DoubleType, nullable = false),
+      StructField("magnitudeJ", DoubleType, nullable = false),
+      StructField("thetaI", DoubleType, nullable = false),
+      StructField("thetaIJ", DoubleType, nullable = false),
+      StructField("offsetX", DoubleType, nullable = false),
+      StructField("offsetY", DoubleType, nullable = false)))
+
+  override def eval(input: InternalRow): Any = {
+    // Evaluate the input expressions
+    val rasterGeom = inputExpressions(0).toRaster(input)
+
+    // Check if the raster geometry is null
+    if (rasterGeom == null) {
+      null
+    } else {
+      // Get the metadata using the Java method
+      val geoTransform = RasterAccessors.getGeoTransform(rasterGeom)
+
+      if (geoTransform == null) {
+        return null
+      }
+      // Create an InternalRow with the metadata
+      InternalRow.fromSeq(geoTransform.map(_.asInstanceOf[Any]))
+    }
+  }
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): RS_GeoTransform = {
+    copy(inputExpressions = newChildren)
+  }
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT)
 }
