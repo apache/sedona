@@ -454,12 +454,12 @@ SELECT RS_GeoReferrence(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1,
 
 Introduction: Returns a struct of parameters that represent the GeoTransformation of the raster. The struct has the following schema:
 
-- magnitudeI: pixel width along west-east axis (x-axis)
-- magnitudeJ: pixel height along north-south axis (y-axis)
-- thetaI: Rotation of the raster
-- thetaIJ: Angular separation between x-axis and y-axis
-- offsetX: X ordinate of upper-left coordinate
-- offsetY: Y ordinate of upper-left coordinate
+- magnitudeI: size of a pixel along the transformed i axis
+- magnitudeJ: size of a pixel along the transformed j axis
+- thetaI: angle by which the raster is rotated (Radians positive clockwise)
+- thetaIJ: angle from transformed i axis to transformed j axis (Radians positive counter-clockwise)
+- offsetX: X ordinate of the upper-left corner of the upper-left pixel
+- offsetY: Y ordinate of the upper-left corner of the upper-left pixel
 
 !!!note
     Refer to [this image](https://www.researchgate.net/figure/Relation-between-the-cartesian-axes-x-y-and-i-j-axes-of-the-pixels_fig3_313860913) for a clear understanding between i & j axis and x & y-axis.
