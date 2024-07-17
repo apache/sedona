@@ -1686,7 +1686,12 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       df = df.selectExpr(
         "RS_FromGeoTiff(content) as raster",
         "ST_GeomFromWKT('POLYGON ((-8673439.6642 4572993.5327, -8673155.5737 4563873.2099, -8701890.3259 4562931.7093, -8682522.8735 4572703.8908, -8673439.6642 4572993.5327))', 3857) as geom")
-      val actual = df.selectExpr("RS_ZonalStatsAll(raster, geom, 1, true)").first().get(0)
+      val actual = df
+        .selectExpr("RS_ZonalStatsAll(raster, geom, 1, true)")
+        .first()
+        .getStruct(0)
+        .toSeq
+        .slice(0, 9)
       val expected = Seq(184792.0, 1.0719726e7, 58.00968656653401, 0.0, 0.0, 92.15004748703687,
         8491.631251863151, 0.0, 255.0)
       assertTrue(expected.equals(actual))
@@ -1696,7 +1701,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .selectExpr(
           "RS_ZonalStatsAll(raster, ST_GeomFromWKT('POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))'), 1, false)")
         .first()
-        .get(0)
+        .getStruct(0)
       assertNull(actual2)
     }
 
@@ -1707,7 +1712,12 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       df = df.selectExpr(
         "RS_FromGeoTiff(content) as raster",
         "ST_GeomFromWKT('POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000, -180.250000 40.250000, -167.750000 87.750000))', 0) as geom")
-      val actual = df.selectExpr("RS_ZonalStatsAll(raster, geom, 1, true)").first().get(0)
+      val actual = df
+        .selectExpr("RS_ZonalStatsAll(raster, geom, 1, true)")
+        .first()
+        .getStruct(0)
+        .toSeq
+        .slice(0, 9)
       val expected = Seq(14184.0, 3213526.0, 226.55992667794473, 255.0, 255.0, 74.87605357255357,
         5606.423398599913, 1.0, 255.0)
       assertTrue(expected.equals(actual))
