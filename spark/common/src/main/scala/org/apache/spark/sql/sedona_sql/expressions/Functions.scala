@@ -20,11 +20,11 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.{Functions, FunctionsGeoTools}
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
-import org.apache.sedona.common.utils.{InscribedCircle, RandomPointsBuilderSeed, ValidDetail}
+import org.apache.sedona.common.utils.{InscribedCircle, ValidDetail}
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, ExpressionWithRandomSeed, Generator, Literal, Nondeterministic}
+import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, Generator, Nondeterministic}
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
@@ -34,8 +34,6 @@ import org.locationtech.jts.geom._
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.Utils
-
-import scala.util.Random
 
 /**
  * Return the distance between two geometries.
@@ -1446,25 +1444,27 @@ case class ST_GeneratePoints(inputExpressions: Seq[Expression], randomSeed: Long
 
   def this(inputExpressions: Seq[Expression]) = this(inputExpressions, Utils.random.nextLong())
 
-  @transient private[this] var random: Random = _
+  @transient private[this] var random: java.util.Random = _
 
   private val nArgs = children.length
 
-  override protected def initializeInternal(partitionIndex: Int): Unit = random = new Random(
-    randomSeed + partitionIndex)
+  override protected def initializeInternal(partitionIndex: Int): Unit = random =
+    new java.util.Random(randomSeed + partitionIndex)
 
   override protected def evalInternal(input: InternalRow): Any = {
     val geom = children.head.toGeometry(input)
     val numPoints = children(1).eval(input).asInstanceOf[Int]
-    val randomPointsBuilder = if (nArgs == 3) {
+    val generatedPoints = if (nArgs == 3) {
       val seed = children(2).eval(input).asInstanceOf[Int]
-      new RandomPointsBuilderSeed(geom.getFactory, seed)
+      if (seed > 0) {
+        Functions.generatePoints(geom, numPoints, seed)
+      } else {
+        Functions.generatePoints(geom, numPoints, random)
+      }
     } else {
-      new RandomPointsBuilderSeed(geom.getFactory, 0)
+      Functions.generatePoints(geom, numPoints, random)
     }
-    randomPointsBuilder.setExtent(geom)
-    randomPointsBuilder.setNumPoints(numPoints)
-    GeometrySerializer.serialize(randomPointsBuilder.getGeometry)
+    GeometrySerializer.serialize(generatedPoints)
   }
 
   override def nullable: Boolean = true

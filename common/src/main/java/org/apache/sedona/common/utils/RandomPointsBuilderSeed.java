@@ -23,17 +23,20 @@ import org.locationtech.jts.geom.*;
 import org.locationtech.jts.shape.random.RandomPointsBuilder;
 
 public class RandomPointsBuilderSeed extends RandomPointsBuilder {
-  long seed;
   Random rand;
 
   public RandomPointsBuilderSeed(GeometryFactory geometryFactory, long seed) {
     super(geometryFactory);
-    this.seed = seed;
     if (seed > 0) {
       this.rand = new Random(seed);
-      return;
+    } else {
+      this.rand = new Random();
     }
-    this.rand = new Random();
+  }
+
+  public RandomPointsBuilderSeed(GeometryFactory geometryFactory, Random random) {
+    super(geometryFactory);
+    this.rand = random;
   }
 
   @Override

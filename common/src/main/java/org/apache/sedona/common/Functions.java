@@ -1823,6 +1823,13 @@ public class Functions {
     return generatePoints(geom, numPoints, 0);
   }
 
+  public static Geometry generatePoints(Geometry geom, int numPoints, Random random) {
+    RandomPointsBuilderSeed pointsBuilder = new RandomPointsBuilderSeed(geom.getFactory(), random);
+    pointsBuilder.setExtent(geom);
+    pointsBuilder.setNumPoints(numPoints);
+    return pointsBuilder.getGeometry();
+  }
+
   public static Integer nRings(Geometry geometry) throws Exception {
     String geometryType = geometry.getGeometryType();
     if (!(geometry instanceof Polygon || geometry instanceof MultiPolygon)) {

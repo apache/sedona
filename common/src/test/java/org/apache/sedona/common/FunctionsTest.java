@@ -2135,6 +2135,23 @@ public class FunctionsTest extends TestBase {
             "MULTIPOLYGON (((10 0, 10 10, 20 10, 20 0, 10 0)), ((50 0, 50 10, 70 10, 70 0, 50 0)))");
     actual = Functions.generatePoints(geom, 30);
     assertEquals(actual.getNumGeometries(), 30);
+
+    // Deterministic when using the same seed
+    Geometry first = Functions.generatePoints(geom, 10, 100);
+    Geometry second = Functions.generatePoints(geom, 10, 100);
+    assertEquals(first, second);
+
+    // Deterministic when using the same random number generator
+    geom = geom.buffer(10, 48);
+    Random rand = new Random(100);
+    Random rand2 = new Random(100);
+    first = Functions.generatePoints(geom, 100, rand);
+    second = Functions.generatePoints(geom, 100, rand);
+    Geometry first2 = Functions.generatePoints(geom, 100, rand2);
+    Geometry second2 = Functions.generatePoints(geom, 100, rand2);
+    assertNotEquals(first, second);
+    assertEquals(first, first2);
+    assertEquals(second, second2);
   }
 
   @Test
