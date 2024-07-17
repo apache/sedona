@@ -27,8 +27,8 @@ import com.uber.h3core.util.LatLng;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.sedona.common.exception.IllegalGeometryException;
 import org.apache.sedona.common.geometryObjects.Circle;
-import org.apache.sedona.common.geometryObjects.FaultyGeometry;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.*;
@@ -253,8 +253,8 @@ public class Functions {
     Double xwidth = Spheroid.angularWidth(envelope);
     Double ywidth = Spheroid.angularHeight(envelope);
     if (xwidth.isNaN() | ywidth.isNaN()) {
-      throw new IllegalArgumentException(
-          "Only lon/lat coordinate systems are supported by ST_BestSRID");
+      throw new IllegalGeometryException(
+          "Only lon/lat coordinate systems are supported by ST_BestSRID", geometry);
     }
 
     // Prioritize polar regions for Lambert Azimuthal Equal Area projection
@@ -598,8 +598,9 @@ public class Functions {
     } else if (endian.equalsIgnoreCase("XDR")) {
       return GeomUtils.getHexEWKB(geom, ByteOrderValues.BIG_ENDIAN);
     }
-    throw new IllegalArgumentException(
-        "You must select either NDR (little-endian) or XDR (big-endian) as the endian format.");
+    throw new IllegalGeometryException(
+        "You must select either NDR (little-endian) or XDR (big-endian) as the endian format.",
+        geom);
   }
 
   public static String asHexEWKB(Geometry geom) {
@@ -822,7 +823,8 @@ public class Functions {
       Coordinate[] closestPoints = distanceOp.nearestPoints();
       return left.getFactory().createPoint(closestPoints[0]);
     } catch (Exception e) {
-      throw new IllegalArgumentException("ST_ClosestPoint doesn't support empty geometry object.");
+      throw new IllegalGeometryException(
+          "ST_ClosestPoint doesn't support empty geometry object.", left);
     }
   }
 
@@ -1537,8 +1539,8 @@ public class Functions {
           coordinates.add(coord);
         }
       } else {
-        throw new IllegalArgumentException(
-            "ST_MakeLine only supports Point, MultiPoint and LineString geometries");
+        throw new IllegalGeometryException(
+            "ST_MakeLine only supports Point, MultiPoint and LineString geometries", geom);
       }
     }
 
@@ -1623,7 +1625,7 @@ public class Functions {
         emptyResult = factory.createMultiPolygon();
         break;
       default:
-        throw new IllegalArgumentException("Invalid geometry type");
+        throw new IllegalGeometryException("Invalid geometry type: " + geomType, geometry);
     }
     List<Geometry> geometries = GeomUtils.extractGeometryCollection(geometry, geomClass);
     if (geometries.isEmpty()) {
@@ -1769,10 +1771,9 @@ public class Functions {
   public static int numPoints(Geometry geometry) throws Exception {
     String geometryType = geometry.getGeometryType();
     if (!(Geometry.TYPENAME_LINESTRING.equalsIgnoreCase(geometryType))) {
-      throw new IllegalArgumentException(
-          "Unsupported geometry type: "
-              + geometryType
-              + ", only LineString geometry is supported.");
+      throw new IllegalGeometryException(
+          "Unsupported geometry type: " + geometryType + ", only LineString geometry is supported.",
+          geometry);
     }
     return geometry.getNumPoints();
   }
@@ -1816,10 +1817,11 @@ public class Functions {
   public static Integer nRings(Geometry geometry) throws Exception {
     String geometryType = geometry.getGeometryType();
     if (!(geometry instanceof Polygon || geometry instanceof MultiPolygon)) {
-      throw new IllegalArgumentException(
+      throw new IllegalGeometryException(
           "Unsupported geometry type: "
               + geometryType
-              + ", only Polygon or MultiPolygon geometries are supported.");
+              + ", only Polygon or MultiPolygon geometries are supported.",
+          geometry);
     }
     int numRings = 0;
     if (geometry instanceof Polygon) {
@@ -1885,7 +1887,7 @@ public class Functions {
     String geometryType = geometry.getGeometryType();
     if (!(Geometry.TYPENAME_POINT.equals(geometryType)
         || Geometry.TYPENAME_MULTIPOINT.equals(geometryType))) {
-      throw new Exception("Unsupported geometry type: " + geometryType);
+      throw new IllegalGeometryException("Unsupported geometry type: " + geometryType, geometry);
     }
     Coordinate[] coordinates = extractCoordinates(geometry);
     if (coordinates.length == 0) return new Point(null, factory);
@@ -1896,9 +1898,10 @@ public class Functions {
     for (int i = 0; i < maxIter && delta > tolerance; i++)
       delta = iteratePoints(median, coordinates, distances);
     if (failIfNotConverged && delta > tolerance)
-      throw new Exception(
+      throw new IllegalGeometryException(
           String.format(
-              "Median failed to converge within %.1E after %d iterations.", tolerance, maxIter));
+              "Median failed to converge within %.1E after %d iterations.", tolerance, maxIter),
+          geometry);
     boolean is3d = !Double.isNaN(geometry.getCoordinate().z);
     if (!is3d) median.z = Double.NaN;
     return factory.createPoint(median);
@@ -1966,7 +1969,9 @@ public class Functions {
     if (point3 == null && point4 == null) return Functions.angle(point1, point2);
     else if (point4 == null) return Functions.angle(point1, point2, point3);
     if (GeomUtils.isAnyGeomEmpty(point1, point2, point3, point4))
-      throw new IllegalArgumentException("ST_Angle cannot support empty geometries.");
+      throw new IllegalArgumentException(
+          "ST_Angle cannot support empty geometries, empty index = "
+              + Arrays.toString(GeomUtils.emptyGeometries(point1, point2, point3, point4)));
     if (!(point1 instanceof Point
         && point2 instanceof Point
         && point3 instanceof Point
@@ -1983,7 +1988,9 @@ public class Functions {
   public static double angle(Geometry point1, Geometry point2, Geometry point3)
       throws IllegalArgumentException {
     if (GeomUtils.isAnyGeomEmpty(point1, point2, point3))
-      throw new IllegalArgumentException("ST_Angle cannot support empty geometries.");
+      throw new IllegalArgumentException(
+          "ST_Angle cannot support empty geometries, empty index = "
+              + Arrays.toString(GeomUtils.emptyGeometries(point1, point2, point3)));
     if (!(point1 instanceof Point && point2 instanceof Point && point3 instanceof Point))
       throw new IllegalArgumentException(
           "ST_Angle supports either only POINT or only LINESTRING geometries.");
@@ -2158,8 +2165,8 @@ public class Functions {
       return geometry;
     }
     if (pointOrigin == null || pointOrigin.isEmpty() || !(pointOrigin instanceof Point)) {
-      return new FaultyGeometry(pointOrigin, "The origin must be a non-empty Point geometry.");
-      //      throw new IllegalArgumentException("The origin must be a non-empty Point geometry.");
+      throw new IllegalGeometryException(
+          "The origin must be a non-empty Point geometry.", pointOrigin);
     }
     Point origin = (Point) pointOrigin;
     double originX = origin.getX();

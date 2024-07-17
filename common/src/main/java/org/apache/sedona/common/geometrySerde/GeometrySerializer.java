@@ -18,7 +18,6 @@
  */
 package org.apache.sedona.common.geometrySerde;
 
-import org.apache.sedona.common.geometryObjects.FaultyGeometry;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.Geometry;
@@ -54,12 +53,6 @@ public class GeometrySerializer {
       buffer = serializeMultiPolygon((MultiPolygon) geometry);
     } else if (geometry instanceof GeometryCollection) {
       buffer = serializeGeometryCollection((GeometryCollection) geometry);
-    } else if (geometry instanceof FaultyGeometry) {
-      throw new UnsupportedOperationException(
-          "FaultyGeometry returned with error message: "
-              + ((FaultyGeometry) geometry).getErrorMessage()
-              + " for geometry: "
-              + geometry);
     } else {
       throw new UnsupportedOperationException(
           "Geometry type is not supported: " + geometry.getClass().getSimpleName());

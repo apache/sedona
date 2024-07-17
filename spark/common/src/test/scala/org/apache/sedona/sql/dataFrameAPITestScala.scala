@@ -19,6 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.commons.codec.binary.Hex
+import org.apache.sedona.common.exception.IllegalGeometryException
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions.{array, col, element_at, lit}
 import org.apache.spark.sql.sedona_sql.expressions.st_aggregates._
@@ -2194,23 +2195,19 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(expected.equals(actual))
     }
 
-    it("Returning geometry with errors on ST_Rotate") {
+    it("Returning exception with geometry when exception is thrown by ST_Rotate") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0))') AS geom1, ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))') AS geom2")
 
       // Use intercept to assert that an exception is thrown
-      val exception = intercept[Exception] {
+      val exception = intercept[IllegalGeometryException] {
         baseDf.select(ST_Rotate("geom1", 50, "geom2")).take(1)
       }
+      // Check the exception geometry
+      assert(exception.getGeometry != null)
       // Check the exception message
       assert(exception.getMessage.contains(
-        "FaultyGeometry returned with error message: The origin must be a non-empty Point geometry. for geometry: POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0)) - The origin must be a non-empty Point geometry."))
-
-      val rowWithError =
-        baseDf.select(ST_AsEWKT(ST_Rotate("geom1", 50, "geom2"))).take(1).mkString("")
-      assertEquals(
-        "[[ERROR]The origin must be a non-empty Point geometry. SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))]",
-        rowWithError)
+        "The origin must be a non-empty Point geometry. [GEOM] POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))"))
     }
   }
 }

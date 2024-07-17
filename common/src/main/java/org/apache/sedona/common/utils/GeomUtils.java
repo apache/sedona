@@ -23,7 +23,7 @@ import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 import java.nio.ByteOrder;
 import java.util.*;
 import org.apache.sedona.common.Functions;
-import org.apache.sedona.common.geometryObjects.FaultyGeometry;
+import org.apache.sedona.common.exception.IllegalGeometryException;
 import org.locationtech.jts.algorithm.Angle;
 import org.locationtech.jts.algorithm.distance.DiscreteFrechetDistance;
 import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
@@ -176,13 +176,6 @@ public class GeomUtils {
     if (srid != 0) {
       sridString = "SRID=" + String.valueOf(srid) + ";";
     }
-    if (geometry instanceof FaultyGeometry) {
-      return "[ERROR]"
-          + ((FaultyGeometry) geometry).getErrorMessage()
-          + " "
-          + sridString
-          + new WKTWriter(4).write(((FaultyGeometry) geometry).getGeometry());
-    }
     return sridString + new WKTWriter(4).write(geometry);
   }
 
@@ -190,24 +183,12 @@ public class GeomUtils {
     if (geometry == null) {
       return null;
     }
-    if (geometry instanceof FaultyGeometry) {
-      return "[ERROR]"
-          + ((FaultyGeometry) geometry).getErrorMessage()
-          + " "
-          + new WKTWriter(4).write(((FaultyGeometry) geometry).getGeometry());
-    }
     return new WKTWriter(4).write(geometry);
   }
 
   public static String getHexEWKB(Geometry geometry, int endian) {
     WKBWriter writer =
         new WKBWriter(GeomUtils.getDimension(geometry), endian, geometry.getSRID() != 0);
-    if (geometry instanceof FaultyGeometry) {
-      return "[ERROR]"
-          + ((FaultyGeometry) geometry).getErrorMessage()
-          + " "
-          + WKBWriter.toHex(writer.write(((FaultyGeometry) geometry).getGeometry()));
-    }
     return WKBWriter.toHex(writer.write(geometry));
   }
 
@@ -499,6 +480,15 @@ public class GeomUtils {
     return false;
   }
 
+  public static int[] emptyGeometries(Geometry... geometries) {
+    List<Integer> emptyGeometries = new ArrayList<>();
+    int i = 0;
+    for (Geometry geometry : geometries) {
+      if (geometry != null) if (geometry.isEmpty()) emptyGeometries.add(i);
+    }
+    return emptyGeometries.stream().mapToInt(Integer::intValue).toArray();
+  }
+
   public static Coordinate[] getStartEndCoordinates(Geometry line) {
     if (line.getNumPoints() < 2) return null;
     Coordinate[] coordinates = line.getCoordinates();
@@ -574,7 +564,7 @@ public class GeomUtils {
 
   public static Geometry addMeasure(Geometry geom, double measure_start, double measure_end) {
     if (!(geom instanceof LineString) && !(geom instanceof MultiLineString)) {
-      throw new IllegalArgumentException("Geometry must be a LineString or MultiLineString.");
+      throw new IllegalGeometryException("Geometry must be a LineString or MultiLineString.", geom);
     }
 
     if (geom instanceof LineString) {
