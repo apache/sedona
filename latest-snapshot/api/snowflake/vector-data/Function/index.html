@@ -3588,6 +3588,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#st_generatepoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_GeneratePoints
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_geohash" class="md-nav__link">
     <span class="md-ellipsis">
       ST_GeoHash
@@ -5551,6 +5560,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#st_generatepoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_GeneratePoints
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#st_geohash" class="md-nav__link">
     <span class="md-ellipsis">
       ST_GeoHash
@@ -7000,6 +7018,23 @@ based on <a href="http://www.kr.tuwien.ac.at/staff/eiter/et-archive/cdtr9464.pdf
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>5.0990195135927845
 </code></pre></div>
+<h2 id="st_generatepoints">ST_GeneratePoints<a class="headerlink" href="#st_generatepoints" title="Permanent link">&para;</a></h2>
+<p>Introduction: Generates a specified quantity of pseudo-random points within the boundaries of the provided polygonal geometry. When <code>seed</code> is either zero or not defined then output will be random.</p>
+<p>Format:</p>
+<p><code>ST_GeneratePoints(geom: Geometry, numPoints: Integer, seed: Long = 0)</code></p>
+<p><code>ST_GeneratePoints(geom: Geometry, numPoints: Integer)</code></p>
+<p>SQL Example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeneratePoints</span><span class="p">(</span>
+<span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">4</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Due to the pseudo-random nature of point generation, the output of this function will vary between executions and may not match any provided examples.</p>
+</div>
+<div class="highlight"><pre><span></span><code>MULTIPOINT ((0.2393028905520183 0.9721563442837837), (0.3805848547053376 0.7546556656982678), (0.0950295778200995 0.2494334895495989), (0.4133520939987385 0.3447046312451945))
+</code></pre></div>
 <h2 id="st_geohash">ST_GeoHash<a class="headerlink" href="#st_geohash" title="Permanent link">&para;</a></h2>
 <p>Introduction: Returns GeoHash of the geometry with given precision</p>
 <p>Format: <code>ST_GeoHash(geom: geometry, precision: int)</code></p>
@@ -8025,7 +8060,7 @@ If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGO
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">June 27, 2024 06:52:17</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">July 17, 2024 21:59:48</span>
   </span>
 
     
