@@ -33,6 +33,7 @@ import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom._
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.unsafe.types.UTF8String
+import org.apache.spark.sql.types.{AbstractDataType, BooleanType, DataType, DoubleType, IntegerType, StructField, StructType}
 
 /**
  * Return the distance between two geometries.
@@ -1603,4 +1604,53 @@ case class ST_IsValidReason(inputExpressions: Seq[Expression])
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
     copy(inputExpressions = newChildren)
+}
+
+/**
+ * Returns a geometry that represents the point set intersection of the Geometries.
+ *
+ * @param geom
+ *   The geometry to validate.
+ *
+ * @return
+ *   A struct of the following schema:
+ *   - geometry: Geometry
+ *   - error_message: String
+ */
+case class ST_SafeGeom(inputExpressions: Seq[Expression])
+    extends Expression
+    with CodegenFallback
+    with ExpectsInputTypes {
+
+  override def nullable: Boolean = true
+
+  // Define the schema for the result
+  override def dataType: DataType = StructType(
+    Seq(
+      StructField("geometry", new GeometryUDT, nullable = true),
+      StructField("error_message", StringType, nullable = true)))
+
+  override def eval(input: InternalRow): Any = {
+    // Evaluate the input expressions
+    val geom = inputExpressions(0).toGeometry(input)
+
+    // Check if the raster geometry is null
+    if (geom == null) {
+      null
+    } else {
+      // Get the geometry with potential error message
+      val safeGemo = Functions.isValidReason(geom)
+
+      // Create an InternalRow with the metadata
+      InternalRow.fromSeq(safeGemo.map(_.asInstanceOf[Any]))
+    }
+  }
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): ST_SafeGeom = {
+    copy(inputExpressions = newChildren)
+  }
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(GeometryUDT)
 }
