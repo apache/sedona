@@ -38,13 +38,6 @@ case class RS_SRID(inputExpressions: Seq[Expression])
   }
 }
 
-//case class RS_Metadata(inputExpressions: Seq[Expression])
-//    extends InferredExpression(RasterAccessors.metadata _) {
-//  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-//    copy(inputExpressions = newChildren)
-//  }
-//}
-
 case class RS_Width(inputExpressions: Seq[Expression])
     extends InferredExpression(RasterAccessors.getWidth _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {

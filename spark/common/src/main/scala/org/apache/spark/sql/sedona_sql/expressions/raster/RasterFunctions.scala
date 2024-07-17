@@ -18,14 +18,13 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions.raster
 
-import org.apache.sedona.common.raster.RasterAccessors
+import org.apache.sedona.common.raster.{RasterAccessors, RasterBandAccessors}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
 import org.apache.spark.sql.sedona_sql.expressions.raster.implicits.RasterInputExpressionEnhancer
-import org.apache.spark.sql.types.{AbstractDataType, DataType, DoubleType, IntegerType, StructField, StructType}
-import org.geotools.coverage.grid.GridCoverage2D
+import org.apache.spark.sql.types.{AbstractDataType, BooleanType, DataType, DoubleType, IntegerType, StructField, StructType}
 
 case class RS_Metadata(inputExpressions: Seq[Expression])
     extends Expression
@@ -70,4 +69,62 @@ case class RS_Metadata(inputExpressions: Seq[Expression])
   }
 
   override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT)
+}
+
+case class RS_SummaryStatsAll(inputExpressions: Seq[Expression])
+    extends Expression
+    with CodegenFallback
+    with ExpectsInputTypes {
+
+  override def nullable: Boolean = true
+
+  override def dataType: DataType = StructType(
+    Seq(
+      StructField("count", DoubleType, nullable = false),
+      StructField("sum", DoubleType, nullable = false),
+      StructField("mean", DoubleType, nullable = false),
+      StructField("stddev", DoubleType, nullable = false),
+      StructField("min", DoubleType, nullable = false),
+      StructField("max", DoubleType, nullable = false)))
+
+  override def eval(input: InternalRow): Any = {
+    // Evaluate the input expressions
+    val rasterGeom = inputExpressions(0).toRaster(input)
+    val band = if (inputExpressions.length >= 2) {
+      inputExpressions(1).eval(input).asInstanceOf[Int]
+    } else {
+      1
+    }
+    val noData = if (inputExpressions.length >= 3) {
+      inputExpressions(2).eval(input).asInstanceOf[Boolean]
+    } else {
+      true
+    }
+
+    // Check if the raster geometry is null
+    if (rasterGeom == null) {
+      null
+    } else {
+      val summaryStatsAll = RasterBandAccessors.getSummaryStatsAll(rasterGeom, band, noData)
+      // Create an InternalRow with the summaryStatsAll
+      InternalRow.fromSeq(summaryStatsAll.map(_.asInstanceOf[Any]))
+    }
+  }
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(
+      newChildren: IndexedSeq[Expression]): RS_SummaryStatsAll = {
+    copy(inputExpressions = newChildren)
+  }
+
+  override def inputTypes: Seq[AbstractDataType] = {
+    if (inputExpressions.length == 1) {
+      Seq(RasterUDT)
+    } else if (inputExpressions.length == 2) {
+      Seq(RasterUDT, IntegerType)
+    } else {
+      Seq(RasterUDT, IntegerType, BooleanType)
+    }
+  }
 }
