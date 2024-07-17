@@ -108,7 +108,8 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
       ("ST_BoundingDiagonal(geom1)", 1000),
       ("ST_DelaunayTriangles(geom4)", 1000),
       ("ST_Rotate(geom1, 10)", 1000),
-      ("ST_Collect(geom1, geom2, geom3)", 1000))
+      ("ST_Collect(geom1, geom2, geom3)", 1000),
+      ("ST_GeneratePoints(geom1, 3)", 1000))
 
     forAll(testCases) { case (expression: String, srid: Int) =>
       it(s"$expression") {

@@ -1833,6 +1833,28 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertTrue(actual)
     }
 
+    it("Should pass ST_GeneratePoints") {
+      var poly = sparkSession
+        .sql(
+          "SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(50 50,150 150,150 50)'), 10, false, 'endcap=round join=round') AS geom")
+      var actual = poly
+        .select(ST_NumGeometries(ST_GeneratePoints("geom", 15)))
+        .first()
+        .get(0)
+        .asInstanceOf[Int]
+      assert(actual == 15)
+
+      poly = sparkSession
+        .sql(
+          "SELECT ST_GeomFromWKT('MULTIPOLYGON (((10 0, 10 10, 20 10, 20 0, 10 0)), ((50 0, 50 10, 70 10, 70 0, 50 0)))') AS geom")
+      actual = poly
+        .select(ST_NumGeometries(ST_GeneratePoints("geom", 30)))
+        .first()
+        .get(0)
+        .asInstanceOf[Int]
+      assert(actual == 30)
+    }
+
     it("Passed ST_NRings") {
       val polyDf =
         sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))') AS geom")
