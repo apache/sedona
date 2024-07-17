@@ -2193,5 +2193,18 @@ class dataFrameAPITestScala extends TestBaseScala {
         "SRID=4326;POLYGON ((-0.4546817643920842 0.5948176504236309, 1.4752502925921425 0.0700679430157733, 2 2, 0.0700679430157733 2.5247497074078575, 0.7726591178039579 1.2974088252118154, -0.4546817643920842 0.5948176504236309))"
       assert(expected.equals(actual))
     }
+
+    it("Returning geometry with errors on ST_Rotate") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0))') AS geom1, ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))') AS geom2")
+      val row = baseDf.select(ST_Rotate("geom1", 50, "geom2")).take(1).mkString("")
+      val rowWithError =
+        baseDf.select(ST_AsEWKT(ST_Rotate("geom1", 50, "geom2"))).take(1).mkString("")
+
+      assertEquals("[POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))]", row)
+      assertEquals(
+        "[[ERROR]The origin must be a non-empty Point geometry. SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))]",
+        rowWithError)
+    }
   }
 }

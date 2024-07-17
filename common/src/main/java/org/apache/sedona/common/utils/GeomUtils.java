@@ -23,6 +23,7 @@ import static org.locationtech.jts.geom.Coordinate.NULL_ORDINATE;
 import java.nio.ByteOrder;
 import java.util.*;
 import org.apache.sedona.common.Functions;
+import org.apache.sedona.common.geometryObjects.FaultyGeometry;
 import org.locationtech.jts.algorithm.Angle;
 import org.locationtech.jts.algorithm.distance.DiscreteFrechetDistance;
 import org.locationtech.jts.algorithm.distance.DiscreteHausdorffDistance;
@@ -175,6 +176,13 @@ public class GeomUtils {
     if (srid != 0) {
       sridString = "SRID=" + String.valueOf(srid) + ";";
     }
+    if (geometry instanceof FaultyGeometry) {
+      return "[ERROR]"
+          + ((FaultyGeometry) geometry).getErrorMessage()
+          + " "
+          + sridString
+          + new WKTWriter(4).write(((FaultyGeometry) geometry).getGeometry());
+    }
     return sridString + new WKTWriter(4).write(geometry);
   }
 
@@ -182,12 +190,24 @@ public class GeomUtils {
     if (geometry == null) {
       return null;
     }
+    if (geometry instanceof FaultyGeometry) {
+      return "[ERROR]"
+          + ((FaultyGeometry) geometry).getErrorMessage()
+          + " "
+          + new WKTWriter(4).write(((FaultyGeometry) geometry).getGeometry());
+    }
     return new WKTWriter(4).write(geometry);
   }
 
   public static String getHexEWKB(Geometry geometry, int endian) {
     WKBWriter writer =
         new WKBWriter(GeomUtils.getDimension(geometry), endian, geometry.getSRID() != 0);
+    if (geometry instanceof FaultyGeometry) {
+      return "[ERROR]"
+          + ((FaultyGeometry) geometry).getErrorMessage()
+          + " "
+          + WKBWriter.toHex(writer.write(((FaultyGeometry) geometry).getGeometry()));
+    }
     return WKBWriter.toHex(writer.write(geometry));
   }
 

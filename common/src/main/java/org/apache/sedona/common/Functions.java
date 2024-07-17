@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.geometryObjects.Circle;
+import org.apache.sedona.common.geometryObjects.FaultyGeometry;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.*;
@@ -2157,7 +2158,8 @@ public class Functions {
       return geometry;
     }
     if (pointOrigin == null || pointOrigin.isEmpty() || !(pointOrigin instanceof Point)) {
-      throw new IllegalArgumentException("The origin must be a non-empty Point geometry.");
+      return new FaultyGeometry(pointOrigin, "The origin must be a non-empty Point geometry.");
+      //      throw new IllegalArgumentException("The origin must be a non-empty Point geometry.");
     }
     Point origin = (Point) pointOrigin;
     double originX = origin.getX();
