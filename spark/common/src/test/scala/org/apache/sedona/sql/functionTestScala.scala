@@ -2917,6 +2917,28 @@ class functionTestScala
     assert(actual == 1)
   }
 
+  it("Should pass ST_GeneratePoints") {
+    var actual = sparkSession
+      .sql("SELECT ST_NumGeometries(ST_GeneratePoints(ST_Buffer(ST_GeomFromWKT('LINESTRING(50 50,150 150,150 50)'), 10, false, 'endcap=round join=round'), 15))")
+      .first()
+      .get(0)
+    assert(actual == 15)
+
+    actual = sparkSession
+      .sql("SELECT ST_NumGeometries(ST_GeneratePoints(ST_GeomFromWKT('MULTIPOLYGON (((10 0, 10 10, 20 10, 20 0, 10 0)), ((50 0, 50 10, 70 10, 70 0, 50 0)))'), 30))")
+      .first()
+      .get(0)
+    assert(actual == 30)
+
+    actual = sparkSession
+      .sql("SELECT ST_AsText(ST_ReducePrecision(ST_GeneratePoints(ST_GeomFromWKT('MULTIPOLYGON (((10 0, 10 10, 20 10, 20 0, 10 0)), ((50 0, 50 10, 70 10, 70 0, 50 0)))'), 5, 10), 5))")
+      .first()
+      .get(0)
+    val expected =
+      "MULTIPOINT ((53.82582 2.57803), (13.55212 2.44117), (59.12854 3.70611), (61.37698 7.14985), (10.49657 4.40622))"
+    assertEquals(expected, actual)
+  }
+
   it("should pass ST_NRings") {
     val geomTestCases = Map(
       ("'POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))'") -> 1,

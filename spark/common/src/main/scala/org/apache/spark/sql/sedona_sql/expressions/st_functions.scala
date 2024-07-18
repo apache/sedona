@@ -676,6 +676,19 @@ object st_functions extends DataFrameAPI {
   def ST_ForceRHR(geometry: Column): Column = wrapExpression[ST_ForceRHR](geometry)
   def ST_ForceRHR(geometry: String): Column = wrapExpression[ST_ForceRHR](geometry)
 
+  def ST_GeneratePoints(geometry: Column, numPoints: Column): Column =
+    wrapExpression[ST_GeneratePoints](geometry, numPoints)
+  def ST_GeneratePoints(geometry: String, numPoints: String): Column =
+    wrapExpression[ST_GeneratePoints](geometry, numPoints)
+  def ST_GeneratePoints(geometry: String, numPoints: Integer): Column =
+    wrapExpression[ST_GeneratePoints](geometry, numPoints)
+  def ST_GeneratePoints(geometry: String, numPoints: Integer, seed: Integer): Column =
+    wrapExpression[ST_GeneratePoints](geometry, numPoints, seed)
+  def ST_GeneratePoints(geometry: String, numPoints: String, seed: String): Column =
+    wrapExpression[ST_GeneratePoints](geometry, numPoints, seed)
+  def ST_GeneratePoints(geometry: Column, numPoints: Column, seed: Column): Column =
+    wrapExpression[ST_GeneratePoints](geometry, numPoints, seed)
+
   def ST_NRings(geometry: Column): Column = wrapExpression[ST_NRings](geometry)
 
   def ST_NRings(geometry: String): Column = wrapExpression[ST_NRings](geometry)

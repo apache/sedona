@@ -2121,6 +2121,48 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void generatePoints() throws ParseException {
+    Geometry geom = Constructors.geomFromWKT("LINESTRING(50 50,10 10,10 50)", 4326);
+
+    Geometry actual =
+        Functions.generatePoints(Functions.buffer(geom, 10, false, "endcap=round join=round"), 12);
+    assertEquals(actual.getNumGeometries(), 12);
+
+    actual =
+        Functions.reducePrecision(
+            Functions.generatePoints(
+                Functions.buffer(geom, 10, false, "endcap=round join=round"), 5, 100),
+            5);
+    String expected =
+        "MULTIPOINT ((40.02957 46.70645), (37.11646 37.38582), (14.2051 29.23363), (40.82533 31.47273), (28.16839 34.16338))";
+    assertEquals(expected, actual.toString());
+    assertEquals(4326, actual.getSRID());
+
+    geom =
+        Constructors.geomFromEWKT(
+            "MULTIPOLYGON (((10 0, 10 10, 20 10, 20 0, 10 0)), ((50 0, 50 10, 70 10, 70 0, 50 0)))");
+    actual = Functions.generatePoints(geom, 30);
+    assertEquals(actual.getNumGeometries(), 30);
+
+    // Deterministic when using the same seed
+    Geometry first = Functions.generatePoints(geom, 10, 100);
+    Geometry second = Functions.generatePoints(geom, 10, 100);
+    assertEquals(first, second);
+
+    // Deterministic when using the same random number generator
+    geom = geom.buffer(10, 48);
+    Random rand = new Random(100);
+    Random rand2 = new Random(100);
+    first = Functions.generatePoints(geom, 100, rand);
+    second = Functions.generatePoints(geom, 100, rand);
+    Geometry first2 = Functions.generatePoints(geom, 100, rand2);
+    Geometry second2 = Functions.generatePoints(geom, 100, rand2);
+    assertNotEquals(first, second);
+    assertEquals(first, first2);
+    assertEquals(second, second2);
+  }
+
+  @Test
   public void nRingsPolygonOnlyExternal() throws Exception {
     Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
     Integer expected = 1;

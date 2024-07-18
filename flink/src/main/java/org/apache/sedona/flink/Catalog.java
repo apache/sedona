@@ -184,6 +184,7 @@ public class Catalog {
       new Functions.ST_ForceCollection(),
       new Functions.ST_ForcePolygonCW(),
       new Functions.ST_ForceRHR(),
+      new Functions.ST_GeneratePoints(),
       new Functions.ST_NRings(),
       new Functions.ST_IsPolygonCCW(),
       new Functions.ST_ForcePolygonCCW(),
