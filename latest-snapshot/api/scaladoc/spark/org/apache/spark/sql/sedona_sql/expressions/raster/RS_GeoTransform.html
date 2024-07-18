@@ -608,7 +608,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">RS_GeoTransform</span><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="../InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">RS_GeoTransform</span><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback">CodegenFallback</span> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes">ExpectsInputTypes</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
@@ -617,7 +617,7 @@
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="../InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a>, <span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="../FoldableExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression">FoldableExpression</a>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback">CodegenFallback</span>, <a href="../SerdeAware.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.SerdeAware">SerdeAware</a>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes">ImplicitCastInputTypes</span>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes">ExpectsInputTypes</span>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>, <span class="extype" name="org.apache.spark.sql.catalyst.trees.TreeNode">TreeNode</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>], <span class="extype" name="org.apache.spark.sql.catalyst.trees.TreePatternBits">TreePatternBits</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes">ExpectsInputTypes</span>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback">CodegenFallback</span>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>, <span class="extype" name="org.apache.spark.sql.catalyst.trees.TreeNode">TreeNode</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>], <span class="extype" name="org.apache.spark.sql.catalyst.trees.TreePatternBits">TreePatternBits</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -643,7 +643,7 @@
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_GeoTransform"><span>RS_GeoTransform</span></li><li class="in" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression"><span>InferredExpression</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression"><span>FoldableExpression</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback"><span>CodegenFallback</span></li><li class="in" name="org.apache.spark.sql.sedona_sql.expressions.SerdeAware"><span>SerdeAware</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes"><span>ImplicitCastInputTypes</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes"><span>ExpectsInputTypes</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.Expression"><span>Expression</span></li><li class="in" name="org.apache.spark.sql.catalyst.trees.TreeNode"><span>TreeNode</span></li><li class="in" name="org.apache.spark.sql.catalyst.trees.TreePatternBits"><span>TreePatternBits</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_GeoTransform"><span>RS_GeoTransform</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes"><span>ExpectsInputTypes</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback"><span>CodegenFallback</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.Expression"><span>Expression</span></li><li class="in" name="org.apache.spark.sql.catalyst.trees.TreeNode"><span>TreeNode</span></li><li class="in" name="org.apache.spark.sql.catalyst.trees.TreePatternBits"><span>TreePatternBits</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -833,7 +833,7 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ExpectsInputTypes → Expression</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression#children" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_GeoTransform#children" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="children:Seq[org.apache.spark.sql.catalyst.expressions.Expression]"></a><a id="children:Seq[Expression]"></a>
       <span class="permalink">
       <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_GeoTransform.html#children:Seq[org.apache.spark.sql.catalyst.expressions.Expression]" title="Permalink">
@@ -848,7 +848,7 @@
         <span class="name">children</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> → TreeNode</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_GeoTransform">RS_GeoTransform</a> → TreeNode</dd></dl></div>
     </li><li name="org.apache.spark.sql.catalyst.expressions.Expression#childrenResolved" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="childrenResolved:Boolean"></a>
       <span class="permalink">
@@ -1012,7 +1012,7 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TreeNode</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression#dataType" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_GeoTransform#dataType" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="dataType:org.apache.spark.sql.types.DataType"></a><a id="dataType:DataType"></a>
       <span class="permalink">
       <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_GeoTransform.html#dataType:org.apache.spark.sql.types.DataType" title="Permalink">
@@ -1027,7 +1027,7 @@
         <span class="name">dataType</span><span class="result">: <span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> → Expression</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_GeoTransform">RS_GeoTransform</a> → Expression</dd></dl></div>
     </li><li name="org.apache.spark.sql.catalyst.expressions.Expression#deterministic" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="deterministic:Boolean"></a>
       <span class="permalink">
@@ -1076,7 +1076,7 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression#eval" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_GeoTransform#eval" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eval(input:org.apache.spark.sql.catalyst.InternalRow):Any"></a><a id="eval(InternalRow):Any"></a>
       <span class="permalink">
       <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_GeoTransform.html#eval(input:org.apache.spark.sql.catalyst.InternalRow):Any" title="Permalink">
@@ -1091,23 +1091,7 @@
         <span class="name">eval</span><span class="params">(<span name="input">input: <span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span></span>)</span><span class="result">: <span class="extype" name="scala.Any">Any</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> → Expression</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression#evalWithoutSerialization" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="evalWithoutSerialization(input:org.apache.spark.sql.catalyst.InternalRow):Any"></a><a id="evalWithoutSerialization(InternalRow):Any"></a>
-      <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_GeoTransform.html#evalWithoutSerialization(input:org.apache.spark.sql.catalyst.InternalRow):Any" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">evalWithoutSerialization</span><span class="params">(<span name="input">input: <span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span></span>)</span><span class="result">: <span class="extype" name="scala.Any">Any</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> → <a href="../SerdeAware.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.SerdeAware">SerdeAware</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_GeoTransform">RS_GeoTransform</a> → Expression</dd></dl></div>
     </li><li name="org.apache.spark.sql.catalyst.trees.TreeNode#exists" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exists(f:BaseType=&gt;Boolean):Boolean"></a><a id="exists((Expression)⇒Boolean):Boolean"></a>
       <span class="permalink">
@@ -1124,22 +1108,6 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TreeNode</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression#f" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="f:org.apache.spark.sql.sedona_sql.expressions.InferrableFunction"></a><a id="f:InferrableFunction"></a>
-      <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_GeoTransform.html#f:org.apache.spark.sql.sedona_sql.expressions.InferrableFunction" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">lazy val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">f</span><span class="result">: <a href="../InferrableFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction">InferrableFunction</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a></dd></dl></div>
     </li><li name="org.apache.spark.sql.catalyst.trees.TreeNode#fastEquals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="fastEquals(other:org.apache.spark.sql.catalyst.trees.TreeNode[_]):Boolean"></a><a id="fastEquals(TreeNode[_]):Boolean"></a>
       <span class="permalink">
@@ -1226,7 +1194,7 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TreeNode</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression#foldable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.catalyst.expressions.Expression#foldable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="foldable:Boolean"></a>
       <span class="permalink">
       <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_GeoTransform.html#foldable:Boolean" title="Permalink">
@@ -1241,7 +1209,7 @@
         <span class="name">foldable</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../FoldableExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression">FoldableExpression</a> → Expression</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Expression</dd></dl></div>
     </li><li name="org.apache.spark.sql.catalyst.trees.TreeNode#foreach" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="foreach(f:BaseType=&gt;Unit):Unit"></a><a id="foreach((Expression)⇒Unit):Unit"></a>
       <span class="permalink">
@@ -1389,7 +1357,7 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TreeNode</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_GeoTransform#inputExpressions" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_GeoTransform#inputExpressions" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="inputExpressions:Seq[org.apache.spark.sql.catalyst.expressions.Expression]"></a><a id="inputExpressions:Seq[Expression]"></a>
       <span class="permalink">
       <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_GeoTransform.html#inputExpressions:Seq[org.apache.spark.sql.catalyst.expressions.Expression]" title="Permalink">
@@ -1404,8 +1372,8 @@
         <span class="name">inputExpressions</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_GeoTransform">RS_GeoTransform</a> → <a href="../InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a></dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression#inputTypes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_GeoTransform#inputTypes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="inputTypes:Seq[org.apache.spark.sql.types.AbstractDataType]"></a><a id="inputTypes:Seq[AbstractDataType]"></a>
       <span class="permalink">
       <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_GeoTransform.html#inputTypes:Seq[org.apache.spark.sql.types.AbstractDataType]" title="Permalink">
@@ -1420,7 +1388,7 @@
         <span class="name">inputTypes</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.types.AbstractDataType">AbstractDataType</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> → ExpectsInputTypes</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_GeoTransform">RS_GeoTransform</a> → ExpectsInputTypes</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -1651,7 +1619,7 @@
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression#nullable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_GeoTransform#nullable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="nullable:Boolean"></a>
       <span class="permalink">
       <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_GeoTransform.html#nullable:Boolean" title="Permalink">
@@ -1666,7 +1634,7 @@
         <span class="name">nullable</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> → Expression</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_GeoTransform">RS_GeoTransform</a> → Expression</dd></dl></div>
     </li><li name="org.apache.spark.sql.catalyst.trees.TreeNode#numberedTreeString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="numberedTreeString:String"></a>
       <span class="permalink">
@@ -1955,7 +1923,7 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TreeNode</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.catalyst.expressions.Expression#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
       <a href="../../../../../../../org/apache/spark/sql/sedona_sql/expressions/raster/RS_GeoTransform.html#toString():String" title="Permalink">
@@ -1970,7 +1938,7 @@
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> → Expression → TreeNode → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Expression → TreeNode → AnyRef → Any</dd></dl></div>
     </li><li name="org.apache.spark.sql.catalyst.trees.TreeNode#transform" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="transform(rule:PartialFunction[BaseType,BaseType]):BaseType"></a><a id="transform(PartialFunction[Expression,Expression]):Expression"></a>
       <span class="permalink">
@@ -2321,22 +2289,14 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">
-              <h3>Inherited from <a href="../InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a></h3>
-            </div><div class="parent" name="scala.Serializable">
+        <div class="parent" name="scala.Serializable">
               <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
             </div><div class="parent" name="java.io.Serializable">
               <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
-            </div><div class="parent" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression">
-              <h3>Inherited from <a href="../FoldableExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression">FoldableExpression</a></h3>
-            </div><div class="parent" name="org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback">
-              <h3>Inherited from <span class="extype" name="org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback">CodegenFallback</span></h3>
-            </div><div class="parent" name="org.apache.spark.sql.sedona_sql.expressions.SerdeAware">
-              <h3>Inherited from <a href="../SerdeAware.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.SerdeAware">SerdeAware</a></h3>
-            </div><div class="parent" name="org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes">
-              <h3>Inherited from <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes">ImplicitCastInputTypes</span></h3>
             </div><div class="parent" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes">
               <h3>Inherited from <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes">ExpectsInputTypes</span></h3>
+            </div><div class="parent" name="org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback">
+              <h3>Inherited from <span class="extype" name="org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback">CodegenFallback</span></h3>
             </div><div class="parent" name="org.apache.spark.sql.catalyst.expressions.Expression">
               <h3>Inherited from <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></h3>
             </div><div class="parent" name="org.apache.spark.sql.catalyst.trees.TreeNode">

@@ -5984,14 +5984,14 @@ UpperLeftY + ScaleY * 0.5
 198.500000
 </code></pre></div>
 <h3 id="rs_geotransform">RS_GeoTransform<a class="headerlink" href="#rs_geotransform" title="Permanent link">&para;</a></h3>
-<p>Introduction: Returns an array of parameters that represent the GeoTransformation of the raster. The array contains the following values:</p>
+<p>Introduction: Returns a struct of parameters that represent the GeoTransformation of the raster. The struct has the following schema:</p>
 <ul>
-<li>0: pixel width along west-east axis (x-axis)</li>
-<li>1: pixel height along north-south axis (y-axis)</li>
-<li>2: Rotation of the raster</li>
-<li>3: Angular separation between x-axis and y-axis</li>
-<li>4: X ordinate of upper-left coordinate</li>
-<li>5: Y ordinate of upper-left coordinate</li>
+<li>magnitudeI: size of a pixel along the transformed i axis</li>
+<li>magnitudeJ: size of a pixel along the transformed j axis</li>
+<li>thetaI: angle by which the raster is rotated (Radians positive clockwise)</li>
+<li>thetaIJ: angle from transformed i axis to transformed j axis (Radians positive counter-clockwise)</li>
+<li>offsetX: X ordinate of the upper-left corner of the upper-left pixel</li>
+<li>offsetY: Y ordinate of the upper-left corner of the upper-left pixel</li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -6005,7 +6005,7 @@ UpperLeftY + ScaleY * 0.5
 <span class="w">       </span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
-<div class="highlight"><pre><span></span><code>[2.23606797749979, 2.23606797749979, -1.1071487177940904, -2.214297435588181, 1.0, 2.0]
+<div class="highlight"><pre><span></span><code>{2.23606797749979, 2.23606797749979, -1.1071487177940904, -2.214297435588181, 1.0, 2.0}
 </code></pre></div>
 <h3 id="rs_height">RS_Height<a class="headerlink" href="#rs_height" title="Permanent link">&para;</a></h3>
 <p>Introduction: Returns the height of the raster.</p>
@@ -6356,7 +6356,7 @@ Set excludeNoDataValue to <code>false</code> to get count of all pixels in raste
 <div class="highlight"><pre><span></span><code>9.4678403028357
 </code></pre></div>
 <h3 id="rs_summarystatsall">RS_SummaryStatsAll<a class="headerlink" href="#rs_summarystatsall" title="Permanent link">&para;</a></h3>
-<p>Introduction: Returns summary stats consisting of count, sum, mean, stddev, min, max for a given band in raster. If band is not specified then it defaults to <code>1</code>.</p>
+<p>Introduction: Returns summary stats struct consisting of count, sum, mean, stddev, min, max for a given band in raster. If band is not specified then it defaults to <code>1</code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>If excludeNoDataValue is set <code>true</code> then it will only count pixels with value not equal to the nodata value of the raster.
@@ -6375,13 +6375,13 @@ Set excludeNoDataValue to <code>false</code> to get count of all pixels in raste
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_SummaryStatsAll</span><span class="p">(</span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
-<div class="highlight"><pre><span></span><code>25.0, 204.0, 8.16, 9.4678403028357, 0.0, 25.0
+<div class="highlight"><pre><span></span><code>{25.0, 204.0, 8.16, 9.4678403028357, 0.0, 25.0}
 </code></pre></div>
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_SummaryStatsAll</span><span class="p">(</span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
-<div class="highlight"><pre><span></span><code>14.0, 204.0, 14.571428571428571, 11.509091348732502, 1.0, 25.0
+<div class="highlight"><pre><span></span><code>{14.0, 204.0, 14.571428571428571, 11.509091348732502, 1.0, 25.0}
 </code></pre></div>
 <h3 id="rs_zonalstats">RS_ZonalStats<a class="headerlink" href="#rs_zonalstats" title="Permanent link">&para;</a></h3>
 <p>Introduction: This returns a statistic value specified by <code>statType</code> over the region of interest defined by <code>zone</code>. It computes the statistic from the pixel values within the ROI geometry and returns the result. If the <code>excludeNoData</code> parameter is not specified, it will default to <code>true</code>. This excludes NoData values from the statistic calculation. Additionally, if the <code>band</code> parameter is not provided, band 1 will be used by default for the statistic computation. The valid options for <code>statType</code> are:</p>
@@ -6429,17 +6429,17 @@ Set excludeNoDataValue to <code>false</code> to get count of all pixels in raste
 <div class="highlight"><pre><span></span><code>226.55992667794473
 </code></pre></div>
 <h3 id="rs_zonalstatsall">RS_ZonalStatsAll<a class="headerlink" href="#rs_zonalstatsall" title="Permanent link">&para;</a></h3>
-<p>Introduction: Returns an array of statistic values, where each statistic is computed over a region defined by the <code>zone</code> geometry. The array contains the following values:</p>
+<p>Introduction: Returns a struct of statistic values, where each statistic is computed over a region defined by the <code>zone</code> geometry. The struct has the following schema:</p>
 <ul>
-<li>0: Count of the pixels.</li>
-<li>1: Sum of the pixel values.</li>
-<li>2: Arithmetic mean.</li>
-<li>3: Median.</li>
-<li>4: Mode.</li>
-<li>5: Standard deviation.</li>
-<li>6: Variance.</li>
-<li>7: Minimum value of the zone.</li>
-<li>8: Maximum value of the zone.</li>
+<li>count: Count of the pixels.</li>
+<li>sum: Sum of the pixel values.</li>
+<li>mean: Arithmetic mean.</li>
+<li>median: Median.</li>
+<li>mode: Mode.</li>
+<li>stddev: Standard deviation.</li>
+<li>variance: Variance.</li>
+<li>min: Minimum value of the zone.</li>
+<li>max: Maximum value of the zone.</li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -6465,13 +6465,13 @@ Set excludeNoDataValue to <code>false</code> to get count of all pixels in raste
 <div class="highlight"><pre><span></span><code><span class="n">RS_ZonalStatsAll</span><span class="p">(</span><span class="n">rast1</span><span class="p">,</span><span class="w"> </span><span class="n">geom1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
-<div class="highlight"><pre><span></span><code>[184792.0, 1.0690406E7, 57.851021689230684, 0.0, 0.0, 92.13277429243035, 8488.448098819916, 0.0, 255.0]
+<div class="highlight"><pre><span></span><code>{184792.0, 1.0690406E7, 57.851021689230684, 0.0, 0.0, 92.13277429243035, 8488.448098819916, 0.0, 255.0}
 </code></pre></div>
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="n">RS_ZonalStatsAll</span><span class="p">(</span><span class="n">rast2</span><span class="p">,</span><span class="w"> </span><span class="n">geom2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="k">true</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
-<div class="highlight"><pre><span></span><code>[14184.0, 3213526.0, 226.55992667794473, 255.0, 255.0, 74.87605357255357, 5606.423398599913, 1.0, 255.0]
+<div class="highlight"><pre><span></span><code>{14184.0, 3213526.0, 226.55992667794473, 255.0, 255.0, 74.87605357255357, 5606.423398599913, 1.0, 255.0}
 </code></pre></div>
 <h2 id="raster-predicates">Raster Predicates<a class="headerlink" href="#raster-predicates" title="Permanent link">&para;</a></h2>
 <h3 id="rs_contains">RS_Contains<a class="headerlink" href="#rs_contains" title="Permanent link">&para;</a></h3>
@@ -6645,18 +6645,18 @@ If no <code>toRasterIndex</code> is provided, the new band is appended to the en
 <p><img alt="Original raster" src="../../../image/heatmap_Interpolate.png" title="Original raster" />
 <img alt="Interpolated raster" src="../../../image/heatmap_Interpolate2.png" title="Interpolated raster" /></p>
 <h3 id="rs_metadata">RS_MetaData<a class="headerlink" href="#rs_metadata" title="Permanent link">&para;</a></h3>
-<p>Introduction: Returns the metadata of the raster as an array of double. The array contains the following values:</p>
+<p>Introduction: Returns the metadata of the raster as a struct. The struct has the following schema:</p>
 <ul>
-<li>0: upper left x coordinate of the raster, in terms of CRS units</li>
-<li>1: upper left y coordinate of the raster, in terms of CRS units</li>
-<li>2: width of the raster, in terms of pixels</li>
-<li>3: height of the raster, in terms of pixels</li>
-<li>4: ScaleX: the scaling factor in the x direction</li>
-<li>5: ScaleY: the scaling factor in the y direction</li>
-<li>6: skew in x direction (rotation x)</li>
-<li>7: skew in y direction (rotation y)</li>
-<li>8: srid of the raster</li>
-<li>9: number of bands</li>
+<li>upperLeftX: upper left x coordinate of the raster, in terms of CRS units</li>
+<li>upperLeftX: upper left y coordinate of the raster, in terms of CRS units</li>
+<li>gridWidth: width of the raster, in terms of pixels</li>
+<li>gridHeight: height of the raster, in terms of pixels</li>
+<li>scaleX: ScaleX: the scaling factor in the x direction</li>
+<li>scaleY: ScaleY: the scaling factor in the y direction</li>
+<li>skewX: skew in x direction (rotation x)</li>
+<li>skewY: skew in y direction (rotation y)</li>
+<li>srid: srid of the raster</li>
+<li>numSampleDimensions: number of bands</li>
 </ul>
 <p>For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the <a href="../Raster-affine-transformation/">Affine Transformations</a> section.</p>
 <p>Format: <code>RS_MetaData (raster: Raster)</code></p>
@@ -6665,7 +6665,7 @@ If no <code>toRasterIndex</code> is provided, the new band is appended to the en
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MetaData</span><span class="p">(</span><span class="n">raster</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
 </code></pre></div>
 <p>Output:</p>
-<div class="highlight"><pre><span></span><code>[-1.3095817809482181E7, 4021262.7487925636, 512.0, 517.0, 72.32861272132695, -72.32861272132695, 0.0, 0.0, 3857.0, 1.0]
+<div class="highlight"><pre><span></span><code>{-1.3095817809482181E7, 4021262.7487925636, 512.0, 517.0, 72.32861272132695, -72.32861272132695, 0.0, 0.0, 3857.0, 1.0}
 </code></pre></div>
 <h3 id="rs_normalizeall">RS_NormalizeAll<a class="headerlink" href="#rs_normalizeall" title="Permanent link">&para;</a></h3>
 <p>Introduction: Normalizes values in all bands of a raster between a given normalization range. The function maintains the data type of the raster values by ensuring that the normalized values are cast back to the original data type of each band in the raster. By default, the values are normalized to range [0, 255]. RS_NormalizeAll can take upto 7 of the following arguments.</p>
@@ -7463,7 +7463,7 @@ To learn how to write map algebra script, please refer to <a href="https://githu
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 8, 2024 01:22:51</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">July 18, 2024 15:51:36</span>
   </span>
 
     
