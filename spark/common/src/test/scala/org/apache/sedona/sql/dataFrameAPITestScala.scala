@@ -2207,7 +2207,7 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(exception.getGeometries != null && exception.getGeometries.length > 0)
       // Check the exception message
       assert(exception.getMessage.contains(
-        "The origin must be a non-empty Point geometry. [GEOM] POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))"))
+        "The origin must be a non-empty Point geometry. [GEOM] [POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0)), POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))]"))
     }
   }
 }
