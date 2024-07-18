@@ -564,7 +564,8 @@ public class GeomUtils {
 
   public static Geometry addMeasure(Geometry geom, double measure_start, double measure_end) {
     if (!(geom instanceof LineString) && !(geom instanceof MultiLineString)) {
-      throw new IllegalGeometryException("Geometry must be a LineString or MultiLineString.", geom);
+      throw new IllegalGeometryException(
+          "Geometry must be a LineString or MultiLineString.", new Geometry[] {geom});
     }
 
     if (geom instanceof LineString) {

@@ -2204,7 +2204,7 @@ class dataFrameAPITestScala extends TestBaseScala {
         baseDf.select(ST_Rotate("geom1", 50, "geom2")).take(1)
       }
       // Check the exception geometry
-      assert(exception.getGeometry != null)
+      assert(exception.getGeometries != null && exception.getGeometries.length > 0)
       // Check the exception message
       assert(exception.getMessage.contains(
         "The origin must be a non-empty Point geometry. [GEOM] POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))"))

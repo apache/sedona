@@ -18,24 +18,25 @@
  */
 package org.apache.sedona.common.exception;
 
+import java.util.Arrays;
 import org.locationtech.jts.geom.Geometry;
 
 /** Exception for illegal geometries. */
 public class IllegalGeometryException extends RuntimeException {
-  // The geometry that caused the exception
-  private Geometry geometry;
+  // The geometries that caused the exception
+  private Geometry[] geometries;
 
-  public IllegalGeometryException(String message, Geometry geometry) {
-    super(message + " [GEOM] " + geometry.toString());
-    this.geometry = geometry;
+  public IllegalGeometryException(String message, Geometry[] geometries) {
+    super(message + " [GEOM] " + Arrays.toString(geometries));
+    this.geometries = geometries;
   }
 
-  public IllegalGeometryException(String message, Geometry geometry, Throwable cause) {
-    super(message + " " + geometry.toString(), cause);
-    this.geometry = geometry;
+  public IllegalGeometryException(String message, Geometry[] geometries, Throwable cause) {
+    super(message + " " + Arrays.toString(geometries), cause);
+    this.geometries = geometries;
   }
 
-  public Geometry getGeometry() {
-    return geometry;
+  public Geometry[] getGeometries() {
+    return geometries;
   }
 }
