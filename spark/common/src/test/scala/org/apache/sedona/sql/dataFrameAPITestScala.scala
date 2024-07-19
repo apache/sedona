@@ -2227,7 +2227,8 @@ class dataFrameAPITestScala extends TestBaseScala {
       }
 
       // Check the exception message
-      assert(exception.getMessage.contains("[SRID=4326;POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0)), 50.0, SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))]"))
+      assert(exception.getMessage.contains(
+        "[SRID=4326;POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0)), 50.0, SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))]"))
       assert(exception.getMessage.contains("The origin must be a non-empty Point geometry."))
     }
   }
