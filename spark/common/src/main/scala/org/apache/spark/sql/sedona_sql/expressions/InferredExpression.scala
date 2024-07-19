@@ -37,7 +37,7 @@ import scala.reflect.runtime.universe.typeOf
  * Custom exception to include the input row and the original exception message.
  */
 class InferredExpressionException(message: String, cause: Throwable)
-  extends Exception(s"$message, cause: " + cause.getMessage, cause)
+    extends Exception(s"$message, cause: " + cause.getMessage, cause)
 
 /**
  * This is the base class for wrapping Java/Scala functions as a catalyst expression in Spark SQL.
@@ -98,12 +98,15 @@ abstract class InferredExpression(fSeq: InferrableFunction*)
     } catch {
       case e: Exception =>
         val literalsAsStrings = if (input == null) {
+          // In case no input row is provided, we can't extract literals from the input expressions.
           findAllLiteralsInExpressions(inputExpressions)
         } else {
           Seq.empty[String]
         }
         val literalsOrInputString = literalsAsStrings.mkString(", ")
-        throw new InferredExpressionException(s"Exception occurred while evaluating expression - source: [$literalsOrInputString]", e)
+        throw new InferredExpressionException(
+          s"Exception occurred while evaluating expression - source: [$literalsOrInputString]",
+          e)
     }
   }
 
@@ -113,12 +116,15 @@ abstract class InferredExpression(fSeq: InferrableFunction*)
     } catch {
       case e: Exception =>
         val literalsOrInputStrings = if (input == null) {
+          // In case no input row is provided, we can't extract literals from the input expressions.
           findAllLiteralsInExpressions(inputExpressions)
         } else {
           Seq.empty[String]
         }
         val literalsOrInputString = literalsOrInputStrings.mkString(", ")
-        throw new InferredExpressionException(s"Exception occurred while evaluating input row without serialization. Literals found: [$literalsOrInputString]", e)
+        throw new InferredExpressionException(
+          s"Exception occurred while evaluating input row without serialization. Literals found: [$literalsOrInputString]",
+          e)
     }
   }
 }
