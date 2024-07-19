@@ -79,6 +79,7 @@ object Catalog {
     function[ST_BestSRID](),
     function[ST_ShiftLongitude](),
     function[ST_Envelope](),
+    function[ST_Expand](),
     function[ST_Length](),
     function[ST_Length2D](),
     function[ST_Area](),

@@ -512,6 +512,31 @@ def ST_Envelope(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_Expand(geometry: ColumnOrName, deltaX_uniformDelta: Union[ColumnOrName, float], deltaY: Optional[Union[ColumnOrName, float]] = None, deltaZ: Optional[Union[ColumnOrName, float]] = None) -> Column:
+    """Expand the given geometry column by a constant unit in each direction
+
+    :param geometry: Geometry column to calculate the envelope of.
+    :type geometry: ColumnOrName
+    :param deltaX_uniformDelta: it is either deltaX or uniformDelta depending on the number of arguments provided
+    :type deltaX_uniformDelta: Union[ColumnOrName, float]
+    :param deltaY: Constant unit of deltaY
+    :type deltaY: Union[ColumnOrName, float]
+    :param deltaZ: Constant unit of deltaZ
+    :type deltaZ: Union[ColumnOrName, float]
+    :return: Envelope of geometry as a geometry column.
+    :rtype: Column
+    """
+    if deltaZ is None:
+        args = (geometry, deltaX_uniformDelta, deltaY)
+        if deltaY is None:
+            args = (geometry, deltaX_uniformDelta)
+    else:
+        args = (geometry, deltaX_uniformDelta, deltaY, deltaZ)
+
+    return _call_st_function("ST_Expand", args)
+
+
+@validate_argument_types
 def ST_ExteriorRing(polygon: ColumnOrName) -> Column:
     """Get a linestring representing the exterior ring of a polygon geometry
     column.

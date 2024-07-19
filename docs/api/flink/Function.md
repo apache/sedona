@@ -1211,6 +1211,38 @@ Output:
 POLYGON ((0 0, 0 3, 1 3, 1 0, 0 0))
 ```
 
+## ST_Expand
+
+Introduction: Returns a geometry expanded from the bounding box of the input. The expansion can be specified in two ways:
+
+1. By individual axis using `deltaX`, `deltaY`, or `deltaZ` parameters.
+2. Uniformly across all axes using the `uniformDelta` parameter.
+
+Format:
+
+`ST_Expand(geometry: Geometry, uniformDelta: Double)`
+
+`ST_Expand(geometry: Geometry, deltaX: Double, deltaY: Double)`
+
+`ST_Expand(geometry: Geometry, deltaX: Double, deltaY: Double, deltaZ: Double)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_Expand(
+        ST_GeomFromWKT('POLYGON Z((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))'),
+        10
+   )
+```
+
+Output:
+
+```
+POLYGON Z((40 40 -9, 40 90 -9, 90 90 13, 90 40 13, 40 40 -9))
+```
+
 ## ST_ExteriorRing
 
 Introduction: Returns a LINESTRING representing the exterior ring (shell) of a POLYGON. Returns NULL if the geometry is not a polygon.

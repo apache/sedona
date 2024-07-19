@@ -25,6 +25,7 @@ import com.google.common.geometry.S2CellId;
 import com.uber.h3core.exceptions.H3Exception;
 import com.uber.h3core.util.LatLng;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.geometryObjects.Circle;
@@ -37,6 +38,8 @@ import org.locationtech.jts.algorithm.construct.LargestEmptyCircle;
 import org.locationtech.jts.algorithm.construct.MaximumInscribedCircle;
 import org.locationtech.jts.algorithm.hull.ConcaveHull;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.util.AffineTransformation;
 import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.io.ByteOrderValues;
@@ -88,6 +91,41 @@ public class Functions {
       boundary = geometry.getFactory().createLineString(boundary.getCoordinates());
     }
     return boundary;
+  }
+
+  public static Geometry expand(Geometry geometry, double uniformDelta) {
+    return expand(geometry, uniformDelta, uniformDelta, uniformDelta);
+  }
+
+  public static Geometry expand(Geometry geometry, double deltaX, double deltaY) {
+    return expand(geometry, deltaX, deltaY, 0);
+  }
+
+  public static Geometry expand(Geometry geometry, double deltaX, double deltaY, double deltaZ) {
+    if (geometry == null || geometry.isEmpty()) {
+      return geometry;
+    }
+
+    BBox bBox = new BBox(geometry);
+    double minX = bBox.getStartLon() - deltaX;
+    double maxX = bBox.getEndLon() + deltaX;
+    double minY = bBox.getStartLat() - deltaY;
+    double maxY = bBox.getEndLat() + deltaY;
+    double minZ, maxZ;
+    if (Functions.hasZ(geometry)) {
+      minZ = bBox.getMinZ() - deltaZ;
+      maxZ = bBox.getMaxZ() + deltaZ;
+      Coordinate[] coordinates = new Coordinate[5];
+      coordinates[0] = new Coordinate(minX, minY, minZ);
+      coordinates[1] = new Coordinate(minX, maxY, minZ);
+      coordinates[2] = new Coordinate(maxX, maxY, maxZ);
+      coordinates[3] = new Coordinate(maxX, minY, maxZ);
+      coordinates[4] = coordinates[0];
+      return geometry.getFactory().createPolygon(coordinates);
+    }
+    Geometry result = Constructors.polygonFromEnvelope(minX, minY, maxX, maxY);
+    result.setSRID(geometry.getSRID());
+    return result;
   }
 
   public static Geometry buffer(Geometry geometry, double radius) {

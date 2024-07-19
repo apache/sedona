@@ -175,6 +175,22 @@ class functionTestScala
       assert(functionDf.count() > 0);
     }
 
+    it("Passed ST_Expand") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON ((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))') as geom")
+      var actual = baseDf.selectExpr("ST_AsText(ST_Expand(geom, 10))").first().get(0)
+      var expected = "POLYGON Z((40 40 -9, 40 90 -9, 90 90 13, 90 40 13, 40 40 -9))"
+      assertEquals(expected, actual)
+
+      actual = baseDf.selectExpr("ST_AsText(ST_Expand(geom, 5, 6))").first().get(0)
+      expected = "POLYGON Z((45 44 1, 45 86 1, 85 86 3, 85 44 3, 45 44 1))"
+      assertEquals(expected, actual)
+
+      actual = baseDf.selectExpr("ST_AsText(ST_Expand(geom, 6, 5, -3))").first().get(0)
+      expected = "POLYGON Z((44 45 4, 44 85 4, 86 85 0, 86 45 0, 44 45 4))"
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_YMax") {
       var test = sparkSession.sql(
         "SELECT ST_YMax(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 -2, -3 -1, -3 -3))'))")

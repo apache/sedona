@@ -2209,6 +2209,64 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void testExpand() throws ParseException {
+    Geometry geometry =
+        GEOMETRY_FACTORY.createPolygon(coordArray(50, 50, 50, 80, 80, 80, 80, 50, 50, 50));
+    String actual = Functions.asWKT(Functions.expand(geometry, 10, 0));
+    String expected = "POLYGON ((40 50, 40 80, 90 80, 90 50, 40 50))";
+    assertEquals(expected, actual);
+
+    geometry = Constructors.geomFromWKT("POINT (10 20 1)", 4326);
+    Geometry result = Functions.expand(geometry, 10);
+    actual = Functions.asWKT(result);
+    expected = "POLYGON Z((0 10 -9, 0 30 -9, 20 30 11, 20 10 11, 0 10 -9))";
+    assertEquals(expected, actual);
+    assertEquals(4326, result.getSRID());
+
+    geometry = Constructors.geomFromWKT("LINESTRING (0 0, 1 1, 2 2)", 0);
+    actual = Functions.asWKT(Functions.expand(geometry, 10, 10));
+    expected = "POLYGON ((-10 -10, -10 12, 12 12, 12 -10, -10 -10))";
+    assertEquals(expected, actual);
+
+    geometry =
+        Constructors.geomFromWKT(
+            "MULTIPOLYGON (((52 68 1, 42 64 1, 66 62 2, 88 64 2, 85 68 2, 72 70 1, 52 68 1)), ((50 50 2, 50 80 2, 80 80 3, 80 50 2, 50 50 2)))",
+            4326);
+    actual = Functions.asWKT(Functions.expand(geometry, 10.5, 2, 5));
+    expected = "POLYGON Z((31.5 48 -4, 31.5 82 -4, 98.5 82 8, 98.5 48 8, 31.5 48 -4))";
+    assertEquals(expected, actual);
+
+    geometry = Constructors.geomFromWKT("MULTIPOINT((10 20 1), (20 30 2))", 0);
+    actual = Functions.asWKT(Functions.expand(geometry, 9.5, 3.5));
+    expected = "POLYGON Z((0.5 16.5 1, 0.5 33.5 1, 29.5 33.5 2, 29.5 16.5 2, 0.5 16.5 1))";
+    assertEquals(expected, actual);
+
+    geometry =
+        Constructors.geomFromWKT(
+            "MULTILINESTRING ((1 0 4, 2 0 4, 4 0 4),(1 0 4, 2 0 4, 4 0 4))", 0);
+    actual = Functions.asWKT(Functions.expand(geometry, 0));
+    expected = "POLYGON Z((1 0 4, 1 0 4, 4 0 4, 4 0 4, 1 0 4))";
+    assertEquals(expected, actual);
+
+    geometry =
+        Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION (POINT (10 10),LINESTRING (20 20, 30 30),POLYGON ((25 25, 35 35, 35 35, 25 25)),MULTIPOINT (30 30, 40 40),MULTILINESTRING ((40 40, 50 50), (45 45, 55 55)),MULTIPOLYGON (((50 50, 60 60, 60 60, 50 50)), ((55 55, 65 65, 65 65, 55 55))))",
+            1234);
+    result = Functions.expand(geometry, 10);
+    actual = Functions.asWKT(result);
+    expected = "POLYGON ((0 0, 0 75, 75 75, 75 0, 0 0))";
+    assertEquals(expected, actual);
+    assertEquals(1234, result.getSRID());
+
+    // The function drops the M dimension
+    geometry =
+        Constructors.geomFromWKT("POLYGON M((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))", 0);
+    actual = Functions.asWKT(Functions.expand(geometry, 0));
+    expected = "POLYGON ((50 50, 50 80, 80 80, 80 50, 50 50))";
+    assertEquals(expected, actual);
+  }
+
+  @Test
   public void testBuffer() {
     Polygon polygon =
         GEOMETRY_FACTORY.createPolygon(coordArray(50, 50, 50, 150, 150, 150, 150, 50, 50, 50));

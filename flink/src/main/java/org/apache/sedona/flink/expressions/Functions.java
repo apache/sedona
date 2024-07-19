@@ -244,6 +244,35 @@ public class Functions {
     }
   }
 
+  public static class ST_Expand extends ScalarFunction {
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint(value = "Double") Double uniformDelta) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.expand(geom, uniformDelta);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint(value = "Double") Double deltaX,
+        @DataTypeHint(value = "Double") Double deltaY) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.expand(geom, deltaX, deltaY);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint(value = "Double") Double deltaX,
+        @DataTypeHint(value = "Double") Double deltaY,
+        @DataTypeHint(value = "Double") Double deltaZ) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.expand(geom, deltaX, deltaY, deltaZ);
+    }
+  }
+
   public static class ST_Dimension extends ScalarFunction {
     @DataTypeHint("Integer")
     public Integer eval(

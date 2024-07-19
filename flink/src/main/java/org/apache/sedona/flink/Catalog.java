@@ -70,6 +70,7 @@ public class Catalog {
       new Functions.ST_ConcaveHull(),
       new Functions.ST_ConvexHull(),
       new Functions.ST_CrossesDateLine(),
+      new Functions.ST_Expand(),
       new Functions.ST_Envelope(),
       new Functions.ST_Difference(),
       new Functions.ST_Dimension(),
