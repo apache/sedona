@@ -19,11 +19,11 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
+import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes, Literal}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.types.{AbstractDataType, BinaryType, BooleanType, DataType, DataTypes, DoubleType, IntegerType, LongType, StringType}
+import org.apache.spark.sql.types.{AbstractDataType, BinaryType, BooleanType, DataType, DataTypes, DoubleType, IntegerType, LongType, StringType, StructField, StructType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.Geometry
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
@@ -32,6 +32,12 @@ import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.runtime.universe.Type
 import scala.reflect.runtime.universe.typeOf
+
+/**
+ * Custom exception to include the input row and the original exception message.
+ */
+class InferredExpressionException(message: String, cause: Throwable)
+  extends Exception(s"$message, cause: " + cause.getMessage, cause)
 
 /**
  * This is the base class for wrapping Java/Scala functions as a catalyst expression in Spark SQL.
@@ -74,8 +80,47 @@ abstract class InferredExpression(fSeq: InferrableFunction*)
   private lazy val argExtractors: Array[InternalRow => Any] = f.buildExtractors(inputExpressions)
   private lazy val evaluator: InternalRow => Any = f.evaluatorBuilder(argExtractors)
 
-  override def eval(input: InternalRow): Any = f.serializer(evaluator(input))
-  override def evalWithoutSerialization(input: InternalRow): Any = evaluator(input)
+  private def findAllLiterals(expression: Expression): Seq[Literal] = {
+    expression match {
+      case lit: Literal => Seq(lit)
+      case _ => expression.children.flatMap(findAllLiterals)
+    }
+  }
+
+  private def findAllLiteralsInExpressions(expressions: Seq[Expression]): Seq[String] = {
+    expressions.flatMap(findAllLiterals).map(_.value.toString)
+  }
+
+  override def eval(input: InternalRow): Any = {
+
+    try {
+      f.serializer(evaluator(input))
+    } catch {
+      case e: Exception =>
+        val literalsAsStrings = if (input == null) {
+          findAllLiteralsInExpressions(inputExpressions)
+        } else {
+          Seq.empty[String]
+        }
+        val literalsOrInputString = literalsAsStrings.mkString(", ")
+        throw new InferredExpressionException(s"Exception occurred while evaluating expression - source: [$literalsOrInputString]", e)
+    }
+  }
+
+  override def evalWithoutSerialization(input: InternalRow): Any = {
+    try {
+      evaluator(input)
+    } catch {
+      case e: Exception =>
+        val literalsOrInputStrings = if (input == null) {
+          findAllLiteralsInExpressions(inputExpressions)
+        } else {
+          Seq.empty[String]
+        }
+        val literalsOrInputString = literalsOrInputStrings.mkString(", ")
+        throw new InferredExpressionException(s"Exception occurred while evaluating input row without serialization. Literals found: [$literalsOrInputString]", e)
+    }
+  }
 }
 
 // This is a compile time type shield for the types we are able to infer. Anything

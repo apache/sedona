@@ -19,7 +19,6 @@
 package org.apache.sedona.common;
 
 import java.util.Set;
-import org.apache.sedona.common.exception.IllegalGeometryException;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
@@ -40,31 +39,19 @@ public class FunctionsGeoTools {
 
   public static Geometry transform(Geometry geometry, String targetCRS)
       throws FactoryException, TransformException {
-    try {
-      return transform(geometry, null, targetCRS, true);
-    } catch (FactoryException e) {
-      throw new IllegalGeometryException(e.getMessage(), new Geometry[] {geometry});
-    }
+    return transform(geometry, null, targetCRS, true);
   }
 
   public static Geometry transform(Geometry geometry, String sourceCRS, String targetCRS)
       throws FactoryException, TransformException {
-    try {
-      return transform(geometry, sourceCRS, targetCRS, true);
-    } catch (FactoryException e) {
-      throw new IllegalGeometryException(e.getMessage(), new Geometry[] {geometry});
-    }
+    return transform(geometry, sourceCRS, targetCRS, true);
   }
 
   public static Geometry transform(
       Geometry geometry, String sourceCRScode, String targetCRScode, boolean lenient)
       throws FactoryException, TransformException {
     CoordinateReferenceSystem targetCRS = parseCRSString(targetCRScode);
-    try {
-      return transformToGivenTarget(geometry, sourceCRScode, targetCRS, lenient);
-    } catch (FactoryException e) {
-      throw new IllegalGeometryException(e.getMessage(), new Geometry[] {geometry});
-    }
+    return transformToGivenTarget(geometry, sourceCRScode, targetCRS, lenient);
   }
 
   /**

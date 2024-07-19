@@ -26,7 +26,6 @@ import com.google.common.geometry.S2CellId;
 import com.google.common.math.DoubleMath;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.apache.sedona.common.exception.IllegalGeometryException;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.utils.*;
@@ -1217,9 +1216,7 @@ public class FunctionsTest extends TestBase {
   public void geometricMedianUnsupported() {
     LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1480, 0, 620, 0));
     Exception e = assertThrows(Exception.class, () -> Functions.geometricMedian(lineString));
-    assertEquals(
-        "Unsupported geometry type: LineString [GEOM] [LINESTRING (1480 0, 620 0)]",
-        e.getMessage());
+    assertEquals("Unsupported geometry type: LineString", e.getMessage());
   }
 
   @Test
@@ -1229,9 +1226,7 @@ public class FunctionsTest extends TestBase {
             coordArray(12, 5, 62, 7, 100, -1, 100, -5, 10, 20, 105, -5));
     Exception e =
         assertThrows(Exception.class, () -> Functions.geometricMedian(multiPoint, 1e-6, 5, true));
-    assertEquals(
-        "Median failed to converge within 1.0E-06 after 5 iterations. [GEOM] [MULTIPOINT ((12 5), (62 7), (100 -1), (100 -5), (10 20), (105 -5))]",
-        e.getMessage());
+    assertEquals("Median failed to converge within 1.0E-06 after 5 iterations.", e.getMessage());
   }
 
   @Test
@@ -1585,10 +1580,8 @@ public class FunctionsTest extends TestBase {
   public void numPointsUnsupported() throws Exception {
     Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 90, 0, 0));
     String expected =
-        "Unsupported geometry type: "
-            + "Polygon"
-            + ", only LineString geometry is supported. [GEOM] [POLYGON ((0 0, 0 90, 0 0))]";
-    Exception e = assertThrows(IllegalGeometryException.class, () -> Functions.numPoints(polygon));
+        "Unsupported geometry type: " + "Polygon" + ", only LineString geometry is supported.";
+    Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.numPoints(polygon));
     assertEquals(expected, e.getMessage());
   }
 
@@ -2025,10 +2018,9 @@ public class FunctionsTest extends TestBase {
     Polygon polygon2 = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 10, 10, 10, 10, 0, 0, 0));
 
     Exception e =
-        assertThrows(IllegalGeometryException.class, () -> Functions.makeLine(polygon1, polygon2));
+        assertThrows(IllegalArgumentException.class, () -> Functions.makeLine(polygon1, polygon2));
     assertEquals(
-        "ST_MakeLine only supports Point, MultiPoint and LineString geometries [GEOM] [POLYGON ((0 0, 0 90, 0 0))]",
-        e.getMessage());
+        "ST_MakeLine only supports Point, MultiPoint and LineString geometries", e.getMessage());
   }
 
   @Test
@@ -2580,8 +2572,8 @@ public class FunctionsTest extends TestBase {
     String expected =
         "Unsupported geometry type: "
             + "LineString"
-            + ", only Polygon or MultiPolygon geometries are supported. [GEOM] [LINESTRING (0 1, 1 2, 1 2)]";
-    Exception e = assertThrows(IllegalGeometryException.class, () -> Functions.nRings(lineString));
+            + ", only Polygon or MultiPolygon geometries are supported.";
+    Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.nRings(lineString));
     assertEquals(expected, e.getMessage());
   }
 
@@ -2914,10 +2906,8 @@ public class FunctionsTest extends TestBase {
     Point point3 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
 
     Exception e =
-        assertThrows(IllegalGeometryException.class, () -> Functions.angle(point1, point2, point3));
-    assertEquals(
-        "ST_Angle cannot support empty geometries, empty index = [0] [GEOM] [POINT (3 5), POINT EMPTY, POINT (1 1)]",
-        e.getMessage());
+        assertThrows(IllegalArgumentException.class, () -> Functions.angle(point1, point2, point3));
+    assertEquals("ST_Angle cannot support empty geometries.", e.getMessage());
   }
 
   @Test
@@ -2928,10 +2918,9 @@ public class FunctionsTest extends TestBase {
 
     Exception e =
         assertThrows(
-            IllegalGeometryException.class, () -> Functions.angle(point1, polygon, point3));
+            IllegalArgumentException.class, () -> Functions.angle(point1, polygon, point3));
     assertEquals(
-        "ST_Angle supports either only POINT or only LINESTRING geometries. [GEOM] [POINT (3 5), POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0)), POINT (1 1)]",
-        e.getMessage());
+        "ST_Angle supports either only POINT or only LINESTRING geometries.", e.getMessage());
   }
 
   @Test
@@ -3268,22 +3257,19 @@ public class FunctionsTest extends TestBase {
     // One of the object is empty
     Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
     LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
-    String expected1 =
-        "ST_ClosestPoint doesn't support empty geometry object. [GEOM] [POINT (1 1), LINESTRING EMPTY]";
+    String expected = "ST_ClosestPoint doesn't support empty geometry object.";
     Exception e1 =
         assertThrows(
-            IllegalGeometryException.class, () -> Functions.closestPoint(point, emptyLineString));
-    assertEquals(expected1, e1.getMessage());
+            IllegalArgumentException.class, () -> Functions.closestPoint(point, emptyLineString));
+    assertEquals(expected, e1.getMessage());
 
     // Both objects are empty
     Polygon emptyPolygon = GEOMETRY_FACTORY.createPolygon();
-    String expected2 =
-        "ST_ClosestPoint doesn't support empty geometry object. [GEOM] [POLYGON EMPTY, LINESTRING EMPTY]";
     Exception e2 =
         assertThrows(
-            IllegalGeometryException.class,
+            IllegalArgumentException.class,
             () -> Functions.closestPoint(emptyPolygon, emptyLineString));
-    assertEquals(expected2, e2.getMessage());
+    assertEquals(expected, e2.getMessage());
   }
 
   @Test
@@ -3331,10 +3317,9 @@ public class FunctionsTest extends TestBase {
     LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(1, 2, 1, 5, 2, 6, 1, 2));
     Exception e =
         assertThrows(
-            IllegalGeometryException.class,
+            IllegalArgumentException.class,
             () -> Functions.hausdorffDistance(point, lineString, 3));
-    String expected =
-        "Fraction is not in range (0.0 - 1.0] [GEOM] [POINT (10 34), LINESTRING (1 2, 1 5, 2 6, 1 2)]";
+    String expected = "Fraction is not in range (0.0 - 1.0]";
     String actual = e.getMessage();
     assertEquals(expected, actual);
   }
@@ -3413,7 +3398,7 @@ public class FunctionsTest extends TestBase {
     // The source CRS is an invalid SRID
     e =
         assertThrows(
-            IllegalGeometryException.class,
+            FactoryException.class,
             () -> FunctionsGeoTools.transform(geomExpected, "abcde", "EPSG:3857"));
     assertTrue(e.getMessage().contains("First failed to read as a well-known CRS code"));
 
@@ -3542,9 +3527,9 @@ public class FunctionsTest extends TestBase {
     geom = Constructors.geomFromEWKT("POLYGON M((0 0 1, 1 1 1, 5 1 1, 5 0 1, 1 0 1, 0 0 1))");
     Geometry finalGeom = geom;
     Exception e =
-        assertThrows(IllegalGeometryException.class, () -> Functions.locateAlong(finalGeom, 1));
+        assertThrows(IllegalArgumentException.class, () -> Functions.locateAlong(finalGeom, 1));
     assertEquals(
-        "ST_LocateAlong failed to evaluate. Polygon geometry type not supported, supported types are: (Multi)Point and (Multi)LineString. [GEOM] [POLYGON ((0 0, 1 1, 5 1, 5 0, 1 0, 0 0))]",
+        "Polygon geometry type not supported, supported types are: (Multi)Point and (Multi)LineString.",
         e.getMessage());
   }
 
