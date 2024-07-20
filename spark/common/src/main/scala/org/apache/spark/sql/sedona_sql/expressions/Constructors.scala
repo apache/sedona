@@ -160,16 +160,21 @@ case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
   override def nullable: Boolean = true
 
   override def eval(inputRow: InternalRow): Any = {
-    (inputExpressions.head.eval(inputRow)) match {
-      case (geomString: UTF8String) => {
-        // Parse UTF-8 encoded wkb string
-        Constructors.geomFromText(geomString.toString, FileDataSplitter.WKB).toGenericArrayData
+    try {
+      (inputExpressions.head.eval(inputRow)) match {
+        case (geomString: UTF8String) => {
+          // Parse UTF-8 encoded wkb string
+          Constructors.geomFromText(geomString.toString, FileDataSplitter.WKB).toGenericArrayData
+        }
+        case (wkb: Array[Byte]) => {
+          // convert raw wkb byte array to geometry
+          Constructors.geomFromWKB(wkb).toGenericArrayData
+        }
+        case null => null
       }
-      case (wkb: Array[Byte]) => {
-        // convert raw wkb byte array to geometry
-        Constructors.geomFromWKB(wkb).toGenericArrayData
-      }
-      case null => null
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(inputRow, inputExpressions, e)
     }
   }
 
@@ -196,16 +201,21 @@ case class ST_GeomFromEWKB(inputExpressions: Seq[Expression])
   override def nullable: Boolean = true
 
   override def eval(inputRow: InternalRow): Any = {
-    (inputExpressions.head.eval(inputRow)) match {
-      case (geomString: UTF8String) => {
-        // Parse UTF-8 encoded wkb string
-        Constructors.geomFromText(geomString.toString, FileDataSplitter.WKB).toGenericArrayData
+    try {
+      (inputExpressions.head.eval(inputRow)) match {
+        case (geomString: UTF8String) => {
+          // Parse UTF-8 encoded wkb string
+          Constructors.geomFromText(geomString.toString, FileDataSplitter.WKB).toGenericArrayData
+        }
+        case (wkb: Array[Byte]) => {
+          // convert raw wkb byte array to geometry
+          Constructors.geomFromWKB(wkb).toGenericArrayData
+        }
+        case null => null
       }
-      case (wkb: Array[Byte]) => {
-        // convert raw wkb byte array to geometry
-        Constructors.geomFromWKB(wkb).toGenericArrayData
-      }
-      case null => null
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(inputRow, inputExpressions, e)
     }
   }
 
@@ -238,21 +248,26 @@ case class ST_LineFromWKB(inputExpressions: Seq[Expression])
       if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow).asInstanceOf[Int]
       else -1
 
-    wkb match {
-      case geomString: UTF8String =>
-        // Parse UTF-8 encoded WKB string
-        val geom = Constructors.lineStringFromText(geomString.toString, "wkb")
-        if (geom.getGeometryType == "LineString") {
-          (if (srid != -1) Functions.setSRID(geom, srid) else geom).toGenericArrayData
-        } else {
-          null
-        }
+    try {
+      wkb match {
+        case geomString: UTF8String =>
+          // Parse UTF-8 encoded WKB string
+          val geom = Constructors.lineStringFromText(geomString.toString, "wkb")
+          if (geom.getGeometryType == "LineString") {
+            (if (srid != -1) Functions.setSRID(geom, srid) else geom).toGenericArrayData
+          } else {
+            null
+          }
 
-      case wkbArray: Array[Byte] =>
-        // Convert raw WKB byte array to geometry
-        Constructors.lineFromWKB(wkbArray, srid).toGenericArrayData
+        case wkbArray: Array[Byte] =>
+          // Convert raw WKB byte array to geometry
+          Constructors.lineFromWKB(wkbArray, srid).toGenericArrayData
 
-      case _ => null
+        case _ => null
+      }
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(inputRow, inputExpressions, e)
     }
   }
 
@@ -287,21 +302,26 @@ case class ST_LinestringFromWKB(inputExpressions: Seq[Expression])
       if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow).asInstanceOf[Int]
       else -1
 
-    wkb match {
-      case geomString: UTF8String =>
-        // Parse UTF-8 encoded WKB string
-        val geom = Constructors.lineStringFromText(geomString.toString, "wkb")
-        if (geom.getGeometryType == "LineString") {
-          (if (srid != -1) Functions.setSRID(geom, srid) else geom).toGenericArrayData
-        } else {
-          null
-        }
+    try {
+      wkb match {
+        case geomString: UTF8String =>
+          // Parse UTF-8 encoded WKB string
+          val geom = Constructors.lineStringFromText(geomString.toString, "wkb")
+          if (geom.getGeometryType == "LineString") {
+            (if (srid != -1) Functions.setSRID(geom, srid) else geom).toGenericArrayData
+          } else {
+            null
+          }
 
-      case wkbArray: Array[Byte] =>
-        // Convert raw WKB byte array to geometry
-        Constructors.lineFromWKB(wkbArray, srid).toGenericArrayData
+        case wkbArray: Array[Byte] =>
+          // Convert raw WKB byte array to geometry
+          Constructors.lineFromWKB(wkbArray, srid).toGenericArrayData
 
-      case _ => null
+        case _ => null
+      }
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(inputRow, inputExpressions, e)
     }
   }
 
@@ -336,21 +356,26 @@ case class ST_PointFromWKB(inputExpressions: Seq[Expression])
       if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow).asInstanceOf[Int]
       else -1
 
-    wkb match {
-      case geomString: UTF8String =>
-        // Parse UTF-8 encoded WKB string
-        val geom = Constructors.pointFromText(geomString.toString, "wkb")
-        if (geom.getGeometryType == "Point") {
-          (if (srid != -1) Functions.setSRID(geom, srid) else geom).toGenericArrayData
-        } else {
-          null
-        }
+    try {
+      wkb match {
+        case geomString: UTF8String =>
+          // Parse UTF-8 encoded WKB string
+          val geom = Constructors.pointFromText(geomString.toString, "wkb")
+          if (geom.getGeometryType == "Point") {
+            (if (srid != -1) Functions.setSRID(geom, srid) else geom).toGenericArrayData
+          } else {
+            null
+          }
 
-      case wkbArray: Array[Byte] =>
-        // Convert raw WKB byte array to geometry
-        Constructors.pointFromWKB(wkbArray, srid).toGenericArrayData
+        case wkbArray: Array[Byte] =>
+          // Convert raw WKB byte array to geometry
+          Constructors.pointFromWKB(wkbArray, srid).toGenericArrayData
 
-      case _ => null
+        case _ => null
+      }
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(inputRow, inputExpressions, e)
     }
   }
 
@@ -387,12 +412,18 @@ case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
 
   override def eval(inputRow: InternalRow): Any = {
     val geomString = inputExpressions.head.eval(inputRow).asInstanceOf[UTF8String].toString
-    val geometry = Constructors.geomFromText(geomString, FileDataSplitter.GEOJSON)
-    // If the user specify a bunch of attributes to go with each geometry, we need to store all of them in this geometry
-    if (inputExpressions.length > 1) {
-      geometry.setUserData(generateUserData(minInputLength, inputExpressions, inputRow))
+    try {
+
+      val geometry = Constructors.geomFromText(geomString, FileDataSplitter.GEOJSON)
+      // If the user specify a bunch of attributes to go with each geometry, we need to store all of them in this geometry
+      if (inputExpressions.length > 1) {
+        geometry.setUserData(generateUserData(minInputLength, inputExpressions, inputRow))
+      }
+      GeometrySerializer.serialize(geometry)
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(inputRow, inputExpressions, e)
     }
-    GeometrySerializer.serialize(geometry)
   }
 
   override def dataType: DataType = GeometryUDT

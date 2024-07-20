@@ -97,16 +97,7 @@ abstract class InferredExpression(fSeq: InferrableFunction*)
       f.serializer(evaluator(input))
     } catch {
       case e: Exception =>
-        val literalsAsStrings = if (input == null) {
-          // In case no input row is provided, we can't extract literals from the input expressions.
-          findAllLiteralsInExpressions(inputExpressions)
-        } else {
-          Seq.empty[String]
-        }
-        val literalsOrInputString = literalsAsStrings.mkString(", ")
-        throw new InferredExpressionException(
-          s"Exception occurred while evaluating expression - source: [$literalsOrInputString]",
-          e)
+        InferredExpression.throwExpressionInferenceException(input, inputExpressions, e)
     }
   }
 
@@ -115,16 +106,32 @@ abstract class InferredExpression(fSeq: InferrableFunction*)
       evaluator(input)
     } catch {
       case e: Exception =>
-        val literalsOrInputStrings = if (input == null) {
-          // In case no input row is provided, we can't extract literals from the input expressions.
-          findAllLiteralsInExpressions(inputExpressions)
-        } else {
-          Seq.empty[String]
-        }
-        val literalsOrInputString = literalsOrInputStrings.mkString(", ")
-        throw new InferredExpressionException(
-          s"Exception occurred while evaluating input row without serialization. Literals found: [$literalsOrInputString]",
-          e)
+        InferredExpression.throwExpressionInferenceException(input, inputExpressions, e)
+    }
+  }
+}
+
+object InferredExpression {
+  def throwExpressionInferenceException(
+      input: InternalRow,
+      inputExpressions: Seq[Expression],
+      e: Exception): Nothing = {
+    val literalsAsStrings = if (input == null) {
+      // In case no input row is provided, we can't extract literals from the input expressions.
+      inputExpressions.flatMap(findAllLiterals).map(_.value.toString)
+    } else {
+      Seq.empty[String]
+    }
+    val literalsOrInputString = literalsAsStrings.mkString(", ")
+    throw new InferredExpressionException(
+      s"Exception occurred while evaluating expression - source: [$literalsOrInputString]",
+      e)
+  }
+
+  def findAllLiterals(expression: Expression): Seq[Literal] = {
+    expression match {
+      case lit: Literal => Seq(lit)
+      case _ => expression.children.flatMap(findAllLiterals)
     }
   }
 }

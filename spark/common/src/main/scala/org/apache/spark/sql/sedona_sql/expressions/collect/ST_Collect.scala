@@ -25,7 +25,7 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
-import org.apache.spark.sql.sedona_sql.expressions.SerdeAware
+import org.apache.spark.sql.sedona_sql.expressions.{InferredExpression, SerdeAware}
 import org.apache.spark.sql.types.{ArrayType, _}
 import org.locationtech.jts.geom.Geometry
 
@@ -44,24 +44,29 @@ case class ST_Collect(inputExpressions: Seq[Expression])
   override def evalWithoutSerialization(input: InternalRow): Any = {
     val firstElement = inputExpressions.head
 
-    firstElement.dataType match {
-      case ArrayType(elementType, _) =>
-        elementType match {
-          case _: GeometryUDT =>
-            val data = firstElement.eval(input).asInstanceOf[ArrayData]
-            val numElements = data.numElements()
-            val geomElements = (0 until numElements)
-              .map(element => data.getBinary(element))
-              .filter(_ != null)
-              .map(_.toGeometry)
+    try {
+      firstElement.dataType match {
+        case ArrayType(elementType, _) =>
+          elementType match {
+            case _: GeometryUDT =>
+              val data = firstElement.eval(input).asInstanceOf[ArrayData]
+              val numElements = data.numElements()
+              val geomElements = (0 until numElements)
+                .map(element => data.getBinary(element))
+                .filter(_ != null)
+                .map(_.toGeometry)
 
-            Functions.createMultiGeometry(geomElements.toArray)
-          case _ => Functions.createMultiGeometry(Array())
-        }
-      case _ =>
-        val geomElements =
-          inputExpressions.map(_.toGeometry(input)).filter(_ != null)
-        Functions.createMultiGeometry(geomElements.toArray)
+              Functions.createMultiGeometry(geomElements.toArray)
+            case _ => Functions.createMultiGeometry(Array())
+          }
+        case _ =>
+          val geomElements =
+            inputExpressions.map(_.toGeometry(input)).filter(_ != null)
+          Functions.createMultiGeometry(geomElements.toArray)
+      }
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(input, inputExpressions, e)
     }
   }
 
