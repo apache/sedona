@@ -106,22 +106,38 @@ public class Functions {
       return geometry;
     }
 
-    BBox bBox = new BBox(geometry);
-    double minX = bBox.getStartLon() - deltaX;
-    double maxX = bBox.getEndLon() + deltaX;
-    double minY = bBox.getStartLat() - deltaY;
-    double maxY = bBox.getEndLat() + deltaY;
-    double minZ, maxZ;
+    Coordinate[] coordinates = geometry.getCoordinates();
+    double minX = Double.MAX_VALUE;
+    double maxX = -Double.MAX_VALUE;
+    double minY = Double.MAX_VALUE;
+    double maxY = -Double.MAX_VALUE;
+    double minZ = Double.MAX_VALUE;
+    double maxZ = -Double.MAX_VALUE;
+
+    for (int i = 0; i < coordinates.length; i++) {
+      minX = Math.min(minX, coordinates[i].x);
+      maxX = Math.max(maxX, coordinates[i].x);
+      minY = Math.min(minY, coordinates[i].y);
+      maxY = Math.max(maxY, coordinates[i].y);
+      minZ = Math.min(minZ, coordinates[i].z);
+      maxZ = Math.max(maxZ, coordinates[i].z);
+    }
+
+    minX = minX - deltaX;
+    maxX = maxX + deltaX;
+    minY = minY - deltaY;
+    maxY = maxY + deltaY;
+
     if (Functions.hasZ(geometry)) {
-      minZ = bBox.getMinZ() - deltaZ;
-      maxZ = bBox.getMaxZ() + deltaZ;
-      Coordinate[] coordinates = new Coordinate[5];
-      coordinates[0] = new Coordinate(minX, minY, minZ);
-      coordinates[1] = new Coordinate(minX, maxY, minZ);
-      coordinates[2] = new Coordinate(maxX, maxY, maxZ);
-      coordinates[3] = new Coordinate(maxX, minY, maxZ);
-      coordinates[4] = coordinates[0];
-      return geometry.getFactory().createPolygon(coordinates);
+      minZ = minZ - deltaZ;
+      maxZ = maxZ + deltaZ;
+      Coordinate[] newCoords = new Coordinate[5];
+      newCoords[0] = new Coordinate(minX, minY, minZ);
+      newCoords[1] = new Coordinate(minX, maxY, minZ);
+      newCoords[2] = new Coordinate(maxX, maxY, maxZ);
+      newCoords[3] = new Coordinate(maxX, minY, maxZ);
+      newCoords[4] = newCoords[0];
+      return geometry.getFactory().createPolygon(newCoords);
     }
     Geometry result = Constructors.polygonFromEnvelope(minX, minY, maxX, maxY);
     result.setSRID(geometry.getSRID());
