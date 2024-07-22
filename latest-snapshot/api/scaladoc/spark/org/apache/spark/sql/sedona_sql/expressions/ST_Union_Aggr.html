@@ -963,8 +963,8 @@
                         <a href="ST_Union.html" title="Return the union of geometry A and B">ST_Union</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
-                        <a class="class" href="" title="Return the polygon union of all Polygon in the given column"></a>
-                        <a href="" title="Return the polygon union of all Polygon in the given column">ST_Union_Aggr</a>
+                        <a class="class" href="" title=""></a>
+                        <a href="" title="">ST_Union_Aggr</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="ST_VoronoiPolygons.html" title=""></a>
@@ -1068,17 +1068,16 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ST_Union_Aggr</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.expressions.Aggregator">expressions.Aggregator</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>, <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>, <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>] with <a href="TraitSTAggregateExec.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec">TraitSTAggregateExec</a></span>
+        <span class="name">ST_Union_Aggr</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.expressions.Aggregator">expressions.Aggregator</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>, <span class="extype" name="scala.collection.mutable.ListBuffer">ListBuffer</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>], <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>] with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Return the polygon union of all Polygon in the given column
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="TraitSTAggregateExec.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec">TraitSTAggregateExec</a>, <span class="extype" name="org.apache.spark.sql.expressions.Aggregator">expressions.Aggregator</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>, <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>, <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>], <span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="org.apache.spark.sql.expressions.Aggregator">expressions.Aggregator</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>, <span class="extype" name="scala.collection.mutable.ListBuffer">ListBuffer</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>], <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>], <span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -1104,7 +1103,7 @@
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr"><span>ST_Union_Aggr</span></li><li class="in" name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec"><span>TraitSTAggregateExec</span></li><li class="in" name="org.apache.spark.sql.expressions.Aggregator"><span>Aggregator</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr"><span>ST_Union_Aggr</span></li><li class="in" name="org.apache.spark.sql.expressions.Aggregator"><span>Aggregator</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -1125,9 +1124,9 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;():org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr"></a><a id="&lt;init&gt;:ST_Union_Aggr"></a>
+      <a id="&lt;init&gt;(bufferSize:Int):org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr"></a><a id="&lt;init&gt;:ST_Union_Aggr"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Union_Aggr.html#&lt;init&gt;():org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Union_Aggr.html#&lt;init&gt;(bufferSize:Int):org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1136,7 +1135,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ST_Union_Aggr</span><span class="params">()</span>
+        <span class="name">ST_Union_Aggr</span><span class="params">(<span name="bufferSize">bufferSize: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1000</span></span>)</span>
       </span>
       
       
@@ -1214,10 +1213,10 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec#bufferEncoder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="bufferEncoder:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[org.locationtech.jts.geom.Geometry]"></a><a id="bufferEncoder:ExpressionEncoder[Geometry]"></a>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr#bufferEncoder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bufferEncoder:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[scala.collection.mutable.ListBuffer[org.locationtech.jts.geom.Geometry]]"></a><a id="bufferEncoder:ExpressionEncoder[ListBuffer[Geometry]]"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Union_Aggr.html#bufferEncoder:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[org.locationtech.jts.geom.Geometry]" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Union_Aggr.html#bufferEncoder:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[scala.collection.mutable.ListBuffer[org.locationtech.jts.geom.Geometry]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1226,10 +1225,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">bufferEncoder</span><span class="result">: <span class="extype" name="org.apache.spark.sql.catalyst.encoders.ExpressionEncoder">ExpressionEncoder</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>
+        <span class="name">bufferEncoder</span><span class="result">: <span class="extype" name="org.apache.spark.sql.catalyst.encoders.ExpressionEncoder">ExpressionEncoder</span>[<span class="extype" name="scala.collection.mutable.ListBuffer">ListBuffer</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TraitSTAggregateExec.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec">TraitSTAggregateExec</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr">ST_Union_Aggr</a> → Aggregator</dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -1308,10 +1307,10 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec#finish" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="finish(out:org.locationtech.jts.geom.Geometry):org.locationtech.jts.geom.Geometry"></a><a id="finish(Geometry):Geometry"></a>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr#finish" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finish(reduction:scala.collection.mutable.ListBuffer[org.locationtech.jts.geom.Geometry]):org.locationtech.jts.geom.Geometry"></a><a id="finish(ListBuffer[Geometry]):Geometry"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Union_Aggr.html#finish(out:org.locationtech.jts.geom.Geometry):org.locationtech.jts.geom.Geometry" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Union_Aggr.html#finish(reduction:scala.collection.mutable.ListBuffer[org.locationtech.jts.geom.Geometry]):org.locationtech.jts.geom.Geometry" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1320,10 +1319,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finish</span><span class="params">(<span name="out">out: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>)</span><span class="result">: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>
+        <span class="name">finish</span><span class="params">(<span name="reduction">reduction: <span class="extype" name="scala.collection.mutable.ListBuffer">ListBuffer</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>)</span><span class="result">: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TraitSTAggregateExec.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec">TraitSTAggregateExec</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr">ST_Union_Aggr</a> → Aggregator</dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -1362,22 +1361,6 @@
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec#initialGeometry" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="initialGeometry:org.locationtech.jts.geom.Geometry"></a><a id="initialGeometry:Geometry"></a>
-      <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Union_Aggr.html#initialGeometry:org.locationtech.jts.geom.Geometry" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">initialGeometry</span><span class="result">: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TraitSTAggregateExec.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec">TraitSTAggregateExec</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -1395,9 +1378,9 @@
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr#merge" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="merge(buffer1:org.locationtech.jts.geom.Geometry,buffer2:org.locationtech.jts.geom.Geometry):org.locationtech.jts.geom.Geometry"></a><a id="merge(Geometry,Geometry):Geometry"></a>
+      <a id="merge(buffer1:scala.collection.mutable.ListBuffer[org.locationtech.jts.geom.Geometry],buffer2:scala.collection.mutable.ListBuffer[org.locationtech.jts.geom.Geometry]):scala.collection.mutable.ListBuffer[org.locationtech.jts.geom.Geometry]"></a><a id="merge(ListBuffer[Geometry],ListBuffer[Geometry]):ListBuffer[Geometry]"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Union_Aggr.html#merge(buffer1:org.locationtech.jts.geom.Geometry,buffer2:org.locationtech.jts.geom.Geometry):org.locationtech.jts.geom.Geometry" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Union_Aggr.html#merge(buffer1:scala.collection.mutable.ListBuffer[org.locationtech.jts.geom.Geometry],buffer2:scala.collection.mutable.ListBuffer[org.locationtech.jts.geom.Geometry]):scala.collection.mutable.ListBuffer[org.locationtech.jts.geom.Geometry]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1406,7 +1389,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">merge</span><span class="params">(<span name="buffer1">buffer1: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>, <span name="buffer2">buffer2: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>)</span><span class="result">: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>
+        <span class="name">merge</span><span class="params">(<span name="buffer1">buffer1: <span class="extype" name="scala.collection.mutable.ListBuffer">ListBuffer</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>, <span name="buffer2">buffer2: <span class="extype" name="scala.collection.mutable.ListBuffer">ListBuffer</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.mutable.ListBuffer">ListBuffer</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr">ST_Union_Aggr</a> → Aggregator</dd></dl></div>
@@ -1464,7 +1447,7 @@
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec#outputEncoder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr#outputEncoder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="outputEncoder:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[org.locationtech.jts.geom.Geometry]"></a><a id="outputEncoder:ExpressionEncoder[Geometry]"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Union_Aggr.html#outputEncoder:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[org.locationtech.jts.geom.Geometry]" title="Permalink">
@@ -1479,11 +1462,11 @@
         <span class="name">outputEncoder</span><span class="result">: <span class="extype" name="org.apache.spark.sql.catalyst.encoders.ExpressionEncoder">ExpressionEncoder</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TraitSTAggregateExec.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec">TraitSTAggregateExec</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr">ST_Union_Aggr</a> → Aggregator</dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr#reduce" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="reduce(buffer:org.locationtech.jts.geom.Geometry,input:org.locationtech.jts.geom.Geometry):org.locationtech.jts.geom.Geometry"></a><a id="reduce(Geometry,Geometry):Geometry"></a>
+      <a id="reduce(buffer:scala.collection.mutable.ListBuffer[org.locationtech.jts.geom.Geometry],input:org.locationtech.jts.geom.Geometry):scala.collection.mutable.ListBuffer[org.locationtech.jts.geom.Geometry]"></a><a id="reduce(ListBuffer[Geometry],Geometry):ListBuffer[Geometry]"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Union_Aggr.html#reduce(buffer:org.locationtech.jts.geom.Geometry,input:org.locationtech.jts.geom.Geometry):org.locationtech.jts.geom.Geometry" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Union_Aggr.html#reduce(buffer:scala.collection.mutable.ListBuffer[org.locationtech.jts.geom.Geometry],input:org.locationtech.jts.geom.Geometry):scala.collection.mutable.ListBuffer[org.locationtech.jts.geom.Geometry]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1492,26 +1475,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">reduce</span><span class="params">(<span name="buffer">buffer: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>, <span name="input">input: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>)</span><span class="result">: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>
+        <span class="name">reduce</span><span class="params">(<span name="buffer">buffer: <span class="extype" name="scala.collection.mutable.ListBuffer">ListBuffer</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>, <span name="input">input: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>)</span><span class="result">: <span class="extype" name="scala.collection.mutable.ListBuffer">ListBuffer</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr">ST_Union_Aggr</a> → Aggregator</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec#serde" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="serde:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[org.locationtech.jts.geom.Geometry]"></a><a id="serde:ExpressionEncoder[Geometry]"></a>
-      <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Union_Aggr.html#serde:org.apache.spark.sql.catalyst.encoders.ExpressionEncoder[org.locationtech.jts.geom.Geometry]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">serde</span><span class="result">: <span class="extype" name="org.apache.spark.sql.catalyst.encoders.ExpressionEncoder">ExpressionEncoder</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TraitSTAggregateExec.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec">TraitSTAggregateExec</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -1628,10 +1595,10 @@
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec#zero" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="zero:org.locationtech.jts.geom.Geometry"></a><a id="zero:Geometry"></a>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr#zero" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="zero:scala.collection.mutable.ListBuffer[org.locationtech.jts.geom.Geometry]"></a><a id="zero:ListBuffer[Geometry]"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Union_Aggr.html#zero:org.locationtech.jts.geom.Geometry" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Union_Aggr.html#zero:scala.collection.mutable.ListBuffer[org.locationtech.jts.geom.Geometry]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1640,10 +1607,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">zero</span><span class="result">: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>
+        <span class="name">zero</span><span class="result">: <span class="extype" name="scala.collection.mutable.ListBuffer">ListBuffer</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TraitSTAggregateExec.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec">TraitSTAggregateExec</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr">ST_Union_Aggr</a> → Aggregator</dd></dl></div>
     </li>
               </ol>
             </div>
@@ -1654,10 +1621,8 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec">
-              <h3>Inherited from <a href="TraitSTAggregateExec.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.TraitSTAggregateExec">TraitSTAggregateExec</a></h3>
-            </div><div class="parent" name="org.apache.spark.sql.expressions.Aggregator">
-              <h3>Inherited from <span class="extype" name="org.apache.spark.sql.expressions.Aggregator">expressions.Aggregator</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>, <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>, <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</h3>
+        <div class="parent" name="org.apache.spark.sql.expressions.Aggregator">
+              <h3>Inherited from <span class="extype" name="org.apache.spark.sql.expressions.Aggregator">expressions.Aggregator</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>, <span class="extype" name="scala.collection.mutable.ListBuffer">ListBuffer</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>], <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</h3>
             </div><div class="parent" name="scala.Serializable">
               <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
             </div><div class="parent" name="java.io.Serializable">
