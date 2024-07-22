@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.javalang.typed
 import org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr
 import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon}
@@ -70,10 +71,12 @@ class aggregateFunctionTestScala extends TestBaseScala {
     it("Measured ST_Union_aggr wall time") {
       // number of random polygons to generate
       val numPolygons = 1000
-      createPolygonDataFrame(numPolygons)
+      val df = createPolygonDataFrame(numPolygons)
+
+      df.createOrReplaceTempView("geometry_table")
 
       // cache the table to eliminate the time of table scan
-      sparkSession.sql("cache table geometry_table")
+      df.cache()
       sparkSession.sql("select count(*) from geometry_table").take(1)(0).get(0)
 
       // measure time for optimized ST_Union_Aggr
@@ -85,6 +88,9 @@ class aggregateFunctionTestScala extends TestBaseScala {
       val durationOptimized = endTimeOptimized - startTimeOptimized
 
       assert(durationOptimized > 0, "Duration of optimized ST_Union_Aggr should be positive")
+
+      // clear cache
+      df.unpersist()
     }
 
     it("Passed ST_Intersection_aggr") {
@@ -130,7 +136,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
     s"POLYGON (($x $y, ${x + 1} $y, ${x + 1} ${y + 1}, $x ${y + 1}, $x $y))"
   }
 
-  def createPolygonDataFrame(numPolygons: Int): Unit = {
+  def createPolygonDataFrame(numPolygons: Int): DataFrame = {
     val polygons = (1 to numPolygons).map(generateRandomPolygon).toArray
     val polygonArray = polygons.map(polygon => s"ST_GeomFromWKT('$polygon')")
     val polygonArrayStr = polygonArray.mkString(", ")
@@ -140,6 +146,6 @@ class aggregateFunctionTestScala extends TestBaseScala {
          |SELECT explode(array($polygonArrayStr)) AS geom
      """.stripMargin
 
-    sparkSession.sql(sqlQuery).createOrReplaceTempView("geometry_table")
+    sparkSession.sql(sqlQuery)
   }
 }
