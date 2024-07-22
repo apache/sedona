@@ -73,16 +73,20 @@ class aggregateFunctionTestScala extends TestBaseScala {
       val numPolygons = 1000
       val df = createPolygonDataFrame(numPolygons)
 
-      df.createOrReplaceTempView("geometry_table")
+      df.createOrReplaceTempView("geometry_table_for_measuring_union_aggr")
 
       // cache the table to eliminate the time of table scan
       df.cache()
-      sparkSession.sql("select count(*) from geometry_table").take(1)(0).get(0)
+      sparkSession
+        .sql("select count(*) from geometry_table_for_measuring_union_aggr")
+        .take(1)(0)
+        .get(0)
 
       // measure time for optimized ST_Union_Aggr
       val startTimeOptimized = System.currentTimeMillis()
       val unionOptimized =
-        sparkSession.sql("SELECT ST_Union_Aggr(geom) AS union_geom FROM geometry_table")
+        sparkSession.sql(
+          "SELECT ST_Union_Aggr(geom) AS union_geom FROM geometry_table_for_measuring_union_aggr")
       assert(unionOptimized.take(1)(0).get(0).asInstanceOf[Geometry].getArea > 0)
       val endTimeOptimized = System.currentTimeMillis()
       val durationOptimized = endTimeOptimized - startTimeOptimized
