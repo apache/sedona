@@ -332,13 +332,18 @@ case class ST_IsValidDetail(children: Seq[Expression])
       throw new IllegalArgumentException(s"Invalid number of arguments: $nArgs")
     }
 
-    if (validDetail.location == null) {
-      return InternalRow.fromSeq(Seq(validDetail.valid, null, null))
-    }
+    try {
+      if (validDetail.location == null) {
+        return InternalRow.fromSeq(Seq(validDetail.valid, null, null))
+      }
 
-    val serLocation = GeometrySerializer.serialize(validDetail.location)
-    InternalRow.fromSeq(
-      Seq(validDetail.valid, UTF8String.fromString(validDetail.reason), serLocation))
+      val serLocation = GeometrySerializer.serialize(validDetail.location)
+      InternalRow.fromSeq(
+        Seq(validDetail.valid, UTF8String.fromString(validDetail.reason), serLocation))
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(input, children, e)
+    }
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
@@ -609,14 +614,20 @@ case class ST_MinimumBoundingRadius(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     val expr = inputExpressions(0)
-    val geometry = expr match {
-      case s: SerdeAware => s.evalWithoutSerialization(input)
-      case _ => expr.toGeometry(input)
-    }
 
-    geometry match {
-      case geometry: Geometry => getMinimumBoundingRadius(geometry)
-      case _ => null
+    try {
+      val geometry = expr match {
+        case s: SerdeAware => s.evalWithoutSerialization(input)
+        case _ => expr.toGeometry(input)
+      }
+
+      geometry match {
+        case geometry: Geometry => getMinimumBoundingRadius(geometry)
+        case _ => null
+      }
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(input, inputExpressions, e)
     }
   }
 
@@ -910,17 +921,23 @@ case class ST_SubDivideExplode(children: Seq[Expression]) extends Generator with
   override def eval(input: InternalRow): TraversableOnce[InternalRow] = {
     val geometryRaw = children.head
     val maxVerticesRaw = children(1)
-    geometryRaw.toGeometry(input) match {
-      case geom: Geometry =>
-        ArrayData.toArrayData(
-          Functions.subDivide(geom, maxVerticesRaw.toInt(input)).map(_.toGenericArrayData))
-        Functions
-          .subDivide(geom, maxVerticesRaw.toInt(input))
-          .map(_.toGenericArrayData)
-          .map(InternalRow(_))
-      case _ => new Array[InternalRow](0)
+    try {
+      geometryRaw.toGeometry(input) match {
+        case geom: Geometry =>
+          ArrayData.toArrayData(
+            Functions.subDivide(geom, maxVerticesRaw.toInt(input)).map(_.toGenericArrayData))
+          Functions
+            .subDivide(geom, maxVerticesRaw.toInt(input))
+            .map(_.toGenericArrayData)
+            .map(InternalRow(_))
+        case _ => new Array[InternalRow](0)
+      }
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(input, children, e)
     }
   }
+
   override def elementSchema: StructType = {
     new StructType()
       .add("geom", GeometryUDT, true)
@@ -978,13 +995,18 @@ case class ST_MaximumInscribedCircle(children: Seq[Expression])
     with CodegenFallback {
 
   override def eval(input: InternalRow): Any = {
-    val geometry = children.head.toGeometry(input)
-    var inscribedCircle: InscribedCircle = null
-    inscribedCircle = Functions.maximumInscribedCircle(geometry)
+    try {
+      val geometry = children.head.toGeometry(input)
+      var inscribedCircle: InscribedCircle = null
+      inscribedCircle = Functions.maximumInscribedCircle(geometry)
 
-    val serCenter = GeometrySerializer.serialize(inscribedCircle.center)
-    val serNearest = GeometrySerializer.serialize(inscribedCircle.nearest)
-    InternalRow.fromSeq(Seq(serCenter, serNearest, inscribedCircle.radius))
+      val serCenter = GeometrySerializer.serialize(inscribedCircle.center)
+      val serNearest = GeometrySerializer.serialize(inscribedCircle.nearest)
+      InternalRow.fromSeq(Seq(serCenter, serNearest, inscribedCircle.radius))
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(input, children, e)
+    }
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {

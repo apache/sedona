@@ -21,6 +21,7 @@ package org.apache.sedona.sql
 import org.apache.commons.codec.binary.Hex
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions.{array, col, element_at, lit}
+import org.apache.spark.sql.sedona_sql.expressions.InferredExpressionException
 import org.apache.spark.sql.sedona_sql.expressions.st_aggregates._
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
 import org.apache.spark.sql.sedona_sql.expressions.st_functions._
@@ -2214,6 +2215,21 @@ class dataFrameAPITestScala extends TestBaseScala {
       expected =
         "SRID=4326;POLYGON ((-0.4546817643920842 0.5948176504236309, 1.4752502925921425 0.0700679430157733, 2 2, 0.0700679430157733 2.5247497074078575, 0.7726591178039579 1.2974088252118154, -0.4546817643920842 0.5948176504236309))"
       assert(expected.equals(actual))
+    }
+
+    it("Passed returning exception with geometry when exception is thrown") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0))') AS geom1, ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))') AS geom2")
+
+      // Use intercept to assert that an exception is thrown
+      val exception = intercept[InferredExpressionException] {
+        baseDf.select(ST_Rotate("geom1", 50, "geom2")).take(1)
+      }
+
+      // Check the exception message
+      assert(exception.getMessage.contains(
+        "[SRID=4326;POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0)), 50.0, SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))]"))
+      assert(exception.getMessage.contains("The origin must be a non-empty Point geometry."))
     }
   }
 }
