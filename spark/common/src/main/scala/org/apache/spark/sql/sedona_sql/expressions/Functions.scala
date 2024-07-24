@@ -24,7 +24,7 @@ import org.apache.sedona.common.utils.{InscribedCircle, ValidDetail}
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, Generator}
+import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, Generator, Nondeterministic}
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
@@ -33,6 +33,7 @@ import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom._
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.unsafe.types.UTF8String
+import org.apache.spark.util.Utils
 
 /**
  * Return the distance between two geometries.
@@ -331,13 +332,18 @@ case class ST_IsValidDetail(children: Seq[Expression])
       throw new IllegalArgumentException(s"Invalid number of arguments: $nArgs")
     }
 
-    if (validDetail.location == null) {
-      return InternalRow.fromSeq(Seq(validDetail.valid, null, null))
-    }
+    try {
+      if (validDetail.location == null) {
+        return InternalRow.fromSeq(Seq(validDetail.valid, null, null))
+      }
 
-    val serLocation = GeometrySerializer.serialize(validDetail.location)
-    InternalRow.fromSeq(
-      Seq(validDetail.valid, UTF8String.fromString(validDetail.reason), serLocation))
+      val serLocation = GeometrySerializer.serialize(validDetail.location)
+      InternalRow.fromSeq(
+        Seq(validDetail.valid, UTF8String.fromString(validDetail.reason), serLocation))
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(input, children, e)
+    }
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
@@ -608,14 +614,20 @@ case class ST_MinimumBoundingRadius(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     val expr = inputExpressions(0)
-    val geometry = expr match {
-      case s: SerdeAware => s.evalWithoutSerialization(input)
-      case _ => expr.toGeometry(input)
-    }
 
-    geometry match {
-      case geometry: Geometry => getMinimumBoundingRadius(geometry)
-      case _ => null
+    try {
+      val geometry = expr match {
+        case s: SerdeAware => s.evalWithoutSerialization(input)
+        case _ => expr.toGeometry(input)
+      }
+
+      geometry match {
+        case geometry: Geometry => getMinimumBoundingRadius(geometry)
+        case _ => null
+      }
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(input, inputExpressions, e)
     }
   }
 
@@ -909,17 +921,23 @@ case class ST_SubDivideExplode(children: Seq[Expression]) extends Generator with
   override def eval(input: InternalRow): TraversableOnce[InternalRow] = {
     val geometryRaw = children.head
     val maxVerticesRaw = children(1)
-    geometryRaw.toGeometry(input) match {
-      case geom: Geometry =>
-        ArrayData.toArrayData(
-          Functions.subDivide(geom, maxVerticesRaw.toInt(input)).map(_.toGenericArrayData))
-        Functions
-          .subDivide(geom, maxVerticesRaw.toInt(input))
-          .map(_.toGenericArrayData)
-          .map(InternalRow(_))
-      case _ => new Array[InternalRow](0)
+    try {
+      geometryRaw.toGeometry(input) match {
+        case geom: Geometry =>
+          ArrayData.toArrayData(
+            Functions.subDivide(geom, maxVerticesRaw.toInt(input)).map(_.toGenericArrayData))
+          Functions
+            .subDivide(geom, maxVerticesRaw.toInt(input))
+            .map(_.toGenericArrayData)
+            .map(InternalRow(_))
+        case _ => new Array[InternalRow](0)
+      }
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(input, children, e)
     }
   }
+
   override def elementSchema: StructType = {
     new StructType()
       .add("geom", GeometryUDT, true)
@@ -977,13 +995,18 @@ case class ST_MaximumInscribedCircle(children: Seq[Expression])
     with CodegenFallback {
 
   override def eval(input: InternalRow): Any = {
-    val geometry = children.head.toGeometry(input)
-    var inscribedCircle: InscribedCircle = null
-    inscribedCircle = Functions.maximumInscribedCircle(geometry)
+    try {
+      val geometry = children.head.toGeometry(input)
+      var inscribedCircle: InscribedCircle = null
+      inscribedCircle = Functions.maximumInscribedCircle(geometry)
 
-    val serCenter = GeometrySerializer.serialize(inscribedCircle.center)
-    val serNearest = GeometrySerializer.serialize(inscribedCircle.nearest)
-    InternalRow.fromSeq(Seq(serCenter, serNearest, inscribedCircle.radius))
+      val serCenter = GeometrySerializer.serialize(inscribedCircle.center)
+      val serNearest = GeometrySerializer.serialize(inscribedCircle.nearest)
+      InternalRow.fromSeq(Seq(serCenter, serNearest, inscribedCircle.radius))
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(input, children, e)
+    }
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
@@ -1430,6 +1453,58 @@ case class ST_ForcePolygonCW(inputExpressions: Seq[Expression])
 
 case class ST_ForceRHR(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.forcePolygonCW _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_GeneratePoints(inputExpressions: Seq[Expression], randomSeed: Long)
+    extends Expression
+    with CodegenFallback
+    with ExpectsInputTypes
+    with Nondeterministic {
+
+  def this(inputExpressions: Seq[Expression]) = this(inputExpressions, Utils.random.nextLong())
+
+  @transient private[this] var random: java.util.Random = _
+
+  private val nArgs = children.length
+
+  override protected def initializeInternal(partitionIndex: Int): Unit = random =
+    new java.util.Random(randomSeed + partitionIndex)
+
+  override protected def evalInternal(input: InternalRow): Any = {
+    val geom = children.head.toGeometry(input)
+    val numPoints = children(1).eval(input).asInstanceOf[Int]
+    val generatedPoints = if (nArgs == 3) {
+      val seed = children(2).eval(input).asInstanceOf[Int]
+      if (seed > 0) {
+        Functions.generatePoints(geom, numPoints, seed)
+      } else {
+        Functions.generatePoints(geom, numPoints, random)
+      }
+    } else {
+      Functions.generatePoints(geom, numPoints, random)
+    }
+    GeometrySerializer.serialize(generatedPoints)
+  }
+
+  override def nullable: Boolean = true
+
+  override def dataType: DataType = GeometryUDT
+
+  override def inputTypes: Seq[AbstractDataType] = {
+    if (nArgs == 3) {
+      Seq(GeometryUDT, IntegerType, IntegerType)
+    } else if (nArgs == 2) {
+      Seq(GeometryUDT, IntegerType)
+    } else {
+      throw new IllegalArgumentException(s"Invalid number of arguments: $nArgs")
+    }
+  }
+
+  override def children: Seq[Expression] = inputExpressions
+
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

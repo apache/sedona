@@ -2143,6 +2143,49 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testGeneratePoints() {
+    Table polyTable =
+        tableEnv.sqlQuery(
+            "SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(50 50,10 10,10 50)'), 10, false, 'endcap=round join=round') AS geom");
+    Geometry actual =
+        (Geometry)
+            first(
+                    polyTable.select(
+                        call(Functions.ST_GeneratePoints.class.getSimpleName(), $("geom"), 15)))
+                .getField(0);
+    assertEquals(actual.getNumGeometries(), 15);
+
+    actual =
+        (Geometry)
+            first(
+                    polyTable
+                        .select(
+                            call(
+                                Functions.ST_GeneratePoints.class.getSimpleName(),
+                                $("geom"),
+                                5,
+                                100L))
+                        .as("geom")
+                        .select(
+                            call(Functions.ST_ReducePrecision.class.getSimpleName(), $("geom"), 5)))
+                .getField(0);
+    String expected =
+        "MULTIPOINT ((40.02957 46.70645), (37.11646 37.38582), (14.2051 29.23363), (40.82533 31.47273), (28.16839 34.16338))";
+    assertEquals(expected, actual.toString());
+
+    polyTable =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromWKT('MULTIPOLYGON (((10 0, 10 10, 20 10, 20 0, 10 0)), ((50 0, 50 10, 70 10, 70 0, 50 0)))') AS geom");
+    actual =
+        (Geometry)
+            first(
+                    polyTable.select(
+                        call(Functions.ST_GeneratePoints.class.getSimpleName(), $("geom"), 30)))
+                .getField(0);
+    assertEquals(actual.getNumGeometries(), 30);
+  }
+
+  @Test
   public void testNRings() {
     Integer expected = 1;
     Table pointTable =

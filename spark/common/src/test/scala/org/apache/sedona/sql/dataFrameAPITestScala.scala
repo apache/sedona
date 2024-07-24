@@ -21,6 +21,7 @@ package org.apache.sedona.sql
 import org.apache.commons.codec.binary.Hex
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions.{array, col, element_at, lit}
+import org.apache.spark.sql.sedona_sql.expressions.InferredExpressionException
 import org.apache.spark.sql.sedona_sql.expressions.st_aggregates._
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
 import org.apache.spark.sql.sedona_sql.expressions.st_functions._
@@ -1585,7 +1586,7 @@ class dataFrameAPITestScala extends TestBaseScala {
         "SELECT explode(array(ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))'), ST_GeomFromWKT('POLYGON ((1 0, 2 0, 2 1, 1 1, 1 0))'))) AS geom")
       val df = baseDf.select(ST_Union_Aggr("geom"))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
-      val expectedResult = "POLYGON ((1 0, 0 0, 0 1, 1 1, 2 1, 2 0, 1 0))"
+      val expectedResult = "POLYGON ((0 0, 0 1, 1 1, 2 1, 2 0, 1 0, 0 0))"
       assert(actualResult == expectedResult)
     }
 
@@ -1831,6 +1832,28 @@ class dataFrameAPITestScala extends TestBaseScala {
         "SELECT ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))') as poly")
       actual = baseDf.select(ST_IsPolygonCW("poly")).take(1)(0).get(0).asInstanceOf[Boolean]
       assertTrue(actual)
+    }
+
+    it("Should pass ST_GeneratePoints") {
+      var poly = sparkSession
+        .sql(
+          "SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(50 50,150 150,150 50)'), 10, false, 'endcap=round join=round') AS geom")
+      var actual = poly
+        .select(ST_NumGeometries(ST_GeneratePoints("geom", 15)))
+        .first()
+        .get(0)
+        .asInstanceOf[Int]
+      assert(actual == 15)
+
+      poly = sparkSession
+        .sql(
+          "SELECT ST_GeomFromWKT('MULTIPOLYGON (((10 0, 10 10, 20 10, 20 0, 10 0)), ((50 0, 50 10, 70 10, 70 0, 50 0)))') AS geom")
+      actual = poly
+        .select(ST_NumGeometries(ST_GeneratePoints("geom", 30)))
+        .first()
+        .get(0)
+        .asInstanceOf[Int]
+      assert(actual == 30)
     }
 
     it("Passed ST_NRings") {
@@ -2192,6 +2215,21 @@ class dataFrameAPITestScala extends TestBaseScala {
       expected =
         "SRID=4326;POLYGON ((-0.4546817643920842 0.5948176504236309, 1.4752502925921425 0.0700679430157733, 2 2, 0.0700679430157733 2.5247497074078575, 0.7726591178039579 1.2974088252118154, -0.4546817643920842 0.5948176504236309))"
       assert(expected.equals(actual))
+    }
+
+    it("Passed returning exception with geometry when exception is thrown") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0))') AS geom1, ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))') AS geom2")
+
+      // Use intercept to assert that an exception is thrown
+      val exception = intercept[InferredExpressionException] {
+        baseDf.select(ST_Rotate("geom1", 50, "geom2")).take(1)
+      }
+
+      // Check the exception message
+      assert(exception.getMessage.contains(
+        "[SRID=4326;POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0)), 50.0, SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))]"))
+      assert(exception.getMessage.contains("The origin must be a non-empty Point geometry."))
     }
   }
 }

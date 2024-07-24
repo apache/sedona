@@ -21,6 +21,10 @@ package org.apache.spark.sql.sedona_sql.expressions
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.expressions.Aggregator
 import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory}
+import org.locationtech.jts.operation.overlayng.OverlayNGRobust
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 
 /**
  * traits for creating Aggregate Function
@@ -50,22 +54,44 @@ trait TraitSTAggregateExec {
   def finish(out: Geometry): Geometry = out
 }
 
-/**
- * Return the polygon union of all Polygon in the given column
- */
-class ST_Union_Aggr extends Aggregator[Geometry, Geometry, Geometry] with TraitSTAggregateExec {
+class ST_Union_Aggr(bufferSize: Int = 1000)
+    extends Aggregator[Geometry, ListBuffer[Geometry], Geometry]
+    with Serializable {
 
-  def reduce(buffer: Geometry, input: Geometry): Geometry = {
-    if (buffer.equalsExact(initialGeometry)) input
-    else buffer.union(input)
+  override def reduce(buffer: ListBuffer[Geometry], input: Geometry): ListBuffer[Geometry] = {
+    buffer += input
+    if (buffer.size >= bufferSize) {
+      // Perform the union when buffer size is reached
+      val unionGeometry = OverlayNGRobust.union(buffer.asJava)
+      buffer.clear()
+      buffer += unionGeometry
+    }
+    buffer
   }
 
-  def merge(buffer1: Geometry, buffer2: Geometry): Geometry = {
-    if (buffer1.equals(initialGeometry)) buffer2
-    else if (buffer2.equals(initialGeometry)) buffer1
-    else buffer1.union(buffer2)
+  override def merge(
+      buffer1: ListBuffer[Geometry],
+      buffer2: ListBuffer[Geometry]): ListBuffer[Geometry] = {
+    buffer1 ++= buffer2
+    if (buffer1.size >= bufferSize) {
+      // Perform the union when buffer size is reached
+      val unionGeometry = OverlayNGRobust.union(buffer1.asJava)
+      buffer1.clear()
+      buffer1 += unionGeometry
+    }
+    buffer1
   }
 
+  override def finish(reduction: ListBuffer[Geometry]): Geometry = {
+    OverlayNGRobust.union(reduction.asJava)
+  }
+
+  def bufferEncoder: ExpressionEncoder[ListBuffer[Geometry]] =
+    ExpressionEncoder[ListBuffer[Geometry]]()
+
+  def outputEncoder: ExpressionEncoder[Geometry] = ExpressionEncoder[Geometry]()
+
+  override def zero: ListBuffer[Geometry] = ListBuffer.empty
 }
 
 /**
