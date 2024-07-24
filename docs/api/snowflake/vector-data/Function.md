@@ -948,6 +948,13 @@ Format:
 
 `ST_Expand(geometry: Geometry, deltaX: Double, deltaY: Double, deltaZ: Double)`
 
+!!!Note
+    Things to consider when using this function:
+
+    1. The `uniformDelta` parameter expands Z dimensions for XYZ geometries; otherwise, it only affects XY dimensions.
+    2. For XYZ geometries, specifying only `deltaX` and `deltaY` will preserve the original Z dimension.
+    3. If the input geometry has an M dimension then using this function will drop the said M dimension.
+
 SQL Example:
 
 ```sql

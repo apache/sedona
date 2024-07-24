@@ -1218,6 +1218,13 @@ Introduction: Returns a geometry expanded from the bounding box of the input. Th
 1. By individual axis using `deltaX`, `deltaY`, or `deltaZ` parameters.
 2. Uniformly across all axes using the `uniformDelta` parameter.
 
+!!!Note
+    Things to consider when using this function:
+
+    1. The `uniformDelta` parameter expands Z dimensions for XYZ geometries; otherwise, it only affects XY dimensions.
+    2. For XYZ geometries, specifying only `deltaX` and `deltaY` will preserve the original Z dimension.
+    3. If the input geometry has an M dimension then using this function will drop the said M dimension.
+
 Format:
 
 `ST_Expand(geometry: Geometry, uniformDelta: Double)`
