@@ -207,6 +207,17 @@ case class ST_Envelope(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Expand(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction4(Functions.expand),
+      inferrableFunction3(Functions.expand),
+      inferrableFunction2(Functions.expand)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
  * Return the length measurement of a Geometry
  *

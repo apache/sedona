@@ -469,6 +469,33 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "uniformDelta"},
+      argTypes = {"Geometry", "double"},
+      returnTypes = "Geometry")
+  public static String ST_Expand(String geometry, double uniformDelta) {
+    return GeometrySerde.serGeoJson(
+        Functions.expand(GeometrySerde.deserGeoJson(geometry), uniformDelta));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "deltaX", "deltaY"},
+      argTypes = {"Geometry", "double", "double"},
+      returnTypes = "Geometry")
+  public static String ST_Expand(String geometry, double deltaX, double deltaY) {
+    return GeometrySerde.serGeoJson(
+        Functions.expand(GeometrySerde.deserGeoJson(geometry), deltaX, deltaY));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "deltaX", "deltaY", "deltaZ"},
+      argTypes = {"Geometry", "double", "double", "double"},
+      returnTypes = "Geometry")
+  public static String ST_Expand(String geometry, double deltaX, double deltaY, double deltaZ) {
+    return GeometrySerde.serGeoJson(
+        Functions.expand(GeometrySerde.deserGeoJson(geometry), deltaX, deltaY, deltaZ));
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"leftGeometry", "rightGeometry"},
       argTypes = {"Geometry", "Geometry"})
   public static boolean ST_Equals(String leftGeometry, String rightGeometry) {

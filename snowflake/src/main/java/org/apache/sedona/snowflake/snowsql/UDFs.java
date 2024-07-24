@@ -340,6 +340,24 @@ public class UDFs {
     return GeometrySerde.serialize(Functions.envelope(GeometrySerde.deserialize(geometry)));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "uniformDelta"})
+  public static byte[] ST_Expand(byte[] geometry, double uniformDelta) {
+    return GeometrySerde.serialize(
+        Functions.expand(GeometrySerde.deserialize(geometry), uniformDelta));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "deltaX", "deltaY"})
+  public static byte[] ST_Expand(byte[] geometry, double deltaX, double deltaY) {
+    return GeometrySerde.serialize(
+        Functions.expand(GeometrySerde.deserialize(geometry), deltaX, deltaY));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "deltaX", "deltaY", "deltaZ"})
+  public static byte[] ST_Expand(byte[] geometry, double deltaX, double deltaY, double deltaZ) {
+    return GeometrySerde.serialize(
+        Functions.expand(GeometrySerde.deserialize(geometry), deltaX, deltaY, deltaZ));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry"})
   public static boolean ST_Equals(byte[] leftGeometry, byte[] rightGeometry) {
     return Predicates.equals(

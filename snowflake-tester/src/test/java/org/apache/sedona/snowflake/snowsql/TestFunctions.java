@@ -363,6 +363,24 @@ public class TestFunctions extends TestBase {
   }
 
   @Test
+  public void test_ST_Expand() {
+    registerUDF("ST_Expand", byte[].class, double.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_Expand(sedona.ST_GeomFromText('POLYGON ((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))'), 10))",
+        "POLYGON Z((40 40 -9, 40 90 -9, 90 90 13, 90 40 13, 40 40 -9))");
+
+    registerUDF("ST_Expand", byte[].class, double.class, double.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_Expand(sedona.ST_GeomFromText('POLYGON ((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))'), 5, 6))",
+        "POLYGON Z((45 44 1, 45 86 1, 85 86 3, 85 44 3, 45 44 1))");
+
+    registerUDF("ST_Expand", byte[].class, double.class, double.class, double.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_Expand(sedona.ST_GeomFromText('POLYGON ((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))'), 6, 5, -3))",
+        "POLYGON Z((44 45 4, 44 85 4, 86 85 0, 86 45 0, 44 45 4))");
+  }
+
+  @Test
   public void test_ST_ExteriorRing() {
     registerUDF("ST_ExteriorRing", byte[].class);
     verifySqlSingleRes(

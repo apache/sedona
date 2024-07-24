@@ -169,6 +169,25 @@ object st_functions extends DataFrameAPI {
   def ST_Envelope(geometry: Column): Column = wrapExpression[ST_Envelope](geometry)
   def ST_Envelope(geometry: String): Column = wrapExpression[ST_Envelope](geometry)
 
+  def ST_Expand(geometry: Column, uniformDelta: Column) =
+    wrapExpression[ST_Expand](geometry, uniformDelta)
+  def ST_Expand(geometry: String, uniformDelta: String) =
+    wrapExpression[ST_Expand](geometry, uniformDelta)
+  def ST_Expand(geometry: String, uniformDelta: Double) =
+    wrapExpression[ST_Expand](geometry, uniformDelta)
+  def ST_Expand(geometry: Column, deltaX: Column, deltaY: Column) =
+    wrapExpression[ST_Expand](geometry, deltaX, deltaY)
+  def ST_Expand(geometry: String, deltaX: String, deltaY: String) =
+    wrapExpression[ST_Expand](geometry, deltaX, deltaY)
+  def ST_Expand(geometry: String, deltaX: Double, deltaY: Double) =
+    wrapExpression[ST_Expand](geometry, deltaX, deltaY)
+  def ST_Expand(geometry: Column, deltaX: Column, deltaY: Column, deltaZ: Column) =
+    wrapExpression[ST_Expand](geometry, deltaX, deltaY, deltaZ)
+  def ST_Expand(geometry: String, deltaX: String, deltaY: String, deltaZ: String) =
+    wrapExpression[ST_Expand](geometry, deltaX, deltaY, deltaZ)
+  def ST_Expand(geometry: String, deltaX: Double, deltaY: Double, deltaZ: Double) =
+    wrapExpression[ST_Expand](geometry, deltaX, deltaY, deltaZ)
+
   def ST_ExteriorRing(polygon: Column): Column = wrapExpression[ST_ExteriorRing](polygon)
   def ST_ExteriorRing(polygon: String): Column = wrapExpression[ST_ExteriorRing](polygon)
 
