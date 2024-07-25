@@ -23,6 +23,8 @@ import org.apache.hadoop.mapreduce.{Job, TaskAttemptContext}
 import org.apache.hadoop.mapreduce.JobContext
 import org.apache.hadoop.mapreduce.OutputCommitter
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat
+import org.apache.hadoop.mapreduce.lib.output.PathOutputCommitter
+import org.apache.hadoop.mapreduce.lib.output.PathOutputCommitterFactory
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.execution.datasources.{FileFormat, OutputWriter, OutputWriterFactory}
@@ -53,9 +55,17 @@ private[spark] class RasterFileFormat extends FileFormat with DataSourceRegister
       throw new IllegalArgumentException("Invalid Raster DataFrame Schema")
     }
     if (rasterOptions.useDirectCommitter) {
-      job.getConfiguration.set(
-        "spark.sql.sources.outputCommitterClass",
-        classOf[DirectOutputCommitter].getName)
+      val conf = job.getConfiguration
+
+      // For working with SQLHadoopMapReduceCommitProtocol, which is the default output commit protocol
+      conf.set("spark.sql.sources.outputCommitterClass", classOf[DirectOutputCommitter].getName)
+
+      // For working with org.apache.spark.internal.io.cloud.PathOutputCommitProtocol, which is the
+      // output commit protocol used in cloud storage. For instance, the S3 magic committer uses
+      // this output commit protocol
+      conf.set(
+        "mapreduce.outputcommitter.factory.class",
+        classOf[DirectOutputCommitterFactory].getName)
     }
 
     new OutputWriterFactory {
@@ -153,7 +163,14 @@ private class RasterFileWriter(
   }
 }
 
-class DirectOutputCommitter extends OutputCommitter {
+class DirectOutputCommitterFactory extends PathOutputCommitterFactory {
+  override def createOutputCommitter(
+      outputPath: Path,
+      context: TaskAttemptContext): PathOutputCommitter =
+    new DirectPathOutputCommitter(outputPath, context)
+}
+
+trait DirectOutputCommitterTrait extends OutputCommitter {
   override def setupJob(jobContext: JobContext): Unit = {
     val outputPath = FileOutputFormat.getOutputPath(jobContext)
     if (outputPath != null) {
@@ -183,4 +200,14 @@ class DirectOutputCommitter extends OutputCommitter {
   override def needsTaskCommit(taskContext: TaskAttemptContext): Boolean = false
   override def commitTask(taskContext: TaskAttemptContext): Unit = ()
   override def abortTask(taskContext: TaskAttemptContext): Unit = ()
+}
+
+class DirectOutputCommitter extends DirectOutputCommitterTrait
+
+class DirectPathOutputCommitter(outputPath: Path, context: JobContext)
+    extends PathOutputCommitter(outputPath, context)
+    with DirectOutputCommitterTrait {
+
+  override def getOutputPath: Path = outputPath
+  override def getWorkPath: Path = outputPath
 }
