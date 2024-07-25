@@ -156,6 +156,9 @@ Available options:
 * pathField
 	* No default value. If you use this option, then the column specified in this option must exist in the DataFrame schema. If this option is not used, each produced raster image will have a random UUID file name.
 	* Allowed values: any column name that indicates the paths of each raster file
+* useDirectCommitter (Since: `v1.6.1`)
+	* Default value: `true`. If set to `true`, the output files will be written directly to the target location. If set to `false`, the output files will be written to a temporary location and finally be committed to their target location. It is usually slower to write large amount of raster files with `useDirectCommitter` set to `false`, especially when writing to object stores such as S3.
+	* Allowed values: `true` or `false`
 
 The schema of the Raster dataframe to be written can be one of the following two schemas:
 
