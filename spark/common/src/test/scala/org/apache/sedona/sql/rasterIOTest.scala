@@ -51,6 +51,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
         .option("rasterField", "content")
         .option("fileExtension", ".tiff")
         .option("pathField", "path")
+        .option("useDirectCommitter", "false")
         .mode(SaveMode.Overwrite)
         .save(tempDir + "/raster-written")
       rasterDf = sparkSession.read.format("binaryFile").load(tempDir + "/raster-written/*")

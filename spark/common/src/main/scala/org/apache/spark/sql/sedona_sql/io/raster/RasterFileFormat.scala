@@ -18,8 +18,13 @@
  */
 package org.apache.spark.sql.sedona_sql.io.raster
 
-import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
+import org.apache.hadoop.fs.{FileStatus, Path}
 import org.apache.hadoop.mapreduce.{Job, TaskAttemptContext}
+import org.apache.hadoop.mapreduce.JobContext
+import org.apache.hadoop.mapreduce.OutputCommitter
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat
+import org.apache.hadoop.mapreduce.lib.output.PathOutputCommitter
+import org.apache.hadoop.mapreduce.lib.output.PathOutputCommitterFactory
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.execution.datasources.{FileFormat, OutputWriter, OutputWriterFactory}
@@ -48,6 +53,19 @@ private[spark] class RasterFileFormat extends FileFormat with DataSourceRegister
     val rasterOptions = new RasterOptions(options)
     if (!isValidRasterSchema(dataSchema)) {
       throw new IllegalArgumentException("Invalid Raster DataFrame Schema")
+    }
+    if (rasterOptions.useDirectCommitter) {
+      val conf = job.getConfiguration
+
+      // For working with SQLHadoopMapReduceCommitProtocol, which is the default output commit protocol
+      conf.set("spark.sql.sources.outputCommitterClass", classOf[DirectOutputCommitter].getName)
+
+      // For working with org.apache.spark.internal.io.cloud.PathOutputCommitProtocol, which is the
+      // output commit protocol used in cloud storage. For instance, the S3 magic committer uses
+      // this output commit protocol
+      conf.set(
+        "mapreduce.outputcommitter.factory.class",
+        classOf[DirectOutputCommitterFactory].getName)
     }
 
     new OutputWriterFactory {
@@ -143,4 +161,53 @@ private class RasterFileWriter(
     }
     rasterFilePath + rasterOptions.fileExtension
   }
+}
+
+class DirectOutputCommitterFactory extends PathOutputCommitterFactory {
+  override def createOutputCommitter(
+      outputPath: Path,
+      context: TaskAttemptContext): PathOutputCommitter =
+    new DirectPathOutputCommitter(outputPath, context)
+}
+
+trait DirectOutputCommitterTrait extends OutputCommitter {
+  override def setupJob(jobContext: JobContext): Unit = {
+    val outputPath = FileOutputFormat.getOutputPath(jobContext)
+    if (outputPath != null) {
+      val fs = outputPath.getFileSystem(jobContext.getConfiguration)
+      if (!fs.exists(outputPath)) {
+        fs.mkdirs(outputPath)
+      }
+    }
+  }
+
+  override def commitJob(jobContext: JobContext): Unit = {
+    val outputPath = FileOutputFormat.getOutputPath(jobContext)
+    if (outputPath != null) {
+      val fs = outputPath.getFileSystem(jobContext.getConfiguration)
+      // True if the job requires output.dir marked on successful job.
+      // Note that by default it is set to true.
+      if (jobContext.getConfiguration.getBoolean(
+          "mapreduce.fileoutputcommitter.marksuccessfuljobs",
+          true)) {
+        val markerPath = new Path(outputPath, "_SUCCESS")
+        fs.create(markerPath).close()
+      }
+    }
+  }
+
+  override def setupTask(taskContext: TaskAttemptContext): Unit = ()
+  override def needsTaskCommit(taskContext: TaskAttemptContext): Boolean = false
+  override def commitTask(taskContext: TaskAttemptContext): Unit = ()
+  override def abortTask(taskContext: TaskAttemptContext): Unit = ()
+}
+
+class DirectOutputCommitter extends DirectOutputCommitterTrait
+
+class DirectPathOutputCommitter(outputPath: Path, context: JobContext)
+    extends PathOutputCommitter(outputPath, context)
+    with DirectOutputCommitterTrait {
+
+  override def getOutputPath: Path = outputPath
+  override def getWorkPath: Path = outputPath
 }
