@@ -25,11 +25,6 @@ from pyspark.sql import Column
 from sedona.sql.dataframe_api import call_sedona_function, ColumnOrName, ColumnOrNameOrNumber, validate_argument_types
 
 
-# Automatically populate __all__
-__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
-           if inspect.isfunction(obj)]
-
-
 _call_st_function = partial(call_sedona_function, "st_functions")
 
 @validate_argument_types
@@ -2025,3 +2020,8 @@ def ST_Rotate(geometry: ColumnOrName, angle: Union[ColumnOrName, float], originX
         args = (geometry, angle)
 
     return _call_st_function("ST_Rotate", args)
+
+
+# Automatically populate __all__
+__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
+           if inspect.isfunction(obj)]

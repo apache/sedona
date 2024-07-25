@@ -25,10 +25,6 @@ from sedona.sql.dataframe_api import ColumnOrName, call_sedona_function, validat
 
 _call_aggregate_function = partial(call_sedona_function, "st_aggregates")
 
-# Automatically populate __all__
-__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
-           if inspect.isfunction(obj)]
-
 
 @validate_argument_types
 def ST_Envelope_Aggr(geometry: ColumnOrName) -> Column:
@@ -64,3 +60,8 @@ def ST_Union_Aggr(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_aggregate_function("ST_Union_Aggr", geometry)
+
+
+# Automatically populate __all__
+__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
+           if inspect.isfunction(obj)]
