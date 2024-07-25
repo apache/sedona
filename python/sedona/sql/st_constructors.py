@@ -25,11 +25,6 @@ from pyspark.sql import Column
 from sedona.sql.dataframe_api import ColumnOrName, ColumnOrNameOrNumber, call_sedona_function, validate_argument_types
 
 
-# Automatically populate __all__
-__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
-           if inspect.isfunction(obj)]
-
-
 _call_constructor_function = partial(call_sedona_function, "st_constructors")
 
 
@@ -454,3 +449,8 @@ def ST_GeomCollFromText(wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] 
     args = (wkt) if srid is None else (wkt, srid)
 
     return _call_constructor_function("ST_GeomCollFromText", args)
+
+
+# Automatically populate __all__
+__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
+           if inspect.isfunction(obj)]
