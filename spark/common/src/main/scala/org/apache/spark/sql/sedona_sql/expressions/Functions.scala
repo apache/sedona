@@ -466,7 +466,9 @@ case class ST_AsText(inputExpressions: Seq[Expression])
 }
 
 case class ST_AsGeoJSON(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.asGeoJson _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.asGeoJson),
+      inferrableFunction2(Functions.asGeoJson)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

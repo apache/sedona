@@ -186,6 +186,13 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "type"},
+      argTypes = {"Geometry", "String"})
+  public static String ST_AsGeoJSON(String geometry, String type) {
+    return Functions.asGeoJson(GeometrySerde.deserGeoJson(geometry), type);
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"})
   public static String ST_AsKML(String geometry) {

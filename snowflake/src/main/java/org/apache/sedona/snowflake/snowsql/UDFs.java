@@ -144,6 +144,11 @@ public class UDFs {
     return Functions.asGeoJson(GeometrySerde.deserialize(geometry));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "type"})
+  public static String ST_AsGeoJSON(byte[] geometry, String type) {
+    return Functions.asGeoJson(GeometrySerde.deserialize(geometry), type);
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static String ST_AsKML(byte[] geometry) {
     return Functions.asKML(GeometrySerde.deserialize(geometry));

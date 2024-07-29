@@ -160,7 +160,7 @@ def ST_AsEWKT(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_AsGeoJSON(geometry: ColumnOrName) -> Column:
+def ST_AsGeoJSON(geometry: ColumnOrName, type: Optional[ColumnOrName] = None) -> Column:
     """Generate the GeoJSON style representation of a geometry column.
 
     :param geometry: Geometry column to generate GeoJSON for.
@@ -168,7 +168,8 @@ def ST_AsGeoJSON(geometry: ColumnOrName) -> Column:
     :return: GeoJSON representation of geometry as a string column.
     :rtype: Column
     """
-    return _call_st_function("ST_AsGeoJSON", geometry)
+    args = (geometry) if type is None else (geometry, type)
+    return _call_st_function("ST_AsGeoJSON", args)
 
 
 @validate_argument_types

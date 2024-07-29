@@ -772,9 +772,21 @@ class dataFrameAPITestScala extends TestBaseScala {
 
     it("Passed ST_AsGeoJSON") {
       val pointDf = sparkSession.sql("SELECT ST_Point(0.0, 0.0) AS geom")
-      val df = pointDf.select(ST_AsGeoJSON("geom"))
-      val actualResult = df.take(1)(0).get(0).asInstanceOf[String]
-      val expectedResult = "{\"type\":\"Point\",\"coordinates\":[0.0,0.0]}"
+      var df = pointDf.select(ST_AsGeoJSON("geom"))
+      var actualResult = df.take(1)(0).get(0).asInstanceOf[String]
+      var expectedResult = "{\"type\":\"Point\",\"coordinates\":[0.0,0.0]}"
+      assert(actualResult == expectedResult)
+
+      df = pointDf.select(ST_AsGeoJSON(col("geom"), lit("feature")))
+      actualResult = df.take(1)(0).get(0).asInstanceOf[String]
+      expectedResult =
+        "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[0.0,0.0]},\"properties\":{}}"
+      assert(actualResult == expectedResult)
+
+      df = pointDf.select(ST_AsGeoJSON(col("geom"), lit("featureCollection")))
+      actualResult = df.take(1)(0).get(0).asInstanceOf[String]
+      expectedResult =
+        "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[0.0,0.0]},\"properties\":{}}]}"
       assert(actualResult == expectedResult)
     }
 

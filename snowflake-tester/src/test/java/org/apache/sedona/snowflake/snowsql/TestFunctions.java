@@ -154,6 +154,16 @@ public class TestFunctions extends TestBase {
     verifySqlSingleRes(
         "select sedona.ST_AsGeoJSON(sedona.ST_GeomFromText('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))",
         "{\"type\":\"Polygon\",\"coordinates\":[[[1.0,1.0],[8.0,1.0],[8.0,8.0],[1.0,8.0],[1.0,1.0]]]}");
+
+    registerUDF("ST_AsGeoJSON", byte[].class, String.class);
+    verifySqlSingleRes(
+            "select sedona.ST_AsGeoJSON(sedona.ST_GeomFromText('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'), 'feature')",
+            "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[1.0,1.0],[8.0,1.0],[8.0,8.0],[1.0,8.0],[1.0,1.0]]]},\"properties\":{}}");
+
+    registerUDF("ST_AsGeoJSON", byte[].class, String.class);
+    verifySqlSingleRes(
+            "select sedona.ST_AsGeoJSON(sedona.ST_GeomFromText('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'), 'featurecollection')",
+            "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[1.0,1.0],[8.0,1.0],[8.0,8.0],[1.0,8.0],[1.0,1.0]]]},\"properties\":{}}]}");
   }
 
   @Test

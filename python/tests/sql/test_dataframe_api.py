@@ -92,6 +92,8 @@ test_configurations = [
     (stf.ST_AsHEXEWKB, ("point",), "point_geom", "", "01010000000000000000000000000000000000F03F"),
     (stf.ST_AsEWKT, (lambda: f.expr("ST_SetSRID(point, 4326)"),), "point_geom", "", "SRID=4326;POINT (0 1)"),
     (stf.ST_AsGeoJSON, ("point",), "point_geom", "", "{\"type\":\"Point\",\"coordinates\":[0.0,1.0]}"),
+    (stf.ST_AsGeoJSON, ("point", "feature"), "point_geom", "", "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[0.0,1.0]},\"properties\":{}}"),
+    (stf.ST_AsGeoJSON, ("point", "featurecollection"), "point_geom", "", "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[0.0,1.0]},\"properties\":{}}]}"),
     (stf.ST_AsGML, ("point",), "point_geom", "", "<gml:Point>\n  <gml:coordinates>\n    0.0,1.0 \n  </gml:coordinates>\n</gml:Point>\n"),
     (stf.ST_AsKML, ("point",), "point_geom", "", "<Point>\n  <coordinates>0.0,1.0</coordinates>\n</Point>\n"),
     (stf.ST_AsText, ("point",), "point_geom", "", "POINT (0 1)"),

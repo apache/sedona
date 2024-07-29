@@ -64,6 +64,8 @@ import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.locationtech.jts.simplify.VWSimplifier;
 import org.locationtech.jts.triangulate.DelaunayTriangulationBuilder;
 import org.locationtech.jts.triangulate.polygon.ConstrainedDelaunayTriangulator;
+import org.wololo.geojson.Feature;
+import org.wololo.geojson.FeatureCollection;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
 public class Functions {
@@ -664,11 +666,39 @@ public class Functions {
   }
 
   public static String asGeoJson(Geometry geometry) {
+    return asGeoJson(geometry, "simple");
+  }
+
+  public static String asGeoJson(Geometry geometry, String type) {
     if (geometry == null) {
       return null;
     }
+
     GeoJSONWriter writer = new GeoJSONWriter();
-    return writer.write(geometry).toString();
+    org.wololo.geojson.Geometry geoJson = writer.write(geometry);
+
+    switch (type.toLowerCase()) {
+      case "simple":
+        return geoJson.toString();
+
+      case "feature":
+        Map<String, Object> properties = new HashMap<>();
+        Feature feature = new Feature(geoJson, properties);
+        return feature.toString();
+
+      case "featurecollection":
+        List<Feature> features = new ArrayList<>();
+        features.add(new Feature(geoJson, new HashMap<>()));
+        FeatureCollection featureCollection =
+            new FeatureCollection(features.toArray(new Feature[0]));
+        return featureCollection.toString();
+
+      default:
+        throw new IllegalArgumentException(
+            "Unknown type: "
+                + type
+                + ". Valid types are: 'geometry', 'feature', 'featurecollection'.");
+    }
   }
 
   public static int nPoints(Geometry geometry) {
