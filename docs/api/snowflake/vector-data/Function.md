@@ -270,7 +270,17 @@ FROM polygondf
 
 Introduction: Return the [GeoJSON](https://geojson.org/) string representation of a geometry
 
-Format: `ST_AsGeoJSON (A:geometry)`
+The type parameter takes the following options -
+
+- "Simple" (default): Returns a simple GeoJSON geometry.
+- "Feature": Wraps the geometry in a GeoJSON Feature.
+- "FeatureCollection": Wraps the Feature in a GeoJSON FeatureCollection.
+
+Format:
+
+`ST_AsGeoJSON (A:geometry)`
+
+`ST_AsGeoJSON (A:geometry, type: String)`
 
 SQL example:
 
