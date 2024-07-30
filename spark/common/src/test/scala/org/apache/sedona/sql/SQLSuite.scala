@@ -18,38 +18,42 @@
  */
 package org.apache.sedona.sql
 
-import org.scalatest.matchers.must.Matchers.include
+import org.scalatest.matchers.must.Matchers.be
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatest.prop.TableDrivenPropertyChecks
 
 /**
- * Test suite for testing SQLsupport in Sedona-SQL module.
+ * Test suite for testing Sedona SQL support.
  */
 class SQLSuite extends TestBaseScala with TableDrivenPropertyChecks {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
+    sparkSession.conf.set("spark.sql.legacy.createHiveTableByDefault", "false")
   }
 
-  describe("Hive table creation") {
-    it("should throw an exception when creating a regular Hive table without Hive support") {
-      val exception = intercept[org.apache.spark.sql.AnalysisException] {
-        sparkSession.sql("CREATE TABLE T_TEST (INT_COL INT)")
-      }
-      exception.getMessage should include("Hive support is required to CREATE Hive TABLE")
+  describe("Table creation DDL tests") {
+
+    it("should be able to create a regular table without geometry column should work") {
+      sparkSession.sql("CREATE TABLE T_TEST_REGULAR (INT_COL INT)")
+      sparkSession.catalog.tableExists("T_TEST_REGULAR") should be(true)
     }
 
-    it("should throw an exception when creating a geospatial Hive table without Hive support") {
-      val exception = intercept[org.apache.spark.sql.AnalysisException] {
-        // Create sample data
-        sparkSession.sql("""
+    it(
+      "should be able to create a regular table with geometry column should work with a workaround") {
+      sparkSession.sql("""
     CREATE OR REPLACE TEMP VIEW EMPTY_VIEW AS
     SELECT ST_GEOMFROMTEXT(CAST(NULL AS STRING)) AS GEOM
     WHERE 1 = 0
   """)
-        sparkSession.sql("CREATE TABLE T_TEST AS (SELECT * FROM EMPTY_VIEW)")
-      }
-      exception.getMessage should include("Hive support is required to CREATE Hive TABLE")
+      sparkSession.sql("CREATE TABLE T_TEST_IMPLICIT_GEOMETRY AS (SELECT * FROM EMPTY_VIEW)")
+      sparkSession.catalog.tableExists("T_TEST_IMPLICIT_GEOMETRY") should be(true)
+    }
+
+    ignore(
+      "should be able to create a regular table with geometry column should work without a workaround") {
+      sparkSession.sql("CREATE TABLE T_TEST_EXPLICIT_GEOMETRY (INT_COL GEOMETRY)")
+      sparkSession.catalog.tableExists("T_TEST_EXPLICIT_GEOMETRY") should be(true)
     }
   }
 }
