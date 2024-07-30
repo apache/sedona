@@ -282,11 +282,69 @@ Format:
 
 `ST_AsGeoJSON (A:geometry, type: String)`
 
-SQL example:
+SQL Example (Simple GeoJSON):
 
-```SQL
-SELECT ST_AsGeoJSON(polygondf.countyshape)
-FROM polygondf
+```sql
+SELECT ST_AsGeoJSON(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
+```
+
+Output:
+
+```json
+{
+  "type":"Polygon",
+  "coordinates":[
+    [[1.0,1.0],
+      [8.0,1.0],
+      [8.0,8.0],
+      [1.0,8.0],
+      [1.0,1.0]]
+  ]
+}
+```
+
+SQL Example (Feature GeoJSON):
+
+Output:
+
+```json
+{
+  "type":"Feature",
+  "geometry": {
+      "type":"Polygon",
+      "coordinates":[
+        [[1.0,1.0],
+          [8.0,1.0],
+          [8.0,8.0],
+          [1.0,8.0],
+          [1.0,1.0]]
+      ]
+  }
+}
+```
+
+SQL Example (FeatureCollection GeoJSON):
+
+Output:
+
+```json
+{
+  "type":"FeatureCollection",
+  "features": [{
+      "type":"Feature",
+      "geometry": {
+          "type":"Polygon",
+          "coordinates":[
+            [[1.0,1.0],
+              [8.0,1.0],
+              [8.0,8.0],
+              [1.0,8.0],
+              [1.0,1.0]]
+          ]
+      }
+    }
+  ]
+}
 ```
 
 ## ST_AsGML
