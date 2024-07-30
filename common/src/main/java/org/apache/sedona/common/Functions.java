@@ -697,7 +697,7 @@ public class Functions {
         throw new IllegalArgumentException(
             "Unknown type: "
                 + type
-                + ". Valid types are: 'geometry', 'feature', 'featurecollection'.");
+                + ". Valid types are: 'simple', 'feature', 'featurecollection'.");
     }
   }
 
