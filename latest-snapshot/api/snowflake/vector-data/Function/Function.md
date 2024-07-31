@@ -270,13 +270,81 @@ FROM polygondf
 
 Introduction: Return the [GeoJSON](https://geojson.org/) string representation of a geometry
 
-Format: `ST_AsGeoJSON (A:geometry)`
+The type parameter takes the following options -
 
-SQL example:
+- "Simple" (default): Returns a simple GeoJSON geometry.
+- "Feature": Wraps the geometry in a GeoJSON Feature.
+- "FeatureCollection": Wraps the Feature in a GeoJSON FeatureCollection.
 
-```SQL
-SELECT ST_AsGeoJSON(polygondf.countyshape)
-FROM polygondf
+Format:
+
+`ST_AsGeoJSON (A:geometry)`
+
+`ST_AsGeoJSON (A:geometry, type: String)`
+
+SQL Example (Simple GeoJSON):
+
+```sql
+SELECT ST_AsGeoJSON(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
+```
+
+Output:
+
+```json
+{
+  "type":"Polygon",
+  "coordinates":[
+    [[1.0,1.0],
+      [8.0,1.0],
+      [8.0,8.0],
+      [1.0,8.0],
+      [1.0,1.0]]
+  ]
+}
+```
+
+SQL Example (Feature GeoJSON):
+
+Output:
+
+```json
+{
+  "type":"Feature",
+  "geometry": {
+      "type":"Polygon",
+      "coordinates":[
+        [[1.0,1.0],
+          [8.0,1.0],
+          [8.0,8.0],
+          [1.0,8.0],
+          [1.0,1.0]]
+      ]
+  }
+}
+```
+
+SQL Example (FeatureCollection GeoJSON):
+
+Output:
+
+```json
+{
+  "type":"FeatureCollection",
+  "features": [{
+      "type":"Feature",
+      "geometry": {
+          "type":"Polygon",
+          "coordinates":[
+            [[1.0,1.0],
+              [8.0,1.0],
+              [8.0,8.0],
+              [1.0,8.0],
+              [1.0,1.0]]
+          ]
+      }
+    }
+  ]
+}
 ```
 
 ## ST_AsGML

@@ -6886,9 +6886,17 @@ It will support M coordinate if present since v1.5.0.</p>
 <p>This method is not recommended. Please use <a href="../../../tutorial/sql/#save-as-geojson">Sedona GeoJSON data source</a> to write GeoJSON files.</p>
 </div>
 <p>Introduction: Return the <a href="https://geojson.org/">GeoJSON</a> string representation of a geometry</p>
-<p>Format: <code>ST_AsGeoJSON (A: Geometry)</code></p>
+<p>The type parameter (Since: <code>v1.6.1</code>) takes the following options -</p>
+<ul>
+<li>"Simple" (default): Returns a simple GeoJSON geometry.</li>
+<li>"Feature": Wraps the geometry in a GeoJSON Feature.</li>
+<li>"FeatureCollection": Wraps the Feature in a GeoJSON FeatureCollection.</li>
+</ul>
+<p>Format:</p>
+<p><code>ST_AsGeoJSON (A: Geometry)</code></p>
+<p><code>ST_AsGeoJSON (A: Geometry, type: String)</code></p>
 <p>Since: <code>v1.0.0</code></p>
-<p>SQL Example</p>
+<p>SQL Example (Simple GeoJSON):</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsGeoJSON</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))&#39;</span><span class="p">))</span>
 </code></pre></div>
 <p>Output:</p>
@@ -6900,6 +6908,42 @@ It will support M coordinate if present since v1.5.0.</p>
 <span class="w">      </span><span class="p">[</span><span class="mf">8.0</span><span class="p">,</span><span class="mf">8.0</span><span class="p">],</span>
 <span class="w">      </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">8.0</span><span class="p">],</span>
 <span class="w">      </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]]</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>SQL Example (Feature GeoJSON):</p>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Polygon&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;coordinates&quot;</span><span class="p">:[</span>
+<span class="w">        </span><span class="p">[[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span>
+<span class="w">          </span><span class="p">[</span><span class="mf">8.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span>
+<span class="w">          </span><span class="p">[</span><span class="mf">8.0</span><span class="p">,</span><span class="mf">8.0</span><span class="p">],</span>
+<span class="w">          </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">8.0</span><span class="p">],</span>
+<span class="w">          </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]]</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>SQL Example (FeatureCollection GeoJSON):</p>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;FeatureCollection&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;features&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Polygon&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;coordinates&quot;</span><span class="p">:[</span>
+<span class="w">            </span><span class="p">[[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span>
+<span class="w">              </span><span class="p">[</span><span class="mf">8.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span>
+<span class="w">              </span><span class="p">[</span><span class="mf">8.0</span><span class="p">,</span><span class="mf">8.0</span><span class="p">],</span>
+<span class="w">              </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">8.0</span><span class="p">],</span>
+<span class="w">              </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]]</span>
+<span class="w">          </span><span class="p">]</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -9051,7 +9095,7 @@ If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGO
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">July 24, 2024 23:14:58</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">July 31, 2024 04:07:19</span>
   </span>
 
     
