@@ -160,7 +160,7 @@ def ST_AsEWKT(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_AsGeoJSON(geometry: ColumnOrName, type: Optional[ColumnOrName] = None) -> Column:
+def ST_AsGeoJSON(geometry: ColumnOrName, type: Optional[Union[ColumnOrName, str]] = None) -> Column:
     """Generate the GeoJSON style representation of a geometry column.
 
     :param geometry: Geometry column to generate GeoJSON for.
