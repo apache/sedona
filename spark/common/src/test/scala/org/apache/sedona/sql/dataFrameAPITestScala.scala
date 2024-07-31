@@ -520,6 +520,22 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_Expand") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON ((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))') as geom")
+      var actual = baseDf.select(ST_AsText(ST_Expand("geom", 10))).first().get(0)
+      var expected = "POLYGON Z((40 40 -9, 40 90 -9, 90 90 13, 90 40 13, 40 40 -9))"
+      assertEquals(expected, actual)
+
+      actual = baseDf.select(ST_AsText(ST_Expand("geom", 5, 6))).first().get(0)
+      expected = "POLYGON Z((45 44 1, 45 86 1, 85 86 3, 85 44 3, 45 44 1))"
+      assertEquals(expected, actual)
+
+      actual = baseDf.select(ST_AsText(ST_Expand("geom", 6, 5, -3))).first().get(0)
+      expected = "POLYGON Z((44 45 4, 44 85 4, 86 85 0, 86 45 0, 44 45 4))"
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_YMax") {
       val polygonDf =
         sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS geom")
@@ -756,9 +772,21 @@ class dataFrameAPITestScala extends TestBaseScala {
 
     it("Passed ST_AsGeoJSON") {
       val pointDf = sparkSession.sql("SELECT ST_Point(0.0, 0.0) AS geom")
-      val df = pointDf.select(ST_AsGeoJSON("geom"))
-      val actualResult = df.take(1)(0).get(0).asInstanceOf[String]
-      val expectedResult = "{\"type\":\"Point\",\"coordinates\":[0.0,0.0]}"
+      var df = pointDf.select(ST_AsGeoJSON("geom"))
+      var actualResult = df.take(1)(0).get(0).asInstanceOf[String]
+      var expectedResult = "{\"type\":\"Point\",\"coordinates\":[0.0,0.0]}"
+      assert(actualResult == expectedResult)
+
+      df = pointDf.select(ST_AsGeoJSON(col("geom"), lit("feature")))
+      actualResult = df.take(1)(0).get(0).asInstanceOf[String]
+      expectedResult =
+        "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[0.0,0.0]},\"properties\":{}}"
+      assert(actualResult == expectedResult)
+
+      df = pointDf.select(ST_AsGeoJSON(col("geom"), lit("featureCollection")))
+      actualResult = df.take(1)(0).get(0).asInstanceOf[String]
+      expectedResult =
+        "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[0.0,0.0]},\"properties\":{}}]}"
       assert(actualResult == expectedResult)
     }
 

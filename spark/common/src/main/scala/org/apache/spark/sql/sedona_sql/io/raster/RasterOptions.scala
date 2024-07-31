@@ -30,4 +30,6 @@ private[io] class RasterOptions(@transient private val parameters: CaseInsensiti
   val rasterPathField = parameters.get("pathField")
   // Column of the raster image itself
   val rasterField = parameters.get("rasterField")
+  // Use direct committer to directly write to the final destination
+  val useDirectCommitter = parameters.getOrElse("useDirectCommitter", "true").toBoolean
 }

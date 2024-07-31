@@ -207,6 +207,17 @@ case class ST_Envelope(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Expand(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction4(Functions.expand),
+      inferrableFunction3(Functions.expand),
+      inferrableFunction2(Functions.expand)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
  * Return the length measurement of a Geometry
  *
@@ -455,7 +466,9 @@ case class ST_AsText(inputExpressions: Seq[Expression])
 }
 
 case class ST_AsGeoJSON(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.asGeoJson _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.asGeoJson),
+      inferrableFunction2(Functions.asGeoJson)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

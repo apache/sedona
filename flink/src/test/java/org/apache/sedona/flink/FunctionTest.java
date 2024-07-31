@@ -380,6 +380,45 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testExpand() {
+    Table baseTable =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromWKT('POLYGON ((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))') as geom");
+    String actual =
+        (String)
+            first(
+                    baseTable
+                        .select(call(Functions.ST_Expand.class, $("geom"), 10))
+                        .as("geom")
+                        .select(call(Functions.ST_AsText.class, $("geom"))))
+                .getField(0);
+    String expected = "POLYGON Z((40 40 -9, 40 90 -9, 90 90 13, 90 40 13, 40 40 -9))";
+    assertEquals(expected, actual);
+
+    actual =
+        (String)
+            first(
+                    baseTable
+                        .select(call(Functions.ST_Expand.class, $("geom"), 5, 6))
+                        .as("geom")
+                        .select(call(Functions.ST_AsText.class, $("geom"))))
+                .getField(0);
+    expected = "POLYGON Z((45 44 1, 45 86 1, 85 86 3, 85 44 3, 45 44 1))";
+    assertEquals(expected, actual);
+
+    actual =
+        (String)
+            first(
+                    baseTable
+                        .select(call(Functions.ST_Expand.class, $("geom"), 6, 5, -3))
+                        .as("geom")
+                        .select(call(Functions.ST_AsText.class, $("geom"))))
+                .getField(0);
+    expected = "POLYGON Z((44 45 4, 44 85 4, 86 85 0, 86 45 0, 44 45 4))";
+    assertEquals(expected, actual);
+  }
+
+  @Test
   public void testFlipCoordinates() {
     Table pointTable = createPointTable_real(testDataSize);
     Table flippedTable =
@@ -964,6 +1003,27 @@ public class FunctionTest extends TestBase {
     String result = (String) first(polygonTable).getField(0);
     assertEquals(
         "{\"type\":\"Polygon\",\"coordinates\":[[[-0.5,-0.5],[-0.5,0.5],[0.5,0.5],[0.5,-0.5],[-0.5,-0.5]]]}",
+        result);
+
+    polygonTable = createPolygonTable(testDataSize);
+    polygonTable =
+        polygonTable.select(
+            call(Functions.ST_AsGeoJSON.class.getSimpleName(), $(polygonColNames[0]), "Feature"));
+    result = (String) first(polygonTable).getField(0);
+    assertEquals(
+        "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[-0.5,-0.5],[-0.5,0.5],[0.5,0.5],[0.5,-0.5],[-0.5,-0.5]]]},\"properties\":{}}",
+        result);
+
+    polygonTable = createPolygonTable(testDataSize);
+    polygonTable =
+        polygonTable.select(
+            call(
+                Functions.ST_AsGeoJSON.class.getSimpleName(),
+                $(polygonColNames[0]),
+                "FeatureCollection"));
+    result = (String) first(polygonTable).getField(0);
+    assertEquals(
+        "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[-0.5,-0.5],[-0.5,0.5],[0.5,0.5],[0.5,-0.5],[-0.5,-0.5]]]},\"properties\":{}}]}",
         result);
   }
 

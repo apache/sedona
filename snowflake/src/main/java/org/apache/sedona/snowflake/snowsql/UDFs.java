@@ -144,6 +144,11 @@ public class UDFs {
     return Functions.asGeoJson(GeometrySerde.deserialize(geometry));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "type"})
+  public static String ST_AsGeoJSON(byte[] geometry, String type) {
+    return Functions.asGeoJson(GeometrySerde.deserialize(geometry), type);
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static String ST_AsKML(byte[] geometry) {
     return Functions.asKML(GeometrySerde.deserialize(geometry));
@@ -338,6 +343,24 @@ public class UDFs {
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static byte[] ST_Envelope(byte[] geometry) {
     return GeometrySerde.serialize(Functions.envelope(GeometrySerde.deserialize(geometry)));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "uniformDelta"})
+  public static byte[] ST_Expand(byte[] geometry, double uniformDelta) {
+    return GeometrySerde.serialize(
+        Functions.expand(GeometrySerde.deserialize(geometry), uniformDelta));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "deltaX", "deltaY"})
+  public static byte[] ST_Expand(byte[] geometry, double deltaX, double deltaY) {
+    return GeometrySerde.serialize(
+        Functions.expand(GeometrySerde.deserialize(geometry), deltaX, deltaY));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "deltaX", "deltaY", "deltaZ"})
+  public static byte[] ST_Expand(byte[] geometry, double deltaX, double deltaY, double deltaZ) {
+    return GeometrySerde.serialize(
+        Functions.expand(GeometrySerde.deserialize(geometry), deltaX, deltaY, deltaZ));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry"})
