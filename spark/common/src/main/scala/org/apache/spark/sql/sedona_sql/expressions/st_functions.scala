@@ -67,6 +67,11 @@ object st_functions extends DataFrameAPI {
   def ST_AsGeoJSON(geometry: Column): Column = wrapExpression[ST_AsGeoJSON](geometry)
   def ST_AsGeoJSON(geometry: String): Column = wrapExpression[ST_AsGeoJSON](geometry)
 
+  def ST_AsGeoJSON(geometry: Column, Type: Column): Column =
+    wrapExpression[ST_AsGeoJSON](geometry, Type)
+  def ST_AsGeoJSON(geometry: String, Type: String): Column =
+    wrapExpression[ST_AsGeoJSON](geometry, Type)
+
   def ST_AsGML(geometry: Column): Column = wrapExpression[ST_AsGML](geometry)
   def ST_AsGML(geometry: String): Column = wrapExpression[ST_AsGML](geometry)
 

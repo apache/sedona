@@ -744,6 +744,14 @@ public class Functions {
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.Functions.asGeoJson(geom);
     }
+
+    @DataTypeHint("String")
+    public String eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        String type) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.asGeoJson(geom, type);
+    }
   }
 
   public static class ST_AsGML extends ScalarFunction {

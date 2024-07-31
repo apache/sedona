@@ -755,11 +755,25 @@ class functionTestScala
         sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))') AS polygon")
       df.createOrReplaceTempView("table")
 
-      val geojsonDf = sparkSession.sql("""select ST_AsGeoJSON(polygon) as geojson
+      var geojsonDf = sparkSession.sql("""select ST_AsGeoJSON(polygon) as geojson
           |from table""".stripMargin)
 
-      val expectedGeoJson =
+      var expectedGeoJson =
         """{"type":"Polygon","coordinates":[[[1.0,1.0],[8.0,1.0],[8.0,8.0],[1.0,8.0],[1.0,1.0]]]}"""
+      assert(geojsonDf.first().getString(0) === expectedGeoJson)
+
+      geojsonDf = sparkSession.sql("""select ST_AsGeoJSON(polygon, 'Feature') as geojson
+                                         |from table""".stripMargin)
+
+      expectedGeoJson =
+        """{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[1.0,1.0],[8.0,1.0],[8.0,8.0],[1.0,8.0],[1.0,1.0]]]},"properties":{}}"""
+      assert(geojsonDf.first().getString(0) === expectedGeoJson)
+
+      geojsonDf = sparkSession.sql("""select ST_AsGeoJSON(polygon, 'FeatureCollection') as geojson
+                                     |from table""".stripMargin)
+
+      expectedGeoJson =
+        """{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[1.0,1.0],[8.0,1.0],[8.0,8.0],[1.0,8.0],[1.0,1.0]]]},"properties":{}}]}"""
       assert(geojsonDf.first().getString(0) === expectedGeoJson)
     }
 

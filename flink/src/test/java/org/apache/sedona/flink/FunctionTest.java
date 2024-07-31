@@ -1004,6 +1004,27 @@ public class FunctionTest extends TestBase {
     assertEquals(
         "{\"type\":\"Polygon\",\"coordinates\":[[[-0.5,-0.5],[-0.5,0.5],[0.5,0.5],[0.5,-0.5],[-0.5,-0.5]]]}",
         result);
+
+    polygonTable = createPolygonTable(testDataSize);
+    polygonTable =
+        polygonTable.select(
+            call(Functions.ST_AsGeoJSON.class.getSimpleName(), $(polygonColNames[0]), "Feature"));
+    result = (String) first(polygonTable).getField(0);
+    assertEquals(
+        "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[-0.5,-0.5],[-0.5,0.5],[0.5,0.5],[0.5,-0.5],[-0.5,-0.5]]]},\"properties\":{}}",
+        result);
+
+    polygonTable = createPolygonTable(testDataSize);
+    polygonTable =
+        polygonTable.select(
+            call(
+                Functions.ST_AsGeoJSON.class.getSimpleName(),
+                $(polygonColNames[0]),
+                "FeatureCollection"));
+    result = (String) first(polygonTable).getField(0);
+    assertEquals(
+        "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[-0.5,-0.5],[-0.5,0.5],[0.5,0.5],[0.5,-0.5],[-0.5,-0.5]]]},\"properties\":{}}]}",
+        result);
   }
 
   @Test
