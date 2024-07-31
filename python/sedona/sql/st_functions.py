@@ -2050,4 +2050,4 @@ def ST_Rotate(geometry: ColumnOrName, angle: Union[ColumnOrName, float], originX
 
 # Automatically populate __all__
 __all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
-           if inspect.isfunction(obj)]
+           if inspect.isfunction(obj) and name != 'GeometryType']
