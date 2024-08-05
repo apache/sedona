@@ -29,20 +29,25 @@ import org.locationtech.jts.geom.Geometry
  */
 trait GeoParquetSpatialFilter {
   def evaluate(columns: Map[String, GeometryFieldMetaData]): Boolean
+  def simpleString: String
 }
 
 object GeoParquetSpatialFilter {
 
   case class AndFilter(left: GeoParquetSpatialFilter, right: GeoParquetSpatialFilter)
       extends GeoParquetSpatialFilter {
-    override def evaluate(columns: Map[String, GeometryFieldMetaData]): Boolean =
+    override def evaluate(columns: Map[String, GeometryFieldMetaData]): Boolean = {
       left.evaluate(columns) && right.evaluate(columns)
+    }
+
+    override def simpleString: String = s"(${left.simpleString}) AND (${right.simpleString})"
   }
 
   case class OrFilter(left: GeoParquetSpatialFilter, right: GeoParquetSpatialFilter)
       extends GeoParquetSpatialFilter {
     override def evaluate(columns: Map[String, GeometryFieldMetaData]): Boolean =
       left.evaluate(columns) || right.evaluate(columns)
+    override def simpleString: String = s"(${left.simpleString}) OR (${right.simpleString})"
   }
 
   /**
@@ -77,5 +82,6 @@ object GeoParquetSpatialFilter {
         }
       }
     }
+    override def simpleString: String = s"$columnName ${predicateType.name} $queryWindow"
   }
 }
