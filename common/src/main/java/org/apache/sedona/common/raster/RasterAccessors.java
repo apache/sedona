@@ -19,6 +19,7 @@
 package org.apache.sedona.common.raster;
 
 import java.awt.geom.Point2D;
+import java.awt.image.RenderedImage;
 import java.util.Arrays;
 import java.util.Set;
 import org.apache.sedona.common.utils.RasterUtils;
@@ -266,6 +267,7 @@ public class RasterAccessors {
     // Get Geo-reference metadata
     GridEnvelope2D gridRange = raster.getGridGeometry().getGridRange2D();
     AffineTransform2D affine = RasterUtils.getGDALAffineTransform(raster);
+    RenderedImage image = raster.getRenderedImage();
 
     // Get the affine parameters
     double upperLeftX = affine.getTranslateX();
@@ -274,6 +276,8 @@ public class RasterAccessors {
     double scaleY = affine.getScaleY();
     double skewX = affine.getShearX();
     double skewY = affine.getShearY();
+    double tileWidth = image.getTileWidth();
+    double tileHeight = image.getTileHeight();
     return new double[] {
       upperLeftX,
       upperLeftY,
@@ -284,7 +288,75 @@ public class RasterAccessors {
       skewX,
       skewY,
       srid(raster),
-      raster.getNumSampleDimensions()
+      raster.getNumSampleDimensions(),
+      tileWidth,
+      tileHeight
     };
+  }
+
+  public static class RasterMetadata {
+    public double upperLeftX;
+    public double upperLeftY;
+    public int gridWidth;
+    public int gridHeight;
+    public double scaleX;
+    public double scaleY;
+    public double skewX;
+    public double skewY;
+    public int srid;
+    public int numBands;
+    public int tileWidth;
+    public int tileHeight;
+
+    public RasterMetadata(
+        double upperLeftX,
+        double upperLeftY,
+        int gridWidth,
+        int gridHeight,
+        double scaleX,
+        double scaleY,
+        double skewX,
+        double skewY,
+        int srid,
+        int numBands,
+        int tileWidth,
+        int tileHeight) {
+      this.upperLeftX = upperLeftX;
+      this.upperLeftY = upperLeftY;
+      this.gridWidth = gridWidth;
+      this.gridHeight = gridHeight;
+      this.scaleX = scaleX;
+      this.scaleY = scaleY;
+      this.skewX = skewX;
+      this.skewY = skewY;
+      this.srid = srid;
+      this.numBands = numBands;
+      this.tileWidth = tileWidth;
+      this.tileHeight = tileHeight;
+    }
+  }
+
+  /**
+   * Returns the metadata of a raster as a {@link RasterMetadata} object.
+   *
+   * @param raster the raster
+   * @return a {@link RasterMetadata} object
+   * @throws FactoryException
+   */
+  public static RasterMetadata rasterMetadata(GridCoverage2D raster) throws FactoryException {
+    double[] meta = metadata(raster);
+    return new RasterMetadata(
+        meta[0],
+        meta[1],
+        (int) meta[2],
+        (int) meta[3],
+        meta[4],
+        meta[5],
+        meta[6],
+        meta[7],
+        (int) meta[8],
+        (int) meta[9],
+        (int) meta[10],
+        (int) meta[11]);
   }
 }
