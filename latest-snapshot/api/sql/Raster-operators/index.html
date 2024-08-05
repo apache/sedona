@@ -6657,15 +6657,20 @@ If no <code>toRasterIndex</code> is provided, the new band is appended to the en
 <li>skewY: skew in y direction (rotation y)</li>
 <li>srid: srid of the raster</li>
 <li>numSampleDimensions: number of bands</li>
+<li>tileWidth: (Since <code>v1.6.1</code>) width of tiles in the raster</li>
+<li>tileHeight: (Since <code>v1.6.1</code>) height of tiles in the raster</li>
 </ul>
 <p>For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the <a href="../Raster-affine-transformation/">Affine Transformations</a> section.</p>
+<p><code>tileWidth</code> and <code>tileHeight</code> are available since <code>v1.6.1</code>, they are the dimensions of the tiles in the raster. For example,
+rasters written by <code>RS_FromGeoTiff</code> uses the tiling scheme of the loaded GeoTIFF file. For rasters that has only 1 tile,
+<code>tileWidth</code> and <code>tileHeight</code> will be equal to <code>gridWidth</code> and <code>gridHeight</code> respectively.</p>
 <p>Format: <code>RS_MetaData (raster: Raster)</code></p>
 <p>Since: <code>v1.4.1</code></p>
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MetaData</span><span class="p">(</span><span class="n">raster</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
 </code></pre></div>
 <p>Output:</p>
-<div class="highlight"><pre><span></span><code>{-1.3095817809482181E7, 4021262.7487925636, 512.0, 517.0, 72.32861272132695, -72.32861272132695, 0.0, 0.0, 3857.0, 1.0}
+<div class="highlight"><pre><span></span><code>{-1.3095817809482181E7, 4021262.7487925636, 512, 517, 72.32861272132695, -72.32861272132695, 0.0, 0.0, 3857, 1, 256, 256}
 </code></pre></div>
 <h3 id="rs_normalizeall">RS_NormalizeAll<a class="headerlink" href="#rs_normalizeall" title="Permanent link">&para;</a></h3>
 <p>Introduction: Normalizes values in all bands of a raster between a given normalization range. The function maintains the data type of the raster values by ensuring that the normalized values are cast back to the original data type of each band in the raster. By default, the values are normalized to range [0, 255]. RS_NormalizeAll can take upto 7 of the following arguments.</p>
@@ -7463,7 +7468,7 @@ To learn how to write map algebra script, please refer to <a href="https://githu
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">July 18, 2024 15:51:36</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">August 5, 2024 16:47:41</span>
   </span>
 
     
