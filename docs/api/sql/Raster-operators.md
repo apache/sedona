@@ -1553,8 +1553,14 @@ Introduction: Returns the metadata of the raster as a struct. The struct has the
 - skewY: skew in y direction (rotation y)
 - srid: srid of the raster
 - numSampleDimensions: number of bands
+- tileWidth: (Since `v1.6.1`) width of tiles in the raster
+- tileHeight: (Since `v1.6.1`) height of tiles in the raster
 
 For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
+
+`tileWidth` and `tileHeight` are available since `v1.6.1`, they are the dimensions of the tiles in the raster. For example,
+rasters written by `RS_FromGeoTiff` uses the tiling scheme of the loaded GeoTIFF file. For rasters that has only 1 tile,
+`tileWidth` and `tileHeight` will be equal to `gridWidth` and `gridHeight` respectively.
 
 Format: `RS_MetaData (raster: Raster)`
 
@@ -1569,7 +1575,7 @@ SELECT RS_MetaData(raster) FROM raster_table
 Output:
 
 ```
-{-1.3095817809482181E7, 4021262.7487925636, 512.0, 517.0, 72.32861272132695, -72.32861272132695, 0.0, 0.0, 3857.0, 1.0}
+{-1.3095817809482181E7, 4021262.7487925636, 512, 517, 72.32861272132695, -72.32861272132695, 0.0, 0.0, 3857, 1, 256, 256}
 ```
 
 ### RS_NormalizeAll
