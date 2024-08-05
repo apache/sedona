@@ -32,6 +32,7 @@ import org.apache.spark.sql.execution.FileSourceScanExec
 import org.apache.spark.sql.execution.datasources.parquet.GeoParquetFileFormat
 import org.apache.spark.sql.execution.datasources.parquet.GeoParquetMetaData
 import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter
+import org.apache.spark.sql.execution.SimpleMode
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.GeometryFactory
@@ -222,6 +223,25 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
       testFilter(
         "id < 10 AND ST_Intersects(geom, ST_GeomFromText('POLYGON ((5 -5, 15 -5, 15 5, 5 5, 5 -5))'))",
         Seq(1, 3))
+    }
+
+    it("Explain geoparquet scan with spatial filter push-down") {
+      val dfFiltered = geoParquetDf.where(
+        "ST_Intersects(geom, ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'))")
+      val explainString = dfFiltered.queryExecution.explainString(SimpleMode)
+      assert(explainString.contains("FileScan geoparquet"))
+      assert(explainString.contains("with spatial filter"))
+    }
+
+    it("Manually disable spatial filter push-down") {
+      withConf(Map("spark.sedona.geoparquet.spatialFilterPushDown" -> "false")) {
+        val dfFiltered = geoParquetDf.where(
+          "ST_Intersects(geom, ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'))")
+        val explainString = dfFiltered.queryExecution.explainString(SimpleMode)
+        assert(explainString.contains("FileScan geoparquet"))
+        assert(!explainString.contains("with spatial filter"))
+        assert(getPushedDownSpatialFilter(dfFiltered).isEmpty)
+      }
     }
   }
 
