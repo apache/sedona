@@ -129,6 +129,9 @@ POINT(40.7128 -74.006)
 
 Introduction: Construct a Geometry from GML.
 
+!!!note
+    This function only supports GML 1 and GML 2. GML 3 is not supported.
+
 Format:
 `ST_GeomFromGML (gml: String)`
 
