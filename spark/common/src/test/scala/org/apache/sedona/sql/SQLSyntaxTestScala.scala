@@ -25,7 +25,7 @@ import org.scalatest.prop.TableDrivenPropertyChecks
 /**
  * Test suite for testing Sedona SQL support.
  */
-class SQLSuite extends TestBaseScala with TableDrivenPropertyChecks {
+class SQLSyntaxTestScala extends TestBaseScala with TableDrivenPropertyChecks {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -35,22 +35,14 @@ class SQLSuite extends TestBaseScala with TableDrivenPropertyChecks {
   describe("Table creation DDL tests") {
 
     it("should be able to create a regular table without geometry column should work") {
-      sparkSession.sql("CREATE TABLE T_TEST_REGULAR (INT_COL INT)")
+      sparkSession.sql("DROP TABLE IF EXISTS T_TEST_REGULAR")
+      sparkSession.sql("CREATE TABLE IF NOT EXISTS T_TEST_REGULAR (INT_COL INT)")
       sparkSession.catalog.tableExists("T_TEST_REGULAR") should be(true)
+      sparkSession.sql("DROP TABLE IF EXISTS T_TEST_REGULAR")
+      sparkSession.catalog.tableExists("T_TEST_REGULAR") should be(false)
     }
 
     it(
-      "should be able to create a regular table with geometry column should work with a workaround") {
-      sparkSession.sql("""
-    CREATE OR REPLACE TEMP VIEW EMPTY_VIEW AS
-    SELECT ST_GEOMFROMTEXT(CAST(NULL AS STRING)) AS GEOM
-    WHERE 1 = 0
-  """)
-      sparkSession.sql("CREATE TABLE T_TEST_IMPLICIT_GEOMETRY AS (SELECT * FROM EMPTY_VIEW)")
-      sparkSession.catalog.tableExists("T_TEST_IMPLICIT_GEOMETRY") should be(true)
-    }
-
-    ignore(
       "should be able to create a regular table with geometry column should work without a workaround") {
       sparkSession.sql("CREATE TABLE T_TEST_EXPLICIT_GEOMETRY (INT_COL GEOMETRY)")
       sparkSession.catalog.tableExists("T_TEST_EXPLICIT_GEOMETRY") should be(true)
