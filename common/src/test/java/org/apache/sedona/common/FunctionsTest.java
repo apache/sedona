@@ -33,6 +33,8 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.projection.ProjectionException;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
+import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
@@ -303,6 +305,41 @@ public class FunctionsTest extends TestBase {
     String expectedResult = "MULTILINESTRING ((0 0, 1 1), (1 1, 2 2))";
 
     assertEquals(actualResult, expectedResult);
+  }
+
+  @Test
+  public void splitLineStringFpPrecisionIssue() {
+    LineString lineString =
+        GEOMETRY_FACTORY.createLineString(
+            coordArray(
+                -8.961173822708158, -3.93776773106963, -8.08908227533288, -3.8845245068873444));
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(
+                -6.318936372442209, -6.44985859539768,
+                -8.669092633645995, -3.0659222341103956,
+                -6.264600073171498, -3.075347218794894,
+                -5.3654318906014495, -3.1019726170919877,
+                -5.488002156793005, -5.892626167859213,
+                -6.318936372442209, -6.44985859539768));
+
+    Geometry result = Functions.split(lineString, polygon);
+    assertEquals(2, result.getNumGeometries());
+    assertEquals(lineString.getLength(), result.getLength(), 1e-6);
+  }
+
+  @Test
+  public void tempTest() {
+    LineString lineString =
+        GEOMETRY_FACTORY.createLineString(
+            coordArray(
+                -8.961173822708158, -3.93776773106963, -8.08908227533288, -3.8845245068873444));
+    Point point =
+        GEOMETRY_FACTORY.createPoint(new Coordinate(-8.100103048843774, -3.885197350829553));
+    PreparedGeometryFactory factory = new PreparedGeometryFactory();
+    PreparedGeometry prepLineString = factory.create(lineString);
+    boolean intersects = prepLineString.intersects(point);
+    System.out.println(intersects);
   }
 
   @Test
