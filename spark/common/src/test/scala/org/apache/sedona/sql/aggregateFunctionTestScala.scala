@@ -19,10 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.expressions.javalang.typed
-import org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr
-import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon}
-import org.locationtech.jts.io.WKTReader
+import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory}
 
 import scala.util.Random
 
@@ -64,7 +61,8 @@ class aggregateFunctionTestScala extends TestBaseScala {
       var polygonDf = sparkSession.sql(
         "select 'sample' as filename, ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      var union = sparkSession.sql("select EXPLODE(ST_DUMP(ST_BUFFER(ST_Union_Aggr(polygondf.polygonshape), 1.0))) as geom from polygondf group by filename")
+      var union = sparkSession.sql(
+        "select EXPLODE(ST_DUMP(ST_BUFFER(ST_Union_Aggr(polygondf.polygonshape), 1.0))) as geom from polygondf group by filename")
       union.show()
     }
 
