@@ -19,7 +19,10 @@
 package org.apache.sedona.sql
 
 import org.apache.spark.sql.DataFrame
-import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory}
+import org.apache.spark.sql.expressions.javalang.typed
+import org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr
+import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon}
+import org.locationtech.jts.io.WKTReader
 
 import scala.util.Random
 
@@ -59,11 +62,10 @@ class aggregateFunctionTestScala extends TestBaseScala {
         .load(unionPolygonInputLocation)
       polygonCsvDf.createOrReplaceTempView("polygontable")
       var polygonDf = sparkSession.sql(
-        "select 'sample' as filename, ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
+        "select ST_PolygonFromEnvelope(cast(polygontable._c0 as Decimal(24,20)),cast(polygontable._c1 as Decimal(24,20)), cast(polygontable._c2 as Decimal(24,20)), cast(polygontable._c3 as Decimal(24,20))) as polygonshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
-      var union = sparkSession.sql(
-        "select EXPLODE(ST_DUMP(ST_BUFFER(ST_Union_Aggr(polygondf.polygonshape), 1.0))) as geom from polygondf group by filename")
-      union.show()
+      var union = sparkSession.sql("select ST_Union_Aggr(polygondf.polygonshape) from polygondf")
+      assert(union.take(1)(0).get(0).asInstanceOf[Geometry].getArea == 10100)
     }
 
     it("Measured ST_Union_aggr wall time") {

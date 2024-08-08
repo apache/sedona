@@ -18,7 +18,6 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.spark.sql.{Encoder, Encoders}
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.expressions.Aggregator
 import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory}
@@ -56,9 +55,11 @@ trait TraitSTAggregateExec {
 }
 
 class ST_Union_Aggr(bufferSize: Int = 1000)
-    extends Aggregator[Geometry, ListBuffer[Geometry], Geometry] {
+    extends Aggregator[Geometry, ListBuffer[Geometry], Geometry]
+    with Serializable {
 
-  override def zero: ListBuffer[Geometry] = ListBuffer.empty
+  val serde = ExpressionEncoder[Geometry]()
+  val bufferSerde = ExpressionEncoder[ListBuffer[Geometry]]()
 
   override def reduce(buffer: ListBuffer[Geometry], input: Geometry): ListBuffer[Geometry] = {
     buffer += input
@@ -88,9 +89,11 @@ class ST_Union_Aggr(bufferSize: Int = 1000)
     OverlayNGRobust.union(reduction.asJava)
   }
 
-  override def bufferEncoder: Encoder[ListBuffer[Geometry]] = Encoders.kryo[ListBuffer[Geometry]]
+  def bufferEncoder: ExpressionEncoder[ListBuffer[Geometry]] = bufferSerde
 
-  override def outputEncoder: Encoder[Geometry] = Encoders.kryo[Geometry]
+  def outputEncoder: ExpressionEncoder[Geometry] = serde
+
+  override def zero: ListBuffer[Geometry] = ListBuffer.empty
 }
 
 /**
