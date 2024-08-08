@@ -55,8 +55,7 @@ trait TraitSTAggregateExec {
 }
 
 class ST_Union_Aggr(bufferSize: Int = 1000)
-    extends Aggregator[Geometry, ListBuffer[Geometry], Geometry]
-    with Serializable {
+    extends Aggregator[Geometry, ListBuffer[Geometry], Geometry] {
 
   val serde = ExpressionEncoder[Geometry]()
   val bufferSerde = ExpressionEncoder[ListBuffer[Geometry]]()
