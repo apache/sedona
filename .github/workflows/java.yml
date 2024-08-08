@@ -76,10 +76,6 @@ jobs:
             scala: 2.12.15
             jdk: '8'
             skipTests: ''
-          - spark: 3.0.3
-            scala: 2.12.15
-            jdk: '8'
-            skipTests: ''
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
