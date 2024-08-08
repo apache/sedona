@@ -270,13 +270,81 @@ FROM polygondf
 
 Introduction: Return the [GeoJSON](https://geojson.org/) string representation of a geometry
 
-Format: `ST_AsGeoJSON (A:geometry)`
+The type parameter takes the following options -
 
-SQL example:
+- "Simple" (default): Returns a simple GeoJSON geometry.
+- "Feature": Wraps the geometry in a GeoJSON Feature.
+- "FeatureCollection": Wraps the Feature in a GeoJSON FeatureCollection.
 
-```SQL
-SELECT ST_AsGeoJSON(polygondf.countyshape)
-FROM polygondf
+Format:
+
+`ST_AsGeoJSON (A:geometry)`
+
+`ST_AsGeoJSON (A:geometry, type: String)`
+
+SQL Example (Simple GeoJSON):
+
+```sql
+SELECT ST_AsGeoJSON(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
+```
+
+Output:
+
+```json
+{
+  "type":"Polygon",
+  "coordinates":[
+    [[1.0,1.0],
+      [8.0,1.0],
+      [8.0,8.0],
+      [1.0,8.0],
+      [1.0,1.0]]
+  ]
+}
+```
+
+SQL Example (Feature GeoJSON):
+
+Output:
+
+```json
+{
+  "type":"Feature",
+  "geometry": {
+      "type":"Polygon",
+      "coordinates":[
+        [[1.0,1.0],
+          [8.0,1.0],
+          [8.0,8.0],
+          [1.0,8.0],
+          [1.0,1.0]]
+      ]
+  }
+}
+```
+
+SQL Example (FeatureCollection GeoJSON):
+
+Output:
+
+```json
+{
+  "type":"FeatureCollection",
+  "features": [{
+      "type":"Feature",
+      "geometry": {
+          "type":"Polygon",
+          "coordinates":[
+            [[1.0,1.0],
+              [8.0,1.0],
+              [8.0,8.0],
+              [1.0,8.0],
+              [1.0,1.0]]
+          ]
+      }
+    }
+  ]
+}
 ```
 
 ## ST_AsGML
@@ -931,6 +999,43 @@ SQL example:
 ```SQL
 SELECT ST_Envelope(polygondf.countyshape)
 FROM polygondf
+```
+
+## ST_Expand
+
+Introduction: Returns a geometry expanded from the bounding box of the input. The expansion can be specified in two ways:
+
+1. By individual axis using `deltaX`, `deltaY`, or `deltaZ` parameters.
+2. Uniformly across all axes using the `uniformDelta` parameter.
+
+Format:
+
+`ST_Expand(geometry: Geometry, uniformDelta: Double)`
+
+`ST_Expand(geometry: Geometry, deltaX: Double, deltaY: Double)`
+
+`ST_Expand(geometry: Geometry, deltaX: Double, deltaY: Double, deltaZ: Double)`
+
+!!!Note
+    Things to consider when using this function:
+
+    1. The `uniformDelta` parameter expands Z dimensions for XYZ geometries; otherwise, it only affects XY dimensions.
+    2. For XYZ geometries, specifying only `deltaX` and `deltaY` will preserve the original Z dimension.
+    3. If the input geometry has an M dimension then using this function will drop the said M dimension.
+
+SQL Example:
+
+```sql
+SELECT ST_Expand(
+        ST_GeomFromWKT('POLYGON Z((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))'),
+        10
+   )
+```
+
+Output:
+
+```
+POLYGON Z((40 40 -9, 40 90 -9, 90 90 13, 90 40 13, 40 40 -9))
 ```
 
 ## ST_ExteriorRing

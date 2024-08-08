@@ -25,11 +25,6 @@ from pyspark.sql import Column
 from sedona.sql.dataframe_api import call_sedona_function, ColumnOrName, ColumnOrNameOrNumber, validate_argument_types
 
 
-# Automatically populate __all__
-__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
-           if inspect.isfunction(obj)]
-
-
 _call_st_function = partial(call_sedona_function, "st_functions")
 
 @validate_argument_types
@@ -165,7 +160,7 @@ def ST_AsEWKT(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_AsGeoJSON(geometry: ColumnOrName) -> Column:
+def ST_AsGeoJSON(geometry: ColumnOrName, type: Optional[Union[ColumnOrName, str]] = None) -> Column:
     """Generate the GeoJSON style representation of a geometry column.
 
     :param geometry: Geometry column to generate GeoJSON for.
@@ -173,7 +168,8 @@ def ST_AsGeoJSON(geometry: ColumnOrName) -> Column:
     :return: GeoJSON representation of geometry as a string column.
     :rtype: Column
     """
-    return _call_st_function("ST_AsGeoJSON", geometry)
+    args = (geometry) if type is None else (geometry, type)
+    return _call_st_function("ST_AsGeoJSON", args)
 
 
 @validate_argument_types
@@ -509,6 +505,31 @@ def ST_Envelope(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_Envelope", geometry)
+
+
+@validate_argument_types
+def ST_Expand(geometry: ColumnOrName, deltaX_uniformDelta: Union[ColumnOrName, float], deltaY: Optional[Union[ColumnOrName, float]] = None, deltaZ: Optional[Union[ColumnOrName, float]] = None) -> Column:
+    """Expand the given geometry column by a constant unit in each direction
+
+    :param geometry: Geometry column to calculate the envelope of.
+    :type geometry: ColumnOrName
+    :param deltaX_uniformDelta: it is either deltaX or uniformDelta depending on the number of arguments provided
+    :type deltaX_uniformDelta: Union[ColumnOrName, float]
+    :param deltaY: Constant unit of deltaY
+    :type deltaY: Union[ColumnOrName, float]
+    :param deltaZ: Constant unit of deltaZ
+    :type deltaZ: Union[ColumnOrName, float]
+    :return: Envelope of geometry as a geometry column.
+    :rtype: Column
+    """
+    if deltaZ is None:
+        args = (geometry, deltaX_uniformDelta, deltaY)
+        if deltaY is None:
+            args = (geometry, deltaX_uniformDelta)
+    else:
+        args = (geometry, deltaX_uniformDelta, deltaY, deltaZ)
+
+    return _call_st_function("ST_Expand", args)
 
 
 @validate_argument_types
@@ -2025,3 +2046,8 @@ def ST_Rotate(geometry: ColumnOrName, angle: Union[ColumnOrName, float], originX
         args = (geometry, angle)
 
     return _call_st_function("ST_Rotate", args)
+
+
+# Automatically populate __all__
+__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
+           if inspect.isfunction(obj) and name != 'GeometryType']

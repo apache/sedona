@@ -379,7 +379,9 @@ public class RasterAccessorsTest extends RasterTestBase {
     assertEquals(0, metadata[7], 1e-9);
     assertEquals(0, metadata[8], 1e-9);
     assertEquals(numBands, metadata[9], 1e-9);
-    assertEquals(10, metadata.length);
+    assertEquals(widthInPixel, metadata[10], 1e-9);
+    assertEquals(heightInPixel, metadata[11], 1e-9);
+    assertEquals(12, metadata.length);
 
     upperLeftX = 5;
     upperLeftY = 6;
@@ -404,8 +406,29 @@ public class RasterAccessorsTest extends RasterTestBase {
     assertEquals(0, metadata[7], 1e-9);
     assertEquals(0, metadata[8], 1e-9);
     assertEquals(numBands, metadata[9], 1e-9);
+    assertEquals(widthInPixel, metadata[10], 1e-9);
+    assertEquals(heightInPixel, metadata[11], 1e-9);
 
-    assertEquals(10, metadata.length);
+    assertEquals(12, metadata.length);
+  }
+
+  @Test
+  public void testMetadataOfTiledRasters() throws IOException, FactoryException {
+    GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    double[] metadata = RasterAccessors.metadata(raster);
+    assertEquals(-13095817.809, metadata[0], 0.01);
+    assertEquals(4021262.749, metadata[1], 0.01);
+    assertEquals(512, metadata[2], 1e-9);
+    assertEquals(517, metadata[3], 1e-9);
+    assertEquals(72.328612721326948, metadata[4], 0.001);
+    assertEquals(-72.328612721326948, metadata[5], 0.001);
+    assertEquals(0, metadata[6], 1e-9);
+    assertEquals(0, metadata[7], 1e-9);
+    assertEquals(3857, metadata[8], 1e-9);
+    assertEquals(1, metadata[9], 1e-9);
+    assertEquals(256, metadata[10], 1e-9);
+    assertEquals(256, metadata[11], 1e-9);
+    assertEquals(12, metadata.length);
   }
 
   @Test
@@ -443,6 +466,8 @@ public class RasterAccessorsTest extends RasterTestBase {
     assertEquals(skewY, metadata[7], 1e-9);
     assertEquals(3857, metadata[8], 1e-9);
     assertEquals(numBands, metadata[9], 1e-9);
-    assertEquals(10, metadata.length);
+    assertEquals(widthInPixel, metadata[10], 1e-9);
+    assertEquals(heightInPixel, metadata[11], 1e-9);
+    assertEquals(12, metadata.length);
   }
 }

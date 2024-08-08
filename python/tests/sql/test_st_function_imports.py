@@ -14,25 +14,27 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
-import inspect
-import sys
 
-# These allow use to access the __all__
-import sedona.sql.st_aggregates as st_aggregates
-import sedona.sql.st_constructors as st_constructors
-import sedona.sql.st_functions as st_functions
-import sedona.sql.st_predicates as st_predicates
+"""module without top level imports of these names"""
 
-# These bring the contents of the modules into this module
-from sedona.sql.st_aggregates import *
-from sedona.sql.st_constructors import *
-from sedona.sql.st_functions import *
-from sedona.sql.st_predicates import *
+from tests.test_base import TestBase
 
-__all__ = (
-        [name for name, obj in inspect.getmembers(sys.modules[__name__])]  # get expected values from the modules
-        + st_predicates.__all__
-        + st_constructors.__all__
-        + st_functions.__all__
-        + st_aggregates.__all__
-)
+
+class TestStFunctionImport(TestBase):
+    def test_import(self):
+        from sedona.sql import (
+            ST_Distance,
+            ST_Point,
+            ST_Contains,
+            ST_Envelope_Aggr,
+        )
+
+        ST_Distance
+        ST_Point
+        ST_Contains
+        ST_Envelope_Aggr
+
+    def test_geometry_type_should_be_a_sql_type(self):
+        from sedona.spark import GeometryType
+        from pyspark.sql.types import UserDefinedType
+        assert isinstance(GeometryType(), UserDefinedType)
