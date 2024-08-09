@@ -100,8 +100,9 @@ jobs:
           SCALA_VERSION: ${{ matrix.scala }}
           SKIP_TESTS: ${{ matrix.skipTests }}
         run: |
+          SPARK_COMPAT_VERSION="3.0"
           SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
-          mvn -q clean install -Dspark.compat.version=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${SKIP_TESTS}
+          mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${SKIP_TESTS}
       - run: mkdir staging
       - run: cp spark-shaded/target/sedona-*.jar staging
       - run: |
