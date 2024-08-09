@@ -19,10 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.expressions.javalang.typed
-import org.apache.spark.sql.sedona_sql.expressions.ST_Union_Aggr
 import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon}
-import org.locationtech.jts.io.WKTReader
 
 import scala.util.Random
 
