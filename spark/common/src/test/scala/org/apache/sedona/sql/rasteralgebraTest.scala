@@ -23,7 +23,7 @@ import org.apache.sedona.common.utils.RasterUtils
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.{DataFrame, Row, SaveMode}
 import org.apache.spark.sql.functions.{col, collect_list, expr, lit, row_number}
-import org.apache.spark.sql.types.{DoubleType, StructField, StructType}
+import org.apache.spark.sql.types.{DoubleType, IntegerType, StructField, StructType}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.junit.Assert.{assertEquals, assertNotNull, assertNull, assertTrue}
 import org.locationtech.jts.geom.{Coordinate, Geometry}
@@ -446,28 +446,30 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         Seq(
           StructField("upperLeftX", DoubleType, nullable = false),
           StructField("upperLeftY", DoubleType, nullable = false),
-          StructField("gridWidth", DoubleType, nullable = false),
-          StructField("gridHeight", DoubleType, nullable = false),
+          StructField("gridWidth", IntegerType, nullable = false),
+          StructField("gridHeight", IntegerType, nullable = false),
           StructField("scaleX", DoubleType, nullable = false),
           StructField("scaleY", DoubleType, nullable = false),
           StructField("skewX", DoubleType, nullable = false),
           StructField("skewY", DoubleType, nullable = false),
-          StructField("srid", DoubleType, nullable = false),
-          StructField("numSampleDimensions", DoubleType, nullable = false)))
+          StructField("srid", IntegerType, nullable = false),
+          StructField("numSampleDimensions", IntegerType, nullable = false),
+          StructField("tileWidth", IntegerType, nullable = false),
+          StructField("tileHeight", IntegerType, nullable = false)))
 
       assert(dfResult.schema("metadata").dataType == expectedSchema)
       assert(dfResult.schema("metadata_4326").dataType == expectedSchema)
 
       // Assert metadata fields
-      assert(metadata.getDouble(0) == metadata_4326.getDouble(0))
-      assert(metadata.getDouble(1) == metadata_4326.getDouble(1))
-      assert(metadata.getDouble(2) == metadata_4326.getDouble(2))
-      assert(metadata.getDouble(3) == metadata_4326.getDouble(3))
-      assert(metadata.getDouble(4) == metadata_4326.getDouble(4))
-      assert(metadata.getDouble(5) == metadata_4326.getDouble(5))
-      assert(metadata.getDouble(6) == metadata_4326.getDouble(6))
-      assert(metadata.getDouble(7) == metadata_4326.getDouble(7))
-      assert(metadata.getDouble(9) == metadata_4326.getDouble(9))
+      assert(metadata(0) == metadata_4326(0))
+      assert(metadata(1) == metadata_4326(1))
+      assert(metadata(2) == metadata_4326(2))
+      assert(metadata(3) == metadata_4326(3))
+      assert(metadata(4) == metadata_4326(4))
+      assert(metadata(5) == metadata_4326(5))
+      assert(metadata(6) == metadata_4326(6))
+      assert(metadata(7) == metadata_4326(7))
+      assert(metadata(9) == metadata_4326(9))
     }
 
     it("Passed RS_SetGeoReference should handle null values") {
@@ -967,14 +969,9 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .first()
         .getStruct(0)
 
-      // Convert Struct to Seq[Double]
-      def structToSeq(struct: Row): Seq[Double] = {
-        (0 until struct.size).map(struct.getDouble)
-      }
-
       // Compare the metadata
-      val clippedMetadataSeq = structToSeq(clippedMetadata).slice(0, 9)
-      val originalMetadataSeq = structToSeq(originalMetadata).slice(0, 9)
+      val clippedMetadataSeq = metadataStructToSeq(clippedMetadata).slice(0, 9)
+      val originalMetadataSeq = metadataStructToSeq(originalMetadata).slice(0, 9)
       assert(
         clippedMetadataSeq == originalMetadataSeq,
         s"Expected: $originalMetadataSeq, but got: $clippedMetadataSeq")
@@ -1189,19 +1186,12 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val result =
         df.selectExpr("RS_Metadata(RS_FromGeoTiff(content)) as metadata").first().getStruct(0)
 
-      // Function to convert Struct to Seq[Double]
-      def structToSeq(struct: Row): Seq[Double] = {
-        (0 until struct.size).map(struct.getDouble)
-      }
-
-      // Convert the struct to a sequence of doubles
-      val metadataSeq = structToSeq(result)
-
-      // Assertions
-      assert(metadataSeq.length == 10)
-      assert(metadataSeq(2) == 512.0)
-      assert(metadataSeq(3) == 517.0)
-      assert(metadataSeq(9) == 1.0)
+      assert(result.length == 12)
+      assert(result(2) == 512)
+      assert(result(3) == 517)
+      assert(result(9) == 1)
+      assert(result(10) == 256)
+      assert(result(11) == 256)
     }
 
     it("Passed RS_MakeEmptyRaster") {
@@ -1217,7 +1207,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize))")
         .first()
         .getStruct(0)
-      assertEquals(numBands, result.getDouble(9), 0.001)
+      assertEquals(numBands, result.getInt(9))
 
       // Test without skewX, skewY, srid
       result = sparkSession
@@ -1225,7 +1215,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, 'I', $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize))")
         .first()
         .getStruct(0)
-      assertEquals(numBands, result.getDouble(9), 0.001)
+      assertEquals(numBands, result.getInt(9))
 
       // Test with integer type input
       result = sparkSession
@@ -1233,7 +1223,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, ${upperLeftX.toInt}, ${upperLeftY.toInt}, ${cellSize.toInt}))")
         .first()
         .getStruct(0)
-      assertEquals(numBands, result.getDouble(9), 0.001)
+      assertEquals(numBands, result.getInt(9))
 
       // Test with skewX, skewY, srid but WITHOUT datatype
       val skewX = 0.0
@@ -1244,7 +1234,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize, -$cellSize, $skewX, $skewY, $srid))")
         .first()
         .getStruct(0)
-      assertEquals(numBands, result.getDouble(9), 0.001)
+      assertEquals(numBands, result.getInt(9))
 
       // Test with skewX, skewY, srid and datatype
       result = sparkSession
@@ -1252,7 +1242,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           s"SELECT RS_Metadata(RS_MakeEmptyRaster($numBands, 'I', $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize, -$cellSize, $skewX, $skewY, $srid))")
         .first()
         .getStruct(0)
-      assertEquals(numBands, result.getDouble(9), 0.001)
+      assertEquals(numBands, result.getInt(9))
     }
 
     it("Passed RS_MakeRaster") {
@@ -1261,8 +1251,8 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .load(resourceFolder + "raster/test1.tiff")
         .withColumn("rast", expr("RS_FromGeoTiff(content)"))
       val metadata = df.selectExpr("RS_Metadata(rast)").first().getStruct(0).toSeq
-      val width = metadata(2).asInstanceOf[Double].toInt
-      val height = metadata(3).asInstanceOf[Double].toInt
+      val width = metadata(2).asInstanceOf[Int]
+      val height = metadata(3).asInstanceOf[Int]
       val values = Array.tabulate(width * height) { i => i * i }
 
       // Attach values as a new column to the dataframe
@@ -1293,8 +1283,8 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val metadata =
         df.selectExpr("RS_Metadata(RS_FromGeoTiff(content))").first().getStruct(0).toSeq
-      val width = metadata(2).asInstanceOf[Double].toInt
-      val height = metadata(3).asInstanceOf[Double].toInt
+      val width = metadata(2).asInstanceOf[Int]
+      val height = metadata(3).asInstanceOf[Int]
       val result = df.selectExpr("RS_BandAsArray(RS_FromGeoTiff(content), 1)").first().getSeq(0)
       assertEquals(width * height, result.length)
       val resultOutOfBound =
@@ -2505,13 +2495,14 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val rasterDf = df.selectExpr("RS_Resample(raster, 6, 5, 1, -1, false, null) as raster")
       val rasterOutput = rasterDf.selectExpr("RS_AsMatrix(raster)").first().getString(0)
       val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getStruct(0)
+      val rasterMetadataSeq = metadataStructToSeq(rasterMetadata)
       val expectedOutput =
         "| 1.0   1.0   2.0   3.0   3.0   5.0|\n" + "| 1.0   1.0   2.0   3.0   3.0   5.0|\n" + "| 4.0   4.0   5.0   6.0   6.0   9.0|\n" + "| 7.0   7.0   8.0   9.0   9.0  10.0|\n" + "| 7.0   7.0   8.0   9.0   9.0  10.0|\n"
       val expectedMetadata: Seq[Double] =
         Seq(-0.33333333333333326, 0.19999999999999996, 6, 5, 1.388888888888889, -1.24, 0, 0, 0, 1)
       assertEquals(expectedOutput, rasterOutput)
       for (i <- expectedMetadata.indices) {
-        assertEquals(expectedMetadata(i), rasterMetadata.getDouble(i), 1e-6)
+        assertEquals(expectedMetadata(i), rasterMetadataSeq(i), 1e-6)
       }
     }
 
@@ -2522,12 +2513,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val rasterDf = df.selectExpr("RS_Resample(raster, 1.2, -1.4, true, null) as raster")
       val rasterOutput = rasterDf.selectExpr("RS_AsMatrix(raster)").first().getString(0)
       val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getStruct(0)
+      val rasterMetadataSeq = metadataStructToSeq(rasterMetadata)
       val expectedOutput =
         "|  1.0    1.0    2.0    3.0    3.0    5.0    5.0|\n" + "|  4.0    4.0    5.0    6.0    6.0    9.0    9.0|\n" + "|  4.0    4.0    5.0    6.0    6.0    9.0    9.0|\n" + "|  7.0    7.0    8.0    9.0    9.0   10.0   10.0|\n" + "|  NaN    NaN    NaN    NaN    NaN    NaN    NaN|\n"
       val expectedMetadata: Seq[Double] = Seq(0, 0, 7, 5, 1.2, -1.4, 0, 0, 0, 1)
       assertEquals(expectedOutput, rasterOutput)
       for (i <- expectedMetadata.indices) {
-        assertEquals(expectedMetadata(i), rasterMetadata.getDouble(i), 1e-6)
+        assertEquals(expectedMetadata(i), rasterMetadataSeq(i), 1e-6)
       }
     }
 
@@ -2539,13 +2531,14 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val rasterDf = df.selectExpr("RS_Resample(raster, refRaster, true, null) as raster")
       val rasterOutput = rasterDf.selectExpr("RS_AsMatrix(raster)").first().getString(0)
       val rasterMetadata = rasterDf.selectExpr("RS_Metadata(raster)").first().getStruct(0)
+      val rasterMetadataSeq = metadataStructToSeq(rasterMetadata)
       val expectedOutput =
         "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n" + "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n" + "| 4.0   4.0   5.0   6.0   6.0   9.0   9.0|\n" + "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n" + "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n"
       val expectedMetadata: Seq[Double] =
         Seq(-0.20000000298023224, 0.4000000059604645, 7.0, 5.0, 1.2, -1.4, 0.0, 0.0, 0.0, 1.0)
       assertEquals(expectedOutput, rasterOutput)
       for (i <- expectedMetadata.indices) {
-        assertEquals(expectedMetadata(i), rasterMetadata.getDouble(i), 1e-6)
+        assertEquals(expectedMetadata(i), rasterMetadataSeq(i), 1e-6)
       }
     }
 
@@ -2577,9 +2570,9 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val expectedMetadata = Seq(4.9375, 50.9375, 80, 48, 0.125, -0.125, 0, 0, 0, 4)
       val actualMetadata =
         rasterDf.selectExpr("RS_Metadata(raster) as metadata").first().getStruct(0)
-
+      val actualMetadataSeq = metadataStructToSeq(actualMetadata)
       for (i <- expectedMetadata.indices) {
-        assertEquals(expectedMetadata(i), actualMetadata.getDouble(i), 1e-6)
+        assertEquals(expectedMetadata(i), actualMetadataSeq(i), 1e-6)
       }
 
       val expectedFirstVal = 60.95357131958008
@@ -2595,10 +2588,9 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val expectedMetadata = Seq(4.9375, 50.9375, 80, 48, 0.125, -0.125, 0, 0, 0, 4)
       val actualMetadata =
         rasterDf.selectExpr("RS_Metadata(raster) as metadata").first().getStruct(0)
-
-      for (i <- expectedMetadata.indices) {
-        assertEquals(expectedMetadata(i), actualMetadata.getDouble(i), 1e-6)
-      }
+      val actualMetadataSeq = metadataStructToSeq(actualMetadata)
+      for (i <- expectedMetadata.indices)
+        assertEquals(expectedMetadata(i), actualMetadataSeq(i), 1e-6)
 
       val expectedFirstVal = 60.95357131958008
       val actualFirstVal =
@@ -2628,18 +2620,22 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     // Extract the expected metadata struct
     val expectedMetadataStruct = expectedDf.selectExpr(expectedCol).first().getStruct(0)
 
-    // Function to convert Struct to Seq[Double]
-    def structToSeq(struct: Row): Seq[Double] = {
-      (0 until struct.size).map(struct.getDouble)
-    }
-
     // Convert Structs to Seqs
-    val actualMetadata = structToSeq(actualMetadataStruct).slice(0, 9)
-    val expectedMetadata = structToSeq(expectedMetadataStruct).slice(0, 9)
+    val actualMetadata = metadataStructToSeq(actualMetadataStruct).slice(0, 9)
+    val expectedMetadata = metadataStructToSeq(expectedMetadataStruct).slice(0, 9)
 
     // Compare the actual and expected metadata
     assert(
       actualMetadata == expectedMetadata,
       s"Expected: $expectedMetadata, but got: $actualMetadata")
+  }
+
+  private def metadataStructToSeq(struct: Row): Seq[Double] = {
+    (0 until struct.length).map { k =>
+      struct(k) match {
+        case value: Int => value.toDouble
+        case value: Double => value
+      }
+    }
   }
 }

@@ -154,6 +154,16 @@ public class TestFunctions extends TestBase {
     verifySqlSingleRes(
         "select sedona.ST_AsGeoJSON(sedona.ST_GeomFromText('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))",
         "{\"type\":\"Polygon\",\"coordinates\":[[[1.0,1.0],[8.0,1.0],[8.0,8.0],[1.0,8.0],[1.0,1.0]]]}");
+
+    registerUDF("ST_AsGeoJSON", byte[].class, String.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsGeoJSON(sedona.ST_GeomFromText('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'), 'feature')",
+        "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[1.0,1.0],[8.0,1.0],[8.0,8.0],[1.0,8.0],[1.0,1.0]]]},\"properties\":{}}");
+
+    registerUDF("ST_AsGeoJSON", byte[].class, String.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsGeoJSON(sedona.ST_GeomFromText('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'), 'featurecollection')",
+        "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[1.0,1.0],[8.0,1.0],[8.0,8.0],[1.0,8.0],[1.0,1.0]]]},\"properties\":{}}]}");
   }
 
   @Test
@@ -360,6 +370,24 @@ public class TestFunctions extends TestBase {
     verifySqlSingleRes(
         "select sedona.ST_AsText(sedona.ST_Envelope(sedona.ST_GeomFromText('LINESTRING(1 2, 3 4)')))",
         "POLYGON ((1 2, 1 4, 3 4, 3 2, 1 2))");
+  }
+
+  @Test
+  public void test_ST_Expand() {
+    registerUDF("ST_Expand", byte[].class, double.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_Expand(sedona.ST_GeomFromText('POLYGON ((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))'), 10))",
+        "POLYGON Z((40 40 -9, 40 90 -9, 90 90 13, 90 40 13, 40 40 -9))");
+
+    registerUDF("ST_Expand", byte[].class, double.class, double.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_Expand(sedona.ST_GeomFromText('POLYGON ((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))'), 5, 6))",
+        "POLYGON Z((45 44 1, 45 86 1, 85 86 3, 85 44 3, 45 44 1))");
+
+    registerUDF("ST_Expand", byte[].class, double.class, double.class, double.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_Expand(sedona.ST_GeomFromText('POLYGON ((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))'), 6, 5, -3))",
+        "POLYGON Z((44 45 4, 44 85 4, 86 85 0, 86 45 0, 44 45 4))");
   }
 
   @Test

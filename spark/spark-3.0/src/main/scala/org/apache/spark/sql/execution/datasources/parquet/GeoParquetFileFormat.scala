@@ -66,6 +66,14 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
 
   override def hashCode(): Int = getClass.hashCode()
 
+  override def toString(): String = {
+    // HACK: This is the only place we can inject spatial filter information into the described query plan.
+    // Please see org.apache.spark.sql.execution.DataSourceScanExec#simpleString for more details.
+    "GeoParquet" + spatialFilter
+      .map(filter => " with spatial filter [" + filter.simpleString + "]")
+      .getOrElse("")
+  }
+
   def withSpatialPredicates(spatialFilter: GeoParquetSpatialFilter): GeoParquetFileFormat =
     new GeoParquetFileFormat(Some(spatialFilter))
 

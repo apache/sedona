@@ -38,14 +38,16 @@ case class RS_Metadata(inputExpressions: Seq[Expression])
     Seq(
       StructField("upperLeftX", DoubleType, nullable = false),
       StructField("upperLeftY", DoubleType, nullable = false),
-      StructField("gridWidth", DoubleType, nullable = false),
-      StructField("gridHeight", DoubleType, nullable = false),
+      StructField("gridWidth", IntegerType, nullable = false),
+      StructField("gridHeight", IntegerType, nullable = false),
       StructField("scaleX", DoubleType, nullable = false),
       StructField("scaleY", DoubleType, nullable = false),
       StructField("skewX", DoubleType, nullable = false),
       StructField("skewY", DoubleType, nullable = false),
-      StructField("srid", DoubleType, nullable = false),
-      StructField("numSampleDimensions", DoubleType, nullable = false)))
+      StructField("srid", IntegerType, nullable = false),
+      StructField("numSampleDimensions", IntegerType, nullable = false),
+      StructField("tileWidth", IntegerType, nullable = false),
+      StructField("tileHeight", IntegerType, nullable = false)))
 
   override def eval(input: InternalRow): Any = {
     // Evaluate the input expressions
@@ -56,10 +58,22 @@ case class RS_Metadata(inputExpressions: Seq[Expression])
       null
     } else {
       // Get the metadata using the Java method
-      val metaData = RasterAccessors.metadata(rasterGeom)
+      val metaData = RasterAccessors.rasterMetadata(rasterGeom)
 
       // Create an InternalRow with the metadata
-      InternalRow.fromSeq(metaData.map(_.asInstanceOf[Any]))
+      InternalRow(
+        metaData.upperLeftX,
+        metaData.upperLeftY,
+        metaData.gridWidth,
+        metaData.gridHeight,
+        metaData.scaleX,
+        metaData.scaleY,
+        metaData.skewX,
+        metaData.skewY,
+        metaData.srid,
+        metaData.numBands,
+        metaData.tileWidth,
+        metaData.tileHeight)
     }
   }
 

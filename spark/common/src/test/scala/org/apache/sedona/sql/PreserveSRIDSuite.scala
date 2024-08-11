@@ -44,6 +44,7 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
       ("ST_Buffer(geom1, 1)", 1000),
       ("ST_ShiftLongitude(geom1)", 1000),
       ("ST_Envelope(geom1)", 1000),
+      ("ST_Expand(geom1, 0)", 1000),
       ("ST_Centroid(geom1)", 1000),
       ("ST_Transform(geom1, 'EPSG:4326', 'EPSG:3857')", 3857),
       ("ST_Intersection(geom1, ST_Point(0, 1))", 1000),

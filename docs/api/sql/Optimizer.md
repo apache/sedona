@@ -343,3 +343,5 @@ We can compare the metrics of querying the GeoParquet dataset with or without th
 | Without spatial predicate | With spatial predicate |
 | ----------- | ----------- |
 | ![](../../image/scan-parquet-without-spatial-pred.png) | ![](../../image/scan-parquet-with-spatial-pred.png) |
+
+Spatial predicate push-down to GeoParquet is enabled by default. Users can manually disable it by setting the Spark configuration `spark.sedona.geoparquet.spatialFilterPushDown` to `false`.

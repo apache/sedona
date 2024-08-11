@@ -186,6 +186,13 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "type"},
+      argTypes = {"Geometry", "String"})
+  public static String ST_AsGeoJSON(String geometry, String type) {
+    return Functions.asGeoJson(GeometrySerde.deserGeoJson(geometry), type);
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"})
   public static String ST_AsKML(String geometry) {
@@ -466,6 +473,33 @@ public class UDFsV2 {
       returnTypes = "Geometry")
   public static String ST_Envelope(String geometry) {
     return GeometrySerde.serGeoJson(Functions.envelope(GeometrySerde.deserGeoJson(geometry)));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "uniformDelta"},
+      argTypes = {"Geometry", "double"},
+      returnTypes = "Geometry")
+  public static String ST_Expand(String geometry, double uniformDelta) {
+    return GeometrySerde.serGeoJson(
+        Functions.expand(GeometrySerde.deserGeoJson(geometry), uniformDelta));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "deltaX", "deltaY"},
+      argTypes = {"Geometry", "double", "double"},
+      returnTypes = "Geometry")
+  public static String ST_Expand(String geometry, double deltaX, double deltaY) {
+    return GeometrySerde.serGeoJson(
+        Functions.expand(GeometrySerde.deserGeoJson(geometry), deltaX, deltaY));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "deltaX", "deltaY", "deltaZ"},
+      argTypes = {"Geometry", "double", "double", "double"},
+      returnTypes = "Geometry")
+  public static String ST_Expand(String geometry, double deltaX, double deltaY, double deltaZ) {
+    return GeometrySerde.serGeoJson(
+        Functions.expand(GeometrySerde.deserGeoJson(geometry), deltaX, deltaY, deltaZ));
   }
 
   @UDFAnnotations.ParamMeta(

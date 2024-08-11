@@ -25,11 +25,6 @@ from typing import Union, Optional
 from sedona.sql.dataframe_api import ColumnOrName, call_sedona_function, validate_argument_types
 
 
-# Automatically populate __all__
-__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
-           if inspect.isfunction(obj)]
-
-
 _call_predicate_function = partial(call_sedona_function, "st_predicates")
 
 
@@ -227,3 +222,8 @@ def ST_DWithin(a: ColumnOrName, b: ColumnOrName, distance: Union[ColumnOrName, f
     """
     args = (a, b, distance, use_sphere) if use_sphere is not None else (a, b, distance,)
     return _call_predicate_function("ST_DWithin", args)
+
+
+# Automatically populate __all__
+__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
+           if inspect.isfunction(obj)]

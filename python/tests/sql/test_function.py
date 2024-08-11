@@ -171,6 +171,21 @@ class TestPredicateJoin(TestBase):
         function_df = self.spark.sql("select ST_Envelope(polygondf.countyshape) from polygondf")
         function_df.show()
 
+    def test_st_expand(self):
+        baseDf = self.spark.sql(
+            "SELECT ST_GeomFromWKT('POLYGON ((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))') as geom")
+        actual = baseDf.selectExpr("ST_AsText(ST_Expand(geom, 10))").first()[0]
+        expected = "POLYGON Z((40 40 -9, 40 90 -9, 90 90 13, 90 40 13, 40 40 -9))"
+        assert expected == actual
+
+        actual = baseDf.selectExpr("ST_AsText(ST_Expand(geom, 5, 6))").first()[0]
+        expected = "POLYGON Z((45 44 1, 45 86 1, 85 86 3, 85 44 3, 45 44 1))"
+        assert expected == actual
+
+        actual = baseDf.selectExpr("ST_AsText(ST_Expand(geom, 6, 5, -3))").first()[0]
+        expected = "POLYGON Z((44 45 4, 44 85 4, 86 85 0, 86 45 0, 44 45 4))"
+        assert expected == actual
+
     def test_st_centroid(self):
         polygon_wkt_df = self.spark.read.format("csv"). \
             option("delimiter", "\t"). \

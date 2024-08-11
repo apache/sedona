@@ -111,10 +111,7 @@ jobs:
           SPARK_VERSION: ${{ matrix.spark }}
           SCALA_VERSION: ${{ matrix.scala }}
         run: |
-            SPARK_COMPAT_VERSION="3.0"
-            if [ ${SPARK_VERSION:2:1} -gt "3" ]; then
-              SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
-            fi
+            SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
             mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dgeotools
       - env:
           SPARK_VERSION: ${{ matrix.spark }}

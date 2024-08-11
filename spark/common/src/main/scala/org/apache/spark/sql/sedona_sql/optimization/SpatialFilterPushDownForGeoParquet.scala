@@ -62,23 +62,30 @@ import org.locationtech.jts.geom.Point
 
 class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rule[LogicalPlan] {
 
-  override def apply(plan: LogicalPlan): LogicalPlan = plan transform {
-    case filter @ Filter(condition, lr: LogicalRelation) if isGeoParquetRelation(lr) =>
-      val filters = splitConjunctivePredicates(condition)
-      val normalizedFilters = DataSourceStrategy.normalizeExprs(filters, lr.output)
-      val (_, normalizedFiltersWithoutSubquery) =
-        normalizedFilters.partition(SubqueryExpression.hasSubquery)
-      val geoParquetSpatialFilters =
-        translateToGeoParquetSpatialFilters(normalizedFiltersWithoutSubquery)
-      val hadoopFsRelation = lr.relation.asInstanceOf[HadoopFsRelation]
-      val fileFormat = hadoopFsRelation.fileFormat.asInstanceOf[GeoParquetFileFormatBase]
-      if (geoParquetSpatialFilters.isEmpty) filter
-      else {
-        val combinedSpatialFilter = geoParquetSpatialFilters.reduce(AndFilter)
-        val newFileFormat = fileFormat.withSpatialPredicates(combinedSpatialFilter)
-        val newRelation = hadoopFsRelation.copy(fileFormat = newFileFormat)(sparkSession)
-        filter.copy(child = lr.copy(relation = newRelation))
+  override def apply(plan: LogicalPlan): LogicalPlan = {
+    val enableSpatialFilterPushDown =
+      sparkSession.conf.get("spark.sedona.geoparquet.spatialFilterPushDown", "true").toBoolean
+    if (!enableSpatialFilterPushDown) plan
+    else {
+      plan transform {
+        case filter @ Filter(condition, lr: LogicalRelation) if isGeoParquetRelation(lr) =>
+          val filters = splitConjunctivePredicates(condition)
+          val normalizedFilters = DataSourceStrategy.normalizeExprs(filters, lr.output)
+          val (_, normalizedFiltersWithoutSubquery) =
+            normalizedFilters.partition(SubqueryExpression.hasSubquery)
+          val geoParquetSpatialFilters =
+            translateToGeoParquetSpatialFilters(normalizedFiltersWithoutSubquery)
+          val hadoopFsRelation = lr.relation.asInstanceOf[HadoopFsRelation]
+          val fileFormat = hadoopFsRelation.fileFormat.asInstanceOf[GeoParquetFileFormatBase]
+          if (geoParquetSpatialFilters.isEmpty) filter
+          else {
+            val combinedSpatialFilter = geoParquetSpatialFilters.reduce(AndFilter)
+            val newFileFormat = fileFormat.withSpatialPredicates(combinedSpatialFilter)
+            val newRelation = hadoopFsRelation.copy(fileFormat = newFileFormat)(sparkSession)
+            filter.copy(child = lr.copy(relation = newRelation))
+          }
       }
+    }
   }
 
   private def isGeoParquetRelation(lr: LogicalRelation): Boolean =

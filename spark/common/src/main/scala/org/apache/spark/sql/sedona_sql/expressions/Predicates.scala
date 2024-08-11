@@ -55,9 +55,14 @@ abstract class ST_Predicate
       if (rightArray == null) {
         null
       } else {
-        val leftGeometry = GeometrySerializer.deserialize(leftArray)
-        val rightGeometry = GeometrySerializer.deserialize(rightArray)
-        evalGeom(leftGeometry, rightGeometry)
+        try {
+          val leftGeometry = GeometrySerializer.deserialize(leftArray)
+          val rightGeometry = GeometrySerializer.deserialize(rightArray)
+          evalGeom(leftGeometry, rightGeometry)
+        } catch {
+          case e: Exception =>
+            InferredExpression.throwExpressionInferenceException(inputRow, inputExpressions, e)
+        }
       }
     }
   }
