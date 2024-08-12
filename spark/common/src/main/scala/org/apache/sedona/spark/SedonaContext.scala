@@ -24,8 +24,6 @@ import org.apache.sedona.sql.{ParserRegistrator, RasterRegistrator}
 import org.apache.sedona.sql.UDF.UdfRegistrator
 import org.apache.sedona.sql.UDT.UdtRegistrator
 import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.sql.execution.SparkSqlParser
-import org.apache.spark.sql.parser.SedonaSqlParser
 import org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet
 import org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetector
 import org.apache.spark.sql.{SQLContext, SparkSession}

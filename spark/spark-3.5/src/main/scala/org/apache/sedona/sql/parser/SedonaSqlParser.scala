@@ -16,29 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql
+package org.apache.sedona.sql.parser
 
-import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.parser.ParserInterface
-import org.apache.spark.sql.parser.ParserFactory
+import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
+import org.apache.spark.sql.execution.SparkSqlParser
 
-object ParserRegistrator {
+class SedonaSqlParser(delegate: ParserInterface) extends SparkSqlParser {
+
+  // The parser builder for the Sedona SQL AST
+  val parserBuilder = new SedonaSqlAstBuilder
 
   /**
-   * Register the custom Sedona Spark parser
-   * @param sparkSession
+   * Parse the SQL text and return the logical plan.
+   * @param sqlText
+   * @return
    */
-  def register(sparkSession: SparkSession): Unit = {
-    try {
-      val parserClassName = "org.apache.sedona.sql.parser.SedonaSqlParser"
-      val delegate: ParserInterface = sparkSession.sessionState.sqlParser
-
-      val parser = ParserFactory.getParser(parserClassName, delegate)
-      val field = sparkSession.sessionState.getClass.getDeclaredField("sqlParser")
-      field.setAccessible(true)
-      field.set(sparkSession.sessionState, parser)
-    } catch {
-      case _: Exception =>
+  override def parsePlan(sqlText: String): LogicalPlan = parse(sqlText) { parser =>
+    parserBuilder.visit(parser.singleStatement()) match {
+      case plan: LogicalPlan => plan
+      case _ =>
+        delegate.parsePlan(sqlText)
     }
   }
 }

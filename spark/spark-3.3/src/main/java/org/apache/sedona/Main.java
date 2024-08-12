@@ -16,29 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql
+package org.apache.sedona;
 
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.catalyst.parser.ParserInterface
-import org.apache.spark.sql.parser.ParserFactory
-
-object ParserRegistrator {
-
-  /**
-   * Register the custom Sedona Spark parser
-   * @param sparkSession
-   */
-  def register(sparkSession: SparkSession): Unit = {
-    try {
-      val parserClassName = "org.apache.sedona.sql.parser.SedonaSqlParser"
-      val delegate: ParserInterface = sparkSession.sessionState.sqlParser
-
-      val parser = ParserFactory.getParser(parserClassName, delegate)
-      val field = sparkSession.sessionState.getClass.getDeclaredField("sqlParser")
-      field.setAccessible(true)
-      field.set(sparkSession.sessionState, parser)
-    } catch {
-      case _: Exception =>
-    }
+public class Main {
+  public static void main(String[] args) {
+    System.out.println("Hello world!");
   }
 }

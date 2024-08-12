@@ -19,24 +19,14 @@
 package org.apache.spark.sql.parser
 
 import org.apache.spark.sql.catalyst.parser.ParserInterface
-import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.SparkSqlParser
 
-class SedonaSqlParser(delegate: ParserInterface) extends SparkSqlParser {
-
-  // The parser builder for the Sedona SQL AST
-  val parserBuilder = new SedonaSqlAstBuilder
-
-  /**
-   * Parse the SQL text and return the logical plan.
-   * @param sqlText
-   * @return
-   */
-  override def parsePlan(sqlText: String): LogicalPlan = parse(sqlText) { parser =>
-    parserBuilder.visit(parser.singleStatement()) match {
-      case plan: LogicalPlan => plan
-      case _ =>
-        delegate.parsePlan(sqlText)
-    }
+object ParserFactory {
+  def getParser(className: String, delegate: ParserInterface): SparkSqlParser = {
+    Class
+      .forName(className)
+      .getConstructor(classOf[ParserInterface])
+      .newInstance(delegate)
+      .asInstanceOf[SparkSqlParser]
   }
 }

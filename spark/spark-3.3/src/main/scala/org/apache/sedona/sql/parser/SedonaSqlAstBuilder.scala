@@ -16,29 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql
+package org.apache.sedona.sql.parser
 
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.catalyst.parser.ParserInterface
-import org.apache.spark.sql.parser.ParserFactory
+import org.apache.spark.sql.catalyst.parser.SqlBaseParser._
+import org.apache.spark.sql.execution.SparkSqlAstBuilder
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.types.DataType
 
-object ParserRegistrator {
+class SedonaSqlAstBuilder extends SparkSqlAstBuilder {
 
   /**
-   * Register the custom Sedona Spark parser
-   * @param sparkSession
+   * Override the method to handle the geometry data type
+   * @param ctx
+   * @return
    */
-  def register(sparkSession: SparkSession): Unit = {
-    try {
-      val parserClassName = "org.apache.sedona.sql.parser.SedonaSqlParser"
-      val delegate: ParserInterface = sparkSession.sessionState.sqlParser
-
-      val parser = ParserFactory.getParser(parserClassName, delegate)
-      val field = sparkSession.sessionState.getClass.getDeclaredField("sqlParser")
-      field.setAccessible(true)
-      field.set(sparkSession.sessionState, parser)
-    } catch {
-      case _: Exception =>
+  override def visitPrimitiveDataType(ctx: PrimitiveDataTypeContext): DataType = {
+    ctx.getText.toUpperCase() match {
+      case "GEOMETRY" => GeometryUDT
+      case _ => super.visitPrimitiveDataType(ctx)
     }
   }
 }
