@@ -40,5 +40,17 @@ object ParserRegistrator {
     } catch {
       case _: Exception =>
     }
+
+    try {
+      val parserClassName = "org.apache.sedona.sql.parser.SedonaSqlParser"
+      val delegate: ParserInterface = sparkSession.sessionState.sqlParser
+
+      val parser = ParserFactory.getParser(parserClassName, sparkSession.sessionState.conf, delegate)
+      val field = sparkSession.sessionState.getClass.getDeclaredField("sqlParser")
+      field.setAccessible(true)
+      field.set(sparkSession.sessionState, parser)
+    } catch {
+      case _: Exception =>
+    }
   }
 }
