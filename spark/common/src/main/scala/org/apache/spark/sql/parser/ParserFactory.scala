@@ -34,7 +34,7 @@ object ParserFactory {
   def getParser(className: String, conf: SQLConf, delegate: ParserInterface): SparkSqlParser = {
     Class
       .forName(className)
-      .getConstructor(classOf[ParserInterface])
+      .getConstructor(classOf[SQLConf], classOf[ParserInterface])
       .newInstance(conf, delegate)
       .asInstanceOf[SparkSqlParser]
   }

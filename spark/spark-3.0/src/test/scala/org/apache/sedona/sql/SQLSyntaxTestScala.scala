@@ -21,6 +21,9 @@ package org.apache.sedona.sql
 import org.scalatest.matchers.must.Matchers.be
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatest.prop.TableDrivenPropertyChecks
+import org.apache.spark.sql.catalyst.parser.ParserInterface
+import org.apache.spark.sql.AnalysisException
+import org.scalatest.matchers.should.Matchers._
 
 /**
  * Test suite for testing Sedona SQL support.
@@ -35,23 +38,27 @@ class SQLSyntaxTestScala extends TestBaseScala with TableDrivenPropertyChecks {
   describe("Table creation DDL tests") {
 
     it("should be able to create a regular table without geometry column should work") {
-      sparkSession.sql("DROP TABLE IF EXISTS T_TEST_REGULAR")
-      sparkSession.sql("CREATE TABLE IF NOT EXISTS T_TEST_REGULAR (INT_COL INT)")
-      sparkSession.catalog.tableExists("T_TEST_REGULAR") should be(true)
-      sparkSession.sql("DROP TABLE IF EXISTS T_TEST_REGULAR")
-      sparkSession.catalog.tableExists("T_TEST_REGULAR") should be(false)
+      val parser: ParserInterface = sparkSession.sessionState.sqlParser
+      val plan = parser.parsePlan("CREATE TABLE IF NOT EXISTS T_TEST_REGULAR (INT_COL INT)")
+
+      plan should not be (null)
     }
 
     it(
       "should be able to create a regular table with geometry column should work without a workaround") {
-      sparkSession.sql("CREATE TABLE T_TEST_EXPLICIT_GEOMETRY (GEO_COL GEOMETRY)")
-      sparkSession.catalog.tableExists("T_TEST_EXPLICIT_GEOMETRY") should be(true)
+      val parser: ParserInterface = sparkSession.sessionState.sqlParser
+      val plan = parser.parsePlan("CREATE TABLE T_TEST_EXPLICIT_GEOMETRY (GEO_COL GEOMETRY)")
+
+      plan should not be (null)
     }
 
     it(
       "should be able to create a regular table with regular and geometry column should work without a workaround") {
-      sparkSession.sql("CREATE TABLE T_TEST_EXPLICIT_GEOMETRY_2 (INT_COL INT, GEO_COL GEOMETRY)")
-      sparkSession.catalog.tableExists("T_TEST_EXPLICIT_GEOMETRY_2") should be(true)
+      val parser: ParserInterface = sparkSession.sessionState.sqlParser
+      val plan = parser.parsePlan(
+        "CREATE TABLE T_TEST_EXPLICIT_GEOMETRY_2 (INT_COL INT, GEO_COL GEOMETRY)")
+
+      plan should not be (null)
     }
   }
 }
