@@ -57,8 +57,8 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
 sedona_initialize_spark_connection <- function(sc) {
   invoke_static(
     sc,
-    "org.apache.sedona.sql.utils.SedonaSQLRegistrator",
-    "registerAll",
+    "org.apache.sedona.spark.SedonaContext",
+    "create",
     spark_session(sc),
     "r"
   )
