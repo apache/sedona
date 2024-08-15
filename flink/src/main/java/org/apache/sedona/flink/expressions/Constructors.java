@@ -243,7 +243,9 @@ public class Constructors {
     }
 
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-    public Geometry eval(@DataTypeHint("String") String wktString, @DataTypeHint("Int") Integer srid) throws ParseException {
+    public Geometry eval(
+        @DataTypeHint("String") String wktString, @DataTypeHint("Int") Integer srid)
+        throws ParseException {
       return org.apache.sedona.common.Constructors.geomFromWKT(wktString, srid);
     }
   }
@@ -276,7 +278,9 @@ public class Constructors {
     }
 
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
-    public Geometry eval(@DataTypeHint("String") String wktString, @DataTypeHint("Int") Integer srid) throws ParseException {
+    public Geometry eval(
+        @DataTypeHint("String") String wktString, @DataTypeHint("Int") Integer srid)
+        throws ParseException {
       return org.apache.sedona.common.Constructors.geomFromWKT(wktString, srid);
     }
   }
