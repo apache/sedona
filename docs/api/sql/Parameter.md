@@ -63,3 +63,7 @@ sparkSession.conf.set("sedona.global.index","false")
 		* all: Always optimize spatial join queries, even for equi-joins.
 		* none: Disable optimization for spatial joins.
 		* nonequi: Optimize spatial join queries that are not equi-joins.
+* spark.sedona.enableParserExtension
+	* Enable the parser extension to parse GEOMETRY data type in SQL DDL statements
+	* Default: true
+	* Possible values: true, false
