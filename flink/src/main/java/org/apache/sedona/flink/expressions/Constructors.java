@@ -241,6 +241,13 @@ public class Constructors {
     public Geometry eval(@DataTypeHint("String") String wktString) throws ParseException {
       return org.apache.sedona.common.Constructors.geomFromWKT(wktString, 0);
     }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint("String") String wktString, @DataTypeHint("Int") Integer srid)
+        throws ParseException {
+      return org.apache.sedona.common.Constructors.geomFromWKT(wktString, srid);
+    }
   }
 
   public static class ST_GeomFromEWKT extends ScalarFunction {
@@ -268,6 +275,13 @@ public class Constructors {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(@DataTypeHint("String") String wktString) throws ParseException {
       return org.apache.sedona.common.Constructors.geomFromWKT(wktString, 0);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint("String") String wktString, @DataTypeHint("Int") Integer srid)
+        throws ParseException {
+      return org.apache.sedona.common.Constructors.geomFromWKT(wktString, srid);
     }
   }
 
