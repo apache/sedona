@@ -287,6 +287,14 @@ public class ConstructorTest extends TestBase {
             $(polygonColNames[1]));
     Row result = last(geomTable);
     assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
+
+    geomTable =
+            wktTable.select(
+                    call(Constructors.ST_GeomFromWKT.class.getSimpleName(), $(polygonColNames[0]), 1111)
+                            .as(polygonColNames[0]),
+                    $(polygonColNames[1]));
+    int sridActual = (int) last(geomTable.select(call(Functions.ST_SRID.class.getSimpleName(), $(polygonColNames[0])))).getField(0);
+    assertEquals(1111, sridActual);
   }
 
   @Test
@@ -316,6 +324,14 @@ public class ConstructorTest extends TestBase {
             $(polygonColNames[1]));
     Row result = last(geomTable);
     assertEquals(data.get(data.size() - 1).getField(0).toString(), result.getField(0).toString());
+
+    geomTable =
+            wktTable.select(
+                    call(Constructors.ST_GeomFromText.class.getSimpleName(), $(polygonColNames[0]), 1111)
+                            .as(polygonColNames[0]),
+                    $(polygonColNames[1]));
+    int sridActual = (int) last(geomTable.select(call(Functions.ST_SRID.class.getSimpleName(), $(polygonColNames[0])))).getField(0);
+    assertEquals(1111, sridActual);
   }
 
   @Test
