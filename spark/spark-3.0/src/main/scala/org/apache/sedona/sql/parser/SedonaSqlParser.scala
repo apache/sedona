@@ -33,11 +33,17 @@ class SedonaSqlParser(conf: SQLConf, delegate: ParserInterface) extends SparkSql
    * @param sqlText
    * @return
    */
-  override def parsePlan(sqlText: String): LogicalPlan = parse(sqlText) { parser =>
-    parserBuilder.visit(parser.singleStatement()) match {
-      case plan: LogicalPlan => plan
-      case _ =>
+  override def parsePlan(sqlText: String): LogicalPlan =
+    try {
+      parse(sqlText) { parser =>
+        parserBuilder.visit(parser.singleStatement()) match {
+          case plan: LogicalPlan => plan
+          case _ =>
+            delegate.parsePlan(sqlText)
+        }
+      }
+    } catch {
+      case _: Exception =>
         delegate.parsePlan(sqlText)
     }
-  }
 }
