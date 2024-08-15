@@ -18,7 +18,7 @@
 
 spark_dependencies <- function(spark_version, scala_version, ...) {
   if (spark_version[1, 1] == "3") {
-    spark_version <- "3.0"
+    spark_version <- spark_version
     scala_version <- scala_version %||% "2.12"
   } else {
     stop("Unsupported Spark version: ", spark_version)
@@ -42,7 +42,7 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
       ),
       packages
     )
-    cli::cli_alert_info(sprintf("Using Sedona jars versions: %s etc.", packages[1]))
+    cli::cli_alert_info(sprintf("Using Sedona jar version: %s", packages[1]))
   }
 
   spark_dependency(
