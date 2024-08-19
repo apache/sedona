@@ -2021,6 +2021,20 @@ def ST_IsCollection(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_RotateX(geometry: ColumnOrName, angle: Union[ColumnOrName, float]) -> Column:
+    """Returns geometry rotated by the given angle in X axis
+
+    @param geometry: Geometry column or name
+    :type geometry: ColumnOrName
+    @param angle: Rotation angle in radians
+    :type angle: float
+    @return: X-axis rotated geometry
+    """
+
+    return _call_st_function("ST_RotateX", (geometry, angle))
+
+
+@validate_argument_types
 def ST_Rotate(geometry: ColumnOrName, angle: Union[ColumnOrName, float], originX: Union[ColumnOrName, float] = None,
               originY: Union[ColumnOrName, float] = None, pointOrigin: ColumnOrName = None) -> Column:
     """Return a counter-clockwise rotated geometry along the specified origin.

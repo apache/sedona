@@ -2213,6 +2213,15 @@ public class Functions {
     return geometry.getFactory().createMultiPointFromCoords(coordinates);
   }
 
+  public static Geometry rotateX(Geometry geometry, double angle) {
+    if (GeomUtils.isAnyGeomEmpty(geometry)) {
+      return geometry;
+    }
+    double sinAngle = Math.sin(angle);
+    double cosAngle = Math.cos(angle);
+    return affine(geometry, 1, 0, 0, 0, cosAngle, -sinAngle, 0, sinAngle, cosAngle, 0, 0, 0);
+  }
+
   /**
    * Rotates a geometry by a given angle in radians.
    *
