@@ -1491,6 +1491,14 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "angle"},
+      argTypes = {"Geometry", "double"},
+      returnTypes = "Geometry")
+  public static String ST_RotateX(String geometry, double angle) {
+    return GeometrySerde.serGeoJson(Functions.rotateX(GeometrySerde.deserGeoJson(geometry), angle));
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geom", "angle"},
       argTypes = {"Geometry", "double"},
       returnTypes = "Geometry")

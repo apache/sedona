@@ -2610,6 +2610,22 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testRotateX() {
+    Table tbl =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromEWKT('POLYGON ((0 0, 2 0, 1 1, 2 2, 0 2, 1 1, 0 0))') AS geom");
+    String actual =
+        (String)
+            first(
+                    tbl.select(call(Functions.ST_RotateX.class.getSimpleName(), $("geom"), Math.PI))
+                        .as("geom")
+                        .select(call(Functions.ST_AsEWKT.class.getSimpleName(), $("geom"))))
+                .getField(0);
+    String expected = "POLYGON ((0 0, 2 0, 1 -1, 2 -2, 0 -2, 1 -1, 0 0))";
+    assertEquals(expected, actual);
+  }
+
+  @Test
   public void testRotate() {
     Table tbl =
         tableEnv.sqlQuery(

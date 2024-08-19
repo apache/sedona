@@ -2473,6 +2473,24 @@ Output:
 SRID=4326;POLYGON ((0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0))
 ```
 
+## ST_RotateX
+
+Introduction: Performs a counter-clockwise rotation of the specified geometry around the X-axis by the given angle measured in radians.
+
+Format: `ST_RotateX(geometry: Geometry, angle: Double)`
+
+SQL Example:
+
+```sql
+SELECT ST_RotateX(ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 0))'), 10)
+```
+
+Output:
+
+```
+SRID=4326;POLYGON ((0 0, 1 0, 1 -0.8390715290764524, 0 0))
+```
+
 ## ST_S2CellIDs
 
 Introduction: Cover the geometry with Google S2 Cells, return the corresponding cell IDs with the given level.

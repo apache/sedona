@@ -3391,6 +3391,37 @@ class functionTestScala
     }
   }
 
+  it("Should pass ST_RotateX") {
+    sparkSession
+      .sql(
+        "SELECT ST_AsEWKT(ST_RotateX(ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 0))'), 10)) ")
+      .show(truncate = false)
+    val geomTestCases = Map(
+      (
+        1,
+        "'LINESTRING (50 160, 50 50, 100 50)'",
+        "PI()") -> "'LINESTRING (50 -160, 50 -50, 100 -50)'",
+      (
+        2,
+        "'LINESTRING(1 2 3, 1 1 1)'",
+        "PI()/2") -> "'LINESTRING Z(1 -3 2, 1 -0.9999999999999999 1)'")
+
+    for (((index, geom, angle), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"""
+                                   |SELECT
+                                   |  ST_AsEWKT(
+                                   |    ST_RotateX(
+                                   |      ST_GeomFromEWKT($geom),
+                                   |      $angle
+                                   |    )
+                                   |  ) AS geom
+         """.stripMargin)
+
+      val actual = df.take(1)(0).get(0).asInstanceOf[String]
+      assert(actual == expectedResult.stripPrefix("'").stripSuffix("'"))
+    }
+  }
+
   it("Should pass ST_Rotate") {
     val geomTestCases = Map(
       (

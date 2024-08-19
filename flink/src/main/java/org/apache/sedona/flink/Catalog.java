@@ -102,6 +102,7 @@ public class Catalog {
       new Functions.ST_ReducePrecision(),
       new Functions.ST_Reverse(),
       new Functions.ST_Rotate(),
+      new Functions.ST_RotateX(),
       new Functions.ST_GeometryN(),
       new Functions.ST_InteriorRingN(),
       new Functions.ST_PointN(),

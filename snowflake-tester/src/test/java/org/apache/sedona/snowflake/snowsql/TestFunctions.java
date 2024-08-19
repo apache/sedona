@@ -1208,6 +1208,14 @@ public class TestFunctions extends TestBase {
   }
 
   @Test
+  public void test_ST_RotateX() {
+    registerUDF("ST_RotateX", byte[].class, double.class);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_AsText(sedona.ST_RotateX(sedona.ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)'), 10))",
+        "LINESTRING (0 0, 1 0, 1 -0.8390715290764524, 0 0)");
+  }
+
+  @Test
   public void test_ST_Rotate() {
     registerUDF("ST_Rotate", byte[].class, double.class);
     verifySqlSingleRes(
