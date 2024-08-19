@@ -3392,10 +3392,6 @@ class functionTestScala
   }
 
   it("Should pass ST_RotateX") {
-    sparkSession
-      .sql(
-        "SELECT ST_AsEWKT(ST_RotateX(ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 0))'), 10)) ")
-      .show(truncate = false)
     val geomTestCases = Map(
       (
         1,
