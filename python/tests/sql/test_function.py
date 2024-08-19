@@ -949,6 +949,17 @@ class TestPredicateJoin(TestBase):
         ]
         assert (collected_geometries[0] == "LINESTRING (0 0, 1 1, 1 0, 21 52)")
 
+    def test_st_rotate_x(self):
+        baseDf = self.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (50 160, 50 50, 100 50)') as geom1, ST_GeomFromWKT('LINESTRING(1 2 3, 1 1 1)') AS geom2")
+
+        actual = baseDf.selectExpr("ST_RotateX(geom1, PI())").first()[0].wkt
+        expected = "LINESTRING (50 -160, 50 -50, 100 -50)"
+        assert expected == actual
+
+        actual = baseDf.selectExpr("ST_RotateX(geom2, PI() / 2)").first()[0].wkt
+        expected = "LINESTRING Z (1 -3 2, 1 -0.9999999999999999 1)"
+        assert expected == actual
+
     def test_st_remove_point(self):
         result_and_expected = [
             [self.calculate_st_remove("Linestring(0 0, 1 1, 1 0, 0 0)", 0), "LINESTRING (1 1, 1 0, 0 0)"],

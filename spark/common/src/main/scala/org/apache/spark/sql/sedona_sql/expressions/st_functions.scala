@@ -471,6 +471,13 @@ object st_functions extends DataFrameAPI {
   def ST_Reverse(geometry: Column): Column = wrapExpression[ST_Reverse](geometry)
   def ST_Reverse(geometry: String): Column = wrapExpression[ST_Reverse](geometry)
 
+  def ST_RotateX(geometry: Column, angle: Column): Column =
+    wrapExpression[ST_RotateX](geometry, angle)
+  def ST_RotateX(geometry: String, angle: Double): Column =
+    wrapExpression[ST_RotateX](geometry, angle)
+  def ST_RotateX(geometry: String, angle: String): Column =
+    wrapExpression[ST_RotateX](geometry, angle)
+
   def ST_Rotate(geometry: Column, angle: Column): Column =
     wrapExpression[ST_Rotate](geometry, angle)
   def ST_Rotate(geometry: String, angle: Double): Column =
