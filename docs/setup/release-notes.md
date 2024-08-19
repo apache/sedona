@@ -1,13 +1,224 @@
 !!! note
-	Sedona before 1.6.0 only works with Shapely 1.x. If you want to work with Shapely 2.x, please use Sedona no earlier than 1.6.0.
+	Sedona before 1.6.0 only works with Shapely 1.x. If you want to work with Shapely 2.x, please use Sedona 1.6.0+
 
     If you use Sedona < 1.6.0, please use GeoPandas <= `0.11.1` since GeoPandas > 0.11.1 will automatically install Shapely 2.0. If you use Shapely, please use <= `1.8.5`.
+
+## Sedona 1.6.1
+
+Sedona 1.6.1 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.19, Snowflake 7+, Java 8.
+
+This release is a maintenance release that includes bug fixes and minor improvements.
+
+### New Contributors
+* @zhangfengcdt made their first contribution in https://github.com/apache/sedona/pull/1431
+* @james-willis made their first contribution in https://github.com/apache/sedona/pull/1453
+
+### Highlights
+
+* [X] Add native DataFrame based GeoJSON reader and writer
+* [X] 48 new ST functions added
+* [X] GeoParquet reader and writer supports GeoParquet 1.1.0 covering column
+* [X] Improve the error handling of ST functions so that the error message includes the geometry that caused the error
+
+### API breaking changes
+
+* [X] The following raster functions now return struct type outputs instead of array types.
+  	* RS_Metadata
+    * RS_SummaryStatsAll
+    * RS_ZonalStatsAll
+    * RS_GeoTransform
+
+### Bug
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-560'>SEDONA-560</a>] -         Spatial join involving dataframe containing 0 partition throws exception
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-561'>SEDONA-561</a>] -         Failed to run examples in the core.showcase package
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-580'>SEDONA-580</a>] -         New instances of RasterUDT object is not equal to the RasterUDT case object
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-581'>SEDONA-581</a>] -         SedonaKepler fails to reload if a raster column exists
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-605'>SEDONA-605</a>] -         RS_AsRaster(useGeometryExtent=false) does not work with reference rasters with scaleX/Y &lt; 1
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-608'>SEDONA-608</a>] -         Fix ST_IsPolygonCW, ST_IsPolygonCCW, ST_ForcePolygonCW and ST_ForcePolygonCCW
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-609'>SEDONA-609</a>] -         Fix python 3.12 build issue caused by binary compatibility issues with numpy 2.0.0
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-611'>SEDONA-611</a>] -         Cannot write rasters to S3 on EMR
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-618'>SEDONA-618</a>] -         Maven build failed with javadoc classes and package list files missing
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-624'>SEDONA-624</a>] -         Distance join throws java.lang.reflect.InvocationTargetException when working with aggregation functions
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-626'>SEDONA-626</a>] -         SRID of geometries returned by many ST functions are incorrect
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-628'>SEDONA-628</a>] -         Python DataFrame Functions Cannot Be Imported As Documented
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-639'>SEDONA-639</a>] -         ST_Split may produce inaccurate results when splitting linestrings
+</li>
+</ul>
+
+### New Feature
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-462'>SEDONA-462</a>] -         ST_IsValidDetail
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-486'>SEDONA-486</a>] -         Implement ST_MMin
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-487'>SEDONA-487</a>] -         Implement ST_MMax
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-562'>SEDONA-562</a>] -         Add native DataFrame based GeoJSON reader and writer
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-563'>SEDONA-563</a>] -         Add ST_GeomFromEWKB
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-564'>SEDONA-564</a>] -         Add ST_NumInteriorRing
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-565'>SEDONA-565</a>] -         Add ST_ForceRHR
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-566'>SEDONA-566</a>] -         Add ST_TriangulatePolygon
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-567'>SEDONA-567</a>] -         Add ST_M
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-569'>SEDONA-569</a>] -         Add ST_PointZM
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-570'>SEDONA-570</a>] -         Add ST_PointM
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-571'>SEDONA-571</a>] -         Add ST_MMin
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-572'>SEDONA-572</a>] -         Add ST_PointFromWKB
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-573'>SEDONA-573</a>] -         Add ST_HasM
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-574'>SEDONA-574</a>] -         Add ST_MMax
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-575'>SEDONA-575</a>] -         Add ST_LineFromWKB
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-576'>SEDONA-576</a>] -         Add ST_HasZ
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-577'>SEDONA-577</a>] -         Add ST_GeometryFromText
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-578'>SEDONA-578</a>] -         Add ST_Points
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-579'>SEDONA-579</a>] -         Add ST_AsHEXEWKB
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-582'>SEDONA-582</a>] -         Add ST_PointFromGeoHash
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-583'>SEDONA-583</a>] -         Add ST_Length2D
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-584'>SEDONA-584</a>] -         Add ST_Zmflag
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-585'>SEDONA-585</a>] -         Add ST_ForceCollection
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-586'>SEDONA-586</a>] -         Add ST_Force3DZ
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-587'>SEDONA-587</a>] -         Add ST_Force3DM
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-588'>SEDONA-588</a>] -         Add ST_Force4D
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-589'>SEDONA-589</a>] -         Add ST_LongestLine
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-590'>SEDONA-590</a>] -         Add ST_GeomColFromText
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-591'>SEDONA-591</a>] -         Add ST_MaxDistance
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-592'>SEDONA-592</a>] -         Add ST_MPointFromText
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-593'>SEDONA-593</a>] -         Add ST_Relate
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-594'>SEDONA-594</a>] -         Add ST_RelatedMatch
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-595'>SEDONA-595</a>] -         Add ST_LineStringFromWKB
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-596'>SEDONA-596</a>] -         Add ST_SimplifyVW
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-597'>SEDONA-597</a>] -         Add ST_SimplifyPolygonHull
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-598'>SEDONA-598</a>] -         Add ST_UnaryUnion
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-599'>SEDONA-599</a>] -         Add ST_MinimumClearance
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-600'>SEDONA-600</a>] -         Add ST_MinimumClearanceLine
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-601'>SEDONA-601</a>] -         Add ST_DelaunyTriangles
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-602'>SEDONA-602</a>] -         Add ST_LocateAlong
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-603'>SEDONA-603</a>] -         Add ST_MakePointM
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-604'>SEDONA-604</a>] -         Add ST_AddMeasure
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-606'>SEDONA-606</a>] -         Add ST_IsValidDetail
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-607'>SEDONA-607</a>] -         Include Geometry in ST Function Exceptions
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-610'>SEDONA-610</a>] -         Add ST_IsValidTrajectory
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-615'>SEDONA-615</a>] -         Add ST_MaximumInscribedCircle
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-617'>SEDONA-617</a>] -         Add ST_Rotate
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-625'>SEDONA-625</a>] -         Add ST_GeneratePoints
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-627'>SEDONA-627</a>] -         Writing covering column metadata to GeoParquet files
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-631'>SEDONA-631</a>] -         Add ST_Expand
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-643'>SEDONA-643</a>] -         Fix Flink constructor functions signatures
+</li>
+</ul>
+
+### Improvement
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-558'>SEDONA-558</a>] -         Fix and improve SedonaPyDeck behavior
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-559'>SEDONA-559</a>] -         Make the flink example work
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-568'>SEDONA-568</a>] -         Refactor TestBaseScala to use method instead of a class-level variable for sparkSession
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-616'>SEDONA-616</a>] -         Apply spotless to snowflake module
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-620'>SEDONA-620</a>] -         Simplify Java if statements
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-621'>SEDONA-621</a>] -         Remove redundant call to `toString()`
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-622'>SEDONA-622</a>] -         Improve SedonaPyDeck behavior
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-623'>SEDONA-623</a>] -         Simplify Java `if` statements
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-629'>SEDONA-629</a>] -         Return Structs for RS_ Functions
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-632'>SEDONA-632</a>] -         Don&#39;t use a conventional output committer when writing raster files using df.write.format(&quot;raster&quot;)
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-633'>SEDONA-633</a>] -         Add tileWidth and tileHeight fields to the result of RS_Metadata
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-634'>SEDONA-634</a>] -         Support omitting tileWidth and tileHeight parameters when calling RS_Tile or RS_TileExplode on rasters with decent tiling scheme
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-635'>SEDONA-635</a>] -         Allow feature and feature collection format in ST_AsGeoJSON
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-637'>SEDONA-637</a>] -         Show spatial filters pushed to GeoParquet scans in the query plan
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-638'>SEDONA-638</a>] -         Send telemetry data asynchronously to avoid blocking the initialization of SedonaContext
+</li>
+</ul>
+
+### Task
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-101'>SEDONA-101</a>] -         Add Scala Formatter to MVN
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-102'>SEDONA-102</a>] -         Java Code Formatting using formatter plugin
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-553'>SEDONA-553</a>] -         Update Sedona docker to use newer GeoPandas
+</li>
+</ul>
 
 ## Sedona 1.6.0
 
 Sedona 1.6.0 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.19, Snowflake 7+, Java 8.
 
-## New Contributors
+### New Contributors
 
 * @mpetazzoni made their first contribution in https://github.com/apache/sedona/pull/1216
 * @sebdiem made their first contribution in https://github.com/apache/sedona/pull/1217

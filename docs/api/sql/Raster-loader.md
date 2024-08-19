@@ -1,19 +1,18 @@
 !!!note
 	Sedona loader are available in Scala, Java and Python and have the same APIs.
 
-## Load any raster to Raster format
-
 The raster loader of Sedona leverages Spark built-in binary data source and works with several RS constructors to produce Raster type. Each raster is a row in the resulting DataFrame and stored in a `Raster` format.
 
 By default, these functions uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
-### Load raster to a binary DataFrame
+## Step 1: Load raster to a binary DataFrame
 
 You can load any type of raster data using the code below. Then use the RS constructors below to create a Raster DataFrame.
 
 ```scala
 sedona.read.format("binaryFile").load("/some/path/*.asc")
 ```
+## Step 2: Create a raster type column
 
 ### RS_FromArcInfoAsciiGrid
 
