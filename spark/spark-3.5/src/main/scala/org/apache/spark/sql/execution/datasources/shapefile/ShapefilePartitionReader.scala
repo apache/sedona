@@ -119,7 +119,7 @@ class ShapefilePartitionReader(
   private val shpSchema: StructType = {
     val dbfFields = dbfReader
       .map { reader =>
-        ShapefileUtils.fieldDescriptorsToStructFields(reader.getFieldDescriptors.asScala)
+        ShapefileUtils.fieldDescriptorsToStructFields(reader.getFieldDescriptors.asScala.toSeq)
       }
       .getOrElse(Seq.empty)
     geometryField match {
@@ -165,7 +165,7 @@ class ShapefilePartitionReader(
         } else { (_: Array[Byte]) =>
           null
         }
-      }
+      }.toSeq
     }
     .getOrElse(Seq.empty)
 
@@ -227,9 +227,9 @@ class ShapefilePartitionReader(
       }
 
       val shpRow = if (geometryField.isDefined) {
-        InternalRow.fromSeq(geometry.map(GeometryUDT.serialize).orNull +: attrValues)
+        InternalRow.fromSeq(geometry.map(GeometryUDT.serialize).orNull +: attrValues.toSeq)
       } else {
-        InternalRow.fromSeq(attrValues)
+        InternalRow.fromSeq(attrValues.toSeq)
       }
       currentRow = projection(shpRow)
       true

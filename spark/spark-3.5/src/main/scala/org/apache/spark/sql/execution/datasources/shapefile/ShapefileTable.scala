@@ -73,7 +73,10 @@ case class ShapefileTable(
               val dbfParser = new DbfParseUtil()
               dbfParser.parseFileHead(stream)
               val fieldDescriptors = dbfParser.getFieldDescriptors
-              fieldDescriptorsToSchema(fieldDescriptors.asScala, geometryFieldName, resolver)
+              fieldDescriptorsToSchema(
+                fieldDescriptors.asScala.toSeq,
+                geometryFieldName,
+                resolver)
             } finally {
               stream.close()
             }
