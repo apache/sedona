@@ -1,6 +1,5 @@
 Please pay attention to the Spark version postfix and Scala version postfix on our [Maven Coordinate page](../maven-coordinates). Databricks Spark and Apache Spark's compatibility can be found here: https://docs.databricks.com/en/release-notes/runtime/index.html
 
-
 ## Community edition (free-tier)
 
 You just need to install the Sedona jars and Sedona Python on Databricks using Databricks default web UI. Then everything will work.
@@ -45,6 +44,7 @@ SedonaRegistrator.registerAll(spark)
 In Databricks advanced editions, you need to install Sedona via [cluster init-scripts](https://docs.databricks.com/clusters/init-scripts.html) as described below. We recommend Databricks 10.x+. Sedona is not guaranteed to be 100% compatible with `Databricks photon acceleration`. Sedona requires Spark internal APIs to inject many optimization strategies, which sometimes is not accessible in `Photon`.
 
 In Spark 3.2, `org.apache.spark.sql.catalyst.expressions.Generator` class added a field `nodePatterns`. Any SQL functions that rely on Generator class may have issues if compiled for a runtime with a differing spark version. For Sedona, those functions are:
+
 * ST_MakeValid
 * ST_SubDivideExplode
 

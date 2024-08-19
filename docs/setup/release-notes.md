@@ -10,6 +10,7 @@ Sedona 1.6.1 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.19, 
 This release is a maintenance release that includes bug fixes and minor improvements.
 
 ### New Contributors
+
 * @zhangfengcdt made their first contribution in https://github.com/apache/sedona/pull/1431
 * @james-willis made their first contribution in https://github.com/apache/sedona/pull/1453
 
@@ -23,10 +24,10 @@ This release is a maintenance release that includes bug fixes and minor improvem
 ### API breaking changes
 
 * [X] The following raster functions now return struct type outputs instead of array types.
-  	* RS_Metadata
-    * RS_SummaryStatsAll
-    * RS_ZonalStatsAll
-    * RS_GeoTransform
+   * RS_Metadata
+   * RS_SummaryStatsAll
+   * RS_ZonalStatsAll
+   * RS_GeoTransform
 
 ### Bug
 

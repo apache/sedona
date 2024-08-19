@@ -12,6 +12,7 @@ You can load any type of raster data using the code below. Then use the RS const
 ```scala
 sedona.read.format("binaryFile").load("/some/path/*.asc")
 ```
+
 ## Step 2: Create a raster type column
 
 ### RS_FromArcInfoAsciiGrid
