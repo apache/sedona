@@ -20,12 +20,26 @@ package org.apache.spark.sql.execution.datasources.shapefile
 
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
-case class ShapefileReadOptions(geometryFieldName: String, charset: Option[String])
+/**
+ * Options for reading Shapefiles.
+ * @param geometryFieldName
+ *   The name of the geometry field.
+ * @param keyFieldName
+ *   The name of the shape key field.
+ * @param charset
+ *   The charset of non-spatial attributes.
+ */
+case class ShapefileReadOptions(
+    geometryFieldName: String,
+    keyFieldName: Option[String],
+    charset: Option[String])
 
 object ShapefileReadOptions {
   def parse(options: CaseInsensitiveStringMap): ShapefileReadOptions = {
     val geometryFieldName = options.getOrDefault("geometry.name", "geometry")
+    val keyFieldName =
+      if (options.containsKey("key.name")) Some(options.get("key.name")) else None
     val charset = if (options.containsKey("charset")) Some(options.get("charset")) else None
-    ShapefileReadOptions(geometryFieldName, charset)
+    ShapefileReadOptions(geometryFieldName, keyFieldName, charset)
   }
 }

@@ -30,6 +30,18 @@ import java.util.Locale
 import scala.collection.JavaConverters._
 import scala.util.Try
 
+/**
+ * A Spark SQL data source for reading ESRI Shapefiles. This data source supports reading the
+ * following components of shapefiles:
+ *
+ * <ul> <li>.shp: the main file <li>.dbf: (optional) the attribute file <li>.shx: (optional) the
+ * index file <li>.cpg: (optional) the code page file <li>.prj: (optional) the projection file
+ * </ul>
+ *
+ * <p>The load path can be a directory containing the shapefiles, or a path to the .shp file. If
+ * the path refers to a .shp file, the data source will also read other components such as .dbf
+ * and .shx files in the same directory.
+ */
 class ShapefileDataSource extends FileDataSourceV2 with DataSourceRegister {
 
   override def shortName(): String = "shapefile"

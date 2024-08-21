@@ -413,6 +413,50 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       }
     }
 
+    it("read partitioned directory") {
+      FileUtils.cleanDirectory(new File(temporaryLocation))
+      Files.createDirectory(new File(temporaryLocation + "/part=1").toPath)
+      Files.createDirectory(new File(temporaryLocation + "/part=2").toPath)
+      FileUtils.copyFile(
+        new File(resourceFolder + "shapefiles/datatypes/datatypes1.shp"),
+        new File(temporaryLocation + "/part=1/datatypes1.shp"))
+      FileUtils.copyFile(
+        new File(resourceFolder + "shapefiles/datatypes/datatypes1.dbf"),
+        new File(temporaryLocation + "/part=1/datatypes1.dbf"))
+      FileUtils.copyFile(
+        new File(resourceFolder + "shapefiles/datatypes/datatypes1.cpg"),
+        new File(temporaryLocation + "/part=1/datatypes1.cpg"))
+      FileUtils.copyFile(
+        new File(resourceFolder + "shapefiles/datatypes/datatypes2.shp"),
+        new File(temporaryLocation + "/part=2/datatypes2.shp"))
+      FileUtils.copyFile(
+        new File(resourceFolder + "shapefiles/datatypes/datatypes2.dbf"),
+        new File(temporaryLocation + "/part=2/datatypes2.dbf"))
+      FileUtils.copyFile(
+        new File(resourceFolder + "shapefiles/datatypes/datatypes2.cpg"),
+        new File(temporaryLocation + "/part=2/datatypes2.cpg"))
+
+      val shapefileDf = sparkSession.read
+        .format("shapefile")
+        .load(temporaryLocation)
+        .select("part", "id", "aInt", "aUnicode", "geometry")
+      val rows = shapefileDf.collect()
+      assert(rows.length == 9)
+      rows.foreach { row =>
+        assert(row.getAs[Geometry]("geometry").isInstanceOf[Point])
+        val id = row.getAs[Long]("id")
+        assert(row.getAs[Long]("aInt") == id)
+        if (id < 10) {
+          assert(row.getAs[Int]("part") == 1)
+        } else {
+          assert(row.getAs[Int]("part") == 2)
+        }
+        if (id > 0) {
+          assert(row.getAs[String]("aUnicode") == s"测试$id")
+        }
+      }
+    }
+
     it("read with custom geometry column name") {
       val shapefileDf = sparkSession.read
         .format("shapefile")
@@ -445,6 +489,83 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       assert(
         exception.getMessage.contains(
           "osm_id is reserved for geometry but appears in non-spatial attributes"))
+    }
+
+    it("read with shape key column") {
+      val shapefileDf = sparkSession.read
+        .format("shapefile")
+        .option("key.name", "fid")
+        .load(resourceFolder + "shapefiles/datatypes")
+        .select("id", "fid", "geometry", "aUnicode")
+      val schema = shapefileDf.schema
+      assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "id").get.dataType == LongType)
+      assert(schema.find(_.name == "fid").get.dataType == LongType)
+      assert(schema.find(_.name == "aUnicode").get.dataType == StringType)
+      val rows = shapefileDf.collect()
+      assert(rows.length == 9)
+      shapefileDf.show()
+      rows.foreach { row =>
+        val geom = row.getAs[Geometry]("geometry")
+        assert(geom.isInstanceOf[Point])
+        val id = row.getAs[Long]("id")
+        if (id > 0) {
+          assert(row.getAs[Long]("fid") == id % 10)
+          assert(row.getAs[String]("aUnicode") == s"测试$id")
+        } else {
+          assert(row.getAs[Long]("fid") == 5)
+        }
+      }
+    }
+
+    it("read with both custom geometry column and shape key column") {
+      val shapefileDf = sparkSession.read
+        .format("shapefile")
+        .option("geometry.name", "g")
+        .option("key.name", "fid")
+        .load(resourceFolder + "shapefiles/datatypes")
+        .select("id", "fid", "g", "aUnicode")
+      val schema = shapefileDf.schema
+      assert(schema.find(_.name == "g").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "id").get.dataType == LongType)
+      assert(schema.find(_.name == "fid").get.dataType == LongType)
+      assert(schema.find(_.name == "aUnicode").get.dataType == StringType)
+      val rows = shapefileDf.collect()
+      assert(rows.length == 9)
+      shapefileDf.show()
+      rows.foreach { row =>
+        val geom = row.getAs[Geometry]("g")
+        assert(geom.isInstanceOf[Point])
+        val id = row.getAs[Long]("id")
+        if (id > 0) {
+          assert(row.getAs[Long]("fid") == id % 10)
+          assert(row.getAs[String]("aUnicode") == s"测试$id")
+        } else {
+          assert(row.getAs[Long]("fid") == 5)
+        }
+      }
+    }
+
+    it("read with invalid shape key column") {
+      val exception = intercept[Exception] {
+        sparkSession.read
+          .format("shapefile")
+          .option("geometry.name", "g")
+          .option("key.name", "aDate")
+          .load(resourceFolder + "shapefiles/datatypes")
+      }
+      assert(
+        exception.getMessage.contains(
+          "aDate is reserved for shape key but appears in non-spatial attributes"))
+
+      val exception2 = intercept[Exception] {
+        sparkSession.read
+          .format("shapefile")
+          .option("geometry.name", "g")
+          .option("key.name", "g")
+          .load(resourceFolder + "shapefiles/datatypes")
+      }
+      assert(exception2.getMessage.contains("geometry.name and key.name cannot be the same"))
     }
 
     it("read with custom charset") {

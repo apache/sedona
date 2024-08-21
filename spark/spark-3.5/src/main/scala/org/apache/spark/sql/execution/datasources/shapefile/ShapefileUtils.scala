@@ -98,15 +98,36 @@ object ShapefileUtils {
 
   def fieldDescriptorsToSchema(
       fieldDescriptors: Seq[FieldDescriptor],
-      geometryFieldName: String,
+      options: ShapefileReadOptions,
       resolver: Resolver): StructType = {
     val structFields = fieldDescriptorsToStructFields(fieldDescriptors)
+    val geometryFieldName = options.geometryFieldName
     if (structFields.exists(f => resolver(f.name, geometryFieldName))) {
       throw new IllegalArgumentException(
         s"Field name $geometryFieldName is reserved for geometry but appears in non-spatial attributes. " +
           "Please specify a different field name for geometry using the 'geometry.name' option.")
     }
-    StructType(StructField(geometryFieldName, GeometryUDT) +: structFields)
+    options.keyFieldName.foreach { name =>
+      if (structFields.exists(f => resolver(f.name, name))) {
+        throw new IllegalArgumentException(
+          s"Field name $name is reserved for shape key but appears in non-spatial attributes. " +
+            "Please specify a different field name for shape key using the 'key.name' option.")
+      }
+    }
+    StructType(baseSchema(options, Some(resolver)).fields ++ structFields)
+  }
+
+  def baseSchema(options: ShapefileReadOptions, resolver: Option[Resolver] = None): StructType = {
+    options.keyFieldName match {
+      case Some(name) =>
+        if (resolver.exists(_(name, options.geometryFieldName))) {
+          throw new IllegalArgumentException(s"geometry.name and key.name cannot be the same")
+        }
+        StructType(
+          Seq(StructField(options.geometryFieldName, GeometryUDT), StructField(name, LongType)))
+      case _ =>
+        StructType(StructField(options.geometryFieldName, GeometryUDT) :: Nil)
+    }
   }
 
   def fieldValueConverter(desc: FieldDescriptor, cpg: Option[String]): Array[Byte] => Any = {

@@ -24,7 +24,6 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.FSDataInputStream
 import org.apache.hadoop.fs.Path
 import org.apache.sedona.common.FunctionsGeoTools
-import org.apache.sedona.core.formatMapper.shapefileParser.shapes.CombineShapeReader
 import org.apache.sedona.core.formatMapper.shapefileParser.shapes.DbfFileReader
 import org.apache.sedona.core.formatMapper.shapefileParser.shapes.PrimitiveShape
 import org.apache.sedona.core.formatMapper.shapefileParser.shapes.ShapeFileReader
@@ -39,6 +38,7 @@ import org.apache.spark.sql.execution.datasources.PartitionedFile
 import org.apache.spark.sql.execution.datasources.shapefile.ShapefilePartitionReader.logger
 import org.apache.spark.sql.execution.datasources.shapefile.ShapefilePartitionReader.openStream
 import org.apache.spark.sql.execution.datasources.shapefile.ShapefilePartitionReader.tryOpenStream
+import org.apache.spark.sql.execution.datasources.shapefile.ShapefileUtils.baseSchema
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.StructType
 import org.locationtech.jts.geom.GeometryFactory
@@ -122,10 +122,7 @@ class ShapefilePartitionReader(
         ShapefileUtils.fieldDescriptorsToStructFields(reader.getFieldDescriptors.asScala.toSeq)
       }
       .getOrElse(Seq.empty)
-    geometryField match {
-      case Some(geomField) => StructType(geomField +: dbfFields)
-      case None => StructType(dbfFields)
-    }
+    StructType(baseSchema(options).fields ++ dbfFields)
   }
 
   // projection from shpSchema to readDataSchema
@@ -226,10 +223,11 @@ class ShapefilePartitionReader(
           Seq.fill(fieldValueConverters.length)(null)
       }
 
-      val shpRow = if (geometryField.isDefined) {
-        InternalRow.fromSeq(geometry.map(GeometryUDT.serialize).orNull +: attrValues.toSeq)
+      val serializedGeom = geometry.map(GeometryUDT.serialize).orNull
+      val shpRow = if (options.keyFieldName.isDefined) {
+        InternalRow.fromSeq(serializedGeom +: key.getIndex +: attrValues.toSeq)
       } else {
-        InternalRow.fromSeq(attrValues.toSeq)
+        InternalRow.fromSeq(serializedGeom +: attrValues.toSeq)
       }
       currentRow = projection(shpRow)
       true
