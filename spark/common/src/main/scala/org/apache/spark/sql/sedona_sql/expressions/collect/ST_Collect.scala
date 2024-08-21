@@ -44,29 +44,41 @@ case class ST_Collect(inputExpressions: Seq[Expression])
   override def evalWithoutSerialization(input: InternalRow): Any = {
     val firstElement = inputExpressions.head
 
-    try {
-      firstElement.dataType match {
-        case ArrayType(elementType, _) =>
-          elementType match {
-            case _: GeometryUDT =>
-              val data = firstElement.eval(input).asInstanceOf[ArrayData]
-              val numElements = data.numElements()
-              val geomElements = (0 until numElements)
-                .map(element => data.getBinary(element))
-                .filter(_ != null)
-                .map(_.toGeometry)
+    firstElement.dataType match {
+      case ArrayType(elementType, _) =>
+        elementType match {
+          case _: GeometryUDT =>
+            val data = firstElement.eval(input).asInstanceOf[ArrayData]
+            val numElements = data.numElements()
+            val geomElements = (0 until numElements)
+              .map(element => data.getBinary(element))
+              .filter(_ != null)
+              .map(_.toGeometry)
 
+            try {
               Functions.createMultiGeometry(geomElements.toArray)
-            case _ => Functions.createMultiGeometry(Array())
-          }
-        case _ =>
-          val geomElements =
-            inputExpressions.map(_.toGeometry(input)).filter(_ != null)
+            } catch {
+              case e: Exception =>
+                InferredExpression.throwExpressionInferenceException(
+                  getClass.getSimpleName,
+                  Seq(geomElements),
+                  e)
+            }
+
+          case _ => Functions.createMultiGeometry(Array())
+        }
+      case _ =>
+        val geomElements =
+          inputExpressions.map(_.toGeometry(input)).filter(_ != null)
+        try {
           Functions.createMultiGeometry(geomElements.toArray)
-      }
-    } catch {
-      case e: Exception =>
-        InferredExpression.throwExpressionInferenceException(input, inputExpressions, e)
+        } catch {
+          case e: Exception =>
+            InferredExpression.throwExpressionInferenceException(
+              getClass.getSimpleName,
+              Seq(geomElements),
+              e)
+        }
     }
   }
 

@@ -216,8 +216,9 @@ class constructorTestScala extends TestBaseScala {
       val thrown = intercept[Exception] {
         sparkSession.sql("SELECT ST_GeomFromWKT('not wkt')").collect()
       }
-      assert(
-        thrown.getMessage == "Exception occurred while evaluating expression - source: [not wkt, 0], cause: Unknown geometry type: NOT (line 1)")
+      assert(thrown.getMessage.contains("ST_GeomFromWKT"))
+      assert(thrown.getMessage.contains("not wkt"))
+      assert(thrown.getMessage.contains("Unknown geometry type"))
     }
 
     it("Passed ST_GeomFromEWKT") {
@@ -246,8 +247,9 @@ class constructorTestScala extends TestBaseScala {
       val thrown = intercept[Exception] {
         sparkSession.sql("SELECT ST_GeomFromEWKT('not wkt')").collect()
       }
-      assert(
-        thrown.getMessage == "Exception occurred while evaluating expression - source: [not wkt], cause: Unknown geometry type: NOT (line 1)")
+      assert(thrown.getMessage.contains("ST_GeomFromEWKT"))
+      assert(thrown.getMessage.contains("not wkt"))
+      assert(thrown.getMessage.contains("Unknown geometry type"))
     }
 
     it("Passed ST_LineFromText") {
