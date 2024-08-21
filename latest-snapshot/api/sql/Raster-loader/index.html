@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../../../image/sedona_logo_symbol.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.31">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.32">
     
     
       
@@ -66,7 +66,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#load-any-raster-to-raster-format" class="md-skip">
+        <a href="#step-1-load-raster-to-a-binary-dataframe" class="md-skip">
           Skip to content
         </a>
       
@@ -2457,23 +2457,23 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#load-any-raster-to-raster-format" class="md-nav__link">
+  <a href="#step-1-load-raster-to-a-binary-dataframe" class="md-nav__link">
     <span class="md-ellipsis">
-      Load any raster to Raster format
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Load any raster to Raster format">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#load-raster-to-a-binary-dataframe" class="md-nav__link">
-    <span class="md-ellipsis">
-      Load raster to a binary DataFrame
+      Step 1: Load raster to a binary DataFrame
     </span>
   </a>
   
 </li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-create-a-raster-type-column" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2: Create a raster type column
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Create a raster type column">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#rs_fromarcinfoasciigrid" class="md-nav__link">
@@ -3984,23 +3984,23 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#load-any-raster-to-raster-format" class="md-nav__link">
+  <a href="#step-1-load-raster-to-a-binary-dataframe" class="md-nav__link">
     <span class="md-ellipsis">
-      Load any raster to Raster format
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Load any raster to Raster format">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#load-raster-to-a-binary-dataframe" class="md-nav__link">
-    <span class="md-ellipsis">
-      Load raster to a binary DataFrame
+      Step 1: Load raster to a binary DataFrame
     </span>
   </a>
   
 </li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-create-a-raster-type-column" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2: Create a raster type column
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Create a raster type column">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#rs_fromarcinfoasciigrid" class="md-nav__link">
@@ -4087,13 +4087,13 @@
 <p class="admonition-title">Note</p>
 <p>Sedona loader are available in Scala, Java and Python and have the same APIs.</p>
 </div>
-<h2 id="load-any-raster-to-raster-format">Load any raster to Raster format<a class="headerlink" href="#load-any-raster-to-raster-format" title="Permanent link">&para;</a></h2>
 <p>The raster loader of Sedona leverages Spark built-in binary data source and works with several RS constructors to produce Raster type. Each raster is a row in the resulting DataFrame and stored in a <code>Raster</code> format.</p>
 <p>By default, these functions uses lon/lat order since <code>v1.5.0</code>. Before, it used lat/lon order.</p>
-<h3 id="load-raster-to-a-binary-dataframe">Load raster to a binary DataFrame<a class="headerlink" href="#load-raster-to-a-binary-dataframe" title="Permanent link">&para;</a></h3>
+<h2 id="step-1-load-raster-to-a-binary-dataframe">Step 1: Load raster to a binary DataFrame<a class="headerlink" href="#step-1-load-raster-to-a-binary-dataframe" title="Permanent link">&para;</a></h2>
 <p>You can load any type of raster data using the code below. Then use the RS constructors below to create a Raster DataFrame.</p>
 <div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;binaryFile&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/some/path/*.asc&quot;</span><span class="p">)</span>
 </code></pre></div>
+<h2 id="step-2-create-a-raster-type-column">Step 2: Create a raster type column<a class="headerlink" href="#step-2-create-a-raster-type-column" title="Permanent link">&para;</a></h2>
 <h3 id="rs_fromarcinfoasciigrid">RS_FromArcInfoAsciiGrid<a class="headerlink" href="#rs_fromarcinfoasciigrid" title="Permanent link">&para;</a></h3>
 <p>Introduction: Returns a raster geometry from an Arc Info Ascii Grid file.</p>
 <p>Format: <code>RS_FromArcInfoAsciiGrid(asc: ARRAY[Byte])</code></p>
@@ -4279,7 +4279,7 @@ NO2(time=2, z=2, lat=48, lon=80)
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 28, 2024 01:25:26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">August 19, 2024 04:42:59</span>
   </span>
 
     
@@ -4418,7 +4418,7 @@ NO2(time=2, z=2, lat=48, lon=80)
     <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.tabs", "navigation.top", "search.suggest", "search.highlight", "search.share", "navigation.footer"], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.fe8b6f2b.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.471ce7a9.min.js"></script>
       
     
   </body>

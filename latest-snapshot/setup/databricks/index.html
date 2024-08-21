@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../../image/sedona_logo_symbol.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.31">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.32">
     
     
       
@@ -1028,25 +1028,7 @@
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#advanced-editions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Advanced editions
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-sedona-from-the-web-ui-not-recommended" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install Sedona from the web UI (not recommended)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Install Sedona from the web UI (not recommended)">
+    <nav class="md-nav" aria-label="Community edition (free-tier)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1073,13 +1055,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#install-sedona-from-the-init-script" class="md-nav__link">
+  <a href="#advanced-editions" class="md-nav__link">
     <span class="md-ellipsis">
-      Install Sedona from the init script
+      Advanced editions
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Install Sedona from the init script">
+    <nav class="md-nav" aria-label="Advanced editions">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3997,25 +3979,7 @@
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#advanced-editions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Advanced editions
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-sedona-from-the-web-ui-not-recommended" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install Sedona from the web UI (not recommended)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Install Sedona from the web UI (not recommended)">
+    <nav class="md-nav" aria-label="Community edition (free-tier)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -4042,13 +4006,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#install-sedona-from-the-init-script" class="md-nav__link">
+  <a href="#advanced-editions" class="md-nav__link">
     <span class="md-ellipsis">
-      Install Sedona from the init script
+      Advanced editions
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Install Sedona from the init script">
+    <nav class="md-nav" aria-label="Advanced editions">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -4105,29 +4069,9 @@
 
   <h1>Install on Databricks</h1>
 
+<p>Please pay attention to the Spark version postfix and Scala version postfix on our <a href="../maven-coordinates">Maven Coordinate page</a>. Databricks Spark and Apache Spark's compatibility can be found here: <a href="https://docs.databricks.com/en/release-notes/runtime/index.html">https://docs.databricks.com/en/release-notes/runtime/index.html</a></p>
 <h2 id="community-edition-free-tier">Community edition (free-tier)<a class="headerlink" href="#community-edition-free-tier" title="Permanent link">&para;</a></h2>
 <p>You just need to install the Sedona jars and Sedona Python on Databricks using Databricks default web UI. Then everything will work.</p>
-<h2 id="advanced-editions">Advanced editions<a class="headerlink" href="#advanced-editions" title="Permanent link">&para;</a></h2>
-<p>We recommend Databricks 10.x+.</p>
-<ul>
-<li>Sedona 1.0.1 &amp; 1.1.0 is compiled against Spark 3.1 (~ Databricks DBR 9 LTS, DBR 7 is Spark 3.0)</li>
-<li>Sedona 1.1.1, 1.2.0 are compiled against Spark 3.2 (~ DBR 10 &amp; 11)</li>
-<li>Sedona 1.2.1, 1.3.1, 1.4.0 are complied against Spark 3.3</li>
-<li>1.4.1, 1.5.0 are complied against Spark 3.3, 3.4, 3.5</li>
-</ul>
-<blockquote>
-<p>In Spark 3.2, <code>org.apache.spark.sql.catalyst.expressions.Generator</code> class added a field <code>nodePatterns</code>. Any SQL functions that rely on Generator class may have issues if compiled for a runtime with a differing spark version. For Sedona, those functions are:</p>
-<ul>
-<li>ST_MakeValid</li>
-<li>ST_SubDivideExplode</li>
-</ul>
-</blockquote>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you are using Spark 3.4+ and Scala 2.12, please use <code>sedona-spark-shaded-3.4_2.12</code>. Please pay attention to the Spark version postfix and Scala version postfix. Sedona is not able to support <code>Databricks photon acceleration</code>. Sedona requires Spark internal APIs to inject many optimization strategies, which is not accessible in <code>Photon</code>.</p>
-</div>
-<h2 id="install-sedona-from-the-web-ui-not-recommended">Install Sedona from the web UI (not recommended)<a class="headerlink" href="#install-sedona-from-the-web-ui-not-recommended" title="Permanent link">&para;</a></h2>
-<p>This method cannot achieve the best performance of Sedona and does not work for pure SQL environment.</p>
 <h3 id="install-libraries">Install libraries<a class="headerlink" href="#install-libraries" title="Permanent link">&para;</a></h3>
 <p>1) From the Libraries tab install from Maven Coordinates</p>
 <div class="codehilite"><pre><span></span><code><span class="err">```</span>
@@ -4154,9 +4098,13 @@ pydeck==0.8.0
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.register.geo_registrator</span> <span class="kn">import</span> <span class="n">SedonaRegistrator</span>
 <span class="n">SedonaRegistrator</span><span class="o">.</span><span class="n">registerAll</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
 </code></pre></div>
-<h2 id="install-sedona-from-the-init-script">Install Sedona from the init script<a class="headerlink" href="#install-sedona-from-the-init-script" title="Permanent link">&para;</a></h2>
-<p>In order to activate the Kryo serializer (this speeds up the serialization and deserialization of geometry types) you need to install the libraries via init script as described below.</p>
-<p>In order to use the Sedona <code>ST_*/RS_*</code> functions from SQL without having to register the Sedona functions from a python/scala cell, you need to install the Sedona libraries from the <a href="https://docs.databricks.com/clusters/init-scripts.html">cluster init-scripts</a> as follows.</p>
+<h2 id="advanced-editions">Advanced editions<a class="headerlink" href="#advanced-editions" title="Permanent link">&para;</a></h2>
+<p>In Databricks advanced editions, you need to install Sedona via <a href="https://docs.databricks.com/clusters/init-scripts.html">cluster init-scripts</a> as described below. We recommend Databricks 10.x+. Sedona is not guaranteed to be 100% compatible with <code>Databricks photon acceleration</code>. Sedona requires Spark internal APIs to inject many optimization strategies, which sometimes is not accessible in <code>Photon</code>.</p>
+<p>In Spark 3.2, <code>org.apache.spark.sql.catalyst.expressions.Generator</code> class added a field <code>nodePatterns</code>. Any SQL functions that rely on Generator class may have issues if compiled for a runtime with a differing spark version. For Sedona, those functions are:</p>
+<ul>
+<li>ST_MakeValid</li>
+<li>ST_SubDivideExplode</li>
+</ul>
 <h3 id="download-sedona-jars">Download Sedona jars<a class="headerlink" href="#download-sedona-jars" title="Permanent link">&para;</a></h3>
 <p>Download the Sedona jars to a DBFS location. You can do that manually via UI or from a notebook by executing this code in a cell:</p>
 <div class="highlight"><pre><span></span><code>%sh
@@ -4231,7 +4179,7 @@ pydeck==0.8.0
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 27, 2024 03:44:31</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">August 19, 2024 04:42:59</span>
   </span>
 
     
@@ -4370,7 +4318,7 @@ pydeck==0.8.0
     <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tabs", "navigation.top", "search.suggest", "search.highlight", "search.share", "navigation.footer"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.fe8b6f2b.min.js"></script>
+      <script src="../../assets/javascripts/bundle.471ce7a9.min.js"></script>
       
     
   </body>
