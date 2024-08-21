@@ -30,7 +30,9 @@ import org.apache.spark.sql.connector.read.PartitionReaderFactory
 import org.apache.spark.sql.execution.datasources.v2.FileScan
 import org.apache.spark.sql.execution.datasources.FilePartition
 import org.apache.spark.sql.execution.datasources.PartitionedFile
+import org.apache.spark.sql.execution.datasources.shapefile.ShapefileScan.logger
 import org.apache.spark.util.SerializableConfiguration
+import org.slf4j.{Logger, LoggerFactory}
 
 import java.util.Locale
 import scala.collection.JavaConverters._
@@ -93,15 +95,24 @@ case class ShapefileScan(
     }
 
     // Create a partition for each group
-    shapefileGroups.zipWithIndex.map { case ((key, group), index) =>
+    shapefileGroups.zipWithIndex.flatMap { case ((key, group), index) =>
       // Check if the group has all the necessary files
       val suffixes = group.keys.toSet
-      ShapefileUtils.mandatoryFileExtensions.foreach { suffix =>
+      val hasMissingFiles = ShapefileUtils.mandatoryFileExtensions.exists { suffix =>
         if (!suffixes.contains(suffix)) {
-          throw new IllegalArgumentException(s"Shapefile $key is missing a $suffix file")
-        }
+          logger.warn(s"Shapefile $key is missing a $suffix file")
+          true
+        } else false
       }
-      FilePartition(index, group.values.toArray)
+      if (!hasMissingFiles) {
+        Some(FilePartition(index, group.values.toArray))
+      } else {
+        None
+      }
     }.toArray
   }
+}
+
+object ShapefileScan {
+  val logger: Logger = LoggerFactory.getLogger(classOf[ShapefileScan])
 }

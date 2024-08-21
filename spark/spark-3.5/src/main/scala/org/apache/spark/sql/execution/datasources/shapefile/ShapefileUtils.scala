@@ -143,8 +143,8 @@ object ShapefileUtils {
           if (bytes.isEmpty) null
           else {
             bytes.head match {
-              case 'T' => true
-              case 'F' => false
+              case 'T' | 't' | 'Y' | 'y' => true
+              case 'F' | 'f' | 'N' | 'n' => false
               case _ => null
             }
           }

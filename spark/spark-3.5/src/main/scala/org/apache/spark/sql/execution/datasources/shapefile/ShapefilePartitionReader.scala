@@ -253,7 +253,7 @@ class ShapefilePartitionReader(
 }
 
 object ShapefilePartitionReader {
-  val logger: Logger = LoggerFactory.getLogger(classOf[CombineShapeReader])
+  val logger: Logger = LoggerFactory.getLogger(classOf[ShapefilePartitionReader])
 
   private def openStream(
       partitionedFilesMap: Map[String, Path],

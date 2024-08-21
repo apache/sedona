@@ -20,7 +20,7 @@ package org.apache.spark.sql.execution.datasources.shapefile
 
 import org.apache.hadoop.fs.FileStatus
 import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil
-import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.types.{StructField, StructType}
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.catalog.TableCapability
@@ -31,6 +31,7 @@ import org.apache.spark.sql.execution.datasources.FileFormat
 import org.apache.spark.sql.execution.datasources.shapefile.ShapefileUtils.fieldDescriptorsToSchema
 import org.apache.spark.sql.execution.datasources.shapefile.ShapefileUtils.mergeSchemas
 import org.apache.spark.sql.execution.datasources.v2.FileTable
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.util.SerializableConfiguration
 
 import java.util.Locale
@@ -58,34 +59,45 @@ case class ShapefileTable(
         name.endsWith(".dbf")
       }
 
-      val dbfAndZipFiles = files.filter(isDbfFile)
-      val serializableConf = new SerializableConfiguration(
-        sparkSession.sessionState.newHadoopConfWithOptions(options.asScala.toMap))
-      val geometryFieldName = ShapefileReadOptions.parse(options).geometryFieldName
-      val resolver = sparkSession.sessionState.conf.resolver
-      val partiallyMergedSchemas = sparkSession.sparkContext
-        .parallelize(dbfAndZipFiles)
-        .mapPartitions { iter =>
-          val schemas = iter.map { stat =>
-            val fs = stat.getPath.getFileSystem(serializableConf.value)
-            val stream = fs.open(stat.getPath)
-            try {
-              val dbfParser = new DbfParseUtil()
-              dbfParser.parseFileHead(stream)
-              val fieldDescriptors = dbfParser.getFieldDescriptors
-              fieldDescriptorsToSchema(
-                fieldDescriptors.asScala.toSeq,
-                geometryFieldName,
-                resolver)
-            } finally {
-              stream.close()
-            }
-          }.toSeq
-          mergeSchemas(schemas).iterator
-        }
-        .collect()
+      def isShpFile(file: FileStatus): Boolean = {
+        val name = file.getPath.getName.toLowerCase(Locale.ROOT)
+        name.endsWith(".shp")
+      }
 
-      mergeSchemas(partiallyMergedSchemas)
+      if (!files.exists(isShpFile)) None
+      else {
+        val geometryFieldName = ShapefileReadOptions.parse(options).geometryFieldName
+        val dbfFiles = files.filter(isDbfFile)
+        if (dbfFiles.isEmpty) {
+          Some(StructType(StructField(geometryFieldName, GeometryUDT) :: Nil))
+        } else {
+          val serializableConf = new SerializableConfiguration(
+            sparkSession.sessionState.newHadoopConfWithOptions(options.asScala.toMap))
+          val resolver = sparkSession.sessionState.conf.resolver
+          val partiallyMergedSchemas = sparkSession.sparkContext
+            .parallelize(dbfFiles)
+            .mapPartitions { iter =>
+              val schemas = iter.map { stat =>
+                val fs = stat.getPath.getFileSystem(serializableConf.value)
+                val stream = fs.open(stat.getPath)
+                try {
+                  val dbfParser = new DbfParseUtil()
+                  dbfParser.parseFileHead(stream)
+                  val fieldDescriptors = dbfParser.getFieldDescriptors
+                  fieldDescriptorsToSchema(
+                    fieldDescriptors.asScala.toSeq,
+                    geometryFieldName,
+                    resolver)
+                } finally {
+                  stream.close()
+                }
+              }.toSeq
+              mergeSchemas(schemas).iterator
+            }
+            .collect()
+          mergeSchemas(partiallyMergedSchemas)
+        }
+      }
     }
   }
 

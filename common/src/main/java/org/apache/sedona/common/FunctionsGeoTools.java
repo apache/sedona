@@ -110,7 +110,14 @@ public class FunctionsGeoTools {
   public static int wktCRSToSRID(String crsWKT) {
     try {
       CoordinateReferenceSystem crs = CRS.parseWKT(crsWKT);
-      return crsToSRID(crs);
+      int srid = crsToSRID(crs);
+      if (srid == 0) {
+        Integer epsgCode = CRS.lookupEpsgCode(crs, true);
+        if (epsgCode != null) {
+          srid = epsgCode;
+        }
+      }
+      return srid;
     } catch (FactoryException e) {
       throw new IllegalArgumentException("Cannot parse CRS WKT", e);
     }
