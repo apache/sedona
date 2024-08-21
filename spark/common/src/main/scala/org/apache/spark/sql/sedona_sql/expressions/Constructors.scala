@@ -160,21 +160,20 @@ case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
   override def nullable: Boolean = true
 
   override def eval(inputRow: InternalRow): Any = {
+    val arg = inputExpressions.head.eval(inputRow)
     try {
-      (inputExpressions.head.eval(inputRow)) match {
-        case (geomString: UTF8String) => {
+      arg match {
+        case geomString: UTF8String =>
           // Parse UTF-8 encoded wkb string
           Constructors.geomFromText(geomString.toString, FileDataSplitter.WKB).toGenericArrayData
-        }
-        case (wkb: Array[Byte]) => {
+        case wkb: Array[Byte] =>
           // convert raw wkb byte array to geometry
           Constructors.geomFromWKB(wkb).toGenericArrayData
-        }
         case null => null
       }
     } catch {
       case e: Exception =>
-        InferredExpression.throwExpressionInferenceException(inputRow, inputExpressions, e)
+        InferredExpression.throwExpressionInferenceException(getClass.getSimpleName, Seq(arg), e)
     }
   }
 
@@ -201,21 +200,20 @@ case class ST_GeomFromEWKB(inputExpressions: Seq[Expression])
   override def nullable: Boolean = true
 
   override def eval(inputRow: InternalRow): Any = {
+    val arg = inputExpressions.head.eval(inputRow)
     try {
-      (inputExpressions.head.eval(inputRow)) match {
-        case (geomString: UTF8String) => {
+      arg match {
+        case geomString: UTF8String =>
           // Parse UTF-8 encoded wkb string
           Constructors.geomFromText(geomString.toString, FileDataSplitter.WKB).toGenericArrayData
-        }
-        case (wkb: Array[Byte]) => {
+        case wkb: Array[Byte] =>
           // convert raw wkb byte array to geometry
           Constructors.geomFromWKB(wkb).toGenericArrayData
-        }
         case null => null
       }
     } catch {
       case e: Exception =>
-        InferredExpression.throwExpressionInferenceException(inputRow, inputExpressions, e)
+        InferredExpression.throwExpressionInferenceException(getClass.getSimpleName, Seq(arg), e)
     }
   }
 
@@ -267,7 +265,10 @@ case class ST_LineFromWKB(inputExpressions: Seq[Expression])
       }
     } catch {
       case e: Exception =>
-        InferredExpression.throwExpressionInferenceException(inputRow, inputExpressions, e)
+        InferredExpression.throwExpressionInferenceException(
+          getClass.getSimpleName,
+          Seq(wkb, srid),
+          e)
     }
   }
 
@@ -321,7 +322,10 @@ case class ST_LinestringFromWKB(inputExpressions: Seq[Expression])
       }
     } catch {
       case e: Exception =>
-        InferredExpression.throwExpressionInferenceException(inputRow, inputExpressions, e)
+        InferredExpression.throwExpressionInferenceException(
+          getClass.getSimpleName,
+          Seq(wkb, srid),
+          e)
     }
   }
 
@@ -375,7 +379,10 @@ case class ST_PointFromWKB(inputExpressions: Seq[Expression])
       }
     } catch {
       case e: Exception =>
-        InferredExpression.throwExpressionInferenceException(inputRow, inputExpressions, e)
+        InferredExpression.throwExpressionInferenceException(
+          getClass.getSimpleName,
+          Seq(wkb, srid),
+          e)
     }
   }
 
@@ -413,7 +420,6 @@ case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
   override def eval(inputRow: InternalRow): Any = {
     val geomString = inputExpressions.head.eval(inputRow).asInstanceOf[UTF8String].toString
     try {
-
       val geometry = Constructors.geomFromText(geomString, FileDataSplitter.GEOJSON)
       // If the user specify a bunch of attributes to go with each geometry, we need to store all of them in this geometry
       if (inputExpressions.length > 1) {
@@ -422,7 +428,10 @@ case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
       GeometrySerializer.serialize(geometry)
     } catch {
       case e: Exception =>
-        InferredExpression.throwExpressionInferenceException(inputRow, inputExpressions, e)
+        InferredExpression.throwExpressionInferenceException(
+          getClass.getSimpleName,
+          Seq(geomString),
+          e)
     }
   }
 

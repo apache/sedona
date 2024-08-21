@@ -353,7 +353,10 @@ case class ST_IsValidDetail(children: Seq[Expression])
         Seq(validDetail.valid, UTF8String.fromString(validDetail.reason), serLocation))
     } catch {
       case e: Exception =>
-        InferredExpression.throwExpressionInferenceException(input, children, e)
+        InferredExpression.throwExpressionInferenceException(
+          getClass.getSimpleName,
+          Seq(geometry),
+          e)
     }
   }
 
@@ -627,20 +630,19 @@ case class ST_MinimumBoundingRadius(inputExpressions: Seq[Expression])
 
   override def eval(input: InternalRow): Any = {
     val expr = inputExpressions(0)
+    val geometry = expr.toGeometry(input)
 
     try {
-      val geometry = expr match {
-        case s: SerdeAware => s.evalWithoutSerialization(input)
-        case _ => expr.toGeometry(input)
-      }
-
       geometry match {
         case geometry: Geometry => getMinimumBoundingRadius(geometry)
         case _ => null
       }
     } catch {
       case e: Exception =>
-        InferredExpression.throwExpressionInferenceException(input, inputExpressions, e)
+        InferredExpression.throwExpressionInferenceException(
+          getClass.getSimpleName,
+          Seq(geometry),
+          e)
     }
   }
 
@@ -932,22 +934,24 @@ case class ST_SubDivideExplode(children: Seq[Expression]) extends Generator with
   children.validateLength(2)
 
   override def eval(input: InternalRow): TraversableOnce[InternalRow] = {
-    val geometryRaw = children.head
-    val maxVerticesRaw = children(1)
+    val geometry = children.head.toGeometry(input)
+    val maxVertices = children(1).toInt(input)
     try {
-      geometryRaw.toGeometry(input) match {
+      geometry match {
         case geom: Geometry =>
-          ArrayData.toArrayData(
-            Functions.subDivide(geom, maxVerticesRaw.toInt(input)).map(_.toGenericArrayData))
+          ArrayData.toArrayData(Functions.subDivide(geom, maxVertices).map(_.toGenericArrayData))
           Functions
-            .subDivide(geom, maxVerticesRaw.toInt(input))
+            .subDivide(geom, maxVertices)
             .map(_.toGenericArrayData)
             .map(InternalRow(_))
         case _ => new Array[InternalRow](0)
       }
     } catch {
       case e: Exception =>
-        InferredExpression.throwExpressionInferenceException(input, children, e)
+        InferredExpression.throwExpressionInferenceException(
+          getClass.getSimpleName,
+          Seq(geometry, maxVertices),
+          e)
     }
   }
 
@@ -1008,8 +1012,8 @@ case class ST_MaximumInscribedCircle(children: Seq[Expression])
     with CodegenFallback {
 
   override def eval(input: InternalRow): Any = {
+    val geometry = children.head.toGeometry(input)
     try {
-      val geometry = children.head.toGeometry(input)
       var inscribedCircle: InscribedCircle = null
       inscribedCircle = Functions.maximumInscribedCircle(geometry)
 
@@ -1018,7 +1022,10 @@ case class ST_MaximumInscribedCircle(children: Seq[Expression])
       InternalRow.fromSeq(Seq(serCenter, serNearest, inscribedCircle.radius))
     } catch {
       case e: Exception =>
-        InferredExpression.throwExpressionInferenceException(input, children, e)
+        InferredExpression.throwExpressionInferenceException(
+          getClass.getSimpleName,
+          Seq(geometry),
+          e)
     }
   }
 
