@@ -20,7 +20,7 @@ package org.apache.sedona.sql
 
 import org.apache.commons.codec.binary.Hex
 import org.apache.spark.sql.Row
-import org.apache.spark.sql.functions.{array, col, element_at, lit}
+import org.apache.spark.sql.functions.{array, col, element_at, expr, lit}
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpressionException
 import org.apache.spark.sql.sedona_sql.expressions.st_aggregates._
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
@@ -2275,9 +2275,21 @@ class dataFrameAPITestScala extends TestBaseScala {
       }
 
       // Check the exception message
-      assert(exception.getMessage.contains(
-        "[SRID=4326;POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0)), 50.0, SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))]"))
+      assert(exception.getMessage.contains("POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0))"))
+      assert(exception.getMessage.contains("POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))"))
+      assert(exception.getMessage.contains("ST_Rotate"))
       assert(exception.getMessage.contains("The origin must be a non-empty Point geometry."))
+
+      // Non-literal test case: ST_MakeLine will raise an exception
+      val exception2 = intercept[Exception] {
+        sparkSession
+          .range(0, 1)
+          .withColumn("geom", expr("ST_PolygonFromEnvelope(id, id, id + 1, id + 1)"))
+          .selectExpr("id", "ST_Envelope(ST_MakeLine(geom, geom))")
+          .collect()
+      }
+      assert(exception2.getMessage.contains("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
+      assert(exception2.getMessage.contains("ST_MakeLine"))
     }
   }
 }
