@@ -107,7 +107,10 @@ abstract class InferredExpression(fSeq: InferrableFunction*)
       f.serializer(evaluator(input))
     } catch {
       case e: Exception =>
-        InferredExpression.throwExpressionInferenceException(getClass.getSimpleName, inputArgs, e)
+        InferredExpression.throwExpressionInferenceException(
+          getClass.getSimpleName,
+          inputArgs.toSeq,
+          e)
     } finally {
       inputArgs.clear()
     }
@@ -118,7 +121,10 @@ abstract class InferredExpression(fSeq: InferrableFunction*)
       evaluator(input)
     } catch {
       case e: Exception =>
-        InferredExpression.throwExpressionInferenceException(getClass.getSimpleName, inputArgs, e)
+        InferredExpression.throwExpressionInferenceException(
+          getClass.getSimpleName,
+          inputArgs.toSeq,
+          e)
     } finally {
       inputArgs.clear()
     }
