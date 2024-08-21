@@ -167,6 +167,8 @@ This release is a maintenance release that includes bug fixes and minor improvem
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-643'>SEDONA-643</a>] -         Fix Flink constructor functions signatures
 </li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-645'>SEDONA-645</a>] -         Add ST_RotateX
+</li>
 </ul>
 
 ### Improvement
