@@ -16,11 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.execution.datasources.shapefile
+package org.apache.sedona.sql.datasources.shapefile
 
 import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.dbf.FieldDescriptor
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.SparkException
 import org.apache.spark.sql.catalyst.analysis.SqlApiAnalysis.Resolver
 import org.apache.spark.sql.types.BooleanType
 import org.apache.spark.sql.types.DateType
@@ -58,9 +57,9 @@ object ShapefileUtils {
       var mergedSchema = schemas.head
       schemas.tail.foreach { schema =>
         try {
-          mergedSchema = mergedSchema.merge(schema)
+          mergedSchema = mergeSchema(mergedSchema, schema)
         } catch {
-          case cause: SparkException =>
+          case cause: IllegalArgumentException =>
             throw new IllegalArgumentException(
               s"Failed to merge schema $mergedSchema with $schema",
               cause)
@@ -68,6 +67,24 @@ object ShapefileUtils {
       }
       Some(mergedSchema)
     }
+  }
+
+  private def mergeSchema(schema1: StructType, schema2: StructType): StructType = {
+    // The field names are case insensitive when performing schema merging
+    val fieldMap = schema1.fields.map(f => f.name.toLowerCase(Locale.ROOT) -> f).toMap
+    var newFields = schema1.fields
+    schema2.fields.foreach { f =>
+      fieldMap.get(f.name.toLowerCase(Locale.ROOT)) match {
+        case Some(existingField) =>
+          if (existingField.dataType != f.dataType) {
+            throw new IllegalArgumentException(
+              s"Failed to merge fields ${existingField.name} and ${f.name} because they have different data types: ${existingField.dataType} and ${f.dataType}")
+          }
+        case _ =>
+          newFields :+= f
+      }
+    }
+    StructType(newFields)
   }
 
   def fieldDescriptorsToStructFields(fieldDescriptors: Seq[FieldDescriptor]): Seq[StructField] = {

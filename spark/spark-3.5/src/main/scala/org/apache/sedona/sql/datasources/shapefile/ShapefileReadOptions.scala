@@ -16,33 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.execution.datasources.shapefile
+package org.apache.sedona.sql.datasources.shapefile
 
-import org.apache.spark.sql.connector.read.Scan
-import org.apache.spark.sql.execution.datasources.v2.FileScanBuilder
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.execution.datasources.PartitioningAwareFileIndex
-import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
-case class ShapefileScanBuilder(
-    sparkSession: SparkSession,
-    fileIndex: PartitioningAwareFileIndex,
-    schema: StructType,
-    dataSchema: StructType,
-    options: CaseInsensitiveStringMap)
-    extends FileScanBuilder(sparkSession, fileIndex, dataSchema) {
+/**
+ * Options for reading Shapefiles.
+ * @param geometryFieldName
+ *   The name of the geometry field.
+ * @param keyFieldName
+ *   The name of the shape key field.
+ * @param charset
+ *   The charset of non-spatial attributes.
+ */
+case class ShapefileReadOptions(
+    geometryFieldName: String,
+    keyFieldName: Option[String],
+    charset: Option[String])
 
-  override def build(): Scan = {
-    ShapefileScan(
-      sparkSession,
-      fileIndex,
-      dataSchema,
-      readDataSchema(),
-      readPartitionSchema(),
-      options,
-      pushedDataFilters,
-      partitionFilters,
-      dataFilters)
+object ShapefileReadOptions {
+  def parse(options: CaseInsensitiveStringMap): ShapefileReadOptions = {
+    val geometryFieldName = options.getOrDefault("geometry.name", "geometry")
+    val keyFieldName =
+      if (options.containsKey("key.name")) Some(options.get("key.name")) else None
+    val charset = if (options.containsKey("charset")) Some(options.get("charset")) else None
+    ShapefileReadOptions(geometryFieldName, keyFieldName, charset)
   }
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.execution.datasources.shapefile
+package org.apache.sedona.sql.datasources.shapefile
 
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.io.IOUtils
@@ -35,10 +35,10 @@ import org.apache.spark.sql.catalyst.expressions.Literal
 import org.apache.spark.sql.catalyst.expressions.UnsafeProjection
 import org.apache.spark.sql.connector.read.PartitionReader
 import org.apache.spark.sql.execution.datasources.PartitionedFile
-import org.apache.spark.sql.execution.datasources.shapefile.ShapefilePartitionReader.logger
-import org.apache.spark.sql.execution.datasources.shapefile.ShapefilePartitionReader.openStream
-import org.apache.spark.sql.execution.datasources.shapefile.ShapefilePartitionReader.tryOpenStream
-import org.apache.spark.sql.execution.datasources.shapefile.ShapefileUtils.baseSchema
+import org.apache.sedona.sql.datasources.shapefile.ShapefilePartitionReader.logger
+import org.apache.sedona.sql.datasources.shapefile.ShapefilePartitionReader.openStream
+import org.apache.sedona.sql.datasources.shapefile.ShapefilePartitionReader.tryOpenStream
+import org.apache.sedona.sql.datasources.shapefile.ShapefileUtils.baseSchema
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.StructType
 import org.locationtech.jts.geom.GeometryFactory
@@ -132,7 +132,7 @@ class ShapefilePartitionReader(
       if (index >= 0) {
         val sourceField = shpSchema.fields(index)
         val refExpr = BoundReference(index, sourceField.dataType, sourceField.nullable)
-        if (sourceField.dataType.sameType(field.dataType)) refExpr
+        if (sourceField.dataType == field.dataType) refExpr
         else {
           Cast(refExpr, field.dataType)
         }
