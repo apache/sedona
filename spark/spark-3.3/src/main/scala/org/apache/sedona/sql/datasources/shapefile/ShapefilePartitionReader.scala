@@ -172,7 +172,7 @@ class ShapefilePartitionReader(
         try {
           FunctionsGeoTools.wktCRSToSRID(wkt)
         } catch {
-          case e: Exception =>
+          case e: Throwable =>
             val prjPath = partitionedFilesMap.get("prj").orNull
             logger.warn(s"Failed to parse SRID from .prj file $prjPath", e)
             0
