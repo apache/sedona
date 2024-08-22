@@ -82,4 +82,4 @@ class TestShapefile(TestBase):
                 assert row['aUnicode'] == ''
                 assert row['aDecimal'] is None
                 assert row['aDecimal2'] is None
-                assert row['aDate'] is None        
+                assert row['aDate'] is None

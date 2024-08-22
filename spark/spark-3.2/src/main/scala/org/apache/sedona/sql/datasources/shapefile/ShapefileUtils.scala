@@ -171,7 +171,8 @@ object ShapefileUtils {
           }
         } else { (bytes: Array[Byte]) =>
           try {
-            Decimal.fromDecimal(new java.math.BigDecimal(new String(bytes, StandardCharsets.ISO_8859_1).trim))
+            Decimal.fromDecimal(
+              new java.math.BigDecimal(new String(bytes, StandardCharsets.ISO_8859_1).trim))
           } catch {
             case _: Exception => null
           }
