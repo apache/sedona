@@ -71,12 +71,12 @@ class TestShapefile(TestBase):
             if id is not None:
                 assert row['aUnicode'] == "测试" + str(id)
                 if id < 10:
-                    assert (row['aDecimal'] * 10).to_integral() == id * 10 + id
+                    assert row['aDecimal'] * 10 == id * 10 + id
                     assert row['aDecimal2'] is None
                     assert row['aDate'] == datetime.date(2020 + id, id, id)
                 else:
                     assert row['aDecimal'] is None
-                    assert (row['aDecimal2'] * 100).to_integral() == id * 100 + id
+                    assert row['aDecimal2'] * 100 == id * 100 + id
                     assert row['aDate'] is None
             else:
                 assert row['aUnicode'] == ''
