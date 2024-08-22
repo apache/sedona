@@ -26,6 +26,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
 import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShpFileParser;
 
 public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
@@ -92,7 +93,12 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
       int currentLength = indexes[indexId + 1] * 2 - 4;
       recordKey = new ShapeKey();
       recordKey.setIndex(parser.parseRecordHeadID());
-      recordContent = parser.parseRecordPrimitiveContent(currentLength);
+      if (currentLength >= 0) {
+        recordContent = parser.parseRecordPrimitiveContent(currentLength);
+      } else {
+        // Ignore this index entry
+        recordContent = new ShpRecord(new byte[0], ShapeType.NULL.getId());
+      }
       indexId += 2;
     } else {
       if (getProgress() >= 1) {

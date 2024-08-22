@@ -210,6 +210,78 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       assert(nonNullLods == 17)
     }
 
+    it("read bad_shx") {
+      var shapefileDf = sparkSession.read
+        .format("shapefile")
+        .load(resourceFolder + "shapefiles/bad_shx")
+      val schema = shapefileDf.schema
+      assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "field_1").get.dataType == LongType)
+      var rows = shapefileDf.collect()
+      assert(rows.length == 2)
+      rows.foreach { row =>
+        val geom = row.getAs[Geometry]("geometry")
+        if (geom == null) {
+          assert(row.getAs[Long]("field_1") == 3)
+        } else {
+          assert(geom.isInstanceOf[Point])
+          assert(row.getAs[Long]("field_1") == 2)
+        }
+      }
+
+      // Copy the .shp and .dbf files to temporary location, and read the same shapefiles without .shx
+      FileUtils.cleanDirectory(new File(temporaryLocation))
+      FileUtils.copyFile(
+        new File(resourceFolder + "shapefiles/bad_shx/bad_shx.shp"),
+        new File(temporaryLocation + "/bad_shx.shp"))
+      FileUtils.copyFile(
+        new File(resourceFolder + "shapefiles/bad_shx/bad_shx.dbf"),
+        new File(temporaryLocation + "/bad_shx.dbf"))
+      shapefileDf = sparkSession.read
+        .format("shapefile")
+        .load(temporaryLocation)
+      rows = shapefileDf.collect()
+      assert(rows.length == 2)
+      rows.foreach { row =>
+        val geom = row.getAs[Geometry]("geometry")
+        if (geom == null) {
+          assert(row.getAs[Long]("field_1") == 3)
+        } else {
+          assert(geom.isInstanceOf[Point])
+          assert(row.getAs[Long]("field_1") == 2)
+        }
+      }
+    }
+
+    it("read contains_null_geom") {
+      val shapefileDf = sparkSession.read
+        .format("shapefile")
+        .load(resourceFolder + "shapefiles/contains_null_geom")
+      val schema = shapefileDf.schema
+      assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+      assert(schema.find(_.name == "fInt").get.dataType == LongType)
+      assert(schema.find(_.name == "fFloat").get.dataType.isInstanceOf[DecimalType])
+      assert(schema.find(_.name == "fString").get.dataType == StringType)
+      assert(schema.length == 4)
+      val rows = shapefileDf.collect()
+      assert(rows.length == 10)
+      rows.foreach { row =>
+        val fInt = row.getAs[Long]("fInt")
+        val fFloat = row.getAs[java.math.BigDecimal]("fFloat").doubleValue()
+        val fString = row.getAs[String]("fString")
+        val geom = row.getAs[Geometry]("geometry")
+        if (fInt == 2 || fInt == 5) {
+          assert(geom == null)
+        } else {
+          assert(geom.isInstanceOf[Point])
+          assert(geom.getCoordinate.x == fInt)
+          assert(geom.getCoordinate.y == fInt)
+        }
+        assert(Math.abs(fFloat - 3.14159 * fInt) < 1e-4)
+        assert(fString == s"str_$fInt")
+      }
+    }
+
     it("read test_datatypes") {
       val shapefileDf = sparkSession.read
         .format("shapefile")
@@ -504,7 +576,6 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       assert(schema.find(_.name == "aUnicode").get.dataType == StringType)
       val rows = shapefileDf.collect()
       assert(rows.length == 9)
-      shapefileDf.show()
       rows.foreach { row =>
         val geom = row.getAs[Geometry]("geometry")
         assert(geom.isInstanceOf[Point])
@@ -532,7 +603,6 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       assert(schema.find(_.name == "aUnicode").get.dataType == StringType)
       val rows = shapefileDf.collect()
       assert(rows.length == 9)
-      shapefileDf.show()
       rows.foreach { row =>
         val geom = row.getAs[Geometry]("g")
         assert(geom.isInstanceOf[Point])
