@@ -1007,6 +1007,24 @@ public class Functions {
     }
   }
 
+  public static class ST_RemoveRepeatedPoints extends ScalarFunction {
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.removeRepeatedPoints(geom);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        double tolerance) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.removeRepeatedPoints(geom, tolerance);
+    }
+  }
+
   public static class ST_SetPoint extends ScalarFunction {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(

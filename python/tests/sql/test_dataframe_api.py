@@ -204,6 +204,7 @@ test_configurations = [
     (stf.ST_PointOnSurface, ("line",), "linestring_geom", "", "POINT (2 0)"),
     (stf.ST_ReducePrecision, ("geom", 1), "precision_reduce_point", "", "POINT (0.1 0.2)"),
     (stf.ST_RemovePoint, ("line", 1), "linestring_geom", "", "LINESTRING (0 0, 2 0, 3 0, 4 0, 5 0)"),
+    (stf.ST_RemoveRepeatedPoints, ("geom",), "repeated_multipoint", "", "MULTIPOINT (1 1, 2 2, 3 3, 4 4)"),
     (stf.ST_Reverse, ("line",), "linestring_geom", "", "LINESTRING (5 0, 4 0, 3 0, 2 0, 1 0, 0 0)"),
     (stf.ST_RotateX, ("line", 10.0), "4D_line", "ST_ReducePrecision(geom, 2)", "LINESTRING Z (1 -0.3 -1.383092639965822, 2 -0.59 -2.766185279931644, 3 -0.89 -4.149277919897466, -1 0.3 1.383092639965822)"),
     (stf.ST_Rotate, ("line", 10.0), "linestring_geom", "ST_ReducePrecision(geom, 2)", "LINESTRING (0 0, -0.84 -0.54, -1.68 -1.09, -2.52 -1.63, -3.36 -2.18, -4.2 -2.72)"),
@@ -426,6 +427,7 @@ wrong_type_configurations = [
     (stf.ST_RemovePoint, (None, 1)),
     (stf.ST_RemovePoint, ("", None)),
     (stf.ST_RemovePoint, ("", 1.0)),
+    (stf.ST_RemoveRepeatedPoints, (None, None)),
     (stf.ST_Reverse, (None,)),
     (stf.ST_Rotate, (None,None,)),
     (stf.ST_Rotate, (None,None)),
@@ -578,6 +580,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)') AS geom")
         elif request.param == "empty_geom":
             return TestDataFrameAPI.spark.sql("SELECT ST_Difference(ST_Point(0.0, 0.0), ST_Point(0.0, 0.0)) AS geom")
+        elif request.param == "repeated_multipoint":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('MULTIPOINT (1 1, 1 1, 2 2, 3 3, 3 3, 4 4)') AS geom")
         elif request.param == "multiline_geom":
             return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('MULTILINESTRING ((0 0, 1 0), (1 0, 1 1), (1 1, 0 0))') AS geom")
         elif request.param == "geom_collection":

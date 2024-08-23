@@ -1623,6 +1623,126 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void removeRepeatedPoints() throws ParseException {
+    Geometry geom = Constructors.geomFromWKT("POINT (10 23)", 4321);
+    Geometry actualGeom = Functions.removeRepeatedPoints(geom);
+    String actual = Functions.asWKT(actualGeom);
+    String expected = "POINT (10 23)";
+    assertEquals(expected, actual);
+    int actualSRID = Functions.getSRID(actualGeom);
+    assertEquals(4321, actualSRID);
+
+    geom = Constructors.geomFromWKT("MULTIPOINT ((1 1), (4 4), (2 2), (3 3))", 1000);
+    actualGeom = Functions.removeRepeatedPoints(geom);
+    actual = Functions.asWKT(actualGeom);
+    expected = "MULTIPOINT ((1 1), (4 4), (2 2), (3 3))";
+    assertEquals(expected, actual);
+    actualSRID = Functions.getSRID(actualGeom);
+    assertEquals(1000, actualSRID);
+
+    geom =
+        Constructors.geomFromWKT("MULTIPOINT (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 20));
+    expected = "MULTIPOINT ((10 10), (30 30))";
+    assertEquals(expected, actual);
+
+    geom = Constructors.geomFromWKT("MULTIPOINT ((1 1), (4 4), (2 2), (3 3), (3 3))", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 2000));
+    expected = "MULTIPOINT ((1 1))";
+    assertEquals(expected, actual);
+
+    geom = Constructors.geomFromWKT("LINESTRING (0 0, 0 0, 1 1, 0 0, 1 1, 2 2)", 2000);
+    actualGeom = Functions.removeRepeatedPoints(geom);
+    actual = Functions.asWKT(actualGeom);
+    expected = "LINESTRING (0 0, 1 1, 0 0, 1 1, 2 2)";
+    assertEquals(expected, actual);
+    actualSRID = Functions.getSRID(actualGeom);
+    assertEquals(2000, actualSRID);
+
+    geom = Constructors.geomFromWKT("LINESTRING (0 0, 0 0, 1 1, 5 5, 1 1, 2 2)", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 2));
+    expected = "LINESTRING (0 0, 5 5, 2 2)";
+    assertEquals(expected, actual);
+
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 6));
+    expected = "LINESTRING (0 0, 2 2)";
+    assertEquals(expected, actual);
+
+    geom =
+        Constructors.geomFromWKT("LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 20));
+    expected = "LINESTRING (20 20, 40 40, 20 20, 40 40)";
+    assertEquals(expected, actual);
+
+    geom =
+        Constructors.geomFromWKT("LINESTRING (10 10, 20 20, 20 20, 30 30, 30 30, 40 40, 40 40)", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 10000));
+    expected = "LINESTRING (10 10, 40 40)";
+    assertEquals(expected, actual);
+
+    geom =
+        Constructors.geomFromWKT(
+            "MULTILINESTRING ((10 10, 20 20, 20 20, 30 30), (40 40, 50 50, 50 50, 60 60))", 3000);
+    actualGeom = Functions.removeRepeatedPoints(geom);
+    actual = Functions.asWKT(actualGeom);
+    expected = "MULTILINESTRING ((10 10, 20 20, 30 30), (40 40, 50 50, 60 60))";
+    assertEquals(expected, actual);
+    actualSRID = Functions.getSRID(actualGeom);
+    assertEquals(3000, actualSRID);
+
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((10 10, 20 20, 20 20, 30 30, 30 30, 40 40, 40 40, 10 10))", 4000);
+    actualGeom = Functions.removeRepeatedPoints(geom);
+    actual = Functions.asWKT(actualGeom);
+    expected = "POLYGON ((10 10, 20 20, 30 30, 40 40, 10 10))";
+    assertEquals(expected, actual);
+    actualSRID = Functions.getSRID(actualGeom);
+    assertEquals(4000, actualSRID);
+
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((10 10, 20 20, 20 20, 30 30, 30 30, 40 40, 40 40, 10 10),(15 15, 25 25, 25 25, 35 35, 35 35, 15 15),(25 25, 35 35, 35 35, 45 45, 45 45, 25 25))",
+            0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 1000));
+    expected =
+        "POLYGON ((10 10, 40 40, 40 40, 10 10), (15 15, 35 35, 35 35, 15 15), (25 25, 45 45, 45 45, 25 25))";
+    assertEquals(expected, actual);
+
+    geom =
+        Constructors.geomFromWKT(
+            "MULTIPOLYGON (((10 10, 20 20, 20 20, 30 30, 30 30, 40 40, 40 40, 10 10)),((50 50, 60 60, 60 60, 70 70, 70 70, 80 80, 80 80, 50 50)))",
+            5000);
+    actualGeom = Functions.removeRepeatedPoints(geom, 1000);
+    actual = Functions.asWKT(actualGeom);
+    expected = "MULTIPOLYGON (((10 10, 40 40, 40 40, 10 10)), ((50 50, 80 80, 80 80, 50 50)))";
+    assertEquals(expected, actual);
+    actualSRID = Functions.getSRID(actualGeom);
+    assertEquals(5000, actualSRID);
+
+    geom =
+        Constructors.geomFromWKT(
+            "MULTIPOLYGON (((10 10, 20 20, 20 20, 30 30, 30 30, 40 40, 40 40, 10 10),(15 15, 25 25, 25 25, 35 35, 35 35, 15 15),(25 25, 35 35, 35 35, 45 45, 45 45, 25 25)),((50 50, 60 60, 60 60, 70 70, 70 70, 80 80, 80 80, 50 50),(55 55, 65 65, 65 65, 75 75, 75 75, 55 55),(65 65, 75 75, 75 75, 85 85, 85 85, 65 65)))",
+            0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 1000));
+    expected =
+        "MULTIPOLYGON (((10 10, 40 40, 40 40, 10 10), (15 15, 35 35, 35 35, 15 15), (25 25, 45 45, 45 45, 25 25)), ((50 50, 80 80, 80 80, 50 50), (55 55, 75 75, 75 75, 55 55), (65 65, 85 85, 85 85, 65 65)))";
+    assertEquals(expected, actual);
+
+    geom =
+        Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION (POINT (10 10),LINESTRING (20 20, 20 20, 30 30, 30 30),POLYGON ((40 40, 50 50, 50 50, 60 60, 60 60, 70 70, 70 70, 40 40)), MULTIPOINT ((80 80), (90 90), (90 90), (100 100)))",
+            6000);
+    actualGeom = Functions.removeRepeatedPoints(geom);
+    actual = Functions.asWKT(actualGeom);
+    expected =
+        "GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (20 20, 30 30), POLYGON ((40 40, 50 50, 60 60, 70 70, 40 40)), MULTIPOINT ((80 80), (90 90), (100 100)))";
+    assertEquals(expected, actual);
+    actualSRID = Functions.getSRID(actualGeom);
+    assertEquals(6000, actualSRID);
+  }
+
+  @Test
   public void simplifyVW() throws ParseException {
     Geometry geom = Constructors.geomFromEWKT("LINESTRING(5 2, 3 8, 6 20, 7 25, 10 10)");
     String actual = Functions.simplifyVW(geom, 30).toString();

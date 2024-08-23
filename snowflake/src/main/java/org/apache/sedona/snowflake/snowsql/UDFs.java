@@ -901,6 +901,17 @@ public class UDFs {
         Functions.removePoint(GeometrySerde.deserialize(linestring), position));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geom"})
+  public static byte[] ST_RemoveRepeatedPoints(byte[] geom) {
+    return GeometrySerde.serialize(Functions.removeRepeatedPoints(GeometrySerde.deserialize(geom)));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geom", "tolerance"})
+  public static byte[] ST_RemoveRepeatedPoints(byte[] geom, double tolerance) {
+    return GeometrySerde.serialize(
+        Functions.removeRepeatedPoints(GeometrySerde.deserialize(geom), tolerance));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static byte[] ST_Reverse(byte[] geometry) {
     return GeometrySerde.serialize(Functions.reverse(GeometrySerde.deserialize(geometry)));

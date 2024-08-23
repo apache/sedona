@@ -1170,6 +1170,17 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_RemoveRepeatedPoints") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('MULTIPOINT (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)', 2000) AS geom")
+      val actualDf = baseDf.select(ST_RemoveRepeatedPoints("geom", 20).as("geom"))
+      val actual = actualDf.select(ST_AsText("geom")).first().get(0)
+      val expected = "MULTIPOINT ((10 10), (30 30))"
+      assertEquals(expected, actual)
+      val actualSRID = actualDf.select(ST_SRID("geom")).first().get(0)
+      assertEquals(2000, actualSRID)
+    }
+
     it("Passed ST_SetPoint") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS line, ST_Point(1.0, 1.0) AS point")

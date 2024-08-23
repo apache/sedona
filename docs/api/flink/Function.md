@@ -3206,6 +3206,46 @@ Output:
 LINESTRING(0 0, 1 0)
 ```
 
+## ST_RemoveRepeatedPoints
+
+Introduction: This function eliminates consecutive duplicate points within a geometry, preserving endpoints of LineStrings. It operates on (Multi)LineStrings, (Multi)Polygons, and MultiPoints, processing GeometryCollection elements individually. When an optional 'tolerance' value is provided, vertices within that distance are also considered duplicates.
+
+Format:
+
+`ST_RemoveRepeatedPoints(geom: Geometry, tolerance: Double)`
+
+`ST_RemoveRepeatedPoints(geom: Geometry)`
+
+Since: `v1.7.0`
+
+SQL Example:
+
+```sql
+SELECT ST_RemoveRepeatedPoints(
+        ST_GeomFromWKT('MULTIPOINT ((20 20), (10 10), (30 30), (40 40), (20 20), (30 30), (40 40))')
+       )
+```
+
+Output:
+
+```
+MULTIPOINT ((20 20), (10 10), (30 30), (40 40))
+```
+
+SQL Example:
+
+```sql
+SELECT ST_RemoveRepeatedPoints(
+        ST_GeomFromWKT('LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)'), 20
+       )
+```
+
+Output:
+
+```
+LINESTRING (20 20, 40 40, 20 20, 40 40)
+```
+
 ## ST_Rotate
 
 Introduction: Rotates a geometry by a specified angle in radians counter-clockwise around a given origin point. The origin for rotation can be specified as either a POINT geometry or x and y coordinates. If the origin is not specified, the geometry is rotated around POINT(0 0).

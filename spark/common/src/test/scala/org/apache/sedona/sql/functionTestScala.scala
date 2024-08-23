@@ -1821,6 +1821,18 @@ class functionTestScala
       3) shouldBe None
   }
 
+  it("Should pass ST_RemoveRepeatedPoints") {
+    val baseDf = sparkSession.sql(
+      "SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION (POINT (10 10),LINESTRING (20 20, 20 20, 30 30, 30 30),POLYGON ((40 40, 50 50, 50 50, 60 60, 60 60, 70 70, 70 70, 40 40)), MULTIPOINT ((80 80), (90 90), (90 90), (100 100)))', 1000) AS geom")
+    val actualDf = baseDf.selectExpr("ST_RemoveRepeatedPoints(geom, 1000) as geom")
+    val actual = actualDf.selectExpr("ST_AsText(geom)").first().get(0)
+    val expected =
+      "GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (20 20, 30 30), POLYGON ((40 40, 70 70, 70 70, 40 40)), MULTIPOINT ((80 80)))";
+    assertEquals(expected, actual)
+    val actualSRID = actualDf.selectExpr("ST_SRID(geom)").first().get(0)
+    assertEquals(1000, actualSRID)
+  }
+
   it("Should correctly set using ST_SetPoint") {
     calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", 0, "Point(0 1)") shouldBe Some(
       "LINESTRING (0 1, 1 1, 1 0, 0 0)")

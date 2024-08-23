@@ -851,6 +851,16 @@ case class ST_RemovePoint(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_RemoveRepeatedPoints(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction2(Functions.removeRepeatedPoints),
+      inferrableFunction1(Functions.removeRepeatedPoints)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_SetPoint(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.setPoint _) {
 

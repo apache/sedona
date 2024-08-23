@@ -1452,6 +1452,25 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testRemoveRepeatedPoints() {
+    Table baseTable =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromWKT('LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)', 1000) AS geom");
+    Table actualTable =
+        baseTable
+            .select(call(Functions.ST_RemoveRepeatedPoints.class.getSimpleName(), $("geom"), 100))
+            .as("geom");
+    String actual = first(actualTable).getField(0).toString();
+    String expected = "LINESTRING (20 20, 40 40)";
+    assertEquals(expected, actual);
+    int actualSRID =
+        (Integer)
+            first(actualTable.select(call(Functions.ST_SRID.class.getSimpleName(), $("geom"))))
+                .getField(0);
+    assertEquals(1000, actualSRID);
+  }
+
+  @Test
   public void testRemovePointWithIndex() {
     Table pointTable =
         tableEnv.sqlQuery("SELECT ST_RemovePoint(ST_GeomFromWKT('LINESTRING (0 0, 1 1, 2 2)'), 1)");

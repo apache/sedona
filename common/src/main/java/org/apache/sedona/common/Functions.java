@@ -873,6 +873,14 @@ public class Functions {
     return null;
   }
 
+  public static Geometry removeRepeatedPoints(Geometry geom, double tolerance) {
+    return GeometryDuplicateCoordinateRemover.transform(geom, tolerance);
+  }
+
+  public static Geometry removeRepeatedPoints(Geometry geom) {
+    return removeRepeatedPoints(geom, 0);
+  }
+
   public static Geometry setPoint(Geometry linestring, int position, Geometry point) {
     if (linestring instanceof LineString) {
       List<Coordinate> coordinates = new ArrayList<>(Arrays.asList(linestring.getCoordinates()));
