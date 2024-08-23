@@ -1623,7 +1623,7 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void removeRepeatedPoints() throws ParseException {
+  public void removeRepeatedPointsMultiPoint() throws ParseException {
     Geometry geom = Constructors.geomFromWKT("POINT (10 23)", 4321);
     Geometry actualGeom = Functions.removeRepeatedPoints(geom);
     String actual = Functions.asWKT(actualGeom);
@@ -1646,17 +1646,24 @@ public class FunctionsTest extends TestBase {
     expected = "MULTIPOINT ((10 10), (30 30))";
     assertEquals(expected, actual);
 
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom));
+    expected = "MULTIPOINT ((20 20), (10 10), (30 30), (40 40))";
+    assertEquals(expected, actual);
+
     geom = Constructors.geomFromWKT("MULTIPOINT ((1 1), (4 4), (2 2), (3 3), (3 3))", 0);
     actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 2000));
     expected = "MULTIPOINT ((1 1))";
     assertEquals(expected, actual);
+  }
 
-    geom = Constructors.geomFromWKT("LINESTRING (0 0, 0 0, 1 1, 0 0, 1 1, 2 2)", 2000);
-    actualGeom = Functions.removeRepeatedPoints(geom);
-    actual = Functions.asWKT(actualGeom);
-    expected = "LINESTRING (0 0, 1 1, 0 0, 1 1, 2 2)";
+  @Test
+  public void removeRepeatedPointsLineString() throws ParseException {
+    Geometry geom = Constructors.geomFromWKT("LINESTRING (0 0, 0 0, 1 1, 0 0, 1 1, 2 2)", 2000);
+    Geometry actualGeom = Functions.removeRepeatedPoints(geom);
+    String actual = Functions.asWKT(actualGeom);
+    String expected = "LINESTRING (0 0, 1 1, 0 0, 1 1, 2 2)";
     assertEquals(expected, actual);
-    actualSRID = Functions.getSRID(actualGeom);
+    int actualSRID = Functions.getSRID(actualGeom);
     assertEquals(2000, actualSRID);
 
     geom = Constructors.geomFromWKT("LINESTRING (0 0, 0 0, 1 1, 5 5, 1 1, 2 2)", 0);
@@ -1689,15 +1696,18 @@ public class FunctionsTest extends TestBase {
     assertEquals(expected, actual);
     actualSRID = Functions.getSRID(actualGeom);
     assertEquals(3000, actualSRID);
+  }
 
-    geom =
+  @Test
+  public void removeRepeatedPointsPolygon() throws ParseException {
+    Geometry geom =
         Constructors.geomFromWKT(
             "POLYGON ((10 10, 20 20, 20 20, 30 30, 30 30, 40 40, 40 40, 10 10))", 4000);
-    actualGeom = Functions.removeRepeatedPoints(geom);
-    actual = Functions.asWKT(actualGeom);
-    expected = "POLYGON ((10 10, 20 20, 30 30, 40 40, 10 10))";
+    Geometry actualGeom = Functions.removeRepeatedPoints(geom);
+    String actual = Functions.asWKT(actualGeom);
+    String expected = "POLYGON ((10 10, 20 20, 30 30, 40 40, 10 10))";
     assertEquals(expected, actual);
-    actualSRID = Functions.getSRID(actualGeom);
+    int actualSRID = Functions.getSRID(actualGeom);
     assertEquals(4000, actualSRID);
 
     geom =
@@ -1728,17 +1738,20 @@ public class FunctionsTest extends TestBase {
     expected =
         "MULTIPOLYGON (((10 10, 40 40, 40 40, 10 10), (15 15, 35 35, 35 35, 15 15), (25 25, 45 45, 45 45, 25 25)), ((50 50, 80 80, 80 80, 50 50), (55 55, 75 75, 75 75, 55 55), (65 65, 85 85, 85 85, 65 65)))";
     assertEquals(expected, actual);
+  }
 
-    geom =
+  @Test
+  public void removeRepeatedPointsGeometryCollection() throws ParseException {
+    Geometry geom =
         Constructors.geomFromWKT(
             "GEOMETRYCOLLECTION (POINT (10 10),LINESTRING (20 20, 20 20, 30 30, 30 30),POLYGON ((40 40, 50 50, 50 50, 60 60, 60 60, 70 70, 70 70, 40 40)), MULTIPOINT ((80 80), (90 90), (90 90), (100 100)))",
             6000);
-    actualGeom = Functions.removeRepeatedPoints(geom);
-    actual = Functions.asWKT(actualGeom);
-    expected =
+    Geometry actualGeom = Functions.removeRepeatedPoints(geom);
+    String actual = Functions.asWKT(actualGeom);
+    String expected =
         "GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (20 20, 30 30), POLYGON ((40 40, 50 50, 60 60, 70 70, 40 40)), MULTIPOINT ((80 80), (90 90), (100 100)))";
     assertEquals(expected, actual);
-    actualSRID = Functions.getSRID(actualGeom);
+    int actualSRID = Functions.getSRID(actualGeom);
     assertEquals(6000, actualSRID);
   }
 

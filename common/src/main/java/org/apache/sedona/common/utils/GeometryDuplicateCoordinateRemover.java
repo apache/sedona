@@ -27,7 +27,7 @@ import org.locationtech.jts.geom.*;
 public class GeometryDuplicateCoordinateRemover {
 
   public static Coordinate[] removeDuplicates(Coordinate[] coords, int minPoints) {
-    Coordinate pt;
+    Coordinate currentPoint;
     int numPoint = coords.length;
     int totalPointsOut = 1;
 
@@ -35,38 +35,38 @@ public class GeometryDuplicateCoordinateRemover {
 
     if (numPoint <= minPoints) return new Coordinate[0];
 
-    Coordinate last = coords[0];
-    int pToIndex = 1;
+    Coordinate lastPoint = coords[0];
+    int writeIndex = 1;
 
     for (int i = 1; i < numPoint; i++) {
-      boolean lastPoint = (i == numPoint - 1);
+      boolean isLastPoint = (i == numPoint - 1);
 
-      pt = coords[i];
+      currentPoint = coords[i];
 
       if (numPoint + totalPointsOut > minPoints + i) {
         if (TOLERANCE > 0.0) {
-          distance = pt.distance(last);
-          if (!lastPoint && distance <= TOLERANCE) {
+          distance = currentPoint.distance(lastPoint);
+          if (!isLastPoint && distance <= TOLERANCE) {
             continue;
           }
         } else {
-          if (pt.equals2D(last)) {
+          if (currentPoint.equals2D(lastPoint)) {
             continue;
           }
         }
 
-        if (lastPoint && totalPointsOut > 1 && TOLERANCE > 0.0 && distance <= TOLERANCE) {
+        if (isLastPoint && totalPointsOut > 1 && TOLERANCE > 0.0 && distance <= TOLERANCE) {
           totalPointsOut--;
-          pToIndex--;
+          writeIndex--;
         }
       }
 
-      coords[pToIndex] = pt;
+      coords[writeIndex] = currentPoint;
       totalPointsOut++;
-      pToIndex++;
-      last = pt;
+      writeIndex++;
+      lastPoint = currentPoint;
     }
-    Coordinate[] newCoordinates = newCoordinates = new Coordinate[totalPointsOut];
+    Coordinate[] newCoordinates = new Coordinate[totalPointsOut];
     System.arraycopy(coords, 0, newCoordinates, 0, totalPointsOut);
 
     return newCoordinates;
@@ -102,7 +102,7 @@ public class GeometryDuplicateCoordinateRemover {
 
   private static double TOLERANCE = 0;
 
-  public static Geometry transform(Geometry geometry, double tolerance) {
+  public static Geometry process(Geometry geometry, double tolerance) {
 
     TOLERANCE = tolerance;
 
@@ -112,71 +112,71 @@ public class GeometryDuplicateCoordinateRemover {
 
     if (geometry.getGeometryType().equals(Geometry.TYPENAME_POINT)) return geometry;
     if (geometry.getGeometryType().equals(Geometry.TYPENAME_MULTIPOINT))
-      return transformMultiPoint((MultiPoint) geometry);
+      return processMultiPoint((MultiPoint) geometry);
     if (geometry.getGeometryType().equals(Geometry.TYPENAME_LINEARRING))
-      return transformLinearRing((LinearRing) geometry);
+      return processLinearRing((LinearRing) geometry);
     if (geometry.getGeometryType().equals(Geometry.TYPENAME_LINESTRING))
-      return transformLineString((LineString) geometry);
+      return processLineString((LineString) geometry);
     if (geometry.getGeometryType().equals(Geometry.TYPENAME_MULTILINESTRING))
-      return transformMultiLineString((MultiLineString) geometry);
+      return processMultiLineString((MultiLineString) geometry);
     if (geometry.getGeometryType().equals(Geometry.TYPENAME_POLYGON))
-      return transformPolygon((Polygon) geometry);
+      return processPolygon((Polygon) geometry);
     if (geometry.getGeometryType().equals(Geometry.TYPENAME_MULTIPOLYGON))
-      return transformMultiPolygon((MultiPolygon) geometry);
+      return processMultiPolygon((MultiPolygon) geometry);
     if (geometry.getGeometryType().equals(Geometry.TYPENAME_GEOMETRYCOLLECTION))
-      return transformGeometryCollection((GeometryCollection) geometry);
+      return processGeometryCollection((GeometryCollection) geometry);
 
     throw new IllegalArgumentException(
         "Unknown Geometry subtype: " + geometry.getClass().getName());
   }
 
-  private static MultiPoint transformMultiPoint(MultiPoint geometry) {
+  private static MultiPoint processMultiPoint(MultiPoint geometry) {
     Coordinate[] coords = geometry.getCoordinates();
     return FACTORY.createMultiPointFromCoords(removeDuplicatePointsMultiPoint(coords, false));
   }
 
-  private static LinearRing transformLinearRing(LinearRing geometry) {
+  private static LinearRing processLinearRing(LinearRing geometry) {
     Coordinate[] coords = geometry.getCoordinates();
     return FACTORY.createLinearRing(removeDuplicates(coords, 4));
   }
 
-  private static LineString transformLineString(LineString geometry) {
+  private static LineString processLineString(LineString geometry) {
     if (geometry.getNumPoints() <= 2) return geometry;
 
     Coordinate[] coords = geometry.getCoordinates();
     return FACTORY.createLineString(removeDuplicates(coords, 2));
   }
 
-  private static MultiLineString transformMultiLineString(MultiLineString geometry) {
+  private static MultiLineString processMultiLineString(MultiLineString geometry) {
     LineString[] lineStrings = new LineString[geometry.getNumGeometries()];
     for (int i = 0; i < lineStrings.length; i++) {
-      lineStrings[i] = transformLineString((LineString) geometry.getGeometryN(i));
+      lineStrings[i] = processLineString((LineString) geometry.getGeometryN(i));
     }
     return FACTORY.createMultiLineString(lineStrings);
   }
 
-  private static Polygon transformPolygon(Polygon geometry) {
-    LinearRing shell = transformLinearRing(geometry.getExteriorRing());
+  private static Polygon processPolygon(Polygon geometry) {
+    LinearRing shell = processLinearRing(geometry.getExteriorRing());
 
     LinearRing[] holes = new LinearRing[geometry.getNumInteriorRing()];
     for (int i = 0; i < holes.length; i++) {
-      holes[i] = transformLinearRing(geometry.getInteriorRingN(i));
+      holes[i] = processLinearRing(geometry.getInteriorRingN(i));
     }
     return FACTORY.createPolygon(shell, holes);
   }
 
-  private static MultiPolygon transformMultiPolygon(MultiPolygon geometry) {
+  private static MultiPolygon processMultiPolygon(MultiPolygon geometry) {
     Polygon[] polygons = new Polygon[geometry.getNumGeometries()];
     for (int i = 0; i < polygons.length; i++) {
-      polygons[i] = transformPolygon((Polygon) geometry.getGeometryN(i));
+      polygons[i] = processPolygon((Polygon) geometry.getGeometryN(i));
     }
     return FACTORY.createMultiPolygon(polygons);
   }
 
-  private static GeometryCollection transformGeometryCollection(GeometryCollection geometry) {
+  private static GeometryCollection processGeometryCollection(GeometryCollection geometry) {
     Geometry[] geometries = new Geometry[geometry.getNumGeometries()];
     for (int i = 0; i < geometries.length; i++) {
-      geometries[i] = transform(geometry.getGeometryN(i), TOLERANCE);
+      geometries[i] = process(geometry.getGeometryN(i), TOLERANCE);
     }
     return FACTORY.createGeometryCollection(geometries);
   }

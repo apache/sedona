@@ -874,7 +874,7 @@ public class Functions {
   }
 
   public static Geometry removeRepeatedPoints(Geometry geom, double tolerance) {
-    return GeometryDuplicateCoordinateRemover.transform(geom, tolerance);
+    return GeometryDuplicateCoordinateRemover.process(geom, tolerance);
   }
 
   public static Geometry removeRepeatedPoints(Geometry geom) {
