@@ -1008,6 +1008,24 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geom"},
+      argTypes = {"Geometry"},
+      returnTypes = "Geometry")
+  public static String ST_RemoveRepeatedPoints(String geom) {
+    return GeometrySerde.serGeoJson(
+        Functions.removeRepeatedPoints(GeometrySerde.deserGeoJson(geom)));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geom", "tolerance"},
+      argTypes = {"Geometry", "double"},
+      returnTypes = "Geometry")
+  public static String ST_RemoveRepeatedPoints(String geom, double tolerance) {
+    return GeometrySerde.serGeoJson(
+        Functions.removeRepeatedPoints(GeometrySerde.deserGeoJson(geom), tolerance));
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"},
       returnTypes = "Geometry")

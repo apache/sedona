@@ -155,6 +155,7 @@ object Catalog {
     function[ST_AddMeasure](),
     function[ST_AddPoint](-1),
     function[ST_RemovePoint](-1),
+    function[ST_RemoveRepeatedPoints](),
     function[ST_SetPoint](),
     function[ST_IsPolygonCW](),
     function[ST_IsRing](),

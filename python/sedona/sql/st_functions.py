@@ -1340,6 +1340,22 @@ def ST_RemovePoint(line_string: ColumnOrName, index: Union[ColumnOrName, int]) -
 
 
 @validate_argument_types
+def ST_RemoveRepeatedPoints(geom: ColumnOrName, tolerance: Optional[Union[ColumnOrName, float]] = None) -> Column:
+    """Removes duplicate coordinates from a geometry, optionally removing those within a specified distance tolerance.
+
+    @param geom: Geometry with repeated points
+    @type geom: ColumnOrName
+    @param tolerance: Tolerance for removing nearby coordinates
+    @type tolerance: Optional[Union[ColumnOrName, float]]
+    @return:
+    """
+    args = (geom, tolerance)
+    if tolerance is None:
+        args = (geom,)
+    return _call_st_function("ST_RemoveRepeatedPoints", args)
+
+
+@validate_argument_types
 def ST_Reverse(geometry: ColumnOrName) -> Column:
     """Reverse the points for the geometry.
 

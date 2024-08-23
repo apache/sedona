@@ -825,6 +825,18 @@ public class TestFunctions extends TestBase {
   }
 
   @Test
+  public void test_ST_RemoveRepeatedPoints() {
+    registerUDF("ST_RemoveRepeatedPoints", byte[].class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_RemoveRepeatedPoints(sedona.ST_GeomFromText('LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)')))",
+        "LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)");
+    registerUDF("ST_RemoveRepeatedPoints", byte[].class, double.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_RemoveRepeatedPoints(sedona.ST_GeomFromText('LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)'), 20))",
+        "LINESTRING (20 20, 40 40, 20 20, 40 40)");
+  }
+
+  @Test
   public void test_ST_Reverse() {
     registerUDF("ST_Reverse", byte[].class);
     verifySqlSingleRes(
