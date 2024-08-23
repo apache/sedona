@@ -981,7 +981,7 @@ class TestPredicateJoin(TestBase):
         baseDf = self.spark.sql("SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION (POINT (10 10),LINESTRING (20 20, 20 20, 30 30, 30 30),POLYGON ((40 40, 50 50, 50 50, 60 60, 60 60, 70 70, 70 70, 40 40)), MULTIPOINT ((80 80), (90 90), (90 90), (100 100)))', 1000) AS geom")
         actualDf = baseDf.selectExpr("ST_RemoveRepeatedPoints(geom, 1000) as geom")
         actual = actualDf.selectExpr("ST_AsText(geom)").first()[0]
-        expected = "GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (20 20, 30 30), POLYGON ((40 40, 70 70, 70 70, 40 40)), MULTIPOINT ((80 80)))";
+        expected = "GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (20 20, 30 30), POLYGON ((40 40, 70 70, 70 70, 40 40)), MULTIPOINT ((80 80)))"
         assert expected == actual
         actualSRID = actualDf.selectExpr("ST_SRID(geom)").first()[0]
         assert 1000 == actualSRID
