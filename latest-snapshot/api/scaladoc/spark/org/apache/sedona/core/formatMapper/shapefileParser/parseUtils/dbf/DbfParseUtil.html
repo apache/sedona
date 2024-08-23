@@ -607,6 +607,24 @@
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil#parse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="parse(inputStream:java.io.DataInputStream):java.util.List[Array[Byte]]"></a><a id="parse(DataInputStream):List[Array[Byte]]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/dbf/DbfParseUtil.html#parse(inputStream:java.io.DataInputStream):java.util.List[Array[Byte]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">parse</span><span class="params">(<span name="inputStream">inputStream: <span class="extype" name="java.io.DataInputStream">DataInputStream</span></span>)</span><span class="result">: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Parse the next record in the .dbf file
+</p><div class="fullcomment"><div class="comment cmt"><p>Parse the next record in the .dbf file
+</p></div><dl class="paramcmts block"><dt class="param">inputStream</dt><dd class="cmt"><p>input stream of .dbf file</p></dd><dt>returns</dt><dd class="cmt"><p>a list of fields as their original representation in the dbf file</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><span class="extype" name="IOException"><code>IOException</code></span> if an I/O error occurs</p></span></dd></dl></div>
     </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil#parseFileHead" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="parseFileHead(inputStream:java.io.DataInputStream):Unit"></a><a id="parseFileHead(DataInputStream):Unit"></a>
       <span class="permalink">
@@ -624,58 +642,6 @@
       
       <p class="shortcomment cmt">parse header of .dbf file and draw information for next step
 </p><div class="fullcomment"><div class="comment cmt"><p>parse header of .dbf file and draw information for next step
-</p></div><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"></span></dd></dl></div>
-    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil#parsePrimitiveRecord" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="parsePrimitiveRecord(inputStream:java.io.DataInputStream):String"></a><a id="parsePrimitiveRecord(DataInputStream):String"></a>
-      <span class="permalink">
-      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/dbf/DbfParseUtil.html#parsePrimitiveRecord(inputStream:java.io.DataInputStream):String" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">parsePrimitiveRecord</span><span class="params">(<span name="inputStream">inputStream: <span class="extype" name="java.io.DataInputStream">DataInputStream</span></span>)</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">draw raw byte array of effective record
-</p><div class="fullcomment"><div class="comment cmt"><p>draw raw byte array of effective record
-</p></div><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"></span></dd></dl></div>
-    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil#primitiveToAttributes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="primitiveToAttributes(buffer:java.nio.ByteBuffer):String"></a><a id="primitiveToAttributes(ByteBuffer):String"></a>
-      <span class="permalink">
-      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/dbf/DbfParseUtil.html#primitiveToAttributes(buffer:java.nio.ByteBuffer):String" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">primitiveToAttributes</span><span class="params">(<span name="buffer">buffer: <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span></span>)</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">abstract attributes from primitive bytes according to field descriptors.</p><div class="fullcomment"><div class="comment cmt"><p>abstract attributes from primitive bytes according to field descriptors.
-</p></div><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"></span></dd></dl></div>
-    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil#primitiveToAttributes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="primitiveToAttributes(inputStream:java.io.DataInputStream):String"></a><a id="primitiveToAttributes(DataInputStream):String"></a>
-      <span class="permalink">
-      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/dbf/DbfParseUtil.html#primitiveToAttributes(inputStream:java.io.DataInputStream):String" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">primitiveToAttributes</span><span class="params">(<span name="inputStream">inputStream: <span class="extype" name="java.io.DataInputStream">DataInputStream</span></span>)</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">abstract attributes from primitive bytes according to field descriptors.</p><div class="fullcomment"><div class="comment cmt"><p>abstract attributes from primitive bytes according to field descriptors.
 </p></div><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"></span></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
