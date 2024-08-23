@@ -137,13 +137,13 @@ public class DbfParseUtil implements ShapeFileConst {
   }
 
   /**
-   * draw raw byte array of effective record
+   * Parse the next record in the .dbf file
    *
-   * @param inputStream
-   * @return
-   * @throws IOException
+   * @param inputStream input stream of .dbf file
+   * @return a list of fields as their original representation in the dbf file
+   * @throws IOException if an I/O error occurs
    */
-  public String parsePrimitiveRecord(DataInputStream inputStream) throws IOException {
+  public List<byte[]> parse(DataInputStream inputStream) throws IOException {
     if (isDone()) {
       return null;
     }
@@ -160,50 +160,34 @@ public class DbfParseUtil implements ShapeFileConst {
     byte[] primitiveBytes = new byte[recordLength];
     inputStream.readFully(primitiveBytes);
     numRecordRead++; // update number of record read
-    return primitiveToAttributes(ByteBuffer.wrap(primitiveBytes));
+    return extractFieldBytes(ByteBuffer.wrap(primitiveBytes));
   }
 
-  /**
-   * abstract attributes from primitive bytes according to field descriptors.
-   *
-   * @param inputStream
-   * @return
-   * @throws IOException
-   */
-  public String primitiveToAttributes(DataInputStream inputStream) throws IOException {
-    byte[] delimiter = {'\t'};
-    Text attributes = new Text();
-    for (int i = 0; i < fieldDescriptors.size(); ++i) {
-      FieldDescriptor descriptor = fieldDescriptors.get(i);
-      byte[] fldBytes = new byte[descriptor.getFieldLength()];
-      inputStream.readFully(fldBytes);
-      // System.out.println(descriptor.getFiledName() + "  " + new String(fldBytes));
-      byte[] attr = new String(fldBytes).trim().getBytes();
-      if (i > 0) {
-        attributes.append(delimiter, 0, 1); // first attribute doesn't append '\t'
-      }
-      attributes.append(attr, 0, attr.length);
-    }
-    String attrs = attributes.toString();
-    return attributes.toString();
-  }
-
-  /**
-   * abstract attributes from primitive bytes according to field descriptors.
-   *
-   * @param buffer
-   * @return
-   * @throws IOException
-   */
-  public String primitiveToAttributes(ByteBuffer buffer) throws IOException {
-    byte[] delimiter = {'\t'};
-    Text attributes = new Text();
-    for (int i = 0; i < fieldDescriptors.size(); ++i) {
-      FieldDescriptor descriptor = fieldDescriptors.get(i);
+  /** Extract attributes from primitive bytes according to field descriptors. */
+  private List<byte[]> extractFieldBytes(ByteBuffer buffer) {
+    int numFields = fieldDescriptors.size();
+    List<byte[]> fieldBytesList = new ArrayList<>(numFields);
+    for (FieldDescriptor descriptor : fieldDescriptors) {
       byte[] fldBytes = new byte[descriptor.getFieldLength()];
       buffer.get(fldBytes, 0, fldBytes.length);
+      fieldBytesList.add(fldBytes);
+    }
+    return fieldBytesList;
+  }
+
+  /**
+   * abstract attributes from primitive bytes according to field descriptors.
+   *
+   * @param fieldBytesList a list of primitive bytes
+   * @return string attributes delimited by '\t'
+   */
+  public static String fieldBytesToString(List<byte[]> fieldBytesList) {
+    byte[] delimiter = {'\t'};
+    Text attributes = new Text();
+    for (int i = 0; i < fieldBytesList.size(); ++i) {
+      byte[] fldBytes = fieldBytesList.get(i);
       String charset = System.getProperty("sedona.global.charset", "default");
-      Boolean utf8flag = charset.equalsIgnoreCase("utf8");
+      boolean utf8flag = charset.equalsIgnoreCase("utf8");
       byte[] attr = utf8flag ? fldBytes : fastParse(fldBytes, 0, fldBytes.length).trim().getBytes();
       if (i > 0) {
         attributes.append(delimiter, 0, 1); // first attribute doesn't append '\t'

@@ -459,9 +459,96 @@ root
  |-- prop0: string (nullable = true)
 ```
 
-## Load Shapefile using SpatialRDD
+## Load Shapefile
 
-Shapefile can be loaded by SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](rdd.md#create-a-generic-spatialrdd) and [DataFrame <-> RDD](#convert-between-dataframe-and-spatialrdd).
+Since v`1.7.0`, Sedona supports loading Shapefile as a DataFrame.
+
+=== "Scala/Java"
+
+    ```scala
+    val df = sedona.read.format("shapefile").load("/path/to/shapefile")
+    ```
+
+=== "Java"
+
+    ```java
+    Dataset<Row> df = sedona.read().format("shapefile").load("/path/to/shapefile")
+    ```
+
+=== "Python"
+
+    ```python
+    df = sedona.read.format("shapefile").load("/path/to/shapefile")
+    ```
+
+The input path can be a directory containing one or multiple shapefiles, or path to a `.shp` file.
+
+- When the input path is a directory, all shapefiles directly under the directory will be loaded. If you want to load all shapefiles in subdirectories, please specify `.option("recursiveFileLookup", "true")`.
+- When the input path is a `.shp` file, that shapefile will be loaded. Sedona will look for sibling files (`.dbf`, `.shx`, etc.) with the same main file name and load them automatically.
+
+The name of the geometry column is `geometry` by default. You can change the name of the geometry column using the `geometry.name` option. If one of the non-spatial attributes is named "geometry", `geometry.name` must be configured to avoid conflict.
+
+=== "Scala/Java"
+
+    ```scala
+    val df = sedona.read.format("shapefile").option("geometry.name", "geom").load("/path/to/shapefile")
+    ```
+
+=== "Java"
+
+    ```java
+    Dataset<Row> df = sedona.read().format("shapefile").option("geometry.name", "geom").load("/path/to/shapefile")
+    ```
+
+=== "Python"
+
+    ```python
+    df = sedona.read.format("shapefile").option("geometry.name", "geom").load("/path/to/shapefile")
+    ```
+
+Each record in shapefile has a unique record number, that record number is not loaded by default. If you want to include record number in the loaded DataFrame, you can set the `key.name` option to the name of the record number column:
+
+=== "Scala/Java"
+
+    ```scala
+    val df = sedona.read.format("shapefile").option("key.name", "FID").load("/path/to/shapefile")
+    ```
+
+=== "Java"
+
+    ```java
+    Dataset<Row> df = sedona.read().format("shapefile").option("key.name", "FID").load("/path/to/shapefile")
+    ```
+
+=== "Python"
+
+    ```python
+    df = sedona.read.format("shapefile").option("key.name", "FID").load("/path/to/shapefile")
+    ```
+
+The character encoding of string attributes are inferred from the `.cpg` file. If you see garbled values in string fields, you can manually specify the correct charset using the `charset` option. For example:
+
+=== "Scala/Java"
+
+    ```scala
+    val df = sedona.read.format("shapefile").option("charset", "UTF-8").load("/path/to/shapefile")
+    ```
+
+=== "Java"
+
+    ```java
+    Dataset<Row> df = sedona.read().format("shapefile").option("charset", "UTF-8").load("/path/to/shapefile")
+    ```
+
+=== "Python"
+
+    ```python
+    df = sedona.read.format("shapefile").option("charset", "UTF-8").load("/path/to/shapefile")
+    ```
+
+### (Deprecated) Loading Shapefile using SpatialRDD
+
+If you are using Sedona earlier than v`1.7.0`, you can load shapefiles as SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](rdd.md#create-a-generic-spatialrdd) and [DataFrame <-> RDD](#convert-between-dataframe-and-spatialrdd).
 
 ## Load GeoParquet
 

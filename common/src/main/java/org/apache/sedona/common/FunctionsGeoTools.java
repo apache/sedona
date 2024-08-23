@@ -102,6 +102,28 @@ public class FunctionsGeoTools {
   }
 
   /**
+   * Get the SRID of a CRS from a WKT string
+   *
+   * @param crsWKT WKT string for CRS
+   * @return SRID
+   */
+  public static int wktCRSToSRID(String crsWKT) {
+    try {
+      CoordinateReferenceSystem crs = CRS.parseWKT(crsWKT);
+      int srid = crsToSRID(crs);
+      if (srid == 0) {
+        Integer epsgCode = CRS.lookupEpsgCode(crs, true);
+        if (epsgCode != null) {
+          srid = epsgCode;
+        }
+      }
+      return srid;
+    } catch (FactoryException e) {
+      throw new IllegalArgumentException("Cannot parse CRS WKT", e);
+    }
+  }
+
+  /**
    * Get the SRID of a CRS. We use the EPSG code of the CRS if available.
    *
    * @param crs CoordinateReferenceSystem

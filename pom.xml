@@ -709,7 +709,7 @@
             <activation>
                 <property>
                     <name>spark</name>
-                    <value>3.2.3</value>
+                    <value>3.2</value>
                 </property>
             </activation>
             <properties>

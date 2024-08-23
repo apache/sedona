@@ -19,6 +19,7 @@
 package org.apache.sedona.core.formatMapper.shapefileParser.shapes;
 
 import java.io.IOException;
+import java.util.List;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -26,6 +27,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil;
+import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.dbf.FieldDescriptor;
 
 public class DbfFileReader extends org.apache.hadoop.mapreduce.RecordReader<ShapeKey, String> {
 
@@ -34,45 +36,60 @@ public class DbfFileReader extends org.apache.hadoop.mapreduce.RecordReader<Shap
   /** inputstream of .dbf file */
   private FSDataInputStream inputStream = null;
   /** primitive bytes array of one row */
-  private String value = null;
+  private List<byte[]> value = null;
   /** key value of current row */
   private ShapeKey key = null;
   /** generated id of current row */
   private int id = 0;
 
-  public void initialize(InputSplit split, TaskAttemptContext context)
-      throws IOException, InterruptedException {
+  public void initialize(InputSplit split, TaskAttemptContext context) throws IOException {
     FileSplit fileSplit = (FileSplit) split;
     Path inputPath = fileSplit.getPath();
     FileSystem fileSys = inputPath.getFileSystem(context.getConfiguration());
-    inputStream = fileSys.open(inputPath);
+    FSDataInputStream stream = fileSys.open(inputPath);
+    initialize(stream);
+  }
+
+  public void initialize(FSDataInputStream stream) throws IOException {
+    inputStream = stream;
     dbfParser = new DbfParseUtil();
     dbfParser.parseFileHead(inputStream);
   }
 
-  public boolean nextKeyValue() throws IOException, InterruptedException {
+  public List<FieldDescriptor> getFieldDescriptors() {
+    return dbfParser.getFieldDescriptors();
+  }
+
+  public boolean nextKeyValue() throws IOException {
     // first check deleted flag
-    String curbytes = dbfParser.parsePrimitiveRecord(inputStream);
-    if (curbytes == null) {
+    List<byte[]> fieldBytesList = dbfParser.parse(inputStream);
+    if (fieldBytesList == null) {
       value = null;
       return false;
     } else {
-      value = curbytes;
+      value = fieldBytesList;
       key = new ShapeKey();
       key.setIndex(id++);
       return true;
     }
   }
 
-  public ShapeKey getCurrentKey() throws IOException, InterruptedException {
+  public ShapeKey getCurrentKey() {
     return key;
   }
 
-  public String getCurrentValue() throws IOException, InterruptedException {
+  public List<byte[]> getCurrentFieldBytes() {
     return value;
   }
 
-  public float getProgress() throws IOException, InterruptedException {
+  public String getCurrentValue() {
+    if (value == null) {
+      return null;
+    }
+    return DbfParseUtil.fieldBytesToString(value);
+  }
+
+  public float getProgress() {
     return dbfParser.getProgress();
   }
 
