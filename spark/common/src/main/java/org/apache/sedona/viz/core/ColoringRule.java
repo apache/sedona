@@ -28,11 +28,11 @@ public abstract class ColoringRule implements Serializable {
   /**
    * Encode to RGB.
    *
-   * @param normailizedCount the normailized count
+   * @param normalizedCount the normalized count
    * @param globalParameter the global parameter
    * @return the integer
    * @throws Exception the exception
    */
-  public abstract Integer EncodeToRGB(
-      Double normailizedCount, final GlobalParameter globalParameter) throws Exception;
+  public abstract Integer EncodeToRGB(Double normalizedCount, final GlobalParameter globalParameter)
+      throws Exception;
 }

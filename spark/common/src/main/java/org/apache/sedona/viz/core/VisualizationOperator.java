@@ -773,23 +773,23 @@ public abstract class VisualizationOperator implements Serializable {
   /**
    * Encode to color.
    *
-   * @param normailizedCount the normailized count
+   * @param normalizedCount the normalized count
    * @return the color
    * @throws Exception the exception
    */
-  protected Color EncodeToColor(int normailizedCount) throws Exception {
+  protected Color EncodeToColor(int normalizedCount) throws Exception {
     if (controlColorChannel.equals(Color.RED)) {
-      red = useInverseRatioForControlColorChannel ? 255 - normailizedCount : normailizedCount;
+      red = useInverseRatioForControlColorChannel ? 255 - normalizedCount : normalizedCount;
     } else if (controlColorChannel.equals(Color.GREEN)) {
-      green = useInverseRatioForControlColorChannel ? 255 - normailizedCount : normailizedCount;
+      green = useInverseRatioForControlColorChannel ? 255 - normalizedCount : normalizedCount;
     } else if (controlColorChannel.equals(Color.BLUE)) {
-      blue = useInverseRatioForControlColorChannel ? 255 - normailizedCount : normailizedCount;
+      blue = useInverseRatioForControlColorChannel ? 255 - normalizedCount : normalizedCount;
     } else {
       throw new Exception(
           "[Sedona-VizViz][GenerateColor] Unsupported changing color color type. It should be in R,G,B");
     }
 
-    if (normailizedCount == 0) {
+    if (normalizedCount == 0) {
       return new Color(red, green, blue, 0);
     }
     return new Color(red, green, blue, colorAlpha);
@@ -798,23 +798,23 @@ public abstract class VisualizationOperator implements Serializable {
   /**
    * Encode to RGB.
    *
-   * @param normailizedCount the normailized count
+   * @param normalizedCount the normalized count
    * @return the integer
    * @throws Exception the exception
    */
-  protected Integer EncodeToRGB(int normailizedCount) throws Exception {
+  protected Integer EncodeToRGB(int normalizedCount) throws Exception {
     if (controlColorChannel.equals(Color.RED)) {
-      red = useInverseRatioForControlColorChannel ? 255 - normailizedCount : normailizedCount;
+      red = useInverseRatioForControlColorChannel ? 255 - normalizedCount : normalizedCount;
     } else if (controlColorChannel.equals(Color.GREEN)) {
-      green = useInverseRatioForControlColorChannel ? 255 - normailizedCount : normailizedCount;
+      green = useInverseRatioForControlColorChannel ? 255 - normalizedCount : normalizedCount;
     } else if (controlColorChannel.equals(Color.BLUE)) {
-      blue = useInverseRatioForControlColorChannel ? 255 - normailizedCount : normailizedCount;
+      blue = useInverseRatioForControlColorChannel ? 255 - normalizedCount : normalizedCount;
     } else {
       throw new Exception(
           "[Sedona-VizViz][GenerateColor] Unsupported changing color color type. It should be in R,G,B");
     }
 
-    if (normailizedCount == 0) {
+    if (normalizedCount == 0) {
       return new Color(red, green, blue, 0).getRGB();
     }
     return new Color(red, green, blue, colorAlpha).getRGB();
