@@ -65,18 +65,28 @@ class ShapefilePartitionReader(
   }.toMap
 
   private val cpg = options.charset.orElse {
-    tryOpenStream(partitionedFilesMap, "cpg", configuration).flatMap { stream =>
-      try {
-        val lineIter = IOUtils.lineIterator(stream, StandardCharsets.UTF_8)
-        if (lineIter.hasNext) {
-          Some(lineIter.next().trim())
-        } else {
-          None
+    // No charset option or sedona.global.charset system property specified, infer charset
+    // from the cpg file.
+    tryOpenStream(partitionedFilesMap, "cpg", configuration)
+      .flatMap { stream =>
+        try {
+          val lineIter = IOUtils.lineIterator(stream, StandardCharsets.UTF_8)
+          if (lineIter.hasNext) {
+            Some(lineIter.next().trim())
+          } else {
+            None
+          }
+        } finally {
+          stream.close()
         }
-      } finally {
-        stream.close()
       }
-    }
+      .orElse {
+        // Cannot infer charset from cpg file. If sedona.global.charset is set to "utf8", use UTF-8 as
+        // the default charset. This is for compatibility with the behavior of the RDD API.
+        val charset = System.getProperty("sedona.global.charset", "default")
+        val utf8flag = charset.equalsIgnoreCase("utf8")
+        if (utf8flag) Some("UTF-8") else None
+      }
   }
 
   private val prj = tryOpenStream(partitionedFilesMap, "prj", configuration).map { stream =>

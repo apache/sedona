@@ -150,9 +150,7 @@ object ShapefileUtils {
   def fieldValueConverter(desc: FieldDescriptor, cpg: Option[String]): Array[Byte] => Any = {
     desc.getFieldType match {
       case 'C' =>
-        val charset = System.getProperty("sedona.global.charset", "default")
-        val utf8flag = charset.equalsIgnoreCase("utf8")
-        val encoding = if (utf8flag) "UTF-8" else cpg.getOrElse("ISO-8859-1")
+        val encoding = cpg.getOrElse("ISO-8859-1")
         if (encoding.toLowerCase(Locale.ROOT) == "utf-8") { (bytes: Array[Byte]) =>
           UTF8String.fromBytes(bytes).trimRight()
         } else { (bytes: Array[Byte]) =>

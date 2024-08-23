@@ -541,6 +541,46 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       }
     }
 
+    it("read with recursiveFileLookup") {
+      FileUtils.cleanDirectory(new File(temporaryLocation))
+      Files.createDirectory(new File(temporaryLocation + "/part1").toPath)
+      Files.createDirectory(new File(temporaryLocation + "/part2").toPath)
+      FileUtils.copyFile(
+        new File(resourceFolder + "shapefiles/datatypes/datatypes1.shp"),
+        new File(temporaryLocation + "/part1/datatypes1.shp"))
+      FileUtils.copyFile(
+        new File(resourceFolder + "shapefiles/datatypes/datatypes1.dbf"),
+        new File(temporaryLocation + "/part1/datatypes1.dbf"))
+      FileUtils.copyFile(
+        new File(resourceFolder + "shapefiles/datatypes/datatypes1.cpg"),
+        new File(temporaryLocation + "/part1/datatypes1.cpg"))
+      FileUtils.copyFile(
+        new File(resourceFolder + "shapefiles/datatypes/datatypes2.shp"),
+        new File(temporaryLocation + "/part2/datatypes2.shp"))
+      FileUtils.copyFile(
+        new File(resourceFolder + "shapefiles/datatypes/datatypes2.dbf"),
+        new File(temporaryLocation + "/part2/datatypes2.dbf"))
+      FileUtils.copyFile(
+        new File(resourceFolder + "shapefiles/datatypes/datatypes2.cpg"),
+        new File(temporaryLocation + "/part2/datatypes2.cpg"))
+
+      val shapefileDf = sparkSession.read
+        .format("shapefile")
+        .option("recursiveFileLookup", "true")
+        .load(temporaryLocation)
+        .select("id", "aInt", "aUnicode", "geometry")
+      val rows = shapefileDf.collect()
+      assert(rows.length == 9)
+      rows.foreach { row =>
+        assert(row.getAs[Geometry]("geometry").isInstanceOf[Point])
+        val id = row.getAs[Long]("id")
+        assert(row.getAs[Long]("aInt") == id)
+        if (id > 0) {
+          assert(row.getAs[String]("aUnicode") == s"测试$id")
+        }
+      }
+    }
+
     it("read with custom geometry column name") {
       val shapefileDf = sparkSession.read
         .format("shapefile")
