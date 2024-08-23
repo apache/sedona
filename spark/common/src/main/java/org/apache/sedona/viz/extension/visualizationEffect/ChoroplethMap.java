@@ -191,19 +191,19 @@ public class ChoroplethMap extends VisualizationOperator {
    * @see VisualizationOperator#EncodeToColor(int)
    */
   @Override
-  protected Color EncodeToColor(int normailizedCount) throws Exception {
+  protected Color EncodeToColor(int normalizedCount) throws Exception {
     if (controlColorChannel.equals(Color.RED)) {
-      red = useInverseRatioForControlColorChannel ? 255 - normailizedCount : normailizedCount;
+      red = useInverseRatioForControlColorChannel ? 255 - normalizedCount : normalizedCount;
     } else if (controlColorChannel.equals(Color.GREEN)) {
-      green = useInverseRatioForControlColorChannel ? 255 - normailizedCount : normailizedCount;
+      green = useInverseRatioForControlColorChannel ? 255 - normalizedCount : normalizedCount;
     } else if (controlColorChannel.equals(Color.BLUE)) {
-      blue = useInverseRatioForControlColorChannel ? 255 - normailizedCount : normailizedCount;
+      blue = useInverseRatioForControlColorChannel ? 255 - normalizedCount : normalizedCount;
     } else {
       throw new Exception(
           "[VisualizationOperator][GenerateColor] Unsupported changing color color type. It should be in R,G,B");
     }
 
-    if (normailizedCount == 0) {
+    if (normalizedCount == 0) {
       return new Color(red, green, blue, 255);
     }
     return new Color(red, green, blue, colorAlpha);

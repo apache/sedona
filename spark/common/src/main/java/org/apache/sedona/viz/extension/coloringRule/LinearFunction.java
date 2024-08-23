@@ -31,7 +31,7 @@ public class LinearFunction extends ColoringRule {
    * @see org.datasyslab.babylon.core.internalobject.ColoringRule#EncodeToRGB(java.lang.Double, org.datasyslab.babylon.core.parameters.GlobalParameter)
    */
   @Override
-  public Integer EncodeToRGB(Double normailizedCount, GlobalParameter globalParameter)
+  public Integer EncodeToRGB(Double normalizedCount, GlobalParameter globalParameter)
       throws Exception {
     int red = 0;
     int green = 0;
@@ -39,24 +39,24 @@ public class LinearFunction extends ColoringRule {
     if (globalParameter.controlColorChannel.equals(Color.RED)) {
       red =
           globalParameter.useInverseRatioForControlColorChannel
-              ? 255 - normailizedCount.intValue()
-              : normailizedCount.intValue();
+              ? 255 - normalizedCount.intValue()
+              : normalizedCount.intValue();
     } else if (globalParameter.controlColorChannel.equals(Color.GREEN)) {
       green =
           globalParameter.useInverseRatioForControlColorChannel
-              ? 255 - normailizedCount.intValue()
-              : normailizedCount.intValue();
+              ? 255 - normalizedCount.intValue()
+              : normalizedCount.intValue();
     } else if (globalParameter.controlColorChannel.equals(Color.BLUE)) {
       blue =
           globalParameter.useInverseRatioForControlColorChannel
-              ? 255 - normailizedCount.intValue()
-              : normailizedCount.intValue();
+              ? 255 - normalizedCount.intValue()
+              : normalizedCount.intValue();
     } else {
       throw new Exception(
           "[Babylon][GenerateColor] Unsupported changing color color type. It should be in R,G,B");
     }
 
-    if (normailizedCount == 0) {
+    if (normalizedCount == 0) {
       return new Color(red, green, blue, 0).getRGB();
     }
 
