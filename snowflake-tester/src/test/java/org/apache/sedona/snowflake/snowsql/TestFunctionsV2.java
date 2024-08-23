@@ -782,7 +782,7 @@ public class TestFunctionsV2 extends TestBase {
   }
 
   @Test
-  public void test_ST_RemovePoint() {
+  public void test_ST_RemoveRepeatedPoints() {
     registerUDFV2("ST_RemoveRepeatedPoints", String.class);
     verifySqlSingleRes(
         "select ST_AsText(sedona.ST_RemoveRepeatedPoints(ST_GeomFromText('LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)')))",
