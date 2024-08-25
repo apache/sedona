@@ -3623,48 +3623,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="11. Publish the doc website">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#prepare-the-environment-and-doc-folder" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prepare the environment and doc folder
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#generate-javadoc-and-scaladoc" class="md-nav__link">
-    <span class="md-ellipsis">
-      Generate Javadoc and Scaladoc
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#compile-r-html-docs" class="md-nav__link">
-    <span class="md-ellipsis">
-      Compile R html docs
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#deploy-the-website" class="md-nav__link">
-    <span class="md-ellipsis">
-      Deploy the website
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -4255,48 +4213,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="11. Publish the doc website">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#prepare-the-environment-and-doc-folder" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prepare the environment and doc folder
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#generate-javadoc-and-scaladoc" class="md-nav__link">
-    <span class="md-ellipsis">
-      Generate Javadoc and Scaladoc
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#compile-r-html-docs" class="md-nav__link">
-    <span class="md-ellipsis">
-      Compile R html docs
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#deploy-the-website" class="md-nav__link">
-    <span class="md-ellipsis">
-      Deploy the website
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -4678,35 +4594,14 @@ R<span class="w"> </span>CMD<span class="w"> </span>check<span class="w"> </span
 </code></pre></div>
 <p>Then submit to CRAN using this <a href="https://xmpalantir.wu.ac.at/cransubmit/">web form</a>.</p>
 <h2 id="11-publish-the-doc-website">11. Publish the doc website<a class="headerlink" href="#11-publish-the-doc-website" title="Permanent link">&para;</a></h2>
-<h3 id="prepare-the-environment-and-doc-folder">Prepare the environment and doc folder<a class="headerlink" href="#prepare-the-environment-and-doc-folder" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Check out the 1.6.1 Git tag on your local repo.</li>
-<li>Read <a href="../../setup/compile/">Compile documentation website</a> to set up your environment. But don't deploy anything yet.</li>
+<li>Check out the 1.6.1 Git tag on your local repo to a branch namely <code>branch-1.6.1</code></li>
 <li>Add the download link to <a href="../../download/">Download page</a>.</li>
 <li>Add the news to <code>docs/index.md</code>.</li>
-</ol>
-<h3 id="generate-javadoc-and-scaladoc">Generate Javadoc and Scaladoc<a class="headerlink" href="#generate-javadoc-and-scaladoc" title="Permanent link">&para;</a></h3>
-<p>Run the following script to build Javadoc and Scaladoc of sedona modules and move them to docs/api/javadoc directory.</p>
-<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
-
-mvn<span class="w"> </span>-q<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DskipTests
-rm<span class="w"> </span>-rf<span class="w"> </span>docs/api/javadoc<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>docs/api/javadoc
-mkdir<span class="w"> </span>-p<span class="w"> </span>docs/api/javadoc/spark
-mv<span class="w"> </span>spark/common/target/apidocs/*<span class="w"> </span>docs/api/javadoc/spark
-</code></pre></div>
-<p>Please use Intellij IDEA to generate Scaladoc for the spark-common module and paste to <code>docs/api/scaladoc/spark</code>.</p>
-<p>Please do not commit these generated docs to Sedona GitHub.</p>
-<h3 id="compile-r-html-docs">Compile R html docs<a class="headerlink" href="#compile-r-html-docs" title="Permanent link">&para;</a></h3>
-<p>From <a href="https://github.com/apache/sedona/actions/workflows/docs.yml">GitHub Action docs workflow</a>, find generated-docs of the commit which is right after the release candidate tag. Download it and copy this folder <code>docs/api/rdocs</code> to the same location of the Sedona to-be-released source repo.</p>
-<h3 id="deploy-the-website">Deploy the website<a class="headerlink" href="#deploy-the-website" title="Permanent link">&para;</a></h3>
-<ol>
-<li>Run <code>mike deploy --update-aliases 1.6.1 latest -b website -p</code>. This will deploy this website to Sedona main repo's <code>website</code>.</li>
-<li>Check out the master branch.</li>
-<li>Git commit and push your changes in <code>download.md</code> and <code>index.md</code> to master branch. Delete all generated docs.</li>
-<li>Check out the <code>website</code> branch.</li>
-<li>In a separate folder, check out GitHub sedona-website <a href="https://github.com/apache/sedona-website/tree/asf-site">asf-site branch</a></li>
-<li>Copy all content to in Sedona main repo <code>website</code> branch to Sedona website repo <code>asf-site</code> branch.</li>
-<li>Commit and push the changes to the remote <code>asf-site</code> branch.</li>
+<li>Push the changes to this branch on GitHub.</li>
+<li>GitHub CI will pick up the changes and deploy to <code>website</code> branch.</li>
+<li>Once the deployment is done, check out the <code>website</code> branch. In <a href="https://github.com/apache/sedona/blob/website/versions.json">this file</a>, put <code>latest</code> to the <code>aliases</code> of the version to release.</li>
+<li>Normally <a href="https://github.com/jiayuasu/sedona-sync-action">this repo</a> will automatically publish the website on a daily basis.</li>
 </ol>
 
 
@@ -4728,7 +4623,7 @@ mv<span class="w"> </span>spark/common/target/apidocs/*<span class="w"> </span>d
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 12, 2024 03:02:34</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">August 25, 2024 05:09:50</span>
   </span>
 
     
