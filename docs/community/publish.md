@@ -397,40 +397,10 @@ Then submit to CRAN using this [web form](https://xmpalantir.wu.ac.at/cransubmit
 
 ## 11. Publish the doc website
 
-### Prepare the environment and doc folder
-
-1. Check out the {{ sedona_create_release.current_version }} Git tag on your local repo.
-2. Read [Compile documentation website](../setup/compile.md) to set up your environment. But don't deploy anything yet.
-3. Add the download link to [Download page](../download.md).
-4. Add the news to `docs/index.md`.
-
-### Generate Javadoc and Scaladoc
-
-Run the following script to build Javadoc and Scaladoc of sedona modules and move them to docs/api/javadoc directory.
-
-```bash
-#!/bin/bash
-
-mvn -q clean install -DskipTests
-rm -rf docs/api/javadoc && mkdir -p docs/api/javadoc
-mkdir -p docs/api/javadoc/spark
-mv spark/common/target/apidocs/* docs/api/javadoc/spark
-```
-
-Please use Intellij IDEA to generate Scaladoc for the spark-common module and paste to `docs/api/scaladoc/spark`.
-
-Please do not commit these generated docs to Sedona GitHub.
-
-### Compile R html docs
-
-From [GitHub Action docs workflow](https://github.com/apache/sedona/actions/workflows/docs.yml), find generated-docs of the commit which is right after the release candidate tag. Download it and copy this folder `docs/api/rdocs` to the same location of the Sedona to-be-released source repo.
-
-### Deploy the website
-
-1. Run `mike deploy --update-aliases {{ sedona_create_release.current_version }} latest -b website -p`. This will deploy this website to Sedona main repo's `website`.
-2. Check out the master branch.
-3. Git commit and push your changes in `download.md` and `index.md` to master branch. Delete all generated docs.
-4. Check out the `website` branch.
-5. In a separate folder, check out GitHub sedona-website [asf-site branch](https://github.com/apache/sedona-website/tree/asf-site)
-6. Copy all content to in Sedona main repo `website` branch to Sedona website repo `asf-site` branch.
-7. Commit and push the changes to the remote `asf-site` branch.
+1. Check out the {{ sedona_create_release.current_version }} Git tag on your local repo to a branch namely `branch-{{ sedona_create_release.current_version }}`
+2. Add the download link to [Download page](../download.md).
+3. Add the news to `docs/index.md`.
+4. Push the changes to this branch on GitHub.
+5. GitHub CI will pick up the changes and deploy to `website` branch.
+6. Once the deployment is done, check out the `website` branch. In [this file](https://github.com/apache/sedona/blob/website/versions.json), put `latest` to the `aliases` of the version to release.
+7. Normally [this repo](https://github.com/jiayuasu/sedona-sync-action) will automatically publish the website on a daily basis.
