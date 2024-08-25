@@ -59,9 +59,7 @@ You can refer to [Snowflake Documentation](https://docs.snowflake.com/en/sql-ref
 
 ## Step 4: Get the SQL script for creating Sedona's functions
 
-You will need to download [sedona-snowflake.sql](../../image/snowflake/sedona-snowflake.sql) to create Sedona's functions in the schema created in the previous step.
-
-You can also get this SQL script by running the following command:
+You will need to get this SQL script by running the following command:
 
 ```bash
 java -jar sedona-snowflake-{{ sedona.current_version }}.jar --geotools-version {{ sedona.current_geotools }} > sedona-snowflake.sql
