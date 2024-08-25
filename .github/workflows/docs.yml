@@ -49,8 +49,8 @@ jobs:
             any::pkgdown
           working-directory : './R'
       - run: Rscript -e 'pkgdown::build_site(pkg = "./R", preview = FALSE, override = list(destination = "../docs/api/rdocs"))'
-      - run: git config --global user.name="GitHub Action"
-      - run: git config --global user.email="test@abc.com"
+      - run: git config --global user.name = "GitHub Action"
+      - run: git config --global user.email = "test@abc.com"
       - run: mkdocs build
       - name: Deploy the doc to the website branch
         if: ${{ github.event_name != 'pull_request' && github.repository == 'apache/sedona' }}
