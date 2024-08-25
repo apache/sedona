@@ -3318,7 +3318,7 @@ Introduction: Performs a counter-clockwise rotation of the specified geometry ar
 
 Format: `ST_RotateX(geometry: Geometry, angle: Double)`
 
-Since: `v1.7.0`
+Since: `v1.6.1`
 
 SQL Example:
 
