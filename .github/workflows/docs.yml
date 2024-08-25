@@ -61,7 +61,7 @@ jobs:
           elif [[ "${GITHUB_REF##*/}" =~ ^branch-[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             git fetch origin website --depth=1
             version="${GITHUB_REF##*/branch-}"
-            mike deploy "$version" -b website -p
+            mike deploy --update-aliases "$version" latest -b website -p
           fi
       - run: mkdir staging
       - run: cp -r site/* staging/
