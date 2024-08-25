@@ -159,8 +159,8 @@ extra:
     - icon: fontawesome/brands/discord
       link: 'https://share.hsforms.com/1Ndql_ZigTdmLlVQc_d1o4gqga4q'
   sedona:
-    current_version: 1.6.0
-    current_geotools: 1.6.0-28.2
+    current_version: 1.6.1
+    current_geotools: 1.6.1-28.2
   sedona_create_release:
     current_version: 1.6.1
     current_git_tag: sedona-1.6.1-rc2
