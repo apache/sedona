@@ -402,5 +402,4 @@ Then submit to CRAN using this [web form](https://xmpalantir.wu.ac.at/cransubmit
 3. Add the news to `docs/index.md`.
 4. Push the changes to this branch on GitHub.
 5. GitHub CI will pick up the changes and deploy to `website` branch.
-6. Once the deployment is done, check out the `website` branch. In [this file](https://github.com/apache/sedona/blob/website/versions.json), put `latest` to the `aliases` of the version to release.
-7. Normally [this repo](https://github.com/jiayuasu/sedona-sync-action) will automatically publish the website on a daily basis.
+6. Normally [this repo](https://github.com/jiayuasu/sedona-sync-action) will automatically publish the website on a daily basis.
