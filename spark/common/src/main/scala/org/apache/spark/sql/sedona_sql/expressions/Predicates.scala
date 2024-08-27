@@ -299,3 +299,19 @@ case class ST_DWithin(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+/**
+ * Test if leftGeometry is one of the k nearest neighbors (KNN) of rightGeometry based on
+ * approximate distance metric.
+ *
+ * @param inputExpressions
+ */
+case class ST_KNN(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction3(Predicates.knn),
+      inferrableFunction4(Predicates.knn)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

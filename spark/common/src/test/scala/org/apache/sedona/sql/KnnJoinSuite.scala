@@ -65,6 +65,7 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     it("KNN Join with exact algorithms based on euclidean distance") {
       val df = sparkSession.sql(
         s"SELECT QUERIES.ID, OBJECTS.ID FROM QUERIES JOIN OBJECTS ON ST_KNN(QUERIES.GEOM, OBJECTS.GEOM, 3, true)")
+
       validateQueryPlan(
         df,
         numNeighbors = 3,

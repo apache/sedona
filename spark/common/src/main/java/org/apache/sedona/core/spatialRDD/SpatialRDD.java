@@ -252,6 +252,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
           ExtendedQuadTree<Integer> extendedQuadTree = (ExtendedQuadTree<Integer>) tree;
           extendedQuadTree.build(neighborSampleNumber);
           partitioner = new QuadTreeRTPartitioner(extendedQuadTree);
+          break;
         }
 
       default:

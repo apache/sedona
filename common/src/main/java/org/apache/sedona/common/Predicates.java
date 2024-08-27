@@ -94,4 +94,14 @@ public class Predicates {
   public static boolean relateMatch(String matrix1, String matrix2) {
     return IntersectionMatrix.matches(matrix1, matrix2);
   }
+
+  public static boolean knn(Geometry leftGeometry, Geometry rightGeometry, int k) {
+    return knn(leftGeometry, rightGeometry, k, false);
+  }
+
+  public static boolean knn(
+      Geometry leftGeometry, Geometry rightGeometry, int k, boolean useSpheroid) {
+    // This should only be used as a test predicate used with extra join condition
+    return true;
+  }
 }

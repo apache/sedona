@@ -66,6 +66,7 @@ object Catalog {
     function[ST_Contains](),
     function[ST_Intersects](),
     function[ST_Within](),
+    function[ST_KNN](),
     function[ST_Covers](),
     function[ST_CoveredBy](),
     function[ST_Dimension](),
