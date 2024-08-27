@@ -375,6 +375,39 @@ public class JoinQuery {
   }
 
   /**
+   * Joins two sets of geometries on specified distance metric and finds the k nearest neighbors.
+   *
+   * <p>Duplicate geometries present in the input queryWindowRDD, regardless of their non-spatial
+   * attributes, will not be reflected in the join results. Duplicate geometries present in the
+   * input objectRDD, regardless of their non-spatial attributes, will be reflected in the join
+   * results.
+   *
+   * @param <U> Type of the geometries in queryWindowRDD set
+   * @param <T> Type of the geometries in objectRDD set
+   * @param objectRDD {@code objectRDD} is the set of geometries (neighbors) to be queried
+   * @param queryRDD {@code queryRDD} is the set of geometries which serve as query geometries
+   *     (center points)
+   * @param indexType {@code indexType} is the index type to use for the join
+   * @param k {@code k} is the number of nearest neighbors to find
+   * @param distanceMetric {@code distanceMetric} is the distance metric to use
+   * @return RDD of pairs where each pair contains a geometry and a set of matching geometries
+   * @throws Exception the exception
+   */
+  public static <U extends Geometry, T extends Geometry> JavaPairRDD<U, List<T>> KNNJoinQuery(
+      SpatialRDD<T> objectRDD,
+      SpatialRDD<U> queryRDD,
+      IndexType indexType,
+      int k,
+      DistanceMetric distanceMetric)
+      throws Exception {
+    final JoinParams joinParams =
+        new JoinParams(true, null, IndexType.RTREE, null, k, distanceMetric, null);
+
+    final JavaPairRDD<U, T> joinResults = knnJoin(queryRDD, objectRDD, joinParams, false, false);
+    return collectGeometriesByKey(joinResults);
+  }
+
+  /**
    * Inner joins two sets of geometries, where the query windows are circles (aka. distance join).
    * Results are put in a flat pair format.
    *
