@@ -62,70 +62,6 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
   }
 
   describe("KNN spatial join SQLs should be parsed correctly") {
-    it("KNN Join with approximate algorithms based on euclidean distance") {
-      val df = sparkSession.sql(
-        s"SELECT QUERIES.ID, OBJECTS.ID FROM QUERIES JOIN OBJECTS ON ST_AKNN(QUERIES.GEOM, OBJECTS.GEOM, 3, false)")
-      validateQueryPlan(
-        df,
-        numNeighbors = 3,
-        useApproximate = true,
-        expressionSize = 5,
-        isGeography = false,
-        mustInclude = "")
-    }
-
-    it(
-      "KNN Join with approximate algorithms based on euclidean distance using different join clause ordering") {
-      val df = sparkSession.sql(
-        s"SELECT QUERIES.ID, OBJECTS.ID FROM OBJECTS JOIN QUERIES ON ST_AKNN(QUERIES.GEOM, OBJECTS.GEOM, 3, false)")
-      validateQueryPlan(
-        df,
-        numNeighbors = 3,
-        useApproximate = true,
-        expressionSize = 5,
-        isGeography = false,
-        mustInclude = "")
-    }
-
-    it(
-      "KNN Join with approximate algorithms based on euclidean distance using join-where clause and apply ST_Distance") {
-      val df = sparkSession.sql(
-        s"SELECT QUERIES.GEOM, OBJECTS.GEOM, ST_Distance(QUERIES.GEOM, OBJECTS.GEOM) FROM QUERIES, OBJECTS WHERE ST_AKNN(QUERIES.GEOM, OBJECTS.GEOM, 3, false)")
-      validateQueryPlan(
-        df,
-        numNeighbors = 3,
-        useApproximate = true,
-        expressionSize = 5,
-        isGeography = false,
-        mustInclude = "")
-    }
-
-    it(
-      "KNN Join with approximate algorithms based on euclidean distance using join-where clause and select gem") {
-      val df = sparkSession.sql(
-        s"SELECT QUERIES.GEOM, OBJECTS.GEOM FROM QUERIES, OBJECTS WHERE ST_AKNN(QUERIES.GEOM, OBJECTS.GEOM, 3, false)")
-      validateQueryPlan(
-        df,
-        numNeighbors = 3,
-        useApproximate = true,
-        expressionSize = 5,
-        isGeography = false,
-        mustInclude = "")
-    }
-
-    it(
-      "KNN Join with approximate algorithms based on euclidean distance using join-where clause and select all") {
-      val df = sparkSession.sql(
-        s"SELECT * FROM QUERIES, OBJECTS WHERE ST_AKNN(QUERIES.GEOM, OBJECTS.GEOM, 3, false)")
-      validateQueryPlan(
-        df,
-        numNeighbors = 3,
-        useApproximate = true,
-        expressionSize = 5,
-        isGeography = false,
-        mustInclude = "")
-    }
-
     it("KNN Join with exact algorithms based on euclidean distance") {
       val df = sparkSession.sql(
         s"SELECT QUERIES.ID, OBJECTS.ID FROM QUERIES JOIN OBJECTS ON ST_KNN(QUERIES.GEOM, OBJECTS.GEOM, 3, true)")
@@ -141,7 +77,7 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     it("KNN Join based on single point on left side should not be supported") {
       val exception = intercept[UnsupportedOperationException] {
         val df = sparkSession.sql(
-          s"SELECT QUERIES.ID, OBJECTS.ID FROM QUERIES JOIN OBJECTS ON ST_AKNN(ST_MakePoint(100, 100, 1), OBJECTS.GEOM, 3, false)")
+          s"SELECT QUERIES.ID, OBJECTS.ID FROM QUERIES JOIN OBJECTS ON ST_KNN(ST_MakePoint(100, 100, 1), OBJECTS.GEOM, 3, false)")
         validateQueryPlan(
           df,
           numNeighbors = 3,
@@ -150,13 +86,13 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
           isGeography = false,
           mustInclude = "")
       }
-      exception.getMessage should include("ST_AKNN filter is not yet supported in the join query")
+      exception.getMessage should include("ST_KNN filter is not yet supported in the join query")
     }
 
     it("KNN Join based on single point on right side should not be supported") {
       val exception = intercept[UnsupportedOperationException] {
         val df = sparkSession.sql(
-          s"SELECT QUERIES.ID, OBJECTS.ID FROM QUERIES JOIN OBJECTS ON ST_AKNN(OBJECTS.GEOM, ST_MakePoint(100, 100, 1), 3, false)")
+          s"SELECT QUERIES.ID, OBJECTS.ID FROM QUERIES JOIN OBJECTS ON ST_KNN(OBJECTS.GEOM, ST_MakePoint(100, 100, 1), 3, false)")
         validateQueryPlan(
           df,
           numNeighbors = 3,
@@ -165,12 +101,12 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
           isGeography = false,
           mustInclude = "")
       }
-      exception.getMessage should include("ST_AKNN filter is not yet supported in the join query")
+      exception.getMessage should include("ST_KNN filter is not yet supported in the join query")
     }
 
     it("KNN Join based with complex join conditions using integer columns") {
       val df = sparkSession.sql(
-        s"SELECT QUERIES.ID, OBJECTS.ID FROM QUERIES JOIN OBJECTS ON ST_AKNN(QUERIES.GEOM, OBJECTS.GEOM, 3, false) AND QUERIES.ID <= 88")
+        s"SELECT QUERIES.ID, OBJECTS.ID FROM QUERIES JOIN OBJECTS ON ST_KNN(QUERIES.GEOM, OBJECTS.GEOM, 3, false) AND QUERIES.ID <= 88")
       validateQueryPlan(
         df,
         numNeighbors = 3,
@@ -182,7 +118,7 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
 
     it("KNN Join based with complex join conditions using text columns") {
       val df = sparkSession.sql(
-        s"SELECT QUERIES.ID, OBJECTS.ID FROM QUERIES JOIN OBJECTS ON ST_AKNN(QUERIES.GEOM, OBJECTS.GEOM, 3, false) AND QUERIES.SHAPE = 'point'")
+        s"SELECT QUERIES.ID, OBJECTS.ID FROM QUERIES JOIN OBJECTS ON ST_KNN(QUERIES.GEOM, OBJECTS.GEOM, 3, false) AND QUERIES.SHAPE = 'point'")
       validateQueryPlan(
         df,
         numNeighbors = 3,
@@ -194,7 +130,7 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
 
     it("KNN Join based with complex join conditions using text columns and using where clause") {
       val df = sparkSession.sql(
-        s"SELECT QUERIES.ID, OBJECTS.ID FROM QUERIES JOIN OBJECTS ON ST_AKNN(QUERIES.GEOM, OBJECTS.GEOM, 3, false) WHERE QUERIES.SHAPE = 'point'")
+        s"SELECT QUERIES.ID, OBJECTS.ID FROM QUERIES JOIN OBJECTS ON ST_KNN(QUERIES.GEOM, OBJECTS.GEOM, 3, false) WHERE QUERIES.SHAPE = 'point'")
       validateQueryPlan(
         df,
         numNeighbors = 3,
@@ -206,7 +142,7 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
 
     it("KNN Join should work with dataframe containing 0 partitions") {
       val df = sparkSession.sql(
-        s"SELECT QUERIES.ID, EMPTYTABLE.ID FROM QUERIES JOIN EMPTYTABLE ON ST_AKNN(QUERIES.GEOM, EMPTYTABLE.GEOM, 3, false)")
+        s"SELECT QUERIES.ID, EMPTYTABLE.ID FROM QUERIES JOIN EMPTYTABLE ON ST_KNN(QUERIES.GEOM, EMPTYTABLE.GEOM, 3, false)")
       validateQueryPlan(
         df,
         numNeighbors = 3,
@@ -214,44 +150,6 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
         expressionSize = 5,
         isGeography = false,
         mustInclude = "")
-    }
-  }
-
-  describe("AKNN spatial join SQLs should be executed correctly") {
-    it("AKNN Join with approximate algorithms based on EUCLIDEAN distance") {
-      val df = sparkSession.sql(
-        s"SELECT QUERIES.ID, OBJECTS.ID FROM QUERIES JOIN OBJECTS ON ST_AKNN(QUERIES.GEOM, OBJECTS.GEOM, 4, false)")
-      val resultAll = df.collect().sortBy(row => (row.getInt(0), row.getInt(1)))
-      resultAll.length should be(3 * 4) // 3 queries and 4 neighbors each
-      resultAll.mkString should be(
-        "[1,3][1,6][1,13][1,16][2,1][2,5][2,11][2,15][3,3][3,9][3,13][3,19]")
-    }
-
-    it(
-      "AKNN Join with approximate algorithms based on EUCLIDEAN distance with different join ordering") {
-      val df = sparkSession.sql(
-        s"SELECT OBJECTS.ID, QUERIES.ID FROM OBJECTS JOIN QUERIES ON ST_AKNN(QUERIES.GEOM, OBJECTS.GEOM, 4, false)")
-      val resultAll = df.collect().sortBy(row => (row.getInt(0), row.getInt(1)))
-      resultAll.length should be(3 * 4) // 3 queries and 4 neighbors each
-      resultAll.mkString should be(
-        "[1,2][3,1][3,3][5,2][6,1][9,3][11,2][13,1][13,3][15,2][16,1][19,3]")
-    }
-
-    it("AKNN Join with approximate algorithms based on SPHEROID distance") {
-      val df = sparkSession.sql(
-        s"SELECT QUERIES.ID, OBJECTS.ID FROM QUERIES JOIN OBJECTS ON ST_AKNN(QUERIES.GEOM, OBJECTS.GEOM, 4, true)")
-      val resultAll = df.collect().sortBy(row => (row.getInt(0), row.getInt(1)))
-      resultAll.length should be(3 * 4) // 3 queries and 4 neighbors each
-      resultAll.mkString should be(
-        "[1,3][1,6][1,13][1,16][2,1][2,5][2,11][2,15][3,3][3,9][3,13][3,19]")
-    }
-
-    it("AKNN Join with approximate algorithms with additional join conditions on id") {
-      val df = sparkSession.sql(
-        s"SELECT QUERIES.ID, OBJECTS.ID FROM QUERIES JOIN OBJECTS ON ST_AKNN(QUERIES.GEOM, OBJECTS.GEOM, 4, false) AND QUERIES.ID > 1")
-      val resultAll = df.collect().sortBy(row => (row.getInt(0), row.getInt(1)))
-      resultAll.length should be(8) // 2 queries (filtered out 1) and 4 neighbors each
-      resultAll.mkString should be("[2,1][2,5][2,11][2,15][3,3][3,9][3,13][3,19]")
     }
   }
 
@@ -308,21 +206,6 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       resultAll.length should be(3 * 4) // 3 queries and 4 neighbors each
       resultAll.mkString should be(
         "[1,3][1,6][1,13][1,16][2,1][2,5][2,11][2,15][3,3][3,9][3,13][3,19]")
-    }
-
-    it(
-      "KNN Join with approximate algorithms should work on tiny datasets with lots of partitions") {
-      val df = sparkSession
-        .range(0, 4)
-        .toDF("id")
-        .withColumn("geom", expr("ST_Point(id, id)"))
-        .repartition(10)
-      df.createOrReplaceTempView("df10parts")
-      val dfResult = sparkSession.sql(
-        s"SELECT A.ID, B.ID FROM DF10PARTS A JOIN DF10PARTS B ON ST_AKNN(A.GEOM, B.GEOM, 4, false)")
-      val resultAll = dfResult.collect().sortBy(row => (row.getLong(0), row.getLong(1)))
-      resultAll.mkString should be(
-        "[0,0][0,1][0,2][0,3][1,0][1,1][1,2][1,3][2,0][2,1][2,2][2,3][3,0][3,1][3,2][3,3]")
     }
 
     it("KNN Join with exact algorithms with additional join conditions on id") {
