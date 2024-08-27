@@ -27,9 +27,9 @@ import org.locationtech.jts.geom.Geometry;
 import scala.Tuple2;
 
 public class QuadTreePartitioner extends SpatialPartitioner {
-  private final StandardQuadTree<? extends Geometry> quadTree;
+  private final StandardQuadTree<?> quadTree;
 
-  public QuadTreePartitioner(StandardQuadTree<? extends Geometry> quadTree) {
+  public QuadTreePartitioner(StandardQuadTree<?> quadTree) {
     super(GridType.QUADTREE, quadTree.fetchLeafZones());
     this.quadTree = quadTree;
 

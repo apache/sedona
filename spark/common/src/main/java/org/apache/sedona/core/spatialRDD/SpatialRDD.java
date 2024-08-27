@@ -32,6 +32,7 @@ import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.spatialPartitioning.*;
+import org.apache.sedona.core.spatialPartitioning.quadtree.ExtendedQuadTree;
 import org.apache.sedona.core.spatialPartitioning.quadtree.StandardQuadTree;
 import org.apache.sedona.core.spatialRddTool.IndexBuilder;
 import org.apache.sedona.core.spatialRddTool.StatCalculator;
@@ -50,6 +51,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.index.SpatialIndex;
+import org.locationtech.jts.index.strtree.STRtree;
 import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTWriter;
 import org.wololo.geojson.Feature;
@@ -94,6 +96,9 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
   /** The sample number. */
   private int sampleNumber = -1;
 
+  /** The neighbor sample number. */
+  private int neighborSampleNumber = -1;
+
   public int getSampleNumber() {
     return sampleNumber;
   }
@@ -105,6 +110,15 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
    */
   public void setSampleNumber(int sampleNumber) {
     this.sampleNumber = sampleNumber;
+  }
+
+  /**
+   * Sets the neighbor sample number.
+   *
+   * @param neighborSampleNumber the new neighbor sample number
+   */
+  public void setNeighborSampleNumber(int neighborSampleNumber) {
+    this.neighborSampleNumber = neighborSampleNumber;
   }
 
   /**
@@ -232,6 +246,14 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
           partitioner = new KDBTreePartitioner(tree);
           break;
         }
+      case QUADTREE_RTREE:
+        {
+          ExtendedQuadTree tree = new ExtendedQuadTree<>(paddedBoundary, numPartitions);
+          ExtendedQuadTree<Integer> extendedQuadTree = (ExtendedQuadTree<Integer>) tree;
+          extendedQuadTree.build(neighborSampleNumber);
+          partitioner = new QuadTreeRTPartitioner(extendedQuadTree);
+        }
+
       default:
         throw new Exception(
             "[AbstractSpatialRDD][spatialPartitioning] Unsupported spatial partitioning method. "
@@ -352,6 +374,17 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
       }
       this.indexedRDD = this.spatialPartitionedRDD.mapPartitions(new IndexBuilder(indexType));
     }
+  }
+
+  /**
+   * Builds the index on coalesced raw spatial RDD.
+   *
+   * @param indexType the index type
+   * @throws Exception the exception
+   */
+  public STRtree coalesceAndBuildRawIndex(final IndexType indexType) {
+    return (STRtree)
+        this.rawSpatialRDD.coalesce(1).mapPartitions(new IndexBuilder(indexType)).take(1).get(0);
   }
 
   /**

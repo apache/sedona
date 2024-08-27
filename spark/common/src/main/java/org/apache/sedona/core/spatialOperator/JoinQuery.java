@@ -27,6 +27,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.utils.GeomUtils;
+import org.apache.sedona.core.enums.DistanceMetric;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.enums.JoinBuildSide;
 import org.apache.sedona.core.joinJudgement.*;
@@ -40,8 +41,10 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
+import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.util.LongAccumulator;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.index.strtree.STRtree;
 import scala.Tuple2;
 
 public class JoinQuery {
@@ -697,21 +700,140 @@ public class JoinQuery {
             (PairFunction<Pair<U, T>, U, T>) pair -> new Tuple2<>(pair.getKey(), pair.getValue()));
   }
 
+  private static <U extends Geometry, T extends Geometry> void verifyPartitioningNumberMatch(
+      SpatialRDD<T> spatialRDD, SpatialRDD<U> queryRDD) throws Exception {
+    Objects.requireNonNull(
+        spatialRDD.spatialPartitionedRDD,
+        "[JoinQuery] spatialRDD SpatialPartitionedRDD is null. Please do spatial partitioning.");
+    Objects.requireNonNull(
+        queryRDD.spatialPartitionedRDD,
+        "[JoinQuery] queryRDD SpatialPartitionedRDD is null. Please use the spatialRDD's grids to do spatial partitioning.");
+
+    final SpatialPartitioner spatialPartitioner = spatialRDD.getPartitioner();
+    final SpatialPartitioner queryPartitioner = queryRDD.getPartitioner();
+
+    final int spatialNumPart = spatialRDD.spatialPartitionedRDD.getNumPartitions();
+    final int queryNumPart = queryRDD.spatialPartitionedRDD.getNumPartitions();
+    if (spatialNumPart != queryNumPart) {
+      throw new IllegalArgumentException(
+          "[JoinQuery] numbers of partitions in queryRDD and spatialRDD don't match: "
+              + queryNumPart
+              + " vs. "
+              + spatialNumPart
+              + ". Please make sure they both use the same partitioning otherwise wrong results will appear.");
+    }
+  }
+
+  /**
+   * @param queryRDD {@code queryRDD} is the set of geometries which serve as query geometries
+   *     (center points)
+   * @param objectRDD {@code objectRDD} is the set of geometries (neighbors) to be queried
+   * @param joinParams {@code joinParams} is the parameters for the join
+   * @param includeTies {@code includeTies} is a boolean indicating whether to include ties
+   * @return RDD of pairs where each pair contains a geometry and a set of matching geometries
+   * @param <U> Type of the geometries in queryRDD set
+   * @param <T> Type of the geometries in objectRDD set
+   * @throws Exception
+   */
+  public static <U extends Geometry, T extends Geometry> JavaPairRDD<U, T> knnJoin(
+      SpatialRDD<U> queryRDD,
+      SpatialRDD<T> objectRDD,
+      JoinParams joinParams,
+      boolean includeTies,
+      boolean broadcastJoin)
+      throws Exception {
+    verifyCRSMatch(queryRDD, objectRDD);
+    if (!broadcastJoin) verifyPartitioningNumberMatch(queryRDD, objectRDD);
+
+    SparkContext sparkContext = queryRDD.rawSpatialRDD.context();
+    LongAccumulator buildCount = Metrics.createMetric(sparkContext, "buildCount");
+    LongAccumulator streamCount = Metrics.createMetric(sparkContext, "streamCount");
+    LongAccumulator resultCount = Metrics.createMetric(sparkContext, "resultCount");
+    LongAccumulator candidateCount = Metrics.createMetric(sparkContext, "candidateCount");
+
+    final Broadcast<STRtree> broadcastedTreeIndex;
+    if (broadcastJoin) {
+      // adjust auto broadcast threshold to avoid building index on large RDDs
+      STRtree strTree = objectRDD.coalesceAndBuildRawIndex(IndexType.RTREE);
+      broadcastedTreeIndex = JavaSparkContext.fromSparkContext(sparkContext).broadcast(strTree);
+    } else {
+      broadcastedTreeIndex = null;
+    }
+
+    // The reason for using objectRDD as the right side is that the partitions are built on the
+    // right side.
+    final JavaRDD<Pair<U, T>> joinResult;
+    if (objectRDD.indexedRDD != null) {
+      final KnnJoinIndexJudgement judgement =
+          new KnnJoinIndexJudgement(
+              joinParams.k,
+              joinParams.distanceMetric,
+              includeTies,
+              broadcastedTreeIndex,
+              buildCount,
+              streamCount,
+              resultCount,
+              candidateCount);
+      joinResult = queryRDD.spatialPartitionedRDD.zipPartitions(objectRDD.indexedRDD, judgement);
+    } else if (broadcastedTreeIndex != null) {
+      final KnnJoinIndexJudgement judgement =
+          new KnnJoinIndexJudgement(
+              joinParams.k,
+              joinParams.distanceMetric,
+              includeTies,
+              broadcastedTreeIndex,
+              buildCount,
+              streamCount,
+              resultCount,
+              candidateCount);
+      int numPartitionsObjects = objectRDD.rawSpatialRDD.getNumPartitions();
+      joinResult =
+          queryRDD
+              .rawSpatialRDD
+              .repartition(numPartitionsObjects)
+              .zipPartitions(objectRDD.rawSpatialRDD, judgement);
+    } else {
+      throw new IllegalArgumentException("No index found on the input RDDs.");
+    }
+
+    return joinResult.mapToPair(
+        (PairFunction<Pair<U, T>, U, T>) pair -> new Tuple2<>(pair.getKey(), pair.getValue()));
+  }
+
   public static final class JoinParams {
     public final boolean useIndex;
     public final SpatialPredicate spatialPredicate;
     public final IndexType indexType;
     public final JoinBuildSide joinBuildSide;
 
+    // KNN specific parameters
+    public final int k;
+    public final DistanceMetric distanceMetric;
+    public final Double searchRadius;
+
     public JoinParams(
         boolean useIndex,
         SpatialPredicate spatialPredicate,
         IndexType polygonIndexType,
         JoinBuildSide joinBuildSide) {
+      this(useIndex, spatialPredicate, polygonIndexType, joinBuildSide, -1, null, null);
+    }
+
+    public JoinParams(
+        boolean useIndex,
+        SpatialPredicate spatialPredicate,
+        IndexType polygonIndexType,
+        JoinBuildSide joinBuildSide,
+        int k,
+        DistanceMetric distanceMetric,
+        Double searchRadius) {
       this.useIndex = useIndex;
       this.spatialPredicate = spatialPredicate;
       this.indexType = polygonIndexType;
       this.joinBuildSide = joinBuildSide;
+      this.k = k;
+      this.distanceMetric = distanceMetric;
+      this.searchRadius = searchRadius;
     }
 
     public JoinParams(boolean useIndex, SpatialPredicate spatialPredicate) {
