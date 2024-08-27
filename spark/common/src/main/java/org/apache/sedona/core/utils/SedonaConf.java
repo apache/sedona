@@ -58,10 +58,6 @@ public class SedonaConf implements Serializable {
 
   // Parameters for knn joins
   private boolean includeTieBreakersInKNNJoins = false;
-  private double skewnessCutoffRatioInKNNJoins = 1.0;
-  private int skewnessMinimumMBRCountInKNNJoins = 100;
-  private int skewnessMaximumMBRDividesInKNNJoins = 100;
-  private boolean enableParallelPartitioningInKNNJoins = true;
 
   public static SedonaConf fromActiveSession() {
     return new SedonaConf(SparkSession.active().conf());
@@ -100,20 +96,6 @@ public class SedonaConf implements Serializable {
     this.includeTieBreakersInKNNJoins =
         Boolean.parseBoolean(
             runtimeConfig.get("spark.sedona.join.knn.includeTieBreakers", "false"));
-
-    this.skewnessCutoffRatioInKNNJoins =
-        Double.parseDouble(runtimeConfig.get("spark.sedona.join.knn.skewnessCutoffRatio", "1.0"));
-
-    this.skewnessMinimumMBRCountInKNNJoins =
-        Integer.parseInt(runtimeConfig.get("spark.sedona.join.knn.skewnessMinimumMBRCount", "100"));
-
-    this.skewnessMaximumMBRDividesInKNNJoins =
-        Integer.parseInt(
-            runtimeConfig.get("spark.sedona.join.knn.skewnessMaximumMBRDivides", "100"));
-
-    this.enableParallelPartitioningInKNNJoins =
-        Boolean.parseBoolean(
-            runtimeConfig.get("spark.sedona.join.knn.enableParallelPartitioning", "true"));
   }
 
   public boolean getUseIndex() {
@@ -154,22 +136,6 @@ public class SedonaConf implements Serializable {
 
   public boolean isIncludeTieBreakersInKNNJoins() {
     return includeTieBreakersInKNNJoins;
-  }
-
-  public double getSkewnessCutoffRatioInKNNJoins() {
-    return skewnessCutoffRatioInKNNJoins;
-  }
-
-  public int getSkewnessMinimumMBRCountInKNNJoins() {
-    return skewnessMinimumMBRCountInKNNJoins;
-  }
-
-  public int getSkewnessMaximumMBRDividesInKNNJoins() {
-    return skewnessMaximumMBRDividesInKNNJoins;
-  }
-
-  public boolean isEnableParallelPartitioningInKNNJoins() {
-    return enableParallelPartitioningInKNNJoins;
   }
 
   public String toString() {
