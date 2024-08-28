@@ -311,6 +311,10 @@
       
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
+                        <a class="class" href="BroadcastedSpatialPartitioner.html" title="The SpatialPartitioner may contain a large number of grids, which may make the serialized tasks to be larger than 1MB and trigger a warning: &quot;WARN DAGScheduler: Broadcasting large task binary with size XXXX KB&quot;."></a>
+                        <a href="BroadcastedSpatialPartitioner.html" title="The SpatialPartitioner may contain a large number of grids, which may make the serialized tasks to be larger than 1MB and trigger a warning: &quot;WARN DAGScheduler: Broadcasting large task binary with size XXXX KB&quot;.">BroadcastedSpatialPartitioner</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
                         <a class="class" href="EqualPartitioning.html" title="The Class EqualPartitioning."></a>
                         <a href="EqualPartitioning.html" title="The Class EqualPartitioning.">EqualPartitioning</a>
                       </li><li class="current-entities indented5">
@@ -337,6 +341,14 @@
                         <span class="separator"></span>
                         <a class="class" href="QuadTreePartitioner.html" title=""></a>
                         <a href="QuadTreePartitioner.html" title="">QuadTreePartitioner</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="QuadTreeRTPartitioner.html" title="This class implements spatial partitioner based on the principles outlined in:"></a>
+                        <a href="QuadTreeRTPartitioner.html" title="This class implements spatial partitioner based on the principles outlined in:">QuadTreeRTPartitioner</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="QuadTreeRTPartitioning.html" title="The class is used to build an R-tree over a random sample of another dataset and uses distance bounds to ensure efficient local kNN joins."></a>
+                        <a href="QuadTreeRTPartitioning.html" title="The class is used to build an R-tree over a random sample of another dataset and uses distance bounds to ensure efficient local kNN joins.">QuadTreeRTPartitioning</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="class" href="QuadtreePartitioning.html" title=""></a>
@@ -440,7 +452,29 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="org.apache.sedona.core.spatialPartitioning.EqualPartitioning" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="org.apache.sedona.core.spatialPartitioning.BroadcastedSpatialPartitioner" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="BroadcastedSpatialPartitionerextendsSpatialPartitioner"></a><a id="BroadcastedSpatialPartitioner:BroadcastedSpatialPartitioner"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/BroadcastedSpatialPartitioner.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The SpatialPartitioner may contain a large number of grids, which may make the serialized tasks to be larger than 1MB and trigger a warning: &quot;WARN DAGScheduler: Broadcasting large task binary with size XXXX KB&quot;." href="BroadcastedSpatialPartitioner.html"><span class="name">BroadcastedSpatialPartitioner</span></a><span class="result"> extends <a href="SpatialPartitioner.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.SpatialPartitioner">SpatialPartitioner</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">The SpatialPartitioner may contain a large number of grids, which may make the serialized tasks
+to be larger than 1MB and trigger a warning: &quot;WARN DAGScheduler: Broadcasting large task binary
+with size XXXX KB&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>The SpatialPartitioner may contain a large number of grids, which may make the serialized tasks
+to be larger than 1MB and trigger a warning: &quot;WARN DAGScheduler: Broadcasting large task binary
+with size XXXX KB&quot;. This class is a wrapper around a SpatialPartitioner that is broadcasted to
+reduce the size of serialized tasks.
+</p></div></div>
+    </li><li name="org.apache.sedona.core.spatialPartitioning.EqualPartitioning" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="EqualPartitioningextendsSerializable"></a><a id="EqualPartitioning:EqualPartitioning"></a>
       <span class="permalink">
       <a href="../../../../../org/apache/sedona/core/spatialPartitioning/EqualPartitioning.html" title="Permalink">
@@ -552,6 +586,56 @@
       </span>
       
       
+    </li><li name="org.apache.sedona.core.spatialPartitioning.QuadTreeRTPartitioner" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="QuadTreeRTPartitionerextendsQuadTreePartitioner"></a><a id="QuadTreeRTPartitioner:QuadTreeRTPartitioner"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/QuadTreeRTPartitioner.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="This class implements spatial partitioner based on the principles outlined in:" href="QuadTreeRTPartitioner.html"><span class="name">QuadTreeRTPartitioner</span></a><span class="result"> extends <a href="QuadTreePartitioner.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.QuadTreePartitioner">QuadTreePartitioner</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">This class implements spatial partitioner based on the principles outlined in:</p><div class="fullcomment"><div class="comment cmt"><p>This class implements spatial partitioner based on the principles outlined in:</p><p>It uses the Quad-tree partitioning strategy to create balanced partitions This partitioning is
+essential for efficiently executing kNN joins. The process involves the following steps:</p><p>1. **Quad-tree Partitioning**: - Data is partitioned into partitions using the Quad-tree data
+structure. - This ensures balanced partitions and spatial locality preservation.</p><p>2. **Global R-Tree Index Construction**: - A set of random samples S' from the dataset S is
+taken. - An R-tree T is built over S' in the master node (driver program).</p><p>3. **Distance Bound Calculation**: - For each partition Ri, the distance ui from the furthest
+point in Ri to the centroid cri is calculated. - k-nearest neighbors of each centroid cri are
+found using the R-tree T. - A distance bound γi is derived for each Ri, defined as γi = 2ui +</p><p>|cri, sk|, where sk is the k-th nearest neighbor of cri.</p><p>4. **Partitioning Neighbors**: - For each partition Ri, a subset Si ⊂ S is identified such
+that for any r ∈ Ri, knn(r, S) = knn(r, Si) using a circle range query centered at cri with
+radius γi. - This guarantees that the k-nearest neighbors of any point in Ri can be found within
+the subset Si.</p><p>5. **Parallel Local kNN Joins**: - Each combined partition (Ri, Si) is processed in parallel.
+- An R-tree is built over Si, and a local kNN join is performed for each record in Ri. - The
+results from all partitions are combined to produce the final kNN join results.</p><p>Reference: Xie, Dong, et al. &quot;Simba: Efficient in-memory spatial analytics.&quot; In Proceedings of
+the 2016 ACM SIGMOD International Conference on Management of Data (SIGMOD '16), 2016, DOI:
+10.1145/2882903.2915237.
+</p></div></div>
+    </li><li name="org.apache.sedona.core.spatialPartitioning.QuadTreeRTPartitioning" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="QuadTreeRTPartitioningextendsQuadtreePartitioning"></a><a id="QuadTreeRTPartitioning:QuadTreeRTPartitioning"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/QuadTreeRTPartitioning.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The class is used to build an R-tree over a random sample of another dataset and uses distance bounds to ensure efficient local kNN joins." href="QuadTreeRTPartitioning.html"><span class="name">QuadTreeRTPartitioning</span></a><span class="result"> extends <a href="QuadtreePartitioning.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.QuadtreePartitioning">QuadtreePartitioning</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">The class is used to build an R-tree over a random sample of another dataset and uses distance
+bounds to ensure efficient local kNN joins.</p><div class="fullcomment"><div class="comment cmt"><p>The class is used to build an R-tree over a random sample of another dataset and uses distance
+bounds to ensure efficient local kNN joins.</p><p>By calculating distance bounds and using circle range queries, it ensures that the subsets Si,
+containing all necessary points for accurate kNN results. The final union of local join results
+provides the complete kNN join result for the datasets R and S.</p><p>It generates List&lt;List&lt;Integer&gt;&gt; expandedParitionedBoundaries based on the quad tree.
+</p></div></div>
     </li><li name="org.apache.sedona.core.spatialPartitioning.QuadtreePartitioning" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="QuadtreePartitioningextendsSerializable"></a><a id="QuadtreePartitioning:QuadtreePartitioning"></a>
       <span class="permalink">

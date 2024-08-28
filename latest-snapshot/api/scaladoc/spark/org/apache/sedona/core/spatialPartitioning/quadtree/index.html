@@ -167,6 +167,10 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core.spatialPartitioning">spatialPartitioning</a></dd></dl></div>
     </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="ExtendedQuadTree.html" title="The ExtendedQuadTree class uses a modified quad-tree approach for partitioning spatial data, as described in &quot;Simba: Efficient In-Memory Spatial Analytics&quot;."></a>
+                        <a href="ExtendedQuadTree.html" title="The ExtendedQuadTree class uses a modified quad-tree approach for partitioning spatial data, as described in &quot;Simba: Efficient In-Memory Spatial Analytics&quot;.">ExtendedQuadTree</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="QuadNode.html" title=""></a>
                         <a href="QuadNode.html" title="">QuadNode</a>
                       </li><li class="current-entities indented6">
@@ -216,7 +220,33 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="org.apache.sedona.core.spatialPartitioning.quadtree.QuadNode" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="org.apache.sedona.core.spatialPartitioning.quadtree.ExtendedQuadTree" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ExtendedQuadTree[T]extendsPartitioningUtilswithSerializable"></a><a id="ExtendedQuadTree[T]:ExtendedQuadTree[T]"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/sedona/core/spatialPartitioning/quadtree/ExtendedQuadTree.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The ExtendedQuadTree class uses a modified quad-tree approach for partitioning spatial data, as described in &quot;Simba: Efficient In-Memory Spatial Analytics&quot;." href="ExtendedQuadTree.html"><span class="name">ExtendedQuadTree</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="../PartitioningUtils.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.PartitioningUtils">PartitioningUtils</a> with <span class="extype" name="java.io.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The ExtendedQuadTree class uses a modified quad-tree approach for partitioning spatial data, as
+described in &quot;Simba: Efficient In-Memory Spatial Analytics&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>The ExtendedQuadTree class uses a modified quad-tree approach for partitioning spatial data, as
+described in &quot;Simba: Efficient In-Memory Spatial Analytics&quot;.</p><p>In this approach, a global R-tree index is constructed by taking a set of random samples from
+the dataset and building the R-tree on the master node. For each partition, the distance from the
+furthest point in the partition to its centroid is calculated. Using the R-tree, the k-nearest
+neighbors of each centroid are found, and a distance bound is derived for each partition. This
+bound ensures that the k-nearest neighbors of any point in a partition can be found within a
+subset of the data identified by a circle range query centered at the centroid with the derived
+radius. This method guarantees efficient and accurate k-nearest neighbor joins by leveraging both
+local and global spatial indexing.
+</p></div></div>
+    </li><li name="org.apache.sedona.core.spatialPartitioning.quadtree.QuadNode" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="QuadNode[T]extendsSerializable"></a><a id="QuadNode[T]:QuadNode[T]"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/sedona/core/spatialPartitioning/quadtree/QuadNode.html" title="Permalink">

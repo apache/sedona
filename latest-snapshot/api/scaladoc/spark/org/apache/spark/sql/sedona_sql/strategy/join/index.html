@@ -187,6 +187,14 @@
                         <a href="BroadcastIndexJoinExec.html" title="">BroadcastIndexJoinExec</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
+                        <a class="class" href="BroadcastObjectSideKNNJoinExec.html" title=""></a>
+                        <a href="BroadcastObjectSideKNNJoinExec.html" title="">BroadcastObjectSideKNNJoinExec</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="BroadcastQuerySideKNNJoinExec.html" title=""></a>
+                        <a href="BroadcastQuerySideKNNJoinExec.html" title="">BroadcastQuerySideKNNJoinExec</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
                         <a class="class" href="DistanceJoinExec.html" title="Distance joins requires matching geometries to be in the same partition, despite not necessarily overlapping."></a>
                         <a href="DistanceJoinExec.html" title="Distance joins requires matching geometries to be in the same partition, despite not necessarily overlapping.">DistanceJoinExec</a>
                       </li><li class="current-entities indented7">
@@ -209,6 +217,10 @@
                         <span class="separator"></span>
                         <a class="object" href="JoinedGeometryRaster$.html" title=""></a>
                         <a href="JoinedGeometryRaster$.html" title="">JoinedGeometryRaster</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
+                        <a class="class" href="KNNJoinExec.html" title="KNN / AKNN joins requires target geometries (objects) to be in the same partition as the query geometries."></a>
+                        <a href="KNNJoinExec.html" title="KNN / AKNN joins requires target geometries (objects) to be in the same partition as the query geometries.">KNNJoinExec</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
                         <a class="object" href="LeftSide$.html" title=""></a>
@@ -237,6 +249,10 @@
                         <span class="separator"></span>
                         <a class="trait" href="TraitJoinQueryExec.html" title=""></a>
                         <a href="TraitJoinQueryExec.html" title="">TraitJoinQueryExec</a>
+                      </li><li class="current-entities indented7">
+                        <a class="object" href="TraitKNNJoinQueryExec$.html" title=""></a>
+                        <a class="trait" href="TraitKNNJoinQueryExec.html" title="TraitKNNJoinQueryExec is a trait that extends the TraitJoinQueryExec trait and provides the necessary functionality to execute a KNN join operation."></a>
+                        <a href="TraitKNNJoinQueryExec.html" title="TraitKNNJoinQueryExec is a trait that extends the TraitJoinQueryExec trait and provides the necessary functionality to execute a KNN join operation.">TraitKNNJoinQueryExec</a>
                       </li>
               </ul>
             </div>
@@ -313,6 +329,38 @@
       </span>
       <span class="symbol">
         <a title="" href="BroadcastIndexJoinExec.html"><span class="name">BroadcastIndexJoinExec</span></a><span class="params">(<span name="left">left: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="right">right: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="streamShape">streamShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="indexBuildSide">indexBuildSide: <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a></span>, <span name="windowJoinSide">windowJoinSide: <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a></span>, <span name="joinType">joinType: <span class="extype" name="org.apache.spark.sql.catalyst.plans.JoinType">JoinType</span></span>, <span name="spatialPredicate">spatialPredicate: <a href="../../../../../sedona/core/spatialOperator/SpatialPredicate.html" class="extype" name="org.apache.sedona.core.spatialOperator.SpatialPredicate">SpatialPredicate</a></span>, <span name="extraCondition">extraCondition: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>, <span name="distance">distance: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span> with <a href="../../execution/SedonaBinaryExecNode.html" class="extype" name="org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode">SedonaBinaryExecNode</a> with <a href="TraitJoinQueryBase.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase">TraitJoinQueryBase</a> with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.BroadcastObjectSideKNNJoinExec" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BroadcastObjectSideKNNJoinExecextendsSparkPlanwithSedonaBinaryExecNodewithTraitKNNJoinQueryExecwithLoggingwithProductwithSerializable"></a><a id="BroadcastObjectSideKNNJoinExec:BroadcastObjectSideKNNJoinExec"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/BroadcastObjectSideKNNJoinExec.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="BroadcastObjectSideKNNJoinExec.html"><span class="name">BroadcastObjectSideKNNJoinExec</span></a><span class="params">(<span name="left">left: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="right">right: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="leftShape">leftShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="rightShape">rightShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="joinSide">joinSide: <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a></span>, <span name="joinType">joinType: <span class="extype" name="org.apache.spark.sql.catalyst.plans.JoinType">JoinType</span></span>, <span name="k">k: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="useApproximate">useApproximate: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="spatialPredicate">spatialPredicate: <a href="../../../../../sedona/core/spatialOperator/SpatialPredicate.html" class="extype" name="org.apache.sedona.core.spatialOperator.SpatialPredicate">SpatialPredicate</a></span>, <span name="isGeography">isGeography: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="condition">condition: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="extraCondition">extraCondition: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span> with <a href="../../execution/SedonaBinaryExecNode.html" class="extype" name="org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode">SedonaBinaryExecNode</a> with <a href="TraitKNNJoinQueryExec.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitKNNJoinQueryExec">TraitKNNJoinQueryExec</a> with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.BroadcastQuerySideKNNJoinExec" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BroadcastQuerySideKNNJoinExecextendsSparkPlanwithSedonaBinaryExecNodewithTraitKNNJoinQueryExecwithLoggingwithProductwithSerializable"></a><a id="BroadcastQuerySideKNNJoinExec:BroadcastQuerySideKNNJoinExec"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/BroadcastQuerySideKNNJoinExec.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="BroadcastQuerySideKNNJoinExec.html"><span class="name">BroadcastQuerySideKNNJoinExec</span></a><span class="params">(<span name="left">left: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="right">right: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="leftShape">leftShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="rightShape">rightShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="joinSide">joinSide: <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a></span>, <span name="joinType">joinType: <span class="extype" name="org.apache.spark.sql.catalyst.plans.JoinType">JoinType</span></span>, <span name="k">k: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="useApproximate">useApproximate: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="spatialPredicate">spatialPredicate: <a href="../../../../../sedona/core/spatialOperator/SpatialPredicate.html" class="extype" name="org.apache.sedona.core.spatialOperator.SpatialPredicate">SpatialPredicate</a></span>, <span name="isGeography">isGeography: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="condition">condition: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="extraCondition">extraCondition: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span> with <a href="../../execution/SedonaBinaryExecNode.html" class="extype" name="org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode">SedonaBinaryExecNode</a> with <a href="TraitKNNJoinQueryExec.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitKNNJoinQueryExec">TraitKNNJoinQueryExec</a> with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       
@@ -398,6 +446,36 @@ ST_Intersects(a, b).</p><p>Plans <code>DistanceJoinExec</code> for inner joins o
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.KNNJoinExec" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="KNNJoinExecextendsSparkPlanwithSedonaBinaryExecNodewithTraitKNNJoinQueryExecwithLoggingwithProductwithSerializable"></a><a id="KNNJoinExec:KNNJoinExec"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/KNNJoinExec.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="KNN / AKNN joins requires target geometries (objects) to be in the same partition as the query geometries." href="KNNJoinExec.html"><span class="name">KNNJoinExec</span></a><span class="params">(<span name="left">left: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="right">right: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="leftShape">leftShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="rightShape">rightShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="joinType">joinType: <span class="extype" name="org.apache.spark.sql.catalyst.plans.JoinType">JoinType</span></span>, <span name="k">k: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="spatialPredicate">spatialPredicate: <a href="../../../../../sedona/core/spatialOperator/SpatialPredicate.html" class="extype" name="org.apache.sedona.core.spatialOperator.SpatialPredicate">SpatialPredicate</a></span>, <span name="isGeography">isGeography: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="condition">condition: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="extraCondition">extraCondition: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span> with <a href="../../execution/SedonaBinaryExecNode.html" class="extype" name="org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode">SedonaBinaryExecNode</a> with <a href="TraitKNNJoinQueryExec.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitKNNJoinQueryExec">TraitKNNJoinQueryExec</a> with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">KNN / AKNN joins requires target geometries (objects) to be in the same partition as the query
+geometries.</p><div class="fullcomment"><div class="comment cmt"><p>KNN / AKNN joins requires target geometries (objects) to be in the same partition as the query
+geometries. To create an overlap and guarantee matching geometries end up in the same
+partition, the target geometry is expanded during partitioning.</p><p>E.g., SELECT * FROM QUERIES JOIN OBJECTS ON ST_KNN(QUERIES.GEOM, OBJECTS.GEOM, $numNeighbors,
+true) SELECT * FROM QUERIES JOIN OBJECTS ON ST_AKNN(QUERIES.GEOM, OBJECTS.GEOM, $numNeighbors,
+true)
+</p></div><dl class="paramcmts block"><dt class="param">left</dt><dd class="cmt"><p>
+  left side of the join</p></dd><dt class="param">right</dt><dd class="cmt"><p>
+  right side of the join</p></dd><dt class="param">leftShape</dt><dd class="cmt"><p>
+  shape expression for the left side</p></dd><dt class="param">rightShape</dt><dd class="cmt"><p>
+  shape expression for the right side</p></dd><dt class="param">k</dt><dd class="cmt"><p>
+  \- number of neighbors to find</p></dd><dt class="param">spatialPredicate</dt><dd class="cmt"><p>
+  spatial predicate as join condition</p></dd><dt class="param">condition</dt><dd class="cmt"><p>
+  full join condition</p></dd><dt class="param">extraCondition</dt><dd class="cmt"><p>
+  extra join condition other than spatialPredicate</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.OptimizableJoinCondition" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="OptimizableJoinConditionextendsProductwithSerializable"></a><a id="OptimizableJoinCondition:OptimizableJoinCondition"></a>
       <span class="permalink">
@@ -488,6 +566,27 @@ intersect
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.TraitKNNJoinQueryExec" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="TraitKNNJoinQueryExecextendsTraitJoinQueryExec"></a><a id="TraitKNNJoinQueryExec:TraitKNNJoinQueryExec"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/TraitKNNJoinQueryExec.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="TraitKNNJoinQueryExec is a trait that extends the TraitJoinQueryExec trait and provides the necessary functionality to execute a KNN join operation." href="TraitKNNJoinQueryExec.html"><span class="name">TraitKNNJoinQueryExec</span></a><span class="result"> extends <a href="TraitJoinQueryExec.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryExec">TraitJoinQueryExec</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">TraitKNNJoinQueryExec is a trait that extends the TraitJoinQueryExec trait and provides the
+necessary functionality to execute a KNN join operation.</p><div class="fullcomment"><div class="comment cmt"><p>TraitKNNJoinQueryExec is a trait that extends the TraitJoinQueryExec trait and provides the
+necessary functionality to execute a KNN join operation.</p><p>It is used by the KNNJoinExec class to execute a KNN join operation. The KNN join operation is
+a k-nearest neighbors join that finds the k-nearest neighbors of each object in the right
+dataset for each query in the left dataset.
+</p></div></div>
     </li></ol>
             </div>
 
@@ -557,6 +656,22 @@ intersect
       </span>
       <span class="symbol">
         <a title="" href="RightSide$.html"><span class="name">RightSide</span></a><span class="result"> extends <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.TraitKNNJoinQueryExec" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TraitKNNJoinQueryExec"></a><a id="TraitKNNJoinQueryExec:TraitKNNJoinQueryExec"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/TraitKNNJoinQueryExec$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="TraitKNNJoinQueryExec$.html"><span class="name">TraitKNNJoinQueryExec</span></a>
       </span>
       
       

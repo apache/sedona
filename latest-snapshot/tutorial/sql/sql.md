@@ -775,6 +775,10 @@ LIMIT 5
 
 The details of a join query is available here [Join query](../api/sql/Optimizer.md).
 
+### KNN join query
+
+The details of a KNN join query is available here [KNN join query](../api/sql/NearestNeighbourSearching.md).
+
 ### Other queries
 
 There are lots of other functions can be combined with these queries. Please read [SedonaSQL functions](../api/sql/Function.md) and [SedonaSQL aggregate functions](../api/sql/AggregateFunction.md).

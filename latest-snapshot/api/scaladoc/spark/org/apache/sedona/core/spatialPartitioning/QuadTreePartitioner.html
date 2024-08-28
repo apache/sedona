@@ -167,6 +167,10 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="org.apache.sedona.core.spatialPartitioning">spatialPartitioning</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
+                        <a class="class" href="BroadcastedSpatialPartitioner.html" title="The SpatialPartitioner may contain a large number of grids, which may make the serialized tasks to be larger than 1MB and trigger a warning: &quot;WARN DAGScheduler: Broadcasting large task binary with size XXXX KB&quot;."></a>
+                        <a href="BroadcastedSpatialPartitioner.html" title="The SpatialPartitioner may contain a large number of grids, which may make the serialized tasks to be larger than 1MB and trigger a warning: &quot;WARN DAGScheduler: Broadcasting large task binary with size XXXX KB&quot;.">BroadcastedSpatialPartitioner</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
                         <a class="class" href="EqualPartitioning.html" title="The Class EqualPartitioning."></a>
                         <a href="EqualPartitioning.html" title="The Class EqualPartitioning.">EqualPartitioning</a>
                       </li><li class="current-entities indented5">
@@ -193,6 +197,14 @@
                         <span class="separator"></span>
                         <a class="class" href="" title=""></a>
                         <a href="" title="">QuadTreePartitioner</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="QuadTreeRTPartitioner.html" title="This class implements spatial partitioner based on the principles outlined in:"></a>
+                        <a href="QuadTreeRTPartitioner.html" title="This class implements spatial partitioner based on the principles outlined in:">QuadTreeRTPartitioner</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="QuadTreeRTPartitioning.html" title="The class is used to build an R-tree over a random sample of another dataset and uses distance bounds to ensure efficient local kNN joins."></a>
+                        <a href="QuadTreeRTPartitioning.html" title="The class is used to build an R-tree over a random sample of another dataset and uses distance bounds to ensure efficient local kNN joins.">QuadTreeRTPartitioning</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="class" href="QuadtreePartitioning.html" title=""></a>
@@ -242,7 +254,12 @@
             Linear Supertypes
           </span>
           <div class="superTypes hiddenContent"><a href="SpatialPartitioner.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.SpatialPartitioner">SpatialPartitioner</a>, <span class="extype" name="org.apache.spark.Partitioner">Partitioner</span>, <span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
-        </div></div>
+        </div><div class="toggleContainer block">
+            <span class="toggle">
+              Known Subclasses
+            </span>
+            <div class="subClasses hiddenContent"><a href="QuadTreeRTPartitioner.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.QuadTreeRTPartitioner">QuadTreeRTPartitioner</a></div>
+          </div></div>
         
 
       <div id="mbrsel">
@@ -288,9 +305,9 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="org.apache.sedona.core.spatialPartitioning.QuadTreePartitioner#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(quadTree:org.apache.sedona.core.spatialPartitioning.quadtree.StandardQuadTree[_&lt;:org.locationtech.jts.geom.Geometry]):org.apache.sedona.core.spatialPartitioning.QuadTreePartitioner"></a><a id="&lt;init&gt;:QuadTreePartitioner"></a>
+      <a id="&lt;init&gt;(quadTree:org.apache.sedona.core.spatialPartitioning.quadtree.StandardQuadTree[_]):org.apache.sedona.core.spatialPartitioning.QuadTreePartitioner"></a><a id="&lt;init&gt;:QuadTreePartitioner"></a>
       <span class="permalink">
-      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/QuadTreePartitioner.html#&lt;init&gt;(quadTree:org.apache.sedona.core.spatialPartitioning.quadtree.StandardQuadTree[_&lt;:org.locationtech.jts.geom.Geometry]):org.apache.sedona.core.spatialPartitioning.QuadTreePartitioner" title="Permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/QuadTreePartitioner.html#&lt;init&gt;(quadTree:org.apache.sedona.core.spatialPartitioning.quadtree.StandardQuadTree[_]):org.apache.sedona.core.spatialPartitioning.QuadTreePartitioner" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -299,7 +316,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">QuadTreePartitioner</span><span class="params">(<span name="quadTree">quadTree: <a href="quadtree/StandardQuadTree.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.quadtree.StandardQuadTree">StandardQuadTree</a>[_ &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>)</span>
+        <span class="name">QuadTreePartitioner</span><span class="params">(<span name="quadTree">quadTree: <a href="quadtree/StandardQuadTree.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.quadtree.StandardQuadTree">StandardQuadTree</a>[_]</span>)</span>
       </span>
       
       
