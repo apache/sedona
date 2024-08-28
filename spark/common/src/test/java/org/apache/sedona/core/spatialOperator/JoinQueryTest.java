@@ -38,6 +38,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.locationtech.jts.geom.Geometry;
 
+// test changes for ci build
 @RunWith(Parameterized.class)
 public class JoinQueryTest extends SpatialQueryTestBase {
 
