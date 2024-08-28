@@ -25,6 +25,7 @@ import org.locationtech.jts.geom.Envelope
 
 class optVizOperatorTest extends VizTestBase {
 
+  
   describe("SedonaViz SQL function Test") {
 
     it("Passed full pipeline using optimized operator") {
