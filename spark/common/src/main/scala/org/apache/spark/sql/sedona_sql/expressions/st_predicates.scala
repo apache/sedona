@@ -72,4 +72,13 @@ object st_predicates extends DataFrameAPI {
     wrapExpression[ST_DWithin](a, b, distance, useSphere)
   def ST_DWithin(a: String, b: String, distance: Double, useSphere: Boolean): Column =
     wrapExpression[ST_DWithin](a, b, distance, useSphere)
+
+  def ST_KNN(a: Column, b: Column, distance: Column): Column =
+    wrapExpression[ST_KNN](a, b, distance)
+  def ST_KNN(a: String, b: String, distance: Double): Column =
+    wrapExpression[ST_KNN](a, b, distance)
+  def ST_KNN(a: Column, b: Column, distance: Column, useSphere: Column): Column =
+    wrapExpression[ST_KNN](a, b, distance, useSphere)
+  def ST_KNN(a: String, b: String, distance: Double, useSphere: Boolean): Column =
+    wrapExpression[ST_KNN](a, b, distance, useSphere)
 }

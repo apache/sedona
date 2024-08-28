@@ -27,7 +27,7 @@ import org.locationtech.jts.geom.Envelope;
 public class QuadtreePartitioning implements Serializable {
 
   /** The Quad-Tree. */
-  private final StandardQuadTree<Integer> partitionTree;
+  protected final StandardQuadTree<Integer> partitionTree;
 
   /**
    * Instantiates a new Quad-Tree partitioning.

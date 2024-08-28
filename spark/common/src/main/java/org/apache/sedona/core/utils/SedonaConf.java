@@ -56,6 +56,9 @@ public class SedonaConf implements Serializable {
 
   private SpatialJoinOptimizationMode spatialJoinOptimizationMode;
 
+  // Parameters for knn joins
+  private boolean includeTieBreakersInKNNJoins = false;
+
   public static SedonaConf fromActiveSession() {
     return new SedonaConf(SparkSession.active().conf());
   }
@@ -88,6 +91,11 @@ public class SedonaConf implements Serializable {
     this.spatialJoinOptimizationMode =
         SpatialJoinOptimizationMode.getSpatialJoinOptimizationMode(
             runtimeConfig.get("sedona.join.optimizationmode", "nonequi"));
+
+    // Parameters for knn joins
+    this.includeTieBreakersInKNNJoins =
+        Boolean.parseBoolean(
+            runtimeConfig.get("spark.sedona.join.knn.includeTieBreakers", "false"));
   }
 
   public boolean getUseIndex() {
@@ -124,6 +132,10 @@ public class SedonaConf implements Serializable {
 
   public long getAutoBroadcastJoinThreshold() {
     return autoBroadcastJoinThreshold;
+  }
+
+  public boolean isIncludeTieBreakersInKNNJoins() {
+    return includeTieBreakersInKNNJoins;
   }
 
   public String toString() {
