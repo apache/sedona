@@ -686,6 +686,8 @@
                 <spark.version>3.0.3</spark.version>
                 <spark.compat.version>3.0</spark.compat.version>
                 <log4j.version>2.17.2</log4j.version>
+                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
+                <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>
         </profile>
         <profile>
@@ -701,6 +703,8 @@
                 <spark.version>3.1.2</spark.version>
                 <spark.compat.version>3.1</spark.compat.version>
                 <log4j.version>2.17.2</log4j.version>
+                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
+                <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>
         </profile>
         <profile>
@@ -716,6 +720,8 @@
                 <spark.version>3.2.0</spark.version>
                 <spark.compat.version>3.2</spark.compat.version>
                 <log4j.version>2.17.2</log4j.version>
+                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
+                <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>
         </profile>
         <profile>
@@ -746,7 +752,7 @@
                 <spark.version>3.4.0</spark.version>
                 <spark.compat.version>3.4</spark.compat.version>
                 <log4j.version>2.19.0</log4j.version>
-                <!-- Skip deploying parent module for sedona-spark-3.0 profile, it will be deployed with sedona-spark-3.0 -->
+                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
                 <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>
         </profile>
@@ -762,7 +768,7 @@
                 <spark.version>3.5.0</spark.version>
                 <spark.compat.version>3.5</spark.compat.version>
                 <log4j.version>2.20.0</log4j.version>
-                <!-- Skip deploying parent module for sedona-spark-3.0 profile, it will be deployed with sedona-spark-3.0 -->
+                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
                 <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>
         </profile>
