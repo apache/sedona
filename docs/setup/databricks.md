@@ -48,6 +48,9 @@ In Spark 3.2, `org.apache.spark.sql.catalyst.expressions.Generator` class added 
 * ST_MakeValid
 * ST_SubDivideExplode
 
+!!!note
+    The following steps use DBR including Apache Spark 3.4.x as an example. Please change the Spark version according to your DBR version.
+
 ### Download Sedona jars
 
 Download the Sedona jars to a DBFS location. You can do that manually via UI or from a notebook by executing this code in a cell:
@@ -102,9 +105,9 @@ spark.kryo.registrator org.apache.sedona.core.serde.SedonaKryoRegistrator
 
 From your cluster configuration (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options` -> `Init Scripts`) add the newly created `Workspace` init script
 
-```
-/Workspace/sedona/sedona-init.sh
-```
+| Type | File path |
+|------|-----------|
+| Workspace | /Shared/sedona/sedona-init.sh |
 
 For enabling python support, from the Libraries tab install from PyPI
 
