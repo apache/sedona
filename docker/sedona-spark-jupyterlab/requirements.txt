@@ -6,7 +6,7 @@ shapely==2.0.4
 geopandas==0.14.4
 ipykernel
 ipywidgets
-jupyterlab==3.6.4
+jupyterlab==4.2.5
 jupyterlab-widgets==1.1.7
 keplergl==0.3.2
 matplotlib
