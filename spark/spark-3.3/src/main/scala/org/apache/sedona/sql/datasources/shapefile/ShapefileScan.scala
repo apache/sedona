@@ -105,7 +105,7 @@ case class ShapefileScan(
         } else false
       }
       if (!hasMissingFiles) {
-        Some(FilePartition(index, group.values.toArray))
+        Some(ShapefilePartition(index, group.values.toArray))
       } else {
         None
       }

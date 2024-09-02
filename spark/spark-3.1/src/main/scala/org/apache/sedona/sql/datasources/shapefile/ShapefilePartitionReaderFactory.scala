@@ -25,7 +25,6 @@ import org.apache.spark.sql.connector.read.PartitionReader
 import org.apache.spark.sql.connector.read.PartitionReaderFactory
 import org.apache.spark.sql.execution.datasources.PartitionedFile
 import org.apache.spark.sql.execution.datasources.v2.PartitionReaderWithPartitionValues
-import org.apache.spark.sql.execution.datasources.FilePartition
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.sources.Filter
 import org.apache.spark.sql.types.StructType
@@ -58,7 +57,7 @@ case class ShapefilePartitionReaderFactory(
 
   override def createReader(partition: InputPartition): PartitionReader[InternalRow] = {
     partition match {
-      case filePartition: FilePartition => buildReader(filePartition.files)
+      case filePartition: ShapefilePartition => buildReader(filePartition.files)
       case _ =>
         throw new IllegalArgumentException(
           s"Unexpected partition type: ${partition.getClass.getCanonicalName}")
