@@ -60,12 +60,12 @@ jobs:
           sudo apt-get -y remove --purge default-jdk adoptopenjdk-11-hotspot || :
         shell: bash
       - uses: actions/checkout@v4
-      - uses: r-lib/actions/setup-r@v2.9.0
+      - uses: r-lib/actions/setup-r@v2.10.1
         with:
           r-version: ${{ matrix.r }}
           use-public-rspm: true
       - name: Query R dependencies
-        uses: r-lib/actions/setup-r-dependencies@v2.9.0
+        uses: r-lib/actions/setup-r-dependencies@v2.10.1
         with:
           cache: true
           extra-packages: |
@@ -73,7 +73,7 @@ jobs:
             any::rcmdcheck
           working-directory : './R'
       - name: Build and check R package
-        uses: r-lib/actions/check-r-package@v2.9.0
+        uses: r-lib/actions/check-r-package@v2.10.1
         with:
           build_args: 'c("--no-build-vignettes", "--no-manual")'
           args: 'c("--no-build-vignettes", "--no-manual", "--no-tests")'
