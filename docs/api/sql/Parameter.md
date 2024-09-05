@@ -25,6 +25,16 @@ println(sedonaConf)
 sparkSession.conf.set("sedona.global.index","false")
 ```
 
+In addition, you can also add `spark` prefix to the parameter name, for example:
+
+```scala
+sparkSession.conf.set("spark.sedona.global.index","false")
+```
+
+However, any parameter set through `spark` prefix will be honored by Spark, which means you can set these parameters before hand via `spark-defaults.conf` or Spark on Kubernetes configuration.
+
+If you set the same parameter through both `sedona` and `spark.sedona` prefixes, the parameter set through `sedona` prefix will override the parameter set through `spark.sedona` prefix.
+
 ## Explanation
 
 * sedona.global.index
