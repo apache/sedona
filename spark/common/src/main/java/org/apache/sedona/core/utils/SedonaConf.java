@@ -64,38 +64,53 @@ public class SedonaConf implements Serializable {
   }
 
   public SedonaConf(RuntimeConfig runtimeConfig) {
-    this.useIndex = Boolean.parseBoolean(runtimeConfig.get("sedona.global.index", "true"));
-    this.indexType = IndexType.getIndexType(runtimeConfig.get("sedona.global.indextype", "rtree"));
+    this.useIndex = Boolean.parseBoolean(getConfigValue(runtimeConfig, "global.index", "true"));
+    this.indexType =
+        IndexType.getIndexType(getConfigValue(runtimeConfig, "global.indextype", "rtree"));
     this.joinApproximateTotalCount =
-        Long.parseLong(runtimeConfig.get("sedona.join.approxcount", "-1"));
-    String[] boundaryString = runtimeConfig.get("sedona.join.boundary", "0,0,0,0").split(",");
+        Long.parseLong(getConfigValue(runtimeConfig, "join.approxcount", "-1"));
+    String[] boundaryString = getConfigValue(runtimeConfig, "join.boundary", "0,0,0,0").split(",");
     this.datasetBoundary =
         new Envelope(
             Double.parseDouble(boundaryString[0]),
             Double.parseDouble(boundaryString[1]),
             Double.parseDouble(boundaryString[2]),
             Double.parseDouble(boundaryString[3]));
-    this.joinGridType = GridType.getGridType(runtimeConfig.get("sedona.join.gridtype", "kdbtree"));
+    this.joinGridType =
+        GridType.getGridType(getConfigValue(runtimeConfig, "join.gridtype", "kdbtree"));
     this.joinBuildSide =
-        JoinBuildSide.getBuildSide(runtimeConfig.get("sedona.join.indexbuildside", "left"));
+        JoinBuildSide.getBuildSide(getConfigValue(runtimeConfig, "join.indexbuildside", "left"));
     this.joinSparitionDominantSide =
         JoinSparitionDominantSide.getJoinSparitionDominantSide(
-            runtimeConfig.get("sedona.join.spatitionside", "left"));
+            getConfigValue(runtimeConfig, "join.spatitionside", "left"));
     this.fallbackPartitionNum =
-        Integer.parseInt(runtimeConfig.get("sedona.join.numpartition", "-1"));
+        Integer.parseInt(getConfigValue(runtimeConfig, "join.numpartition", "-1"));
     this.autoBroadcastJoinThreshold =
         bytesFromString(
-            runtimeConfig.get(
-                "sedona.join.autoBroadcastJoinThreshold",
+            getConfigValue(
+                runtimeConfig,
+                "join.autoBroadcastJoinThreshold",
                 runtimeConfig.get("spark.sql.autoBroadcastJoinThreshold")));
     this.spatialJoinOptimizationMode =
         SpatialJoinOptimizationMode.getSpatialJoinOptimizationMode(
-            runtimeConfig.get("sedona.join.optimizationmode", "nonequi"));
+            getConfigValue(runtimeConfig, "join.optimizationmode", "nonequi"));
 
     // Parameters for knn joins
     this.includeTieBreakersInKNNJoins =
-        Boolean.parseBoolean(
-            runtimeConfig.get("spark.sedona.join.knn.includeTieBreakers", "false"));
+        Boolean.parseBoolean(getConfigValue(runtimeConfig, "join.knn.includeTieBreakers", "false"));
+  }
+
+  // Helper method to prioritize `sedona.*` over `spark.sedona.*`
+  private String getConfigValue(
+      RuntimeConfig runtimeConfig, String keySuffix, String defaultValue) {
+    String sedonaKey = "sedona." + keySuffix;
+    String sparkSedonaKey = "spark.sedona." + keySuffix;
+
+    if (runtimeConfig.contains(sedonaKey)) {
+      return runtimeConfig.get(sedonaKey, defaultValue);
+    } else {
+      return runtimeConfig.get(sparkSedonaKey, defaultValue);
+    }
   }
 
   public boolean getUseIndex() {
