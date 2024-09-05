@@ -1,6 +1,6 @@
 attrs
 descartes
-fiona==1.8.22
+fiona==1.10.0
 pandas==1.5.3
 shapely==2.0.4
 geopandas==0.14.4
