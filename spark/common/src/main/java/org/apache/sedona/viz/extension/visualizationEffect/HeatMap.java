@@ -109,7 +109,7 @@ public class HeatMap extends VisualizationOperator {
    * @see VisualizationOperator#EncodeToColor(int)
    */
   @Override
-  protected Integer EncodeToRGB(int normailizedCount) throws Exception {
+  protected Integer EncodeToRGB(int normalizedCount) throws Exception {
     int alpha = 150;
     Color[] colors =
         new Color[] {
@@ -122,21 +122,21 @@ public class HeatMap extends VisualizationOperator {
           new Color(255, 51, 0, alpha),
           new Color(255, 0, 0, alpha)
         };
-    if (normailizedCount < 1) {
+    if (normalizedCount < 1) {
       return new Color(255, 255, 255, 0).getRGB();
-    } else if (normailizedCount < 30) {
+    } else if (normalizedCount < 30) {
       return colors[0].getRGB();
-    } else if (normailizedCount < 50) {
+    } else if (normalizedCount < 50) {
       return colors[1].getRGB();
-    } else if (normailizedCount < 70) {
+    } else if (normalizedCount < 70) {
       return colors[2].getRGB();
-    } else if (normailizedCount < 100) {
+    } else if (normalizedCount < 100) {
       return colors[3].getRGB();
-    } else if (normailizedCount < 130) {
+    } else if (normalizedCount < 130) {
       return colors[4].getRGB();
-    } else if (normailizedCount < 160) {
+    } else if (normalizedCount < 160) {
       return colors[5].getRGB();
-    } else if (normailizedCount < 190) {
+    } else if (normalizedCount < 190) {
       return colors[6].getRGB();
     } else {
       return colors[7].getRGB();

@@ -66,6 +66,7 @@ object Catalog {
     function[ST_Contains](),
     function[ST_Intersects](),
     function[ST_Within](),
+    function[ST_KNN](),
     function[ST_Covers](),
     function[ST_CoveredBy](),
     function[ST_Dimension](),
@@ -155,6 +156,7 @@ object Catalog {
     function[ST_AddMeasure](),
     function[ST_AddPoint](-1),
     function[ST_RemovePoint](-1),
+    function[ST_RemoveRepeatedPoints](),
     function[ST_SetPoint](),
     function[ST_IsPolygonCW](),
     function[ST_IsRing](),
@@ -230,6 +232,7 @@ object Catalog {
     function[ST_DWithin](),
     function[ST_IsValidReason](),
     function[ST_Rotate](),
+    function[ST_RotateX](),
     // Expression for rasters
     function[RS_NormalizedDifference](),
     function[RS_Mean](),

@@ -2425,6 +2425,73 @@ SELECT ST_RemovePoint(ST_GeomFromText('LINESTRING(0 0, 1 1, 1 0)'), 1)
 
 Output: `LINESTRING(0 0, 1 0)`
 
+## ST_RemoveRepeatedPoints
+
+Introduction: This function eliminates consecutive duplicate points within a geometry, preserving endpoints of LineStrings. It operates on (Multi)LineStrings, (Multi)Polygons, and MultiPoints, processing GeometryCollection elements individually. When an optional 'tolerance' value is provided, vertices within that distance are also considered duplicates.
+
+Format:
+
+`ST_RemoveRepeatedPoints(geom: Geometry, tolerance: Double)`
+
+`ST_RemoveRepeatedPoints(geom: Geometry)`
+
+SQL Example:
+
+```sql
+SELECT ST_RemoveRepeatedPoints(
+        ST_GeomFromWKT('MULTIPOINT ((20 20), (10 10), (30 30), (40 40), (20 20), (30 30), (40 40))')
+       )
+```
+
+Output:
+
+```
+MULTIPOINT ((20 20), (10 10), (30 30), (40 40))
+```
+
+SQL Example:
+
+```sql
+SELECT ST_RemoveRepeatedPoints(
+        ST_GeomFromWKT('LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)')
+       )
+```
+
+Output:
+
+```
+LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)
+```
+
+SQL Example: Each geometry within a collection is processed independently.
+
+```sql
+ST_RemoveRepeatedPoints(
+        ST_GeomFromWKT('GEOMETRYCOLLECTION (POINT (10 10), POINT(10 10), LINESTRING (20 20, 20 20, 30 30, 30 30), MULTIPOINT ((80 80), (90 90), (90 90), (100 100)))')
+    )
+```
+
+Output:
+
+```
+GEOMETRYCOLLECTION (POINT (10 10), POINT (10 10), LINESTRING (20 20, 30 30), MULTIPOINT ((80 80), (90 90), (100 100)))
+```
+
+SQL Example: Elimination of repeated points within a specified distance tolerance.
+
+```sql
+SELECT ST_RemoveRepeatedPoints(
+        ST_GeomFromWKT('LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)'),
+        20
+       )
+```
+
+Output:
+
+```
+LINESTRING (20 20, 40 40, 20 20, 40 40)
+```
+
 ## ST_Reverse
 
 Introduction: Return the geometry with vertex order reversed
@@ -2471,6 +2538,24 @@ Output:
 
 ```
 SRID=4326;POLYGON ((0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0))
+```
+
+## ST_RotateX
+
+Introduction: Performs a counter-clockwise rotation of the specified geometry around the X-axis by the given angle measured in radians.
+
+Format: `ST_RotateX(geometry: Geometry, angle: Double)`
+
+SQL Example:
+
+```sql
+SELECT ST_RotateX(ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 0))'), 10)
+```
+
+Output:
+
+```
+SRID=4326;POLYGON ((0 0, 1 0, 1 -0.8390715290764524, 0 0))
 ```
 
 ## ST_S2CellIDs

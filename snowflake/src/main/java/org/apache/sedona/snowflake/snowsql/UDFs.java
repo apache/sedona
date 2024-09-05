@@ -901,6 +901,17 @@ public class UDFs {
         Functions.removePoint(GeometrySerde.deserialize(linestring), position));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geom"})
+  public static byte[] ST_RemoveRepeatedPoints(byte[] geom) {
+    return GeometrySerde.serialize(Functions.removeRepeatedPoints(GeometrySerde.deserialize(geom)));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geom", "tolerance"})
+  public static byte[] ST_RemoveRepeatedPoints(byte[] geom, double tolerance) {
+    return GeometrySerde.serialize(
+        Functions.removeRepeatedPoints(GeometrySerde.deserialize(geom), tolerance));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static byte[] ST_Reverse(byte[] geometry) {
     return GeometrySerde.serialize(Functions.reverse(GeometrySerde.deserialize(geometry)));
@@ -1248,6 +1259,11 @@ public class UDFs {
   public static byte[] ST_Translate(byte[] geom, double deltaX, double deltaY, double deltaZ) {
     return GeometrySerde.serialize(
         Functions.translate(GeometrySerde.deserialize(geom), deltaX, deltaY, deltaZ));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "angle"})
+  public static byte[] ST_RotateX(byte[] geometry, double angle) {
+    return GeometrySerde.serialize(Functions.rotateX(GeometrySerde.deserialize(geometry), angle));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom", "angle"})

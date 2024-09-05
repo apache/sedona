@@ -148,19 +148,12 @@ public final class GeometrySplitter {
   }
 
   private MultiLineString splitLinesByLines(Geometry inputLines, Geometry blade) {
-    // compute the intersection of inputLines and blade
-    // and pass back to splitLines to handle as points
-    Geometry intersectionWithBlade = inputLines.intersection(blade);
-
-    if (intersectionWithBlade.isEmpty()) {
-      // blade and inputLines are disjoint so just return the input as a multilinestring
-      return (MultiLineString) ensureMultiGeometryOfDimensionN(inputLines, 1);
-    } else if (intersectionWithBlade.getDimension() != 0) {
-      logger.warn("Colinear sections detected between source and blade geometry. Returned null.");
-      return null;
+    Geometry diff = inputLines.difference(blade);
+    if (diff instanceof MultiLineString) {
+      return (MultiLineString) diff;
+    } else {
+      return geometryFactory.createMultiLineString(new LineString[] {(LineString) inputLines});
     }
-
-    return splitLines(inputLines, intersectionWithBlade);
   }
 
   private MultiPolygon splitPolygonsByLines(Geometry polygons, Geometry blade) {
@@ -197,6 +190,7 @@ public final class GeometrySplitter {
         Iterator<Coordinate> coordIterator =
             getIteratorForSegmentDirection(pointCoords, lineBuilder.getLastCoordinate(), endCoord);
 
+        // line.getPrecisionModel()
         applyCoordsToLineSegment(lineBuilder, coordIterator, endCoord);
       }
 

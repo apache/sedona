@@ -468,8 +468,27 @@ object st_functions extends DataFrameAPI {
   def ST_RemovePoint(lineString: String, index: Int): Column =
     wrapExpression[ST_RemovePoint](lineString, index)
 
+  def ST_RemoveRepeatedPoints(geom: Column, tolerance: Column): Column =
+    wrapExpression[ST_RemoveRepeatedPoints](geom, tolerance)
+  def ST_RemoveRepeatedPoints(geom: String, tolerance: Double): Column =
+    wrapExpression[ST_RemoveRepeatedPoints](geom, tolerance)
+  def ST_RemoveRepeatedPoints(geom: String, tolerance: String): Column =
+    wrapExpression[ST_RemoveRepeatedPoints](geom, tolerance)
+
+  def ST_RemoveRepeatedPoints(geom: Column): Column =
+    wrapExpression[ST_RemoveRepeatedPoints](geom)
+  def ST_RemoveRepeatedPoints(geom: String): Column =
+    wrapExpression[ST_RemoveRepeatedPoints](geom)
+
   def ST_Reverse(geometry: Column): Column = wrapExpression[ST_Reverse](geometry)
   def ST_Reverse(geometry: String): Column = wrapExpression[ST_Reverse](geometry)
+
+  def ST_RotateX(geometry: Column, angle: Column): Column =
+    wrapExpression[ST_RotateX](geometry, angle)
+  def ST_RotateX(geometry: String, angle: Double): Column =
+    wrapExpression[ST_RotateX](geometry, angle)
+  def ST_RotateX(geometry: String, angle: String): Column =
+    wrapExpression[ST_RotateX](geometry, angle)
 
   def ST_Rotate(geometry: Column, angle: Column): Column =
     wrapExpression[ST_Rotate](geometry, angle)

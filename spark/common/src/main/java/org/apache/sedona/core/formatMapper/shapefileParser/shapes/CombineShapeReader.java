@@ -19,24 +19,21 @@
 package org.apache.sedona.core.formatMapper.shapefileParser.shapes;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import org.apache.log4j.Logger;
 import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
 
   /** dubug logger */
-  static final Logger logger = Logger.getLogger(CombineShapeReader.class);
+  private static final Logger logger = LoggerFactory.getLogger(CombineShapeReader.class);
   /** suffix of attribute file */
   private static final String DBF_SUFFIX = "dbf";
   /** suffix of shape record file */
@@ -93,20 +90,7 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
       if (shxSplit != null) {
         // shape file exists, extract .shp with .shx
         // first read all indexes into memory
-        Path filePath = shxSplit.getPath();
-        FileSystem fileSys = filePath.getFileSystem(context.getConfiguration());
-        FSDataInputStream shxInpuStream = fileSys.open(filePath);
-        shxInpuStream.skip(24);
-        int shxFileLength =
-            shxInpuStream.readInt() * 2 - 100; // get length in bytes, exclude header
-        // skip following 72 bytes in header
-        shxInpuStream.skip(72);
-        byte[] bytes = new byte[shxFileLength];
-        // read all indexes into memory, skip first 50 bytes(header)
-        shxInpuStream.readFully(bytes, 0, bytes.length);
-        IntBuffer buffer = ByteBuffer.wrap(bytes).asIntBuffer();
-        int[] indexes = new int[shxFileLength / 4];
-        buffer.get(indexes);
+        int[] indexes = ShxFileReader.readAll(shxSplit, context);
         shapeFileReader = new ShapeFileReader(indexes);
       } else {
         shapeFileReader = new ShapeFileReader(); // no index, construct with no parameter
@@ -122,7 +106,7 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
     }
   }
 
-  public boolean nextKeyValue() throws IOException, InterruptedException {
+  public boolean nextKeyValue() throws IOException {
 
     boolean hasNextShp = shapeFileReader.nextKeyValue();
     if (hasDbf) {
@@ -132,10 +116,8 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
     ShapeType curShapeType = shapeFileReader.getCurrentValue().getType();
     while (hasNextShp && !curShapeType.isSupported()) {
       logger.warn(
-          "[SEDONA] Shapefile type "
-              + curShapeType.name()
-              + " is not supported. Skipped this record."
-              + " Please use QGIS or GeoPandas to convert it to a type listed in ShapeType.java");
+          "[SEDONA] Shapefile type {} is not supported. Skipped this record. Please use QGIS or GeoPandas to convert it to a type listed in ShapeType.java",
+          curShapeType.name());
       if (hasDbf) {
         hasNextDbf = dbfFileReader.nextKeyValue();
       }
@@ -149,20 +131,20 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
             new Exception(
                 "shape record loses attributes in .dbf file at ID="
                     + shapeFileReader.getCurrentKey().getIndex());
-        e.printStackTrace();
+        logger.warn(e.getMessage(), e);
       } else if (!hasNextShp && hasNextDbf) {
         Exception e = new Exception("Redundant attributes in .dbf exists");
-        e.printStackTrace();
+        logger.warn(e.getMessage(), e);
       }
     }
     return hasNextShp;
   }
 
-  public ShapeKey getCurrentKey() throws IOException, InterruptedException {
+  public ShapeKey getCurrentKey() {
     return shapeFileReader.getCurrentKey();
   }
 
-  public PrimitiveShape getCurrentValue() throws IOException, InterruptedException {
+  public PrimitiveShape getCurrentValue() {
     PrimitiveShape value = new PrimitiveShape(shapeFileReader.getCurrentValue());
     if (hasDbf && hasNextDbf) {
       value.setAttributes(dbfFileReader.getCurrentValue());
@@ -170,7 +152,7 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
     return value;
   }
 
-  public float getProgress() throws IOException, InterruptedException {
+  public float getProgress() {
     return shapeFileReader.getProgress();
   }
 

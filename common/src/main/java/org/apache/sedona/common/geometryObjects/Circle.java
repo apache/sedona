@@ -254,7 +254,7 @@ public class Circle extends Geometry {
     double centerDeltaX = start.getX() - centerPoint.x;
     double centerDeltaY = start.getY() - centerPoint.y;
 
-    // Building and solving quadractic equation: ax2 + bx + c = 0
+    // Building and solving quadratic equation: ax2 + bx + c = 0
     double a = deltaX * deltaX + deltaY * deltaY;
     double b = 2 * (deltaX * centerDeltaX + deltaY * centerDeltaY);
     double c = centerDeltaX * centerDeltaX + centerDeltaY * centerDeltaY - radius * radius;

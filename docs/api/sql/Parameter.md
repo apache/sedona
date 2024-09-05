@@ -44,6 +44,10 @@ sparkSession.conf.set("sedona.global.index","false")
 	* Spatial partitioning grid type for join query
 	* Default: kdbtree
 	* Possible values: quadtree, kdbtree
+* spark.sedona.join.knn.includeTieBreakers
+	* KNN join will include all ties in the result, possibly returning more than k results
+	* Default: false
+	* Possible values: true, false
 * sedona.join.indexbuildside **(Advanced users only!)**
 	* The side which Sedona builds spatial indices on
 	* Default: left
@@ -63,3 +67,7 @@ sparkSession.conf.set("sedona.global.index","false")
 		* all: Always optimize spatial join queries, even for equi-joins.
 		* none: Disable optimization for spatial joins.
 		* nonequi: Optimize spatial join queries that are not equi-joins.
+* spark.sedona.enableParserExtension
+	* Enable the parser extension to parse GEOMETRY data type in SQL DDL statements
+	* Default: true
+	* Possible values: true, false

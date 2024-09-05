@@ -33,6 +33,8 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.projection.ProjectionException;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
+import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
@@ -303,6 +305,41 @@ public class FunctionsTest extends TestBase {
     String expectedResult = "MULTILINESTRING ((0 0, 1 1), (1 1, 2 2))";
 
     assertEquals(actualResult, expectedResult);
+  }
+
+  @Test
+  public void splitLineStringFpPrecisionIssue() {
+    LineString lineString =
+        GEOMETRY_FACTORY.createLineString(
+            coordArray(
+                -8.961173822708158, -3.93776773106963, -8.08908227533288, -3.8845245068873444));
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(
+                -6.318936372442209, -6.44985859539768,
+                -8.669092633645995, -3.0659222341103956,
+                -6.264600073171498, -3.075347218794894,
+                -5.3654318906014495, -3.1019726170919877,
+                -5.488002156793005, -5.892626167859213,
+                -6.318936372442209, -6.44985859539768));
+
+    Geometry result = Functions.split(lineString, polygon);
+    assertEquals(2, result.getNumGeometries());
+    assertEquals(lineString.getLength(), result.getLength(), 1e-6);
+  }
+
+  @Test
+  public void tempTest() {
+    LineString lineString =
+        GEOMETRY_FACTORY.createLineString(
+            coordArray(
+                -8.961173822708158, -3.93776773106963, -8.08908227533288, -3.8845245068873444));
+    Point point =
+        GEOMETRY_FACTORY.createPoint(new Coordinate(-8.100103048843774, -3.885197350829553));
+    PreparedGeometryFactory factory = new PreparedGeometryFactory();
+    PreparedGeometry prepLineString = factory.create(lineString);
+    boolean intersects = prepLineString.intersects(point);
+    System.out.println(intersects);
   }
 
   @Test
@@ -1583,6 +1620,139 @@ public class FunctionsTest extends TestBase {
         "Unsupported geometry type: " + "Polygon" + ", only LineString geometry is supported.";
     Exception e = assertThrows(IllegalArgumentException.class, () -> Functions.numPoints(polygon));
     assertEquals(expected, e.getMessage());
+  }
+
+  @Test
+  public void removeRepeatedPointsMultiPoint() throws ParseException {
+    Geometry geom = Constructors.geomFromWKT("POINT (10 23)", 4321);
+    Geometry actualGeom = Functions.removeRepeatedPoints(geom);
+    String actual = Functions.asWKT(actualGeom);
+    String expected = "POINT (10 23)";
+    assertEquals(expected, actual);
+    int actualSRID = Functions.getSRID(actualGeom);
+    assertEquals(4321, actualSRID);
+
+    geom = Constructors.geomFromWKT("MULTIPOINT ((1 1), (4 4), (2 2), (3 3))", 1000);
+    actualGeom = Functions.removeRepeatedPoints(geom);
+    actual = Functions.asWKT(actualGeom);
+    expected = "MULTIPOINT ((1 1), (4 4), (2 2), (3 3))";
+    assertEquals(expected, actual);
+    actualSRID = Functions.getSRID(actualGeom);
+    assertEquals(1000, actualSRID);
+
+    geom =
+        Constructors.geomFromWKT("MULTIPOINT (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 20));
+    expected = "MULTIPOINT ((10 10), (30 30))";
+    assertEquals(expected, actual);
+
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom));
+    expected = "MULTIPOINT ((20 20), (10 10), (30 30), (40 40))";
+    assertEquals(expected, actual);
+
+    geom = Constructors.geomFromWKT("MULTIPOINT ((1 1), (4 4), (2 2), (3 3), (3 3))", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 2000));
+    expected = "MULTIPOINT ((1 1))";
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void removeRepeatedPointsLineString() throws ParseException {
+    Geometry geom = Constructors.geomFromWKT("LINESTRING (0 0, 0 0, 1 1, 0 0, 1 1, 2 2)", 2000);
+    Geometry actualGeom = Functions.removeRepeatedPoints(geom);
+    String actual = Functions.asWKT(actualGeom);
+    String expected = "LINESTRING (0 0, 1 1, 0 0, 1 1, 2 2)";
+    assertEquals(expected, actual);
+    int actualSRID = Functions.getSRID(actualGeom);
+    assertEquals(2000, actualSRID);
+
+    geom = Constructors.geomFromWKT("LINESTRING (0 0, 0 0, 1 1, 5 5, 1 1, 2 2)", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 2));
+    expected = "LINESTRING (0 0, 5 5, 2 2)";
+    assertEquals(expected, actual);
+
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 6));
+    expected = "LINESTRING (0 0, 2 2)";
+    assertEquals(expected, actual);
+
+    geom =
+        Constructors.geomFromWKT("LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 20));
+    expected = "LINESTRING (20 20, 40 40, 20 20, 40 40)";
+    assertEquals(expected, actual);
+
+    geom =
+        Constructors.geomFromWKT("LINESTRING (10 10, 20 20, 20 20, 30 30, 30 30, 40 40, 40 40)", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 10000));
+    expected = "LINESTRING (10 10, 40 40)";
+    assertEquals(expected, actual);
+
+    geom =
+        Constructors.geomFromWKT(
+            "MULTILINESTRING ((10 10, 20 20, 20 20, 30 30), (40 40, 50 50, 50 50, 60 60))", 3000);
+    actualGeom = Functions.removeRepeatedPoints(geom);
+    actual = Functions.asWKT(actualGeom);
+    expected = "MULTILINESTRING ((10 10, 20 20, 30 30), (40 40, 50 50, 60 60))";
+    assertEquals(expected, actual);
+    actualSRID = Functions.getSRID(actualGeom);
+    assertEquals(3000, actualSRID);
+  }
+
+  @Test
+  public void removeRepeatedPointsPolygon() throws ParseException {
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((10 10, 20 20, 20 20, 30 30, 30 30, 40 40, 40 40, 10 10))", 4000);
+    Geometry actualGeom = Functions.removeRepeatedPoints(geom);
+    String actual = Functions.asWKT(actualGeom);
+    String expected = "POLYGON ((10 10, 20 20, 30 30, 40 40, 10 10))";
+    assertEquals(expected, actual);
+    int actualSRID = Functions.getSRID(actualGeom);
+    assertEquals(4000, actualSRID);
+
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((10 10, 20 20, 20 20, 30 30, 30 30, 40 40, 40 40, 10 10),(15 15, 25 25, 25 25, 35 35, 35 35, 15 15),(25 25, 35 35, 35 35, 45 45, 45 45, 25 25))",
+            0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 1000));
+    expected =
+        "POLYGON ((10 10, 40 40, 40 40, 10 10), (15 15, 35 35, 35 35, 15 15), (25 25, 45 45, 45 45, 25 25))";
+    assertEquals(expected, actual);
+
+    geom =
+        Constructors.geomFromWKT(
+            "MULTIPOLYGON (((10 10, 20 20, 20 20, 30 30, 30 30, 40 40, 40 40, 10 10)),((50 50, 60 60, 60 60, 70 70, 70 70, 80 80, 80 80, 50 50)))",
+            5000);
+    actualGeom = Functions.removeRepeatedPoints(geom, 1000);
+    actual = Functions.asWKT(actualGeom);
+    expected = "MULTIPOLYGON (((10 10, 40 40, 40 40, 10 10)), ((50 50, 80 80, 80 80, 50 50)))";
+    assertEquals(expected, actual);
+    actualSRID = Functions.getSRID(actualGeom);
+    assertEquals(5000, actualSRID);
+
+    geom =
+        Constructors.geomFromWKT(
+            "MULTIPOLYGON (((10 10, 20 20, 20 20, 30 30, 30 30, 40 40, 40 40, 10 10),(15 15, 25 25, 25 25, 35 35, 35 35, 15 15),(25 25, 35 35, 35 35, 45 45, 45 45, 25 25)),((50 50, 60 60, 60 60, 70 70, 70 70, 80 80, 80 80, 50 50),(55 55, 65 65, 65 65, 75 75, 75 75, 55 55),(65 65, 75 75, 75 75, 85 85, 85 85, 65 65)))",
+            0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 1000));
+    expected =
+        "MULTIPOLYGON (((10 10, 40 40, 40 40, 10 10), (15 15, 35 35, 35 35, 15 15), (25 25, 45 45, 45 45, 25 25)), ((50 50, 80 80, 80 80, 50 50), (55 55, 75 75, 75 75, 55 55), (65 65, 85 85, 85 85, 65 65)))";
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void removeRepeatedPointsGeometryCollection() throws ParseException {
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION (POINT (10 10),LINESTRING (20 20, 20 20, 30 30, 30 30),POLYGON ((40 40, 50 50, 50 50, 60 60, 60 60, 70 70, 70 70, 40 40)), MULTIPOINT ((80 80), (90 90), (90 90), (100 100)))",
+            6000);
+    Geometry actualGeom = Functions.removeRepeatedPoints(geom);
+    String actual = Functions.asWKT(actualGeom);
+    String expected =
+        "GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (20 20, 30 30), POLYGON ((40 40, 50 50, 60 60, 70 70, 40 40)), MULTIPOINT ((80 80), (90 90), (100 100)))";
+    assertEquals(expected, actual);
+    int actualSRID = Functions.getSRID(actualGeom);
+    assertEquals(6000, actualSRID);
   }
 
   @Test
@@ -3764,6 +3934,21 @@ public class FunctionsTest extends TestBase {
     assertEquals("MULTIPOINT ((0 0), (1 1), (1 0), (0 0), (2 2), (3 3), (3 2), (2 2))", result);
     String result1 = Functions.asEWKT(Functions.points(geometry3D));
     assertEquals("MULTIPOINT Z((0 0 1), (1 1 2), (2 2 3), (0 0 1))", result1);
+  }
+
+  @Test
+  public void rotateX() throws ParseException {
+    Geometry lineString = Constructors.geomFromEWKT("LINESTRING (50 160, 50 50, 100 50)");
+    String actual = Functions.asEWKT(Functions.rotateX(lineString, Math.PI));
+    String expected = "LINESTRING (50 -160, 50 -50, 100 -50)";
+    assertEquals(expected, actual);
+
+    lineString = Constructors.geomFromWKT("LINESTRING(1 2 3, 1 1 1)", 1234);
+    Geometry geomActual = Functions.rotateX(lineString, Math.PI / 2);
+    actual = Functions.asWKT(geomActual);
+    expected = "LINESTRING Z(1 -3 2, 1 -0.9999999999999999 1)";
+    assertEquals(1234, geomActual.getSRID());
+    assertEquals(expected, actual);
   }
 
   @Test

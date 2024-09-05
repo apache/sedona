@@ -83,6 +83,9 @@ POINT(40.7128 -74.006)
 
 Introduction: Construct a Geometry from GML.
 
+!!!note
+    This function only supports GML1 and GML2. GML3 is not supported.
+
 Format:
 `ST_GeomFromGML (gml: String)`
 
@@ -232,6 +235,8 @@ Introduction: Construct a Geometry from WKT. Alias of  [ST_GeomFromWKT](#st_geom
 Format:
 `ST_GeomFromText (Wkt: String)`
 
+`ST_GeomFromText (Wkt: String, srid: Integer)`
+
 Since: `v1.2.1`
 
 Example:
@@ -244,42 +249,6 @@ Output:
 
 ```
 POINT(40.7128 -74.006)
-```
-
-## ST_GeomFromEWKB
-
-Introduction: Construct a Geometry from EWKB string or Binary. This function is an alias of [ST_GeomFromWKB](#st_geomfromwkb).
-
-Format:
-
-`ST_GeomFromEWKB (Wkb: String)`
-
-`ST_GeomFromEWKB (Wkb: Binary)`
-
-Since: `v1.6.1`
-
-SQL Example
-
-```sql
-SELECT ST_GeomFromEWKB([01 02 00 00 00 02 00 00 00 00 00 00 00 84 D6 00 C0 00 00 00 00 80 B5 D6 BF 00 00 00 60 E1 EF F7 BF 00 00 00 80 07 5D E5 BF])
-```
-
-Output:
-
-```
-LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)
-```
-
-SQL Example
-
-```sql
-SELECT ST_asEWKT(ST_GeomFromEWKB('01010000a0e6100000000000000000f03f000000000000f03f000000000000f03f'))
-```
-
-Output:
-
-```
-SRID=4326;POINT Z(1 1 1)
 ```
 
 ## ST_GeomFromWKB
@@ -336,6 +305,8 @@ Introduction: Construct a Geometry from WKT
 
 Format:
 `ST_GeomFromWKT (Wkt: String)`
+
+`ST_GeomFromWKT (Wkt: String, srid: Integer)`
 
 Since: `v1.2.0`
 
@@ -481,7 +452,11 @@ LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061
 
 Introduction: Construct a MultiLineString from Text and Optional SRID
 
-Format: `ST_MLineFromText (Text: String, Srid: Integer)`
+Format:
+
+`ST_MLineFromText (Wkt: String)`
+
+`ST_MLineFromText (Wkt: String, Srid: Integer)`
 
 Since: `1.3.1`
 
@@ -525,7 +500,11 @@ MULTIPOINT ((10 10), (20 20), (30 30))
 
 Introduction: Construct a MultiPolygon from Text and Optional SRID
 
-Format: `ST_MPolyFromText (Text: String, Srid: Integer)`
+Format:
+
+`ST_MPolyFromText (Wkt: String)`
+
+`ST_MPolyFromText (Wkt: String, Srid: Integer)`
 
 Since: `1.3.1`
 

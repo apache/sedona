@@ -1008,6 +1008,24 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geom"},
+      argTypes = {"Geometry"},
+      returnTypes = "Geometry")
+  public static String ST_RemoveRepeatedPoints(String geom) {
+    return GeometrySerde.serGeoJson(
+        Functions.removeRepeatedPoints(GeometrySerde.deserGeoJson(geom)));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geom", "tolerance"},
+      argTypes = {"Geometry", "double"},
+      returnTypes = "Geometry")
+  public static String ST_RemoveRepeatedPoints(String geom, double tolerance) {
+    return GeometrySerde.serGeoJson(
+        Functions.removeRepeatedPoints(GeometrySerde.deserGeoJson(geom), tolerance));
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"},
       returnTypes = "Geometry")
@@ -1488,6 +1506,14 @@ public class UDFsV2 {
   public static String ST_Translate(String geom, double deltaX, double deltaY, double deltaZ) {
     return GeometrySerde.serGeoJson(
         Functions.translate(GeometrySerde.deserGeoJson(geom), deltaX, deltaY, deltaZ));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "angle"},
+      argTypes = {"Geometry", "double"},
+      returnTypes = "Geometry")
+  public static String ST_RotateX(String geometry, double angle) {
+    return GeometrySerde.serGeoJson(Functions.rotateX(GeometrySerde.deserGeoJson(geometry), angle));
   }
 
   @UDFAnnotations.ParamMeta(

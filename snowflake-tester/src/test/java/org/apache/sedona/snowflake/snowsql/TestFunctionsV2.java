@@ -782,6 +782,18 @@ public class TestFunctionsV2 extends TestBase {
   }
 
   @Test
+  public void test_ST_RemoveRepeatedPoints() {
+    registerUDFV2("ST_RemoveRepeatedPoints", String.class);
+    verifySqlSingleRes(
+        "select ST_AsText(sedona.ST_RemoveRepeatedPoints(ST_GeomFromText('LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)')))",
+        "LINESTRING(20 20,10 10,30 30,40 40,20 20,30 30,40 40)");
+    registerUDFV2("ST_RemoveRepeatedPoints", String.class, double.class);
+    verifySqlSingleRes(
+        "select ST_AsText(sedona.ST_RemoveRepeatedPoints(ST_GeomFromText('LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)'), 20))",
+        "LINESTRING(20 20,40 40,20 20,40 40)");
+  }
+
+  @Test
   public void test_ST_Reverse() {
     registerUDFV2("ST_Reverse", String.class);
     verifySqlSingleRes(
@@ -1160,6 +1172,15 @@ public class TestFunctionsV2 extends TestBase {
     verifySqlSingleRes(
         "SELECT ST_AsText(sedona.ST_Translate(ST_GeometryFromWKT('POINT(1 3)'), 1, 2))",
         "POINT(2 5)");
+  }
+
+  @Test
+  public void test_ST_RotateX() {
+    registerUDFV2("ST_RotateX", String.class, double.class);
+    registerUDFV2("ST_ReducePrecision", String.class, int.class);
+    verifySqlSingleRes(
+        "select ST_AsText(ST_ReducePrecision(sedona.ST_RotateX(ST_GeometryFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)'), 10),2))",
+        "LINESTRING(0 0,1 0,1 -0.84,0 0)");
   }
 
   @Test

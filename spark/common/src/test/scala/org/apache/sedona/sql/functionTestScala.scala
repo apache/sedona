@@ -1821,6 +1821,47 @@ class functionTestScala
       3) shouldBe None
   }
 
+  it("Should pass ST_RemoveRepeatedPoints") {
+    val baseDf = sparkSession.sql(
+      "SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION (POINT (10 10),LINESTRING (20 20, 20 20, 30 30, 30 30),POLYGON ((40 40, 50 50, 50 50, 60 60, 60 60, 70 70, 70 70, 40 40)), MULTIPOINT ((80 80), (90 90), (90 90), (100 100)))', 1000) AS geom")
+    val actualDf = baseDf.selectExpr("ST_RemoveRepeatedPoints(geom, 1000) as geom")
+    var actual = actualDf.selectExpr("ST_AsText(geom)").first().get(0)
+    var expected =
+      "GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (20 20, 30 30), POLYGON ((40 40, 70 70, 70 70, 40 40)), MULTIPOINT ((80 80)))";
+    assertEquals(expected, actual)
+    val actualSRID = actualDf.selectExpr("ST_SRID(geom)").first().get(0)
+    assertEquals(1000, actualSRID)
+
+    actual = sparkSession
+      .sql("SELECT ST_AsText(ST_RemoveRepeatedPoints(ST_GeomFromWKT('MULTIPOINT ((1 1), (2 2), (3 3), (2 2))')))")
+      .first()
+      .get(0);
+    expected = "MULTIPOINT ((1 1), (2 2), (3 3))"
+    assertEquals(expected, actual)
+
+    actual = sparkSession
+      .sql("SELECT ST_AsText(ST_RemoveRepeatedPoints(ST_GeomFromWKT('LINESTRING (0 0, 0 0, 1 1, 0 0, 1 1, 2 2)')))")
+      .first()
+      .get(0);
+    expected = "LINESTRING (0 0, 1 1, 0 0, 1 1, 2 2)"
+    assertEquals(expected, actual)
+
+    actual = sparkSession
+      .sql("SELECT ST_AsText(ST_RemoveRepeatedPoints(ST_GeomFromWKT('GEOMETRYCOLLECTION (LINESTRING (1 1, 2 2, 2 2, 3 3), POINT (4 4), POINT (4 4), POINT (5 5))')))")
+      .first()
+      .get(0);
+    expected =
+      "GEOMETRYCOLLECTION (LINESTRING (1 1, 2 2, 3 3), POINT (4 4), POINT (4 4), POINT (5 5))"
+    assertEquals(expected, actual)
+
+    actual = sparkSession
+      .sql("SELECT ST_AsText(ST_RemoveRepeatedPoints(ST_GeomFromWKT('LINESTRING (0 0, 0 0, 1 1, 5 5, 1 1, 2 2)'), 2))")
+      .first()
+      .get(0);
+    expected = "LINESTRING (0 0, 5 5, 2 2)"
+    assertEquals(expected, actual)
+  }
+
   it("Should correctly set using ST_SetPoint") {
     calculateStSetPointOption("Linestring(0 0, 1 1, 1 0, 0 0)", 0, "Point(0 1)") shouldBe Some(
       "LINESTRING (0 1, 1 1, 1 0, 0 0)")
@@ -3388,6 +3429,33 @@ class functionTestScala
       val gid = row.getAs[Int]("gid")
       val validityInfo = row.getAs[String]("validity_info")
       assert(validityInfo == expectedResults(gid))
+    }
+  }
+
+  it("Should pass ST_RotateX") {
+    val geomTestCases = Map(
+      (
+        1,
+        "'LINESTRING (50 160, 50 50, 100 50)'",
+        "PI()") -> "'LINESTRING (50 -160, 50 -50, 100 -50)'",
+      (
+        2,
+        "'LINESTRING(1 2 3, 1 1 1)'",
+        "PI()/2") -> "'LINESTRING Z(1 -3 2, 1 -0.9999999999999999 1)'")
+
+    for (((index, geom, angle), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"""
+                                   |SELECT
+                                   |  ST_AsEWKT(
+                                   |    ST_RotateX(
+                                   |      ST_GeomFromEWKT($geom),
+                                   |      $angle
+                                   |    )
+                                   |  ) AS geom
+         """.stripMargin)
+
+      val actual = df.take(1)(0).get(0).asInstanceOf[String]
+      assert(actual == expectedResult.stripPrefix("'").stripSuffix("'"))
     }
   }
 

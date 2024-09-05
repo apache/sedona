@@ -873,6 +873,14 @@ public class Functions {
     return null;
   }
 
+  public static Geometry removeRepeatedPoints(Geometry geom, double tolerance) {
+    return GeometryDuplicateCoordinateRemover.process(geom, tolerance);
+  }
+
+  public static Geometry removeRepeatedPoints(Geometry geom) {
+    return removeRepeatedPoints(geom, 0);
+  }
+
   public static Geometry setPoint(Geometry linestring, int position, Geometry point) {
     if (linestring instanceof LineString) {
       List<Coordinate> coordinates = new ArrayList<>(Arrays.asList(linestring.getCoordinates()));
@@ -2211,6 +2219,15 @@ public class Functions {
 
     // Creating a MultiPoint from the extracted coordinates
     return geometry.getFactory().createMultiPointFromCoords(coordinates);
+  }
+
+  public static Geometry rotateX(Geometry geometry, double angle) {
+    if (GeomUtils.isAnyGeomEmpty(geometry)) {
+      return geometry;
+    }
+    double sinAngle = Math.sin(angle);
+    double cosAngle = Math.cos(angle);
+    return affine(geometry, 1, 0, 0, 0, cosAngle, -sinAngle, 0, sinAngle, cosAngle, 0, 0, 0);
   }
 
   /**

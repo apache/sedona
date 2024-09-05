@@ -68,6 +68,7 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
       ("ST_AddMeasure(geom3, 0, 1)", 1000),
       ("ST_AddPoint(geom3, ST_Point(0.5, 0.5), 1)", 1000),
       ("ST_RemovePoint(geom3, 1)", 1000),
+      ("ST_RemoveRepeatedPoints(geom3, 1)", 1000),
       ("ST_SetPoint(geom3, 1, ST_Point(0.5, 0.5))", 1000),
       ("ST_ClosestPoint(geom1, geom2)", 1000),
       ("ST_FlipCoordinates(geom1)", 1000),
@@ -109,6 +110,7 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
       ("ST_BoundingDiagonal(geom1)", 1000),
       ("ST_DelaunayTriangles(geom4)", 1000),
       ("ST_Rotate(geom1, 10)", 1000),
+      ("ST_RotateX(geom1, 10)", 1000),
       ("ST_Collect(geom1, geom2, geom3)", 1000),
       ("ST_GeneratePoints(geom1, 3)", 1000))
 

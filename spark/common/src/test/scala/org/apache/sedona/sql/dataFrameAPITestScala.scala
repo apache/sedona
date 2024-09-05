@@ -20,7 +20,7 @@ package org.apache.sedona.sql
 
 import org.apache.commons.codec.binary.Hex
 import org.apache.spark.sql.Row
-import org.apache.spark.sql.functions.{array, col, element_at, lit}
+import org.apache.spark.sql.functions.{array, col, element_at, expr, lit}
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpressionException
 import org.apache.spark.sql.sedona_sql.expressions.st_aggregates._
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
@@ -1170,6 +1170,17 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_RemoveRepeatedPoints") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('MULTIPOINT (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)', 2000) AS geom")
+      val actualDf = baseDf.select(ST_RemoveRepeatedPoints("geom", 20).as("geom"))
+      val actual = actualDf.select(ST_AsText("geom")).first().get(0)
+      val expected = "MULTIPOINT ((10 10), (30 30))"
+      assertEquals(expected, actual)
+      val actualSRID = actualDf.select(ST_SRID("geom")).first().get(0)
+      assertEquals(2000, actualSRID)
+    }
+
     it("Passed ST_SetPoint") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0)') AS line, ST_Point(1.0, 1.0) AS point")
@@ -2226,6 +2237,26 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertEquals("SRID=4326;POINT ZM(1 2 3 100)", point2)
     }
 
+    it("Should pass ST_RotateX") {
+      val geomTestCases = Map(
+        (
+          1,
+          "'LINESTRING (50 160, 50 50, 100 50)'",
+          Math.PI) -> "'LINESTRING (50 -160, 50 -50, 100 -50)'",
+        (
+          2,
+          "'LINESTRING(1 2 3, 1 1 1)'",
+          Math.PI / 2) -> "'LINESTRING Z(1 -3 2, 1 -0.9999999999999999 1)'")
+
+      for (((index, geom, angle), expectedResult) <- geomTestCases) {
+        val baseDf = sparkSession.sql(s"SELECT ST_GeomFromEWKT($geom) as geom")
+        val df = baseDf.select(ST_AsEWKT(ST_RotateX("geom", angle)))
+
+        val actual = df.take(1)(0).get(0).asInstanceOf[String]
+        assert(actual == expectedResult.stripPrefix("'").stripSuffix("'"))
+      }
+    }
+
     it("Passed ST_Rotate") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0))') AS geom1, ST_GeomFromText('POINT (2 2)') AS geom2")
@@ -2255,9 +2286,21 @@ class dataFrameAPITestScala extends TestBaseScala {
       }
 
       // Check the exception message
-      assert(exception.getMessage.contains(
-        "[SRID=4326;POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0)), 50.0, SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))]"))
+      assert(exception.getMessage.contains("POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0))"))
+      assert(exception.getMessage.contains("POLYGON ((0 0, 1 0, 1 1, 0 1, 1 1, 0 0))"))
+      assert(exception.getMessage.contains("ST_Rotate"))
       assert(exception.getMessage.contains("The origin must be a non-empty Point geometry."))
+
+      // Non-literal test case: ST_MakeLine will raise an exception
+      val exception2 = intercept[Exception] {
+        sparkSession
+          .range(0, 1)
+          .withColumn("geom", expr("ST_PolygonFromEnvelope(id, id, id + 1, id + 1)"))
+          .selectExpr("id", "ST_Envelope(ST_MakeLine(geom, geom))")
+          .collect()
+      }
+      assert(exception2.getMessage.contains("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
+      assert(exception2.getMessage.contains("ST_MakeLine"))
     }
   }
 }

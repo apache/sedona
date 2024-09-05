@@ -26,6 +26,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
 import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShpFileParser;
 
 public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
@@ -36,7 +37,7 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
   private ShapeKey recordKey = null;
   /** primitive bytes value */
   private ShpRecord recordContent = null;
-  /** inputstream for .shp file */
+  /** input stream for .shp file */
   private FSDataInputStream shpInputStream = null;
   /** Iterator of indexes of records */
   private int[] indexes;
@@ -53,7 +54,7 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
   /**
    * constructor with index
    *
-   * @param indexes
+   * @param indexes offsets of records in the .shp file
    */
   public ShapeFileReader(int[] indexes) {
     this.indexes = indexes;
@@ -65,28 +66,40 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
     FileSplit fileSplit = (FileSplit) split;
     Path filePath = fileSplit.getPath();
     FileSystem fileSys = filePath.getFileSystem(context.getConfiguration());
-    shpInputStream = fileSys.open(filePath);
-    // assign inputstream to parser and parse file header to init;
-    parser = new ShpFileParser(shpInputStream);
+    FSDataInputStream stream = fileSys.open(filePath);
+    initialize(stream);
+  }
+
+  public void initialize(FSDataInputStream stream) throws IOException {
+    shpInputStream = stream;
+    parser = new ShpFileParser(stream);
     parser.parseShapeFileHead();
   }
 
-  public boolean nextKeyValue() throws IOException, InterruptedException {
+  public boolean nextKeyValue() throws IOException {
     if (useIndex) {
-      /** with index, iterate until end and extract bytes with information from indexes */
+      /* with index, iterate until end and extract bytes with information from indexes */
       if (indexId == indexes.length) {
         return false;
       }
       // check offset, if current offset in inputStream not match with information in shx, move it
-      if (shpInputStream.getPos() < indexes[indexId] * 2) {
-        shpInputStream.skip(indexes[indexId] * 2 - shpInputStream.getPos());
+      long pos = indexes[indexId] * 2L;
+      if (shpInputStream.getPos() < pos) {
+        long skipBytes = pos - shpInputStream.getPos();
+        if (shpInputStream.skip(skipBytes) != skipBytes) {
+          throw new IOException("Failed to seek to the right place in .shp file");
+        }
       }
       int currentLength = indexes[indexId + 1] * 2 - 4;
       recordKey = new ShapeKey();
       recordKey.setIndex(parser.parseRecordHeadID());
-      recordContent = parser.parseRecordPrimitiveContent(currentLength);
+      if (currentLength >= 0) {
+        recordContent = parser.parseRecordPrimitiveContent(currentLength);
+      } else {
+        // Ignore this index entry
+        recordContent = new ShpRecord(new byte[0], ShapeType.NULL.getId());
+      }
       indexId += 2;
-      return true;
     } else {
       if (getProgress() >= 1) {
         return false;
@@ -94,19 +107,19 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
       recordKey = new ShapeKey();
       recordKey.setIndex(parser.parseRecordHeadID());
       recordContent = parser.parseRecordPrimitiveContent();
-      return true;
     }
+    return true;
   }
 
-  public ShapeKey getCurrentKey() throws IOException, InterruptedException {
+  public ShapeKey getCurrentKey() {
     return recordKey;
   }
 
-  public ShpRecord getCurrentValue() throws IOException, InterruptedException {
+  public ShpRecord getCurrentValue() {
     return recordContent;
   }
 
-  public float getProgress() throws IOException, InterruptedException {
+  public float getProgress() {
     return parser.getProgress();
   }
 

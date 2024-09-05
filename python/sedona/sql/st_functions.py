@@ -1340,6 +1340,22 @@ def ST_RemovePoint(line_string: ColumnOrName, index: Union[ColumnOrName, int]) -
 
 
 @validate_argument_types
+def ST_RemoveRepeatedPoints(geom: ColumnOrName, tolerance: Optional[Union[ColumnOrName, float]] = None) -> Column:
+    """Removes duplicate coordinates from a geometry, optionally removing those within a specified distance tolerance.
+
+    @param geom: Geometry with repeated points
+    @type geom: ColumnOrName
+    @param tolerance: Tolerance for removing nearby coordinates
+    @type tolerance: Optional[Union[ColumnOrName, float]]
+    @return:
+    """
+    args = (geom, tolerance)
+    if tolerance is None:
+        args = (geom,)
+    return _call_st_function("ST_RemoveRepeatedPoints", args)
+
+
+@validate_argument_types
 def ST_Reverse(geometry: ColumnOrName) -> Column:
     """Reverse the points for the geometry.
 
@@ -2021,6 +2037,20 @@ def ST_IsCollection(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_RotateX(geometry: ColumnOrName, angle: Union[ColumnOrName, float]) -> Column:
+    """Returns geometry rotated by the given angle in X axis
+
+    @param geometry: Geometry column or name
+    :type geometry: ColumnOrName
+    @param angle: Rotation angle in radians
+    :type angle: float
+    @return: X-axis rotated geometry
+    """
+
+    return _call_st_function("ST_RotateX", (geometry, angle))
+
+
+@validate_argument_types
 def ST_Rotate(geometry: ColumnOrName, angle: Union[ColumnOrName, float], originX: Union[ColumnOrName, float] = None,
               originY: Union[ColumnOrName, float] = None, pointOrigin: ColumnOrName = None) -> Column:
     """Return a counter-clockwise rotated geometry along the specified origin.
@@ -2050,4 +2080,4 @@ def ST_Rotate(geometry: ColumnOrName, angle: Union[ColumnOrName, float], originX
 
 # Automatically populate __all__
 __all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
-           if inspect.isfunction(obj)]
+           if inspect.isfunction(obj) and name != 'GeometryType']

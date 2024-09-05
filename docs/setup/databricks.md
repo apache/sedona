@@ -1,27 +1,8 @@
+Please pay attention to the Spark version postfix and Scala version postfix on our [Maven Coordinate page](../maven-coordinates). Databricks Spark and Apache Spark's compatibility can be found here: https://docs.databricks.com/en/release-notes/runtime/index.html
+
 ## Community edition (free-tier)
 
 You just need to install the Sedona jars and Sedona Python on Databricks using Databricks default web UI. Then everything will work.
-
-## Advanced editions
-
-We recommend Databricks 10.x+.
-
-* Sedona 1.0.1 & 1.1.0 is compiled against Spark 3.1 (~ Databricks DBR 9 LTS, DBR 7 is Spark 3.0)
-* Sedona 1.1.1, 1.2.0 are compiled against Spark 3.2 (~ DBR 10 & 11)
-* Sedona 1.2.1, 1.3.1, 1.4.0 are complied against Spark 3.3
-* 1.4.1, 1.5.0 are complied against Spark 3.3, 3.4, 3.5
-
-> In Spark 3.2, `org.apache.spark.sql.catalyst.expressions.Generator` class added a field `nodePatterns`. Any SQL functions that rely on Generator class may have issues if compiled for a runtime with a differing spark version. For Sedona, those functions are:
->
-> * ST_MakeValid
-> * ST_SubDivideExplode
-
-!!!note
-	If you are using Spark 3.4+ and Scala 2.12, please use `sedona-spark-shaded-3.4_2.12`. Please pay attention to the Spark version postfix and Scala version postfix. Sedona is not able to support `Databricks photon acceleration`. Sedona requires Spark internal APIs to inject many optimization strategies, which is not accessible in `Photon`.
-
-## Install Sedona from the web UI (not recommended)
-
-This method cannot achieve the best performance of Sedona and does not work for pure SQL environment.
 
 ### Install libraries
 
@@ -58,11 +39,17 @@ from sedona.register.geo_registrator import SedonaRegistrator
 SedonaRegistrator.registerAll(spark)
 ```
 
-## Install Sedona from the init script
+## Advanced editions
 
-In order to activate the Kryo serializer (this speeds up the serialization and deserialization of geometry types) you need to install the libraries via init script as described below.
+In Databricks advanced editions, you need to install Sedona via [cluster init-scripts](https://docs.databricks.com/clusters/init-scripts.html) as described below. We recommend Databricks 10.x+. Sedona is not guaranteed to be 100% compatible with `Databricks photon acceleration`. Sedona requires Spark internal APIs to inject many optimization strategies, which sometimes is not accessible in `Photon`.
 
-In order to use the Sedona `ST_*/RS_*` functions from SQL without having to register the Sedona functions from a python/scala cell, you need to install the Sedona libraries from the [cluster init-scripts](https://docs.databricks.com/clusters/init-scripts.html) as follows.
+In Spark 3.2, `org.apache.spark.sql.catalyst.expressions.Generator` class added a field `nodePatterns`. Any SQL functions that rely on Generator class may have issues if compiled for a runtime with a differing spark version. For Sedona, those functions are:
+
+* ST_MakeValid
+* ST_SubDivideExplode
+
+!!!note
+    The following steps use DBR including Apache Spark 3.4.x as an example. Please change the Spark version according to your DBR version.
 
 ### Download Sedona jars
 
@@ -118,9 +105,9 @@ spark.kryo.registrator org.apache.sedona.core.serde.SedonaKryoRegistrator
 
 From your cluster configuration (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options` -> `Init Scripts`) add the newly created `Workspace` init script
 
-```
-/Workspace/sedona/sedona-init.sh
-```
+| Type | File path |
+|------|-----------|
+| Workspace | /Shared/sedona/sedona-init.sh |
 
 For enabling python support, from the Libraries tab install from PyPI
 

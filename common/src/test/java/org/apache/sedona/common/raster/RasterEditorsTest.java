@@ -3600,7 +3600,7 @@ public class RasterEditorsTest extends RasterTestBase {
       -0.33333333333333326, 0.19999999999999996, 6, 5, 1.388888888888889, -1.24, 0, 0, 0, 1
     };
     // verify correct raster geometry
-    for (int i = 0; i < metadata.length; i++) {
+    for (int i = 0; i < expectedMetadata.length; i++) {
       assertEquals(expectedMetadata[i], metadata[i], 1e-6);
     }
 
@@ -3621,7 +3621,7 @@ public class RasterEditorsTest extends RasterTestBase {
           -0.20000000298023224, 0.4000000059604645, 7.0, 5.0, 1.2, -1.4, 0.0, 0.0, 0.0, 1.0
         };
     // verify correct raster geometry
-    for (int i = 0; i < metadata.length; i++) {
+    for (int i = 0; i < expectedMetadata.length; i++) {
       assertEquals(expectedMetadata[i], metadata[i], 1e-6);
     }
   }
@@ -3679,7 +3679,7 @@ public class RasterEditorsTest extends RasterTestBase {
     };
     assertEquals(expectedRes1, res1);
     assertEquals(expectedRes2, res2);
-    for (int i = 0; i < metadata.length; i++) {
+    for (int i = 0; i < expectedMetadata.length; i++) {
       assertEquals(expectedMetadata[i], metadata[i], 1e-6);
     }
 
@@ -3716,7 +3716,7 @@ public class RasterEditorsTest extends RasterTestBase {
         };
     assertEquals(expectedRes1, res1);
     assertEquals(expectedRes2, res2);
-    for (int i = 0; i < metadata.length; i++) {
+    for (int i = 0; i < expectedMetadata.length; i++) {
       assertEquals(expectedMetadata[i], metadata[i], 1e-6);
     }
 
@@ -3749,7 +3749,7 @@ public class RasterEditorsTest extends RasterTestBase {
         };
     assertEquals(expectedRes1, res1);
     assertEquals(expectedRes2, res2);
-    for (int i = 0; i < metadata.length; i++) {
+    for (int i = 0; i < expectedMetadata.length; i++) {
       assertEquals(expectedMetadata[i], metadata[i], 1e-6);
     }
   }
@@ -3772,7 +3772,7 @@ public class RasterEditorsTest extends RasterTestBase {
     double[] metadata = RasterAccessors.metadata(newRaster);
     double[] expectedMetadata = {0, 0, 6, 5, 1.3333333333333333, -1.2, 0, 0, 0, 1};
     // verify correct raster geometry
-    for (int i = 0; i < metadata.length; i++) {
+    for (int i = 0; i < expectedMetadata.length; i++) {
       assertEquals(expectedMetadata[i], metadata[i], 1e-6);
     }
 
@@ -3790,7 +3790,7 @@ public class RasterEditorsTest extends RasterTestBase {
     metadata = RasterAccessors.metadata(newRaster);
     expectedMetadata = new double[] {0, 0, 7, 5, 1.2, -1.4, 0, 0, 0, 1};
     // verify correct raster geometry
-    for (int i = 0; i < metadata.length; i++) {
+    for (int i = 0; i < expectedMetadata.length; i++) {
       assertEquals(expectedMetadata[i], metadata[i], 1e-6);
     }
   }
@@ -3819,7 +3819,7 @@ public class RasterEditorsTest extends RasterTestBase {
       -0.33333333333333326, 0.19999999999999996, 6, 5, 1.388888888888889, -1.24, 0, 0, 0, 1
     };
     // verify correct raster geometry
-    for (int i = 0; i < metadata.length; i++) {
+    for (int i = 0; i < expectedMetadata.length; i++) {
       assertEquals(expectedMetadata[i], metadata[i], 1e-6);
     }
 
@@ -3840,7 +3840,7 @@ public class RasterEditorsTest extends RasterTestBase {
           -0.20000000298023224, 0.4000000059604645, 7.0, 5.0, 1.2, -1.4, 0.0, 0.0, 0.0, 1.0
         };
     // verify correct raster geometry
-    for (int i = 0; i < metadata.length; i++) {
+    for (int i = 0; i < expectedMetadata.length; i++) {
       assertEquals(expectedMetadata[i], metadata[i], 1e-6);
     }
   }
@@ -3868,7 +3868,7 @@ public class RasterEditorsTest extends RasterTestBase {
     double[] metadata = RasterAccessors.metadata(newRaster);
     double[] expectedMetadata = {0, 0, 5, 5, 1.2, -1.2, 0, 0, 0, 1};
     // verify correct raster geometry
-    for (int i = 0; i < metadata.length; i++) {
+    for (int i = 0; i < expectedMetadata.length; i++) {
       assertEquals(expectedMetadata[i], metadata[i], 1e-6);
     }
 
@@ -3885,7 +3885,7 @@ public class RasterEditorsTest extends RasterTestBase {
     assertEquals(expectedRes, res);
     metadata = RasterAccessors.metadata(newRaster);
     // verify correct raster geometry
-    for (int i = 0; i < metadata.length; i++) {
+    for (int i = 0; i < expectedMetadata.length; i++) {
       assertEquals(expectedMetadata[i], metadata[i], 1e-6);
     }
   }

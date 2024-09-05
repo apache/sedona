@@ -1,49 +1,3 @@
-## Read ESRI Shapefile
-
-Introduction: Construct a DataFrame from a Shapefile
-
-Since: `v1.0.0`
-
-SparkSQL example:
-
-```scala
-var spatialRDD = new SpatialRDD[Geometry]
-spatialRDD.rawSpatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
-var rawSpatialDf = Adapter.toDf(spatialRDD,sparkSession)
-rawSpatialDf.createOrReplaceTempView("rawSpatialDf")
-var spatialDf = sparkSession.sql("""
-          | ST_GeomFromWKT(rddshape), _c1, _c2
-          | FROM rawSpatialDf
-        """.stripMargin)
-spatialDf.show()
-spatialDf.printSchema()
-```
-
-!!!note
-	The path to the shapefile is the path to the folder that contains the .shp file, not the path to the .shp file itself. The file extensions of .shp, .shx, .dbf must be in lowercase. Assume you have a shape file called ==myShapefile==, the path should be `XXX/myShapefile`. The file structure should be like this:
-	```
-	- shapefile1
-	- shapefile2
-	- myshapefile
-		- myshapefile.shp
-		- myshapefile.shx
-		- myshapefile.dbf
-		- myshapefile...
-	- ...
-	```
-
-!!!warning
-	Please make sure you use ==ST_GeomFromWKT== to create Geometry type column otherwise that column cannot be used in SedonaSQL.
-
-If the file you are reading contains non-ASCII characters you'll need to explicitly set the Spark config before initializing the SparkSession, then you can use `ShapefileReader.readToGeometryRDD`.
-
-Example:
-
-```scala
-spark.driver.extraJavaOptions  -Dsedona.global.charset=utf8
-spark.executor.extraJavaOptions  -Dsedona.global.charset=utf8
-```
-
 ## ST_GeomCollFromText
 
 Introduction: Constructs a GeometryCollection from the WKT with the given SRID. If SRID is not provided then it defaults to 0. It returns `null` if the WKT is not a `GEOMETRYCOLLECTION`.
@@ -128,6 +82,9 @@ POINT(40.7128 -74.006)
 ## ST_GeomFromGML
 
 Introduction: Construct a Geometry from GML.
+
+!!!note
+    This function only supports GML 1 and GML 2. GML 3 is not supported.
 
 Format:
 `ST_GeomFromGML (gml: String)`

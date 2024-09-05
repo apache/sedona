@@ -949,6 +949,17 @@ class TestPredicateJoin(TestBase):
         ]
         assert (collected_geometries[0] == "LINESTRING (0 0, 1 1, 1 0, 21 52)")
 
+    def test_st_rotate_x(self):
+        baseDf = self.spark.sql("SELECT ST_GeomFromWKT('LINESTRING (50 160, 50 50, 100 50)') as geom1, ST_GeomFromWKT('LINESTRING(1 2 3, 1 1 1)') AS geom2")
+
+        actual = baseDf.selectExpr("ST_RotateX(geom1, PI())").first()[0].wkt
+        expected = "LINESTRING (50 -160, 50 -50, 100 -50)"
+        assert expected == actual
+
+        actual = baseDf.selectExpr("ST_RotateX(geom2, PI() / 2)").first()[0].wkt
+        expected = "LINESTRING Z (1 -3 2, 1 -0.9999999999999999 1)"
+        assert expected == actual
+
     def test_st_remove_point(self):
         result_and_expected = [
             [self.calculate_st_remove("Linestring(0 0, 1 1, 1 0, 0 0)", 0), "LINESTRING (1 1, 1 0, 0 0)"],
@@ -965,6 +976,16 @@ class TestPredicateJoin(TestBase):
         ]
         for actual, expected in result_and_expected:
             assert (actual == expected)
+
+    def test_st_remove_repeated_points(self):
+        baseDf = self.spark.sql("SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION (POINT (10 10),LINESTRING (20 20, 20 20, 30 30, 30 30),POLYGON ((40 40, 50 50, 50 50, 60 60, 60 60, 70 70, 70 70, 40 40)), MULTIPOINT ((80 80), (90 90), (90 90), (100 100)))', 1000) AS geom")
+        actualDf = baseDf.selectExpr("ST_RemoveRepeatedPoints(geom, 1000) as geom")
+        actual = actualDf.selectExpr("ST_AsText(geom)").first()[0]
+        expected = "GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (20 20, 30 30), POLYGON ((40 40, 70 70, 70 70, 40 40)), MULTIPOINT ((80 80)))"
+        assert expected == actual
+        actualSRID = actualDf.selectExpr("ST_SRID(geom)").first()[0]
+        assert 1000 == actualSRID
+
 
     def test_isPolygonCW(self):
         actual = self.spark.sql("SELECT ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))'))").take(1)[0][0]

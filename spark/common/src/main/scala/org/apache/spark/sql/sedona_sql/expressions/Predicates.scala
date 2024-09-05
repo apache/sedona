@@ -55,13 +55,16 @@ abstract class ST_Predicate
       if (rightArray == null) {
         null
       } else {
+        val leftGeometry = GeometrySerializer.deserialize(leftArray)
+        val rightGeometry = GeometrySerializer.deserialize(rightArray)
         try {
-          val leftGeometry = GeometrySerializer.deserialize(leftArray)
-          val rightGeometry = GeometrySerializer.deserialize(rightArray)
           evalGeom(leftGeometry, rightGeometry)
         } catch {
           case e: Exception =>
-            InferredExpression.throwExpressionInferenceException(inputRow, inputExpressions, e)
+            InferredExpression.throwExpressionInferenceException(
+              getClass.getSimpleName,
+              Seq(leftGeometry, rightGeometry),
+              e)
         }
       }
     }
@@ -291,6 +294,22 @@ case class ST_DWithin(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction3(Predicates.dWithin),
       inferrableFunction4(Predicates.dWithin)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Test if leftGeometry is one of the k nearest neighbors (KNN) of rightGeometry based on
+ * approximate distance metric.
+ *
+ * @param inputExpressions
+ */
+case class ST_KNN(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction3(Predicates.knn),
+      inferrableFunction4(Predicates.knn)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

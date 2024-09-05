@@ -25,12 +25,14 @@ import org.apache.spark.sql.catalyst.expressions.{And, EqualNullSafe, EqualTo, E
 import org.apache.spark.sql.catalyst.plans._
 import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.execution.datasources.LogicalRelation
+import org.apache.spark.sql.execution.datasources.v2.DataSourceV2ScanRelation
 import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
 import org.apache.spark.sql.sedona_sql.expressions._
 import org.apache.spark.sql.sedona_sql.expressions.raster._
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
 import org.apache.spark.sql.{SparkSession, Strategy}
-import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.{matches, matchExpressionsToPlans, matchDistanceExpressionToJoinSide}
+import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.{matchDistanceExpressionToJoinSide, matchExpressionsToPlans, matches}
 
 case class JoinQueryDetection(
     left: LogicalPlan,
@@ -198,6 +200,10 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
           broadcastRight = canAutoBroadCastRight
         }
       }
+
+      // Check if the filters in the plans are supported
+      checkPlanFilters(left)
+      checkPlanFilters(right)
 
       val joinConditionMatcher = OptimizableJoinCondition(left, right)
       val queryDetection: Option[JoinQueryDetection] = condition.flatMap {
@@ -378,6 +384,32 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
                   condition,
                   Some(distance)))
 
+            // ST_KNN
+            case ST_KNN(Seq(leftShape, rightShape, k)) =>
+              Some(
+                JoinQueryDetection(
+                  left,
+                  right,
+                  leftShape,
+                  rightShape,
+                  spatialPredicate = SpatialPredicate.KNN,
+                  isGeography = false,
+                  condition,
+                  Some(k)))
+
+            case ST_KNN(Seq(leftShape, rightShape, k, useSpheroid)) =>
+              val useSpheroidUnwrapped = useSpheroid.eval().asInstanceOf[Boolean]
+              Some(
+                JoinQueryDetection(
+                  left,
+                  right,
+                  leftShape,
+                  rightShape,
+                  spatialPredicate = SpatialPredicate.KNN,
+                  isGeography = useSpheroidUnwrapped,
+                  condition,
+                  Some(k)))
+
             case _ => None
           }
         case _ => None
@@ -441,15 +473,30 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
                   isGeography,
                   extraCondition,
                   Some(distance))) =>
-            planDistanceJoin(
-              left,
-              right,
-              Seq(leftShape, rightShape),
-              joinType,
-              distance,
-              spatialPredicate,
-              isGeography,
-              extraCondition)
+            Option(spatialPredicate) match {
+              case Some(SpatialPredicate.KNN) =>
+                planKNNJoin(
+                  left,
+                  right,
+                  Seq(leftShape, rightShape),
+                  joinType,
+                  distance,
+                  isGeography,
+                  condition.get,
+                  extraCondition)
+              case Some(predicate) =>
+                planDistanceJoin(
+                  left,
+                  right,
+                  Seq(leftShape, rightShape),
+                  joinType,
+                  distance,
+                  spatialPredicate,
+                  isGeography,
+                  extraCondition)
+              case None =>
+                Nil
+            }
           case None =>
             Nil
         }
@@ -519,6 +566,43 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
             "with join relations is not supported")
         Nil
     }
+  }
+
+  private def planKNNJoin(
+      left: LogicalPlan,
+      right: LogicalPlan,
+      children: Seq[Expression],
+      joinType: JoinType,
+      distance: Expression,
+      isGeography: Boolean,
+      condition: Expression,
+      extraCondition: Option[Expression] = None): Seq[SparkPlan] = {
+
+    if (joinType != Inner) {
+      return Nil
+    }
+
+    val leftShape = children.head
+    val rightShape = children.tail.head
+
+    val querySide = getKNNQuerySide(left, leftShape)
+    val objectSidePlan = if (querySide == LeftSide) right else left
+
+    checkObjectPlanFilterPushdown(objectSidePlan)
+
+    logInfo(
+      "Planning knn join, left side is for queries and right size is for the object to be searched")
+    KNNJoinExec(
+      planLater(left),
+      planLater(right),
+      leftShape,
+      rightShape,
+      joinType,
+      distance,
+      spatialPredicate = null,
+      isGeography,
+      condition,
+      extraCondition) :: Nil
   }
 
   private def planDistanceJoin(
@@ -605,6 +689,50 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
 
     if (broadcastSide.isEmpty) {
       return Nil
+    }
+
+    if (spatialPredicate == SpatialPredicate.KNN) {
+      {
+        val leftShape = children.head
+        val rightShape = children.tail.head
+
+        val querySide = getKNNQuerySide(left, leftShape)
+        val objectSidePlan = if (querySide == LeftSide) right else left
+
+        checkObjectPlanFilterPushdown(objectSidePlan)
+
+        if (querySide == broadcastSide.get) {
+          // broadcast is on query side
+          return BroadcastQuerySideKNNJoinExec(
+            planLater(left),
+            planLater(right),
+            leftShape,
+            rightShape,
+            broadcastSide.get,
+            joinType,
+            k = distance.get,
+            useApproximate = false,
+            spatialPredicate,
+            isGeography = false,
+            condition = null,
+            extraCondition = None) :: Nil
+        } else {
+          // broadcast is on object side
+          return BroadcastObjectSideKNNJoinExec(
+            planLater(left),
+            planLater(right),
+            leftShape,
+            rightShape,
+            broadcastSide.get,
+            joinType,
+            k = distance.get,
+            useApproximate = false,
+            spatialPredicate,
+            isGeography = false,
+            condition = null,
+            extraCondition = None) :: Nil
+        }
+      }
     }
 
     val a = children.head
@@ -712,6 +840,27 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
   }
 
   /**
+   * Gets the query and object plans based on the left shape.
+   *
+   * This method checks if the left shape is part of the left or right plan and returns the query
+   * and object plans accordingly.
+   *
+   * @param leftShape
+   *   The left shape expression.
+   * @return
+   *   The join side where the left shape is located.
+   */
+  private def getKNNQuerySide(left: LogicalPlan, leftShape: Expression) = {
+    val isLeftQuerySide =
+      left.toString().toLowerCase().contains(leftShape.toString().toLowerCase())
+    if (isLeftQuerySide) {
+      LeftSide
+    } else {
+      RightSide
+    }
+  }
+
+  /**
    * Check if the given condition is an equi-join between the given plans. This method basically
    * replicates the logic of
    * [[org.apache.spark.sql.catalyst.planning.ExtractEquiJoinKeys.unapply]] but it does not
@@ -738,6 +887,96 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
       case EqualNullSafe(l, r) if matches(l, left) && matches(r, right) => true
       case EqualNullSafe(l, r) if matches(l, right) && matches(r, left) => true
       case _ => false
+    }
+  }
+
+  /**
+   * Find the first filter expression in the given plan.
+   * @param plan
+   *   logical plan
+   * @return
+   *   filter expression if found, None otherwise
+   */
+  private def findFilterExpression(plan: LogicalPlan): Option[String] = {
+    plan match {
+      case Filter(condition, _) => Some(condition.getClass.getSimpleName)
+      case _ => plan.children.flatMap(findFilterExpression).headOption
+    }
+  }
+
+  /**
+   * Check if the filters in the given plan are supported.
+   * @param plan
+   *   logical plan
+   */
+  private def checkPlanFilters(plan: LogicalPlan): Unit = {
+    val unsupportedFilters = Map(
+      "ST_KNN" -> "ST_KNN filter is not yet supported in the join query")
+
+    val filterInExpression: Option[String] = findFilterExpression(plan)
+
+    filterInExpression match {
+      case Some(filter) if unsupportedFilters.contains(filter) =>
+        throw new UnsupportedOperationException(unsupportedFilters(filter))
+      case _ => // Do nothing
+    }
+  }
+
+  /**
+   * Check if the given logic plan has a filter that can be pushed down to the data source.
+   * @param plan
+   * @return
+   */
+  private def containPlanFilterPushdown(plan: LogicalPlan): Boolean = {
+    plan match {
+      case Filter(condition, child) =>
+        // If a Filter node is found, check if it is applied to a scan relation (indicating potential pushdown)
+        child match {
+          case _: LogicalRelation | _: DataSourceV2ScanRelation =>
+            true
+          case _ => containPlanFilterPushdown(child)
+        }
+
+      // Continue recursively checking for other potential cases
+      case Project(_, child) => containPlanFilterPushdown(child)
+      case Join(left, right, _, _, _) =>
+        containPlanFilterPushdown(left) || containPlanFilterPushdown(right)
+      case Aggregate(_, _, child) => containPlanFilterPushdown(child)
+      case _: LogicalRelation | _: DataSourceV2ScanRelation => false
+
+      // Default case to check other children
+      case other => other.children.exists(containPlanFilterPushdown)
+    }
+  }
+
+  /**
+   * Check if the given plan has a filter that can be pushed down to the object side of the KNN
+   * join. Print a warning if a filter pushdown is detected.
+   * @param objectSidePlan
+   */
+  private def checkObjectPlanFilterPushdown(objectSidePlan: LogicalPlan): Unit = {
+    if (containPlanFilterPushdown(objectSidePlan)) {
+      val warnings = Seq(
+        "Warning: One or more filter pushdowns have been detected on the object side of the KNN join. \n" +
+          "These filters will be applied to the object side reader before the KNN join is executed. \n" +
+          "If you intend to apply the filters after the KNN join, please ensure that you materialize the KNN join results before applying the filters. \n" +
+          "For example, you can use the following approach:\n\n" +
+
+          // Scala Example
+          "Scala Example:\n" +
+          "val knnResult = knnJoinDF.cache()\n" +
+          "val filteredResult = knnResult.filter(condition)\n\n" +
+
+          // SQL Example
+          "SQL Example:\n" +
+          "CREATE OR REPLACE TEMP VIEW knnResult AS\n" +
+          "SELECT * FROM (\n" +
+          "  -- Your KNN join SQL here\n" +
+          ") AS knnView\n" +
+          "CACHE TABLE knnResult;\n" +
+          "SELECT * FROM knnResult WHERE condition;")
+      logWarning(warnings.mkString("\n"))
+      println(warnings.mkString("\n"))
     }
   }
 }

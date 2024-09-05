@@ -825,6 +825,18 @@ public class TestFunctions extends TestBase {
   }
 
   @Test
+  public void test_ST_RemoveRepeatedPoints() {
+    registerUDF("ST_RemoveRepeatedPoints", byte[].class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_RemoveRepeatedPoints(sedona.ST_GeomFromText('LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)')))",
+        "LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)");
+    registerUDF("ST_RemoveRepeatedPoints", byte[].class, double.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_RemoveRepeatedPoints(sedona.ST_GeomFromText('LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)'), 20))",
+        "LINESTRING (20 20, 40 40, 20 20, 40 40)");
+  }
+
+  @Test
   public void test_ST_Reverse() {
     registerUDF("ST_Reverse", byte[].class);
     verifySqlSingleRes(
@@ -1205,6 +1217,14 @@ public class TestFunctions extends TestBase {
     verifySqlSingleRes(
         "SELECT sedona.ST_AsText(sedona.ST_Translate(sedona.ST_GeomFromText('GEOMETRYCOLLECTION(MULTIPOLYGON (((1 0 0, 1 1 0, 2 1 0, 2 0 0, 1 0 0)), ((1 2 0, 3 4 0, 3 5 0, 1 2 0))), POINT(1 1 1), LINESTRING EMPTY))'), 2, 2, 3))",
         "GEOMETRYCOLLECTION Z(MULTIPOLYGON Z(((3 2 3, 3 3 3, 4 3 3, 4 2 3, 3 2 3)), ((3 4 3, 5 6 3, 5 7 3, 3 4 3))), POINT Z(3 3 4), LINESTRING ZEMPTY)");
+  }
+
+  @Test
+  public void test_ST_RotateX() {
+    registerUDF("ST_RotateX", byte[].class, double.class);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_AsText(sedona.ST_RotateX(sedona.ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)'), 10))",
+        "LINESTRING (0 0, 1 0, 1 -0.8390715290764524, 0 0)");
   }
 
   @Test

@@ -18,10 +18,9 @@
  */
 package org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.geotools.geometry.jts.coordinatesequence.CoordinateSequences;
+import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -44,7 +43,6 @@ public class PolygonParser extends ShapeParser {
    *
    * @param reader the reader
    * @return the geometry
-   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   public Geometry parseShape(ShapeReader reader) {
@@ -72,16 +70,13 @@ public class PolygonParser extends ShapeParser {
       LinearRing ring = geometryFactory.createLinearRing(csRing);
       if (shell == null) {
         shell = ring;
-        shellsCCW = CoordinateSequences.isCCW(csRing);
-      } else if (CoordinateSequences.isCCW(csRing) != shellsCCW) {
+        shellsCCW = Orientation.isCCW(csRing);
+      } else if (Orientation.isCCW(csRing) != shellsCCW) {
         holes.add(ring);
       } else {
-        if (shell != null) {
-          Polygon polygon =
-              geometryFactory.createPolygon(shell, GeometryFactory.toLinearRingArray(holes));
-          polygons.add(polygon);
-        }
-
+        Polygon polygon =
+            geometryFactory.createPolygon(shell, GeometryFactory.toLinearRingArray(holes));
+        polygons.add(polygon);
         shell = ring;
         holes.clear();
       }
