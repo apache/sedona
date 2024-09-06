@@ -43,7 +43,7 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.
 
 ## Create Sedona config
 
-Use the following code to create your Sedona config at the beginning. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please skip this step and can use `spark` directly.
+Use the following code to create your Sedona config at the beginning. If you already have a SparkSession (usually named `spark`) created by AWS EMR/Databricks/Microsoft Fabric, please ==skip this step==.
 
 ==Sedona >= 1.4.1==
 
@@ -147,7 +147,7 @@ The following method has been deprecated since Sedona 1.4.1. Please use the meth
 
 ## Initiate SedonaContext
 
-Add the following line after creating Sedona config. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please call `SedonaContext.create(spark)` instead.
+Add the following line after creating Sedona config. If you already have a SparkSession (usually named `spark`) created by AWS EMR/Databricks/Microsoft Fabric, please call `sedona = SedonaContext.create(spark)` instead. For ==Databricks==, the situation is more complicated, please refer to [Databricks setup guide](../setup/databricks.md), but generally you don't need to create SedonaContext.
 
 ==Sedona >= 1.4.1==
 
