@@ -873,6 +873,17 @@ public class UDFs {
     return GeometrySerde.serialize(Constructors.polygonFromEnvelope(minX, minY, maxX, maxY));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"minX", "minY", "maxX", "maxY"})
+  public static byte[] ST_MakeEnvelope(double minX, double minY, double maxX, double maxY) {
+    return GeometrySerde.serialize(Constructors.makeEnvelope(minX, minY, maxX, maxY));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"minX", "minY", "maxX", "maxY", "srid"})
+  public static byte[] ST_MakeEnvelope(
+      double minX, double minY, double maxX, double maxY, int srid) {
+    return GeometrySerde.serialize(Constructors.makeEnvelope(minX, minY, maxX, maxY, srid));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geomString", "delimiter"})
   public static byte[] ST_PolygonFromText(String geomString, String geomFormat) {
     return GeometrySerde.serialize(Constructors.polygonFromText(geomString, geomFormat));

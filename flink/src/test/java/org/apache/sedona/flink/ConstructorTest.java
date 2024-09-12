@@ -368,6 +368,33 @@ public class ConstructorTest extends TestBase {
   }
 
   @Test
+  public void testMakeEvelope() {
+    Double minX = 1.0;
+    Double minY = 100.0;
+    Double maxX = 2.0;
+    Double maxY = 200.0;
+    Coordinate[] coordinates = new Coordinate[5];
+    coordinates[0] = new Coordinate(minX, minY);
+    coordinates[1] = new Coordinate(minX, maxY);
+    coordinates[2] = new Coordinate(maxX, maxY);
+    coordinates[3] = new Coordinate(maxX, minY);
+    coordinates[4] = coordinates[0];
+    GeometryFactory geometryFactory = new GeometryFactory();
+    Geometry geom = geometryFactory.createPolygon(coordinates);
+    Geometry actualGeom =
+        (Geometry)
+            last(tableEnv.sqlQuery("SELECT ST_MakeEnvelope(1, 100, 2, 200, 1111)")).getField(0);
+    assertEquals(actualGeom.toString(), geom.toString());
+    assertEquals(1111, actualGeom.getSRID());
+
+    assertEquals(
+        last(tableEnv.sqlQuery("SELECT ST_MakeEnvelope(1.0, 100.0, 2.0, 200.0)"))
+            .getField(0)
+            .toString(),
+        geom.toString());
+  }
+
+  @Test
   public void testPolygonFromEnvelope() {
     Double minX = 1.0;
     Double minY = 100.0;

@@ -271,6 +271,17 @@ public class Constructors {
     return GEOMETRY_FACTORY.createPolygon(coordinates);
   }
 
+  public static Geometry makeEnvelope(
+      double minX, double minY, double maxX, double maxY, int srid) {
+    Geometry envelope = polygonFromEnvelope(minX, minY, maxX, maxY);
+    envelope.setSRID(srid);
+    return envelope;
+  }
+
+  public static Geometry makeEnvelope(double minX, double minY, double maxX, double maxY) {
+    return makeEnvelope(minX, minY, maxX, maxY, 0);
+  }
+
   public static Geometry geomFromGeoHash(String geoHash, Integer precision) {
     try {
       return GeoHashDecoder.decode(geoHash, precision);

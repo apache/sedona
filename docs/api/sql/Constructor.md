@@ -449,6 +449,34 @@ Output:
 LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)
 ```
 
+## ST_MakeEnvelope
+
+Introduction: Construct a Polygon from MinX, MinY, MaxX, MaxY, and an optional SRID.
+
+Format:
+
+```
+ST_MakeEnvelope(MinX: Double, MinY: Double, MaxX: Double, MaxY: Double)
+```
+
+```
+ST_MakeEnvelope(MinX: Double, MinY: Double, MaxX: Double, MaxY: Double, srid: Integer)
+```
+
+Since: `v1.7.0`
+
+SQL Example
+
+```sql
+SELECT ST_MakeEnvelope(1.234, 2.234, 3.345, 3.345, 4236)
+```
+
+Output:
+
+```
+POLYGON ((1.234 2.234, 1.234 3.345, 3.345 3.345, 3.345 2.234, 1.234 2.234))
+```
+
 ## ST_MLineFromText
 
 Introduction: Construct a MultiLineString from Wkt. If srid is not set, it defaults to 0 (unknown).

@@ -361,6 +361,28 @@ def ST_MakePoint(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, z: Optional[C
         args = args + (m,)
     return _call_constructor_function("ST_MakePoint", (args))
 
+@validate_argument_types
+def ST_MakeEnvelope(min_x: ColumnOrNameOrNumber, min_y: ColumnOrNameOrNumber, max_x: ColumnOrNameOrNumber, max_y: ColumnOrNameOrNumber, srid: Optional[ColumnOrNameOrNumber] = None) -> Column:
+    """Generate a polygon geometry column from the minimum and maximum coordinates of an envelope with an option to add SRID
+
+    :param min_x: Minimum X coordinate for the envelope.
+    :type min_x: ColumnOrNameOrNumber
+    :param min_y: Minimum Y coordinate for the envelope.
+    :type min_y: ColumnOrNameOrNumber
+    :param max_x: Maximum X coordinate for the envelope.
+    :type max_x: ColumnOrNameOrNumber
+    :param max_y: Maximum Y coordinate for the envelope.
+    :type max_y: ColumnOrNameOrNumber
+    :param srid: SRID to be set for the envelope.
+    :type srid: ColumnOrNameOrNumber
+    :return: Polygon geometry column representing the envelope described by the coordinate bounds.
+    :rtype: Column
+    """
+    args = (min_x, min_y, max_x, max_y, srid)
+    if srid is None:
+        args = (min_x, min_y, max_x, max_y)
+
+    return _call_constructor_function("ST_MakeEnvelope", args)
 
 @validate_argument_types
 def ST_PolygonFromEnvelope(min_x: ColumnOrNameOrNumber, min_y: ColumnOrNameOrNumber, max_x: ColumnOrNameOrNumber, max_y: ColumnOrNameOrNumber) -> Column:

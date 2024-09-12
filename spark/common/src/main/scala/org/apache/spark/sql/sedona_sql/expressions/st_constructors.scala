@@ -194,6 +194,29 @@ object st_constructors extends DataFrameAPI {
   def ST_PointFromText(coords: String, delimiter: String): Column =
     wrapExpression[ST_PointFromText](coords, delimiter)
 
+  def ST_MakeEnvelope(minX: Column, minY: Column, maxX: Column, maxY: Column): Column =
+    wrapExpression[ST_MakeEnvelope](minX, minY, maxX, maxY)
+  def ST_MakeEnvelope(minX: String, minY: String, maxX: String, maxY: String): Column =
+    wrapExpression[ST_MakeEnvelope](minX, minY, maxX, maxY)
+  def ST_MakeEnvelope(minX: Double, minY: Double, maxX: Double, maxY: Double): Column =
+    wrapExpression[ST_MakeEnvelope](minX, minY, maxX, maxY)
+  def ST_MakeEnvelope(
+      minX: Column,
+      minY: Column,
+      maxX: Column,
+      maxY: Column,
+      srid: Column): Column =
+    wrapExpression[ST_MakeEnvelope](minX, minY, maxX, maxY, srid)
+  def ST_MakeEnvelope(
+      minX: String,
+      minY: String,
+      maxX: String,
+      maxY: String,
+      srid: String): Column =
+    wrapExpression[ST_MakeEnvelope](minX, minY, maxX, maxY, srid)
+  def ST_MakeEnvelope(minX: Double, minY: Double, maxX: Double, maxY: Double, srid: Int): Column =
+    wrapExpression[ST_MakeEnvelope](minX, minY, maxX, maxY, srid)
+
   def ST_PolygonFromEnvelope(minX: Column, minY: Column, maxX: Column, maxY: Column): Column =
     wrapExpression[ST_PolygonFromEnvelope](minX, minY, maxX, maxY)
   def ST_PolygonFromEnvelope(minX: String, minY: String, maxX: String, maxY: String): Column =

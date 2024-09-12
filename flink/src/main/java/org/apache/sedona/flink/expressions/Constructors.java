@@ -212,6 +212,27 @@ public class Constructors {
     }
   }
 
+  public static class ST_MakeEnvelope extends ScalarFunction {
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint("Double") Double minX,
+        @DataTypeHint("Double") Double minY,
+        @DataTypeHint("Double") Double maxX,
+        @DataTypeHint("Double") Double maxY,
+        @DataTypeHint("Integer") Integer srid) {
+      return org.apache.sedona.common.Constructors.makeEnvelope(minX, minY, maxX, maxY, srid);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint("Double") Double minX,
+        @DataTypeHint("Double") Double minY,
+        @DataTypeHint("Double") Double maxX,
+        @DataTypeHint("Double") Double maxY) {
+      return org.apache.sedona.common.Constructors.makeEnvelope(minX, minY, maxX, maxY);
+    }
+  }
+
   public static class ST_PolygonFromEnvelope extends ScalarFunction {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(
