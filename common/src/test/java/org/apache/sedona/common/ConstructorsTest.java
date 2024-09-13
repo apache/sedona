@@ -22,10 +22,7 @@ import static org.junit.Assert.*;
 
 import org.apache.sedona.common.utils.GeomUtils;
 import org.junit.Test;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBWriter;
 
@@ -224,6 +221,24 @@ public class ConstructorsTest {
 
     point = Functions.asWKT(Constructors.pointFromGeoHash("9qqj7nmxncgyy4d0dbxqz0", 1));
     assertEquals("POINT (-112.5 22.5)", point);
+  }
+
+  @Test
+  public void makeEnvelope() {
+    Geometry geom = Constructors.makeEnvelope(10, 10, 11, 11, 4326);
+    assertTrue(geom instanceof Polygon);
+    String actual = Functions.asWKT(geom);
+    String expected = "POLYGON ((10 10, 10 11, 11 11, 11 10, 10 10))";
+    assertEquals(expected, actual);
+
+    int actualSrid = geom.getSRID();
+    int expectedSrid = 4326;
+    assertEquals(expectedSrid, actualSrid);
+
+    geom = Constructors.makeEnvelope(10, 10, 11, 11);
+    assertTrue(geom instanceof Polygon);
+    actual = Functions.asWKT(geom);
+    assertEquals(expected, actual);
   }
 
   @Test

@@ -1,4 +1,4 @@
-Please pay attention to the Spark version postfix and Scala version postfix on our [Maven Coordinate page](../maven-coordinates). Databricks Spark and Apache Spark's compatibility can be found here: https://docs.databricks.com/en/release-notes/runtime/index.html
+Please pay attention to the Spark version postfix and Scala version postfix on our [Maven Coordinate page](maven-coordinates.md). Databricks Spark and Apache Spark's compatibility can be found [here](https://docs.databricks.com/en/release-notes/runtime/index.html).
 
 ## Community edition (free-tier)
 
@@ -8,18 +8,18 @@ You just need to install the Sedona jars and Sedona Python on Databricks using D
 
 1) From the Libraries tab install from Maven Coordinates
 
-    ```
-    org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }}
-    org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
-    ```
+```
+org.apache.sedona:sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}
+org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
+```
 
 2) For enabling python support, from the Libraries tab install from PyPI
 
-    ```
-    apache-sedona
-    keplergl==0.3.2
-    pydeck==0.8.0
-    ```
+```
+apache-sedona=={{ sedona.current_version }}
+keplergl==0.3.2
+pydeck==0.8.0
+```
 
 ### Initialize
 
@@ -66,10 +66,15 @@ curl -o /Workspace/Shared/sedona/{{ sedona.current_version }}/geotools-wrapper-{
 curl -o /Workspace/Shared/sedona/{{ sedona.current_version }}/sedona-spark-shaded-3.4_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.4_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.4_2.12-{{ sedona.current_version }}.jar"
 ```
 
+Of course, you can also do the steps above manually.
+
 ### Create an init script
 
 !!!warning
-    Starting from December 2023, Databricks has disabled all DBFS based init script (/dbfs/XXX/<script-name>.sh).  So you will have to store the init script from a workspace level (`/Users/<user-name>/<script-name>.sh`) or Unity Catalog volume (`/Volumes/<catalog>/<schema>/<volume>/<path-to-script>/<script-name>.sh`). Please see https://docs.databricks.com/en/init-scripts/cluster-scoped.html#configure-a-cluster-scoped-init-script-using-the-ui
+    Starting from December 2023, Databricks has disabled all DBFS based init script (/dbfs/XXX/<script-name>.sh).  So you will have to store the init script from a workspace level (`/Workspace/Users/<user-name>/<script-name>.sh`) or Unity Catalog volume (`/Volumes/<catalog>/<schema>/<volume>/<path-to-script>/<script-name>.sh`). Please see [Databricks init scripts](https://docs.databricks.com/en/init-scripts/cluster-scoped.html#configure-a-cluster-scoped-init-script-using-the-ui) for more information.
+
+!!!note
+    If you are creating a Shared cluster, you won't be able to use init scripts and jars stored under `Workspace`. Please instead store them in `Volumes`. The overall process should be the same.
 
 Create an init script in `Workspace` that loads the Sedona jars into the cluster's default jar directory. You can create that from any notebook by running:
 
@@ -86,12 +91,13 @@ cat > /Workspace/Shared/sedona/sedona-init.sh <<'EOF'
 # File: sedona-init.sh
 #
 # On cluster startup, this script will copy the Sedona jars to the cluster's default jar directory.
-# In order to activate Sedona functions, remember to add to your spark configuration the Sedona extensions: "spark.sql.extensions org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions"
 
 cp /Workspace/Shared/sedona/{{ sedona.current_version }}/*.jar /databricks/jars
 
 EOF
 ```
+
+Of course, you can also do the steps above manually.
 
 ### Set up cluster config
 
@@ -120,3 +126,13 @@ pydeck==0.8.0
 
 !!!tips
 	You need to install the Sedona libraries via init script because the libraries installed via UI are installed after the cluster has already started, and therefore the classes specified by the config `spark.sql.extensions`, `spark.serializer`, and `spark.kryo.registrator` are not available at startup time.*
+
+### Verify installation
+
+After you have started the cluster, you can verify that Sedona is correctly installed by running the following code in a notebook:
+
+```python
+spark.sql("SELECT ST_Point(1, 1)").show()
+```
+
+Note that: you don't need to run the `SedonaRegistrator.registerAll(spark)` or `SedonaContext.create(spark)` in the advanced edition because `org.apache.sedona.sql.SedonaSqlExtensions` in the Cluster Config will take care of that.

@@ -52,3 +52,13 @@ When you create an EMR cluster, in the software configuration, add the following
 
 !!!note
 	If you use Sedona 1.3.1-incubating, please use `sedona-python-adpater-3.0_2.12` jar in the content above, instead of `sedona-spark-shaded-3.0_2.12`.
+
+## Verify installation
+
+After the cluster is created, you can verify the installation by running the following code in a Jupyter notebook:
+
+```python
+spark.sql("SELECT ST_Point(0, 0)").show()
+```
+
+Note that: you don't need to run the `SedonaRegistrator.registerAll(spark)` or `SedonaContext.create(spark)` because `org.apache.sedona.sql.SedonaSqlExtensions` in the config will take care of that.
