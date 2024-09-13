@@ -2230,6 +2230,15 @@ public class Functions {
     return affine(geometry, 1, 0, 0, 0, cosAngle, -sinAngle, 0, sinAngle, cosAngle, 0, 0, 0);
   }
 
+  public static Geometry rotateY(Geometry geometry, double angle) {
+    if (GeomUtils.isAnyGeomEmpty(geometry)) {
+      return geometry;
+    }
+    double sinAngle = Math.sin(angle);
+    double cosAngle = Math.cos(angle);
+    return affine(geometry, cosAngle, 0, sinAngle, 0, 1, 0, -sinAngle, 0, cosAngle, 0, 0, 0);
+  }
+
   /**
    * Rotates a geometry by a given angle in radians.
    *

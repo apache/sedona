@@ -1954,6 +1954,16 @@ public class Functions {
     }
   }
 
+  public static class ST_RotateY extends ScalarFunction {
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint(value = "Double") Double angle) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.rotateY(geom, angle);
+    }
+  }
+
   public static class ST_Rotate extends ScalarFunction {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(

@@ -3952,6 +3952,21 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void rotateY() throws ParseException {
+    Geometry lineString = Constructors.geomFromEWKT("LINESTRING (50 160, 50 50, 100 50)");
+    String actual = Functions.asEWKT(Functions.rotateY(lineString, Math.PI));
+    String expected = "LINESTRING (-50 160, -50 50, -100 50)";
+    assertEquals(expected, actual);
+
+    lineString = Constructors.geomFromWKT("LINESTRING(1 2 3, 1 1 1)", 1234);
+    Geometry geomActual = Functions.rotateY(lineString, Math.PI / 2);
+    actual = Functions.asWKT(geomActual);
+    expected = "LINESTRING Z(3 2 -0.9999999999999998, 1 1 -0.9999999999999999)";
+    assertEquals(1234, geomActual.getSRID());
+    assertEquals(expected, actual);
+  }
+
+  @Test
   public void rotate() throws ParseException {
     Geometry lineString = Constructors.geomFromEWKT("LINESTRING (50 160, 50 50, 100 50)");
     String result = Functions.asEWKT(Functions.rotate(lineString, Math.PI));

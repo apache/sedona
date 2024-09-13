@@ -2282,6 +2282,26 @@ class dataFrameAPITestScala extends TestBaseScala {
       }
     }
 
+    it("Should pass ST_RotateY") {
+      val geomTestCases = Map(
+        (
+          1,
+          "'LINESTRING (50 160, 50 50, 100 50)'",
+          Math.PI) -> "'LINESTRING (-50 160, -50 50, -100 50)'",
+        (
+          2,
+          "'LINESTRING(1 2 3, 1 1 1)'",
+          Math.PI / 2) -> "LINESTRING Z(3 2 -0.9999999999999998, 1 1 -0.9999999999999999)")
+
+      for (((index, geom, angle), expectedResult) <- geomTestCases) {
+        val baseDf = sparkSession.sql(s"SELECT ST_GeomFromEWKT($geom) as geom")
+        val df = baseDf.select(ST_AsEWKT(ST_RotateY("geom", angle)))
+
+        val actual = df.take(1)(0).get(0).asInstanceOf[String]
+        assert(actual == expectedResult.stripPrefix("'").stripSuffix("'"))
+      }
+    }
+
     it("Passed ST_Rotate") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0))') AS geom1, ST_GeomFromText('POINT (2 2)') AS geom2")

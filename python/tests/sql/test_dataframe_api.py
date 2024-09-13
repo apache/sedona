@@ -210,6 +210,7 @@ test_configurations = [
     (stf.ST_RemoveRepeatedPoints, ("geom",), "repeated_multipoint", "", "MULTIPOINT (1 1, 2 2, 3 3, 4 4)"),
     (stf.ST_Reverse, ("line",), "linestring_geom", "", "LINESTRING (5 0, 4 0, 3 0, 2 0, 1 0, 0 0)"),
     (stf.ST_RotateX, ("line", 10.0), "4D_line", "ST_ReducePrecision(geom, 2)", "LINESTRING Z (1 -0.3 -1.383092639965822, 2 -0.59 -2.766185279931644, 3 -0.89 -4.149277919897466, -1 0.3 1.383092639965822)"),
+    (stf.ST_RotateY, ("line", 10.0), "4D_line", "ST_AsText(ST_ReducePrecision(geom, 2))", "LINESTRING ZM(-1.38 1 -0.2950504181870827 1, -2.77 2 -0.5901008363741653 2, -4.15 3 -0.8851512545612479 3, 1.38 -1 0.2950504181870827 -1)"),
     (stf.ST_Rotate, ("line", 10.0), "linestring_geom", "ST_ReducePrecision(geom, 2)", "LINESTRING (0 0, -0.84 -0.54, -1.68 -1.09, -2.52 -1.63, -3.36 -2.18, -4.2 -2.72)"),
     (stf.ST_Rotate, ("line", 10.0, 0.0, 0.0), "linestring_geom", "ST_ReducePrecision(geom, 2)", "LINESTRING (0 0, -0.84 -0.54, -1.68 -1.09, -2.52 -1.63, -3.36 -2.18, -4.2 -2.72)"),
     (stf.ST_S2CellIDs, ("point", 30), "point_geom", "", [1153451514845492609]),
