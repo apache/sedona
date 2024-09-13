@@ -19,7 +19,7 @@ In case there are ties in the distance, the result will include all the tied geo
 spark.sedona.join.knn.includeTieBreakers=true
 ```
 
-Filter Pushdown Considerations:
+### Filter Pushdown Considerations:
 
 When using ST_KNN with filters applied to the resulting DataFrame, some of these filters may be pushed down to the object side of the kNN join. This means the filters will be applied to the object side reader before the kNN join is executed. If you want the filters to be applied after the kNN join, ensure that you first materialize the kNN join results and then apply the filters.
 
@@ -43,7 +43,39 @@ CACHE TABLE knnResult;
 SELECT * FROM knnResult WHERE condition;
 ```
 
-SQL Example
+### Handling SQL-Defined Tables in ST_KNN Joins:
+
+When creating DataFrames from hard-coded SQL select statements in Sedona, and later using them in `ST_KNN` joins, Sedona may attempt to optimize the query in a way that bypasses the intended kNN join logic. Specifically, if you create DataFrames with hard-coded SQL, such as:
+
+```scala
+val df1 = sedona.sql("SELECT ST_Point(0.0, 0.0) as geom1")
+val df2 = sedona.sql("SELECT ST_Point(0.0, 0.0) as geom2")
+
+val df = df1.join(df2, expr("ST_KNN(geom1, geom2, 1)"))
+```
+
+Sedona may optimize the join to a form like this:
+
+```sql
+SELECT ST_KNN(ST_Point(0.0, 0.0), ST_Point(0.0, 0.0), 1)
+```
+
+As a result, the ST_KNN function is handled as a User-Defined Function (UDF) instead of a proper join operation, preventing Sedona from initiating the kNN join execution path. Unlike typical UDFs, the ST_KNN function operates on multiple rows across DataFrames, not just individual rows. When this occurs, the query fails with an UnsupportedOperationException, indicating that the KNN predicate is not supported.
+
+Workaround:
+
+To prevent Spark's optimization from bypassing the kNN join logic, the DataFrames created with hard-coded SQL select statements must be materialized before performing the join. By caching the DataFrames, you can instruct Spark to avoid this undesired optimization:
+
+```scala
+val df1 = sedona.sql("SELECT ST_Point(0.0, 0.0) as geom1").cache()
+val df2 = sedona.sql("SELECT ST_Point(0.0, 0.0) as geom2").cache()
+
+val df = df1.join(df2, expr("ST_KNN(geom1, geom2, 1)"))
+```
+
+Materializing the DataFrames with .cache() ensures that the correct kNN join path is followed in the Spark logical plan and prevents the optimization that would treat ST_KNN as a simple UDF.
+
+### SQL Example
 
 Suppose we have two tables `QUERIES` and `OBJECTS` with the following data:
 
