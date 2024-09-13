@@ -6591,9 +6591,14 @@ If no <code>toRasterIndex</code> is provided, the new band is appended to the en
 <p>If <code>crop</code> is not specified then it will default to <code>true</code>, meaning it will make the resulting raster shrink to the geometry's extent and if <code>noDataValue</code> is not specified then the resulting raster will have the minimum possible value for the band pixel data type.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Since <code>v1.5.1</code>, if the coordinate reference system (CRS) of the input <code>geom</code> geometry differs from that of the <code>raster</code>, then <code>geom</code> will be transformed to match the CRS of the <code>raster</code>. If the <code>raster</code> or <code>geom</code> doesn't have a CRS then it will default to <code>4326/WGS84</code>.</p>
+<ul>
+<li>Since <code>v1.5.1</code>, if the coordinate reference system (CRS) of the input <code>geom</code> geometry differs from that of the <code>raster</code>, then <code>geom</code> will be transformed to match the CRS of the <code>raster</code>. If the <code>raster</code> or <code>geom</code> doesn't have a CRS then it will default to <code>4326/WGS84</code>.</li>
+<li>Since <code>v1.7.0</code>, <code>RS_Clip</code> function will return <code>null</code> if the <code>raster</code> and <code>geometry</code> geometry do not intersect. If you want to throw an exception in this case, you can set the <code>lenient</code> parameter to <code>false</code>.</li>
+</ul>
 </div>
 <p>Format:</p>
+<div class="highlight"><pre><span></span><code>RS_Clip(raster: Raster, band: Integer, geom: Geometry, noDataValue: Double, crop: Boolean, lenient: Boolean)
+</code></pre></div>
 <div class="highlight"><pre><span></span><code>RS_Clip(raster: Raster, band: Integer, geom: Geometry, noDataValue: Double, crop: Boolean)
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>RS_Clip(raster: Raster, band: Integer, geom: Geometry, noDataValue: Double)
@@ -7489,7 +7494,7 @@ To learn how to write map algebra script, please refer to <a href="https://githu
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">August 5, 2024 16:47:41</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">September 13, 2024 23:11:59</span>
   </span>
 
     
