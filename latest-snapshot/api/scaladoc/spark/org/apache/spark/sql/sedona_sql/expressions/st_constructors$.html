@@ -719,6 +719,10 @@
                         <a href="ST_MPolyFromText.html" title="Return a Geometry from a WKT string">ST_MPolyFromText</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="ST_MakeEnvelope.html" title="Return a polygon given minX,minY,maxX,maxY and optional SRID"></a>
+                        <a href="ST_MakeEnvelope.html" title="Return a polygon given minX,minY,maxX,maxY and optional SRID">ST_MakeEnvelope</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="ST_MakeLine.html" title=""></a>
                         <a href="ST_MakeLine.html" title="">ST_MakeLine</a>
                       </li><li class="current-entities indented6">
@@ -2091,6 +2095,102 @@
       </span>
       <span class="symbol">
         <span class="name">ST_MPolyFromText</span><span class="params">(<span name="wkt">wkt: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.st_constructors#ST_MakeEnvelope" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_MakeEnvelope(minX:Double,minY:Double,maxX:Double,maxY:Double,srid:Int):org.apache.spark.sql.Column"></a><a id="ST_MakeEnvelope(Double,Double,Double,Double,Int):Column"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/st_constructors$.html#ST_MakeEnvelope(minX:Double,minY:Double,maxX:Double,maxY:Double,srid:Int):org.apache.spark.sql.Column" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ST_MakeEnvelope</span><span class="params">(<span name="minX">minX: <span class="extype" name="scala.Double">Double</span></span>, <span name="minY">minY: <span class="extype" name="scala.Double">Double</span></span>, <span name="maxX">maxX: <span class="extype" name="scala.Double">Double</span></span>, <span name="maxY">maxY: <span class="extype" name="scala.Double">Double</span></span>, <span name="srid">srid: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.st_constructors#ST_MakeEnvelope" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_MakeEnvelope(minX:String,minY:String,maxX:String,maxY:String,srid:String):org.apache.spark.sql.Column"></a><a id="ST_MakeEnvelope(String,String,String,String,String):Column"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/st_constructors$.html#ST_MakeEnvelope(minX:String,minY:String,maxX:String,maxY:String,srid:String):org.apache.spark.sql.Column" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ST_MakeEnvelope</span><span class="params">(<span name="minX">minX: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="minY">minY: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="maxX">maxX: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="maxY">maxY: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="srid">srid: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.st_constructors#ST_MakeEnvelope" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_MakeEnvelope(minX:org.apache.spark.sql.Column,minY:org.apache.spark.sql.Column,maxX:org.apache.spark.sql.Column,maxY:org.apache.spark.sql.Column,srid:org.apache.spark.sql.Column):org.apache.spark.sql.Column"></a><a id="ST_MakeEnvelope(Column,Column,Column,Column,Column):Column"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/st_constructors$.html#ST_MakeEnvelope(minX:org.apache.spark.sql.Column,minY:org.apache.spark.sql.Column,maxX:org.apache.spark.sql.Column,maxY:org.apache.spark.sql.Column,srid:org.apache.spark.sql.Column):org.apache.spark.sql.Column" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ST_MakeEnvelope</span><span class="params">(<span name="minX">minX: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>, <span name="minY">minY: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>, <span name="maxX">maxX: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>, <span name="maxY">maxY: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>, <span name="srid">srid: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.st_constructors#ST_MakeEnvelope" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_MakeEnvelope(minX:Double,minY:Double,maxX:Double,maxY:Double):org.apache.spark.sql.Column"></a><a id="ST_MakeEnvelope(Double,Double,Double,Double):Column"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/st_constructors$.html#ST_MakeEnvelope(minX:Double,minY:Double,maxX:Double,maxY:Double):org.apache.spark.sql.Column" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ST_MakeEnvelope</span><span class="params">(<span name="minX">minX: <span class="extype" name="scala.Double">Double</span></span>, <span name="minY">minY: <span class="extype" name="scala.Double">Double</span></span>, <span name="maxX">maxX: <span class="extype" name="scala.Double">Double</span></span>, <span name="maxY">maxY: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.st_constructors#ST_MakeEnvelope" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_MakeEnvelope(minX:String,minY:String,maxX:String,maxY:String):org.apache.spark.sql.Column"></a><a id="ST_MakeEnvelope(String,String,String,String):Column"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/st_constructors$.html#ST_MakeEnvelope(minX:String,minY:String,maxX:String,maxY:String):org.apache.spark.sql.Column" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ST_MakeEnvelope</span><span class="params">(<span name="minX">minX: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="minY">minY: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="maxX">maxX: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="maxY">maxY: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.st_constructors#ST_MakeEnvelope" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_MakeEnvelope(minX:org.apache.spark.sql.Column,minY:org.apache.spark.sql.Column,maxX:org.apache.spark.sql.Column,maxY:org.apache.spark.sql.Column):org.apache.spark.sql.Column"></a><a id="ST_MakeEnvelope(Column,Column,Column,Column):Column"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/st_constructors$.html#ST_MakeEnvelope(minX:org.apache.spark.sql.Column,minY:org.apache.spark.sql.Column,maxX:org.apache.spark.sql.Column,maxY:org.apache.spark.sql.Column):org.apache.spark.sql.Column" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ST_MakeEnvelope</span><span class="params">(<span name="minX">minX: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>, <span name="minY">minY: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>, <span name="maxX">maxX: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>, <span name="maxY">maxY: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
       </span>
       
       
