@@ -511,6 +511,21 @@ case class ST_MakePoint(inputExpressions: Seq[Expression])
 }
 
 /**
+ * Return a polygon given minX,minY,maxX,maxY and optional SRID
+ *
+ * @param inputExpressions
+ */
+case class ST_MakeEnvelope(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction5(Constructors.makeEnvelope),
+      inferrableFunction4(Constructors.makeEnvelope)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
  * Return a polygon given minX,minY,maxX,maxY
  *
  * @param inputExpressions

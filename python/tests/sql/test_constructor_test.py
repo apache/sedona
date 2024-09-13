@@ -117,6 +117,16 @@ class TestConstructors(TestBase):
         polygon_df = self.spark.sql("select ST_GeomFromWkt(wkt) as geomn from input_wkt")
         assert polygon_df.count() == 8
 
+    def test_st_make_envelope(self):
+        polygonDF = self.spark.sql(
+            "select ST_MakeEnvelope(double(1.234),double(2.234),double(3.345),double(3.345), 1111) as geom")
+        assert (polygonDF.count() == 1)
+        assert (1111 == polygonDF.selectExpr("ST_SRID(geom)").first()[0])
+
+        polygonDF = self.spark.sql(
+            "select ST_MakeEnvelope(double(1.234),double(2.234),double(3.345),double(3.345))")
+        assert (polygonDF.count() == 1)
+
     def test_st_geom_from_text(self):
         polygon_wkt_df = self.spark.read.format("csv").\
             option("delimiter", "\t").\

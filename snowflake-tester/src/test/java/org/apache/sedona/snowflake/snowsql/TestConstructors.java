@@ -242,6 +242,22 @@ public class TestConstructors extends TestBase {
   }
 
   @Test
+  public void test_ST_MakeEnvelope() {
+    registerUDF("ST_MakeEnvelope", double.class, double.class, double.class, double.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_MakeEnvelope(1.23, 2.3, 3.4, 4.5))",
+        "POLYGON ((1.23 2.3, 1.23 4.5, 3.4 4.5, 3.4 2.3, 1.23 2.3))");
+
+    registerUDF(
+        "ST_MakeEnvelope", double.class, double.class, double.class, double.class, int.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_MakeEnvelope(1.23, 2.3, 3.4, 4.5, 1111))",
+        "POLYGON ((1.23 2.3, 1.23 4.5, 3.4 4.5, 3.4 2.3, 1.23 2.3))");
+    verifySqlSingleRes(
+        "select sedona.ST_SRID(sedona.ST_MakeEnvelope(1.23, 2.3, 3.4, 4.5, 1111))", 1111);
+  }
+
+  @Test
   public void test_ST_PolygonFromEnvelope() {
     registerUDF("ST_PolygonFromEnvelope", double.class, double.class, double.class, double.class);
     verifySqlSingleRes(

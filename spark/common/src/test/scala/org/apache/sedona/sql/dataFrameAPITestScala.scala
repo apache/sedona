@@ -295,6 +295,31 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("passed st_makeenvlope") {
+      val df = sparkSession.sql(
+        "SELECT 0.0 AS minx, 1.0 AS miny, 2.0 AS maxx, 3.0 AS maxy, 1111 AS srid")
+      val actualResult =
+        df.select(ST_MakeEnvelope("minx", "miny", "maxx", "maxy", "srid").as("geom"))
+      var actualGeom = actualResult
+        .take(1)(0)
+        .get(0)
+        .asInstanceOf[Geometry]
+        .toText()
+      var expectedResult = "POLYGON ((0 1, 0 3, 2 3, 2 1, 0 1))"
+      assert(actualGeom == expectedResult)
+
+      assert(1111 == actualResult.selectExpr("ST_SRID(geom)").first().getInt(0))
+
+      actualGeom = df
+        .select(ST_MakeEnvelope("minx", "miny", "maxx", "maxy"))
+        .take(1)(0)
+        .get(0)
+        .asInstanceOf[Geometry]
+        .toText()
+      expectedResult = "POLYGON ((0 1, 0 3, 2 3, 2 1, 0 1))"
+      assert(actualGeom == expectedResult)
+    }
+
     it("passed st_polygonfromenvelope with column values") {
       val df = sparkSession.sql("SELECT 0.0 AS minx, 1.0 AS miny, 2.0 AS maxx, 3.0 AS maxy")
       val actualResult = df

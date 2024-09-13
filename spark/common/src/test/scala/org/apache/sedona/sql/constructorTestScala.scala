@@ -118,6 +118,17 @@ class constructorTestScala extends TestBaseScala {
       assert(pointDf.count() == 1)
     }
 
+    it("Passed ST_MakeEnvelope") {
+      var polygonDF = sparkSession.sql(
+        "select ST_MakeEnvelope(double(1.234),double(2.234),double(3.345),double(3.345), 1111) as geom")
+      assert(polygonDF.count() == 1)
+      assert(1111 == polygonDF.selectExpr("ST_SRID(geom)").first().getInt(0))
+
+      polygonDF = sparkSession.sql(
+        "select ST_MakeEnvelope(double(1.234),double(2.234),double(3.345),double(3.345))")
+      assert(polygonDF.count() == 1)
+    }
+
     it("Passed ST_PolygonFromEnvelope") {
       val polygonDF = sparkSession.sql(
         "select ST_PolygonFromEnvelope(double(1.234),double(2.234),double(3.345),double(3.345))")
