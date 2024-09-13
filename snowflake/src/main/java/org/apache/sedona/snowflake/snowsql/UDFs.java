@@ -1277,6 +1277,11 @@ public class UDFs {
     return GeometrySerde.serialize(Functions.rotateX(GeometrySerde.deserialize(geometry), angle));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "angle"})
+  public static byte[] ST_RotateY(byte[] geometry, double angle) {
+    return GeometrySerde.serialize(Functions.rotateY(GeometrySerde.deserialize(geometry), angle));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geom", "angle"})
   public static byte[] ST_Rotate(byte[] geom, double angle) {
     return GeometrySerde.serialize(Functions.rotate(GeometrySerde.deserialize(geom), angle));

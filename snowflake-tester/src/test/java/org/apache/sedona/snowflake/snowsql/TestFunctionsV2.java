@@ -1184,6 +1184,15 @@ public class TestFunctionsV2 extends TestBase {
   }
 
   @Test
+  public void test_ST_RotateY() {
+    registerUDFV2("ST_RotateY", String.class, double.class);
+    registerUDFV2("ST_ReducePrecision", String.class, int.class);
+    verifySqlSingleRes(
+        "select ST_AsText(ST_ReducePrecision(sedona.ST_RotateY(ST_GeometryFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)'), 10),2))",
+        "LINESTRING(0 0,-0.84 0,-0.84 1,0 0)");
+  }
+
+  @Test
   public void test_ST_Rotate() {
     registerUDFV2("ST_Rotate", String.class, double.class);
     verifySqlSingleRes(

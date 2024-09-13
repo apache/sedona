@@ -2051,6 +2051,20 @@ def ST_RotateX(geometry: ColumnOrName, angle: Union[ColumnOrName, float]) -> Col
 
 
 @validate_argument_types
+def ST_RotateY(geometry: ColumnOrName, angle: Union[ColumnOrName, float]) -> Column:
+    """Returns geometry rotated by the given angle in Y axis
+
+    @param geometry: Geometry column or name
+    :type geometry: ColumnOrName
+    @param angle: Rotation angle in radians
+    :type angle: float
+    @return: Y-axis rotated geometry
+    """
+
+    return _call_st_function("ST_RotateY", (geometry, angle))
+
+
+@validate_argument_types
 def ST_Rotate(geometry: ColumnOrName, angle: Union[ColumnOrName, float], originX: Union[ColumnOrName, float] = None,
               originY: Union[ColumnOrName, float] = None, pointOrigin: ColumnOrName = None) -> Column:
     """Return a counter-clockwise rotated geometry along the specified origin.

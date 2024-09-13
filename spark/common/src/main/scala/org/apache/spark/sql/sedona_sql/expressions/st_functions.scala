@@ -490,6 +490,13 @@ object st_functions extends DataFrameAPI {
   def ST_RotateX(geometry: String, angle: String): Column =
     wrapExpression[ST_RotateX](geometry, angle)
 
+  def ST_RotateY(geometry: Column, angle: Column): Column =
+    wrapExpression[ST_RotateY](geometry, angle)
+  def ST_RotateY(geometry: String, angle: Double): Column =
+    wrapExpression[ST_RotateY](geometry, angle)
+  def ST_RotateY(geometry: String, angle: String): Column =
+    wrapExpression[ST_RotateY](geometry, angle)
+
   def ST_Rotate(geometry: Column, angle: Column): Column =
     wrapExpression[ST_Rotate](geometry, angle)
   def ST_Rotate(geometry: String, angle: Double): Column =
