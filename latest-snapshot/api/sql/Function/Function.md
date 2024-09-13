@@ -3401,6 +3401,26 @@ Output:
 SRID=4326;POLYGON ((0 0, 1 0, 1 -0.8390715290764524, 0 0))
 ```
 
+## ST_RotateY
+
+Introduction: Performs a counter-clockwise rotation of the specified geometry around the Y-axis by the given angle measured in radians.
+
+Format: `ST_RotateY(geometry: Geometry, angle: Double)`
+
+Since: `v1.7.0`
+
+SQL Example:
+
+```sql
+SELECT ST_RotateY(ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 0))'), 10)
+```
+
+Output:
+
+```
+SRID=4326;POLYGON ((0 0, -0.8390715290764524 0, -0.8390715290764524 1, 0 0))
+```
+
 ## ST_S2CellIDs
 
 Introduction: Cover the geometry with Google S2 Cells, return the corresponding cell IDs with the given level.
