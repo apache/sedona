@@ -1027,6 +1027,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       expectedValues = Seq(0.0, 0.0, 0.0, 0.0, null)
       assertTrue(expectedValues.equals(actualValues))
 
+      // Test with a polygon that does not intersect the raster in lenient mode
+      val actual = df
+        .selectExpr(
+          "RS_Clip(raster, 1, ST_GeomFromWKT('POLYGON((274157 4174899,263510 4174947,269859 4183348,274157 4174899))'))")
+        .first()
+        .get(0)
+      assertNull(actual)
     }
 
     it("Passed RS_AsGeoTiff") {

@@ -59,6 +59,7 @@ case class RS_Union(inputExpressions: Seq[Expression])
 
 case class RS_Clip(inputExpressions: Seq[Expression])
     extends InferredExpression(
+      inferrableFunction6(RasterBandEditors.clip),
       inferrableFunction5(RasterBandEditors.clip),
       inferrableFunction4(RasterBandEditors.clip),
       inferrableFunction3(RasterBandEditors.clip)) {
