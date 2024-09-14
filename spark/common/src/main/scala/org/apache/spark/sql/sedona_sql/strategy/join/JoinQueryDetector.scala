@@ -28,7 +28,7 @@ import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.execution.datasources.LogicalRelation
 import org.apache.spark.sql.execution.datasources.v2.DataSourceV2ScanRelation
 import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
-import org.apache.spark.sql.sedona_sql.expressions._
+import org.apache.spark.sql.sedona_sql.expressions.{ST_KNN, _}
 import org.apache.spark.sql.sedona_sql.expressions.raster._
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
 import org.apache.spark.sql.{SparkSession, Strategy}
@@ -602,7 +602,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
       spatialPredicate = null,
       isGeography,
       condition,
-      extraCondition) :: Nil
+      extractExtraKNNJoinCondition(condition)) :: Nil
   }
 
   private def planDistanceJoin(
@@ -661,6 +661,24 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
           "Spatial distance join for ST_Distance with arguments not " +
             "aligned with join relations is not supported")
         Nil
+    }
+  }
+
+  private def extractExtraKNNJoinCondition(condition: Expression): Option[Expression] = {
+    condition match {
+      case and: And =>
+        // Check both left and right sides for ST_KNN or ST_AKNN
+        if (and.left.isInstanceOf[ST_KNN]) {
+          Some(and.right)
+        } else if (and.right.isInstanceOf[ST_KNN]) {
+          Some(and.left)
+        } else {
+          None
+        }
+      case _: ST_KNN =>
+        None
+      case _ =>
+        Some(condition)
     }
   }
 
