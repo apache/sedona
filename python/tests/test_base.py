@@ -15,6 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+from tempfile import mkdtemp
 from sedona.spark import *
 from sedona.utils.decorators import classproperty
 
@@ -25,6 +26,7 @@ class TestBase:
     def spark(self):
         if not hasattr(self, "__spark"):
             spark = SedonaContext.create(SedonaContext.builder().master("local[*]").getOrCreate())
+            spark.sparkContext.setCheckpointDir(mkdtemp())
             setattr(self, "__spark", spark)
         return getattr(self, "__spark")
 
