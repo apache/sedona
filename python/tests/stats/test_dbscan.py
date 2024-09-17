@@ -90,7 +90,6 @@ class TestDBScan(TestBase):
 
     def test_dbscan_valid_parameters(self):
         # repeated broadcast joins with this small data size use a lot of RAM on broadcast references
-        prior_join_threshold = self.spark.conf.get("sedona.join.autoBroadcastJoinThreshold", None)
         self.spark.conf.set(
             "sedona.join.autoBroadcastJoinThreshold", -1
         )
@@ -101,12 +100,11 @@ class TestDBScan(TestBase):
                     self.get_data(), epsilon, min_pts
                 ) == self.get_actual_results(df, epsilon, min_pts)
 
-        if prior_join_threshold is None:
-            self.spark.conf.unset("sedona.join.autoBroadcastJoinThreshold")
-        else:
-            self.spark.conf.set("sedona.join.autoBroadcastJoinThreshold", prior_join_threshold)
-
     def test_dbscan_valid_parameters_default_column_name(self):
+        # repeated broadcast joins with this small data size use a lot of RAM on broadcast references
+        self.spark.conf.set(
+            "sedona.join.autoBroadcastJoinThreshold", -1
+        )
         df = self.create_sample_dataframe().select(
             "id", f.col("arealandmark").alias("geometryFieldName")
         )
@@ -118,6 +116,10 @@ class TestDBScan(TestBase):
         ) == self.get_actual_results(df, epsilon, min_pts)
 
     def test_dbscan_valid_parameters_polygons(self):
+        # repeated broadcast joins with this small data size use a lot of RAM on broadcast references
+        self.spark.conf.set(
+            "sedona.join.autoBroadcastJoinThreshold", -1
+        )
         df = self.create_sample_dataframe().select(
             "id", ST_Buffer(f.col("arealandmark"), 0.000001).alias("geometryFieldName")
         )
@@ -129,6 +131,10 @@ class TestDBScan(TestBase):
         ) == self.get_actual_results(df, epsilon, min_pts)
 
     def test_dbscan_supports_other_distance_function(self):
+        # repeated broadcast joins with this small data size use a lot of RAM on broadcast references
+        self.spark.conf.set(
+            "sedona.join.autoBroadcastJoinThreshold", -1
+        )
         df = self.create_sample_dataframe().select(
             "id", ST_Buffer(f.col("arealandmark"), 0.000001).alias("geometryFieldName")
         )
@@ -171,6 +177,10 @@ class TestDBScan(TestBase):
             assert True
 
     def test_return_empty_df_when_no_clusters(self):
+        # repeated broadcast joins with this small data size use a lot of RAM on broadcast references
+        self.spark.conf.set(
+            "sedona.join.autoBroadcastJoinThreshold", -1
+        )
         df = self.create_sample_dataframe()
         epsilon = 0.1
         min_pts = 10000
@@ -183,6 +193,10 @@ class TestDBScan(TestBase):
         )
 
     def test_dbscan_doesnt_duplicate_border_points_in_two_clusters(self):
+        # repeated broadcast joins with this small data size use a lot of RAM on broadcast references
+        self.spark.conf.set(
+            "sedona.join.autoBroadcastJoinThreshold", -1
+        )
         input_df = self.spark.createDataFrame(
             [
                 {"id": 10, "x": 1.0, "y": 1.8},
@@ -204,6 +218,10 @@ class TestDBScan(TestBase):
         assert output_df.select("cluster").distinct().count() == 2
 
     def test_return_outliers_false_doesnt_return_outliers(self):
+        # repeated broadcast joins with this small data size use a lot of RAM on broadcast references
+        self.spark.conf.set(
+            "sedona.join.autoBroadcastJoinThreshold", -1
+        )
         df = self.create_sample_dataframe()
         for epsilon in [0.6, 0.7, 0.8]:
             for min_pts in [3, 4, 5]:
