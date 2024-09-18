@@ -23,7 +23,7 @@ import java.lang.reflect.Field;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.enums.JoinBuildSide;
-import org.apache.sedona.core.enums.JoinSparitionDominantSide;
+import org.apache.sedona.core.enums.JoinSpartitionDominantSide;
 import org.apache.sedona.core.enums.SpatialJoinOptimizationMode;
 import org.apache.spark.sql.RuntimeConfig;
 import org.apache.spark.sql.SparkSession;
@@ -40,7 +40,7 @@ public class SedonaConf implements Serializable {
 
   // Parameters for JoinQuery including RangeJoin and DistanceJoin
 
-  private JoinSparitionDominantSide joinSparitionDominantSide;
+  private JoinSpartitionDominantSide joinSpartitionDominantSide;
 
   private JoinBuildSide joinBuildSide;
 
@@ -80,8 +80,8 @@ public class SedonaConf implements Serializable {
         GridType.getGridType(getConfigValue(runtimeConfig, "join.gridtype", "kdbtree"));
     this.joinBuildSide =
         JoinBuildSide.getBuildSide(getConfigValue(runtimeConfig, "join.indexbuildside", "left"));
-    this.joinSparitionDominantSide =
-        JoinSparitionDominantSide.getJoinSparitionDominantSide(
+    this.joinSpartitionDominantSide =
+        JoinSpartitionDominantSide.getJoinSpartitionDominantSide(
             getConfigValue(runtimeConfig, "join.spatitionside", "left"));
     this.fallbackPartitionNum =
         Integer.parseInt(getConfigValue(runtimeConfig, "join.numpartition", "-1"));
@@ -137,8 +137,8 @@ public class SedonaConf implements Serializable {
     return joinGridType;
   }
 
-  public JoinSparitionDominantSide getJoinSparitionDominantSide() {
-    return joinSparitionDominantSide;
+  public JoinSpartitionDominantSide getJoinSpartitionDominantSide() {
+    return joinSpartitionDominantSide;
   }
 
   public int getFallbackPartitionNum() {
