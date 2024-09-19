@@ -342,7 +342,7 @@ public class ImageGenerator implements Serializable {
   public boolean SaveVectorImageAsLocalFile(
       JavaPairRDD<Integer, String> distributedImage, String outputPath, ImageType imageType)
       throws Exception {
-    logger.info("[Sedona-Viz][SaveVectormageAsLocalFile][Start]");
+    logger.info("[Sedona-Viz][SaveVectorImageAsLocalFile][Start]");
     JavaRDD<String> distributedVectorImageNoKey =
         distributedImage.map(
             new Function<Tuple2<Integer, String>, String>() {
@@ -353,7 +353,7 @@ public class ImageGenerator implements Serializable {
               }
             });
     this.SaveVectorImageAsLocalFile(distributedVectorImageNoKey.collect(), outputPath, imageType);
-    logger.info("[Sedona-Viz][SaveVectormageAsLocalFile][Stop]");
+    logger.info("[Sedona-Viz][SaveVectorImageAsLocalFile][Stop]");
     return true;
   }
 

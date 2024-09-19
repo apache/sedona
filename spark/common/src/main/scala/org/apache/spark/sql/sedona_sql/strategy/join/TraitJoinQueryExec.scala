@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
-import org.apache.sedona.core.enums.JoinSparitionDominantSide
+import org.apache.sedona.core.enums.JoinSpartitionDominantSide
 import org.apache.sedona.core.spatialOperator.{JoinQuery, SpatialPredicate}
 import org.apache.sedona.core.spatialOperator.JoinQuery.JoinParams
 import org.apache.sedona.core.utils.SedonaConf
@@ -56,7 +56,7 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
     // Only do SpatialRDD analyze when the user doesn't know approximate total count of the spatial partitioning
     // dominant side rdd
     if (sedonaConf.getJoinApproximateTotalCount == -1) {
-      if (sedonaConf.getJoinSparitionDominantSide == JoinSparitionDominantSide.LEFT) {
+      if (sedonaConf.getJoinSpartitionDominantSide == JoinSpartitionDominantSide.LEFT) {
         leftShapes.analyze()
       } else {
         rightShapes.analyze()
@@ -67,7 +67,7 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
 
     var numPartitions = -1
     try {
-      if (sedonaConf.getJoinSparitionDominantSide == JoinSparitionDominantSide.LEFT) {
+      if (sedonaConf.getJoinSpartitionDominantSide == JoinSpartitionDominantSide.LEFT) {
         if (sedonaConf.getFallbackPartitionNum != -1) {
           numPartitions = sedonaConf.getFallbackPartitionNum
         } else {
@@ -93,7 +93,7 @@ trait TraitJoinQueryExec extends TraitJoinQueryBase {
         print(e.getMessage)
         // Partition number are not qualified
         // Use fallback num partitions specified in SedonaConf
-        if (sedonaConf.getJoinSparitionDominantSide == JoinSparitionDominantSide.LEFT) {
+        if (sedonaConf.getJoinSpartitionDominantSide == JoinSpartitionDominantSide.LEFT) {
           numPartitions = sedonaConf.getFallbackPartitionNum
           doSpatialPartitioning(leftShapes, rightShapes, numPartitions, sedonaConf)
         } else {

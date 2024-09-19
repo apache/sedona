@@ -37,7 +37,7 @@ import org.locationtech.jts.index.strtree.STRtree;
  * containing all necessary points for accurate kNN results. The final union of local join results
  * provides the complete kNN join result for the datasets R and S.
  *
- * <p>It generates List<List<Integer>> expandedParitionedBoundaries based on the quad tree.
+ * <p>It generates List<List<Integer>> expandedPartitionedBoundaries based on the quad tree.
  */
 public class QuadTreeRTPartitioning extends QuadtreePartitioning {
   static final Logger log = Logger.getLogger(QuadTreeRTPartitioning.class);

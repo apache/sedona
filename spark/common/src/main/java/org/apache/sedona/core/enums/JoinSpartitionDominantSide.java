@@ -18,13 +18,13 @@
  */
 package org.apache.sedona.core.enums;
 
-public enum JoinSparitionDominantSide {
+public enum JoinSpartitionDominantSide {
   LEFT,
   RIGHT,
   NONE;
 
-  public static JoinSparitionDominantSide getJoinSparitionDominantSide(String str) {
-    for (JoinSparitionDominantSide me : JoinSparitionDominantSide.values()) {
+  public static JoinSpartitionDominantSide getJoinSpartitionDominantSide(String str) {
+    for (JoinSpartitionDominantSide me : JoinSpartitionDominantSide.values()) {
       if (me.name().equalsIgnoreCase(str)) {
         return me;
       }

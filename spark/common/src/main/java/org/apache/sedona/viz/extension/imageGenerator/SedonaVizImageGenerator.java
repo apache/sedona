@@ -261,7 +261,7 @@ public class SedonaVizImageGenerator extends ImageGenerator {
   // String outputPath, ImageType imageType)
   //            throws Exception
   //    {
-  //        logger.info("[Sedona-VizViz][SaveVectormageAsLocalFile][Start]");
+  //        logger.info("[Sedona-VizViz][SaveVectorImageAsLocalFile][Start]");
   //        JavaRDD<String> distributedVectorImageNoKey = distributedImage.map(new
   // Function<Tuple2<Integer, String>, String>()
   //        {
@@ -275,7 +275,7 @@ public class SedonaVizImageGenerator extends ImageGenerator {
   //        });
   //        this.SaveVectorImageAsLocalFile(distributedVectorImageNoKey.collect(), outputPath,
   // imageType);
-  //        logger.info("[Sedona-VizViz][SaveVectormageAsLocalFile][Stop]");
+  //        logger.info("[Sedona-VizViz][SaveVectorImageAsLocalFile][Stop]");
   //        return true;
   //    }
   //
