@@ -1100,6 +1100,21 @@ def ST_Polygonize(geometry: ColumnOrName) -> Column:
     return _call_st_function("ST_Polygonize", (geometry))
 
 @validate_argument_types
+def ST_Project(geom: ColumnOrName, distance: Union[ColumnOrName, float], azimuth: Union[ColumnOrName, float], lenient: Optional[Union[ColumnOrName, bool]] = None) -> Column:
+    """ Calculates a new point location given a starting point, distance, and direction (azimuth).
+
+    @param geom:
+    @param distance:
+    @param azimuth:
+    @param lenient:
+    @return:
+    """
+    args = (geom, distance, azimuth, lenient)
+    if lenient is None:
+        args = (geom, distance, azimuth)
+    return _call_st_function("ST_Project", args)
+
+@validate_argument_types
 def ST_MakePolygon(line_string: ColumnOrName, holes: Optional[ColumnOrName] = None) -> Column:
     """Create a polygon geometry from a linestring describing the exterior ring as well as an array of linestrings describing holes.
 

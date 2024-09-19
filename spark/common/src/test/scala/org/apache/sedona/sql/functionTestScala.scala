@@ -632,6 +632,25 @@ class functionTestScala
         result.toText() == "GEOMETRYCOLLECTION (POLYGON ((20 90, 20 160, 70 190, 80 130, 70 70, 20 90)), POLYGON ((20 90, 70 70, 80 130, 160 160, 180 40, 30 20, 20 90), (80 60, 150 80, 120 130, 80 60)), POLYGON ((70 190, 160 160, 80 130, 70 190)), POLYGON ((80 60, 120 130, 150 80, 80 60)))")
     }
 
+    it("Passed ST_Project") {
+      val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT(0 0)') as point")
+      var actual = baseDf.selectExpr("ST_Project(point, 10, radians(45))").first().get(0).toString
+      var expected = "POINT (7.0710678118654755 7.071067811865475)"
+      assertEquals(expected, actual)
+
+      actual = sparkSession
+        .sql("SELECT ST_Project(ST_MakeEnvelope(0, 1, 2, 0), 10, radians(50), true)")
+        .first()
+        .get(0)
+        .toString
+      expected = "POINT EMPTY"
+      assertEquals(expected, actual)
+
+      sparkSession
+        .sql("select ST_AsText(ST_Project(ST_GeomFromText('POLYGON ((1 5, 1 1, 3 3, 5 3, 1 5))'), 25, radians(270), true))")
+        .show(false)
+    }
+
     it("Passed ST_MakeValid On Invalid Polygon") {
 
       val df = sparkSession.sql(

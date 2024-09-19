@@ -78,6 +78,7 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
       ("ST_Points(geom1)", 1000),
       ("ST_Polygon(ST_InteriorRingN(geom4, 0), 2000)", 2000),
       ("ST_Polygonize(geom5)", 1000),
+      ("ST_Project(geom5, 12, 12, true)", 1000),
       ("ST_MakePolygon(ST_ExteriorRing(geom4), ARRAY(ST_InteriorRingN(geom4, 0)))", 1000),
       ("ST_Difference(geom1, geom2)", 1000),
       ("ST_SymDifference(geom1, geom2)", 1000),

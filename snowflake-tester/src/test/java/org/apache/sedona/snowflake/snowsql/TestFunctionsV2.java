@@ -754,6 +754,14 @@ public class TestFunctionsV2 extends TestBase {
   }
 
   @Test
+  public void test_ST_Project() {
+    registerUDFV2("ST_Project", String.class);
+    verifySqlSingleRes(
+        "select ST_AsWKT(sedona.ST_Project(ST_GeomFromWKT('POINT (0 0)'), 1000, 10))",
+        "POINT(-544.0211108893703 -839.0715290764522)");
+  }
+
+  @Test
   public void test_ST_PrecisionReduce() {
     registerUDFV2("ST_PrecisionReduce", String.class, int.class);
     verifySqlSingleRes(

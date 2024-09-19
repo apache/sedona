@@ -775,6 +775,21 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testProject() {
+    Table pointTable = createPointTable(testDataSize);
+    Table surfaceTable =
+        pointTable.select(
+            call(
+                Functions.ST_Project.class.getSimpleName(),
+                $(pointColNames[0]),
+                100,
+                Math.toRadians(45)));
+    Geometry result = (Geometry) first(surfaceTable).getField(0);
+    String expected = "POINT (70.71067811865476 70.71067811865474)";
+    assertEquals(expected, result.toString());
+  }
+
+  @Test
   public void testReducePrecision() {
     Table polygonTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('POINT(0.12 0.23)') AS geom");
     Table resultTable =

@@ -64,6 +64,7 @@ object Catalog {
     function[ST_PointM](0),
     function[ST_PointZM](0),
     function[ST_PolygonFromEnvelope](),
+    function[ST_Project](),
     function[ST_Contains](),
     function[ST_Intersects](),
     function[ST_Within](),

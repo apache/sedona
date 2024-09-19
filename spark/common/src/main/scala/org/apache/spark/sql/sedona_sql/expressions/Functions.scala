@@ -1009,6 +1009,16 @@ case class ST_Polygonize(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Project(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction4(Functions.project),
+      inferrableFunction3(Functions.project)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_MakePolygon(inputExpressions: Seq[Expression])
     extends InferredExpression(InferrableFunction.allowRightNull(Functions.makePolygon)) {
 
