@@ -46,7 +46,7 @@ class TestSpatialRDDToDataFrame(TestBase):
             [Point(22, 52.0), "2", 2],
             [Point(23.0, 52), "3", 3],
             [Point(23, 54), "4", 4],
-            [Point(24.0, 56.0), "5", 5]
+            [Point(24.0, 56.0), "5", 5],
         ]
         schema = StructType(
             [
@@ -68,7 +68,7 @@ class TestSpatialRDDToDataFrame(TestBase):
             Offset=0,
             splitter=splitter,
             carryInputData=True,
-            partitions=numPartitions
+            partitions=numPartitions,
         )
 
         raw_spatial_rdd = spatial_rdd.rawSpatialRDD.map(
@@ -78,10 +78,7 @@ class TestSpatialRDDToDataFrame(TestBase):
         self.spark.createDataFrame(raw_spatial_rdd).show()
 
         schema = StructType(
-            [
-                StructField("geom", GeometryType()),
-                StructField("name", StringType())
-            ]
+            [StructField("geom", GeometryType()), StructField("name", StringType())]
         )
 
         spatial_rdd_with_schema = self.spark.createDataFrame(
@@ -90,4 +87,6 @@ class TestSpatialRDDToDataFrame(TestBase):
 
         spatial_rdd_with_schema.show()
 
-        assert spatial_rdd_with_schema.take(1)[0][0].wkt == "POINT (32.324142 -88.331492)"
+        assert (
+            spatial_rdd_with_schema.take(1)[0][0].wkt == "POINT (32.324142 -88.331492)"
+        )

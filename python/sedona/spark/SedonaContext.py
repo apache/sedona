@@ -46,5 +46,6 @@ class SedonaContext:
         This method is needed when the user wants to manually configure Sedona
         :return: SparkSession.builder
         """
-        return SparkSession.builder.config("spark.serializer", KryoSerializer.getName).\
-            config("spark.kryo.registrator", SedonaKryoRegistrator.getName)
+        return SparkSession.builder.config(
+            "spark.serializer", KryoSerializer.getName
+        ).config("spark.kryo.registrator", SedonaKryoRegistrator.getName)

@@ -22,7 +22,11 @@ from functools import partial
 from pyspark.sql import Column
 from typing import Union, Optional
 
-from sedona.sql.dataframe_api import ColumnOrName, call_sedona_function, validate_argument_types
+from sedona.sql.dataframe_api import (
+    ColumnOrName,
+    call_sedona_function,
+    validate_argument_types,
+)
 
 
 _call_predicate_function = partial(call_sedona_function, "st_predicates")
@@ -54,6 +58,7 @@ def ST_Crosses(a: ColumnOrName, b: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_predicate_function("ST_Crosses", (a, b))
+
 
 @validate_argument_types
 def ST_Disjoint(a: ColumnOrName, b: ColumnOrName) -> Column:
@@ -138,8 +143,11 @@ def ST_Touches(a: ColumnOrName, b: ColumnOrName) -> Column:
     """
     return _call_predicate_function("ST_Touches", (a, b))
 
+
 @validate_argument_types
-def ST_Relate(a: ColumnOrName, b: ColumnOrName, intersectionMatrix: Optional[ColumnOrName] = None) -> Column:
+def ST_Relate(
+    a: ColumnOrName, b: ColumnOrName, intersectionMatrix: Optional[ColumnOrName] = None
+) -> Column:
     """Check whether two geometries are related to each other.
 
     :param a: One geometry column to check.
@@ -154,6 +162,7 @@ def ST_Relate(a: ColumnOrName, b: ColumnOrName, intersectionMatrix: Optional[Col
     args = (a, b) if intersectionMatrix is None else (a, b, intersectionMatrix)
 
     return _call_predicate_function("ST_Relate", args)
+
 
 @validate_argument_types
 def ST_RelateMatch(matrix1: ColumnOrName, matrix2: ColumnOrName) -> Column:
@@ -210,8 +219,14 @@ def ST_CoveredBy(a: ColumnOrName, b: ColumnOrName) -> Column:
     """
     return _call_predicate_function("ST_CoveredBy", (a, b))
 
+
 @validate_argument_types
-def ST_DWithin(a: ColumnOrName, b: ColumnOrName, distance: Union[ColumnOrName, float], use_sphere: Optional[Union[ColumnOrName, bool]] = None):
+def ST_DWithin(
+    a: ColumnOrName,
+    b: ColumnOrName,
+    distance: Union[ColumnOrName, float],
+    use_sphere: Optional[Union[ColumnOrName, bool]] = None,
+):
     """
     Check if geometry a is within 'distance' units of geometry b
     :param a: Geometry column to check
@@ -220,10 +235,21 @@ def ST_DWithin(a: ColumnOrName, b: ColumnOrName, distance: Union[ColumnOrName, f
     :param use_sphere: whether to use spheroid distance or euclidean distance
     :return: True if a is within distance units of Geometry b
     """
-    args = (a, b, distance, use_sphere) if use_sphere is not None else (a, b, distance,)
+    args = (
+        (a, b, distance, use_sphere)
+        if use_sphere is not None
+        else (
+            a,
+            b,
+            distance,
+        )
+    )
     return _call_predicate_function("ST_DWithin", args)
 
 
 # Automatically populate __all__
-__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
-           if inspect.isfunction(obj)]
+__all__ = [
+    name
+    for name, obj in inspect.getmembers(sys.modules[__name__])
+    if inspect.isfunction(obj)
+]

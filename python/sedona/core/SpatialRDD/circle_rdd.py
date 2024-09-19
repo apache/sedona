@@ -29,34 +29,35 @@ class CircleRDD(SpatialRDD, metaclass=MultipleMeta):
         :param Radius: float
         """
         super()._do_init(spatialRDD._sc)
-        self._srdd = self._jvm_spatial_rdd(
-            spatialRDD._srdd,
-            Radius
-        )
+        self._srdd = self._jvm_spatial_rdd(spatialRDD._srdd, Radius)
 
-    def getCenterPointAsSpatialRDD(self) -> 'PointRDD':
+    def getCenterPointAsSpatialRDD(self) -> "PointRDD":
         from sedona.core.SpatialRDD import PointRDD
+
         srdd = self._srdd.getCenterPointAsSpatialRDD()
         point_rdd = PointRDD()
         point_rdd.set_srdd(srdd)
         return point_rdd
 
-    def getCenterPolygonAsSpatialRDD(self) -> 'PolygonRDD':
+    def getCenterPolygonAsSpatialRDD(self) -> "PolygonRDD":
         from sedona.core.SpatialRDD import PolygonRDD
+
         srdd = self._srdd.getCenterPolygonAsSpatialRDD()
         polygon_rdd = PolygonRDD()
         polygon_rdd.set_srdd(srdd)
         return polygon_rdd
 
-    def getCenterLineStringRDDAsSpatialRDD(self) -> 'LineStringRDD':
+    def getCenterLineStringRDDAsSpatialRDD(self) -> "LineStringRDD":
         from sedona.core.SpatialRDD import LineStringRDD
+
         srdd = self._srdd.getCenterPolygonAsSpatialRDD()
         linestring_rdd = LineStringRDD()
         linestring_rdd.set_srdd(srdd)
         return linestring_rdd
 
-    def getCenterRectangleRDDAsSpatialRDD(self) -> 'RectangleRDD':
+    def getCenterRectangleRDDAsSpatialRDD(self) -> "RectangleRDD":
         from sedona.core.SpatialRDD import RectangleRDD
+
         srdd = self._srdd.getCenterLineStringRDDAsSpatialRDD()
         rectangle_rdd = RectangleRDD()
         rectangle_rdd.set_srdd(srdd)

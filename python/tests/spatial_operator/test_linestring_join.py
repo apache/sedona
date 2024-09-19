@@ -47,34 +47,44 @@ parameters = [
     dict(num_partitions=11, grid_type=GridType.KDBTREE),
 ]
 params_dyn = [{**param, **{"index_type": IndexType.QUADTREE}} for param in parameters]
-params_dyn.extend([{**param, **{"index_type": IndexType.RTREE}} for param in parameters])
+params_dyn.extend(
+    [{**param, **{"index_type": IndexType.RTREE}} for param in parameters]
+)
 
 
 class TestRectangleJoin(TestJoinBase):
     params = {
         "test_nested_loop": parameters,
         "test_dynamic_index_int": params_dyn,
-        "test_index_int": params_dyn
+        "test_index_int": params_dyn,
     }
 
     def test_nested_loop(self, num_partitions, grid_type):
         query_rdd = self.create_polygon_rdd(query_polygon_set, splitter, num_partitions)
-        spatial_rdd = self.create_linestring_rdd(input_location, splitter, num_partitions)
+        spatial_rdd = self.create_linestring_rdd(
+            input_location, splitter, num_partitions
+        )
 
         self.partition_rdds(query_rdd, spatial_rdd, grid_type)
 
         result = JoinQuery.SpatialJoinQuery(
-            spatial_rdd, query_rdd, False, True).collect()
+            spatial_rdd, query_rdd, False, True
+        ).collect()
 
         self.sanity_check_join_results(result)
-        expected_count = match_with_original_duplicates_count if self.expect_to_preserve_original_duplicates(
-            grid_type) else match_count
+        expected_count = (
+            match_with_original_duplicates_count
+            if self.expect_to_preserve_original_duplicates(grid_type)
+            else match_count
+        )
 
         assert expected_count == self.count_join_results(result)
 
     def test_dynamic_index_int(self, num_partitions, grid_type, index_type):
         query_rdd = self.create_polygon_rdd(query_polygon_set, splitter, num_partitions)
-        spatial_rdd = self.create_linestring_rdd(input_location, splitter, num_partitions)
+        spatial_rdd = self.create_linestring_rdd(
+            input_location, splitter, num_partitions
+        )
 
         self.partition_rdds(query_rdd, spatial_rdd, grid_type)
 
@@ -83,22 +93,31 @@ class TestRectangleJoin(TestJoinBase):
 
         self.sanity_check_flat_join_results(result)
 
-        expected_count = match_with_original_duplicates_count \
-            if self.expect_to_preserve_original_duplicates(grid_type) else match_count
+        expected_count = (
+            match_with_original_duplicates_count
+            if self.expect_to_preserve_original_duplicates(grid_type)
+            else match_count
+        )
 
         assert expected_count == result.__len__()
 
     def test_index_int(self, num_partitions, grid_type, index_type):
         query_rdd = self.create_polygon_rdd(query_polygon_set, splitter, num_partitions)
-        spatial_rdd = self.create_linestring_rdd(input_location, splitter, num_partitions)
+        spatial_rdd = self.create_linestring_rdd(
+            input_location, splitter, num_partitions
+        )
 
         self.partition_rdds(query_rdd, spatial_rdd, grid_type)
         spatial_rdd.buildIndex(index_type, True)
 
         result = JoinQuery.SpatialJoinQuery(
-            spatial_rdd, query_rdd, False, True).collect()
+            spatial_rdd, query_rdd, False, True
+        ).collect()
 
         self.sanity_check_join_results(result)
-        expected_count = match_with_original_duplicates_count if self.expect_to_preserve_original_duplicates(
-            grid_type) else match_count
+        expected_count = (
+            match_with_original_duplicates_count
+            if self.expect_to_preserve_original_duplicates(grid_type)
+            else match_count
+        )
         assert expected_count == self.count_join_results(result)

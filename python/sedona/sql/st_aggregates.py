@@ -21,7 +21,11 @@ from functools import partial
 
 from pyspark.sql import Column
 
-from sedona.sql.dataframe_api import ColumnOrName, call_sedona_function, validate_argument_types
+from sedona.sql.dataframe_api import (
+    ColumnOrName,
+    call_sedona_function,
+    validate_argument_types,
+)
 
 _call_aggregate_function = partial(call_sedona_function, "st_aggregates")
 
@@ -63,5 +67,8 @@ def ST_Union_Aggr(geometry: ColumnOrName) -> Column:
 
 
 # Automatically populate __all__
-__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
-           if inspect.isfunction(obj)]
+__all__ = [
+    name
+    for name, obj in inspect.getmembers(sys.modules[__name__])
+    if inspect.isfunction(obj)
+]
