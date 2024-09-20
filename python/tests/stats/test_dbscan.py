@@ -93,6 +93,8 @@ class TestDBScan(TestBase):
         self.spark.conf.set(
             "sedona.join.autoBroadcastJoinThreshold", -1
         )
+        self.spark.conf.set("spark.sql.autoBroadcastJoinThreshold", -1)
+
         df = self.create_sample_dataframe()
         for epsilon in [0.6, 0.7, 0.8]:
             for min_pts in [3, 4, 5]:
@@ -105,6 +107,8 @@ class TestDBScan(TestBase):
         self.spark.conf.set(
             "sedona.join.autoBroadcastJoinThreshold", -1
         )
+        self.spark.conf.set("spark.sql.autoBroadcastJoinThreshold", -1)
+
         df = self.create_sample_dataframe().select(
             "id", f.col("arealandmark").alias("geometryFieldName")
         )
@@ -120,6 +124,8 @@ class TestDBScan(TestBase):
         self.spark.conf.set(
             "sedona.join.autoBroadcastJoinThreshold", -1
         )
+        self.spark.conf.set("spark.sql.autoBroadcastJoinThreshold", -1)
+
         df = self.create_sample_dataframe().select(
             "id", ST_Buffer(f.col("arealandmark"), 0.000001).alias("geometryFieldName")
         )
@@ -135,6 +141,8 @@ class TestDBScan(TestBase):
         self.spark.conf.set(
             "sedona.join.autoBroadcastJoinThreshold", -1
         )
+        self.spark.conf.set("spark.sql.autoBroadcastJoinThreshold", -1)
+
         df = self.create_sample_dataframe().select(
             "id", ST_Buffer(f.col("arealandmark"), 0.000001).alias("geometryFieldName")
         )
@@ -181,6 +189,8 @@ class TestDBScan(TestBase):
         self.spark.conf.set(
             "sedona.join.autoBroadcastJoinThreshold", -1
         )
+        self.spark.conf.set("spark.sql.autoBroadcastJoinThreshold", -1)
+
         df = self.create_sample_dataframe()
         epsilon = 0.1
         min_pts = 10000
@@ -197,6 +207,8 @@ class TestDBScan(TestBase):
         self.spark.conf.set(
             "sedona.join.autoBroadcastJoinThreshold", -1
         )
+        self.spark.conf.set("spark.sql.autoBroadcastJoinThreshold", -1)
+
         input_df = self.spark.createDataFrame(
             [
                 {"id": 10, "x": 1.0, "y": 1.8},
@@ -222,6 +234,8 @@ class TestDBScan(TestBase):
         self.spark.conf.set(
             "sedona.join.autoBroadcastJoinThreshold", -1
         )
+        self.spark.conf.set("spark.sql.autoBroadcastJoinThreshold", -1)
+
         df = self.create_sample_dataframe()
         for epsilon in [0.6, 0.7, 0.8]:
             for min_pts in [3, 4, 5]:
