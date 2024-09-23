@@ -645,10 +645,6 @@ class functionTestScala
         .toString
       expected = "POINT EMPTY"
       assertEquals(expected, actual)
-
-      sparkSession
-        .sql("select ST_AsText(ST_Project(ST_GeomFromText('POLYGON ((1 5, 1 1, 3 3, 5 3, 1 5))'), 25, radians(270), true))")
-        .show(false)
     }
 
     it("Passed ST_MakeValid On Invalid Polygon") {

@@ -1366,8 +1366,11 @@ public class Functions {
       }
     }
 
+    // Normalize azimuth if it is out of (-360, 360) range
+    // by calculating the number of orbits and subtracting it
     int orbit = (int) Math.floor(azimuth / Angle.PI_TIMES_2);
     azimuth -= Angle.PI_TIMES_2 * orbit;
+    // Convert azimuth to conventional slope
     double slope = Angle.PI_TIMES_2 - azimuth + Angle.PI_OVER_2;
     if (slope > Angle.PI_TIMES_2) slope -= Angle.PI_TIMES_2;
     if (slope < -Angle.PI_TIMES_2) slope += Angle.PI_TIMES_2;
