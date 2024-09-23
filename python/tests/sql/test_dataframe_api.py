@@ -755,8 +755,20 @@ test_configurations = [
         "ST_Normalize(geom)",
         "GEOMETRYCOLLECTION (POLYGON ((0 2, 1 3, 2 4, 2 3, 2 2, 1 2, 0 2)), POLYGON ((2 2, 2 3, 2 4, 3 3, 4 2, 3 2, 2 2)))",
     ),
-    (stf.ST_Project, ("point", 10.0, radians(10)), "point_geom", "", "POINT (1.7364817766693021 10.848077530122081)"),
-    (stf.ST_Project, ("geom", 10.0, radians(10), True), "triangle_geom", "", "POINT EMPTY"),
+    (
+        stf.ST_Project,
+        ("point", 10.0, radians(10)),
+        "point_geom",
+        "",
+        "POINT (1.7364817766693021 10.848077530122081)",
+    ),
+    (
+        stf.ST_Project,
+        ("geom", 10.0, radians(10), True),
+        "triangle_geom",
+        "",
+        "POINT EMPTY",
+    ),
     (
         stf.ST_MakePolygon,
         ("geom",),
