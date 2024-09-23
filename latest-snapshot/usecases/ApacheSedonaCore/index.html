@@ -4464,8 +4464,7 @@ from shapely.geometry import Point
 from shapely.geometry import Polygon
 
 from sedona.spark import *
-from sedona.core.geom.envelope import Envelope
-</div>
+from sedona.core.geom.envelope import Envelope</div>
 </div>
 </div>
 </div>
@@ -4490,21 +4489,29 @@ from sedona.core.geom.envelope import Envelope
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span> <span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s1">'spark.jars.packages'</span><span class="p">,</span>
-           <span class="s1">'org.apache.sedona:sedona-spark-3.4_2.12:1.6.0,'</span>
-           <span class="s1">'org.datasyslab:geotools-wrapper:1.6.0-28.2,'</span>
-           <span class="s1">'uk.co.gresearch.spark:spark-extension_2.12:2.11.0-3.4'</span><span class="p">)</span><span class="o">.</span> \
-    <span class="n">getOrCreate</span><span class="p">()</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span>
+        <span class="s2">"spark.jars.packages"</span><span class="p">,</span>
+        <span class="s2">"org.apache.sedona:sedona-spark-3.4_2.12:1.6.0,"</span>
+        <span class="s2">"org.datasyslab:geotools-wrapper:1.6.0-28.2,"</span>
+        <span class="s2">"uk.co.gresearch.spark:spark-extension_2.12:2.11.0-3.4"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
 
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-2">config = SedonaContext.builder() .\
-    config('spark.jars.packages',
-           'org.apache.sedona:sedona-spark-3.4_2.12:1.6.0,'
-           'org.datasyslab:geotools-wrapper:1.6.0-28.2,'
-           'uk.co.gresearch.spark:spark-extension_2.12:2.11.0-3.4'). \
-    getOrCreate()
+<div class="clipboard-copy-txt" id="cell-2">config = (
+    SedonaContext.builder()
+    .config(
+        "spark.jars.packages",
+        "org.apache.sedona:sedona-spark-3.4_2.12:1.6.0,"
+        "org.datasyslab:geotools-wrapper:1.6.0-28.2,"
+        "uk.co.gresearch.spark:spark-extension_2.12:2.11.0-3.4",
+    )
+    .getOrCreate()
+)
 
 sedona = SedonaContext.create(config)</div>
 </div>
@@ -5313,9 +5320,13 @@ point_rdd.rawSpatialRDD.map(lambda x: x.geom.distance(Point(21, 52))).take(5)</d
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">point_rdd_to_geo</span> <span class="o">=</span> <span class="n">point_rdd</span><span class="o">.</span><span class="n">rawSpatialRDD</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">geom</span><span class="p">,</span> <span class="o">*</span><span class="n">x</span><span class="o">.</span><span class="n">getUserData</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">)])</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">point_rdd_to_geo</span> <span class="o">=</span> <span class="n">point_rdd</span><span class="o">.</span><span class="n">rawSpatialRDD</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">geom</span><span class="p">,</span> <span class="o">*</span><span class="n">x</span><span class="o">.</span><span class="n">getUserData</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">)]</span>
+<span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-16">point_rdd_to_geo = point_rdd.rawSpatialRDD.map(lambda x: [x.geom, *x.getUserData().split("\t")])</div>
+<div class="clipboard-copy-txt" id="cell-16">point_rdd_to_geo = point_rdd.rawSpatialRDD.map(
+    lambda x: [x.geom, *x.getUserData().split("\t")]
+)</div>
 </div>
 </div>
 </div>
@@ -5341,11 +5352,15 @@ point_rdd.rawSpatialRDD.map(lambda x: x.geom.distance(Point(21, 52))).take(5)</d
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">point_gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
-    <span class="n">point_rdd_to_geo</span><span class="o">.</span><span class="n">collect</span><span class="p">(),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">"geom"</span><span class="p">,</span> <span class="s2">"attr1"</span><span class="p">,</span> <span class="s2">"attr2"</span><span class="p">,</span> <span class="s2">"attr3"</span><span class="p">],</span> <span class="n">geometry</span><span class="o">=</span><span class="s2">"geom"</span>
+    <span class="n">point_rdd_to_geo</span><span class="o">.</span><span class="n">collect</span><span class="p">(),</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">"geom"</span><span class="p">,</span> <span class="s2">"attr1"</span><span class="p">,</span> <span class="s2">"attr2"</span><span class="p">,</span> <span class="s2">"attr3"</span><span class="p">],</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="s2">"geom"</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-17">point_gdf = gpd.GeoDataFrame(
-    point_rdd_to_geo.collect(), columns=["geom", "attr1", "attr2", "attr3"], geometry="geom"
+    point_rdd_to_geo.collect(),
+    columns=["geom", "attr1", "attr2", "attr3"],
+    geometry="geom",
 )</div>
 </div>
 </div>
@@ -5522,15 +5537,15 @@ point_rdd.rawSpatialRDD.map(lambda x: x.geom.distance(Point(21, 52))).take(5)</d
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">spatial_df</span> <span class="o">=</span> <span class="n">Adapter</span><span class="o">.</span>\
-    <span class="n">toDf</span><span class="p">(</span><span class="n">point_rdd</span><span class="p">,</span> <span class="p">[</span><span class="s2">"attr1"</span><span class="p">,</span> <span class="s2">"attr2"</span><span class="p">,</span> <span class="s2">"attr3"</span><span class="p">],</span> <span class="n">sedona</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"spatial_df"</span><span class="p">)</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">spatial_df</span> <span class="o">=</span> <span class="n">Adapter</span><span class="o">.</span><span class="n">toDf</span><span class="p">(</span>
+    <span class="n">point_rdd</span><span class="p">,</span> <span class="p">[</span><span class="s2">"attr1"</span><span class="p">,</span> <span class="s2">"attr2"</span><span class="p">,</span> <span class="s2">"attr3"</span><span class="p">],</span> <span class="n">sedona</span>
+<span class="p">)</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"spatial_df"</span><span class="p">)</span>
 
 <span class="n">spatial_gdf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"Select attr1, attr2, attr3, geometry as geom from spatial_df"</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-20">spatial_df = Adapter.\
-    toDf(point_rdd, ["attr1", "attr2", "attr3"], sedona).\
-    createOrReplaceTempView("spatial_df")
+<div class="clipboard-copy-txt" id="cell-20">spatial_df = Adapter.toDf(
+    point_rdd, ["attr1", "attr2", "attr3"], sedona
+).createOrReplaceTempView("spatial_df")
 
 spatial_gdf = sedona.sql("Select attr1, attr2, attr3, geometry as geom from spatial_df")</div>
 </div>
@@ -5939,15 +5954,27 @@ only showing top 5 rows
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">rectangle_rdd</span> <span class="o">=</span> <span class="n">RectangleRDD</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="s2">"data/zcta510-small.csv"</span><span class="p">,</span> <span class="n">FileDataSplitter</span><span class="o">.</span><span class="n">CSV</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">11</span><span class="p">)</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">rectangle_rdd</span> <span class="o">=</span> <span class="n">RectangleRDD</span><span class="p">(</span>
+    <span class="n">sc</span><span class="p">,</span> <span class="s2">"data/zcta510-small.csv"</span><span class="p">,</span> <span class="n">FileDataSplitter</span><span class="o">.</span><span class="n">CSV</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">11</span>
+<span class="p">)</span>
 <span class="n">point_rdd</span> <span class="o">=</span> <span class="n">PointRDD</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="s2">"data/arealm-small.csv"</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">FileDataSplitter</span><span class="o">.</span><span class="n">CSV</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">11</span><span class="p">)</span>
-<span class="n">polygon_rdd</span> <span class="o">=</span> <span class="n">PolygonRDD</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="s2">"data/primaryroads-polygon.csv"</span><span class="p">,</span> <span class="n">FileDataSplitter</span><span class="o">.</span><span class="n">CSV</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">11</span><span class="p">)</span>
-<span class="n">linestring_rdd</span> <span class="o">=</span> <span class="n">LineStringRDD</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="s2">"data/primaryroads-linestring.csv"</span><span class="p">,</span> <span class="n">FileDataSplitter</span><span class="o">.</span><span class="n">CSV</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">polygon_rdd</span> <span class="o">=</span> <span class="n">PolygonRDD</span><span class="p">(</span>
+    <span class="n">sc</span><span class="p">,</span> <span class="s2">"data/primaryroads-polygon.csv"</span><span class="p">,</span> <span class="n">FileDataSplitter</span><span class="o">.</span><span class="n">CSV</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">11</span>
+<span class="p">)</span>
+<span class="n">linestring_rdd</span> <span class="o">=</span> <span class="n">LineStringRDD</span><span class="p">(</span>
+    <span class="n">sc</span><span class="p">,</span> <span class="s2">"data/primaryroads-linestring.csv"</span><span class="p">,</span> <span class="n">FileDataSplitter</span><span class="o">.</span><span class="n">CSV</span><span class="p">,</span> <span class="kc">True</span>
+<span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-26">rectangle_rdd = RectangleRDD(sc, "data/zcta510-small.csv", FileDataSplitter.CSV, True, 11)
+<div class="clipboard-copy-txt" id="cell-26">rectangle_rdd = RectangleRDD(
+    sc, "data/zcta510-small.csv", FileDataSplitter.CSV, True, 11
+)
 point_rdd = PointRDD(sc, "data/arealm-small.csv", 1, FileDataSplitter.CSV, False, 11)
-polygon_rdd = PolygonRDD(sc, "data/primaryroads-polygon.csv", FileDataSplitter.CSV, True, 11)
-linestring_rdd = LineStringRDD(sc, "data/primaryroads-linestring.csv", FileDataSplitter.CSV, True)</div>
+polygon_rdd = PolygonRDD(
+    sc, "data/primaryroads-polygon.csv", FileDataSplitter.CSV, True, 11
+)
+linestring_rdd = LineStringRDD(
+    sc, "data/primaryroads-linestring.csv", FileDataSplitter.CSV, True
+)</div>
 </div>
 </div>
 </div>
@@ -6486,14 +6513,14 @@ result.map(lambda x: x[0].geom.area).take(5)</div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">schema</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">(</span>
     <span class="p">[</span>
         <span class="n">StructField</span><span class="p">(</span><span class="s2">"geom_left"</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">(),</span> <span class="kc">False</span><span class="p">),</span>
-        <span class="n">StructField</span><span class="p">(</span><span class="s2">"geom_right"</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">(),</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">StructField</span><span class="p">(</span><span class="s2">"geom_right"</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">(),</span> <span class="kc">False</span><span class="p">),</span>
     <span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-37">schema = StructType(
     [
         StructField("geom_left", GeometryType(), False),
-        StructField("geom_right", GeometryType(), False)
+        StructField("geom_right", GeometryType(), False),
     ]
 )</div>
 </div>
@@ -6849,9 +6876,13 @@ rectangle_rdd.spatialPartitioning(point_rdd.getPartitioner())</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">spatial_join_result_non_flat</span> <span class="o">=</span> <span class="n">JoinQuery</span><span class="o">.</span><span class="n">SpatialJoinQuery</span><span class="p">(</span><span class="n">point_rdd</span><span class="p">,</span> <span class="n">rectangle_rdd</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">spatial_join_result_non_flat</span> <span class="o">=</span> <span class="n">JoinQuery</span><span class="o">.</span><span class="n">SpatialJoinQuery</span><span class="p">(</span>
+    <span class="n">point_rdd</span><span class="p">,</span> <span class="n">rectangle_rdd</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
+<span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-44">spatial_join_result_non_flat = JoinQuery.SpatialJoinQuery(point_rdd, rectangle_rdd, False, True)</div>
+<div class="clipboard-copy-txt" id="cell-44">spatial_join_result_non_flat = JoinQuery.SpatialJoinQuery(
+    point_rdd, rectangle_rdd, False, True
+)</div>
 </div>
 </div>
 </div>
@@ -6877,10 +6908,14 @@ rectangle_rdd.spatialPartitioning(point_rdd.getPartitioner())</div>
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># number of point for each polygon</span>
-<span class="n">number_of_points</span> <span class="o">=</span> <span class="n">spatial_join_result_non_flat</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">geom</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()])</span>
+<span class="n">number_of_points</span> <span class="o">=</span> <span class="n">spatial_join_result_non_flat</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">geom</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()]</span>
+<span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-45"># number of point for each polygon
-number_of_points = spatial_join_result_non_flat.map(lambda x: [x[0].geom, x[1].__len__()])</div>
+number_of_points = spatial_join_result_non_flat.map(
+    lambda x: [x[0].geom, x[1].__len__()]
+)</div>
 </div>
 </div>
 </div>
@@ -6905,15 +6940,19 @@ number_of_points = spatial_join_result_non_flat.map(lambda x: [x[0].geom, x[1]._
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">schema</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">([</span>
-    <span class="n">StructField</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">(),</span> <span class="kc">False</span><span class="p">),</span>
-    <span class="n">StructField</span><span class="p">(</span><span class="s2">"number_of_points"</span><span class="p">,</span> <span class="n">LongType</span><span class="p">(),</span> <span class="kc">False</span><span class="p">)</span>
-<span class="p">])</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">schema</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">StructField</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">(),</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="n">StructField</span><span class="p">(</span><span class="s2">"number_of_points"</span><span class="p">,</span> <span class="n">LongType</span><span class="p">(),</span> <span class="kc">False</span><span class="p">),</span>
+    <span class="p">]</span>
+<span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-46">schema = StructType([
-    StructField("geometry", GeometryType(), False),
-    StructField("number_of_points", LongType(), False)
-])</div>
+<div class="clipboard-copy-txt" id="cell-46">schema = StructType(
+    [
+        StructField("geometry", GeometryType(), False),
+        StructField("number_of_points", LongType(), False),
+    ]
+)</div>
 </div>
 </div>
 </div>
@@ -7124,17 +7163,25 @@ number_of_points = spatial_join_result_non_flat.map(lambda x: [x[0].geom, x[1]._
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">polygon</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span>
-    <span class="p">[(</span><span class="o">-</span><span class="mf">84.237756</span><span class="p">,</span> <span class="mf">33.904859</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">84.237756</span><span class="p">,</span> <span class="mf">34.090426</span><span class="p">),</span>
-     <span class="p">(</span><span class="o">-</span><span class="mf">83.833011</span><span class="p">,</span> <span class="mf">34.090426</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">83.833011</span><span class="p">,</span> <span class="mf">33.904859</span><span class="p">),</span>
-     <span class="p">(</span><span class="o">-</span><span class="mf">84.237756</span><span class="p">,</span> <span class="mf">33.904859</span><span class="p">)</span>
-    <span class="p">])</span>
+    <span class="p">[</span>
+        <span class="p">(</span><span class="o">-</span><span class="mf">84.237756</span><span class="p">,</span> <span class="mf">33.904859</span><span class="p">),</span>
+        <span class="p">(</span><span class="o">-</span><span class="mf">84.237756</span><span class="p">,</span> <span class="mf">34.090426</span><span class="p">),</span>
+        <span class="p">(</span><span class="o">-</span><span class="mf">83.833011</span><span class="p">,</span> <span class="mf">34.090426</span><span class="p">),</span>
+        <span class="p">(</span><span class="o">-</span><span class="mf">83.833011</span><span class="p">,</span> <span class="mf">33.904859</span><span class="p">),</span>
+        <span class="p">(</span><span class="o">-</span><span class="mf">84.237756</span><span class="p">,</span> <span class="mf">33.904859</span><span class="p">),</span>
+    <span class="p">]</span>
+<span class="p">)</span>
 <span class="n">polygons_nearby</span> <span class="o">=</span> <span class="n">KNNQuery</span><span class="o">.</span><span class="n">SpatialKnnQuery</span><span class="p">(</span><span class="n">polygon_rdd</span><span class="p">,</span> <span class="n">polygon</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-50">polygon = Polygon(
-    [(-84.237756, 33.904859), (-84.237756, 34.090426),
-     (-83.833011, 34.090426), (-83.833011, 33.904859),
-     (-84.237756, 33.904859)
-    ])
+    [
+        (-84.237756, 33.904859),
+        (-84.237756, 34.090426),
+        (-83.833011, 34.090426),
+        (-83.833011, 33.904859),
+        (-84.237756, 33.904859),
+    ]
+)
 polygons_nearby = KNNQuery.SpatialKnnQuery(polygon_rdd, polygon, 5, False)</div>
 </div>
 </div>
@@ -7308,11 +7355,15 @@ RangeQuery has one method:</p>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">query_envelope</span> <span class="o">=</span> <span class="n">Envelope</span><span class="p">(</span><span class="o">-</span><span class="mf">85.01</span><span class="p">,</span> <span class="o">-</span><span class="mf">60.01</span><span class="p">,</span> <span class="mf">34.01</span><span class="p">,</span> <span class="mf">50.01</span><span class="p">)</span>
 
-<span class="n">result_range_query</span> <span class="o">=</span> <span class="n">RangeQuery</span><span class="o">.</span><span class="n">SpatialRangeQuery</span><span class="p">(</span><span class="n">linestring_rdd</span><span class="p">,</span> <span class="n">query_envelope</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">result_range_query</span> <span class="o">=</span> <span class="n">RangeQuery</span><span class="o">.</span><span class="n">SpatialRangeQuery</span><span class="p">(</span>
+    <span class="n">linestring_rdd</span><span class="p">,</span> <span class="n">query_envelope</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
+<span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-54">query_envelope = Envelope(-85.01, -60.01, 34.01, 50.01)
 
-result_range_query = RangeQuery.SpatialRangeQuery(linestring_rdd, query_envelope, False, False)</div>
+result_range_query = RangeQuery.SpatialRangeQuery(
+    linestring_rdd, query_envelope, False, False
+)</div>
 </div>
 </div>
 </div>
@@ -7475,15 +7526,11 @@ result_range_query = RangeQuery.SpatialRangeQuery(linestring_rdd, query_envelope
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
-    <span class="n">result_range_query</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">geom</span><span class="p">]),</span>
-    <span class="n">schema</span><span class="p">,</span>
-    <span class="n">verifySchema</span><span class="o">=</span><span class="kc">False</span>
+    <span class="n">result_range_query</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">geom</span><span class="p">]),</span> <span class="n">schema</span><span class="p">,</span> <span class="n">verifySchema</span><span class="o">=</span><span class="kc">False</span>
 <span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-59">sedona.createDataFrame(
-    result_range_query.map(lambda x: [x.geom]),
-    schema,
-    verifySchema=False
+    result_range_query.map(lambda x: [x.geom]), schema, verifySchema=False
 ).show(5, True)</div>
 </div>
 </div>
@@ -8497,11 +8544,15 @@ only showing top 5 rows
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">query_envelope</span> <span class="o">=</span> <span class="n">Envelope</span><span class="p">(</span><span class="o">-</span><span class="mf">85.01</span><span class="p">,</span> <span class="o">-</span><span class="mf">60.01</span><span class="p">,</span> <span class="mf">34.01</span><span class="p">,</span> <span class="mf">50.01</span><span class="p">)</span>
 
-<span class="n">result_range_query</span> <span class="o">=</span> <span class="n">RangeQueryRaw</span><span class="o">.</span><span class="n">SpatialRangeQuery</span><span class="p">(</span><span class="n">linestring_rdd</span><span class="p">,</span> <span class="n">query_envelope</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">result_range_query</span> <span class="o">=</span> <span class="n">RangeQueryRaw</span><span class="o">.</span><span class="n">SpatialRangeQuery</span><span class="p">(</span>
+    <span class="n">linestring_rdd</span><span class="p">,</span> <span class="n">query_envelope</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
+<span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-83">query_envelope = Envelope(-85.01, -60.01, 34.01, 50.01)
 
-result_range_query = RangeQueryRaw.SpatialRangeQuery(linestring_rdd, query_envelope, False, False)</div>
+result_range_query = RangeQueryRaw.SpatialRangeQuery(
+    linestring_rdd, query_envelope, False, False
+)</div>
 </div>
 </div>
 </div>
@@ -8807,7 +8858,7 @@ only showing top 5 rows
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 23, 2024 06:17:36</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">September 23, 2024 22:14:04</span>
   </span>
 
     

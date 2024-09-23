@@ -4508,24 +4508,31 @@ from sedona.spark import *</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span> <span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s1">'spark.jars.packages'</span><span class="p">,</span>
-           <span class="s1">'org.apache.sedona:sedona-spark-3.4_2.12:1.6.0,'</span>
-           <span class="s1">'org.datasyslab:geotools-wrapper:1.6.0-28.2,'</span>
-           <span class="s1">'uk.co.gresearch.spark:spark-extension_2.12:2.11.0-3.4'</span><span class="p">)</span><span class="o">.</span> \
-    <span class="n">getOrCreate</span><span class="p">()</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span>
+        <span class="s2">"spark.jars.packages"</span><span class="p">,</span>
+        <span class="s2">"org.apache.sedona:sedona-spark-3.4_2.12:1.6.0,"</span>
+        <span class="s2">"org.datasyslab:geotools-wrapper:1.6.0-28.2,"</span>
+        <span class="s2">"uk.co.gresearch.spark:spark-extension_2.12:2.11.0-3.4"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
 
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-2">config = SedonaContext.builder() .\
-    config('spark.jars.packages',
-           'org.apache.sedona:sedona-spark-3.4_2.12:1.6.0,'
-           'org.datasyslab:geotools-wrapper:1.6.0-28.2,'
-           'uk.co.gresearch.spark:spark-extension_2.12:2.11.0-3.4'). \
-    getOrCreate()
+<div class="clipboard-copy-txt" id="cell-2">config = (
+    SedonaContext.builder()
+    .config(
+        "spark.jars.packages",
+        "org.apache.sedona:sedona-spark-3.4_2.12:1.6.0,"
+        "org.datasyslab:geotools-wrapper:1.6.0-28.2,"
+        "uk.co.gresearch.spark:spark-extension_2.12:2.11.0-3.4",
+    )
+    .getOrCreate()
+)
 
-sedona = SedonaContext.create(config)
-</div>
+sedona = SedonaContext.create(config)</div>
 </div>
 </div>
 </div>
@@ -4663,24 +4670,32 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">point_csv_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"csv"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s2">"delimiter"</span><span class="p">,</span> <span class="s2">","</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">load</span><span class="p">(</span><span class="s2">"data/testpoint.csv"</span><span class="p">)</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">point_csv_df</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"csv"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"delimiter"</span><span class="p">,</span> <span class="s2">","</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"data/testpoint.csv"</span><span class="p">)</span>
+<span class="p">)</span>
 
 <span class="n">point_csv_df</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"pointtable"</span><span class="p">)</span>
 
-<span class="n">point_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable"</span><span class="p">)</span>
+<span class="n">point_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
+    <span class="s2">"select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable"</span>
+<span class="p">)</span>
 <span class="n">point_df</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-3">point_csv_df = sedona.read.format("csv").\
-    option("delimiter", ",").\
-    option("header", "false").\
-    load("data/testpoint.csv")
+<div class="clipboard-copy-txt" id="cell-3">point_csv_df = (
+    sedona.read.format("csv")
+    .option("delimiter", ",")
+    .option("header", "false")
+    .load("data/testpoint.csv")
+)
 
 point_csv_df.createOrReplaceTempView("pointtable")
 
-point_df = sedona.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
+point_df = sedona.sql(
+    "select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable"
+)
 point_df.show(5)</div>
 </div>
 </div>
@@ -4752,22 +4767,30 @@ only showing top 5 rows
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">polygon_wkt_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"csv"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s2">"delimiter"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">load</span><span class="p">(</span><span class="s2">"data/county_small.tsv"</span><span class="p">)</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">polygon_wkt_df</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"csv"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"delimiter"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"data/county_small.tsv"</span><span class="p">)</span>
+<span class="p">)</span>
 
 <span class="n">polygon_wkt_df</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"polygontable"</span><span class="p">)</span>
-<span class="n">polygon_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"select polygontable._c6 as name, ST_GeomFromText(polygontable._c0) as countyshape from polygontable"</span><span class="p">)</span>
+<span class="n">polygon_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
+    <span class="s2">"select polygontable._c6 as name, ST_GeomFromText(polygontable._c0) as countyshape from polygontable"</span>
+<span class="p">)</span>
 <span class="n">polygon_df</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-4">polygon_wkt_df = sedona.read.format("csv").\
-    option("delimiter", "\t").\
-    option("header", "false").\
-    load("data/county_small.tsv")
+<div class="clipboard-copy-txt" id="cell-4">polygon_wkt_df = (
+    sedona.read.format("csv")
+    .option("delimiter", "\t")
+    .option("header", "false")
+    .load("data/county_small.tsv")
+)
 
 polygon_wkt_df.createOrReplaceTempView("polygontable")
-polygon_df = sedona.sql("select polygontable._c6 as name, ST_GeomFromText(polygontable._c0) as countyshape from polygontable")
+polygon_df = sedona.sql(
+    "select polygontable._c6 as name, ST_GeomFromText(polygontable._c0) as countyshape from polygontable"
+)
 polygon_df.show(5)</div>
 </div>
 </div>
@@ -4827,22 +4850,30 @@ only showing top 5 rows
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">polygon_wkb_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"csv"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s2">"delimiter"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">load</span><span class="p">(</span><span class="s2">"data/county_small_wkb.tsv"</span><span class="p">)</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">polygon_wkb_df</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"csv"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"delimiter"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"data/county_small_wkb.tsv"</span><span class="p">)</span>
+<span class="p">)</span>
 
 <span class="n">polygon_wkb_df</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"polygontable"</span><span class="p">)</span>
-<span class="n">polygon_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"select polygontable._c6 as name, ST_GeomFromWKB(polygontable._c0) as countyshape from polygontable"</span><span class="p">)</span>
+<span class="n">polygon_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
+    <span class="s2">"select polygontable._c6 as name, ST_GeomFromWKB(polygontable._c0) as countyshape from polygontable"</span>
+<span class="p">)</span>
 <span class="n">polygon_df</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-5">polygon_wkb_df = sedona.read.format("csv").\
-    option("delimiter", "\t").\
-    option("header", "false").\
-    load("data/county_small_wkb.tsv")
+<div class="clipboard-copy-txt" id="cell-5">polygon_wkb_df = (
+    sedona.read.format("csv")
+    .option("delimiter", "\t")
+    .option("header", "false")
+    .load("data/county_small_wkb.tsv")
+)
 
 polygon_wkb_df.createOrReplaceTempView("polygontable")
-polygon_df = sedona.sql("select polygontable._c6 as name, ST_GeomFromWKB(polygontable._c0) as countyshape from polygontable")
+polygon_df = sedona.sql(
+    "select polygontable._c6 as name, ST_GeomFromWKB(polygontable._c0) as countyshape from polygontable"
+)
 polygon_df.show(5)</div>
 </div>
 </div>
@@ -4902,22 +4933,30 @@ only showing top 5 rows
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">polygon_json_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"csv"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s2">"delimiter"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">load</span><span class="p">(</span><span class="s2">"data/testPolygon.json"</span><span class="p">)</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">polygon_json_df</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"csv"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"delimiter"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"data/testPolygon.json"</span><span class="p">)</span>
+<span class="p">)</span>
 
 <span class="n">polygon_json_df</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"polygontable"</span><span class="p">)</span>
-<span class="n">polygon_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"select ST_GeomFromGeoJSON(polygontable._c0) as countyshape from polygontable"</span><span class="p">)</span>
+<span class="n">polygon_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
+    <span class="s2">"select ST_GeomFromGeoJSON(polygontable._c0) as countyshape from polygontable"</span>
+<span class="p">)</span>
 <span class="n">polygon_df</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-6">polygon_json_df = sedona.read.format("csv").\
-    option("delimiter", "\t").\
-    option("header", "false").\
-    load("data/testPolygon.json")
+<div class="clipboard-copy-txt" id="cell-6">polygon_json_df = (
+    sedona.read.format("csv")
+    .option("delimiter", "\t")
+    .option("header", "false")
+    .load("data/testPolygon.json")
+)
 
 polygon_json_df.createOrReplaceTempView("polygontable")
-polygon_df = sedona.sql("select ST_GeomFromGeoJSON(polygontable._c0) as countyshape from polygontable")
+polygon_df = sedona.sql(
+    "select ST_GeomFromGeoJSON(polygontable._c0) as countyshape from polygontable"
+)
 polygon_df.show(5)</div>
 </div>
 </div>
@@ -4988,45 +5027,69 @@ only showing top 5 rows
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">point_csv_df_1</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"csv"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s2">"delimiter"</span><span class="p">,</span> <span class="s2">","</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"data/testpoint.csv"</span><span class="p">)</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">point_csv_df_1</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"csv"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"delimiter"</span><span class="p">,</span> <span class="s2">","</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"data/testpoint.csv"</span><span class="p">)</span>
+<span class="p">)</span>
 
 <span class="n">point_csv_df_1</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"pointtable"</span><span class="p">)</span>
 
-<span class="n">point_df1</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SELECT ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape1, </span><span class="se">\'</span><span class="s2">abc</span><span class="se">\'</span><span class="s2"> as name1 from pointtable"</span><span class="p">)</span>
+<span class="n">point_df1</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
+    <span class="s2">"SELECT ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape1, 'abc' as name1 from pointtable"</span>
+<span class="p">)</span>
 <span class="n">point_df1</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"pointdf1"</span><span class="p">)</span>
 
-<span class="n">point_csv_df2</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"csv"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s2">"delimiter"</span><span class="p">,</span> <span class="s2">","</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"data/testpoint.csv"</span><span class="p">)</span>
+<span class="n">point_csv_df2</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"csv"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"delimiter"</span><span class="p">,</span> <span class="s2">","</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"data/testpoint.csv"</span><span class="p">)</span>
+<span class="p">)</span>
 
 <span class="n">point_csv_df2</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"pointtable"</span><span class="p">)</span>
-<span class="n">point_df2</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape2, </span><span class="se">\'</span><span class="s2">def</span><span class="se">\'</span><span class="s2"> as name2 from pointtable"</span><span class="p">)</span>
+<span class="n">point_df2</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
+    <span class="s2">"select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape2, 'def' as name2 from pointtable"</span>
+<span class="p">)</span>
 <span class="n">point_df2</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"pointdf2"</span><span class="p">)</span>
 
-<span class="n">distance_join_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"select * from pointdf1, pointdf2 where ST_Distance(pointdf1.pointshape1,pointdf2.pointshape2) &lt; 2"</span><span class="p">)</span>
+<span class="n">distance_join_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
+    <span class="s2">"select * from pointdf1, pointdf2 where ST_Distance(pointdf1.pointshape1,pointdf2.pointshape2) &lt; 2"</span>
+<span class="p">)</span>
 <span class="n">distance_join_df</span><span class="o">.</span><span class="n">explain</span><span class="p">()</span>
 <span class="n">distance_join_df</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-7">point_csv_df_1 = sedona.read.format("csv").\
-    option("delimiter", ",").\
-    option("header", "false").load("data/testpoint.csv")
+<div class="clipboard-copy-txt" id="cell-7">point_csv_df_1 = (
+    sedona.read.format("csv")
+    .option("delimiter", ",")
+    .option("header", "false")
+    .load("data/testpoint.csv")
+)
 
 point_csv_df_1.createOrReplaceTempView("pointtable")
 
-point_df1 = sedona.sql("SELECT ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape1, \'abc\' as name1 from pointtable")
+point_df1 = sedona.sql(
+    "SELECT ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape1, 'abc' as name1 from pointtable"
+)
 point_df1.createOrReplaceTempView("pointdf1")
 
-point_csv_df2 = sedona.read.format("csv").\
-    option("delimiter", ",").\
-    option("header", "false").load("data/testpoint.csv")
+point_csv_df2 = (
+    sedona.read.format("csv")
+    .option("delimiter", ",")
+    .option("header", "false")
+    .load("data/testpoint.csv")
+)
 
 point_csv_df2.createOrReplaceTempView("pointtable")
-point_df2 = sedona.sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape2, \'def\' as name2 from pointtable")
+point_df2 = sedona.sql(
+    "select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape2, 'def' as name2 from pointtable"
+)
 point_df2.createOrReplaceTempView("pointdf2")
 
-distance_join_df = sedona.sql("select * from pointdf1, pointdf2 where ST_Distance(pointdf1.pointshape1,pointdf2.pointshape2) &lt; 2")
+distance_join_df = sedona.sql(
+    "select * from pointdf1, pointdf2 where ST_Distance(pointdf1.pointshape1,pointdf2.pointshape2) &lt; 2"
+)
 distance_join_df.explain()
 distance_join_df.show(5)</div>
 </div>
@@ -5120,18 +5183,16 @@ only showing top 5 rows
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
 <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="s2">"data/gis_osm_pois_free_1.shp"</span><span class="p">)</span>
-<span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span> <span class="s1">''</span><span class="p">)</span>
-<span class="n">osm_points</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
-    <span class="n">gdf</span>
-<span class="p">)</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+<span class="n">osm_points</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-8">import pandas as pd
+
 gdf = gpd.read_file("data/gis_osm_pois_free_1.shp")
-gdf = gdf.replace(pd.NA, '')
-osm_points = sedona.createDataFrame(
-    gdf
-)</div>
+gdf = gdf.replace(pd.NA, "")
+osm_points = sedona.createDataFrame(gdf)</div>
 </div>
 </div>
 </div>
@@ -5299,7 +5360,8 @@ only showing top 5 rows
 <span class="sd">               name,</span>
 <span class="sd">               ST_Transform(geometry, 'epsg:4326', 'epsg:2180') as geom </span>
 <span class="sd">        FROM points</span>
-<span class="sd">    """</span><span class="p">)</span>
+<span class="sd">    """</span>
+<span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-12">transformed_df = sedona.sql(
     """
@@ -5309,7 +5371,8 @@ only showing top 5 rows
                name,
                ST_Transform(geometry, 'epsg:4326', 'epsg:2180') as geom 
         FROM points
-    """)</div>
+    """
+)</div>
 </div>
 </div>
 </div>
@@ -5423,21 +5486,25 @@ only showing top 5 rows
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">neighbours_within_1000m</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
-<span class="s2">        SELECT a.osm_id AS id_1,</span>
-<span class="s2">               b.osm_id AS id_2,</span>
-<span class="s2">               a.geom </span>
-<span class="s2">        FROM points_2180 AS a, points_2180 AS b </span>
-<span class="s2">        WHERE ST_Distance(a.geom,b.geom) &lt; 50</span>
-<span class="s2">    """</span><span class="p">)</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">neighbours_within_1000m</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">        SELECT a.osm_id AS id_1,</span>
+<span class="sd">               b.osm_id AS id_2,</span>
+<span class="sd">               a.geom </span>
+<span class="sd">        FROM points_2180 AS a, points_2180 AS b </span>
+<span class="sd">        WHERE ST_Distance(a.geom,b.geom) &lt; 50</span>
+<span class="sd">    """</span>
+<span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-15">neighbours_within_1000m = sedona.sql("""
+<div class="clipboard-copy-txt" id="cell-15">neighbours_within_1000m = sedona.sql(
+    """
         SELECT a.osm_id AS id_1,
                b.osm_id AS id_2,
                a.geom 
         FROM points_2180 AS a, points_2180 AS b 
         WHERE ST_Distance(a.geom,b.geom) &lt; 50
-    """)</div>
+    """
+)</div>
 </div>
 </div>
 </div>
@@ -5759,7 +5826,7 @@ only showing top 20 rows
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 23, 2024 06:17:36</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">September 23, 2024 22:14:04</span>
   </span>
 
     

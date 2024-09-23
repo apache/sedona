@@ -4356,11 +4356,11 @@ under the License.
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># pip install sklearn </span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># pip install sklearn</span>
 <span class="c1"># pip install pyarrow</span>
 <span class="c1"># pip install fsspec</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-1"># pip install sklearn 
+<div class="clipboard-copy-txt" id="cell-1"># pip install sklearn
 # pip install pyarrow
 # pip install fsspec</div>
 </div>
@@ -4391,7 +4391,15 @@ under the License.
 <span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
 <span class="kn">from</span> <span class="nn">pyspark</span> <span class="kn">import</span> <span class="n">StorageLevel</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.types</span> <span class="kn">import</span> <span class="n">StructType</span><span class="p">,</span> <span class="n">StructField</span><span class="p">,</span><span class="n">StringType</span><span class="p">,</span> <span class="n">LongType</span><span class="p">,</span> <span class="n">IntegerType</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">,</span> <span class="n">ArrayType</span>
+<span class="kn">from</span> <span class="nn">pyspark.sql.types</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">StructType</span><span class="p">,</span>
+    <span class="n">StructField</span><span class="p">,</span>
+    <span class="n">StringType</span><span class="p">,</span>
+    <span class="n">LongType</span><span class="p">,</span>
+    <span class="n">IntegerType</span><span class="p">,</span>
+    <span class="n">DoubleType</span><span class="p">,</span>
+    <span class="n">ArrayType</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">regexp_replace</span>
 <span class="kn">from</span> <span class="nn">sedona.register</span> <span class="kn">import</span> <span class="n">SedonaRegistrator</span>
 <span class="kn">from</span> <span class="nn">sedona.utils</span> <span class="kn">import</span> <span class="n">SedonaKryoRegistrator</span><span class="p">,</span> <span class="n">KryoSerializer</span>
@@ -4407,7 +4415,15 @@ under the License.
 from pyspark.sql import SparkSession
 from pyspark import StorageLevel
 import pandas as pd
-from pyspark.sql.types import StructType, StructField,StringType, LongType, IntegerType, DoubleType, ArrayType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    StringType,
+    LongType,
+    IntegerType,
+    DoubleType,
+    ArrayType,
+)
 from pyspark.sql.functions import regexp_replace
 from sedona.register import SedonaRegistrator
 from sedona.utils import SedonaKryoRegistrator, KryoSerializer
@@ -4443,11 +4459,11 @@ from datetime import date</div>
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="n">analise_folder</span> <span class="o">=</span> <span class="s2">"analise_teste_"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">())</span>
-<span class="n">hdfs</span> <span class="o">=</span> <span class="n">PyWebHdfsClient</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">'179.106.229.159'</span><span class="p">,</span><span class="n">port</span><span class="o">=</span><span class="s1">'50070'</span><span class="p">,</span> <span class="n">user_name</span><span class="o">=</span><span class="s1">'root'</span><span class="p">)</span>
+<span class="n">hdfs</span> <span class="o">=</span> <span class="n">PyWebHdfsClient</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s2">"179.106.229.159"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="s2">"50070"</span><span class="p">,</span> <span class="n">user_name</span><span class="o">=</span><span class="s2">"root"</span><span class="p">)</span>
 <span class="n">hdfs</span><span class="o">.</span><span class="n">delete_file_dir</span><span class="p">(</span><span class="n">analise_folder</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-3">analise_folder = "analise_teste_" + str(date.today())
-hdfs = PyWebHdfsClient(host='179.106.229.159',port='50070', user_name='root')
+hdfs = PyWebHdfsClient(host="179.106.229.159", port="50070", user_name="root")
 hdfs.delete_file_dir(analise_folder, recursive=True)</div>
 </div>
 </div>
@@ -4486,51 +4502,57 @@ hdfs.delete_file_dir(analise_folder, recursive=True)</div>
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># spark.scheduler.mode', 'FAIR'</span>
-<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span>\
-    <span class="n">builder</span><span class="o">.</span>\
-    <span class="n">appName</span><span class="p">(</span><span class="s2">"Sentinel-app"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">enableHiveSupport</span><span class="p">()</span><span class="o">.</span>\
-    <span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">master</span><span class="p">(</span><span class="s2">"spark://spark-master:7077"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s2">"spark.executor.memory"</span><span class="p">,</span> <span class="s2">"15G"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s2">"spark.driver.maxResultSize"</span><span class="p">,</span> <span class="s2">"135G"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s2">"spark.sql.shuffle.partitions"</span><span class="p">,</span> <span class="s2">"500"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s1">' spark.sql.adaptive.coalescePartitions.enabled'</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s1">'spark.sql.adaptive.enabled'</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s1">'spark.sql.adaptive.coalescePartitions.initialPartitionNum'</span><span class="p">,</span> <span class="mi">125</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s2">"spark.sql.execution.arrow.pyspark.enabled"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s2">"spark.sql.execution.arrow.fallback.enabled"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s1">'spark.kryoserializer.buffer.max'</span><span class="p">,</span> <span class="mi">2047</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s2">"spark.serializer"</span><span class="p">,</span> <span class="n">KryoSerializer</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s2">"spark.kryo.registrator"</span><span class="p">,</span> <span class="n">SedonaKryoRegistrator</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s2">"spark.jars.packages"</span><span class="p">,</span> <span class="s2">"org.apache.sedona:sedona-python-adapter-3.0_2.12:1.1.0-incubating,org.datasyslab:geotools-wrapper:1.1.0-25.2"</span><span class="p">)</span> <span class="o">.</span>\
-    <span class="n">enableHiveSupport</span><span class="p">()</span><span class="o">.</span>\
-    <span class="n">getOrCreate</span><span class="p">()</span>
+<span class="n">spark</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">"Sentinel-app"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">enableHiveSupport</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"spark://spark-master:7077"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.executor.memory"</span><span class="p">,</span> <span class="s2">"15G"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.driver.maxResultSize"</span><span class="p">,</span> <span class="s2">"135G"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sql.shuffle.partitions"</span><span class="p">,</span> <span class="s2">"500"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">" spark.sql.adaptive.coalescePartitions.enabled"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sql.adaptive.enabled"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sql.adaptive.coalescePartitions.initialPartitionNum"</span><span class="p">,</span> <span class="mi">125</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sql.execution.arrow.pyspark.enabled"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sql.execution.arrow.fallback.enabled"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.kryoserializer.buffer.max"</span><span class="p">,</span> <span class="mi">2047</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.serializer"</span><span class="p">,</span> <span class="n">KryoSerializer</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.kryo.registrator"</span><span class="p">,</span> <span class="n">SedonaKryoRegistrator</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span>
+        <span class="s2">"spark.jars.packages"</span><span class="p">,</span>
+        <span class="s2">"org.apache.sedona:sedona-python-adapter-3.0_2.12:1.1.0-incubating,org.datasyslab:geotools-wrapper:1.1.0-25.2"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">enableHiveSupport</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
 
 <span class="n">SedonaRegistrator</span><span class="o">.</span><span class="n">registerAll</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
 <span class="n">sc</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-4"># spark.scheduler.mode', 'FAIR'
-spark = SparkSession.\
-    builder.\
-    appName("Sentinel-app").\
-    enableHiveSupport().\
-    master("local[*]").\
-    master("spark://spark-master:7077").\
-    config("spark.executor.memory", "15G").\
-    config("spark.driver.maxResultSize", "135G").\
-    config("spark.sql.shuffle.partitions", "500").\
-    config(' spark.sql.adaptive.coalescePartitions.enabled', True).\
-    config('spark.sql.adaptive.enabled', True).\
-    config('spark.sql.adaptive.coalescePartitions.initialPartitionNum', 125).\
-    config("spark.sql.execution.arrow.pyspark.enabled", True).\
-    config("spark.sql.execution.arrow.fallback.enabled", True).\
-    config('spark.kryoserializer.buffer.max', 2047).\
-    config("spark.serializer", KryoSerializer.getName).\
-    config("spark.kryo.registrator", SedonaKryoRegistrator.getName).\
-    config("spark.jars.packages", "org.apache.sedona:sedona-python-adapter-3.0_2.12:1.1.0-incubating,org.datasyslab:geotools-wrapper:1.1.0-25.2") .\
-    enableHiveSupport().\
-    getOrCreate()
+spark = (
+    SparkSession.builder.appName("Sentinel-app")
+    .enableHiveSupport()
+    .master("local[*]")
+    .master("spark://spark-master:7077")
+    .config("spark.executor.memory", "15G")
+    .config("spark.driver.maxResultSize", "135G")
+    .config("spark.sql.shuffle.partitions", "500")
+    .config(" spark.sql.adaptive.coalescePartitions.enabled", True)
+    .config("spark.sql.adaptive.enabled", True)
+    .config("spark.sql.adaptive.coalescePartitions.initialPartitionNum", 125)
+    .config("spark.sql.execution.arrow.pyspark.enabled", True)
+    .config("spark.sql.execution.arrow.fallback.enabled", True)
+    .config("spark.kryoserializer.buffer.max", 2047)
+    .config("spark.serializer", KryoSerializer.getName)
+    .config("spark.kryo.registrator", SedonaKryoRegistrator.getName)
+    .config(
+        "spark.jars.packages",
+        "org.apache.sedona:sedona-python-adapter-3.0_2.12:1.1.0-incubating,org.datasyslab:geotools-wrapper:1.1.0-25.2",
+    )
+    .enableHiveSupport()
+    .getOrCreate()
+)
 
 SedonaRegistrator.registerAll(spark)
 sc = spark.sparkContext</div>
@@ -4615,13 +4637,13 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Path to directory of geotiff images </span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Path to directory of geotiff images</span>
 <span class="n">DATA_DIR</span> <span class="o">=</span> <span class="s2">"hdfs://776faf4d6a1e:8020/sentinel2_tmp/*"</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geotiff"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"dropInvalid"</span><span class="p">,</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geotiff"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"dropInvalid"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-5"># Path to directory of geotiff images 
+<div class="clipboard-copy-txt" id="cell-5"># Path to directory of geotiff images
 DATA_DIR = "hdfs://776faf4d6a1e:8020/sentinel2_tmp/*"
-df = spark.read.format("geotiff").option("dropInvalid",True).load(DATA_DIR)</div>
+df = spark.read.format("geotiff").option("dropInvalid", True).load(DATA_DIR)</div>
 </div>
 </div>
 </div>
@@ -4659,12 +4681,12 @@ df = spark.read.format("geotiff").option("dropInvalid",True).load(DATA_DIR)</div
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># SUPER IMPORTANT ULTRA MEGA POWER FOR MEMORY PROBLENS SOLVE</span>
-<span class="n">rdd</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span><span class="o">.</span><span class="n">parallelize</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">20</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"From local[5]"</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">rdd</span><span class="o">.</span><span class="n">getNumPartitions</span><span class="p">()))</span>
+<span class="n">rdd</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span><span class="o">.</span><span class="n">parallelize</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"From local[5]"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rdd</span><span class="o">.</span><span class="n">getNumPartitions</span><span class="p">()))</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-6"># SUPER IMPORTANT ULTRA MEGA POWER FOR MEMORY PROBLENS SOLVE
-rdd = spark.sparkContext.parallelize((0,20))
-print("From local[5]"+str(rdd.getNumPartitions()))</div>
+rdd = spark.sparkContext.parallelize((0, 20))
+print("From local[5]" + str(rdd.getNumPartitions()))</div>
 </div>
 </div>
 </div>
@@ -4760,13 +4782,15 @@ df.printSchema()</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">monotonically_increasing_id</span> 
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">monotonically_increasing_id</span>
+
 <span class="c1"># add ID</span>
 <span class="n">df_index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"*"</span><span class="p">)</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"id"</span><span class="p">,</span> <span class="n">monotonically_increasing_id</span><span class="p">())</span>
 <span class="n">df_index</span><span class="o">.</span><span class="n">explain</span><span class="p">()</span>
 <span class="n">df_index</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-8">from pyspark.sql.functions import monotonically_increasing_id 
+<div class="clipboard-copy-txt" id="cell-8">from pyspark.sql.functions import monotonically_increasing_id
+
 # add ID
 df_index = df.select("*").withColumn("id", monotonically_increasing_id())
 df_index.explain()
@@ -4843,18 +4867,28 @@ only showing top 5 rows
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># "image.wkt as Geom", </span>
-<span class="n">df_export</span> <span class="o">=</span> <span class="n">df_index</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"id"</span><span class="p">,</span><span class="s2">"image.origin as origin"</span><span class="p">,</span>
-                          <span class="s2">"image.height as height"</span><span class="p">,</span> <span class="s2">"image.width as width"</span><span class="p">,</span> 
-                          <span class="s2">"cast(image.data as string) as data"</span><span class="p">,</span> <span class="s2">"image.nBands as bands"</span><span class="p">)</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># "image.wkt as Geom",</span>
+<span class="n">df_export</span> <span class="o">=</span> <span class="n">df_index</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"id"</span><span class="p">,</span>
+    <span class="s2">"image.origin as origin"</span><span class="p">,</span>
+    <span class="s2">"image.height as height"</span><span class="p">,</span>
+    <span class="s2">"image.width as width"</span><span class="p">,</span>
+    <span class="s2">"cast(image.data as string) as data"</span><span class="p">,</span>
+    <span class="s2">"image.nBands as bands"</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">df_export</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span>
 <span class="n">df_export</span><span class="o">.</span><span class="n">explain</span><span class="p">()</span>
 <span class="n">df_export</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"df_export"</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-9"># "image.wkt as Geom", 
-df_export = df_index.selectExpr("id","image.origin as origin",
-                          "image.height as height", "image.width as width", 
-                          "cast(image.data as string) as data", "image.nBands as bands")
+<div class="clipboard-copy-txt" id="cell-9"># "image.wkt as Geom",
+df_export = df_index.selectExpr(
+    "id",
+    "image.origin as origin",
+    "image.height as height",
+    "image.width as width",
+    "cast(image.data as string) as data",
+    "image.nBands as bands",
+)
 print(df_export.dtypes)
 df_export.explain()
 df_export.createOrReplaceTempView("df_export")</div>
@@ -4974,14 +5008,14 @@ df_export.createOrReplaceTempView("df_export")</div>
 <span class="c1"># part_df_export.take(3)</span>
 <span class="n">part_df_export</span> <span class="o">=</span> <span class="n">df_export</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="c1"># print(part_df_export)</span>
-<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">part_df_export</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">"teste.csv"</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">','</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">'utf-8'</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">part_df_export</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">"teste.csv"</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">","</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-12"># POR 1 LINHA SER GRANDE O SUFICIENTE PARA ESTOURO DE MEMORIA O COLLECT NÂO FUNCIONA E NEM SALVAR O DF_SPARK DIRETO
 # (NECESSÀRIO TRANFORMAR PARA PANDAS LINHA A LINHA)
 # part_df_export.take(3)
 part_df_export = df_export.take(1)
 # print(part_df_export)
-pd.DataFrame(part_df_export).to_csv("teste.csv", sep=',', encoding='utf-8')</div>
+pd.DataFrame(part_df_export).to_csv("teste.csv", sep=",", encoding="utf-8")</div>
 </div>
 </div>
 </div>
@@ -5006,16 +5040,26 @@ pd.DataFrame(part_df_export).to_csv("teste.csv", sep=',', encoding='utf-8')</div
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"image.origin as origin"</span><span class="p">,</span><span class="s2">"ST_GeomFromWkt(image.wkt) as Geom"</span><span class="p">,</span> 
-                   <span class="s2">"image.height as height"</span><span class="p">,</span> <span class="s2">"image.width as width"</span><span class="p">,</span> <span class="s2">"image.data as data"</span><span class="p">,</span> 
-                   <span class="s2">"image.nBands as bands"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"image.origin as origin"</span><span class="p">,</span>
+    <span class="s2">"ST_GeomFromWkt(image.wkt) as Geom"</span><span class="p">,</span>
+    <span class="s2">"image.height as height"</span><span class="p">,</span>
+    <span class="s2">"image.width as width"</span><span class="p">,</span>
+    <span class="s2">"image.data as data"</span><span class="p">,</span>
+    <span class="s2">"image.nBands as bands"</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">explain</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-13">df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", 
-                   "image.height as height", "image.width as width", "image.data as data", 
-                   "image.nBands as bands").cache()
+<div class="clipboard-copy-txt" id="cell-13">df = df.selectExpr(
+    "image.origin as origin",
+    "ST_GeomFromWkt(image.wkt) as Geom",
+    "image.height as height",
+    "image.width as width",
+    "image.data as data",
+    "image.nBands as bands",
+).cache()
 df.show(5)
 print(df.dtypes)
 df.explain()</div>
@@ -5083,27 +5127,37 @@ InMemoryTableScan [origin#111, Geom#112, height#113, width#114, data#115, bands#
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"origin"</span><span class="p">,</span> <span class="s2">"Geom"</span><span class="p">,</span><span class="s2">"RS_GetBand(data, 1,bands) as B2"</span><span class="p">,</span><span class="s2">"RS_GetBand(data, 2,bands) as B3"</span><span class="p">,</span>
-                   <span class="s2">"RS_GetBand(data, 3,bands) as B4"</span><span class="p">,</span> 
-                   <span class="s2">"RS_GetBand(data, 4,bands) as B8"</span><span class="p">,</span> 
-                   <span class="s2">"RS_Array(height * width, 2.4) as constant_evi_2"</span><span class="p">,</span>
-                   <span class="s2">"RS_Array(height * width, 2.5) as constant_evi_1"</span><span class="p">,</span>
-                   <span class="s2">"RS_Array(height * width, 1.0) as constant_evi_3"</span><span class="p">,</span>
-                   <span class="s2">"RS_Array(height * width, -0.5) as constant_tgi_1"</span><span class="p">,</span>
-                   <span class="s2">"RS_Array(height * width, 120.0) as constant_tgi_2"</span><span class="p">,</span>
-                   <span class="s2">"RS_Array(height * width, 0.001) as corrector"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"origin"</span><span class="p">,</span>
+    <span class="s2">"Geom"</span><span class="p">,</span>
+    <span class="s2">"RS_GetBand(data, 1,bands) as B2"</span><span class="p">,</span>
+    <span class="s2">"RS_GetBand(data, 2,bands) as B3"</span><span class="p">,</span>
+    <span class="s2">"RS_GetBand(data, 3,bands) as B4"</span><span class="p">,</span>
+    <span class="s2">"RS_GetBand(data, 4,bands) as B8"</span><span class="p">,</span>
+    <span class="s2">"RS_Array(height * width, 2.4) as constant_evi_2"</span><span class="p">,</span>
+    <span class="s2">"RS_Array(height * width, 2.5) as constant_evi_1"</span><span class="p">,</span>
+    <span class="s2">"RS_Array(height * width, 1.0) as constant_evi_3"</span><span class="p">,</span>
+    <span class="s2">"RS_Array(height * width, -0.5) as constant_tgi_1"</span><span class="p">,</span>
+    <span class="s2">"RS_Array(height * width, 120.0) as constant_tgi_2"</span><span class="p">,</span>
+    <span class="s2">"RS_Array(height * width, 0.001) as corrector"</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 <span class="n">df</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"allbands"</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-14">df = df.selectExpr("origin", "Geom","RS_GetBand(data, 1,bands) as B2","RS_GetBand(data, 2,bands) as B3",
-                   "RS_GetBand(data, 3,bands) as B4", 
-                   "RS_GetBand(data, 4,bands) as B8", 
-                   "RS_Array(height * width, 2.4) as constant_evi_2",
-                   "RS_Array(height * width, 2.5) as constant_evi_1",
-                   "RS_Array(height * width, 1.0) as constant_evi_3",
-                   "RS_Array(height * width, -0.5) as constant_tgi_1",
-                   "RS_Array(height * width, 120.0) as constant_tgi_2",
-                   "RS_Array(height * width, 0.001) as corrector").cache()
+<div class="clipboard-copy-txt" id="cell-14">df = df.selectExpr(
+    "origin",
+    "Geom",
+    "RS_GetBand(data, 1,bands) as B2",
+    "RS_GetBand(data, 2,bands) as B3",
+    "RS_GetBand(data, 3,bands) as B4",
+    "RS_GetBand(data, 4,bands) as B8",
+    "RS_Array(height * width, 2.4) as constant_evi_2",
+    "RS_Array(height * width, 2.5) as constant_evi_1",
+    "RS_Array(height * width, 1.0) as constant_evi_3",
+    "RS_Array(height * width, -0.5) as constant_tgi_1",
+    "RS_Array(height * width, 120.0) as constant_tgi_2",
+    "RS_Array(height * width, 0.001) as corrector",
+).cache()
 df.createOrReplaceTempView("allbands")
 df.show(5)</div>
 </div>
@@ -5166,24 +5220,28 @@ only showing top 5 rows
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Não tem data da imagem </span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Não tem data da imagem</span>
 <span class="c1"># Não tem parte a qual ela se refere</span>
 <span class="c1"># Necessário adicionar</span>
 <span class="n">origin</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"origin"</span><span class="p">)</span>
-<span class="n">split_origin</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">split</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"origin"</span><span class="p">),</span><span class="s2">"/"</span><span class="p">))</span>
+<span class="n">split_origin</span> <span class="o">=</span> <span class="n">origin</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">split</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"origin"</span><span class="p">),</span> <span class="s2">"/"</span><span class="p">))</span>
 <span class="n">split_origin</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="c1"># 20211226T134212</span>
-<span class="n">split_origin</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"select to_timestamp(REPLACE(SPLIT(SPLIT(origin,'/')[5], '_')[1],'T',' '),'yyyyMMdd HHmmss') as image_date, SPLIT(origin,'/')[4] as feature_name, * from allbands"</span><span class="p">)</span>
+<span class="n">split_origin</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
+    <span class="s2">"select to_timestamp(REPLACE(SPLIT(SPLIT(origin,'/')[5], '_')[1],'T',' '),'yyyyMMdd HHmmss') as image_date, SPLIT(origin,'/')[4] as feature_name, * from allbands"</span>
+<span class="p">)</span>
 <span class="n">split_origin</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-15"># Não tem data da imagem 
+<div class="clipboard-copy-txt" id="cell-15"># Não tem data da imagem
 # Não tem parte a qual ela se refere
 # Necessário adicionar
 origin = df.selectExpr("origin")
-split_origin = origin.select(split(col("origin"),"/"))
+split_origin = origin.select(split(col("origin"), "/"))
 split_origin.head()
 # 20211226T134212
-split_origin = spark.sql("select to_timestamp(REPLACE(SPLIT(SPLIT(origin,'/')[5], '_')[1],'T',' '),'yyyyMMdd HHmmss') as image_date, SPLIT(origin,'/')[4] as feature_name, * from allbands")
+split_origin = spark.sql(
+    "select to_timestamp(REPLACE(SPLIT(SPLIT(origin,'/')[5], '_')[1],'T',' '),'yyyyMMdd HHmmss') as image_date, SPLIT(origin,'/')[4] as feature_name, * from allbands"
+)
 split_origin.show(5)</div>
 </div>
 </div>
@@ -5245,62 +5303,82 @@ only showing top 5 rows
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Fator de correcao da banda para ficar com valores entre 0 e 1</span>
-<span class="n">correct_origin</span> <span class="o">=</span> <span class="n">split_origin</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_MultiplyBands(B2, corrector) as bluen"</span><span class="p">,</span>
-                                         <span class="s2">"RS_MultiplyBands(B3, corrector) as greenn"</span><span class="p">,</span> 
-                                         <span class="s2">"RS_MultiplyBands(B4, corrector) as redn"</span><span class="p">,</span>
-                                         <span class="s2">"RS_MultiplyBands(B8, corrector) as nirn"</span><span class="p">,</span> 
-                                         <span class="s2">"*"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
-<span class="n">correct_origin</span> <span class="o">=</span> <span class="n">correct_origin</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_NormalizedDifference(nirn, redn) as gndvi"</span><span class="p">,</span>
-                                         <span class="s2">"RS_SubtractBands(nirn, redn) as sub_nirn_redn"</span><span class="p">,</span> 
-                                         <span class="s2">"RS_AddBands(nirn,constant_evi_2) as add_nirn_contant_evi_2"</span><span class="p">,</span>
-                                         <span class="s2">"RS_AddBands(redn, constant_evi_3) as add_redn_contant_evi_3"</span><span class="p">,</span> 
-                                         <span class="s2">"RS_DivideBands(nirn, greenn) as div_nirn_greenn"</span><span class="p">,</span>
-                                         <span class="s2">"RS_SubtractBands(greenn, redn) as sub_greenn_redn"</span><span class="p">,</span>
-                                         <span class="s2">"RS_SubtractBands(redn, greenn) as sub_redn_greenn"</span><span class="p">,</span>
-                                         <span class="s2">"RS_SubtractBands(redn, bluen) as sub_redn_bluen"</span><span class="p">,</span>
-                                         <span class="s2">"RS_AddBands(greenn, redn) as add_greenn_redn"</span><span class="p">,</span>
-                                         <span class="s2">"*"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<span class="n">correct_origin</span> <span class="o">=</span> <span class="n">split_origin</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"RS_MultiplyBands(B2, corrector) as bluen"</span><span class="p">,</span>
+    <span class="s2">"RS_MultiplyBands(B3, corrector) as greenn"</span><span class="p">,</span>
+    <span class="s2">"RS_MultiplyBands(B4, corrector) as redn"</span><span class="p">,</span>
+    <span class="s2">"RS_MultiplyBands(B8, corrector) as nirn"</span><span class="p">,</span>
+    <span class="s2">"*"</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<span class="n">correct_origin</span> <span class="o">=</span> <span class="n">correct_origin</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"RS_NormalizedDifference(nirn, redn) as gndvi"</span><span class="p">,</span>
+    <span class="s2">"RS_SubtractBands(nirn, redn) as sub_nirn_redn"</span><span class="p">,</span>
+    <span class="s2">"RS_AddBands(nirn,constant_evi_2) as add_nirn_contant_evi_2"</span><span class="p">,</span>
+    <span class="s2">"RS_AddBands(redn, constant_evi_3) as add_redn_contant_evi_3"</span><span class="p">,</span>
+    <span class="s2">"RS_DivideBands(nirn, greenn) as div_nirn_greenn"</span><span class="p">,</span>
+    <span class="s2">"RS_SubtractBands(greenn, redn) as sub_greenn_redn"</span><span class="p">,</span>
+    <span class="s2">"RS_SubtractBands(redn, greenn) as sub_redn_greenn"</span><span class="p">,</span>
+    <span class="s2">"RS_SubtractBands(redn, bluen) as sub_redn_bluen"</span><span class="p">,</span>
+    <span class="s2">"RS_AddBands(greenn, redn) as add_greenn_redn"</span><span class="p">,</span>
+    <span class="s2">"*"</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 
-<span class="n">correct_origin</span> <span class="o">=</span> <span class="n">correct_origin</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_SubtractBands(add_greenn_redn, bluen) as greenn_redn_sub_bluen"</span><span class="p">,</span>
-                                           <span class="s2">"RS_AddBands(add_greenn_redn, bluen) as greenn_redn_add_bluen"</span><span class="p">,</span>
-                                           <span class="s2">"RS_SubtractBands(sub_greenn_redn, bluen) as sub_greenn_redn_bluen"</span><span class="p">,</span>
-                                           <span class="s2">"RS_SubtractBands(sub_redn_greenn, constant_tgi_2) as sub_red_gren_tgi_2"</span><span class="p">,</span>
-                                         <span class="s2">"*"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
-<span class="n">correct_origin</span> <span class="o">=</span> <span class="n">correct_origin</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_MultiplyFactor(sub_redn_bluen,120) as ms_redn_bluen_120"</span><span class="p">,</span>
-                                         <span class="s2">"*"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
-<span class="n">correct_origin</span> <span class="o">=</span> <span class="n">correct_origin</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_MultiplyFactor(sub_redn_greenn,190) as ms_redn_greenn_190"</span><span class="p">,</span>
-                                         <span class="s2">"*"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
-<span class="n">correct_origin</span> <span class="o">=</span> <span class="n">correct_origin</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_SubtractBands(ms_redn_greenn_190,ms_redn_bluen_120) as sub_msrg_190_msrb_120"</span><span class="p">,</span>
-                                         <span class="s2">"*"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<span class="n">correct_origin</span> <span class="o">=</span> <span class="n">correct_origin</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"RS_SubtractBands(add_greenn_redn, bluen) as greenn_redn_sub_bluen"</span><span class="p">,</span>
+    <span class="s2">"RS_AddBands(add_greenn_redn, bluen) as greenn_redn_add_bluen"</span><span class="p">,</span>
+    <span class="s2">"RS_SubtractBands(sub_greenn_redn, bluen) as sub_greenn_redn_bluen"</span><span class="p">,</span>
+    <span class="s2">"RS_SubtractBands(sub_redn_greenn, constant_tgi_2) as sub_red_gren_tgi_2"</span><span class="p">,</span>
+    <span class="s2">"*"</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<span class="n">correct_origin</span> <span class="o">=</span> <span class="n">correct_origin</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"RS_MultiplyFactor(sub_redn_bluen,120) as ms_redn_bluen_120"</span><span class="p">,</span> <span class="s2">"*"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<span class="n">correct_origin</span> <span class="o">=</span> <span class="n">correct_origin</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"RS_MultiplyFactor(sub_redn_greenn,190) as ms_redn_greenn_190"</span><span class="p">,</span> <span class="s2">"*"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<span class="n">correct_origin</span> <span class="o">=</span> <span class="n">correct_origin</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"RS_SubtractBands(ms_redn_greenn_190,ms_redn_bluen_120) as sub_msrg_190_msrb_120"</span><span class="p">,</span>
+    <span class="s2">"*"</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-16"># Fator de correcao da banda para ficar com valores entre 0 e 1
-correct_origin = split_origin.selectExpr("RS_MultiplyBands(B2, corrector) as bluen",
-                                         "RS_MultiplyBands(B3, corrector) as greenn", 
-                                         "RS_MultiplyBands(B4, corrector) as redn",
-                                         "RS_MultiplyBands(B8, corrector) as nirn", 
-                                         "*").cache()
-correct_origin = correct_origin.selectExpr("RS_NormalizedDifference(nirn, redn) as gndvi",
-                                         "RS_SubtractBands(nirn, redn) as sub_nirn_redn", 
-                                         "RS_AddBands(nirn,constant_evi_2) as add_nirn_contant_evi_2",
-                                         "RS_AddBands(redn, constant_evi_3) as add_redn_contant_evi_3", 
-                                         "RS_DivideBands(nirn, greenn) as div_nirn_greenn",
-                                         "RS_SubtractBands(greenn, redn) as sub_greenn_redn",
-                                         "RS_SubtractBands(redn, greenn) as sub_redn_greenn",
-                                         "RS_SubtractBands(redn, bluen) as sub_redn_bluen",
-                                         "RS_AddBands(greenn, redn) as add_greenn_redn",
-                                         "*").cache()
+correct_origin = split_origin.selectExpr(
+    "RS_MultiplyBands(B2, corrector) as bluen",
+    "RS_MultiplyBands(B3, corrector) as greenn",
+    "RS_MultiplyBands(B4, corrector) as redn",
+    "RS_MultiplyBands(B8, corrector) as nirn",
+    "*",
+).cache()
+correct_origin = correct_origin.selectExpr(
+    "RS_NormalizedDifference(nirn, redn) as gndvi",
+    "RS_SubtractBands(nirn, redn) as sub_nirn_redn",
+    "RS_AddBands(nirn,constant_evi_2) as add_nirn_contant_evi_2",
+    "RS_AddBands(redn, constant_evi_3) as add_redn_contant_evi_3",
+    "RS_DivideBands(nirn, greenn) as div_nirn_greenn",
+    "RS_SubtractBands(greenn, redn) as sub_greenn_redn",
+    "RS_SubtractBands(redn, greenn) as sub_redn_greenn",
+    "RS_SubtractBands(redn, bluen) as sub_redn_bluen",
+    "RS_AddBands(greenn, redn) as add_greenn_redn",
+    "*",
+).cache()
 
-correct_origin = correct_origin.selectExpr("RS_SubtractBands(add_greenn_redn, bluen) as greenn_redn_sub_bluen",
-                                           "RS_AddBands(add_greenn_redn, bluen) as greenn_redn_add_bluen",
-                                           "RS_SubtractBands(sub_greenn_redn, bluen) as sub_greenn_redn_bluen",
-                                           "RS_SubtractBands(sub_redn_greenn, constant_tgi_2) as sub_red_gren_tgi_2",
-                                         "*").cache()
-correct_origin = correct_origin.selectExpr("RS_MultiplyFactor(sub_redn_bluen,120) as ms_redn_bluen_120",
-                                         "*").cache()
-correct_origin = correct_origin.selectExpr("RS_MultiplyFactor(sub_redn_greenn,190) as ms_redn_greenn_190",
-                                         "*").cache()
-correct_origin = correct_origin.selectExpr("RS_SubtractBands(ms_redn_greenn_190,ms_redn_bluen_120) as sub_msrg_190_msrb_120",
-                                         "*").cache()</div>
+correct_origin = correct_origin.selectExpr(
+    "RS_SubtractBands(add_greenn_redn, bluen) as greenn_redn_sub_bluen",
+    "RS_AddBands(add_greenn_redn, bluen) as greenn_redn_add_bluen",
+    "RS_SubtractBands(sub_greenn_redn, bluen) as sub_greenn_redn_bluen",
+    "RS_SubtractBands(sub_redn_greenn, constant_tgi_2) as sub_red_gren_tgi_2",
+    "*",
+).cache()
+correct_origin = correct_origin.selectExpr(
+    "RS_MultiplyFactor(sub_redn_bluen,120) as ms_redn_bluen_120", "*"
+).cache()
+correct_origin = correct_origin.selectExpr(
+    "RS_MultiplyFactor(sub_redn_greenn,190) as ms_redn_greenn_190", "*"
+).cache()
+correct_origin = correct_origin.selectExpr(
+    "RS_SubtractBands(ms_redn_greenn_190,ms_redn_bluen_120) as sub_msrg_190_msrb_120",
+    "*",
+).cache()</div>
 </div>
 </div>
 </div>
@@ -5345,44 +5423,54 @@ correct_origin = correct_origin.selectExpr("RS_SubtractBands(ms_redn_greenn_190,
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># bluen = src.read(1, masked=True) / 10000</span>
- <span class="c1"># greenn = src.read(2, masked=True) / 10000</span>
- <span class="c1"># redn = src.read(3, masked=True) / 10000</span>
- <span class="c1"># nirn = src.read(4, masked=True) / 10000</span>
- <span class="c1"># evi = 2.5 * (nirn - redn) / (nirn + 2.4 * redn + 1)</span>
- <span class="c1"># gci = (nirn / greenn) - 1</span>
- <span class="c1"># gli = (2 * greenn - redn - bluen) / (2 * greenn + redn + bluen)</span>
- <span class="c1"># gndvi = (nirn - greenn) / (nirn + greenn)</span>
- <span class="c1"># tgi = (-0.5) * (190 * (redn - greenn) - 120 * (redn - bluen))</span>
- <span class="c1"># vari = (greenn - redn) / (greenn + redn - bluen)</span>
+<span class="c1"># greenn = src.read(2, masked=True) / 10000</span>
+<span class="c1"># redn = src.read(3, masked=True) / 10000</span>
+<span class="c1"># nirn = src.read(4, masked=True) / 10000</span>
+<span class="c1"># evi = 2.5 * (nirn - redn) / (nirn + 2.4 * redn + 1)</span>
+<span class="c1"># gci = (nirn / greenn) - 1</span>
+<span class="c1"># gli = (2 * greenn - redn - bluen) / (2 * greenn + redn + bluen)</span>
+<span class="c1"># gndvi = (nirn - greenn) / (nirn + greenn)</span>
+<span class="c1"># tgi = (-0.5) * (190 * (redn - greenn) - 120 * (redn - bluen))</span>
+<span class="c1"># vari = (greenn - redn) / (greenn + redn - bluen)</span>
 
 
-<span class="n">calculated</span> <span class="o">=</span> <span class="n">correct_origin</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_NormalizedDifference(nirn, redn) as gndvi"</span><span class="p">,</span>
-                                       <span class="s2">"RS_DivideBands(RS_MultiplyBands(constant_evi_1, sub_nirn_redn), RS_MultiplyBands(add_nirn_contant_evi_2, add_redn_contant_evi_3)) as evi"</span><span class="p">,</span>
-                                       <span class="s2">"RS_SubtractBands(div_nirn_greenn, constant_evi_3) as gci"</span><span class="p">,</span>
-                                       <span class="s2">"RS_DivideBands(sub_greenn_redn, greenn_redn_sub_bluen) as vari"</span><span class="p">,</span>
-                                       <span class="s2">"RS_DivideBands(RS_MultiplyFactor(sub_greenn_redn_bluen,2),RS_MultiplyFactor(greenn_redn_add_bluen, 2)) as gli"</span><span class="p">,</span>
-                                       <span class="s2">"RS_MultiplyBands(constant_tgi_1,sub_msrg_190_msrb_120)  as tgi"</span><span class="p">,</span> <span class="s2">"origin"</span><span class="p">,</span> <span class="s2">"image_date"</span><span class="p">,</span> <span class="s2">"feature_name"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<span class="n">calculated</span> <span class="o">=</span> <span class="n">correct_origin</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"RS_NormalizedDifference(nirn, redn) as gndvi"</span><span class="p">,</span>
+    <span class="s2">"RS_DivideBands(RS_MultiplyBands(constant_evi_1, sub_nirn_redn), RS_MultiplyBands(add_nirn_contant_evi_2, add_redn_contant_evi_3)) as evi"</span><span class="p">,</span>
+    <span class="s2">"RS_SubtractBands(div_nirn_greenn, constant_evi_3) as gci"</span><span class="p">,</span>
+    <span class="s2">"RS_DivideBands(sub_greenn_redn, greenn_redn_sub_bluen) as vari"</span><span class="p">,</span>
+    <span class="s2">"RS_DivideBands(RS_MultiplyFactor(sub_greenn_redn_bluen,2),RS_MultiplyFactor(greenn_redn_add_bluen, 2)) as gli"</span><span class="p">,</span>
+    <span class="s2">"RS_MultiplyBands(constant_tgi_1,sub_msrg_190_msrb_120)  as tgi"</span><span class="p">,</span>
+    <span class="s2">"origin"</span><span class="p">,</span>
+    <span class="s2">"image_date"</span><span class="p">,</span>
+    <span class="s2">"feature_name"</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 <span class="n">calculated</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 <span class="n">calculated</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-17"> # bluen = src.read(1, masked=True) / 10000
- # greenn = src.read(2, masked=True) / 10000
- # redn = src.read(3, masked=True) / 10000
- # nirn = src.read(4, masked=True) / 10000
- # evi = 2.5 * (nirn - redn) / (nirn + 2.4 * redn + 1)
- # gci = (nirn / greenn) - 1
- # gli = (2 * greenn - redn - bluen) / (2 * greenn + redn + bluen)
- # gndvi = (nirn - greenn) / (nirn + greenn)
- # tgi = (-0.5) * (190 * (redn - greenn) - 120 * (redn - bluen))
- # vari = (greenn - redn) / (greenn + redn - bluen)
+<div class="clipboard-copy-txt" id="cell-17"># bluen = src.read(1, masked=True) / 10000
+# greenn = src.read(2, masked=True) / 10000
+# redn = src.read(3, masked=True) / 10000
+# nirn = src.read(4, masked=True) / 10000
+# evi = 2.5 * (nirn - redn) / (nirn + 2.4 * redn + 1)
+# gci = (nirn / greenn) - 1
+# gli = (2 * greenn - redn - bluen) / (2 * greenn + redn + bluen)
+# gndvi = (nirn - greenn) / (nirn + greenn)
+# tgi = (-0.5) * (190 * (redn - greenn) - 120 * (redn - bluen))
+# vari = (greenn - redn) / (greenn + redn - bluen)
 
 
-calculated = correct_origin.selectExpr("RS_NormalizedDifference(nirn, redn) as gndvi",
-                                       "RS_DivideBands(RS_MultiplyBands(constant_evi_1, sub_nirn_redn), RS_MultiplyBands(add_nirn_contant_evi_2, add_redn_contant_evi_3)) as evi",
-                                       "RS_SubtractBands(div_nirn_greenn, constant_evi_3) as gci",
-                                       "RS_DivideBands(sub_greenn_redn, greenn_redn_sub_bluen) as vari",
-                                       "RS_DivideBands(RS_MultiplyFactor(sub_greenn_redn_bluen,2),RS_MultiplyFactor(greenn_redn_add_bluen, 2)) as gli",
-                                       "RS_MultiplyBands(constant_tgi_1,sub_msrg_190_msrb_120)  as tgi", "origin", "image_date", "feature_name").cache()
+calculated = correct_origin.selectExpr(
+    "RS_NormalizedDifference(nirn, redn) as gndvi",
+    "RS_DivideBands(RS_MultiplyBands(constant_evi_1, sub_nirn_redn), RS_MultiplyBands(add_nirn_contant_evi_2, add_redn_contant_evi_3)) as evi",
+    "RS_SubtractBands(div_nirn_greenn, constant_evi_3) as gci",
+    "RS_DivideBands(sub_greenn_redn, greenn_redn_sub_bluen) as vari",
+    "RS_DivideBands(RS_MultiplyFactor(sub_greenn_redn_bluen,2),RS_MultiplyFactor(greenn_redn_add_bluen, 2)) as gli",
+    "RS_MultiplyBands(constant_tgi_1,sub_msrg_190_msrb_120)  as tgi",
+    "origin",
+    "image_date",
+    "feature_name",
+).cache()
 calculated.show(5)
 calculated.printSchema()</div>
 </div>
@@ -5489,22 +5577,32 @@ root
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">calculated_mean</span> <span class="o">=</span> <span class="n">calculated</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_Mean(gndvi) as gndvi"</span><span class="p">,</span>
-                                        <span class="s2">"RS_Mean(evi) as evi"</span><span class="p">,</span>
-                                        <span class="s2">"RS_Mean(gci) as gci"</span><span class="p">,</span>
-                                        <span class="s2">"RS_Mean(vari) as vari"</span><span class="p">,</span>
-                                        <span class="s2">"RS_Mean(gli) as gli"</span><span class="p">,</span>
-                                        <span class="s2">"RS_Mean(tgi) as tgi"</span><span class="p">,</span> <span class="s2">"origin"</span><span class="p">,</span> <span class="s2">"image_date"</span><span class="p">,</span> <span class="s2">"feature_name"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">calculated_mean</span> <span class="o">=</span> <span class="n">calculated</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"RS_Mean(gndvi) as gndvi"</span><span class="p">,</span>
+    <span class="s2">"RS_Mean(evi) as evi"</span><span class="p">,</span>
+    <span class="s2">"RS_Mean(gci) as gci"</span><span class="p">,</span>
+    <span class="s2">"RS_Mean(vari) as vari"</span><span class="p">,</span>
+    <span class="s2">"RS_Mean(gli) as gli"</span><span class="p">,</span>
+    <span class="s2">"RS_Mean(tgi) as tgi"</span><span class="p">,</span>
+    <span class="s2">"origin"</span><span class="p">,</span>
+    <span class="s2">"image_date"</span><span class="p">,</span>
+    <span class="s2">"feature_name"</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 <span class="n">calculated_mean</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 <span class="n">calculated_mean</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 <span class="n">calculated_mean</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"all_mean"</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-19">calculated_mean = calculated.selectExpr("RS_Mean(gndvi) as gndvi",
-                                        "RS_Mean(evi) as evi",
-                                        "RS_Mean(gci) as gci",
-                                        "RS_Mean(vari) as vari",
-                                        "RS_Mean(gli) as gli",
-                                        "RS_Mean(tgi) as tgi", "origin", "image_date", "feature_name").cache()
+<div class="clipboard-copy-txt" id="cell-19">calculated_mean = calculated.selectExpr(
+    "RS_Mean(gndvi) as gndvi",
+    "RS_Mean(evi) as evi",
+    "RS_Mean(gci) as gci",
+    "RS_Mean(vari) as vari",
+    "RS_Mean(gli) as gli",
+    "RS_Mean(tgi) as tgi",
+    "origin",
+    "image_date",
+    "feature_name",
+).cache()
 calculated_mean.show(5)
 calculated_mean.printSchema()
 calculated_mean.createOrReplaceTempView("all_mean")</div>
@@ -5578,14 +5676,14 @@ root
 <span class="c1"># part_df_export.take(3)</span>
 <span class="n">part_df_export</span> <span class="o">=</span> <span class="n">calculated_mean</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">part_df_export</span><span class="p">)</span>
-<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">part_df_export</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">"teste.csv"</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">','</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">'utf-8'</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">part_df_export</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">"teste.csv"</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">","</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-20"># POR 1 LINHA SER GRANDE O SUFICIENTE PARA ESTOURO DE MEMORIA O COLLECT NÂO FUNCIONA E NEM SALVAR O DF_SPARK DIRETO
 # (NECESSÀRIO TRANFORMAR PARA PANDAS LINHA A LINHA)
 # part_df_export.take(3)
 part_df_export = calculated_mean.limit(10).collect()
 print(part_df_export)
-pd.DataFrame(part_df_export).to_csv("teste.csv", sep=',', encoding='utf-8')</div>
+pd.DataFrame(part_df_export).to_csv("teste.csv", sep=",", encoding="utf-8")</div>
 </div>
 </div>
 </div>
@@ -5626,12 +5724,14 @@ pd.DataFrame(part_df_export).to_csv("teste.csv", sep=',', encoding='utf-8')</div
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># SAVE COPY TO HDFS</span>
 <span class="c1"># dá o mesmo problema de threadshod unsuficiente que ocorre no fit</span>
 <span class="kn">import</span> <span class="nn">gc</span>
+
 <span class="n">collected</span> <span class="o">=</span> <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Garbage collector: collected </span><span class="si">%d</span><span class="s2"> objects."</span> <span class="o">%</span> <span class="n">collected</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-21"># SAVE COPY TO HDFS
 # dá o mesmo problema de threadshod unsuficiente que ocorre no fit
 import gc
+
 collected = gc.collect()
 print("Garbage collector: collected %d objects." % collected)</div>
 </div>
@@ -5702,7 +5802,12 @@ print("Garbage collector: collected %d objects." % collected)</div>
 <span class="kn">from</span> <span class="nn">pyspark.ml</span> <span class="kn">import</span> <span class="n">Pipeline</span>
 <span class="kn">from</span> <span class="nn">pyspark.ml.classification</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
 <span class="kn">from</span> <span class="nn">pyspark.ml.linalg</span> <span class="kn">import</span> <span class="n">Vectors</span>
-<span class="kn">from</span> <span class="nn">pyspark.ml.feature</span> <span class="kn">import</span> <span class="n">IndexToString</span><span class="p">,</span> <span class="n">StringIndexer</span><span class="p">,</span> <span class="n">VectorIndexer</span><span class="p">,</span> <span class="n">VectorAssembler</span>
+<span class="kn">from</span> <span class="nn">pyspark.ml.feature</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">IndexToString</span><span class="p">,</span>
+    <span class="n">StringIndexer</span><span class="p">,</span>
+    <span class="n">VectorIndexer</span><span class="p">,</span>
+    <span class="n">VectorAssembler</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pyspark.ml.evaluation</span> <span class="kn">import</span> <span class="n">MulticlassClassificationEvaluator</span>
 <span class="kn">from</span> <span class="nn">pyspark.ml.tuning</span> <span class="kn">import</span> <span class="n">ParamGridBuilder</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -5714,7 +5819,12 @@ print("Garbage collector: collected %d objects." % collected)</div>
 from pyspark.ml import Pipeline
 from pyspark.ml.classification import RandomForestClassifier
 from pyspark.ml.linalg import Vectors
-from pyspark.ml.feature import IndexToString, StringIndexer, VectorIndexer, VectorAssembler
+from pyspark.ml.feature import (
+    IndexToString,
+    StringIndexer,
+    VectorIndexer,
+    VectorAssembler,
+)
 from pyspark.ml.evaluation import MulticlassClassificationEvaluator
 from pyspark.ml.tuning import ParamGridBuilder
 import numpy as np
@@ -5745,12 +5855,14 @@ from pyspark.ml.feature import OneHotEncoder</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">vari</span> <span class="o">=</span> <span class="n">calculated_mean</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">'vari'</span><span class="p">)</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">vari</span> <span class="o">=</span> <span class="n">calculated_mean</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"vari"</span><span class="p">)</span>
 <span class="n">vari</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 <span class="n">vari</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-<span class="n">df_rf_assembler</span> <span class="o">=</span> <span class="n">calculated_mean</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"vari"</span><span class="p">,</span><span class="s2">"gndvi"</span><span class="p">,</span><span class="s2">"evi"</span><span class="p">,</span><span class="s2">"tgi"</span><span class="p">,</span><span class="s2">"gli"</span><span class="p">,</span><span class="s2">"cast(feature_name as long) as labels"</span><span class="p">)</span>
+<span class="n">df_rf_assembler</span> <span class="o">=</span> <span class="n">calculated_mean</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"vari"</span><span class="p">,</span> <span class="s2">"gndvi"</span><span class="p">,</span> <span class="s2">"evi"</span><span class="p">,</span> <span class="s2">"tgi"</span><span class="p">,</span> <span class="s2">"gli"</span><span class="p">,</span> <span class="s2">"cast(feature_name as long) as labels"</span>
+<span class="p">)</span>
 <span class="c1"># FORMATO NECESSARIO PARA O FIT</span>
-<span class="n">feature_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df_rf_assembler</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="s1">'labels'</span><span class="p">]</span>
+<span class="n">feature_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df_rf_assembler</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="s2">"labels"</span><span class="p">]</span>
 <span class="n">assembler</span> <span class="o">=</span> <span class="n">VectorAssembler</span><span class="p">(</span><span class="n">inputCols</span><span class="o">=</span><span class="n">feature_list</span><span class="p">,</span> <span class="n">outputCol</span><span class="o">=</span><span class="s2">"features"</span><span class="p">)</span>
 <span class="c1"># rf = RandomForestClassifier(labelCol="labels", featuresCol="features")</span>
 <span class="n">df_rf_assembler</span> <span class="o">=</span> <span class="n">assembler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df_rf_assembler</span><span class="p">)</span>
@@ -5759,12 +5871,14 @@ from pyspark.ml.feature import OneHotEncoder</div>
 <span class="c1"># trainingData.show(5)</span>
 <span class="c1"># testData.show(5)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-24">vari = calculated_mean.select('vari')
+<div class="clipboard-copy-txt" id="cell-24">vari = calculated_mean.select("vari")
 vari.printSchema()
 vari.show(5)
-df_rf_assembler = calculated_mean.selectExpr("vari","gndvi","evi","tgi","gli","cast(feature_name as long) as labels")
+df_rf_assembler = calculated_mean.selectExpr(
+    "vari", "gndvi", "evi", "tgi", "gli", "cast(feature_name as long) as labels"
+)
 # FORMATO NECESSARIO PARA O FIT
-feature_list = [col for col in df_rf_assembler.columns if col != 'labels']
+feature_list = [col for col in df_rf_assembler.columns if col != "labels"]
 assembler = VectorAssembler(inputCols=feature_list, outputCol="features")
 # rf = RandomForestClassifier(labelCol="labels", featuresCol="features")
 df_rf_assembler = assembler.transform(df_rf_assembler)
@@ -5876,7 +5990,11 @@ only showing top 5 rows
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">allclose</span>
 <span class="kn">from</span> <span class="nn">pyspark.ml.linalg</span> <span class="kn">import</span> <span class="n">Vectors</span>
 <span class="kn">from</span> <span class="nn">pyspark.ml.feature</span> <span class="kn">import</span> <span class="n">StringIndexer</span>
-<span class="kn">from</span> <span class="nn">pyspark.ml.classification</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">RandomForestClassificationModel</span>
+<span class="kn">from</span> <span class="nn">pyspark.ml.classification</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">RandomForestClassifier</span><span class="p">,</span>
+    <span class="n">RandomForestClassificationModel</span><span class="p">,</span>
+<span class="p">)</span>
+
 <span class="c1"># df = spark.createDataFrame([</span>
 <span class="c1">#     (1.0, Vectors.dense(1.0)),</span>
 <span class="c1">#     (0.0, Vectors.sparse(1, [], []))], ["label", "features"])</span>
@@ -5940,7 +6058,11 @@ only showing top 5 rows
 from numpy import allclose
 from pyspark.ml.linalg import Vectors
 from pyspark.ml.feature import StringIndexer
-from pyspark.ml.classification import RandomForestClassifier, RandomForestClassificationModel
+from pyspark.ml.classification import (
+    RandomForestClassifier,
+    RandomForestClassificationModel,
+)
+
 # df = spark.createDataFrame([
 #     (1.0, Vectors.dense(1.0)),
 #     (0.0, Vectors.sparse(1, [], []))], ["label", "features"])
@@ -6086,7 +6208,7 @@ from pyspark.ml.classification import RandomForestClassifier, RandomForestClassi
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 14, 2024 03:28:23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">September 23, 2024 22:14:04</span>
   </span>
 
     

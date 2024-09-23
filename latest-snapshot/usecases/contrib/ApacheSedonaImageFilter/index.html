@@ -4403,7 +4403,15 @@ under the License.
 <span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
 <span class="kn">from</span> <span class="nn">pyspark</span> <span class="kn">import</span> <span class="n">StorageLevel</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.types</span> <span class="kn">import</span> <span class="n">StructType</span><span class="p">,</span> <span class="n">StructField</span><span class="p">,</span><span class="n">StringType</span><span class="p">,</span> <span class="n">LongType</span><span class="p">,</span> <span class="n">IntegerType</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">,</span> <span class="n">ArrayType</span>
+<span class="kn">from</span> <span class="nn">pyspark.sql.types</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">StructType</span><span class="p">,</span>
+    <span class="n">StructField</span><span class="p">,</span>
+    <span class="n">StringType</span><span class="p">,</span>
+    <span class="n">LongType</span><span class="p">,</span>
+    <span class="n">IntegerType</span><span class="p">,</span>
+    <span class="n">DoubleType</span><span class="p">,</span>
+    <span class="n">ArrayType</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">regexp_replace</span>
 <span class="kn">from</span> <span class="nn">sedona.register</span> <span class="kn">import</span> <span class="n">SedonaRegistrator</span>
 <span class="kn">from</span> <span class="nn">sedona.utils</span> <span class="kn">import</span> <span class="n">SedonaKryoRegistrator</span><span class="p">,</span> <span class="n">KryoSerializer</span>
@@ -4417,7 +4425,15 @@ under the License.
 from pyspark.sql import SparkSession
 from pyspark import StorageLevel
 import pandas as pd
-from pyspark.sql.types import StructType, StructField,StringType, LongType, IntegerType, DoubleType, ArrayType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    StringType,
+    LongType,
+    IntegerType,
+    DoubleType,
+    ArrayType,
+)
 from pyspark.sql.functions import regexp_replace
 from sedona.register import SedonaRegistrator
 from sedona.utils import SedonaKryoRegistrator, KryoSerializer
@@ -4450,18 +4466,21 @@ from pyspark.sql.functions import udf, lit</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span>\
-    <span class="n">builder</span><span class="o">.</span>\
-    <span class="n">appName</span><span class="p">(</span><span class="s2">"Demo-app"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">enableHiveSupport</span><span class="p">()</span><span class="o">.</span>\
-    <span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">master</span><span class="p">(</span><span class="s2">"spark://spark-master:7077"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s2">"spark.executor.memory"</span><span class="p">,</span> <span class="s2">"15G"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s2">"spark.driver.maxResultSize"</span><span class="p">,</span> <span class="s2">"15G"</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s2">"spark.serializer"</span><span class="p">,</span> <span class="n">KryoSerializer</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s2">"spark.kryo.registrator"</span><span class="p">,</span> <span class="n">SedonaKryoRegistrator</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s2">"spark.jars.packages"</span><span class="p">,</span> <span class="s2">"org.apache.sedona:sedona-python-adapter-3.0_2.12:1.1.0-incubating,org.datasyslab:geotools-wrapper:1.1.0-25.2"</span><span class="p">)</span> <span class="o">.</span>\
-    <span class="n">getOrCreate</span><span class="p">()</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">spark</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">"Demo-app"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">enableHiveSupport</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"spark://spark-master:7077"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.executor.memory"</span><span class="p">,</span> <span class="s2">"15G"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.driver.maxResultSize"</span><span class="p">,</span> <span class="s2">"15G"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.serializer"</span><span class="p">,</span> <span class="n">KryoSerializer</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.kryo.registrator"</span><span class="p">,</span> <span class="n">SedonaKryoRegistrator</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span>
+        <span class="s2">"spark.jars.packages"</span><span class="p">,</span>
+        <span class="s2">"org.apache.sedona:sedona-python-adapter-3.0_2.12:1.1.0-incubating,org.datasyslab:geotools-wrapper:1.1.0-25.2"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
 <span class="c1">#     config("spark.rpc.message.maxSize", 2047).\</span>
 <span class="c1"># rdd = spark.sparkContext.parallelize(range(1000))</span>
 <span class="c1"># rdd.takeSample(False, 5)</span>
@@ -4469,18 +4488,21 @@ from pyspark.sql.functions import udf, lit</div>
 <span class="n">SedonaRegistrator</span><span class="o">.</span><span class="n">registerAll</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
 <span class="n">sc</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-3">spark = SparkSession.\
-    builder.\
-    appName("Demo-app").\
-    enableHiveSupport().\
-    master("local[*]").\
-    master("spark://spark-master:7077").\
-    config("spark.executor.memory", "15G").\
-    config("spark.driver.maxResultSize", "15G").\
-    config("spark.serializer", KryoSerializer.getName).\
-    config("spark.kryo.registrator", SedonaKryoRegistrator.getName).\
-    config("spark.jars.packages", "org.apache.sedona:sedona-python-adapter-3.0_2.12:1.1.0-incubating,org.datasyslab:geotools-wrapper:1.1.0-25.2") .\
-    getOrCreate()
+<div class="clipboard-copy-txt" id="cell-3">spark = (
+    SparkSession.builder.appName("Demo-app")
+    .enableHiveSupport()
+    .master("local[*]")
+    .master("spark://spark-master:7077")
+    .config("spark.executor.memory", "15G")
+    .config("spark.driver.maxResultSize", "15G")
+    .config("spark.serializer", KryoSerializer.getName)
+    .config("spark.kryo.registrator", SedonaKryoRegistrator.getName)
+    .config(
+        "spark.jars.packages",
+        "org.apache.sedona:sedona-python-adapter-3.0_2.12:1.1.0-incubating,org.datasyslab:geotools-wrapper:1.1.0-25.2",
+    )
+    .getOrCreate()
+)
 #     config("spark.rpc.message.maxSize", 2047).\
 # rdd = spark.sparkContext.parallelize(range(1000))
 # rdd.takeSample(False, 5)
@@ -4565,13 +4587,13 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Path to directory of geotiff images </span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Path to directory of geotiff images</span>
 <span class="n">DATA_DIR</span> <span class="o">=</span> <span class="s2">"hdfs://776faf4d6a1e:8020/tmp/"</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geotiff"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"dropInvalid"</span><span class="p">,</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geotiff"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"dropInvalid"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-4"># Path to directory of geotiff images 
+<div class="clipboard-copy-txt" id="cell-4"># Path to directory of geotiff images
 DATA_DIR = "hdfs://776faf4d6a1e:8020/tmp/"
-df = spark.read.format("geotiff").option("dropInvalid",True).load(DATA_DIR)</div>
+df = spark.read.format("geotiff").option("dropInvalid", True).load(DATA_DIR)</div>
 </div>
 </div>
 </div>
@@ -4688,13 +4710,27 @@ df.printSchema()</div>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Java Heap Out Of Memory  =&gt; Ir nas máquinas e aumentar o export _JAVA_OPTIONS="-Xmx15g"</span>
 <span class="c1"># Java lang Assertion Error image is too large =&gt;</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"image.origin as origin"</span><span class="p">,</span><span class="s2">"ST_GeomFromWkt(image.wkt) as Geom"</span><span class="p">,</span> <span class="s2">"image.height as height"</span><span class="p">,</span> <span class="s2">"image.width as width"</span><span class="p">,</span> <span class="s2">"image.data as data"</span><span class="p">,</span> <span class="s2">"image.nBands as bands"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"image.origin as origin"</span><span class="p">,</span>
+    <span class="s2">"ST_GeomFromWkt(image.wkt) as Geom"</span><span class="p">,</span>
+    <span class="s2">"image.height as height"</span><span class="p">,</span>
+    <span class="s2">"image.width as width"</span><span class="p">,</span>
+    <span class="s2">"image.data as data"</span><span class="p">,</span>
+    <span class="s2">"image.nBands as bands"</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 <span class="c1"># df.count()</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-7"># Java Heap Out Of Memory  =&gt; Ir nas máquinas e aumentar o export _JAVA_OPTIONS="-Xmx15g"
 # Java lang Assertion Error image is too large =&gt;
-df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands").cache()
+df = df.selectExpr(
+    "image.origin as origin",
+    "ST_GeomFromWkt(image.wkt) as Geom",
+    "image.height as height",
+    "image.width as width",
+    "image.data as data",
+    "image.nBands as bands",
+).cache()
 df.show(5)
 # df.count()</div>
 </div>
@@ -4734,12 +4770,24 @@ df.show(5)
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># ,"RS_GetBand(data, 2,bands) as Band2","RS_GetBand(data, 3,bands) as Band3", "RS_GetBand(data, 4,bands) as Band4"</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"Geom"</span><span class="p">,</span><span class="s2">"RS_GetBand(data, 1,bands) as Band1"</span><span class="p">,</span><span class="s2">"RS_GetBand(data, 2,bands) as Band2"</span><span class="p">,</span><span class="s2">"RS_GetBand(data, 3,bands) as Band3"</span><span class="p">,</span> <span class="s2">"RS_GetBand(data, 4,bands) as Band4"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"Geom"</span><span class="p">,</span>
+    <span class="s2">"RS_GetBand(data, 1,bands) as Band1"</span><span class="p">,</span>
+    <span class="s2">"RS_GetBand(data, 2,bands) as Band2"</span><span class="p">,</span>
+    <span class="s2">"RS_GetBand(data, 3,bands) as Band3"</span><span class="p">,</span>
+    <span class="s2">"RS_GetBand(data, 4,bands) as Band4"</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 <span class="n">df</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"allbands"</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-8"># ,"RS_GetBand(data, 2,bands) as Band2","RS_GetBand(data, 3,bands) as Band3", "RS_GetBand(data, 4,bands) as Band4"
-df = df.selectExpr("Geom","RS_GetBand(data, 1,bands) as Band1","RS_GetBand(data, 2,bands) as Band2","RS_GetBand(data, 3,bands) as Band3", "RS_GetBand(data, 4,bands) as Band4").cache()
+df = df.selectExpr(
+    "Geom",
+    "RS_GetBand(data, 1,bands) as Band1",
+    "RS_GetBand(data, 2,bands) as Band2",
+    "RS_GetBand(data, 3,bands) as Band3",
+    "RS_GetBand(data, 4,bands) as Band4",
+).cache()
 df.createOrReplaceTempView("allbands")
 df.show(5)</div>
 </div>
@@ -4795,10 +4843,14 @@ df.show(5)</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">NomalizedDifference</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_NormalizedDifference(Band1, Band2) as normDiff"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">NomalizedDifference</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"RS_NormalizedDifference(Band1, Band2) as normDiff"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 <span class="n">NomalizedDifference</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-10">NomalizedDifference = df.selectExpr("RS_NormalizedDifference(Band1, Band2) as normDiff").cache()
+<div class="clipboard-copy-txt" id="cell-10">NomalizedDifference = df.selectExpr(
+    "RS_NormalizedDifference(Band1, Band2) as normDiff"
+).cache()
 NomalizedDifference.show(5)</div>
 </div>
 </div>
@@ -4882,10 +4934,14 @@ modeDF.show(5)</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">greaterthanDF</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"Select RS_GreaterThan(Band1,1000.0) as greaterthan from allbands"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">greaterthanDF</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
+    <span class="s2">"Select RS_GreaterThan(Band1,1000.0) as greaterthan from allbands"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 <span class="n">greaterthanDF</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-13">greaterthanDF = spark.sql("Select RS_GreaterThan(Band1,1000.0) as greaterthan from allbands").cache()
+<div class="clipboard-copy-txt" id="cell-13">greaterthanDF = spark.sql(
+    "Select RS_GreaterThan(Band1,1000.0) as greaterthan from allbands"
+).cache()
 greaterthanDF.show()</div>
 </div>
 </div>
@@ -4911,10 +4967,14 @@ greaterthanDF.show()</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">greaterthanEqualDF</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"Select RS_GreaterThanEqual(Band1,360.0) as greaterthanEqual from allbands"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">greaterthanEqualDF</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
+    <span class="s2">"Select RS_GreaterThanEqual(Band1,360.0) as greaterthanEqual from allbands"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 <span class="n">greaterthanEqualDF</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-14">greaterthanEqualDF = spark.sql("Select RS_GreaterThanEqual(Band1,360.0) as greaterthanEqual from allbands").cache()
+<div class="clipboard-copy-txt" id="cell-14">greaterthanEqualDF = spark.sql(
+    "Select RS_GreaterThanEqual(Band1,360.0) as greaterthanEqual from allbands"
+).cache()
 greaterthanEqualDF.show()</div>
 </div>
 </div>
@@ -4940,10 +5000,14 @@ greaterthanEqualDF.show()</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">lessthanDF</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"Select RS_LessThan(Band1,1000.0) as lessthan from allbands"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">lessthanDF</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
+    <span class="s2">"Select RS_LessThan(Band1,1000.0) as lessthan from allbands"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 <span class="n">lessthanDF</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-15">lessthanDF = spark.sql("Select RS_LessThan(Band1,1000.0) as lessthan from allbands").cache()
+<div class="clipboard-copy-txt" id="cell-15">lessthanDF = spark.sql(
+    "Select RS_LessThan(Band1,1000.0) as lessthan from allbands"
+).cache()
 lessthanDF.show()</div>
 </div>
 </div>
@@ -4969,10 +5033,14 @@ lessthanDF.show()</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">lessthanEqualDF</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"Select RS_LessThanEqual(Band1,2890.0) as lessthanequal from allbands"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">lessthanEqualDF</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
+    <span class="s2">"Select RS_LessThanEqual(Band1,2890.0) as lessthanequal from allbands"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 <span class="n">lessthanEqualDF</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-16">lessthanEqualDF = spark.sql("Select RS_LessThanEqual(Band1,2890.0) as lessthanequal from allbands").cache()
+<div class="clipboard-copy-txt" id="cell-16">lessthanEqualDF = spark.sql(
+    "Select RS_LessThanEqual(Band1,2890.0) as lessthanequal from allbands"
+).cache()
 lessthanEqualDF.show()</div>
 </div>
 </div>
@@ -5346,20 +5414,62 @@ logOver.show(5)</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geotiff"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"dropInvalid"</span><span class="p">,</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"image.origin as origin"</span><span class="p">,</span><span class="s2">"ST_GeomFromWkt(image.wkt) as Geom"</span><span class="p">,</span> <span class="s2">"image.height as height"</span><span class="p">,</span> <span class="s2">"image.width as width"</span><span class="p">,</span> <span class="s2">"image.data as data"</span><span class="p">,</span> <span class="s2">"image.nBands as bands"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geotiff"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"dropInvalid"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"image.origin as origin"</span><span class="p">,</span>
+    <span class="s2">"ST_GeomFromWkt(image.wkt) as Geom"</span><span class="p">,</span>
+    <span class="s2">"image.height as height"</span><span class="p">,</span>
+    <span class="s2">"image.width as width"</span><span class="p">,</span>
+    <span class="s2">"image.data as data"</span><span class="p">,</span>
+    <span class="s2">"image.nBands as bands"</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 
-<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_GetBand(data,1,bands) as targetband"</span><span class="p">,</span> <span class="s2">"height"</span><span class="p">,</span> <span class="s2">"width"</span><span class="p">,</span> <span class="s2">"bands"</span><span class="p">,</span> <span class="s2">"Geom"</span><span class="p">)</span>
-<span class="n">df_base64</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"Geom"</span><span class="p">,</span> <span class="s2">"RS_Base64(height,width,RS_Normalize(targetBand), RS_Array(height*width,0.0), RS_Array(height*width, 0.0)) as red"</span><span class="p">,</span><span class="s2">"RS_Base64(height,width,RS_Array(height*width, 0.0), RS_Normalize(targetBand), RS_Array(height*width, 0.0)) as green"</span><span class="p">,</span> <span class="s2">"RS_Base64(height,width,RS_Array(height*width, 0.0),  RS_Array(height*width, 0.0), RS_Normalize(targetBand)) as blue"</span><span class="p">,</span><span class="s2">"RS_Base64(height,width,RS_Normalize(targetBand), RS_Normalize(targetBand),RS_Normalize(targetBand)) as RGB"</span> <span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
-<span class="n">df_HTML</span> <span class="o">=</span> <span class="n">df_base64</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"Geom"</span><span class="p">,</span><span class="s2">"RS_HTML(red) as RedBand"</span><span class="p">,</span><span class="s2">"RS_HTML(blue) as BlueBand"</span><span class="p">,</span><span class="s2">"RS_HTML(green) as GreenBand"</span><span class="p">,</span> <span class="s2">"RS_HTML(RGB) as CombinedBand"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"RS_GetBand(data,1,bands) as targetband"</span><span class="p">,</span> <span class="s2">"height"</span><span class="p">,</span> <span class="s2">"width"</span><span class="p">,</span> <span class="s2">"bands"</span><span class="p">,</span> <span class="s2">"Geom"</span>
+<span class="p">)</span>
+<span class="n">df_base64</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"Geom"</span><span class="p">,</span>
+    <span class="s2">"RS_Base64(height,width,RS_Normalize(targetBand), RS_Array(height*width,0.0), RS_Array(height*width, 0.0)) as red"</span><span class="p">,</span>
+    <span class="s2">"RS_Base64(height,width,RS_Array(height*width, 0.0), RS_Normalize(targetBand), RS_Array(height*width, 0.0)) as green"</span><span class="p">,</span>
+    <span class="s2">"RS_Base64(height,width,RS_Array(height*width, 0.0),  RS_Array(height*width, 0.0), RS_Normalize(targetBand)) as blue"</span><span class="p">,</span>
+    <span class="s2">"RS_Base64(height,width,RS_Normalize(targetBand), RS_Normalize(targetBand),RS_Normalize(targetBand)) as RGB"</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<span class="n">df_HTML</span> <span class="o">=</span> <span class="n">df_base64</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"Geom"</span><span class="p">,</span>
+    <span class="s2">"RS_HTML(red) as RedBand"</span><span class="p">,</span>
+    <span class="s2">"RS_HTML(blue) as BlueBand"</span><span class="p">,</span>
+    <span class="s2">"RS_HTML(green) as GreenBand"</span><span class="p">,</span>
+    <span class="s2">"RS_HTML(RGB) as CombinedBand"</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 <span class="n">df_HTML</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-29">df = spark.read.format("geotiff").option("dropInvalid",True).load(DATA_DIR)
-df = df.selectExpr("image.origin as origin","ST_GeomFromWkt(image.wkt) as Geom", "image.height as height", "image.width as width", "image.data as data", "image.nBands as bands").cache()
+<div class="clipboard-copy-txt" id="cell-29">df = spark.read.format("geotiff").option("dropInvalid", True).load(DATA_DIR)
+df = df.selectExpr(
+    "image.origin as origin",
+    "ST_GeomFromWkt(image.wkt) as Geom",
+    "image.height as height",
+    "image.width as width",
+    "image.data as data",
+    "image.nBands as bands",
+).cache()
 
-df = df.selectExpr("RS_GetBand(data,1,bands) as targetband", "height", "width", "bands", "Geom")
-df_base64 = df.selectExpr("Geom", "RS_Base64(height,width,RS_Normalize(targetBand), RS_Array(height*width,0.0), RS_Array(height*width, 0.0)) as red","RS_Base64(height,width,RS_Array(height*width, 0.0), RS_Normalize(targetBand), RS_Array(height*width, 0.0)) as green", "RS_Base64(height,width,RS_Array(height*width, 0.0),  RS_Array(height*width, 0.0), RS_Normalize(targetBand)) as blue","RS_Base64(height,width,RS_Normalize(targetBand), RS_Normalize(targetBand),RS_Normalize(targetBand)) as RGB" ).cache()
-df_HTML = df_base64.selectExpr("Geom","RS_HTML(red) as RedBand","RS_HTML(blue) as BlueBand","RS_HTML(green) as GreenBand", "RS_HTML(RGB) as CombinedBand").cache()
+df = df.selectExpr(
+    "RS_GetBand(data,1,bands) as targetband", "height", "width", "bands", "Geom"
+)
+df_base64 = df.selectExpr(
+    "Geom",
+    "RS_Base64(height,width,RS_Normalize(targetBand), RS_Array(height*width,0.0), RS_Array(height*width, 0.0)) as red",
+    "RS_Base64(height,width,RS_Array(height*width, 0.0), RS_Normalize(targetBand), RS_Array(height*width, 0.0)) as green",
+    "RS_Base64(height,width,RS_Array(height*width, 0.0),  RS_Array(height*width, 0.0), RS_Normalize(targetBand)) as blue",
+    "RS_Base64(height,width,RS_Normalize(targetBand), RS_Normalize(targetBand),RS_Normalize(targetBand)) as RGB",
+).cache()
+df_HTML = df_base64.selectExpr(
+    "Geom",
+    "RS_HTML(red) as RedBand",
+    "RS_HTML(blue) as BlueBand",
+    "RS_HTML(green) as GreenBand",
+    "RS_HTML(RGB) as CombinedBand",
+).cache()
 df_HTML.show(5)</div>
 </div>
 </div>
@@ -5415,24 +5525,25 @@ df_HTML.show(5)</div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="k">def</span> <span class="nf">SumOfValues</span><span class="p">(</span><span class="n">band</span><span class="p">):</span>
     <span class="n">total</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">band</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">num</span><span class="o">&gt;</span><span class="mf">1000.0</span><span class="p">:</span>
-            <span class="n">total</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="n">num</span> <span class="o">&gt;</span> <span class="mf">1000.0</span><span class="p">:</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">total</span>
-    
+
+
 <span class="n">calculateSum</span> <span class="o">=</span> <span class="n">udf</span><span class="p">(</span><span class="n">SumOfValues</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
 <span class="n">spark</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"RS_Sum"</span><span class="p">,</span> <span class="n">calculateSum</span><span class="p">)</span>
 
 <span class="n">sumDF</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_Sum(targetband) as sum"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 <span class="n">sumDF</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-31">
-def SumOfValues(band):
+<div class="clipboard-copy-txt" id="cell-31">def SumOfValues(band):
     total = 0.0
     for num in band:
-        if num&gt;1000.0:
-            total+=1
+        if num &gt; 1000.0:
+            total += 1
     return total
-    
+
+
 calculateSum = udf(SumOfValues, DoubleType())
 spark.udf.register("RS_Sum", calculateSum)
 
@@ -5462,36 +5573,48 @@ sumDF.show()</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="k">def</span> <span class="nf">generatemask</span><span class="p">(</span><span class="n">band</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span><span class="n">height</span><span class="p">):</span>
-    <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">band</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="n">width</span><span class="o">&gt;=</span><span class="mi">12</span> <span class="ow">and</span> <span class="n">i</span><span class="o">%</span><span class="n">width</span><span class="o">&lt;</span><span class="mi">26</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="n">height</span><span class="o">&gt;=</span><span class="mi">12</span> <span class="ow">and</span> <span class="n">i</span><span class="o">%</span><span class="n">height</span><span class="o">&lt;</span><span class="mi">26</span><span class="p">):</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="k">def</span> <span class="nf">generatemask</span><span class="p">(</span><span class="n">band</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">band</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">%</span> <span class="n">width</span> <span class="o">&gt;=</span> <span class="mi">12</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">%</span> <span class="n">width</span> <span class="o">&lt;</span> <span class="mi">26</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">i</span> <span class="o">%</span> <span class="n">height</span> <span class="o">&gt;=</span> <span class="mi">12</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">%</span> <span class="n">height</span> <span class="o">&lt;</span> <span class="mi">26</span>
+        <span class="p">):</span>
             <span class="n">band</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">255.0</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">band</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="k">return</span> <span class="n">band</span>
 
+
 <span class="n">maskValues</span> <span class="o">=</span> <span class="n">udf</span><span class="p">(</span><span class="n">generatemask</span><span class="p">,</span> <span class="n">ArrayType</span><span class="p">(</span><span class="n">DoubleType</span><span class="p">()))</span>
 <span class="n">spark</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"RS_MaskValues"</span><span class="p">,</span> <span class="n">maskValues</span><span class="p">)</span>
 
 
-<span class="n">df_base64</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"Geom"</span><span class="p">,</span> <span class="s2">"RS_Base64(height,width,RS_Normalize(targetband), RS_Array(height*width,0.0), RS_Array(height*width, 0.0), RS_MaskValues(targetband,width,height)) as region"</span> <span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
-<span class="n">df_HTML</span> <span class="o">=</span> <span class="n">df_base64</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"Geom"</span><span class="p">,</span><span class="s2">"RS_HTML(region) as selectedregion"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<span class="n">df_base64</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"Geom"</span><span class="p">,</span>
+    <span class="s2">"RS_Base64(height,width,RS_Normalize(targetband), RS_Array(height*width,0.0), RS_Array(height*width, 0.0), RS_MaskValues(targetband,width,height)) as region"</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<span class="n">df_HTML</span> <span class="o">=</span> <span class="n">df_base64</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"Geom"</span><span class="p">,</span> <span class="s2">"RS_HTML(region) as selectedregion"</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 <span class="n">display</span><span class="p">(</span><span class="n">HTML</span><span class="p">(</span><span class="n">df_HTML</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">toPandas</span><span class="p">()</span><span class="o">.</span><span class="n">to_html</span><span class="p">(</span><span class="n">escape</span><span class="o">=</span><span class="kc">False</span><span class="p">)))</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-32">def generatemask(band, width,height):
-    for (i,val) in enumerate(band):
-        if (i%width&gt;=12 and i%width&lt;26) and (i%height&gt;=12 and i%height&lt;26):
+<div class="clipboard-copy-txt" id="cell-32">def generatemask(band, width, height):
+    for i, val in enumerate(band):
+        if (i % width &gt;= 12 and i % width &lt; 26) and (
+            i % height &gt;= 12 and i % height &lt; 26
+        ):
             band[i] = 255.0
         else:
             band[i] = 0.0
     return band
 
+
 maskValues = udf(generatemask, ArrayType(DoubleType()))
 spark.udf.register("RS_MaskValues", maskValues)
 
 
-df_base64 = df.selectExpr("Geom", "RS_Base64(height,width,RS_Normalize(targetband), RS_Array(height*width,0.0), RS_Array(height*width, 0.0), RS_MaskValues(targetband,width,height)) as region" ).cache()
-df_HTML = df_base64.selectExpr("Geom","RS_HTML(region) as selectedregion").cache()
+df_base64 = df.selectExpr(
+    "Geom",
+    "RS_Base64(height,width,RS_Normalize(targetband), RS_Array(height*width,0.0), RS_Array(height*width, 0.0), RS_MaskValues(targetband,width,height)) as region",
+).cache()
+df_HTML = df_base64.selectExpr("Geom", "RS_HTML(region) as selectedregion").cache()
 display(HTML(df_HTML.limit(2).toPandas().to_html(escape=False)))</div>
 </div>
 </div>
@@ -5580,7 +5703,7 @@ display(HTML(df_HTML.limit(2).toPandas().to_html(escape=False)))</div>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">April 14, 2024 03:28:23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">September 23, 2024 22:14:04</span>
   </span>
 
     
