@@ -27,7 +27,7 @@ class SpatialType(Enum):
     CIRCLE = "CIRCLE"
 
     @classmethod
-    def from_str(cls, spatial: str) -> 'SpatialType':
+    def from_str(cls, spatial: str) -> "SpatialType":
         try:
             spatial = getattr(cls, spatial.upper())
         except AttributeError:

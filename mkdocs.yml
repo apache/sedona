@@ -149,6 +149,7 @@ theme:
     - search.highlight
     - search.share
     - navigation.footer
+    - content.code.copy
 extra:
   version:
     provider: mike

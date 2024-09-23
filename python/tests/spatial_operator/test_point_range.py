@@ -35,10 +35,7 @@ distance = 0.01
 queryPolygonSet = "primaryroads-polygon.csv"
 inputCount = 3000
 inputBoundary = Envelope(
-    minx=-173.120769,
-    maxx=-84.965961,
-    miny=30.244859,
-    maxy=71.355134
+    minx=-173.120769, maxx=-84.965961, miny=30.244859, maxy=71.355134
 )
 rectangleMatchCount = 103
 rectangleMatchWithOriginalDuplicatesCount = 103
@@ -53,9 +50,9 @@ class TestPointRange(TestBase):
     def test_spatial_range_query(self):
         spatial_rdd = PointRDD(self.sc, input_location, offset, splitter, False)
         for i in range(self.loop_times):
-            result_size = RangeQuery.\
-                SpatialRangeQuery(spatial_rdd, self.query_envelope, False, False)\
-                .count()
+            result_size = RangeQuery.SpatialRangeQuery(
+                spatial_rdd, self.query_envelope, False, False
+            ).count()
             assert result_size == 2830
 
     def test_spatial_range_query_using_index(self):
@@ -64,7 +61,7 @@ class TestPointRange(TestBase):
         spatial_rdd.buildIndex(IndexType.RTREE, False)
 
         for i in range(self.loop_times):
-            result_size = RangeQuery.\
-                SpatialRangeQuery(spatial_rdd, self.query_envelope, False, False)\
-                .count()
+            result_size = RangeQuery.SpatialRangeQuery(
+                spatial_rdd, self.query_envelope, False, False
+            ).count()
             assert result_size == 2830

@@ -21,8 +21,11 @@ from shapely.geometry import Point
 
 from sedona.utils.spatial_rdd_parser import GeoData
 
-tests_path = path.abspath(path.join(__file__ ,"../../../spark/common/src/test/"))
-tests_resource = path.abspath(path.join(__file__ ,"../../../spark/common/src/test/resources/"))
+tests_path = path.abspath(path.join(__file__, "../../../spark/common/src/test/"))
+tests_resource = path.abspath(
+    path.join(__file__, "../../../spark/common/src/test/resources/")
+)
+
 
 def distance_sorting_functions(geo_data: GeoData, query_point: Point):
     return geo_data.geom.distance(query_point)

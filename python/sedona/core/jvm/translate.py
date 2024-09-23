@@ -30,7 +30,9 @@ class JvmSedonaPythonConverter:
         return self._jvm.PythonConverter.translateSpatialPairRDDToPython(spatial_rdd)
 
     def translate_spatial_pair_rdd_with_list_to_python(self, spatial_rdd):
-        return self._jvm.PythonConverter.translateSpatialPairRDDWithListToPython(spatial_rdd)
+        return self._jvm.PythonConverter.translateSpatialPairRDDWithListToPython(
+            spatial_rdd
+        )
 
     def translate_python_rdd_to_java(self, java_rdd):
         return self._jvm.PythonConverter.translatePythonRDDToJava(java_rdd)
@@ -103,13 +105,19 @@ class PythonRddToJavaRDDAdapter:
         self._jvm = jvm
 
     def deserialize_to_point_raw_rdd(self, java_spatial_rdd):
-        return self._jvm.PythonRddToJavaRDDAdapter.deserializeToPointRawRDD(java_spatial_rdd)
+        return self._jvm.PythonRddToJavaRDDAdapter.deserializeToPointRawRDD(
+            java_spatial_rdd
+        )
 
     def deserialize_to_polygon_raw_rdd(self, java_spatial_rdd):
-        return self._jvm.PythonRddToJavaRDDAdapter.deserializeToPolygonRawRDD(java_spatial_rdd)
+        return self._jvm.PythonRddToJavaRDDAdapter.deserializeToPolygonRawRDD(
+            java_spatial_rdd
+        )
 
     def deserialize_to_linestring_raw_rdd(self, java_spatial_rdd):
-        return self._jvm.PythonRddToJavaRDDAdapter.deserializeToLineStringRawRDD(java_spatial_rdd)
+        return self._jvm.PythonRddToJavaRDDAdapter.deserializeToLineStringRawRDD(
+            java_spatial_rdd
+        )
 
 
 class SpatialObjectLoaderAdapter:

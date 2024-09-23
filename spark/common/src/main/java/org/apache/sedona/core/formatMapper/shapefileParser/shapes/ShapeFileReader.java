@@ -42,7 +42,7 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
   /** Iterator of indexes of records */
   private int[] indexes;
 
-  /** whether use index, true when using indexes */
+  /** whether to use index, true when using indexes */
   private boolean useIndex = false;
 
   /** current index id */

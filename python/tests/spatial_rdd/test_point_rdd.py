@@ -19,8 +19,18 @@ from sedona.core.SpatialRDD import PointRDD
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.enums import IndexType, GridType
 from sedona.core.geom.envelope import Envelope
-from tests.properties.point_properties import input_location, offset, splitter, num_partitions, input_count, input_boundary, \
-    transformed_envelope, crs_point_test, crs_envelope, crs_envelope_transformed
+from tests.properties.point_properties import (
+    input_location,
+    offset,
+    splitter,
+    num_partitions,
+    input_count,
+    input_boundary,
+    transformed_envelope,
+    crs_point_test,
+    crs_envelope,
+    crs_envelope_transformed,
+)
 from tests.test_base import TestBase
 
 
@@ -33,24 +43,33 @@ class TestPointRDD(TestBase):
 
     def test_constructor(self):
         spatial_rdd = PointRDD(
-            self.sc,
-            input_location,
-            offset,
-            splitter,
-            True,
-            num_partitions
+            self.sc, input_location, offset, splitter, True, num_partitions
         )
         spatial_rdd.rawSpatialRDD.take(9)[0].getUserData()
-        assert spatial_rdd.rawSpatialRDD.take(9)[0].getUserData() == "testattribute0\ttestattribute1\ttestattribute2"
-        assert spatial_rdd.rawSpatialRDD.take(9)[2].getUserData() == "testattribute0\ttestattribute1\ttestattribute2"
-        assert spatial_rdd.rawSpatialRDD.take(9)[4].getUserData() == "testattribute0\ttestattribute1\ttestattribute2"
-        assert spatial_rdd.rawSpatialRDD.take(9)[8].getUserData() == "testattribute0\ttestattribute1\ttestattribute2"
+        assert (
+            spatial_rdd.rawSpatialRDD.take(9)[0].getUserData()
+            == "testattribute0\ttestattribute1\ttestattribute2"
+        )
+        assert (
+            spatial_rdd.rawSpatialRDD.take(9)[2].getUserData()
+            == "testattribute0\ttestattribute1\ttestattribute2"
+        )
+        assert (
+            spatial_rdd.rawSpatialRDD.take(9)[4].getUserData()
+            == "testattribute0\ttestattribute1\ttestattribute2"
+        )
+        assert (
+            spatial_rdd.rawSpatialRDD.take(9)[8].getUserData()
+            == "testattribute0\ttestattribute1\ttestattribute2"
+        )
 
         spatial_rdd_copy = PointRDD(spatial_rdd.rawJvmSpatialRDD)
         self.compare_count(spatial_rdd_copy, input_count, input_boundary)
         spatial_rdd_copy = PointRDD(spatial_rdd.rawJvmSpatialRDD)
         self.compare_count(spatial_rdd_copy, input_count, input_boundary)
-        spatial_rdd_copy = PointRDD(self.sc, input_location, offset, splitter, True, num_partitions)
+        spatial_rdd_copy = PointRDD(
+            self.sc, input_location, offset, splitter, True, num_partitions
+        )
         self.compare_count(spatial_rdd_copy, input_count, input_boundary)
         spatial_rdd_copy = PointRDD(self.sc, crs_point_test, splitter, True)
         self.compare_count(spatial_rdd_copy, 20000, crs_envelope)
@@ -62,7 +81,7 @@ class TestPointRDD(TestBase):
             Offset=offset,
             splitter=splitter,
             carryInputData=True,
-            partitions=num_partitions
+            partitions=num_partitions,
         )
         spatial_rdd.buildIndex(IndexType.RTREE, False)
         spatial_rdd_copy = PointRDD()
@@ -76,12 +95,15 @@ class TestPointRDD(TestBase):
             Offset=offset,
             splitter=splitter,
             carryInputData=False,
-            partitions=10
+            partitions=10,
         )
         spatial_rdd.analyze()
         spatial_rdd.spatialPartitioning(GridType.QUADTREE)
 
-        assert spatial_rdd.countWithoutDuplicates() == spatial_rdd.countWithoutDuplicatesSPRDD()
+        assert (
+            spatial_rdd.countWithoutDuplicates()
+            == spatial_rdd.countWithoutDuplicatesSPRDD()
+        )
 
     def test_build_index_without_set_grid(self):
         spatial_rdd = PointRDD(
@@ -90,6 +112,6 @@ class TestPointRDD(TestBase):
             Offset=offset,
             splitter=splitter,
             carryInputData=True,
-            partitions=num_partitions
+            partitions=num_partitions,
         )
         spatial_rdd.buildIndex(IndexType.RTREE, False)

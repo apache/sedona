@@ -41,7 +41,9 @@ class TestPolygonKnn(TestBase):
         polygon_rdd = PolygonRDD(self.sc, input_location, splitter, True)
 
         for i in range(self.loop_times):
-            result = KNNQuery.SpatialKnnQuery(polygon_rdd, self.query_point, self.top_k, False)
+            result = KNNQuery.SpatialKnnQuery(
+                polygon_rdd, self.query_point, self.top_k, False
+            )
             assert result.__len__() > -1
             assert result[0].getUserData() is not None
 
@@ -49,24 +51,36 @@ class TestPolygonKnn(TestBase):
         polygon_rdd = PolygonRDD(self.sc, input_location, splitter, True)
         polygon_rdd.buildIndex(IndexType.RTREE, False)
         for i in range(self.loop_times):
-            result = KNNQuery.SpatialKnnQuery(polygon_rdd, self.query_point, self.top_k, True)
+            result = KNNQuery.SpatialKnnQuery(
+                polygon_rdd, self.query_point, self.top_k, True
+            )
             assert result.__len__() > -1
             assert result[0].getUserData() is not None
 
     def test_spatial_knn_correctness(self):
         polygon_rdd = PolygonRDD(self.sc, input_location, splitter, True)
-        result_no_index = KNNQuery.SpatialKnnQuery(polygon_rdd, self.query_point, self.top_k, False)
+        result_no_index = KNNQuery.SpatialKnnQuery(
+            polygon_rdd, self.query_point, self.top_k, False
+        )
         polygon_rdd.buildIndex(IndexType.RTREE, False)
-        result_with_index = KNNQuery.SpatialKnnQuery(polygon_rdd, self.query_point, self.top_k, True)
+        result_with_index = KNNQuery.SpatialKnnQuery(
+            polygon_rdd, self.query_point, self.top_k, True
+        )
 
-        sorted_result_no_index = sorted(result_no_index, key=lambda geo_data: distance_sorting_functions(
-            geo_data, self.query_point))
+        sorted_result_no_index = sorted(
+            result_no_index,
+            key=lambda geo_data: distance_sorting_functions(geo_data, self.query_point),
+        )
 
-        sorted_result_with_index = sorted(result_with_index, key=lambda geo_data: distance_sorting_functions(
-            geo_data, self.query_point))
+        sorted_result_with_index = sorted(
+            result_with_index,
+            key=lambda geo_data: distance_sorting_functions(geo_data, self.query_point),
+        )
 
         difference = 0
         for x in range(self.top_k):
-            difference += sorted_result_no_index[x].geom.distance(sorted_result_with_index[x].geom)
+            difference += sorted_result_no_index[x].geom.distance(
+                sorted_result_with_index[x].geom
+            )
 
         assert difference == 0
