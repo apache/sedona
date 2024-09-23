@@ -50,11 +50,13 @@ class SedonaRegistrator:
     def register(cls, spark: SparkSession):
         return spark._jvm.SedonaSQLRegistrator.registerAll(spark._jsparkSession)
 
+
 class PackageImporter:
 
     @staticmethod
     def import_jvm_lib(jvm) -> bool:
         from sedona.core.utils import ImportedJvmLib
+
         """
         Imports all the specified methods and functions in jvm
         :param jvm: Jvm gateway from py4j

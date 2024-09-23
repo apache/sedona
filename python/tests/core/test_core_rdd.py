@@ -30,13 +30,7 @@ counties_path = os.path.join(tests_resource, "county_small.tsv")
 class TestSpatialRDD(TestBase):
 
     def test_creating_point_rdd(self):
-        point_rdd = PointRDD(
-            self.spark._sc,
-            point_path,
-            4,
-            FileDataSplitter.WKT,
-            True
-        )
+        point_rdd = PointRDD(self.spark._sc, point_path, 4, FileDataSplitter.WKT, True)
 
         point_rdd.analyze()
         cnt = point_rdd.countWithoutDuplicates()
@@ -44,12 +38,7 @@ class TestSpatialRDD(TestBase):
 
     def test_creating_polygon_rdd(self):
         polygon_rdd = PolygonRDD(
-            self.spark._sc,
-            counties_path,
-            0,
-            1,
-            FileDataSplitter.WKT,
-            True
+            self.spark._sc, counties_path, 0, 1, FileDataSplitter.WKT, True
         )
 
         polygon_rdd.analyze()

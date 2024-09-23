@@ -30,7 +30,9 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
     def __init__(self, rdd: RDD):
         super().__init__(rdd.ctx)
 
-        spatial_rdd = PythonRddToJavaRDDAdapter(self._jvm).deserialize_to_linestring_raw_rdd(rdd._jrdd)
+        spatial_rdd = PythonRddToJavaRDDAdapter(
+            self._jvm
+        ).deserialize_to_linestring_raw_rdd(rdd._jrdd)
 
         srdd = self._jvm_spatial_rdd(spatial_rdd)
         self._srdd = srdd
@@ -48,8 +50,16 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
         jsrdd = rawSpatialRDD.jsrdd
         self._srdd = self._jvm_spatial_rdd(jsrdd)
 
-    def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
-                 splitter: FileDataSplitter, carryInputData: bool, partitions: int):
+    def __init__(
+        self,
+        sparkContext: SparkContext,
+        InputLocation: str,
+        startOffset: int,
+        endOffset: int,
+        splitter: FileDataSplitter,
+        carryInputData: bool,
+        partitions: int,
+    ):
         """
 
         :param sparkContext: SparkContext instance
@@ -70,11 +80,18 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
             endOffset,
             jvm_splitter,
             carryInputData,
-            partitions
+            partitions,
         )
 
-    def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
-                 splitter: FileDataSplitter, carryInputData: bool):
+    def __init__(
+        self,
+        sparkContext: SparkContext,
+        InputLocation: str,
+        startOffset: int,
+        endOffset: int,
+        splitter: FileDataSplitter,
+        carryInputData: bool,
+    ):
         """
 
         :param sparkContext: SparkContext instance
@@ -96,8 +113,14 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
             carryInputData,
         )
 
-    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter, carryInputData: bool,
-                 partitions: int):
+    def __init__(
+        self,
+        sparkContext: SparkContext,
+        InputLocation: str,
+        splitter: FileDataSplitter,
+        carryInputData: bool,
+        partitions: int,
+    ):
         """
 
         :param sparkContext: SparkContext instance
@@ -110,15 +133,16 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
         super().__init__(sparkContext)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
         self._srdd = self._jvm_spatial_rdd(
-            self._jsc,
-            InputLocation,
-            jvm_splitter,
-            carryInputData,
-            partitions
+            self._jsc, InputLocation, jvm_splitter, carryInputData, partitions
         )
 
-    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter,
-                 carryInputData: bool):
+    def __init__(
+        self,
+        sparkContext: SparkContext,
+        InputLocation: str,
+        splitter: FileDataSplitter,
+        carryInputData: bool,
+    ):
         """
 
         :param sparkContext: SparkContext instance
@@ -130,10 +154,7 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
         super().__init__(sparkContext)
         jvm_splitter = FileSplitterJvm(self._jvm, splitter).jvm_instance
         self._srdd = self._jvm_spatial_rdd(
-            self._jsc,
-            InputLocation,
-            jvm_splitter,
-            carryInputData
+            self._jsc, InputLocation, jvm_splitter, carryInputData
         )
 
     @property
@@ -146,6 +167,7 @@ class LineStringRDD(SpatialRDD, metaclass=MultipleMeta):
 
     def MinimumBoundingRectangle(self):
         from sedona.core.SpatialRDD import RectangleRDD
+
         rectangle_rdd = RectangleRDD()
         srdd = self._srdd.MinimumBoundingRectangle()
 

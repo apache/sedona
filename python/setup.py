@@ -24,48 +24,52 @@ with open("README.md", "r") as fh:
 
 extension_args = {}
 
-if os.getenv('ENABLE_ASAN'):
+if os.getenv("ENABLE_ASAN"):
     extension_args = {
-        'extra_compile_args': ["-fsanitize=address"],
-        'extra_link_args': ["-fsanitize=address"]
+        "extra_compile_args": ["-fsanitize=address"],
+        "extra_link_args": ["-fsanitize=address"],
     }
 
 ext_modules = [
-    Extension('sedona.utils.geomserde_speedup', sources=[
-        'src/geomserde_speedup_module.c',
-        'src/geomserde.c',
-        'src/geom_buf.c',
-        'src/geos_c_dyn.c'
-    ], **extension_args)
+    Extension(
+        "sedona.utils.geomserde_speedup",
+        sources=[
+            "src/geomserde_speedup_module.c",
+            "src/geomserde.c",
+            "src/geom_buf.c",
+            "src/geos_c_dyn.c",
+        ],
+        **extension_args
+    )
 ]
 
 setup(
-    name='apache-sedona',
+    name="apache-sedona",
     version=version,
-    description='Apache Sedona is a cluster computing system for processing large-scale spatial data',
-    url='https://sedona.apache.org',
+    description="Apache Sedona is a cluster computing system for processing large-scale spatial data",
+    url="https://sedona.apache.org",
     license="Apache License v2.0",
-    author='Apache Sedona',
-    author_email='dev@sedona.apache.org',
+    author="Apache Sedona",
+    author_email="dev@sedona.apache.org",
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     ext_modules=ext_modules,
     long_description=long_description,
     long_description_content_type="text/markdown",
-    python_requires='>=3.6',
-    install_requires=['attrs', "shapely>=1.7.0", "rasterio>=1.2.10"],
+    python_requires=">=3.6",
+    install_requires=["attrs", "shapely>=1.7.0", "rasterio>=1.2.10"],
     extras_require={
         "spark": ["pyspark>=2.3.0"],
         "pydeck-map": ["geopandas", "pydeck==0.8.0"],
         "kepler-map": ["geopandas", "keplergl==0.3.2"],
-        "all": ["pyspark>=2.3.0", "geopandas","pydeck==0.8.0", "keplergl==0.3.2"],
+        "all": ["pyspark>=2.3.0", "geopandas", "pydeck==0.8.0", "keplergl==0.3.2"],
     },
     project_urls={
-        'Documentation': 'https://sedona.apache.org',
-        'Source code': 'https://github.com/apache/sedona',
-        'Bug Reports': 'https://issues.apache.org/jira/projects/SEDONA'
+        "Documentation": "https://sedona.apache.org",
+        "Source code": "https://github.com/apache/sedona",
+        "Bug Reports": "https://issues.apache.org/jira/projects/SEDONA",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: Apache Software License"
-    ]
+        "License :: OSI Approved :: Apache Software License",
+    ],
 )

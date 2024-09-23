@@ -27,7 +27,8 @@ import functools
 import inspect
 import warnings
 
-string_types = (type(b''), type(u''))
+string_types = (type(b""), type(""))
+
 
 def is_greater_or_equal_version(version_a: str, version_b: str) -> bool:
     if all([version_b, version_a]):
@@ -92,7 +93,7 @@ def deprecated(reason):
                 warnings.warn(
                     fmt1.format(name=func1.__name__, reason=reason),
                     category=DeprecationWarning,
-                    stacklevel=2
+                    stacklevel=2,
                 )
                 return func1(*args, **kwargs)
 
@@ -122,7 +123,7 @@ def deprecated(reason):
             warnings.warn(
                 fmt2.format(name=func2.__name__),
                 category=DeprecationWarning,
-                stacklevel=2
+                stacklevel=2,
             )
             return func2(*args, **kwargs)
 

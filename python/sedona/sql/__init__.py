@@ -30,9 +30,11 @@ from sedona.sql.st_functions import *
 from sedona.sql.st_predicates import *
 
 __all__ = (
-        [name for name, obj in inspect.getmembers(sys.modules[__name__])]  # get expected values from the modules
-        + st_predicates.__all__
-        + st_constructors.__all__
-        + st_functions.__all__
-        + st_aggregates.__all__
+    [
+        name for name, obj in inspect.getmembers(sys.modules[__name__])
+    ]  # get expected values from the modules
+    + st_predicates.__all__
+    + st_constructors.__all__
+    + st_functions.__all__
+    + st_aggregates.__all__
 )

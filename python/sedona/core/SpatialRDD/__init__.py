@@ -24,5 +24,10 @@ from .rectangle_rdd import SpatialRDD
 
 
 __all__ = [
-    "PolygonRDD", "PointRDD", "CircleRDD", "LineStringRDD", "RectangleRDD", "SpatialRDD"
+    "PolygonRDD",
+    "PointRDD",
+    "CircleRDD",
+    "LineStringRDD",
+    "RectangleRDD",
+    "SpatialRDD",
 ]
