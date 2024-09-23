@@ -22,11 +22,6 @@ repos:
         description: Check spelling with codespell
         args: [--ignore-words=.github/linters/codespell.txt]
         exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases|^tools/maven/scalafmt
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.5
-    hooks:
-      - id: ruff
-        args: [--config=.github/linters/ruff.toml, --fix]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
