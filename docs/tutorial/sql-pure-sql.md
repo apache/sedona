@@ -31,7 +31,7 @@ This will register all Sedona types, functions and optimizations in SedonaSQL an
 
 ## Load data
 
-Let use data from `examples/sql`.  To load data from CSV file we need to execute two commands:
+Let use data from `examples/sql`. To load data from CSV file we need to execute two commands:
 
 Use the following code to load the data and create a raw DataFrame:
 

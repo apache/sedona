@@ -19,7 +19,7 @@ If your Maven (`mvn --version`) points to other JDK versions, you must change it
 JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home)}" exec "/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn" "$@"
 ```
 
-4. Change `JAVA_HOME:-$(/usr/libexec/java_home)}` to `JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}`.  The resulting content will be like this:
+4. Change `JAVA_HOME:-$(/usr/libexec/java_home)}` to `JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}`. The resulting content will be like this:
 
 ```
 #!/bin/bash
