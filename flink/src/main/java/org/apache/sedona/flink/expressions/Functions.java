@@ -1190,6 +1190,29 @@ public class Functions {
     }
   }
 
+  public static class ST_Project extends ScalarFunction {
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o1,
+        @DataTypeHint(value = "Double") Double distance,
+        @DataTypeHint(value = "Double") Double azimuth,
+        @DataTypeHint("Boolean") Boolean lenient) {
+      Geometry point = (Geometry) o1;
+      return org.apache.sedona.common.Functions.project(point, distance, azimuth, lenient);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o1,
+        @DataTypeHint(value = "Double") Double distance,
+        @DataTypeHint(value = "Double") Double azimuth) {
+      Geometry point = (Geometry) o1;
+      return org.apache.sedona.common.Functions.project(point, distance, azimuth);
+    }
+  }
+
   public static class ST_MakeValid extends ScalarFunction {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(

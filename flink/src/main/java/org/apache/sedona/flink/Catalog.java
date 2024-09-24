@@ -161,6 +161,7 @@ public class Catalog {
       new Functions.ST_Points(),
       new Functions.ST_Polygon(),
       new Functions.ST_Polygonize(),
+      new Functions.ST_Project(),
       new Functions.ST_MakePolygon(),
       new Functions.ST_MakeValid(),
       new Functions.ST_MaxDistance(),

@@ -14,7 +14,7 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
-
+from math import radians
 from typing import Callable, Tuple
 
 from pyspark.sql import functions as f, Row
@@ -756,6 +756,20 @@ test_configurations = [
         "GEOMETRYCOLLECTION (POLYGON ((0 2, 1 3, 2 4, 2 3, 2 2, 1 2, 0 2)), POLYGON ((2 2, 2 3, 2 4, 3 3, 4 2, 3 2, 2 2)))",
     ),
     (
+        stf.ST_Project,
+        ("point", 10.0, radians(10)),
+        "point_geom",
+        "",
+        "POINT (1.7364817766693021 10.848077530122081)",
+    ),
+    (
+        stf.ST_Project,
+        ("geom", 10.0, radians(10), True),
+        "triangle_geom",
+        "",
+        "POINT EMPTY",
+    ),
+    (
         stf.ST_MakePolygon,
         ("geom",),
         "closed_linestring_geom",
@@ -1288,6 +1302,9 @@ wrong_type_configurations = [
     (stf.ST_PointN, ("", None)),
     (stf.ST_PointN, ("", 2.0)),
     (stf.ST_PointOnSurface, (None,)),
+    (stf.ST_Project, (None, "", "", None)),
+    (stf.ST_Project, ("", None, "", None)),
+    (stf.ST_Project, ("", "", None, None)),
     (stf.ST_ReducePrecision, (None, 1)),
     (stf.ST_ReducePrecision, ("", None)),
     (stf.ST_ReducePrecision, ("", 1.0)),

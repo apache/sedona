@@ -1735,6 +1735,23 @@ class TestPredicateJoin(TestBase):
         for actual, expected in result:
             assert actual == expected
 
+    def test_st_project(self):
+        baseDf = self.spark.sql("SELECT ST_GeomFromWKT('POINT(0 0)') as point")
+        actual = baseDf.selectExpr("ST_Project(point, 10, radians(45))").first()[0].wkt
+        expected = "POINT (7.0710678118654755 7.071067811865475)"
+        assert expected == actual
+
+        actual = (
+            self.spark.sql(
+                "SELECT ST_Project(ST_MakeEnvelope(0, 1, 2, 0), 10, radians(50), true)"
+            )
+            .first()[0]
+            .wkt
+        )
+
+        expected = "POINT EMPTY"
+        assert expected == actual
+
     def test_st_make_polygon(self):
         # Given
         geometry_df = self.spark.createDataFrame(
