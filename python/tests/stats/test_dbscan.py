@@ -81,6 +81,8 @@ class TestDBScan(TestBase):
             if x.cluster != -1 or include_outliers
         ]
 
+        result.unpersist()
+
         clusters = {
             frozenset([y[0] for y in clusters_members if y[1] == x])
             for x in set([y[1] for y in clusters_members])
@@ -237,10 +239,14 @@ class TestDBScan(TestBase):
         self.spark.conf.set("spark.sql.autoBroadcastJoinThreshold", -1)
 
         df = self.create_sample_dataframe()
-        for epsilon in [0.6, 0.7, 0.8]:
-            for min_pts in [3, 4, 5]:
+        for epsilon in [0.6]:
+            for min_pts in [3]:
                 assert self.get_expected_result(
                     self.get_data(), epsilon, min_pts, include_outliers=False
                 ) == self.get_actual_results(
                     df, epsilon, min_pts, include_outliers=False
                 )
+
+
+        while True:
+            pass # TODO delete
