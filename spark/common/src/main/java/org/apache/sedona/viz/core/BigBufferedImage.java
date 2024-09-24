@@ -89,7 +89,7 @@ public class BigBufferedImage extends BufferedImage {
   }
 
   /**
-   * Creates the.
+   * Creates the buffered image.
    *
    * @param width the width
    * @param height the height
@@ -110,7 +110,7 @@ public class BigBufferedImage extends BufferedImage {
   }
 
   /**
-   * Creates the.
+   * Creates the buffered image.
    *
    * @param inputFile the input file
    * @param imageType the image type
