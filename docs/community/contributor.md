@@ -130,14 +130,14 @@ to guide the direction of the project.
 
 Being a committer does not require you to
 participate any more than you already do. It does
-tend to make one even more committed.  You will
+tend to make one even more committed. You will
 probably find that you spend more time here.
 
 Of course, you can decline and instead remain as a
 contributor, participating as you do now.
 
 A. This personal invitation is a chance for you to
-accept or decline in private.  Either way, please
+accept or decline in private. Either way, please
 let us know in reply to the private@sedona.apache.org
 address only.
 
