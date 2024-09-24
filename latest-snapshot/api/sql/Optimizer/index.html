@@ -4390,7 +4390,7 @@ BroadcastIndexJoin pointshape#52: geometry, BuildRight, BuildLeft, true, 2.0 ST_
 </div>
 <h3 id="s2-for-distance-join">S2 for distance join<a class="headerlink" href="#s2-for-distance-join" title="Permanent link">&para;</a></h3>
 <p>This also works for distance join. You first need to use <code>ST_Buffer(geometry, distance)</code> to wrap one of your original geometry column. If your original geometry column contains points, this <code>ST_Buffer</code> will make them become circles with a radius of <code>distance</code>.</p>
-<p>Since the coordinates are in the longitude and latitude system, so the unit of <code>distance</code> should be degree instead of meter or mile. You can get an approximation by performing <code>METER_DISTANCE/111000.0</code>, then filter out false-positives.  Note that this might lead to inaccurate results if your data is close to the poles or antimeridian.</p>
+<p>Since the coordinates are in the longitude and latitude system, so the unit of <code>distance</code> should be degree instead of meter or mile. You can get an approximation by performing <code>METER_DISTANCE/111000.0</code>, then filter out false-positives. Note that this might lead to inaccurate results if your data is close to the poles or antimeridian.</p>
 <p>In a nutshell, run this query first on the left table before Step 1. Please replace <code>METER_DISTANCE</code> with a meter distance. In Step 1, generate S2 IDs based on the <code>buffered_geom</code> column. Then run Step 2, 3, 4 on the original <code>geom</code> column.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="n">ST_Buffer</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="n">METER_DISTANCE</span><span class="o">/</span><span class="mi">111000</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">buffered_geom</span><span class="p">,</span><span class="w"> </span><span class="n">name</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">lefts</span>
@@ -4461,7 +4461,7 @@ answer queries such as <code>SELECT * FROM geoparquet_dataset WHERE ST_Intersect
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">August 5, 2024 16:45:49</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">September 24, 2024 11:40:40</span>
   </span>
 
     
