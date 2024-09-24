@@ -2388,6 +2388,46 @@ Output:
 GEOMETRYCOLLECTION (POLYGON ((0 2, 1 3, 2 4, 2 3, 2 2, 1 2, 0 2)), POLYGON ((2 2, 2 3, 2 4, 3 3, 4 2, 3 2, 2 2)))
 ```
 
+## ST_Project
+
+Introduction: Calculates a new point location given a starting point, distance, and azimuth. The azimuth indicates the direction, expressed in radians, and is measured in a clockwise manner starting from true north. The system can handle azimuth values that are negative or exceed 2π (360 degrees). The optional `lenient` parameter prevents an error if the input geometry is not a Point. Its default value is `false`.
+
+Format:
+
+```
+ST_Project(point: Geometry, distance: Double, azimuth: Double, lenient: Boolean = False)
+```
+
+```
+ST_Project(point: Geometry, distance: Double, Azimuth: Double)
+```
+
+SQL Example:
+
+```sql
+SELECT ST_Project(ST_GeomFromText('POINT (10 15)'), 100, radians(90))
+```
+
+Output:
+
+```
+POINT (110 14.999999999999975)
+```
+
+SQL Example:
+
+```sql
+SELECT ST_Project(
+        ST_GeomFromText('POLYGON ((1 5, 1 1, 3 3, 5 3, 1 5))'),
+        25, radians(270), true)
+```
+
+Output:
+
+```
+POINT EMPTY
+```
+
 ## ST_ReducePrecision
 
 Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded. This function was called ST_PrecisionReduce in versions prior to v1.5.0.
