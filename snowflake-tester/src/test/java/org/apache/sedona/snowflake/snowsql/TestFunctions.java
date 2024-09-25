@@ -880,6 +880,8 @@ public class TestFunctions extends TestBase {
   @Test
   public void test_ST_Simplify() {
     registerUDF("ST_Simplify", byte[].class, double.class);
+    registerUDF("ST_Buffer", byte[].class, double.class);
+    registerUDF("ST_NPoints", byte[].class);
     verifySqlSingleRes(
         "SELECT sedona.ST_NPoints(sedona.ST_Simplify(sedona.ST_Buffer(sedona.ST_GeomFromWKT('POINT (0 2)'), 10), 1))",
         9);

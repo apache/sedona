@@ -841,6 +841,8 @@ public class TestFunctionsV2 extends TestBase {
   @Test
   public void test_ST_Simplify() {
     registerUDFV2("ST_Simplify", String.class, double.class);
+    registerUDFV2("ST_Buffer", String.class, double.class);
+    registerUDFV2("ST_NPoints", String.class);
     verifySqlSingleRes(
         "SELECT sedona.ST_NPoints(sedona.ST_Simplify(sedona.ST_Buffer(ST_GeomFromWKT('POINT (0 2)'), 10), 1))",
         9);
