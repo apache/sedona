@@ -442,6 +442,14 @@ case class ST_ReducePrecision(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Simplify(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.simplify _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_SimplifyVW(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.simplifyVW _) {
 

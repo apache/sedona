@@ -900,6 +900,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_Simplify") {
+      val baseDf = sparkSession.sql("SELECT ST_Buffer(ST_GeomFromWKT('POINT (0 2)'), 10) AS geom")
+      val actualPoints = baseDf.select(ST_NPoints(ST_Simplify("geom", 1))).first().get(0)
+      val expectedPoints = 9
+      assertEquals(expectedPoints, actualPoints)
+    }
+
     it("Passed ST_SimplifyVW") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('LINESTRING(5 2, 3 8, 6 20, 7 25, 10 10)') AS geom")

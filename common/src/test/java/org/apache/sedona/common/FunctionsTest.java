@@ -1791,6 +1791,29 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void simplify() throws ParseException {
+    Geometry geom = Constructors.geomFromWKT("POINT (1 2)", 1111);
+    geom = Functions.buffer(geom, 10, false, "quad_segs=12");
+    int actualPoints = Functions.nPoints(Functions.simplify(geom, 0.1));
+    int expectedPoints = 33;
+    assertEquals(expectedPoints, actualPoints);
+
+    actualPoints = Functions.nPoints(Functions.simplify(geom, 0.5));
+    expectedPoints = 17;
+    assertEquals(expectedPoints, actualPoints);
+
+    actualPoints = Functions.nPoints(Functions.simplify(geom, 1));
+    expectedPoints = 9;
+    assertEquals(expectedPoints, actualPoints);
+
+    Geometry actual = Functions.simplify(geom, 10);
+    actualPoints = Functions.nPoints(actual);
+    expectedPoints = 4;
+    assertEquals(expectedPoints, actualPoints);
+    assertEquals(1111, actual.getSRID());
+  }
+
+  @Test
   public void simplifyVW() throws ParseException {
     Geometry geom = Constructors.geomFromEWKT("LINESTRING(5 2, 3 8, 6 20, 7 25, 10 10)");
     String actual = Functions.simplifyVW(geom, 30).toString();

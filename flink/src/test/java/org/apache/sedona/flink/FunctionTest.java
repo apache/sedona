@@ -1740,6 +1740,17 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testSimplify() {
+    Table table = tableEnv.sqlQuery("SELECT ST_Buffer(ST_GeomFromWKT('POINT (0 2)'), 10) AS geom");
+    Geometry actualGeometry =
+        (Geometry)
+            first(table.select(call(Functions.ST_Simplify.class.getSimpleName(), $("geom"), 1)))
+                .getField(0);
+    int actualPoints = actualGeometry.getNumPoints();
+    assertEquals(9, actualPoints);
+  }
+
+  @Test
   public void testSimplifyPreserveTopology() {
     Table table =
         tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 0.9, 1 1, 0 0))') AS geom");

@@ -50,6 +50,7 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
       ("ST_Intersection(geom1, ST_Point(0, 1))", 1000),
       ("ST_MakeValid(geom1)", 1000),
       ("ST_ReducePrecision(geom1, 6)", 1000),
+      ("ST_Simplify(geom1, 0.1)", 1000),
       ("ST_SimplifyVW(geom1, 0.1)", 1000),
       ("ST_SimplifyPolygonHull(geom1, 0.5)", 1000),
       ("ST_SetSRID(geom1, 2000)", 2000),

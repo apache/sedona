@@ -1094,6 +1094,15 @@ public class UDFsV2 {
       argNames = {"geometry", "distanceTolerance"},
       argTypes = {"Geometry", "double"},
       returnTypes = "Geometry")
+  public static String ST_Simplify(String geometry, double distanceTolerance) {
+    return GeometrySerde.serGeoJson(
+        Functions.simplify(GeometrySerde.deserGeoJson(geometry), distanceTolerance));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "distanceTolerance"},
+      argTypes = {"Geometry", "double"},
+      returnTypes = "Geometry")
   public static String ST_SimplifyPreserveTopology(String geometry, double distanceTolerance) {
     return GeometrySerde.serGeoJson(
         Functions.simplifyPreserveTopology(

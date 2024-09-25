@@ -968,6 +968,12 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "distanceTolerance"})
+  public static byte[] ST_Simplify(byte[] geometry, double distanceTolerance) {
+    return GeometrySerde.serialize(
+        Functions.simplify(GeometrySerde.deserialize(geometry), distanceTolerance));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "distanceTolerance"})
   public static byte[] ST_SimplifyPreserveTopology(byte[] geometry, double distanceTolerance) {
     return GeometrySerde.serialize(
         Functions.simplifyPreserveTopology(GeometrySerde.deserialize(geometry), distanceTolerance));
