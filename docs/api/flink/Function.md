@@ -3518,7 +3518,7 @@ Output:
 Introduction: This function simplifies the input geometry by applying the Douglas-Peucker algorithm.
 
 !!!Note
-The simplification may not preserve topology, potentially producing invalid geometries. Use [ST_SimplifyPreserveTopology](#st_simplifypreservetopology) to retain valid topology after simplification.
+    The simplification may not preserve topology, potentially producing invalid geometries. Use [ST_SimplifyPreserveTopology](#st_simplifypreservetopology) to retain valid topology after simplification.
 
 Format: `ST_Simplify(geom: Geometry, tolerance: Double)`
 
