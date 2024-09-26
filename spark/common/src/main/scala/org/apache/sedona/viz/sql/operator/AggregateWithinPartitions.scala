@@ -26,7 +26,7 @@ import org.apache.spark.sql.{DataFrame, Row}
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-object AggregateWithinPartitons {
+object AggregateWithinPartitions {
 
   /**
    * Run aggregation within each partition without incurring a data shuffle. Currently support
