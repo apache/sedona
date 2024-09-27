@@ -596,6 +596,11 @@ object st_functions extends DataFrameAPI {
   def ST_Transform(geometry: Column, targetCRS: Column): Column =
     wrapExpression[ST_Transform](geometry, targetCRS)
 
+  def ST_Simplify(geometry: Column, distanceTolerance: Column): Column =
+    wrapExpression[ST_Simplify](geometry, distanceTolerance)
+  def ST_Simplify(geometry: String, distanceTolerance: Double): Column =
+    wrapExpression[ST_Simplify](geometry, distanceTolerance)
+
   def ST_SimplifyVW(geometry: Column, distanceTolerance: Column): Column =
     wrapExpression[ST_SimplifyVW](geometry, distanceTolerance)
   def ST_SimplifyVW(geometry: String, distanceTolerance: Double): Column =

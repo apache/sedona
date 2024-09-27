@@ -1442,6 +1442,14 @@ class TestPredicateJoin(TestBase):
         ).take(1)[0][0]
         assert actual
 
+    def test_st_simplify(self):
+        baseDf = self.spark.sql(
+            "SELECT ST_Buffer(ST_GeomFromWKT('POINT (0 2)'), 10) AS geom"
+        )
+        actualPoints = baseDf.selectExpr("ST_NPoints(ST_Simplify(geom, 1))").first()[0]
+        expectedPoints = 9
+        assert expectedPoints == actualPoints
+
     def test_st_simplify_vw(self):
         basedf = self.spark.sql(
             "SELECT ST_GeomFromWKT('LINESTRING(5 2, 3 8, 6 20, 7 25, 10 10)') as geom"

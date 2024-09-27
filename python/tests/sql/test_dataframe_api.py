@@ -901,6 +901,13 @@ test_configurations = [
         "POLYGON ((0 0, 1 0, 1 1, 0 0))",
     ),
     (
+        stf.ST_Simplify,
+        ("geom", 0.1),
+        "0.9_poly",
+        "",
+        "POLYGON ((0 0, 1 0, 1 1, 0 0))",
+    ),
+    (
         stf.ST_SimplifyPreserveTopology,
         ("geom", 0.2),
         "0.9_poly",
@@ -1330,6 +1337,8 @@ wrong_type_configurations = [
     (stf.ST_SetSRID, ("", None)),
     (stf.ST_SetSRID, ("", 3021.0)),
     (stf.ST_ShiftLongitude, (None,)),
+    (stf.ST_Simplify, (None, 2)),
+    (stf.ST_Simplify, ("", None)),
     (stf.ST_SimplifyPreserveTopology, (None, 0.2)),
     (stf.ST_SimplifyPreserveTopology, ("", None)),
     (stf.ST_SimplifyVW, (None, 2)),

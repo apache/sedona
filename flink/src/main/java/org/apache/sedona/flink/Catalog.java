@@ -172,6 +172,7 @@ public class Catalog {
       new Functions.ST_Multi(),
       new Functions.ST_StartPoint(),
       new Functions.ST_ShiftLongitude(),
+      new Functions.ST_Simplify(),
       new Functions.ST_SimplifyPreserveTopology(),
       new Functions.ST_SimplifyVW(),
       new Functions.ST_SimplifyPolygonHull(),

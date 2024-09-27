@@ -60,6 +60,7 @@ import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.operation.valid.TopologyValidationError;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.locationtech.jts.precision.MinimumClearance;
+import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
 import org.locationtech.jts.simplify.PolygonHullSimplifier;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.locationtech.jts.simplify.VWSimplifier;
@@ -1541,6 +1542,10 @@ public class Functions {
       }
     }
     return polygons.toArray(new Polygon[0]);
+  }
+
+  public static Geometry simplify(Geometry geom, double distanceTolerance) {
+    return DouglasPeuckerSimplifier.simplify(geom, distanceTolerance);
   }
 
   // create static function named simplifyPreserveTopology

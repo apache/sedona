@@ -1394,6 +1394,16 @@ public class Functions {
     }
   }
 
+  public static class ST_Simplify extends ScalarFunction {
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint("Double") Double distanceTolerance) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.simplify(geom, distanceTolerance);
+    }
+  }
+
   public static class ST_SimplifyPreserveTopology extends ScalarFunction {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(

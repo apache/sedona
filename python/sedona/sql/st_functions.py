@@ -1667,6 +1667,22 @@ def ST_SubDivideExplode(
 
 
 @validate_argument_types
+def ST_Simplify(
+    geometry: ColumnOrName, distance_tolerance: ColumnOrNameOrNumber
+) -> Column:
+    """Simplify a geometry using Douglas-Peucker algorithm within a specified tolerance while preserving topological relationships.
+
+    :param geometry: Geometry column to simplify.
+    :type geometry: ColumnOrName
+    :param distance_tolerance: Tolerance for merging points together to simplify the geometry as either a number or numeric column.
+    :type distance_tolerance: ColumnOrNameOrNumber
+    :return: Simplified geometry as a geometry column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_Simplify", (geometry, distance_tolerance))
+
+
+@validate_argument_types
 def ST_SimplifyPreserveTopology(
     geometry: ColumnOrName, distance_tolerance: ColumnOrNameOrNumber
 ) -> Column:
