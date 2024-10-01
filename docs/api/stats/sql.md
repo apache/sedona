@@ -1,5 +1,10 @@
 ## Overview
-The stats module of Sedona implements Scala and Python functions that can be called on dataframes with spatial columns to perform geospatial statistical analysis. The stats module is built on top of the core module and provides a set of functions that can be used to perform spatial analysis on dataframes. The stats module is designed to be used with the core module and the viz module to provide a complete set of geospatial analysis tools.
+Sedona's stats module provides Scala and Python functions for conducting geospatial
+statistical analysis on dataframes with spatial columns. 
+The stats module is built on top of the core module and provides a set of functions
+that can be used to perform spatial analysis on these dataframes. The stats module
+is designed to be used with the core module and the viz module to provide a
+complete set of geospatial analysis tools.
 
 ## Using DBSCAN
 The DBSCAN function is provided at `org.apache.sedona.stats.DBSCAN.dbscan` in scala/java and `sedona.stats.dbscan.dbscan` in python.
