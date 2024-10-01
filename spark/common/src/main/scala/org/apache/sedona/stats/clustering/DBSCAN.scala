@@ -37,10 +37,10 @@ object DBSCAN {
    * column name must be provided. The new column will be named 'cluster'.
    *
    * @param dataframe
-   *   apache sedona idDataframe containing the point geometries
+   *   dataframe to cluster. Must contain at least one GeometryType column
    * @param epsilon
    *   minimum distance parameter of DBSCAN algorithm
-   * @param min_pts
+   * @param minPts
    *   minimum number of points parameter of DBSCAN algorithm
    * @param geometry
    *   name of the geometry column
@@ -55,7 +55,7 @@ object DBSCAN {
   def dbscan(
       dataframe: DataFrame,
       epsilon: Double,
-      min_pts: Int,
+      minPts: Int,
       geometry: String = null,
       includeOutliers: Boolean = true,
       useSpheroid: Boolean = false): DataFrame = {

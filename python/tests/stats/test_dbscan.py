@@ -78,6 +78,9 @@ class TestDBScan(TestBase):
         result = dbscan(
             input_data, epsilon, min_pts, geometry, include_outliers=include_outliers
         )
+
+        result.show()
+
         id = id or "id"
         clusters_members = [
             (x[id], x.cluster)
@@ -106,6 +109,8 @@ class TestDBScan(TestBase):
         assert self.get_expected_result(
             sample_data, epsilon, min_pts
         ) == self.get_actual_results(sample_dataframe, epsilon, min_pts)
+
+        assert False
 
     def test_dbscan_valid_parameters_default_column_name(self, sample_data, sample_dataframe):
         # repeated broadcast joins with this small data size use a lot of RAM on broadcast references
