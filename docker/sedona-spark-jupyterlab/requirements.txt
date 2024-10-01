@@ -11,4 +11,4 @@ jupyterlab-widgets==1.1.7
 keplergl==0.3.2
 matplotlib
 pydeck==0.8.0
-numpy<2
+numpy<3
