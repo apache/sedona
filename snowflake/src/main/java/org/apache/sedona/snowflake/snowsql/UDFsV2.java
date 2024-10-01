@@ -973,6 +973,24 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"point", "distance", "azimuth"},
+      argTypes = {"Geometry", "double", "double"},
+      returnTypes = "Geometry")
+  public static String ST_Project(String point, double distance, double azimuth) {
+    return GeometrySerde.serGeoJson(
+        Functions.project(GeometrySerde.deserGeoJson(point), distance, azimuth));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"point", "distance", "azimuth", "lenient"},
+      argTypes = {"Geometry", "double", "double", "boolean"},
+      returnTypes = "Geometry")
+  public static String ST_Project(String point, double distance, double azimuth, boolean lenient) {
+    return GeometrySerde.serGeoJson(
+        Functions.project(GeometrySerde.deserGeoJson(point), distance, azimuth, lenient));
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geometry", "precisionScale"},
       argTypes = {"Geometry", "int"},
       returnTypes = "Geometry")
@@ -1070,6 +1088,15 @@ public class UDFsV2 {
       returnTypes = "Geometry")
   public static String ST_SetSRID(String geometry, int srid) {
     return GeometrySerde.serGeoJson(Functions.setSRID(GeometrySerde.deserGeoJson(geometry), srid));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "distanceTolerance"},
+      argTypes = {"Geometry", "double"},
+      returnTypes = "Geometry")
+  public static String ST_Simplify(String geometry, double distanceTolerance) {
+    return GeometrySerde.serGeoJson(
+        Functions.simplify(GeometrySerde.deserGeoJson(geometry), distanceTolerance));
   }
 
   @UDFAnnotations.ParamMeta(

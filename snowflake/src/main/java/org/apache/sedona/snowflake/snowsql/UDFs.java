@@ -873,6 +873,18 @@ public class UDFs {
     return GeometrySerde.serialize(Constructors.polygonFromEnvelope(minX, minY, maxX, maxY));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"point", "distance", "azimuth"})
+  public static byte[] ST_Project(byte[] point, double distance, double azimuth) {
+    return GeometrySerde.serialize(
+        Functions.project(GeometrySerde.deserialize(point), distance, azimuth));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"point", "distance", "azimuth", "lenient"})
+  public static byte[] ST_Project(byte[] point, double distance, double azimuth, boolean lenient) {
+    return GeometrySerde.serialize(
+        Functions.project(GeometrySerde.deserialize(point), distance, azimuth, lenient));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"minX", "minY", "maxX", "maxY"})
   public static byte[] ST_MakeEnvelope(double minX, double minY, double maxX, double maxY) {
     return GeometrySerde.serialize(Constructors.makeEnvelope(minX, minY, maxX, maxY));
@@ -953,6 +965,12 @@ public class UDFs {
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "srid"})
   public static byte[] ST_SetSRID(byte[] geometry, int srid) {
     return GeometrySerde.serialize(Functions.setSRID(GeometrySerde.deserialize(geometry), srid));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "distanceTolerance"})
+  public static byte[] ST_Simplify(byte[] geometry, double distanceTolerance) {
+    return GeometrySerde.serialize(
+        Functions.simplify(GeometrySerde.deserialize(geometry), distanceTolerance));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "distanceTolerance"})

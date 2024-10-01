@@ -22,10 +22,16 @@ from typing import Optional, Union
 
 from pyspark.sql import Column
 
-from sedona.sql.dataframe_api import call_sedona_function, ColumnOrName, ColumnOrNameOrNumber, validate_argument_types
+from sedona.sql.dataframe_api import (
+    call_sedona_function,
+    ColumnOrName,
+    ColumnOrNameOrNumber,
+    validate_argument_types,
+)
 
 
 _call_st_function = partial(call_sedona_function, "st_functions")
+
 
 @validate_argument_types
 def GeometryType(geometry: ColumnOrName):
@@ -38,6 +44,7 @@ def GeometryType(geometry: ColumnOrName):
     :rtype: Column
     """
     return _call_st_function("GeometryType", geometry)
+
 
 @validate_argument_types
 def ST_3DDistance(a: ColumnOrName, b: ColumnOrName) -> Column:
@@ -52,8 +59,13 @@ def ST_3DDistance(a: ColumnOrName, b: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_3DDistance", (a, b))
 
+
 @validate_argument_types
-def ST_AddMeasure(geom: ColumnOrName, measureStart: Union[ColumnOrName, float], measureEnd: Union[ColumnOrName, float]) -> Column:
+def ST_AddMeasure(
+    geom: ColumnOrName,
+    measureStart: Union[ColumnOrName, float],
+    measureEnd: Union[ColumnOrName, float],
+) -> Column:
     """Interpolate measure values with the provided start and end points and return the result geometry.
 
     :param geom: Geometry column to use in the calculation.
@@ -67,8 +79,13 @@ def ST_AddMeasure(geom: ColumnOrName, measureStart: Union[ColumnOrName, float], 
     """
     return _call_st_function("ST_AddMeasure", (geom, measureStart, measureEnd))
 
+
 @validate_argument_types
-def ST_AddPoint(line_string: ColumnOrName, point: ColumnOrName, index: Optional[Union[ColumnOrName, int]] = None) -> Column:
+def ST_AddPoint(
+    line_string: ColumnOrName,
+    point: ColumnOrName,
+    index: Optional[Union[ColumnOrName, int]] = None,
+) -> Column:
     """Add a point to either the end of a linestring or a specified index.
     If index is not provided then point will be added to the end of line_string.
 
@@ -95,6 +112,7 @@ def ST_Area(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_Area", geometry)
+
 
 @validate_argument_types
 def ST_AreaSpheroid(geometry: ColumnOrName) -> Column:
@@ -132,8 +150,11 @@ def ST_AsEWKB(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_AsEWKB", geometry)
 
+
 @validate_argument_types
-def ST_AsHEXEWKB(geometry: ColumnOrName, endian: Optional[ColumnOrName] = None) -> Column:
+def ST_AsHEXEWKB(
+    geometry: ColumnOrName, endian: Optional[ColumnOrName] = None
+) -> Column:
     """Generate the Extended Well-Known Binary representation of a geometry as Hex string.
 
     :param geometry: Geometry to generate EWKB for.
@@ -160,7 +181,9 @@ def ST_AsEWKT(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_AsGeoJSON(geometry: ColumnOrName, type: Optional[Union[ColumnOrName, str]] = None) -> Column:
+def ST_AsGeoJSON(
+    geometry: ColumnOrName, type: Optional[Union[ColumnOrName, str]] = None
+) -> Column:
     """Generate the GeoJSON style representation of a geometry column.
 
     :param geometry: Geometry column to generate GeoJSON for.
@@ -234,6 +257,7 @@ def ST_BestSRID(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_BestSRID", geometry)
 
+
 @validate_argument_types
 def ST_ShiftLongitude(geometry: ColumnOrName) -> Column:
     """Shifts longitudes between -180..0 degrees to 180..360 degrees and vice versa.
@@ -244,6 +268,7 @@ def ST_ShiftLongitude(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_ShiftLongitude", geometry)
+
 
 @validate_argument_types
 def ST_Boundary(geometry: ColumnOrName) -> Column:
@@ -258,7 +283,12 @@ def ST_Boundary(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_Buffer(geometry: ColumnOrName, buffer: ColumnOrNameOrNumber, useSpheroid: Optional[Union[ColumnOrName, bool]] = None, parameters: Optional[Union[ColumnOrName, str]] = None) -> Column:
+def ST_Buffer(
+    geometry: ColumnOrName,
+    buffer: ColumnOrNameOrNumber,
+    useSpheroid: Optional[Union[ColumnOrName, bool]] = None,
+    parameters: Optional[Union[ColumnOrName, str]] = None,
+) -> Column:
     """Calculate a geometry that represents all points whose distance from the
     input geometry column is equal to or less than a given amount.
 
@@ -320,7 +350,9 @@ def ST_Collect(*geometries: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_CollectionExtract(collection: ColumnOrName, geom_type: Optional[Union[ColumnOrName, int]] = None) -> Column:
+def ST_CollectionExtract(
+    collection: ColumnOrName, geom_type: Optional[Union[ColumnOrName, int]] = None
+) -> Column:
     """Extract a specific type of geometry from a geometry collection column
     as a multi-geometry column.
 
@@ -351,7 +383,11 @@ def ST_ClosestPoint(a: ColumnOrName, b: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_ConcaveHull(geometry: ColumnOrName, pctConvex: Union[ColumnOrName, float], allowHoles: Optional[Union[ColumnOrName, bool]] = None) -> Column:
+def ST_ConcaveHull(
+    geometry: ColumnOrName,
+    pctConvex: Union[ColumnOrName, float],
+    allowHoles: Optional[Union[ColumnOrName, bool]] = None,
+) -> Column:
     """Generate the cancave hull of a geometry column.
 
     :param geometry: Geometry column to generate a cancave hull for.
@@ -363,8 +399,13 @@ def ST_ConcaveHull(geometry: ColumnOrName, pctConvex: Union[ColumnOrName, float]
     :return: Concave hull of geometry as a geometry column.
     :rtype: Column
     """
-    args = (geometry, pctConvex) if allowHoles is None else (geometry, pctConvex, allowHoles)
+    args = (
+        (geometry, pctConvex)
+        if allowHoles is None
+        else (geometry, pctConvex, allowHoles)
+    )
     return _call_st_function("ST_ConcaveHull", args)
+
 
 @validate_argument_types
 def ST_ConvexHull(geometry: ColumnOrName) -> Column:
@@ -377,6 +418,7 @@ def ST_ConvexHull(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_ConvexHull", geometry)
 
+
 @validate_argument_types
 def ST_CrossesDateLine(a: ColumnOrName) -> Column:
     """Check whether geometry a crosses the International Date Line.
@@ -388,6 +430,7 @@ def ST_CrossesDateLine(a: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_CrossesDateLine", (a))
 
+
 @validate_argument_types
 def ST_Dimension(geometry: ColumnOrName):
     """Calculate the inherent dimension of a geometry column.
@@ -398,6 +441,7 @@ def ST_Dimension(geometry: ColumnOrName):
     :rtype: Column
     """
     return _call_st_function("ST_Dimension", geometry)
+
 
 @validate_argument_types
 def ST_Difference(a: ColumnOrName, b: ColumnOrName) -> Column:
@@ -428,6 +472,7 @@ def ST_Distance(a: ColumnOrName, b: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_Distance", (a, b))
 
+
 @validate_argument_types
 def ST_DistanceSpheroid(a: ColumnOrName, b: ColumnOrName) -> Column:
     """Calculate the geodesic distance between two geometry columns using WGS84 spheroid.
@@ -441,8 +486,13 @@ def ST_DistanceSpheroid(a: ColumnOrName, b: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_DistanceSpheroid", (a, b))
 
+
 @validate_argument_types
-def ST_DistanceSphere(a: ColumnOrName, b: ColumnOrName, radius: Optional[Union[ColumnOrName, float]] = 6371008.0) -> Column:
+def ST_DistanceSphere(
+    a: ColumnOrName,
+    b: ColumnOrName,
+    radius: Optional[Union[ColumnOrName, float]] = 6371008.0,
+) -> Column:
     """Calculate the haversine/great-circle distance between two geometry columns using a given radius.
 
     :param a: Geometry column to use in the calculation.
@@ -455,6 +505,7 @@ def ST_DistanceSphere(a: ColumnOrName, b: ColumnOrName, radius: Optional[Union[C
     :rtype: Column
     """
     return _call_st_function("ST_DistanceSphere", (a, b, radius))
+
 
 @validate_argument_types
 def ST_Dump(geometry: ColumnOrName) -> Column:
@@ -508,7 +559,12 @@ def ST_Envelope(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_Expand(geometry: ColumnOrName, deltaX_uniformDelta: Union[ColumnOrName, float], deltaY: Optional[Union[ColumnOrName, float]] = None, deltaZ: Optional[Union[ColumnOrName, float]] = None) -> Column:
+def ST_Expand(
+    geometry: ColumnOrName,
+    deltaX_uniformDelta: Union[ColumnOrName, float],
+    deltaY: Optional[Union[ColumnOrName, float]] = None,
+    deltaZ: Optional[Union[ColumnOrName, float]] = None,
+) -> Column:
     """Expand the given geometry column by a constant unit in each direction
 
     :param geometry: Geometry column to calculate the envelope of.
@@ -570,7 +626,11 @@ def ST_Force_2D(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_GeneratePoints(geometry: ColumnOrName, numPoints: Union[ColumnOrName, int], seed:Optional[Union[ColumnOrName, int]] = None) -> Column:
+def ST_GeneratePoints(
+    geometry: ColumnOrName,
+    numPoints: Union[ColumnOrName, int],
+    seed: Optional[Union[ColumnOrName, int]] = None,
+) -> Column:
     """Generate random points in given geometry.
 
     :param geometry: Geometry column to hash.
@@ -587,6 +647,7 @@ def ST_GeneratePoints(geometry: ColumnOrName, numPoints: Union[ColumnOrName, int
 
     return _call_st_function("ST_GeneratePoints", args)
 
+
 @validate_argument_types
 def ST_GeoHash(geometry: ColumnOrName, precision: Union[ColumnOrName, int]) -> Column:
     """Return the geohash of a geometry column at a given precision level.
@@ -600,10 +661,14 @@ def ST_GeoHash(geometry: ColumnOrName, precision: Union[ColumnOrName, int]) -> C
     """
     return _call_st_function("ST_GeoHash", (geometry, precision))
 
+
 @validate_argument_types
-def ST_GeometricMedian(geometry: ColumnOrName, tolerance: Optional[Union[ColumnOrName, float]] = 1e-6,
-        max_iter: Optional[Union[ColumnOrName, int]] = 1000,
-        fail_if_not_converged: Optional[Union[ColumnOrName, bool]] = False) -> Column:
+def ST_GeometricMedian(
+    geometry: ColumnOrName,
+    tolerance: Optional[Union[ColumnOrName, float]] = 1e-6,
+    max_iter: Optional[Union[ColumnOrName, int]] = 1000,
+    fail_if_not_converged: Optional[Union[ColumnOrName, bool]] = False,
+) -> Column:
     """Computes the approximate geometric median of a MultiPoint geometry using the Weiszfeld algorithm.
     The geometric median provides a centrality measure that is less sensitive to outlier points than the centroid.
     The algorithm will iterate until the distance change between successive iterations is less than the
@@ -656,7 +721,9 @@ def ST_GeometryType(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_H3CellDistance(cell1: Union[ColumnOrName, int], cell2: Union[ColumnOrName, int]) -> Column:
+def ST_H3CellDistance(
+    cell1: Union[ColumnOrName, int], cell2: Union[ColumnOrName, int]
+) -> Column:
     """Cover Geometry with H3 Cells and return a List of Long type cell IDs
     :param cell: start cell
     :type cell: long
@@ -670,7 +737,11 @@ def ST_H3CellDistance(cell1: Union[ColumnOrName, int], cell2: Union[ColumnOrName
 
 
 @validate_argument_types
-def ST_H3CellIDs(geometry: ColumnOrName, level: Union[ColumnOrName, int], full_cover: Union[ColumnOrName, bool]) -> Column:
+def ST_H3CellIDs(
+    geometry: ColumnOrName,
+    level: Union[ColumnOrName, int],
+    full_cover: Union[ColumnOrName, bool],
+) -> Column:
     """Cover Geometry with H3 Cells and return a List of Long type cell IDs
     :param geometry: Geometry column to generate cell IDs
     :type geometry: ColumnOrName
@@ -686,7 +757,11 @@ def ST_H3CellIDs(geometry: ColumnOrName, level: Union[ColumnOrName, int], full_c
 
 
 @validate_argument_types
-def ST_H3KRing(cell: Union[ColumnOrName, int], k: Union[ColumnOrName, int], exact_ring: Union[ColumnOrName, bool]) -> Column:
+def ST_H3KRing(
+    cell: Union[ColumnOrName, int],
+    k: Union[ColumnOrName, int],
+    exact_ring: Union[ColumnOrName, bool],
+) -> Column:
     """Cover Geometry with H3 Cells and return a List of Long type cell IDs
     :param cell: original cell
     :type cell: long
@@ -804,7 +879,9 @@ def ST_IsSimple(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_IsValid(geometry: ColumnOrName, flag: Optional[Union[ColumnOrName, int]] = None) -> Column:
+def ST_IsValid(
+    geometry: ColumnOrName, flag: Optional[Union[ColumnOrName, int]] = None
+) -> Column:
     """Check if a geometry is well formed.
 
     :param geometry: Geometry column to check in.
@@ -818,8 +895,11 @@ def ST_IsValid(geometry: ColumnOrName, flag: Optional[Union[ColumnOrName, int]] 
     args = (geometry,) if flag is None else (geometry, flag)
     return _call_st_function("ST_IsValid", args)
 
+
 @validate_argument_types
-def ST_IsValidDetail(geometry: ColumnOrName, flag: Optional[Union[ColumnOrName, int]] = None) -> Column:
+def ST_IsValidDetail(
+    geometry: ColumnOrName, flag: Optional[Union[ColumnOrName, int]] = None
+) -> Column:
     """
     Return a row of valid, reason and location. valid defines the validity of geometry, reason defines the
     reason why it is not valid and location defines the location where it is not valid
@@ -835,6 +915,7 @@ def ST_IsValidDetail(geometry: ColumnOrName, flag: Optional[Union[ColumnOrName, 
     args = (geometry,) if flag is None else (geometry, flag)
     return _call_st_function("ST_IsValidDetail", args)
 
+
 @validate_argument_types
 def ST_IsValidTrajectory(geometry: ColumnOrName) -> Column:
     """
@@ -848,8 +929,11 @@ def ST_IsValidTrajectory(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_IsValidTrajectory", (geometry))
 
+
 @validate_argument_types
-def ST_IsValidReason(geometry: ColumnOrName, flag: Optional[Union[ColumnOrName, int]] = None) -> Column:
+def ST_IsValidReason(
+    geometry: ColumnOrName, flag: Optional[Union[ColumnOrName, int]] = None
+) -> Column:
     """
     Provides a text description of why a geometry is not valid or states that it is valid.
     An optional flag parameter can be provided for additional options.
@@ -864,6 +948,7 @@ def ST_IsValidReason(geometry: ColumnOrName, flag: Optional[Union[ColumnOrName, 
     args = (geometry,) if flag is None else (geometry, flag)
     return _call_st_function("ST_IsValidReason", args)
 
+
 @validate_argument_types
 def ST_Length(geometry: ColumnOrName) -> Column:
     """Calculate the length of a linestring geometry.
@@ -874,6 +959,7 @@ def ST_Length(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_Length", geometry)
+
 
 @validate_argument_types
 def ST_Length2D(geometry: ColumnOrName) -> Column:
@@ -886,6 +972,7 @@ def ST_Length2D(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_Length2D", geometry)
 
+
 @validate_argument_types
 def ST_LengthSpheroid(geometry: ColumnOrName) -> Column:
     """Calculate the perimeter of a geometry using WGS84 spheroid.
@@ -896,6 +983,7 @@ def ST_LengthSpheroid(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_LengthSpheroid", geometry)
+
 
 @validate_argument_types
 def ST_LineFromMultiPoint(geometry: ColumnOrName) -> Column:
@@ -910,7 +998,9 @@ def ST_LineFromMultiPoint(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_LineInterpolatePoint(geometry: ColumnOrName, fraction: ColumnOrNameOrNumber) -> Column:
+def ST_LineInterpolatePoint(
+    geometry: ColumnOrName, fraction: ColumnOrNameOrNumber
+) -> Column:
     """Calculate a point that is interpolated along a linestring.
 
     :param geometry: Linestring geometry column to interpolate from.
@@ -921,6 +1011,7 @@ def ST_LineInterpolatePoint(geometry: ColumnOrName, fraction: ColumnOrNameOrNumb
     :rtype: Column
     """
     return _call_st_function("ST_LineInterpolatePoint", (geometry, fraction))
+
 
 @validate_argument_types
 def ST_LineLocatePoint(linestring: ColumnOrName, point: ColumnOrName) -> Column:
@@ -950,7 +1041,11 @@ def ST_LineMerge(multi_line_string: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_LineSubstring(line_string: ColumnOrName, start_fraction: ColumnOrNameOrNumber, end_fraction: ColumnOrNameOrNumber) -> Column:
+def ST_LineSubstring(
+    line_string: ColumnOrName,
+    start_fraction: ColumnOrNameOrNumber,
+    end_fraction: ColumnOrNameOrNumber,
+) -> Column:
     """Generate a substring of a linestring geometry column.
 
     :param line_string: Linestring geometry column to generate from.
@@ -962,10 +1057,17 @@ def ST_LineSubstring(line_string: ColumnOrName, start_fraction: ColumnOrNameOrNu
     :return: Smaller linestring that runs from start_fraction to end_fraction of line_string as a linestring geometry column, will be null if either start_fraction or end_fraction are outside the interval [0, 1].
     :rtype: Column
     """
-    return _call_st_function("ST_LineSubstring", (line_string, start_fraction, end_fraction))
+    return _call_st_function(
+        "ST_LineSubstring", (line_string, start_fraction, end_fraction)
+    )
+
 
 @validate_argument_types
-def ST_LocateAlong(geom: ColumnOrName, measure: Union[ColumnOrName, float], offset: Optional[Union[ColumnOrName, float]] = None) -> Column:
+def ST_LocateAlong(
+    geom: ColumnOrName,
+    measure: Union[ColumnOrName, float],
+    offset: Optional[Union[ColumnOrName, float]] = None,
+) -> Column:
     """return locations along a measure geometry that have the given measure value.
 
     :param geom:
@@ -980,6 +1082,7 @@ def ST_LocateAlong(geom: ColumnOrName, measure: Union[ColumnOrName, float], offs
     args = (geom, measure) if offset is None else (geom, measure, offset)
     return _call_st_function("ST_LocateAlong", args)
 
+
 @validate_argument_types
 def ST_LongestLine(geom1: ColumnOrName, geom2: ColumnOrName) -> Column:
     """Compute the longest line between the two geometries
@@ -993,6 +1096,7 @@ def ST_LongestLine(geom1: ColumnOrName, geom2: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_LongestLine", (geom1, geom2))
 
+
 @validate_argument_types
 def ST_HasZ(geom: ColumnOrName) -> Column:
     """Check whether geometry has Z coordinate
@@ -1003,6 +1107,7 @@ def ST_HasZ(geom: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_HasZ", geom)
+
 
 @validate_argument_types
 def ST_HasM(geom: ColumnOrName) -> Column:
@@ -1027,6 +1132,7 @@ def ST_M(geom: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_M", geom)
 
+
 @validate_argument_types
 def ST_MMin(geom: ColumnOrName) -> Column:
     """Return the minimum M coordinate of a geometry.
@@ -1037,6 +1143,7 @@ def ST_MMin(geom: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_MMin", geom)
+
 
 @validate_argument_types
 def ST_MMax(geom: ColumnOrName) -> Column:
@@ -1064,6 +1171,7 @@ def ST_MakeLine(geom1: ColumnOrName, geom2: Optional[ColumnOrName] = None) -> Co
     args = (geom1,) if geom2 is None else (geom1, geom2)
     return _call_st_function("ST_MakeLine", args)
 
+
 @validate_argument_types
 def ST_Points(geometry: ColumnOrName) -> Column:
     """Creates a MultiPoint geometry consisting of all the coordinates of the input geometry
@@ -1074,6 +1182,7 @@ def ST_Points(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_Points", (geometry))
+
 
 @validate_argument_types
 def ST_Polygon(line_string: ColumnOrName, srid: ColumnOrNameOrNumber) -> Column:
@@ -1088,6 +1197,7 @@ def ST_Polygon(line_string: ColumnOrName, srid: ColumnOrNameOrNumber) -> Column:
     """
     return _call_st_function("ST_Polygon", (line_string, srid))
 
+
 @validate_argument_types
 def ST_Polygonize(geometry: ColumnOrName) -> Column:
     """Generates a GeometryCollection composed of polygons that are formed from the linework of a set of input geometries.
@@ -1099,8 +1209,32 @@ def ST_Polygonize(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_Polygonize", (geometry))
 
+
 @validate_argument_types
-def ST_MakePolygon(line_string: ColumnOrName, holes: Optional[ColumnOrName] = None) -> Column:
+def ST_Project(
+    geom: ColumnOrName,
+    distance: Union[ColumnOrName, float],
+    azimuth: Union[ColumnOrName, float],
+    lenient: Optional[Union[ColumnOrName, bool]] = None,
+) -> Column:
+    """Calculates a new point location given a starting point, distance, and direction (azimuth).
+
+    @param geom:
+    @param distance:
+    @param azimuth:
+    @param lenient:
+    @return:
+    """
+    args = (geom, distance, azimuth, lenient)
+    if lenient is None:
+        args = (geom, distance, azimuth)
+    return _call_st_function("ST_Project", args)
+
+
+@validate_argument_types
+def ST_MakePolygon(
+    line_string: ColumnOrName, holes: Optional[ColumnOrName] = None
+) -> Column:
     """Create a polygon geometry from a linestring describing the exterior ring as well as an array of linestrings describing holes.
 
     :param line_string: Closed linestring geometry column that describes the exterior ring of the polygon.
@@ -1115,7 +1249,9 @@ def ST_MakePolygon(line_string: ColumnOrName, holes: Optional[ColumnOrName] = No
 
 
 @validate_argument_types
-def ST_MakeValid(geometry: ColumnOrName, keep_collapsed: Optional[Union[ColumnOrName, bool]] = None) -> Column:
+def ST_MakeValid(
+    geometry: ColumnOrName, keep_collapsed: Optional[Union[ColumnOrName, bool]] = None
+) -> Column:
     """Convert an invalid geometry in a geometry column into a valid geometry.
 
     :param geometry: Geometry column that contains the invalid geometry.
@@ -1133,12 +1269,13 @@ def ST_MakeValid(geometry: ColumnOrName, keep_collapsed: Optional[Union[ColumnOr
 def ST_MaximumInscribedCircle(geometry: ColumnOrName) -> Column:
     """Finds the largest circle that is contained within a geometry, or which does not overlap any lines and points
 
-        :param geometry:
-        :type geometry: ColumnOrName
-        :return: Row of center point, nearest point and radius
-        :rtype: Column
-        """
+    :param geometry:
+    :type geometry: ColumnOrName
+    :return: Row of center point, nearest point and radius
+    :rtype: Column
+    """
     return _call_st_function("ST_MaximumInscribedCircle", geometry)
+
 
 @validate_argument_types
 def ST_MaxDistance(geom1: ColumnOrName, geom2: ColumnOrName) -> Column:
@@ -1153,6 +1290,7 @@ def ST_MaxDistance(geom1: ColumnOrName, geom2: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_MaxDistance", (geom1, geom2))
 
+
 @validate_argument_types
 def ST_MinimumClearance(geometry: ColumnOrName) -> Column:
     """Calculate the minimum clearance between two vertices
@@ -1163,6 +1301,7 @@ def ST_MinimumClearance(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_MinimumClearance", geometry)
+
 
 @validate_argument_types
 def ST_MinimumClearanceLine(geometry: ColumnOrName) -> Column:
@@ -1175,8 +1314,11 @@ def ST_MinimumClearanceLine(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_MinimumClearanceLine", geometry)
 
+
 @validate_argument_types
-def ST_MinimumBoundingCircle(geometry: ColumnOrName, quadrant_segments: Optional[Union[ColumnOrName, int]] = None) -> Column:
+def ST_MinimumBoundingCircle(
+    geometry: ColumnOrName, quadrant_segments: Optional[Union[ColumnOrName, int]] = None
+) -> Column:
     """Generate the minimum bounding circle that contains a geometry.
 
     :param geometry: Geometry column to generate minimum bounding circles for.
@@ -1273,6 +1415,7 @@ def ST_NumInteriorRings(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_NumInteriorRings", geometry)
 
+
 @validate_argument_types
 def ST_NumInteriorRing(geometry: ColumnOrName) -> Column:
     """Return the number of interior rings contained in a polygon geometry.
@@ -1312,7 +1455,9 @@ def ST_PointOnSurface(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_ReducePrecision(geometry: ColumnOrName, precision: Union[ColumnOrName, int]) -> Column:
+def ST_ReducePrecision(
+    geometry: ColumnOrName, precision: Union[ColumnOrName, int]
+) -> Column:
     """Reduce the precision of the coordinates in geometry to a specified number of decimal places.
 
     :param geometry: Geometry to reduce the precision of.
@@ -1326,7 +1471,9 @@ def ST_ReducePrecision(geometry: ColumnOrName, precision: Union[ColumnOrName, in
 
 
 @validate_argument_types
-def ST_RemovePoint(line_string: ColumnOrName, index: Union[ColumnOrName, int]) -> Column:
+def ST_RemovePoint(
+    line_string: ColumnOrName, index: Union[ColumnOrName, int]
+) -> Column:
     """Remove the specified point (0-th based) for a linestring geometry column.
 
     :param line_string: Linestring geometry column to remove the point from.
@@ -1340,7 +1487,9 @@ def ST_RemovePoint(line_string: ColumnOrName, index: Union[ColumnOrName, int]) -
 
 
 @validate_argument_types
-def ST_RemoveRepeatedPoints(geom: ColumnOrName, tolerance: Optional[Union[ColumnOrName, float]] = None) -> Column:
+def ST_RemoveRepeatedPoints(
+    geom: ColumnOrName, tolerance: Optional[Union[ColumnOrName, float]] = None
+) -> Column:
     """Removes duplicate coordinates from a geometry, optionally removing those within a specified distance tolerance.
 
     @param geom: Geometry with repeated points
@@ -1394,7 +1543,9 @@ def ST_S2ToGeom(cells: Union[ColumnOrName, list]) -> Column:
 
 
 @validate_argument_types
-def ST_SetPoint(line_string: ColumnOrName, index: Union[ColumnOrName, int], point: ColumnOrName) -> Column:
+def ST_SetPoint(
+    line_string: ColumnOrName, index: Union[ColumnOrName, int], point: ColumnOrName
+) -> Column:
     """Replace a point in a linestring.
 
     :param line_string: Linestring geometry column which contains the point to be replaced.
@@ -1422,8 +1573,11 @@ def ST_SetSRID(geometry: ColumnOrName, srid: Union[ColumnOrName, int]) -> Column
     """
     return _call_st_function("ST_SetSRID", (geometry, srid))
 
+
 @validate_argument_types
-def ST_Snap(input: ColumnOrName, reference: ColumnOrName, tolerance: Union[ColumnOrName, float]) -> Column:
+def ST_Snap(
+    input: ColumnOrName, reference: ColumnOrName, tolerance: Union[ColumnOrName, float]
+) -> Column:
     """Snaps input Geometry to reference Geometry controlled by distance tolerance.
 
     :param input: Geometry
@@ -1481,7 +1635,9 @@ def ST_StartPoint(line_string: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_SubDivide(geometry: ColumnOrName, max_vertices: Union[ColumnOrName, int]) -> Column:
+def ST_SubDivide(
+    geometry: ColumnOrName, max_vertices: Union[ColumnOrName, int]
+) -> Column:
     """Subdivide a geometry into an array of geometries with at maximum number of vertices in each.
 
     :param geometry: Geometry column to subdivide.
@@ -1495,7 +1651,9 @@ def ST_SubDivide(geometry: ColumnOrName, max_vertices: Union[ColumnOrName, int])
 
 
 @validate_argument_types
-def ST_SubDivideExplode(geometry: ColumnOrName, max_vertices: Union[ColumnOrName, int]) -> Column:
+def ST_SubDivideExplode(
+    geometry: ColumnOrName, max_vertices: Union[ColumnOrName, int]
+) -> Column:
     """Same as ST_SubDivide except also explode the generated array into multiple rows.
 
     :param geometry: Geometry column to subdivide.
@@ -1509,7 +1667,25 @@ def ST_SubDivideExplode(geometry: ColumnOrName, max_vertices: Union[ColumnOrName
 
 
 @validate_argument_types
-def ST_SimplifyPreserveTopology(geometry: ColumnOrName, distance_tolerance: ColumnOrNameOrNumber) -> Column:
+def ST_Simplify(
+    geometry: ColumnOrName, distance_tolerance: ColumnOrNameOrNumber
+) -> Column:
+    """Simplify a geometry using Douglas-Peucker algorithm within a specified tolerance while preserving topological relationships.
+
+    :param geometry: Geometry column to simplify.
+    :type geometry: ColumnOrName
+    :param distance_tolerance: Tolerance for merging points together to simplify the geometry as either a number or numeric column.
+    :type distance_tolerance: ColumnOrNameOrNumber
+    :return: Simplified geometry as a geometry column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_Simplify", (geometry, distance_tolerance))
+
+
+@validate_argument_types
+def ST_SimplifyPreserveTopology(
+    geometry: ColumnOrName, distance_tolerance: ColumnOrNameOrNumber
+) -> Column:
     """Simplify a geometry within a specified tolerance while preserving topological relationships.
 
     :param geometry: Geometry column to simplify.
@@ -1519,10 +1695,15 @@ def ST_SimplifyPreserveTopology(geometry: ColumnOrName, distance_tolerance: Colu
     :return: Simplified geometry as a geometry column.
     :rtype: Column
     """
-    return _call_st_function("ST_SimplifyPreserveTopology", (geometry, distance_tolerance))
+    return _call_st_function(
+        "ST_SimplifyPreserveTopology", (geometry, distance_tolerance)
+    )
+
 
 @validate_argument_types
-def ST_SimplifyVW(geometry: ColumnOrName, distance_tolerance: ColumnOrNameOrNumber) -> Column:
+def ST_SimplifyVW(
+    geometry: ColumnOrName, distance_tolerance: ColumnOrNameOrNumber
+) -> Column:
     """Simplify a geometry using Visvalingam-Whyatt algorithm within a specified tolerance while preserving topological relationships.
 
     :param geometry: Geometry column to simplify.
@@ -1536,7 +1717,11 @@ def ST_SimplifyVW(geometry: ColumnOrName, distance_tolerance: ColumnOrNameOrNumb
 
 
 @validate_argument_types
-def ST_SimplifyPolygonHull(geometry: ColumnOrName, vertexFactor: ColumnOrNameOrNumber, isOuter: Optional[Union[ColumnOrName, bool]] = None) -> Column:
+def ST_SimplifyPolygonHull(
+    geometry: ColumnOrName,
+    vertexFactor: ColumnOrNameOrNumber,
+    isOuter: Optional[Union[ColumnOrName, bool]] = None,
+) -> Column:
     """Simplify a geometry using Visvalingam-Whyatt algorithm within a specified tolerance while preserving topological relationships.
 
     :param geometry: Geometry column to simplify.
@@ -1546,9 +1731,14 @@ def ST_SimplifyPolygonHull(geometry: ColumnOrName, vertexFactor: ColumnOrNameOrN
     :return: Simplified geometry as a geometry column.
     :rtype: Column
     """
-    args = (geometry, vertexFactor) if isOuter is None else (geometry, vertexFactor, isOuter)
+    args = (
+        (geometry, vertexFactor)
+        if isOuter is None
+        else (geometry, vertexFactor, isOuter)
+    )
 
     return _call_st_function("ST_SimplifyPolygonHull", args)
+
 
 @validate_argument_types
 def ST_Split(input: ColumnOrName, blade: ColumnOrName) -> Column:
@@ -1579,7 +1769,12 @@ def ST_SymDifference(a: ColumnOrName, b: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_Transform(geometry: ColumnOrName, source_crs: ColumnOrName, target_crs: Optional[Union[ColumnOrName, str]] = None, disable_error: Optional[Union[ColumnOrName, bool]] = None) -> Column:
+def ST_Transform(
+    geometry: ColumnOrName,
+    source_crs: ColumnOrName,
+    target_crs: Optional[Union[ColumnOrName, str]] = None,
+    disable_error: Optional[Union[ColumnOrName, bool]] = None,
+) -> Column:
     """Convert a geometry from one coordinate system to another coordinate system.
 
     :param geometry: Geometry column to convert.
@@ -1607,6 +1802,7 @@ def ST_Transform(geometry: ColumnOrName, source_crs: ColumnOrName, target_crs: O
         args = (geometry, source_crs, target_crs, disable_error)
     return _call_st_function("ST_Transform", args)
 
+
 @validate_argument_types
 def ST_TriangulatePolygon(geom: ColumnOrName) -> Column:
     """Computes the constrained Delaunay triangulation of polygons. Holes and Multipolygons are supported.
@@ -1618,16 +1814,18 @@ def ST_TriangulatePolygon(geom: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_TriangulatePolygon", geom)
 
+
 @validate_argument_types
 def ST_UnaryUnion(geom: ColumnOrName) -> Column:
     """Calculate the unary union of a geometry
 
-        :param geom: Geometry to do union
-        :type geom: ColumnOrName
-        :return: Geometry representing the unary union of geom as a geometry column.
-        :rtype: Column
-        """
+    :param geom: Geometry to do union
+    :type geom: ColumnOrName
+    :return: Geometry representing the unary union of geom as a geometry column.
+    :rtype: Column
+    """
     return _call_st_function("ST_UnaryUnion", geom)
+
 
 @validate_argument_types
 def ST_Union(a: ColumnOrName, b: Optional[ColumnOrName] = None) -> Column:
@@ -1732,6 +1930,7 @@ def ST_Z(point: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_Z", point)
 
+
 @validate_argument_types
 def ST_Zmflag(geom: ColumnOrName) -> Column:
     """Return the code indicating the ZM coordinate dimension of a geometry
@@ -1744,6 +1943,7 @@ def ST_Zmflag(geom: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_Zmflag", geom)
 
+
 @validate_argument_types
 def ST_ZMax(geometry: ColumnOrName) -> Column:
     """Return the maximum Z coordinate of a geometry.
@@ -1755,6 +1955,7 @@ def ST_ZMax(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_ZMax", geometry)
 
+
 @validate_argument_types
 def ST_ZMin(geometry: ColumnOrName) -> Column:
     """Return the minimum Z coordinate of a geometry.
@@ -1765,6 +1966,8 @@ def ST_ZMin(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_ZMin", geometry)
+
+
 @validate_argument_types
 def ST_NumPoints(geometry: ColumnOrName) -> Column:
     """Return the number of points in a LineString
@@ -1775,8 +1978,11 @@ def ST_NumPoints(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_NumPoints", geometry)
 
+
 @validate_argument_types
-def ST_Force3D(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+def ST_Force3D(
+    geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, float]] = 0.0
+) -> Column:
     """
     Return a geometry with a 3D coordinate of value 'zValue' forced upon it. No change happens if the geometry is already 3D
     :param zValue: Optional value of z coordinate to be potentially added, default value is 0.0
@@ -1786,8 +1992,11 @@ def ST_Force3D(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, floa
     args = (geometry, zValue)
     return _call_st_function("ST_Force3D", args)
 
+
 @validate_argument_types
-def ST_Force3DM(geometry: ColumnOrName, mValue: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+def ST_Force3DM(
+    geometry: ColumnOrName, mValue: Optional[Union[ColumnOrName, float]] = 0.0
+) -> Column:
     """
     Return a geometry with a 3D coordinate of value 'mValue' forced upon it. No change happens if the geometry is already 3D
     :param mValue: Optional value of m coordinate to be potentially added, default value is 0.0
@@ -1797,8 +2006,11 @@ def ST_Force3DM(geometry: ColumnOrName, mValue: Optional[Union[ColumnOrName, flo
     args = (geometry, mValue)
     return _call_st_function("ST_Force3DM", args)
 
+
 @validate_argument_types
-def ST_Force3DZ(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+def ST_Force3DZ(
+    geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, float]] = 0.0
+) -> Column:
     """
     Return a geometry with a 3D coordinate of value 'zValue' forced upon it. No change happens if the geometry is already 3D
     :param zValue: Optional value of z coordinate to be potentially added, default value is 0.0
@@ -1808,9 +2020,13 @@ def ST_Force3DZ(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, flo
     args = (geometry, zValue)
     return _call_st_function("ST_Force3DZ", args)
 
+
 @validate_argument_types
-def ST_Force4D(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, float]] = 0.0,
-               mValue: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+def ST_Force4D(
+    geometry: ColumnOrName,
+    zValue: Optional[Union[ColumnOrName, float]] = 0.0,
+    mValue: Optional[Union[ColumnOrName, float]] = 0.0,
+) -> Column:
     """
     Return a geometry with a 4D coordinate of value 'zValue' and mValue forced upon it. No change happens if the
     geometry is already 4D, if geometry either has z or m, it will not change the existing z or m value.
@@ -1822,6 +2038,7 @@ def ST_Force4D(geometry: ColumnOrName, zValue: Optional[Union[ColumnOrName, floa
     args = (geometry, zValue, mValue)
     return _call_st_function("ST_Force4D", args)
 
+
 @validate_argument_types
 def ST_ForceCollection(geometry: ColumnOrName) -> Column:
     """
@@ -1832,6 +2049,7 @@ def ST_ForceCollection(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_ForceCollection", geometry)
 
+
 @validate_argument_types
 def ST_ForcePolygonCW(geometry: ColumnOrName) -> Column:
     """
@@ -1840,6 +2058,7 @@ def ST_ForcePolygonCW(geometry: ColumnOrName) -> Column:
     :return: Clockwise oriented geometry
     """
     return _call_st_function("ST_ForcePolygonCW", geometry)
+
 
 @validate_argument_types
 def ST_ForceRHR(geometry: ColumnOrName) -> Column:
@@ -1850,6 +2069,7 @@ def ST_ForceRHR(geometry: ColumnOrName) -> Column:
     """
     return _call_st_function("ST_ForceRHR", geometry)
 
+
 @validate_argument_types
 def ST_NRings(geometry: ColumnOrName) -> Column:
     """
@@ -1858,8 +2078,15 @@ def ST_NRings(geometry: ColumnOrName) -> Column:
     :return: Number of exterior rings + interior rings (if any) for the given Polygon or MultiPolygon
     """
     return _call_st_function("ST_NRings", geometry)
+
+
 @validate_argument_types
-def ST_Translate(geometry: ColumnOrName, deltaX: Union[ColumnOrName, float], deltaY: Union[ColumnOrName, float], deltaZ: Optional[Union[ColumnOrName, float]] = 0.0) -> Column:
+def ST_Translate(
+    geometry: ColumnOrName,
+    deltaX: Union[ColumnOrName, float],
+    deltaY: Union[ColumnOrName, float],
+    deltaZ: Optional[Union[ColumnOrName, float]] = 0.0,
+) -> Column:
     """
     Returns the geometry with x, y and z (if present) coordinates offset by given deltaX, deltaY, and deltaZ values.
     :param geometry: Geometry column whose coordinates are to be translated.
@@ -1871,8 +2098,13 @@ def ST_Translate(geometry: ColumnOrName, deltaX: Union[ColumnOrName, float], del
     args = (geometry, deltaX, deltaY, deltaZ)
     return _call_st_function("ST_Translate", args)
 
+
 @validate_argument_types
-def ST_VoronoiPolygons(geometry: ColumnOrName, tolerance: Optional[Union[ColumnOrName, float]] = 0.0, extendTo: Optional[ColumnOrName] = None) -> Column:
+def ST_VoronoiPolygons(
+    geometry: ColumnOrName,
+    tolerance: Optional[Union[ColumnOrName, float]] = 0.0,
+    extendTo: Optional[ColumnOrName] = None,
+) -> Column:
     """
     ST_VoronoiPolygons computes a two-dimensional Voronoi diagram from the vertices of the supplied geometry.
     The result is a GeometryCollection of Polygons that covers an envelope larger than the extent of the input vertices.
@@ -1887,6 +2119,7 @@ def ST_VoronoiPolygons(geometry: ColumnOrName, tolerance: Optional[Union[ColumnO
     args = (geometry, tolerance, extendTo)
     return _call_st_function("ST_VoronoiPolygons", args)
 
+
 @validate_argument_types
 def ST_FrechetDistance(g1: ColumnOrName, g2: ColumnOrName) -> Column:
     """
@@ -1900,11 +2133,23 @@ def ST_FrechetDistance(g1: ColumnOrName, g2: ColumnOrName) -> Column:
     args = (g1, g2)
     return _call_st_function("ST_FrechetDistance", args)
 
+
 @validate_argument_types
-def ST_Affine(geometry: ColumnOrName, a: Union[ColumnOrName, float], b: Union[ColumnOrName, float], d: Union[ColumnOrName, float],
-        e: Union[ColumnOrName, float], xOff: Union[ColumnOrName, float], yOff: Union[ColumnOrName, float], c: Optional[Union[ColumnOrName, float]] = None, f: Optional[Union[ColumnOrName, float]] = None,
-        g: Optional[Union[ColumnOrName, float]] = None, h: Optional[Union[ColumnOrName, float]] = None,
-        i: Optional[Union[ColumnOrName, float]] = None,  zOff: Optional[Union[ColumnOrName, float]] = None) -> Column:
+def ST_Affine(
+    geometry: ColumnOrName,
+    a: Union[ColumnOrName, float],
+    b: Union[ColumnOrName, float],
+    d: Union[ColumnOrName, float],
+    e: Union[ColumnOrName, float],
+    xOff: Union[ColumnOrName, float],
+    yOff: Union[ColumnOrName, float],
+    c: Optional[Union[ColumnOrName, float]] = None,
+    f: Optional[Union[ColumnOrName, float]] = None,
+    g: Optional[Union[ColumnOrName, float]] = None,
+    h: Optional[Union[ColumnOrName, float]] = None,
+    i: Optional[Union[ColumnOrName, float]] = None,
+    zOff: Optional[Union[ColumnOrName, float]] = None,
+) -> Column:
     """
     Apply a 3D/2D affine transformation to the given geometry
     x = a * x + b * y + c * z + xOff | x = a * x + b * y + xOff
@@ -1930,6 +2175,7 @@ def ST_Affine(geometry: ColumnOrName, a: Union[ColumnOrName, float], b: Union[Co
         args = (geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)
     return _call_st_function("ST_Affine", args)
 
+
 @validate_argument_types
 def ST_BoundingDiagonal(geometry: ColumnOrName) -> Column:
     """
@@ -1943,7 +2189,12 @@ def ST_BoundingDiagonal(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_Angle(g1: ColumnOrName, g2: ColumnOrName, g3: Optional[ColumnOrName] = None, g4: Optional[ColumnOrName] = None) -> Column:
+def ST_Angle(
+    g1: ColumnOrName,
+    g2: ColumnOrName,
+    g3: Optional[ColumnOrName] = None,
+    g4: Optional[ColumnOrName] = None,
+) -> Column:
     """
     Returns the computed angle between vectors formed by given geometries in radian. Range of result is between 0 and 2 * pi.
     3 Variants:
@@ -1968,6 +2219,7 @@ def ST_Angle(g1: ColumnOrName, g2: ColumnOrName, g3: Optional[ColumnOrName] = No
     # args = (g1, g2, g3, g4)
     return _call_st_function("ST_Angle", args)
 
+
 @validate_argument_types
 def ST_Degrees(angleInRadian: Union[ColumnOrName, float]) -> Column:
     """
@@ -1977,8 +2229,13 @@ def ST_Degrees(angleInRadian: Union[ColumnOrName, float]) -> Column:
     """
     return _call_st_function("ST_Degrees", angleInRadian)
 
+
 @validate_argument_types
-def ST_DelaunayTriangles(geometry: ColumnOrName, tolerance: Optional[Union[ColumnOrName, float]] = None, flag: Optional[Union[ColumnOrName, int]] = None) -> Column:
+def ST_DelaunayTriangles(
+    geometry: ColumnOrName,
+    tolerance: Optional[Union[ColumnOrName, float]] = None,
+    flag: Optional[Union[ColumnOrName, int]] = None,
+) -> Column:
     """
     Computes the Delaunay Triangles of the vertices of the input geometry.
 
@@ -1993,15 +2250,20 @@ def ST_DelaunayTriangles(geometry: ColumnOrName, tolerance: Optional[Union[Colum
     """
 
     if flag is None and tolerance is None:
-        args = (geometry)
+        args = geometry
     elif flag is None:
         args = (geometry, tolerance)
     else:
         args = (geometry, tolerance, flag)
     return _call_st_function("ST_DelaunayTriangles", args)
 
+
 @validate_argument_types
-def ST_HausdorffDistance(g1: ColumnOrName, g2: ColumnOrName, densityFrac: Optional[Union[ColumnOrName, float]] = -1) -> Column:
+def ST_HausdorffDistance(
+    g1: ColumnOrName,
+    g2: ColumnOrName,
+    densityFrac: Optional[Union[ColumnOrName, float]] = -1,
+) -> Column:
     """
     Returns discretized (and hence approximate) hausdorff distance between two given geometries.
     Optionally, a distance fraction can also be provided which decreases the gap between actual and discretized hausforff distance
@@ -2013,6 +2275,7 @@ def ST_HausdorffDistance(g1: ColumnOrName, g2: ColumnOrName, densityFrac: Option
     args = (g1, g2, densityFrac)
     return _call_st_function("ST_HausdorffDistance", args)
 
+
 @validate_argument_types
 def ST_CoordDim(geometry: ColumnOrName) -> Column:
     """Return the number of dimensions contained in a coordinate
@@ -2023,6 +2286,7 @@ def ST_CoordDim(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_CoordDim", geometry)
+
 
 @validate_argument_types
 def ST_IsCollection(geometry: ColumnOrName) -> Column:
@@ -2065,8 +2329,13 @@ def ST_RotateY(geometry: ColumnOrName, angle: Union[ColumnOrName, float]) -> Col
 
 
 @validate_argument_types
-def ST_Rotate(geometry: ColumnOrName, angle: Union[ColumnOrName, float], originX: Union[ColumnOrName, float] = None,
-              originY: Union[ColumnOrName, float] = None, pointOrigin: ColumnOrName = None) -> Column:
+def ST_Rotate(
+    geometry: ColumnOrName,
+    angle: Union[ColumnOrName, float],
+    originX: Union[ColumnOrName, float] = None,
+    originY: Union[ColumnOrName, float] = None,
+    pointOrigin: ColumnOrName = None,
+) -> Column:
     """Return a counter-clockwise rotated geometry along the specified origin.
 
     :param geometry: Geometry column or name.
@@ -2093,5 +2362,8 @@ def ST_Rotate(geometry: ColumnOrName, angle: Union[ColumnOrName, float], originX
 
 
 # Automatically populate __all__
-__all__ = [name for name, obj in inspect.getmembers(sys.modules[__name__])
-           if inspect.isfunction(obj) and name != 'GeometryType']
+__all__ = [
+    name
+    for name, obj in inspect.getmembers(sys.modules[__name__])
+    if inspect.isfunction(obj) and name != "GeometryType"
+]

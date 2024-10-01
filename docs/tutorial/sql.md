@@ -26,7 +26,7 @@ SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of 
 	myDataFrame.createOrReplaceTempView("spatialDf")
 	```
 
-Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.md). You can find example county data (i.e., `county_small.tsv`) in [Sedona GitHub repo](https://github.com/apache/sedona/tree/master/core/src/test/resources).
+Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.md). You can find example county data (i.e., `county_small.tsv`) in [Sedona GitHub repo](https://github.com/apache/sedona/tree/master/spark/common/src/test/resources).
 
 ## Set up dependencies
 
@@ -71,12 +71,12 @@ You can add additional Spark runtime config to the config builder. For example, 
 
 	SparkSession config = SedonaContext.builder()
 	.master("local[*]") // Delete this if run in cluster mode
-	.appName("readTestScala") // Change this to a proper name
+	.appName("readTestJava") // Change this to a proper name
 	.getOrCreate()
 	```
 	If you use SedonaViz together with SedonaSQL, please add the following line after `SedonaContext.builder()` to enable Sedona Kryo serializer:
-	```scala
-	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+	```java
+	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName()) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 	```
 
 === "Python"
@@ -118,16 +118,16 @@ The following method has been deprecated since Sedona 1.4.1. Please use the meth
 	```java
 	SparkSession sparkSession = SparkSession.builder()
 	.master("local[*]") // Delete this if run in cluster mode
-	.appName("readTestScala") // Change this to a proper name
+	.appName("readTestJava") // Change this to a proper name
 	// Enable Sedona custom Kryo serializer
-	.config("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", SedonaKryoRegistrator.class.getName)
+	.config("spark.serializer", KryoSerializer.class.getName()) // org.apache.spark.serializer.KryoSerializer
+	.config("spark.kryo.registrator", SedonaKryoRegistrator.class.getName())
 	.getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
 	```
 	If you use SedonaViz together with SedonaSQL, please use the following two lines to enable Sedona Kryo serializer instead:
-	```scala
-	.config("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+	```java
+	.config("spark.serializer", KryoSerializer.class.getName()) // org.apache.spark.serializer.KryoSerializer
+	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName()) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 	```
 
 === "Python"
@@ -135,9 +135,9 @@ The following method has been deprecated since Sedona 1.4.1. Please use the meth
 	```python
 	sparkSession = SparkSession. \
 	    builder. \
-	    appName('appName'). \
-	    config("spark.serializer", KryoSerializer.getName). \
-	    config("spark.kryo.registrator", SedonaKryoRegistrator.getName). \
+	    appName('readTestPython'). \
+	    config("spark.serializer", KryoSerializer.getName()). \
+	    config("spark.kryo.registrator", SedonaKryoRegistrator.getName()). \
 	    config('spark.jars.packages',
 	           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
 	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \

@@ -15,6 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+
 class GeometryUnavailableException(Exception):
 
     def __init__(self, message):

@@ -28,19 +28,19 @@ from tests.tools import distance_sorting_functions
 class TestCrsTransformation(TestBase):
 
     def test_spatial_range_query(self):
-        spatial_rdd = PointRDD(
-            self.sc,
-            input_location,
-            offset,
-            splitter,
-            True
-        )
+        spatial_rdd = PointRDD(self.sc, input_location, offset, splitter, True)
         spatial_rdd.flipCoordinates()
         spatial_rdd.CRSTransform("epsg:4326", "epsg:3005")
 
         for i in range(loop_times):
-            result_size = RangeQuery.SpatialRangeQuery(spatial_rdd, query_envelope, False, False).count()
+            result_size = RangeQuery.SpatialRangeQuery(
+                spatial_rdd, query_envelope, False, False
+            ).count()
             assert result_size == 3127
 
-        assert RangeQuery.SpatialRangeQuery(
-            spatial_rdd, query_envelope, False, False).take(10)[1].getUserData() is not None
+        assert (
+            RangeQuery.SpatialRangeQuery(spatial_rdd, query_envelope, False, False)
+            .take(10)[1]
+            .getUserData()
+            is not None
+        )

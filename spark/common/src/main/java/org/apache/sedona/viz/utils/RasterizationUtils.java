@@ -509,7 +509,7 @@ public class RasterizationUtils implements Serializable {
           result.add(new Tuple2<Pixel, Double>(newPixel, 1.0));
         } catch (Exception e) {
           /*
-           * This spatial object is out of the given dataset boudanry. It is ignored here.
+           * This spatial object is out of the given dataset boundary. It is ignored here.
            */
         }
         eps += dy;
@@ -525,7 +525,7 @@ public class RasterizationUtils implements Serializable {
           result.add(new Tuple2<Pixel, Double>(newPixel, 1.0));
         } catch (Exception e) {
           /*
-           * This spatial object is out of the given dataset boudanry. It is ignored here.
+           * This spatial object is out of the given dataset boundary. It is ignored here.
            */
         }
         eps += dx;

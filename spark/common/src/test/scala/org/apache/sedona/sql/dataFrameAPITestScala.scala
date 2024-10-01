@@ -20,7 +20,7 @@ package org.apache.sedona.sql
 
 import org.apache.commons.codec.binary.Hex
 import org.apache.spark.sql.Row
-import org.apache.spark.sql.functions.{array, col, element_at, expr, lit}
+import org.apache.spark.sql.functions.{radians, col, element_at, expr, lit}
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpressionException
 import org.apache.spark.sql.sedona_sql.expressions.st_aggregates._
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
@@ -760,6 +760,23 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult.toText() == expectedResult)
     }
 
+    it("Passed ST_Project") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POINT(0 0)') as point, ST_MakeEnvelope(0, 1, 2, 0) as poly")
+      var actual =
+        baseDf.select(ST_Project("point", 10, Math.toRadians(45))).first().get(0).toString
+      var expected = "POINT (7.0710678118654755 7.071067811865475)"
+      assertEquals(expected, actual)
+
+      actual = baseDf
+        .select(ST_Project(ST_MakeEnvelope(0, 1, 2, 0), lit(10), radians(lit(50)), lit(true)))
+        .first()
+        .get(0)
+        .toString()
+      expected = "POINT EMPTY"
+      assertEquals(expected, actual)
+    }
+
     it("Passed `ST_MakePolygon`") {
       val invalidDf =
         sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)') AS geom")
@@ -881,6 +898,13 @@ class dataFrameAPITestScala extends TestBaseScala {
       val actualResult = df.take(1)(0).getInt(0)
       val expectedResult = 2
       assert(actualResult == expectedResult)
+    }
+
+    it("Passed ST_Simplify") {
+      val baseDf = sparkSession.sql("SELECT ST_Buffer(ST_GeomFromWKT('POINT (0 2)'), 10) AS geom")
+      val actualPoints = baseDf.select(ST_NPoints(ST_Simplify("geom", 1))).first().get(0)
+      val expectedPoints = 9
+      assertEquals(expectedPoints, actualPoints)
     }
 
     it("Passed ST_SimplifyVW") {

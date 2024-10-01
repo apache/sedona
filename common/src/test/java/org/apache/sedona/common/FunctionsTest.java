@@ -658,6 +658,41 @@ public class FunctionsTest extends TestBase {
     assertEquals(actualResult, expectedResult);
   }
 
+  @Test
+  public void project() throws ParseException {
+    Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    String actual = Functions.asWKT(Functions.project(point, 100000, Math.toRadians(45.0)));
+    String expected = "POINT (70710.67811865476 70710.67811865475)";
+    assertEquals(expected, actual);
+
+    actual =
+        Functions.asWKT(Functions.project(Constructors.makeEnvelope(0, 1, 0, 1), 10, 10, true));
+    expected = "POINT EMPTY";
+    assertEquals(expected, actual);
+
+    point = Constructors.geomFromWKT("POINT Z(10 15 12)", 1111);
+    Geometry actualPoint = Functions.project(point, 1000, Math.toRadians(300.0));
+    actual = Functions.asWKT(actualPoint);
+    expected = "POINT Z(-856.0254037844385 515.0000000000003 12)";
+    assertEquals(expected, actual);
+    assertEquals(1111, actualPoint.getSRID());
+
+    point = Constructors.geomFromWKT("POINT M(10 15 12)", 1111);
+    actual = Functions.asWKT(Functions.project(point, 1000, Math.toRadians(300.0)));
+    expected = "POINT M(-856.0254037844385 515.0000000000003 12)";
+    assertEquals(expected, actual);
+
+    point = Constructors.geomFromWKT("POINT ZM(10 15 12 2)", 1111);
+    actual = Functions.asWKT(Functions.project(point, 1000, Math.toRadians(300.0)));
+    expected = "POINT ZM(-856.0254037844385 515.0000000000003 12 2)";
+    assertEquals(expected, actual);
+
+    point = Constructors.geomFromWKT("POINT(2 -1)", 0);
+    actual = Functions.asWKT(Functions.project(point, 100, Math.toRadians(470)));
+    expected = Functions.asWKT(Functions.project(point, 100, Math.toRadians(110)));
+    assertEquals(expected, actual);
+  }
+
   private static boolean intersects(Set<?> s1, Set<?> s2) {
     Set<?> copy = new HashSet<>(s1);
     copy.retainAll(s2);
@@ -1753,6 +1788,29 @@ public class FunctionsTest extends TestBase {
     assertEquals(expected, actual);
     int actualSRID = Functions.getSRID(actualGeom);
     assertEquals(6000, actualSRID);
+  }
+
+  @Test
+  public void simplify() throws ParseException {
+    Geometry geom = Constructors.geomFromWKT("POINT (1 2)", 1111);
+    geom = Functions.buffer(geom, 10, false, "quad_segs=12");
+    int actualPoints = Functions.nPoints(Functions.simplify(geom, 0.1));
+    int expectedPoints = 33;
+    assertEquals(expectedPoints, actualPoints);
+
+    actualPoints = Functions.nPoints(Functions.simplify(geom, 0.5));
+    expectedPoints = 17;
+    assertEquals(expectedPoints, actualPoints);
+
+    actualPoints = Functions.nPoints(Functions.simplify(geom, 1));
+    expectedPoints = 9;
+    assertEquals(expectedPoints, actualPoints);
+
+    Geometry actual = Functions.simplify(geom, 10);
+    actualPoints = Functions.nPoints(actual);
+    expectedPoints = 4;
+    assertEquals(expectedPoints, actualPoints);
+    assertEquals(1111, actual.getSRID());
   }
 
   @Test

@@ -805,6 +805,14 @@ public class TestFunctions extends TestBase {
   }
 
   @Test
+  public void test_ST_Project() {
+    registerUDF("ST_Project", byte[].class, double.class, double.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_Project(sedona.ST_GeomFromText('POINT (0 0)'), 1000, 10))",
+        "POINT (-544.0211108893703 -839.0715290764522)");
+  }
+
+  @Test
   public void test_ST_PrecisionReduce() {
     registerUDF("ST_PrecisionReduce", byte[].class, int.class);
     verifySqlSingleRes(
@@ -867,6 +875,16 @@ public class TestFunctions extends TestBase {
     verifySqlSingleRes(
         "select sedona.ST_AsEWKT(sedona.ST_SetSRID(sedona.ST_GeomFromText('POINT(1 2)'), 4326))",
         "SRID=4326;POINT (1 2)");
+  }
+
+  @Test
+  public void test_ST_Simplify() {
+    registerUDF("ST_Simplify", byte[].class, double.class);
+    registerUDF("ST_Buffer", byte[].class, double.class);
+    registerUDF("ST_NPoints", byte[].class);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_NPoints(sedona.ST_Simplify(sedona.ST_Buffer(sedona.ST_GeomFromWKT('POINT (0 2)'), 10), 1))",
+        9);
   }
 
   @Test

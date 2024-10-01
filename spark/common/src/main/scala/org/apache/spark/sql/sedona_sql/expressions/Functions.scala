@@ -442,6 +442,14 @@ case class ST_ReducePrecision(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Simplify(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.simplify _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_SimplifyVW(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.simplifyVW _) {
 
@@ -1003,6 +1011,16 @@ case class ST_Polygon(inputExpressions: Seq[Expression])
 
 case class ST_Polygonize(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.polygonize _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_Project(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction4(Functions.project),
+      inferrableFunction3(Functions.project)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

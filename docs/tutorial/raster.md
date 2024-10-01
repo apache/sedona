@@ -242,7 +242,7 @@ The output will look like this:
 For multiple raster data files use the following code to load the data [from path](https://github.com/apache/sedona/blob/0eae42576c2588fe278f75cef3b17fee600eac90/spark/common/src/test/resources/raster/) and create raw DataFrame.
 
 !!!note
-    The above code works too for loading multiple raster data files.  if the raster files are in separate directories and the option also makes sure that only `.tif` or `.tiff` files are being loaded.
+    The above code works too for loading multiple raster data files. If the raster files are in separate directories and the option also makes sure that only `.tif` or `.tiff` files are being loaded.
 
 === "Scala"
     ```scala

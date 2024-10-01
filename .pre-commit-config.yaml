@@ -10,6 +10,10 @@ repos:
     hooks:
       - id: identity
       - id: check-hooks-apply
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 24.8.0
+    hooks:
+      - id: black-jupyter
   - repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
     hooks:
@@ -18,18 +22,13 @@ repos:
         description: Check spelling with codespell
         args: [--ignore-words=.github/linters/codespell.txt]
         exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases|^tools/maven/scalafmt
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.10
-    hooks:
-      - id: ruff
-        args: [--config=.github/linters/ruff.toml, --fix]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
       - id: check-ast
       - id: check-builtin-literals
       - id: check-case-conflict
-      # - id: check-docstring-first
+      - id: check-docstring-first
       - id: check-executables-have-shebangs
       # - id: check-json
       - id: check-merge-conflict

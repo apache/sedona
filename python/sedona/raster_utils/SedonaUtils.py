@@ -15,8 +15,10 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+
 class SedonaUtils:
     @classmethod
     def display_image(cls, df):
         from IPython.display import display, HTML
+
         display(HTML(df.toPandas().to_html(escape=False)))

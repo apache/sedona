@@ -32,6 +32,7 @@ import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.*;
+import org.locationtech.jts.algorithm.Angle;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.algorithm.construct.LargestEmptyCircle;
@@ -59,6 +60,7 @@ import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.operation.valid.TopologyValidationError;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.locationtech.jts.precision.MinimumClearance;
+import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
 import org.locationtech.jts.simplify.PolygonHullSimplifier;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.locationtech.jts.simplify.VWSimplifier;
@@ -1353,6 +1355,45 @@ public class Functions {
     return dimension;
   }
 
+  public static Geometry project(Geometry point, double distance, double azimuth, boolean lenient) {
+    if (!point.getClass().getSimpleName().equals("Point")) {
+      if (lenient) {
+        return point.getFactory().createPoint();
+      } else {
+        throw new IllegalArgumentException(
+            String.format(
+                "Input geometry is %s. It should be a Point type geometry",
+                point.getClass().getSimpleName()));
+      }
+    }
+
+    // Normalize azimuth if it is out of (-360, 360) range
+    // by calculating the number of orbits and subtracting it
+    int orbit = (int) Math.floor(azimuth / Angle.PI_TIMES_2);
+    azimuth -= Angle.PI_TIMES_2 * orbit;
+    // Convert azimuth to conventional slope
+    double slope = Angle.PI_TIMES_2 - azimuth + Angle.PI_OVER_2;
+    if (slope > Angle.PI_TIMES_2) slope -= Angle.PI_TIMES_2;
+    if (slope < -Angle.PI_TIMES_2) slope += Angle.PI_TIMES_2;
+
+    Coordinate projectedCoordinate = Angle.project(point.getCoordinate(), slope, distance);
+
+    if (Functions.hasZ(point)) {
+      projectedCoordinate.setZ(point.getCoordinate().getZ());
+    }
+
+    if (Functions.hasM(point)) {
+      CoordinateXYZM projectedCoordinateM = new CoordinateXYZM(projectedCoordinate);
+      projectedCoordinateM.setM(point.getCoordinate().getM());
+      return point.getFactory().createPoint(projectedCoordinateM);
+    }
+    return point.getFactory().createPoint(projectedCoordinate);
+  }
+
+  public static Geometry project(Geometry point, double distance, double azimuth) {
+    return project(point, distance, azimuth, false);
+  }
+
   /**
    * get the coordinates of a geometry and transform to Google s2 cell id
    *
@@ -1501,6 +1542,10 @@ public class Functions {
       }
     }
     return polygons.toArray(new Polygon[0]);
+  }
+
+  public static Geometry simplify(Geometry geom, double distanceTolerance) {
+    return DouglasPeuckerSimplifier.simplify(geom, distanceTolerance);
   }
 
   // create static function named simplifyPreserveTopology

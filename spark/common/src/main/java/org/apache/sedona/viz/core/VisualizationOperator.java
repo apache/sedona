@@ -168,7 +168,7 @@ public abstract class VisualizationOperator implements Serializable {
   protected int partitionIntervalY;
 
   /*
-   * Parameter tells whether do photo filter in parallel and do rendering in parallel
+   * Parameter tells whether to do photo filter in parallel and do rendering in parallel
    */
   /** The has been spatial partitioned. */
   protected boolean hasBeenSpatialPartitioned = false;

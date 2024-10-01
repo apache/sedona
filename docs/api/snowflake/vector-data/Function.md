@@ -2388,6 +2388,46 @@ Output:
 GEOMETRYCOLLECTION (POLYGON ((0 2, 1 3, 2 4, 2 3, 2 2, 1 2, 0 2)), POLYGON ((2 2, 2 3, 2 4, 3 3, 4 2, 3 2, 2 2)))
 ```
 
+## ST_Project
+
+Introduction: Calculates a new point location given a starting point, distance, and azimuth. The azimuth indicates the direction, expressed in radians, and is measured in a clockwise manner starting from true north. The system can handle azimuth values that are negative or exceed 2π (360 degrees). The optional `lenient` parameter prevents an error if the input geometry is not a Point. Its default value is `false`.
+
+Format:
+
+```
+ST_Project(point: Geometry, distance: Double, azimuth: Double, lenient: Boolean = False)
+```
+
+```
+ST_Project(point: Geometry, distance: Double, Azimuth: Double)
+```
+
+SQL Example:
+
+```sql
+SELECT ST_Project(ST_GeomFromText('POINT (10 15)'), 100, radians(90))
+```
+
+Output:
+
+```
+POINT (110 14.999999999999975)
+```
+
+SQL Example:
+
+```sql
+SELECT ST_Project(
+        ST_GeomFromText('POLYGON ((1 5, 1 1, 3 3, 5 3, 1 5))'),
+        25, radians(270), true)
+```
+
+Output:
+
+```
+POINT EMPTY
+```
+
 ## ST_ReducePrecision
 
 Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded. This function was called ST_PrecisionReduce in versions prior to v1.5.0.
@@ -2656,6 +2696,27 @@ Output:
 
 ```sql
 LINESTRING(177 10, 179 10, 181 10, 183 10)
+```
+
+## ST_Simplify
+
+Introduction: This function simplifies the input geometry by applying the Douglas-Peucker algorithm.
+
+!!!Note
+    The simplification may not preserve topology, potentially producing invalid geometries. Use [ST_SimplifyPreserveTopology](#st_simplifypreservetopology) to retain valid topology after simplification.
+
+Format: `ST_Simplify(geom: Geometry, tolerance: Double)`
+
+SQL Example:
+
+```sql
+SELECT ST_Simplify(ST_Buffer(ST_GeomFromWKT('POINT (0 2)'), 10), 1)
+```
+
+Output:
+
+```
+POLYGON ((10 2, 7.0710678118654755 -5.071067811865475, 0.0000000000000006 -8, -7.071067811865475 -5.0710678118654755, -10 1.9999999999999987, -7.071067811865477 9.071067811865476, -0.0000000000000018 12, 7.071067811865474 9.071067811865477, 10 2))
 ```
 
 ## ST_SimplifyPolygonHull

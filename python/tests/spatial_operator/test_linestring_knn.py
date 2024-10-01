@@ -40,7 +40,9 @@ class TestLineStringKnn(TestBase):
     def test_spatial_knn_query(self):
         line_string_rdd = LineStringRDD(self.sc, input_location, splitter, True)
         for i in range(self.loop_times):
-            result = KNNQuery.SpatialKnnQuery(line_string_rdd, self.query_point, 5, False)
+            result = KNNQuery.SpatialKnnQuery(
+                line_string_rdd, self.query_point, 5, False
+            )
             assert result.__len__() > -1
             assert result[0].getUserData() is not None
 
@@ -48,6 +50,8 @@ class TestLineStringKnn(TestBase):
         line_string_rdd = LineStringRDD(self.sc, input_location, splitter, True)
         line_string_rdd.buildIndex(IndexType.RTREE, False)
         for i in range(self.loop_times):
-            result = KNNQuery.SpatialKnnQuery(line_string_rdd, self.query_point, 5, False)
+            result = KNNQuery.SpatialKnnQuery(
+                line_string_rdd, self.query_point, 5, False
+            )
             assert result.__len__() > -1
             assert result[0].getUserData() is not None
