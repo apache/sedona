@@ -24,18 +24,20 @@ import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 private[stats] object Util {
   def getGeometryColumnName(dataframe: DataFrame): String = {
     val geomFields = dataframe.schema.fields.filter(_.dataType == GeometryUDT)
-    if (geomFields.length > 1) {
-      if (geomFields.exists(_.name == "geometry")) {
-        "geometry"
-      } else {
-        throw new IllegalArgumentException(
-          "Multiple GeometryType columns found. Provide the column name as an argument.")
-      }
-    } else if (geomFields.length == 1) {
-      geomFields.head.name
-    } else {
-      throw new IllegalArgumentException(
-        "No GeometryType column found. Provide a dataframe containing a geometry column.")
+
+    if (geomFields.isEmpty) {
+      throw new IllegalArgumentException("No GeometryType column found. Provide a dataframe containing a geometry column.")
     }
+
+    if (geomFields.length == 1) {
+      geomFields.head.name
+    }
+
+    if (geomFields.length > 1 && !geomFields.exists(_.name == "geometry")) {
+      throw new IllegalArgumentException(
+        "Multiple GeometryType columns found. Provide the column name as an argument.")
+    }
+
+    "geometry"
   }
 }

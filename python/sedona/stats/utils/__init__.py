@@ -23,11 +23,14 @@ def get_geometry_column_name(df: DataFrame) -> Column:
     geom_fields = [
         field.name for field in df.schema.fields if field.dataType == GeometryType()
     ]
-    if len(geom_fields) > 1:
-        if "geometry" in geom_fields:
-            return "geometry"
-        else:
-            raise ValueError("Multiple geometry columns found in DataFrame")
+
     if len(geom_fields) == 0:
-        raise ValueError("No geometry column found in DataFrame")
-    return geom_fields[0]
+        raise ValueError("No GeometryType column found. Provide a dataframe containing a geometry column.")
+
+    if len(geom_fields) == 1:
+        return geom_fields[0]
+
+    if len(geom_fields) > 1 and "geometry" not in geom_fields:
+        raise ValueError("Multiple GeometryType columns found. Provide the column name as an argument.")
+
+    return "geometry"
