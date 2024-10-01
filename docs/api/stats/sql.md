@@ -5,7 +5,7 @@ The stats module of Sedona implements Scala and Python functions that can be cal
 The DBSCAN function is provided at `org.apache.sedona.stats.DBSCAN.dbscan` in scala/java and `sedona.stats.dbscan.dbscan` in python.
 
 The function annotates a dataframe with a cluster label for each data record using the DBSCAN algorithm.
-The dataframe should contain at least one GeometryType column. Rows must be unique. If one
+The dataframe should contain at least one `GeometryType` column. Rows must be unique. If one
 geometry column is present it will be used automatically. If two are present, the one named
 'geometry' will be used. If more than one are present and none are named 'geometry', the
 column name must be provided. The new column will be named 'cluster'.
