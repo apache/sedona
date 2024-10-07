@@ -83,6 +83,8 @@ nav:
               - Parameter: api/sql/Parameter.md
           - RDD (core):
               - Scala/Java doc: api/java-api.md
+          - Stats:
+              - DataFrame: api/stats/sql.md
           - Viz:
               - DataFrame/SQL: api/viz/sql.md
               - RDD: api/viz/java-api.md

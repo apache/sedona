@@ -67,7 +67,8 @@ object DBSCAN {
       case null => getGeometryColumnName(dataframe)
       case _ => geometry
     }
-    validateInputs(dataframe, epsilon, min_pts, geometryCol)
+
+    validateInputs(dataframe, epsilon, minPts, geometryCol)
 
     val distanceFunction: (Column, Column) => Column =
       if (useSpheroid) ST_DistanceSpheroid else ST_Distance
@@ -91,7 +92,7 @@ object DBSCAN {
         first(struct("left.*")).alias("leftContents"),
         count(col(s"right.id")).alias("neighbors_count"),
         collect_list(col(s"right.id")).alias("neighbors"))
-      .withColumn("isCore", col("neighbors_count") >= lit(min_pts))
+      .withColumn("isCore", col("neighbors_count") >= lit(minPts))
       .select("leftContents.*", "neighbors", "isCore")
       .checkpoint()
 
@@ -141,11 +142,11 @@ object DBSCAN {
   private def validateInputs(
       geo_df: DataFrame,
       epsilon: Double,
-      min_pts: Int,
+      minPts: Int,
       geometry: String): Unit = {
     require(epsilon > 0, "epsilon must be greater than 0")
-    require(min_pts > 0, "min_pts must be greater than 0")
-    require(geo_df.columns.contains(geometry), "geometry column not found in idDataframe")
+    require(minPts > 0, "minPts must be greater than 0")
+    require(geo_df.columns.contains(geometry), "geometry column not found in dataframe")
     require(
       geo_df.schema.fields(geo_df.schema.fieldIndex(geometry)).dataType == GeometryUDT,
       "geometry column must be of type GeometryType")

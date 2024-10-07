@@ -740,6 +740,7 @@ The coordinates of polygons have been changed. The output will be like this:
 ```
 
 ## Cluster with DBSCAN
+
 Sedona provides an implementation of the [DBSCAN](https://en.wikipedia.org/wiki/Dbscan) algorithm to cluster spatial data.
 
 The algorithm is available as a Scala and Python function called on a spatial dataframe. The returned dataframe has an additional column added containing the unique identifier of the cluster that record is a member of and a boolean column indicating if the record is a core point.
@@ -771,6 +772,7 @@ The first parameter is the dataframe, the next two are the epsilon and min_point
 	```
 
 The output will look like this:
+
 ```
 +----------------+---+------+-------+
 |        geometry| id|isCore|cluster|

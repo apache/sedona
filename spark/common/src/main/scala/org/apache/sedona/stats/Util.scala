@@ -25,18 +25,16 @@ private[stats] object Util {
   def getGeometryColumnName(dataframe: DataFrame): String = {
     val geomFields = dataframe.schema.fields.filter(_.dataType == GeometryUDT)
 
-    if (geomFields.isEmpty) {
-      throw new IllegalArgumentException("No GeometryType column found. Provide a dataframe containing a geometry column.")
-    }
+    if (geomFields.isEmpty)
+      throw new IllegalArgumentException(
+        "No GeometryType column found. Provide a dataframe containing a geometry column.")
 
-    if (geomFields.length == 1) {
-      geomFields.head.name
-    }
+    if (geomFields.length == 1)
+      return geomFields.head.name
 
-    if (geomFields.length > 1 && !geomFields.exists(_.name == "geometry")) {
+    if (geomFields.length > 1 && !geomFields.exists(_.name == "geometry"))
       throw new IllegalArgumentException(
         "Multiple GeometryType columns found. Provide the column name as an argument.")
-    }
 
     "geometry"
   }
