@@ -1525,7 +1525,7 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void pologonize() throws ParseException {
+  public void polygonize() throws ParseException {
     LineString line1 = GEOMETRY_FACTORY.createLineString(coordArray(180, 40, 30, 20, 20, 90));
     LineString line2 = GEOMETRY_FACTORY.createLineString(coordArray(180, 40, 160, 160));
     LineString line3 = GEOMETRY_FACTORY.createLineString(coordArray(80, 60, 120, 130, 150, 80));

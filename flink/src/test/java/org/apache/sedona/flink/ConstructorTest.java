@@ -368,7 +368,7 @@ public class ConstructorTest extends TestBase {
   }
 
   @Test
-  public void testMakeEvelope() {
+  public void testMakeEnvelope() {
     Double minX = 1.0;
     Double minY = 100.0;
     Double maxX = 2.0;

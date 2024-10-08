@@ -295,7 +295,7 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
-    it("passed st_makeenvlope") {
+    it("passed st_makeenvelope") {
       val df = sparkSession.sql(
         "SELECT 0.0 AS minx, 1.0 AS miny, 2.0 AS maxx, 3.0 AS maxy, 1111 AS srid")
       val actualResult =
