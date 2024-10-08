@@ -739,6 +739,60 @@ The coordinates of polygons have been changed. The output will be like this:
 
 ```
 
+## Cluster with DBSCAN
+
+Sedona provides an implementation of the [DBSCAN](https://en.wikipedia.org/wiki/Dbscan) algorithm to cluster spatial data.
+
+The algorithm is available as a Scala and Python function called on a spatial dataframe. The returned dataframe has an additional column added containing the unique identifier of the cluster that record is a member of and a boolean column indicating if the record is a core point.
+
+The first parameter is the dataframe, the next two are the epsilon and min_points parameters of the DBSCAN algorithm.
+
+=== "Scala"
+
+	```scala
+	import org.apache.sedona.stats.DBSCAN.dbscan
+
+	dbscan(df, 0.1, 5).show()
+	```
+
+=== "Java"
+
+	```java
+	import org.apache.sedona.stats.DBSCAN;
+
+	DBSCAN.dbscan(df, 0.1, 5).show();
+	```
+
+=== "Python"
+
+	```python
+	from sedona.stats.dbscan import dbscan
+
+	dbscan(df, 0.1, 5).show()
+	```
+
+The output will look like this:
+
+```
++----------------+---+------+-------+
+|        geometry| id|isCore|cluster|
++----------------+---+------+-------+
+|   POINT (2.5 4)|  3| false|      1|
+|     POINT (3 4)|  2| false|      1|
+|     POINT (3 5)|  5| false|      1|
+|     POINT (1 3)|  9|  true|      0|
+| POINT (2.5 4.5)|  7|  true|      1|
+|     POINT (1 2)|  1|  true|      0|
+| POINT (1.5 2.5)|  4|  true|      0|
+| POINT (1.2 2.5)|  8|  true|      0|
+|   POINT (1 2.5)| 11|  true|      0|
+|     POINT (1 5)| 10| false|     -1|
+|     POINT (5 6)| 12| false|     -1|
+|POINT (12.8 4.5)|  6| false|     -1|
+|     POINT (4 3)| 13| false|     -1|
++----------------+---+------+-------+
+```
+
 ## Run spatial queries
 
 After creating a Geometry type column, you are able to run spatial queries.
