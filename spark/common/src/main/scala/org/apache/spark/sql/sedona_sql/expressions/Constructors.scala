@@ -153,7 +153,7 @@ case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
     with FoldableExpression
     with ImplicitCastInputTypes
     with CodegenFallback
-    with UserDataGeneratator {
+    with UserDataGenerator {
   // This is an expression which takes one input expressions
   assert(inputExpressions.length == 1)
 
@@ -193,7 +193,7 @@ case class ST_GeomFromEWKB(inputExpressions: Seq[Expression])
     with FoldableExpression
     with ImplicitCastInputTypes
     with CodegenFallback
-    with UserDataGeneratator {
+    with UserDataGenerator {
   // This is an expression which takes one input expressions
   assert(inputExpressions.length == 1)
 
@@ -233,7 +233,7 @@ case class ST_LineFromWKB(inputExpressions: Seq[Expression])
     with FoldableExpression
     with ImplicitCastInputTypes
     with CodegenFallback
-    with UserDataGeneratator {
+    with UserDataGenerator {
 
   // Validate the number of input expressions (1 or 2)
   assert(inputExpressions.length >= 1 && inputExpressions.length <= 2)
@@ -290,7 +290,7 @@ case class ST_LinestringFromWKB(inputExpressions: Seq[Expression])
     with FoldableExpression
     with ImplicitCastInputTypes
     with CodegenFallback
-    with UserDataGeneratator {
+    with UserDataGenerator {
 
   // Validate the number of input expressions (1 or 2)
   assert(inputExpressions.length >= 1 && inputExpressions.length <= 2)
@@ -347,7 +347,7 @@ case class ST_PointFromWKB(inputExpressions: Seq[Expression])
     with FoldableExpression
     with ImplicitCastInputTypes
     with CodegenFallback
-    with UserDataGeneratator {
+    with UserDataGenerator {
 
   // Validate the number of input expressions (1 or 2)
   assert(inputExpressions.length >= 1 && inputExpressions.length <= 2)
@@ -410,7 +410,7 @@ case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
     extends Expression
     with FoldableExpression
     with CodegenFallback
-    with UserDataGeneratator {
+    with UserDataGenerator {
   // This is an expression which takes one input expressions
   val minInputLength = 1
   assert(inputExpressions.length >= minInputLength)
@@ -538,7 +538,7 @@ case class ST_PolygonFromEnvelope(inputExpressions: Seq[Expression])
   }
 }
 
-trait UserDataGeneratator {
+trait UserDataGenerator {
   def generateUserData(
       minInputLength: Integer,
       inputExpressions: Seq[Expression],
