@@ -38,7 +38,16 @@ public enum GridType implements Serializable {
   ZORDER,
 
   /** Modified Quad-tree partitioning for KNN joins */
-  QUADTREE_RTREE;
+  QUADTREE_RTREE,
+
+  ImprovedQT,
+
+  Hilbert,
+
+  STRTREE,
+
+  Voronoi,
+  ;
 
   /**
    * Gets the grid type.
