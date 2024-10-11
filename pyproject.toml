@@ -1,0 +1,4 @@
+[tool.vulture]
+min_confidence = 100
+paths = ["python/", "spark-version-converter.py", "docs/usecases/utilities.py"]
+sort_by_size = true

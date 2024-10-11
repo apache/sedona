@@ -101,7 +101,7 @@ class GeoData:
 class AbstractSpatialRDDParser(ABC):
 
     @classmethod
-    def serialize(cls, obj: List[Any], binary_buffer: "BinaryBuffer") -> bytearray:
+    def serialize(cls, obj: List[Any]) -> bytearray:
         raise NotImplemented()
 
     @classmethod
@@ -131,7 +131,7 @@ class SpatialPairRDDParserData(AbstractSpatialRDDParser):
         return deserialized_data
 
     @classmethod
-    def serialize(cls, obj: BaseGeometry, binary_buffer: "BinaryBuffer"):
+    def serialize(cls, obj: BaseGeometry):
         raise NotImplementedError("Currently this operation is not supported")
 
 
@@ -147,7 +147,7 @@ class SpatialRDDParserData(AbstractSpatialRDDParser):
         return left_geom_data
 
     @classmethod
-    def serialize(cls, obj: BaseGeometry, binary_buffer: "BinaryBuffer"):
+    def serialize(cls, obj: BaseGeometry):
         raise NotImplementedError("Currently this operation is not supported")
 
 
@@ -174,7 +174,7 @@ class SpatialRDDParserDataMultipleRightGeom(AbstractSpatialRDDParser):
         return deserialized_data
 
     @classmethod
-    def serialize(cls, obj: BaseGeometry, binary_buffer: "BinaryBuffer"):
+    def serialize(cls, obj: BaseGeometry):
         raise NotImplementedError("Currently this operation is not supported")
 
 
