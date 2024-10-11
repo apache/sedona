@@ -1349,7 +1349,7 @@ class dataFrameAPITestScala extends TestBaseScala {
         .select(ST_MinimumBoundingCircle("geom").as("geom"))
         .selectExpr("ST_ReducePrecision(geom, 2)")
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].getCoordinates().length
-      val expectedResult = BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6 * 4 + 1;
+      val expectedResult = BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6 * 4 + 1
       assert(actualResult == expectedResult)
     }
 
@@ -1723,7 +1723,7 @@ class dataFrameAPITestScala extends TestBaseScala {
         "SELECT ST_GeomFromWKT('Polygon ((0 0, 1 2, 2 2, 3 2, 5 0, 4 0, 3 1, 2 1, 1 0, 0 0))') as geom")
       val df = baseDF.select(ST_MakeValid(ST_Collect(ST_H3ToGeom(ST_H3CellIDs("geom", 6, true)))))
       val actualResult = df.take(1)(0).getAs[Geometry](0)
-      val targetShape = baseDF.take(1)(0).getAs[Polygon](0);
+      val targetShape = baseDF.take(1)(0).getAs[Polygon](0)
       assert(actualResult.contains(targetShape))
     }
 
@@ -1982,7 +1982,7 @@ class dataFrameAPITestScala extends TestBaseScala {
       val polyDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POLYGON ((1 0 1, 1 1 1, 2 1 1, 2 0 1, 1 0 1))') AS geom")
       val df = polyDf.select(ST_Translate("geom", 2, 3, 1))
-      val wktWriter3D = new WKTWriter(3);
+      val wktWriter3D = new WKTWriter(3)
       val actualGeom = df.take(1)(0).get(0).asInstanceOf[Geometry]
       val actual = wktWriter3D.write(actualGeom)
       val expected = "POLYGON Z((3 3 2, 3 4 2, 4 4 2, 4 3 2, 3 3 2))"
@@ -1999,7 +1999,7 @@ class dataFrameAPITestScala extends TestBaseScala {
       val polyDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('MULTIPOINT (0 0, 2 2)') AS geom, ST_Buffer(ST_GeomFromWKT('POINT(1 1)'), 10.0) as buf")
       val df = polyDf.select(ST_VoronoiPolygons("geom"))
-      val wktWriter3D = new WKTWriter(3);
+      val wktWriter3D = new WKTWriter(3)
       val actualGeom = df.take(1)(0).get(0).asInstanceOf[Geometry]
       val actual = wktWriter3D.write(actualGeom)
       val expected =
@@ -2019,9 +2019,9 @@ class dataFrameAPITestScala extends TestBaseScala {
     it("Passed ST_Affine") {
       val polyDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POLYGON ((2 3 1, 4 5 1, 7 8 2, 2 3 1))') AS geom")
-      val df = polyDf.select(ST_Affine("geom", 1, 2, 3, 3, 4, 4, 1, 4, 2, 1, 2, 1));
+      val df = polyDf.select(ST_Affine("geom", 1, 2, 3, 3, 4, 4, 1, 4, 2, 1, 2, 1))
       val dfDefaultValue = polyDf.select(ST_Affine("geom", 1, 2, 1, 2, 1, 2))
-      val wKTWriter3D = new WKTWriter(3);
+      val wKTWriter3D = new WKTWriter(3)
       val actualGeom = df.take(1)(0).get(0).asInstanceOf[Geometry]
       val actualGeomDefaultValue = dfDefaultValue.take(1)(0).get(0).asInstanceOf[Geometry]
       val actual = wKTWriter3D.write(actualGeom)
@@ -2036,7 +2036,7 @@ class dataFrameAPITestScala extends TestBaseScala {
       val polyDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POLYGON ((1 0 1, 2 3 2, 5 0 1, 5 2 9, 1 0 1))') AS geom")
       val df = polyDf.select(ST_BoundingDiagonal("geom"))
-      val wKTWriter = new WKTWriter(3);
+      val wKTWriter = new WKTWriter(3)
       val expected = "LINESTRING Z(1 0 1, 5 3 9)"
       val actual = wKTWriter.write(df.take(1)(0).get(0).asInstanceOf[Geometry])
       assertEquals(expected, actual)

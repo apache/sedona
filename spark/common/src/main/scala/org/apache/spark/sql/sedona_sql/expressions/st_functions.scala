@@ -893,13 +893,13 @@ object st_functions extends DataFrameAPI {
     wrapExpression[ST_HausdorffDistance](g1, g2, -1)
 
   def ST_HausdorffDistance(g1: String, g2: String) =
-    wrapExpression[ST_HausdorffDistance](g1, g2, -1);
+    wrapExpression[ST_HausdorffDistance](g1, g2, -1)
 
   def ST_HausdorffDistance(g1: Column, g2: Column, densityFrac: Column) =
-    wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac);
+    wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac)
 
   def ST_HausdorffDistance(g1: String, g2: String, densityFrac: Double) =
-    wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac);
+    wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac)
 
   def ST_CoordDim(geometry: Column): Column = wrapExpression[ST_CoordDim](geometry)
 

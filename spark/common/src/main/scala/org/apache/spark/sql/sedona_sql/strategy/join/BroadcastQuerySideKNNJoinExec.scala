@@ -130,7 +130,7 @@ case class BroadcastQuerySideKNNJoinExec(
     require(kValue > 0, "The number of neighbors must be greater than 0.")
     objectsShapes.setNeighborSampleNumber(kValue)
 
-    val joinPartitions: Integer = numPartitions;
+    val joinPartitions: Integer = numPartitions
     broadcastJoin = false
 
     // expand the boundary for partition to include both RDDs
