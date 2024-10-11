@@ -156,9 +156,9 @@ jobs:
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
-        run:
+        run: |
           GT_SPARK_3_4=$(python -c "import os; print(tuple(map(int, os.getenv('SPARK_VERSION').split('.'))) > (3,4,0))")
-          if [[ $GT_SPARK_3_4 != "True" ]]
+          if [[ "$GT_SPARK_3_4" != "True" ]]
           then
             echo "Skipping connect tests for spark $SPARK_VERSION"
           fi
