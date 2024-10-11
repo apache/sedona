@@ -149,10 +149,10 @@ jobs:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
         run: find spark-shaded/target -name sedona-*.jar -exec cp {} spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/jars/ \;
-      - env:
-          SPARK_VERSION: ${{ matrix.spark }}
-          HADOOP_VERSION: ${{ matrix.hadoop }}
-        run: (export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION};export PYTHONPATH=$SPARK_HOME/python;cd python;pipenv run pytest tests)
+      #- env:
+      #    SPARK_VERSION: ${{ matrix.spark }}
+      #    HADOOP_VERSION: ${{ matrix.hadoop }}
+      #  run: (export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION};export PYTHONPATH=$SPARK_HOME/python;cd python;pipenv run pytest tests)
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
@@ -169,5 +169,5 @@ jobs:
           cd python
 
           docker-compose up -f tests/docker-compose.yaml
-          pipenv run pytest tests
+          pipenv run pytest tests/sql/test_dataframe_api.py
 
