@@ -1,0 +1,17 @@
+services:
+  spark:
+    image: bitnami/spark:${SPARK_VERSION}
+    command:
+      - ./sbin/start-connect-server.sh
+      - --packages
+      - org.apache.spark:spark-connect_2.12:${SPARK_VERSION}
+      - --conf
+      - spark.serializer=org.apache.spark.serializer.KryoSerializer
+      - --conf
+      - spark.kryo.registrator=org.apache.sedona.core.serde.SedonaKryoRegistrator
+      - --conf
+      - spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions
+    ports:
+      - 15002:15002
+    volumes:
+      - ./custom-jars:/opt/bitnami/spark/jars

@@ -153,3 +153,21 @@ jobs:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
         run: (export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION};export PYTHONPATH=$SPARK_HOME/python;cd python;pipenv run pytest tests)
+      - env:
+          SPARK_VERSION: ${{ matrix.spark }}
+          HADOOP_VERSION: ${{ matrix.hadoop }}
+        run:
+          GT_SPARK_3_4=$(python -c "import os; print(tuple(map(int, os.getenv('SPARK_VERSION').split('.'))) > (3,4,0))")
+          if [[ $GT_SPARK_3_4 != "True" ]]
+          then
+            echo "Skipping connect tests for spark $SPARK_VERSION"
+          fi
+
+          ln -s spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/jars custom-jars
+          export PYTHONPATH=$SPARK_HOME/python
+          export SPARK_REMOTE=sc://localhost
+          cd python
+
+          docker-compose up -f tests/docker-compose.yaml
+          pipenv run pytest tests
+

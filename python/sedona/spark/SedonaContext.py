@@ -34,8 +34,11 @@ class SedonaContext:
         :return: SedonaContext which is an instance of SparkSession
         """
         spark.sql("SELECT 1 as geom").count()
-        PackageImporter.import_jvm_lib(spark._jvm)
-        spark._jvm.SedonaContext.create(spark._jsparkSession, "python")
+
+        # spark connect sessions won't have the _jvm attribute
+        if hasattr(spark, "_jvm"):
+            PackageImporter.import_jvm_lib(spark._jvm)
+            spark._jvm.SedonaContext.create(spark._jsparkSession, "python")
         return spark
 
     @classmethod

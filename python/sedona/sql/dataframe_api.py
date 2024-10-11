@@ -34,11 +34,13 @@ from pyspark.sql import SparkSession, Column, functions as f
 
 try:
     from pyspark.sql.utils import is_remote
+    from pyspark.sql.connect.column import Column as ConnectColumn
+# is_remote only exists since 3.4.0
 except ImportError:
-
     def is_remote():
         return False
-
+    class ConnectColumn:
+        pass
 else:
     from sedona.sql.connect import call_sedona_function_connect
 
@@ -70,8 +72,7 @@ def call_sedona_function(
     # apparently a Column is an Iterable so we need to check for it explicitly
     if (
         (not isinstance(args, Iterable))
-        or isinstance(args, str)
-        or isinstance(args, Column)
+        or isinstance(args, (str, Column, ConnectColumn))
     ):
         args = [args]
 
@@ -108,6 +109,10 @@ def _get_type_list(annotated_type: Type) -> Tuple[Type, ...]:
         valid_types = annotated_type.__args__
     else:
         valid_types = (annotated_type,)
+
+    # functions accepting a Column should also accept the spark connect sort of Column
+    if Column in valid_types:
+        valid_types = valid_types + (ConnectColumn,)
 
     return valid_types
 

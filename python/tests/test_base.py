@@ -14,19 +14,24 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
-
+import os
 from tempfile import mkdtemp
 from sedona.spark import *
 from sedona.utils.decorators import classproperty
 
-
+SPARK_REMOTE = os.getenv("SPARK_REMOTE")
 class TestBase:
 
     @classproperty
     def spark(self):
         if not hasattr(self, "__spark"):
+            if SPARK_REMOTE:
+                builder = SedonaContext.builder().remote(SPARK_REMOTE)
+            else:
+                builder = SedonaContext.builder().master("local[*]")
+
             spark = SedonaContext.create(
-                SedonaContext.builder().master("local[*]").getOrCreate()
+                builder.getOrCreate()
             )
             spark.sparkContext.setCheckpointDir(mkdtemp())
 
