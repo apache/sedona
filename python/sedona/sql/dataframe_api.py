@@ -32,6 +32,16 @@ import typing
 
 from pyspark.sql import SparkSession, Column, functions as f
 
+try:
+    from pyspark.sql.utils import is_remote
+except ImportError:
+
+    def is_remote():
+        return False
+
+else:
+    from sedona.sql.connect import call_sedona_function_connect
+
 
 ColumnOrName = Union[Column, str]
 ColumnOrNameOrNumber = Union[Column, str, float, int]
@@ -64,6 +74,10 @@ def call_sedona_function(
         or isinstance(args, Column)
     ):
         args = [args]
+
+    # in spark-connect environments use connect api
+    if is_remote():
+        return call_sedona_function_connect(function_name, args)
 
     args = map(_convert_argument_to_java_column, args)
 
