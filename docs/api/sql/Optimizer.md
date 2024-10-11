@@ -340,8 +340,8 @@ answer queries such as `SELECT * FROM geoparquet_dataset WHERE ST_Intersects(geo
 
 We can compare the metrics of querying the GeoParquet dataset with or without the spatial predicate and observe that querying with spatial predicate results in fewer number of rows scanned.
 
-| Without spatial predicate | With spatial predicate |
-| ----------- | ----------- |
-| ![](../../image/scan-parquet-without-spatial-pred.png) | ![](../../image/scan-parquet-with-spatial-pred.png) |
+| Without spatial predicate                                                                       | With spatial predicate |
+|-------------------------------------------------------------------------------------------------| ----------- |
+| ![Scan geoparquet without spatial predicate](../../image/scan-parquet-without-spatial-pred.png) | ![Scan geoparquet with spatial predicate](../../image/scan-parquet-with-spatial-pred.png) |
 
 Spatial predicate push-down to GeoParquet is enabled by default. Users can manually disable it by setting the Spark configuration `spark.sedona.geoparquet.spatialFilterPushDown` to `false`.

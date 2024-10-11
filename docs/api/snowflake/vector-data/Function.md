@@ -2810,7 +2810,7 @@ Format: `ST_Snap(input: Geometry, reference: Geometry, tolerance: double)`
 
 Input geometry:
 
-![](../../../image/st_snap/st-snap-base-example.png "ST_Snap Base example")
+![ST_Snap Base example](../../../image/st_snap/st-snap-base-example.png "ST_Snap Base example")
 
 SQL Example:
 
@@ -2824,7 +2824,7 @@ SELECT
 
 Output:
 
-![](../../../image/st_snap/st-snap-applied.png "ST_Snap applied example")
+![ST_Snap applied example](../../../image/st_snap/st-snap-applied.png "ST_Snap applied example")
 
 ```
 POLYGON ((236877.58 -6.61, 236878.29 -8.35, 236879.98 -8.33, 236879.72 -7.63, 236880.69 -6.81, 236877.58 -6.61), (236878.45 -7.01, 236878.43 -7.52, 236879.29 -7.5, 236878.63 -7.22, 236878.76 -6.89, 236878.45 -7.01))

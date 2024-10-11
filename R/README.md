@@ -1,4 +1,4 @@
-# apache.sedona <img src="man/figures/logo.png" align="right" width="120"/>
+# apache.sedona <img src="man/figures/logo.png" align="right" alt="Apache Sedona Logo" width="120"/>
 
 [Apache Sedona](https://sedona.apache.org/) is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark and Apache Flink, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
 
