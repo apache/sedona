@@ -79,7 +79,7 @@ public class H3Utils {
     cellSizeMap.put(15, 0.0004567448929842399);
   }
 
-  public static LatLng coordindateToLatLng(Coordinate coordinate) {
+  public static LatLng coordinateToLatLng(Coordinate coordinate) {
     return new LatLng(coordinate.getY(), coordinate.getX());
   }
 
@@ -96,13 +96,13 @@ public class H3Utils {
     try {
       List<LatLng> shell =
           Arrays.stream(polygon.getExteriorRing().getCoordinates())
-              .map(H3Utils::coordindateToLatLng)
+              .map(H3Utils::coordinateToLatLng)
               .collect(Collectors.toList());
       List<List<LatLng>> holes = new ArrayList<>();
       for (int i = 0; i < polygon.getNumInteriorRing(); i++) {
         holes.add(
             Arrays.stream(polygon.getInteriorRingN(i).getCoordinates())
-                .map(H3Utils::coordindateToLatLng)
+                .map(H3Utils::coordinateToLatLng)
                 .collect(Collectors.toList()));
       }
       // H3 polyfill only include hexagons with centroid within the polygon, we fix by generating
