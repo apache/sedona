@@ -25,7 +25,6 @@ from typing import Optional
 from pyspark.sql import DataFrame, SparkSession
 
 ID_COLUMN_NAME = "__id"
-DEFAULT_MAX_SAMPLE_SIZE = 1000000  # 1 million
 
 
 def dbscan(

@@ -18,7 +18,6 @@
 import pyspark.sql.functions as f
 import pytest
 
-from itertools import product
 from sedona.sql.st_constructors import ST_MakePoint
 from sedona.sql.st_functions import ST_Buffer
 from sklearn.cluster import DBSCAN as sklearnDBSCAN
