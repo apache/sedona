@@ -18,12 +18,12 @@
 import os
 
 from shapely.geometry import Point
-
-from sedona.core.SpatialRDD import LineStringRDD
-from sedona.core.enums import IndexType, FileDataSplitter
-from sedona.core.spatialOperator import KNNQuery
 from tests.test_base import TestBase
 from tests.tools import tests_resource
+
+from sedona.core.enums import FileDataSplitter, IndexType
+from sedona.core.spatialOperator import KNNQuery
+from sedona.core.SpatialRDD import LineStringRDD
 
 input_location = os.path.join(tests_resource, "primaryroads-linestring.csv")
 offset = 0

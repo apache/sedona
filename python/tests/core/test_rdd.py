@@ -16,26 +16,25 @@
 #  under the License.
 
 import logging
-
-from shapely.geometry import Point
-
-from sedona.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
-from sedona.core.enums import GridType, FileDataSplitter, IndexType
-from sedona.core.enums.join_build_side import JoinBuildSide
-from sedona.core.geom.envelope import Envelope
-from sedona.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery
-from sedona.core.spatialOperator.join_params import JoinParams
 import os
 
+from shapely.geometry import Point
 from tests.properties.polygon_properties import (
-    polygon_rdd_input_location,
-    polygon_rdd_start_offset,
     polygon_rdd_end_offset,
-    polygon_rdd_splitter,
     polygon_rdd_index_type,
+    polygon_rdd_input_location,
+    polygon_rdd_splitter,
+    polygon_rdd_start_offset,
 )
 from tests.test_base import TestBase
 from tests.tools import tests_resource
+
+from sedona.core.enums import FileDataSplitter, GridType, IndexType
+from sedona.core.enums.join_build_side import JoinBuildSide
+from sedona.core.geom.envelope import Envelope
+from sedona.core.spatialOperator import JoinQuery, KNNQuery, RangeQuery
+from sedona.core.spatialOperator.join_params import JoinParams
+from sedona.core.SpatialRDD import CircleRDD, PointRDD, PolygonRDD
 
 point_rdd_input_location = os.path.join(tests_resource, "arealm-small.csv")
 

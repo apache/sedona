@@ -17,13 +17,12 @@
 
 import pyspark.sql.functions as f
 import pytest
+from sklearn.cluster import DBSCAN as sklearnDBSCAN
+from tests.test_base import TestBase
 
 from sedona.sql.st_constructors import ST_MakePoint
 from sedona.sql.st_functions import ST_Buffer
-from sklearn.cluster import DBSCAN as sklearnDBSCAN
 from sedona.stats.clustering.dbscan import dbscan
-
-from tests.test_base import TestBase
 
 
 class TestDBScan(TestBase):

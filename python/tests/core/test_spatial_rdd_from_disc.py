@@ -19,17 +19,17 @@ import os
 import shutil
 
 import pytest
-
-from sedona.core.SpatialRDD import PointRDD, PolygonRDD, LineStringRDD
-from sedona.core.enums import IndexType, GridType
-from sedona.core.formatMapper.disc_utils import (
-    load_spatial_rdd_from_disc,
-    load_spatial_index_rdd_from_disc,
-    GeoType,
-)
-from sedona.core.spatialOperator import JoinQuery
 from tests.test_base import TestBase
 from tests.tools import tests_resource
+
+from sedona.core.enums import GridType, IndexType
+from sedona.core.formatMapper.disc_utils import (
+    GeoType,
+    load_spatial_index_rdd_from_disc,
+    load_spatial_rdd_from_disc,
+)
+from sedona.core.spatialOperator import JoinQuery
+from sedona.core.SpatialRDD import LineStringRDD, PointRDD, PolygonRDD
 
 
 def remove_directory(path: str) -> bool:
@@ -48,9 +48,9 @@ class TestDiscUtils(TestBase):
     def test_saving_to_disc_spatial_rdd_point(self):
         from tests.properties.point_properties import (
             input_location,
+            num_partitions,
             offset,
             splitter,
-            num_partitions,
         )
 
         point_rdd = PointRDD(
@@ -64,8 +64,8 @@ class TestDiscUtils(TestBase):
     def test_saving_to_disc_spatial_rdd_polygon(self):
         from tests.properties.polygon_properties import (
             input_location,
-            splitter,
             num_partitions,
+            splitter,
         )
 
         polygon_rdd = PolygonRDD(
@@ -78,8 +78,8 @@ class TestDiscUtils(TestBase):
     def test_saving_to_disc_spatial_rdd_linestring(self):
         from tests.properties.linestring_properties import (
             input_location,
-            splitter,
             num_partitions,
+            splitter,
         )
 
         linestring_rdd = LineStringRDD(
@@ -92,8 +92,8 @@ class TestDiscUtils(TestBase):
     def test_saving_to_disc_index_linestring(self):
         from tests.properties.linestring_properties import (
             input_location,
-            splitter,
             num_partitions,
+            splitter,
         )
 
         linestring_rdd = LineStringRDD(
@@ -107,8 +107,8 @@ class TestDiscUtils(TestBase):
     def test_saving_to_disc_index_polygon(self):
         from tests.properties.polygon_properties import (
             input_location,
-            splitter,
             num_partitions,
+            splitter,
         )
 
         polygon_rdd = PolygonRDD(
@@ -122,9 +122,9 @@ class TestDiscUtils(TestBase):
     def test_saving_to_disc_index_point(self):
         from tests.properties.point_properties import (
             input_location,
+            num_partitions,
             offset,
             splitter,
-            num_partitions,
         )
 
         point_rdd = PointRDD(

@@ -15,11 +15,8 @@
 #  specific language governing permissions and limitations
 #  under the License.
 import pytest
-
-from pyspark.sql.types import StructType, StringType
-from sedona.sql.types import GeometryType
 from pyspark.sql.functions import expr
-
+from pyspark.sql.types import StringType, StructType
 from shapely.geometry import (
     GeometryCollection,
     LineString,
@@ -30,8 +27,9 @@ from shapely.geometry import (
     Polygon,
 )
 from shapely.wkt import loads as wkt_loads
-
 from tests.test_base import TestBase
+
+from sedona.sql.types import GeometryType
 
 
 class TestGeometrySerde(TestBase):

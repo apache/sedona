@@ -17,8 +17,8 @@
 
 from shapely.geometry.base import BaseGeometry
 
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.spatialOperator.rdd import SedonaPairRDD, SedonaRDD
+from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.utils.decorators import require
 from sedona.utils.geometry_adapter import GeometryAdapter
 

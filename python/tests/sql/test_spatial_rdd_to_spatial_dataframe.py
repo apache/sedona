@@ -17,15 +17,14 @@
 
 import os
 
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType
-
-from sedona.core.SpatialRDD import PointRDD
-from sedona.core.enums import FileDataSplitter
-from sedona.sql.types import GeometryType
-from tests.test_base import TestBase
+from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from shapely.geometry import Point
-
+from tests.test_base import TestBase
 from tests.tools import tests_resource
+
+from sedona.core.enums import FileDataSplitter
+from sedona.core.SpatialRDD import PointRDD
+from sedona.sql.types import GeometryType
 
 point_input_path = os.path.join(tests_resource, "arealm-small.csv")
 

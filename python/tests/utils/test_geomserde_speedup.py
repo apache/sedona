@@ -15,9 +15,6 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from sedona.utils import geometry_serde
-
-from shapely.geometry.base import BaseGeometry
 from shapely.geometry import (
     GeometryCollection,
     LineString,
@@ -27,7 +24,10 @@ from shapely.geometry import (
     Point,
     Polygon,
 )
+from shapely.geometry.base import BaseGeometry
 from shapely.wkt import loads as wkt_loads
+
+from sedona.utils import geometry_serde
 
 
 class TestGeomSerdeSpeedup:

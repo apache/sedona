@@ -15,10 +15,10 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-import pytest
-import os.path
 import datetime
+import os.path
 
+import pytest
 from tests.test_base import TestBase
 from tests.tools import tests_resource
 

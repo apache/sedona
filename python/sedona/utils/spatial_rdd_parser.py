@@ -18,7 +18,7 @@
 import struct
 from abc import ABC
 from copy import copy
-from typing import List, Any
+from typing import Any, List
 
 import attr
 from shapely.geometry.base import BaseGeometry
@@ -27,6 +27,7 @@ try:
     from pyspark import CPickleSerializer
 except ImportError:
     from pyspark import PickleSerializer as CPickleSerializer
+
 from shapely.wkb import dumps
 
 from sedona.core.geom.circle import Circle

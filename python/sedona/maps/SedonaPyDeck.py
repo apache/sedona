@@ -18,13 +18,13 @@
 from types import ModuleType
 
 from pyspark.sql.types import (
-    FloatType,
+    ByteType,
+    DecimalType,
     DoubleType,
+    FloatType,
     IntegerType,
     LongType,
-    DecimalType,
     ShortType,
-    ByteType,
 )
 
 from sedona.maps.SedonaMapUtils import SedonaMapUtils

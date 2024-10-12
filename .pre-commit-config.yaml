@@ -14,6 +14,11 @@ repos:
     rev: 24.10.0
     hooks:
       - id: black-jupyter
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort (python)
   - repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
     hooks:

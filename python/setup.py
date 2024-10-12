@@ -15,8 +15,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from setuptools import setup, find_packages, Extension
 import os
+
+from setuptools import Extension, find_packages, setup
+
 from sedona import version
 
 with open("README.md", "r") as fh:
