@@ -172,5 +172,7 @@ jobs:
           --conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions
 
           export SPARK_REMOTE=sc://localhost
+
+          cd python
           pipenv run pytest tests/sql/test_dataframe_api.py
 
