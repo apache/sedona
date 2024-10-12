@@ -174,5 +174,6 @@ jobs:
           export SPARK_REMOTE=sc://localhost
 
           cd python
+          pipenv install "pyspark[connect]==${SPARK_VERSION}"
           pipenv run pytest tests/sql/test_dataframe_api.py
 

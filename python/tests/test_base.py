@@ -20,20 +20,26 @@ from sedona.spark import *
 from sedona.utils.decorators import classproperty
 
 SPARK_REMOTE = os.getenv("SPARK_REMOTE")
+
 class TestBase:
 
     @classproperty
     def spark(self):
         if not hasattr(self, "__spark"):
+
+            builder = SedonaContext.builder()
             if SPARK_REMOTE:
-                builder = SedonaContext.builder().remote(SPARK_REMOTE)
+                builder.remote(SPARK_REMOTE)
             else:
-                builder = SedonaContext.builder().master("local[*]")
+                builder.master("local[*]")
 
             spark = SedonaContext.create(
                 builder.getOrCreate()
             )
-            spark.sparkContext.setCheckpointDir(mkdtemp())
+
+            # with spark connect we don't have a local sparkContext
+            if not SPARK_REMOTE:
+                spark.sparkContext.setCheckpointDir(mkdtemp())
 
             setattr(self, "__spark", spark)
         return getattr(self, "__spark")
