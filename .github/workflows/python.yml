@@ -165,7 +165,7 @@ jobs:
           export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}
           export PYTHONPATH=$SPARK_HOME/python
 
-          spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/sbin/start-connect-server.sh/sbin/start-connect-server.sh \
+          spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/sbin/start-connect-server.sh \
           --packages org.apache.spark:spark-connect_2.12:${SPARK_VERSION} \
           --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
           --conf spark.kryo.registrator=org.apache.sedona.core.serde.SedonaKryoRegistrator \
