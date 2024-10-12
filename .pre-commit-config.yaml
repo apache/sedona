@@ -14,7 +14,6 @@ repos:
     rev: v2.13
     hooks:
       - id: vulture
-        args: [--min-confidence=100]
   - repo: https://github.com/psf/black-pre-commit-mirror
     rev: 24.10.0
     hooks:
