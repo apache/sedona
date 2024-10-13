@@ -23,6 +23,10 @@ import pyspark.sql.connect.functions as f
 
 
 class SedonaFunction(CallFunction):
+    """
+    Simple child of CallFunction, that renders sedona function columns
+    as <function_name>(<args>,..)
+    """
     def __repr__(self):
         if len(self._args) > 0:
             return f"{self._name}({', '.join([str(arg) for arg in self._args])})"
