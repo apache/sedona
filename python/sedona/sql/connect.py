@@ -26,7 +26,7 @@ def _convert_argument_to_connect_column(arg: Any) -> Column:
 
 
 def call_sedona_function_connect(
-    function_name: str, args: Union[Any, Tuple[Any]]
+    function_name: str, args: Tuple[Any]
 ) -> Column:
 
     expressions = [_convert_argument_to_connect_column(arg)._expr for arg in args]

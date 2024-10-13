@@ -16,6 +16,7 @@
 #  under the License.
 import os
 from tempfile import mkdtemp
+from pyspark.sql import SparkSession
 from sedona.spark import *
 from sedona.utils.decorators import classproperty
 
@@ -27,18 +28,12 @@ class TestBase:
     def spark(self):
         if not hasattr(self, "__spark"):
 
-            builder = SedonaContext.builder()
             if SPARK_REMOTE:
-                builder.remote(SPARK_REMOTE)
+                spark = SparkSession.builder.remote(SPARK_REMOTE).getOrCreate()
             else:
-                builder.master("local[*]")
-
-            spark = SedonaContext.create(
-                builder.getOrCreate()
-            )
-
-            # with spark connect we don't have a local sparkContext
-            if not SPARK_REMOTE:
+                spark = SedonaContext.create(
+                    SedonaContext.builder().master("local[*]").getOrCreate()
+                )
                 spark.sparkContext.setCheckpointDir(mkdtemp())
 
             setattr(self, "__spark", spark)

@@ -45,8 +45,8 @@ else:
     from sedona.sql.connect import call_sedona_function_connect
 
 
-ColumnOrName = Union[Column, str]
-ColumnOrNameOrNumber = Union[Column, str, float, int]
+ColumnOrName = Union[Column, ConnectColumn, str]
+ColumnOrNameOrNumber = Union[Column, ConnectColumn, str, float, int]
 
 
 def _convert_argument_to_java_column(arg: Any) -> Column:
@@ -187,7 +187,7 @@ def validate_argument_types(f: Callable) -> Callable:
         # all arguments are Columns or strings are always legal, so only check types when one of the arguments is not a column
         if not all(
             [
-                isinstance(x, Column) or isinstance(x, str)
+                isinstance(x, (Column, ConnectColumn)) or isinstance(x, str)
                 for x in itertools.chain(args, kwargs.values())
             ]
         ):
