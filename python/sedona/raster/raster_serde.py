@@ -63,7 +63,7 @@ def _deserialize(bio: BytesIO, raster_type: int) -> SedonaRaster:
             width, height, bands_meta, affine_trans, crs_wkt, awt_raster
         )
     else:
-        raise ValueError("unsupported raster_type: {}".format(raster_type))
+        raise ValueError(f"unsupported raster_type: {raster_type}")
 
 
 def _read_grid_envelope(bio: BytesIO) -> Tuple[int, int, int, int]:
@@ -183,7 +183,7 @@ def _read_data_buffer(bio: BytesIO) -> DataBuffer:
         elif data_type == DataBuffer.TYPE_DOUBLE:
             np_array = np.frombuffer(bio.read(8 * bank_size), dtype=np.float64)
         else:
-            raise ValueError("unknown data_type {}".format(data_type))
+            raise ValueError(f"unknown data_type {data_type}")
 
         banks.append(np_array)
 

@@ -174,31 +174,31 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
     def _reduce_for_geostat_function(
         self,
-        sfun: Callable[["GeoSeries"], Column],
+        sfun: Callable[[GeoSeries], Column],
         name: str,
-        axis: Optional[Axis] = None,
+        axis: Axis | None = None,
         numeric_only: bool = True,
         skipna: bool = True,
         **kwargs: Any,
-    ) -> Union["GeoSeries", Scalar]:
+    ) -> GeoSeries | Scalar:
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def dtypes(self) -> Union[gpd.GeoSeries, pd.Series, Dtype]:
+    def dtypes(self) -> gpd.GeoSeries | pd.Series | Dtype:
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    def to_geopandas(self) -> Union[gpd.GeoDataFrame, pd.Series]:
+    def to_geopandas(self) -> gpd.GeoDataFrame | pd.Series:
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    def _to_geopandas(self) -> Union[gpd.GeoDataFrame, pd.Series]:
+    def _to_geopandas(self) -> gpd.GeoDataFrame | pd.Series:
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def geoindex(self) -> "GeoIndex":
+    def geoindex(self) -> GeoIndex:
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
@@ -232,7 +232,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             return self
 
     @property
-    def area(self) -> "GeoDataFrame":
+    def area(self) -> GeoDataFrame:
         """
         Returns a GeoDataFrame containing the area of each geometry expressed in the units of the CRS.
 
@@ -517,7 +517,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         mitre_limit=5.0,
         single_sided=False,
         **kwargs,
-    ) -> "GeoDataFrame":
+    ) -> GeoDataFrame:
         """
         Returns a GeoDataFrame with all geometries buffered by the specified distance.
 

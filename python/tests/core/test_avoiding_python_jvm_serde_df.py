@@ -165,24 +165,20 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
         right_geometries = self.__row_to_list(right_geometries_raw)
 
         # Ignore the ordering of these
-        assert set(geom[0] for geom in left_geometries) == set(
-            [
-                "POLYGON ((0 4, -3 3, -8 6, -6 8, -2 9, 0 4))",
-                "POLYGON ((10 3, 10 6, 14 6, 14 3, 10 3))",
-                "POLYGON ((2 2, 2 4, 3 5, 7 5, 9 3, 8 1, 4 1, 2 2))",
-                "POLYGON ((-1 -1, -1 -3, -2 -5, -6 -8, -5 -2, -3 -2, -1 -1))",
-                "POLYGON ((-1 -1, -1 -3, -2 -5, -6 -8, -5 -2, -3 -2, -1 -1))",
-            ]
-        )
-        assert set(geom[0] for geom in right_geometries) == set(
-            [
-                "POINT (-3 5)",
-                "POINT (11 5)",
-                "POINT (4 3)",
-                "POINT (-1 -1)",
-                "POINT (-4 -5)",
-            ]
-        )
+        assert {geom[0] for geom in left_geometries} == {
+            "POLYGON ((0 4, -3 3, -8 6, -6 8, -2 9, 0 4))",
+            "POLYGON ((10 3, 10 6, 14 6, 14 3, 10 3))",
+            "POLYGON ((2 2, 2 4, 3 5, 7 5, 9 3, 8 1, 4 1, 2 2))",
+            "POLYGON ((-1 -1, -1 -3, -2 -5, -6 -8, -5 -2, -3 -2, -1 -1))",
+            "POLYGON ((-1 -1, -1 -3, -2 -5, -6 -8, -5 -2, -3 -2, -1 -1))",
+        }
+        assert {geom[0] for geom in right_geometries} == {
+            "POINT (-3 5)",
+            "POINT (11 5)",
+            "POINT (4 3)",
+            "POINT (-1 -1)",
+            "POINT (-4 -5)",
+        }
 
     def test_range_query_flat_to_df(self):
         poi_point_rdd = WktReader.readToGeometryRDD(
