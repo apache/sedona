@@ -67,6 +67,8 @@ repos:
       - id: forbid-submodules
       - id: mixed-line-ending
         exclude: \.csv$
+      - id: requirements-txt-fixer
+        files: ^docker/sedona-spark-jupyterlab/requirements\.txt$
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
         exclude: ^docs-overrides/main\.html$|\.Rd$
