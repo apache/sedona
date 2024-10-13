@@ -22,7 +22,7 @@ import typing
 from typing import Any, Callable, Iterable, List, Mapping, Tuple, Type, Union
 
 from pyspark.sql import Column, SparkSession
-from pyspark.sql importfunctions as f
+from pyspark.sql import functions as f
 
 try:
     from pyspark.sql.utils import is_remote
