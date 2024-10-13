@@ -3,7 +3,7 @@ template:
   bootstrap: 5
   # bootswatch: cosmo
   bslib:
-    #font_scale: 1.1
+    # font_scale: 1.1
     primary: "#ff6e42"
     light: "#ff6e42"
     navbar-light-color: "#fff"
@@ -13,7 +13,7 @@ template:
     # bg: "#fff"
 navbar:
   structure:
-   # left:  [intro, articles, reference, news]
+    # left: [intro, articles, reference, news]
     right: [search, github]
 home:
   sidebar:
