@@ -17,7 +17,6 @@
 
 import shapely
 
-
 if shapely.__version__.startswith("2."):
     from .shapely2.circle import Circle
 else:

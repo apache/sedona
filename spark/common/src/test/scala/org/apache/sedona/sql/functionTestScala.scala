@@ -61,7 +61,7 @@ class functionTestScala
       polygonDf.createOrReplaceTempView("polygondf")
       var functionDf =
         sparkSession.sql("select ST_ConcaveHull(polygondf.countyshape, 1, true) from polygondf")
-      assert(functionDf.count() > 0);
+      assert(functionDf.count() > 0)
     }
 
     it("Passed ST_ConvexHull") {
@@ -76,7 +76,7 @@ class functionTestScala
       polygonDf.createOrReplaceTempView("polygondf")
       var functionDf =
         sparkSession.sql("select ST_ConvexHull(polygondf.countyshape) from polygondf")
-      assert(functionDf.count() > 0);
+      assert(functionDf.count() > 0)
     }
 
     it("Passed ST_CrossesDateLine") {
@@ -107,7 +107,7 @@ class functionTestScala
       polygonDf.createOrReplaceTempView("polygondf")
       val functionDf =
         sparkSession.sql("select ST_Buffer(polygondf.countyshape, 1) from polygondf")
-      assert(functionDf.count() > 0);
+      assert(functionDf.count() > 0)
     }
 
     it("Passed ST_Buffer Spheroid") {
@@ -123,11 +123,11 @@ class functionTestScala
 
       var functionDf =
         sparkSession.sql("select ST_Buffer(polygondf.countyshape, 1, true) from polygondf")
-      assert(functionDf.count() > 0);
+      assert(functionDf.count() > 0)
 
       functionDf = sparkSession.sql(
         "select ST_Buffer(polygondf.countyshape, 1, true, 'quad_segs=2') from polygondf")
-      assert(functionDf.count() > 0);
+      assert(functionDf.count() > 0)
     }
 
     it("Passed ST_BestSRID") {
@@ -142,7 +142,7 @@ class functionTestScala
       polygonDf.createOrReplaceTempView("polygondf")
       val functionDf =
         sparkSession.sql("select ST_BestSRID(polygondf.countyshape) from polygondf")
-      assert(functionDf.count() > 0);
+      assert(functionDf.count() > 0)
     }
 
     it("Passed ST_ShiftLongitude") {
@@ -157,7 +157,7 @@ class functionTestScala
       polygonDf.createOrReplaceTempView("polygondf")
       val functionDf =
         sparkSession.sql("select ST_ShiftLongitude(polygondf.countyshape) from polygondf")
-      assert(functionDf.count() > 0);
+      assert(functionDf.count() > 0)
     }
 
     it("Passed ST_Envelope") {
@@ -172,7 +172,7 @@ class functionTestScala
       polygonDf.createOrReplaceTempView("polygondf")
       var functionDf =
         sparkSession.sql("select ST_Envelope(polygondf.countyshape) from polygondf")
-      assert(functionDf.count() > 0);
+      assert(functionDf.count() > 0)
     }
 
     it("Passed ST_Expand") {
@@ -236,7 +236,7 @@ class functionTestScala
       polygonDf.createOrReplaceTempView("polygondf")
       var functionDf =
         sparkSession.sql("select ST_Centroid(polygondf.countyshape) from polygondf")
-      assert(functionDf.count() > 0);
+      assert(functionDf.count() > 0)
     }
 
     it("Passed ST_Length") {
@@ -250,7 +250,7 @@ class functionTestScala
         "select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
       var functionDf = sparkSession.sql("select ST_Length(polygondf.countyshape) from polygondf")
-      assert(functionDf.count() > 0);
+      assert(functionDf.count() > 0)
     }
 
     it("Passed ST_Length2D") {
@@ -265,7 +265,7 @@ class functionTestScala
       polygonDf.createOrReplaceTempView("polygondf")
       var functionDf =
         sparkSession.sql("select ST_Length2D(polygondf.countyshape) from polygondf")
-      assert(functionDf.count() > 0);
+      assert(functionDf.count() > 0)
     }
 
     it("Passed ST_Area") {
@@ -279,7 +279,7 @@ class functionTestScala
         "select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
       var functionDf = sparkSession.sql("select ST_Area(polygondf.countyshape) from polygondf")
-      assert(functionDf.count() > 0);
+      assert(functionDf.count() > 0)
     }
 
     it("Passed ST_Dimension with Geometry") {
@@ -325,7 +325,7 @@ class functionTestScala
       polygonDf.createOrReplaceTempView("polygondf")
       var functionDf = sparkSession.sql(
         "select ST_Distance(polygondf.countyshape, polygondf.countyshape) from polygondf")
-      assert(functionDf.count() > 0);
+      assert(functionDf.count() > 0)
     }
 
     it("Passed ST_3DDistance") {
@@ -1849,7 +1849,7 @@ class functionTestScala
     val actualDf = baseDf.selectExpr("ST_RemoveRepeatedPoints(geom, 1000) as geom")
     var actual = actualDf.selectExpr("ST_AsText(geom)").first().get(0)
     var expected =
-      "GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (20 20, 30 30), POLYGON ((40 40, 70 70, 70 70, 40 40)), MULTIPOINT ((80 80)))";
+      "GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (20 20, 30 30), POLYGON ((40 40, 70 70, 70 70, 40 40)), MULTIPOINT ((80 80)))"
     assertEquals(expected, actual)
     val actualSRID = actualDf.selectExpr("ST_SRID(geom)").first().get(0)
     assertEquals(1000, actualSRID)
@@ -1857,21 +1857,21 @@ class functionTestScala
     actual = sparkSession
       .sql("SELECT ST_AsText(ST_RemoveRepeatedPoints(ST_GeomFromWKT('MULTIPOINT ((1 1), (2 2), (3 3), (2 2))')))")
       .first()
-      .get(0);
+      .get(0)
     expected = "MULTIPOINT ((1 1), (2 2), (3 3))"
     assertEquals(expected, actual)
 
     actual = sparkSession
       .sql("SELECT ST_AsText(ST_RemoveRepeatedPoints(ST_GeomFromWKT('LINESTRING (0 0, 0 0, 1 1, 0 0, 1 1, 2 2)')))")
       .first()
-      .get(0);
+      .get(0)
     expected = "LINESTRING (0 0, 1 1, 0 0, 1 1, 2 2)"
     assertEquals(expected, actual)
 
     actual = sparkSession
       .sql("SELECT ST_AsText(ST_RemoveRepeatedPoints(ST_GeomFromWKT('GEOMETRYCOLLECTION (LINESTRING (1 1, 2 2, 2 2, 3 3), POINT (4 4), POINT (4 4), POINT (5 5))')))")
       .first()
-      .get(0);
+      .get(0)
     expected =
       "GEOMETRYCOLLECTION (LINESTRING (1 1, 2 2, 3 3), POINT (4 4), POINT (4 4), POINT (5 5))"
     assertEquals(expected, actual)
@@ -1879,7 +1879,7 @@ class functionTestScala
     actual = sparkSession
       .sql("SELECT ST_AsText(ST_RemoveRepeatedPoints(ST_GeomFromWKT('LINESTRING (0 0, 0 0, 1 1, 5 5, 1 1, 2 2)'), 2))")
       .first()
-      .get(0);
+      .get(0)
     expected = "LINESTRING (0 0, 5 5, 2 2)"
     assertEquals(expected, actual)
   }
@@ -2916,7 +2916,7 @@ class functionTestScala
         .get(1)
         .asInstanceOf[String]
       assertEquals(expected, actual)
-      assertEquals(expectedDefaultValue, actualDefaultValue);
+      assertEquals(expectedDefaultValue, actualDefaultValue)
     }
   }
 
@@ -2941,7 +2941,7 @@ class functionTestScala
         .get(1)
         .asInstanceOf[String]
       assertEquals(expected, actual)
-      assertEquals(expectedDefaultValue, actualDefaultValue);
+      assertEquals(expectedDefaultValue, actualDefaultValue)
     }
   }
 
@@ -2966,7 +2966,7 @@ class functionTestScala
         .get(1)
         .asInstanceOf[String]
       assertEquals(expected, actual)
-      assertEquals(expectedDefaultValue, actualDefaultValue);
+      assertEquals(expectedDefaultValue, actualDefaultValue)
     }
   }
 
@@ -2991,7 +2991,7 @@ class functionTestScala
         .get(1)
         .asInstanceOf[String]
       assertEquals(expected, actual)
-      assertEquals(expectedDefaultValue, actualDefaultValue);
+      assertEquals(expectedDefaultValue, actualDefaultValue)
     }
   }
 

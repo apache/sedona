@@ -4,25 +4,25 @@ This tutorial will guide you through the process of installing Sedona on Microso
 
 Go to the [Microsoft Fabric portal](https://app.fabric.microsoft.com/) and choose the `Data Engineering` option.
 
-![](../image/fabric/fabric-1.png)
+![Microsoft Fabric portal](../image/fabric/fabric-1.png)
 
 ## Step 2: Create a Microsoft Fabric Data Engineering environment
 
 On the left side, click `My Workspace` and then click `+ New` to create a new `Environment`. Let's name it `ApacheSedona`.
 
-![](../image/fabric/fabric-2.png)
+![Create new Data Engineering environment](../image/fabric/fabric-2.png)
 
 ## Step 3: Select the Apache Spark version
 
 In the `Environment` page, click the `Home` tab and select the appropriate version of Apache Spark. You will need this version to install the correct version of Apache Sedona.
 
-![](../image/fabric/fabric-3.png)
+![Add the appropriate version of Apache Spark to the Environment page Home tab](../image/fabric/fabric-3.png)
 
 ## Step 4: Install the Sedona Python package
 
 In the `Environment` page, click the `Public libraries` tab and then type in `apache-sedona`. Please select the appropriate version of Apache Sedona. The source is `PyPI`.
 
-![](../image/fabric/fabric-4.png)
+![Add the appropriate version of Apache Sedona to the Environment page Public libraries](../image/fabric/fabric-4.png)
 
 ## Step 5: Set Spark properties
 
@@ -32,13 +32,13 @@ In the `Environment` page, click the `Spark properties` tab, then create the fol
 - `spark.serializer`: `org.apache.spark.serializer.KryoSerializer`
 - `spark.kryo.registrator`: `org.apache.sedona.core.serde.SedonaKryoRegistrator`
 
-![](../image/fabric/fabric-5.png)
+![Add 3 properties to the Environment page Spark properties tab](../image/fabric/fabric-5.png)
 
 ## Step 6: Save and publish the environment
 
 Click the `Save` button and then click the `Publish` button to save and publish the environment. This will create the environment with the Apache Sedona Python package installed. The publishing process will take about 10 minutes.
 
-![](../image/fabric/fabric-6.png)
+![Save and publish the environment](../image/fabric/fabric-6.png)
 
 ## Step 7: Find the download links of Sedona jars
 
@@ -57,7 +57,7 @@ https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.5.1-28.2/geotoo
 
 In the notebook page, select the `ApacheSedona` environment you created before.
 
-![](../image/fabric/fabric-9.png)
+![Start the notebook with the Sedona environment and install the jars](../image/fabric/fabric-9.png)
 
 In the notebook, you can install the jars by running the following code. Please replace the `jars` with the download links of the 2 jars from the previous step.
 
@@ -84,7 +84,7 @@ sedona.sql("SELECT ST_GeomFromEWKT('SRID=4269;POINT(40.7128 -74.0060)')").show()
 
 If you see the output of the point, then the installation is successful.
 
-![](../image/fabric/fabric-10.png)
+![Verify the installation](../image/fabric/fabric-10.png)
 
 ## Optional: manually upload Sedona jars to the Fabric environment LakeHouse storage
 
@@ -100,9 +100,9 @@ abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e1
 abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e15f3695-af7e-47de-979e-473c3caa9f5b/Files/geotools-wrapper-1.5.1-28.2.jar
 ```
 
-![](../image/fabric/fabric-7.png)
+![Sedona notebook tab Lakehouses data source](../image/fabric/fabric-7.png)
 
-![](../image/fabric/fabric-8.png)
+![From Files upload the jars and then copy their ABFS paths](../image/fabric/fabric-8.png)
 
 If you use this option, the config files in your notebook should be
 

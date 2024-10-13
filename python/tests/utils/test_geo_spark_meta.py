@@ -15,8 +15,9 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from sedona.core.jvm.config import is_greater_or_equal_version, SedonaMeta
 from tests.test_base import TestBase
+
+from sedona.core.jvm.config import SedonaMeta, is_greater_or_equal_version
 
 
 class TestGeoSparkMeta(TestBase):

@@ -15,10 +15,11 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from IPython.display import display, HTML
-from tests.test_base import TestBase
-from sedona.raster_utils.SedonaUtils import SedonaUtils
+from IPython.display import HTML, display
 from tests import world_map_raster_input_location
+from tests.test_base import TestBase
+
+from sedona.raster_utils.SedonaUtils import SedonaUtils
 
 
 class TestSedonaUtils(TestBase):

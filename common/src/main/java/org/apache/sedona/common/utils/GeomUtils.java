@@ -344,7 +344,7 @@ public class GeomUtils {
   }
 
   /**
-   * Checks if the geoemetry pair - <code>left</code> and <code>right</code> - should be handled be
+   * Checks if the geometry pair - <code>left</code> and <code>right</code> - should be handled be
    * the current partition - <code>extent</code>.
    *
    * @param left

@@ -18,13 +18,13 @@
 from typing import List
 
 from shapely.geometry import (
-    Point,
-    MultiPoint,
-    Polygon,
-    MultiPolygon,
+    GeometryCollection,
     LineString,
     MultiLineString,
-    GeometryCollection,
+    MultiPoint,
+    MultiPolygon,
+    Point,
+    Polygon,
 )
 from shapely.geometry.base import BaseGeometry
 

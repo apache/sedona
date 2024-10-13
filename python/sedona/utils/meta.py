@@ -17,10 +17,9 @@
 
 import inspect
 import types
+from typing import Any
 
 from sedona.exceptions import InvalidParametersException
-
-from typing import Any
 
 try:
     from typing import GenericMeta

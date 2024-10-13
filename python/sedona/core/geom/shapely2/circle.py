@@ -18,12 +18,12 @@
 from math import sqrt
 
 from shapely.geometry import (
-    Polygon,
-    Point,
     LineString,
+    MultiLineString,
     MultiPoint,
     MultiPolygon,
-    MultiLineString,
+    Point,
+    Polygon,
     box,
 )
 from shapely.geometry.base import BaseGeometry

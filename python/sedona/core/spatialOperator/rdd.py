@@ -15,7 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from pyspark import SparkContext, RDD
+from pyspark import RDD, SparkContext
 
 from sedona.core.jvm.translate import JvmSedonaPythonConverter
 from sedona.utils.spatial_rdd_parser import SedonaPickler

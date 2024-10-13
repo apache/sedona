@@ -18,19 +18,11 @@
 import functools
 import inspect
 import itertools
-from typing import (
-    Any,
-    Callable,
-    Iterable,
-    List,
-    Mapping,
-    Tuple,
-    Type,
-    Union,
-)
 import typing
+from typing import Any, Callable, Iterable, List, Mapping, Tuple, Type, Union
 
-from pyspark.sql import SparkSession, Column, functions as f
+from pyspark.sql import Column, SparkSession
+from pyspark.sql importfunctions as f
 
 try:
     from pyspark.sql.utils import is_remote

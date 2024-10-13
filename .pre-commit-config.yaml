@@ -14,6 +14,11 @@ repos:
     rev: 24.10.0
     hooks:
       - id: black-jupyter
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort (python)
   - repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
     hooks:
@@ -26,6 +31,11 @@ repos:
     rev: v8.20.1
     hooks:
       - id: gitleaks
+  - repo: https://github.com/shssoichiro/oxipng
+    rev: v9.1.2
+    hooks:
+      - id: oxipng
+        args: ["-o", "4", "--strip", "safe", "--alpha"]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:

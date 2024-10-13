@@ -15,11 +15,11 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from pyspark.sql.types import UserDefinedType, BinaryType
+from pyspark.sql.types import BinaryType, UserDefinedType
 
-from ..utils import geometry_serde
 from ..raster import raster_serde
 from ..raster.sedona_raster import SedonaRaster
+from ..utils import geometry_serde
 
 
 class GeometryType(UserDefinedType):
