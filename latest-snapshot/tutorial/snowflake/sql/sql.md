@@ -38,7 +38,7 @@ SELECT Sedona.ST_GeomFromWKT(wkt) AS geom, city_name
 FROM city_tbl
 ```
 
-The `geom` column Table `city_tbl_geom ` is now in a `Binary` type and data in this column is in a format that can be understood by Sedona. The output of this query will show geometries in WKB binary format like this:
+The `geom` column Table `city_tbl_geom` is now in a `Binary` type and data in this column is in a format that can be understood by Sedona. The output of this query will show geometries in WKB binary format like this:
 
 ```
 GEOM CITY_NAME
