@@ -21,6 +21,11 @@ from pyspark.sql import SparkSession
 from sedona.register.geo_registrator import PackageImporter
 from sedona.utils import KryoSerializer, SedonaKryoRegistrator
 
+try:
+    from pyspark.sql.utils import is_remote
+except ImportError:
+    def is_remote():
+        return False
 
 @attr.s
 class SedonaContext:
@@ -35,8 +40,8 @@ class SedonaContext:
         """
         spark.sql("SELECT 1 as geom").count()
 
-        # spark connect sessions won't have the _jvm attribute
-        if hasattr(spark, "_jvm"):
+        # with spark connect there is no local jvm
+        if not is_remote():
             PackageImporter.import_jvm_lib(spark._jvm)
             spark._jvm.SedonaContext.create(spark._jsparkSession, "python")
         return spark

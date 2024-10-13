@@ -35,7 +35,7 @@ from pyspark.sql import SparkSession, Column, functions as f
 try:
     from pyspark.sql.utils import is_remote
     from pyspark.sql.connect.column import Column as ConnectColumn
-# is_remote only exists since 3.4.0
+# is_remote and connect api only exists since 3.4.0
 except ImportError:
     def is_remote():
         return False
