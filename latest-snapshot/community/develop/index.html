@@ -4269,12 +4269,12 @@
 <p>We recommend <a href="https://www.jetbrains.com/idea/">Intellij IDEA</a> with Scala plugin installed. Please make sure that the IDE has JDK 1.8 set as project default.</p>
 <h3 id="import-the-project">Import the project<a class="headerlink" href="#import-the-project" title="Permanent link">&para;</a></h3>
 <h4 id="choose-open">Choose <code>Open</code><a class="headerlink" href="#choose-open" title="Permanent link">&para;</a></h4>
-<p><img alt="" src="../../image/ide-java-1.png" /></p>
+<p><img alt="Import the project by clicking Open" src="../../image/ide-java-1.png" /></p>
 <h4 id="go-to-the-sedona-root-folder-not-a-submodule-folder-and-choose-open">Go to the Sedona root folder (not a submodule folder) and choose <code>open</code><a class="headerlink" href="#go-to-the-sedona-root-folder-not-a-submodule-folder-and-choose-open" title="Permanent link">&para;</a></h4>
-<p><img alt="" src="../../image/ide-java-2.png" /></p>
+<p><img alt="Open the Sedona root folder" src="../../image/ide-java-2.png" /></p>
 <h4 id="the-ide-might-show-errors">The IDE might show errors<a class="headerlink" href="#the-ide-might-show-errors" title="Permanent link">&para;</a></h4>
 <p>The IDE usually has trouble understanding the complex project structure in Sedona.</p>
-<p><img alt="" src="../../image/ide-java-4.png" /></p>
+<p><img alt="The IDE usually has trouble understanding the project" src="../../image/ide-java-4.png" /></p>
 <h4 id="fix-errors-by-changing-pomxml">Fix errors by changing <code>pom.xml</code><a class="headerlink" href="#fix-errors-by-changing-pomxml" title="Permanent link">&para;</a></h4>
 <p>You need to comment out the following lines in <code>pom.xml</code> at the root folder, as follows. <mark>Remember that you should NOT submit this change to Sedona.</mark></p>
 <div class="highlight"><pre><span></span><code><span class="cm">&lt;!--    &lt;parent&gt;--&gt;</span>
@@ -4286,9 +4286,9 @@
 </code></pre></div>
 <h4 id="reload-pomxml">Reload <code>pom.xml</code><a class="headerlink" href="#reload-pomxml" title="Permanent link">&para;</a></h4>
 <p>Make sure you reload the <code>pom.xml</code> or reload the maven project. The IDE will ask you to remove some modules. Please select <code>yes</code>.</p>
-<p><img alt="" src="../../image/ide-java-5.png" /></p>
+<p><img alt="Reload the Maven project" src="../../image/ide-java-5.png" /></p>
 <h4 id="the-final-project-structure-should-be-like-this">The final project structure should be like this:<a class="headerlink" href="#the-final-project-structure-should-be-like-this" title="Permanent link">&para;</a></h4>
-<p><img alt="" src="../../image/ide-java-3.png" /></p>
+<p><img alt="The final correct project structure" src="../../image/ide-java-3.png" /></p>
 <h3 id="run-unit-tests">Run unit tests<a class="headerlink" href="#run-unit-tests" title="Permanent link">&para;</a></h3>
 <h4 id="run-all-unit-tests">Run all unit tests<a class="headerlink" href="#run-all-unit-tests" title="Permanent link">&para;</a></h4>
 <p>In a terminal, go to the Sedona root folder. Run <code>mvn clean install</code>. All tests will take more than 15 minutes. To only build the project jars, run <code>mvn clean install -DskipTests</code>.</p>
@@ -4300,20 +4300,20 @@ For example, to compile sedona with Spark 3.4 and Scala 2.12, use: <code>mvn cle
 <p>More details can be found on <a href="../../setup/compile/">Compile Sedona</a></p>
 <h4 id="run-a-single-unit-test">Run a single unit test<a class="headerlink" href="#run-a-single-unit-test" title="Permanent link">&para;</a></h4>
 <p>In the IDE, right-click a test case and run this test case.</p>
-<p><img alt="" src="../../image/ide-java-6.png" /></p>
+<p><img alt="Right click a test case to run" src="../../image/ide-java-6.png" /></p>
 <p>When you run a test case written in Scala, the IDE might tell you that the "Path does not exist" as follows:</p>
-<p><img alt="" src="../../image/ide-java-7.png" /></p>
+<p><img alt="Path does not exist" src="../../image/ide-java-7.png" /></p>
 <p>Go to <code>Edit Configuration</code></p>
-<p><img alt="" src="../../image/ide-java-8.png" /></p>
+<p><img alt="Edit Configuration" src="../../image/ide-java-8.png" /></p>
 <p>Change the value of <code>Working Directory</code> to <code>$MODULE_WORKING_DIR$</code>.</p>
-<p><img alt="" src="../../image/ide-java-9.png" /></p>
+<p><img alt="Change the working directory" src="../../image/ide-java-9.png" /></p>
 <p>Re-run the test case. Do NOT right-click the test case to re-run. Instead, click the button as shown in the figure below.</p>
-<p><img alt="" src="../../image/ide-java-10.png" /></p>
+<p><img alt="Re-run test case by clicking the button" src="../../image/ide-java-10.png" /></p>
 <p>If you don't want to change the <code>Working Directory</code> configuration every time, you can change the default value of <code>Working Directory</code>
 in the <code>Run/Debug Configurations</code> window. Click <code>Edit configuration templates...</code> and change the value
 of <code>Working Directory</code> of ScalaTest to <code>$MODULE_WORKING_DIR$</code>.</p>
-<p><img alt="" src="../../image/ide-java-11.png" />
-<img alt="" src="../../image/ide-java-12.png" /></p>
+<p><img alt="Run/Debug Configurations click Edit configuration templates" src="../../image/ide-java-11.png" />
+<img alt="Set ScalaTest Working directory" src="../../image/ide-java-12.png" /></p>
 <p>Now newly created run configurations for ScalaTest will have the correct value set for <code>Working Directory</code>.</p>
 <h3 id="ide-configurations-when-using-java-11">IDE Configurations When Using Java 11<a class="headerlink" href="#ide-configurations-when-using-java-11" title="Permanent link">&para;</a></h3>
 <p>If you are using Java 11, you may encounter the following error when running tests:</p>
@@ -4322,7 +4322,7 @@ package sun.misc does not exist
 sun.misc.Unsafe
 </code></pre></div>
 <p>You can fix this issue by disabling <code>Use '--release' option for cross-compilation</code> in the IDE settings.</p>
-<p><img alt="" src="../../image/ide-java-13.png" /></p>
+<p><img alt="Disable &quot;Use '--release' option for cross-compilation&quot; when using Java 11" src="../../image/ide-java-13.png" /></p>
 <h2 id="python-developers">Python developers<a class="headerlink" href="#python-developers" title="Permanent link">&para;</a></h2>
 <h3 id="ide_1">IDE<a class="headerlink" href="#ide_1" title="Permanent link">&para;</a></h3>
 <p>We recommend <a href="https://www.jetbrains.com/pycharm/">PyCharm</a>.</p>
@@ -4361,7 +4361,7 @@ sun.misc.Unsafe
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">May 24, 2024 20:35:32</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">October 13, 2024 01:58:52</span>
   </span>
 
     
