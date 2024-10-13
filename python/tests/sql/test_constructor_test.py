@@ -16,11 +16,11 @@
 #  under the License.
 
 from tests import (
-    csv_point_input_location,
     area_lm_point_input_location,
-    mixed_wkt_geometry_input_location,
-    mixed_wkb_geometry_input_location,
+    csv_point_input_location,
     geojson_input_location,
+    mixed_wkb_geometry_input_location,
+    mixed_wkt_geometry_input_location,
 )
 from tests.test_base import TestBase
 

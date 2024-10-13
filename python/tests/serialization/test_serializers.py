@@ -17,23 +17,22 @@
 
 import os
 
-from pyspark.sql.types import IntegerType
 import geopandas as gpd
 import pandas as pd
-
-from tests import tests_resource
-from sedona.sql.types import GeometryType
+from pyspark.sql import types as t
+from pyspark.sql.types import IntegerType
 from shapely.geometry import (
-    Point,
-    MultiPoint,
     LineString,
     MultiLineString,
-    Polygon,
+    MultiPoint,
     MultiPolygon,
+    Point,
+    Polygon,
 )
-from pyspark.sql import types as t
-
+from tests import tests_resource
 from tests.test_base import TestBase
+
+from sedona.sql.types import GeometryType
 
 
 class TestsSerializers(TestBase):

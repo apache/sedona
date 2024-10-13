@@ -16,8 +16,8 @@
 #  under the License.
 
 import array
-import struct
 import math
+import struct
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
@@ -34,7 +34,6 @@ from shapely.geometry import (
 from shapely.geometry.base import BaseGeometry
 from shapely.wkb import dumps as wkb_dumps
 from shapely.wkt import loads as wkt_loads
-
 
 CoordType = Union[
     Tuple[float, float], Tuple[float, float, float], Tuple[float, float, float, float]

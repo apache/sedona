@@ -18,20 +18,11 @@
 import functools
 import inspect
 import itertools
-from typing import (
-    Any,
-    Callable,
-    Iterable,
-    List,
-    Mapping,
-    Tuple,
-    Type,
-    Union,
-)
 import typing
+from typing import Any, Callable, Iterable, List, Mapping, Tuple, Type, Union
 
-from pyspark.sql import SparkSession, Column, functions as f
-
+from pyspark.sql import Column, SparkSession
+from pyspark.sql import functions as f
 
 ColumnOrName = Union[Column, str]
 ColumnOrNameOrNumber = Union[Column, str, float, int]

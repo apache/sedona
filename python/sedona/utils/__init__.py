@@ -15,7 +15,6 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from .serde import KryoSerializer
-from .serde import SedonaKryoRegistrator
+from .serde import KryoSerializer, SedonaKryoRegistrator
 
 __all__ = ["KryoSerializer", "SedonaKryoRegistrator"]

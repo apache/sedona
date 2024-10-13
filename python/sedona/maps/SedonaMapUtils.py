@@ -16,6 +16,7 @@
 #  under the License.
 
 import json
+
 from sedona.sql.types import GeometryType
 
 

@@ -15,12 +15,13 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+import math
+import pickle
+
 from shapely.geometry import Polygon, box
 from shapely.geometry.base import BaseGeometry
 
 from sedona.utils.decorators import require
-import math
-import pickle
 
 
 class Envelope(Polygon):

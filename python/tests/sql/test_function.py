@@ -16,23 +16,24 @@
 #  under the License.
 
 import math
+from typing import List
+
 from pyspark.sql import DataFrame, Row
-from pyspark.sql.functions import col
-from pyspark.sql.functions import explode, expr
-from pyspark.sql.types import StructType, StructField, IntegerType
-from sedona.sql.types import GeometryType
+from pyspark.sql.functions import col, explode, expr
+from pyspark.sql.types import IntegerType, StructField, StructType
 from shapely import wkt
 from shapely.wkt import loads
 from tests import mixed_wkt_geometry_input_location
 from tests.sql.resource.sample_data import (
+    create_sample_lines_df,
     create_sample_points,
-    create_simple_polygons_df,
     create_sample_points_df,
     create_sample_polygons_df,
-    create_sample_lines_df,
+    create_simple_polygons_df,
 )
 from tests.test_base import TestBase
-from typing import List
+
+from sedona.sql.types import GeometryType
 
 
 class TestPredicateJoin(TestBase):

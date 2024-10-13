@@ -15,19 +15,19 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+import math
 import os
 import uuid
-from typing import List, Any, Optional
+from typing import Any, List, Optional
 
 import pytest
-from pyspark.sql.types import StructType, StructField, Row
-from shapely import wkt, wkb
-
-from sedona.sql.types import GeometryType
+from pyspark.sql.types import Row, StructField, StructType
+from shapely import wkb, wkt
 from tests import tests_resource
 from tests.streaming.spark.cases_builder import SuiteContainer
 from tests.test_base import TestBase
-import math
+
+from sedona.sql.types import GeometryType
 
 SCHEMA = StructType([StructField("geom", GeometryType())])
 

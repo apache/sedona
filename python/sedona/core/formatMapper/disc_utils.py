@@ -19,8 +19,8 @@ from enum import Enum
 
 from pyspark import SparkContext
 
-from sedona.core.SpatialRDD import SpatialRDD, PolygonRDD, LineStringRDD, PointRDD
 from sedona.core.jvm.translate import SpatialObjectLoaderAdapter
+from sedona.core.SpatialRDD import LineStringRDD, PointRDD, PolygonRDD, SpatialRDD
 from sedona.utils.decorators import require
 
 

@@ -16,7 +16,6 @@
 #  under the License.
 import inspect
 import sys
-
 from functools import partial
 
 from pyspark.sql import Column

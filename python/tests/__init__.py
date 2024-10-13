@@ -19,7 +19,6 @@ import os
 
 from tests.tools import tests_resource
 
-
 mixed_wkb_geometry_input_location = os.path.join(tests_resource, "county_small_wkb.tsv")
 mixed_wkt_geometry_input_location = os.path.join(tests_resource, "county_small.tsv")
 shape_file_input_location = os.path.join(tests_resource, "shapefiles/dbf")

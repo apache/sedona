@@ -17,10 +17,11 @@
 
 import os
 
-from sedona.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD, LineStringRDD
-from sedona.core.enums import FileDataSplitter, IndexType
 from tests.test_base import TestBase
 from tests.tools import tests_resource
+
+from sedona.core.enums import FileDataSplitter, IndexType
+from sedona.core.SpatialRDD import CircleRDD, LineStringRDD, PointRDD, PolygonRDD
 
 point_rdd_input_location = os.path.join(tests_resource, "arealm-small.csv")
 polygon_rdd_input_location = os.path.join(tests_resource, "primaryroads-polygon.csv")

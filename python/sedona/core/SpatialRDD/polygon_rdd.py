@@ -15,12 +15,12 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from pyspark import SparkContext, StorageLevel, RDD
+from pyspark import RDD, SparkContext, StorageLevel
 
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmSpatialRDD
-from sedona.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
-from sedona.core.enums.file_data_splitter import FileSplitterJvm, FileDataSplitter
+from sedona.core.enums.file_data_splitter import FileDataSplitter, FileSplitterJvm
 from sedona.core.jvm.translate import PythonRddToJavaRDDAdapter
+from sedona.core.SpatialRDD.spatial_rdd import JvmSpatialRDD, SpatialRDD
+from sedona.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from sedona.utils.meta import MultipleMeta
 
 

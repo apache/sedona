@@ -17,24 +17,20 @@
 from math import radians
 from typing import Callable, Tuple
 
-from pyspark.sql import functions as f, Row
 import pytest
+from pyspark.sql import Row
+from pyspark.sql import functions as f
 from shapely.geometry.base import BaseGeometry
+from tests.test_base import TestBase
 
+from sedona.sql import st_aggregates as sta
+from sedona.sql import st_constructors as stc
+from sedona.sql import st_functions as stf
+from sedona.sql import st_predicates as stp
 from sedona.sql.st_aggregates import *
 from sedona.sql.st_constructors import *
 from sedona.sql.st_functions import *
 from sedona.sql.st_predicates import *
-
-from sedona.sql import (
-    st_aggregates as sta,
-    st_constructors as stc,
-    st_functions as stf,
-    st_predicates as stp,
-)
-
-from tests.test_base import TestBase
-
 
 test_configurations = [
     # constructors

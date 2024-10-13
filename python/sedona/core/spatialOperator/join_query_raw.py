@@ -15,9 +15,9 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from sedona.core.SpatialRDD import SpatialRDD
 from sedona.core.spatialOperator.join_params import JoinParams
-from sedona.core.spatialOperator.rdd import SedonaPairRDDList, SedonaPairRDD
+from sedona.core.spatialOperator.rdd import SedonaPairRDD, SedonaPairRDDList
+from sedona.core.SpatialRDD import SpatialRDD
 from sedona.utils.decorators import require
 
 

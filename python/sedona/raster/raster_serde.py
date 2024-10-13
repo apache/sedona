@@ -15,23 +15,24 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from typing import Optional, Union, Tuple, List, Dict
-from io import BytesIO
 import struct
 import zlib
+from io import BytesIO
+from typing import Dict, List, Optional, Tuple, Union
+
 import numpy as np
 
+from .awt_raster import AWTRaster
+from .data_buffer import DataBuffer
+from .meta import AffineTransform, PixelAnchor, SampleDimension
 from .sample_model import (
-    SampleModel,
     ComponentSampleModel,
-    PixelInterleavedSampleModel,
     MultiPixelPackedSampleModel,
+    PixelInterleavedSampleModel,
+    SampleModel,
     SinglePixelPackedSampleModel,
 )
-from .data_buffer import DataBuffer
-from .awt_raster import AWTRaster
-from .meta import AffineTransform, PixelAnchor, SampleDimension
-from .sedona_raster import SedonaRaster, InDbSedonaRaster
+from .sedona_raster import InDbSedonaRaster, SedonaRaster
 
 
 class RasterTypes:

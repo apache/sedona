@@ -17,9 +17,9 @@
 
 from pyspark import RDD
 
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.spatialOperator.join_params import JoinParams
 from sedona.core.spatialOperator.join_query_raw import JoinQueryRaw
+from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.utils.decorators import require
 
 
