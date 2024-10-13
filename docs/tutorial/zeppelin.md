@@ -28,7 +28,7 @@ FROM wktpoint
 
 Select the geometry column to visualize:
 
-![](../image/sql-zeppelin.gif)
+![Create an SQL paragraph to fetch the data and then select the geometry column](../image/sql-zeppelin.gif)
 
 ## Large-scale with SedonaViz
 
@@ -57,7 +57,7 @@ FROM images
 
 Select the image and its geospatial boundary:
 
-![](../image/viz-zeppelin.gif)
+![Selecting the image and its boundary](../image/viz-zeppelin.gif)
 
 ## Zeppelin Spark notebook demo
 
