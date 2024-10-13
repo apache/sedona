@@ -25,14 +25,16 @@ from pyspark.sql import Column, SparkSession
 from pyspark.sql import functions as f
 
 try:
-    from pyspark.sql.utils import is_remote
     from pyspark.sql.connect.column import Column as ConnectColumn
-# is_remote and connect api only exists since 3.4.0
+    from pyspark.sql.utils import is_remote
 except ImportError:
+    # be backwards compatible with spark < 3.4
     def is_remote():
         return False
+
     class ConnectColumn:
         pass
+
 else:
     from sedona.sql.connect import call_sedona_function_connect
 
@@ -62,9 +64,8 @@ def call_sedona_function(
         )
 
     # apparently a Column is an Iterable so we need to check for it explicitly
-    if (
-        (not isinstance(args, Iterable))
-        or isinstance(args, (str, Column, ConnectColumn))
+    if (not isinstance(args, Iterable)) or isinstance(
+        args, (str, Column, ConnectColumn)
     ):
         args = [args]
 

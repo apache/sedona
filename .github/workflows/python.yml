@@ -149,10 +149,10 @@ jobs:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
         run: find spark-shaded/target -name sedona-*.jar -exec cp {} spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/jars/ \;
-      #- env:
-      #    SPARK_VERSION: ${{ matrix.spark }}
-      #    HADOOP_VERSION: ${{ matrix.hadoop }}
-      #  run: (export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION};export PYTHONPATH=$SPARK_HOME/python;cd python;pipenv run pytest tests)
+      - env:
+          SPARK_VERSION: ${{ matrix.spark }}
+          HADOOP_VERSION: ${{ matrix.hadoop }}
+        run: (export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION};export PYTHONPATH=$SPARK_HOME/python;cd python;pipenv run pytest tests)
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
@@ -160,20 +160,13 @@ jobs:
           if [ ! -f "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/sbin/start-connect-server.sh" ]
           then
             echo "Skipping connect tests for spark $SPARK_VERSION"
+            exit
           fi
 
           export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}
           export PYTHONPATH=$SPARK_HOME/python
-
-          spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/sbin/start-connect-server.sh \
-          --packages org.apache.spark:spark-connect_2.12:${SPARK_VERSION} \
-          --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
-          --conf spark.kryo.registrator=org.apache.sedona.core.serde.SedonaKryoRegistrator \
-          --conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions
-
-          export SPARK_REMOTE=sc://localhost
+          export SPARK_REMOTE=local
 
           cd python
           pipenv install "pyspark[connect]==${SPARK_VERSION}"
           pipenv run pytest tests/sql/test_dataframe_api.py
-
