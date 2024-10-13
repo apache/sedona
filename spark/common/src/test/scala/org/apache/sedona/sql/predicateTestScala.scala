@@ -258,7 +258,7 @@ class predicateTestScala extends TestBaseScala {
 
     it("Passed ST_Relate") {
       val baseDf = sparkSession.sql(
-        "SELECT ST_GeomFromWKT('LINESTRING (1 1, 5 5)') AS g1, ST_GeomFromWKT('POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))') as g2, '1010F0212' as im");
+        "SELECT ST_GeomFromWKT('LINESTRING (1 1, 5 5)') AS g1, ST_GeomFromWKT('POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))') as g2, '1010F0212' as im")
       val actual = baseDf.selectExpr("ST_Relate(g1, g2)").first().get(0)
       assert(actual.equals("1010F0212"))
 

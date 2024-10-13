@@ -1143,13 +1143,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
     it("Passed RS_GeoReference") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
-      var result = df.selectExpr("RS_GeoReference(RS_FromGeoTiff(content))").first().getString(0);
+      var result = df.selectExpr("RS_GeoReference(RS_FromGeoTiff(content))").first().getString(0)
       var expected: String =
         "72.328613 \n0.000000 \n0.000000 \n-72.328613 \n-13095817.809482 \n4021262.748793"
       assertEquals(expected, result)
 
       result =
-        df.selectExpr("RS_GeoReference(RS_FromGeoTiff(content), 'ESRI')").first().getString(0);
+        df.selectExpr("RS_GeoReference(RS_FromGeoTiff(content), 'ESRI')").first().getString(0)
       expected =
         "72.328613 \n0.000000 \n0.000000 \n-72.328613 \n-13095781.645176 \n4021226.584486"
       assertEquals(expected, result)
@@ -1337,7 +1337,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         "RS_FromGeoTiff(content) as raster",
         "RS_MultiplyFactor(RS_BandAsArray(RS_FromGeoTiff(content), 1), 2) as band")
       val raster =
-        df.selectExpr("RS_AddBandFromArray(raster, band, 2, 2)").first().getAs[GridCoverage2D](0);
+        df.selectExpr("RS_AddBandFromArray(raster, band, 2, 2)").first().getAs[GridCoverage2D](0)
       assertEquals(2, RasterUtils.getNoDataValue(raster.getSampleDimension(1)), 1e-9)
     }
 
@@ -1457,8 +1457,8 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_ConvexHull with raster") {
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       val result =
-        df.selectExpr("RS_ConvexHull(RS_FromGeoTiff(content))").first().getAs[Geometry](0);
-      val coordinates = result.getCoordinates;
+        df.selectExpr("RS_ConvexHull(RS_FromGeoTiff(content))").first().getAs[Geometry](0)
+      val coordinates = result.getCoordinates
 
       val expectedCoordOne = new Coordinate(-13095817.809482181, 4021262.7487925636)
       val expectedCoordTwo = new Coordinate(-13058785.559768861, 4021262.7487925636)
@@ -1798,10 +1798,10 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .sql(
           s"SELECT RS_PixelAsPoint(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 2, 1)")
         .first()
-        .getAs[Geometry](0);
+        .getAs[Geometry](0)
       val expectedX = 127.19
       val expectedY = -12
-      val actualCoordinates = result.getCoordinate;
+      val actualCoordinates = result.getCoordinate
       assertEquals(expectedX, actualCoordinates.x, 1e-5)
       assertEquals(expectedY, actualCoordinates.y, 1e-5)
     }
@@ -1817,7 +1817,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .sql(
           s"SELECT RS_PixelAsPoints(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 1)")
         .first()
-        .getList(0);
+        .getList(0)
       val expected = "[POINT (127.19000244140625 -12),0.0,2,1]"
       assertEquals(expected, result.get(1).toString)
     }
@@ -1848,7 +1848,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .sql(
           s"SELECT ST_AsText(RS_PixelAsPolygon(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 2, 3))")
         .first()
-        .getString(0);
+        .getString(0)
       val expected =
         "POLYGON ((127.19000244140625 -20, 131.19000244140625 -20, 131.19000244140625 -24, 127.19000244140625 -24, 127.19000244140625 -20))"
       assertEquals(expected, result)
@@ -1865,7 +1865,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .sql(
           s"SELECT RS_PixelAsPolygons(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 1)")
         .first()
-        .getList(0);
+        .getList(0)
       val expected =
         "[POLYGON ((127.19000244140625 -20, 131.19000244140625 -20, 131.19000244140625 -24, 127.19000244140625 -24, 127.19000244140625 -20)),0.0,2,3]"
       assertEquals(expected, result.get(11).toString)
@@ -1897,7 +1897,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .sql(
           s"SELECT ST_AsText(RS_PixelAsCentroid(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 2, 3))")
         .first()
-        .getString(0);
+        .getString(0)
       val expected = "POINT (253.5 -215.5)"
       assertEquals(expected, result)
     }
@@ -1913,7 +1913,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .sql(
           s"SELECT RS_PixelAsCentroids(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 1)")
         .first()
-        .getList(0);
+        .getList(0)
       val expected = "[POINT (253.5 -215.5),0.0,2,3]"
       assertEquals(expected, result.get(25).toString)
     }
@@ -1962,7 +1962,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .selectExpr(
           "ST_AsText(RS_WorldToRasterCoord(raster, -13095817.809482181, 4021262.7487925636))")
         .first()
-        .getString(0);
+        .getString(0)
       val expected = "POINT (1 1)"
       assertEquals(expected, result)
     }
@@ -1973,7 +1973,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val result = df
         .selectExpr("RS_WorldToRasterCoordX(raster, -13095817.809482181, 4021262.7487925636)")
         .first()
-        .getInt(0);
+        .getInt(0)
       val expected = 1
       assertEquals(expected, result)
     }
@@ -1984,7 +1984,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val result = df
         .selectExpr("RS_WorldToRasterCoordY(raster, -13095817.809482181, 4021262.7487925636)")
         .first()
-        .getInt(0);
+        .getInt(0)
       val expected = 1
       assertEquals(expected, result)
     }
@@ -2411,7 +2411,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val df = inputDf.selectExpr(
         "RS_AddBandFromArray(RS_MakeEmptyRaster(1, 4, 3, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as emptyRaster")
       val resultDf = df.selectExpr("RS_AsMatrix(emptyRaster, 1, 5) as matrix")
-      val actual = resultDf.first().getString(0);
+      val actual = resultDf.first().getString(0)
       val expected =
         "| 1.00000   3.33333   4.00000   0.00010|\n" + "| 2.22220   9.00000  10.00000  11.11111|\n" + "| 3.00000   4.00000   5.00000   6.00000|\n"
       assertEquals(expected, actual)
@@ -2423,7 +2423,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val df = inputDf.selectExpr(
         "RS_AddBandFromArray(RS_MakeEmptyRaster(1, 4, 3, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as emptyRaster")
       val resultDf = df.selectExpr("RS_AsMatrix(emptyRaster, 1) as matrix")
-      val actual = resultDf.first().getString(0);
+      val actual = resultDf.first().getString(0)
       val expected =
         "| 1.000000   3.333333   4.000000   0.000100|\n| 2.222200   9.000000  10.000000  11.111111|\n| 3.000000   4.000000   5.000000   6.000000|\n"
           .format()
@@ -2436,7 +2436,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val df = inputDf.selectExpr(
         "RS_AddBandFromArray(RS_MakeEmptyRaster(1, 4, 3, 0, 0, 1, -1, 0, 0, 0), band, 1, 0d) as emptyRaster")
       val resultDf = df.selectExpr("RS_AsMatrix(emptyRaster) as matrix")
-      val actual = resultDf.first().getString(0);
+      val actual = resultDf.first().getString(0)
       val expected =
         "| 1.000000   3.333333   4.000000   0.000100|\n| 2.222200   9.000000  10.000000  11.111111|\n| 3.000000   4.000000   5.000000   6.000000|\n"
           .format()
