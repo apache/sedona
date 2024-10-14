@@ -25,6 +25,11 @@ repos:
       - id: clang-format
         args: [--style=Google]
         types_or: [c]
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.10
+    hooks:
+      - id: bandit
+        args: ["-c=pyproject.toml", "-r"]
   - repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
     hooks:
