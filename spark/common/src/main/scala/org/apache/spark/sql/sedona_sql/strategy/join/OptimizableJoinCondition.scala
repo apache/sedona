@@ -25,11 +25,14 @@ import org.apache.spark.sql.sedona_sql.expressions.raster.RS_Predicate
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils
 
 case class OptimizableJoinCondition(left: LogicalPlan, right: LogicalPlan) {
+
   /**
-   * An extractor that matches expressions that are optimizable join conditions. Join queries with optimizable join
-   * conditions will be executed as a spatial join (RangeJoin or DistanceJoin).
-   * @param expression the join condition
-   * @return an optional tuple containing the spatial predicate and the other predicates
+   * An extractor that matches expressions that are optimizable join conditions. Join queries with
+   * optimizable join conditions will be executed as a spatial join (RangeJoin or DistanceJoin).
+   * @param expression
+   *   the join condition
+   * @return
+   *   an optional tuple containing the spatial predicate and the other predicates
    */
   def unapply(expression: Expression): Option[(Expression, Option[Expression])] = {
     val predicates = ExpressionUtils.splitConjunctivePredicates(expression)
@@ -42,7 +45,8 @@ case class OptimizableJoinCondition(left: LogicalPlan, right: LogicalPlan) {
     }
   }
 
-  private def extractFirstOptimizablePredicate(expressions: Seq[Expression]): (Option[Expression], Seq[Expression]) = {
+  private def extractFirstOptimizablePredicate(
+      expressions: Seq[Expression]): (Option[Expression], Seq[Expression]) = {
     expressions match {
       case Nil => (None, Nil)
       case head :: tail =>
@@ -57,16 +61,9 @@ case class OptimizableJoinCondition(left: LogicalPlan, right: LogicalPlan) {
 
   private def isOptimizablePredicate(expression: Expression): Boolean = {
     expression match {
-      case _: ST_Intersects |
-           _: ST_Contains |
-           _: ST_Covers |
-           _: ST_Within |
-           _: ST_CoveredBy |
-           _: ST_Overlaps |
-           _: ST_Touches |
-           _: ST_Equals |
-           _: ST_Crosses |
-           _: RS_Predicate =>
+      case _: ST_Intersects | _: ST_Contains | _: ST_Covers | _: ST_Within | _: ST_CoveredBy |
+          _: ST_Overlaps | _: ST_Touches | _: ST_Equals | _: ST_Crosses | _: ST_KNN |
+          _: RS_Predicate =>
         val leftShape = expression.children.head
         val rightShape = expression.children(1)
         ExpressionUtils.matchExpressionsToPlans(leftShape, rightShape, left, right).isDefined
@@ -74,15 +71,14 @@ case class OptimizableJoinCondition(left: LogicalPlan, right: LogicalPlan) {
       case ST_DWithin(Seq(leftShape, rightShape, distance)) =>
         isDistanceJoinOptimizable(leftShape, rightShape, distance)
       case ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid)) =>
-        useSpheroid.isInstanceOf[Literal] && isDistanceJoinOptimizable(leftShape, rightShape, distance)
+        useSpheroid
+          .isInstanceOf[Literal] && isDistanceJoinOptimizable(leftShape, rightShape, distance)
 
       case _: LessThan | _: LessThanOrEqual =>
         val (smaller, larger) = (expression.children.head, expression.children(1))
         smaller match {
-          case _: ST_Distance |
-               _: ST_DistanceSphere |
-               _: ST_DistanceSpheroid |
-               _: ST_FrechetDistance =>
+          case _: ST_Distance | _: ST_DistanceSphere | _: ST_DistanceSpheroid |
+              _: ST_FrechetDistance =>
             val leftShape = smaller.children.head
             val rightShape = smaller.children(1)
             isDistanceJoinOptimizable(leftShape, rightShape, larger)
@@ -99,8 +95,11 @@ case class OptimizableJoinCondition(left: LogicalPlan, right: LogicalPlan) {
     }
   }
 
-  private def isDistanceJoinOptimizable(leftShape: Expression, rightShape: Expression, distance: Expression): Boolean = {
+  private def isDistanceJoinOptimizable(
+      leftShape: Expression,
+      rightShape: Expression,
+      distance: Expression): Boolean = {
     ExpressionUtils.matchExpressionsToPlans(leftShape, rightShape, left, right).isDefined &&
-      ExpressionUtils.matchDistanceExpressionToJoinSide(distance, left, right).isDefined
+    ExpressionUtils.matchDistanceExpressionToJoinSide(distance, left, right).isDefined
   }
 }

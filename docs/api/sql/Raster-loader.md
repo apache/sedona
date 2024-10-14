@@ -1,19 +1,19 @@
 !!!note
 	Sedona loader are available in Scala, Java and Python and have the same APIs.
 
-## Load any raster to Raster format
-
 The raster loader of Sedona leverages Spark built-in binary data source and works with several RS constructors to produce Raster type. Each raster is a row in the resulting DataFrame and stored in a `Raster` format.
 
 By default, these functions uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
-### Load raster to a binary DataFrame
+## Step 1: Load raster to a binary DataFrame
 
 You can load any type of raster data using the code below. Then use the RS constructors below to create a Raster DataFrame.
 
 ```scala
 sedona.read.format("binaryFile").load("/some/path/*.asc")
 ```
+
+## Step 2: Create a raster type column
 
 ### RS_FromArcInfoAsciiGrid
 
@@ -93,14 +93,16 @@ Accepts one of:
 * Height: The height of the raster in pixels.
 * UpperleftX: The X coordinate of the upper left corner of the raster, in terms of the CRS units.
 * UpperleftY: The Y coordinate of the upper left corner of the raster, in terms of the CRS units.
-* ScaleX (pixel size on X): The size of the cells on the X axis, in terms of the CRS units.
-* ScaleY (pixel size on Y): The size of the cells on the Y axis, in terms of the CRS units.
-* SkewX: The skew of the raster on the X axis, in terms of the CRS units.
-* SkewY: The skew of the raster on the Y axis, in terms of the CRS units.
+* ScaleX: The scaling factor of the cells on the X axis
+* ScaleY: The scaling factor of the cells on the Y axis
+* SkewX: The skew of the raster on the X axis, effectively tilting them in the horizontal direction
+* SkewY: The skew of the raster on the Y axis, effectively tilting them in the vertical direction
 * SRID: The SRID of the raster. Use 0 if you want to use the default Cartesian coordinate system. Use 4326 if you want to use WGS84.
 
+For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
+
 !!!Note
-  If any other value than the accepted values for the bandDataType is provided, RS_MakeEmptyRaster defaults to double as the data type for the raster.
+    If any other value than the accepted values for the bandDataType is provided, RS_MakeEmptyRaster defaults to double as the data type for the raster.
 
 Spark SQL example 1 (with 2 bands):
 

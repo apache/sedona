@@ -35,7 +35,7 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		</dependency>
 		```
 
-	=== "Spark 3.4+ and Scala 2.12"
+	=== "Spark 3.4 and Scala 2.12"
 
 		```xml
 		<dependency>
@@ -84,7 +84,7 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		</dependency>
 		```
 
-	=== "Spark 3.4+ and Scala 2.13"
+	=== "Spark 3.4 and Scala 2.13"
 
 		```xml
 		<dependency>
@@ -156,7 +156,7 @@ The optional GeoTools library is required if you want to use CRS transformation,
 This is required only if you want to read HDF/NetCDF files using `RS_FromNetCDF`. Note that this JAR is not in Maven Central so you will need to add this repository to your pom.xml or build.sbt, or specify the URL in Spark Config `spark.jars.repositories` or spark-submit `--repositories` option.
 
 !!!warning
-	Due to a bug in Sedona 1.5.1, the jar becomes a required dependency. You will need to specify the URL of the repository.
+	This jar was a required dependency due to a bug in Sedona 1.5.1. You will need to specify the URL of the repository in `spark.jars.repositories` if you use 1.5.1. This has been fixed in Sedona 1.5.2 and later.
 
 Under BSD 3-clause (compatible with Apache 2.0 license)
 
@@ -226,7 +226,7 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		    <version>{{ sedona.current_geotools }}</version>
 		</dependency>
 		```
-	=== "Spark 3.4+ and Scala 2.12"
+	=== "Spark 3.4 and Scala 2.12"
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
@@ -268,7 +268,7 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		    <version>{{ sedona.current_geotools }}</version>
 		</dependency>
 		```
-	=== "Spark 3.4+ and Scala 2.13"
+	=== "Spark 3.4 and Scala 2.13"
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>

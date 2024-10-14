@@ -18,14 +18,16 @@
 import struct
 from abc import ABC
 from copy import copy
-from typing import List, Any
+from typing import Any, List
 
 import attr
 from shapely.geometry.base import BaseGeometry
+
 try:
     from pyspark import CPickleSerializer
 except ImportError:
     from pyspark import PickleSerializer as CPickleSerializer
+
 from shapely.wkb import dumps
 
 from sedona.core.geom.circle import Circle
@@ -57,7 +59,7 @@ class GeoData:
 
         return dict(
             geom=bytearray([el if el >= 0 else el + 256 for el in geom_bytes]),
-            userData=getattr(self, attributes[1])
+            userData=getattr(self, attributes[1]),
         )
 
     def __setstate__(self, attributes):
@@ -85,7 +87,9 @@ class GeoData:
     __slots__ = ("_geom", "_userData")
 
     def __repr__(self):
-        return f"Geometry: {str(self.geom.__class__.__name__)} userData: {self.userData}"
+        return (
+            f"Geometry: {str(self.geom.__class__.__name__)} userData: {self.userData}"
+        )
 
     def __eq__(self, other):
         return self.geom == other.geom and self.userData == other.userData
@@ -98,15 +102,15 @@ class GeoData:
 class AbstractSpatialRDDParser(ABC):
 
     @classmethod
-    def serialize(cls, obj: List[Any], binary_buffer: 'BinaryBuffer') -> bytearray:
+    def serialize(cls, obj: List[Any], binary_buffer: "BinaryBuffer") -> bytearray:
         raise NotImplemented()
 
     @classmethod
-    def deserialize(cls, bin_parser: 'BinaryParser') -> BaseGeometry:
+    def deserialize(cls, bin_parser: "BinaryParser") -> BaseGeometry:
         raise NotImplementedError("Parser has to implement deserialize method")
 
     @classmethod
-    def _deserialize_geom(cls, bin_parser: 'BinaryParser') -> GeoData:
+    def _deserialize_geom(cls, bin_parser: "BinaryParser") -> GeoData:
         is_circle = bin_parser.read_byte()
         return geom_deserializers[is_circle].geometry_from_bytes(bin_parser)
 
@@ -116,7 +120,7 @@ class SpatialPairRDDParserData(AbstractSpatialRDDParser):
     name = "SpatialPairRDDParserData"
 
     @classmethod
-    def deserialize(cls, bin_parser: 'BinaryParser'):
+    def deserialize(cls, bin_parser: "BinaryParser"):
         left_geom_data = cls._deserialize_geom(bin_parser)
 
         _ = bin_parser.read_int()
@@ -128,7 +132,7 @@ class SpatialPairRDDParserData(AbstractSpatialRDDParser):
         return deserialized_data
 
     @classmethod
-    def serialize(cls, obj: BaseGeometry, binary_buffer: 'BinaryBuffer'):
+    def serialize(cls, obj: BaseGeometry, binary_buffer: "BinaryBuffer"):
         raise NotImplementedError("Currently this operation is not supported")
 
 
@@ -137,14 +141,14 @@ class SpatialRDDParserData(AbstractSpatialRDDParser):
     name = "SpatialRDDParser"
 
     @classmethod
-    def deserialize(cls, bin_parser: 'BinaryParser'):
+    def deserialize(cls, bin_parser: "BinaryParser"):
         left_geom_data = cls._deserialize_geom(bin_parser)
         _ = bin_parser.read_int()
 
         return left_geom_data
 
     @classmethod
-    def serialize(cls, obj: BaseGeometry, binary_buffer: 'BinaryBuffer'):
+    def serialize(cls, obj: BaseGeometry, binary_buffer: "BinaryBuffer"):
         raise NotImplementedError("Currently this operation is not supported")
 
 
@@ -153,7 +157,7 @@ class SpatialRDDParserDataMultipleRightGeom(AbstractSpatialRDDParser):
     name = "SpatialRDDParser"
 
     @classmethod
-    def deserialize(cls, bin_parser: 'BinaryParser'):
+    def deserialize(cls, bin_parser: "BinaryParser"):
         left_geom_data = cls._deserialize_geom(bin_parser)
 
         geometry_numbers = bin_parser.read_int()
@@ -164,12 +168,14 @@ class SpatialRDDParserDataMultipleRightGeom(AbstractSpatialRDDParser):
             right_geom_data = cls._deserialize_geom(bin_parser)
             right_geoms.append(right_geom_data)
 
-        deserialized_data = [left_geom_data, right_geoms] if right_geoms else left_geom_data
+        deserialized_data = (
+            [left_geom_data, right_geoms] if right_geoms else left_geom_data
+        )
 
         return deserialized_data
 
     @classmethod
-    def serialize(cls, obj: BaseGeometry, binary_buffer: 'BinaryBuffer'):
+    def serialize(cls, obj: BaseGeometry, binary_buffer: "BinaryBuffer"):
         raise NotImplementedError("Currently this operation is not supported")
 
 
@@ -235,10 +241,11 @@ class CircleGeometryFactory:
 
     @classmethod
     def to_bytes(cls, geom: Circle) -> List[int]:
-        return struct.pack("b", 1) + struct.pack("d", geom.radius) + dumps(geom.centerGeometry)
+        return (
+            struct.pack("b", 1)
+            + struct.pack("d", geom.radius)
+            + dumps(geom.centerGeometry)
+        )
 
 
-geom_deserializers = {
-    1: CircleGeometryFactory,
-    0: GeometryFactory
-}
+geom_deserializers = {1: CircleGeometryFactory, 0: GeometryFactory}

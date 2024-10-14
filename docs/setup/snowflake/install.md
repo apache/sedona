@@ -20,11 +20,11 @@ A stage is a Snowflake object that maps to a location in a cloud storage provide
 
 In this case, we will create a stage named `ApacheSedona` in the `public` schema of the database created in the previous step. The stage will be used to load Sedona's JAR files into the database. We will choose a `Snowflake managed` stage.
 
-![](../../image/snowflake/snowflake-1.png)
+![Create a stage in the database](../../image/snowflake/snowflake-1.png)
 
 After creating the stage, you should be able to see the stage in the database.
 
-![](../../image/snowflake/snowflake-2.png)
+![Viewing the stage in the database](../../image/snowflake/snowflake-2.png)
 
 You can refer to [Snowflake Documentation](https://docs.snowflake.com/en/sql-reference/sql/create-stage.html) to how to create a stage.
 
@@ -39,7 +39,7 @@ Then you can upload the 2 JAR files to the stage created in the previous step.
 
 After uploading the 2 JAR files, you should be able to see the 2 JAR files in the stage.
 
-![](../../image/snowflake/snowflake-3.png)
+![The 2 JAR files in the stage](../../image/snowflake/snowflake-3.png)
 
 You can refer to [Snowflake Documentation](https://docs.snowflake.com/en/sql-reference/sql/put.html) to how to upload files to a stage.
 
@@ -49,19 +49,17 @@ A schema is a Snowflake object that maps to a database. You can use a schema to 
 
 In this case, we will create a schema named `SEDONA` in the database created in the previous step. The schema will be used to create Sedona's functions.
 
-![](../../image/snowflake/snowflake-4.png)
+![Create a schema in the database](../../image/snowflake/snowflake-4.png)
 
 You can find your schema in the database as follows:
 
-![](../../image/snowflake/snowflake-5.png)
+![Find your schema in the database](../../image/snowflake/snowflake-5.png)
 
 You can refer to [Snowflake Documentation](https://docs.snowflake.com/en/sql-reference/sql/create-schema.html) to how to create a schema.
 
 ## Step 4: Get the SQL script for creating Sedona's functions
 
-You will need to download [sedona-snowflake.sql](../../image/snowflake/sedona-snowflake.sql) to create Sedona's functions in the schema created in the previous step.
-
-You can also get this SQL script by running the following command:
+You will need to get this SQL script by running the following command:
 
 ```bash
 java -jar sedona-snowflake-{{ sedona.current_version }}.jar --geotools-version {{ sedona.current_geotools }} > sedona-snowflake.sql
@@ -75,11 +73,11 @@ We will create a worksheet in the database created in the previous step, and run
 
 In this case, we will choose the option `Create Worksheet from SQL File`.
 
-![](../../image/snowflake/snowflake-6.png)
+![Create Worksheet from SQL File](../../image/snowflake/snowflake-6.png)
 
 In the worksheet, choose `SEDONA_TEST` as the database, and `PUBLIC` as the schema. The SQL script should be in the worksheet. Then right-click the worksheet and choose `Run All`. Snowflake will take 3 minutes to create Sedona's functions.
 
-![](../../image/snowflake/snowflake-7.png)
+![Run the SQL script to create Sedona's functions](../../image/snowflake/snowflake-7.png)
 
 ## Step 6: Verify the installation
 
@@ -97,4 +95,4 @@ SRID=4326;POINT (1 2)
 
 The worksheet should look like this:
 
-![](../../image/snowflake/snowflake-8.png)
+![Verify the installation worksheet output](../../image/snowflake/snowflake-8.png)

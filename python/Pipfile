@@ -5,15 +5,21 @@ verify_ssl = true
 
 [dev-packages]
 pytest="*"
-notebook="==6.0.0"
+notebook="==6.4.12"
 jupyter="*"
 mkdocs="*"
 pytest-cov = "*"
 
+scikit-learn = "*"
+
 [packages]
-shapely=">=2.0.0"
-pandas="<=1.3.5"
-geopandas="<=0.10.2"
+pandas="<=1.5.3"
+numpy="<2"
+geopandas="*"
+# https://stackoverflow.com/questions/78949093/how-to-resolve-attributeerror-module-fiona-has-no-attribute-path
+# cannot set geopandas>=0.14.4 since it doesn't support python 3.8, so we pin fiona to <1.10.0
+fiona="<1.10.0"
+shapely=">=1.7.0"
 pyspark=">=2.3.0"
 attrs="*"
 pyarrow="*"

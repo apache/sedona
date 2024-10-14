@@ -18,9 +18,9 @@
 import attr
 from pyspark import SparkContext
 
-from sedona.core.SpatialRDD import PolygonRDD, PointRDD, LineStringRDD
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.formatMapper.geo_reader import GeoDataReader
+from sedona.core.SpatialRDD import LineStringRDD, PointRDD, PolygonRDD
+from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.utils.meta import MultipleMeta
 
 
@@ -37,10 +37,7 @@ class ShapefileReader(GeoDataReader, metaclass=MultipleMeta):
         """
         jvm = sc._jvm
         jsc = sc._jsc
-        srdd = jvm.ShapefileReader.readToGeometryRDD(
-            jsc,
-            inputPath
-        )
+        srdd = jvm.ShapefileReader.readToGeometryRDD(jsc, inputPath)
         spatial_rdd = SpatialRDD(sc=sc)
 
         spatial_rdd.set_srdd(srdd)
@@ -56,10 +53,7 @@ class ShapefileReader(GeoDataReader, metaclass=MultipleMeta):
         """
         jvm = sc._jvm
         jsc = sc._jsc
-        srdd = jvm.ShapefileReader.readToPolygonRDD(
-            jsc,
-            inputPath
-        )
+        srdd = jvm.ShapefileReader.readToPolygonRDD(jsc, inputPath)
         spatial_rdd = PolygonRDD()
         spatial_rdd.set_srdd(srdd)
         return spatial_rdd
@@ -74,10 +68,7 @@ class ShapefileReader(GeoDataReader, metaclass=MultipleMeta):
         """
         jvm = sc._jvm
         jsc = sc._jsc
-        srdd = jvm.ShapefileReader.readToPointRDD(
-            jsc,
-            inputPath
-        )
+        srdd = jvm.ShapefileReader.readToPointRDD(jsc, inputPath)
         spatial_rdd = PointRDD()
         spatial_rdd.set_srdd(srdd)
         return spatial_rdd
@@ -92,10 +83,7 @@ class ShapefileReader(GeoDataReader, metaclass=MultipleMeta):
         """
         jvm = sc._jvm
         jsc = sc._jsc
-        srdd = jvm.ShapefileReader.readToLineStringRDD(
-            jsc,
-            inputPath
-        )
+        srdd = jvm.ShapefileReader.readToLineStringRDD(jsc, inputPath)
         spatial_rdd = LineStringRDD()
         spatial_rdd.set_srdd(srdd)
         return spatial_rdd

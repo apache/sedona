@@ -50,4 +50,4 @@ GeoSpark Perspective and Beyond"](https://jiayuasu.github.io/files/paper/GeoSpar
 
 ### A Tutorial about Geospatial Data Management in Spark
 
-["Geospatial Data Management in Apache Spark: A Tutorial"](https://jiayuasu.github.io/files/talk/jia-icde19-tutorial.pdf) (Tutorial) Jia Yu and Mohamed Sarwat.  In Proceedings of the International Conference on Data Engineering, ICDE, 2019
+["Geospatial Data Management in Apache Spark: A Tutorial"](https://jiayuasu.github.io/files/talk/jia-icde19-tutorial.pdf) (Tutorial) Jia Yu and Mohamed Sarwat. In Proceedings of the International Conference on Data Engineering, ICDE, 2019

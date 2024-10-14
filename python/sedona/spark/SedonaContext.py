@@ -35,7 +35,7 @@ class SedonaContext:
         """
         spark.sql("SELECT 1 as geom").count()
         PackageImporter.import_jvm_lib(spark._jvm)
-        spark._jvm.SedonaContext.create(spark._jsparkSession)
+        spark._jvm.SedonaContext.create(spark._jsparkSession, "python")
         return spark
 
     @classmethod
@@ -46,5 +46,6 @@ class SedonaContext:
         This method is needed when the user wants to manually configure Sedona
         :return: SparkSession.builder
         """
-        return SparkSession.builder.config("spark.serializer", KryoSerializer.getName).\
-            config("spark.kryo.registrator", SedonaKryoRegistrator.getName)
+        return SparkSession.builder.config(
+            "spark.serializer", KryoSerializer.getName
+        ).config("spark.kryo.registrator", SedonaKryoRegistrator.getName)

@@ -12,6 +12,7 @@ on:
       - 'flink-shaded/**'
       - 'snowflake/**'
       - 'pom.xml'
+      - '.github/workflows/java.yml'
   pull_request:
     branches:
       - '*'
@@ -23,16 +24,17 @@ on:
       - 'flink-shaded/**'
       - 'snowflake/**'
       - 'pom.xml'
+      - '.github/workflows/java.yml'
 
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
+  DO_NOT_TRACK: true
 
 permissions:
   contents: read
 
 jobs:
   build:
-
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: true
@@ -78,37 +80,33 @@ jobs:
             scala: 2.12.15
             jdk: '8'
             skipTests: ''
-
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-java@v4
-      with:
-        distribution: 'zulu'
-        java-version: ${{ matrix.jdk }}
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.7'
-    - name: Cache Maven packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
-    - env:
-        SPARK_VERSION: ${{ matrix.spark }}
-        SCALA_VERSION: ${{ matrix.scala }}
-        SKIP_TESTS: ${{ matrix.skipTests }}
-      run: |
-        SPARK_COMPAT_VERSION="3.0"
-        if [ ${SPARK_VERSION:2:1} -gt "3" ]; then
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: ${{ matrix.jdk }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.7'
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - env:
+          SPARK_VERSION: ${{ matrix.spark }}
+          SCALA_VERSION: ${{ matrix.scala }}
+          SKIP_TESTS: ${{ matrix.skipTests }}
+        run: |
           SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
-        fi
-        mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${SKIP_TESTS}
-    - run: mkdir staging
-    - run: cp spark-shaded/target/sedona-*.jar staging
-    - run: |
-        [ -d "flink-shaded/target/" ] && cp flink-shaded/target/sedona-*.jar staging 2>/dev/null || true
-    - uses: actions/upload-artifact@v3
-      with:
-        name: generated-jars ${{ matrix.spark }} ${{ matrix.scala }} ${{ matrix.jdk }}
-        path: staging
+          mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${SKIP_TESTS}
+      - run: mkdir staging
+      - run: cp spark-shaded/target/sedona-*.jar staging
+      - run: |
+          [ -d "flink-shaded/target/" ] && cp flink-shaded/target/sedona-*.jar staging 2>/dev/null || true
+      - uses: actions/upload-artifact@v3
+        with:
+          name: generated-jars ${{ matrix.spark }} ${{ matrix.scala }} ${{ matrix.jdk }}
+          path: staging

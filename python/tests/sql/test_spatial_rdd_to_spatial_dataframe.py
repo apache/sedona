@@ -17,15 +17,14 @@
 
 import os
 
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType
-
-from sedona.core.SpatialRDD import PointRDD
-from sedona.core.enums import FileDataSplitter
-from sedona.sql.types import GeometryType
-from tests.test_base import TestBase
+from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from shapely.geometry import Point
-
+from tests.test_base import TestBase
 from tests.tools import tests_resource
+
+from sedona.core.enums import FileDataSplitter
+from sedona.core.SpatialRDD import PointRDD
+from sedona.sql.types import GeometryType
 
 point_input_path = os.path.join(tests_resource, "arealm-small.csv")
 
@@ -46,7 +45,7 @@ class TestSpatialRDDToDataFrame(TestBase):
             [Point(22, 52.0), "2", 2],
             [Point(23.0, 52), "3", 3],
             [Point(23, 54), "4", 4],
-            [Point(24.0, 56.0), "5", 5]
+            [Point(24.0, 56.0), "5", 5],
         ]
         schema = StructType(
             [
@@ -68,7 +67,7 @@ class TestSpatialRDDToDataFrame(TestBase):
             Offset=0,
             splitter=splitter,
             carryInputData=True,
-            partitions=numPartitions
+            partitions=numPartitions,
         )
 
         raw_spatial_rdd = spatial_rdd.rawSpatialRDD.map(
@@ -78,10 +77,7 @@ class TestSpatialRDDToDataFrame(TestBase):
         self.spark.createDataFrame(raw_spatial_rdd).show()
 
         schema = StructType(
-            [
-                StructField("geom", GeometryType()),
-                StructField("name", StringType())
-            ]
+            [StructField("geom", GeometryType()), StructField("name", StringType())]
         )
 
         spatial_rdd_with_schema = self.spark.createDataFrame(
@@ -90,4 +86,6 @@ class TestSpatialRDDToDataFrame(TestBase):
 
         spatial_rdd_with_schema.show()
 
-        assert spatial_rdd_with_schema.take(1)[0][0].wkt == "POINT (32.324142 -88.331492)"
+        assert (
+            spatial_rdd_with_schema.take(1)[0][0].wkt == "POINT (32.324142 -88.331492)"
+        )

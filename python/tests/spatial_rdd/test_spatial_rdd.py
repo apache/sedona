@@ -21,13 +21,13 @@ import pyspark
 import pytest
 from pyspark import RDD
 from shapely.geometry import Point
+from tests.test_base import TestBase
+from tests.tools import tests_resource
 
-from sedona.core.SpatialRDD import PointRDD
 from sedona.core.enums import FileDataSplitter, GridType, IndexType
 from sedona.core.formatMapper.geo_json_reader import GeoJsonReader
 from sedona.core.geom.envelope import Envelope
-from tests.test_base import TestBase
-from tests.tools import tests_resource
+from sedona.core.SpatialRDD import PointRDD
 
 input_file_location = os.path.join(tests_resource, "arealm-small.csv")
 crs_test_point = os.path.join(tests_resource, "crs-test-point.csv")
@@ -49,7 +49,7 @@ class TestSpatialRDD(TestBase):
             Offset=offset,
             splitter=splitter,
             carryInputData=True,
-            partitions=numPartitions
+            partitions=numPartitions,
         )
         return spatial_rdd
 
@@ -71,13 +71,17 @@ class TestSpatialRDD(TestBase):
         spatial_rdd = self.create_spatial_rdd()
         envelope = spatial_rdd.boundary()
 
-        assert envelope == Envelope(minx=-173.120769, maxx=-84.965961, miny=30.244859, maxy=71.355134)
+        assert envelope == Envelope(
+            minx=-173.120769, maxx=-84.965961, miny=30.244859, maxy=71.355134
+        )
 
     def test_boundary_envelope(self):
         spatial_rdd = self.create_spatial_rdd()
         spatial_rdd.analyze()
-        assert Envelope(
-            minx=-173.120769, maxx=-84.965961, miny=30.244859, maxy=71.355134) == spatial_rdd.boundaryEnvelope
+        assert (
+            Envelope(minx=-173.120769, maxx=-84.965961, miny=30.244859, maxy=71.355134)
+            == spatial_rdd.boundaryEnvelope
+        )
 
     def test_build_index(self):
         for grid_type in GridType:
@@ -101,15 +105,12 @@ class TestSpatialRDD(TestBase):
         spatial_rdd = self.create_spatial_rdd()
         assert spatial_rdd.fieldNames == []
         geo_json_rdd = GeoJsonReader.readToGeometryRDD(
-            self.sc,
-            geo_json_contains_id,
-            True,
-            False
+            self.sc, geo_json_contains_id, True, False
         )
         try:
-            assert geo_json_rdd.fieldNames == ['zipcode', 'name']
+            assert geo_json_rdd.fieldNames == ["zipcode", "name"]
         except AssertionError:
-            assert geo_json_rdd.fieldNames == ['id', 'zipcode', 'name']
+            assert geo_json_rdd.fieldNames == ["id", "zipcode", "name"]
 
     def test_get_partitioner(self):
         spatial_rdd = self.create_spatial_rdd()

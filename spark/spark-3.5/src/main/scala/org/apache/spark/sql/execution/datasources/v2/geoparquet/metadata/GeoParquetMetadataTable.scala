@@ -1,15 +1,20 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.spark.sql.execution.datasources.v2.geoparquet.metadata
 
@@ -30,7 +35,7 @@ case class GeoParquetMetadataTable(
     paths: Seq[String],
     userSpecifiedSchema: Option[StructType],
     fallbackFileFormat: Class[_ <: FileFormat])
-  extends FileTable(sparkSession, options, paths, userSpecifiedSchema) {
+    extends FileTable(sparkSession, options, paths, userSpecifiedSchema) {
   override def formatName: String = "GeoParquet Metadata"
 
   override def inferSchema(files: Seq[FileStatus]): Option[StructType] =
@@ -41,23 +46,25 @@ case class GeoParquetMetadataTable(
 
   override def newWriteBuilder(info: LogicalWriteInfo): WriteBuilder = null
 
-  override def capabilities: java.util.Set[TableCapability] = java.util.EnumSet.of(TableCapability.BATCH_READ)
+  override def capabilities: java.util.Set[TableCapability] =
+    java.util.EnumSet.of(TableCapability.BATCH_READ)
 }
 
 object GeoParquetMetadataTable {
-  private val columnMetadataType = StructType(Seq(
-    StructField("encoding", StringType, nullable = true),
-    StructField("geometry_types", ArrayType(StringType), nullable = true),
-    StructField("bbox", ArrayType(DoubleType), nullable = true),
-    StructField("crs", StringType, nullable = true)
-  ))
+  private val columnMetadataType = StructType(
+    Seq(
+      StructField("encoding", StringType, nullable = true),
+      StructField("geometry_types", ArrayType(StringType), nullable = true),
+      StructField("bbox", ArrayType(DoubleType), nullable = true),
+      StructField("crs", StringType, nullable = true),
+      StructField("covering", StringType, nullable = true)))
 
   private val columnsType = MapType(StringType, columnMetadataType, valueContainsNull = false)
 
-  val schema: StructType = StructType(Seq(
-    StructField("path", StringType, nullable = false),
-    StructField("version", StringType, nullable = true),
-    StructField("primary_column", StringType, nullable = true),
-    StructField("columns", columnsType, nullable = true)
-  ))
+  val schema: StructType = StructType(
+    Seq(
+      StructField("path", StringType, nullable = false),
+      StructField("version", StringType, nullable = true),
+      StructField("primary_column", StringType, nullable = true),
+      StructField("columns", columnsType, nullable = true)))
 }

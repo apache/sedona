@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.spark.sql.sedona_sql.optimization
 
 import org.apache.sedona.common.geometryObjects.Circle
@@ -63,34 +62,47 @@ import org.locationtech.jts.geom.Point
 
 class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rule[LogicalPlan] {
 
-  override def apply(plan: LogicalPlan): LogicalPlan = plan transform {
-    case filter@Filter(condition, lr: LogicalRelation) if isGeoParquetRelation(lr) =>
-      val filters = splitConjunctivePredicates(condition)
-      val normalizedFilters = DataSourceStrategy.normalizeExprs(filters, lr.output)
-      val (_, normalizedFiltersWithoutSubquery) = normalizedFilters.partition(SubqueryExpression.hasSubquery)
-      val geoParquetSpatialFilters = translateToGeoParquetSpatialFilters(normalizedFiltersWithoutSubquery)
-      val hadoopFsRelation = lr.relation.asInstanceOf[HadoopFsRelation]
-      val fileFormat = hadoopFsRelation.fileFormat.asInstanceOf[GeoParquetFileFormatBase]
-      if (geoParquetSpatialFilters.isEmpty) filter else {
-        val combinedSpatialFilter = geoParquetSpatialFilters.reduce(AndFilter)
-        val newFileFormat = fileFormat.withSpatialPredicates(combinedSpatialFilter)
-        val newRelation = hadoopFsRelation.copy(fileFormat = newFileFormat)(sparkSession)
-        filter.copy(child = lr.copy(relation = newRelation))
+  override def apply(plan: LogicalPlan): LogicalPlan = {
+    val enableSpatialFilterPushDown =
+      sparkSession.conf.get("spark.sedona.geoparquet.spatialFilterPushDown", "true").toBoolean
+    if (!enableSpatialFilterPushDown) plan
+    else {
+      plan transform {
+        case filter @ Filter(condition, lr: LogicalRelation) if isGeoParquetRelation(lr) =>
+          val filters = splitConjunctivePredicates(condition)
+          val normalizedFilters = DataSourceStrategy.normalizeExprs(filters, lr.output)
+          val (_, normalizedFiltersWithoutSubquery) =
+            normalizedFilters.partition(SubqueryExpression.hasSubquery)
+          val geoParquetSpatialFilters =
+            translateToGeoParquetSpatialFilters(normalizedFiltersWithoutSubquery)
+          val hadoopFsRelation = lr.relation.asInstanceOf[HadoopFsRelation]
+          val fileFormat = hadoopFsRelation.fileFormat.asInstanceOf[GeoParquetFileFormatBase]
+          if (geoParquetSpatialFilters.isEmpty) filter
+          else {
+            val combinedSpatialFilter = geoParquetSpatialFilters.reduce(AndFilter)
+            val newFileFormat = fileFormat.withSpatialPredicates(combinedSpatialFilter)
+            val newRelation = hadoopFsRelation.copy(fileFormat = newFileFormat)(sparkSession)
+            filter.copy(child = lr.copy(relation = newRelation))
+          }
       }
+    }
   }
 
   private def isGeoParquetRelation(lr: LogicalRelation): Boolean =
     lr.relation.isInstanceOf[HadoopFsRelation] &&
       lr.relation.asInstanceOf[HadoopFsRelation].fileFormat.isInstanceOf[GeoParquetFileFormatBase]
 
-  private def translateToGeoParquetSpatialFilters(predicates: Seq[Expression]): Seq[GeoParquetSpatialFilter] = {
+  private def translateToGeoParquetSpatialFilters(
+      predicates: Seq[Expression]): Seq[GeoParquetSpatialFilter] = {
     val pushableColumn = PushableColumn(nestedPredicatePushdownEnabled = false)
-    predicates.flatMap { predicate => translateToGeoParquetSpatialFilter(predicate, pushableColumn) }
+    predicates.flatMap { predicate =>
+      translateToGeoParquetSpatialFilter(predicate, pushableColumn)
+    }
   }
 
   private def translateToGeoParquetSpatialFilter(
-    predicate: Expression,
-    pushableColumn: PushableColumnBase): Option[GeoParquetSpatialFilter] = {
+      predicate: Expression,
+      pushableColumn: PushableColumnBase): Option[GeoParquetSpatialFilter] = {
     predicate match {
       case And(left, right) =>
         val spatialFilterLeft = translateToGeoParquetSpatialFilter(left, pushableColumn)
@@ -136,7 +148,10 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
 
       case ST_Intersects(_) | ST_Crosses(_) | ST_Overlaps(_) | ST_Touches(_) =>
         for ((name, value) <- resolveNameAndLiteral(predicate.children, pushableColumn))
-          yield LeafFilter(unquote(name), SpatialPredicate.INTERSECTS, GeometryUDT.deserialize(value))
+          yield LeafFilter(
+            unquote(name),
+            SpatialPredicate.INTERSECTS,
+            GeometryUDT.deserialize(value))
 
       case LessThan(ST_Distance(distArgs), Literal(d, DoubleType)) =>
         for ((name, value) <- resolveNameAndLiteral(distArgs, pushableColumn))
@@ -165,7 +180,9 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
     parseColumnPath(name).mkString(".")
   }
 
-  private def resolveNameAndLiteral(expressions: Seq[Expression], pushableColumn: PushableColumnBase): Option[(String, Any)] = {
+  private def resolveNameAndLiteral(
+      expressions: Seq[Expression],
+      pushableColumn: PushableColumnBase): Option[(String, Any)] = {
     expressions match {
       case Seq(pushableColumn(name), Literal(v, _)) => Some(name, v)
       case Seq(Literal(v, _), pushableColumn(name)) => Some(name, v)

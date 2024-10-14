@@ -1,15 +1,20 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.spark.sql.execution.datasources.parquet
 
@@ -45,7 +50,7 @@ import scala.util.Failure
 import scala.util.Try
 
 class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
-  extends ParquetFileFormat
+    extends ParquetFileFormat
     with GeoParquetFileFormatBase
     with FileFormat
     with DataSourceRegister
@@ -59,21 +64,29 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
 
   override def hashCode(): Int = getClass.hashCode()
 
+  override def toString(): String = {
+    // HACK: This is the only place we can inject spatial filter information into the described query plan.
+    // Please see org.apache.spark.sql.execution.DataSourceScanExec#simpleString for more details.
+    "GeoParquet" + spatialFilter
+      .map(filter => " with spatial filter [" + filter.simpleString + "]")
+      .getOrElse("")
+  }
+
   def withSpatialPredicates(spatialFilter: GeoParquetSpatialFilter): GeoParquetFileFormat =
     new GeoParquetFileFormat(Some(spatialFilter))
 
   override def inferSchema(
-                            sparkSession: SparkSession,
-                            parameters: Map[String, String],
-                            files: Seq[FileStatus]): Option[StructType] = {
+      sparkSession: SparkSession,
+      parameters: Map[String, String],
+      files: Seq[FileStatus]): Option[StructType] = {
     GeoParquetUtils.inferSchema(sparkSession, parameters, files)
   }
 
   override def prepareWrite(
-    sparkSession: SparkSession,
-    job: Job,
-    options: Map[String, String],
-    dataSchema: StructType): OutputWriterFactory = {
+      sparkSession: SparkSession,
+      job: Job,
+      options: Map[String, String],
+      dataSchema: StructType): OutputWriterFactory = {
     val sqlConf = sparkSession.sessionState.conf
     val parquetOptions = new ParquetOptions(options, sqlConf)
 
@@ -86,16 +99,15 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
         classOf[OutputCommitter])
 
     if (conf.get(SQLConf.PARQUET_OUTPUT_COMMITTER_CLASS.key) == null) {
-      logInfo("Using default output committer for Parquet: " +
-        classOf[ParquetOutputCommitter].getCanonicalName)
+      logInfo(
+        "Using default output committer for Parquet: " +
+          classOf[ParquetOutputCommitter].getCanonicalName)
     } else {
-      logInfo("Using user defined output committer for Parquet: " + committerClass.getCanonicalName)
+      logInfo(
+        "Using user defined output committer for Parquet: " + committerClass.getCanonicalName)
     }
 
-    conf.setClass(
-      SQLConf.OUTPUT_COMMITTER_CLASS.key,
-      committerClass,
-      classOf[OutputCommitter])
+    conf.setClass(SQLConf.OUTPUT_COMMITTER_CLASS.key, committerClass, classOf[OutputCommitter])
 
     // We're not really using `ParquetOutputFormat[Row]` for writing data here, because we override
     // it in `ParquetOutputWriter` to support appending and dynamic partitioning.  The reason why
@@ -110,9 +122,7 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
 
     // Sets flags for `ParquetWriteSupport`, which converts Catalyst schema to Parquet
     // schema and writes actual rows to Parquet files.
-    conf.set(
-      SQLConf.PARQUET_WRITE_LEGACY_FORMAT.key,
-      sqlConf.writeLegacyParquetFormat.toString)
+    conf.set(SQLConf.PARQUET_WRITE_LEGACY_FORMAT.key, sqlConf.writeLegacyParquetFormat.toString)
 
     conf.set(
       SQLConf.PARQUET_OUTPUT_TIMESTAMP_TYPE.key,
@@ -122,9 +132,7 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
       SQLConf.PARQUET_FIELD_ID_WRITE_ENABLED.key,
       sqlConf.parquetFieldIdWriteEnabled.toString)
 
-    conf.set(
-      SQLConf.LEGACY_PARQUET_NANOS_AS_LONG.key,
-      sqlConf.legacyParquetNanosAsLong.toString)
+    conf.set(SQLConf.LEGACY_PARQUET_NANOS_AS_LONG.key, sqlConf.legacyParquetNanosAsLong.toString)
 
     // Sets compression scheme
     conf.set(ParquetOutputFormat.COMPRESSION, parquetOptions.compressionCodecClassName)
@@ -138,18 +146,19 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
     if (ParquetOutputFormat.getJobSummaryLevel(conf) != JobSummaryLevel.NONE
       && !classOf[ParquetOutputCommitter].isAssignableFrom(committerClass)) {
       // output summary is requested, but the class is not a Parquet Committer
-      logWarning(s"Committer $committerClass is not a ParquetOutputCommitter and cannot" +
-        s" create job summaries. " +
-        s"Set Parquet option ${ParquetOutputFormat.JOB_SUMMARY_LEVEL} to NONE.")
+      logWarning(
+        s"Committer $committerClass is not a ParquetOutputCommitter and cannot" +
+          s" create job summaries. " +
+          s"Set Parquet option ${ParquetOutputFormat.JOB_SUMMARY_LEVEL} to NONE.")
     }
 
     conf.set(ParquetOutputFormat.WRITE_SUPPORT_CLASS, classOf[GeoParquetWriteSupport].getName)
 
     new OutputWriterFactory {
       override def newInstance(
-        path: String,
-        dataSchema: StructType,
-        context: TaskAttemptContext): OutputWriter = {
+          path: String,
+          dataSchema: StructType,
+          context: TaskAttemptContext): OutputWriter = {
         new ParquetOutputWriter(path, context)
       }
 
@@ -160,20 +169,16 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
   }
 
   override def buildReaderWithPartitionValues(
-       sparkSession: SparkSession,
-       dataSchema: StructType,
-       partitionSchema: StructType,
-       requiredSchema: StructType,
-       filters: Seq[Filter],
-       options: Map[String, String],
-       hadoopConf: Configuration): (PartitionedFile) => Iterator[InternalRow] = {
+      sparkSession: SparkSession,
+      dataSchema: StructType,
+      partitionSchema: StructType,
+      requiredSchema: StructType,
+      filters: Seq[Filter],
+      options: Map[String, String],
+      hadoopConf: Configuration): (PartitionedFile) => Iterator[InternalRow] = {
     hadoopConf.set(ParquetInputFormat.READ_SUPPORT_CLASS, classOf[ParquetReadSupport].getName)
-    hadoopConf.set(
-      ParquetReadSupport.SPARK_ROW_REQUESTED_SCHEMA,
-      requiredSchema.json)
-    hadoopConf.set(
-      ParquetWriteSupport.SPARK_ROW_SCHEMA,
-      requiredSchema.json)
+    hadoopConf.set(ParquetReadSupport.SPARK_ROW_REQUESTED_SCHEMA, requiredSchema.json)
+    hadoopConf.set(ParquetWriteSupport.SPARK_ROW_SCHEMA, requiredSchema.json)
     hadoopConf.set(
       SQLConf.SESSION_LOCAL_TIMEZONE.key,
       sparkSession.sessionState.conf.sessionLocalTimeZone)
@@ -231,12 +236,15 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
       val sharedConf = broadcastedHadoopConf.value.value
 
       val footerFileMetaData =
-        ParquetFooterReader.readFooter(sharedConf, file, ParquetFooterReader.SKIP_ROW_GROUPS).getFileMetaData
+        ParquetFooterReader
+          .readFooter(sharedConf, file, ParquetFooterReader.SKIP_ROW_GROUPS)
+          .getFileMetaData
       val datetimeRebaseSpec = DataSourceUtils.datetimeRebaseSpec(
         footerFileMetaData.getKeyValueMetaData.get,
         datetimeRebaseModeInRead)
       val int96RebaseSpec = DataSourceUtils.int96RebaseSpec(
-        footerFileMetaData.getKeyValueMetaData.get, int96RebaseModeInRead)
+        footerFileMetaData.getKeyValueMetaData.get,
+        int96RebaseModeInRead)
       // Try to push down filters when filter push-down is enabled.
       val pushed = if (enableParquetFilterPushDown) {
         val parquetSchema = footerFileMetaData.getSchema
@@ -260,9 +268,10 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
       }
 
       // Prune file scans using pushed down spatial filters and per-column bboxes in geoparquet metadata
-      val shouldScanFile = GeoParquetMetaData.parseKeyValueMetaData(footerFileMetaData.getKeyValueMetaData).forall {
-        metadata => spatialFilter.forall(_.evaluate(metadata.columns))
-      }
+      val shouldScanFile =
+        GeoParquetMetaData.parseKeyValueMetaData(footerFileMetaData.getKeyValueMetaData).forall {
+          metadata => spatialFilter.forall(_.evaluate(metadata.columns))
+        }
       if (!shouldScanFile) {
         // The entire file is pruned so that we don't need to scan this file.
         Seq.empty[InternalRow].iterator
@@ -292,7 +301,8 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
           ParquetInputFormat.setFilterPredicate(hadoopAttemptContext.getConfiguration, pushed.get)
         }
         if (enableVectorizedReader) {
-          logWarning(s"GeoParquet currently does not support vectorized reader. Falling back to parquet-mr")
+          logWarning(
+            s"GeoParquet currently does not support vectorized reader. Falling back to parquet-mr")
         }
         logDebug(s"Falling back to parquet-mr")
         // ParquetRecordReader returns InternalRow
@@ -308,8 +318,8 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
         } else {
           new ParquetRecordReader[InternalRow](readSupport)
         }
-        val readerWithRowIndexes = ParquetRowIndexUtil.addRowIndexToRecordReaderIfNeeded(reader,
-          requiredSchema)
+        val readerWithRowIndexes =
+          ParquetRowIndexUtil.addRowIndexToRecordReaderIfNeeded(reader, requiredSchema)
         val iter = new RecordReaderIterator[InternalRow](readerWithRowIndexes)
         try {
           readerWithRowIndexes.initialize(split, hadoopAttemptContext)
@@ -347,19 +357,19 @@ object GeoParquetFileFormat extends Logging {
    *
    * Note that locality is not taken into consideration here because:
    *
-   *  1. For a single Parquet part-file, in most cases the footer only resides in the last block of
-   *     that file.  Thus we only need to retrieve the location of the last block.  However, Hadoop
-   *     `FileSystem` only provides API to retrieve locations of all blocks, which can be
-   *     potentially expensive.
+   *   1. For a single Parquet part-file, in most cases the footer only resides in the last block
+   *      of that file. Thus we only need to retrieve the location of the last block. However,
+   *      Hadoop `FileSystem` only provides API to retrieve locations of all blocks, which can be
+   *      potentially expensive.
    *
-   *  2. This optimization is mainly useful for S3, where file metadata operations can be pretty
-   *     slow.  And basically locality is not available when using S3 (you can't run computation on
-   *     S3 nodes).
+   * 2. This optimization is mainly useful for S3, where file metadata operations can be pretty
+   * slow. And basically locality is not available when using S3 (you can't run computation on S3
+   * nodes).
    */
   def mergeSchemasInParallel(
-                              parameters: Map[String, String],
-                              filesToTouch: Seq[FileStatus],
-                              sparkSession: SparkSession): Option[StructType] = {
+      parameters: Map[String, String],
+      filesToTouch: Seq[FileStatus],
+      sparkSession: SparkSession): Option[StructType] = {
     val assumeBinaryIsString = sparkSession.sessionState.conf.isParquetBinaryAsString
     val assumeInt96IsTimestamp = sparkSession.sessionState.conf.isParquetINT96AsTimestamp
 
@@ -380,43 +390,50 @@ object GeoParquetFileFormat extends Logging {
     SchemaMergeUtils.mergeSchemasInParallel(sparkSession, parameters, filesToTouch, reader)
   }
 
-  private def readSchemaFromFooter(footer: Footer, keyValueMetaData: java.util.Map[String, String],
-                                   converter: GeoParquetToSparkSchemaConverter,
-                                   parameters: Map[String, String]): StructType = {
+  private def readSchemaFromFooter(
+      footer: Footer,
+      keyValueMetaData: java.util.Map[String, String],
+      converter: GeoParquetToSparkSchemaConverter,
+      parameters: Map[String, String]): StructType = {
     val fileMetaData = footer.getParquetMetadata.getFileMetaData
-    fileMetaData
-      .getKeyValueMetaData
-      .asScala.toMap
+    fileMetaData.getKeyValueMetaData.asScala.toMap
       .get(ParquetReadSupport.SPARK_METADATA_KEY)
       .flatMap(schema => deserializeSchemaString(schema, keyValueMetaData, parameters))
       .getOrElse(converter.convert(fileMetaData.getSchema))
   }
 
-  private def deserializeSchemaString(schemaString: String, keyValueMetaData: java.util.Map[String, String],
-                                      parameters: Map[String, String]): Option[StructType] = {
+  private def deserializeSchemaString(
+      schemaString: String,
+      keyValueMetaData: java.util.Map[String, String],
+      parameters: Map[String, String]): Option[StructType] = {
     // Tries to deserialize the schema string as JSON first, then falls back to the case class
     // string parser (data generated by older versions of Spark SQL uses this format).
-    val schemaOpt = Try(DataType.fromJson(schemaString).asInstanceOf[StructType]).recover {
-      case _: Throwable =>
+    val schemaOpt = Try(DataType.fromJson(schemaString).asInstanceOf[StructType])
+      .recover { case _: Throwable =>
         logInfo(
           "Serialized Spark schema in Parquet key-value metadata is not in JSON format, " +
             "falling back to the deprecated DataType.fromCaseClassString parser.")
         LegacyTypeStringParser.parseString(schemaString).asInstanceOf[StructType]
-    }.recoverWith {
-      case cause: Throwable =>
+      }
+      .recoverWith { case cause: Throwable =>
         logWarning(
           "Failed to parse and ignored serialized Spark schema in " +
-            s"Parquet key-value metadata:\n\t$schemaString", cause)
+            s"Parquet key-value metadata:\n\t$schemaString",
+          cause)
         Failure(cause)
-    }.toOption
+      }
+      .toOption
 
-    schemaOpt.map(schema => replaceGeometryColumnWithGeometryUDT(schema, keyValueMetaData, parameters))
+    schemaOpt.map(schema =>
+      replaceGeometryColumnWithGeometryUDT(schema, keyValueMetaData, parameters))
   }
 
-  private def replaceGeometryColumnWithGeometryUDT(schema: StructType,
-                                                   keyValueMetaData: java.util.Map[String, String],
-                                                   parameters: Map[String, String]): StructType = {
-    val geoParquetMetaData: GeoParquetMetaData = GeoParquetUtils.parseGeoParquetMetaData(keyValueMetaData, parameters)
+  private def replaceGeometryColumnWithGeometryUDT(
+      schema: StructType,
+      keyValueMetaData: java.util.Map[String, String],
+      parameters: Map[String, String]): StructType = {
+    val geoParquetMetaData: GeoParquetMetaData =
+      GeoParquetUtils.parseGeoParquetMetaData(keyValueMetaData, parameters)
     val fields = schema.fields.map { field =>
       field.dataType match {
         case _: BinaryType if geoParquetMetaData.columns.contains(field.name) =>

@@ -16,25 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
-import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
-import org.apache.spark.sql.types.{ByteType, DataTypes}
+import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.{Geometry, GeometryFactory, Point}
-
-import java.util
 
 object implicits {
 
   implicit class InputExpressionEnhancer(inputExpression: Expression) {
     def toGeometry(input: InternalRow): Geometry = {
       if (inputExpression.isInstanceOf[SerdeAware]) {
-        inputExpression.asInstanceOf[SerdeAware].evalWithoutSerialization(input).asInstanceOf[Geometry]
+        inputExpression
+          .asInstanceOf[SerdeAware]
+          .evalWithoutSerialization(input)
+          .asInstanceOf[Geometry]
       } else {
         inputExpression.eval(input).asInstanceOf[Array[Byte]] match {
           case binary: Array[Byte] => GeometrySerializer.deserialize(binary)
@@ -92,7 +91,7 @@ object implicits {
                 geometries.add(arrayData.getBinary(i).toGeometry)
               }
               geometries.asInstanceOf[java.util.List[Geometry]]
-              case _ => null
+            case _ => null
           }
       }
     }
@@ -116,7 +115,6 @@ object implicits {
         case Some(x) => assert(length == seq.length, message)
       }
     }
-
 
     def betweenLength(a: Int, b: Int): Unit = {
       val length = seq.length

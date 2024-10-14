@@ -31,7 +31,7 @@ This will register all Sedona types, functions and optimizations in SedonaSQL an
 
 ## Load data
 
-Let use data from `examples/sql`.  To load data from CSV file we need to execute two commands:
+Let use data from `examples/sql`. To load data from CSV file we need to execute two commands:
 
 Use the following code to load the data and create a raw DataFrame:
 
@@ -74,3 +74,18 @@ WHERE ST_Contains(polygondata.polygonshape, pointdata.pointshape)
       AND ST_Contains(ST_PolygonFromEnvelope(1.0,101.0,501.0,601.0), polygondata.polygonshape)
 LIMIT 5;
 ```
+
+## `GEOMETRY` data type support
+
+Sedona has a Spark SQL parser extension to support `GEOMETRY` data type in DDL statements. For example, you can specify a schema with a geometry column when creating the table:
+
+```sql
+CREATE TABLE geom_table (id STRING, version INT, geometry GEOMETRY)
+USING geoparquet
+LOCATION '/path/to/geoparquet_geom_table';
+
+SELECT * FROM geom_table LIMIT 10;
+```
+
+The SQL parser extension is enabled by default. If you find it conflicting with other extensions and want to disable it,
+please specify `--conf spark.sedona.enableParserExtension=false` when starting `spark-sql`.

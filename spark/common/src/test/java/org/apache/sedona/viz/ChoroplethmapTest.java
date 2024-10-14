@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.viz;
 
+import java.awt.Color;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.spatialOperator.JoinQuery;
@@ -33,98 +34,116 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.junit.Test;
 import org.locationtech.jts.geom.Polygon;
 
-import java.awt.Color;
-
 // TODO: Auto-generated Javadoc
 
-/**
- * The Class ChoroplethmapTest.
- */
-public class ChoroplethmapTest
-        extends VizTestBase
-{
-    /**
-     * Test rectangle RDD visualization.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testRectangleRDDVisualization()
-            throws Exception
-    {
-        PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
-        RectangleRDD queryRDD = new RectangleRDD(sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
-        spatialRDD.analyze();
-        spatialRDD.spatialPartitioning(GridType.KDBTREE);
-        queryRDD.spatialPartitioning(spatialRDD.getPartitioner());
-        spatialRDD.buildIndex(IndexType.RTREE, true);
-        JavaPairRDD<Polygon, Long> joinResult = JoinQuery.SpatialJoinQueryCountByKey(spatialRDD, queryRDD, true, true);
+/** The Class ChoroplethmapTest. */
+public class ChoroplethmapTest extends VizTestBase {
+  /**
+   * Test rectangle RDD visualization.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testRectangleRDDVisualization() throws Exception {
+    PointRDD spatialRDD =
+        new PointRDD(
+            sparkContext,
+            PointInputLocation,
+            PointOffset,
+            PointSplitter,
+            false,
+            PointNumPartitions);
+    RectangleRDD queryRDD =
+        new RectangleRDD(
+            sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions);
+    spatialRDD.analyze();
+    spatialRDD.spatialPartitioning(GridType.KDBTREE);
+    queryRDD.spatialPartitioning(spatialRDD.getPartitioner());
+    spatialRDD.buildIndex(IndexType.RTREE, true);
+    JavaPairRDD<Polygon, Long> joinResult =
+        JoinQuery.SpatialJoinQueryCountByKey(spatialRDD, queryRDD, true, true);
 
-        ChoroplethMap visualizationOperator = new ChoroplethMap(1000, 600, USMainLandBoundary, false);
-        visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);
-        visualizationOperator.Visualize(sparkContext, joinResult);
+    ChoroplethMap visualizationOperator = new ChoroplethMap(1000, 600, USMainLandBoundary, false);
+    visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);
+    visualizationOperator.Visualize(sparkContext, joinResult);
 
-        ScatterPlot frontImage = new ScatterPlot(1000, 600, USMainLandBoundary, false);
-        frontImage.CustomizeColor(0, 0, 0, 255, Color.GREEN, true);
-        frontImage.Visualize(sparkContext, queryRDD);
+    ScatterPlot frontImage = new ScatterPlot(1000, 600, USMainLandBoundary, false);
+    frontImage.CustomizeColor(0, 0, 0, 255, Color.GREEN, true);
+    frontImage.Visualize(sparkContext, queryRDD);
 
-        RasterOverlayOperator overlayOperator = new RasterOverlayOperator(visualizationOperator.rasterImage);
-        overlayOperator.JoinImage(frontImage.rasterImage);
+    RasterOverlayOperator overlayOperator =
+        new RasterOverlayOperator(visualizationOperator.rasterImage);
+    overlayOperator.JoinImage(frontImage.rasterImage);
 
-        ImageGenerator imageGenerator = new ImageGenerator();
-        imageGenerator.SaveRasterImageAsLocalFile(overlayOperator.backRasterImage, "./target/choroplethmap/RectangleRDD-combined", ImageType.PNG);
-    }
+    ImageGenerator imageGenerator = new ImageGenerator();
+    imageGenerator.SaveRasterImageAsLocalFile(
+        overlayOperator.backRasterImage,
+        "./target/choroplethmap/RectangleRDD-combined",
+        ImageType.PNG);
+  }
 
-    /**
-     * Test polygon RDD visualization.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testPolygonRDDVisualization()
-            throws Exception
-    {
-        //UserSuppliedPolygonMapper userSuppliedPolygonMapper = new UserSuppliedPolygonMapper();
-        PointRDD spatialRDD = new PointRDD(sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions);
-        PolygonRDD queryRDD = new PolygonRDD(sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions);
-        spatialRDD.analyze();
-        spatialRDD.spatialPartitioning(GridType.KDBTREE);
-        queryRDD.spatialPartitioning(spatialRDD.getPartitioner());
-        spatialRDD.buildIndex(IndexType.RTREE, true);
-        JavaPairRDD<Polygon, Long> joinResult = JoinQuery.SpatialJoinQueryCountByKey(spatialRDD, queryRDD, true, true);
+  /**
+   * Test polygon RDD visualization.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testPolygonRDDVisualization() throws Exception {
+    // UserSuppliedPolygonMapper userSuppliedPolygonMapper = new UserSuppliedPolygonMapper();
+    PointRDD spatialRDD =
+        new PointRDD(
+            sparkContext,
+            PointInputLocation,
+            PointOffset,
+            PointSplitter,
+            false,
+            PointNumPartitions);
+    PolygonRDD queryRDD =
+        new PolygonRDD(
+            sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions);
+    spatialRDD.analyze();
+    spatialRDD.spatialPartitioning(GridType.KDBTREE);
+    queryRDD.spatialPartitioning(spatialRDD.getPartitioner());
+    spatialRDD.buildIndex(IndexType.RTREE, true);
+    JavaPairRDD<Polygon, Long> joinResult =
+        JoinQuery.SpatialJoinQueryCountByKey(spatialRDD, queryRDD, true, true);
 
-        ChoroplethMap visualizationOperator = new ChoroplethMap(1000, 600, USMainLandBoundary, false);
-        visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);
-        visualizationOperator.Visualize(sparkContext, joinResult);
+    ChoroplethMap visualizationOperator = new ChoroplethMap(1000, 600, USMainLandBoundary, false);
+    visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);
+    visualizationOperator.Visualize(sparkContext, joinResult);
 
-        ScatterPlot frontImage = new ScatterPlot(1000, 600, USMainLandBoundary, false);
-        frontImage.CustomizeColor(0, 0, 0, 255, Color.GREEN, true);
-        frontImage.Visualize(sparkContext, queryRDD);
+    ScatterPlot frontImage = new ScatterPlot(1000, 600, USMainLandBoundary, false);
+    frontImage.CustomizeColor(0, 0, 0, 255, Color.GREEN, true);
+    frontImage.Visualize(sparkContext, queryRDD);
 
-        RasterOverlayOperator rasterOverlayOperator = new RasterOverlayOperator(visualizationOperator.rasterImage);
-        rasterOverlayOperator.JoinImage(frontImage.rasterImage);
+    RasterOverlayOperator rasterOverlayOperator =
+        new RasterOverlayOperator(visualizationOperator.rasterImage);
+    rasterOverlayOperator.JoinImage(frontImage.rasterImage);
 
-        ImageGenerator imageGenerator = new ImageGenerator();
-        imageGenerator.SaveRasterImageAsLocalFile(rasterOverlayOperator.backRasterImage, "./target/choroplethmap/PolygonRDD-combined", ImageType.GIF);
+    ImageGenerator imageGenerator = new ImageGenerator();
+    imageGenerator.SaveRasterImageAsLocalFile(
+        rasterOverlayOperator.backRasterImage,
+        "./target/choroplethmap/PolygonRDD-combined",
+        ImageType.GIF);
 
-        /*
-        visualizationOperator = new ChoroplethMap(1000, 600, USMainLandBoundary, false, true);
-        visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);
-        visualizationOperator.Visualize(sparkContext, joinResult);
+    /*
+    visualizationOperator = new ChoroplethMap(1000, 600, USMainLandBoundary, false, true);
+    visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.RED, true);
+    visualizationOperator.Visualize(sparkContext, joinResult);
 
-        imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.vectorImage, "./target/choroplethmap/PolygonRDD-combined-1", ImageType.SVG);
+    imageGenerator.SaveVectorImageAsLocalFile(visualizationOperator.vectorImage, "./target/choroplethmap/PolygonRDD-combined-1", ImageType.SVG);
 
-        frontImage = new ScatterPlot(1000, 600, USMainLandBoundary, false, true);
-        frontImage.CustomizeColor(0, 0, 0, 255, Color.GREEN, true);
-        frontImage.Visualize(sparkContext, queryRDD);
+    frontImage = new ScatterPlot(1000, 600, USMainLandBoundary, false, true);
+    frontImage.CustomizeColor(0, 0, 0, 255, Color.GREEN, true);
+    frontImage.Visualize(sparkContext, queryRDD);
 
-        imageGenerator.SaveVectorImageAsLocalFile(frontImage.vectorImage, "./target/choroplethmap/PolygonRDD-combined-2", ImageType.SVG);
+    imageGenerator.SaveVectorImageAsLocalFile(frontImage.vectorImage, "./target/choroplethmap/PolygonRDD-combined-2", ImageType.SVG);
 
-        VectorOverlayOperator vectorOverlayOperator = new VectorOverlayOperator(visualizationOperator.vectorImage);
-        vectorOverlayOperator.JoinImage(frontImage.vectorImage);
+    VectorOverlayOperator vectorOverlayOperator = new VectorOverlayOperator(visualizationOperator.vectorImage);
+    vectorOverlayOperator.JoinImage(frontImage.vectorImage);
 
-        imageGenerator = new ImageGenerator();
-        imageGenerator.SaveVectorImageAsLocalFile(vectorOverlayOperator.backVectorImage, "./target/choroplethmap/PolygonRDD-combined", ImageType.SVG);
-        */
-    }
+    imageGenerator = new ImageGenerator();
+    imageGenerator.SaveVectorImageAsLocalFile(vectorOverlayOperator.backVectorImage, "./target/choroplethmap/PolygonRDD-combined", ImageType.SVG);
+    */
+  }
 }

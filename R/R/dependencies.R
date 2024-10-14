@@ -18,15 +18,14 @@
 
 spark_dependencies <- function(spark_version, scala_version, ...) {
   if (spark_version[1, 1] == "3") {
-    spark_version <- "3.0"
+    spark_version <- spark_version
     scala_version <- scala_version %||% "2.12"
   } else {
     stop("Unsupported Spark version: ", spark_version)
   }
 
   packages <- c(
-    "org.datasyslab:geotools-wrapper:1.5.1-28.2",
-    "edu.ucar:cdm-core:5.4.2"
+    "org.datasyslab:geotools-wrapper:1.6.1-28.2"
   )
   jars <- NULL
 
@@ -39,11 +38,11 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
       paste0(
         "org.apache.sedona:sedona-",
         c("spark-shaded"),
-        sprintf("-%s_%s:1.5.1", spark_version, scala_version)
+        sprintf("-%s_%s:1.6.1", spark_version, scala_version)
       ),
       packages
     )
-    cli::cli_alert_info(sprintf("Using Sedona jars versions: %s etc.", packages[1]))
+    cli::cli_alert_info(sprintf("Using Sedona jar version: %s", packages[1]))
   }
 
   spark_dependency(
@@ -58,9 +57,10 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
 sedona_initialize_spark_connection <- function(sc) {
   invoke_static(
     sc,
-    "org.apache.sedona.sql.utils.SedonaSQLRegistrator",
-    "registerAll",
-    spark_session(sc)
+    "org.apache.sedona.spark.SedonaContext",
+    "create",
+    spark_session(sc),
+    "r"
   )
 
   # Instantiate all enum objects and store them immutably under

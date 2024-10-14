@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.common.enums;
 
 import java.io.Serializable;
@@ -25,107 +24,90 @@ import java.util.Map;
 
 // TODO: Auto-generated Javadoc
 
-/**
- * The Enum FileDataSplitter.
- */
-public enum FileDataSplitter
-        implements Serializable
-{
+/** The Enum FileDataSplitter. */
+public enum FileDataSplitter implements Serializable {
 
-    /**
-     * The csv.
-     */
-    CSV(","),
+  /** The csv. */
+  CSV(","),
 
-    /**
-     * The tsv.
-     */
-    TSV("\t"),
+  /** The tsv. */
+  TSV("\t"),
 
-    /**
-     * The geojson.
-     */
-    GEOJSON(""),
+  /** The geojson. */
+  GEOJSON(""),
 
-    /**
-     * The wkt.
-     */
-    WKT("\t"),
+  /** The wkt. */
+  WKT("\t"),
 
-    /**
-     * The wkb.
-     */
-    WKB("\t"),
+  /** The wkb. */
+  WKB("\t"),
 
-    COMMA(","),
+  COMMA(","),
 
-    TAB("\t"),
+  TAB("\t"),
 
-    QUESTIONMARK("?"),
+  QUESTIONMARK("?"),
 
-    SINGLEQUOTE("\'"),
+  SINGLEQUOTE("\'"),
 
-    QUOTE("\""),
+  QUOTE("\""),
 
-    UNDERSCORE("_"),
+  UNDERSCORE("_"),
 
-    DASH("-"),
+  DASH("-"),
 
-    PERCENT("%"),
+  PERCENT("%"),
 
-    TILDE("~"),
+  TILDE("~"),
 
-    PIPE("|"),
+  PIPE("|"),
 
-    SEMICOLON(";");
+  SEMICOLON(";");
 
-    /**
-     * The splitter.
-     */
-    private final String splitter;
+  /** The splitter. */
+  private final String splitter;
 
-    // A lookup map for getting a FileDataSplitter from a delimiter, or its name
-    private static final Map<String, FileDataSplitter> lookup = new HashMap<String, FileDataSplitter>();
+  // A lookup map for getting a FileDataSplitter from a delimiter, or its name
+  private static final Map<String, FileDataSplitter> lookup =
+      new HashMap<String, FileDataSplitter>();
 
-    static {
-        for (FileDataSplitter f : FileDataSplitter.values()) {
-            lookup.put(f.getDelimiter(), f);
-            lookup.put(f.name().toLowerCase(), f);
-            lookup.put(f.name().toUpperCase(), f);
-        }
+  static {
+    for (FileDataSplitter f : FileDataSplitter.values()) {
+      lookup.put(f.getDelimiter(), f);
+      lookup.put(f.name().toLowerCase(), f);
+      lookup.put(f.name().toUpperCase(), f);
     }
-    /**
-     * Instantiates a new file data splitter.
-     *
-     * @param splitter the splitter
-     */
-    FileDataSplitter(String splitter)
-    {
-        this.splitter = splitter;
-    }
+  }
+  /**
+   * Instantiates a new file data splitter.
+   *
+   * @param splitter the splitter
+   */
+  FileDataSplitter(String splitter) {
+    this.splitter = splitter;
+  }
 
-    /**
-     * Gets the file data splitter.
-     *
-     * @param str the str
-     * @return the file data splitter
-     */
-    public static FileDataSplitter getFileDataSplitter(String str)
-    {
-        FileDataSplitter f = lookup.get(str);
-        if (f == null) {
-            throw new IllegalArgumentException("[" + FileDataSplitter.class + "] Unsupported FileDataSplitter:" + str);
-        }
-        return f;
+  /**
+   * Gets the file data splitter.
+   *
+   * @param str the str
+   * @return the file data splitter
+   */
+  public static FileDataSplitter getFileDataSplitter(String str) {
+    FileDataSplitter f = lookup.get(str);
+    if (f == null) {
+      throw new IllegalArgumentException(
+          "[" + FileDataSplitter.class + "] Unsupported FileDataSplitter:" + str);
     }
+    return f;
+  }
 
-    /**
-     * Gets the delimiter.
-     *
-     * @return the delimiter
-     */
-    public String getDelimiter()
-    {
-        return this.splitter;
-    }
+  /**
+   * Gets the delimiter.
+   *
+   * @return the delimiter
+   */
+  public String getDelimiter() {
+    return this.splitter;
+  }
 }

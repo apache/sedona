@@ -16,30 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.sql.utils
 
 import org.apache.sedona.common.raster.serde.Serde
 import org.geotools.coverage.grid.GridCoverage2D
 
 object RasterSerializer {
+
   /**
    * Given a raster returns array of bytes
    *
-   * @param GridCoverage2D raster
-   * @return Array of bites represents this geometry
+   * @param GridCoverage2D
+   *   raster
+   * @return
+   *   Array of bites represents this geometry
    */
   def serialize(raster: GridCoverage2D): Array[Byte] = {
-    Serde.serialize(raster);
+    Serde.serialize(raster)
   }
 
   /**
    * Given ArrayData returns Geometry
    *
-   * @param value ArrayData
-   * @return GridCoverage2D
+   * @param value
+   *   ArrayData
+   * @return
+   *   GridCoverage2D
    */
   def deserialize(value: Array[Byte]): GridCoverage2D = {
-    Serde.deserialize(value);
+    Serde.deserialize(value)
   }
 }

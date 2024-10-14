@@ -1,0 +1,8 @@
+# Ignore everything
+*
+
+# Allow files and folders with a pattern starting with !
+!docker/**
+!docs/usecases/**
+!python/**
+!spark-shaded/target/**

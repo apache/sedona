@@ -17,12 +17,13 @@
 
 import os
 
-from sedona.core.SpatialRDD import PolygonRDD
-from sedona.core.enums import IndexType, FileDataSplitter
-from sedona.core.geom.envelope import Envelope
-from sedona.core.spatialOperator import RangeQuery
 from tests.test_base import TestBase
 from tests.tools import tests_resource
+
+from sedona.core.enums import FileDataSplitter, IndexType
+from sedona.core.geom.envelope import Envelope
+from sedona.core.spatialOperator import RangeQuery
+from sedona.core.SpatialRDD import PolygonRDD
 
 input_location = os.path.join(tests_resource, "primaryroads-polygon.csv")
 splitter = FileDataSplitter.CSV
@@ -35,26 +36,32 @@ class TestPolygonRange(TestBase):
     query_envelope = Envelope(-85.01, -60.01, 34.01, 50.01)
 
     def test_spatial_range_query(self):
-        spatial_rdd = PolygonRDD(
-            self.sc, input_location, splitter, True
-        )
+        spatial_rdd = PolygonRDD(self.sc, input_location, splitter, True)
         for i in range(self.loop_times):
-            result_size = RangeQuery.\
-                SpatialRangeQuery(spatial_rdd, self.query_envelope, False, False).count()
+            result_size = RangeQuery.SpatialRangeQuery(
+                spatial_rdd, self.query_envelope, False, False
+            ).count()
             assert result_size == 704
 
-        assert RangeQuery.SpatialRangeQuery(
-            spatial_rdd, self.query_envelope, False, False).take(10)[0].getUserData() is not None
+        assert (
+            RangeQuery.SpatialRangeQuery(spatial_rdd, self.query_envelope, False, False)
+            .take(10)[0]
+            .getUserData()
+            is not None
+        )
 
     def test_spatial_range_query_using_index(self):
-        spatial_rdd = PolygonRDD(
-            self.sc, input_location, splitter, True
-        )
+        spatial_rdd = PolygonRDD(self.sc, input_location, splitter, True)
         spatial_rdd.buildIndex(IndexType.RTREE, False)
         for i in range(self.loop_times):
-            result_size = RangeQuery.\
-                SpatialRangeQuery(spatial_rdd, self.query_envelope, False, False).count()
+            result_size = RangeQuery.SpatialRangeQuery(
+                spatial_rdd, self.query_envelope, False, False
+            ).count()
             assert result_size == 704
 
-        assert RangeQuery.SpatialRangeQuery(
-            spatial_rdd, self.query_envelope, False, False).take(10)[0].getUserData() is not None
+        assert (
+            RangeQuery.SpatialRangeQuery(spatial_rdd, self.query_envelope, False, False)
+            .take(10)[0]
+            .getUserData()
+            is not None
+        )

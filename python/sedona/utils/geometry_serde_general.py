@@ -16,8 +16,8 @@
 #  under the License.
 
 import array
-import struct
 import math
+import struct
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
@@ -35,9 +35,14 @@ from shapely.geometry.base import BaseGeometry
 from shapely.wkb import dumps as wkb_dumps
 from shapely.wkt import loads as wkt_loads
 
-
-CoordType = Union[Tuple[float, float], Tuple[float, float, float], Tuple[float, float, float, float]]
-ListCoordType = Union[List[Tuple[float, float]], List[Tuple[float, float, float]], List[Tuple[float, float, float, float]]]
+CoordType = Union[
+    Tuple[float, float], Tuple[float, float, float], Tuple[float, float, float, float]
+]
+ListCoordType = Union[
+    List[Tuple[float, float]],
+    List[Tuple[float, float, float]],
+    List[Tuple[float, float, float, float]],
+]
 
 GET_COORDS_NUMPY_THRESHOLD = 50
 
@@ -46,6 +51,7 @@ class GeometryTypeID:
     """
     Constants used to identify the geometry type in the serialized bytearray of geometry.
     """
+
     POINT = 1
     LINESTRING = 2
     POLYGON = 3
@@ -59,6 +65,7 @@ class CoordinateType:
     """
     Constants used to identify geometry dimensions in the serialized bytearray of geometry.
     """
+
     XY = 1
     XYZ = 2
     XYM = 3
@@ -66,7 +73,7 @@ class CoordinateType:
 
     BYTES_PER_COORDINATE = [16, 24, 24, 32]
     NUM_COORD_COMPONENTS = [2, 3, 3, 4]
-    UNPACK_FORMAT = ['dd', 'ddd', 'ddxxxxxxxx', 'dddxxxxxxxx']
+    UNPACK_FORMAT = ["dd", "ddd", "ddxxxxxxxx", "dddxxxxxxxx"]
 
     @staticmethod
     def type_of(geom) -> int:
@@ -99,12 +106,8 @@ class GeometryBuffer:
     ints_offset: int
 
     def __init__(
-        self,
-        buffer: bytearray,
-        coord_type: int,
-        coords_offset: int,
-        num_coords: int
-        ) -> None:
+        self, buffer: bytearray, coord_type: int, coords_offset: int, num_coords: int
+    ) -> None:
         self.buffer = buffer
         self.coord_type = coord_type
         self.bytes_per_coord = CoordinateType.bytes_per_coord(coord_type)
@@ -126,17 +129,16 @@ class GeometryBuffer:
         if num_rings == 0:
             return Polygon()
 
-        rings = [
-            self.read_coordinates(self.read_int())
-            for _ in range(num_rings)
-        ]
+        rings = [self.read_coordinates(self.read_int()) for _ in range(num_rings)]
 
         return Polygon(rings[0], rings[1:])
 
     def write_linestring(self, line: LineString) -> None:
         coords = [tuple(c) for c in line.coords]
         self.write_int(len(coords))
-        self.coords_offset = put_coordinates(self.buffer, self.coords_offset, self.coord_type, coords)
+        self.coords_offset = put_coordinates(
+            self.buffer, self.coords_offset, self.coord_type, coords
+        )
 
     def write_polygon(self, polygon: Polygon) -> None:
         exterior = polygon.exterior
@@ -149,7 +151,9 @@ class GeometryBuffer:
             self.write_linestring(interior)
 
     def read_coordinates(self, num_coords: int) -> ListCoordType:
-        coords = get_coordinates(self.buffer, self.coords_offset, self.coord_type, num_coords)
+        coords = get_coordinates(
+            self.buffer, self.coords_offset, self.coord_type, num_coords
+        )
         self.coords_offset += num_coords * self.bytes_per_coord
         return coords
 
@@ -161,13 +165,14 @@ class GeometryBuffer:
     def read_int(self) -> int:
         value = struct.unpack_from("i", self.buffer, self.ints_offset)[0]
         if value > len(self.buffer):
-            raise ValueError('Unexpected large integer in structural data')
+            raise ValueError("Unexpected large integer in structural data")
         self.ints_offset += 4
         return value
 
     def write_int(self, value: int) -> None:
         struct.pack_into("i", self.buffer, self.ints_offset, value)
         self.ints_offset += 4
+
 
 def serialize(geom: BaseGeometry) -> Optional[Union[bytes, bytearray]]:
     """
@@ -197,6 +202,7 @@ def serialize(geom: BaseGeometry) -> Optional[Union[bytes, bytearray]]:
     else:
         raise ValueError(f"Unsupported geometry type: {type(geom)}")
 
+
 def deserialize(buffer: bytes) -> Optional[BaseGeometry]:
     """
     Deserialize a shapely geometry object from the internal representation of GeometryUDT.
@@ -208,9 +214,9 @@ def deserialize(buffer: bytes) -> Optional[BaseGeometry]:
     preamble_byte = buffer[0]
     geom_type = (preamble_byte >> 4) & 0x0F
     coord_type = (preamble_byte >> 1) & 0x07
-    num_coords = struct.unpack_from('i', buffer, 4)[0]
+    num_coords = struct.unpack_from("i", buffer, 4)[0]
     if num_coords > len(buffer):
-        raise ValueError('num_coords cannot be larger than buffer size')
+        raise ValueError("num_coords cannot be larger than buffer size")
     geom_buffer = GeometryBuffer(buffer, coord_type, 8, num_coords)
     if geom_type == GeometryTypeID.POINT:
         geom = deserialize_point(geom_buffer)
@@ -231,47 +237,57 @@ def deserialize(buffer: bytes) -> Optional[BaseGeometry]:
     return geom, geom_buffer.ints_offset
 
 
-def create_buffer_for_geom(geom_type: int, coord_type: int, size: int, num_coords: int) -> bytearray:
+def create_buffer_for_geom(
+    geom_type: int, coord_type: int, size: int, num_coords: int
+) -> bytearray:
     buffer = bytearray(size)
     preamble_byte = (geom_type << 4) | (coord_type << 1)
     buffer[0] = preamble_byte
-    struct.pack_into('i', buffer, 4, num_coords)
+    struct.pack_into("i", buffer, 4, num_coords)
     return buffer
+
 
 def generate_header_bytes(geom_type: int, coord_type: int, num_coords: int) -> bytes:
     preamble_byte = (geom_type << 4) | (coord_type << 1)
-    return struct.pack(
-        'BBBBi',
-        preamble_byte,
-        0,
-        0,
-        0,
-        num_coords
-    )
+    return struct.pack("BBBBi", preamble_byte, 0, 0, 0, num_coords)
 
 
-def put_coordinates(buffer: bytearray, offset: int, coord_type: int, coords: ListCoordType) -> int:
+def put_coordinates(
+    buffer: bytearray, offset: int, coord_type: int, coords: ListCoordType
+) -> int:
     for coord in coords:
-        struct.pack_into(CoordinateType.unpack_format(coord_type, buffer, offset, *coord))
+        struct.pack_into(
+            CoordinateType.unpack_format(coord_type, buffer, offset, *coord)
+        )
         offset += CoordinateType.bytes_per_coord(coord_type)
     return offset
 
 
-def put_coordinate(buffer: bytearray, offset: int, coord_type: int, coord: CoordType) -> int:
+def put_coordinate(
+    buffer: bytearray, offset: int, coord_type: int, coord: CoordType
+) -> int:
     struct.pack_into(CoordinateType.unpack_format(coord_type, buffer, offset, *coord))
     offset += CoordinateType.bytes_per_coord(coord_type)
     return offset
 
 
-def get_coordinates(buffer: bytearray, offset: int, coord_type: int, num_coords: int) -> Union[np.ndarray, ListCoordType]:
+def get_coordinates(
+    buffer: bytearray, offset: int, coord_type: int, num_coords: int
+) -> Union[np.ndarray, ListCoordType]:
     if num_coords < GET_COORDS_NUMPY_THRESHOLD:
         coords = [
-            struct.unpack_from(CoordinateType.unpack_format(coord_type), buffer, offset + (i * CoordinateType.bytes_per_coord(coord_type)))
+            struct.unpack_from(
+                CoordinateType.unpack_format(coord_type),
+                buffer,
+                offset + (i * CoordinateType.bytes_per_coord(coord_type)),
+            )
             for i in range(num_coords)
         ]
     else:
         nums_per_coord = CoordinateType.components_per_coord(coord_type)
-        coords = np.frombuffer(buffer, np.float64, num_coords * nums_per_coord, offset).reshape((num_coords, nums_per_coord))
+        coords = np.frombuffer(
+            buffer, np.float64, num_coords * nums_per_coord, offset
+        ).reshape((num_coords, nums_per_coord))
 
     return coords
 
@@ -290,26 +306,12 @@ def serialize_point(geom: Point) -> bytes:
         # FIXME this does not handle M yet, but geom.has_z is extremely slow
         pack_format = "BBBBi" + "d" * geom._ndim
         coord_type = CoordinateType.type_of(geom)
-        preamble_byte = ((GeometryTypeID.POINT << 4) | (coord_type << 1))
+        preamble_byte = (GeometryTypeID.POINT << 4) | (coord_type << 1)
         coords = coords[0]
-        return struct.pack(
-            pack_format,
-            preamble_byte,
-            0,
-            0,
-            0,
-            1,
-            *coords
-        )
+        return struct.pack(pack_format, preamble_byte, 0, 0, 0, 1, *coords)
     else:
-        return struct.pack(
-            'BBBBi',
-            18,
-            0,
-            0,
-            0,
-            0
-        )
+        return struct.pack("BBBBi", 18, 0, 0, 0, 0)
+
 
 def deserialize_point(geom_buffer: GeometryBuffer) -> Point:
     if geom_buffer.num_coords == 0:
@@ -338,7 +340,7 @@ def serialize_multi_point(geom: MultiPoint) -> bytes:
             for k in range(geom._ndim):
                 coords.append(math.nan)
 
-    body = array.array('d', coords).tobytes()
+    body = array.array("d", coords).tobytes()
 
     return header + body
 
@@ -361,8 +363,10 @@ def serialize_linestring(geom: LineString) -> bytes:
     coords = [tuple(c) for c in geom.coords]
     if coords:
         coord_type = CoordinateType.type_of(geom)
-        header = generate_header_bytes(GeometryTypeID.LINESTRING, coord_type, len(coords))
-        return header + array.array('d', [x for c in coords for x in c]).tobytes()
+        header = generate_header_bytes(
+            GeometryTypeID.LINESTRING, coord_type, len(coords)
+        )
+        return header + array.array("d", [x for c in coords for x in c]).tobytes()
     else:
         return generate_header_bytes(GeometryTypeID.LINESTRING, 1, 0)
 
@@ -379,13 +383,17 @@ def serialize_multi_linestring(geom: MultiLineString) -> bytes:
 
     coord_type = CoordinateType.type_of(geom)
     lines = [[list(coord) for coord in ls.coords] for ls in linestrings]
-    line_lengths = [len(l) for l in lines]
+    line_lengths = [len(line) for line in lines]
     num_coords = sum(line_lengths)
 
-    header = generate_header_bytes(GeometryTypeID.MULTILINESTRING, coord_type, num_coords)
-    coord_data = array.array('d', [c for l in lines for coord in l for c in coord]).tobytes()
-    num_lines = struct.pack('i', len(lines))
-    structure_data = array.array('i', line_lengths).tobytes()
+    header = generate_header_bytes(
+        GeometryTypeID.MULTILINESTRING, coord_type, num_coords
+    )
+    coord_data = array.array(
+        "d", [c for line in lines for coord in line for c in coord]
+    ).tobytes()
+    num_lines = struct.pack("i", len(lines))
+    structure_data = array.array("i", line_lengths).tobytes()
 
     result = header + coord_data + num_lines + structure_data
 
@@ -403,17 +411,18 @@ def deserialize_multi_linestring(geom_buffer: GeometryBuffer) -> MultiLineString
         return wkt_loads("MULTILINESTRING EMPTY")
     return MultiLineString(linestrings)
 
+
 def serialize_polygon(geom: Polygon) -> bytes:
     # it may seem odd, but dumping to wkb and parsing proved to be the fastest here
     wkb_string = wkb_dumps(geom)
 
-    int_format = ">i" if struct.unpack_from('B', wkb_string) == 0 else "<i"
+    int_format = ">i" if struct.unpack_from("B", wkb_string) == 0 else "<i"
     num_rings = struct.unpack_from(int_format, wkb_string, 5)[0]
 
     if num_rings == 0:
         return generate_header_bytes(GeometryTypeID.POLYGON, CoordinateType.XY, 0)
 
-    coord_bytes = b''
+    coord_bytes = b""
     ring_lengths = []
     offset = 9  #  1 byte endianness + 4 byte geom type + 4 byte num rings
     bytes_per_coord = geom._ndim * 8
@@ -425,13 +434,13 @@ def serialize_polygon(geom: Polygon) -> bytes:
         num_coords += ring_len
         offset += 4
 
-        coord_bytes += wkb_string[offset: (offset + bytes_per_coord * ring_len)]
+        coord_bytes += wkb_string[offset : (offset + bytes_per_coord * ring_len)]
         offset += bytes_per_coord * ring_len
 
     coord_type = CoordinateType.type_of(geom)
 
     header = generate_header_bytes(GeometryTypeID.POLYGON, coord_type, num_coords)
-    structure_data_bytes = array.array('i', [num_rings] + ring_lengths).tobytes()
+    structure_data_bytes = array.array("i", [num_rings] + ring_lengths).tobytes()
 
     return header + coord_bytes + structure_data_bytes
 
@@ -444,17 +453,37 @@ def deserialize_polygon(geom_buffer: GeometryBuffer) -> Polygon:
 
 def serialize_multi_polygon(geom: MultiPolygon) -> bytes:
     coords_for = lambda x: [y for y in list(x)]
-    polygons = [[coords_for(polygon.exterior.coords)] + [coords_for(ring.coords) for ring in polygon.interiors] for polygon in list(geom.geoms)]
+    polygons = [
+        [coords_for(polygon.exterior.coords)]
+        + [coords_for(ring.coords) for ring in polygon.interiors]
+        for polygon in list(geom.geoms)
+    ]
 
     coord_type = CoordinateType.type_of(geom)
 
-    structure_data = array.array('i', [val for polygon in polygons for val in [len(polygon)] + [len(ring) for ring in polygon]]).tobytes()
-    coords = array.array('d', [component for polygon in polygons for ring in polygon for coord in ring for component in coord]).tobytes()
+    structure_data = array.array(
+        "i",
+        [
+            val
+            for polygon in polygons
+            for val in [len(polygon)] + [len(ring) for ring in polygon]
+        ],
+    ).tobytes()
+    coords = array.array(
+        "d",
+        [
+            component
+            for polygon in polygons
+            for ring in polygon
+            for coord in ring
+            for component in coord
+        ],
+    ).tobytes()
 
     num_coords = len(coords) // CoordinateType.bytes_per_coord(coord_type)
     header = generate_header_bytes(GeometryTypeID.MULTIPOLYGON, coord_type, num_coords)
 
-    num_polygons = struct.pack('i', len(polygons))
+    num_polygons = struct.pack("i", len(polygons))
 
     result = header + coords + num_polygons + structure_data
     return result
@@ -480,7 +509,9 @@ def serialize_geometry_collection(geom: GeometryCollection) -> bytearray:
         return serialize_shapely_1_empty_geom(geom)
     geometries = geom.geoms
     if not geometries:
-        return create_buffer_for_geom(GeometryTypeID.GEOMETRYCOLLECTION, CoordinateType.XY, 8, 0)
+        return create_buffer_for_geom(
+            GeometryTypeID.GEOMETRYCOLLECTION, CoordinateType.XY, 8, 0
+        )
     num_geometries = len(geometries)
     total_size = 8
     buffers = []
@@ -488,10 +519,12 @@ def serialize_geometry_collection(geom: GeometryCollection) -> bytearray:
         buf = serialize(geom)
         buffers.append(buf)
         total_size += aligned_offset(len(buf))
-    buffer = create_buffer_for_geom(GeometryTypeID.GEOMETRYCOLLECTION, CoordinateType.XY, total_size, num_geometries)
+    buffer = create_buffer_for_geom(
+        GeometryTypeID.GEOMETRYCOLLECTION, CoordinateType.XY, total_size, num_geometries
+    )
     offset = 8
     for buf in buffers:
-        buffer[offset:(offset + len(buf))] = buf
+        buffer[offset : (offset + len(buf))] = buf
         offset += aligned_offset(len(buf))
     return buffer
 

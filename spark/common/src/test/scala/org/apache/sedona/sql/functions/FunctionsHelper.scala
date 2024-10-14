@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.sql.functions
 
 import org.locationtech.jts.geom.{Geometry, GeometryFactory}

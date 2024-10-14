@@ -10,7 +10,9 @@
 
 - Yes, the URL of the associated JIRA ticket is https://issues.apache.org/jira/browse/SEDONA-XXX. The PR name follows the format `[SEDONA-XXX] my subject`.
 
-- No, this is a documentation update. The PR name follows the format `[DOCS] my subject`.
+- No:
+  - this is a documentation update. The PR name follows the format `[DOCS] my subject`
+  - this is a CI update. The PR name follows the format `[CI] my subject`
 
 
 ## What changes were proposed in this PR?

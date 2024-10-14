@@ -17,8 +17,7 @@
 
 import shapely
 
-
-if shapely.__version__.startswith('2.'):
+if shapely.__version__.startswith("2."):
     from .shapely2.envelope import Envelope
 else:
     from .shapely1.envelope import Envelope

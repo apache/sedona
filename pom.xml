@@ -26,7 +26,7 @@
     </parent>
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-parent</artifactId>
-    <version>1.6.0-SNAPSHOT</version>
+    <version>1.6.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>sedona-parent</name>
     <url>http://sedona.apache.org/</url>
@@ -83,9 +83,11 @@
              Setting a default value helps IDE:s that can't make sense of profiles. -->
         <scala.compat.version>2.12</scala.compat.version>
         <spark.version>3.3.0</spark.version>
-        <spark.compat.version>3.0</spark.compat.version>
+        <spark.compat.version>3.3</spark.compat.version>
         <log4j.version>2.17.2</log4j.version>
+        <graphframe.version>0.8.3-spark3.4</graphframe.version>
 
+        <flink.version>1.19.0</flink.version>
         <slf4j.version>1.7.36</slf4j.version>
         <googles2.version>2.0.0</googles2.version>
         <uberh3.version>4.1.1</uberh3.version>
@@ -393,6 +395,10 @@
                 <enabled>true</enabled>
             </releases>
         </repository>
+        <repository>
+            <id>Spark Packages</id>
+            <url>https://repos.spark-packages.org/</url>
+        </repository>
     </repositories>
     <build>
         <pluginManagement>
@@ -525,7 +531,7 @@
                         <failOnWarning>false</failOnWarning>
                         <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
                         <testSourceDirectory>${project.basedir}/src/test/scala</testSourceDirectory>
-                        <configLocation>${project.basedir}/../scalastyle_config.xml</configLocation>
+                        <configLocation>tools/maven/scalastyle_config.xml</configLocation>
                         <outputFile>${project.basedir}/target/scalastyle-output.xml</outputFile>
                         <outputEncoding>UTF-8</outputEncoding>
                     </configuration>
@@ -577,6 +583,8 @@
                         <scala.compat.version>${scala.compat.version}</scala.compat.version>
                         <spark.version>${spark.version}</spark.version>
                         <scala.version>${scala.version}</scala.version>
+                        <log4j.version>${log4j.version}</log4j.version>
+                        <graphframe.version>${graphframe.version}</graphframe.version>
                     </properties>
                 </configuration>
                 <executions>
@@ -610,7 +618,6 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <failOnError>false</failOnError>
                     <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
             </plugin>
@@ -618,6 +625,39 @@
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
                 <version>0.14</version>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.30.0</version>
+                <configuration>
+                    <java>
+                        <googleJavaFormat>
+                            <version>1.7</version>
+                        </googleJavaFormat>
+                        <licenseHeader>
+                            <file>tools/maven/license-header.txt</file>
+                        </licenseHeader>
+                    </java>
+                    <scala>
+                        <scalafmt>
+                            <version>3.7.5</version>
+                            <file>tools/maven/scalafmt.conf</file>
+                            <scalaMajorVersion>2.12</scalaMajorVersion>
+                        </scalafmt>
+                        <licenseHeader>
+                            <file>tools/maven/license-header.txt</file>
+                        </licenseHeader>
+                    </scala>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>compile</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -641,19 +681,74 @@
             </repositories>
         </profile>
         <profile>
-            <!-- This profile works for Spark 3.0, 3.1, 3.2 and 3.3 -->
+            <!-- This profile works for Spark 3.0 -->
             <id>sedona-spark-3.0</id>
             <activation>
                 <property>
                     <name>spark</name>
                     <value>3.0</value>
                 </property>
+            </activation>
+            <properties>
+                <spark.version>3.0.3</spark.version>
+                <spark.compat.version>3.0</spark.compat.version>
+                <log4j.version>2.17.2</log4j.version>
+                <graphframe.version>0.8.1-spark3.0</graphframe.version>
+                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
+                <skip.deploy.common.modules>true</skip.deploy.common.modules>
+            </properties>
+        </profile>
+        <profile>
+            <!-- This profile works for Spark 3.1 -->
+            <id>sedona-spark-3.1</id>
+            <activation>
+                <property>
+                    <name>spark</name>
+                    <value>3.1</value>
+                </property>
+            </activation>
+            <properties>
+                <spark.version>3.1.2</spark.version>
+                <spark.compat.version>3.1</spark.compat.version>
+                <log4j.version>2.17.2</log4j.version>
+                <graphframe.version>0.8.2-spark3.1</graphframe.version>
+                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
+                <skip.deploy.common.modules>true</skip.deploy.common.modules>
+            </properties>
+        </profile>
+        <profile>
+            <!-- This profile works for Spark 3.2 -->
+            <id>sedona-spark-3.2</id>
+            <activation>
+                <property>
+                    <name>spark</name>
+                    <value>3.2</value>
+                </property>
+            </activation>
+            <properties>
+                <spark.version>3.2.0</spark.version>
+                <spark.compat.version>3.2</spark.compat.version>
+                <log4j.version>2.17.2</log4j.version>
+                <graphframe.version>0.8.2-spark3.2</graphframe.version>
+                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
+                <skip.deploy.common.modules>true</skip.deploy.common.modules>
+            </properties>
+        </profile>
+        <profile>
+            <!-- This profile works for Spark 3.3 -->
+            <id>sedona-spark-3.3</id>
+            <activation>
+                <property>
+                    <name>spark</name>
+                    <value>3.3</value>
+                </property>
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
                 <spark.version>3.3.0</spark.version>
-                <spark.compat.version>3.0</spark.compat.version>
+                <spark.compat.version>3.3</spark.compat.version>
                 <log4j.version>2.17.2</log4j.version>
+                <graphframe.version>0.8.3-spark3.4</graphframe.version>
             </properties>
         </profile>
         <profile>
@@ -668,7 +763,8 @@
                 <spark.version>3.4.0</spark.version>
                 <spark.compat.version>3.4</spark.compat.version>
                 <log4j.version>2.19.0</log4j.version>
-                <!-- Skip deploying parent module for sedona-spark-3.0 profile, it will be deployed with sedona-spark-3.0 -->
+                <graphframe.version>0.8.3-spark3.4</graphframe.version>
+                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
                 <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>
         </profile>
@@ -684,7 +780,8 @@
                 <spark.version>3.5.0</spark.version>
                 <spark.compat.version>3.5</spark.compat.version>
                 <log4j.version>2.20.0</log4j.version>
-                <!-- Skip deploying parent module for sedona-spark-3.0 profile, it will be deployed with sedona-spark-3.0 -->
+                <graphframe.version>0.8.3-spark3.5</graphframe.version>
+                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
                 <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>
         </profile>

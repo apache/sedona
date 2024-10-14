@@ -1,5 +1,5 @@
 !!!note
-	Sedona writers are available in Scala, Java and Python and have the same APIs.
+	Sedona writers are available in Scala. Java and Python have the same APIs.
 
 ## Write Raster DataFrame to raster files
 
@@ -148,7 +148,7 @@ Since: `v1.4.1`
 Available options:
 
 * rasterField:
-	* Default value: the `binary` type column in the DataFrame. If the input DataFrame has several binary columns, please specify which column you want to use.
+	* Default value: the `binary` type column in the DataFrame. If the input DataFrame has several binary columns, please specify which column you want to use. You can use one of the `RS_As*` functions mentioned above to convert the raster objects to binary raster file content to write.
 	* Allowed values: the name of the to-be-saved binary type column
 * fileExtension
 	* Default value: `.tiff`
@@ -156,32 +156,44 @@ Available options:
 * pathField
 	* No default value. If you use this option, then the column specified in this option must exist in the DataFrame schema. If this option is not used, each produced raster image will have a random UUID file name.
 	* Allowed values: any column name that indicates the paths of each raster file
+* useDirectCommitter (Since: `v1.6.1`)
+	* Default value: `true`. If set to `true`, the output files will be written directly to the target location. If set to `false`, the output files will be written to a temporary location and finally be committed to their target location. It is usually slower to write large amount of raster files with `useDirectCommitter` set to `false`, especially when writing to object stores such as S3.
+	* Allowed values: `true` or `false`
 
 The schema of the Raster dataframe to be written can be one of the following two schemas:
 
 ```html
 root
- |-- rs_asgeotiff(raster): binary (nullable = true)
+ |-- raster_binary: binary (nullable = true)
 ```
 
 or
 
 ```html
 root
- |-- rs_asgeotiff(raster): binary (nullable = true)
+ |-- raster_binary: binary (nullable = true)
  |-- path: string (nullable = true)
 ```
 
 Spark SQL example 1:
 
 ```scala
-sparkSession.write.format("raster").mode(SaveMode.Overwrite).save("my_raster_file")
+// Assume that df contains a raster column named "rast"
+df.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)"))\
+  .write.format("raster").mode("overwrite").save("my_raster_file")
 ```
 
 Spark SQL example 2:
 
 ```scala
-sparkSession.write.format("raster").option("rasterField", "raster").option("pathField", "path").option("fileExtension", ".tiff").mode(SaveMode.Overwrite).save("my_raster_file")
+// Assume that df contains a raster column named "rast" and a string column named "path"
+df.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)"))\
+  .write.format("raster")\
+  .option("rasterField", "raster_binary")\
+  .option("pathField", "path")\
+  .option("fileExtension", ".tiff")\
+  .mode("overwrite")\
+  .save("my_raster_file")
 ```
 
 The produced file structure will look like this:
@@ -216,7 +228,7 @@ The newly created DataFrame can be written to disk again but must be under a dif
 
 Introduction: Converts a Geometry to a Raster dataset. Defaults to using `1.0` for cell `value` and `null` for `noDataValue` if not provided. Supports all geometry types.
 The `pixelType` argument defines data type of the output raster. This can be one of the following, D (double), F (float), I (integer), S (short), US (unsigned short) or B (byte).
-The `useGeomeryExtent` argument defines the extent of the resultant raster. When set to `true`, it corresponds to the extent of `geom`, and when set to false, it corresponds to the extent of `raster`. Default value is `true` if not set.
+The `useGeometryExtent` argument defines the extent of the resultant raster. When set to `true`, it corresponds to the extent of `geom`, and when set to false, it corresponds to the extent of `raster`. Default value is `true` if not set.
 Format:
 
 ```
@@ -246,6 +258,8 @@ Since: `v1.5.0`
 	SkewY != 0
 	```
 	If a raster is provided with anyone of these properties then IllegalArgumentException is thrown.
+
+For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
 
 SQL Example
 

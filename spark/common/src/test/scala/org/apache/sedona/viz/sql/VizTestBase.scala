@@ -40,15 +40,28 @@ trait VizTestBase extends TestBaseScala {
   }
 
   def getPoint(): DataFrame = {
-    val pointDf = sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(pointInputLocation).sample(false, 1)
-    pointDf.selectExpr("ST_Point(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20))) as shape")
-      .filter("ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)")
+    val pointDf = sparkSession.read
+      .format("csv")
+      .option("delimiter", ",")
+      .option("header", "false")
+      .load(pointInputLocation)
+      .sample(false, 1)
+    pointDf
+      .selectExpr("ST_Point(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20))) as shape")
+      .filter(
+        "ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)")
   }
 
-  def getPolygon():DataFrame = {
-    val polygonDf = sparkSession.read.format("csv").option("delimiter", "\t").option("header", "false").load(polygonInputLocationWkt)
-    polygonDf.selectExpr("ST_GeomFromWKT(_c0) as shape", "_c1 as rate", "_c2", "_c3")
-      .filter("ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)")
+  def getPolygon(): DataFrame = {
+    val polygonDf = sparkSession.read
+      .format("csv")
+      .option("delimiter", "\t")
+      .option("header", "false")
+      .load(polygonInputLocationWkt)
+    polygonDf
+      .selectExpr("ST_GeomFromWKT(_c0) as shape", "_c1 as rate", "_c2", "_c3")
+      .filter(
+        "ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)")
   }
 
 }

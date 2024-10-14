@@ -30,13 +30,14 @@ import org.locationtech.jts.geom.Geometry
 trait TraitJoinQueryBase {
   self: SparkPlan =>
 
-  def toSpatialRddPair(leftRdd: RDD[UnsafeRow],
-                       leftShapeExpr: Expression,
-                       rightRdd: RDD[UnsafeRow],
-                       rightShapeExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) = {
-    if (leftShapeExpr.dataType.acceptsType(RasterUDT) || rightShapeExpr.dataType.acceptsType(RasterUDT)) {
-      (toWGS84EnvelopeRDD(leftRdd, leftShapeExpr),
-        toWGS84EnvelopeRDD(rightRdd, rightShapeExpr))
+  def toSpatialRddPair(
+      leftRdd: RDD[UnsafeRow],
+      leftShapeExpr: Expression,
+      rightRdd: RDD[UnsafeRow],
+      rightShapeExpr: Expression): (SpatialRDD[Geometry], SpatialRDD[Geometry]) = {
+    if (leftShapeExpr.dataType.isInstanceOf[RasterUDT] || rightShapeExpr.dataType
+        .isInstanceOf[RasterUDT]) {
+      (toWGS84EnvelopeRDD(leftRdd, leftShapeExpr), toWGS84EnvelopeRDD(rightRdd, rightShapeExpr))
     } else {
       (toSpatialRDD(leftRdd, leftShapeExpr), toSpatialRDD(rightRdd, rightShapeExpr))
     }
@@ -47,7 +48,8 @@ trait TraitJoinQueryBase {
     spatialRdd.setRawSpatialRDD(
       rdd
         .map { x =>
-          val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
+          val shape =
+            GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
           shape.setUserData(x.copy)
           shape
         }
@@ -55,21 +57,25 @@ trait TraitJoinQueryBase {
     spatialRdd
   }
 
-  def toWGS84EnvelopeRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression): SpatialRDD[Geometry] = {
+  def toWGS84EnvelopeRDD(
+      rdd: RDD[UnsafeRow],
+      shapeExpression: Expression): SpatialRDD[Geometry] = {
     // This RDD is for performing raster-geometry or raster-raster join, where we need to perform implicit CRS
     // transformation for both sides. We use expanded WGS84 envelope as the joined geometries and perform a
     // coarse-grained spatial join.
     val spatialRdd = new SpatialRDD[Geometry]
-    val wgs84EnvelopeRdd = if (shapeExpression.dataType.acceptsType(RasterUDT)) {
+    val wgs84EnvelopeRdd = if (shapeExpression.dataType.isInstanceOf[RasterUDT]) {
       rdd.map { row =>
-        val raster = RasterSerializer.deserialize(shapeExpression.eval(row).asInstanceOf[Array[Byte]])
+        val raster =
+          RasterSerializer.deserialize(shapeExpression.eval(row).asInstanceOf[Array[Byte]])
         val shape = JoinedGeometryRaster.rasterToWGS84Envelope(raster)
         shape.setUserData(row.copy)
         shape
       }
     } else {
       rdd.map { row =>
-        val geom = GeometrySerializer.deserialize(shapeExpression.eval(row).asInstanceOf[Array[Byte]])
+        val geom =
+          GeometrySerializer.deserialize(shapeExpression.eval(row).asInstanceOf[Array[Byte]])
         val shape = JoinedGeometryRaster.geometryToWGS84Envelope(geom)
         shape.setUserData(row.copy)
         shape
@@ -79,14 +85,20 @@ trait TraitJoinQueryBase {
     spatialRdd
   }
 
-  def toExpandedEnvelopeRDD(rdd: RDD[UnsafeRow], shapeExpression: Expression, boundRadius: Expression, isGeography: Boolean): SpatialRDD[Geometry] = {
+  def toExpandedEnvelopeRDD(
+      rdd: RDD[UnsafeRow],
+      shapeExpression: Expression,
+      boundRadius: Expression,
+      isGeography: Boolean): SpatialRDD[Geometry] = {
     val spatialRdd = new SpatialRDD[Geometry]
     spatialRdd.setRawSpatialRDD(
       rdd
         .map { x =>
-          val shape = GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
+          val shape =
+            GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
           val distance = boundRadius.eval(x).asInstanceOf[Double]
-          val expandedEnvelope = JoinedGeometry.geometryToExpandedEnvelope(shape, distance, isGeography)
+          val expandedEnvelope =
+            JoinedGeometry.geometryToExpandedEnvelope(shape, distance, isGeography)
           expandedEnvelope.setUserData(x.copy)
           expandedEnvelope
         }
@@ -94,9 +106,12 @@ trait TraitJoinQueryBase {
     spatialRdd
   }
 
-  def doSpatialPartitioning(dominantShapes: SpatialRDD[Geometry], followerShapes: SpatialRDD[Geometry],
-                            numPartitions: Integer, sedonaConf: SedonaConf): Unit = {
-    if (dominantShapes.approximateTotalCount > 0) {
+  def doSpatialPartitioning(
+      dominantShapes: SpatialRDD[Geometry],
+      followerShapes: SpatialRDD[Geometry],
+      numPartitions: Integer,
+      sedonaConf: SedonaConf): Unit = {
+    if (dominantShapes.approximateTotalCount > 0 && numPartitions > 0) {
       dominantShapes.spatialPartitioning(sedonaConf.getJoinGridType, numPartitions)
       followerShapes.spatialPartitioning(dominantShapes.getPartitioner)
     }

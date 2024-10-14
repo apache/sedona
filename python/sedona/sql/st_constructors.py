@@ -14,41 +14,27 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
-
+import inspect
+import sys
 from functools import partial
 from typing import Optional, Union
 
 from pyspark.sql import Column
 
-from sedona.sql.dataframe_api import ColumnOrName, ColumnOrNameOrNumber, call_sedona_function, validate_argument_types
-
-
-__all__ = [
-    "ST_GeomFromGeoHash",
-    "ST_GeomFromGeoJSON",
-    "ST_GeomFromGML",
-    "ST_GeomFromKML",
-    "ST_GeomFromText",
-    "ST_GeomFromWKB",
-    "ST_GeomFromWKT",
-    "ST_GeomFromEWKT",
-    "ST_LineFromText",
-    "ST_LineStringFromText",
-    "ST_Point",
-    "ST_PointFromText",
-    "ST_MakePoint"
-    "ST_PolygonFromEnvelope",
-    "ST_PolygonFromText",
-    "ST_MLineFromText",
-    "ST_MPolyFromText"
-]
-
+from sedona.sql.dataframe_api import (
+    ColumnOrName,
+    ColumnOrNameOrNumber,
+    call_sedona_function,
+    validate_argument_types,
+)
 
 _call_constructor_function = partial(call_sedona_function, "st_constructors")
 
 
 @validate_argument_types
-def ST_GeomFromGeoHash(geohash: ColumnOrName, precision: Union[ColumnOrName, int]) -> Column:
+def ST_GeomFromGeoHash(
+    geohash: ColumnOrName, precision: Union[ColumnOrName, int]
+) -> Column:
     """Generate a geometry column from a geohash column at a specified precision.
 
     :param geohash: Geohash string column to generate from.
@@ -59,6 +45,24 @@ def ST_GeomFromGeoHash(geohash: ColumnOrName, precision: Union[ColumnOrName, int
     :rtype: Column
     """
     return _call_constructor_function("ST_GeomFromGeoHash", (geohash, precision))
+
+
+@validate_argument_types
+def ST_PointFromGeoHash(
+    geohash: ColumnOrName, precision: Optional[Union[ColumnOrName, int]] = None
+) -> Column:
+    """Generate a point column from a geohash column at a specified precision.
+
+    :param geohash: Geohash string column to generate from.
+    :type geohash: ColumnOrName
+    :param precision: Geohash precision to use, either an integer or an integer column.
+    :type precision: Union[ColumnOrName, int]
+    :return: Point column representing the supplied geohash and precision level.
+    :rtype: Column
+    """
+    args = (geohash) if precision is None else (geohash, precision)
+
+    return _call_constructor_function("ST_PointFromGeoHash", args)
 
 
 @validate_argument_types
@@ -98,7 +102,9 @@ def ST_GeomFromKML(kml_string: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_GeomFromText(wkt: ColumnOrName) -> Column:
+def ST_GeomFromText(
+    wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None
+) -> Column:
     """Generate a geometry column from a Well-Known Text (WKT) string column.
     This is an alias of ST_GeomFromWKT.
 
@@ -107,7 +113,26 @@ def ST_GeomFromText(wkt: ColumnOrName) -> Column:
     :return: Geometry column representing the WKT string.
     :rtype: Column
     """
-    return _call_constructor_function("ST_GeomFromText", wkt)
+    args = (wkt) if srid is None else (wkt, srid)
+
+    return _call_constructor_function("ST_GeomFromText", args)
+
+
+@validate_argument_types
+def ST_GeometryFromText(
+    wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None
+) -> Column:
+    """Generate a geometry column from a Well-Known Text (WKT) string column.
+    This is an alias of ST_GeomFromWKT.
+
+    :param wkt: WKT string column to generate from.
+    :type wkt: ColumnOrName
+    :return: Geometry column representing the WKT string.
+    :rtype: Column
+    """
+    args = (wkt) if srid is None else (wkt, srid)
+
+    return _call_constructor_function("ST_GeometryFromText", args)
 
 
 @validate_argument_types
@@ -123,7 +148,21 @@ def ST_GeomFromWKB(wkb: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_GeomFromWKT(wkt: ColumnOrName) -> Column:
+def ST_GeomFromEWKB(wkb: ColumnOrName) -> Column:
+    """Generate a geometry column from a Well-Known Binary (WKB) binary column.
+
+    :param wkb: WKB binary column to generate from.
+    :type wkb: ColumnOrName
+    :return: Geometry column representing the WKB binary.
+    :rtype: Column
+    """
+    return _call_constructor_function("ST_GeomFromEWKB", wkb)
+
+
+@validate_argument_types
+def ST_GeomFromWKT(
+    wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None
+) -> Column:
     """Generate a geometry column from a Well-Known Text (WKT) string column.
     This is an alias of ST_GeomFromText.
 
@@ -132,7 +171,10 @@ def ST_GeomFromWKT(wkt: ColumnOrName) -> Column:
     :return: Geometry column representing the WKT string.
     :rtype: Column
     """
-    return _call_constructor_function("ST_GeomFromWKT", wkt)
+    args = (wkt) if srid is None else (wkt, srid)
+
+    return _call_constructor_function("ST_GeomFromWKT", args)
+
 
 @validate_argument_types
 def ST_GeomFromEWKT(ewkt: ColumnOrName) -> Column:
@@ -186,8 +228,14 @@ def ST_Point(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber) -> Column:
     """
     return _call_constructor_function("ST_Point", (x, y))
 
+
 @validate_argument_types
-def ST_PointZ(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, z: ColumnOrNameOrNumber, srid: Optional[ColumnOrNameOrNumber] = None) -> Column:
+def ST_PointZ(
+    x: ColumnOrNameOrNumber,
+    y: ColumnOrNameOrNumber,
+    z: ColumnOrNameOrNumber,
+    srid: Optional[ColumnOrNameOrNumber] = None,
+) -> Column:
     """Generates a 3D point geometry column from numeric values.
 
     :param x: Either a number or numeric column representing the X coordinate of a point.
@@ -204,6 +252,58 @@ def ST_PointZ(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, z: ColumnOrNameO
     args = (x, y, z) if srid is None else (x, y, z, srid)
     return _call_constructor_function("ST_PointZ", args)
 
+
+@validate_argument_types
+def ST_PointM(
+    x: ColumnOrNameOrNumber,
+    y: ColumnOrNameOrNumber,
+    m: ColumnOrNameOrNumber,
+    srid: Optional[ColumnOrNameOrNumber] = None,
+) -> Column:
+    """Generates a 3D point geometry column from numeric values.
+
+    :param x: Either a number or numeric column representing the X coordinate of a point.
+    :type x: ColumnOrNameOrNumber
+    :param y: Either a number or numeric column representing the Y coordinate of a point.
+    :type y: ColumnOrNameOrNumber
+    :param z: Either a number or numeric column representing the Z coordinate of a point, if None then a 2D point is generated, defaults to None
+    :type z: ColumnOrNameOrNumber
+    :param srid: The srid of the point. Defaults to 0 (unknown).
+    :type srid: Optional[ColumnOrNameOrNumber], optional
+    :return: Point geometry column generated from the coordinate values.
+    :rtype: Column
+    """
+    args = (x, y, m) if srid is None else (x, y, m, srid)
+    return _call_constructor_function("ST_PointM", args)
+
+
+@validate_argument_types
+def ST_PointZM(
+    x: ColumnOrNameOrNumber,
+    y: ColumnOrNameOrNumber,
+    z: ColumnOrNameOrNumber,
+    m: ColumnOrNameOrNumber,
+    srid: Optional[ColumnOrNameOrNumber] = None,
+) -> Column:
+    """Generates a 3D point geometry column from numeric values.
+
+    :param x: Either a number or numeric column representing the X coordinate of a point.
+    :type x: ColumnOrNameOrNumber
+    :param y: Either a number or numeric column representing the Y coordinate of a point.
+    :type y: ColumnOrNameOrNumber
+    :param z: Either a number or numeric column representing the Z coordinate of a point, if None then a 2D point is generated, defaults to None
+    :type z: ColumnOrNameOrNumber
+    :param m: Either a number or numeric column representing the M value of a point.
+    :type m: ColumnOrNameOrNumber
+    :param srid: The srid of the point. Defaults to 0 (unknown).
+    :type srid: Optional[ColumnOrNameOrNumber], optional
+    :return: Point geometry column generated from the coordinate values.
+    :rtype: Column
+    """
+    args = (x, y, z, m) if srid is None else (x, y, z, m, srid)
+    return _call_constructor_function("ST_PointZM", args)
+
+
 @validate_argument_types
 def ST_PointFromText(coords: ColumnOrName, delimiter: ColumnOrName) -> Column:
     """Generate a point geometry column from coordinates separated by a delimiter and stored
@@ -218,8 +318,83 @@ def ST_PointFromText(coords: ColumnOrName, delimiter: ColumnOrName) -> Column:
     """
     return _call_constructor_function("ST_PointFromText", (coords, delimiter))
 
+
 @validate_argument_types
-def ST_MakePoint(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, z: Optional[ColumnOrNameOrNumber] = None, m: Optional[ColumnOrNameOrNumber] = None) -> Column:
+def ST_PointFromWKB(
+    wkb: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None
+) -> Column:
+    """Generate a Point geometry column from a Well-Known Binary (WKB) binary column.
+
+    :param wkb: WKB binary column to generate from.
+    :type wkb: ColumnOrName
+    :param srid: SRID to be set for geometry
+    :type srid: ColumnOrNameOrNumber
+    :return: Point Geometry column representing the WKB binary.
+    :rtype: Column
+    """
+    args = (wkb) if srid is None else (wkb, srid)
+    return _call_constructor_function("ST_PointFromWKB", args)
+
+
+@validate_argument_types
+def ST_LineFromWKB(
+    wkb: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None
+) -> Column:
+    """Generate a Line geometry column from a Well-Known Binary (WKB) binary column.
+
+    :param wkb: WKB binary column to generate from.
+    :type wkb: ColumnOrName
+    :param srid: SRID to be set for the geometry.
+    :type srid: ColumnOrNameOrNumber
+    :return: Geometry column representing the WKB binary.
+    :rtype: Column
+    """
+    args = (wkb) if srid is None else (wkb, srid)
+    return _call_constructor_function("ST_LineFromWKB", args)
+
+
+@validate_argument_types
+def ST_LinestringFromWKB(
+    wkb: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None
+) -> Column:
+    """Generate a Line geometry column from a Well-Known Binary (WKB) binary column.
+
+    :param wkb: WKB binary column to generate from.
+    :type wkb: ColumnOrName
+    :param srid: SRID to be set for the geometry.
+    :type srid: ColumnOrNameOrNumber
+    :return: Geometry column representing the WKB binary.
+    :rtype: Column
+    """
+    args = (wkb) if srid is None else (wkb, srid)
+    return _call_constructor_function("ST_LinestringFromWKB", args)
+
+
+@validate_argument_types
+def ST_MakePointM(
+    x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, m: ColumnOrNameOrNumber
+) -> Column:
+    """Generate 3D M Point geometry.
+
+    :param x: Either a number or numeric column representing the X coordinate of a point.
+    :type x: ColumnOrNameOrNumber
+    :param y: Either a number or numeric column representing the Y coordinate of a point.
+    :type y: ColumnOrNameOrNumber
+    :param m: Either a number or numeric column representing the M coordinate of a point
+    :type m: ColumnOrNameOrNumber
+    :return: Point geometry column generated from the coordinate values.
+    :rtype: Column
+    """
+    return _call_constructor_function("ST_MakePointM", (x, y, m))
+
+
+@validate_argument_types
+def ST_MakePoint(
+    x: ColumnOrNameOrNumber,
+    y: ColumnOrNameOrNumber,
+    z: Optional[ColumnOrNameOrNumber] = None,
+    m: Optional[ColumnOrNameOrNumber] = None,
+) -> Column:
     """Generate a 2D, 3D Z or 4D ZM Point geometry. If z is None then a 2D point is generated.
     This function doesn't support M coordinates for creating a 4D ZM Point in Dataframe API.
 
@@ -243,7 +418,42 @@ def ST_MakePoint(x: ColumnOrNameOrNumber, y: ColumnOrNameOrNumber, z: Optional[C
 
 
 @validate_argument_types
-def ST_PolygonFromEnvelope(min_x: ColumnOrNameOrNumber, min_y: ColumnOrNameOrNumber, max_x: ColumnOrNameOrNumber, max_y: ColumnOrNameOrNumber) -> Column:
+def ST_MakeEnvelope(
+    min_x: ColumnOrNameOrNumber,
+    min_y: ColumnOrNameOrNumber,
+    max_x: ColumnOrNameOrNumber,
+    max_y: ColumnOrNameOrNumber,
+    srid: Optional[ColumnOrNameOrNumber] = None,
+) -> Column:
+    """Generate a polygon geometry column from the minimum and maximum coordinates of an envelope with an option to add SRID
+
+    :param min_x: Minimum X coordinate for the envelope.
+    :type min_x: ColumnOrNameOrNumber
+    :param min_y: Minimum Y coordinate for the envelope.
+    :type min_y: ColumnOrNameOrNumber
+    :param max_x: Maximum X coordinate for the envelope.
+    :type max_x: ColumnOrNameOrNumber
+    :param max_y: Maximum Y coordinate for the envelope.
+    :type max_y: ColumnOrNameOrNumber
+    :param srid: SRID to be set for the envelope.
+    :type srid: ColumnOrNameOrNumber
+    :return: Polygon geometry column representing the envelope described by the coordinate bounds.
+    :rtype: Column
+    """
+    args = (min_x, min_y, max_x, max_y, srid)
+    if srid is None:
+        args = (min_x, min_y, max_x, max_y)
+
+    return _call_constructor_function("ST_MakeEnvelope", args)
+
+
+@validate_argument_types
+def ST_PolygonFromEnvelope(
+    min_x: ColumnOrNameOrNumber,
+    min_y: ColumnOrNameOrNumber,
+    max_x: ColumnOrNameOrNumber,
+    max_y: ColumnOrNameOrNumber,
+) -> Column:
     """Generate a polygon geometry column from the minimum and maximum coordinates of an envelope.
 
     :param min_x: Minimum X coordinate for the envelope.
@@ -257,7 +467,9 @@ def ST_PolygonFromEnvelope(min_x: ColumnOrNameOrNumber, min_y: ColumnOrNameOrNum
     :return: Polygon geometry column representing the envelope described by the coordinate bounds.
     :rtype: Column
     """
-    return _call_constructor_function("ST_PolygonFromEnvelope", (min_x, min_y, max_x, max_y))
+    return _call_constructor_function(
+        "ST_PolygonFromEnvelope", (min_x, min_y, max_x, max_y)
+    )
 
 
 @validate_argument_types
@@ -274,8 +486,11 @@ def ST_PolygonFromText(coords: ColumnOrName, delimiter: ColumnOrName) -> Column:
     """
     return _call_constructor_function("ST_PolygonFromText", (coords, delimiter))
 
+
 @validate_argument_types
-def ST_MPolyFromText(wkt: ColumnOrName) -> Column:
+def ST_MPolyFromText(
+    wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None
+) -> Column:
     """Generate multiPolygon geometry from a multiPolygon WKT representation.
 
     :param wkt: multiPolygon WKT string column to generate from.
@@ -283,10 +498,15 @@ def ST_MPolyFromText(wkt: ColumnOrName) -> Column:
     :return: multiPolygon geometry generated from the wkt column.
     :rtype: Column
     """
-    return _call_constructor_function("ST_MPolyFromText", wkt)
+    args = (wkt) if srid is None else (wkt, srid)
+
+    return _call_constructor_function("ST_MPolyFromText", args)
+
 
 @validate_argument_types
-def ST_MLineFromText(wkt: ColumnOrName) -> Column:
+def ST_MLineFromText(
+    wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None
+) -> Column:
     """Generate multiLineString geometry from a multiLineString WKT representation.
 
     :param wkt: multiLineString WKT string column to generate from.
@@ -294,4 +514,50 @@ def ST_MLineFromText(wkt: ColumnOrName) -> Column:
     :return: multiLineString geometry generated from the wkt column.
     :rtype: Column
     """
-    return _call_constructor_function("ST_MLineFromText", wkt)
+    args = (wkt) if srid is None else (wkt, srid)
+
+    return _call_constructor_function("ST_MLineFromText", args)
+
+
+@validate_argument_types
+def ST_MPointFromText(
+    wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None
+) -> Column:
+    """Generate MultiPoint geometry from a MultiPoint WKT representation.
+
+    :param wkt: MultiPoint WKT string column to generate from.
+    :type wkt: ColumnOrName
+    :param srid: SRID for the geometry
+    :type srid: ColumnOrNameOrNumber
+    :return: MultiPoint geometry generated from the wkt column.
+    :rtype: Column
+    """
+    args = (wkt) if srid is None else (wkt, srid)
+
+    return _call_constructor_function("ST_MPointFromText", args)
+
+
+@validate_argument_types
+def ST_GeomCollFromText(
+    wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None
+) -> Column:
+    """Generate GeometryCollection geometry from a GeometryCollection WKT representation.
+
+    :param wkt: GeometryCollection WKT string column to generate from.
+    :type wkt: ColumnOrName
+    :param srid: SRID for the geometry
+    :type srid: ColumnOrNameOrNumber
+    :return: GeometryCollection geometry generated from the wkt column.
+    :rtype: Column
+    """
+    args = (wkt) if srid is None else (wkt, srid)
+
+    return _call_constructor_function("ST_GeomCollFromText", args)
+
+
+# Automatically populate __all__
+__all__ = [
+    name
+    for name, obj in inspect.getmembers(sys.modules[__name__])
+    if inspect.isfunction(obj)
+]

@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.rangeJudgement;
 
 import org.apache.sedona.core.spatialOperator.SpatialPredicate;
@@ -25,27 +24,22 @@ import org.locationtech.jts.geom.Geometry;
 
 // TODO: Auto-generated Javadoc
 
-public class RangeFilter<U extends Geometry, T extends Geometry>
-        extends JudgementBase
-        implements Function<T, Boolean>
-{
+public class RangeFilter<U extends Geometry, T extends Geometry> extends JudgementBase
+    implements Function<T, Boolean> {
 
-    public RangeFilter(U queryWindow, SpatialPredicate spatialPredicate)
-    {
-        super(queryWindow, spatialPredicate);
-    }
+  public RangeFilter(U queryWindow, SpatialPredicate spatialPredicate) {
+    super(queryWindow, spatialPredicate);
+  }
 
-    public RangeFilter(U queryWindow, boolean considerBoundaryIntersection, boolean leftCoveredByRight)
-    {
-        super(queryWindow, considerBoundaryIntersection, leftCoveredByRight);
-    }
+  public RangeFilter(
+      U queryWindow, boolean considerBoundaryIntersection, boolean leftCoveredByRight) {
+    super(queryWindow, considerBoundaryIntersection, leftCoveredByRight);
+  }
 
-    /* (non-Javadoc)
-     * @see org.apache.spark.api.java.function.Function#call(java.lang.Object)
-     */
-    public Boolean call(T geometry)
-            throws Exception
-    {
-        return match(geometry, queryGeometry);
-    }
+  /* (non-Javadoc)
+   * @see org.apache.spark.api.java.function.Function#call(java.lang.Object)
+   */
+  public Boolean call(T geometry) throws Exception {
+    return match(geometry, queryGeometry);
+  }
 }

@@ -19,8 +19,8 @@ from enum import Enum
 
 from pyspark import SparkContext
 
-from sedona.core.SpatialRDD import SpatialRDD, PolygonRDD, LineStringRDD, PointRDD
 from sedona.core.jvm.translate import SpatialObjectLoaderAdapter
+from sedona.core.SpatialRDD import LineStringRDD, PointRDD, PolygonRDD, SpatialRDD
 from sedona.utils.decorators import require
 
 
@@ -71,7 +71,9 @@ class LineStringRDDDiscLoader(DiscLoader):
     def load(cls, sc: SparkContext, path: str) -> SpatialRDD:
         jvm = sc._jvm
         line_string_rdd = LineStringRDD()
-        srdd = SpatialObjectLoaderAdapter(jvm).load_line_string_spatial_rdd(sc._jsc, path)
+        srdd = SpatialObjectLoaderAdapter(jvm).load_line_string_spatial_rdd(
+            sc._jsc, path
+        )
         line_string_rdd.set_srdd(srdd)
         return line_string_rdd
 
@@ -99,7 +101,7 @@ loaders = {
     GeoType.POINT: PointRDDDiscLoader,
     GeoType.POLYGON: PolygonRDDDiscLoader,
     GeoType.LINESTRING: LineStringRDDDiscLoader,
-    GeoType.GEOMETRY: SpatialRDDDiscLoader
+    GeoType.GEOMETRY: SpatialRDDDiscLoader,
 }
 
 

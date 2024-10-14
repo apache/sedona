@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.sql
 
 import org.apache.spark.sql.DataFrame
@@ -30,8 +29,10 @@ object implicits {
       df.collect().toSeq.map(element => element(0).asInstanceOf[T]).toList
 
     def toSeqOption[T]: Option[T] = {
-      df.collect().headOption
-        .map(element => if (element(0) != null) element(0).asInstanceOf[T] else None.asInstanceOf[T])
+      df.collect()
+        .headOption
+        .map(element =>
+          if (element(0) != null) element(0).asInstanceOf[T] else None.asInstanceOf[T])
     }
   }
 

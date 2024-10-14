@@ -26,7 +26,7 @@ import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
 import org.apache.spark.sql.execution.aggregate.ScalaUDAF
 
 trait DataFrameAPI {
-  protected def wrapExpression[E <: Expression : ClassTag](args: Any *): Column = {
+  protected def wrapExpression[E <: Expression: ClassTag](args: Any*): Column = {
     val exprArgs = args.map(_ match {
       case c: Column => c.expr
       case s: String => Column(s).expr
@@ -34,7 +34,8 @@ trait DataFrameAPI {
       case x: Any => Literal(x)
       case null => Literal(null)
     })
-    val expressionConstructor = implicitly[ClassTag[E]].runtimeClass.getConstructor(classOf[Seq[Expression]])
+    val expressionConstructor =
+      implicitly[ClassTag[E]].runtimeClass.getConstructor(classOf[Seq[Expression]])
     val expressionInstance = expressionConstructor.newInstance(exprArgs).asInstanceOf[E]
     Column(expressionInstance)
   }
@@ -47,12 +48,13 @@ trait DataFrameAPI {
       case x: Any => Literal(x)
       case null => Literal(null)
     })
-    val expressionConstructor = implicitly[ClassTag[E]].runtimeClass.getConstructor(classOf[Seq[Expression]])
+    val expressionConstructor =
+      implicitly[ClassTag[E]].runtimeClass.getConstructor(classOf[Seq[Expression]])
     val expressionInstance = expressionConstructor.newInstance(exprArgs).asInstanceOf[E]
     Column(expressionInstance)
   }
 
-  protected def wrapAggregator[A <: UserDefinedAggregateFunction: ClassTag](arg: Any *): Column = {
+  protected def wrapAggregator[A <: UserDefinedAggregateFunction: ClassTag](arg: Any*): Column = {
     val exprArgs = arg.map(_ match {
       case c: Column => c.expr
       case s: String => Column(s).expr
@@ -62,7 +64,8 @@ trait DataFrameAPI {
     })
     val aggregatorClass = implicitly[ClassTag[A]].runtimeClass
     val aggregatorConstructor = aggregatorClass.getConstructor()
-    val aggregatorInstance = aggregatorConstructor.newInstance().asInstanceOf[UserDefinedAggregateFunction]
+    val aggregatorInstance =
+      aggregatorConstructor.newInstance().asInstanceOf[UserDefinedAggregateFunction]
     val scalaAggregator = ScalaUDAF(exprArgs, aggregatorInstance)
     Column(scalaAggregator)
   }

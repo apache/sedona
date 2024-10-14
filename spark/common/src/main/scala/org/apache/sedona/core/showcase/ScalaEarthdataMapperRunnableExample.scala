@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.showcase
 
 import org.apache.log4j.{Level, Logger}
@@ -51,30 +50,46 @@ object ScalaEarthdataMapperRunnableExample extends App {
   System.out.println("All Earthdata DEMOs passed!")
 
   /**
-    * Test spatial range query.
-    */
+   * Test spatial range query.
+   */
   def testSpatialRangeQuery() {
-    val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName, HDFDataVariableList, HDFDataVariableName, urlPrefix)
+    val earthdataHDFPoint = new EarthdataHDFPointMapper(
+      HDFIncrement,
+      HDFOffset,
+      HDFRootGroupName,
+      HDFDataVariableList,
+      HDFDataVariableName,
+      urlPrefix)
     val spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint)
     var i = 0
     while (i < loopTimes) {
       var resultSize = 0L
-      resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, SpatialPredicate.COVERED_BY, false).count
+      resultSize = RangeQuery
+        .SpatialRangeQuery(spatialRDD, queryEnvelope, SpatialPredicate.COVERED_BY, false)
+        .count
       i = i + 1
     }
   }
 
   /**
-    * Test spatial range query using index.
-    */
+   * Test spatial range query using index.
+   */
   def testSpatialRangeQueryUsingIndex() {
-    val earthdataHDFPoint = new EarthdataHDFPointMapper(HDFIncrement, HDFOffset, HDFRootGroupName, HDFDataVariableList, HDFDataVariableName, urlPrefix)
+    val earthdataHDFPoint = new EarthdataHDFPointMapper(
+      HDFIncrement,
+      HDFOffset,
+      HDFRootGroupName,
+      HDFDataVariableList,
+      HDFDataVariableName,
+      urlPrefix)
     val spatialRDD = new PointRDD(sc, InputLocation, numPartitions, earthdataHDFPoint)
     spatialRDD.buildIndex(IndexType.RTREE, false)
     var i = 0
     while (i < loopTimes) {
       var resultSize = 0L
-      resultSize = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, SpatialPredicate.COVERED_BY, true).count
+      resultSize = RangeQuery
+        .SpatialRangeQuery(spatialRDD, queryEnvelope, SpatialPredicate.COVERED_BY, true)
+        .count
       i = i + 1
     }
   }

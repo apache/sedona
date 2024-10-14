@@ -15,11 +15,11 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from pyspark import SparkContext, StorageLevel, RDD
+from pyspark import RDD, SparkContext, StorageLevel
 
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmSpatialRDD
+from sedona.core.enums.file_data_splitter import FileDataSplitter, FileSplitterJvm
+from sedona.core.SpatialRDD.spatial_rdd import JvmSpatialRDD, SpatialRDD
 from sedona.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
-from sedona.core.enums.file_data_splitter import FileSplitterJvm, FileDataSplitter
 from sedona.utils.jvm import JvmStorageLevel
 from sedona.utils.meta import MultipleMeta
 
@@ -39,8 +39,15 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
         jsrdd = rawSpatialRDD.jsrdd
         self._srdd = self._jvm_spatial_rdd(jsrdd)
 
-    def __init__(self, sparkContext: SparkContext, InputLocation: str, Offset: int,
-                 splitter: FileDataSplitter, carryInputData: bool, partitions: int):
+    def __init__(
+        self,
+        sparkContext: SparkContext,
+        InputLocation: str,
+        Offset: int,
+        splitter: FileDataSplitter,
+        carryInputData: bool,
+        partitions: int,
+    ):
         """
 
         :param sparkContext: SparkContext, the spark context
@@ -59,11 +66,17 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
             Offset,
             jvm_splitter.jvm_instance,
             carryInputData,
-            partitions
+            partitions,
         )
 
-    def __init__(self, sparkContext: SparkContext, InputLocation: str, Offset: int,
-                 splitter: FileDataSplitter, carryInputData: bool):
+    def __init__(
+        self,
+        sparkContext: SparkContext,
+        InputLocation: str,
+        Offset: int,
+        splitter: FileDataSplitter,
+        carryInputData: bool,
+    ):
         """
 
         :param sparkContext: SparkContext, the spark context
@@ -76,15 +89,17 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
         jvm_splitter = FileSplitterJvm(self._jvm, splitter)
 
         self._srdd = self._jvm_spatial_rdd(
-            self._jsc,
-            InputLocation,
-            Offset,
-            jvm_splitter.jvm_instance,
-            carryInputData
+            self._jsc, InputLocation, Offset, jvm_splitter.jvm_instance, carryInputData
         )
 
-    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter,
-                 carryInputData: bool, partitions: int):
+    def __init__(
+        self,
+        sparkContext: SparkContext,
+        InputLocation: str,
+        splitter: FileDataSplitter,
+        carryInputData: bool,
+        partitions: int,
+    ):
         """
 
         :param sparkContext: SparkContext, the spark context
@@ -102,11 +117,16 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
             InputLocation,
             jvm_splitter.jvm_instance,
             carryInputData,
-            partitions
+            partitions,
         )
 
-    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter,
-                 carryInputData: bool):
+    def __init__(
+        self,
+        sparkContext: SparkContext,
+        InputLocation: str,
+        splitter: FileDataSplitter,
+        carryInputData: bool,
+    ):
         """
 
         :param sparkContext: SparkContext, the spark context
@@ -119,11 +139,9 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
         jvm_splitter = FileSplitterJvm(self._jvm, splitter)
 
         self._srdd = self._jvm_spatial_rdd(
-            self._jsc,
-            InputLocation,
-            jvm_splitter.jvm_instance,
-            carryInputData
+            self._jsc, InputLocation, jvm_splitter.jvm_instance, carryInputData
         )
+
     @property
     def _jvm_spatial_rdd(self):
         spatial_factory = SpatialRDDFactory(self._sc)
@@ -133,4 +151,6 @@ class RectangleRDD(SpatialRDD, metaclass=MultipleMeta):
         return jvm_polygon_rdd
 
     def MinimumBoundingRectangle(self):
-        raise NotImplementedError("RectangleRDD has not MinimumBoundingRectangle method.")
+        raise NotImplementedError(
+            "RectangleRDD has not MinimumBoundingRectangle method."
+        )

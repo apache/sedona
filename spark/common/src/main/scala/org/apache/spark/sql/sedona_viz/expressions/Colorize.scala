@@ -27,9 +27,10 @@ import org.apache.spark.sql.types.{DataType, IntegerType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.beryx.awt.color.ColorFactory
 
-
 case class ST_Colorize(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback with Logging {
+    extends Expression
+    with CodegenFallback
+    with Logging {
   assert(inputExpressions.length <= 3)
   override def nullable: Boolean = false
 
@@ -38,22 +39,23 @@ case class ST_Colorize(inputExpressions: Seq[Expression])
       // This means the user wants to apply the same color to everywhere
       // Fetch the color from the third input string
       // supported color can be found at: https://github.com/beryx/awt-color-factory#example-usage
-      var color = ColorFactory.valueOf(inputExpressions(2).eval(input).asInstanceOf[UTF8String].toString)
+      var color =
+        ColorFactory.valueOf(inputExpressions(2).eval(input).asInstanceOf[UTF8String].toString)
       return color.getRGB
     }
     var weight = 0.0
     try {
       weight = inputExpressions(0).eval(input).asInstanceOf[Double]
-    }
-    catch {
-      case e: java.lang.ClassCastException => weight = inputExpressions(0).eval(input).asInstanceOf[Long]
+    } catch {
+      case e: java.lang.ClassCastException =>
+        weight = inputExpressions(0).eval(input).asInstanceOf[Long]
     }
     var max = 0.0
     try {
       max = inputExpressions(1).eval(input).asInstanceOf[Double]
-    }
-    catch {
-      case e: java.lang.ClassCastException => max = inputExpressions(1).eval(input).asInstanceOf[Long]
+    } catch {
+      case e: java.lang.ClassCastException =>
+        max = inputExpressions(1).eval(input).asInstanceOf[Long]
     }
     val normalizedWeight: Double = weight * 255.0 / max
     GenericColoringRule.EncodeToRGB(normalizedWeight)

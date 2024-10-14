@@ -15,8 +15,9 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from typing import List
 from abc import ABC, abstractmethod
+from typing import List
+
 import numpy as np
 
 from .data_buffer import DataBuffer
@@ -27,6 +28,7 @@ class SampleModel(ABC):
     SampleModel class in Java AWT.
 
     """
+
     TYPE_BANDED = 1
     TYPE_PIXEL_INTERLEAVED = 2
     TYPE_SINGLE_PIXEL_PACKED = 3
@@ -47,7 +49,9 @@ class SampleModel(ABC):
 
     @abstractmethod
     def as_numpy(self, data_buffer: DataBuffer) -> np.ndarray:
-        raise NotImplementedError("Abstract method as_numpy was not implemented by subclass")
+        raise NotImplementedError(
+            "Abstract method as_numpy was not implemented by subclass"
+        )
 
 
 class ComponentSampleModel(SampleModel):
@@ -56,7 +60,16 @@ class ComponentSampleModel(SampleModel):
     bank_indices: List[int]
     band_offsets: List[int]
 
-    def __init__(self, data_type, width, height, pixel_stride, scanline_stride, bank_indices, band_offsets):
+    def __init__(
+        self,
+        data_type,
+        width,
+        height,
+        pixel_stride,
+        scanline_stride,
+        bank_indices,
+        band_offsets,
+    ):
         super().__init__(SampleModel.TYPE_COMPONENT, data_type, width, height)
         self.pixel_stride = pixel_stride
         self.scanline_stride = scanline_stride
@@ -71,7 +84,7 @@ class ComponentSampleModel(SampleModel):
                 bank_data = data_buffer.bank_data[bank_index]
                 offset = self.band_offsets[bank_index]
                 if offset != 0:
-                    bank_data = bank_data[offset:(offset + self.width * self.height)]
+                    bank_data = bank_data[offset : (offset + self.width * self.height)]
                 band_arr = bank_data.reshape(self.height, self.width)
                 band_arrs.append(band_arr)
             return np.array(band_arrs)
@@ -98,7 +111,9 @@ class PixelInterleavedSampleModel(SampleModel):
     scanline_stride: int
     band_offsets: List[int]
 
-    def __init__(self, data_type, width, height, pixel_stride, scanline_stride, band_offsets):
+    def __init__(
+        self, data_type, width, height, pixel_stride, scanline_stride, band_offsets
+    ):
         super().__init__(SampleModel.TYPE_PIXEL_INTERLEAVED, data_type, width, height)
         self.pixel_stride = pixel_stride
         self.scanline_stride = scanline_stride
@@ -107,9 +122,11 @@ class PixelInterleavedSampleModel(SampleModel):
     def as_numpy(self, data_buffer: DataBuffer) -> np.ndarray:
         num_bands = len(self.band_offsets)
         bank_data = data_buffer.bank_data[0]
-        if self.pixel_stride == num_bands and \
-           self.scanline_stride == self.width * num_bands and \
-           self.band_offsets == list(range(0, num_bands)):
+        if (
+            self.pixel_stride == num_bands
+            and self.scanline_stride == self.width * num_bands
+            and self.band_offsets == list(range(0, num_bands))
+        ):
             # Fast path: no gapping in between band data, no band reordering
             arr = bank_data.reshape(self.height, self.width, num_bands)
             return np.transpose(arr, [2, 0, 1])
@@ -151,7 +168,9 @@ class SinglePixelPackedSampleModel(SampleModel):
                 for mask, bit_offset in zip(self.bit_masks, self.bit_offsets):
                     pixel.append((value & mask) >> bit_offset)
                 pixel_data.append(pixel)
-        arr = np.array(pixel_data, dtype=bank_data.dtype).reshape(self.height, self.width, num_bands)
+        arr = np.array(pixel_data, dtype=bank_data.dtype).reshape(
+            self.height, self.width, num_bands
+        )
         return np.transpose(arr, [2, 0, 1])
 
 
@@ -160,7 +179,9 @@ class MultiPixelPackedSampleModel(SampleModel):
     scanline_stride: int
     data_bit_offset: int
 
-    def __init__(self, data_type, width, height, num_bits, scanline_stride, data_bit_offset):
+    def __init__(
+        self, data_type, width, height, num_bits, scanline_stride, data_bit_offset
+    ):
         super().__init__(SampleModel.TYPE_MULTI_PIXEL_PACKED, data_type, width, height)
         self.num_bits = num_bits
         self.scanline_stride = scanline_stride
@@ -178,12 +199,12 @@ class MultiPixelPackedSampleModel(SampleModel):
             pos = y * self.scanline_stride + self.data_bit_offset // bits_per_value
             value = bank_data[pos]
             shift = self.data_bit_offset % bits_per_value
-            value = (value << shift)
+            value = value << shift
             pixels: List[int] = []
             while len(pixels) < self.width:
                 while shift < bits_per_value and len(pixels) < self.width:
                     pixels.append((value & mask) >> shift_right)
-                    value = (value << self.num_bits)
+                    value = value << self.num_bits
                     shift += self.num_bits
                 pos += 1
                 value = bank_data[pos]

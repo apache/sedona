@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.sedona</groupId>
         <artifactId>sedona-spark-parent-${spark.compat.version}_${scala.compat.version}</artifactId>
-        <version>1.6.0-SNAPSHOT</version>
+        <version>1.6.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 	<artifactId>sedona-spark-common-${spark.compat.version}_${scala.compat.version}</artifactId>
@@ -156,6 +156,11 @@
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>graphframes</groupId>
+            <artifactId>graphframes</artifactId>
+            <version>${graphframe.version}-s_${scala.compat.version}</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>

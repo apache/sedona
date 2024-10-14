@@ -41,7 +41,11 @@ class IndexTypeJvm(JvmObject):
     index_type = attr.ib(type=IndexType)
 
     def _create_jvm_instance(self):
-        return self.jvm_index(self.index_type.value) if self.index_type.value is not None else None
+        return (
+            self.jvm_index(self.index_type.value)
+            if self.index_type.value is not None
+            else None
+        )
 
     @property
     @require(["FileDataSplitter"])

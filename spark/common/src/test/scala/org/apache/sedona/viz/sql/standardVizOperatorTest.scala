@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.viz.sql
 
 import org.apache.sedona.viz.core.{ImageGenerator, ImageSerializableWrapper}
@@ -27,27 +26,33 @@ class standardVizOperatorTest extends VizTestBase {
   describe("SedonaViz SQL function Test") {
 
     it("Generate a single image") {
-      sparkSession.sql(
-        """
+      sparkSession
+        .sql("""
           |SELECT pixel, shape FROM pointtable
           |LATERAL VIEW EXPLODE(ST_Pixelize(shape, 256, 256, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000)) ) AS pixel
-        """.stripMargin).createOrReplaceTempView("pixels")
-      sparkSession.sql(
-        """
+        """.stripMargin)
+        .createOrReplaceTempView("pixels")
+      sparkSession
+        .sql("""
           |SELECT pixel, count(*) as weight
           |FROM pixels
           |GROUP BY pixel
-        """.stripMargin).createOrReplaceTempView("pixelaggregates")
-      sparkSession.sql(
-        """
+        """.stripMargin)
+        .createOrReplaceTempView("pixelaggregates")
+      sparkSession
+        .sql("""
           |SELECT ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates), 'red')) AS image
           |FROM pixelaggregates
-        """.stripMargin).createOrReplaceTempView("images")
-      var image = sparkSession.table("images").take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
+        """.stripMargin)
+        .createOrReplaceTempView("images")
+      var image =
+        sparkSession.table("images").take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
       var imageGenerator = new ImageGenerator
-      imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir") + "/target/points", ImageType.PNG)
-      val imageString = sparkSession.sql(
-        """
+      imageGenerator.SaveRasterImageAsLocalFile(
+        image,
+        System.getProperty("user.dir") + "/target/points",
+        ImageType.PNG)
+      val imageString = sparkSession.sql("""
           |SELECT ST_EncodeImage(image)
           |FROM images
         """.stripMargin)
@@ -55,12 +60,13 @@ class standardVizOperatorTest extends VizTestBase {
     }
 
     it("Generate a single image using a fat query") {
-      sparkSession.sql(
-        """
+      sparkSession
+        .sql("""
           |SELECT ST_Envelope_Aggr(shape) as bound FROM pointtable
-        """.stripMargin).createOrReplaceTempView("boundtable")
-      sparkSession.sql(
-        """
+        """.stripMargin)
+        .createOrReplaceTempView("boundtable")
+      sparkSession
+        .sql("""
           |SELECT pixel, shape FROM pointtable
           |LATERAL VIEW
           | EXPLODE(
@@ -70,16 +76,15 @@ class standardVizOperatorTest extends VizTestBase {
           |   256,
           |   (SELECT ST_Transform(bound, 'epsg:4326','epsg:3857') FROM boundtable)
           |  )) AS pixel
-        """.stripMargin).createOrReplaceTempView("pixels")
-      sparkSession.sql(
-        """
+        """.stripMargin)
+        .createOrReplaceTempView("pixels")
+      sparkSession.sql("""
           |CREATE OR REPLACE TEMP VIEW pixelaggregates AS
           |SELECT pixel, count(*) as weight
           |FROM pixels
           |GROUP BY pixel
         """.stripMargin)
-      val images = sparkSession.sql(
-        """
+      val images = sparkSession.sql("""
           |SELECT
           | ST_EncodeImage(ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates)))) AS image,
           | (SELECT ST_AsText(bound) FROM boundtable) AS boundary
@@ -89,13 +94,13 @@ class standardVizOperatorTest extends VizTestBase {
     }
 
     it("Passed the pipeline on points") {
-      sparkSession.sql(
-        """
+      sparkSession
+        .sql("""
           |SELECT pixel, shape FROM pointtable
           |LATERAL VIEW EXPLODE(ST_Pixelize(shape, 1000, 800, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel
-        """.stripMargin).createOrReplaceTempView("pixels")
-      sparkSession.sql(
-        """
+        """.stripMargin)
+        .createOrReplaceTempView("pixels")
+      sparkSession.sql("""
           |CREATE OR REPLACE TEMP VIEW pixelaggregates AS
           |SELECT pixel, count(*) as weight
           |FROM pixels
@@ -106,49 +111,51 @@ class standardVizOperatorTest extends VizTestBase {
     }
 
     it("Passed the pipeline on polygons") {
-      sparkSession.sql(
-        """
+      sparkSession
+        .sql("""
           |SELECT pixel, rate, shape FROM usdata
           |LATERAL VIEW EXPLODE(ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel
-        """.stripMargin).createOrReplaceTempView("pixels")
-      sparkSession.sql(
-        """
+        """.stripMargin)
+        .createOrReplaceTempView("pixels")
+      sparkSession.sql("""
           |CREATE OR REPLACE TEMP VIEW pixelaggregates AS
           |SELECT pixel, count(*) as weight
           |FROM pixels
           |GROUP BY pixel
         """.stripMargin)
-      val imageDf = sparkSession.sql(
-        """
+      val imageDf = sparkSession.sql("""
           |SELECT ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates))) AS image
           |FROM pixelaggregates
         """.stripMargin)
       var image = imageDf.take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
       var imageGenerator = new ImageGenerator
-      imageGenerator.SaveRasterImageAsLocalFile(image, System.getProperty("user.dir") + "/target/polygons", ImageType.PNG)
+      imageGenerator.SaveRasterImageAsLocalFile(
+        image,
+        System.getProperty("user.dir") + "/target/polygons",
+        ImageType.PNG)
     }
 
     it("Passed ST_TileName") {
       var zoomLevel = 2
-      sparkSession.sql(
-        """
+      sparkSession
+        .sql("""
           |SELECT pixel, shape FROM pointtable
           |LATERAL VIEW EXPLODE(ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel
-        """.stripMargin).createOrReplaceTempView("pixels")
-      sparkSession.sql(
-        """
+        """.stripMargin)
+        .createOrReplaceTempView("pixels")
+      sparkSession.sql("""
           |CREATE OR REPLACE TEMP VIEW pixelaggregates AS
           |SELECT pixel, count(*) as weight
           |FROM pixels
           |GROUP BY pixel
         """.stripMargin)
-      sparkSession.sql(
-        s"""
+      sparkSession
+        .sql(s"""
           |SELECT pixel, weight, ST_TileName(pixel, $zoomLevel) AS pid
           |FROM pixelaggregates
-        """.stripMargin).createOrReplaceTempView("pixel_weights")
-      val images = sparkSession.sql(
-        s"""
+        """.stripMargin)
+        .createOrReplaceTempView("pixel_weights")
+      val images = sparkSession.sql(s"""
           |SELECT ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates)), $zoomLevel) AS image
           |FROM pixel_weights
           |GROUP BY pid

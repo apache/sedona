@@ -13,10 +13,12 @@ It is important to confirm that your contribution is acceptable. You should crea
 Code contributions should include the following:
 
 * Detailed documentations on classes and methods.
-* Unit Tests to demonstrate code correctness and allow this to be maintained going forward.  In the case of bug fixes the unit test should demonstrate the bug in the absence of the fix (if any).  Unit Tests can be JUnit test or Scala test. Some Sedona functions need to be tested in both Scala and Java.
+* Unit Tests to demonstrate code correctness and allow this to be maintained going forward. In the case of bug fixes the unit test should demonstrate the bug in the absence of the fix (if any). Unit Tests can be JUnit test or Scala test. Some Sedona functions need to be tested in both Scala and Java.
 * Updates on corresponding Sedona documentation if necessary.
 
 Code contributions must include an Apache 2.0 license header at the top of each file.
+
+Please run `mvn spotless:apply` to format the code before making a pull request. If you've modified code for a specific spark version (for example, source files in spark/spark-3.5/), please add additional Maven CLI arguments to format that code: `mvn spotless:apply -Dscala=2.12 -Dspark=3.5`.
 
 ## Develop a document contribution
 

@@ -15,12 +15,13 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+import math
+import pickle
+
 from shapely.geometry import Polygon, box
 from shapely.geometry.base import BaseGeometry
 
 from sedona.utils.decorators import require
-import math
-import pickle
 
 
 class Envelope(Polygon):
@@ -54,10 +55,12 @@ class Envelope(Polygon):
     def __eq__(self, other) -> bool:
         minx, miny, maxx, maxy = self.bounds
         other_minx, other_miny, other_maxx, other_maxy = other.bounds
-        return self.isClose(minx, other_minx) and \
-                self.isClose(miny, other_miny) and \
-                self.isClose(maxx, other_maxx) and \
-                self.isClose(maxy, other_maxy)
+        return (
+            self.isClose(minx, other_minx)
+            and self.isClose(miny, other_miny)
+            and self.isClose(maxx, other_maxx)
+            and self.isClose(maxy, other_maxy)
+        )
 
     @require(["Envelope"])
     def create_jvm_instance(self, jvm):
@@ -75,6 +78,7 @@ class Envelope(Polygon):
 
     def to_bytes(self):
         from sedona.utils.binary_parser import BinaryBuffer
+
         minx, miny, maxx, maxy = self.bounds
         bin_buffer = BinaryBuffer()
         bin_buffer.put_double(minx)
@@ -108,6 +112,7 @@ class TmpEnvelopeForPickle:
     immutable.
 
     """
+
     def __init__(self, minx, maxx, miny, maxy):
         self.minx = minx
         self.maxx = maxx
@@ -115,11 +120,7 @@ class TmpEnvelopeForPickle:
         self.maxy = maxy
 
     def __getstate__(self):
-        return dict(
-            minx=self.minx,
-            maxx=self.maxx,
-            miny=self.miny,
-            maxy=self.maxy)
+        return dict(minx=self.minx, maxx=self.maxx, miny=self.miny, maxy=self.maxy)
 
     def __setstate__(self, state):
         minx = state.get("minx", 0)

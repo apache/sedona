@@ -10,6 +10,7 @@ on:
       - 'spark-shaded/**'
       - 'pom.xml'
       - 'R/**'
+      - '.github/workflows/r.yml'
   pull_request:
     branches:
       - '*'
@@ -19,13 +20,14 @@ on:
       - 'spark-shaded/**'
       - 'pom.xml'
       - 'R/**'
+      - '.github/workflows/r.yml'
 
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
+  DO_NOT_TRACK: true
 
 jobs:
   build:
-
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: true
@@ -34,7 +36,6 @@ jobs:
         hadoop: [3]
         scala: [2.12.15]
         r: [oldrel, release]
-
     env:
       SPARK_VERSION: ${{ matrix.spark }}
       HADOOP_VERSION: ${{ matrix.hadoop }}
@@ -59,12 +60,12 @@ jobs:
           sudo apt-get -y remove --purge default-jdk adoptopenjdk-11-hotspot || :
         shell: bash
       - uses: actions/checkout@v4
-      - uses: r-lib/actions/setup-r@v2
+      - uses: r-lib/actions/setup-r@v2.10.1
         with:
           r-version: ${{ matrix.r }}
           use-public-rspm: true
       - name: Query R dependencies
-        uses: r-lib/actions/setup-r-dependencies@v2
+        uses: r-lib/actions/setup-r-dependencies@v2.10.1
         with:
           cache: true
           extra-packages: |
@@ -72,7 +73,7 @@ jobs:
             any::rcmdcheck
           working-directory : './R'
       - name: Build and check R package
-        uses: r-lib/actions/check-r-package@v2
+        uses: r-lib/actions/check-r-package@v2.10.1
         with:
           build_args: 'c("--no-build-vignettes", "--no-manual")'
           args: 'c("--no-build-vignettes", "--no-manual", "--no-tests")'
@@ -101,10 +102,7 @@ jobs:
           key: apache.sedona-apache-spark-${{ steps.os-name.outputs.os-name }}-${{ env.SPARK_VERSION }}
       - name: Build Sedona libraries
         run: |
-          SPARK_COMPAT_VERSION="3.0"
-          if [ ${SPARK_VERSION:2:1} -gt "3" ]; then
-            SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
-          fi
+          SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
           mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4}
       - name: Run tests
         run: |

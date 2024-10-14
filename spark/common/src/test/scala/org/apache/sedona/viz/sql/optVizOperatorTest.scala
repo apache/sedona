@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.viz.sql
 
-import org.apache.sedona.viz.sql.operator.{AggregateWithinPartitons, VizPartitioner}
+import org.apache.sedona.viz.sql.operator.{AggregateWithinPartitions, VizPartitioner}
 import org.apache.sedona.viz.sql.utils.{Conf, LineageDecoder}
 import org.apache.spark.sql.functions.lit
 import org.locationtech.jts.geom.Envelope
@@ -29,8 +28,7 @@ class optVizOperatorTest extends VizTestBase {
   describe("SedonaViz SQL function Test") {
 
     it("Passed full pipeline using optimized operator") {
-      val table = sparkSession.sql(
-       """
+      val table = sparkSession.sql("""
          |SELECT pixel, shape FROM pointtable
          |LATERAL VIEW EXPLODE(ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel
         """.stripMargin)
@@ -44,13 +42,17 @@ class optVizOperatorTest extends VizTestBase {
       assert(newDf.rdd.getNumPartitions == secondaryPID)
 
       // Test aggregation within partitions
-      val result = AggregateWithinPartitons(newDf.withColumn("weight", lit(100.0)), "pixel", "weight", "avg")
+      val result =
+        AggregateWithinPartitions(
+          newDf.withColumn("weight", lit(100.0)),
+          "pixel",
+          "weight",
+          "avg")
       assert(result.rdd.getNumPartitions == secondaryPID)
 
       // Test the colorize operator
       result.createOrReplaceTempView("pixelaggregates")
-      val colorTable = sparkSession.sql(
-        s"""
+      val colorTable = sparkSession.sql(s"""
           |SELECT pixel, ${Conf.PrimaryPID}, ${Conf.SecondaryPID}, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates))
           |FROM pixelaggregates
         """.stripMargin)
@@ -59,8 +61,7 @@ class optVizOperatorTest extends VizTestBase {
     }
 
     it("Passed full pipeline - aggregate:avg - color:uniform") {
-      var table = sparkSession.sql(
-        """
+      var table = sparkSession.sql("""
           |SELECT pixel, shape FROM pointtable
           |LATERAL VIEW EXPLODE(ST_Pixelize(shape, 1000, 1000, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel
         """.stripMargin)
@@ -74,20 +75,19 @@ class optVizOperatorTest extends VizTestBase {
       assert(newDf.rdd.getNumPartitions == secondaryPID)
 
       // Test aggregation within partitions
-      val result = AggregateWithinPartitons(newDf, "pixel", "weight", "count")
+      val result = AggregateWithinPartitions(newDf, "pixel", "weight", "count")
       assert(result.rdd.getNumPartitions == secondaryPID)
 
       // Test the colorize operator
       result.createOrReplaceTempView("pixelaggregates")
-      val colorTable = sparkSession.sql(
-        s"""
+      val colorTable = sparkSession.sql(s"""
            |SELECT pixel, ${Conf.PrimaryPID}, ${Conf.SecondaryPID}, ST_Colorize(weight, 0, 'red')
            |FROM pixelaggregates
         """.stripMargin)
       colorTable.show(1)
     }
 
-    it("Passed lineage decoder"){
+    it("Passed lineage decoder") {
       assert(LineageDecoder("01") == "2-1-0")
       assert(LineageDecoder("12") == "2-2-1")
       assert(LineageDecoder("333") == "3-7-7")

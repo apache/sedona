@@ -28,7 +28,8 @@ import org.apache.spark.sql.types.{DataType, StringType}
 import org.apache.spark.unsafe.types.UTF8String
 
 case class ST_TileName(inputExpressions: Seq[Expression])
-  extends Expression with CodegenFallback {
+    extends Expression
+    with CodegenFallback {
   assert(inputExpressions.length == 2)
   override def nullable: Boolean = false
 

@@ -18,7 +18,6 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions.collect
 
-
 import org.apache.sedona.common.Functions
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
@@ -26,7 +25,7 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
-import org.apache.spark.sql.sedona_sql.expressions.SerdeAware
+import org.apache.spark.sql.sedona_sql.expressions.{InferredExpression, SerdeAware}
 import org.apache.spark.sql.types.{ArrayType, _}
 import org.locationtech.jts.geom.Geometry
 
@@ -56,13 +55,30 @@ case class ST_Collect(inputExpressions: Seq[Expression])
               .filter(_ != null)
               .map(_.toGeometry)
 
-            Functions.createMultiGeometry(geomElements.toArray)
+            try {
+              Functions.createMultiGeometry(geomElements.toArray)
+            } catch {
+              case e: Exception =>
+                InferredExpression.throwExpressionInferenceException(
+                  getClass.getSimpleName,
+                  Seq(geomElements),
+                  e)
+            }
+
           case _ => Functions.createMultiGeometry(Array())
         }
       case _ =>
         val geomElements =
           inputExpressions.map(_.toGeometry(input)).filter(_ != null)
-        Functions.createMultiGeometry(geomElements.toArray)
+        try {
+          Functions.createMultiGeometry(geomElements.toArray)
+        } catch {
+          case e: Exception =>
+            InferredExpression.throwExpressionInferenceException(
+              getClass.getSimpleName,
+              Seq(geomElements),
+              e)
+        }
     }
   }
 

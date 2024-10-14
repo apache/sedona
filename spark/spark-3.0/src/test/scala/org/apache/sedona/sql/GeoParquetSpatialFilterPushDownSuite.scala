@@ -32,6 +32,7 @@ import org.apache.spark.sql.execution.FileSourceScanExec
 import org.apache.spark.sql.execution.datasources.parquet.GeoParquetFileFormat
 import org.apache.spark.sql.execution.datasources.parquet.GeoParquetMetaData
 import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter
+import org.apache.spark.sql.execution.SimpleMode
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.GeometryFactory
@@ -42,7 +43,8 @@ import java.nio.file.Files
 
 class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrivenPropertyChecks {
 
-  val tempDir: String = Files.createTempDirectory("sedona_geoparquet_test_").toFile.getAbsolutePath
+  val tempDir: String =
+    Files.createTempDirectory("sedona_geoparquet_test_").toFile.getAbsolutePath
   val geoParquetDir: String = tempDir + "/geoparquet"
   var df: DataFrame = _
   var geoParquetDf: DataFrame = _
@@ -60,56 +62,112 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
 
   describe("GeoParquet spatial filter push down tests") {
     it("Push down ST_Contains") {
-      testFilter("ST_Contains(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom)", Seq(1))
-      testFilter("ST_Contains(ST_GeomFromText('POLYGON ((-16 14, -16 16, -14 16, -14 14, -16 14))'), geom)", Seq(0))
-      testFilter("ST_Contains(ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'), geom)", Seq.empty)
+      testFilter(
+        "ST_Contains(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom)",
+        Seq(1))
+      testFilter(
+        "ST_Contains(ST_GeomFromText('POLYGON ((-16 14, -16 16, -14 16, -14 14, -16 14))'), geom)",
+        Seq(0))
+      testFilter(
+        "ST_Contains(ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'), geom)",
+        Seq.empty)
       testFilter("ST_Contains(geom, ST_GeomFromText('POINT (15 -15)'))", Seq(3))
-      testFilter("ST_Contains(geom, ST_GeomFromText('POLYGON ((4 -5, 5 -5, 5 -4, 4 -4, 4 -5))'))", Seq(3))
-      testFilter("ST_Contains(geom, ST_GeomFromText('POLYGON ((1 -5, 5 -5, 5 -1, 1 -1, 1 -5))'))", Seq.empty)
+      testFilter(
+        "ST_Contains(geom, ST_GeomFromText('POLYGON ((4 -5, 5 -5, 5 -4, 4 -4, 4 -5))'))",
+        Seq(3))
+      testFilter(
+        "ST_Contains(geom, ST_GeomFromText('POLYGON ((1 -5, 5 -5, 5 -1, 1 -1, 1 -5))'))",
+        Seq.empty)
     }
 
     it("Push down ST_Covers") {
-      testFilter("ST_Covers(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom)", Seq(1))
-      testFilter("ST_Covers(ST_GeomFromText('POLYGON ((-16 14, -16 16, -14 16, -14 14, -16 14))'), geom)", Seq(0))
-      testFilter("ST_Covers(ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'), geom)", Seq.empty)
+      testFilter(
+        "ST_Covers(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom)",
+        Seq(1))
+      testFilter(
+        "ST_Covers(ST_GeomFromText('POLYGON ((-16 14, -16 16, -14 16, -14 14, -16 14))'), geom)",
+        Seq(0))
+      testFilter(
+        "ST_Covers(ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'), geom)",
+        Seq.empty)
       testFilter("ST_Covers(geom, ST_GeomFromText('POINT (15 -15)'))", Seq(3))
-      testFilter("ST_Covers(geom, ST_GeomFromText('POLYGON ((4 -5, 5 -5, 5 -4, 4 -4, 4 -5))'))", Seq(3))
-      testFilter("ST_Covers(geom, ST_GeomFromText('POLYGON ((1 -5, 5 -5, 5 -1, 1 -1, 1 -5))'))", Seq.empty)
+      testFilter(
+        "ST_Covers(geom, ST_GeomFromText('POLYGON ((4 -5, 5 -5, 5 -4, 4 -4, 4 -5))'))",
+        Seq(3))
+      testFilter(
+        "ST_Covers(geom, ST_GeomFromText('POLYGON ((1 -5, 5 -5, 5 -1, 1 -1, 1 -5))'))",
+        Seq.empty)
     }
 
     it("Push down ST_Within") {
-      testFilter("ST_Within(geom, ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'))", Seq(1))
-      testFilter("ST_Within(geom, ST_GeomFromText('POLYGON ((-16 14, -16 16, -14 16, -14 14, -16 14))'))", Seq(0))
-      testFilter("ST_Within(geom, ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'))", Seq.empty)
+      testFilter(
+        "ST_Within(geom, ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'))",
+        Seq(1))
+      testFilter(
+        "ST_Within(geom, ST_GeomFromText('POLYGON ((-16 14, -16 16, -14 16, -14 14, -16 14))'))",
+        Seq(0))
+      testFilter(
+        "ST_Within(geom, ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'))",
+        Seq.empty)
       testFilter("ST_Within(ST_GeomFromText('POINT (15 -15)'), geom)", Seq(3))
-      testFilter("ST_Within(ST_GeomFromText('POLYGON ((4 -5, 5 -5, 5 -4, 4 -4, 4 -5))'), geom)", Seq(3))
-      testFilter("ST_Within(ST_GeomFromText('POLYGON ((1 -5, 5 -5, 5 -1, 1 -1, 1 -5))'), geom)", Seq.empty)
+      testFilter(
+        "ST_Within(ST_GeomFromText('POLYGON ((4 -5, 5 -5, 5 -4, 4 -4, 4 -5))'), geom)",
+        Seq(3))
+      testFilter(
+        "ST_Within(ST_GeomFromText('POLYGON ((1 -5, 5 -5, 5 -1, 1 -1, 1 -5))'), geom)",
+        Seq.empty)
     }
 
     it("Push down ST_CoveredBy") {
-      testFilter("ST_CoveredBy(geom, ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'))", Seq(1))
-      testFilter("ST_CoveredBy(geom, ST_GeomFromText('POLYGON ((-16 14, -16 16, -14 16, -14 14, -16 14))'))", Seq(0))
-      testFilter("ST_CoveredBy(geom, ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'))", Seq.empty)
+      testFilter(
+        "ST_CoveredBy(geom, ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'))",
+        Seq(1))
+      testFilter(
+        "ST_CoveredBy(geom, ST_GeomFromText('POLYGON ((-16 14, -16 16, -14 16, -14 14, -16 14))'))",
+        Seq(0))
+      testFilter(
+        "ST_CoveredBy(geom, ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'))",
+        Seq.empty)
       testFilter("ST_CoveredBy(ST_GeomFromText('POINT (15 -15)'), geom)", Seq(3))
-      testFilter("ST_CoveredBy(ST_GeomFromText('POLYGON ((4 -5, 5 -5, 5 -4, 4 -4, 4 -5))'), geom)", Seq(3))
-      testFilter("ST_CoveredBy(ST_GeomFromText('POLYGON ((1 -5, 5 -5, 5 -1, 1 -1, 1 -5))'), geom)", Seq.empty)
+      testFilter(
+        "ST_CoveredBy(ST_GeomFromText('POLYGON ((4 -5, 5 -5, 5 -4, 4 -4, 4 -5))'), geom)",
+        Seq(3))
+      testFilter(
+        "ST_CoveredBy(ST_GeomFromText('POLYGON ((1 -5, 5 -5, 5 -1, 1 -1, 1 -5))'), geom)",
+        Seq.empty)
     }
 
     it("Push down ST_Intersects") {
-      testFilter("ST_Intersects(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom)", Seq(1))
-      testFilter("ST_Intersects(ST_GeomFromText('POLYGON ((-16 14, -16 16, -14 16, -14 14, -16 14))'), geom)", Seq(0))
-      testFilter("ST_Intersects(geom, ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'))", Seq.empty)
+      testFilter(
+        "ST_Intersects(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom)",
+        Seq(1))
+      testFilter(
+        "ST_Intersects(ST_GeomFromText('POLYGON ((-16 14, -16 16, -14 16, -14 14, -16 14))'), geom)",
+        Seq(0))
+      testFilter(
+        "ST_Intersects(geom, ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'))",
+        Seq.empty)
       testFilter("ST_Intersects(geom, ST_GeomFromText('POINT (15 -15)'))", Seq(3))
-      testFilter("ST_Intersects(geom, ST_GeomFromText('POLYGON ((4 -5, 5 -5, 5 -4, 4 -4, 4 -5))'))", Seq(3))
-      testFilter("ST_Intersects(geom, ST_GeomFromText('POLYGON ((1 -5, 5 -5, 5 -1, 1 -1, 1 -5))'))", Seq(3))
-      testFilter("ST_Intersects(geom, ST_GeomFromText('POLYGON ((5 -5, 15 -5, 15 5, 5 5, 5 -5))'))", Seq(1, 3))
+      testFilter(
+        "ST_Intersects(geom, ST_GeomFromText('POLYGON ((4 -5, 5 -5, 5 -4, 4 -4, 4 -5))'))",
+        Seq(3))
+      testFilter(
+        "ST_Intersects(geom, ST_GeomFromText('POLYGON ((1 -5, 5 -5, 5 -1, 1 -1, 1 -5))'))",
+        Seq(3))
+      testFilter(
+        "ST_Intersects(geom, ST_GeomFromText('POLYGON ((5 -5, 15 -5, 15 5, 5 5, 5 -5))'))",
+        Seq(1, 3))
     }
 
     it("Push down ST_Equals") {
-      testFilter("ST_Equals(geom, ST_GeomFromText('POLYGON ((-16 -16, -16 -14, -14 -14, -14 -16, -16 -16))'))", Seq(2))
+      testFilter(
+        "ST_Equals(geom, ST_GeomFromText('POLYGON ((-16 -16, -16 -14, -14 -14, -14 -16, -16 -16))'))",
+        Seq(2))
       testFilter("ST_Equals(geom, ST_GeomFromText('POINT (-15 -15)'))", Seq(2))
       testFilter("ST_Equals(geom, ST_GeomFromText('POINT (-16 -16)'))", Seq(2))
-      testFilter("ST_Equals(geom, ST_GeomFromText('POLYGON ((1 -5, 5 -5, 5 -1, 1 -1, 1 -5))'))", Seq.empty)
+      testFilter(
+        "ST_Equals(geom, ST_GeomFromText('POLYGON ((1 -5, 5 -5, 5 -1, 1 -1, 1 -5))'))",
+        Seq.empty)
     }
 
     forAll(Table("<", "<=")) { op =>
@@ -119,38 +177,81 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
         testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (3 4)')) $op 1", Seq(1))
         testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (0 0)')) $op 7.1", Seq(0, 1, 2, 3))
         testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (-5 -5)')) $op 1", Seq(2))
-        testFilter(s"ST_Distance(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 2", Seq.empty)
-        testFilter(s"ST_Distance(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 3", Seq(0, 1, 2, 3))
-        testFilter(s"ST_Distance(geom, ST_GeomFromText('LINESTRING (17 17, 18 18)')) $op 1", Seq(1))
+        testFilter(
+          s"ST_Distance(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 2",
+          Seq.empty)
+        testFilter(
+          s"ST_Distance(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 3",
+          Seq(0, 1, 2, 3))
+        testFilter(
+          s"ST_Distance(geom, ST_GeomFromText('LINESTRING (17 17, 18 18)')) $op 1",
+          Seq(1))
       }
     }
 
     it("Push down And(filters...)") {
-      testFilter("ST_Intersects(geom, ST_GeomFromText('POLYGON ((5 -5, 15 -5, 15 5, 5 5, 5 -5))')) AND ST_Intersects(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom)", Seq(1))
-      testFilter("ST_Intersects(geom, ST_GeomFromText('POLYGON ((5 -5, 15 -5, 15 5, 5 5, 5 -5))')) AND ST_Intersects(geom, ST_GeomFromText('POLYGON ((4 -5, 5 -5, 5 -4, 4 -4, 4 -5))'))", Seq(3))
+      testFilter(
+        "ST_Intersects(geom, ST_GeomFromText('POLYGON ((5 -5, 15 -5, 15 5, 5 5, 5 -5))')) AND ST_Intersects(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom)",
+        Seq(1))
+      testFilter(
+        "ST_Intersects(geom, ST_GeomFromText('POLYGON ((5 -5, 15 -5, 15 5, 5 5, 5 -5))')) AND ST_Intersects(geom, ST_GeomFromText('POLYGON ((4 -5, 5 -5, 5 -4, 4 -4, 4 -5))'))",
+        Seq(3))
     }
 
     it("Push down Or(filters...)") {
-      testFilter("ST_Intersects(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom) OR ST_Intersects(ST_GeomFromText('POLYGON ((-16 14, -16 16, -14 16, -14 14, -16 14))'), geom)", Seq(0, 1))
-      testFilter("ST_Distance(geom, ST_GeomFromText('POINT (-5 -5)')) <= 1 OR ST_Intersects(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom)", Seq(1, 2))
+      testFilter(
+        "ST_Intersects(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom) OR ST_Intersects(ST_GeomFromText('POLYGON ((-16 14, -16 16, -14 16, -14 14, -16 14))'), geom)",
+        Seq(0, 1))
+      testFilter(
+        "ST_Distance(geom, ST_GeomFromText('POINT (-5 -5)')) <= 1 OR ST_Intersects(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom)",
+        Seq(1, 2))
     }
 
     it("Ignore negated spatial filters") {
-      testFilter("NOT ST_Contains(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom)", Seq(0, 1, 2, 3))
-      testFilter("ST_Contains(geom, ST_GeomFromText('POLYGON ((4 -5, 5 -5, 5 -4, 4 -4, 4 -5))')) AND NOT ST_Contains(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom)", Seq(3))
-      testFilter("ST_Contains(geom, ST_GeomFromText('POLYGON ((4 -5, 5 -5, 5 -4, 4 -4, 4 -5))')) OR NOT ST_Contains(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom)", Seq(0, 1, 2, 3))
+      testFilter(
+        "NOT ST_Contains(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom)",
+        Seq(0, 1, 2, 3))
+      testFilter(
+        "ST_Contains(geom, ST_GeomFromText('POLYGON ((4 -5, 5 -5, 5 -4, 4 -4, 4 -5))')) AND NOT ST_Contains(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom)",
+        Seq(3))
+      testFilter(
+        "ST_Contains(geom, ST_GeomFromText('POLYGON ((4 -5, 5 -5, 5 -4, 4 -4, 4 -5))')) OR NOT ST_Contains(ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), geom)",
+        Seq(0, 1, 2, 3))
     }
 
     it("Mixed spatial filter with other filter") {
-      testFilter("id < 10 AND ST_Intersects(geom, ST_GeomFromText('POLYGON ((5 -5, 15 -5, 15 5, 5 5, 5 -5))'))", Seq(1, 3))
+      testFilter(
+        "id < 10 AND ST_Intersects(geom, ST_GeomFromText('POLYGON ((5 -5, 15 -5, 15 5, 5 5, 5 -5))'))",
+        Seq(1, 3))
+    }
+
+    it("Explain geoparquet scan with spatial filter push-down") {
+      val dfFiltered = geoParquetDf.where(
+        "ST_Intersects(geom, ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'))")
+      val explainString = dfFiltered.queryExecution.explainString(SimpleMode)
+      assert(explainString.contains("FileScan geoparquet"))
+      assert(explainString.contains("with spatial filter"))
+    }
+
+    it("Manually disable spatial filter push-down") {
+      withConf(Map("spark.sedona.geoparquet.spatialFilterPushDown" -> "false")) {
+        val dfFiltered = geoParquetDf.where(
+          "ST_Intersects(geom, ST_GeomFromText('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'))")
+        val explainString = dfFiltered.queryExecution.explainString(SimpleMode)
+        assert(explainString.contains("FileScan geoparquet"))
+        assert(!explainString.contains("with spatial filter"))
+        assert(getPushedDownSpatialFilter(dfFiltered).isEmpty)
+      }
     }
   }
 
   /**
-   * Test filter push down using specified query condition, and verify if the pushed down filter prunes regions as
-   * expected. We'll also verify the correctness of query results.
-   * @param condition SQL query condition
-   * @param expectedPreservedRegions Regions that should be preserved after filter push down
+   * Test filter push down using specified query condition, and verify if the pushed down filter
+   * prunes regions as expected. We'll also verify the correctness of query results.
+   * @param condition
+   *   SQL query condition
+   * @param expectedPreservedRegions
+   *   Regions that should be preserved after filter push down
    */
   private def testFilter(condition: String, expectedPreservedRegions: Seq[Int]): Unit = {
     val dfFiltered = geoParquetDf.where(condition)
@@ -159,7 +260,8 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
       case None => (0 until 4)
     }
     assert(expectedPreservedRegions == preservedRegions)
-    val expectedResult = df.where(condition).orderBy("region", "id").select("region", "id").collect()
+    val expectedResult =
+      df.where(condition).orderBy("region", "id").select("region", "id").collect()
     val actualResult = dfFiltered.orderBy("region", "id").select("region", "id").collect()
     assert(expectedResult sameElements actualResult)
   }
@@ -174,9 +276,12 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
   }
 
   private def resolvePreservedRegions(spatialFilter: GeoParquetSpatialFilter): Seq[Int] = {
-    geoParquetMetaDataMap.filter { case (_, metaDataList) =>
-      metaDataList.exists(metadata => spatialFilter.evaluate(metadata.columns))
-    }.keys.toSeq
+    geoParquetMetaDataMap
+      .filter { case (_, metaDataList) =>
+        metaDataList.exists(metadata => spatialFilter.evaluate(metadata.columns))
+      }
+      .keys
+      .toSeq
   }
 }
 
@@ -184,15 +289,19 @@ object GeoParquetSpatialFilterPushDownSuite {
   case class TestDataItem(id: Int, region: Int, geom: Geometry)
 
   /**
-   * Generate test data centered at (0, 0). The entire dataset was divided into 4 quadrants, each with a unique
-   * region ID. The dataset contains 4 points and 4 polygons in each quadrant.
-   * @param sparkSession SparkSession object
-   * @return DataFrame containing test data
+   * Generate test data centered at (0, 0). The entire dataset was divided into 4 quadrants, each
+   * with a unique region ID. The dataset contains 4 points and 4 polygons in each quadrant.
+   * @param sparkSession
+   *   SparkSession object
+   * @return
+   *   DataFrame containing test data
    */
   def generateTestData(sparkSession: SparkSession): DataFrame = {
     import sparkSession.implicits._
     val regionCenters = Seq((-10, 10), (10, 10), (-10, -10), (10, -10))
-    val testData = regionCenters.zipWithIndex.flatMap { case ((x, y), i) => generateTestDataForRegion(i, x, y) }
+    val testData = regionCenters.zipWithIndex.flatMap { case ((x, y), i) =>
+      generateTestDataForRegion(i, x, y)
+    }
     testData.toDF()
   }
 
@@ -202,8 +311,7 @@ object GeoParquetSpatialFilterPushDownSuite {
       factory.createPoint(new Coordinate(centerX - 5, centerY + 5)),
       factory.createPoint(new Coordinate(centerX + 5, centerY + 5)),
       factory.createPoint(new Coordinate(centerX - 5, centerY - 5)),
-      factory.createPoint(new Coordinate(centerX + 5, centerY - 5))
-    )
+      factory.createPoint(new Coordinate(centerX + 5, centerY - 5)))
     val polygons = points.map { p =>
       val envelope = p.getEnvelopeInternal
       envelope.expandBy(1)
@@ -213,20 +321,25 @@ object GeoParquetSpatialFilterPushDownSuite {
   }
 
   /**
-   * Write the test dataframe as GeoParquet files. Each region is written to a separate file. We'll test spatial
-   * filter push down by examining which regions were preserved/pruned by evaluating the pushed down spatial filters
-   * @param testData dataframe containing test data
-   * @param path path to write GeoParquet files
+   * Write the test dataframe as GeoParquet files. Each region is written to a separate file.
+   * We'll test spatial filter push down by examining which regions were preserved/pruned by
+   * evaluating the pushed down spatial filters
+   * @param testData
+   *   dataframe containing test data
+   * @param path
+   *   path to write GeoParquet files
    */
   def writeTestDataAsGeoParquet(testData: DataFrame, path: String): Unit = {
     testData.coalesce(1).write.partitionBy("region").format("geoparquet").save(path)
   }
 
   /**
-   * Load GeoParquet metadata for each region. Note that there could be multiple files for each region, thus each
-   * region ID was associated with a list of GeoParquet metadata.
-   * @param path path to directory containing GeoParquet files
-   * @return Map of region ID to list of GeoParquet metadata
+   * Load GeoParquet metadata for each region. Note that there could be multiple files for each
+   * region, thus each region ID was associated with a list of GeoParquet metadata.
+   * @param path
+   *   path to directory containing GeoParquet files
+   * @return
+   *   Map of region ID to list of GeoParquet metadata
    */
   def readGeoParquetMetaDataMap(path: String): Map[Int, Seq[GeoParquetMetaData]] = {
     (0 until 4).map { k =>
@@ -235,12 +348,18 @@ object GeoParquetSpatialFilterPushDownSuite {
     }.toMap
   }
 
-  private def readGeoParquetMetaDataByRegion(geoParquetSavePath: String, region: Int): Seq[GeoParquetMetaData] = {
-    val parquetFiles = new File(geoParquetSavePath + s"/region=$region").listFiles().filter(_.getName.endsWith(".parquet"))
+  private def readGeoParquetMetaDataByRegion(
+      geoParquetSavePath: String,
+      region: Int): Seq[GeoParquetMetaData] = {
+    val parquetFiles = new File(geoParquetSavePath + s"/region=$region")
+      .listFiles()
+      .filter(_.getName.endsWith(".parquet"))
     parquetFiles.flatMap { filePath =>
-      val metadata = ParquetFileReader.open(
-        HadoopInputFile.fromPath(new Path(filePath.getPath), new Configuration()))
-        .getFooter.getFileMetaData.getKeyValueMetaData
+      val metadata = ParquetFileReader
+        .open(HadoopInputFile.fromPath(new Path(filePath.getPath), new Configuration()))
+        .getFooter
+        .getFileMetaData
+        .getKeyValueMetaData
       assert(metadata.containsKey("geo"))
       GeoParquetMetaData.parseKeyValueMetaData(metadata)
     }

@@ -25,6 +25,16 @@ println(sedonaConf)
 sparkSession.conf.set("sedona.global.index","false")
 ```
 
+In addition, you can also add `spark` prefix to the parameter name, for example:
+
+```scala
+sparkSession.conf.set("spark.sedona.global.index","false")
+```
+
+However, any parameter set through `spark` prefix will be honored by Spark, which means you can set these parameters before hand via `spark-defaults.conf` or Spark on Kubernetes configuration.
+
+If you set the same parameter through both `sedona` and `spark.sedona` prefixes, the parameter set through `sedona` prefix will override the parameter set through `spark.sedona` prefix.
+
 ## Explanation
 
 * sedona.global.index
@@ -44,6 +54,10 @@ sparkSession.conf.set("sedona.global.index","false")
 	* Spatial partitioning grid type for join query
 	* Default: kdbtree
 	* Possible values: quadtree, kdbtree
+* spark.sedona.join.knn.includeTieBreakers
+	* KNN join will include all ties in the result, possibly returning more than k results
+	* Default: false
+	* Possible values: true, false
 * sedona.join.indexbuildside **(Advanced users only!)**
 	* The side which Sedona builds spatial indices on
 	* Default: left
@@ -63,3 +77,7 @@ sparkSession.conf.set("sedona.global.index","false")
 		* all: Always optimize spatial join queries, even for equi-joins.
 		* none: Disable optimization for spatial joins.
 		* nonequi: Optimize spatial join queries that are not equi-joins.
+* spark.sedona.enableParserExtension
+	* Enable the parser extension to parse GEOMETRY data type in SQL DDL statements
+	* Default: true
+	* Possible values: true, false

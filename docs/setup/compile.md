@@ -149,6 +149,7 @@ pip install mkdocs-material
 pip install mkdocs-macros-plugin
 pip install mkdocs-git-revision-date-localized-plugin
 pip install mike
+pip install pymdown-extensions
 ```
 
 After installing MkDocs and MkDocs-Material, run these commands in the Sedona root folder:

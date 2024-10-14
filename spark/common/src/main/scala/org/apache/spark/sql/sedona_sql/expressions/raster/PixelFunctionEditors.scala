@@ -21,22 +21,24 @@ package org.apache.spark.sql.sedona_sql.expressions.raster
 import org.apache.sedona.common.raster.PixelFunctionEditors
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferrableRasterTypes._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
-case class RS_SetValues(inputExpressions: Seq[Expression]) extends InferredExpression(
-  inferrableFunction8(PixelFunctionEditors.setValues),
-  inferrableFunction7(PixelFunctionEditors.setValues), inferrableFunction5(PixelFunctionEditors.setValues),
-  inferrableFunction4(PixelFunctionEditors.setValues)
-) {
+case class RS_SetValues(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction8(PixelFunctionEditors.setValues),
+      inferrableFunction7(PixelFunctionEditors.setValues),
+      inferrableFunction5(PixelFunctionEditors.setValues),
+      inferrableFunction4(PixelFunctionEditors.setValues)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-case class RS_SetValue(inputExpressions: Seq[Expression]) extends InferredExpression(
-  inferrableFunction5(PixelFunctionEditors.setValue),
-  inferrableFunction4(PixelFunctionEditors.setValue)
-) {
+case class RS_SetValue(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction5(PixelFunctionEditors.setValue),
+      inferrableFunction4(PixelFunctionEditors.setValue)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

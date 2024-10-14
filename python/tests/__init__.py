@@ -19,27 +19,46 @@ import os
 
 from tests.tools import tests_resource
 
-
 mixed_wkb_geometry_input_location = os.path.join(tests_resource, "county_small_wkb.tsv")
 mixed_wkt_geometry_input_location = os.path.join(tests_resource, "county_small.tsv")
 shape_file_input_location = os.path.join(tests_resource, "shapefiles/dbf")
-shape_file_with_missing_trailing_input_location = os.path.join(tests_resource, "shapefiles/missing")
+shape_file_with_missing_trailing_input_location = os.path.join(
+    tests_resource, "shapefiles/missing"
+)
 geojson_input_location = os.path.join(tests_resource, "testPolygon.json")
 area_lm_point_input_location = os.path.join(tests_resource, "arealm.csv")
 csv_point_input_location = os.path.join(tests_resource, "testpoint.csv")
 csv_polygon_input_location = os.path.join(tests_resource, "testenvelope.csv")
-csv_polygon1_input_location = os.path.join(tests_resource, "equalitycheckfiles/testequals_envelope1.csv")
-csv_polygon2_input_location = os.path.join(tests_resource, "equalitycheckfiles/testequals_envelope2.csv")
-csv_polygon1_random_input_location = os.path.join(tests_resource, "equalitycheckfiles/testequals_envelope1_random.csv")
-csv_polygon2_random_input_location = os.path.join(tests_resource, "equalitycheckfiles/testequals_envelope2_random.csv")
-overlap_polygon_input_location = os.path.join(tests_resource, "testenvelope_overlap.csv")
+csv_polygon1_input_location = os.path.join(
+    tests_resource, "equalitycheckfiles/testequals_envelope1.csv"
+)
+csv_polygon2_input_location = os.path.join(
+    tests_resource, "equalitycheckfiles/testequals_envelope2.csv"
+)
+csv_polygon1_random_input_location = os.path.join(
+    tests_resource, "equalitycheckfiles/testequals_envelope1_random.csv"
+)
+csv_polygon2_random_input_location = os.path.join(
+    tests_resource, "equalitycheckfiles/testequals_envelope2_random.csv"
+)
+overlap_polygon_input_location = os.path.join(
+    tests_resource, "testenvelope_overlap.csv"
+)
 union_polygon_input_location = os.path.join(tests_resource, "testunion.csv")
-csv_point1_input_location = os.path.join(tests_resource, "equalitycheckfiles/testequals_point1.csv")
-csv_point2_input_location = os.path.join(tests_resource, "equalitycheckfiles/testequals_point2.csv")
+csv_point1_input_location = os.path.join(
+    tests_resource, "equalitycheckfiles/testequals_point1.csv"
+)
+csv_point2_input_location = os.path.join(
+    tests_resource, "equalitycheckfiles/testequals_point2.csv"
+)
 geojson_id_input_location = os.path.join(tests_resource, "testContainsId.json")
 geoparquet_input_location = os.path.join(tests_resource, "geoparquet/example1.parquet")
 plain_parquet_input_location = os.path.join(tests_resource, "geoparquet/plain.parquet")
-legacy_parquet_input_location = os.path.join(tests_resource, "parquet/legacy-parquet-nested-columns.snappy.parquet")
+legacy_parquet_input_location = os.path.join(
+    tests_resource, "parquet/legacy-parquet-nested-columns.snappy.parquet"
+)
 google_buildings_input_location = os.path.join(tests_resource, "813_buildings_test.csv")
 chicago_crimes_input_location = os.path.join(tests_resource, "Chicago_Crimes.csv")
-world_map_raster_input_location = os.path.join(tests_resource, "raster/raster_with_no_data/test5.tiff")
+world_map_raster_input_location = os.path.join(
+    tests_resource, "raster/raster_with_no_data/test5.tiff"
+)

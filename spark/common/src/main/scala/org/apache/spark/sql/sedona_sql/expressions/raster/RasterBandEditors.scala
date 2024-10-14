@@ -21,33 +21,48 @@ package org.apache.spark.sql.sedona_sql.expressions.raster
 import org.apache.sedona.common.raster.RasterBandEditors
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferrableRasterTypes._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
-case class RS_SetBandNoDataValue(inputExpressions: Seq[Expression]) extends InferredExpression(
-  inferrableFunction4(RasterBandEditors.setBandNoDataValue),
-  inferrableFunction3(RasterBandEditors.setBandNoDataValue),
-  inferrableFunction2(RasterBandEditors.setBandNoDataValue)
-) {
+case class RS_SetBandNoDataValue(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction4(RasterBandEditors.setBandNoDataValue),
+      inferrableFunction3(RasterBandEditors.setBandNoDataValue),
+      inferrableFunction2(RasterBandEditors.setBandNoDataValue)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-case class RS_AddBand(inputExpressions: Seq[Expression]) extends InferredExpression(
-  inferrableFunction4(RasterBandEditors.addBand),
-  inferrableFunction3(RasterBandEditors.addBand),
-  inferrableFunction2(RasterBandEditors.addBand)
-) {
+case class RS_AddBand(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction4(RasterBandEditors.addBand),
+      inferrableFunction3(RasterBandEditors.addBand),
+      inferrableFunction2(RasterBandEditors.addBand)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-case class RS_Clip(inputExpressions: Seq[Expression]) extends InferredExpression(
-  inferrableFunction5(RasterBandEditors.clip),
-  inferrableFunction4(RasterBandEditors.clip),
-  inferrableFunction3(RasterBandEditors.clip)
-) {
+case class RS_Union(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction2(RasterBandEditors.rasterUnion),
+      inferrableFunction3(RasterBandEditors.rasterUnion),
+      inferrableFunction4(RasterBandEditors.rasterUnion),
+      inferrableFunction5(RasterBandEditors.rasterUnion),
+      inferrableFunction6(RasterBandEditors.rasterUnion),
+      inferrableFunction7(RasterBandEditors.rasterUnion)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class RS_Clip(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction6(RasterBandEditors.clip),
+      inferrableFunction5(RasterBandEditors.clip),
+      inferrableFunction4(RasterBandEditors.clip),
+      inferrableFunction3(RasterBandEditors.clip)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

@@ -10,17 +10,17 @@ We recommend [Intellij IDEA](https://www.jetbrains.com/idea/) with Scala plugin 
 
 #### Choose `Open`
 
-![](../image/ide-java-1.png)
+![Import the project by clicking Open](../image/ide-java-1.png)
 
 #### Go to the Sedona root folder (not a submodule folder) and choose `open`
 
-![](../image/ide-java-2.png)
+![Open the Sedona root folder](../image/ide-java-2.png)
 
 #### The IDE might show errors
 
 The IDE usually has trouble understanding the complex project structure in Sedona.
 
-![](../image/ide-java-4.png)
+![The IDE usually has trouble understanding the project](../image/ide-java-4.png)
 
 #### Fix errors by changing `pom.xml`
 
@@ -39,11 +39,11 @@ You need to comment out the following lines in `pom.xml` at the root folder, as 
 
 Make sure you reload the `pom.xml` or reload the maven project. The IDE will ask you to remove some modules. Please select `yes`.
 
-![](../image/ide-java-5.png)
+![Reload the Maven project](../image/ide-java-5.png)
 
 #### The final project structure should be like this:
 
-![](../image/ide-java-3.png)
+![The final correct project structure](../image/ide-java-3.png)
 
 ### Run unit tests
 
@@ -60,23 +60,46 @@ More details can be found on [Compile Sedona](../setup/compile.md)
 
 In the IDE, right-click a test case and run this test case.
 
-![](../image/ide-java-6.png)
+![Right click a test case to run](../image/ide-java-6.png)
 
-The IDE might tell you that the PATH does not exist as follows:
+When you run a test case written in Scala, the IDE might tell you that the "Path does not exist" as follows:
 
-![](../image/ide-java-7.png)
+![Path does not exist](../image/ide-java-7.png)
 
 Go to `Edit Configuration`
 
-![](../image/ide-java-8.png)
+![Edit Configuration](../image/ide-java-8.png)
 
-Append the submodule folder to `Working Directory`. For example, `sedona/sql`.
+Change the value of `Working Directory` to `$MODULE_WORKING_DIR$`.
 
-![](../image/ide-java-9.png)
+![Change the working directory](../image/ide-java-9.png)
 
 Re-run the test case. Do NOT right-click the test case to re-run. Instead, click the button as shown in the figure below.
 
-![](../image/ide-java-10.png)
+![Re-run test case by clicking the button](../image/ide-java-10.png)
+
+If you don't want to change the `Working Directory` configuration every time, you can change the default value of `Working Directory`
+in the `Run/Debug Configurations` window. Click `Edit configuration templates...` and change the value
+of `Working Directory` of ScalaTest to `$MODULE_WORKING_DIR$`.
+
+![Run/Debug Configurations click Edit configuration templates](../image/ide-java-11.png)
+![Set ScalaTest Working directory](../image/ide-java-12.png)
+
+Now newly created run configurations for ScalaTest will have the correct value set for `Working Directory`.
+
+### IDE Configurations When Using Java 11
+
+If you are using Java 11, you may encounter the following error when running tests:
+
+```
+/path/to/sedona/common/src/main/java/org/apache/sedona/common/geometrySerde/UnsafeGeometryBuffer.java
+package sun.misc does not exist
+sun.misc.Unsafe
+```
+
+You can fix this issue by disabling `Use '--release' option for cross-compilation` in the IDE settings.
+
+![Disable "Use '--release' option for cross-compilation" when using Java 11](../image/ide-java-13.png)
 
 ## Python developers
 

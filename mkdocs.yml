@@ -1,121 +1,126 @@
 site_name: Apache Sedona&trade;
 site_description: Apache Sedona&trade; is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark, Apache Flink, and Snowflake, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
 nav:
-    - Home: index.md
-    - Setup:
+  - Home: index.md
+  - Setup:
       - Overview: setup/overview.md
       - Supported platforms:
-        - Sedona with Apache Spark:
-          - Modules: setup/modules.md
-          - Language wrappers: setup/platform.md
-        - Sedona with Apache Flink:
-          - Modules: setup/flink/modules.md
-          - Language wrappers: setup/flink/platform.md
-        - Sedona with Snowflake:
-          - Modules: setup/snowflake/modules.md
+          - Sedona with Apache Spark:
+              - Modules: setup/modules.md
+              - Language wrappers: setup/platform.md
+          - Sedona with Apache Flink:
+              - Modules: setup/flink/modules.md
+              - Language wrappers: setup/flink/platform.md
+          - Sedona with Snowflake:
+              - Modules: setup/snowflake/modules.md
       - Maven Central coordinate: setup/maven-coordinates.md
       - Install with Apache Spark:
-        - Install Sedona Scala/Java: setup/install-scala.md
-        - Install Sedona Python: setup/install-python.md
-        - Install Sedona R: api/rdocs
-        - Install Sedona-Zeppelin: setup/zeppelin.md
-        - Play Sedona in Docker: setup/docker.md
-        - Install on Wherobots: setup/wherobots.md
-        - Install on Databricks: setup/databricks.md
-        - Install on AWS EMR: setup/emr.md
-        - Install on Microsoft Fabric: setup/fabric.md
-        - Set up Spark cluster manually: setup/cluster.md
+          - Install Sedona Scala/Java: setup/install-scala.md
+          - Install Sedona Python: setup/install-python.md
+          - Install Sedona R: api/rdocs
+          - Install Sedona-Zeppelin: setup/zeppelin.md
+          - Play Sedona in Docker: setup/docker.md
+          - Install on Wherobots: setup/wherobots.md
+          - Install on Databricks: setup/databricks.md
+          - Install on AWS EMR: setup/emr.md
+          - Install on AWS Glue: setup/glue.md
+          - Install on Microsoft Fabric: setup/fabric.md
+          - Set up Spark cluster manually: setup/cluster.md
       - Install with Apache Flink:
-        - Install Sedona Scala/Java: setup/flink/install-scala.md
+          - Install Sedona Scala/Java: setup/flink/install-scala.md
       - Install with Snowflake:
-        - Install Sedona SQL: setup/snowflake/install.md
+          - Install Sedona SQL: setup/snowflake/install.md
       - Release notes: setup/release-notes.md
       - Compile the code: setup/compile.md
-    - Download: download.md
-    - Programming Guides:
+  - Download: download.md
+  - Programming Guides:
       - Sedona with Apache Spark:
-        - Spatial SQL app: tutorial/sql.md
-        - Raster SQL app: tutorial/raster.md
-        - Pure SQL environment: tutorial/sql-pure-sql.md
-        - Spatial RDD app: tutorial/rdd.md
-        - Sedona R: api/rdocs
-        - Work with GeoPandas and Shapely: tutorial/geopandas-shapely.md
-        - Map visualization SQL app:
-          - Scala/Java: tutorial/viz.md
-          - Use Apache Zeppelin: tutorial/zeppelin.md
-          - Gallery: tutorial/viz-gallery.md
-        - Performance tuning:
-          - Benchmark: tutorial/benchmark.md
-          - Tune RDD application: tutorial/Advanced-Tutorial-Tune-your-Application.md
-          - Storing large raster geometries in Parquet files: tutorial/storing-blobs-in-parquet.md
+          - Spatial SQL app: tutorial/sql.md
+          - Raster SQL app: tutorial/raster.md
+          - Pure SQL environment: tutorial/sql-pure-sql.md
+          - Spatial RDD app: tutorial/rdd.md
+          - Sedona R: api/rdocs
+          - Work with GeoPandas and Shapely: tutorial/geopandas-shapely.md
+          - Map visualization SQL app:
+              - Scala/Java: tutorial/viz.md
+              - Use Apache Zeppelin: tutorial/zeppelin.md
+              - Gallery: tutorial/viz-gallery.md
+          - Performance tuning:
+              - Benchmark: tutorial/benchmark.md
+              - Tune RDD application: tutorial/Advanced-Tutorial-Tune-your-Application.md
+              - Storing large raster geometries in Parquet files: tutorial/storing-blobs-in-parquet.md
       - Sedona with Apache Flink:
-        - Spatial SQL app (Flink): tutorial/flink/sql.md
+          - Spatial SQL app (Flink): tutorial/flink/sql.md
       - Sedona with Snowflake:
-        - Spatial SQL app (Snowflake): tutorial/snowflake/sql.md
+          - Spatial SQL app (Snowflake): tutorial/snowflake/sql.md
       - Examples:
           - Scala/Java: tutorial/demo.md
           - Python: tutorial/jupyter-notebook.md
-    - API Docs:
+  - API Docs:
       - Sedona with Apache Spark:
-        - SQL:
-          - Quick start: api/sql/Overview.md
-          - Vector data:
-              - Constructor: api/sql/Constructor.md
-              - Function: api/sql/Function.md
-              - Predicate: api/sql/Predicate.md
-              - Aggregate function: api/sql/AggregateFunction.md
-              - DataFrame Style functions: api/sql/DataFrameAPI.md
-              - Query optimization: api/sql/Optimizer.md
-              - Reading Legacy Parquet Files: api/sql/Reading-legacy-parquet.md
-              - Visualization:
-                  - SedonaPyDeck: api/sql/Visualization_SedonaPyDeck.md
-                  - SedonaKepler: api/sql/Visualization_SedonaKepler.md
-          - Raster data:
-              - Raster loader: api/sql/Raster-loader.md
-              - Raster aggregates: api/sql/Raster-aggregate-function.md
-              - Raster writer: api/sql/Raster-writer.md
-              - Raster operators: api/sql/Raster-operators.md
-              - Raster map algebra: api/sql/Raster-map-algebra.md
-              - Raster visualization: api/sql/Raster-visualizer.md
-          - Parameter: api/sql/Parameter.md
-        - RDD (core):
-          - Scala/Java doc: api/java-api.md
-        - Viz:
-          - DataFrame/SQL: api/viz/sql.md
-          - RDD: api/viz/java-api.md
-        - Sedona R: api/rdocs
+          - SQL:
+              - Quick start: api/sql/Overview.md
+              - Vector data:
+                  - Constructor: api/sql/Constructor.md
+                  - Function: api/sql/Function.md
+                  - Predicate: api/sql/Predicate.md
+                  - Aggregate function: api/sql/AggregateFunction.md
+                  - DataFrame Style functions: api/sql/DataFrameAPI.md
+                  - Query optimization: api/sql/Optimizer.md
+                  - Nearest-Neighbour searching: api/sql/NearestNeighbourSearching.md
+                  - Reading Legacy Parquet Files: api/sql/Reading-legacy-parquet.md
+                  - Visualization:
+                      - SedonaPyDeck: api/sql/Visualization_SedonaPyDeck.md
+                      - SedonaKepler: api/sql/Visualization_SedonaKepler.md
+              - Raster data:
+                  - Raster loader: api/sql/Raster-loader.md
+                  - Raster aggregates: api/sql/Raster-aggregate-function.md
+                  - Raster writer: api/sql/Raster-writer.md
+                  - Raster operators: api/sql/Raster-operators.md
+                  - Raster map algebra: api/sql/Raster-map-algebra.md
+                  - Raster visualization: api/sql/Raster-visualizer.md
+                  - Raster affine transformation: api/sql/Raster-affine-transformation.md
+              - Parameter: api/sql/Parameter.md
+          - RDD (core):
+              - Scala/Java doc: api/java-api.md
+          - Stats:
+              - DataFrame: api/stats/sql.md
+          - Viz:
+              - DataFrame/SQL: api/viz/sql.md
+              - RDD: api/viz/java-api.md
+          - Sedona R: api/rdocs
       - Sedona with Apache Flink:
-        - SQL:
-          - Overview (Flink): api/flink/Overview.md
-          - Constructor (Flink): api/flink/Constructor.md
-          - Function (Flink): api/flink/Function.md
-          - Aggregator (Flink): api/flink/Aggregator.md
-          - Predicate (Flink): api/flink/Predicate.md
+          - SQL:
+              - Overview (Flink): api/flink/Overview.md
+              - Constructor (Flink): api/flink/Constructor.md
+              - Function (Flink): api/flink/Function.md
+              - Aggregator (Flink): api/flink/Aggregator.md
+              - Predicate (Flink): api/flink/Predicate.md
       - Sedona with Snowflake:
-        - SQL:
-          - Overview (Snowflake): api/snowflake/vector-data/Overview.md
-          - Constructor (Snowflake): api/snowflake/vector-data/Constructor.md
-          - Function (Snowflake): api/snowflake/vector-data/Function.md
-          - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
-          - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
-    - Community:
+          - SQL:
+              - Overview (Snowflake): api/snowflake/vector-data/Overview.md
+              - Constructor (Snowflake): api/snowflake/vector-data/Constructor.md
+              - Function (Snowflake): api/snowflake/vector-data/Function.md
+              - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
+              - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
+  - Community:
       - Community: community/contact.md
       - Contributor Guide:
-        - Rules: community/rule.md
-        - Develop: community/develop.md
+          - Rules: community/rule.md
+          - Develop: community/develop.md
       - Committer Guide:
-        - Project Management Committee: community/contributor.md
-        - Become a release manager: community/release-manager.md
-        - Publish a snapshot version: community/snapshot.md
-        - Make a release: community/publish.md
-        - Vote a release: community/vote.md
+          - Project Management Committee: community/contributor.md
+          - Become a release manager: community/release-manager.md
+          - Publish a snapshot version: community/snapshot.md
+          - Make a release: community/publish.md
+          - Vote a release: community/vote.md
       - Publications: community/publication.md
-    - Use cases:
+  - Use cases:
       - Spatially aggregate airports per country: usecases/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb
       - Match foot traffic to Seattle coffee shops: usecases/contrib/foot-traffic.ipynb
       - Raster image manipulation: usecases/ApacheSedonaRaster.ipynb
       - Read Overture Maps data: usecases/Sedona_OvertureMaps_GeoParquet.ipynb
-    - Apache Software Foundation:
+  - Apache Software Foundation:
       - Foundation: asf/asf.md
       - License: https://www.apache.org/licenses/" target="_blank
       - Events: https://www.apache.org/events/current-event" target="_blank
@@ -123,6 +128,7 @@ nav:
       - Thanks: https://www.apache.org/foundation/thanks.html" target="_blank
       - Security: https://www.apache.org/security/" target="_blank
       - Privacy: https://privacy.apache.org/policies/privacy-policy-public.html" target="_blank
+      - Telemetry: asf/telemetry.md
 repo_url: https://github.com/apache/sedona
 repo_name: apache/sedona
 theme:
@@ -145,6 +151,7 @@ theme:
     - search.highlight
     - search.share
     - navigation.footer
+    - content.code.copy
 extra:
   version:
     provider: mike
@@ -156,14 +163,14 @@ extra:
     - icon: fontawesome/brands/discord
       link: 'https://share.hsforms.com/1Ndql_ZigTdmLlVQc_d1o4gqga4q'
   sedona:
-    current_version: 1.5.1
-    current_geotools: 1.5.1-28.2
+    current_version: 1.6.1
+    current_geotools: 1.6.1-28.2
   sedona_create_release:
-    current_version: 1.5.1
-    current_git_tag: sedona-1.5.1-rc1
-    current_rc: 1.5.1-rc1
-    current_snapshot: 1.5.1-SNAPSHOT
-    next_version: 1.6.0
+    current_version: 1.6.1
+    current_git_tag: sedona-1.6.1-rc2
+    current_rc: 1.6.1-rc2
+    current_snapshot: 1.6.1-SNAPSHOT
+    next_version: 1.7.0
 copyright: Copyright © 2024 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="https://www.apache.org/">Apache Software Foundation</a> for more details.<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f3e121f6-c909-4592-8be6-5bd345768cba" />
 
 markdown_extensions:
@@ -193,9 +200,9 @@ markdown_extensions:
   - pymdownx.tilde
 plugins:
   - search:
-      #prebuild_index: true
+  # prebuild_index: true
   - macros
   - git-revision-date-localized:
       type: datetime
   - mkdocs-jupyter:
-            include_source: True
+      include_source: True

@@ -1,0 +1,9 @@
+# Ignore everything
+*
+
+# Allow files and folders with a pattern starting with !
+!binder
+!docs/usecases
+!README.md
+!NOTICE
+!LICENSE

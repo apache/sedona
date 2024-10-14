@@ -28,10 +28,11 @@ import org.apache.spark.sql.types.{AbstractDataType, BooleanType, DataType}
 import org.locationtech.jts.geom.Geometry
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 
-abstract class ST_Predicate extends Expression
-  with FoldableExpression
-  with ExpectsInputTypes
-  with NullIntolerant {
+abstract class ST_Predicate
+    extends Expression
+    with FoldableExpression
+    with ExpectsInputTypes
+    with NullIntolerant {
 
   def inputExpressions: Seq[Expression]
 
@@ -56,7 +57,15 @@ abstract class ST_Predicate extends Expression
       } else {
         val leftGeometry = GeometrySerializer.deserialize(leftArray)
         val rightGeometry = GeometrySerializer.deserialize(rightArray)
-        evalGeom(leftGeometry, rightGeometry)
+        try {
+          evalGeom(leftGeometry, rightGeometry)
+        } catch {
+          case e: Exception =>
+            InferredExpression.throwExpressionInferenceException(
+              getClass.getSimpleName,
+              Seq(leftGeometry, rightGeometry),
+              e)
+        }
       }
     }
   }
@@ -65,12 +74,13 @@ abstract class ST_Predicate extends Expression
 }
 
 /**
-  * Test if leftGeometry full contains rightGeometry
-  *
-  * @param inputExpressions
-  */
+ * Test if leftGeometry full contains rightGeometry
+ *
+ * @param inputExpressions
+ */
 case class ST_Contains(inputExpressions: Seq[Expression])
-  extends ST_Predicate with CodegenFallback {
+    extends ST_Predicate
+    with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     Predicates.contains(leftGeometry, rightGeometry)
@@ -82,12 +92,13 @@ case class ST_Contains(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Test if leftGeometry full intersects rightGeometry
-  *
-  * @param inputExpressions
-  */
+ * Test if leftGeometry full intersects rightGeometry
+ *
+ * @param inputExpressions
+ */
 case class ST_Intersects(inputExpressions: Seq[Expression])
-  extends ST_Predicate with CodegenFallback {
+    extends ST_Predicate
+    with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     Predicates.intersects(leftGeometry, rightGeometry)
@@ -99,12 +110,13 @@ case class ST_Intersects(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Test if leftGeometry is full within rightGeometry
-  *
-  * @param inputExpressions
-  */
+ * Test if leftGeometry is full within rightGeometry
+ *
+ * @param inputExpressions
+ */
 case class ST_Within(inputExpressions: Seq[Expression])
-  extends ST_Predicate with CodegenFallback {
+    extends ST_Predicate
+    with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     Predicates.within(leftGeometry, rightGeometry)
@@ -116,12 +128,13 @@ case class ST_Within(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Test if leftGeometry covers rightGeometry
-  *
-  * @param inputExpressions
-  */
+ * Test if leftGeometry covers rightGeometry
+ *
+ * @param inputExpressions
+ */
 case class ST_Covers(inputExpressions: Seq[Expression])
-  extends ST_Predicate with CodegenFallback {
+    extends ST_Predicate
+    with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     Predicates.covers(leftGeometry, rightGeometry)
@@ -133,12 +146,13 @@ case class ST_Covers(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Test if leftGeometry is covered by rightGeometry
-  *
-  * @param inputExpressions
-  */
+ * Test if leftGeometry is covered by rightGeometry
+ *
+ * @param inputExpressions
+ */
 case class ST_CoveredBy(inputExpressions: Seq[Expression])
-  extends ST_Predicate with CodegenFallback {
+    extends ST_Predicate
+    with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     Predicates.coveredBy(leftGeometry, rightGeometry)
@@ -150,12 +164,13 @@ case class ST_CoveredBy(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Test if leftGeometry crosses rightGeometry
-  *
-  * @param inputExpressions
-  */
+ * Test if leftGeometry crosses rightGeometry
+ *
+ * @param inputExpressions
+ */
 case class ST_Crosses(inputExpressions: Seq[Expression])
-  extends ST_Predicate with CodegenFallback {
+    extends ST_Predicate
+    with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     Predicates.crosses(leftGeometry, rightGeometry)
@@ -167,12 +182,13 @@ case class ST_Crosses(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Test if leftGeometry overlaps rightGeometry
-  *
-  * @param inputExpressions
-  */
+ * Test if leftGeometry overlaps rightGeometry
+ *
+ * @param inputExpressions
+ */
 case class ST_Overlaps(inputExpressions: Seq[Expression])
-  extends ST_Predicate with CodegenFallback {
+    extends ST_Predicate
+    with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     Predicates.overlaps(leftGeometry, rightGeometry)
@@ -184,12 +200,13 @@ case class ST_Overlaps(inputExpressions: Seq[Expression])
 }
 
 /**
-  * Test if leftGeometry touches rightGeometry
-  *
-  * @param inputExpressions
-  */
+ * Test if leftGeometry touches rightGeometry
+ *
+ * @param inputExpressions
+ */
 case class ST_Touches(inputExpressions: Seq[Expression])
-  extends ST_Predicate with CodegenFallback {
+    extends ST_Predicate
+    with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     Predicates.touches(leftGeometry, rightGeometry)
@@ -200,13 +217,32 @@ case class ST_Touches(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Relate(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction3(Predicates.relate),
+      inferrableFunction2(Predicates.relate)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_RelateMatch(inputExpressions: Seq[Expression])
+    extends InferredExpression(inferrableFunction2(Predicates.relateMatch)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
-  * Test if leftGeometry is equal to rightGeometry
-  *
-  * @param inputExpressions
-  */
+ * Test if leftGeometry is equal to rightGeometry
+ *
+ * @param inputExpressions
+ */
 case class ST_Equals(inputExpressions: Seq[Expression])
-  extends ST_Predicate with CodegenFallback {
+    extends ST_Predicate
+    with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     // Returns GeometryCollection object
@@ -224,7 +260,8 @@ case class ST_Equals(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_Disjoint(inputExpressions: Seq[Expression])
-  extends ST_Predicate with CodegenFallback {
+    extends ST_Predicate
+    with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     Predicates.disjoint(leftGeometry, rightGeometry)
@@ -241,7 +278,8 @@ case class ST_Disjoint(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_OrderingEquals(inputExpressions: Seq[Expression])
-  extends ST_Predicate with CodegenFallback {
+    extends ST_Predicate
+    with CodegenFallback {
 
   override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
     Predicates.orderingEquals(leftGeometry, rightGeometry)
@@ -253,7 +291,25 @@ case class ST_OrderingEquals(inputExpressions: Seq[Expression])
 }
 
 case class ST_DWithin(inputExpressions: Seq[Expression])
-  extends InferredExpression(inferrableFunction3(Predicates.dWithin), inferrableFunction4(Predicates.dWithin)) {
+    extends InferredExpression(
+      inferrableFunction3(Predicates.dWithin),
+      inferrableFunction4(Predicates.dWithin)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Test if leftGeometry is one of the k nearest neighbors (KNN) of rightGeometry based on
+ * approximate distance metric.
+ *
+ * @param inputExpressions
+ */
+case class ST_KNN(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction3(Predicates.knn),
+      inferrableFunction4(Predicates.knn)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

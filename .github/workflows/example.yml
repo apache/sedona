@@ -5,18 +5,19 @@ on:
       - master
     paths:
       - 'examples/**'
+      - '.github/workflows/example.yml'
   pull_request:
     branches:
       - '*'
     paths:
       - 'examples/**'
+      - '.github/workflows/example.yml'
 
 permissions:
   contents: read
 
 jobs:
   build:
-
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -31,37 +32,36 @@ jobs:
           - spark: 3.3.4
             spark-compat: '3.0'
             sedona: 1.5.1
-
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-java@v4
-      with:
-        distribution: 'zulu'
-        java-version: '8'
-    - run: sudo apt-get remove scala-library scala
-    - run: sudo wget www.scala-lang.org/files/archive/scala-2.12.11.deb
-    - run: sudo dpkg -i scala-2.12.11.deb
-    - run: scala -version
-    - run: echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
-    - run: sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823
-    - run: sudo apt-get update
-    - run: sudo apt-get install sbt
-    - name: Cache SBT
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.ivy2/cache
-          ~/.sbt
-        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
-    - name: Cache Maven packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
-    - env:
-        SPARK_VERSION: ${{ matrix.spark }}
-        SPARK_COMPAT_VERSION: ${{ matrix.spark-compat }}
-        SEDONA_VERSION: ${{ matrix.sedona }}
-      run: (cd examples/spark-sql;mvn clean install -Dspark.version=${SPARK_VERSION} -Dspark.compat.version=${SPARK_COMPAT_VERSION} -Dsedona.version=${SEDONA_VERSION};java -jar target/sedona-spark-example-1.0.0.jar)
-    - run: (cd examples/flink-sql;mvn clean install;java -jar target/sedona-flink-example-1.0.0.jar)
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+      - run: sudo apt-get remove scala-library scala
+      - run: sudo wget www.scala-lang.org/files/archive/scala-2.12.11.deb
+      - run: sudo dpkg -i scala-2.12.11.deb
+      - run: scala -version
+      - run: echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
+      - run: sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823
+      - run: sudo apt-get update
+      - run: sudo apt-get install sbt
+      - name: Cache SBT
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.ivy2/cache
+            ~/.sbt
+          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - env:
+          SPARK_VERSION: ${{ matrix.spark }}
+          SPARK_COMPAT_VERSION: ${{ matrix.spark-compat }}
+          SEDONA_VERSION: ${{ matrix.sedona }}
+        run: (cd examples/spark-sql;mvn clean install -Dspark.version=${SPARK_VERSION} -Dspark.compat.version=${SPARK_COMPAT_VERSION} -Dsedona.version=${SEDONA_VERSION};java -jar target/sedona-spark-example-1.6.0.jar)
+      - run: (cd examples/flink-sql;mvn clean install;java -jar target/sedona-flink-example-1.6.0.jar)

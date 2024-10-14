@@ -31,8 +31,10 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   Logger.getLogger("org.apache.sedona.core").setLevel(Level.WARN)
 
   val warehouseLocation = System.getProperty("user.dir") + "/target/"
-  val sparkSession = SedonaContext.builder().
-    master("local[*]").appName("sedonasqlScalaTest")
+  val sparkSession = SedonaContext
+    .builder()
+    .master("local[*]")
+    .appName("sedonasqlScalaTest")
     .config("spark.sql.warehouse.dir", warehouseLocation)
     // We need to be explicit about broadcasting in tests.
     .config("sedona.join.autoBroadcastJoinThreshold", "-1")
@@ -45,11 +47,26 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   }
 
   override def afterAll(): Unit = {
-    //SedonaSQLRegistrator.dropAll(spark)
-    //spark.stop
+    // SedonaSQLRegistrator.dropAll(spark)
+    // spark.stop
   }
 
   def loadCsv(path: String): DataFrame = {
     sparkSession.read.format("csv").option("delimiter", ",").option("header", "false").load(path)
+  }
+
+  def withConf[T](conf: Map[String, String])(f: => T): T = {
+    val oldConf = conf.keys.map(key => key -> sparkSession.conf.getOption(key))
+    conf.foreach { case (key, value) => sparkSession.conf.set(key, value) }
+    try {
+      f
+    } finally {
+      oldConf.foreach { case (key, value) =>
+        value match {
+          case Some(v) => sparkSession.conf.set(key, v)
+          case None => sparkSession.conf.unset(key)
+        }
+      }
+    }
   }
 }

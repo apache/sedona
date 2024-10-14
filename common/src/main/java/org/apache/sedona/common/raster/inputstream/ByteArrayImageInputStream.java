@@ -23,59 +23,59 @@ import javax.imageio.stream.ImageInputStreamImpl;
 
 public class ByteArrayImageInputStream extends ImageInputStreamImpl {
 
-    private final byte[] bytes;
+  private final byte[] bytes;
 
-    public ByteArrayImageInputStream(byte[] bytes) {
-        this.bytes = bytes;
+  public ByteArrayImageInputStream(byte[] bytes) {
+    this.bytes = bytes;
+  }
+
+  @Override
+  public int read() throws IOException {
+    checkClosed();
+    bitOffset = 0;
+    if (streamPos >= bytes.length) {
+      return -1;
+    }
+    byte b = bytes[(int) streamPos++];
+    return b & 0xFF;
+  }
+
+  @Override
+  public int read(byte[] b, int off, int len) throws IOException {
+    checkClosed();
+
+    if (b == null) {
+      throw new NullPointerException("b == null!");
+    }
+    if (off < 0 || len < 0 || off + len > b.length || off + len < 0) {
+      throw new IndexOutOfBoundsException(
+          "off < 0 || len < 0 || off+len > b.length || off+len < 0!");
     }
 
-    @Override
-    public int read() throws IOException {
-        checkClosed();
-        bitOffset = 0;
-        if (streamPos >= bytes.length) {
-            return -1;
-        }
-        byte b = bytes[(int) streamPos++];
-        return b & 0xFF;
+    bitOffset = 0;
+
+    if (len == 0) {
+      return 0;
     }
 
-    @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        checkClosed();
-
-        if (b == null) {
-            throw new NullPointerException("b == null!");
-        }
-        if (off < 0 || len < 0 || off + len > b.length || off + len < 0) {
-            throw new IndexOutOfBoundsException
-                    ("off < 0 || len < 0 || off+len > b.length || off+len < 0!");
-        }
-
-        bitOffset = 0;
-
-        if (len == 0) {
-            return 0;
-        }
-
-        int remaining = (int) (bytes.length - streamPos);
-        len = Math.min(len, remaining);
-        if (len <= 0) {
-            return -1;
-        }
-
-        System.arraycopy(bytes, (int) streamPos, b, off, len);
-        streamPos += len;
-        return len;
+    int remaining = (int) (bytes.length - streamPos);
+    len = Math.min(len, remaining);
+    if (len <= 0) {
+      return -1;
     }
 
-    @Override
-    public boolean isCached() {
-        return true;
-    }
+    System.arraycopy(bytes, (int) streamPos, b, off, len);
+    streamPos += len;
+    return len;
+  }
 
-    @Override
-    public boolean isCachedMemory() {
-        return true;
-    }
+  @Override
+  public boolean isCached() {
+    return true;
+  }
+
+  @Override
+  public boolean isCachedMemory() {
+    return true;
+  }
 }

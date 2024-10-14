@@ -15,7 +15,8 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from typing import List, Any
+from typing import Any, List
+
 import numpy as np
 
 
@@ -32,7 +33,9 @@ class DataBuffer:
     size: int
     offsets: List[int]
 
-    def __init__(self, data_type: int, bank_data: List[np.ndarray], size: int, offsets: List[int]):
+    def __init__(
+        self, data_type: int, bank_data: List[np.ndarray], size: int, offsets: List[int]
+    ):
         self.data_type = data_type
         self.bank_data = bank_data
         self.size = size

@@ -22,20 +22,26 @@ import org.apache.sedona.common.raster.GeometryFunctions
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferrableRasterTypes._
 
-case class RS_ConvexHull(inputExpressions: Seq[Expression]) extends InferredExpression(GeometryFunctions.convexHull _) {
+case class RS_ConvexHull(inputExpressions: Seq[Expression])
+    extends InferredExpression(GeometryFunctions.convexHull _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-case class RS_Envelope(inputExpressions: Seq[Expression]) extends InferredExpression(GeometryFunctions.envelope _) {
+case class RS_Envelope(inputExpressions: Seq[Expression])
+    extends InferredExpression(GeometryFunctions.envelope _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-case class RS_MinConvexHull(inputExpressions: Seq[Expression]) extends InferredExpression(inferrableFunction2(GeometryFunctions.minConvexHull), inferrableFunction1(GeometryFunctions.minConvexHull)) {
+case class RS_MinConvexHull(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction2(GeometryFunctions.minConvexHull),
+      inferrableFunction1(GeometryFunctions.minConvexHull)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

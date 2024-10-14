@@ -130,7 +130,7 @@ WHERE ST_DistanceSpheroid(pointdf1.pointshape1,pointdf2.pointshape2) <= 2
 ```
 
 !!!warning
-	If you use `ST_DistanceSpheroid ` or `ST_DistanceSphere` as the predicate, the unit of the distance is meter. Currently, distance join with geodesic distance calculators work best for point data. For non-point data, it only considers their centroids.
+	If you use `ST_DistanceSpheroid` or `ST_DistanceSphere` as the predicate, the unit of the distance is meter. Currently, distance join with geodesic distance calculators work best for point data. For non-point data, it only considers their centroids.
 
 ## Broadcast index join
 
@@ -284,7 +284,7 @@ GROUP BY (lcs_geom, rcs_geom)
 
 This also works for distance join. You first need to use `ST_Buffer(geometry, distance)` to wrap one of your original geometry column. If your original geometry column contains points, this `ST_Buffer` will make them become circles with a radius of `distance`.
 
-Since the coordinates are in the longitude and latitude system, so the unit of `distance` should be degree instead of meter or mile. You can get an approximation by performing `METER_DISTANCE/111000.0`, then filter out false-positives.  Note that this might lead to inaccurate results if your data is close to the poles or antimeridian.
+Since the coordinates are in the longitude and latitude system, so the unit of `distance` should be degree instead of meter or mile. You can get an approximation by performing `METER_DISTANCE/111000.0`, then filter out false-positives. Note that this might lead to inaccurate results if your data is close to the poles or antimeridian.
 
 In a nutshell, run this query first on the left table before Step 1. Please replace `METER_DISTANCE` with a meter distance. In Step 1, generate S2 IDs based on the `buffered_geom` column. Then run Step 2, 3, 4 on the original `geom` column.
 
@@ -340,6 +340,8 @@ answer queries such as `SELECT * FROM geoparquet_dataset WHERE ST_Intersects(geo
 
 We can compare the metrics of querying the GeoParquet dataset with or without the spatial predicate and observe that querying with spatial predicate results in fewer number of rows scanned.
 
-| Without spatial predicate | With spatial predicate |
-| ----------- | ----------- |
-| ![](../../image/scan-parquet-without-spatial-pred.png) | ![](../../image/scan-parquet-with-spatial-pred.png) |
+| Without spatial predicate                                                                       | With spatial predicate |
+|-------------------------------------------------------------------------------------------------| ----------- |
+| ![Scan geoparquet without spatial predicate](../../image/scan-parquet-without-spatial-pred.png) | ![Scan geoparquet with spatial predicate](../../image/scan-parquet-with-spatial-pred.png) |
+
+Spatial predicate push-down to GeoParquet is enabled by default. Users can manually disable it by setting the Spark configuration `spark.sedona.geoparquet.spatialFilterPushDown` to `false`.

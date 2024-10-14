@@ -20,9 +20,8 @@ from .sample_model import SampleModel
 
 
 class AWTRaster:
-    """Raster data structure of Java AWT Raster used by GeoTools GridCoverage2D.
+    """Raster data structure of Java AWT Raster used by GeoTools GridCoverage2D."""
 
-    """
     min_x: int
     min_y: int
     width: int
@@ -30,7 +29,15 @@ class AWTRaster:
     sample_model: SampleModel
     data_buffer: DataBuffer
 
-    def __init__(self, min_x, min_y, width, height, sample_model: SampleModel, data_buffer: DataBuffer):
+    def __init__(
+        self,
+        min_x,
+        min_y,
+        width,
+        height,
+        sample_model: SampleModel,
+        data_buffer: DataBuffer,
+    ):
         if sample_model.width != width or sample_model.height != height:
             raise RuntimeError("Size of the image does not match with the sample model")
         self.min_x = min_x

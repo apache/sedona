@@ -18,12 +18,12 @@
 import os
 
 from shapely.geometry import Point
-
-from sedona.core.SpatialRDD import PointRDD
-from sedona.core.enums import IndexType, FileDataSplitter
-from sedona.core.spatialOperator import KNNQuery
 from tests.test_base import TestBase
-from tests.tools import tests_resource, distance_sorting_functions
+from tests.tools import distance_sorting_functions, tests_resource
+
+from sedona.core.enums import FileDataSplitter, IndexType
+from sedona.core.spatialOperator import KNNQuery
+from sedona.core.SpatialRDD import PointRDD
 
 input_location = os.path.join(tests_resource, "arealm-small.csv")
 queryWindowSet = os.path.join(tests_resource, "zcta510-small.csv")
@@ -42,7 +42,9 @@ class TestPointKnn(TestBase):
         point_rdd = PointRDD(self.sc, input_location, offset, splitter, False)
 
         for i in range(self.loop_times):
-            result = KNNQuery.SpatialKnnQuery(point_rdd, self.query_point, self.top_k, False)
+            result = KNNQuery.SpatialKnnQuery(
+                point_rdd, self.query_point, self.top_k, False
+            )
             assert result.__len__() > -1
 
     def test_spatial_knn_query_using_index(self):
@@ -50,23 +52,35 @@ class TestPointKnn(TestBase):
         point_rdd.buildIndex(IndexType.RTREE, False)
 
         for i in range(self.loop_times):
-            result = KNNQuery.SpatialKnnQuery(point_rdd, self.query_point, self.top_k, False)
+            result = KNNQuery.SpatialKnnQuery(
+                point_rdd, self.query_point, self.top_k, False
+            )
             assert result.__len__() > -1
 
     def test_spatial_knn_correctness(self):
         point_rdd = PointRDD(self.sc, input_location, offset, splitter, False)
-        result_no_index = KNNQuery.SpatialKnnQuery(point_rdd, self.query_point, self.top_k, False)
+        result_no_index = KNNQuery.SpatialKnnQuery(
+            point_rdd, self.query_point, self.top_k, False
+        )
         point_rdd.buildIndex(IndexType.RTREE, False)
-        result_with_index = KNNQuery.SpatialKnnQuery(point_rdd, self.query_point, self.top_k, True)
+        result_with_index = KNNQuery.SpatialKnnQuery(
+            point_rdd, self.query_point, self.top_k, True
+        )
 
-        sorted_result_no_index = sorted(result_no_index, key=lambda geo_data: distance_sorting_functions(
-            geo_data, self.query_point))
+        sorted_result_no_index = sorted(
+            result_no_index,
+            key=lambda geo_data: distance_sorting_functions(geo_data, self.query_point),
+        )
 
-        sorted_result_with_index = sorted(result_with_index, key=lambda geo_data: distance_sorting_functions(
-            geo_data, self.query_point))
+        sorted_result_with_index = sorted(
+            result_with_index,
+            key=lambda geo_data: distance_sorting_functions(geo_data, self.query_point),
+        )
 
         difference = 0
         for x in range(self.top_k):
-            difference += sorted_result_no_index[x].geom.distance(sorted_result_with_index[x].geom)
+            difference += sorted_result_no_index[x].geom.distance(
+                sorted_result_with_index[x].geom
+            )
 
         assert difference == 0

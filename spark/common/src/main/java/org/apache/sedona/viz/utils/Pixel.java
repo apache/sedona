@@ -24,153 +24,143 @@ import org.locationtech.jts.geom.PrecisionModel;
 
 // TODO: Auto-generated Javadoc
 
-/**
- * The Class Pixel.
- */
-public class Pixel
-        extends Point
-{
+/** The Class Pixel. */
+public class Pixel extends Point {
 
-    /**
-     * The resolution X.
-     */
-    private final int resolutionX;
+  /** The resolution X. */
+  private final int resolutionX;
 
-    /**
-     * The resolution Y.
-     */
-    private final int resolutionY;
+  /** The resolution Y. */
+  private final int resolutionY;
 
-    /**
-     * The is duplicate.
-     */
-    private boolean isDuplicate = false;
+  /** The is duplicate. */
+  private boolean isDuplicate = false;
 
-    /**
-     * The current partition id.
-     */
-    private int currentPartitionId = -1;
+  /** The current partition id. */
+  private int currentPartitionId = -1;
 
-    /**
-     * Instantiates a new pixel.
-     *
-     * @param x the x
-     * @param y the y
-     * @param resolutionX the resolution X
-     * @param resolutionY the resolution Y
-     * @param isDuplicate the is duplicate
-     * @param currentPartitionId the current partition id
-     */
-    public Pixel(double x, double y, int resolutionX, int resolutionY, boolean isDuplicate, int currentPartitionId)
-    {
-        super(new Coordinate(x, y), new PrecisionModel(), Integer.parseInt("0"));
-        this.resolutionX = resolutionX;
-        this.resolutionY = resolutionY;
-        this.isDuplicate = isDuplicate;
-        this.currentPartitionId = currentPartitionId;
+  /**
+   * Instantiates a new pixel.
+   *
+   * @param x the x
+   * @param y the y
+   * @param resolutionX the resolution X
+   * @param resolutionY the resolution Y
+   * @param isDuplicate the is duplicate
+   * @param currentPartitionId the current partition id
+   */
+  public Pixel(
+      double x,
+      double y,
+      int resolutionX,
+      int resolutionY,
+      boolean isDuplicate,
+      int currentPartitionId) {
+    super(new Coordinate(x, y), new PrecisionModel(), Integer.parseInt("0"));
+    this.resolutionX = resolutionX;
+    this.resolutionY = resolutionY;
+    this.isDuplicate = isDuplicate;
+    this.currentPartitionId = currentPartitionId;
+  }
+
+  /**
+   * Instantiates a new pixel.
+   *
+   * @param x the x
+   * @param y the y
+   * @param resolutionX the resolution X
+   * @param resolutionY the resolution Y
+   */
+  public Pixel(double x, double y, int resolutionX, int resolutionY) {
+    super(new Coordinate(x, y), new PrecisionModel(), Integer.parseInt("0"));
+    this.resolutionX = resolutionX;
+    this.resolutionY = resolutionY;
+  }
+
+  /**
+   * Checks if is duplicate.
+   *
+   * @return true, if is duplicate
+   */
+  public boolean isDuplicate() {
+    return isDuplicate;
+  }
+
+  /**
+   * Sets the duplicate.
+   *
+   * @param duplicate the new duplicate
+   */
+  public void setDuplicate(boolean duplicate) {
+    isDuplicate = duplicate;
+  }
+
+  /**
+   * Gets the current partition id.
+   *
+   * @return the current partition id
+   */
+  public int getCurrentPartitionId() {
+    return currentPartitionId;
+  }
+
+  /**
+   * Sets the current partition id.
+   *
+   * @param currentPartitionId the new current partition id
+   */
+  public void setCurrentPartitionId(int currentPartitionId) {
+    this.currentPartitionId = currentPartitionId;
+  }
+
+  public int getResolutionX() {
+    return resolutionX;
+  }
+
+  public int getResolutionY() {
+    return resolutionY;
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || !(o instanceof Pixel)) {
+      return false;
     }
+    return this.hashCode() == o.hashCode();
+  }
 
-    /**
-     * Instantiates a new pixel.
-     *
-     * @param x the x
-     * @param y the y
-     * @param resolutionX the resolution X
-     * @param resolutionY the resolution Y
-     */
-    public Pixel(double x, double y, int resolutionX, int resolutionY)
-    {
-        super(new Coordinate(x, y), new PrecisionModel(), Integer.parseInt("0"));
-        this.resolutionX = resolutionX;
-        this.resolutionY = resolutionY;
-    }
+  @Override
+  public String toString() {
+    return "Pixel("
+        + "x="
+        + getX()
+        + ", y="
+        + getY()
+        + ", width="
+        + resolutionX
+        + ", height="
+        + resolutionY
+        + ", isDuplicate="
+        + isDuplicate
+        + ", tileId="
+        + currentPartitionId
+        + ')';
+  }
 
-    /**
-     * Checks if is duplicate.
-     *
-     * @return true, if is duplicate
-     */
-    public boolean isDuplicate()
-    {
-        return isDuplicate;
+  /* (non-Javadoc)
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    int id = -1;
+    try {
+      id = RasterizationUtils.Encode2DTo1DId(resolutionX, resolutionY, (int) getX(), (int) getY());
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-
-    /**
-     * Sets the duplicate.
-     *
-     * @param duplicate the new duplicate
-     */
-    public void setDuplicate(boolean duplicate)
-    {
-        isDuplicate = duplicate;
-    }
-
-    /**
-     * Gets the current partition id.
-     *
-     * @return the current partition id
-     */
-    public int getCurrentPartitionId()
-    {
-        return currentPartitionId;
-    }
-
-    /**
-     * Sets the current partition id.
-     *
-     * @param currentPartitionId the new current partition id
-     */
-    public void setCurrentPartitionId(int currentPartitionId)
-    {
-        this.currentPartitionId = currentPartitionId;
-    }
-
-    public int getResolutionX()
-    {
-        return resolutionX;
-    }
-
-    public int getResolutionY()
-    {
-        return resolutionY;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object o)
-    {
-        if (o == null || !(o instanceof Pixel)) { return false; }
-        return this.hashCode() == o.hashCode();
-    }
-
-    @Override
-    public String toString()
-    {
-        return "Pixel(" +
-                "x=" + getX() +
-                ", y=" + getY() +
-                ", width=" + resolutionX +
-                ", height=" + resolutionY +
-                ", isDuplicate=" + isDuplicate +
-                ", tileId=" + currentPartitionId +
-                ')';
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode()
-    {
-        int id = -1;
-        try {
-            id = RasterizationUtils.Encode2DTo1DId(resolutionX, resolutionY, (int) getX(), (int) getY());
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        return id;
-    }
+    return id;
+  }
 }

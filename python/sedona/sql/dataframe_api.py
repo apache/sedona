@@ -18,20 +18,11 @@
 import functools
 import inspect
 import itertools
-from typing import (
-    Any,
-    Callable,
-    Iterable,
-    List,
-    Mapping,
-    Tuple,
-    Type,
-    Union,
-)
 import typing
+from typing import Any, Callable, Iterable, List, Mapping, Tuple, Type, Union
 
-from pyspark.sql import SparkSession, Column, functions as f
-
+from pyspark.sql import Column, SparkSession
+from pyspark.sql import functions as f
 
 ColumnOrName = Union[Column, str]
 ColumnOrNameOrNumber = Union[Column, str, float, int]
@@ -48,13 +39,21 @@ def _convert_argument_to_java_column(arg: Any) -> Column:
         return f.lit(arg)._jc
 
 
-def call_sedona_function(object_name: str, function_name: str, args: Union[Any, Tuple[Any]]) -> Column:
+def call_sedona_function(
+    object_name: str, function_name: str, args: Union[Any, Tuple[Any]]
+) -> Column:
     spark = SparkSession.getActiveSession()
     if spark is None:
-        raise ValueError("No active spark session was detected. Unable to call sedona function.")
+        raise ValueError(
+            "No active spark session was detected. Unable to call sedona function."
+        )
 
     # apparently a Column is an Iterable so we need to check for it explicitly
-    if (not isinstance(args, Iterable)) or isinstance(args, str) or isinstance(args, Column):
+    if (
+        (not isinstance(args, Iterable))
+        or isinstance(args, str)
+        or isinstance(args, Column)
+    ):
         args = [args]
 
     args = map(_convert_argument_to_java_column, args)
@@ -78,7 +77,10 @@ def _get_type_list(annotated_type: Type) -> Tuple[Type, ...]:
     """
     # in 3.8 there is a much nicer way to do this with typing.get_origin
     # we have to be a bit messy until we drop support for 3.7
-    if isinstance(annotated_type, typing._GenericAlias) and annotated_type.__origin__._name == "Union":
+    if (
+        isinstance(annotated_type, typing._GenericAlias)
+        and annotated_type.__origin__._name == "Union"
+    ):
         # again, there is a really nice method for this in 3.8: typing.get_args
         valid_types = annotated_type.__args__
     else:
@@ -88,7 +90,7 @@ def _get_type_list(annotated_type: Type) -> Tuple[Type, ...]:
 
 
 def _strip_extra_from_class_name(class_name):
-    return class_name[len("<class '"):-len("'>")].split(".")[-1]
+    return class_name[len("<class '") : -len("'>")].split(".")[-1]
 
 
 def _get_readable_name_for_type(type: Type) -> str:
@@ -118,7 +120,9 @@ def _get_bound_arguments(f: Callable, *args, **kwargs) -> Mapping[str, Any]:
     return bound_args
 
 
-def _check_bound_arguments(bound_args: Mapping[str, Any], type_annotations: List[Type], function_name: str) -> None:
+def _check_bound_arguments(
+    bound_args: Mapping[str, Any], type_annotations: List[Type], function_name: str
+) -> None:
     """Check bound arguments against type annotations and raise a ValueError if any do not match.
 
     :param bound_args: Bound arguments to check.
@@ -132,8 +136,12 @@ def _check_bound_arguments(bound_args: Mapping[str, Any], type_annotations: List
     for bound_arg_name, bound_arg_value in bound_args.arguments.items():
         annotated_type = type_annotations[bound_arg_name]
         valid_type_list = _get_type_list(annotated_type)
-        if not any([isinstance(bound_arg_value, valid_type) for valid_type in valid_type_list]):
-            raise ValueError(f"Incorrect argument type: {bound_arg_name} for {function_name} should be {_get_readable_name_for_type(annotated_type)} but received {_strip_extra_from_class_name(str(type(bound_arg_value)))}.")
+        if not any(
+            [isinstance(bound_arg_value, valid_type) for valid_type in valid_type_list]
+        ):
+            raise ValueError(
+                f"Incorrect argument type: {bound_arg_name} for {function_name} should be {_get_readable_name_for_type(annotated_type)} but received {_strip_extra_from_class_name(str(type(bound_arg_value)))}."
+            )
 
 
 def validate_argument_types(f: Callable) -> Callable:
@@ -146,12 +154,19 @@ def validate_argument_types(f: Callable) -> Callable:
     :return: f wrapped with type validation checks.
     :rtype: Callable
     """
+
     def validated_function(*args, **kwargs) -> Column:
         # all arguments are Columns or strings are always legal, so only check types when one of the arguments is not a column
-        if not all([isinstance(x, Column) or isinstance(x, str) for x in itertools.chain(args, kwargs.values())]):
+        if not all(
+            [
+                isinstance(x, Column) or isinstance(x, str)
+                for x in itertools.chain(args, kwargs.values())
+            ]
+        ):
             bound_args = _get_bound_arguments(f, *args, **kwargs)
             type_annotations = typing.get_type_hints(f)
             _check_bound_arguments(bound_args, type_annotations, f.__name__)
 
         return f(*args, **kwargs)
+
     return functools.update_wrapper(validated_function, f)

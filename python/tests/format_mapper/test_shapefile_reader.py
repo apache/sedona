@@ -18,13 +18,13 @@
 import os
 
 import pytest
+from tests.test_base import TestBase
+from tests.tools import tests_resource
 
+from sedona.core.formatMapper.shapefileParser import ShapefileReader
 from sedona.core.geom.envelope import Envelope
 from sedona.core.jvm.config import SedonaMeta, is_greater_or_equal_version
 from sedona.core.spatialOperator import RangeQuery
-from tests.tools import tests_resource
-from sedona.core.formatMapper.shapefileParser import ShapefileReader
-from tests.test_base import TestBase
 
 undefined_type_shape_location = os.path.join(tests_resource, "shapefiles/undefined")
 polygon_shape_location = os.path.join(tests_resource, "shapefiles/polygon")
@@ -38,13 +38,17 @@ class TestShapeFileReader(TestBase):
             sc=self.sc, inputPath=undefined_type_shape_location
         )
 
-        assert shape_rdd.fieldNames == ['LGA_CODE16', 'LGA_NAME16', 'STE_CODE16', 'STE_NAME16', 'AREASQKM16']
+        assert shape_rdd.fieldNames == [
+            "LGA_CODE16",
+            "LGA_NAME16",
+            "STE_CODE16",
+            "STE_NAME16",
+            "AREASQKM16",
+        ]
         assert shape_rdd.getRawSpatialRDD().count() == 545
 
     def test_read_geometry_rdd(self):
-        shape_rdd = ShapefileReader.readToGeometryRDD(
-            self.sc, polygon_shape_location
-        )
+        shape_rdd = ShapefileReader.readToGeometryRDD(self.sc, polygon_shape_location)
         assert shape_rdd.fieldNames == []
         assert shape_rdd.rawSpatialRDD.collect().__len__() == 10000
 
@@ -56,8 +60,14 @@ class TestShapeFileReader(TestBase):
         count = RangeQuery.SpatialRangeQuery(spatial_rdd, window, False, False).count()
 
         assert spatial_rdd.rawSpatialRDD.count() == count
-        assert 'org.apache.sedona.core.spatialRDD.SpatialRDD' in geometry_rdd._srdd.toString()
-        assert 'org.apache.sedona.core.spatialRDD.PolygonRDD' in spatial_rdd._srdd.toString()
+        assert (
+            "org.apache.sedona.core.spatialRDD.SpatialRDD"
+            in geometry_rdd._srdd.toString()
+        )
+        assert (
+            "org.apache.sedona.core.spatialRDD.PolygonRDD"
+            in spatial_rdd._srdd.toString()
+        )
 
     def test_read_to_linestring_rdd(self):
         input_location = os.path.join(tests_resource, "shapefiles/polyline")
@@ -66,8 +76,14 @@ class TestShapeFileReader(TestBase):
         window = Envelope(-180.0, 180.0, -90.0, 90.0)
         count = RangeQuery.SpatialRangeQuery(spatial_rdd, window, False, False).count()
         assert spatial_rdd.rawSpatialRDD.count() == count
-        assert 'org.apache.sedona.core.spatialRDD.SpatialRDD' in geometry_rdd._srdd.toString()
-        assert 'org.apache.sedona.core.spatialRDD.LineStringRDD' in spatial_rdd._srdd.toString()
+        assert (
+            "org.apache.sedona.core.spatialRDD.SpatialRDD"
+            in geometry_rdd._srdd.toString()
+        )
+        assert (
+            "org.apache.sedona.core.spatialRDD.LineStringRDD"
+            in spatial_rdd._srdd.toString()
+        )
 
     def test_read_to_point_rdd(self):
         input_location = os.path.join(tests_resource, "shapefiles/point")
@@ -76,8 +92,13 @@ class TestShapeFileReader(TestBase):
         window = Envelope(-180.0, 180.0, -90.0, 90.0)
         count = RangeQuery.SpatialRangeQuery(spatial_rdd, window, False, False).count()
         assert spatial_rdd.rawSpatialRDD.count() == count
-        assert 'org.apache.sedona.core.spatialRDD.SpatialRDD' in geometry_rdd._srdd.toString()
-        assert 'org.apache.sedona.core.spatialRDD.PointRDD' in spatial_rdd._srdd.toString()
+        assert (
+            "org.apache.sedona.core.spatialRDD.SpatialRDD"
+            in geometry_rdd._srdd.toString()
+        )
+        assert (
+            "org.apache.sedona.core.spatialRDD.PointRDD" in spatial_rdd._srdd.toString()
+        )
 
     def test_read_to_point_rdd_multipoint(self):
         input_location = os.path.join(tests_resource, "shapefiles/multipoint")
@@ -86,5 +107,10 @@ class TestShapeFileReader(TestBase):
         window = Envelope(-180.0, 180.0, -90.0, 90.0)
         count = RangeQuery.SpatialRangeQuery(spatial_rdd, window, False, False).count()
         assert spatial_rdd.rawSpatialRDD.count() == count
-        assert 'org.apache.sedona.core.spatialRDD.SpatialRDD' in geometry_rdd._srdd.toString()
-        assert 'org.apache.sedona.core.spatialRDD.PointRDD' in spatial_rdd._srdd.toString()
+        assert (
+            "org.apache.sedona.core.spatialRDD.SpatialRDD"
+            in geometry_rdd._srdd.toString()
+        )
+        assert (
+            "org.apache.sedona.core.spatialRDD.PointRDD" in spatial_rdd._srdd.toString()
+        )

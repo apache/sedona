@@ -1,0 +1,33 @@
+# REMIND: Please run `pipenv lock` to update Pipfile.lock after editing this file
+
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest="*"
+notebook="==6.0.0"
+jupyter = "*"
+mkdocs="*"
+pytest-cov = "*"
+
+[packages]
+pandas="==1.5.3"
+shapely="==2.0.4"
+geopandas="==0.14.4"
+pyspark="==3.4.2"
+attrs="*"
+apache-sedona="==1.6.0"
+matplotlib = "*"
+descartes = "*"
+keplergl = "==0.3.2"
+pydeck = "==0.8.0"
+ipywidgets = "*"
+jupyterlab-widgets = "==1.1.7"
+ipykernel = "*"
+jupyterlab = "==3.6.8"
+pyspark-extension = "==2.11.0.3.4"
+
+[requires]
+python_version = "3.9"

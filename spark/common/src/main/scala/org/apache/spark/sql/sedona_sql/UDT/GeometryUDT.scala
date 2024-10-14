@@ -25,7 +25,6 @@ import org.json4s.JsonDSL._
 import org.json4s.JsonAST.JValue
 import org.locationtech.jts.geom.Geometry
 
-
 class GeometryUDT extends UserDefinedType[Geometry] {
   override def sqlType: DataType = BinaryType
 
@@ -41,7 +40,6 @@ class GeometryUDT extends UserDefinedType[Geometry] {
     }
   }
 
-
   override private[sql] def jsonValue: JValue = {
     super.jsonValue mapField {
       case ("class", _) => "class" -> this.getClass.getName.stripSuffix("$")
@@ -54,7 +52,9 @@ class GeometryUDT extends UserDefinedType[Geometry] {
     case _ => false
   }
 
-  override def hashCode(): Int = super.hashCode()
+  override def hashCode(): Int = userClass.hashCode()
 }
 
-case object GeometryUDT extends org.apache.spark.sql.sedona_sql.UDT.GeometryUDT with scala.Serializable
+case object GeometryUDT
+    extends org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+    with scala.Serializable

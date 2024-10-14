@@ -29,11 +29,6 @@ package org.apache.sedona.viz.core;
  * http://nyomdmegteis.hu/en/
  */
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
-
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.color.ColorSpace;
@@ -62,488 +57,422 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 
 // TODO: Auto-generated Javadoc
 
-/**
- * The Class BigBufferedImage.
- */
-public class BigBufferedImage
-        extends BufferedImage
-{
+/** The Class BigBufferedImage. */
+public class BigBufferedImage extends BufferedImage {
 
-    /**
-     * The Constant MAX_PIXELS_IN_MEMORY.
-     */
-    public static final int MAX_PIXELS_IN_MEMORY = 1024 * 1024;
-    /**
-     * The Constant TMP_DIR.
-     */
-    private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
+  /** The Constant MAX_PIXELS_IN_MEMORY. */
+  public static final int MAX_PIXELS_IN_MEMORY = 1024 * 1024;
+  /** The Constant TMP_DIR. */
+  private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
 
-    /**
-     * Instantiates a new big buffered image.
-     *
-     * @param cm the cm
-     * @param raster the raster
-     * @param isRasterPremultiplied the is raster premultiplied
-     * @param properties the properties
-     */
-    private BigBufferedImage(ColorModel cm, SimpleRaster raster, boolean isRasterPremultiplied, Hashtable<?, ?> properties)
-    {
-        super(cm, raster, isRasterPremultiplied, properties);
+  /**
+   * Instantiates a new big buffered image.
+   *
+   * @param cm the cm
+   * @param raster the raster
+   * @param isRasterPremultiplied the is raster premultiplied
+   * @param properties the properties
+   */
+  private BigBufferedImage(
+      ColorModel cm,
+      SimpleRaster raster,
+      boolean isRasterPremultiplied,
+      Hashtable<?, ?> properties) {
+    super(cm, raster, isRasterPremultiplied, properties);
+  }
+
+  /**
+   * Creates the buffered image.
+   *
+   * @param width the width
+   * @param height the height
+   * @param imageType the image type
+   * @return the buffered image
+   */
+  public static BufferedImage create(int width, int height, int imageType) {
+    if (width * height > MAX_PIXELS_IN_MEMORY) {
+      try {
+        final File tempDir = new File(TMP_DIR);
+        return createBigBufferedImage(tempDir, width, height, imageType);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    } else {
+      return new BufferedImage(width, height, imageType);
     }
+  }
+
+  /**
+   * Creates the buffered image.
+   *
+   * @param inputFile the input file
+   * @param imageType the image type
+   * @return the buffered image
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  public static BufferedImage create(File inputFile, int imageType) throws IOException {
+    try (ImageInputStream stream = ImageIO.createImageInputStream(inputFile)) {
+      Iterator<ImageReader> readers = ImageIO.getImageReaders(stream);
+      if (readers.hasNext()) {
+        try {
+          ImageReader reader = readers.next();
+          reader.setInput(stream, true, true);
+          int width = reader.getWidth(reader.getMinIndex());
+          int height = reader.getHeight(reader.getMinIndex());
+          BufferedImage image = create(width, height, imageType);
+          int cores = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
+          int block =
+              Math.min(
+                  MAX_PIXELS_IN_MEMORY / cores / width, (int) (Math.ceil(height / (double) cores)));
+          ExecutorService generalExecutor = Executors.newFixedThreadPool(cores);
+          List<Callable<ImagePartLoader>> partLoaders = new ArrayList<>();
+          for (int y = 0; y < height; y += block) {
+            partLoaders.add(
+                new ImagePartLoader(y, width, Math.min(block, height - y), inputFile, image));
+          }
+          generalExecutor.invokeAll(partLoaders);
+          generalExecutor.shutdown();
+          return image;
+        } catch (InterruptedException ex) {
+          Logger.getLogger(BigBufferedImage.class.getName()).log(Level.SEVERE, null, ex);
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Creates the big buffered image.
+   *
+   * @param tempDir the temp dir
+   * @param width the width
+   * @param height the height
+   * @param imageType the image type
+   * @return the buffered image
+   * @throws FileNotFoundException the file not found exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private static BufferedImage createBigBufferedImage(
+      File tempDir, int width, int height, int imageType)
+      throws FileNotFoundException, IOException {
+    FileDataBuffer buffer = new FileDataBuffer(tempDir, width * height, 4);
+    ColorModel colorModel = null;
+    BandedSampleModel sampleModel = null;
+    switch (imageType) {
+      case TYPE_INT_RGB:
+        colorModel =
+            new ComponentColorModel(
+                ColorSpace.getInstance(ColorSpace.CS_sRGB),
+                new int[] {8, 8, 8, 0},
+                false,
+                false,
+                ComponentColorModel.TRANSLUCENT,
+                DataBuffer.TYPE_BYTE);
+        sampleModel = new BandedSampleModel(DataBuffer.TYPE_BYTE, width, height, 3);
+        break;
+      case TYPE_INT_ARGB:
+        colorModel =
+            new ComponentColorModel(
+                ColorSpace.getInstance(ColorSpace.CS_sRGB),
+                new int[] {8, 8, 8, 8},
+                true,
+                false,
+                ComponentColorModel.TRANSLUCENT,
+                DataBuffer.TYPE_BYTE);
+        sampleModel = new BandedSampleModel(DataBuffer.TYPE_BYTE, width, height, 4);
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported image type: " + imageType);
+    }
+    SimpleRaster raster = new SimpleRaster(sampleModel, buffer, new Point(0, 0));
+    BigBufferedImage image =
+        new BigBufferedImage(colorModel, raster, colorModel.isAlphaPremultiplied(), null);
+    return image;
+  }
+
+  /**
+   * Dispose.
+   *
+   * @param image the image
+   */
+  public static void dispose(RenderedImage image) {
+    if (image instanceof BigBufferedImage) {
+      ((BigBufferedImage) image).dispose();
+    }
+  }
+
+  /** Dispose. */
+  public void dispose() {
+    ((SimpleRaster) getRaster()).dispose();
+  }
+
+  /** The Class ImagePartLoader. */
+  private static class ImagePartLoader implements Callable<ImagePartLoader> {
+
+    /** The y. */
+    private final int y;
+
+    /** The image. */
+    private final BufferedImage image;
+
+    /** The region. */
+    private final Rectangle region;
+
+    /** The file. */
+    private final File file;
 
     /**
-     * Creates the.
+     * Instantiates a new image part loader.
      *
+     * @param y the y
      * @param width the width
      * @param height the height
-     * @param imageType the image type
-     * @return the buffered image
+     * @param file the file
+     * @param image the image
      */
-    public static BufferedImage create(int width, int height, int imageType)
-    {
-        if (width * height > MAX_PIXELS_IN_MEMORY) {
-            try {
-                final File tempDir = new File(TMP_DIR);
-                return createBigBufferedImage(tempDir, width, height, imageType);
-            }
-            catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        else {
-            return new BufferedImage(width, height, imageType);
-        }
+    public ImagePartLoader(int y, int width, int height, File file, BufferedImage image) {
+      this.y = y;
+      this.image = image;
+      this.file = file;
+      region = new Rectangle(0, y, width, height);
     }
 
-    /**
-     * Creates the.
-     *
-     * @param inputFile the input file
-     * @param imageType the image type
-     * @return the buffered image
-     * @throws IOException Signals that an I/O exception has occurred.
+    /* (non-Javadoc)
+     * @see java.util.concurrent.Callable#call()
      */
-    public static BufferedImage create(File inputFile, int imageType)
-            throws IOException
-    {
-        try (ImageInputStream stream = ImageIO.createImageInputStream(inputFile)) {
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(stream);
-            if (readers.hasNext()) {
-                try {
-                    ImageReader reader = readers.next();
-                    reader.setInput(stream, true, true);
-                    int width = reader.getWidth(reader.getMinIndex());
-                    int height = reader.getHeight(reader.getMinIndex());
-                    BufferedImage image = create(width, height, imageType);
-                    int cores = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
-                    int block = Math.min(MAX_PIXELS_IN_MEMORY / cores / width, (int) (Math.ceil(height / (double) cores)));
-                    ExecutorService generalExecutor = Executors.newFixedThreadPool(cores);
-                    List<Callable<ImagePartLoader>> partLoaders = new ArrayList<>();
-                    for (int y = 0; y < height; y += block) {
-                        partLoaders.add(new ImagePartLoader(
-                                y, width, Math.min(block, height - y), inputFile, image));
-                    }
-                    generalExecutor.invokeAll(partLoaders);
-                    generalExecutor.shutdown();
-                    return image;
-                }
-                catch (InterruptedException ex) {
-                    Logger.getLogger(BigBufferedImage.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
+    @Override
+    public ImagePartLoader call() throws Exception {
+      Thread.currentThread().setPriority((Thread.MIN_PRIORITY + Thread.NORM_PRIORITY) / 2);
+      try (ImageInputStream stream = ImageIO.createImageInputStream(file)) {
+        Iterator<ImageReader> readers = ImageIO.getImageReaders(stream);
+        if (readers.hasNext()) {
+          ImageReader reader = readers.next();
+          reader.setInput(stream, true, true);
+          ImageReadParam param = reader.getDefaultReadParam();
+          param.setSourceRegion(region);
+          BufferedImage part = reader.read(0, param);
+          Raster source = part.getRaster();
+          WritableRaster target = image.getRaster();
+          target.setRect(0, y, source);
         }
-        return null;
+      }
+      return ImagePartLoader.this;
     }
+  }
+
+  /** The Class SimpleRaster. */
+  private static class SimpleRaster extends WritableRaster {
 
     /**
-     * Creates the big buffered image.
+     * Instantiates a new simple raster.
      *
-     * @param tempDir the temp dir
-     * @param width the width
-     * @param height the height
-     * @param imageType the image type
-     * @return the buffered image
+     * @param sampleModel the sample model
+     * @param dataBuffer the data buffer
+     * @param origin the origin
+     */
+    public SimpleRaster(SampleModel sampleModel, FileDataBuffer dataBuffer, Point origin) {
+      super(sampleModel, dataBuffer, origin);
+    }
+
+    /** Dispose. */
+    public void dispose() {
+      ((FileDataBuffer) getDataBuffer()).dispose();
+    }
+  }
+
+  /** The Class FileDataBufferDeleterHook. */
+  private static final class FileDataBufferDeleterHook extends Thread {
+
+    /** The Constant undisposedBuffers. */
+    private static final HashSet<FileDataBuffer> undisposedBuffers = new HashSet<>();
+
+    /* (non-Javadoc)
+     * @see java.lang.Thread#run()
+     */
+    @Override
+    public void run() {
+      final FileDataBuffer[] buffers = undisposedBuffers.toArray(new FileDataBuffer[0]);
+      for (FileDataBuffer b : buffers) {
+        b.disposeNow();
+      }
+    }
+
+    static {
+      Runtime.getRuntime().addShutdownHook(new FileDataBufferDeleterHook());
+    }
+  }
+
+  /** The Class FileDataBuffer. */
+  private static class FileDataBuffer extends DataBuffer {
+
+    /** The id. */
+    private final String id =
+        "buffer-" + System.currentTimeMillis() + "-" + ((int) (Math.random() * 1000));
+
+    /** The dir. */
+    private File dir;
+
+    /** The path. */
+    private String path;
+
+    /** The files. */
+    private File[] files;
+
+    /** The access files. */
+    private RandomAccessFile[] accessFiles;
+
+    /** The buffer. */
+    private MappedByteBuffer[] buffer;
+
+    /**
+     * Instantiates a new file data buffer.
+     *
+     * @param dir the dir
+     * @param size the size
      * @throws FileNotFoundException the file not found exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private static BufferedImage createBigBufferedImage(File tempDir, int width, int height, int imageType)
-            throws FileNotFoundException, IOException
-    {
-        FileDataBuffer buffer = new FileDataBuffer(tempDir, width * height, 4);
-        ColorModel colorModel = null;
-        BandedSampleModel sampleModel = null;
-        switch (imageType) {
-            case TYPE_INT_RGB:
-                colorModel = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB),
-                        new int[] {8, 8, 8, 0},
-                        false,
-                        false,
-                        ComponentColorModel.TRANSLUCENT,
-                        DataBuffer.TYPE_BYTE);
-                sampleModel = new BandedSampleModel(DataBuffer.TYPE_BYTE, width, height, 3);
-                break;
-            case TYPE_INT_ARGB:
-                colorModel = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB),
-                        new int[] {8, 8, 8, 8},
-                        true,
-                        false,
-                        ComponentColorModel.TRANSLUCENT,
-                        DataBuffer.TYPE_BYTE);
-                sampleModel = new BandedSampleModel(DataBuffer.TYPE_BYTE, width, height, 4);
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported image type: " + imageType);
-        }
-        SimpleRaster raster = new SimpleRaster(sampleModel, buffer, new Point(0, 0));
-        BigBufferedImage image = new BigBufferedImage(colorModel, raster, colorModel.isAlphaPremultiplied(), null);
-        return image;
+    public FileDataBuffer(File dir, int size) throws FileNotFoundException, IOException {
+      super(TYPE_BYTE, size);
+      this.dir = dir;
+      init();
     }
 
     /**
-     * Dispose.
+     * Instantiates a new file data buffer.
      *
-     * @param image the image
+     * @param dir the dir
+     * @param size the size
+     * @param numBanks the num banks
+     * @throws FileNotFoundException the file not found exception
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static void dispose(RenderedImage image)
-    {
-        if (image instanceof BigBufferedImage) {
-            ((BigBufferedImage) image).dispose();
-        }
+    public FileDataBuffer(File dir, int size, int numBanks)
+        throws FileNotFoundException, IOException {
+      super(TYPE_BYTE, size, numBanks);
+      this.dir = dir;
+      init();
     }
 
     /**
-     * Dispose.
+     * Inits the.
+     *
+     * @throws FileNotFoundException the file not found exception
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void dispose()
-    {
-        ((SimpleRaster) getRaster()).dispose();
+    private void init() throws FileNotFoundException, IOException {
+      FileDataBufferDeleterHook.undisposedBuffers.add(this);
+      if (dir == null) {
+        dir = new File(".");
+      }
+      if (!dir.exists()) {
+        throw new RuntimeException(
+            "FileDataBuffer constructor parameter dir does not exist: " + dir);
+      }
+      if (!dir.isDirectory()) {
+        throw new RuntimeException(
+            "FileDataBuffer constructor parameter dir is not a directory: " + dir);
+      }
+      path = dir.getPath() + "/" + id;
+      File subDir = new File(path);
+      subDir.mkdir();
+      buffer = new MappedByteBuffer[banks];
+      accessFiles = new RandomAccessFile[banks];
+      files = new File[banks];
+      for (int i = 0; i < banks; i++) {
+        File file = files[i] = new File(path + "/bank" + i + ".dat");
+        final RandomAccessFile randomAccessFile = accessFiles[i] = new RandomAccessFile(file, "rw");
+        buffer[i] = randomAccessFile.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, getSize());
+      }
+    }
+
+    /* (non-Javadoc)
+     * @see java.awt.image.DataBuffer#getElem(int, int)
+     */
+    @Override
+    public int getElem(int bank, int i) {
+      return buffer[bank].get(i) & 0xff;
+    }
+
+    /* (non-Javadoc)
+     * @see java.awt.image.DataBuffer#setElem(int, int, int)
+     */
+    @Override
+    public void setElem(int bank, int i, int val) {
+      buffer[bank].put(i, (byte) val);
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#finalize()
+     */
+    @Override
+    protected void finalize() throws Throwable {
+      dispose();
+    }
+
+    /** Dispose now. */
+    private void disposeNow() {
+      final MappedByteBuffer[] disposedBuffer = this.buffer;
+      this.buffer = null;
+      disposeNow(disposedBuffer);
+    }
+
+    /** Dispose. */
+    public void dispose() {
+      final MappedByteBuffer[] disposedBuffer = this.buffer;
+      this.buffer = null;
+      new Thread() {
+        @Override
+        public void run() {
+          disposeNow(disposedBuffer);
+        }
+      }.start();
     }
 
     /**
-     * The Class ImagePartLoader.
+     * Dispose now.
+     *
+     * @param disposedBuffer the disposed buffer
      */
-    private static class ImagePartLoader
-            implements Callable<ImagePartLoader>
-    {
-
-        /**
-         * The y.
-         */
-        private final int y;
-
-        /**
-         * The image.
-         */
-        private final BufferedImage image;
-
-        /**
-         * The region.
-         */
-        private final Rectangle region;
-
-        /**
-         * The file.
-         */
-        private final File file;
-
-        /**
-         * Instantiates a new image part loader.
-         *
-         * @param y the y
-         * @param width the width
-         * @param height the height
-         * @param file the file
-         * @param image the image
-         */
-        public ImagePartLoader(int y, int width, int height, File file, BufferedImage image)
-        {
-            this.y = y;
-            this.image = image;
-            this.file = file;
-            region = new Rectangle(0, y, width, height);
+    private void disposeNow(final MappedByteBuffer[] disposedBuffer) {
+      FileDataBufferDeleterHook.undisposedBuffers.remove(this);
+      if (disposedBuffer != null) {
+        for (MappedByteBuffer b : disposedBuffer) {
+          // This method does not actually erase the data in the buffer,
+          // but it is named as if it did because it will most often be used in situations
+          // in which that might as well be the case
+          // The original method uses the ((DirectBuffer) b).cleaner().clean(), which is
+          // no longer available since Java 9
+          b.clear();
         }
-
-        /* (non-Javadoc)
-         * @see java.util.concurrent.Callable#call()
-         */
-        @Override
-        public ImagePartLoader call()
-                throws Exception
-        {
-            Thread.currentThread().setPriority((Thread.MIN_PRIORITY + Thread.NORM_PRIORITY) / 2);
-            try (ImageInputStream stream = ImageIO.createImageInputStream(file)) {
-                Iterator<ImageReader> readers = ImageIO.getImageReaders(stream);
-                if (readers.hasNext()) {
-                    ImageReader reader = readers.next();
-                    reader.setInput(stream, true, true);
-                    ImageReadParam param = reader.getDefaultReadParam();
-                    param.setSourceRegion(region);
-                    BufferedImage part = reader.read(0, param);
-                    Raster source = part.getRaster();
-                    WritableRaster target = image.getRaster();
-                    target.setRect(0, y, source);
-                }
-            }
-            return ImagePartLoader.this;
+      }
+      if (accessFiles != null) {
+        for (RandomAccessFile file : accessFiles) {
+          try {
+            file.close();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
         }
+        accessFiles = null;
+      }
+      if (files != null) {
+        for (File file : files) {
+          file.delete();
+        }
+        files = null;
+      }
+      if (path != null) {
+        new File(path).delete();
+        path = null;
+      }
     }
-
-    /**
-     * The Class SimpleRaster.
-     */
-    private static class SimpleRaster
-            extends WritableRaster
-    {
-
-        /**
-         * Instantiates a new simple raster.
-         *
-         * @param sampleModel the sample model
-         * @param dataBuffer the data buffer
-         * @param origin the origin
-         */
-        public SimpleRaster(SampleModel sampleModel, FileDataBuffer dataBuffer, Point origin)
-        {
-            super(sampleModel, dataBuffer, origin);
-        }
-
-        /**
-         * Dispose.
-         */
-        public void dispose()
-        {
-            ((FileDataBuffer) getDataBuffer()).dispose();
-        }
-    }
-
-    /**
-     * The Class FileDataBufferDeleterHook.
-     */
-    private static final class FileDataBufferDeleterHook
-            extends Thread
-    {
-
-        /**
-         * The Constant undisposedBuffers.
-         */
-        private static final HashSet<FileDataBuffer> undisposedBuffers = new HashSet<>();
-
-        /* (non-Javadoc)
-         * @see java.lang.Thread#run()
-         */
-        @Override
-        public void run()
-        {
-            final FileDataBuffer[] buffers = undisposedBuffers.toArray(new FileDataBuffer[0]);
-            for (FileDataBuffer b : buffers) {
-                b.disposeNow();
-            }
-        }
-
-        static {
-            Runtime.getRuntime().addShutdownHook(new FileDataBufferDeleterHook());
-        }
-    }
-
-    /**
-     * The Class FileDataBuffer.
-     */
-    private static class FileDataBuffer
-            extends DataBuffer
-    {
-
-        /**
-         * The id.
-         */
-        private final String id = "buffer-" + System.currentTimeMillis() + "-" + ((int) (Math.random() * 1000));
-
-        /**
-         * The dir.
-         */
-        private File dir;
-
-        /**
-         * The path.
-         */
-        private String path;
-
-        /**
-         * The files.
-         */
-        private File[] files;
-
-        /**
-         * The access files.
-         */
-        private RandomAccessFile[] accessFiles;
-
-        /**
-         * The buffer.
-         */
-        private MappedByteBuffer[] buffer;
-
-        /**
-         * Instantiates a new file data buffer.
-         *
-         * @param dir the dir
-         * @param size the size
-         * @throws FileNotFoundException the file not found exception
-         * @throws IOException Signals that an I/O exception has occurred.
-         */
-        public FileDataBuffer(File dir, int size)
-                throws FileNotFoundException, IOException
-        {
-            super(TYPE_BYTE, size);
-            this.dir = dir;
-            init();
-        }
-
-        /**
-         * Instantiates a new file data buffer.
-         *
-         * @param dir the dir
-         * @param size the size
-         * @param numBanks the num banks
-         * @throws FileNotFoundException the file not found exception
-         * @throws IOException Signals that an I/O exception has occurred.
-         */
-        public FileDataBuffer(File dir, int size, int numBanks)
-                throws FileNotFoundException, IOException
-        {
-            super(TYPE_BYTE, size, numBanks);
-            this.dir = dir;
-            init();
-        }
-
-        /**
-         * Inits the.
-         *
-         * @throws FileNotFoundException the file not found exception
-         * @throws IOException Signals that an I/O exception has occurred.
-         */
-        private void init()
-                throws FileNotFoundException, IOException
-        {
-            FileDataBufferDeleterHook.undisposedBuffers.add(this);
-            if (dir == null) {
-                dir = new File(".");
-            }
-            if (!dir.exists()) {
-                throw new RuntimeException("FileDataBuffer constructor parameter dir does not exist: " + dir);
-            }
-            if (!dir.isDirectory()) {
-                throw new RuntimeException("FileDataBuffer constructor parameter dir is not a directory: " + dir);
-            }
-            path = dir.getPath() + "/" + id;
-            File subDir = new File(path);
-            subDir.mkdir();
-            buffer = new MappedByteBuffer[banks];
-            accessFiles = new RandomAccessFile[banks];
-            files = new File[banks];
-            for (int i = 0; i < banks; i++) {
-                File file = files[i] = new File(path + "/bank" + i + ".dat");
-                final RandomAccessFile randomAccessFile = accessFiles[i] = new RandomAccessFile(file, "rw");
-                buffer[i] = randomAccessFile.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, getSize());
-            }
-        }
-
-        /* (non-Javadoc)
-         * @see java.awt.image.DataBuffer#getElem(int, int)
-         */
-        @Override
-        public int getElem(int bank, int i)
-        {
-            return buffer[bank].get(i) & 0xff;
-        }
-
-        /* (non-Javadoc)
-         * @see java.awt.image.DataBuffer#setElem(int, int, int)
-         */
-        @Override
-        public void setElem(int bank, int i, int val)
-        {
-            buffer[bank].put(i, (byte) val);
-        }
-
-        /* (non-Javadoc)
-         * @see java.lang.Object#finalize()
-         */
-        @Override
-        protected void finalize()
-                throws Throwable
-        {
-            dispose();
-        }
-
-        /**
-         * Dispose now.
-         */
-        private void disposeNow()
-        {
-            final MappedByteBuffer[] disposedBuffer = this.buffer;
-            this.buffer = null;
-            disposeNow(disposedBuffer);
-        }
-
-        /**
-         * Dispose.
-         */
-        public void dispose()
-        {
-            final MappedByteBuffer[] disposedBuffer = this.buffer;
-            this.buffer = null;
-            new Thread()
-            {
-                @Override
-                public void run()
-                {
-                    disposeNow(disposedBuffer);
-                }
-            }.start();
-        }
-
-        /**
-         * Dispose now.
-         *
-         * @param disposedBuffer the disposed buffer
-         */
-        private void disposeNow(final MappedByteBuffer[] disposedBuffer)
-        {
-            FileDataBufferDeleterHook.undisposedBuffers.remove(this);
-            if (disposedBuffer != null) {
-                for (MappedByteBuffer b : disposedBuffer) {
-                    // This method does not actually erase the data in the buffer,
-                    // but it is named as if it did because it will most often be used in situations
-                    // in which that might as well be the case
-                    // The original method uses the ((DirectBuffer) b).cleaner().clean(), which is
-                    // no longer available since Java 9
-                    b.clear();
-                }
-            }
-            if (accessFiles != null) {
-                for (RandomAccessFile file : accessFiles) {
-                    try {
-                        file.close();
-                    }
-                    catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                accessFiles = null;
-            }
-            if (files != null) {
-                for (File file : files) {
-                    file.delete();
-                }
-                files = null;
-            }
-            if (path != null) {
-                new File(path).delete();
-                path = null;
-            }
-        }
-    }
+  }
 }

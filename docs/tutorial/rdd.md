@@ -28,7 +28,7 @@ A generic SpatialRDD is not typed to a certain geometry type and open to more sc
 
 #### From WKT/WKB
 
-Geometries in a WKT and WKB file always occupy a single column no matter how many coordinates they have. Sedona provides `WktReader ` and `WkbReader` to create generic SpatialRDD.
+Geometries in a WKT and WKB file always occupy a single column no matter how many coordinates they have. Sedona provides `WktReader` and `WkbReader` to create generic SpatialRDD.
 
 Suppose we have a `checkin.tsv` WKT TSV file at Path `/Download/checkin.tsv` as follows:
 
@@ -75,6 +75,9 @@ Use the following code to create a SpatialRDD
 	```
 
 #### From GeoJSON
+
+!!!note
+	Reading GeoJSON using SpatialRDD is not recommended. Please use [Sedona SQL and DataFrame API](sql.md#load-geojson-data) to read GeoJSON files.
 
 Geometries in GeoJSON is similar to WKT/WKB. However, a GeoJSON file must be beaked into multiple lines.
 
@@ -157,15 +160,13 @@ Use the following code to create a generic SpatialRDD:
 		- ...
 	```
 
-If the file you are reading contains non-ASCII characters you'll need to explicitly set the encoding
-via `sedona.global.charset` system property before creating your Spark context.
+If the file you are reading contains non-ASCII characters you'll need to explicitly set the Spark config before initializing the SparkSession, then you can use `ShapefileReader.readToGeometryRDD`.
 
 Example:
 
 ```scala
-System.setProperty("sedona.global.charset", "utf8")
-
-val sc = new SparkContext(...)
+spark.driver.extraJavaOptions  -Dsedona.global.charset=utf8
+spark.executor.extraJavaOptions  -Dsedona.global.charset=utf8
 ```
 
 #### From SedonaSQL DataFrame
@@ -202,7 +203,7 @@ var spatialRDD = Adapter.toSpatialRdd(spatialDf, "checkin")
 
 "checkin" is the name of the geometry column
 
-For WKT/WKB/GeoJSON data, please use ==ST_GeomFromWKT / ST_GeomFromWKB / ST_GeomFromGeoJSON== instead.
+For WKT/WKB data, please use ==ST_GeomFromWKT / ST_GeomFromWKB == instead.
 
 ## Transform the Coordinate Reference System
 
@@ -979,6 +980,9 @@ objectRDD.saveAsWKB("hdfs://PATH")
 ```
 
 #### Save to distributed GeoJSON text file
+
+!!!note
+	Saving GeoJSON using SpatialRDD is not recommended. Please use [Sedona SQL and DataFrame API](sql.md#save-as-geojson) to write GeoJSON files.
 
 Use the following code to save an SpatialRDD as a distributed GeoJSON text file:
 

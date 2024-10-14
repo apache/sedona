@@ -17,10 +17,17 @@
 
 import os
 
-from shapely.geometry import MultiPoint, Point, MultiLineString, LineString, Polygon, MultiPolygon, GeometryCollection
 import geopandas as gpd
 import pandas as pd
-
+from shapely.geometry import (
+    GeometryCollection,
+    LineString,
+    MultiLineString,
+    MultiPoint,
+    MultiPolygon,
+    Point,
+    Polygon,
+)
 from tests import tests_resource
 from tests.test_base import TestBase
 
@@ -37,14 +44,16 @@ class TestGeometryConvert(TestBase):
         df.collect()
 
     def test_loading_from_file_deserialization(self):
-        self.spark.read.\
-            options(delimiter="\t", header=False).\
-            csv(os.path.join(tests_resource, "county_small.tsv")).\
-            limit(1).\
-            createOrReplaceTempView("counties")
+        self.spark.read.options(delimiter="\t", header=False).csv(
+            os.path.join(tests_resource, "county_small.tsv")
+        ).limit(1).createOrReplaceTempView("counties")
 
-        geom_area = self.spark.sql("SELECT st_area(st_geomFromWKT(_c0)) as area from counties").collect()[0][0]
-        polygon_shapely = self.spark.sql("SELECT st_geomFromWKT(_c0) from counties").collect()[0][0]
+        geom_area = self.spark.sql(
+            "SELECT st_area(st_geomFromWKT(_c0)) as area from counties"
+        ).collect()[0][0]
+        polygon_shapely = self.spark.sql(
+            "SELECT st_geomFromWKT(_c0) from counties"
+        ).collect()[0][0]
         assert geom_area == polygon_shapely.area
 
     def test_polygon_with_holes_deserialization(self):
@@ -67,11 +76,15 @@ class TestGeometryConvert(TestBase):
         assert geom.area == 712.5
 
     def test_point_deserialization(self):
-        geom = self.spark.sql("""SELECT st_geomfromtext('POINT(-6.0 52.0)') as geom""").collect()[0][0]
+        geom = self.spark.sql(
+            """SELECT st_geomfromtext('POINT(-6.0 52.0)') as geom"""
+        ).collect()[0][0]
         assert geom.wkt == Point(-6.0, 52.0).wkt
 
     def test_multipoint_deserialization(self):
-        geom = self.spark.sql("""select st_geomFromWKT('MULTIPOINT(1 2, -2 3)') as geom""").collect()[0][0]
+        geom = self.spark.sql(
+            """select st_geomFromWKT('MULTIPOINT(1 2, -2 3)') as geom"""
+        ).collect()[0][0]
 
         assert geom.wkt == MultiPoint([(1, 2), (-2, 3)]).wkt
 
@@ -91,10 +104,15 @@ class TestGeometryConvert(TestBase):
         ).collect()[0][0]
 
         assert type(geom) == MultiLineString
-        assert geom.wkt == MultiLineString([
-                ((10, 10), (20, 20), (10, 40)),
-                ((40, 40), (30, 30), (40, 20), (30, 10))
-            ]).wkt
+        assert (
+            geom.wkt
+            == MultiLineString(
+                [
+                    ((10, 10), (20, 20), (10, 40)),
+                    ((40, 40), (30, 30), (40, 20), (30, 10)),
+                ]
+            ).wkt
+        )
 
     def test_geometry_collection_deserialization(self):
         geom = self.spark.sql(
@@ -105,25 +123,33 @@ class TestGeometryConvert(TestBase):
         ).collect()[0][0]
 
         assert type(geom) == GeometryCollection
-        assert geom.wkt == GeometryCollection([
-            MultiLineString([[(1, 2), (3, 4)], [(5, 6), (7, 8)]]),
-            MultiLineString([[(1, 2), (3, 4)], [(5, 6), (7, 8)], [(9, 10), (11, 12)]]),
-            Point(10, 20)
-        ]).wkt
+        assert (
+            geom.wkt
+            == GeometryCollection(
+                [
+                    MultiLineString([[(1, 2), (3, 4)], [(5, 6), (7, 8)]]),
+                    MultiLineString(
+                        [[(1, 2), (3, 4)], [(5, 6), (7, 8)], [(9, 10), (11, 12)]]
+                    ),
+                    Point(10, 20),
+                ]
+            ).wkt
+        )
 
     def test_from_geopandas_convert(self):
-        gdf = gpd.read_file(os.path.join(tests_resource, "shapefiles/gis_osm_pois_free_1/"))
-        gdf = gdf.replace(pd.NA, '')
+        gdf = gpd.read_file(
+            os.path.join(tests_resource, "shapefiles/gis_osm_pois_free_1/")
+        )
+        gdf = gdf.replace(pd.NA, "")
 
-        self.spark.createDataFrame(
-            gdf
-        ).show()
+        self.spark.createDataFrame(gdf).show()
 
     def test_to_geopandas(self):
-        counties = self.spark.read.\
-            options(delimiter="\t", header=False).\
-            csv(os.path.join(tests_resource, "county_small.tsv")).\
-            limit(1)
+        counties = (
+            self.spark.read.options(delimiter="\t", header=False)
+            .csv(os.path.join(tests_resource, "county_small.tsv"))
+            .limit(1)
+        )
 
         counties.createOrReplaceTempView("county")
 

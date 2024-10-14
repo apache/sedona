@@ -31,47 +31,45 @@ jobs:
       matrix:
         os: ['ubuntu-latest', 'windows-latest', 'macos-13']
         python: ['3.10', '3.9', '3.8']
-
     runs-on: ${{ matrix.os }}
     defaults:
       run:
         shell: bash
-
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python }}
-    - name: Install pipenv
-      run: pip install -U pipenv
-    - name: Install dependencies
-      run: |
-        cd python
-        pipenv --python ${{ matrix.python }}
-        pipenv install --dev
-    - name: Build extension
-      run: |
-        cd python
-        pipenv run python setup.py build_ext --inplace
-    - name: Run tests
-      run: |
-        cd python
-        pipenv run pytest tests/utils/test_geomserde_speedup.py
-    - name: Run tests on Shapely 2.0
-      run: |
-        cd python
-        pipenv install shapely~=2.0
-        pipenv run pytest tests/utils/test_geomserde_speedup.py
-    - name: Run tests on Shapley 1.7
-      # Shapely 1.7 only provides wheels for cp36 ~ cp39, so we'll skip running
-      # this test for recent python versions.
-      if: ${{ matrix.python == '3.9' || matrix.python == '3.8' }}
-      run: |
-        cd python
-        pipenv install shapely~=1.7
-        pipenv run pytest tests/utils/test_geomserde_speedup.py
-    - name: Install from sdist
-      run: |
-        cd python
-        pipenv run python setup.py sdist
-        pipenv run python -m pip install dist/*sedona-*.tar.gz
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install pipenv
+        run: pip install -U pipenv
+      - name: Install dependencies
+        run: |
+          cd python
+          pipenv --python ${{ matrix.python }}
+          pipenv install --dev
+      - name: Build extension
+        run: |
+          cd python
+          pipenv run python setup.py build_ext --inplace
+      - name: Run tests
+        run: |
+          cd python
+          pipenv run pytest tests/utils/test_geomserde_speedup.py
+      - name: Run tests on Shapely 2.0
+        run: |
+          cd python
+          pipenv install shapely~=2.0
+          pipenv run pytest tests/utils/test_geomserde_speedup.py
+      - name: Run tests on Shapley 1.7
+        # Shapely 1.7 only provides wheels for cp36 ~ cp39, so we'll skip running
+        # this test for recent python versions.
+        if: ${{ matrix.python == '3.9' || matrix.python == '3.8' }}
+        run: |
+          cd python
+          pipenv install shapely~=1.7
+          pipenv run pytest tests/utils/test_geomserde_speedup.py
+      - name: Install from sdist
+        run: |
+          cd python
+          pipenv run python setup.py sdist
+          pipenv run python -m pip install dist/*sedona-*.tar.gz

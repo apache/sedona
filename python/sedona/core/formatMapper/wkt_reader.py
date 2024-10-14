@@ -15,18 +15,24 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from pyspark import SparkContext, RDD
+from pyspark import RDD, SparkContext
 
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.formatMapper.geo_reader import GeoDataReader
+from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.utils.meta import MultipleMeta
 
 
 class WktReader(GeoDataReader, metaclass=MultipleMeta):
 
     @classmethod
-    def readToGeometryRDD(cls, sc: SparkContext, inputPath: str, wktColumn: int, allowInvalidGeometries: bool,
-                          skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
+    def readToGeometryRDD(
+        cls,
+        sc: SparkContext,
+        inputPath: str,
+        wktColumn: int,
+        allowInvalidGeometries: bool,
+        skipSyntacticallyInvalidGeometries: bool,
+    ) -> SpatialRDD:
         """
 
         :param sc: SparkContext
@@ -37,16 +43,26 @@ class WktReader(GeoDataReader, metaclass=MultipleMeta):
         :return:
         """
         jvm = sc._jvm
-        srdd = jvm.WktReader.readToGeometryRDD(sc._jsc, inputPath, wktColumn, allowInvalidGeometries,
-                                               skipSyntacticallyInvalidGeometries)
+        srdd = jvm.WktReader.readToGeometryRDD(
+            sc._jsc,
+            inputPath,
+            wktColumn,
+            allowInvalidGeometries,
+            skipSyntacticallyInvalidGeometries,
+        )
 
         spatial_rdd = SpatialRDD(sc)
         spatial_rdd.set_srdd(srdd)
         return spatial_rdd
 
     @classmethod
-    def readToGeometryRDD(cls, rawTextRDD: RDD, wktColumn: int, allowInvalidGeometries: bool,
-                          skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
+    def readToGeometryRDD(
+        cls,
+        rawTextRDD: RDD,
+        wktColumn: int,
+        allowInvalidGeometries: bool,
+        skipSyntacticallyInvalidGeometries: bool,
+    ) -> SpatialRDD:
         """
 
         :param rawTextRDD: RDD
@@ -58,7 +74,10 @@ class WktReader(GeoDataReader, metaclass=MultipleMeta):
         sc = rawTextRDD.ctx
         jvm = sc._jvm
         srdd = jvm.WktReader.readToGeometryRDD(
-            rawTextRDD._jrdd, wktColumn, allowInvalidGeometries, skipSyntacticallyInvalidGeometries
+            rawTextRDD._jrdd,
+            wktColumn,
+            allowInvalidGeometries,
+            skipSyntacticallyInvalidGeometries,
         )
         spatial_rdd = SpatialRDD(sc)
         spatial_rdd.set_srdd(srdd)

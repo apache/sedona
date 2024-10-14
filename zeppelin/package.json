@@ -2,7 +2,7 @@
   "name": "apache-sedona",
   "description": "Zeppelin visualization support for Sedona",
   "author": "Apache Sedona, original authors are listed on https://github.com/myuwono/zeppelin-leaflet",
-  "version": "1.5.1",
+  "version": "1.6.1",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

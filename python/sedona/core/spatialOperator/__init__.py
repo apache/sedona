@@ -16,11 +16,9 @@
 #  under the License.
 
 from .join_query import JoinQuery
-from .range_query import RangeQuery
-from .knn_query import KNNQuery
 from .join_query_raw import JoinQueryRaw
+from .knn_query import KNNQuery
+from .range_query import RangeQuery
 from .range_query_raw import RangeQueryRaw
 
-__all__ = [
-    "JoinQuery", "RangeQuery", "KNNQuery", "JoinQueryRaw", "RangeQueryRaw"
-]
+__all__ = ["JoinQuery", "RangeQuery", "KNNQuery", "JoinQueryRaw", "RangeQueryRaw"]

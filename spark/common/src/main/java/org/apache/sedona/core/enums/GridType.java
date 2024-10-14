@@ -16,52 +16,45 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.enums;
 
-import org.apache.log4j.Logger;
-import org.apache.sedona.core.formatMapper.FormatMapper;
-
 import java.io.Serializable;
+import org.apache.log4j.Logger;
 
 // TODO: Auto-generated Javadoc
 
-/**
- * The Enum GridType.
- */
-public enum GridType
-        implements Serializable
-{
+/** The Enum GridType. */
+public enum GridType implements Serializable {
 
-    /**
-     * Partition the space to uniform grids
-     */
+  /** Partition the space to uniform grids */
+  EQUALGRID,
+  /** The Quad-Tree partitioning. */
+  QUADTREE,
 
-    EQUALGRID,
-    /**
-     * The Quad-Tree partitioning.
-     */
-    QUADTREE,
+  /** K-D-B-tree partitioning (k-dimensional B-tree) */
+  KDBTREE,
 
-    /**
-     * K-D-B-tree partitioning (k-dimensional B-tree)
-     */
-    KDBTREE;
+  /** Z-ORDER based partitioning (morton space-filling curve) for KNN joins */
+  ZORDER,
 
+  /** Modified Quad-tree partitioning for KNN joins */
+  QUADTREE_RTREE;
 
-    /**
-     * Gets the grid type.
-     *
-     * @param str the str
-     * @return the grid type
-     */
-    public static GridType getGridType(String str)
-    {
-        final Logger logger = Logger.getLogger(GridType.class);
-        for (GridType me : GridType.values()) {
-            if (me.name().equalsIgnoreCase(str)) { return me; }
-        }
-        logger.error("[Sedona] Choose quadtree or kdbtree instead. This grid type is not supported: " + str);
-        return null;
+  /**
+   * Gets the grid type.
+   *
+   * @param str the str
+   * @return the grid type
+   */
+  public static GridType getGridType(String str) {
+    final Logger logger = Logger.getLogger(GridType.class);
+    for (GridType me : GridType.values()) {
+      if (me.name().equalsIgnoreCase(str)) {
+        return me;
+      }
     }
+    logger.error(
+        "[Sedona] Choose quadtree or kdbtree instead. This grid type is not supported: " + str);
+    return null;
+  }
 }

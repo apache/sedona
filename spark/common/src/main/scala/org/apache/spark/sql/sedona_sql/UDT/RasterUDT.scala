@@ -18,7 +18,6 @@
  */
 package org.apache.spark.sql.sedona_sql.UDT
 
-
 import org.apache.sedona.common.raster.serde.Serde
 import org.apache.spark.sql.types.{BinaryType, DataType, UserDefinedType}
 import org.geotools.coverage.grid.GridCoverage2D
@@ -41,6 +40,13 @@ class RasterUDT extends UserDefinedType[GridCoverage2D] {
   }
 
   override def userClass: Class[GridCoverage2D] = classOf[GridCoverage2D]
+
+  override def equals(other: Any): Boolean = other match {
+    case _: UserDefinedType[_] => other.isInstanceOf[RasterUDT]
+    case _ => false
+  }
+
+  override def hashCode(): Int = userClass.hashCode()
 }
 
 case object RasterUDT extends RasterUDT with Serializable

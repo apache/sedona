@@ -16,62 +16,51 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.spatialPartitioning;
 
+import java.util.Iterator;
+import javax.annotation.Nullable;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.joinJudgement.DedupParams;
 import org.apache.sedona.core.spatialPartitioning.quadtree.StandardQuadTree;
 import org.locationtech.jts.geom.Geometry;
 import scala.Tuple2;
 
-import javax.annotation.Nullable;
+public class QuadTreePartitioner extends SpatialPartitioner {
+  private final StandardQuadTree<?> quadTree;
 
-import java.util.Iterator;
+  public QuadTreePartitioner(StandardQuadTree<?> quadTree) {
+    super(GridType.QUADTREE, quadTree.fetchLeafZones());
+    this.quadTree = quadTree;
 
-public class QuadTreePartitioner
-        extends SpatialPartitioner
-{
-    private final StandardQuadTree<? extends Geometry> quadTree;
+    // Make sure not to broadcast all the samples used to build the Quad
+    // tree to all nodes which are doing partitioning
+    this.quadTree.dropElements();
+  }
 
-    public QuadTreePartitioner(StandardQuadTree<? extends Geometry> quadTree)
-    {
-        super(GridType.QUADTREE, quadTree.fetchLeafZones());
-        this.quadTree = quadTree;
+  @Override
+  public Iterator<Tuple2<Integer, Geometry>> placeObject(Geometry spatialObject) throws Exception {
+    return quadTree.placeObject(spatialObject);
+  }
 
-        // Make sure not to broadcast all the samples used to build the Quad
-        // tree to all nodes which are doing partitioning
-        this.quadTree.dropElements();
+  @Nullable
+  @Override
+  public DedupParams getDedupParams() {
+    return new DedupParams(grids);
+  }
+
+  @Override
+  public int numPartitions() {
+    return grids.size();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || !(o instanceof QuadTreePartitioner)) {
+      return false;
     }
 
-    @Override
-    public Iterator<Tuple2<Integer, Geometry>> placeObject(Geometry spatialObject)
-            throws Exception
-    {
-        return quadTree.placeObject(spatialObject);
-    }
-
-    @Nullable
-    @Override
-    public DedupParams getDedupParams()
-    {
-        return new DedupParams(grids);
-    }
-
-    @Override
-    public int numPartitions()
-    {
-        return grids.size();
-    }
-
-    @Override
-    public boolean equals(Object o)
-    {
-        if (o == null || !(o instanceof QuadTreePartitioner)) {
-            return false;
-        }
-
-        final QuadTreePartitioner other = (QuadTreePartitioner) o;
-        return other.quadTree.equals(this.quadTree);
-    }
+    final QuadTreePartitioner other = (QuadTreePartitioner) o;
+    return other.quadTree.equals(this.quadTree);
+  }
 }

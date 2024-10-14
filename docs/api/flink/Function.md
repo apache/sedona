@@ -53,6 +53,28 @@ Output:
 1.7320508075688772
 ```
 
+## ST_AddMeasure
+
+Introduction: Computes a new geometry with measure (M) values linearly interpolated between start and end points. For geometries lacking M dimensions, M values are added. Existing M values are overwritten by the new values. Applies only to LineString and MultiLineString inputs.
+
+Format: `ST_AddMeasure(geom: Geometry, measureStart: Double, measureEnd: Double)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_AsText(ST_AddMeasure(
+        ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)')
+))
+```
+
+Output:
+
+```
+LINESTRING M(0 0 10, 1 0 16, 2 0 22, 3 0 28, 4 0 34, 5 0 40)
+```
+
 ## ST_AddPoint
 
 Introduction: Return Linestring with additional point at the given index, if position is not available the point will be added at the end of line.
@@ -350,13 +372,23 @@ POINT ZM(1 1 1 1)
 
 ## ST_AsGeoJSON
 
-Introduction: Return the [GeoJSON](https://geojson.org/) string representation of a geometry
+Introduction: Return the [GeoJSON](https://geojson.org/) string representation of a geometry.
 
-Format: `ST_AsGeoJSON (A: Geometry)`
+The type parameter (Since: `v1.6.1`) takes the following options -
+
+- "Simple" (default): Returns a simple GeoJSON geometry.
+- "Feature": Wraps the geometry in a GeoJSON Feature.
+- "FeatureCollection": Wraps the Feature in a GeoJSON FeatureCollection.
+
+Format:
+
+`ST_AsGeoJSON (A: Geometry)`
+
+`ST_AsGeoJSON (A: Geometry, type: String)`
 
 Since: `v1.3.0`
 
-Example:
+SQL Example (Simple GeoJSON):
 
 ```sql
 SELECT ST_AsGeoJSON(ST_GeomFromWKT('POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'))
@@ -373,6 +405,50 @@ Output:
       [8.0,8.0],
       [1.0,8.0],
       [1.0,1.0]]
+  ]
+}
+```
+
+SQL Example (Feature GeoJSON):
+
+Output:
+
+```json
+{
+  "type":"Feature",
+  "geometry": {
+      "type":"Polygon",
+      "coordinates":[
+        [[1.0,1.0],
+          [8.0,1.0],
+          [8.0,8.0],
+          [1.0,8.0],
+          [1.0,1.0]]
+      ]
+  }
+}
+```
+
+SQL Example (FeatureCollection GeoJSON):
+
+Output:
+
+```json
+{
+  "type":"FeatureCollection",
+  "features": [{
+    "type":"Feature",
+    "geometry": {
+      "type":"Polygon",
+      "coordinates":[
+        [[1.0,1.0],
+          [8.0,1.0],
+          [8.0,8.0],
+          [1.0,8.0],
+          [1.0,1.0]]
+      ]
+    }
+  }
   ]
 }
 ```
@@ -395,6 +471,38 @@ Output:
 
 ```
 1.0,1.0 8.0,1.0 8.0,8.0 1.0,8.0 1.0,1.0
+```
+
+## ST_AsHEXEWKB
+
+Introduction: This function returns the input geometry encoded to a text representation in HEXEWKB format. The HEXEWKB encoding can use either little-endian (NDR) or big-endian (XDR) byte ordering. If no encoding is explicitly specified, the function defaults to using the little-endian (NDR) format.
+
+Format: `ST_AsHEXEWKB(geom: Geometry, endian: String = NDR)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_AsHEXEWKB(ST_GeomFromWKT('POINT(1 2)'), 'XDR')
+```
+
+Output:
+
+```
+00000000013FF00000000000004000000000000000
+```
+
+SQL Example
+
+```sql
+SELECT ST_AsHEXEWKB(ST_GeomFromWKT('LINESTRING (30 20, 20 25, 20 15, 30 20)'))
+```
+
+Output:
+
+```
+0102000000040000000000000000003E4000000000000034400000000000003440000000000000394000000000000034400000000000002E400000000000003E400000000000003440
 ```
 
 ## ST_AsKML
@@ -1023,6 +1131,39 @@ Output:
 11.309932474020195
 ```
 
+## ST_DelaunayTriangles
+
+Introduction: This function computes the [Delaunay triangulation](https://en.wikipedia.org/wiki/Delaunay_triangulation) for the set of vertices in the input geometry. An optional `tolerance` parameter allows snapping nearby input vertices together prior to triangulation and can improve robustness in certain scenarios by handling near-coincident vertices. The default for  `tolerance` is 0. The Delaunay triangulation geometry is bounded by the convex hull of the input vertex set.
+
+The output geometry representation depends on the provided `flag`:
+
+- `0` - a GeometryCollection of triangular Polygons (default option)
+- `1` - a MultiLinestring of the edges of the triangulation
+
+Format:
+
+`ST_DelaunayTriangles(geometry: Geometry)`
+
+`ST_DelaunayTriangles(geometry: Geometry, tolerance: Double)`
+
+`ST_DelaunayTriangles(geometry: Geometry, tolerance: Double, flag: Integer)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_DelaunayTriangles(
+        ST_GeomFromWKT('POLYGON ((10 10, 15 30, 20 25, 25 35, 30 20, 40 30, 50 10, 45 5, 35 15, 30 5, 25 15, 20 10, 15 20, 10 10))')
+)
+```
+
+Output:
+
+```
+GEOMETRYCOLLECTION (POLYGON ((15 30, 10 10, 15 20, 15 30)), POLYGON ((15 30, 15 20, 20 25, 15 30)), POLYGON ((15 30, 20 25, 25 35, 15 30)), POLYGON ((25 35, 20 25, 30 20, 25 35)), POLYGON ((25 35, 30 20, 40 30, 25 35)), POLYGON ((40 30, 30 20, 35 15, 40 30)), POLYGON ((40 30, 35 15, 50 10, 40 30)), POLYGON ((50 10, 35 15, 45 5, 50 10)), POLYGON ((30 5, 45 5, 35 15, 30 5)), POLYGON ((30 5, 35 15, 25 15, 30 5)), POLYGON ((30 5, 25 15, 20 10, 30 5)), POLYGON ((30 5, 20 10, 10 10, 30 5)), POLYGON ((10 10, 20 10, 15 20, 10 10)), POLYGON ((15 20, 20 10, 25 15, 15 20)), POLYGON ((15 20, 25 15, 20 25, 15 20)), POLYGON ((20 25, 25 15, 30 20, 20 25)), POLYGON ((30 20, 25 15, 35 15, 30 20)))
+```
+
 ## ST_Difference
 
 Introduction: Return the difference between geometry A and B (return part of geometry A that does not intersect geometry B)
@@ -1122,6 +1263,45 @@ Output:
 
 ```
 POLYGON ((0 0, 0 3, 1 3, 1 0, 0 0))
+```
+
+## ST_Expand
+
+Introduction: Returns a geometry expanded from the bounding box of the input. The expansion can be specified in two ways:
+
+1. By individual axis using `deltaX`, `deltaY`, or `deltaZ` parameters.
+2. Uniformly across all axes using the `uniformDelta` parameter.
+
+!!!Note
+    Things to consider when using this function:
+
+    1. The `uniformDelta` parameter expands Z dimensions for XYZ geometries; otherwise, it only affects XY dimensions.
+    2. For XYZ geometries, specifying only `deltaX` and `deltaY` will preserve the original Z dimension.
+    3. If the input geometry has an M dimension then using this function will drop the said M dimension.
+
+Format:
+
+`ST_Expand(geometry: Geometry, uniformDelta: Double)`
+
+`ST_Expand(geometry: Geometry, deltaX: Double, deltaY: Double)`
+
+`ST_Expand(geometry: Geometry, deltaX: Double, deltaY: Double, deltaZ: Double)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_Expand(
+        ST_GeomFromWKT('POLYGON Z((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))'),
+        10
+   )
+```
+
+Output:
+
+```
+POLYGON Z((40 40 -9, 40 90 -9, 90 90 13, 90 40 13, 40 40 -9))
 ```
 
 ## ST_ExteriorRing
@@ -1234,6 +1414,154 @@ Output:
 LINESTRING EMPTY
 ```
 
+## ST_Force3DM
+
+Introduction: Forces the geometry into XYM mode. Retains any existing M coordinate, but removes the Z coordinate if present. Assigns a default M value of 0.0 if `mValue` is not specified.
+
+!!!Note
+Example output is after calling ST_AsText() on returned geometry, which adds M for in the WKT.
+
+Format: `ST_Force3DM(geometry: Geometry, mValue: Double = 0.0)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force3DM(ST_GeomFromText('POLYGON M((0 0 3,0 5 3,5 0 3,0 0 3),(1 1 3,3 1 3,1 3 3,1 1 3))'), 2.3))
+```
+
+Output:
+
+```
+POLYGON M((0 0 3, 0 5 3, 5 0 3, 0 0 3), (1 1 3, 3 1 3, 1 3 3, 1 1 3))
+```
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force3DM(ST_GeomFromText('LINESTRING(0 1,1 0,2 0)'), 2.3))
+```
+
+Output:
+
+```
+LINESTRING M(0 1 2.3, 1 0 2.3, 2 0 2.3)
+```
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force3DM(ST_GeomFromText('LINESTRING Z(0 1 3,1 0 3,2 0 3)'), 5))
+```
+
+Output:
+
+```
+LINESTRING M(0 1 5, 1 0 5, 2 0 5)
+```
+
+## ST_Force3DZ
+
+Introduction: Forces the geometry into a 3-dimensional model so that all output representations will have X, Y and Z coordinates.
+An optionally given zValue is tacked onto the geometry if the geometry is 2-dimensional. Default value of zValue is 0.0
+If the given geometry is 3-dimensional, no change is performed on it.
+If the given geometry is empty, no change is performed on it. This function is an alias for [ST_Force3D](#st_force3d).
+
+!!!Note
+    Example output is after calling ST_AsText() on returned geometry, which adds Z for in the WKT for 3D geometries
+
+Format: `ST_Force3DZ(geometry: Geometry, zValue: Double)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force3DZ(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'), 2.3))
+```
+
+Output:
+
+```
+POLYGON Z((0 0 2, 0 5 2, 5 0 2, 0 0 2), (1 1 2, 3 1 2, 1 3 2, 1 1 2))
+```
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force3DZ(ST_GeomFromText('LINESTRING(0 1,1 0,2 0)'), 2.3))
+```
+
+Output:
+
+```
+LINESTRING Z(0 1 2.3, 1 0 2.3, 2 0 2.3)
+```
+
+## ST_Force4D
+
+Introduction: Converts the input geometry to 4D XYZM representation. Retains original Z and M values if present. Assigning 0.0 defaults if `mValue` and `zValue` aren't specified. The output contains X, Y, Z, and M coordinates. For geometries already in 4D form, the function returns the original geometry unmodified.
+
+!!!Note
+    Example output is after calling ST_AsText() on returned geometry, which adds Z for in the WKT for 3D geometries
+
+Format:
+
+`ST_Force4D(geom: Geometry, zValue: Double, mValue: Double)`
+
+`ST_Force4D(geom: Geometry`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force4D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'), 5, 10))
+```
+
+Output:
+
+```
+POLYGON ZM((0 0 2 10, 0 5 2 10, 5 0 2 10, 0 0 2 10), (1 1 2 10, 3 1 2 10, 1 3 2 10, 1 1 2 10))
+```
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Force4D(ST_GeomFromText('LINESTRING(0 1,1 0,2 0)'), 3, 1))
+```
+
+Output:
+
+```
+LINESTRING ZM(0 1 3 1, 1 0 3 1, 2 0 3 1)
+```
+
+## ST_ForceCollection
+
+Introduction: This function converts the input geometry into a GeometryCollection, regardless of the original geometry type. If the input is a multipart geometry, such as a MultiPolygon or MultiLineString, it will be decomposed into a GeometryCollection containing each individual Polygon or LineString element from the original multipart geometry.
+
+Format: `ST_ForceCollection(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_ForceCollection(
+            ST_GeomFromWKT(
+                "MULTIPOINT (30 10, 40 40, 20 20, 10 30, 10 10, 20 50)"
+    )
+)
+```
+
+Output:
+
+```
+GEOMETRYCOLLECTION (POINT (30 10), POINT (40 40), POINT (20 20), POINT (10 30), POINT (10 10), POINT (20 50))
+```
+
 ## ST_ForcePolygonCCW
 
 Introduction: For (Multi)Polygon geometries, this function sets the exterior ring orientation to counter-clockwise and interior rings to clockwise orientation. Non-polygonal geometries are returned unchanged.
@@ -1274,6 +1602,26 @@ Output:
 POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))
 ```
 
+## ST_ForceRHR
+
+Introduction: Sets the orientation of polygon vertex orderings to follow the Right-Hand-Rule convention. The exterior ring will have a clockwise winding order, while any interior rings are oriented counter-clockwise. This ensures the area bounded by the polygon falls on the right-hand side relative to the ring directions. The function is an alias for [ST_ForcePolygonCW](#st_forcepolygoncw).
+
+Format: `ST_ForceRHR(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_AsText(ST_ForceRHR(ST_GeomFromText('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))')))
+```
+
+Output:
+
+```
+POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))
+```
+
 ## ST_FrechetDistance
 
 Introduction: Computes and returns discrete [Frechet Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_distance) between the given two geometries,
@@ -1295,6 +1643,35 @@ Output:
 
 ```
 5.0990195135927845
+```
+
+## ST_GeneratePoints
+
+Introduction: Generates a specified quantity of pseudo-random points within the boundaries of the provided polygonal geometry. When `seed` is either zero or not defined then output will be random.
+
+Format:
+
+`ST_GeneratePoints(geom: Geometry, numPoints: Integer, seed: Long = 0)`
+
+`ST_GeneratePoints(geom: Geometry, numPoints: Integer)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_GeneratePoints(
+        ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))'), 4
+)
+```
+
+Output:
+
+!!!Note
+    Due to the pseudo-random nature of point generation, the output of this function will vary between executions and may not match any provided examples.
+
+```
+MULTIPOINT ((0.2393028905520183 0.9721563442837837), (0.3805848547053376 0.7546556656982678), (0.0950295778200995 0.2494334895495989), (0.4133520939987385 0.3447046312451945))
 ```
 
 ## ST_GeoHash
@@ -1530,6 +1907,50 @@ Output:
 
 ```
 [POLYGON ((1.0057629565405093 1.9984665139177547, 1.0037116327309097 2.0018325249140068, 0.999727799357053 2.001163270465665, 0.9977951427833316 1.997128228393235, 0.9998461908217928 1.993762152933182, 1.0038301712104316 1.9944311839965523, 1.0057629565405093 1.9984665139177547))]
+```
+
+## ST_HasM
+
+Introduction: Checks for the presence of M coordinate values representing measures or linear references. Returns true if the input geometry includes an M coordinate, false otherwise.
+
+Format: `ST_HasM(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_HasM(
+        ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))')
+)
+```
+
+Output:
+
+```
+True
+```
+
+## ST_HasZ
+
+Introduction: Checks for the presence of Z coordinate values representing measures or linear references. Returns true if the input geometry includes an Z coordinate, false otherwise.
+
+Format: `ST_HasZ(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_HasZ(
+        ST_GeomFromWKT('LINESTRING Z (30 10 5, 40 40 10, 20 40 15, 10 20 20)')
+)
+```
+
+Output:
+
+```
+True
 ```
 
 ## ST_HausdorffDistance
@@ -1857,9 +2278,45 @@ gid  |                  validity_info
 
 ```
 
+## ST_IsValidTrajectory
+
+Introduction: This function checks if a geometry is a valid trajectory representation. For a trajectory to be considered valid, it must be a LineString that includes measure (M) values. The key requirement is that the M values increase from one vertex to the next as you move along the line.
+
+Format: `ST_IsValidTrajectory(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_IsValidTrajectory(
+               ST_GeomFromText('LINESTRING M (0 0 1, 0 1 2)')
+)
+```
+
+Output:
+
+```
+true
+```
+
+SQL Example:
+
+```sql
+SELECT ST_IsValidTrajectory(
+               ST_GeomFromText('LINESTRING M (0 0 1, 0 1 0)')
+)
+```
+
+Output:
+
+```sql
+false
+```
+
 ## ST_Length
 
-Introduction: Return the perimeter of A
+Introduction: Returns the perimeter of A.
 
 Format: `ST_Length (A: Geometry)`
 
@@ -1869,6 +2326,26 @@ Example:
 
 ```sql
 SELECT ST_Length(ST_GeomFromWKT('LINESTRING(38 16,38 50,65 50,66 16,38 16)'))
+```
+
+Output:
+
+```
+123.0147027033899
+```
+
+## ST_Length2D
+
+Introduction: Returns the perimeter of A. This function is an alias of [ST_Length](#st_length).
+
+Format: ST_Length2D (A:geometry)
+
+Since: `v1.6.1`
+
+Example:
+
+```SQL
+SELECT ST_Length2D(ST_GeomFromWKT('LINESTRING(38 16,38 50,65 50,66 16,38 16)'))
 ```
 
 Output:
@@ -2006,6 +2483,123 @@ Output:
 LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140.21046313888758)
 ```
 
+## ST_LocateAlong
+
+Introduction: This function computes Point or MultiPoint geometries representing locations along a measured input geometry (LineString or MultiLineString) corresponding to the provided measure value(s). Polygonal geometry inputs are not supported. The output points lie directly on the input line at the specified measure positions.
+
+Additionally, an optional `offset` parameter can shift the resulting points left or right from the input line. A positive offset displaces the points to the left side, while a negative value offsets them to the right side by the given distance.
+
+This allows identifying precise locations along a measured linear geometry based on supplied measure values, with the ability to offset the output points if needed.
+
+Format:
+
+`ST_LocateAlong(linear: Geometry, measure: Double, offset: Double)`
+
+`ST_LocateAlong(linear: Geometry, measure: Double)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_LocateAlong(
+        ST_GeomFromText('LINESTRING M (10 30 1, 50 50 1, 30 110 2, 70 90 2, 180 140 3, 130 190 3)')
+)
+```
+
+Output:
+
+```
+MULTIPOINT M((30 110 2), (50 100 2), (70 90 2))
+```
+
+## ST_LongestLine
+
+Introduction: Returns the LineString geometry representing the maximum distance between any two points from the input geometries.
+
+Format: `ST_LongestLine(geom1: Geometry, geom2: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_LongestLine(
+        ST_GeomFromText("POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"),
+        ST_GeomFromText("POLYGON ((10 20, 30 30, 40 20, 30 10, 10 20))")
+)
+```
+
+Output:
+
+```
+LINESTRING (40 40, 10 20)
+```
+
+## ST_M
+
+Introduction: Returns M Coordinate of given Point, null otherwise.
+
+Format: `ST_M(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_M(ST_MakePoint(1, 2, 3, 4))
+```
+
+Output:
+
+```
+4.0
+```
+
+## ST_MMax
+
+Introduction: Returns M maxima of the given geometry or null if there is no M coordinate.
+
+Format: `ST_MMax(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_MMax(
+        ST_GeomFromWKT('POLYGON ZM ((30 10 5 1, 40 40 10 2, 20 40 15 3, 10 20 20 4, 30 10 5 1))')
+)
+```
+
+Output:
+
+```
+4.0
+```
+
+## ST_MMin
+
+Introduction: Returns M minima of the given geometry or null if there is no M coordinate.
+
+Format: `ST_MMin(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_MMin(
+        ST_GeomFromWKT('LINESTRING ZM(1 1 1 1, 2 2 2 2, 3 3 3 3, -1 -1 -1 -1)')
+)
+```
+
+Output:
+
+```
+-1.0
+```
+
 ## ST_MakeLine
 
 Introduction: Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error.
@@ -2096,6 +2690,80 @@ Result:
 +------------------+------------------------+
 |  LINESTRING EMPTY|             POINT (1 1)|
 +------------------+------------------------+
+```
+
+## ST_MaxDistance
+
+Introduction: Calculates and returns the length value representing the maximum distance between any two points across the input geometries. This function is an alias for `ST_LongestDistance`.
+
+Format: `ST_MaxDistance(geom1: Geometry, geom2: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_MaxDistance(
+        ST_GeomFromText("POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"),
+        ST_GeomFromText("POLYGON ((10 20, 30 30, 40 20, 30 10, 10 20))")
+)
+```
+
+Output:
+
+```
+36.05551275463989
+```
+
+## ST_MinimumClearance
+
+Introduction: The minimum clearance is a metric that quantifies a geometry's tolerance to changes in coordinate precision or vertex positions. It represents the maximum distance by which vertices can be adjusted without introducing invalidity to the geometry's structure. A larger minimum clearance value indicates greater robustness against such perturbations.
+
+For a geometry with a minimum clearance of `x`, the following conditions hold:
+
+- No two distinct vertices are separated by a distance less than `x`.
+- No vertex lies within a distance `x` from any line segment it is not an endpoint of.
+
+For geometries with no definable minimum clearance, such as single Point geometries or MultiPoint geometries where all points occupy the same location, the function returns `Double.MAX_VALUE`.
+
+Format: `ST_MinimumClearance(geometry: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_MinimumClearance(
+        ST_GeomFromWKT('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))')
+)
+```
+
+Output:
+
+```
+0.5
+```
+
+## ST_MinimumClearanceLine
+
+Introduction: This function returns a two-point LineString geometry representing the minimum clearance distance of the input geometry. If the input geometry does not have a defined minimum clearance, such as for single Points or coincident MultiPoints, an empty LineString geometry is returned instead.
+
+Format: `ST_MinimumClearanceLine(geometry: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_MinimumClearanceLine(
+        ST_GeomFromWKT('POLYGON ((65 18, 62 16, 64.5 16, 62 14, 65 14, 65 18))')
+)
+```
+
+Output:
+
+```
+LINESTRING (64.5 16, 65 16)
 ```
 
 ## ST_MinimumBoundingCircle
@@ -2283,6 +2951,26 @@ Output:
 1
 ```
 
+## ST_NumInteriorRing
+
+Introduction: Returns number of interior rings of polygon geometries. It is an alias of [ST_NumInteriorRings](#st_numinteriorrings).
+
+Format: `ST_NumInteriorRing(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_NumInteriorRing(ST_GeomFromText('POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))'))
+```
+
+Output:
+
+```
+1
+```
+
 ## ST_NumInteriorRings
 
 Introduction: Returns number of interior rings of polygon geometries.
@@ -2388,6 +3076,26 @@ FROM df
 
    Output: `POINT Z(0 0 1)`
 
+## ST_Points
+
+Introduction: Returns a MultiPoint geometry consisting of all the coordinates of the input geometry. It preserves duplicate points as well as M and Z coordinates.
+
+Format: `ST_Points(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Points(ST_GeomFromEWKT('LINESTRING (2 4, 3 3, 4 2, 7 3)')));
+```
+
+Output:
+
+```
+MULTIPOINT ((2 4), (3 3), (4 2), (7,3))
+```
+
 ## ST_Polygon
 
 Introduction: Function to create a polygon built from the given LineString and sets the spatial reference system from the srid
@@ -2429,6 +3137,48 @@ Output:
 
 ```
 GEOMETRYCOLLECTION (POLYGON ((0 2, 1 3, 2 4, 2 3, 2 2, 1 2, 0 2)), POLYGON ((2 2, 2 3, 2 4, 3 3, 4 2, 3 2, 2 2)))
+```
+
+## ST_Project
+
+Introduction: Calculates a new point location given a starting point, distance, and azimuth. The azimuth indicates the direction, expressed in radians, and is measured in a clockwise manner starting from true north. The system can handle azimuth values that are negative or exceed 2π (360 degrees). The optional `lenient` parameter prevents an error if the input geometry is not a Point. Its default value is `false`.
+
+Format:
+
+```
+ST_Project(point: Geometry, distance: Double, azimuth: Double, lenient: Boolean = False)
+```
+
+```
+ST_Project(point: Geometry, distance: Double, Azimuth: Double)
+```
+
+Since: `v1.7.0`
+
+SQL Example:
+
+```sql
+SELECT ST_Project(ST_GeomFromText('POINT (10 15)'), 100, radians(90))
+```
+
+Output:
+
+```
+POINT (110 14.999999999999975)
+```
+
+SQL Example:
+
+```sql
+SELECT ST_Project(
+        ST_GeomFromText('POLYGON ((1 5, 1 1, 3 3, 5 3, 1 5))'),
+        25, radians(270), true)
+```
+
+Output:
+
+```
+POINT EMPTY
 ```
 
 ## ST_ReducePrecision
@@ -2496,6 +3246,141 @@ Output:
 
 ```
 LINESTRING(0 0, 1 0)
+```
+
+## ST_RemoveRepeatedPoints
+
+Introduction: This function eliminates consecutive duplicate points within a geometry, preserving endpoints of LineStrings. It operates on (Multi)LineStrings, (Multi)Polygons, and MultiPoints, processing GeometryCollection elements individually. When an optional 'tolerance' value is provided, vertices within that distance are also considered duplicates.
+
+Format:
+
+`ST_RemoveRepeatedPoints(geom: Geometry, tolerance: Double)`
+
+`ST_RemoveRepeatedPoints(geom: Geometry)`
+
+Since: `v1.7.0`
+
+SQL Example:
+
+```sql
+SELECT ST_RemoveRepeatedPoints(
+        ST_GeomFromWKT('MULTIPOINT ((20 20), (10 10), (30 30), (40 40), (20 20), (30 30), (40 40))')
+       )
+```
+
+Output:
+
+```
+MULTIPOINT ((20 20), (10 10), (30 30), (40 40))
+```
+
+SQL Example:
+
+```sql
+SELECT ST_RemoveRepeatedPoints(
+        ST_GeomFromWKT('LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)')
+       )
+```
+
+Output:
+
+```
+LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)
+```
+
+SQL Example: Each geometry within a collection is processed independently.
+
+```sql
+ST_RemoveRepeatedPoints(
+        ST_GeomFromWKT('GEOMETRYCOLLECTION (POINT (10 10), POINT(10 10), LINESTRING (20 20, 20 20, 30 30, 30 30), MULTIPOINT ((80 80), (90 90), (90 90), (100 100)))')
+    )
+```
+
+Output:
+
+```
+GEOMETRYCOLLECTION (POINT (10 10), POINT (10 10), LINESTRING (20 20, 30 30), MULTIPOINT ((80 80), (90 90), (100 100)))
+```
+
+SQL Example: Elimination of repeated points within a specified distance tolerance.
+
+```sql
+SELECT ST_RemoveRepeatedPoints(
+        ST_GeomFromWKT('LINESTRING (20 20, 10 10, 30 30, 40 40, 20 20, 30 30, 40 40)'),
+        20
+       )
+```
+
+Output:
+
+```
+LINESTRING (20 20, 40 40, 20 20, 40 40)
+```
+
+## ST_Rotate
+
+Introduction: Rotates a geometry by a specified angle in radians counter-clockwise around a given origin point. The origin for rotation can be specified as either a POINT geometry or x and y coordinates. If the origin is not specified, the geometry is rotated around POINT(0 0).
+
+Formats;
+
+`ST_Rotate (geometry: Geometry, angle: Double)`
+
+`ST_Rotate (geometry: Geometry, angle: Double, originX: Double, originY: Double)`
+
+`ST_Rotate (geometry: Geometry, angle: Double, pointOrigin: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_Rotate(ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 0))'), 10, 0, 0)
+```
+
+Output:
+
+```
+SRID=4326;POLYGON ((0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0))
+```
+
+## ST_RotateX
+
+Introduction: Performs a counter-clockwise rotation of the specified geometry around the X-axis by the given angle measured in radians.
+
+Format: `ST_RotateX(geometry: Geometry, angle: Double)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_RotateX(ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 0))'), 10)
+```
+
+Output:
+
+```
+SRID=4326;POLYGON ((0 0, 1 0, 1 -0.8390715290764524, 0 0))
+```
+
+## ST_RotateY
+
+Introduction: Performs a counter-clockwise rotation of the specified geometry around the Y-axis by the given angle measured in radians.
+
+Format: `ST_RotateY(geometry: Geometry, angle: Double)`
+
+Since: `v1.7.0`
+
+SQL Example:
+
+```sql
+SELECT ST_RotateY(ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 0))'), 10)
+```
+
+Output:
+
+```
+SRID=4326;POLYGON ((0 0, -0.8390715290764524 0, -0.8390715290764524 1, 0 0))
 ```
 
 ## ST_S2CellIDs
@@ -2628,6 +3513,79 @@ Output:
 3021
 ```
 
+## ST_Simplify
+
+Introduction: This function simplifies the input geometry by applying the Douglas-Peucker algorithm.
+
+!!!Note
+    The simplification may not preserve topology, potentially producing invalid geometries. Use [ST_SimplifyPreserveTopology](#st_simplifypreservetopology) to retain valid topology after simplification.
+
+Format: `ST_Simplify(geom: Geometry, tolerance: Double)`
+
+Since: `v1.7.0`
+
+SQL Example:
+
+```sql
+SELECT ST_Simplify(ST_Buffer(ST_GeomFromWKT('POINT (0 2)'), 10), 1)
+```
+
+Output:
+
+```
+POLYGON ((10 2, 7.0710678118654755 -5.071067811865475, 0.0000000000000006 -8, -7.071067811865475 -5.0710678118654755, -10 1.9999999999999987, -7.071067811865477 9.071067811865476, -0.0000000000000018 12, 7.071067811865474 9.071067811865477, 10 2))
+```
+
+## ST_SimplifyPolygonHull
+
+Introduction: This function computes a topology-preserving simplified hull, either outer or inner, for a polygonal geometry input. An outer hull fully encloses the original geometry, while an inner hull lies entirely within. The result maintains the same structure as the input, including handling of MultiPolygons and holes, represented as a polygonal geometry formed from a subset of vertices.
+
+Vertex reduction is governed by the `vertexFactor` parameter ranging from 0 to 1, with lower values yielding simpler outputs with fewer vertices and reduced concavity. For both hull types, a `vertexFactor` of 1.0 returns the original geometry. Specifically, for outer hulls, 0.0 computes the convex hull; for inner hulls, 0.0 produces a triangular geometry.
+
+The simplification algorithm iteratively removes concave corners containing the least area until reaching the target vertex count. It preserves topology by preventing edge crossings, ensuring the output is a valid polygonal geometry in all cases.
+
+Format:
+
+```
+ST_SimplifyPolygonHull(geom: Geometry, vertexFactor: Double, isOuter: Boolean = true)
+```
+
+```
+ST_SimplifyPolygonHull(geom: Geometry, vertexFactor: Double)
+```
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_SimplifyPolygonHull(
+        ST_GeomFromText('POLYGON ((30 10, 40 40, 45 45, 50 30, 55 25, 60 50, 65 45, 70 30, 75 20, 80 25, 70 10, 30 10))'),
+       0.4
+)
+```
+
+Output:
+
+```
+POLYGON ((30 10, 40 40, 45 45, 60 50, 65 45, 80 25, 70 10, 30 10))
+```
+
+SQL Example
+
+```sql
+SELECT ST_SimplifyPolygonHull(
+        ST_GeomFromText('POLYGON ((30 10, 40 40, 45 45, 50 30, 55 25, 60 50, 65 45, 70 30, 75 20, 80 25, 70 10, 30 10))'),
+       0.4, false
+)
+```
+
+Output:
+
+```
+POLYGON ((30 10, 70 10, 60 50, 55 25, 30 10))
+```
+
 ## ST_SimplifyPreserveTopology
 
 Introduction: Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
@@ -2649,6 +3607,29 @@ Output:
 POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))
 ```
 
+## ST_SimplifyVW
+
+Introduction: This function simplifies the input geometry by applying the Visvalingam-Whyatt algorithm.
+
+!!!Note
+    The simplification may not preserve topology, potentially producing invalid geometries. Use [ST_SimplifyPreserveTopology](#st_simplifypreservetopology) to retain valid topology after simplification.
+
+Format: `ST_SimplifyVW(geom: Geometry, tolerance: Double)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_SimplifyVW(ST_GeomFromWKT('POLYGON((8 25, 28 22, 28 20, 15 11, 33 3, 56 30, 46 33,46 34, 47 44, 35 36, 45 33, 43 19, 29 21, 29 22,35 26, 24 39, 8 25))'), 80)
+```
+
+Output:
+
+```
+POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 43 19, 24 39, 8 25))
+```
+
 ## ST_Snap
 
 Introduction: Snaps the vertices and segments of the `input` geometry to `reference` geometry within the specified `tolerance` distance. The `tolerance` parameter controls the maximum snap distance.
@@ -2666,11 +3647,11 @@ Input geometry:
 SQL Example:
 
 ```sql
-SELECT ST_Snap(
-        ST_GeomFromWKT('POLYGON ((236877.58 -6.61, 236878.29 -8.35, 236879.98 -8.33, 236879.72 -7.63, 236880.35 -6.62, 236877.58 -6.61), (236878.45 -7.01, 236878.43 -7.52, 236879.29 -7.50, 236878.63 -7.22, 236878.76 -6.89, 236878.45 -7.01))') as poly,
-        ST_GeomFromWKT('LINESTRING (236880.53 -8.22, 236881.15 -7.68, 236880.69 -6.81)') as line,
-       ST_Distance(poly, line) * 1.01
-       )
+SELECT
+    ST_Snap(poly, line, ST_Distance(poly, line) * 1.01) AS polySnapped FROM (
+        SELECT ST_GeomFromWKT('POLYGON ((236877.58 -6.61, 236878.29 -8.35, 236879.98 -8.33, 236879.72 -7.63, 236880.35 -6.62, 236877.58 -6.61), (236878.45 -7.01, 236878.43 -7.52, 236879.29 -7.50, 236878.63 -7.22, 236878.76 -6.89, 236878.45 -7.01))') as poly,
+           ST_GeomFromWKT('LINESTRING (236880.53 -8.22, 236881.15 -7.68, 236880.69 -6.81)') as line
+)
 ```
 
 Output:
@@ -2893,6 +3874,48 @@ Output:
 
 ```
 POINT (-70.01 44.37)
+```
+
+## ST_TriangulatePolygon
+
+Introduction: Generates the constrained Delaunay triangulation for the input Polygon. The constrained Delaunay triangulation is a set of triangles created from the Polygon's vertices that covers the Polygon area precisely, while maximizing the combined interior angles across all triangles compared to other possible triangulations. This produces the highest quality triangulation representation of the Polygon geometry. The function returns a GeometryCollection of Polygon geometries comprising this optimized constrained Delaunay triangulation. Polygons with holes and MultiPolygon types are supported. For any other geometry type provided, such as Point, LineString, etc., an empty GeometryCollection will be returned.
+
+Format: `ST_TriangulatePolygon(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_TriangulatePolygon(
+        ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (5 5, 5 8, 8 8, 8 5, 5 5))')
+    )
+```
+
+Output:
+
+```
+GEOMETRYCOLLECTION (POLYGON ((0 0, 0 10, 5 5, 0 0)), POLYGON ((5 8, 5 5, 0 10, 5 8)), POLYGON ((10 0, 0 0, 5 5, 10 0)), POLYGON ((10 10, 5 8, 0 10, 10 10)), POLYGON ((10 0, 5 5, 8 5, 10 0)), POLYGON ((5 8, 10 10, 8 8, 5 8)), POLYGON ((10 10, 10 0, 8 5, 10 10)), POLYGON ((8 5, 8 8, 10 10, 8 5)))
+```
+
+## ST_UnaryUnion
+
+Introduction: This variant of [ST_Union](#st_union) operates on a single geometry input. The input geometry can be a simple Geometry type, a MultiGeometry, or a GeometryCollection. The function calculates the geometric union across all components and elements within the provided geometry object.
+
+Format: `ST_UnaryUnion(geometry: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_UnaryUnion(ST_GeomFromWKT('MULTIPOLYGON(((0 10,0 30,20 30,20 10,0 10)),((10 0,10 20,30 20,30 0,10 0)))'))
+```
+
+Output:
+
+```
+POLYGON ((10 0, 10 10, 0 10, 0 30, 20 30, 20 20, 30 20, 30 0, 10 0))
 ```
 
 ## ST_Union
@@ -3144,4 +4167,42 @@ Output:
 
 ```
 4.0
+```
+
+## ST_Zmflag
+
+Introduction: Returns a code indicating the Z and M coordinate dimensions present in the input geometry.
+
+Values are: 0 = 2D, 1 = 3D-M, 2 = 3D-Z, 3 = 4D.
+
+Format: `ST_Zmflag(geom: Geometry)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_Zmflag(
+        ST_GeomFromWKT('LINESTRING Z(1 2 3, 4 5 6)')
+)
+```
+
+Output:
+
+```
+2
+```
+
+SQL Example
+
+```sql
+SELECT ST_Zmflag(
+        ST_GeomFromWKT('POINT ZM(1 2 3 4)')
+)
+```
+
+Output:
+
+```
+3
 ```

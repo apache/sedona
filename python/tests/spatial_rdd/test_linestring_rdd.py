@@ -15,12 +15,22 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from sedona.core.SpatialRDD import LineStringRDD
-from sedona.core.enums import IndexType, GridType
-from sedona.core.geom.envelope import Envelope
-from tests.properties.linestring_properties import input_count, input_boundary, input_location, splitter, num_partitions, \
-    grid_type, transformed_envelope, input_boundary_2, transformed_envelope_2
+from tests.properties.linestring_properties import (
+    grid_type,
+    input_boundary,
+    input_boundary_2,
+    input_count,
+    input_location,
+    num_partitions,
+    splitter,
+    transformed_envelope,
+    transformed_envelope_2,
+)
 from tests.test_base import TestBase
+
+from sedona.core.enums import GridType, IndexType
+from sedona.core.geom.envelope import Envelope
+from sedona.core.SpatialRDD import LineStringRDD
 
 
 class TestLineStringRDD(TestBase):
@@ -38,7 +48,7 @@ class TestLineStringRDD(TestBase):
             InputLocation=input_location,
             splitter=splitter,
             carryInputData=True,
-            partitions=num_partitions
+            partitions=num_partitions,
         )
 
         self.compare_count(spatial_rdd_core, input_boundary, input_count)
@@ -49,7 +59,9 @@ class TestLineStringRDD(TestBase):
 
         self.compare_count(spatial_rdd, input_boundary, input_count)
 
-        spatial_rdd = LineStringRDD(self.sc, input_location, 0, 3, splitter, True, num_partitions)
+        spatial_rdd = LineStringRDD(
+            self.sc, input_location, 0, 3, splitter, True, num_partitions
+        )
 
         self.compare_count(spatial_rdd, input_boundary_2, input_count)
 
@@ -57,7 +69,9 @@ class TestLineStringRDD(TestBase):
 
         self.compare_count(spatial_rdd, input_boundary_2, input_count)
 
-        spatial_rdd = LineStringRDD(self.sc, input_location, splitter, True, num_partitions)
+        spatial_rdd = LineStringRDD(
+            self.sc, input_location, splitter, True, num_partitions
+        )
 
         self.compare_count(spatial_rdd, input_boundary, input_count)
 
@@ -69,10 +83,11 @@ class TestLineStringRDD(TestBase):
 
         self.compare_count(spatial_rdd, input_boundary, input_count)
 
-        spatial_rdd = LineStringRDD(self.sc, input_location, 0, 3, splitter, True, num_partitions)
+        spatial_rdd = LineStringRDD(
+            self.sc, input_location, 0, 3, splitter, True, num_partitions
+        )
 
         self.compare_count(spatial_rdd, input_boundary_2, input_count)
-
 
     def test_empty_constructor(self):
         spatial_rdd = LineStringRDD(
@@ -80,7 +95,7 @@ class TestLineStringRDD(TestBase):
             InputLocation=input_location,
             splitter=splitter,
             carryInputData=True,
-            partitions=num_partitions
+            partitions=num_partitions,
         )
 
         spatial_rdd.analyze()
@@ -96,7 +111,7 @@ class TestLineStringRDD(TestBase):
             InputLocation=input_location,
             splitter=splitter,
             carryInputData=True,
-            partitions=num_partitions
+            partitions=num_partitions,
         )
 
         spatial_rdd.analyze()
@@ -108,7 +123,7 @@ class TestLineStringRDD(TestBase):
             InputLocation=input_location,
             splitter=splitter,
             carryInputData=True,
-            partitions=num_partitions
+            partitions=num_partitions,
         )
 
         rectangle_rdd = linestring_rdd.MinimumBoundingRectangle()

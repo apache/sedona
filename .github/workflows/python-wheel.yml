@@ -10,6 +10,7 @@ on:
       - 'spark-shaded/**'
       - 'pom.xml'
       - 'python/**'
+      - '.github/workflows/python-wheel.yml'
   pull_request:
     branches:
       - '*'
@@ -25,28 +26,26 @@ jobs:
     strategy:
       matrix:
         os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
-
     runs-on: ${{ matrix.os }}
     defaults:
       run:
         shell: bash
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up QEMU
-      if: runner.os == 'Linux'
-      uses: docker/setup-qemu-action@v3
-      with:
-        platforms: all
-    - name: Build wheels
-      uses: pypa/cibuildwheel@v2.16.5
-      env:
-        CIBW_SKIP: 'pp* *musl*'
-        CIBW_ARCHS_LINUX: 'x86_64 aarch64'
-        CIBW_ARCHS_WINDOWS: 'AMD64 ARM64'
-        CIBW_ARCHS_MACOS: 'x86_64 arm64'
-      with:
-        package-dir: python
-    - uses: actions/upload-artifact@v3
-      with:
-        path: ./wheelhouse/*.whl
+      - uses: actions/checkout@v4
+      - name: Set up QEMU
+        if: runner.os == 'Linux'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.20.0
+        env:
+          CIBW_SKIP: 'pp* *musl*'
+          CIBW_ARCHS_LINUX: 'x86_64 aarch64'
+          CIBW_ARCHS_WINDOWS: 'AMD64 ARM64'
+          CIBW_ARCHS_MACOS: 'x86_64 arm64'
+        with:
+          package-dir: python
+      - uses: actions/upload-artifact@v3
+        with:
+          path: ./wheelhouse/*.whl

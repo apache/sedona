@@ -3,7 +3,7 @@ template:
   bootstrap: 5
   # bootswatch: cosmo
   bslib:
-    #font_scale: 1.1
+    # font_scale: 1.1
     primary: "#ff6e42"
     light: "#ff6e42"
     navbar-light-color: "#fff"
@@ -13,7 +13,7 @@ template:
     # bg: "#fff"
 navbar:
   structure:
-   # left:  [intro, articles, reference, news]
+    # left: [intro, articles, reference, news]
     right: [search, github]
 home:
   sidebar:
@@ -25,43 +25,43 @@ home:
           [Homepage](https://sedona.apache.org/)
 
 reference:
-- title: "Reading and Writing Spatial DataFrames"
-  desc: "Functions for reading and writing Spark DataFrames."
-  contents:
-  - starts_with("spark_read")
-  - starts_with("spark_write")
-  - sedona_save_spatial_rdd
-- title: "Reading and Writing Spatial RDDs"
-  desc: "Functions for reading and writing Spatial RDDs."
-  contents:
-  - starts_with("sedona_read")
-  - starts_with("sedona_write")
-- title: "Conversion"
-  desc: "Functions to convert between Spark DataFrames and Spatial RDDs."
-  contents:
-  - contains("sdf_register")
-  - to_spatial_rdd
-- title: "RDD functions"
-- subtitle: "Visualization"
-  contents:
-  - starts_with("sedona_visualization_routines")
-  - starts_with("sedona_render")
-- subtitle: "Joins"
-  contents:
-  - sedona_spatial_join
-  - sedona_spatial_join_count_by_key
-- subtitle: "Query"
-  contents:
-  - sedona_knn_query
-  - sedona_range_query
-- subtitle: "Others"
-  contents:
-  - sedona_apply_spatial_partitioner
-  - sedona_build_index
-  - approx_count
-  - crs_transform
-  - minimum_bounding_box
-  - new_bounding_box
+  - title: "Reading and Writing Spatial DataFrames"
+    desc: "Functions for reading and writing Spark DataFrames."
+    contents:
+      - starts_with("spark_read")
+      - starts_with("spark_write")
+      - sedona_save_spatial_rdd
+  - title: "Reading and Writing Spatial RDDs"
+    desc: "Functions for reading and writing Spatial RDDs."
+    contents:
+      - starts_with("sedona_read")
+      - starts_with("sedona_write")
+  - title: "Conversion"
+    desc: "Functions to convert between Spark DataFrames and Spatial RDDs."
+    contents:
+      - contains("sdf_register")
+      - to_spatial_rdd
+  - title: "RDD functions"
+  - subtitle: "Visualization"
+    contents:
+      - starts_with("sedona_visualization_routines")
+      - starts_with("sedona_render")
+  - subtitle: "Joins"
+    contents:
+      - sedona_spatial_join
+      - sedona_spatial_join_count_by_key
+  - subtitle: "Query"
+    contents:
+      - sedona_knn_query
+      - sedona_range_query
+  - subtitle: "Others"
+    contents:
+      - sedona_apply_spatial_partitioner
+      - sedona_build_index
+      - approx_count
+      - crs_transform
+      - minimum_bounding_box
+      - new_bounding_box
 repo:
   url:
     home: https://github.com/apache/sedona/

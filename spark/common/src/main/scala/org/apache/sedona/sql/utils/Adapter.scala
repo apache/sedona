@@ -32,32 +32,38 @@ import org.locationtech.jts.geom.Geometry
 object Adapter {
 
   /**
-    * Convert a Spatial DF to a Spatial RDD. The geometry column can be at any place in the DF
-    *
-    * @param dataFrame
-    * @param geometryFieldName
-    * @return
-    */
+   * Convert a Spatial DF to a Spatial RDD. The geometry column can be at any place in the DF
+   *
+   * @param dataFrame
+   * @param geometryFieldName
+   * @return
+   */
   def toSpatialRdd(dataFrame: DataFrame, geometryFieldName: String): SpatialRDD[Geometry] = {
     // Delete the field that have geometry
     if (dataFrame.schema.size == 1) {
       toSpatialRdd(dataFrame, 0, List[String]())
-    }
-    else {
+    } else {
       val fieldList = dataFrame.schema.toList.map(f => f.name)
-      toSpatialRdd(dataFrame, geometryFieldName, fieldList.filter(p => !p.equalsIgnoreCase(geometryFieldName)))
+      toSpatialRdd(
+        dataFrame,
+        geometryFieldName,
+        fieldList.filter(p => !p.equalsIgnoreCase(geometryFieldName)))
     }
   }
 
   /**
-    * Convert a Spatial DF to a Spatial RDD with a list of user-supplied col names (except geom col). The geometry column can be at any place in the DF.
-    *
-    * @param dataFrame
-    * @param geometryFieldName
-    * @param fieldNames
-    * @return
-    */
-  def toSpatialRdd(dataFrame: DataFrame, geometryFieldName: String, fieldNames: Seq[String]): SpatialRDD[Geometry] = {
+   * Convert a Spatial DF to a Spatial RDD with a list of user-supplied col names (except geom
+   * col). The geometry column can be at any place in the DF.
+   *
+   * @param dataFrame
+   * @param geometryFieldName
+   * @param fieldNames
+   * @return
+   */
+  def toSpatialRdd(
+      dataFrame: DataFrame,
+      geometryFieldName: String,
+      fieldNames: Seq[String]): SpatialRDD[Geometry] = {
     var spatialRDD = new SpatialRDD[Geometry]
     spatialRDD.rawSpatialRDD = toRdd(dataFrame, geometryFieldName).toJavaRDD()
     import scala.jdk.CollectionConverters._
@@ -74,14 +80,18 @@ object Adapter {
   }
 
   /**
-    * Convert a Spatial DF to a Spatial RDD with a list of user-supplied col names (except geom col). The geometry column can be at any place in the DF.
-    *
-    * @param dataFrame
-    * @param geometryColId
-    * @param fieldNames
-    * @return
-    */
-  def toSpatialRdd(dataFrame: DataFrame, geometryColId: Int, fieldNames: Seq[String]): SpatialRDD[Geometry] = {
+   * Convert a Spatial DF to a Spatial RDD with a list of user-supplied col names (except geom
+   * col). The geometry column can be at any place in the DF.
+   *
+   * @param dataFrame
+   * @param geometryColId
+   * @param fieldNames
+   * @return
+   */
+  def toSpatialRdd(
+      dataFrame: DataFrame,
+      geometryColId: Int,
+      fieldNames: Seq[String]): SpatialRDD[Geometry] = {
     var spatialRDD = new SpatialRDD[Geometry]
     spatialRDD.rawSpatialRDD = toRdd(dataFrame, geometryColId).toJavaRDD()
     import scala.jdk.CollectionConverters._
@@ -91,36 +101,42 @@ object Adapter {
   }
 
   /**
-    * Convert a Spatial DF to a Spatial RDD. The geometry column can be at any place in the DF
-    *
-    * @param dataFrame
-    * @param geometryColId
-    * @return
-    */
+   * Convert a Spatial DF to a Spatial RDD. The geometry column can be at any place in the DF
+   *
+   * @param dataFrame
+   * @param geometryColId
+   * @return
+   */
   def toSpatialRdd(dataFrame: DataFrame, geometryColId: Int): SpatialRDD[Geometry] = {
     // Delete the field that have geometry
     if (dataFrame.schema.size == 1) {
       toSpatialRdd(dataFrame, 0, List[String]())
-    }
-    else {
+    } else {
       val fieldList = dataFrame.schema.toList.map(f => f.name)
       val geometryFieldName = fieldList(geometryColId)
-      toSpatialRdd(dataFrame, geometryColId, fieldList.filter(p => !p.equalsIgnoreCase(geometryFieldName)))
+      toSpatialRdd(
+        dataFrame,
+        geometryColId,
+        fieldList.filter(p => !p.equalsIgnoreCase(geometryFieldName)))
     }
   }
 
   def toDf[T <: Geometry](spatialRDD: SpatialRDD[T], sparkSession: SparkSession): DataFrame = {
     import scala.jdk.CollectionConverters._
-    if (spatialRDD.fieldNames != null) return toDf(spatialRDD, spatialRDD.fieldNames.asScala.toList, sparkSession)
-    toDf(spatialRDD = spatialRDD, fieldNames = null, sparkSession = sparkSession);
+    if (spatialRDD.fieldNames != null)
+      return toDf(spatialRDD, spatialRDD.fieldNames.asScala.toList, sparkSession)
+    toDf(spatialRDD = spatialRDD, fieldNames = null, sparkSession = sparkSession)
   }
 
-  def toDf[T <: Geometry](spatialRDD: SpatialRDD[T], fieldNames: Seq[String], sparkSession: SparkSession): DataFrame = {
+  def toDf[T <: Geometry](
+      spatialRDD: SpatialRDD[T],
+      fieldNames: Seq[String],
+      sparkSession: SparkSession): DataFrame = {
     val rowRdd = spatialRDD.rawSpatialRDD.rdd.map[Row](geom => {
       val stringRow = extractUserData(geom)
       Row.fromSeq(stringRow)
     })
-    var cols:Seq[StructField] = Seq(StructField("geometry", GeometryUDT))
+    var cols: Seq[StructField] = Seq(StructField("geometry", GeometryUDT))
     if (fieldNames != null && fieldNames.nonEmpty) {
       cols = cols ++ fieldNames.map(f => StructField(f, StringType))
     }
@@ -129,15 +145,23 @@ object Adapter {
   }
 
   /**
-    * Convert a spatial RDD to DataFrame with a given schema.
-    *
-    * @param spatialRDD Spatial RDD
-    * @param schema Desired schema
-    * @param sparkSession Spark Session
-    * @tparam T Geometry
-    * @return DataFrame with the specified schema
-    */
-  def toDf[T <: Geometry](spatialRDD: SpatialRDD[T], schema: StructType, sparkSession: SparkSession): DataFrame = {
+   * Convert a spatial RDD to DataFrame with a given schema.
+   *
+   * @param spatialRDD
+   *   Spatial RDD
+   * @param schema
+   *   Desired schema
+   * @param sparkSession
+   *   Spark Session
+   * @tparam T
+   *   Geometry
+   * @return
+   *   DataFrame with the specified schema
+   */
+  def toDf[T <: Geometry](
+      spatialRDD: SpatialRDD[T],
+      schema: StructType,
+      sparkSession: SparkSession): DataFrame = {
     val rdd = spatialRDD.rawSpatialRDD.rdd.map[Row](geom => {
       val stringRow = extractUserData(geom)
       castRowToSchema(stringRow = stringRow, schema = schema)
@@ -146,44 +170,63 @@ object Adapter {
     sparkSession.sqlContext.createDataFrame(rdd, schema)
   }
 
-  def toDf(spatialPairRDD: JavaPairRDD[Geometry, Geometry], sparkSession: SparkSession): DataFrame = {
+  def toDf(
+      spatialPairRDD: JavaPairRDD[Geometry, Geometry],
+      sparkSession: SparkSession): DataFrame = {
     toDf(spatialPairRDD, null, null, sparkSession)
   }
 
-  def toDf(spatialPairRDD: JavaPairRDD[Geometry, Geometry], leftFieldnames: Seq[String], rightFieldNames: Seq[String], sparkSession: SparkSession): DataFrame = {
+  def toDf(
+      spatialPairRDD: JavaPairRDD[Geometry, Geometry],
+      leftFieldnames: Seq[String],
+      rightFieldNames: Seq[String],
+      sparkSession: SparkSession): DataFrame = {
     val rowRdd = spatialPairRDD.rdd.map(f => {
-      val stringRow = extractUserData(row = f, leftFieldnames = leftFieldnames, rightFieldnames = rightFieldNames)
+      val stringRow = extractUserData(
+        row = f,
+        leftFieldnames = leftFieldnames,
+        rightFieldnames = rightFieldNames)
       Row.fromSeq(stringRow)
     })
-    var cols:Seq[StructField] = Seq(StructField("leftgeometry", GeometryUDT))
-    if (leftFieldnames != null && leftFieldnames.nonEmpty) cols = cols ++ leftFieldnames.map(fName => StructField(fName, StringType))
+    var cols: Seq[StructField] = Seq(StructField("leftgeometry", GeometryUDT))
+    if (leftFieldnames != null && leftFieldnames.nonEmpty)
+      cols = cols ++ leftFieldnames.map(fName => StructField(fName, StringType))
     cols = cols ++ Seq(StructField("rightgeometry", GeometryUDT))
-    if (rightFieldNames != null && rightFieldNames.nonEmpty) cols = cols ++ rightFieldNames.map(fName => StructField(fName, StringType))
+    if (rightFieldNames != null && rightFieldNames.nonEmpty)
+      cols = cols ++ rightFieldNames.map(fName => StructField(fName, StringType))
     val schema = StructType(cols)
     sparkSession.createDataFrame(rowRdd, schema)
   }
 
   /**
-    * Convert a JavaPairRDD to DataFrame with a specified schema.
-    *
-    * The schema is expected to follow the format:
-    *   [left geometry, (left user data columns), right geometry, (right user data columns)]
-    *
-    * Note that the schema _must_ provide columns for left and right user data, even if they do not exist in the
-    * original data.
-    *
-    * Also note that some complex types, such as `MapType`, and schemas as strings are not supported.
-    *
-    * @param spatialPairRDD
-    * @param schema Desired output schema
-    * @param sparkSession Spark session
-    * @return Spatial pair RDD as a DataFrame with the desired schema
-    */
-  def toDf(spatialPairRDD: JavaPairRDD[Geometry, Geometry], schema: StructType, sparkSession: SparkSession): DataFrame = {
+   * Convert a JavaPairRDD to DataFrame with a specified schema.
+   *
+   * The schema is expected to follow the format: [left geometry, (left user data columns), right
+   * geometry, (right user data columns)]
+   *
+   * Note that the schema _must_ provide columns for left and right user data, even if they do not
+   * exist in the original data.
+   *
+   * Also note that some complex types, such as `MapType`, and schemas as strings are not
+   * supported.
+   *
+   * @param spatialPairRDD
+   * @param schema
+   *   Desired output schema
+   * @param sparkSession
+   *   Spark session
+   * @return
+   *   Spatial pair RDD as a DataFrame with the desired schema
+   */
+  def toDf(
+      spatialPairRDD: JavaPairRDD[Geometry, Geometry],
+      schema: StructType,
+      sparkSession: SparkSession): DataFrame = {
     val rdd = spatialPairRDD.rdd.map(f => {
       // Extract user data from geometries
       // Use an empty seq to grab all col names -- we will rename to fit the schema anyways
-      val stringRow = extractUserData(row = f, leftFieldnames = Seq(""), rightFieldnames = Seq(""))
+      val stringRow =
+        extractUserData(row = f, leftFieldnames = Seq(""), rightFieldnames = Seq(""))
 
       // Convert data types
       castRowToSchema(stringRow = stringRow, schema = schema)
@@ -193,11 +236,13 @@ object Adapter {
   }
 
   /**
-    * Extract user data from a geometry.
-    *
-    * @param geom Geometry
-    * @return Sequence of Geometry object and its user data as Strings
-    */
+   * Extract user data from a geometry.
+   *
+   * @param geom
+   *   Geometry
+   * @return
+   *   Sequence of Geometry object and its user data as Strings
+   */
   private def extractUserData(geom: Geometry): Seq[Any] = {
     val userData = geom.getUserData
     val geomWithoutUserData = geom.copy
@@ -210,14 +255,23 @@ object Adapter {
   }
 
   /**
-    * Extract user data from left and right geometries.
-    *
-    * @param row Pair of Geometry objects
-    * @param leftFieldnames Left geometry's field names to pull. If null or an empty sequence, user data is not extracted.
-    * @param rightFieldnames Right geometry's field names to pull. If null or an empty sequence, user data is not extracted.
-    * @return Sequence of Geometry objects and their user data as Strings
-    */
-  private def extractUserData(row: (Geometry, Geometry), leftFieldnames: Seq[String], rightFieldnames: Seq[String]): Seq[Any] = {
+   * Extract user data from left and right geometries.
+   *
+   * @param row
+   *   Pair of Geometry objects
+   * @param leftFieldnames
+   *   Left geometry's field names to pull. If null or an empty sequence, user data is not
+   *   extracted.
+   * @param rightFieldnames
+   *   Right geometry's field names to pull. If null or an empty sequence, user data is not
+   *   extracted.
+   * @return
+   *   Sequence of Geometry objects and their user data as Strings
+   */
+  private def extractUserData(
+      row: (Geometry, Geometry),
+      leftFieldnames: Seq[String],
+      rightFieldnames: Seq[String]): Seq[Any] = {
     val left = getGeomAndFields(row._1, leftFieldnames)
     val right = getGeomAndFields(row._2, rightFieldnames)
 
@@ -246,24 +300,28 @@ object Adapter {
     })
   }
 
-  private def getGeomAndFields(geom: Geometry, fieldNames: Seq[String]): (Seq[Geometry], Seq[String]) = {
+  private def getGeomAndFields(
+      geom: Geometry,
+      fieldNames: Seq[String]): (Seq[Geometry], Seq[String]) = {
     if (fieldNames != null && fieldNames.nonEmpty) {
       val userData = "" + geom.getUserData.asInstanceOf[String]
       val fields = userData.split("\t")
       val geomWithoutUserData = geom.copy
       geomWithoutUserData.setUserData(null)
       (Seq(geomWithoutUserData), fields)
-    }
-    else (Seq(geom), Seq())
+    } else (Seq(geom), Seq())
   }
 
   /**
-    * Generate a Row with desired schema from a sequence of Geometry and String objects.
-    *
-    * @param stringRow Sequence of Geometry objects and String user data
-    * @param schema Desired output schema
-    * @return Row with the specified schema
-    */
+   * Generate a Row with desired schema from a sequence of Geometry and String objects.
+   *
+   * @param stringRow
+   *   Sequence of Geometry objects and String user data
+   * @param schema
+   *   Desired output schema
+   * @return
+   *   Row with the specified schema
+   */
   private def castRowToSchema(stringRow: Seq[Any], schema: StructType): Row = {
     val parsedRow = stringRow.zipWithIndex.map { case (value, idx) =>
       val desiredDataType = schema(idx).dataType
@@ -275,12 +333,15 @@ object Adapter {
   }
 
   /**
-    * Parse a string to another data type based on the desired schema.
-    *
-    * @param data Data stored as string
-    * @param desiredType Desired SparkSQL data type
-    * @return Parsed value, or in the case of a struct column, an array of parsed values
-    */
+   * Parse a string to another data type based on the desired schema.
+   *
+   * @param data
+   *   Data stored as string
+   * @param desiredType
+   *   Desired SparkSQL data type
+   * @return
+   *   Parsed value, or in the case of a struct column, an array of parsed values
+   */
   private def parseString(data: String, desiredType: DataType): Any = {
     // Spark needs to know how to serialize null values, so we have to provide the relevant class
     if (data == "null") {
@@ -318,16 +379,19 @@ object Adapter {
   }
 
   /**
-    * Parse the string representation of a struct into an array of values.
-    *
-    * @param data Struct as a string (format: "[value1,value2,...]")
-    * @param desiredType Desired schema for the struct column
-    * @return Array of parsed values
-    */
+   * Parse the string representation of a struct into an array of values.
+   *
+   * @param data
+   *   Struct as a string (format: "[value1,value2,...]")
+   * @param desiredType
+   *   Desired schema for the struct column
+   * @return
+   *   Array of parsed values
+   */
   private def parseStruct(data: String, desiredType: StructType): Array[Any] = {
     // Structs are stored as "[value1,value2,...]"
     // Recurse into the struct and parse
-    val csv = data.slice(1, data.length - 1)  // Remove brackets
+    val csv = data.slice(1, data.length - 1) // Remove brackets
     csv.split(",").zipWithIndex.map { case (element, idx) =>
       val nestedField = desiredType.slice(idx, idx + 1).head
       val nestedDataType = nestedField.dataType

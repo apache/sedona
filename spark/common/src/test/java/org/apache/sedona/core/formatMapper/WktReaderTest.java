@@ -16,51 +16,41 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.formatMapper;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.IOException;
 import org.apache.sedona.core.TestBase;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
+public class WktReaderTest extends TestBase {
 
-import static org.junit.Assert.assertEquals;
+  public static String wktGeometries = null;
 
-public class WktReaderTest
-        extends TestBase
-{
+  @BeforeClass
+  public static void onceExecutedBeforeAll() throws IOException {
+    initialize(WktReaderTest.class.getName());
+    wktGeometries = WktReaderTest.class.getClassLoader().getResource("county_small.tsv").getPath();
+  }
 
-    public static String wktGeometries = null;
+  @AfterClass
+  public static void tearDown() throws Exception {
+    sc.stop();
+  }
 
-    @BeforeClass
-    public static void onceExecutedBeforeAll()
-            throws IOException
-    {
-        initialize(WktReaderTest.class.getName());
-        wktGeometries = WktReaderTest.class.getClassLoader().getResource("county_small.tsv").getPath();
-    }
-
-    @AfterClass
-    public static void tearDown()
-            throws Exception
-    {
-        sc.stop();
-    }
-
-    /**
-     * Test correctness of parsing geojson file
-     *
-     * @throws IOException
-     */
-    @Test
-    public void testReadToGeometryRDD()
-            throws IOException
-    {
-        // load geojson with our tool
-        SpatialRDD wktRDD = WktReader.readToGeometryRDD(sc, wktGeometries, 0, true, false);
-        assertEquals(wktRDD.rawSpatialRDD.count(), 103);
-    }
+  /**
+   * Test correctness of parsing geojson file
+   *
+   * @throws IOException
+   */
+  @Test
+  public void testReadToGeometryRDD() throws IOException {
+    // load geojson with our tool
+    SpatialRDD wktRDD = WktReader.readToGeometryRDD(sc, wktGeometries, 0, true, false);
+    assertEquals(wktRDD.rawSpatialRDD.count(), 103);
+  }
 }

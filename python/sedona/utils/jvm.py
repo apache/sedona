@@ -28,7 +28,9 @@ class JvmStorageLevel(JvmObject):
     @require(["StorageLevel"])
     def _create_jvm_instance(self):
         return self.jvm.StorageLevel.apply(
-            self.storage_level.useDisk, self.storage_level.useMemory,
-            self.storage_level.useOffHeap, self.storage_level.deserialized,
-            self.storage_level.replication
+            self.storage_level.useDisk,
+            self.storage_level.useMemory,
+            self.storage_level.useOffHeap,
+            self.storage_level.deserialized,
+            self.storage_level.replication,
         )

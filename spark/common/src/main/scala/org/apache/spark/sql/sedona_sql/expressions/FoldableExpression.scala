@@ -21,9 +21,9 @@ package org.apache.spark.sql.sedona_sql.expressions
 import org.apache.spark.sql.catalyst.expressions.Expression
 
 /**
-  * Make expression foldable by constant folding optimizer. If all children
-  * expressions are foldable, then the expression itself is foldable.
-  */
+ * Make expression foldable by constant folding optimizer. If all children expressions are
+ * foldable, then the expression itself is foldable.
+ */
 trait FoldableExpression extends Expression {
   override def foldable: Boolean = children.forall(_.foldable)
 }

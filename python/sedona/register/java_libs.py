@@ -25,7 +25,9 @@ class SedonaJvmLib(Enum):
     KNNQuery = "org.apache.sedona.core.spatialOperator.KNNQuery"
     RangeQuery = "org.apache.sedona.core.spatialOperator.RangeQuery"
     Envelope = "org.locationtech.jts.geom.Envelope"
-    GeoSerializerData = "org.apache.sedona.python.wrapper.adapters.GeoSparkPythonConverter"
+    GeoSerializerData = (
+        "org.apache.sedona.python.wrapper.adapters.GeoSparkPythonConverter"
+    )
     GeometryAdapter = "org.apache.sedona.python.wrapper.adapters.GeometryAdapter"
     PointRDD = "org.apache.sedona.core.spatialRDD.PointRDD"
     PolygonRDD = "org.apache.sedona.core.spatialRDD.PolygonRDD"
@@ -35,19 +37,27 @@ class SedonaJvmLib(Enum):
     SpatialRDD = "org.apache.sedona.core.spatialRDD.SpatialRDD"
     FileDataSplitter = "org.apache.sedona.common.enums.FileDataSplitter"
     GeoJsonReader = "org.apache.sedona.core.formatMapper.GeoJsonReader"
-    ShapeFileReader = "org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader"
+    ShapeFileReader = (
+        "org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader"
+    )
     SedonaSQLRegistrator = "org.apache.sedona.sql.utils.SedonaSQLRegistrator"
     StorageLevel = "org.apache.spark.storage.StorageLevel"
     GridType = "org.apache.sedona.core.enums.GridType"
     IndexType = "org.apache.sedona.core.enums.IndexType"
     AdapterWrapper = "org.apache.sedona.python.wrapper.utils.PythonAdapterWrapper"
     WktReader = "org.apache.sedona.core.formatMapper.WktReader"
-    RawJvmIndexRDDSetter = "org.apache.sedona.python.wrapper.adapters.RawJvmIndexRDDSetter"
-    SpatialObjectLoaderAdapter = "org.apache.sedona.python.wrapper.adapters.SpatialObjectLoaderAdapter"
+    RawJvmIndexRDDSetter = (
+        "org.apache.sedona.python.wrapper.adapters.RawJvmIndexRDDSetter"
+    )
+    SpatialObjectLoaderAdapter = (
+        "org.apache.sedona.python.wrapper.adapters.SpatialObjectLoaderAdapter"
+    )
     WkbReader = "org.apache.sedona.core.formatMapper.WkbReader"
     EnvelopeAdapter = "org.apache.sedona.python.wrapper.adapters.EnvelopeAdapter"
     PythonConverter = "org.apache.sedona.python.wrapper.adapters.PythonConverter"
-    PythonRddToJavaRDDAdapter = "org.apache.sedona.python.wrapper.adapters.PythonRddToJavaRDDAdapter"
+    PythonRddToJavaRDDAdapter = (
+        "org.apache.sedona.python.wrapper.adapters.PythonRddToJavaRDDAdapter"
+    )
     st_constructors = "org.apache.spark.sql.sedona_sql.expressions.st_constructors"
     st_functions = "org.apache.spark.sql.sedona_sql.expressions.st_functions"
     st_predicates = "org.apache.spark.sql.sedona_sql.expressions.st_predicates"
@@ -55,7 +65,7 @@ class SedonaJvmLib(Enum):
     SedonaContext = "org.apache.sedona.spark.SedonaContext"
 
     @classmethod
-    def from_str(cls, geo_lib: str) -> 'SedonaJvmLib':
+    def from_str(cls, geo_lib: str) -> "SedonaJvmLib":
         try:
             lib = getattr(cls, geo_lib.upper())
         except AttributeError:

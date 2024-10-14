@@ -16,47 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.spatialPartitioning;
 
+import java.util.Iterator;
+import javax.annotation.Nullable;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.joinJudgement.DedupParams;
 import org.locationtech.jts.geom.Geometry;
 import scala.Tuple2;
 
-import javax.annotation.Nullable;
+public class KDBTreePartitioner extends SpatialPartitioner {
+  private final KDB tree;
 
-import java.util.Iterator;
+  public KDBTreePartitioner(KDB tree) {
+    super(GridType.KDBTREE, tree.fetchLeafZones());
+    this.tree = tree;
+    this.tree.dropElements();
+  }
 
-public class KDBTreePartitioner
-        extends SpatialPartitioner
-{
-    private final KDB tree;
+  @Override
+  public int numPartitions() {
+    return grids.size();
+  }
 
-    public KDBTreePartitioner(KDB tree)
-    {
-        super(GridType.KDBTREE, tree.fetchLeafZones());
-        this.tree = tree;
-        this.tree.dropElements();
-    }
+  @Override
+  public Iterator<Tuple2<Integer, Geometry>> placeObject(Geometry spatialObject) throws Exception {
+    return tree.placeObject(spatialObject);
+  }
 
-    @Override
-    public int numPartitions()
-    {
-        return grids.size();
-    }
-
-    @Override
-    public Iterator<Tuple2<Integer, Geometry>> placeObject(Geometry spatialObject)
-            throws Exception
-    {
-        return tree.placeObject(spatialObject);
-    }
-
-    @Nullable
-    @Override
-    public DedupParams getDedupParams()
-    {
-        return new DedupParams(grids);
-    }
+  @Nullable
+  @Override
+  public DedupParams getDedupParams() {
+    return new DedupParams(grids);
+  }
 }

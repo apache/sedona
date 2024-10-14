@@ -54,11 +54,24 @@ class GeometryUdtTestScala extends TestBaseScala with BeforeAndAfter {
     }
 
     it("Should be able to render and parse JSON schema") {
-      assert(DataType.fromJson(dataFrame.schema.json).asInstanceOf[StructType].equals(dataFrame.schema))
+      assert(
+        DataType
+          .fromJson(dataFrame.schema.json)
+          .asInstanceOf[StructType]
+          .equals(dataFrame.schema))
     }
 
     it("Case object and new instance should be equals") {
-      assert(GeometryUDT.equals(new GeometryUDT))
+      assert(GeometryUDT == GeometryUDT)
+      val udt = new GeometryUDT
+      assert(udt.equals(udt))
+      assert(udt.equals(GeometryUDT))
+      assert(GeometryUDT.equals(udt))
+    }
+
+    it("hashCode should work correctly") {
+      val udt = new GeometryUDT
+      assert(udt.hashCode() == GeometryUDT.hashCode())
     }
   }
 

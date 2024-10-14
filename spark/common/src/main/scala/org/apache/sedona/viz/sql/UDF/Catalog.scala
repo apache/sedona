@@ -23,14 +23,8 @@ import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
 import org.apache.spark.sql.sedona_viz.expressions.{ST_Colorize, ST_EncodeImage, ST_Pixelize, ST_Render, ST_TileName}
 
 object Catalog {
-  val expressions: Seq[FunctionBuilder] = Seq(
-    ST_Pixelize,
-    ST_TileName,
-    ST_Colorize,
-    ST_EncodeImage
-  )
+  val expressions: Seq[FunctionBuilder] =
+    Seq(ST_Pixelize, ST_TileName, ST_Colorize, ST_EncodeImage)
 
-  val aggregateExpressions: Seq[UserDefinedAggregateFunction] = Seq(
-    new ST_Render
-  )
+  val aggregateExpressions: Seq[UserDefinedAggregateFunction] = Seq(new ST_Render)
 }

@@ -1,15 +1,20 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.spark.sql.execution.datasources.v2.geoparquet.metadata
 
@@ -29,6 +34,7 @@ import org.apache.spark.sql.sources.Filter
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.SerializableConfiguration
+import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods.{compact, render}
 
 case class GeoParquetMetadataPartitionReaderFactory(
@@ -38,7 +44,8 @@ case class GeoParquetMetadataPartitionReaderFactory(
     readDataSchema: StructType,
     partitionSchema: StructType,
     options: FileSourceOptions,
-    filters: Seq[Filter]) extends FilePartitionReaderFactory {
+    filters: Seq[Filter])
+    extends FilePartitionReaderFactory {
 
   override def buildReader(partitionedFile: PartitionedFile): PartitionReader[InternalRow] = {
     val iter = GeoParquetMetadataPartitionReaderFactory.readFile(
@@ -46,28 +53,40 @@ case class GeoParquetMetadataPartitionReaderFactory(
       partitionedFile,
       readDataSchema)
     val fileReader = new PartitionReaderFromIterator[InternalRow](iter)
-    new PartitionReaderWithPartitionValues(fileReader, readDataSchema,
-      partitionSchema, partitionedFile.partitionValues)
+    new PartitionReaderWithPartitionValues(
+      fileReader,
+      readDataSchema,
+      partitionSchema,
+      partitionedFile.partitionValues)
   }
 }
 
 object GeoParquetMetadataPartitionReaderFactory {
-  private def readFile(configuration: Configuration,
-               partitionedFile: PartitionedFile,
-               readDataSchema: StructType): Iterator[InternalRow] = {
+  private def readFile(
+      configuration: Configuration,
+      partitionedFile: PartitionedFile,
+      readDataSchema: StructType): Iterator[InternalRow] = {
     val filePath = partitionedFile.toPath.toString
-    val metadata = ParquetFileReader.open(
-      HadoopInputFile.fromPath(partitionedFile.toPath, configuration))
-      .getFooter.getFileMetaData.getKeyValueMetaData
+    val metadata = ParquetFileReader
+      .open(HadoopInputFile.fromPath(partitionedFile.toPath, configuration))
+      .getFooter
+      .getFileMetaData
+      .getKeyValueMetaData
     val row = GeoParquetMetaData.parseKeyValueMetaData(metadata) match {
       case Some(geo) =>
         val geoColumnsMap = geo.columns.map { case (columnName, columnMetadata) =>
+          implicit val formats: org.json4s.Formats = DefaultFormats
+          import org.json4s.jackson.Serialization
           val columnMetadataFields: Array[Any] = Array(
             UTF8String.fromString(columnMetadata.encoding),
             new GenericArrayData(columnMetadata.geometryTypes.map(UTF8String.fromString).toArray),
             new GenericArrayData(columnMetadata.bbox.toArray),
-            columnMetadata.crs.map(projjson => UTF8String.fromString(compact(render(projjson))))
-              .getOrElse(UTF8String.fromString("")))
+            columnMetadata.crs
+              .map(projjson => UTF8String.fromString(compact(render(projjson))))
+              .getOrElse(UTF8String.fromString("")),
+            columnMetadata.covering
+              .map(covering => UTF8String.fromString(Serialization.write(covering)))
+              .orNull)
           val columnMetadataStruct = new GenericInternalRow(columnMetadataFields)
           UTF8String.fromString(columnName) -> columnMetadataStruct
         }
@@ -85,7 +104,10 @@ object GeoParquetMetadataPartitionReaderFactory {
     Iterator(pruneBySchema(row, GeoParquetMetadataTable.schema, readDataSchema))
   }
 
-  private def pruneBySchema(row: InternalRow, schema: StructType, readDataSchema: StructType): InternalRow = {
+  private def pruneBySchema(
+      row: InternalRow,
+      schema: StructType,
+      readDataSchema: StructType): InternalRow = {
     // Projection push down for nested fields is not enabled, so this very simple implementation is enough.
     val values: Array[Any] = readDataSchema.fields.map { field =>
       val index = schema.fieldIndex(field.name)

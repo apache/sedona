@@ -28,7 +28,6 @@ import scala.util.Random
 
 class SphereDistanceJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
   private val spatialJoinPartitionSideConfKey = "sedona.join.spatitionside"
-  private val spatialJoinPartitionSide = sparkSession.sparkContext.getConf.get(spatialJoinPartitionSideConfKey, "left")
 
   private val testData1: Seq[(Int, Double, Geometry)] = generateTestData()
   private val testData2: Seq[(Int, Double, Geometry)] = generateTestData()
@@ -39,53 +38,54 @@ class SphereDistanceJoinSuite extends TestBaseScala with TableDrivenPropertyChec
   }
 
   describe("Sedona-SQL Spatial Join Test") {
-    val joinConditions = Table("join condition",
+    val joinConditions = Table(
+      "join condition",
       "ST_DistanceSphere(df1.geom, df2.geom) < 2000000",
       "ST_DistanceSphere(df2.geom, df1.geom) < 2000000",
       "ST_DistanceSpheroid(df1.geom, df2.geom) < 2000000",
       "ST_DistanceSpheroid(df2.geom, df1.geom) < 2000000",
-
       "ST_DistanceSphere(df1.geom, df2.geom) < df1.dist",
       "ST_DistanceSphere(df2.geom, df1.geom) < df1.dist",
       "ST_DistanceSpheroid(df1.geom, df2.geom) < df1.dist",
       "ST_DistanceSpheroid(df2.geom, df1.geom) < df1.dist",
-
       "ST_DistanceSphere(df1.geom, df2.geom) < df2.dist",
       "ST_DistanceSphere(df2.geom, df1.geom) < df2.dist",
       "ST_DistanceSpheroid(df1.geom, df2.geom) < df2.dist",
-      "ST_DistanceSpheroid(df2.geom, df1.geom) < df2.dist"
-    )
+      "ST_DistanceSpheroid(df2.geom, df1.geom) < df2.dist")
 
-    try {
-      forAll(joinConditions) { joinCondition =>
-        val expected = buildExpectedResult(joinCondition)
-        it(s"sphere distance join ON $joinCondition, with left side as dominant side") {
-          sparkSession.sparkContext.getConf.set(spatialJoinPartitionSideConfKey, "left")
-          val result = sparkSession.sql(s"SELECT df1.id, df2.id FROM df1 JOIN df2 ON $joinCondition")
-          verifyResult(expected, result)
-        }
-        it(s"sphere distance join ON $joinCondition, with right side as dominant side") {
-          sparkSession.sparkContext.getConf.set(spatialJoinPartitionSideConfKey, "right")
-          val result = sparkSession.sql(s"SELECT df1.id, df2.id FROM df1 JOIN df2 ON $joinCondition")
-          verifyResult(expected, result)
-        }
-        it(s"sphere distance ON $joinCondition, broadcast df1") {
-          val result = sparkSession.sql(s"SELECT /*+ BROADCAST(df1) */ df1.id, df2.id FROM df1 JOIN df2 ON $joinCondition")
-          verifyResult(expected, result)
-        }
-        it(s"sphere distance ON $joinCondition, broadcast df2") {
-          val result = sparkSession.sql(s"SELECT /*+ BROADCAST(df2) */ df1.id, df2.id FROM df1 JOIN df2 ON $joinCondition")
+    forAll(joinConditions) { joinCondition =>
+      val expected = buildExpectedResult(joinCondition)
+      it(s"sphere distance join ON $joinCondition, with left side as dominant side") {
+        withConf(Map(spatialJoinPartitionSideConfKey -> "left")) {
+          val result =
+            sparkSession.sql(s"SELECT df1.id, df2.id FROM df1 JOIN df2 ON $joinCondition")
           verifyResult(expected, result)
         }
       }
-    } finally {
-      sparkSession.sparkContext.getConf.set(spatialJoinPartitionSideConfKey, spatialJoinPartitionSide)
+      it(s"sphere distance join ON $joinCondition, with right side as dominant side") {
+        withConf(Map(spatialJoinPartitionSideConfKey -> "right")) {
+          val result =
+            sparkSession.sql(s"SELECT df1.id, df2.id FROM df1 JOIN df2 ON $joinCondition")
+          verifyResult(expected, result)
+        }
+      }
+      it(s"sphere distance ON $joinCondition, broadcast df1") {
+        val result = sparkSession.sql(
+          s"SELECT /*+ BROADCAST(df1) */ df1.id, df2.id FROM df1 JOIN df2 ON $joinCondition")
+        verifyResult(expected, result)
+      }
+      it(s"sphere distance ON $joinCondition, broadcast df2") {
+        val result = sparkSession.sql(
+          s"SELECT /*+ BROADCAST(df2) */ df1.id, df2.id FROM df1 JOIN df2 ON $joinCondition")
+        verifyResult(expected, result)
+      }
     }
   }
 
   describe("Sphere distance join with custom sphere radius") {
     it("do not optimize distance join with custom sphere radius") {
-      val df = sparkSession.sql("SELECT df1.id, df2.id FROM df1 JOIN df2 ON ST_DistanceSphere(df1.geom, df2.geom, 100) > 10")
+      val df = sparkSession.sql(
+        "SELECT df1.id, df2.id FROM df1 JOIN df2 ON ST_DistanceSphere(df1.geom, df2.geom, 100) > 10")
       assert(!isUsingOptimizedSpatialJoin(df))
     }
   }
@@ -96,26 +96,27 @@ class SphereDistanceJoinSuite extends TestBaseScala with TableDrivenPropertyChec
     testData2.toDF("id", "dist", "geom").createOrReplaceTempView("df2")
   }
 
-
   private def buildExpectedResult(joinCondition: String): Seq[(Int, Int)] = {
     val evaluate = joinCondition match {
       case "ST_DistanceSphere(df1.geom, df2.geom) < 2000000" |
-           "ST_DistanceSphere(df2.geom, df1.geom) < 2000000" =>
-        (g1: Geometry, d1: Double, g2: Geometry, d2: Double) => Haversine.distance(g1, g2) < 2000000
+          "ST_DistanceSphere(df2.geom, df1.geom) < 2000000" =>
+        (g1: Geometry, d1: Double, g2: Geometry, d2: Double) =>
+          Haversine.distance(g1, g2) < 2000000
       case "ST_DistanceSphere(df1.geom, df2.geom) < df1.dist" |
-           "ST_DistanceSphere(df2.geom, df1.geom) < df1.dist" =>
+          "ST_DistanceSphere(df2.geom, df1.geom) < df1.dist" =>
         (g1: Geometry, d1: Double, g2: Geometry, d2: Double) => Haversine.distance(g1, g2) < d1
       case "ST_DistanceSphere(df1.geom, df2.geom) < df2.dist" |
-           "ST_DistanceSphere(df2.geom, df1.geom) < df2.dist" =>
+          "ST_DistanceSphere(df2.geom, df1.geom) < df2.dist" =>
         (g1: Geometry, d1: Double, g2: Geometry, d2: Double) => Haversine.distance(g1, g2) < d2
       case "ST_DistanceSpheroid(df1.geom, df2.geom) < 2000000" |
-           "ST_DistanceSpheroid(df2.geom, df1.geom) < 2000000" =>
-        (g1: Geometry, d1: Double, g2: Geometry, d2: Double) => Spheroid.distance(g1, g2) < 2000000
+          "ST_DistanceSpheroid(df2.geom, df1.geom) < 2000000" =>
+        (g1: Geometry, d1: Double, g2: Geometry, d2: Double) =>
+          Spheroid.distance(g1, g2) < 2000000
       case "ST_DistanceSpheroid(df1.geom, df2.geom) < df1.dist" |
-           "ST_DistanceSpheroid(df2.geom, df1.geom) < df1.dist" =>
+          "ST_DistanceSpheroid(df2.geom, df1.geom) < df1.dist" =>
         (g1: Geometry, d1: Double, g2: Geometry, d2: Double) => Spheroid.distance(g1, g2) < d1
       case "ST_DistanceSpheroid(df1.geom, df2.geom) < df2.dist" |
-           "ST_DistanceSpheroid(df2.geom, df1.geom) < df2.dist" =>
+          "ST_DistanceSpheroid(df2.geom, df1.geom) < df2.dist" =>
         (g1: Geometry, d1: Double, g2: Geometry, d2: Double) => Spheroid.distance(g1, g2) < d2
     }
     testData1.flatMap { case (id1, dist1, geom1) =>
@@ -138,8 +139,7 @@ class SphereDistanceJoinSuite extends TestBaseScala with TableDrivenPropertyChec
 
   private def isUsingOptimizedSpatialJoin(df: DataFrame): Boolean = {
     df.queryExecution.executedPlan.collect {
-      case _: BroadcastIndexJoinExec |
-           _: DistanceJoinExec => true
+      case _: BroadcastIndexJoinExec | _: DistanceJoinExec => true
     }.nonEmpty
   }
 }

@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - branch-*
 
   pull_request:
     branches:
@@ -15,62 +16,69 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    - name: Set up Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'zulu'
-        java-version: '8'
-    - name: Compile JavaDoc
-      run: mvn -q clean install -DskipTests && mkdir -p docs/api/javadoc/spark && cp -r spark/common/target/apidocs/* docs/api/javadoc/spark/
-    - name: Compile ScalaDoc
-      run: mvn scala:doc && mkdir -p docs/api/scaladoc/spark && cp -r spark/common/target/site/scaladocs/* docs/api/scaladoc/spark
-    - uses: actions/setup-python@v5
-      with:
-        python-version: 3.x
-    - run: pip install mkdocs-jupyter
-    - run: pip install mkdocs-material
-    - run: pip install mkdocs-macros-plugin
-    - run: pip install mkdocs-git-revision-date-localized-plugin
-    - run: pip install mike
-    - run: sudo apt update
-    - uses: r-lib/actions/setup-r@v2
-      with:
-        r-version: release
-        use-public-rspm: true
-    - name: Query R dependencies
-      uses: r-lib/actions/setup-r-dependencies@v2
-      with:
-        cache: true
-        extra-packages: |
-          any::pkgdown
-        working-directory : './R'
-    - run: Rscript -e 'pkgdown::build_site(pkg = "./R", preview = FALSE, override = list(destination = "../docs/api/rdocs"))'
-    - run: git config --global user.name = "GitHub Action"
-    - run: git config --global user.email = "test@abc.com"
-    - run: mkdocs build
-    - run: git fetch origin website --depth=1
-    - name: Deploy the doc to the website branch
-      if: ${{ github.event_name != 'pull_request' && github.repository == 'apache/sedona' }}
-      run: mike deploy latest-snapshot -b website -p
-    - run: mkdir staging
-    - run: cp -r site/* staging/
-    - uses: actions/upload-artifact@v3
-      with:
-        name: generated-docs
-        path: staging
-    - name: Cache Python packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-    - name: Cache Maven packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+      - name: Compile JavaDoc
+        run: mvn -q clean install -DskipTests && mkdir -p docs/api/javadoc/spark && cp -r spark/common/target/apidocs/* docs/api/javadoc/spark/
+      - name: Compile ScalaDoc
+        run: mvn scala:doc && mkdir -p docs/api/scaladoc/spark && cp -r spark/common/target/site/scaladocs/* docs/api/scaladoc/spark
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+      - run: pip install mkdocs-jupyter
+      - run: pip install mkdocs-material
+      - run: pip install mkdocs-macros-plugin
+      - run: pip install mkdocs-git-revision-date-localized-plugin
+      - run: pip install mike
+      - run: sudo apt update
+      - uses: r-lib/actions/setup-r@v2.10.1
+        with:
+          r-version: release
+          use-public-rspm: true
+      - name: Query R dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2.10.1
+        with:
+          cache: true
+          extra-packages: |
+            any::pkgdown
+          working-directory : './R'
+      - run: Rscript -e 'pkgdown::build_site(pkg = "./R", preview = FALSE, override = list(destination = "../docs/api/rdocs"))'
+      - run: git config --global user.name = "GitHub Action"
+      - run: git config --global user.email = "test@abc.com"
+      - run: mkdocs build
+      - name: Deploy the doc to the website branch
+        if: ${{ github.event_name != 'pull_request' && github.repository == 'apache/sedona' }}
+        run: |
+          if [[ "${GITHUB_REF##*/}" == "master" ]]; then
+            git fetch origin website --depth=1
+            mike deploy latest-snapshot -b website -p
+          elif [[ "${GITHUB_REF##*/}" =~ ^branch-[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            git fetch origin website --depth=1
+            version="${GITHUB_REF##*/branch-}"
+            mike deploy --update-aliases "$version" latest -b website -p
+          fi
+      - run: mkdir staging
+      - run: cp -r site/* staging/
+      - uses: actions/upload-artifact@v3
+        with:
+          name: generated-docs
+          path: staging
+      - name: Cache Python packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2

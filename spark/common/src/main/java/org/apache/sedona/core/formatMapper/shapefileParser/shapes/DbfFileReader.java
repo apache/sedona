@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.formatMapper.shapefileParser.shapes;
 
+import java.io.IOException;
+import java.util.List;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -26,83 +27,73 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil;
+import org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.dbf.FieldDescriptor;
 
-import java.io.IOException;
+public class DbfFileReader extends org.apache.hadoop.mapreduce.RecordReader<ShapeKey, String> {
 
-public class DbfFileReader
-        extends org.apache.hadoop.mapreduce.RecordReader<ShapeKey, String>
-{
+  /** Dbf parser */
+  DbfParseUtil dbfParser = null;
+  /** inputstream of .dbf file */
+  private FSDataInputStream inputStream = null;
+  /** primitive bytes array of one row */
+  private List<byte[]> value = null;
+  /** key value of current row */
+  private ShapeKey key = null;
+  /** generated id of current row */
+  private int id = 0;
 
-    /**
-     * Dbf parser
-     */
-    DbfParseUtil dbfParser = null;
-    /**
-     * inputstream of .dbf file
-     */
-    private FSDataInputStream inputStream = null;
-    /**
-     * primitive bytes array of one row
-     */
-    private String value = null;
-    /**
-     * key value of current row
-     */
-    private ShapeKey key = null;
-    /**
-     * generated id of current row
-     */
-    private int id = 0;
+  public void initialize(InputSplit split, TaskAttemptContext context) throws IOException {
+    FileSplit fileSplit = (FileSplit) split;
+    Path inputPath = fileSplit.getPath();
+    FileSystem fileSys = inputPath.getFileSystem(context.getConfiguration());
+    FSDataInputStream stream = fileSys.open(inputPath);
+    initialize(stream);
+  }
 
-    public void initialize(InputSplit split, TaskAttemptContext context)
-            throws IOException, InterruptedException
-    {
-        FileSplit fileSplit = (FileSplit) split;
-        Path inputPath = fileSplit.getPath();
-        FileSystem fileSys = inputPath.getFileSystem(context.getConfiguration());
-        inputStream = fileSys.open(inputPath);
-        dbfParser = new DbfParseUtil();
-        dbfParser.parseFileHead(inputStream);
+  public void initialize(FSDataInputStream stream) throws IOException {
+    inputStream = stream;
+    dbfParser = new DbfParseUtil();
+    dbfParser.parseFileHead(inputStream);
+  }
+
+  public List<FieldDescriptor> getFieldDescriptors() {
+    return dbfParser.getFieldDescriptors();
+  }
+
+  public boolean nextKeyValue() throws IOException {
+    // first check deleted flag
+    List<byte[]> fieldBytesList = dbfParser.parse(inputStream);
+    if (fieldBytesList == null) {
+      value = null;
+      return false;
+    } else {
+      value = fieldBytesList;
+      key = new ShapeKey();
+      key.setIndex(id++);
+      return true;
     }
+  }
 
-    public boolean nextKeyValue()
-            throws IOException, InterruptedException
-    {
-        // first check deleted flag
-        String curbytes = dbfParser.parsePrimitiveRecord(inputStream);
-        if (curbytes == null) {
-            value = null;
-            return false;
-        }
-        else {
-            value = curbytes;
-            key = new ShapeKey();
-            key.setIndex(id++);
-            return true;
-        }
-    }
+  public ShapeKey getCurrentKey() {
+    return key;
+  }
 
-    public ShapeKey getCurrentKey()
-            throws IOException, InterruptedException
-    {
-        return key;
-    }
+  public List<byte[]> getCurrentFieldBytes() {
+    return value;
+  }
 
-    public String getCurrentValue()
-            throws IOException, InterruptedException
-    {
-        return value;
+  public String getCurrentValue() {
+    if (value == null) {
+      return null;
     }
+    return DbfParseUtil.fieldBytesToString(value);
+  }
 
-    public float getProgress()
-            throws IOException, InterruptedException
-    {
-        return dbfParser.getProgress();
-    }
+  public float getProgress() {
+    return dbfParser.getProgress();
+  }
 
-    public void close()
-            throws IOException
-    {
-        inputStream.close();
-    }
+  public void close() throws IOException {
+    inputStream.close();
+  }
 }

@@ -1,47 +1,61 @@
-## Read ESRI Shapefile
+## ST_GeomCollFromText
 
-Introduction: Construct a DataFrame from a Shapefile
+Introduction: Constructs a GeometryCollection from the WKT with the given SRID. If SRID is not provided then it defaults to 0. It returns `null` if the WKT is not a `GEOMETRYCOLLECTION`.
 
-Since: `v1.0.0`
+Format:
 
-SparkSQL example:
+`ST_GeomCollFromText (Wkt: String)`
 
-```scala
-var spatialRDD = new SpatialRDD[Geometry]
-spatialRDD.rawSpatialRDD = ShapefileReader.readToGeometryRDD(sparkSession.sparkContext, shapefileInputLocation)
-var rawSpatialDf = Adapter.toDf(spatialRDD,sparkSession)
-rawSpatialDf.createOrReplaceTempView("rawSpatialDf")
-var spatialDf = sparkSession.sql("""
-          | ST_GeomFromWKT(rddshape), _c1, _c2
-          | FROM rawSpatialDf
-        """.stripMargin)
-spatialDf.show()
-spatialDf.printSchema()
+`ST_GeomCollFromText (Wkt: String, srid: Integer)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_GeomCollFromText('GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))')
 ```
 
-!!!note
-	The path to the shapefile is the path to the folder that contains the .shp file, not the path to the .shp file itself. The file extensions of .shp, .shx, .dbf must be in lowercase. Assume you have a shape file called ==myShapefile==, the path should be `XXX/myShapefile`. The file structure should be like this:
-	```
-	- shapefile1
-	- shapefile2
-	- myshapefile
-		- myshapefile.shp
-		- myshapefile.shx
-		- myshapefile.dbf
-		- myshapefile...
-	- ...
-	```
+Output:
 
-!!!warning
-	Please make sure you use ==ST_GeomFromWKT== to create Geometry type column otherwise that column cannot be used in SedonaSQL.
+```
+GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((30 10, 40 20, 30 20, 30 10), (35 15, 45 15, 40 25, 35 15)))
+```
 
-If the file you are reading contains non-ASCII characters you'll need to explicitly set the encoding
-via `sedona.global.charset` system property before the call to `ShapefileReader.readToGeometryRDD`.
+## ST_GeomFromEWKB
 
-Example:
+Introduction: Construct a Geometry from EWKB string or Binary. This function is an alias of [ST_GeomFromWKB](#st_geomfromwkb).
 
-```scala
-System.setProperty("sedona.global.charset", "utf8")
+Format:
+
+`ST_GeomFromEWKB (Wkb: String)`
+
+`ST_GeomFromEWKB (Wkb: Binary)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_GeomFromEWKB([01 02 00 00 00 02 00 00 00 00 00 00 00 84 D6 00 C0 00 00 00 00 80 B5 D6 BF 00 00 00 60 E1 EF F7 BF 00 00 00 80 07 5D E5 BF])
+```
+
+Output:
+
+```
+LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)
+```
+
+SQL Example
+
+```sql
+SELECT ST_asEWKT(ST_GeomFromEWKB('01010000a0e6100000000000000000f03f000000000000f03f000000000000f03f'))
+```
+
+Output:
+
+```
+SRID=4326;POINT Z(1 1 1)
 ```
 
 ## ST_GeomFromEWKT
@@ -68,6 +82,9 @@ POINT(40.7128 -74.006)
 ## ST_GeomFromGML
 
 Introduction: Construct a Geometry from GML.
+
+!!!note
+    This function only supports GML 1 and GML 2. GML 3 is not supported.
 
 Format:
 `ST_GeomFromGML (gml: String)`
@@ -115,6 +132,9 @@ POLYGON ((0.703125 0.87890625, 0.703125 1.0546875, 1.0546875 1.0546875, 1.054687
 ```
 
 ## ST_GeomFromGeoJSON
+
+!!!note
+	This method is not recommended. Please use [Sedona GeoJSON data source](../../tutorial/sql.md#load-geojson-data) to read GeoJSON files.
 
 Introduction: Construct a Geometry from GeoJson
 
@@ -302,6 +322,30 @@ Output:
 POINT(40.7128 -74.006)
 ```
 
+## ST_GeometryFromText
+
+Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown). Alias of [ST_GeomFromWKT](#st_geomfromwkt)
+
+Format:
+
+`ST_GeometryFromText (Wkt: String)`
+
+`ST_GeometryFromText (Wkt: String, srid: Integer)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_GeometryFromText('POINT(40.7128 -74.0060)')
+```
+
+Output:
+
+```
+POINT(40.7128 -74.006)
+```
+
 ## ST_LineFromText
 
 Introduction: Construct a Line from Wkt text
@@ -323,6 +367,37 @@ Output:
 LINESTRING (1 2, 3 4)
 ```
 
+## ST_LineFromWKB
+
+Introduction: Construct a LineString geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format.
+
+!!!note
+	Returns null if geometry is not of type LineString.
+
+Format:
+
+`ST_LineFromWKB (Wkb: String)`
+
+`ST_LineFromWKB (Wkb: Binary)`
+
+`ST_LineFromWKB (Wkb: String, srid: Integer)`
+
+`ST_LineFromWKB (Wkb: Binary, srid: Integer)`
+
+Since: `v1.6.1`
+
+Example:
+
+```sql
+SELECT ST_LineFromWKB([01 02 00 00 00 02 00 00 00 00 00 00 00 84 D6 00 C0 00 00 00 00 80 B5 D6 BF 00 00 00 60 E1 EF F7 BF 00 00 00 80 07 5D E5 BF])
+```
+
+Output:
+
+```
+LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)
+```
+
 ## ST_LineStringFromText
 
 Introduction: Construct a LineString from Text, delimited by Delimiter
@@ -341,6 +416,65 @@ Output:
 
 ```
 LINESTRING (-74.0428197 40.6867969, -74.0421975 40.6921336, -74.050802 40.6912794)
+```
+
+## ST_LinestringFromWKB
+
+Introduction: Construct a LineString geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format and it is an alias of [ST_LineFromWKB](#st_linefromwkb).
+
+!!!Note
+	Returns null if geometry is not of type LineString.
+
+Format:
+
+`ST_LinestringFromWKB (Wkb: String)`
+
+`ST_LinestringFromWKB (Wkb: Binary)`
+
+`ST_LinestringFromWKB (Wkb: String, srid: Integer)`
+
+`ST_LinestringFromWKB (Wkb: Binary, srid: Integer)`
+
+Since: `v1.6.1`
+
+Example:
+
+```sql
+SELECT ST_LinestringFromWKB([01 02 00 00 00 02 00 00 00 00 00 00 00 84 D6 00 C0 00 00 00 00 80 B5 D6 BF 00 00 00 60 E1 EF F7 BF 00 00 00 80 07 5D E5 BF])
+```
+
+Output:
+
+```
+LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)
+```
+
+## ST_MakeEnvelope
+
+Introduction: Construct a Polygon from MinX, MinY, MaxX, MaxY, and an optional SRID.
+
+Format:
+
+```
+ST_MakeEnvelope(MinX: Double, MinY: Double, MaxX: Double, MaxY: Double)
+```
+
+```
+ST_MakeEnvelope(MinX: Double, MinY: Double, MaxX: Double, MaxY: Double, srid: Integer)
+```
+
+Since: `v1.7.0`
+
+SQL Example
+
+```sql
+SELECT ST_MakeEnvelope(1.234, 2.234, 3.345, 3.345, 4236)
+```
+
+Output:
+
+```
+POLYGON ((1.234 2.234, 1.234 3.345, 3.345 3.345, 3.345 2.234, 1.234 2.234))
 ```
 
 ## ST_MLineFromText
@@ -365,6 +499,30 @@ Output:
 
 ```
 MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))
+```
+
+## ST_MPointFromText
+
+Introduction: Constructs a MultiPoint from the WKT with the given SRID. If SRID is not provided then it defaults to 0. It returns `null` if the WKT is not a `MULTIPOINT`.
+
+Format:
+
+`ST_MPointFromText (Wkt: String)`
+
+`ST_MPointFromText (Wkt: String, srid: Integer)`
+
+Since: `v1.6.1`
+
+SQL Example:
+
+```sql
+SELECT ST_MPointFromText('MULTIPOINT ((10 10), (20 20), (30 30))')
+```
+
+Output:
+
+```
+MULTIPOINT ((10 10), (20 20), (30 30))
 ```
 
 ## ST_MPolyFromText
@@ -393,7 +551,7 @@ MULTIPOLYGON (((0 0, 20 0, 20 20, 0 20, 0 0), (5 5, 5 7, 7 7, 7 5, 5 5)))
 
 ## ST_MakePoint
 
-Introduction: Creates a 2D, 3D Z or 4D ZM Point geometry. Use ST_MakePointM to make points with XYM coordinates. Z and M values are optional.
+Introduction: Creates a 2D, 3D Z or 4D ZM Point geometry. Use [ST_MakePointM](#st_makepointm) to make points with XYM coordinates. Z and M values are optional.
 
 Format: `ST_MakePoint (X: Double, Y: Double, Z: Double, M: Double)`
 
@@ -435,6 +593,26 @@ Output:
 POINT ZM (1.2345 2.3456 3.4567 4)
 ```
 
+## ST_MakePointM
+
+Introduction: Creates a point with X, Y, and M coordinate. Use [ST_MakePoint](#st_makepoint) to make points with XY, XYZ, or XYZM coordinates.
+
+Format: `ST_MakePointM(x: Double, y: Double, m: Double)`
+
+Since: `v1.6.1`
+
+Example:
+
+```sql
+SELECT ST_MakePointM(1, 2, 3)
+```
+
+Output:
+
+```
+Point M(1 2 3)
+```
+
 ## ST_Point
 
 Introduction: Construct a Point from X and Y
@@ -456,6 +634,26 @@ Output:
 
 ```
 POINT (1.2345 2.3456)
+```
+
+## ST_PointFromGeoHash
+
+Introduction: Generates a Point geometry representing the center of the GeoHash cell defined by the input string. If `precision` is not specified, the full GeoHash precision is used. Providing a `precision` value limits the GeoHash characters used to determine the Point coordinates.
+
+Format: `ST_PointFromGeoHash(geoHash: String, precision: Integer)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_PointFromGeoHash('s00twy01mt', 4)
+```
+
+Output:
+
+```
+POINT (0.87890625 0.966796875)
 ```
 
 ## ST_PointFromText
@@ -501,6 +699,87 @@ Output:
 
 ```
 POINT Z(1.2345 2.3456 3.4567)
+```
+
+## ST_PointM
+
+Introduction: Construct a Point from X, Y and M and an optional srid. If srid is not set, it defaults to 0 (unknown).
+Must use ST_AsEWKT function to print the Z and M coordinates.
+
+Format:
+
+`ST_PointM (X: Double, Y: Double, M: Double)`
+
+`ST_PointM (X: Double, Y: Double, M: Double, srid: Integer)`
+
+Since: `v1.6.1`
+
+Example:
+
+```sql
+SELECT ST_AsEWKT(ST_PointM(1.2345, 2.3456, 3.4567))
+```
+
+Output:
+
+```
+POINT ZM(1.2345 2.3456 0 3.4567)
+```
+
+## ST_PointZM
+
+Introduction: Construct a Point from X, Y, Z, M and an optional srid. If srid is not set, it defaults to 0 (unknown).
+Must use ST_AsEWKT function to print the Z and M coordinates.
+
+Format:
+
+`ST_PointZM (X: Double, Y: Double, Z: Double, M: Double)`
+
+`ST_PointZM (X: Double, Y: Double, Z: Double, M: Double, srid: Integer)`
+
+Since: `v1.6.1`
+
+SQL Example
+
+```sql
+SELECT ST_AsEWKT(ST_PointZM(1.2345, 2.3456, 3.4567, 100))
+```
+
+Output:
+
+```
+POINT ZM(1.2345 2.3456 3.4567, 100)
+```
+
+## ST_PointFromWKB
+
+Introduction: Construct a Point geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format.
+
+!!!note
+	Returns null if geometry is not of type Point.
+
+Format:
+
+`ST_PointFromWKB (Wkb: String)`
+
+`ST_PointFromWKB (Wkb: Binary)`
+
+`ST_PointFromWKB (Wkb: String, srid: Integer)`
+
+`ST_PointFromWKB (Wkb: Binary, srid: Integer)`
+
+Since: `v1.6.1`
+
+Example:
+
+```sql
+SELECT ST_PointFromWKB([01 01 00 00 00 00 00 00 00 00 00 24 40 00 00 00 00 00 00 2e 40])
+```
+
+Output:
+
+```
+POINT (10 15)
 ```
 
 ## ST_PolygonFromEnvelope

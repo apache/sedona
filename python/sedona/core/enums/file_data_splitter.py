@@ -47,7 +47,11 @@ class FileSplitterJvm(JvmObject):
     splitter = attr.ib(type=FileDataSplitter)
 
     def _create_jvm_instance(self):
-        return self.jvm_splitter(self.splitter.value) if self.splitter.value is not None else None
+        return (
+            self.jvm_splitter(self.splitter.value)
+            if self.splitter.value is not None
+            else None
+        )
 
     @property
     @require(["FileDataSplitter"])

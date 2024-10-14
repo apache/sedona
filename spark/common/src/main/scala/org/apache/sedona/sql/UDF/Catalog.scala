@@ -22,14 +22,13 @@ import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, ExpressionInfo, Literal}
 import org.apache.spark.sql.expressions.Aggregator
+import org.apache.spark.sql.sedona_sql.expressions._
 import org.apache.spark.sql.sedona_sql.expressions.collect.ST_Collect
 import org.apache.spark.sql.sedona_sql.expressions.raster._
-import org.apache.spark.sql.sedona_sql.expressions._
-import org.geotools.coverage.grid.GridCoverage2D
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.operation.buffer.BufferParameters
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
 
 object Catalog {
@@ -40,24 +39,36 @@ object Catalog {
     // Expression for vectors
     function[GeometryType](),
     function[ST_PointFromText](),
+    function[ST_PointFromWKB](),
+    function[ST_LineFromWKB](),
+    function[ST_LinestringFromWKB](),
     function[ST_PolygonFromText](),
     function[ST_LineStringFromText](),
     function[ST_GeomFromText](0),
+    function[ST_GeometryFromText](0),
     function[ST_LineFromText](),
     function[ST_GeomFromWKT](0),
     function[ST_GeomFromEWKT](),
     function[ST_GeomFromWKB](),
+    function[ST_GeomFromEWKB](),
     function[ST_GeomFromGeoJSON](),
     function[ST_GeomFromGML](),
     function[ST_GeomFromKML](),
     function[ST_CoordDim](),
     function[ST_Point](),
+    function[ST_Points](),
+    function[ST_MakeEnvelope](),
     function[ST_MakePoint](null, null),
+    function[ST_MakePointM](),
     function[ST_PointZ](0),
+    function[ST_PointM](0),
+    function[ST_PointZM](0),
     function[ST_PolygonFromEnvelope](),
+    function[ST_Project](),
     function[ST_Contains](),
     function[ST_Intersects](),
     function[ST_Within](),
+    function[ST_KNN](),
     function[ST_Covers](),
     function[ST_CoveredBy](),
     function[ST_Dimension](),
@@ -72,19 +83,26 @@ object Catalog {
     function[ST_BestSRID](),
     function[ST_ShiftLongitude](),
     function[ST_Envelope](),
+    function[ST_Expand](),
     function[ST_Length](),
+    function[ST_Length2D](),
     function[ST_Area](),
     function[ST_Centroid](),
     function[ST_Transform](true),
     function[ST_Intersection](),
     function[ST_Difference](),
     function[ST_SymDifference](),
+    function[ST_UnaryUnion](),
     function[ST_Union](),
+    function[ST_IsValidDetail](),
+    function[ST_IsValidTrajectory](),
     function[ST_IsValid](),
     function[ST_IsEmpty](),
     function[ST_ReducePrecision](),
     function[ST_Equals](),
     function[ST_Touches](),
+    function[ST_Relate](),
+    function[ST_RelateMatch](),
     function[ST_Overlaps](),
     function[ST_Crosses](),
     function[ST_CrossesDateLine](),
@@ -95,8 +113,12 @@ object Catalog {
     function[ST_AsGeoJSON](),
     function[ST_AsBinary](),
     function[ST_AsEWKB](),
+    function[ST_AsHEXEWKB](),
     function[ST_AsGML](),
     function[ST_AsKML](),
+    function[ST_Simplify](),
+    function[ST_SimplifyVW](),
+    function[ST_SimplifyPolygonHull](),
     function[ST_SRID](),
     function[ST_SetSRID](),
     function[ST_GeometryType](),
@@ -106,10 +128,18 @@ object Catalog {
     function[ST_X](),
     function[ST_Y](),
     function[ST_Z](),
+    function[ST_Zmflag](),
     function[ST_StartPoint](),
     function[ST_Snap](),
     function[ST_ClosestPoint](),
     function[ST_Boundary](),
+    function[ST_HasZ](),
+    function[ST_HasM](),
+    function[ST_M](),
+    function[ST_MMin](),
+    function[ST_MMax](),
+    function[ST_MinimumClearance](),
+    function[ST_MinimumClearanceLine](),
     function[ST_MinimumBoundingRadius](),
     function[ST_MinimumBoundingCircle](BufferParameters.DEFAULT_QUADRANT_SEGMENTS * 6),
     function[ST_EndPoint](),
@@ -125,8 +155,11 @@ object Catalog {
     function[ST_IsClosed](),
     function[ST_IsCollection](),
     function[ST_NumInteriorRings](),
+    function[ST_NumInteriorRing](),
+    function[ST_AddMeasure](),
     function[ST_AddPoint](-1),
     function[ST_RemovePoint](-1),
+    function[ST_RemoveRepeatedPoints](),
     function[ST_SetPoint](),
     function[ST_IsPolygonCW](),
     function[ST_IsRing](),
@@ -136,14 +169,19 @@ object Catalog {
     function[ST_LineSubstring](),
     function[ST_LineInterpolatePoint](),
     function[ST_LineLocatePoint](),
+    function[ST_LocateAlong](),
+    function[ST_LongestLine](),
     function[ST_SubDivideExplode](),
     function[ST_SubDivide](),
     function[ST_MakeLine](),
     function[ST_Polygon](),
     function[ST_Polygonize](),
     function[ST_MakePolygon](null),
+    function[ST_MaximumInscribedCircle](),
+    function[ST_MaxDistance](),
     function[ST_GeoHash](),
     function[ST_GeomFromGeoHash](null),
+    function[ST_PointFromGeoHash](null),
     function[ST_Collect](),
     function[ST_Multi](),
     function[ST_PointOnSurface](),
@@ -152,6 +190,7 @@ object Catalog {
     function[ST_AsEWKT](),
     function[ST_Force_2D](),
     function[ST_ForcePolygonCW](),
+    function[ST_ForceRHR](),
     function[ST_ZMax](),
     function[ST_ZMin](),
     function[ST_YMax](),
@@ -163,8 +202,10 @@ object Catalog {
     function[ST_CollectionExtract](defaultArgs = null),
     function[ST_Normalize](),
     function[ST_LineFromMultiPoint](),
+    function[ST_MPointFromText](0),
     function[ST_MPolyFromText](0),
     function[ST_MLineFromText](0),
+    function[ST_GeomCollFromText](0),
     function[ST_Split](),
     function[ST_S2CellIDs](),
     function[ST_S2ToGeom](),
@@ -175,17 +216,27 @@ object Catalog {
     function[ST_LengthSpheroid](),
     function[ST_NumPoints](),
     function[ST_Force3D](0.0),
+    function[ST_Force3DM](0.0),
+    function[ST_Force3DZ](0.0),
+    function[ST_Force4D](),
+    function[ST_ForceCollection](),
+    function[ST_GeneratePoints](),
     function[ST_NRings](),
     function[ST_Translate](0.0),
+    function[ST_TriangulatePolygon](),
     function[ST_VoronoiPolygons](0.0, null),
     function[ST_FrechetDistance](),
     function[ST_Affine](),
     function[ST_BoundingDiagonal](),
     function[ST_Angle](),
     function[ST_Degrees](),
+    function[ST_DelaunayTriangles](),
     function[ST_HausdorffDistance](-1),
     function[ST_DWithin](),
     function[ST_IsValidReason](),
+    function[ST_Rotate](),
+    function[ST_RotateX](),
+    function[ST_RotateY](),
     // Expression for rasters
     function[RS_NormalizedDifference](),
     function[RS_Mean](),
@@ -241,6 +292,7 @@ object Catalog {
     function[RS_AsPNG](),
     function[RS_Width](),
     function[RS_Height](),
+    function[RS_Union](),
     function[RS_UpperLeftX](),
     function[RS_UpperLeftY](),
     function[RS_ScaleX](),
@@ -282,18 +334,17 @@ object Catalog {
     function[RS_Resample](),
     function[RS_ReprojectMatch]("nearestneighbor"),
     function[RS_FromNetCDF](),
-    function[RS_NetCDFInfo]()
-  )
+    function[RS_NetCDFInfo]())
 
-  val rasterAggregateExpression: Aggregator[(GridCoverage2D, Int), ArrayBuffer[BandData], GridCoverage2D] = new RS_Union_Aggr
+  // Aggregate functions with Geometry as buffer
+  val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] =
+    Seq(new ST_Envelope_Aggr, new ST_Intersection_Aggr)
 
-  val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] = Seq(
-    new ST_Union_Aggr,
-    new ST_Envelope_Aggr,
-    new ST_Intersection_Aggr
-  )
+  // Aggregate functions with List as buffer
+  val aggregateExpressions2: Seq[Aggregator[Geometry, ListBuffer[Geometry], Geometry]] =
+    Seq(new ST_Union_Aggr())
 
-  private def function[T <: Expression : ClassTag](defaultArgs: Any *): FunctionDescription = {
+  private def function[T <: Expression: ClassTag](defaultArgs: Any*): FunctionDescription = {
     val classTag = implicitly[ClassTag[T]]
     val constructor = classTag.runtimeClass.getConstructor(classOf[Seq[Expression]])
     val functionName = classTag.runtimeClass.getSimpleName
@@ -309,19 +360,22 @@ object Catalog {
         case e: ExpectsInputTypes =>
           val numParameters = e.inputTypes.size
           val numArguments = expressions.size
-          if (numParameters == numArguments) expr else {
+          if (numParameters == numArguments) expr
+          else {
             val numUnspecifiedArgs = numParameters - numArguments
             if (numUnspecifiedArgs > 0) {
               if (numUnspecifiedArgs <= defaultArgs.size) {
-                val args = expressions ++ defaultArgs.takeRight(numUnspecifiedArgs).map(Literal(_))
+                val args =
+                  expressions ++ defaultArgs.takeRight(numUnspecifiedArgs).map(Literal(_))
                 constructor.newInstance(args).asInstanceOf[T]
               } else {
                 throw new IllegalArgumentException(s"function $functionName takes at least " +
                   s"${numParameters - defaultArgs.size} argument(s), $numArguments argument(s) specified")
               }
             } else {
-              throw new IllegalArgumentException(s"function $functionName takes at most " +
-                s"$numParameters argument(s), $numArguments argument(s) specified")
+              throw new IllegalArgumentException(
+                s"function $functionName takes at most " +
+                  s"$numParameters argument(s), $numArguments argument(s) specified")
             }
           }
         case _ => expr

@@ -29,7 +29,10 @@ object implicits {
   implicit class RasterInputExpressionEnhancer(inputExpression: Expression) {
     def toRaster(input: InternalRow): GridCoverage2D = {
       if (inputExpression.isInstanceOf[SerdeAware]) {
-        inputExpression.asInstanceOf[SerdeAware].evalWithoutSerialization(input).asInstanceOf[GridCoverage2D]
+        inputExpression
+          .asInstanceOf[SerdeAware]
+          .evalWithoutSerialization(input)
+          .asInstanceOf[GridCoverage2D]
       } else {
         inputExpression.eval(input).asInstanceOf[Array[Byte]] match {
           case binary: Array[Byte] => Serde.deserialize(binary)

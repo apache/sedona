@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.spark.sql.sedona_sql.optimization
 
 import org.apache.spark.sql.catalyst.expressions.{And, Expression}
@@ -27,14 +26,17 @@ import org.apache.spark.sql.sedona_sql.strategy.join.{JoinSide, LeftSide, RightS
  * This class contains helper methods for transforming catalyst expressions.
  */
 object ExpressionUtils {
+
   /**
-   * This is a polyfill for running on Spark 3.0 while compiling against Spark 3.3. We'd really like to mixin
-   * `PredicateHelper` here, but the class hierarchy of `PredicateHelper` has changed between Spark 3.0 and 3.3 so
-   * it would raise `java.lang.ClassNotFoundException: org.apache.spark.sql.catalyst.expressions.AliasHelper`
-   * at runtime on Spark 3.0.
+   * This is a polyfill for running on Spark 3.0 while compiling against Spark 3.3. We'd really
+   * like to mixin `PredicateHelper` here, but the class hierarchy of `PredicateHelper` has
+   * changed between Spark 3.0 and 3.3 so it would raise `java.lang.ClassNotFoundException:
+   * org.apache.spark.sql.catalyst.expressions.AliasHelper` at runtime on Spark 3.0.
    *
-   * @param condition filter condition to split
-   * @return A list of conjunctive conditions
+   * @param condition
+   *   filter condition to split
+   * @return
+   *   A list of conjunctive conditions
    */
   def splitConjunctivePredicates(condition: Expression): Seq[Expression] = {
     condition match {
@@ -45,16 +47,17 @@ object ExpressionUtils {
   }
 
   /**
-   * Returns true if specified expression has at least one reference and all its references
-   * map to the output of the specified plan.
+   * Returns true if specified expression has at least one reference and all its references map to
+   * the output of the specified plan.
    */
   def matches(expr: Expression, plan: LogicalPlan): Boolean =
     expr.references.nonEmpty && expr.references.subsetOf(plan.outputSet)
 
-  def matchExpressionsToPlans(exprA: Expression,
-    exprB: Expression,
-    planA: LogicalPlan,
-    planB: LogicalPlan): Option[(LogicalPlan, LogicalPlan, Boolean)] =
+  def matchExpressionsToPlans(
+      exprA: Expression,
+      exprB: Expression,
+      planA: LogicalPlan,
+      planB: LogicalPlan): Option[(LogicalPlan, LogicalPlan, Boolean)] =
     if (matches(exprA, planA) && matches(exprB, planB)) {
       Some((planA, planB, false))
     } else if (matches(exprA, planB) && matches(exprB, planA)) {
@@ -63,7 +66,10 @@ object ExpressionUtils {
       None
     }
 
-  def matchDistanceExpressionToJoinSide(distance: Expression, left: LogicalPlan, right: LogicalPlan): Option[JoinSide] = {
+  def matchDistanceExpressionToJoinSide(
+      distance: Expression,
+      left: LogicalPlan,
+      right: LogicalPlan): Option[JoinSide] = {
     if (distance.references.isEmpty || matches(distance, left)) {
       Some(LeftSide)
     } else if (matches(distance, right)) {

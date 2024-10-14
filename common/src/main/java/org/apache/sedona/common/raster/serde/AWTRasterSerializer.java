@@ -22,7 +22,6 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-
 import java.awt.Point;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
@@ -30,32 +29,32 @@ import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
 
 public class AWTRasterSerializer extends Serializer<Raster> {
-    private static final SampleModelSerializer sampleModelSerializer = new SampleModelSerializer();
-    private static final DataBufferSerializer dataBufferSerializer = new DataBufferSerializer();
+  private static final SampleModelSerializer sampleModelSerializer = new SampleModelSerializer();
+  private static final DataBufferSerializer dataBufferSerializer = new DataBufferSerializer();
 
-    @Override
-    public void write(Kryo kryo, Output output, Raster raster) {
-        Raster r;
-        if (raster.getParent() != null) {
-            r = raster.createCompatibleWritableRaster(raster.getBounds());
-            ((WritableRaster) r).setRect(raster);
-        } else {
-            r = raster;
-        }
-
-        output.writeInt(r.getMinX());
-        output.writeInt(r.getMinY());
-        sampleModelSerializer.write(kryo, output, r.getSampleModel());
-        dataBufferSerializer.write(kryo, output, r.getDataBuffer());
+  @Override
+  public void write(Kryo kryo, Output output, Raster raster) {
+    Raster r;
+    if (raster.getParent() != null) {
+      r = raster.createCompatibleWritableRaster(raster.getBounds());
+      ((WritableRaster) r).setRect(raster);
+    } else {
+      r = raster;
     }
 
-    @Override
-    public Raster read(Kryo kryo, Input input, Class<Raster> type) {
-        int minX = input.readInt();
-        int minY = input.readInt();
-        Point location = new Point(minX, minY);
-        SampleModel sampleModel = sampleModelSerializer.read(kryo, input, SampleModel.class);
-        DataBuffer dataBuffer = dataBufferSerializer.read(kryo, input, DataBuffer.class);
-        return Raster.createRaster(sampleModel, dataBuffer, location);
-    }
+    output.writeInt(r.getMinX());
+    output.writeInt(r.getMinY());
+    sampleModelSerializer.write(kryo, output, r.getSampleModel());
+    dataBufferSerializer.write(kryo, output, r.getDataBuffer());
+  }
+
+  @Override
+  public Raster read(Kryo kryo, Input input, Class<Raster> type) {
+    int minX = input.readInt();
+    int minY = input.readInt();
+    Point location = new Point(minX, minY);
+    SampleModel sampleModel = sampleModelSerializer.read(kryo, input, SampleModel.class);
+    DataBuffer dataBuffer = dataBufferSerializer.read(kryo, input, DataBuffer.class);
+    return Raster.createRaster(sampleModel, dataBuffer, location);
+  }
 }

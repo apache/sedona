@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.python.wrapper.adapters
 
 import org.apache.sedona.python.wrapper.translation._
@@ -30,10 +29,12 @@ object PythonConverter extends GeomSerializer {
   def translateSpatialRDDToPython(spatialRDD: JavaRDD[Geometry]): JavaRDD[Array[Byte]] =
     GeometryRddConverter(spatialRDD, geometrySerializer).translateToPython
 
-  def translateSpatialPairRDDToPython(spatialRDD: JavaPairRDD[Geometry, Geometry]): JavaRDD[Array[Byte]] =
+  def translateSpatialPairRDDToPython(
+      spatialRDD: JavaPairRDD[Geometry, Geometry]): JavaRDD[Array[Byte]] =
     FlatPairRddConverter(spatialRDD, geometrySerializer).translateToPython
 
-  def translateSpatialPairRDDWithListToPython(spatialRDD: JavaPairRDD[Geometry, java.util.List[Geometry]]): JavaRDD[Array[Byte]] =
+  def translateSpatialPairRDDWithListToPython(
+      spatialRDD: JavaPairRDD[Geometry, java.util.List[Geometry]]): JavaRDD[Array[Byte]] =
     ListPairRddConverter(spatialRDD, geometrySerializer).translateToPython
 
   def translatePythonRDDToJava(pythonRDD: JavaRDD[Array[Byte]]): JavaRDD[Geometry] =

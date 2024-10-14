@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.sedona.core.serde;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -36,31 +35,28 @@ import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.index.quadtree.Quadtree;
 import org.locationtech.jts.index.strtree.STRtree;
 
-public class SedonaKryoRegistrator
-        implements KryoRegistrator
-{
+public class SedonaKryoRegistrator implements KryoRegistrator {
 
-    final static Logger log = Logger.getLogger(SedonaKryoRegistrator.class);
+  static final Logger log = Logger.getLogger(SedonaKryoRegistrator.class);
 
-    @Override
-    public void registerClasses(Kryo kryo)
-    {
-        GeometrySerde serializer = new GeometrySerde();
-        SpatialIndexSerde indexSerializer = new SpatialIndexSerde(serializer);
+  @Override
+  public void registerClasses(Kryo kryo) {
+    GeometrySerde serializer = new GeometrySerde();
+    SpatialIndexSerde indexSerializer = new SpatialIndexSerde(serializer);
 
-        log.info("Registering custom serializers for geometry types");
+    log.info("Registering custom serializers for geometry types");
 
-        kryo.register(Point.class, serializer);
-        kryo.register(LineString.class, serializer);
-        kryo.register(Polygon.class, serializer);
-        kryo.register(MultiPoint.class, serializer);
-        kryo.register(MultiLineString.class, serializer);
-        kryo.register(MultiPolygon.class, serializer);
-        kryo.register(GeometryCollection.class, serializer);
-        kryo.register(Circle.class, serializer);
-        kryo.register(Envelope.class, serializer);
-        // TODO: Replace the default serializer with default spatial index serializer
-        kryo.register(Quadtree.class, indexSerializer);
-        kryo.register(STRtree.class, indexSerializer);
-    }
+    kryo.register(Point.class, serializer);
+    kryo.register(LineString.class, serializer);
+    kryo.register(Polygon.class, serializer);
+    kryo.register(MultiPoint.class, serializer);
+    kryo.register(MultiLineString.class, serializer);
+    kryo.register(MultiPolygon.class, serializer);
+    kryo.register(GeometryCollection.class, serializer);
+    kryo.register(Circle.class, serializer);
+    kryo.register(Envelope.class, serializer);
+    // TODO: Replace the default serializer with default spatial index serializer
+    kryo.register(Quadtree.class, indexSerializer);
+    kryo.register(STRtree.class, indexSerializer);
+  }
 }

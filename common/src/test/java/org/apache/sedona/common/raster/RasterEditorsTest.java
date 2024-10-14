@@ -18,6 +18,12 @@
  */
 package org.apache.sedona.common.raster;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+
+import java.awt.image.DataBuffer;
+import java.io.IOException;
+import java.util.Arrays;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -34,732 +40,4174 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
-import java.awt.image.DataBuffer;
-import java.io.IOException;
-import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-
 public class RasterEditorsTest extends RasterTestBase {
 
-    @Test
-    public void testSetBandPixelType() throws FactoryException {
-        GridCoverage2D testRaster = RasterConstructors.makeEmptyRaster(4, "F", 4, 4, 0, 0, 1);
-        double[] bandValues1 = {1.1,2.1,3.1,4.1,5.1,6.1,7.1,8.1,9.1,10.1,11.1,12.1,13.1,14.1,15.1,99.2};
-        double[] bandValues2 = {17.9, 18.9, 19.9, 20.9, 21.9, 22.9, 23.9, 24.9, 25.9, 26.9, 27.9, 28.9, 29.9, 30.9, 31.9, 32.9};
-        double[] bandValues3 = {-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5};
-        double[] bandValues4 = {65535, 65536, 65537, 65538, 65539, 65540, 65541, 65542, 65543, 65544, 65545, 65546, 65547, 65548, 65549, -9999};
+  @Test
+  public void testSetBandPixelType() throws FactoryException {
+    GridCoverage2D testRaster = RasterConstructors.makeEmptyRaster(4, "F", 4, 4, 0, 0, 1);
+    double[] bandValues1 = {
+      1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 8.1, 9.1, 10.1, 11.1, 12.1, 13.1, 14.1, 15.1, 99.2
+    };
+    double[] bandValues2 = {
+      17.9, 18.9, 19.9, 20.9, 21.9, 22.9, 23.9, 24.9, 25.9, 26.9, 27.9, 28.9, 29.9, 30.9, 31.9, 32.9
+    };
+    double[] bandValues3 = {-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5};
+    double[] bandValues4 = {
+      65535, 65536, 65537, 65538, 65539, 65540, 65541, 65542, 65543, 65544, 65545, 65546, 65547,
+      65548, 65549, -9999
+    };
 
-        testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues1, 1);
-        testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues2, 2);
-        testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues3, 3);
-        testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues4, 4);
-        testRaster = RasterBandEditors.setBandNoDataValue(testRaster, 1, 99.2);
-        testRaster = RasterBandEditors.setBandNoDataValue(testRaster, 4, -9999.0);
+    testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues1, 1);
+    testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues2, 2);
+    testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues3, 3);
+    testRaster = MapAlgebra.addBandFromArray(testRaster, bandValues4, 4);
+    testRaster = RasterBandEditors.setBandNoDataValue(testRaster, 1, 99.2);
+    testRaster = RasterBandEditors.setBandNoDataValue(testRaster, 4, -9999.0);
 
-        GridCoverage2D modifiedRaster = RasterEditors.setPixelType(testRaster, "D");
+    GridCoverage2D modifiedRaster = RasterEditors.setPixelType(testRaster, "D");
 
-        assertEquals(DataBuffer.TYPE_DOUBLE, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
-        assertEquals(99.19999694824219, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
-        assertEquals(-9999, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
-        assertEquals(testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
-        assertEquals(testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
+    assertEquals(
+        DataBuffer.TYPE_DOUBLE, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+    assertEquals(
+        99.19999694824219, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
+    assertEquals(-9999, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
+    assertEquals(
+        testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
+    assertEquals(
+        testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
 
-        modifiedRaster = RasterEditors.setPixelType(testRaster, "F");
+    modifiedRaster = RasterEditors.setPixelType(testRaster, "F");
 
-        assertEquals(DataBuffer.TYPE_FLOAT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
-        assertEquals(99.19999694824219, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
-        assertEquals(-9999, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
-        assertEquals(testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
-        assertEquals(testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
+    assertEquals(
+        DataBuffer.TYPE_FLOAT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+    assertEquals(
+        99.19999694824219, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
+    assertEquals(-9999, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
+    assertEquals(
+        testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
+    assertEquals(
+        testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
 
+    modifiedRaster = RasterEditors.setPixelType(testRaster, "I");
 
-        modifiedRaster = RasterEditors.setPixelType(testRaster, "I");
+    assertEquals(
+        DataBuffer.TYPE_INT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+    assertEquals(99, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
+    assertEquals(-9999, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
+    assertEquals(
+        testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
+    assertEquals(
+        testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
 
-        assertEquals(DataBuffer.TYPE_INT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
-        assertEquals(99, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
-        assertEquals(-9999, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
-        assertEquals(testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
-        assertEquals(testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
+    modifiedRaster = RasterEditors.setPixelType(testRaster, "S");
+    double[] expected = {
+      -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, -9999.0
+    };
 
-        modifiedRaster = RasterEditors.setPixelType(testRaster, "S");
-        double[] expected = {-1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, -9999.0};
+    assertEquals(
+        DataBuffer.TYPE_SHORT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+    assertEquals(99, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
+    assertEquals(-9999, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 4)));
+    assertEquals(
+        testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
+    assertEquals(
+        testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
 
-        assertEquals(DataBuffer.TYPE_SHORT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
-        assertEquals(99, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
-        assertEquals(-9999, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 4)));
-        assertEquals(testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
-        assertEquals(testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
+    modifiedRaster = RasterEditors.setPixelType(testRaster, "US");
+    expected =
+        new double[] {
+          65526.0, 65527.0, 65528.0, 65529.0, 65530.0, 65531.0, 65532.0, 65533.0, 65534.0, 65535.0,
+          0.0, 1.0, 2.0, 3.0, 4.0, 5.0
+        };
 
-        modifiedRaster = RasterEditors.setPixelType(testRaster, "US");
-        expected = new double[]{65526.0, 65527.0, 65528.0, 65529.0, 65530.0, 65531.0, 65532.0, 65533.0, 65534.0, 65535.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
+    assertEquals(
+        DataBuffer.TYPE_USHORT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+    assertEquals(99, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
+    assertEquals(55537, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 3)));
+    assertEquals(
+        testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
+    assertEquals(
+        testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
 
-        assertEquals(DataBuffer.TYPE_USHORT, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
-        assertEquals(99, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
-        assertEquals(55537, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster, 3)));
-        assertEquals(testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
-        assertEquals(testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
+    modifiedRaster = RasterEditors.setPixelType(testRaster, "B");
 
-        modifiedRaster = RasterEditors.setPixelType(testRaster, "B");
+    assertEquals(
+        DataBuffer.TYPE_BYTE, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
+    assertEquals(99, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
+    assertEquals(241, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
+    assertEquals(
+        testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
+    assertEquals(
+        testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
+  }
 
-        assertEquals(DataBuffer.TYPE_BYTE, modifiedRaster.getRenderedImage().getSampleModel().getDataType());
-        assertEquals(99, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(0)), 0.01);
-        assertEquals(241, RasterUtils.getNoDataValue(modifiedRaster.getSampleDimension(3)), 0.01);
-        assertEquals(testRaster.getRenderedImage().getWidth(), modifiedRaster.getRenderedImage().getWidth());
-        assertEquals(testRaster.getRenderedImage().getHeight(), modifiedRaster.getRenderedImage().getHeight());
+  @Test
+  public void testSetGeoReferenceWithRaster() throws IOException {
+    GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    GridCoverage2D actualGrid =
+        RasterEditors.setGeoReference(raster, -13095817, 4021262, 72, -72, 0, 0);
+    String actual = RasterAccessors.getGeoReference(actualGrid);
+    String expected =
+        "72.000000 \n0.000000 \n0.000000 \n-72.000000 \n-13095817.000000 \n4021262.000000";
+    assertEquals(expected, actual);
+    assert (Arrays.equals(
+        MapAlgebra.bandAsArray(raster, 1), MapAlgebra.bandAsArray(actualGrid, 1)));
+
+    actualGrid = RasterEditors.setGeoReference(raster, "56 1 1 -56 23 34");
+    actual = RasterAccessors.getGeoReference(actualGrid);
+    expected = "56.000000 \n1.000000 \n1.000000 \n-56.000000 \n23.000000 \n34.000000";
+    assertEquals(expected, actual);
+    assert (Arrays.equals(
+        MapAlgebra.bandAsArray(raster, 1), MapAlgebra.bandAsArray(actualGrid, 1)));
+
+    actualGrid = RasterEditors.setGeoReference(raster, "56 1 1 -56 23 34", "esri");
+    actual = RasterAccessors.getGeoReference(actualGrid);
+    expected = "56.000000 \n1.000000 \n1.000000 \n-56.000000 \n-5.000000 \n62.000000";
+    assertEquals(expected, actual);
+    assert (Arrays.equals(
+        MapAlgebra.bandAsArray(raster, 1), MapAlgebra.bandAsArray(actualGrid, 1)));
+  }
+
+  @Test
+  public void testSetGeoReferenceWithEmptyRaster() throws FactoryException {
+    GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 20, 20, 0, 0, 8);
+    GridCoverage2D actualGrid =
+        RasterEditors.setGeoReference(emptyRaster, 10, -10, 10, -10, 10, 10);
+    String actual = RasterAccessors.getGeoReference(actualGrid);
+    String expected = "10.000000 \n10.000000 \n10.000000 \n-10.000000 \n10.000000 \n-10.000000";
+    assertEquals(expected, actual);
+
+    actualGrid = RasterEditors.setGeoReference(emptyRaster, "10 3 3 -10 20 -12");
+    actual = RasterAccessors.getGeoReference(actualGrid);
+    expected = "10.000000 \n3.000000 \n3.000000 \n-10.000000 \n20.000000 \n-12.000000";
+    assertEquals(expected, actual);
+
+    actualGrid = RasterEditors.setGeoReference(emptyRaster, "10 3 3 -10 20 -12", "ESRI");
+    actual = RasterAccessors.getGeoReference(actualGrid);
+    expected = "10.000000 \n3.000000 \n3.000000 \n-10.000000 \n15.000000 \n-7.000000";
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testSetGeoReferenceWithEmptyRasterSRID() throws FactoryException {
+    GridCoverage2D emptyRaster =
+        RasterConstructors.makeEmptyRaster(1, 20, 20, 0, 0, 8, 8, 0.1, 0.1, 4326);
+    GridCoverage2D actualGrid =
+        RasterEditors.setGeoReference(emptyRaster, 10, -10, 10, -10, 10, 10);
+    String actual = RasterAccessors.getGeoReference(actualGrid);
+    String expected = "10.000000 \n10.000000 \n10.000000 \n-10.000000 \n10.000000 \n-10.000000";
+    assertEquals(expected, actual);
+
+    actualGrid = RasterEditors.setGeoReference(emptyRaster, "10 3 3 -10 20 -12");
+    actual = RasterAccessors.getGeoReference(actualGrid);
+    expected = "10.000000 \n3.000000 \n3.000000 \n-10.000000 \n20.000000 \n-12.000000";
+    assertEquals(expected, actual);
+
+    actualGrid = RasterEditors.setGeoReference(emptyRaster, "10 3 3 -10 20 -12", "ESRI");
+    actual = RasterAccessors.getGeoReference(actualGrid);
+    expected = "10.000000 \n3.000000 \n3.000000 \n-10.000000 \n15.000000 \n-7.000000";
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testInterpolate() throws FactoryException {
+    double[] values = new double[15 * 15];
+    double[] values2 = new double[15 * 15];
+    double[] values3 = new double[15 * 10];
+    double[] values4 = new double[15 * 10];
+    for (int i = 0; i < values.length; i++) {
+      values[i] = Double.NaN;
+      values2[i] = -9999;
+      if (i < 150) {
+        values3[i] = Double.NaN;
+        values4[i] = Double.NaN;
+      }
+    }
+    values[1] = 37;
+    values[7] = 20;
+    values[20] = 14;
+    values[29] = 24;
+    values[48] = 10;
+    values[54] = 16;
+    values[90] = 30;
+    values[92] = 27;
+    values[97] = 20;
+    values[110] = 22;
+    values[133] = 34;
+    values[141] = 19;
+    values[159] = 30;
+    values[163] = 21;
+    values[177] = 14;
+    values[182] = 10;
+    values[189] = 15;
+    values[201] = 30;
+    values[215] = 23;
+    values[219] = 12;
+    values[224] = 30;
+
+    values2[1] = 37;
+    values2[7] = 20;
+    values2[110] = 22;
+    values2[133] = 34;
+    values2[215] = 23;
+    values2[219] = 12;
+
+    values3[1] = 37;
+    values3[7] = 20;
+    values3[20] = 14;
+    values3[29] = 24;
+    values3[48] = 10;
+    values3[54] = 16;
+    values3[90] = 30;
+    values3[92] = 27;
+    values3[97] = 20;
+    values3[110] = 22;
+    values3[133] = 34;
+    values3[141] = 19;
+
+    values4[7] = 20;
+    values4[48] = 10;
+    values4[92] = 27;
+    values4[133] = 34;
+
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(2, 15, 15, 0, 0, 1);
+    GridCoverage2D raster2 = RasterConstructors.makeEmptyRaster(2, 15, 10, 0, 0, 1);
+
+    raster = MapAlgebra.addBandFromArray(raster, values, 1);
+    raster = MapAlgebra.addBandFromArray(raster, values2, 2, -9999.0);
+    raster2 = MapAlgebra.addBandFromArray(raster2, values3, 1, 0.0);
+    raster2 = MapAlgebra.addBandFromArray(raster2, values4, 2, 0.0);
+
+    GridCoverage2D modifiedRaster1 = RasterEditors.interpolate(raster);
+    double[] expected = {
+      33.26135744188868,
+      37.0,
+      31.27734198938487,
+      23.00897722975952,
+      18.35744126869061,
+      16.666827623454292,
+      18.588666295819408,
+      20.0,
+      19.7098137066673,
+      19.707393867632348,
+      20.09677197109572,
+      20.85677368219612,
+      21.915348487457578,
+      23.013558477624464,
+      23.546363750939825,
+      30.02559744929351,
+      31.401973172734763,
+      26.157936982433316,
+      20.049623519999688,
+      16.503734593459075,
+      14.0,
+      16.955580469420905,
+      19.14149356545831,
+      19.20841374600329,
+      19.07503401031451,
+      19.52180207270863,
+      20.556382953445674,
+      21.936241361836878,
+      23.368465326619436,
+      24.0,
+      25.445288683635162,
+      23.767322692602917,
+      18.94512817865535,
+      15.09217902438941,
+      15.92949990061788,
+      16.143723135302647,
+      17.46235080409251,
+      18.56161079610608,
+      18.263234159464666,
+      17.55714340029155,
+      18.456351203055267,
+      20.074150212109952,
+      21.623363563901368,
+      22.92626905988335,
+      23.52850073063308,
+      23.581253731925436,
+      21.104894366937405,
+      15.519164347350161,
+      10.0,
+      14.623507085090438,
+      17.571332993435384,
+      18.547755744011337,
+      18.778208809515956,
+      17.63638493260528,
+      16.0,
+      17.698352391678533,
+      19.881951897404495,
+      21.41954077439605,
+      22.439992667428513,
+      22.958953288860922,
+      24.46267883383115,
+      22.55588819274051,
+      19.035860416235817,
+      15.787928817007407,
+      17.29000180869961,
+      18.956752025361677,
+      19.52545205110425,
+      19.49320558794922,
+      18.739939146904266,
+      17.873502005218118,
+      18.868686657509564,
+      20.50163272802599,
+      21.79963208693137,
+      22.648092934151393,
+      23.07325079521243,
+      27.339240686012435,
+      25.49717181984923,
+      24.27637857890148,
+      21.934788841765833,
+      20.54279163393701,
+      20.415602657728982,
+      20.294440968065977,
+      20.12712809201612,
+      20.01695729098881,
+      19.981684138699112,
+      20.56042358555098,
+      21.66808966539439,
+      22.84402887572117,
+      23.66947710350524,
+      23.92792211284503,
+      30.0,
+      26.970993883166358,
+      27.0,
+      24.27923346218002,
+      21.884677024924766,
+      21.393761991703876,
+      20.675783032427226,
+      20.0,
+      20.447966915427305,
+      21.00767892416062,
+      21.76123271899912,
+      22.972510745466153,
+      24.594528947267207,
+      25.758282753129365,
+      25.58299372709193,
+      27.47640333275058,
+      25.999581190048865,
+      25.19625980807816,
+      23.467993578060135,
+      21.95676660485791,
+      22.0,
+      21.174434312111686,
+      20.661712855113723,
+      21.06705134642131,
+      21.803479070626473,
+      22.630447265486644,
+      24.12523799031699,
+      27.131507753840403,
+      29.711071177058518,
+      28.044610472056593,
+      24.575815053843023,
+      23.949908340185708,
+      23.16645809694482,
+      22.261508929430743,
+      21.57639361998243,
+      21.199499207871806,
+      20.512201068340637,
+      20.945210454462963,
+      21.9836704738589,
+      22.924607408812214,
+      23.29994870396163,
+      24.34588050443289,
+      28.456777404095725,
+      34.0,
+      29.299586941543286,
+      22.289282775892673,
+      21.733205542152017,
+      21.282319526154897,
+      21.098628613636073,
+      20.962407662467214,
+      20.284574553210682,
+      19.0,
+      20.78589292573924,
+      23.496987593674145,
+      25.62025601413337,
+      24.18768551072114,
+      23.08050394947618,
+      24.20369229311617,
+      25.751211886213962,
+      25.291145454008287,
+      20.106675399137863,
+      19.039836103047197,
+      18.631736571412027,
+      19.463919247879737,
+      20.459013240500386,
+      20.678005804903012,
+      20.498778676838114,
+      21.647141591206793,
+      24.85886829049983,
+      30.0,
+      24.680524723757998,
+      20.74763785026808,
+      19.60271542163126,
+      21.0,
+      22.018647801799002,
+      18.00154050010474,
+      15.48944127986085,
+      13.937025632369018,
+      16.727443579263173,
+      20.04761876200366,
+      21.666970151632338,
+      22.178007697785134,
+      22.00711417840976,
+      21.845258153363282,
+      21.894236501076087,
+      21.09539317000747,
+      18.30877196034247,
+      14.0,
+      19.100764521956286,
+      21.37625514516915,
+      16.804308085382203,
+      13.210991324547445,
+      10.0,
+      14.678223231872348,
+      20.402354245753287,
+      23.61996099998932,
+      25.34387845550619,
+      22.88842027242889,
+      18.893697344867686,
+      15.0,
+      17.99739221429308,
+      18.623811034390396,
+      17.88199847705721,
+      20.10340576380633,
+      22.540987053793057,
+      17.172062557359556,
+      14.909962597666562,
+      13.723315495756637,
+      17.207184334324843,
+      21.714429170321253,
+      24.819954899437075,
+      30.0,
+      24.42788347777175,
+      18.529164647909127,
+      16.023420997411794,
+      17.177939759174137,
+      19.030219436334406,
+      20.703175413270372,
+      23.82346404132341,
+      26.679563954008973,
+      18.30247124387975,
+      17.549967822928068,
+      17.83102658459945,
+      19.912418921913126,
+      22.403094596784975,
+      23.0,
+      24.833498988263106,
+      22.562283468475155,
+      16.74474130390725,
+      12.0,
+      15.661188713492779,
+      19.096313938391393,
+      22.090142801280727,
+      26.652370233020388,
+      30.0
+    };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster1, 1)));
+    expected =
+        new double[] {
+          36.31560266333892,
+          37.0,
+          35.95001528950461,
+          32.55456281348282,
+          27.747647924498967,
+          23.395511692769787,
+          20.76019187238808,
+          20.0,
+          20.48425641742611,
+          21.46616175625576,
+          22.506083540271757,
+          23.43867372266192,
+          24.22047050690332,
+          24.84515490354181,
+          25.318158635871935,
+          35.59702123639938,
+          36.1080912336396,
+          34.92264760688185,
+          31.694403492272276,
+          27.479588952337373,
+          23.76159564197567,
+          21.402367911031885,
+          20.600048497382318,
+          20.95802924931098,
+          21.85312566934917,
+          22.867961689231304,
+          23.822346729868453,
+          24.645155720233337,
+          25.30316491959463,
+          25.785368958443854,
+          33.736263360481296,
+          33.787337294208356,
+          32.50491879560646,
+          29.918185624285595,
+          26.915509246978683,
+          24.369679300291544,
+          22.67067121782161,
+          21.943173085789816,
+          22.062244729782897,
+          22.703043352277668,
+          23.574150384247577,
+          24.490433456086297,
+          25.326775395027457,
+          25.996085082256286,
+          26.457292143707306,
+          31.362217328380478,
+          30.987046425638866,
+          29.75532060784556,
+          27.885874319910133,
+          25.98701118053546,
+          24.503395147732814,
+          23.53747290596377,
+          23.09319958795616,
+          23.16162848818621,
+          23.662102458770814,
+          24.46009329842152,
+          25.392345914855053,
+          26.277056277056275,
+          26.959486633986536,
+          27.367167653373446,
+          29.092604672488843,
+          28.45893393193426,
+          27.330045600513504,
+          25.956388607332954,
+          24.75496657574432,
+          23.980219874418705,
+          23.61241284600499,
+          23.560975609756103,
+          23.823996331432255,
+          24.43564356435644,
+          25.36885935803671,
+          26.478567308733687,
+          27.5124426759823,
+          28.230187000952824,
+          28.539301516805857,
+          27.247063132405383,
+          26.51060248380727,
+          25.480464625132,
+          24.36618650585948,
+          23.486953749849118,
+          23.07327943198574,
+          23.107181785967228,
+          23.43822599171205,
+          24.02559486650096,
+          24.945099988945547,
+          26.231094879193765,
+          27.724793423887686,
+          29.046658662089868,
+          29.821211019621305,
+          29.957603946416985,
+          25.88974662629361,
+          25.16985500472787,
+          24.26375015572807,
+          23.316195581546452,
+          22.57150555716558,
+          22.281085370136715,
+          22.501649003315638,
+          23.082229580573944,
+          23.957237314920235,
+          25.23497968783408,
+          27.002056583847484,
+          29.056844428939204,
+          30.799549473296587,
+          31.62952426802049,
+          31.491738599934145,
+          24.94751628812812,
+          24.322991651433867,
+          23.589500566716453,
+          22.83834355409085,
+          22.236387977827,
+          22.0,
+          22.22946393479041,
+          22.836371775646363,
+          23.80556850489374,
+          25.31212625719927,
+          27.514894477880453,
+          30.17445556060718,
+          32.39930163485057,
+          33.269053092143395,
+          32.7979114893439,
+          24.29814810151374,
+          23.798477621505032,
+          23.25566160345856,
+          22.73054388352962,
+          22.324648182353915,
+          22.166133024633073,
+          22.31440513388196,
+          22.748455024032953,
+          23.564178054868286,
+          25.034987342814212,
+          27.40997571220446,
+          30.461100969157215,
+          33.06654081641772,
+          34.0,
+          33.32205258218198,
+          23.826259472718835,
+          23.43614030546493,
+          23.04691544183527,
+          22.69863566906218,
+          22.44129998434097,
+          22.317814627342063,
+          22.327826490517666,
+          22.485739728840567,
+          22.97136958765687,
+          24.1378053151195,
+          26.308436167196803,
+          29.314859723929874,
+          32.02257770121466,
+          33.11318031096732,
+          32.588071794802104,
+          23.453731695272058,
+          23.136895439889454,
+          22.837969341740404,
+          22.5750762195122,
+          22.353277267370473,
+          22.153699294884206,
+          21.93818411067455,
+          21.72771357820883,
+          21.739271311459923,
+          22.393469800472655,
+          24.074716107245926,
+          26.681062973970075,
+          29.249698500491373,
+          30.61326470194562,
+          30.619849687748538,
+          23.14528189700489,
+          22.873299078716254,
+          22.624941675396414,
+          22.4042996776114,
+          22.18262701943339,
+          21.872155300492476,
+          21.341975014871363,
+          20.559928178989534,
+          19.826106444585882,
+          19.768851837817355,
+          20.896178588868754,
+          23.107278305233997,
+          25.564770162597814,
+          27.286115398115125,
+          27.974876799410435,
+          22.89317400652958,
+          22.658315087349756,
+          22.464154986026983,
+          22.326522537798503,
+          22.21547615895434,
+          21.94592845919216,
+          21.098758833659954,
+          19.391679190987155,
+          17.43041640912983,
+          16.508789872465073,
+          17.31229064293831,
+          19.45955716222323,
+          22.001625038043162,
+          24.07282092780778,
+          25.3396494285512,
+          22.694617374438472,
+          22.49917341358993,
+          22.375481536253275,
+          22.37470255461734,
+          22.514580747811056,
+          22.555548934473048,
+          21.58211733455415,
+          18.590046494167133,
+          14.947731452814619,
+          13.37480250469191,
+          14.32202301038326,
+          16.677982783439063,
+          19.33238874168123,
+          21.58661168411627,
+          23.18165070393781,
+          22.538940524984902,
+          22.37635977931294,
+          22.30689380937549,
+          22.401712711091545,
+          22.71035568048687,
+          23.0,
+          22.0761719237007,
+          18.257843038546472,
+          13.644800769366695,
+          12.0,
+          13.10060397096215,
+          15.395131557199228,
+          17.87309171401753,
+          20.028384380868758,
+          21.676232335135328
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster1, 2)));
+    assertEquals(
+        Double.NaN, RasterUtils.getNoDataValue(modifiedRaster1.getSampleDimension(1)), 0.01d);
+    modifiedRaster1 = RasterEditors.interpolate(raster2);
+    expected =
+        new double[] {
+          33.68872549987092,
+          37.0,
+          31.63969785752624,
+          23.17193668732212,
+          18.24438953326871,
+          16.531902233632632,
+          18.522948688681627,
+          20.0,
+          19.66240828967433,
+          19.590637846439463,
+          19.98558257874909,
+          20.851360194748942,
+          22.06199506870186,
+          23.192473188371032,
+          23.671585222769448,
+          30.60152437930265,
+          31.797729455897795,
+          26.45714290923834,
+          20.028681943353277,
+          16.355937775904433,
+          14.0,
+          16.82363232952286,
+          19.07111362251498,
+          19.09462527239225,
+          18.891571996482984,
+          19.335578267359164,
+          20.495987477995595,
+          22.077652641379274,
+          23.504101798726882,
+          24.0,
+          25.958292369021784,
+          24.041314697965984,
+          18.87339139846905,
+          14.88306713966779,
+          15.705617469787766,
+          15.944200740059568,
+          17.23848525148528,
+          18.360955561649998,
+          18.050495651857528,
+          17.352649965960136,
+          18.19808289095906,
+          19.924641519495626,
+          21.738433529076435,
+          23.14849141985108,
+          23.69523211104897,
+          23.988046194466175,
+          21.20250679070837,
+          15.311565627310914,
+          10.0,
+          14.335000487877966,
+          17.290263411210216,
+          18.291914118956164,
+          18.524207521600538,
+          17.40495150243105,
+          16.0,
+          17.435303884843975,
+          19.6644871318865,
+          21.520736885047338,
+          22.780771408646714,
+          23.39242217790547,
+          24.937679521256403,
+          22.79493998847052,
+          18.96880829868652,
+          15.550127548748046,
+          17.018456092139623,
+          18.740417074361684,
+          19.32891488173467,
+          19.2675348480171,
+          18.44208407729311,
+          17.56767119537794,
+          18.505350646437783,
+          20.340171793232958,
+          22.052836113854028,
+          23.24748239025756,
+          23.86667196619322,
+          27.75547396092607,
+          25.8718314618907,
+          24.525677344295687,
+          22.086184195110018,
+          20.5479856594581,
+          20.36008699744393,
+          20.192347353659926,
+          20.007522863820512,
+          19.789811176984596,
+          19.63851452950784,
+          20.308168568971322,
+          21.83910308380058,
+          23.621809025313425,
+          24.918729624596683,
+          25.402901036487343,
+          30.0,
+          27.31212525308456,
+          27.0,
+          24.606244759619987,
+          22.04779345708413,
+          21.435983197431607,
+          20.614919004549076,
+          20.0,
+          20.239318749198688,
+          20.705300778285878,
+          21.803154940570796,
+          23.843474979004384,
+          26.388152013102047,
+          28.037184955529895,
+          28.0272247268956,
+          28.156742063544485,
+          26.71218348588587,
+          25.74500787792939,
+          23.986000705917185,
+          22.128835692120525,
+          22.0,
+          21.126202437362323,
+          20.4343467606496,
+          20.615836515507937,
+          21.37595476676991,
+          23.014973040866746,
+          26.02154364881182,
+          29.927930259740283,
+          32.017318693123435,
+          31.025165658880084,
+          26.17762571343666,
+          25.444089118703058,
+          24.42307157358159,
+          23.091457565955963,
+          21.878597022371878,
+          21.221979616532884,
+          20.303900346956254,
+          20.379770535133307,
+          20.89999824156448,
+          21.883370142975252,
+          23.846833896890114,
+          27.375408315897438,
+          31.875434298041768,
+          34.0,
+          32.48895037832805,
+          24.929834613119343,
+          24.38637351604903,
+          23.558921326553268,
+          22.53723178886498,
+          21.44683103113761,
+          20.119096270908674,
+          19.0,
+          19.861869713390853,
+          20.937231379763,
+          22.15357945700695,
+          24.098458863495537,
+          27.163341179551274,
+          30.681772280768445,
+          32.403884304709244,
+          31.520453374592645
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster1, 1)));
+    expected =
+        new double[] {
+          16.95531803251405,
+          16.24468647562652,
+          15.785503728108203,
+          15.953499701069509,
+          17.002364998029172,
+          18.58722735605522,
+          19.725879909958646,
+          20.0,
+          19.962455495878203,
+          20.11848994213282,
+          20.587743309527344,
+          21.294350353400482,
+          22.10896279402254,
+          22.91099251171604,
+          23.616396941134624,
+          16.590770816482834,
+          15.358354493968363,
+          14.240611075747932,
+          13.963754905955778,
+          15.175193798449612,
+          17.46677175509619,
+          19.25489950535345,
+          19.819467101685696,
+          19.92756016350397,
+          20.236233367451383,
+          20.89145556117842,
+          21.798365122615802,
+          22.791300323924112,
+          23.71683965540961,
+          24.477611940298505,
+          16.65196662693683,
+          14.780350084697911,
+          12.58587582190067,
+          11.50197628458498,
+          12.870880968392735,
+          15.786666666666667,
+          18.202572347266884,
+          19.35736839083759,
+          19.92523579480101,
+          20.57142857142857,
+          21.50868365525077,
+          22.664697775152586,
+          23.847794574446056,
+          24.87258414782132,
+          25.637251158324393,
+          17.621612255800855,
+          15.458923759019386,
+          12.045883730003903,
+          10.0,
+          11.829967518712044,
+          15.037502286724797,
+          17.574216976849755,
+          19.135846177323366,
+          20.195121951219512,
+          21.259975192503713,
+          22.549449874936705,
+          23.994180132011635,
+          25.36085996846782,
+          26.429946524064178,
+          27.114111581458772,
+          19.799323324170015,
+          18.795480225988705,
+          15.97306838239481,
+          13.161133321745176,
+          14.105411800625909,
+          16.209631728045327,
+          18.061553985872855,
+          19.556521254666,
+          20.898910855702486,
+          22.354047075928108,
+          24.035897435897436,
+          25.798069397338896,
+          27.32102981741757,
+          28.350651485095536,
+          28.847522853471336,
+          22.396250532594795,
+          23.613824751431462,
+          24.160401002506266,
+          21.440137074319985,
+          18.991097922848663,
+          18.68871309384862,
+          19.393643031784837,
+          20.533182076006803,
+          21.979596492943514,
+          23.766233766233768,
+          25.84458696032719,
+          27.918226812997627,
+          29.541193882585105,
+          30.43774858382548,
+          30.655518783022707,
+          23.947282262355078,
+          25.76306858540949,
+          27.0,
+          25.283973758200563,
+          22.382127659574472,
+          20.941553065842484,
+          20.89109445536428,
+          21.732217573221757,
+          23.227359616149435,
+          25.276144578313254,
+          27.680262047121037,
+          29.980517806152168,
+          31.616151545363913,
+          32.32053782317866,
+          32.242359472588475,
+          24.226514157134822,
+          25.445336186909223,
+          26.040087797583155,
+          25.127063053724427,
+          23.408368516802252,
+          22.254430878298542,
+          22.10169491525424,
+          22.860593301868644,
+          24.402562161962603,
+          26.59602339522895,
+          29.14695340501792,
+          31.497704405587573,
+          33.05209620145864,
+          33.58294094731925,
+          33.30145775336325,
+          23.923209274697363,
+          24.583412701436245,
+          24.80931837290888,
+          24.34285714285714,
+          23.499755442477493,
+          22.909506854498854,
+          22.96513165804978,
+          23.77768577343136,
+          25.32950191570882,
+          27.4967694967695,
+          29.954715981641296,
+          32.15406429956304,
+          33.56223178513133,
+          34.0,
+          33.671795377110826,
+          23.53612845673506,
+          23.891611143171918,
+          23.994776355255546,
+          23.789739089783918,
+          23.44912470225709,
+          23.289298634613143,
+          23.57749712973594,
+          24.453240587864467,
+          25.937816296999532,
+          27.917243671411953,
+          30.09151697915301,
+          32.00316784635945,
+          33.238509271446986,
+          33.658091530876625,
+          33.411618233779464
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster1, 2)));
+    assertEquals(
+        Double.NaN, RasterUtils.getNoDataValue(modifiedRaster1.getSampleDimension(1)), 0.01d);
+
+    GridCoverage2D modifiedRaster2 = RasterEditors.interpolate(raster, 2.0, "Fixed", 5.0);
+    expected =
+        new double[] {
+          35.578947368421055,
+          37.0,
+          32.419354838709666,
+          23.109131403118038,
+          17.432432432432435,
+          15.895735234763892,
+          18.123822341857334,
+          20.0,
+          19.166666666666664,
+          18.101167315175097,
+          19.389830508474574,
+          20.3855421686747,
+          21.954887218045112,
+          23.407407407407405,
+          24.0,
+          32.01170960187353,
+          32.94736842105263,
+          27.182767624020887,
+          19.209302325581394,
+          15.5,
+          14.0,
+          15.72093023255814,
+          18.293515358361773,
+          18.19178082191781,
+          17.800904977375566,
+          18.037267080745345,
+          19.811634349030474,
+          22.11764705882353,
+          23.61904761904762,
+          24.0,
+          28.181818181818183,
+          24.624413145539908,
+          18.616438356164384,
+          14.39333466373977,
+          14.901051329622758,
+          15.507617077299226,
+          15.411042944785274,
+          16.644423260247855,
+          16.972602739726025,
+          16.471990464839095,
+          17.388509441542787,
+          18.857142857142858,
+          21.333333333333332,
+          23.157894736842103,
+          24.0,
+          25.60813704496788,
+          21.290909090909086,
+          14.921888307579994,
+          10.0,
+          14.08533338416862,
+          16.504911783392796,
+          16.72987672226251,
+          16.794520547945208,
+          16.47619047619047,
+          16.0,
+          16.727272727272723,
+          18.29867674858223,
+          20.235294117647058,
+          23.66942148760331,
+          22.896551724137932,
+          26.322314049586776,
+          23.101010101010097,
+          18.830336200156374,
+          15.238693467336683,
+          16.758479314200518,
+          17.078624710623334,
+          18.010212097407695,
+          17.661336869198973,
+          17.445529676934633,
+          16.685258964143422,
+          18.16335540838852,
+          20.34375,
+          23.10172744721689,
+          24.697674418604652,
+          27.461538461538456,
+          28.325301204819276,
+          26.609053497942384,
+          24.557809330628807,
+          21.6995550902905,
+          19.98305084745763,
+          19.192006950477847,
+          19.341775614025494,
+          19.234673162809578,
+          18.920141969831406,
+          20.032258064516125,
+          19.9375,
+          22.450312194388026,
+          25.694915254237287,
+          26.274075936635654,
+          30.153846153846153,
+          30.0,
+          27.654661016949152,
+          27.0,
+          24.768259693417495,
+          22.088146781865838,
+          21.151090262384656,
+          20.519866037448622,
+          20.0,
+          20.2330623306233,
+          21.603167986661113,
+          22.963887776495252,
+          25.467018469656992,
+          26.43815829070118,
+          29.65248226950355,
+          30.102362204724418,
+          28.65625,
+          27.30337078651685,
+          25.60572144871737,
+          24.100253601683484,
+          22.122974261201144,
+          22.0,
+          21.10951628626172,
+          20.551219512195118,
+          20.96311849552675,
+          21.926288328288898,
+          23.517920301815607,
+          25.931453362255965,
+          29.393184316599484,
+          31.701598962834918,
+          30.461538461538456,
+          26.764705882352942,
+          25.659090909090907,
+          24.21948212083847,
+          22.040650913398586,
+          21.671785028790786,
+          21.19338913930028,
+          20.691811214199276,
+          20.800000000000004,
+          22.415147265077135,
+          23.278073454131796,
+          24.27275499313919,
+          25.75,
+          29.875508738328946,
+          34.0,
+          30.75903614457832,
+          23.32258064516129,
+          21.948717948717952,
+          21.20219244823386,
+          21.389698736637513,
+          21.093179744525546,
+          20.262767530283988,
+          19.0,
+          20.9247783010947,
+          24.08532423208191,
+          26.118158144892355,
+          24.973368841544605,
+          23.527331189710612,
+          24.782608695652176,
+          26.17195496417605,
+          26.13733905579399,
+          18.842105263157897,
+          17.42763157894737,
+          18.22185381884334,
+          19.26228799266569,
+          20.64524581572827,
+          20.75542794529443,
+          20.245257219383515,
+          21.876484560570074,
+          25.040284187037336,
+          30.0,
+          24.960920342819815,
+          20.65298507462687,
+          19.47801193391508,
+          21.0,
+          22.4126455906822,
+          13.333333333333332,
+          10.962962962962962,
+          12.696942446043165,
+          14.906403940886701,
+          19.2487922705314,
+          21.48263322391052,
+          22.19375419744795,
+          22.099361249112842,
+          21.78817461779333,
+          21.938681998832493,
+          21.171505739365294,
+          17.909305621162027,
+          14.0,
+          18.957121571657193,
+          21.572254335260116,
+          10.0,
+          10.619047619047619,
+          10.0,
+          13.221258134490238,
+          19.769307923771315,
+          23.78682263069945,
+          25.774662580687227,
+          23.063241106719367,
+          18.45581627558662,
+          15.0,
+          17.794533504717098,
+          18.078341013824883,
+          17.496222660984778,
+          19.925531914893618,
+          22.835820895522392,
+          10.0,
+          12.612966601178782,
+          12.193548387096772,
+          16.088772845953002,
+          21.950000000000003,
+          24.997460639918746,
+          30.0,
+          25.01824817518248,
+          18.032258064516128,
+          15.462269442703006,
+          16.446762631855005,
+          18.26161790017212,
+          19.820689655172412,
+          24.070752883244783,
+          27.632653061224488,
+          13.151515151515152,
+          13.095238095238095,
+          16.24124513618677,
+          19.545454545454547,
+          22.512820512820515,
+          23.0,
+          24.998414512739206,
+          23.085106382978722,
+          16.075349139330953,
+          12.0,
+          15.120542843895583,
+          17.72064777327935,
+          21.572070359478893,
+          26.83333333333333,
+          30.0
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster2, 1)));
+    expected =
+        new double[] {
+          37.0,
+          37.0,
+          36.34615384615384,
+          33.6,
+          28.5,
+          23.4,
+          20.653846153846153,
+          20.0,
+          20.0,
+          20.0,
+          20.000000000000004,
+          20.0,
+          20.0,
+          -9999.0,
+          -9999.0,
+          37.0,
+          37.0,
+          37.0,
+          33.13636363636363,
+          28.500000000000004,
+          23.863636363636363,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          -9999.0,
+          -9999.0,
+          -9999.0,
+          37.0,
+          37.0,
+          37.0,
+          32.142857142857146,
+          28.5,
+          24.325581395348838,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          -9999.0,
+          -9999.0,
+          -9999.0,
+          37.0,
+          37.0,
+          32.714285714285715,
+          28.433179723502302,
+          26.250000000000004,
+          24.486602357984996,
+          20.74074074074074,
+          20.620689655172413,
+          20.57142857142857,
+          20.0,
+          20.0,
+          20.0,
+          -9999.0,
+          34.0,
+          -9999.0,
+          37.0,
+          31.146341463414632,
+          29.714285714285715,
+          27.90909090909091,
+          24.888888888888886,
+          21.379310344827584,
+          21.259259259259256,
+          21.10344827586207,
+          20.97142857142857,
+          20.88888888888889,
+          27.0,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          -9999.0,
+          28.666666666666664,
+          22.0,
+          22.0,
+          21.999999999999996,
+          22.0,
+          21.999999999999996,
+          21.515151515151516,
+          22.0,
+          27.333333333333336,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          -9999.0,
+          22.0,
+          21.999999999999996,
+          21.999999999999996,
+          22.0,
+          22.0,
+          22.0,
+          21.999999999999996,
+          21.999999999999996,
+          27.513513513513516,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          22.0,
+          22.0,
+          22.0,
+          22.0,
+          22.0,
+          22.0,
+          22.0,
+          22.0,
+          22.0,
+          27.81818181818182,
+          30.57142857142857,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          -9999.0,
+          22.0,
+          21.999999999999996,
+          21.999999999999996,
+          22.0,
+          22.0,
+          22.0,
+          21.999999999999996,
+          25.428571428571427,
+          28.18181818181818,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          -9999.0,
+          21.999999999999996,
+          22.0,
+          22.0,
+          21.999999999999996,
+          22.13793103448276,
+          21.999999999999996,
+          22.0,
+          22.0,
+          24.055335968379445,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          -9999.0,
+          22.0,
+          22.418604651162795,
+          22.39393939393939,
+          22.370370370370367,
+          22.36,
+          20.28402366863905,
+          19.456521739130434,
+          18.448772226926334,
+          21.83606557377049,
+          24.46666666666666,
+          27.71428571428571,
+          30.333333333333336,
+          34.0,
+          34.0,
+          -9999.0,
+          23.0,
+          22.581395348837212,
+          22.606060606060606,
+          22.62962962962963,
+          20.647594278283485,
+          19.875,
+          18.60377358490566,
+          17.170454545454543,
+          18.906976744186046,
+          19.857142857142858,
+          22.999999999999996,
+          26.142857142857142,
+          28.17647058823529,
+          34.0,
+          -9999.0,
+          23.0,
+          23.0,
+          23.0,
+          23.0,
+          21.264705882352942,
+          19.944444444444443,
+          17.5,
+          15.055555555555555,
+          13.833333333333332,
+          15.666666666666668,
+          18.285714285714285,
+          21.53333333333333,
+          24.22222222222222,
+          34.0,
+          -9999.0,
+          23.0,
+          23.0,
+          23.0,
+          23.0,
+          22.38888888888889,
+          21.166666666666668,
+          17.5,
+          13.833333333333332,
+          12.61111111111111,
+          11.999999999999998,
+          12.0,
+          12.0,
+          20.904761904761905,
+          -9999.0,
+          23.0,
+          23.0,
+          23.0,
+          23.0,
+          22.576923076923077,
+          23.0,
+          21.9,
+          17.5,
+          13.1,
+          12.0,
+          12.423076923076923,
+          12.0,
+          12.0,
+          12.0,
+          12.0
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster2, 2)));
+    assertEquals(-9999.0, RasterUtils.getNoDataValue(modifiedRaster2.getSampleDimension(1)), 0.01d);
+    modifiedRaster2 = RasterEditors.interpolate(raster2, 2.0, "Fixed", 3.0);
+    expected =
+        new double[] {
+          37.0,
+          37.0,
+          37.0,
+          23.455445544554454,
+          18.461538461538463,
+          15.2,
+          18.0,
+          20.0,
+          20.0,
+          18.76923076923077,
+          20.000000000000004,
+          0.0,
+          24.0,
+          23.999999999999996,
+          24.0,
+          37.0,
+          34.0,
+          27.19178082191781,
+          19.142857142857142,
+          13.333333333333334,
+          14.0,
+          16.0,
+          18.545454545454547,
+          18.19178082191781,
+          17.77777777777778,
+          16.0,
+          19.764705882352942,
+          24.0,
+          24.0,
+          24.0,
+          37.0,
+          25.000000000000004,
+          17.714285714285715,
+          13.150943396226413,
+          11.999999999999998,
+          13.962264150943398,
+          15.714285714285714,
+          16.923076923076923,
+          17.142857142857142,
+          16.444444444444443,
+          16.0,
+          16.0,
+          24.0,
+          23.999999999999996,
+          24.0,
+          20.000000000000004,
+          18.307692307692307,
+          11.7,
+          10.0,
+          10.666666666666666,
+          12.0,
+          13.473684210526317,
+          17.069767441860467,
+          16.0,
+          16.0,
+          16.0,
+          16.0,
+          20.235294117647058,
+          24.0,
+          24.0,
+          29.0,
+          22.333333333333332,
+          17.714285714285715,
+          12.833333333333332,
+          13.4,
+          15.532994923857867,
+          20.0,
+          18.22222222222222,
+          17.142857142857142,
+          16.444444444444443,
+          16.0,
+          16.0,
+          0.0,
+          0.0,
+          24.0,
+          29.5,
+          26.444444444444443,
+          25.0,
+          21.428571428571427,
+          19.666666666666668,
+          18.695652173913047,
+          20.571428571428573,
+          19.8,
+          18.857142857142858,
+          17.77777777777778,
+          16.0,
+          16.0,
+          0.0,
+          34.0,
+          0.0,
+          30.0,
+          28.5,
+          27.0,
+          25.203125000000004,
+          23.19354838709678,
+          22.04081632653061,
+          20.551724137931036,
+          20.0,
+          20.0,
+          18.76923076923077,
+          20.000000000000004,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          29.5,
+          28.5,
+          27.033898305084744,
+          25.333333333333332,
+          22.471698113207548,
+          22.0,
+          21.0,
+          20.206896551724135,
+          20.132075471698116,
+          20.0,
+          0.0,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          29.0,
+          28.5,
+          28.0,
+          24.5,
+          22.03030303030303,
+          20.923076923076923,
+          20.0,
+          19.894736842105264,
+          19.5,
+          20.0,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          30.0,
+          0.0,
+          27.0,
+          20.58823529411765,
+          20.333333333333332,
+          19.6,
+          19.0,
+          19.39325842696629,
+          19.0,
+          19.0,
+          0.0,
+          34.0,
+          34.0,
+          34.0,
+          34.0
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster2, 1)));
+    expected =
+        new double[] {
+          0.0,
+          0.0,
+          0.0,
+          10.000000000000002,
+          20.000000000000004,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          20.000000000000004,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          16.153846153846153,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          13.846153846153845,
+          20.0,
+          20.0,
+          20.0,
+          20.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          10.000000000000002,
+          10.0,
+          11.7,
+          10.0,
+          10.0,
+          10.0,
+          10.000000000000002,
+          20.000000000000004,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          27.0,
+          18.5,
+          15.66666666666667,
+          12.833333333333332,
+          13.4,
+          10.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          27.0,
+          23.599999999999998,
+          24.166666666666668,
+          21.333333333333332,
+          18.5,
+          10.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          34.0,
+          0.0,
+          27.0,
+          27.0,
+          27.0,
+          25.299999999999997,
+          27.0,
+          27.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          27.0,
+          27.0,
+          27.0,
+          27.0,
+          27.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          27.0,
+          27.0,
+          27.0,
+          27.0,
+          27.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          34.0,
+          0.0,
+          0.0,
+          27.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          34.0,
+          34.0,
+          34.0,
+          34.0
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster2, 2)));
+    assertEquals(0.0, RasterUtils.getNoDataValue(modifiedRaster2.getSampleDimension(1)), 0.01d);
+
+    GridCoverage2D modifiedRaster3 = RasterEditors.interpolate(raster, 1.0, "Fixed", 15.0);
+    expected =
+        new double[] {
+          26.0762105008391,
+          37.0,
+          24.793525204174802,
+          22.0883150022448,
+          20.465935936147567,
+          19.63339801958451,
+          19.94417461315354,
+          20.0,
+          20.425170176050134,
+          20.84627815147123,
+          21.07824949045892,
+          21.302418287164752,
+          21.92810052040996,
+          22.292816102451596,
+          22.21827055473856,
+          24.76288485007594,
+          24.951343350259485,
+          22.82049820081395,
+          21.0104572024897,
+          19.644081232167057,
+          14.0,
+          19.45440562922344,
+          20.26819939284971,
+          20.478898971980144,
+          20.635496578501822,
+          20.90484532823043,
+          21.26379379455235,
+          21.65966380881092,
+          22.451353371029978,
+          24.0,
+          22.880975547288394,
+          22.345173103392117,
+          20.959073237299584,
+          19.468434917165432,
+          19.410511257805123,
+          19.491918935582856,
+          19.969997014958395,
+          20.30149460051368,
+          20.265230817836883,
+          20.099833841477686,
+          20.595484547026587,
+          21.163893048111564,
+          21.615116880233508,
+          22.037904597222376,
+          22.636759479497297,
+          22.36773976466443,
+          21.667421138185407,
+          19.908505626873332,
+          10.0,
+          19.28622792941437,
+          20.131706381817228,
+          20.38480394446479,
+          20.4483802305556,
+          20.082265695580425,
+          16.0,
+          20.330257263033197,
+          21.160551685053886,
+          21.623978716646437,
+          21.947508565359616,
+          22.14717915955643,
+          22.593095735402084,
+          22.00800019992829,
+          20.9203398982122,
+          19.9417762454593,
+          20.257119075948864,
+          20.603839650715692,
+          20.711294467006145,
+          20.69876896847547,
+          20.53495555937529,
+          20.337501150359916,
+          20.821629296118473,
+          21.373249184268246,
+          21.77427330914825,
+          22.05003735790981,
+          22.20641992345198,
+          23.645046734106128,
+          22.97079329552904,
+          22.496868146264514,
+          21.630474250812284,
+          21.17048032343603,
+          21.048847993946296,
+          20.96712129725265,
+          20.888425125705535,
+          20.939001385089274,
+          21.063396631215117,
+          21.338760511207866,
+          21.713586539605693,
+          22.077275515064432,
+          22.33938046419246,
+          22.4443724556217,
+          30.0,
+          23.786751583415104,
+          27.0,
+          22.38611670476944,
+          21.613373499715664,
+          21.365132770878038,
+          21.1321822770571,
+          20.0,
+          21.145834214804676,
+          21.414532090086137,
+          21.70348011244388,
+          22.08911358353495,
+          22.55798721772012,
+          22.908069138631628,
+          22.894638094887938,
+          23.59984448857208,
+          23.2156493996082,
+          22.85620859785282,
+          22.17038281033766,
+          21.690386439719614,
+          22.0,
+          21.31428193681361,
+          21.228591110080476,
+          21.42603677664381,
+          21.69096396010584,
+          21.98236608249548,
+          22.439707973748323,
+          23.31249180567834,
+          24.277603941870307,
+          23.67354484386282,
+          22.337775112172544,
+          22.35077544284059,
+          22.08192454621645,
+          21.785616358679565,
+          21.54694503301245,
+          21.37028360018127,
+          21.197803940680032,
+          21.383460878251597,
+          21.70902909274137,
+          22.00156374393987,
+          22.1895421302317,
+          22.561660344856083,
+          23.867951779610312,
+          34.0,
+          24.06217166356261,
+          21.78723761831988,
+          21.610246657604595,
+          21.49918112989452,
+          21.40784389056594,
+          21.345467483313847,
+          21.156772339156745,
+          19.0,
+          21.403879358624142,
+          22.094234171491326,
+          22.704733145857745,
+          22.39444404947938,
+          22.244685311658674,
+          22.704377037225036,
+          23.441803825651448,
+          22.933803907376127,
+          21.17789822551486,
+          20.86587110311289,
+          20.772994998873212,
+          20.933449840270708,
+          21.169913889780467,
+          21.265765616293987,
+          21.275648298871246,
+          21.609468509068257,
+          22.41836849512678,
+          30.0,
+          22.42207752962013,
+          21.523136045584526,
+          21.171370001176903,
+          21.0,
+          21.92796691391193,
+          20.600843887992685,
+          19.81316334482605,
+          19.157548939556886,
+          20.167485329421204,
+          21.03097720244436,
+          21.49147422562408,
+          21.68049163146765,
+          21.65640540905565,
+          21.60199858991366,
+          21.589711326958934,
+          21.342116193297418,
+          20.65807753703852,
+          14.0,
+          20.71822475293455,
+          21.608826571643075,
+          20.240087464676385,
+          18.820303885227894,
+          10.0,
+          19.352307011504987,
+          21.08402656870892,
+          21.98697043011497,
+          22.516665782171806,
+          21.82040294896047,
+          20.720803462086632,
+          15.0,
+          20.325344264275746,
+          20.393188423938998,
+          20.334198477117837,
+          21.136950992691276,
+          21.71926462187672,
+          20.32125368124572,
+          19.54500857476825,
+          18.96183737585601,
+          20.123650305075348,
+          21.372927111914386,
+          22.607462349566738,
+          30.0,
+          22.170561230444196,
+          20.471015103750176,
+          19.174036440514662,
+          19.75812649738564,
+          20.486430583076643,
+          21.101207191171376,
+          22.05720681935462,
+          22.95351859716086,
+          20.629780556804317,
+          20.36777649978461,
+          20.36587664567013,
+          20.851647538933488,
+          21.627573946210028,
+          23.0,
+          22.610166119175226,
+          21.40227045845481,
+          19.71995390452467,
+          12.0,
+          19.34492961033455,
+          20.54622261296096,
+          21.432958044001158,
+          23.015587355947847,
+          30.0
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster3, 1)));
+    expected =
+        new double[] {
+          33.14434888091233,
+          37.0,
+          32.5461498671795,
+          29.728311993709365,
+          26.59230156170789,
+          24.849488157622034,
+          22.95249111430745,
+          20.0,
+          22.507625558366144,
+          23.569549011886956,
+          24.15533942467853,
+          24.687560685882556,
+          24.99354142705771,
+          25.21684096109621,
+          25.37593480333526,
+          32.04247292571026,
+          32.77505827785343,
+          30.282318411265127,
+          28.120727768108278,
+          26.377481615160605,
+          24.919507456609495,
+          23.565475234284648,
+          22.684324751732717,
+          23.114239721278516,
+          23.786668626668874,
+          24.282249221196782,
+          24.644742943483823,
+          24.916664001872462,
+          25.362677777451072,
+          25.525688356383547,
+          29.112682946712805,
+          29.196060236876313,
+          28.41781202406732,
+          27.194185780457627,
+          26.01577566214138,
+          25.02030465529052,
+          24.24007773558749,
+          23.817067977082097,
+          23.863371807741945,
+          24.169102822556425,
+          24.520220349014817,
+          24.842930647628144,
+          25.113931333289813,
+          25.31965236178779,
+          25.453369676204325,
+          27.698019578806246,
+          27.558451002188008,
+          27.042615738269728,
+          26.298354129541234,
+          25.548076211375502,
+          24.9254868504127,
+          24.486918511535603,
+          24.271480864828224,
+          24.291720653567555,
+          24.49129190669461,
+          24.78491343928026,
+          25.104194644808853,
+          25.395759725799344,
+          25.616073327378093,
+          25.74081784531966,
+          26.66668279132406,
+          26.45148563688033,
+          26.041505966408483,
+          25.515638886401263,
+          25.003343036396245,
+          24.61718505008524,
+          24.405230476070177,
+          24.359777356131982,
+          24.4642966285632,
+          24.700455325756,
+          25.036527379310257,
+          25.42280421656388,
+          25.787033124634295,
+          26.046689300534805,
+          26.15225352201301,
+          25.900236194427503,
+          25.65348412750154,
+          25.282005632639702,
+          24.828728294809924,
+          24.38722422097889,
+          24.109565840032513,
+          24.085968534353857,
+          24.22722270095821,
+          24.467172956467184,
+          24.81161296619876,
+          25.270077439461165,
+          25.81554251700798,
+          26.34834807818929,
+          26.697640291751892,
+          26.751778903041487,
+          25.319839882560174,
+          25.062113695912466,
+          24.70511545785504,
+          24.249843748314504,
+          23.714267547385813,
+          23.345175747990645,
+          23.591972812718193,
+          23.978477297048283,
+          24.36569088561112,
+          24.83942526421468,
+          25.473423643070536,
+          26.294998533964907,
+          27.19185465983552,
+          27.757043117733364,
+          27.643603634931647,
+          24.874949672316472,
+          24.624115601669082,
+          24.294014896830905,
+          23.860527453417834,
+          23.233268166670566,
+          22.0,
+          23.18809882682315,
+          23.74540722697297,
+          24.204520413204953,
+          24.767545926720995,
+          25.575092427272555,
+          26.769046561072674,
+          28.423300987438203,
+          29.690256328249735,
+          28.905956805963104,
+          24.52797503393108,
+          24.29711711063345,
+          24.01613245038297,
+          23.68048593928896,
+          23.2931150539021,
+          23.030671041594236,
+          23.241434523283548,
+          23.58164864960496,
+          23.97373901287855,
+          24.53619157053348,
+          25.42049198771934,
+          26.852367128326946,
+          29.290927123010583,
+          34.0,
+          29.45544399714219,
+          24.24803566693262,
+          24.038470740538905,
+          23.804542376913705,
+          23.55947712115373,
+          23.335804434106706,
+          23.203795953722185,
+          23.215191966067696,
+          23.341433288483337,
+          23.595867645608404,
+          24.066775912016396,
+          24.87529687614994,
+          26.15510095833641,
+          27.961122506766856,
+          29.363977010117175,
+          28.124202855188315,
+          24.01245906164301,
+          23.815711311005277,
+          23.6067218841446,
+          23.398594377122965,
+          23.209452278878317,
+          23.05759868183561,
+          22.952468842048177,
+          22.90894831730902,
+          22.98801189774875,
+          23.300738774751906,
+          23.94797373455576,
+          24.936622276122367,
+          26.078981752847834,
+          26.208858058537782,
+          26.194446864270517,
+          23.808895180895686,
+          23.61494630149458,
+          23.410153738881604,
+          23.20214172275553,
+          22.995297683363475,
+          22.78165620101175,
+          22.541567464584297,
+          22.280499748447262,
+          22.092406005518836,
+          22.177623467083578,
+          22.691582289779372,
+          23.54942455509759,
+          23.57690530903803,
+          24.324768404914145,
+          24.63397880757855,
+          23.633744784380667,
+          23.43709726662707,
+          23.22750485198291,
+          23.010508402617354,
+          22.787057212254908,
+          22.523978798777247,
+          22.12441829812346,
+          21.52367725079968,
+          20.834497589656618,
+          20.527094269320745,
+          21.065705438534533,
+          21.095626729799875,
+          22.14162573069548,
+          22.949341172894236,
+          23.44228823171291,
+          23.487911828436822,
+          23.28876487285452,
+          23.076403273149978,
+          22.862402812678404,
+          22.673848598117797,
+          22.4789938022761,
+          21.90591568450098,
+          20.79859295112489,
+          19.123097959937805,
+          17.019603612612347,
+          18.112678959776765,
+          19.748073514309045,
+          21.02754348167131,
+          21.944314463140806,
+          22.553987973298902,
+          23.751628189026846,
+          23.497453336029324,
+          22.96466230858322,
+          22.763359185733304,
+          22.646534880682168,
+          23.0,
+          21.904029616877633,
+          19.56630062853955,
+          17.02818655280354,
+          12.0,
+          16.69057181961273,
+          18.932580734084258,
+          20.32826095347579,
+          21.41013506266134,
+          22.14896411611193
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster3, 2)));
+    assertEquals(
+        Double.NaN, RasterUtils.getNoDataValue(modifiedRaster3.getSampleDimension(1)), 0.01d);
+    modifiedRaster3 = RasterEditors.interpolate(raster2, 1.0, "Fixed", 15.0);
+    expected =
+        new double[] {
+          26.78699224395054,
+          37.0,
+          25.59000950154087,
+          22.41954361005371,
+          20.658563964852206,
+          19.632325683580596,
+          19.997444728364865,
+          20.0,
+          20.588893952863618,
+          20.900075971203655,
+          21.215527708672436,
+          21.58979618764808,
+          22.015106835142095,
+          22.48594529042817,
+          22.62802078634996,
+          25.341182080235427,
+          25.815110081350184,
+          23.556906745336352,
+          21.33624275843935,
+          19.648833910028564,
+          14.0,
+          19.40430501389323,
+          20.17912645264691,
+          20.423711483253875,
+          20.613975923902338,
+          20.970236633019443,
+          21.46875024691036,
+          22.017270779618844,
+          22.67543667031931,
+          24.0,
+          23.79074150892603,
+          23.074666979135408,
+          21.290111177633776,
+          19.445684025301226,
+          19.360948164689244,
+          19.24116874800708,
+          19.79857905884302,
+          20.195618733107413,
+          20.13548567245793,
+          19.916326389948377,
+          20.542345502480952,
+          21.324878405243616,
+          21.971359186152277,
+          22.539328557322413,
+          22.941244649876275,
+          23.238172884229623,
+          22.259442241159096,
+          19.998731380721196,
+          10.0,
+          18.99171526674972,
+          20.006038162849453,
+          20.304494566031362,
+          20.365577402325435,
+          19.885069425778372,
+          16.0,
+          20.17641830918957,
+          21.31848192318521,
+          22.015144543971417,
+          22.507040211668713,
+          22.816009429985858,
+          23.539073503538322,
+          22.714116401903468,
+          21.279851572740597,
+          19.829665833074895,
+          20.192051509245104,
+          20.60894905116254,
+          20.720571787279425,
+          20.676834342630258,
+          20.436906686077702,
+          20.16304067297081,
+          20.813357631457027,
+          21.637234801859854,
+          22.284716910638785,
+          22.74772654706078,
+          23.02533830091741,
+          24.76705115419066,
+          23.898761404702153,
+          23.102639638297397,
+          22.01119420983514,
+          21.396199285958346,
+          21.198151813603104,
+          21.046589356581173,
+          20.90523314310603,
+          20.95134473597128,
+          21.1231803241404,
+          21.55609831457963,
+          22.188330133233425,
+          22.827648862609614,
+          23.30381143046646,
+          23.52184362321799,
+          30.0,
+          24.875980859966177,
+          27.0,
+          23.0305365769999,
+          22.008320707433278,
+          21.605643464240725,
+          21.241575531197714,
+          20.0,
+          21.187670568741307,
+          21.602121334549103,
+          22.12760056483647,
+          22.859283032340493,
+          23.71879393221605,
+          24.350828229485142,
+          24.39611827509592,
+          25.073704992788997,
+          24.387177876697887,
+          23.84530692291961,
+          22.929573500784457,
+          22.15503365480329,
+          22.0,
+          21.471491216450957,
+          21.279398424931212,
+          21.511597751124846,
+          21.954767248529272,
+          22.5957418943529,
+          23.586101649331756,
+          25.132800761763725,
+          26.56673326949605,
+          25.816513870479472,
+          23.98124356082051,
+          23.692099474865955,
+          23.236951878877242,
+          22.6729105217492,
+          22.118598116509407,
+          21.665790117367806,
+          21.287304682509948,
+          21.41373294325544,
+          21.750702019868935,
+          22.222219937683754,
+          22.92338082576777,
+          24.0858296453853,
+          26.429545308895154,
+          34.0,
+          26.76675610212288,
+          23.4566673858453,
+          23.235102168546188,
+          22.928883191999976,
+          22.518266381649802,
+          22.054009447384846,
+          21.413571195313967,
+          19.0,
+          21.297441657432206,
+          21.884326221126873,
+          22.39237549855173,
+          23.05601152515698,
+          24.050611284240794,
+          25.58701047348249,
+          26.975764609744452,
+          25.76264339178288
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster3, 1)));
+    expected =
+        new double[] {
+          17.67041614534914,
+          19.038023497499108,
+          18.722514255590543,
+          18.680916976878848,
+          18.997616200553555,
+          19.514622542921813,
+          19.95281550389205,
+          20.0,
+          20.425677646027733,
+          20.95910963285675,
+          21.50438674753259,
+          22.022333097816432,
+          22.4896263643727,
+          22.890982243675946,
+          23.2185279690047,
+          19.21833143197246,
+          18.530654819094465,
+          17.827904350455732,
+          17.569740115710978,
+          18.124703262372194,
+          19.045298094379604,
+          19.785710977287113,
+          20.18486321286119,
+          20.586386030639105,
+          21.146014232522468,
+          21.746551532518566,
+          22.323729062070147,
+          22.84127124824689,
+          23.27561162807565,
+          23.615099233571875,
+          19.17108964810389,
+          18.123492384582647,
+          16.561664475108383,
+          15.42380408473808,
+          16.761649078997017,
+          18.480935587526826,
+          19.61253545861439,
+          20.312599102830557,
+          20.881366586449786,
+          21.493224615310453,
+          22.141419059314625,
+          22.77295730782692,
+          23.338078488089835,
+          23.798843232730636,
+          24.136242054009482,
+          19.5247628043779,
+          18.359771245484993,
+          15.900699711953438,
+          10.0,
+          15.839753831531553,
+          18.332439510487223,
+          19.683305421813138,
+          20.558414133500573,
+          21.268590055926136,
+          21.967077253090842,
+          22.685802901256196,
+          23.38838493304813,
+          24.01211355673272,
+          24.497101424945686,
+          24.81282607201992,
+          20.394190961074358,
+          19.788839934665255,
+          18.360640329263315,
+          16.755874698487204,
+          17.669415950046783,
+          19.089187297108733,
+          20.153856410894658,
+          20.99884416494533,
+          21.769157633596038,
+          22.552767307586752,
+          23.372110531775768,
+          24.18624376664189,
+          24.90381251950419,
+          25.420611789895016,
+          25.684231258702503,
+          21.535698916084826,
+          22.005483834065263,
+          22.2404426211153,
+          20.88461164173069,
+          20.114475179723595,
+          20.325584342393242,
+          20.89995396260337,
+          21.591767805586255,
+          22.361430068865985,
+          23.22345606917387,
+          24.179607036228237,
+          25.176073140857405,
+          26.06813824506,
+          26.646269692838377,
+          26.800541168017613,
+          22.398812307902652,
+          23.63969764605668,
+          27.0,
+          23.209723774918196,
+          21.72871805180927,
+          21.412909785308695,
+          21.671224269999456,
+          22.22632128144337,
+          22.98058409560091,
+          23.91863284416249,
+          25.045696690307093,
+          26.325979842390836,
+          27.566546026102934,
+          28.30103375379256,
+          28.211253859348883,
+          22.672055302926296,
+          23.454136798896343,
+          24.03095809455141,
+          23.254830004257244,
+          22.416759277849675,
+          22.139227142553935,
+          22.312790823521574,
+          22.80325623610669,
+          23.547553343290687,
+          24.543532426881672,
+          25.829590479024912,
+          27.45570494803025,
+          29.352540569538345,
+          30.60903968482554,
+          29.85707894138994,
+          22.638917474724053,
+          22.989563946907115,
+          23.148361890336243,
+          22.945803383483682,
+          22.660336828807147,
+          22.58630063388931,
+          22.794968867209093,
+          23.269686086345068,
+          23.997279733269583,
+          24.996589834822824,
+          26.32814170650687,
+          28.107847999968207,
+          30.54047304058597,
+          34.0,
+          30.919332247126,
+          22.580278940805904,
+          22.762372415902846,
+          22.85505319663732,
+          22.83650652797382,
+          22.803422424473304,
+          22.882351670407306,
+          23.143803123631287,
+          23.611719619160013,
+          24.29834800155912,
+          25.225507782110675,
+          26.431069963538675,
+          27.954380065257617,
+          29.718673781722014,
+          30.866886777023087,
+          30.117910689528596
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster3, 2)));
+    assertEquals(
+        Double.NaN, RasterUtils.getNoDataValue(modifiedRaster3.getSampleDimension(1)), 0.01d);
+
+    GridCoverage2D modifiedRaster5 = RasterEditors.interpolate(raster, 2.0, "Variable", 3.0, 15.0);
+    expected =
+        new double[] {
+          36.46839157108562,
+          37.0,
+          36.11219830397913,
+          32.93950177935943,
+          27.963302752293583,
+          23.314176245210728,
+          20.67924528301887,
+          20.0,
+          20.367582231264837,
+          21.054747647562017,
+          21.729598051157126,
+          22.29668411867365,
+          22.751975999538452,
+          23.115655853314525,
+          23.409300674476395,
+          35.907701711491434,
+          36.28514654744163,
+          35.23932926829268,
+          32.155440414507765,
+          27.726190476190478,
+          23.683010262257696,
+          21.25183823529412,
+          20.484264611432245,
+          20.70901639344262,
+          21.278688524590166,
+          21.867226368159205,
+          22.373641437383725,
+          22.787836465210766,
+          23.124549119456823,
+          23.400992990654206,
+          34.401263823064774,
+          34.358452138492865,
+          33.10684089162183,
+          30.473251028806583,
+          27.200000000000003,
+          24.325581395348838,
+          22.42954324586978,
+          21.596100278551532,
+          21.52883325882879,
+          21.820765027322405,
+          22.208159866777688,
+          22.581916217337202,
+          22.91139071965914,
+          23.194419918770972,
+          23.436799999999995,
+          32.34738717339668,
+          31.856540084388186,
+          30.50694444444444,
+          28.433179723502302,
+          26.250000000000004,
+          24.486602357984996,
+          23.281249999999996,
+          22.606060606060606,
+          22.372807017543856,
+          22.42366927857336,
+          22.610119047619047,
+          22.842257299081815,
+          23.077586206896555,
+          23.2990099009901,
+          23.50102360308285,
+          30.218340611353714,
+          29.38546603475513,
+          28.006892590465252,
+          26.346504559270517,
+          24.888888888888886,
+          23.91696750902527,
+          23.354737666405637,
+          23.030303030303035,
+          22.871755133669122,
+          22.853658536585364,
+          22.936254373954053,
+          23.075973775549556,
+          23.240700081550717,
+          23.41116153975458,
+          23.57711803041274,
+          28.36028192371476,
+          27.33127889060092,
+          25.965909090909093,
+          24.54774156660949,
+          23.477272727272723,
+          22.961198093941455,
+          22.863095238095237,
+          22.914595571622236,
+          22.975806451612904,
+          23.040275247925518,
+          23.127609603340296,
+          23.2409689757756,
+          23.37234283129805,
+          23.512042853289145,
+          23.652574321413184,
+          26.94316922589837,
+          25.869918699186986,
+          24.598084646277417,
+          23.37795275590551,
+          22.53061224489796,
+          22.228360957642728,
+          22.353037097431713,
+          22.632183908045974,
+          22.88201603665521,
+          23.065830721003138,
+          23.209876543209877,
+          23.339891645280865,
+          23.4675001220882,
+          23.595092024539873,
+          23.721393034825873,
+          25.982558139534884,
+          24.984942146140433,
+          23.887458471760795,
+          22.887413837120246,
+          22.21666666666667,
+          22.0,
+          22.157426778242673,
+          22.480748776855986,
+          22.80006418485237,
+          23.053094274146904,
+          23.24591503267974,
+          23.40157570878141,
+          23.537740462993156,
+          23.663771675878,
+          23.783517887563885,
+          25.398479913137898,
+          24.538528515454942,
+          23.64505119453925,
+          22.860841423948216,
+          22.337662337662334,
+          22.153901216893342,
+          22.26161168554078,
+          22.52631578947368,
+          22.820821917808217,
+          23.07909604519774,
+          23.287762259275212,
+          23.45674553007044,
+          23.59953588596055,
+          34.0,
+          23.842342918776623,
+          25.081508805330795,
+          24.371064969859344,
+          23.664691091954026,
+          23.05968456860118,
+          22.650000000000002,
+          22.48189011478881,
+          22.528446843853818,
+          22.709519934906428,
+          22.939922480620158,
+          23.163958641063516,
+          23.359375,
+          23.52456672594762,
+          23.665730337078646,
+          23.78979851152659,
+          23.902006172839506,
+          24.935241411524903,
+          24.358974358974354,
+          23.80398969627988,
+          23.334494773519168,
+          23.00775193798449,
+          22.851039589860445,
+          22.849848841115218,
+          22.957763378929688,
+          23.120568827049976,
+          23.29651456474154,
+          23.462773327925916,
+          23.611437733832172,
+          23.742687606147655,
+          23.859628389468845,
+          23.965611768188314,
+          24.890254340914648,
+          24.42412074714086,
+          23.98474216710182,
+          23.61412921976302,
+          23.347560975609756,
+          23.20167002861566,
+          23.16890200286123,
+          23.222462027120574,
+          23.328459343794577,
+          23.457406566802845,
+          23.58973715890851,
+          23.715501196490298,
+          23.831318536134233,
+          23.93723877131294,
+          24.034603918228278,
+          24.9018603096803,
+          24.52249770431589,
+          24.169637019982375,
+          23.870967741935484,
+          23.648780487804874,
+          23.51370299553856,
+          23.46199761241544,
+          23.47808358817533,
+          23.54079590647719,
+          23.629881004847952,
+          23.72995780590717,
+          23.83141762452107,
+          23.92936372738976,
+          24.021948402002305,
+          24.10893945372441,
+          24.943123435647475,
+          24.631098293679404,
+          24.342990275526738,
+          24.09735563950351,
+          23.90873015873016,
+          23.784242532243336,
+          23.722227006544955,
+          23.713536941840534,
+          23.744864269992664,
+          23.80244541769102,
+          23.874716745977793,
+          23.953403757292033,
+          24.03336755646817,
+          24.111844090889495,
+          24.187593703148426,
+          24.99845627554864,
+          24.738634503083556,
+          24.499491007804544,
+          24.293729372937293,
+          24.1311475409836,
+          23.0,
+          23.949966634076695,
+          23.925406420564585,
+          23.93461522848135,
+          12.0,
+          24.01782527338215,
+          24.076615187101158,
+          24.139891351267703,
+          24.20463223612698,
+          24.269076900281522
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster5, 2)));
+    assertEquals(
+        Double.NaN, RasterUtils.getNoDataValue(modifiedRaster5.getSampleDimension(1)), 0.01d);
+    modifiedRaster5 = RasterEditors.interpolate(raster2, 2.0, "Variable", 3.0, 15.0);
+    expected =
+        new double[] {
+          34.8203125,
+          37.0,
+          32.83333333333333,
+          23.455445544554454,
+          17.03125,
+          14.9915611814346,
+          15.171641791044776,
+          20.0,
+          16.347756410256412,
+          16.79801394464399,
+          17.159287776708375,
+          17.45398146120721,
+          17.698694029850746,
+          17.905136741233935,
+          18.08165548098434,
+          32.142144638403984,
+          32.94736842105263,
+          27.19178082191781,
+          19.142857142857142,
+          15.153846153846155,
+          14.0,
+          14.517241379310345,
+          15.289256198347108,
+          15.94493290143452,
+          16.46728971962617,
+          16.884988991063334,
+          17.224212476837554,
+          17.50426558767611,
+          17.738973433066803,
+          24.0,
+          26.40909090909091,
+          23.728323699421967,
+          17.250000000000004,
+          13.150943396226413,
+          13.785714285714286,
+          14.280000000000001,
+          14.619565217391306,
+          15.196891191709843,
+          15.780442804428043,
+          16.288537549407113,
+          16.713917525773194,
+          17.067932067932066,
+          17.364077669902915,
+          17.61401085664729,
+          17.827004592016955,
+          21.555382215288606,
+          17.783783783783782,
+          12.555555555555554,
+          10.0,
+          11.831858407079645,
+          13.851851851851851,
+          14.681381957773512,
+          15.24503311258278,
+          15.763147489126133,
+          16.0,
+          16.63511432294752,
+          16.98215313759355,
+          17.278174365587436,
+          17.531380753138077,
+          17.749174706621513,
+          19.062499999999996,
+          16.10743801652893,
+          12.946808510638299,
+          11.47098976109215,
+          12.3125,
+          13.762677484787018,
+          14.717391304347826,
+          15.335766423357667,
+          15.828124999999998,
+          16.255734919286322,
+          16.630787977254265,
+          16.957921581128467,
+          17.242145721925134,
+          17.489023940022154,
+          17.70398406374502,
+          18.12751677852349,
+          16.14012738853503,
+          14.303867403314918,
+          13.38144329896907,
+          13.571428571428571,
+          14.287769784172664,
+          14.977919814061591,
+          15.52112676056338,
+          15.964626138529972,
+          16.347554630593134,
+          16.685589519650655,
+          16.98489425981873,
+          17.249407474931633,
+          17.482849604221638,
+          17.688927943760987,
+          30.0,
+          16.565603552684696,
+          27.0,
+          14.765300393037618,
+          14.691489361702127,
+          14.988700564971749,
+          15.40228426395939,
+          20.0,
+          16.166666666666668,
+          16.49258018190522,
+          16.78707518022657,
+          17.053093442695243,
+          17.29264379165638,
+          17.50770825522154,
+          17.70045045045045,
+          17.92703862660944,
+          17.00525394045534,
+          16.22380336351876,
+          15.729490022172948,
+          15.564211645838872,
+          22.0,
+          15.872483221476509,
+          16.14054054054054,
+          16.413608488270224,
+          16.676258992805753,
+          16.92332268370607,
+          17.152914671923405,
+          17.364425162689805,
+          17.558024320672573,
+          17.734443495189144,
+          18.05075503355705,
+          17.38121756739653,
+          16.813432835820898,
+          16.422537335948107,
+          16.234228971962615,
+          16.21942305182091,
+          16.321272885789014,
+          16.486736369135052,
+          16.680349576271183,
+          16.88234708604987,
+          17.082417582417584,
+          17.275117032769177,
+          17.457529920212767,
+          34.0,
+          17.786619921237154,
+          18.196825185086375,
+          17.690402476780186,
+          17.257315928675027,
+          16.93975903614458,
+          16.754855416486834,
+          16.691967109424414,
+          19.0,
+          16.816568047337277,
+          16.946966579801582,
+          17.09640287769784,
+          17.253517187368892,
+          17.41125541125541,
+          17.56527202962417,
+          17.712946568065824,
+          17.852796010787152
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster5, 1)));
+    expected =
+        new double[] {
+          16.23076923076923,
+          15.596668128014029,
+          15.198675496688743,
+          15.405051449953229,
+          16.50588235294118,
+          18.24235006119951,
+          19.608349900596423,
+          20.0,
+          19.81127642913078,
+          19.50747986191024,
+          19.25976183882581,
+          19.089543217338747,
+          18.97987702627166,
+          18.911461650867402,
+          18.869914485618036,
+          15.98304400484457,
+          14.85129604365621,
+          13.823204419889503,
+          13.576547231270359,
+          14.742268041237114,
+          17.053941908713693,
+          19.004680187207487,
+          19.663551401869157,
+          19.582349923037455,
+          19.34844192634561,
+          19.15430992341535,
+          19.023411371237458,
+          18.941249611439233,
+          18.891544569043134,
+          18.86252616887648,
+          16.150837988826815,
+          14.404145077720207,
+          12.357400722021664,
+          11.352785145888593,
+          12.582822085889568,
+          15.287671232876713,
+          17.641509433962266,
+          18.747039827771793,
+          19.029850746268657,
+          19.028873020800994,
+          18.97188049209139,
+          18.920900995285493,
+          18.88593155893536,
+          18.864580211499764,
+          18.85284048047351,
+          17.210337401292175,
+          15.164179104477613,
+          11.914040114613181,
+          10.0,
+          11.645283018867925,
+          14.4804469273743,
+          16.690265486725664,
+          17.935613682092555,
+          18.493150684931503,
+          18.71178247734139,
+          18.79334834574745,
+          18.824141519250784,
+          18.836941591994243,
+          18.843683083511777,
+          18.84859758755995,
+          19.48,
+          18.568807339449542,
+          15.803149606299215,
+          13.015228426395938,
+          13.796992481203008,
+          15.529411764705884,
+          16.887323943661972,
+          17.773799837266072,
+          18.285846438482885,
+          18.558893911193834,
+          18.7007874015748,
+          18.775786924939467,
+          18.817258883248734,
+          18.84169504040694,
+          18.85721507611077,
+          22.171796707229774,
+          23.50798722044728,
+          24.098360655737704,
+          21.291338582677163,
+          18.602739726027398,
+          17.880398671096348,
+          17.948051948051948,
+          18.203592814371255,
+          18.44316959483686,
+          18.61605206073753,
+          18.727906664878635,
+          18.7972027972028,
+          18.839809896561363,
+          18.866359447004605,
+          18.883348641910505,
+          23.76416065911431,
+          25.71204701273262,
+          27.0,
+          25.209829867674856,
+          22.014925373134332,
+          20.04012036108325,
+          19.186287192755497,
+          18.88659793814433,
+          18.816465652857893,
+          18.826487845766973,
+          18.855683547054987,
+          18.8831262121974,
+          18.903836813987372,
+          18.91814850919359,
+          18.927636277076886,
+          23.99673735725938,
+          25.340314136125656,
+          25.979243884358784,
+          24.975041597337768,
+          22.94048493754592,
+          21.18435754189944,
+          20.0990099009901,
+          19.519869352204683,
+          19.233893298873912,
+          19.099675243567322,
+          19.03867403314917,
+          19.011117612638973,
+          18.99815943392368,
+          18.991332674073643,
+          18.987010799772634,
+          23.55799123156636,
+          24.315937940761636,
+          24.555875991348234,
+          23.96039603960396,
+          22.76802973977695,
+          21.535416022270336,
+          20.589498806682574,
+          19.966131592873523,
+          19.585987261146496,
+          19.36240327719618,
+          19.231978178984285,
+          19.154759134279733,
+          19.107424109847212,
+          34.0,
+          19.05610067481306,
+          22.96,
+          23.3696,
+          23.439047801881358,
+          23.057652426379093,
+          22.3308572575788,
+          21.504424778761063,
+          20.776402039329938,
+          20.222578429127545,
+          19.835096616245522,
+          19.57572573230001,
+          19.40514075887393,
+          19.29274516952242,
+          19.217467106159255,
+          19.165689930740545,
+          19.128900359136207
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster5, 2)));
+
+    GridCoverage2D modifiedRaster6 =
+        RasterEditors.interpolate(raster, 2.0, "Variable", 21.0, 15.0, 1);
+    expected =
+        new double[] {
+          33.26135744188868,
+          37.0,
+          31.27734198938487,
+          23.00897722975952,
+          18.35744126869061,
+          16.666827623454292,
+          18.588666295819408,
+          20.0,
+          19.7098137066673,
+          19.707393867632348,
+          20.09677197109572,
+          20.85677368219612,
+          21.915348487457578,
+          23.013558477624464,
+          23.546363750939825,
+          30.02559744929351,
+          31.401973172734763,
+          26.157936982433316,
+          20.049623519999688,
+          16.503734593459075,
+          14.0,
+          16.955580469420905,
+          19.14149356545831,
+          19.20841374600329,
+          19.07503401031451,
+          19.52180207270863,
+          20.556382953445674,
+          21.936241361836878,
+          23.368465326619436,
+          24.0,
+          25.445288683635162,
+          23.767322692602917,
+          18.94512817865535,
+          15.09217902438941,
+          15.92949990061788,
+          16.143723135302647,
+          17.46235080409251,
+          18.56161079610608,
+          18.263234159464666,
+          17.55714340029155,
+          18.456351203055267,
+          20.074150212109952,
+          21.623363563901368,
+          22.92626905988335,
+          23.52850073063308,
+          23.581253731925436,
+          21.104894366937405,
+          15.519164347350161,
+          10.0,
+          14.623507085090438,
+          17.571332993435384,
+          18.547755744011337,
+          18.778208809515956,
+          17.63638493260528,
+          16.0,
+          17.698352391678533,
+          19.881951897404495,
+          21.41954077439605,
+          22.439992667428513,
+          22.958953288860922,
+          24.46267883383115,
+          22.55588819274051,
+          19.035860416235817,
+          15.787928817007407,
+          17.29000180869961,
+          18.956752025361677,
+          19.52545205110425,
+          19.49320558794922,
+          18.739939146904266,
+          17.873502005218118,
+          18.868686657509564,
+          20.50163272802599,
+          21.79963208693137,
+          22.648092934151393,
+          23.07325079521243,
+          27.339240686012435,
+          25.49717181984923,
+          24.27637857890148,
+          21.934788841765833,
+          20.54279163393701,
+          20.415602657728982,
+          20.294440968065977,
+          20.12712809201612,
+          20.01695729098881,
+          19.981684138699112,
+          20.56042358555098,
+          21.66808966539439,
+          22.84402887572117,
+          23.66947710350524,
+          23.92792211284503,
+          30.0,
+          26.970993883166358,
+          27.0,
+          24.27923346218002,
+          21.884677024924766,
+          21.393761991703876,
+          20.675783032427226,
+          20.0,
+          20.447966915427305,
+          21.00767892416062,
+          21.76123271899912,
+          22.972510745466153,
+          24.594528947267207,
+          25.758282753129365,
+          25.58299372709193,
+          27.47640333275058,
+          25.999581190048865,
+          25.19625980807816,
+          23.467993578060135,
+          21.95676660485791,
+          22.0,
+          21.174434312111686,
+          20.661712855113723,
+          21.06705134642131,
+          21.803479070626473,
+          22.630447265486644,
+          24.12523799031699,
+          27.131507753840403,
+          29.711071177058518,
+          28.044610472056593,
+          24.575815053843023,
+          23.949908340185708,
+          23.16645809694482,
+          22.261508929430743,
+          21.57639361998243,
+          21.199499207871806,
+          20.512201068340637,
+          20.945210454462963,
+          21.9836704738589,
+          22.924607408812214,
+          23.29994870396163,
+          24.34588050443289,
+          28.456777404095725,
+          34.0,
+          29.299586941543286,
+          22.289282775892673,
+          21.733205542152017,
+          21.282319526154897,
+          21.098628613636073,
+          20.962407662467214,
+          20.284574553210682,
+          19.0,
+          20.78589292573924,
+          23.496987593674145,
+          25.62025601413337,
+          24.18768551072114,
+          23.08050394947618,
+          24.20369229311617,
+          25.751211886213962,
+          25.291145454008287,
+          20.106675399137863,
+          19.039836103047197,
+          18.631736571412027,
+          19.463919247879737,
+          20.459013240500386,
+          20.678005804903012,
+          20.498778676838114,
+          21.647141591206793,
+          24.85886829049983,
+          30.0,
+          24.680524723757998,
+          20.74763785026808,
+          19.60271542163126,
+          21.0,
+          22.018647801799002,
+          18.00154050010474,
+          15.48944127986085,
+          13.937025632369018,
+          16.727443579263173,
+          20.04761876200366,
+          21.666970151632338,
+          22.178007697785134,
+          22.00711417840976,
+          21.845258153363282,
+          21.894236501076087,
+          21.09539317000747,
+          18.30877196034247,
+          14.0,
+          19.100764521956286,
+          21.37625514516915,
+          16.804308085382203,
+          13.210991324547445,
+          10.0,
+          14.678223231872348,
+          20.402354245753287,
+          23.61996099998932,
+          25.34387845550619,
+          22.88842027242889,
+          18.893697344867686,
+          15.0,
+          17.99739221429308,
+          18.623811034390396,
+          17.88199847705721,
+          20.10340576380633,
+          22.540987053793057,
+          17.172062557359556,
+          14.909962597666562,
+          13.723315495756637,
+          17.207184334324843,
+          21.714429170321253,
+          24.819954899437075,
+          30.0,
+          24.42788347777175,
+          18.529164647909127,
+          16.023420997411794,
+          17.177939759174137,
+          19.030219436334406,
+          20.703175413270372,
+          23.82346404132341,
+          26.679563954008973,
+          18.30247124387975,
+          17.549967822928068,
+          17.83102658459945,
+          19.912418921913126,
+          22.403094596784975,
+          23.0,
+          24.833498988263106,
+          22.562283468475155,
+          16.74474130390725,
+          12.0,
+          15.661188713492779,
+          19.096313938391393,
+          22.090142801280727,
+          26.652370233020388,
+          30.0
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster6, 1)));
+    expected =
+        new double[] {
+          -9999.0, 37.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, 20.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          22.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, 34.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, 23.0, -9999.0, -9999.0, -9999.0, 12.0,
+          -9999.0, -9999.0, -9999.0, -9999.0, -9999.0
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster6, 2)));
+    assertEquals(-9999.0, RasterUtils.getNoDataValue(modifiedRaster6.getSampleDimension(1)), 0.01d);
+    modifiedRaster6 = RasterEditors.interpolate(raster2, 2.0, "Variable", 12.0, 15.0, 1);
+    expected =
+        new double[] {
+          33.68872549987092,
+          37.0,
+          31.63969785752624,
+          23.17193668732212,
+          18.24438953326871,
+          16.531902233632632,
+          18.522948688681627,
+          20.0,
+          19.66240828967433,
+          19.590637846439463,
+          19.98558257874909,
+          20.851360194748942,
+          22.06199506870186,
+          23.192473188371032,
+          23.671585222769448,
+          30.60152437930265,
+          31.797729455897795,
+          26.45714290923834,
+          20.028681943353277,
+          16.355937775904433,
+          14.0,
+          16.82363232952286,
+          19.07111362251498,
+          19.09462527239225,
+          18.891571996482984,
+          19.335578267359164,
+          20.495987477995595,
+          22.077652641379274,
+          23.504101798726882,
+          24.0,
+          25.958292369021784,
+          24.041314697965984,
+          18.87339139846905,
+          14.88306713966779,
+          15.705617469787766,
+          15.944200740059568,
+          17.23848525148528,
+          18.360955561649998,
+          18.050495651857528,
+          17.352649965960136,
+          18.19808289095906,
+          19.924641519495626,
+          21.738433529076435,
+          23.14849141985108,
+          23.69523211104897,
+          23.988046194466175,
+          21.20250679070837,
+          15.311565627310914,
+          10.0,
+          14.335000487877966,
+          17.290263411210216,
+          18.291914118956164,
+          18.524207521600538,
+          17.40495150243105,
+          16.0,
+          17.435303884843975,
+          19.6644871318865,
+          21.520736885047338,
+          22.780771408646714,
+          23.39242217790547,
+          24.937679521256403,
+          22.79493998847052,
+          18.96880829868652,
+          15.550127548748046,
+          17.018456092139623,
+          18.740417074361684,
+          19.32891488173467,
+          19.2675348480171,
+          18.44208407729311,
+          17.56767119537794,
+          18.505350646437783,
+          20.340171793232958,
+          22.052836113854028,
+          23.24748239025756,
+          23.86667196619322,
+          27.75547396092607,
+          25.8718314618907,
+          24.525677344295687,
+          22.086184195110018,
+          20.5479856594581,
+          20.36008699744393,
+          20.192347353659926,
+          20.007522863820512,
+          19.789811176984596,
+          19.63851452950784,
+          20.308168568971322,
+          21.83910308380058,
+          23.621809025313425,
+          24.918729624596683,
+          25.402901036487343,
+          30.0,
+          27.31212525308456,
+          27.0,
+          24.606244759619987,
+          22.04779345708413,
+          21.435983197431607,
+          20.614919004549076,
+          20.0,
+          20.239318749198688,
+          20.705300778285878,
+          21.803154940570796,
+          23.843474979004384,
+          26.388152013102047,
+          28.037184955529895,
+          28.0272247268956,
+          28.156742063544485,
+          26.71218348588587,
+          25.74500787792939,
+          23.986000705917185,
+          22.128835692120525,
+          22.0,
+          21.126202437362323,
+          20.4343467606496,
+          20.615836515507937,
+          21.37595476676991,
+          23.014973040866746,
+          26.02154364881182,
+          29.927930259740283,
+          32.017318693123435,
+          31.025165658880084,
+          26.17762571343666,
+          25.444089118703058,
+          24.42307157358159,
+          23.091457565955963,
+          21.878597022371878,
+          21.221979616532884,
+          20.303900346956254,
+          20.379770535133307,
+          20.89999824156448,
+          21.883370142975252,
+          23.846833896890114,
+          27.375408315897438,
+          31.875434298041768,
+          34.0,
+          32.48895037832805,
+          24.929834613119343,
+          24.38637351604903,
+          23.558921326553268,
+          22.53723178886498,
+          21.44683103113761,
+          20.119096270908674,
+          19.0,
+          19.861869713390853,
+          20.937231379763,
+          22.15357945700695,
+          24.098458863495537,
+          27.163341179551274,
+          30.681772280768445,
+          32.403884304709244,
+          31.520453374592645
+        };
+    assertEquals(
+        Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster6, 1)));
+    assertEquals(
+        Double.NaN, RasterUtils.getNoDataValue(modifiedRaster6.getSampleDimension(0)), 0.01d);
+    assertEquals(0.0, RasterUtils.getNoDataValue(modifiedRaster6.getSampleDimension(1)), 0.01d);
+  }
+
+  @Test
+  public void testResample() throws FactoryException, TransformException {
+    double[] values = {1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10};
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
+    raster = MapAlgebra.addBandFromArray(raster, values, 1, null);
+
+    // test with height and width
+    GridCoverage2D newRaster =
+        RasterEditors.resample(raster, 6, 5, 1, -1, false, "nearestneighbor");
+    String res = RasterOutputs.asMatrix(newRaster);
+    String expectedRes =
+        "| 1.0   1.0   2.0   3.0   3.0   5.0|\n"
+            + "| 1.0   1.0   2.0   3.0   3.0   5.0|\n"
+            + "| 4.0   4.0   5.0   6.0   6.0   9.0|\n"
+            + "| 7.0   7.0   8.0   9.0   9.0  10.0|\n"
+            + "| 7.0   7.0   8.0   9.0   9.0  10.0|\n";
+    // verify correct interpolation
+    assertEquals(expectedRes, res);
+    double[] metadata = RasterAccessors.metadata(newRaster);
+    double[] expectedMetadata = {
+      -0.33333333333333326, 0.19999999999999996, 6, 5, 1.388888888888889, -1.24, 0, 0, 0, 1
+    };
+    // verify correct raster geometry
+    for (int i = 0; i < expectedMetadata.length; i++) {
+      assertEquals(expectedMetadata[i], metadata[i], 1e-6);
     }
 
-    @Test
-    public void testSetGeoReferenceWithRaster() throws IOException {
-        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
-        GridCoverage2D actualGrid = RasterEditors.setGeoReference(raster, -13095817, 4021262, 72, -72, 0, 0);
-        String actual = RasterAccessors.getGeoReference(actualGrid);
-        String expected = "72.000000 \n0.000000 \n0.000000 \n-72.000000 \n-13095817.000000 \n4021262.000000";
-        assertEquals(expected, actual);
-        assert(Arrays.equals(MapAlgebra.bandAsArray(raster, 1), MapAlgebra.bandAsArray(actualGrid, 1)));
+    // test with scaleX and scaleY
+    newRaster = RasterEditors.resample(raster, 1.2, -1.4, 1, -1, true, null);
+    res = RasterOutputs.asMatrix(newRaster);
+    expectedRes =
+        "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n"
+            + "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n"
+            + "| 4.0   4.0   5.0   6.0   6.0   9.0   9.0|\n"
+            + "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n"
+            + "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n";
+    // verify correct interpolation
+    assertEquals(expectedRes, res);
+    metadata = RasterAccessors.metadata(newRaster);
+    expectedMetadata =
+        new double[] {
+          -0.20000000298023224, 0.4000000059604645, 7.0, 5.0, 1.2, -1.4, 0.0, 0.0, 0.0, 1.0
+        };
+    // verify correct raster geometry
+    for (int i = 0; i < expectedMetadata.length; i++) {
+      assertEquals(expectedMetadata[i], metadata[i], 1e-6);
+    }
+  }
 
-        actualGrid = RasterEditors.setGeoReference(raster, "56 1 1 -56 23 34");
-        actual = RasterAccessors.getGeoReference(actualGrid);
-        expected = "56.000000 \n1.000000 \n1.000000 \n-56.000000 \n23.000000 \n34.000000";
-        assertEquals(expected, actual);
-        assert(Arrays.equals(MapAlgebra.bandAsArray(raster, 1), MapAlgebra.bandAsArray(actualGrid, 1)));
+  @Test
+  public void testResampleNoDataValueHandled() throws FactoryException, TransformException {
+    double[] values1 = {1, 99, 3, 4, 99, 6, 7, 99, 9, 10, 99, 12};
+    double[] values2 = {10, 11, -9999, 13, 14, 15, -9999, 17, 18, 19, -9999, 21};
+    GridCoverage2D raster1 = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
+    raster1 = MapAlgebra.addBandFromArray(raster1, values1, 1, 99.0);
+    raster1 = MapAlgebra.addBandFromArray(raster1, values2, 2, -9999.0);
 
-        actualGrid = RasterEditors.setGeoReference(raster, "56 1 1 -56 23 34", "esri");
-        actual = RasterAccessors.getGeoReference(actualGrid);
-        expected = "56.000000 \n1.000000 \n1.000000 \n-56.000000 \n-5.000000 \n62.000000";
-        assertEquals(expected, actual);
-        assert(Arrays.equals(MapAlgebra.bandAsArray(raster, 1), MapAlgebra.bandAsArray(actualGrid, 1)));
+    values1 =
+        new double[] {
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 99, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25
+        };
+    values2 =
+        new double[] {
+          10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+          32, 33, -9999
+        };
+    GridCoverage2D raster2 = RasterConstructors.makeEmptyRaster(1, "d", 5, 5, 0, 0, 2, -2, 0, 0, 0);
+    raster2 = MapAlgebra.addBandFromArray(raster2, values1, 1, 99.0);
+    raster2 = MapAlgebra.addBandFromArray(raster2, values2, 2, -9999.0);
+
+    GridCoverage2D newRaster = RasterEditors.resample(raster1, 6, 5, 1, -1, false, "bilinear");
+
+    String res1 = RasterOutputs.asMatrix(newRaster, 1);
+    String res2 = RasterOutputs.asMatrix(newRaster, 2);
+    String expectedRes1 =
+        "|99.000000  99.000000  99.000000  99.000000  99.000000  99.000000|\n"
+            + "|99.000000   3.838750  99.000000   4.479375   4.400208   4.495000|\n"
+            + "|99.000000  99.000000   5.985764   6.593403   6.169791  99.000000|\n"
+            + "|99.000000  99.000000   8.250487   7.955348   8.473751  99.000000|\n"
+            + "|99.000000   9.375000   9.895833  99.000000  99.000000  12.000000|\n";
+    String expectedRes2 =
+        "|-9999.000000  -9999.000000  -9999.000000  -9999.000000  -9999.000000  -9999.000000|\n"
+            + "|-9999.000000     11.695000     12.482500  -9999.000000  -9999.000000     14.320000|\n"
+            + "|-9999.000000     14.175000     14.876389  -9999.000000  -9999.000000     16.800000|\n"
+            + "|-9999.000000     16.655001     17.270278  -9999.000000  -9999.000000     19.280001|\n"
+            + "|-9999.000000     18.375000     18.930555  -9999.000000  -9999.000000     21.000000|\n";
+
+    double[] metadata = RasterAccessors.metadata(newRaster);
+    double[] expectedMetadata = {
+      -0.33333298563957214,
+      0.20000000298023224,
+      6.0,
+      5.0,
+      1.3888888309399288,
+      -1.2400000005960465,
+      0.0,
+      0.0,
+      0.0,
+      2.0
+    };
+    assertEquals(expectedRes1, res1);
+    assertEquals(expectedRes2, res2);
+    for (int i = 0; i < expectedMetadata.length; i++) {
+      assertEquals(expectedMetadata[i], metadata[i], 1e-6);
     }
 
-    @Test
-    public void testSetGeoReferenceWithEmptyRaster() throws FactoryException {
-        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 20, 20, 0, 0, 8);
-        GridCoverage2D actualGrid = RasterEditors.setGeoReference(emptyRaster, 10, -10, 10, -10, 10, 10);
-        String actual = RasterAccessors.getGeoReference(actualGrid);
-        String expected = "10.000000 \n10.000000 \n10.000000 \n-10.000000 \n10.000000 \n-10.000000";
-        assertEquals(expected, actual);
+    newRaster = RasterEditors.resample(raster1, 6, 5, 1, -1, false, "bicubic");
 
-        actualGrid = RasterEditors.setGeoReference(emptyRaster, "10 3 3 -10 20 -12");
-        actual = RasterAccessors.getGeoReference(actualGrid);
-        expected = "10.000000 \n3.000000 \n3.000000 \n-10.000000 \n20.000000 \n-12.000000";
-        assertEquals(expected, actual);
+    res1 = RasterOutputs.asMatrix(newRaster, 1);
+    res2 = RasterOutputs.asMatrix(newRaster, 2);
+    expectedRes1 =
+        "|99.000000  99.000000  99.000000  99.000000  99.000000  99.000000|\n"
+            + "|99.000000   3.539351  99.000000   4.273053   4.102367   4.205373|\n"
+            + "|99.000000  99.000000   5.866029   6.737416   6.227383  99.000000|\n"
+            + "|99.000000  99.000000   8.386340   8.053590   8.636799  99.000000|\n"
+            + "|99.000000   9.564744  10.207731  99.000000  99.000000  12.610778|\n";
+    expectedRes2 =
+        "|-9999.000000  -9999.000000  -9999.000000  -9999.000000  -9999.000000  -9999.000000|\n"
+            + "|-9999.000000     11.252455     12.144701  -9999.000000  -9999.000000     13.989338|\n"
+            + "|-9999.000000     14.089166     14.862710  -9999.000000  -9999.000000     16.841017|\n"
+            + "|-9999.000000     16.901485     17.557348  -9999.000000  -9999.000000     19.668177|\n"
+            + "|-9999.000000     18.642647     19.225651  -9999.000000  -9999.000000     21.418527|\n";
 
-        actualGrid = RasterEditors.setGeoReference(emptyRaster, "10 3 3 -10 20 -12", "ESRI");
-        actual = RasterAccessors.getGeoReference(actualGrid);
-        expected = "10.000000 \n3.000000 \n3.000000 \n-10.000000 \n15.000000 \n-7.000000";
-        assertEquals(expected, actual);
+    metadata = RasterAccessors.metadata(newRaster);
+    expectedMetadata =
+        new double[] {
+          -0.33333298563957214,
+          0.20000000298023224,
+          6.0,
+          5.0,
+          1.3888888309399288,
+          -1.2400000005960465,
+          0.0,
+          0.0,
+          0.0,
+          2.0
+        };
+    assertEquals(expectedRes1, res1);
+    assertEquals(expectedRes2, res2);
+    for (int i = 0; i < expectedMetadata.length; i++) {
+      assertEquals(expectedMetadata[i], metadata[i], 1e-6);
     }
 
-    @Test
-    public void testSetGeoReferenceWithEmptyRasterSRID() throws FactoryException {
-        GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 20, 20, 0, 0, 8, 8, 0.1, 0.1, 4326);
-        GridCoverage2D actualGrid = RasterEditors.setGeoReference(emptyRaster, 10, -10, 10, -10, 10, 10);
-        String actual = RasterAccessors.getGeoReference(actualGrid);
-        String expected = "10.000000 \n10.000000 \n10.000000 \n-10.000000 \n10.000000 \n-10.000000";
-        assertEquals(expected, actual);
+    newRaster = RasterEditors.resample(raster2, 3, 3, 1, -1, false, "bilinear");
 
-        actualGrid = RasterEditors.setGeoReference(emptyRaster, "10 3 3 -10 20 -12");
-        actual = RasterAccessors.getGeoReference(actualGrid);
-        expected = "10.000000 \n3.000000 \n3.000000 \n-10.000000 \n20.000000 \n-12.000000";
-        assertEquals(expected, actual);
+    res1 = RasterOutputs.asMatrix(newRaster, 1);
+    res2 = RasterOutputs.asMatrix(newRaster, 2);
+    expectedRes1 =
+        "|99.000000  99.000000  99.000000|\n"
+            + "|99.000000   9.500002  11.555557|\n"
+            + "|99.000000  19.777779  21.833334|\n";
+    expectedRes2 =
+        "|-9999.000000  -9999.000000  -9999.000000|\n"
+            + "|-9999.000000     18.500002     20.555557|\n"
+            + "|-9999.000000     28.777779     29.718364|\n";
 
-        actualGrid = RasterEditors.setGeoReference(emptyRaster, "10 3 3 -10 20 -12", "ESRI");
-        actual = RasterAccessors.getGeoReference(actualGrid);
-        expected = "10.000000 \n3.000000 \n3.000000 \n-10.000000 \n15.000000 \n-7.000000";
-        assertEquals(expected, actual);
+    metadata = RasterAccessors.metadata(newRaster);
+    expectedMetadata =
+        new double[] {
+          -2.3333330154418945,
+          2.3333330154418945,
+          3.0,
+          3.0,
+          4.111111005147298,
+          -4.111111005147298,
+          0.0,
+          0.0,
+          0.0,
+          2.0
+        };
+    assertEquals(expectedRes1, res1);
+    assertEquals(expectedRes2, res2);
+    for (int i = 0; i < expectedMetadata.length; i++) {
+      assertEquals(expectedMetadata[i], metadata[i], 1e-6);
+    }
+  }
+
+  @Test
+  public void testResampleResizeFlavor() throws FactoryException, TransformException {
+    double[] values = {1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10};
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
+    raster = MapAlgebra.addBandFromArray(raster, values, 1, null);
+    GridCoverage2D newRaster = RasterEditors.resample(raster, 6, 5, false, "nearestneighbor");
+    String res = RasterOutputs.asMatrix(newRaster);
+    String expectedRes =
+        "| 1.0   2.0   2.0   3.0   5.0   5.0|\n"
+            + "| 1.0   2.0   2.0   3.0   5.0   5.0|\n"
+            + "| 4.0   5.0   5.0   6.0   9.0   9.0|\n"
+            + "| 7.0   8.0   8.0   9.0  10.0  10.0|\n"
+            + "| 7.0   8.0   8.0   9.0  10.0  10.0|\n";
+    // verify correct interpolation
+    assertEquals(expectedRes, res);
+    double[] metadata = RasterAccessors.metadata(newRaster);
+    double[] expectedMetadata = {0, 0, 6, 5, 1.3333333333333333, -1.2, 0, 0, 0, 1};
+    // verify correct raster geometry
+    for (int i = 0; i < expectedMetadata.length; i++) {
+      assertEquals(expectedMetadata[i], metadata[i], 1e-6);
     }
 
-    @Test
-    public void testInterpolate() throws FactoryException {
-        double[] values = new double[15 * 15];
-        double[] values2 = new double[15 * 15];
-        double[] values3 = new double[15 * 10];
-        double[] values4 = new double[15 * 10];
-        for (int i = 0; i < values.length; i++) {
-            values[i] = Double.NaN;
-            values2[i] = -9999;
-            if (i<150) {
-                values3[i] = Double.NaN;
-                values4[i] = Double.NaN;
+    // check with scaleX and scaleY
+    newRaster = RasterEditors.resample(raster, 1.2, -1.4, true, null);
+    res = RasterOutputs.asMatrix(newRaster);
+    expectedRes =
+        "|  1.0    1.0    2.0    3.0    3.0    5.0    5.0|\n"
+            + "|  4.0    4.0    5.0    6.0    6.0    9.0    9.0|\n"
+            + "|  4.0    4.0    5.0    6.0    6.0    9.0    9.0|\n"
+            + "|  7.0    7.0    8.0    9.0    9.0   10.0   10.0|\n"
+            + "|  NaN    NaN    NaN    NaN    NaN    NaN    NaN|\n";
+    // verify correct interpolation
+    assertEquals(expectedRes, res);
+    metadata = RasterAccessors.metadata(newRaster);
+    expectedMetadata = new double[] {0, 0, 7, 5, 1.2, -1.4, 0, 0, 0, 1};
+    // verify correct raster geometry
+    for (int i = 0; i < expectedMetadata.length; i++) {
+      assertEquals(expectedMetadata[i], metadata[i], 1e-6);
+    }
+  }
+
+  @Test
+  public void testResampleRefRaster() throws FactoryException, TransformException {
+    double[] values = {1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10};
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
+    GridCoverage2D refRaster =
+        RasterConstructors.makeEmptyRaster(2, "d", 6, 5, 1, -1, 1.2, -1.4, 0, 0, 0);
+    raster = MapAlgebra.addBandFromArray(raster, values, 1, null);
+
+    // test with height and width
+    GridCoverage2D newRaster = RasterEditors.resample(raster, refRaster, false, null);
+    String res = RasterOutputs.asMatrix(newRaster);
+    String expectedRes =
+        "| 1.0   1.0   2.0   3.0   3.0   5.0|\n"
+            + "| 1.0   1.0   2.0   3.0   3.0   5.0|\n"
+            + "| 4.0   4.0   5.0   6.0   6.0   9.0|\n"
+            + "| 7.0   7.0   8.0   9.0   9.0  10.0|\n"
+            + "| 7.0   7.0   8.0   9.0   9.0  10.0|\n";
+    // verify correct interpolation
+    assertEquals(expectedRes, res);
+    double[] metadata = RasterAccessors.metadata(newRaster);
+    double[] expectedMetadata = {
+      -0.33333333333333326, 0.19999999999999996, 6, 5, 1.388888888888889, -1.24, 0, 0, 0, 1
+    };
+    // verify correct raster geometry
+    for (int i = 0; i < expectedMetadata.length; i++) {
+      assertEquals(expectedMetadata[i], metadata[i], 1e-6);
+    }
+
+    // test with scaleX and scaleY
+    newRaster = RasterEditors.resample(raster, refRaster, true, null);
+    res = RasterOutputs.asMatrix(newRaster);
+    expectedRes =
+        "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n"
+            + "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n"
+            + "| 4.0   4.0   5.0   6.0   6.0   9.0   9.0|\n"
+            + "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n"
+            + "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n";
+    // verify correct interpolation
+    assertEquals(expectedRes, res);
+    metadata = RasterAccessors.metadata(newRaster);
+    expectedMetadata =
+        new double[] {
+          -0.20000000298023224, 0.4000000059604645, 7.0, 5.0, 1.2, -1.4, 0.0, 0.0, 0.0, 1.0
+        };
+    // verify correct raster geometry
+    for (int i = 0; i < expectedMetadata.length; i++) {
+      assertEquals(expectedMetadata[i], metadata[i], 1e-6);
+    }
+  }
+
+  @Test
+  public void testResampleDiffAlgorithms() throws FactoryException, TransformException {
+    /*
+    Even though we cannot match interpolation with that of PostGIS for other algorithms, this is a sanity test case to detect potentially invalid changes to the function
+     */
+    double[] values = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 3, 3, 0, 0, 2, -2, 0, 0, 0);
+    raster = MapAlgebra.addBandFromArray(raster, values, 1, null);
+
+    // test bilinear
+    GridCoverage2D newRaster = RasterEditors.resample(raster, 5, 5, 0, 0, false, "bilinear");
+    String res = RasterOutputs.asMatrix(newRaster);
+    String expectedRes =
+        "|       NaN         NaN         NaN         NaN         NaN|\n"
+            + "|       NaN    2.600000    3.200000    3.800000    4.200000|\n"
+            + "|       NaN    4.400000    5.000000    5.600000    6.000000|\n"
+            + "|       NaN    6.200000    6.800000    7.400000    7.800000|\n"
+            + "|       NaN    7.400000    8.000000    8.600000    9.000000|\n";
+    // verify correct interpolation
+    assertEquals(expectedRes, res);
+    double[] metadata = RasterAccessors.metadata(newRaster);
+    double[] expectedMetadata = {0, 0, 5, 5, 1.2, -1.2, 0, 0, 0, 1};
+    // verify correct raster geometry
+    for (int i = 0; i < expectedMetadata.length; i++) {
+      assertEquals(expectedMetadata[i], metadata[i], 1e-6);
+    }
+
+    // test bicubic
+    newRaster = RasterEditors.resample(raster, 5, 5, 0, 0, false, "bicubic");
+    res = RasterOutputs.asMatrix(newRaster);
+    expectedRes =
+        "|       NaN         NaN         NaN         NaN         NaN|\n"
+            + "|       NaN    2.305379    2.979034    3.648548    4.042909|\n"
+            + "|       NaN    4.326345    5.000000    5.669513    6.063874|\n"
+            + "|       NaN    6.334885    7.008540    7.678053    8.072415|\n"
+            + "|       NaN    7.517968    8.191623    8.861137    9.255498|\n";
+    // verify correct interpolation
+    assertEquals(expectedRes, res);
+    metadata = RasterAccessors.metadata(newRaster);
+    // verify correct raster geometry
+    for (int i = 0; i < expectedMetadata.length; i++) {
+      assertEquals(expectedMetadata[i], metadata[i], 1e-6);
+    }
+  }
+
+  @Test
+  public void testResampleRefRasterDiffSRID() throws FactoryException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 3, 3, 0, 0, 2, -2, 0, 0, 0);
+    GridCoverage2D refRaster =
+        RasterConstructors.makeEmptyRaster(2, "d", 5, 5, 1, -1, 1.2, -1.2, 0, 0, 4326);
+    assertThrows(
+        "Provided input raster and reference raster have different SRIDs",
+        IllegalArgumentException.class,
+        () -> RasterEditors.resample(raster, refRaster, false, null));
+  }
+
+  @Test
+  public void testNormalizeAll() throws FactoryException {
+    GridCoverage2D raster1 = RasterConstructors.makeEmptyRaster(2, 4, 4, 0, 0, 1);
+    GridCoverage2D raster2 = RasterConstructors.makeEmptyRaster(2, 4, 4, 0, 0, 1);
+    GridCoverage2D raster3 = RasterConstructors.makeEmptyRaster(2, "I", 4, 4, 0, 0, 1);
+    GridCoverage2D raster4 = RasterConstructors.makeEmptyRaster(2, 4, 4, 0, 0, 1);
+    GridCoverage2D raster5 = RasterConstructors.makeEmptyRaster(2, 4, 4, 0, 0, 1);
+
+    for (int band = 1; band <= 2; band++) {
+      double[] bandValues1 = new double[4 * 4];
+      double[] bandValues2 = new double[4 * 4];
+      double[] bandValues3 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+      double[] bandValues4 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0};
+      double[] bandValues5 = new double[4 * 4];
+      for (int i = 0; i < bandValues1.length; i++) {
+        bandValues1[i] = (i) * band;
+        bandValues2[i] = (1) * (band - 1);
+        bandValues5[i] = i + ((band - 1) * 15);
+      }
+      raster1 = MapAlgebra.addBandFromArray(raster1, bandValues1, band);
+      raster2 = MapAlgebra.addBandFromArray(raster2, bandValues2, band);
+      raster3 = MapAlgebra.addBandFromArray(raster3, bandValues3, band);
+      raster4 = MapAlgebra.addBandFromArray(raster4, bandValues4, band);
+      raster4 = RasterBandEditors.setBandNoDataValue(raster4, band, 0.0);
+      raster5 = MapAlgebra.addBandFromArray(raster5, bandValues5, band);
+    }
+    raster3 = RasterBandEditors.setBandNoDataValue(raster3, 1, 16.0);
+    raster3 = RasterBandEditors.setBandNoDataValue(raster3, 2, 1.0);
+
+    GridCoverage2D normalizedRaster1 = RasterEditors.normalizeAll(raster1, 0, 255, false, -9999.0);
+    GridCoverage2D normalizedRaster2 =
+        RasterEditors.normalizeAll(raster1, 256d, 511d, false, -9999.0);
+    GridCoverage2D normalizedRaster3 = RasterEditors.normalizeAll(raster2);
+    GridCoverage2D normalizedRaster4 = RasterEditors.normalizeAll(raster3, 0, 255, true, 95.0);
+    GridCoverage2D normalizedRaster5 = RasterEditors.normalizeAll(raster4, 0, 255, true, 255.0);
+    GridCoverage2D normalizedRaster6 =
+        RasterEditors.normalizeAll(raster5, 0.0, 255.0, -9999.0, 0.0, 30.0);
+    GridCoverage2D normalizedRaster7 = RasterEditors.normalizeAll(raster5, 0, 255, false, -9999.0);
+    GridCoverage2D normalizedRaster8 = RasterEditors.normalizeAll(raster3, 0, 255);
+    GridCoverage2D normalizedRaster10 = RasterEditors.normalizeAll(raster3, 0, 255, false);
+
+    double[] expected1 = {
+      0.0, 17.0, 34.0, 51.0, 68.0, 85.0, 102.0, 119.0, 136.0, 153.0, 170.0, 187.0, 204.0, 221.0,
+      238.0, 255.0
+    };
+    double[] expected2 = {
+      256.0, 273.0, 290.0, 307.0, 324.0, 341.0, 358.0, 375.0, 392.0, 409.0, 426.0, 443.0, 460.0,
+      477.0, 494.0, 511.0
+    };
+    double[] expected3 = {
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    };
+    double[] expected4 = {
+      0.0, 17.0, 34.0, 51.0, 68.0, 85.0, 102.0, 119.0, 136.0, 153.0, 170.0, 187.0, 204.0, 221.0,
+      238.0, 95.0
+    };
+    double[] expected5 = {
+      95.0, 17.0, 34.0, 51.0, 68.0, 85.0, 102.0, 119.0, 136.0, 153.0, 170.0, 187.0, 204.0, 221.0,
+      238.0, 255.0
+    };
+    double[] expected6 = {
+      0.0,
+      18.214285714285715,
+      36.42857142857143,
+      54.642857142857146,
+      72.85714285714286,
+      91.07142857142857,
+      109.28571428571429,
+      127.5,
+      145.71428571428572,
+      163.92857142857142,
+      182.14285714285714,
+      200.35714285714286,
+      218.57142857142858,
+      236.78571428571428,
+      255.0,
+      255.0
+    };
+    double[] expected7 = {
+      0.0, 16.0, 33.0, 50.0, 67.0, 84.0, 101.0, 118.0, 135.0, 152.0, 169.0, 186.0, 203.0, 220.0,
+      237.0, 255.0
+    };
+    double[] expected8 = {
+      255.0, 16.0, 33.0, 50.0, 67.0, 84.0, 101.0, 118.0, 135.0, 152.0, 169.0, 186.0, 203.0, 220.0,
+      237.0, 254.0
+    };
+    double[] expected9 = {
+      0.0, 18.0, 36.0, 54.0, 72.0, 90.0, 108.0, 127.0, 145.0, 163.0, 181.0, 199.0, 217.0, 235.0,
+      254.0, 255.0
+    };
+    double[] expected10 = {
+      255.0, 0.0, 18.0, 36.0, 54.0, 72.0, 90.0, 108.0, 127.0, 145.0, 163.0, 181.0, 199.0, 217.0,
+      235.0, 254.0
+    };
+
+    // Step 3: Validate the results for each band
+    for (int band = 1; band <= 2; band++) {
+      double[] normalizedBand1 = MapAlgebra.bandAsArray(normalizedRaster1, band);
+      double[] normalizedBand2 = MapAlgebra.bandAsArray(normalizedRaster2, band);
+      double[] normalizedBand5 = MapAlgebra.bandAsArray(normalizedRaster5, band);
+      double[] normalizedBand6 = MapAlgebra.bandAsArray(normalizedRaster6, band);
+      double[] normalizedBand7 = MapAlgebra.bandAsArray(normalizedRaster7, band);
+      double normalizedMin6 = Arrays.stream(normalizedBand6).min().getAsDouble();
+      double normalizedMax6 = Arrays.stream(normalizedBand6).max().getAsDouble();
+
+      assertEquals(Arrays.toString(expected1), Arrays.toString(normalizedBand1));
+      assertEquals(Arrays.toString(expected2), Arrays.toString(normalizedBand2));
+      assertEquals(Arrays.toString(expected6), Arrays.toString(normalizedBand5));
+      assertEquals(Arrays.toString(expected1), Arrays.toString(normalizedBand7));
+
+      assertEquals(0 + ((band - 1) * 127.5), normalizedMin6, 0.01d);
+      assertEquals(127.5 + ((band - 1) * 127.5), normalizedMax6, 0.01d);
+    }
+
+    assertEquals(95.0, RasterUtils.getNoDataValue(normalizedRaster4.getSampleDimension(0)), 0.01d);
+    assertEquals(95.0, RasterUtils.getNoDataValue(normalizedRaster4.getSampleDimension(1)), 0.01d);
+
+    assertEquals(
+        Arrays.toString(expected3), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster3, 1)));
+    assertEquals(
+        Arrays.toString(expected4), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster4, 1)));
+    assertEquals(
+        Arrays.toString(expected5), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster4, 2)));
+    assertEquals(
+        Arrays.toString(expected7), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster8, 1)));
+    assertEquals(
+        Arrays.toString(expected8), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster8, 2)));
+    assertEquals(
+        Arrays.toString(expected9), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster10, 1)));
+    assertEquals(
+        Arrays.toString(expected10),
+        Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster10, 2)));
+  }
+
+  @Test
+  public void testNormalizeAll2() throws FactoryException {
+    String[] pixelTypes = {
+      "B", "I", "S", "US", "F", "D"
+    }; // Byte, Integer, Short, Unsigned Short, Float, Double
+    for (String pixelType : pixelTypes) {
+      testNormalizeAll2(10, 10, pixelType);
+    }
+  }
+
+  private void testNormalizeAll2(int width, int height, String pixelType) throws FactoryException {
+    // Create an empty raster with the specified pixel type
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, pixelType, width, height, 10, 20, 1);
+
+    // Fill raster
+    double[] bandValues = new double[width * height];
+    for (int i = 0; i < bandValues.length; i++) {
+      bandValues[i] = i;
+    }
+    raster = MapAlgebra.addBandFromArray(raster, bandValues, 1);
+
+    GridCoverage2D normalizedRaster = RasterEditors.normalizeAll(raster, 0, 255);
+
+    // Check the normalized values and data type
+    double[] normalizedBandValues = MapAlgebra.bandAsArray(normalizedRaster, 1);
+    for (int i = 0; i < bandValues.length; i++) {
+      double expected = (bandValues[i] - 0) * (254 - 0) / (99 - 0);
+      double actual = normalizedBandValues[i];
+      switch (normalizedRaster.getRenderedImage().getSampleModel().getDataType()) {
+        case DataBuffer.TYPE_BYTE:
+        case DataBuffer.TYPE_SHORT:
+        case DataBuffer.TYPE_USHORT:
+        case DataBuffer.TYPE_INT:
+          assertEquals((int) expected, (int) actual);
+          break;
+        default:
+          assertEquals(expected, actual, 0.01);
+      }
+    }
+
+    // Assert the data type remains as expected
+    int resultDataType = normalizedRaster.getRenderedImage().getSampleModel().getDataType();
+    int expectedDataType = RasterUtils.getDataTypeCode(pixelType);
+    assertEquals(expectedDataType, resultDataType);
+  }
+
+  @Test
+  public void testReprojectMatchCropping() throws Exception {
+    GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    GridCoverage2D alignTo =
+        RasterConstructors.makeEmptyRaster(1, 100, 80, -13091202, 4015754, 100, -100, 0, 0, 3857);
+    GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
+    verifyReprojectMatchResult(raster, alignTo, transformed);
+  }
+
+  @Test
+  public void testReprojectMatchExtending() throws Exception {
+    GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    GridCoverage2D alignTo =
+        RasterConstructors.makeEmptyRaster(1, 600, 500, -13102225, 4026420, 100, -100, 0, 0, 3857);
+    GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
+    verifyReprojectMatchResult(raster, alignTo, transformed);
+  }
+
+  @Test
+  public void testReprojectMatchIntersecting() throws Exception {
+    GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    GridCoverage2D alignTo =
+        RasterConstructors.makeEmptyRaster(1, 300, 310, -13070875, 4023162, 100, -100, 0, 0, 3857);
+    GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
+    verifyReprojectMatchResult(raster, alignTo, transformed);
+  }
+
+  @Test
+  public void testReprojectMatchDisjoint() throws Exception {
+    GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    GridCoverage2D alignTo =
+        RasterConstructors.makeEmptyRaster(1, 100, 100, -13027131, 3975625, 100, -100, 0, 0, 3857);
+    GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
+    verifyReprojectMatchResult(raster, alignTo, transformed);
+  }
+
+  @Test
+  public void testReprojectMatchDisjoint2() throws Exception {
+    GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    GridCoverage2D alignTo =
+        RasterConstructors.makeEmptyRaster(1, 100, 100, 490155, 3720761, 100, -100, 0, 0, 32611);
+    GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
+    verifyReprojectMatchResult(raster, alignTo, transformed);
+  }
+
+  @Test
+  public void testReprojectMatchReproject() throws Exception {
+    GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    GridCoverage2D alignTo =
+        RasterConstructors.makeEmptyRaster(1, 300, 300, 453926, 3741637, 100, -100, 0, 0, 32611);
+    GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
+    verifyReprojectMatchResult(raster, alignTo, transformed);
+  }
+
+  private void verifyReprojectMatchResult(
+      GridCoverage2D source, GridCoverage2D target, GridCoverage2D transformed)
+      throws TransformException, FactoryException {
+    // Check the envelope and CRS
+    Envelope expectedEnvelope = target.getEnvelope();
+    Envelope actualEnvelope = transformed.getEnvelope();
+    assertSameEnvelope(expectedEnvelope, actualEnvelope, 1e-6);
+    CoordinateReferenceSystem expectedCrs = target.getCoordinateReferenceSystem();
+    CoordinateReferenceSystem actualCrs = transformed.getCoordinateReferenceSystem();
+    Assert.assertTrue(CRS.equalsIgnoreMetadata(expectedCrs, actualCrs));
+
+    // Get no data values. Transformed pixels that does not have a corresponding source pixel will
+    // be filled with
+    // no data values
+    int numBands = source.getNumSampleDimensions();
+    double[] values = new double[numBands];
+    double[] expectedValues = new double[numBands];
+    double[] noDataValues = new double[numBands];
+    for (int k = 0; k < numBands; k++) {
+      double noData = RasterUtils.getNoDataValue(source.getSampleDimension(k));
+      noDataValues[k] = Double.isNaN(noData) ? 0 : noData;
+    }
+
+    // Compare the pixel values of the transformed raster with the source raster
+    AffineTransform2D affine = (AffineTransform2D) transformed.getGridGeometry().getGridToCRS();
+    double scaleX = affine.getScaleX();
+    double scaleY = affine.getScaleY();
+    double ipX = affine.getTranslateX();
+    double ipY = affine.getTranslateY();
+    MathTransform crsTrans =
+        CRS.findMathTransform(actualCrs, source.getCoordinateReferenceSystem());
+    for (double worldY = ipY; worldY > expectedEnvelope.getMinimum(1); worldY += scaleY) {
+      for (double worldX = ipX; worldX < expectedEnvelope.getMaximum(0); worldX += scaleX) {
+        // Fetch the pixel values from the transformed raster
+        DirectPosition worldPos = new DirectPosition2D(worldX, worldY);
+        transformed.evaluate(worldPos, values);
+
+        // Find the corresponding grid coordinates on the source raster
+        DirectPosition srcWorldPos = crsTrans.transform(worldPos, null);
+        GridCoordinates2D sourceGridPos = source.getGridGeometry().worldToGrid(srcWorldPos);
+        GridEnvelope2D sourceGridRange = source.getGridGeometry().getGridRange2D();
+
+        if (!sourceGridRange.contains(sourceGridPos)) {
+          // The point on transformed raster is outside the source raster. We should have nodata
+          // values.
+          Assert.assertArrayEquals(noDataValues, values, 1e-6);
+        } else {
+          // Should match with values retrieved from source raster. The transformed raster may not
+          // have the
+          // same grid as the source raster, so we need to fetch some nearby values from the source
+          // raster and
+          // see if any of them matches the transformed value. Please note that this requires us to
+          // use the
+          // nearest neighbor interpolation method.
+          boolean found = false;
+          for (int yoff = -1; yoff <= 1; yoff++) {
+            for (int xoff = -1; xoff <= 1; xoff++) {
+              int x = sourceGridPos.x + xoff;
+              int y = sourceGridPos.y + yoff;
+              if (!sourceGridRange.contains(x, y)) {
+                continue;
+              }
+              source.evaluate(new GridCoordinates2D(x, y), expectedValues);
+              if (Arrays.equals(values, expectedValues)) {
+                found = true;
+                break;
+              }
             }
+          }
+          Assert.assertTrue(found);
         }
-        values[1] = 37; values[7] = 20; values[20] = 14; values[29] = 24; values[48] = 10; values[54] = 16; values[90] = 30;
-        values[92] = 27; values[97] = 20; values[110] = 22; values[133] = 34; values[141] = 19; values[159] = 30; values[163] = 21;
-        values[177] = 14; values[182] = 10; values[189] = 15; values[201] = 30; values[215] = 23; values[219] = 12; values[224] = 30;
-
-        values2[1] = 37; values2[7] = 20; values2[110] = 22; values2[133] = 34; values2[215] = 23; values2[219] = 12;
-
-        values3[1] = 37; values3[7] = 20; values3[20] = 14; values3[29] = 24; values3[48] = 10; values3[54] = 16; values3[90] = 30;
-        values3[92] = 27; values3[97] = 20; values3[110] = 22; values3[133] = 34; values3[141] = 19;
-
-        values4[7] = 20; values4[48] = 10; values4[92] = 27; values4[133] = 34;
-
-        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(2, 15, 15, 0, 0, 1);
-        GridCoverage2D raster2 = RasterConstructors.makeEmptyRaster(2, 15, 10, 0, 0, 1);
-
-        raster = MapAlgebra.addBandFromArray(raster, values, 1);
-        raster = MapAlgebra.addBandFromArray(raster, values2, 2, -9999.0);
-        raster2 = MapAlgebra.addBandFromArray(raster2, values3, 1, 0.0);
-        raster2 = MapAlgebra.addBandFromArray(raster2, values4, 2, 0.0);
-
-        GridCoverage2D modifiedRaster1 = RasterEditors.interpolate(raster);
-        double [] expected = {33.26135744188868, 37.0, 31.27734198938487, 23.00897722975952, 18.35744126869061, 16.666827623454292, 18.588666295819408, 20.0, 19.7098137066673, 19.707393867632348, 20.09677197109572, 20.85677368219612, 21.915348487457578, 23.013558477624464, 23.546363750939825, 30.02559744929351, 31.401973172734763, 26.157936982433316, 20.049623519999688, 16.503734593459075, 14.0, 16.955580469420905, 19.14149356545831, 19.20841374600329, 19.07503401031451, 19.52180207270863, 20.556382953445674, 21.936241361836878, 23.368465326619436, 24.0, 25.445288683635162, 23.767322692602917, 18.94512817865535, 15.09217902438941, 15.92949990061788, 16.143723135302647, 17.46235080409251, 18.56161079610608, 18.263234159464666, 17.55714340029155, 18.456351203055267, 20.074150212109952, 21.623363563901368, 22.92626905988335, 23.52850073063308, 23.581253731925436, 21.104894366937405, 15.519164347350161, 10.0, 14.623507085090438, 17.571332993435384, 18.547755744011337, 18.778208809515956, 17.63638493260528, 16.0, 17.698352391678533, 19.881951897404495, 21.41954077439605, 22.439992667428513, 22.958953288860922, 24.46267883383115, 22.55588819274051, 19.035860416235817, 15.787928817007407, 17.29000180869961, 18.956752025361677, 19.52545205110425, 19.49320558794922, 18.739939146904266, 17.873502005218118, 18.868686657509564, 20.50163272802599, 21.79963208693137, 22.648092934151393, 23.07325079521243, 27.339240686012435, 25.49717181984923, 24.27637857890148, 21.934788841765833, 20.54279163393701, 20.415602657728982, 20.294440968065977, 20.12712809201612, 20.01695729098881, 19.981684138699112, 20.56042358555098, 21.66808966539439, 22.84402887572117, 23.66947710350524, 23.92792211284503, 30.0, 26.970993883166358, 27.0, 24.27923346218002, 21.884677024924766, 21.393761991703876, 20.675783032427226, 20.0, 20.447966915427305, 21.00767892416062, 21.76123271899912, 22.972510745466153, 24.594528947267207, 25.758282753129365, 25.58299372709193, 27.47640333275058, 25.999581190048865, 25.19625980807816, 23.467993578060135, 21.95676660485791, 22.0, 21.174434312111686, 20.661712855113723, 21.06705134642131, 21.803479070626473, 22.630447265486644, 24.12523799031699, 27.131507753840403, 29.711071177058518, 28.044610472056593, 24.575815053843023, 23.949908340185708, 23.16645809694482, 22.261508929430743, 21.57639361998243, 21.199499207871806, 20.512201068340637, 20.945210454462963, 21.9836704738589, 22.924607408812214, 23.29994870396163, 24.34588050443289, 28.456777404095725, 34.0, 29.299586941543286, 22.289282775892673, 21.733205542152017, 21.282319526154897, 21.098628613636073, 20.962407662467214, 20.284574553210682, 19.0, 20.78589292573924, 23.496987593674145, 25.62025601413337, 24.18768551072114, 23.08050394947618, 24.20369229311617, 25.751211886213962, 25.291145454008287, 20.106675399137863, 19.039836103047197, 18.631736571412027, 19.463919247879737, 20.459013240500386, 20.678005804903012, 20.498778676838114, 21.647141591206793, 24.85886829049983, 30.0, 24.680524723757998, 20.74763785026808, 19.60271542163126, 21.0, 22.018647801799002, 18.00154050010474, 15.48944127986085, 13.937025632369018, 16.727443579263173, 20.04761876200366, 21.666970151632338, 22.178007697785134, 22.00711417840976, 21.845258153363282, 21.894236501076087, 21.09539317000747, 18.30877196034247, 14.0, 19.100764521956286, 21.37625514516915, 16.804308085382203, 13.210991324547445, 10.0, 14.678223231872348, 20.402354245753287, 23.61996099998932, 25.34387845550619, 22.88842027242889, 18.893697344867686, 15.0, 17.99739221429308, 18.623811034390396, 17.88199847705721, 20.10340576380633, 22.540987053793057, 17.172062557359556, 14.909962597666562, 13.723315495756637, 17.207184334324843, 21.714429170321253, 24.819954899437075, 30.0, 24.42788347777175, 18.529164647909127, 16.023420997411794, 17.177939759174137, 19.030219436334406, 20.703175413270372, 23.82346404132341, 26.679563954008973, 18.30247124387975, 17.549967822928068, 17.83102658459945, 19.912418921913126, 22.403094596784975, 23.0, 24.833498988263106, 22.562283468475155, 16.74474130390725, 12.0, 15.661188713492779, 19.096313938391393, 22.090142801280727, 26.652370233020388, 30.0};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster1, 1)));
-        expected = new double[]{36.31560266333892, 37.0, 35.95001528950461, 32.55456281348282, 27.747647924498967, 23.395511692769787, 20.76019187238808, 20.0, 20.48425641742611, 21.46616175625576, 22.506083540271757, 23.43867372266192, 24.22047050690332, 24.84515490354181, 25.318158635871935, 35.59702123639938, 36.1080912336396, 34.92264760688185, 31.694403492272276, 27.479588952337373, 23.76159564197567, 21.402367911031885, 20.600048497382318, 20.95802924931098, 21.85312566934917, 22.867961689231304, 23.822346729868453, 24.645155720233337, 25.30316491959463, 25.785368958443854, 33.736263360481296, 33.787337294208356, 32.50491879560646, 29.918185624285595, 26.915509246978683, 24.369679300291544, 22.67067121782161, 21.943173085789816, 22.062244729782897, 22.703043352277668, 23.574150384247577, 24.490433456086297, 25.326775395027457, 25.996085082256286, 26.457292143707306, 31.362217328380478, 30.987046425638866, 29.75532060784556, 27.885874319910133, 25.98701118053546, 24.503395147732814, 23.53747290596377, 23.09319958795616, 23.16162848818621, 23.662102458770814, 24.46009329842152, 25.392345914855053, 26.277056277056275, 26.959486633986536, 27.367167653373446, 29.092604672488843, 28.45893393193426, 27.330045600513504, 25.956388607332954, 24.75496657574432, 23.980219874418705, 23.61241284600499, 23.560975609756103, 23.823996331432255, 24.43564356435644, 25.36885935803671, 26.478567308733687, 27.5124426759823, 28.230187000952824, 28.539301516805857, 27.247063132405383, 26.51060248380727, 25.480464625132, 24.36618650585948, 23.486953749849118, 23.07327943198574, 23.107181785967228, 23.43822599171205, 24.02559486650096, 24.945099988945547, 26.231094879193765, 27.724793423887686, 29.046658662089868, 29.821211019621305, 29.957603946416985, 25.88974662629361, 25.16985500472787, 24.26375015572807, 23.316195581546452, 22.57150555716558, 22.281085370136715, 22.501649003315638, 23.082229580573944, 23.957237314920235, 25.23497968783408, 27.002056583847484, 29.056844428939204, 30.799549473296587, 31.62952426802049, 31.491738599934145, 24.94751628812812, 24.322991651433867, 23.589500566716453, 22.83834355409085, 22.236387977827, 22.0, 22.22946393479041, 22.836371775646363, 23.80556850489374, 25.31212625719927, 27.514894477880453, 30.17445556060718, 32.39930163485057, 33.269053092143395, 32.7979114893439, 24.29814810151374, 23.798477621505032, 23.25566160345856, 22.73054388352962, 22.324648182353915, 22.166133024633073, 22.31440513388196, 22.748455024032953, 23.564178054868286, 25.034987342814212, 27.40997571220446, 30.461100969157215, 33.06654081641772, 34.0, 33.32205258218198, 23.826259472718835, 23.43614030546493, 23.04691544183527, 22.69863566906218, 22.44129998434097, 22.317814627342063, 22.327826490517666, 22.485739728840567, 22.97136958765687, 24.1378053151195, 26.308436167196803, 29.314859723929874, 32.02257770121466, 33.11318031096732, 32.588071794802104, 23.453731695272058, 23.136895439889454, 22.837969341740404, 22.5750762195122, 22.353277267370473, 22.153699294884206, 21.93818411067455, 21.72771357820883, 21.739271311459923, 22.393469800472655, 24.074716107245926, 26.681062973970075, 29.249698500491373, 30.61326470194562, 30.619849687748538, 23.14528189700489, 22.873299078716254, 22.624941675396414, 22.4042996776114, 22.18262701943339, 21.872155300492476, 21.341975014871363, 20.559928178989534, 19.826106444585882, 19.768851837817355, 20.896178588868754, 23.107278305233997, 25.564770162597814, 27.286115398115125, 27.974876799410435, 22.89317400652958, 22.658315087349756, 22.464154986026983, 22.326522537798503, 22.21547615895434, 21.94592845919216, 21.098758833659954, 19.391679190987155, 17.43041640912983, 16.508789872465073, 17.31229064293831, 19.45955716222323, 22.001625038043162, 24.07282092780778, 25.3396494285512, 22.694617374438472, 22.49917341358993, 22.375481536253275, 22.37470255461734, 22.514580747811056, 22.555548934473048, 21.58211733455415, 18.590046494167133, 14.947731452814619, 13.37480250469191, 14.32202301038326, 16.677982783439063, 19.33238874168123, 21.58661168411627, 23.18165070393781, 22.538940524984902, 22.37635977931294, 22.30689380937549, 22.401712711091545, 22.71035568048687, 23.0, 22.0761719237007, 18.257843038546472, 13.644800769366695, 12.0, 13.10060397096215, 15.395131557199228, 17.87309171401753, 20.028384380868758, 21.676232335135328};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster1, 2)));
-        assertEquals(Double.NaN, RasterUtils.getNoDataValue(modifiedRaster1.getSampleDimension(1)), 0.01d);
-        modifiedRaster1 = RasterEditors.interpolate(raster2);
-        expected = new double[]{33.68872549987092, 37.0, 31.63969785752624, 23.17193668732212, 18.24438953326871, 16.531902233632632, 18.522948688681627, 20.0, 19.66240828967433, 19.590637846439463, 19.98558257874909, 20.851360194748942, 22.06199506870186, 23.192473188371032, 23.671585222769448, 30.60152437930265, 31.797729455897795, 26.45714290923834, 20.028681943353277, 16.355937775904433, 14.0, 16.82363232952286, 19.07111362251498, 19.09462527239225, 18.891571996482984, 19.335578267359164, 20.495987477995595, 22.077652641379274, 23.504101798726882, 24.0, 25.958292369021784, 24.041314697965984, 18.87339139846905, 14.88306713966779, 15.705617469787766, 15.944200740059568, 17.23848525148528, 18.360955561649998, 18.050495651857528, 17.352649965960136, 18.19808289095906, 19.924641519495626, 21.738433529076435, 23.14849141985108, 23.69523211104897, 23.988046194466175, 21.20250679070837, 15.311565627310914, 10.0, 14.335000487877966, 17.290263411210216, 18.291914118956164, 18.524207521600538, 17.40495150243105, 16.0, 17.435303884843975, 19.6644871318865, 21.520736885047338, 22.780771408646714, 23.39242217790547, 24.937679521256403, 22.79493998847052, 18.96880829868652, 15.550127548748046, 17.018456092139623, 18.740417074361684, 19.32891488173467, 19.2675348480171, 18.44208407729311, 17.56767119537794, 18.505350646437783, 20.340171793232958, 22.052836113854028, 23.24748239025756, 23.86667196619322, 27.75547396092607, 25.8718314618907, 24.525677344295687, 22.086184195110018, 20.5479856594581, 20.36008699744393, 20.192347353659926, 20.007522863820512, 19.789811176984596, 19.63851452950784, 20.308168568971322, 21.83910308380058, 23.621809025313425, 24.918729624596683, 25.402901036487343, 30.0, 27.31212525308456, 27.0, 24.606244759619987, 22.04779345708413, 21.435983197431607, 20.614919004549076, 20.0, 20.239318749198688, 20.705300778285878, 21.803154940570796, 23.843474979004384, 26.388152013102047, 28.037184955529895, 28.0272247268956, 28.156742063544485, 26.71218348588587, 25.74500787792939, 23.986000705917185, 22.128835692120525, 22.0, 21.126202437362323, 20.4343467606496, 20.615836515507937, 21.37595476676991, 23.014973040866746, 26.02154364881182, 29.927930259740283, 32.017318693123435, 31.025165658880084, 26.17762571343666, 25.444089118703058, 24.42307157358159, 23.091457565955963, 21.878597022371878, 21.221979616532884, 20.303900346956254, 20.379770535133307, 20.89999824156448, 21.883370142975252, 23.846833896890114, 27.375408315897438, 31.875434298041768, 34.0, 32.48895037832805, 24.929834613119343, 24.38637351604903, 23.558921326553268, 22.53723178886498, 21.44683103113761, 20.119096270908674, 19.0, 19.861869713390853, 20.937231379763, 22.15357945700695, 24.098458863495537, 27.163341179551274, 30.681772280768445, 32.403884304709244, 31.520453374592645};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster1, 1)));
-        expected = new double[]{16.95531803251405, 16.24468647562652, 15.785503728108203, 15.953499701069509, 17.002364998029172, 18.58722735605522, 19.725879909958646, 20.0, 19.962455495878203, 20.11848994213282, 20.587743309527344, 21.294350353400482, 22.10896279402254, 22.91099251171604, 23.616396941134624, 16.590770816482834, 15.358354493968363, 14.240611075747932, 13.963754905955778, 15.175193798449612, 17.46677175509619, 19.25489950535345, 19.819467101685696, 19.92756016350397, 20.236233367451383, 20.89145556117842, 21.798365122615802, 22.791300323924112, 23.71683965540961, 24.477611940298505, 16.65196662693683, 14.780350084697911, 12.58587582190067, 11.50197628458498, 12.870880968392735, 15.786666666666667, 18.202572347266884, 19.35736839083759, 19.92523579480101, 20.57142857142857, 21.50868365525077, 22.664697775152586, 23.847794574446056, 24.87258414782132, 25.637251158324393, 17.621612255800855, 15.458923759019386, 12.045883730003903, 10.0, 11.829967518712044, 15.037502286724797, 17.574216976849755, 19.135846177323366, 20.195121951219512, 21.259975192503713, 22.549449874936705, 23.994180132011635, 25.36085996846782, 26.429946524064178, 27.114111581458772, 19.799323324170015, 18.795480225988705, 15.97306838239481, 13.161133321745176, 14.105411800625909, 16.209631728045327, 18.061553985872855, 19.556521254666, 20.898910855702486, 22.354047075928108, 24.035897435897436, 25.798069397338896, 27.32102981741757, 28.350651485095536, 28.847522853471336, 22.396250532594795, 23.613824751431462, 24.160401002506266, 21.440137074319985, 18.991097922848663, 18.68871309384862, 19.393643031784837, 20.533182076006803, 21.979596492943514, 23.766233766233768, 25.84458696032719, 27.918226812997627, 29.541193882585105, 30.43774858382548, 30.655518783022707, 23.947282262355078, 25.76306858540949, 27.0, 25.283973758200563, 22.382127659574472, 20.941553065842484, 20.89109445536428, 21.732217573221757, 23.227359616149435, 25.276144578313254, 27.680262047121037, 29.980517806152168, 31.616151545363913, 32.32053782317866, 32.242359472588475, 24.226514157134822, 25.445336186909223, 26.040087797583155, 25.127063053724427, 23.408368516802252, 22.254430878298542, 22.10169491525424, 22.860593301868644, 24.402562161962603, 26.59602339522895, 29.14695340501792, 31.497704405587573, 33.05209620145864, 33.58294094731925, 33.30145775336325, 23.923209274697363, 24.583412701436245, 24.80931837290888, 24.34285714285714, 23.499755442477493, 22.909506854498854, 22.96513165804978, 23.77768577343136, 25.32950191570882, 27.4967694967695, 29.954715981641296, 32.15406429956304, 33.56223178513133, 34.0, 33.671795377110826, 23.53612845673506, 23.891611143171918, 23.994776355255546, 23.789739089783918, 23.44912470225709, 23.289298634613143, 23.57749712973594, 24.453240587864467, 25.937816296999532, 27.917243671411953, 30.09151697915301, 32.00316784635945, 33.238509271446986, 33.658091530876625, 33.411618233779464};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster1, 2)));
-        assertEquals(Double.NaN, RasterUtils.getNoDataValue(modifiedRaster1.getSampleDimension(1)), 0.01d);
-
-        GridCoverage2D modifiedRaster2 = RasterEditors.interpolate(raster, 2.0, "Fixed", 5.0);
-        expected = new double[]{35.578947368421055, 37.0, 32.419354838709666, 23.109131403118038, 17.432432432432435, 15.895735234763892, 18.123822341857334, 20.0, 19.166666666666664, 18.101167315175097, 19.389830508474574, 20.3855421686747, 21.954887218045112, 23.407407407407405, 24.0, 32.01170960187353, 32.94736842105263, 27.182767624020887, 19.209302325581394, 15.5, 14.0, 15.72093023255814, 18.293515358361773, 18.19178082191781, 17.800904977375566, 18.037267080745345, 19.811634349030474, 22.11764705882353, 23.61904761904762, 24.0, 28.181818181818183, 24.624413145539908, 18.616438356164384, 14.39333466373977, 14.901051329622758, 15.507617077299226, 15.411042944785274, 16.644423260247855, 16.972602739726025, 16.471990464839095, 17.388509441542787, 18.857142857142858, 21.333333333333332, 23.157894736842103, 24.0, 25.60813704496788, 21.290909090909086, 14.921888307579994, 10.0, 14.08533338416862, 16.504911783392796, 16.72987672226251, 16.794520547945208, 16.47619047619047, 16.0, 16.727272727272723, 18.29867674858223, 20.235294117647058, 23.66942148760331, 22.896551724137932, 26.322314049586776, 23.101010101010097, 18.830336200156374, 15.238693467336683, 16.758479314200518, 17.078624710623334, 18.010212097407695, 17.661336869198973, 17.445529676934633, 16.685258964143422, 18.16335540838852, 20.34375, 23.10172744721689, 24.697674418604652, 27.461538461538456, 28.325301204819276, 26.609053497942384, 24.557809330628807, 21.6995550902905, 19.98305084745763, 19.192006950477847, 19.341775614025494, 19.234673162809578, 18.920141969831406, 20.032258064516125, 19.9375, 22.450312194388026, 25.694915254237287, 26.274075936635654, 30.153846153846153, 30.0, 27.654661016949152, 27.0, 24.768259693417495, 22.088146781865838, 21.151090262384656, 20.519866037448622, 20.0, 20.2330623306233, 21.603167986661113, 22.963887776495252, 25.467018469656992, 26.43815829070118, 29.65248226950355, 30.102362204724418, 28.65625, 27.30337078651685, 25.60572144871737, 24.100253601683484, 22.122974261201144, 22.0, 21.10951628626172, 20.551219512195118, 20.96311849552675, 21.926288328288898, 23.517920301815607, 25.931453362255965, 29.393184316599484, 31.701598962834918, 30.461538461538456, 26.764705882352942, 25.659090909090907, 24.21948212083847, 22.040650913398586, 21.671785028790786, 21.19338913930028, 20.691811214199276, 20.800000000000004, 22.415147265077135, 23.278073454131796, 24.27275499313919, 25.75, 29.875508738328946, 34.0, 30.75903614457832, 23.32258064516129, 21.948717948717952, 21.20219244823386, 21.389698736637513, 21.093179744525546, 20.262767530283988, 19.0, 20.9247783010947, 24.08532423208191, 26.118158144892355, 24.973368841544605, 23.527331189710612, 24.782608695652176, 26.17195496417605, 26.13733905579399, 18.842105263157897, 17.42763157894737, 18.22185381884334, 19.26228799266569, 20.64524581572827, 20.75542794529443, 20.245257219383515, 21.876484560570074, 25.040284187037336, 30.0, 24.960920342819815, 20.65298507462687, 19.47801193391508, 21.0, 22.4126455906822, 13.333333333333332, 10.962962962962962, 12.696942446043165, 14.906403940886701, 19.2487922705314, 21.48263322391052, 22.19375419744795, 22.099361249112842, 21.78817461779333, 21.938681998832493, 21.171505739365294, 17.909305621162027, 14.0, 18.957121571657193, 21.572254335260116, 10.0, 10.619047619047619, 10.0, 13.221258134490238, 19.769307923771315, 23.78682263069945, 25.774662580687227, 23.063241106719367, 18.45581627558662, 15.0, 17.794533504717098, 18.078341013824883, 17.496222660984778, 19.925531914893618, 22.835820895522392, 10.0, 12.612966601178782, 12.193548387096772, 16.088772845953002, 21.950000000000003, 24.997460639918746, 30.0, 25.01824817518248, 18.032258064516128, 15.462269442703006, 16.446762631855005, 18.26161790017212, 19.820689655172412, 24.070752883244783, 27.632653061224488, 13.151515151515152, 13.095238095238095, 16.24124513618677, 19.545454545454547, 22.512820512820515, 23.0, 24.998414512739206, 23.085106382978722, 16.075349139330953, 12.0, 15.120542843895583, 17.72064777327935, 21.572070359478893, 26.83333333333333, 30.0};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster2, 1)));
-        expected = new double[]{37.0, 37.0, 36.34615384615384, 33.6, 28.5, 23.4, 20.653846153846153, 20.0, 20.0, 20.0, 20.000000000000004, 20.0, 20.0, -9999.0, -9999.0, 37.0, 37.0, 37.0, 33.13636363636363, 28.500000000000004, 23.863636363636363, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, -9999.0, -9999.0, -9999.0, 37.0, 37.0, 37.0, 32.142857142857146, 28.5, 24.325581395348838, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, -9999.0, -9999.0, -9999.0, 37.0, 37.0, 32.714285714285715, 28.433179723502302, 26.250000000000004, 24.486602357984996, 20.74074074074074, 20.620689655172413, 20.57142857142857, 20.0, 20.0, 20.0, -9999.0, 34.0, -9999.0, 37.0, 31.146341463414632, 29.714285714285715, 27.90909090909091, 24.888888888888886, 21.379310344827584, 21.259259259259256, 21.10344827586207, 20.97142857142857, 20.88888888888889, 27.0, 34.0, 34.0, 34.0, 34.0, -9999.0, 28.666666666666664, 22.0, 22.0, 21.999999999999996, 22.0, 21.999999999999996, 21.515151515151516, 22.0, 27.333333333333336, 34.0, 34.0, 34.0, 34.0, 34.0, -9999.0, 22.0, 21.999999999999996, 21.999999999999996, 22.0, 22.0, 22.0, 21.999999999999996, 21.999999999999996, 27.513513513513516, 34.0, 34.0, 34.0, 34.0, 34.0, 22.0, 22.0, 22.0, 22.0, 22.0, 22.0, 22.0, 22.0, 22.0, 27.81818181818182, 30.57142857142857, 34.0, 34.0, 34.0, 34.0, -9999.0, 22.0, 21.999999999999996, 21.999999999999996, 22.0, 22.0, 22.0, 21.999999999999996, 25.428571428571427, 28.18181818181818, 34.0, 34.0, 34.0, 34.0, 34.0, -9999.0, 21.999999999999996, 22.0, 22.0, 21.999999999999996, 22.13793103448276, 21.999999999999996, 22.0, 22.0, 24.055335968379445, 34.0, 34.0, 34.0, 34.0, 34.0, -9999.0, 22.0, 22.418604651162795, 22.39393939393939, 22.370370370370367, 22.36, 20.28402366863905, 19.456521739130434, 18.448772226926334, 21.83606557377049, 24.46666666666666, 27.71428571428571, 30.333333333333336, 34.0, 34.0, -9999.0, 23.0, 22.581395348837212, 22.606060606060606, 22.62962962962963, 20.647594278283485, 19.875, 18.60377358490566, 17.170454545454543, 18.906976744186046, 19.857142857142858, 22.999999999999996, 26.142857142857142, 28.17647058823529, 34.0, -9999.0, 23.0, 23.0, 23.0, 23.0, 21.264705882352942, 19.944444444444443, 17.5, 15.055555555555555, 13.833333333333332, 15.666666666666668, 18.285714285714285, 21.53333333333333, 24.22222222222222, 34.0, -9999.0, 23.0, 23.0, 23.0, 23.0, 22.38888888888889, 21.166666666666668, 17.5, 13.833333333333332, 12.61111111111111, 11.999999999999998, 12.0, 12.0, 20.904761904761905, -9999.0, 23.0, 23.0, 23.0, 23.0, 22.576923076923077, 23.0, 21.9, 17.5, 13.1, 12.0, 12.423076923076923, 12.0, 12.0, 12.0, 12.0};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster2, 2)));
-        assertEquals(-9999.0, RasterUtils.getNoDataValue(modifiedRaster2.getSampleDimension(1)), 0.01d);
-        modifiedRaster2 = RasterEditors.interpolate(raster2, 2.0, "Fixed", 3.0);
-        expected = new double[]{37.0, 37.0, 37.0, 23.455445544554454, 18.461538461538463, 15.2, 18.0, 20.0, 20.0, 18.76923076923077, 20.000000000000004, 0.0, 24.0, 23.999999999999996, 24.0, 37.0, 34.0, 27.19178082191781, 19.142857142857142, 13.333333333333334, 14.0, 16.0, 18.545454545454547, 18.19178082191781, 17.77777777777778, 16.0, 19.764705882352942, 24.0, 24.0, 24.0, 37.0, 25.000000000000004, 17.714285714285715, 13.150943396226413, 11.999999999999998, 13.962264150943398, 15.714285714285714, 16.923076923076923, 17.142857142857142, 16.444444444444443, 16.0, 16.0, 24.0, 23.999999999999996, 24.0, 20.000000000000004, 18.307692307692307, 11.7, 10.0, 10.666666666666666, 12.0, 13.473684210526317, 17.069767441860467, 16.0, 16.0, 16.0, 16.0, 20.235294117647058, 24.0, 24.0, 29.0, 22.333333333333332, 17.714285714285715, 12.833333333333332, 13.4, 15.532994923857867, 20.0, 18.22222222222222, 17.142857142857142, 16.444444444444443, 16.0, 16.0, 0.0, 0.0, 24.0, 29.5, 26.444444444444443, 25.0, 21.428571428571427, 19.666666666666668, 18.695652173913047, 20.571428571428573, 19.8, 18.857142857142858, 17.77777777777778, 16.0, 16.0, 0.0, 34.0, 0.0, 30.0, 28.5, 27.0, 25.203125000000004, 23.19354838709678, 22.04081632653061, 20.551724137931036, 20.0, 20.0, 18.76923076923077, 20.000000000000004, 34.0, 34.0, 34.0, 34.0, 29.5, 28.5, 27.033898305084744, 25.333333333333332, 22.471698113207548, 22.0, 21.0, 20.206896551724135, 20.132075471698116, 20.0, 0.0, 34.0, 34.0, 34.0, 34.0, 29.0, 28.5, 28.0, 24.5, 22.03030303030303, 20.923076923076923, 20.0, 19.894736842105264, 19.5, 20.0, 34.0, 34.0, 34.0, 34.0, 34.0, 30.0, 0.0, 27.0, 20.58823529411765, 20.333333333333332, 19.6, 19.0, 19.39325842696629, 19.0, 19.0, 0.0, 34.0, 34.0, 34.0, 34.0};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster2, 1)));
-        expected = new double[]{0.0, 0.0, 0.0, 10.000000000000002, 20.000000000000004, 20.0, 20.0, 20.0, 20.0, 20.0, 20.000000000000004, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 10.0, 16.153846153846153, 20.0, 20.0, 20.0, 20.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 10.0, 13.846153846153845, 20.0, 20.0, 20.0, 20.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.000000000000002, 10.0, 11.7, 10.0, 10.0, 10.0, 10.000000000000002, 20.000000000000004, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 27.0, 18.5, 15.66666666666667, 12.833333333333332, 13.4, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 27.0, 23.599999999999998, 24.166666666666668, 21.333333333333332, 18.5, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 34.0, 0.0, 27.0, 27.0, 27.0, 25.299999999999997, 27.0, 27.0, 0.0, 0.0, 0.0, 0.0, 0.0, 34.0, 34.0, 34.0, 34.0, 27.0, 27.0, 27.0, 27.0, 27.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 34.0, 34.0, 34.0, 34.0, 27.0, 27.0, 27.0, 27.0, 27.0, 0.0, 0.0, 0.0, 0.0, 0.0, 34.0, 34.0, 34.0, 34.0, 34.0, 0.0, 0.0, 27.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 34.0, 34.0, 34.0, 34.0};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster2, 2)));
-        assertEquals(0.0, RasterUtils.getNoDataValue(modifiedRaster2.getSampleDimension(1)), 0.01d);
-
-        GridCoverage2D modifiedRaster3 = RasterEditors.interpolate(raster, 1.0, "Fixed", 15.0);
-        expected = new double[]{26.0762105008391, 37.0, 24.793525204174802, 22.0883150022448, 20.465935936147567, 19.63339801958451, 19.94417461315354, 20.0, 20.425170176050134, 20.84627815147123, 21.07824949045892, 21.302418287164752, 21.92810052040996, 22.292816102451596, 22.21827055473856, 24.76288485007594, 24.951343350259485, 22.82049820081395, 21.0104572024897, 19.644081232167057, 14.0, 19.45440562922344, 20.26819939284971, 20.478898971980144, 20.635496578501822, 20.90484532823043, 21.26379379455235, 21.65966380881092, 22.451353371029978, 24.0, 22.880975547288394, 22.345173103392117, 20.959073237299584, 19.468434917165432, 19.410511257805123, 19.491918935582856, 19.969997014958395, 20.30149460051368, 20.265230817836883, 20.099833841477686, 20.595484547026587, 21.163893048111564, 21.615116880233508, 22.037904597222376, 22.636759479497297, 22.36773976466443, 21.667421138185407, 19.908505626873332, 10.0, 19.28622792941437, 20.131706381817228, 20.38480394446479, 20.4483802305556, 20.082265695580425, 16.0, 20.330257263033197, 21.160551685053886, 21.623978716646437, 21.947508565359616, 22.14717915955643, 22.593095735402084, 22.00800019992829, 20.9203398982122, 19.9417762454593, 20.257119075948864, 20.603839650715692, 20.711294467006145, 20.69876896847547, 20.53495555937529, 20.337501150359916, 20.821629296118473, 21.373249184268246, 21.77427330914825, 22.05003735790981, 22.20641992345198, 23.645046734106128, 22.97079329552904, 22.496868146264514, 21.630474250812284, 21.17048032343603, 21.048847993946296, 20.96712129725265, 20.888425125705535, 20.939001385089274, 21.063396631215117, 21.338760511207866, 21.713586539605693, 22.077275515064432, 22.33938046419246, 22.4443724556217, 30.0, 23.786751583415104, 27.0, 22.38611670476944, 21.613373499715664, 21.365132770878038, 21.1321822770571, 20.0, 21.145834214804676, 21.414532090086137, 21.70348011244388, 22.08911358353495, 22.55798721772012, 22.908069138631628, 22.894638094887938, 23.59984448857208, 23.2156493996082, 22.85620859785282, 22.17038281033766, 21.690386439719614, 22.0, 21.31428193681361, 21.228591110080476, 21.42603677664381, 21.69096396010584, 21.98236608249548, 22.439707973748323, 23.31249180567834, 24.277603941870307, 23.67354484386282, 22.337775112172544, 22.35077544284059, 22.08192454621645, 21.785616358679565, 21.54694503301245, 21.37028360018127, 21.197803940680032, 21.383460878251597, 21.70902909274137, 22.00156374393987, 22.1895421302317, 22.561660344856083, 23.867951779610312, 34.0, 24.06217166356261, 21.78723761831988, 21.610246657604595, 21.49918112989452, 21.40784389056594, 21.345467483313847, 21.156772339156745, 19.0, 21.403879358624142, 22.094234171491326, 22.704733145857745, 22.39444404947938, 22.244685311658674, 22.704377037225036, 23.441803825651448, 22.933803907376127, 21.17789822551486, 20.86587110311289, 20.772994998873212, 20.933449840270708, 21.169913889780467, 21.265765616293987, 21.275648298871246, 21.609468509068257, 22.41836849512678, 30.0, 22.42207752962013, 21.523136045584526, 21.171370001176903, 21.0, 21.92796691391193, 20.600843887992685, 19.81316334482605, 19.157548939556886, 20.167485329421204, 21.03097720244436, 21.49147422562408, 21.68049163146765, 21.65640540905565, 21.60199858991366, 21.589711326958934, 21.342116193297418, 20.65807753703852, 14.0, 20.71822475293455, 21.608826571643075, 20.240087464676385, 18.820303885227894, 10.0, 19.352307011504987, 21.08402656870892, 21.98697043011497, 22.516665782171806, 21.82040294896047, 20.720803462086632, 15.0, 20.325344264275746, 20.393188423938998, 20.334198477117837, 21.136950992691276, 21.71926462187672, 20.32125368124572, 19.54500857476825, 18.96183737585601, 20.123650305075348, 21.372927111914386, 22.607462349566738, 30.0, 22.170561230444196, 20.471015103750176, 19.174036440514662, 19.75812649738564, 20.486430583076643, 21.101207191171376, 22.05720681935462, 22.95351859716086, 20.629780556804317, 20.36777649978461, 20.36587664567013, 20.851647538933488, 21.627573946210028, 23.0, 22.610166119175226, 21.40227045845481, 19.71995390452467, 12.0, 19.34492961033455, 20.54622261296096, 21.432958044001158, 23.015587355947847, 30.0};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster3, 1)));
-        expected = new double[]{33.14434888091233, 37.0, 32.5461498671795, 29.728311993709365, 26.59230156170789, 24.849488157622034, 22.95249111430745, 20.0, 22.507625558366144, 23.569549011886956, 24.15533942467853, 24.687560685882556, 24.99354142705771, 25.21684096109621, 25.37593480333526, 32.04247292571026, 32.77505827785343, 30.282318411265127, 28.120727768108278, 26.377481615160605, 24.919507456609495, 23.565475234284648, 22.684324751732717, 23.114239721278516, 23.786668626668874, 24.282249221196782, 24.644742943483823, 24.916664001872462, 25.362677777451072, 25.525688356383547, 29.112682946712805, 29.196060236876313, 28.41781202406732, 27.194185780457627, 26.01577566214138, 25.02030465529052, 24.24007773558749, 23.817067977082097, 23.863371807741945, 24.169102822556425, 24.520220349014817, 24.842930647628144, 25.113931333289813, 25.31965236178779, 25.453369676204325, 27.698019578806246, 27.558451002188008, 27.042615738269728, 26.298354129541234, 25.548076211375502, 24.9254868504127, 24.486918511535603, 24.271480864828224, 24.291720653567555, 24.49129190669461, 24.78491343928026, 25.104194644808853, 25.395759725799344, 25.616073327378093, 25.74081784531966, 26.66668279132406, 26.45148563688033, 26.041505966408483, 25.515638886401263, 25.003343036396245, 24.61718505008524, 24.405230476070177, 24.359777356131982, 24.4642966285632, 24.700455325756, 25.036527379310257, 25.42280421656388, 25.787033124634295, 26.046689300534805, 26.15225352201301, 25.900236194427503, 25.65348412750154, 25.282005632639702, 24.828728294809924, 24.38722422097889, 24.109565840032513, 24.085968534353857, 24.22722270095821, 24.467172956467184, 24.81161296619876, 25.270077439461165, 25.81554251700798, 26.34834807818929, 26.697640291751892, 26.751778903041487, 25.319839882560174, 25.062113695912466, 24.70511545785504, 24.249843748314504, 23.714267547385813, 23.345175747990645, 23.591972812718193, 23.978477297048283, 24.36569088561112, 24.83942526421468, 25.473423643070536, 26.294998533964907, 27.19185465983552, 27.757043117733364, 27.643603634931647, 24.874949672316472, 24.624115601669082, 24.294014896830905, 23.860527453417834, 23.233268166670566, 22.0, 23.18809882682315, 23.74540722697297, 24.204520413204953, 24.767545926720995, 25.575092427272555, 26.769046561072674, 28.423300987438203, 29.690256328249735, 28.905956805963104, 24.52797503393108, 24.29711711063345, 24.01613245038297, 23.68048593928896, 23.2931150539021, 23.030671041594236, 23.241434523283548, 23.58164864960496, 23.97373901287855, 24.53619157053348, 25.42049198771934, 26.852367128326946, 29.290927123010583, 34.0, 29.45544399714219, 24.24803566693262, 24.038470740538905, 23.804542376913705, 23.55947712115373, 23.335804434106706, 23.203795953722185, 23.215191966067696, 23.341433288483337, 23.595867645608404, 24.066775912016396, 24.87529687614994, 26.15510095833641, 27.961122506766856, 29.363977010117175, 28.124202855188315, 24.01245906164301, 23.815711311005277, 23.6067218841446, 23.398594377122965, 23.209452278878317, 23.05759868183561, 22.952468842048177, 22.90894831730902, 22.98801189774875, 23.300738774751906, 23.94797373455576, 24.936622276122367, 26.078981752847834, 26.208858058537782, 26.194446864270517, 23.808895180895686, 23.61494630149458, 23.410153738881604, 23.20214172275553, 22.995297683363475, 22.78165620101175, 22.541567464584297, 22.280499748447262, 22.092406005518836, 22.177623467083578, 22.691582289779372, 23.54942455509759, 23.57690530903803, 24.324768404914145, 24.63397880757855, 23.633744784380667, 23.43709726662707, 23.22750485198291, 23.010508402617354, 22.787057212254908, 22.523978798777247, 22.12441829812346, 21.52367725079968, 20.834497589656618, 20.527094269320745, 21.065705438534533, 21.095626729799875, 22.14162573069548, 22.949341172894236, 23.44228823171291, 23.487911828436822, 23.28876487285452, 23.076403273149978, 22.862402812678404, 22.673848598117797, 22.4789938022761, 21.90591568450098, 20.79859295112489, 19.123097959937805, 17.019603612612347, 18.112678959776765, 19.748073514309045, 21.02754348167131, 21.944314463140806, 22.553987973298902, 23.751628189026846, 23.497453336029324, 22.96466230858322, 22.763359185733304, 22.646534880682168, 23.0, 21.904029616877633, 19.56630062853955, 17.02818655280354, 12.0, 16.69057181961273, 18.932580734084258, 20.32826095347579, 21.41013506266134, 22.14896411611193};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster3, 2)));
-        assertEquals(Double.NaN, RasterUtils.getNoDataValue(modifiedRaster3.getSampleDimension(1)), 0.01d);
-        modifiedRaster3 = RasterEditors.interpolate(raster2, 1.0, "Fixed", 15.0);
-        expected = new double[]{26.78699224395054, 37.0, 25.59000950154087, 22.41954361005371, 20.658563964852206, 19.632325683580596, 19.997444728364865, 20.0, 20.588893952863618, 20.900075971203655, 21.215527708672436, 21.58979618764808, 22.015106835142095, 22.48594529042817, 22.62802078634996, 25.341182080235427, 25.815110081350184, 23.556906745336352, 21.33624275843935, 19.648833910028564, 14.0, 19.40430501389323, 20.17912645264691, 20.423711483253875, 20.613975923902338, 20.970236633019443, 21.46875024691036, 22.017270779618844, 22.67543667031931, 24.0, 23.79074150892603, 23.074666979135408, 21.290111177633776, 19.445684025301226, 19.360948164689244, 19.24116874800708, 19.79857905884302, 20.195618733107413, 20.13548567245793, 19.916326389948377, 20.542345502480952, 21.324878405243616, 21.971359186152277, 22.539328557322413, 22.941244649876275, 23.238172884229623, 22.259442241159096, 19.998731380721196, 10.0, 18.99171526674972, 20.006038162849453, 20.304494566031362, 20.365577402325435, 19.885069425778372, 16.0, 20.17641830918957, 21.31848192318521, 22.015144543971417, 22.507040211668713, 22.816009429985858, 23.539073503538322, 22.714116401903468, 21.279851572740597, 19.829665833074895, 20.192051509245104, 20.60894905116254, 20.720571787279425, 20.676834342630258, 20.436906686077702, 20.16304067297081, 20.813357631457027, 21.637234801859854, 22.284716910638785, 22.74772654706078, 23.02533830091741, 24.76705115419066, 23.898761404702153, 23.102639638297397, 22.01119420983514, 21.396199285958346, 21.198151813603104, 21.046589356581173, 20.90523314310603, 20.95134473597128, 21.1231803241404, 21.55609831457963, 22.188330133233425, 22.827648862609614, 23.30381143046646, 23.52184362321799, 30.0, 24.875980859966177, 27.0, 23.0305365769999, 22.008320707433278, 21.605643464240725, 21.241575531197714, 20.0, 21.187670568741307, 21.602121334549103, 22.12760056483647, 22.859283032340493, 23.71879393221605, 24.350828229485142, 24.39611827509592, 25.073704992788997, 24.387177876697887, 23.84530692291961, 22.929573500784457, 22.15503365480329, 22.0, 21.471491216450957, 21.279398424931212, 21.511597751124846, 21.954767248529272, 22.5957418943529, 23.586101649331756, 25.132800761763725, 26.56673326949605, 25.816513870479472, 23.98124356082051, 23.692099474865955, 23.236951878877242, 22.6729105217492, 22.118598116509407, 21.665790117367806, 21.287304682509948, 21.41373294325544, 21.750702019868935, 22.222219937683754, 22.92338082576777, 24.0858296453853, 26.429545308895154, 34.0, 26.76675610212288, 23.4566673858453, 23.235102168546188, 22.928883191999976, 22.518266381649802, 22.054009447384846, 21.413571195313967, 19.0, 21.297441657432206, 21.884326221126873, 22.39237549855173, 23.05601152515698, 24.050611284240794, 25.58701047348249, 26.975764609744452, 25.76264339178288};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster3, 1)));
-        expected = new double[]{17.67041614534914, 19.038023497499108, 18.722514255590543, 18.680916976878848, 18.997616200553555, 19.514622542921813, 19.95281550389205, 20.0, 20.425677646027733, 20.95910963285675, 21.50438674753259, 22.022333097816432, 22.4896263643727, 22.890982243675946, 23.2185279690047, 19.21833143197246, 18.530654819094465, 17.827904350455732, 17.569740115710978, 18.124703262372194, 19.045298094379604, 19.785710977287113, 20.18486321286119, 20.586386030639105, 21.146014232522468, 21.746551532518566, 22.323729062070147, 22.84127124824689, 23.27561162807565, 23.615099233571875, 19.17108964810389, 18.123492384582647, 16.561664475108383, 15.42380408473808, 16.761649078997017, 18.480935587526826, 19.61253545861439, 20.312599102830557, 20.881366586449786, 21.493224615310453, 22.141419059314625, 22.77295730782692, 23.338078488089835, 23.798843232730636, 24.136242054009482, 19.5247628043779, 18.359771245484993, 15.900699711953438, 10.0, 15.839753831531553, 18.332439510487223, 19.683305421813138, 20.558414133500573, 21.268590055926136, 21.967077253090842, 22.685802901256196, 23.38838493304813, 24.01211355673272, 24.497101424945686, 24.81282607201992, 20.394190961074358, 19.788839934665255, 18.360640329263315, 16.755874698487204, 17.669415950046783, 19.089187297108733, 20.153856410894658, 20.99884416494533, 21.769157633596038, 22.552767307586752, 23.372110531775768, 24.18624376664189, 24.90381251950419, 25.420611789895016, 25.684231258702503, 21.535698916084826, 22.005483834065263, 22.2404426211153, 20.88461164173069, 20.114475179723595, 20.325584342393242, 20.89995396260337, 21.591767805586255, 22.361430068865985, 23.22345606917387, 24.179607036228237, 25.176073140857405, 26.06813824506, 26.646269692838377, 26.800541168017613, 22.398812307902652, 23.63969764605668, 27.0, 23.209723774918196, 21.72871805180927, 21.412909785308695, 21.671224269999456, 22.22632128144337, 22.98058409560091, 23.91863284416249, 25.045696690307093, 26.325979842390836, 27.566546026102934, 28.30103375379256, 28.211253859348883, 22.672055302926296, 23.454136798896343, 24.03095809455141, 23.254830004257244, 22.416759277849675, 22.139227142553935, 22.312790823521574, 22.80325623610669, 23.547553343290687, 24.543532426881672, 25.829590479024912, 27.45570494803025, 29.352540569538345, 30.60903968482554, 29.85707894138994, 22.638917474724053, 22.989563946907115, 23.148361890336243, 22.945803383483682, 22.660336828807147, 22.58630063388931, 22.794968867209093, 23.269686086345068, 23.997279733269583, 24.996589834822824, 26.32814170650687, 28.107847999968207, 30.54047304058597, 34.0, 30.919332247126, 22.580278940805904, 22.762372415902846, 22.85505319663732, 22.83650652797382, 22.803422424473304, 22.882351670407306, 23.143803123631287, 23.611719619160013, 24.29834800155912, 25.225507782110675, 26.431069963538675, 27.954380065257617, 29.718673781722014, 30.866886777023087, 30.117910689528596};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster3, 2)));
-        assertEquals(Double.NaN, RasterUtils.getNoDataValue(modifiedRaster3.getSampleDimension(1)), 0.01d);
-
-        GridCoverage2D modifiedRaster5 = RasterEditors.interpolate(raster, 2.0, "Variable", 3.0, 15.0);
-        expected = new double[]{36.46839157108562, 37.0, 36.11219830397913, 32.93950177935943, 27.963302752293583, 23.314176245210728, 20.67924528301887, 20.0, 20.367582231264837, 21.054747647562017, 21.729598051157126, 22.29668411867365, 22.751975999538452, 23.115655853314525, 23.409300674476395, 35.907701711491434, 36.28514654744163, 35.23932926829268, 32.155440414507765, 27.726190476190478, 23.683010262257696, 21.25183823529412, 20.484264611432245, 20.70901639344262, 21.278688524590166, 21.867226368159205, 22.373641437383725, 22.787836465210766, 23.124549119456823, 23.400992990654206, 34.401263823064774, 34.358452138492865, 33.10684089162183, 30.473251028806583, 27.200000000000003, 24.325581395348838, 22.42954324586978, 21.596100278551532, 21.52883325882879, 21.820765027322405, 22.208159866777688, 22.581916217337202, 22.91139071965914, 23.194419918770972, 23.436799999999995, 32.34738717339668, 31.856540084388186, 30.50694444444444, 28.433179723502302, 26.250000000000004, 24.486602357984996, 23.281249999999996, 22.606060606060606, 22.372807017543856, 22.42366927857336, 22.610119047619047, 22.842257299081815, 23.077586206896555, 23.2990099009901, 23.50102360308285, 30.218340611353714, 29.38546603475513, 28.006892590465252, 26.346504559270517, 24.888888888888886, 23.91696750902527, 23.354737666405637, 23.030303030303035, 22.871755133669122, 22.853658536585364, 22.936254373954053, 23.075973775549556, 23.240700081550717, 23.41116153975458, 23.57711803041274, 28.36028192371476, 27.33127889060092, 25.965909090909093, 24.54774156660949, 23.477272727272723, 22.961198093941455, 22.863095238095237, 22.914595571622236, 22.975806451612904, 23.040275247925518, 23.127609603340296, 23.2409689757756, 23.37234283129805, 23.512042853289145, 23.652574321413184, 26.94316922589837, 25.869918699186986, 24.598084646277417, 23.37795275590551, 22.53061224489796, 22.228360957642728, 22.353037097431713, 22.632183908045974, 22.88201603665521, 23.065830721003138, 23.209876543209877, 23.339891645280865, 23.4675001220882, 23.595092024539873, 23.721393034825873, 25.982558139534884, 24.984942146140433, 23.887458471760795, 22.887413837120246, 22.21666666666667, 22.0, 22.157426778242673, 22.480748776855986, 22.80006418485237, 23.053094274146904, 23.24591503267974, 23.40157570878141, 23.537740462993156, 23.663771675878, 23.783517887563885, 25.398479913137898, 24.538528515454942, 23.64505119453925, 22.860841423948216, 22.337662337662334, 22.153901216893342, 22.26161168554078, 22.52631578947368, 22.820821917808217, 23.07909604519774, 23.287762259275212, 23.45674553007044, 23.59953588596055, 34.0, 23.842342918776623, 25.081508805330795, 24.371064969859344, 23.664691091954026, 23.05968456860118, 22.650000000000002, 22.48189011478881, 22.528446843853818, 22.709519934906428, 22.939922480620158, 23.163958641063516, 23.359375, 23.52456672594762, 23.665730337078646, 23.78979851152659, 23.902006172839506, 24.935241411524903, 24.358974358974354, 23.80398969627988, 23.334494773519168, 23.00775193798449, 22.851039589860445, 22.849848841115218, 22.957763378929688, 23.120568827049976, 23.29651456474154, 23.462773327925916, 23.611437733832172, 23.742687606147655, 23.859628389468845, 23.965611768188314, 24.890254340914648, 24.42412074714086, 23.98474216710182, 23.61412921976302, 23.347560975609756, 23.20167002861566, 23.16890200286123, 23.222462027120574, 23.328459343794577, 23.457406566802845, 23.58973715890851, 23.715501196490298, 23.831318536134233, 23.93723877131294, 24.034603918228278, 24.9018603096803, 24.52249770431589, 24.169637019982375, 23.870967741935484, 23.648780487804874, 23.51370299553856, 23.46199761241544, 23.47808358817533, 23.54079590647719, 23.629881004847952, 23.72995780590717, 23.83141762452107, 23.92936372738976, 24.021948402002305, 24.10893945372441, 24.943123435647475, 24.631098293679404, 24.342990275526738, 24.09735563950351, 23.90873015873016, 23.784242532243336, 23.722227006544955, 23.713536941840534, 23.744864269992664, 23.80244541769102, 23.874716745977793, 23.953403757292033, 24.03336755646817, 24.111844090889495, 24.187593703148426, 24.99845627554864, 24.738634503083556, 24.499491007804544, 24.293729372937293, 24.1311475409836, 23.0, 23.949966634076695, 23.925406420564585, 23.93461522848135, 12.0, 24.01782527338215, 24.076615187101158, 24.139891351267703, 24.20463223612698, 24.269076900281522};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster5, 2)));
-        assertEquals(Double.NaN, RasterUtils.getNoDataValue(modifiedRaster5.getSampleDimension(1)), 0.01d);
-        modifiedRaster5 = RasterEditors.interpolate(raster2, 2.0, "Variable", 3.0, 15.0);
-        expected = new double[]{34.8203125, 37.0, 32.83333333333333, 23.455445544554454, 17.03125, 14.9915611814346, 15.171641791044776, 20.0, 16.347756410256412, 16.79801394464399, 17.159287776708375, 17.45398146120721, 17.698694029850746, 17.905136741233935, 18.08165548098434, 32.142144638403984, 32.94736842105263, 27.19178082191781, 19.142857142857142, 15.153846153846155, 14.0, 14.517241379310345, 15.289256198347108, 15.94493290143452, 16.46728971962617, 16.884988991063334, 17.224212476837554, 17.50426558767611, 17.738973433066803, 24.0, 26.40909090909091, 23.728323699421967, 17.250000000000004, 13.150943396226413, 13.785714285714286, 14.280000000000001, 14.619565217391306, 15.196891191709843, 15.780442804428043, 16.288537549407113, 16.713917525773194, 17.067932067932066, 17.364077669902915, 17.61401085664729, 17.827004592016955, 21.555382215288606, 17.783783783783782, 12.555555555555554, 10.0, 11.831858407079645, 13.851851851851851, 14.681381957773512, 15.24503311258278, 15.763147489126133, 16.0, 16.63511432294752, 16.98215313759355, 17.278174365587436, 17.531380753138077, 17.749174706621513, 19.062499999999996, 16.10743801652893, 12.946808510638299, 11.47098976109215, 12.3125, 13.762677484787018, 14.717391304347826, 15.335766423357667, 15.828124999999998, 16.255734919286322, 16.630787977254265, 16.957921581128467, 17.242145721925134, 17.489023940022154, 17.70398406374502, 18.12751677852349, 16.14012738853503, 14.303867403314918, 13.38144329896907, 13.571428571428571, 14.287769784172664, 14.977919814061591, 15.52112676056338, 15.964626138529972, 16.347554630593134, 16.685589519650655, 16.98489425981873, 17.249407474931633, 17.482849604221638, 17.688927943760987, 30.0, 16.565603552684696, 27.0, 14.765300393037618, 14.691489361702127, 14.988700564971749, 15.40228426395939, 20.0, 16.166666666666668, 16.49258018190522, 16.78707518022657, 17.053093442695243, 17.29264379165638, 17.50770825522154, 17.70045045045045, 17.92703862660944, 17.00525394045534, 16.22380336351876, 15.729490022172948, 15.564211645838872, 22.0, 15.872483221476509, 16.14054054054054, 16.413608488270224, 16.676258992805753, 16.92332268370607, 17.152914671923405, 17.364425162689805, 17.558024320672573, 17.734443495189144, 18.05075503355705, 17.38121756739653, 16.813432835820898, 16.422537335948107, 16.234228971962615, 16.21942305182091, 16.321272885789014, 16.486736369135052, 16.680349576271183, 16.88234708604987, 17.082417582417584, 17.275117032769177, 17.457529920212767, 34.0, 17.786619921237154, 18.196825185086375, 17.690402476780186, 17.257315928675027, 16.93975903614458, 16.754855416486834, 16.691967109424414, 19.0, 16.816568047337277, 16.946966579801582, 17.09640287769784, 17.253517187368892, 17.41125541125541, 17.56527202962417, 17.712946568065824, 17.852796010787152};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster5, 1)));
-        expected = new double[]{16.23076923076923, 15.596668128014029, 15.198675496688743, 15.405051449953229, 16.50588235294118, 18.24235006119951, 19.608349900596423, 20.0, 19.81127642913078, 19.50747986191024, 19.25976183882581, 19.089543217338747, 18.97987702627166, 18.911461650867402, 18.869914485618036, 15.98304400484457, 14.85129604365621, 13.823204419889503, 13.576547231270359, 14.742268041237114, 17.053941908713693, 19.004680187207487, 19.663551401869157, 19.582349923037455, 19.34844192634561, 19.15430992341535, 19.023411371237458, 18.941249611439233, 18.891544569043134, 18.86252616887648, 16.150837988826815, 14.404145077720207, 12.357400722021664, 11.352785145888593, 12.582822085889568, 15.287671232876713, 17.641509433962266, 18.747039827771793, 19.029850746268657, 19.028873020800994, 18.97188049209139, 18.920900995285493, 18.88593155893536, 18.864580211499764, 18.85284048047351, 17.210337401292175, 15.164179104477613, 11.914040114613181, 10.0, 11.645283018867925, 14.4804469273743, 16.690265486725664, 17.935613682092555, 18.493150684931503, 18.71178247734139, 18.79334834574745, 18.824141519250784, 18.836941591994243, 18.843683083511777, 18.84859758755995, 19.48, 18.568807339449542, 15.803149606299215, 13.015228426395938, 13.796992481203008, 15.529411764705884, 16.887323943661972, 17.773799837266072, 18.285846438482885, 18.558893911193834, 18.7007874015748, 18.775786924939467, 18.817258883248734, 18.84169504040694, 18.85721507611077, 22.171796707229774, 23.50798722044728, 24.098360655737704, 21.291338582677163, 18.602739726027398, 17.880398671096348, 17.948051948051948, 18.203592814371255, 18.44316959483686, 18.61605206073753, 18.727906664878635, 18.7972027972028, 18.839809896561363, 18.866359447004605, 18.883348641910505, 23.76416065911431, 25.71204701273262, 27.0, 25.209829867674856, 22.014925373134332, 20.04012036108325, 19.186287192755497, 18.88659793814433, 18.816465652857893, 18.826487845766973, 18.855683547054987, 18.8831262121974, 18.903836813987372, 18.91814850919359, 18.927636277076886, 23.99673735725938, 25.340314136125656, 25.979243884358784, 24.975041597337768, 22.94048493754592, 21.18435754189944, 20.0990099009901, 19.519869352204683, 19.233893298873912, 19.099675243567322, 19.03867403314917, 19.011117612638973, 18.99815943392368, 18.991332674073643, 18.987010799772634, 23.55799123156636, 24.315937940761636, 24.555875991348234, 23.96039603960396, 22.76802973977695, 21.535416022270336, 20.589498806682574, 19.966131592873523, 19.585987261146496, 19.36240327719618, 19.231978178984285, 19.154759134279733, 19.107424109847212, 34.0, 19.05610067481306, 22.96, 23.3696, 23.439047801881358, 23.057652426379093, 22.3308572575788, 21.504424778761063, 20.776402039329938, 20.222578429127545, 19.835096616245522, 19.57572573230001, 19.40514075887393, 19.29274516952242, 19.217467106159255, 19.165689930740545, 19.128900359136207};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster5, 2)));
-
-        GridCoverage2D modifiedRaster6 = RasterEditors.interpolate(raster, 2.0, "Variable", 21.0, 15.0, 1);
-        expected = new double[]{33.26135744188868, 37.0, 31.27734198938487, 23.00897722975952, 18.35744126869061, 16.666827623454292, 18.588666295819408, 20.0, 19.7098137066673, 19.707393867632348, 20.09677197109572, 20.85677368219612, 21.915348487457578, 23.013558477624464, 23.546363750939825, 30.02559744929351, 31.401973172734763, 26.157936982433316, 20.049623519999688, 16.503734593459075, 14.0, 16.955580469420905, 19.14149356545831, 19.20841374600329, 19.07503401031451, 19.52180207270863, 20.556382953445674, 21.936241361836878, 23.368465326619436, 24.0, 25.445288683635162, 23.767322692602917, 18.94512817865535, 15.09217902438941, 15.92949990061788, 16.143723135302647, 17.46235080409251, 18.56161079610608, 18.263234159464666, 17.55714340029155, 18.456351203055267, 20.074150212109952, 21.623363563901368, 22.92626905988335, 23.52850073063308, 23.581253731925436, 21.104894366937405, 15.519164347350161, 10.0, 14.623507085090438, 17.571332993435384, 18.547755744011337, 18.778208809515956, 17.63638493260528, 16.0, 17.698352391678533, 19.881951897404495, 21.41954077439605, 22.439992667428513, 22.958953288860922, 24.46267883383115, 22.55588819274051, 19.035860416235817, 15.787928817007407, 17.29000180869961, 18.956752025361677, 19.52545205110425, 19.49320558794922, 18.739939146904266, 17.873502005218118, 18.868686657509564, 20.50163272802599, 21.79963208693137, 22.648092934151393, 23.07325079521243, 27.339240686012435, 25.49717181984923, 24.27637857890148, 21.934788841765833, 20.54279163393701, 20.415602657728982, 20.294440968065977, 20.12712809201612, 20.01695729098881, 19.981684138699112, 20.56042358555098, 21.66808966539439, 22.84402887572117, 23.66947710350524, 23.92792211284503, 30.0, 26.970993883166358, 27.0, 24.27923346218002, 21.884677024924766, 21.393761991703876, 20.675783032427226, 20.0, 20.447966915427305, 21.00767892416062, 21.76123271899912, 22.972510745466153, 24.594528947267207, 25.758282753129365, 25.58299372709193, 27.47640333275058, 25.999581190048865, 25.19625980807816, 23.467993578060135, 21.95676660485791, 22.0, 21.174434312111686, 20.661712855113723, 21.06705134642131, 21.803479070626473, 22.630447265486644, 24.12523799031699, 27.131507753840403, 29.711071177058518, 28.044610472056593, 24.575815053843023, 23.949908340185708, 23.16645809694482, 22.261508929430743, 21.57639361998243, 21.199499207871806, 20.512201068340637, 20.945210454462963, 21.9836704738589, 22.924607408812214, 23.29994870396163, 24.34588050443289, 28.456777404095725, 34.0, 29.299586941543286, 22.289282775892673, 21.733205542152017, 21.282319526154897, 21.098628613636073, 20.962407662467214, 20.284574553210682, 19.0, 20.78589292573924, 23.496987593674145, 25.62025601413337, 24.18768551072114, 23.08050394947618, 24.20369229311617, 25.751211886213962, 25.291145454008287, 20.106675399137863, 19.039836103047197, 18.631736571412027, 19.463919247879737, 20.459013240500386, 20.678005804903012, 20.498778676838114, 21.647141591206793, 24.85886829049983, 30.0, 24.680524723757998, 20.74763785026808, 19.60271542163126, 21.0, 22.018647801799002, 18.00154050010474, 15.48944127986085, 13.937025632369018, 16.727443579263173, 20.04761876200366, 21.666970151632338, 22.178007697785134, 22.00711417840976, 21.845258153363282, 21.894236501076087, 21.09539317000747, 18.30877196034247, 14.0, 19.100764521956286, 21.37625514516915, 16.804308085382203, 13.210991324547445, 10.0, 14.678223231872348, 20.402354245753287, 23.61996099998932, 25.34387845550619, 22.88842027242889, 18.893697344867686, 15.0, 17.99739221429308, 18.623811034390396, 17.88199847705721, 20.10340576380633, 22.540987053793057, 17.172062557359556, 14.909962597666562, 13.723315495756637, 17.207184334324843, 21.714429170321253, 24.819954899437075, 30.0, 24.42788347777175, 18.529164647909127, 16.023420997411794, 17.177939759174137, 19.030219436334406, 20.703175413270372, 23.82346404132341, 26.679563954008973, 18.30247124387975, 17.549967822928068, 17.83102658459945, 19.912418921913126, 22.403094596784975, 23.0, 24.833498988263106, 22.562283468475155, 16.74474130390725, 12.0, 15.661188713492779, 19.096313938391393, 22.090142801280727, 26.652370233020388, 30.0};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster6, 1)));
-        expected = new double[]{-9999.0, 37.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, 20.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, 22.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, 34.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0, 23.0, -9999.0, -9999.0, -9999.0, 12.0, -9999.0, -9999.0, -9999.0, -9999.0, -9999.0};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster6, 2)));
-        assertEquals(-9999.0, RasterUtils.getNoDataValue(modifiedRaster6.getSampleDimension(1)), 0.01d);
-        modifiedRaster6 = RasterEditors.interpolate(raster2, 2.0, "Variable", 12.0, 15.0, 1);
-        expected = new double[]{33.68872549987092, 37.0, 31.63969785752624, 23.17193668732212, 18.24438953326871, 16.531902233632632, 18.522948688681627, 20.0, 19.66240828967433, 19.590637846439463, 19.98558257874909, 20.851360194748942, 22.06199506870186, 23.192473188371032, 23.671585222769448, 30.60152437930265, 31.797729455897795, 26.45714290923834, 20.028681943353277, 16.355937775904433, 14.0, 16.82363232952286, 19.07111362251498, 19.09462527239225, 18.891571996482984, 19.335578267359164, 20.495987477995595, 22.077652641379274, 23.504101798726882, 24.0, 25.958292369021784, 24.041314697965984, 18.87339139846905, 14.88306713966779, 15.705617469787766, 15.944200740059568, 17.23848525148528, 18.360955561649998, 18.050495651857528, 17.352649965960136, 18.19808289095906, 19.924641519495626, 21.738433529076435, 23.14849141985108, 23.69523211104897, 23.988046194466175, 21.20250679070837, 15.311565627310914, 10.0, 14.335000487877966, 17.290263411210216, 18.291914118956164, 18.524207521600538, 17.40495150243105, 16.0, 17.435303884843975, 19.6644871318865, 21.520736885047338, 22.780771408646714, 23.39242217790547, 24.937679521256403, 22.79493998847052, 18.96880829868652, 15.550127548748046, 17.018456092139623, 18.740417074361684, 19.32891488173467, 19.2675348480171, 18.44208407729311, 17.56767119537794, 18.505350646437783, 20.340171793232958, 22.052836113854028, 23.24748239025756, 23.86667196619322, 27.75547396092607, 25.8718314618907, 24.525677344295687, 22.086184195110018, 20.5479856594581, 20.36008699744393, 20.192347353659926, 20.007522863820512, 19.789811176984596, 19.63851452950784, 20.308168568971322, 21.83910308380058, 23.621809025313425, 24.918729624596683, 25.402901036487343, 30.0, 27.31212525308456, 27.0, 24.606244759619987, 22.04779345708413, 21.435983197431607, 20.614919004549076, 20.0, 20.239318749198688, 20.705300778285878, 21.803154940570796, 23.843474979004384, 26.388152013102047, 28.037184955529895, 28.0272247268956, 28.156742063544485, 26.71218348588587, 25.74500787792939, 23.986000705917185, 22.128835692120525, 22.0, 21.126202437362323, 20.4343467606496, 20.615836515507937, 21.37595476676991, 23.014973040866746, 26.02154364881182, 29.927930259740283, 32.017318693123435, 31.025165658880084, 26.17762571343666, 25.444089118703058, 24.42307157358159, 23.091457565955963, 21.878597022371878, 21.221979616532884, 20.303900346956254, 20.379770535133307, 20.89999824156448, 21.883370142975252, 23.846833896890114, 27.375408315897438, 31.875434298041768, 34.0, 32.48895037832805, 24.929834613119343, 24.38637351604903, 23.558921326553268, 22.53723178886498, 21.44683103113761, 20.119096270908674, 19.0, 19.861869713390853, 20.937231379763, 22.15357945700695, 24.098458863495537, 27.163341179551274, 30.681772280768445, 32.403884304709244, 31.520453374592645};
-        assertEquals(Arrays.toString(expected), Arrays.toString(MapAlgebra.bandAsArray(modifiedRaster6, 1)));
-        assertEquals(Double.NaN, RasterUtils.getNoDataValue(modifiedRaster6.getSampleDimension(0)), 0.01d);
-        assertEquals(0.0, RasterUtils.getNoDataValue(modifiedRaster6.getSampleDimension(1)), 0.01d);
+      }
     }
-
-    @Test
-    public void testResample() throws FactoryException, TransformException {
-        double[] values = {1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10};
-        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
-        raster = MapAlgebra.addBandFromArray(raster, values, 1, null);
-
-        //test with height and width
-        GridCoverage2D newRaster = RasterEditors.resample(raster, 6, 5, 1, -1, false, "nearestneighbor");
-        String res = RasterOutputs.asMatrix(newRaster);
-        String expectedRes = "| 1.0   1.0   2.0   3.0   3.0   5.0|\n" +
-                "| 1.0   1.0   2.0   3.0   3.0   5.0|\n" +
-                "| 4.0   4.0   5.0   6.0   6.0   9.0|\n" +
-                "| 7.0   7.0   8.0   9.0   9.0  10.0|\n" +
-                "| 7.0   7.0   8.0   9.0   9.0  10.0|\n";
-        //verify correct interpolation
-        assertEquals(expectedRes, res);
-        double[] metadata = RasterAccessors.metadata(newRaster);
-        double[] expectedMetadata = {-0.33333333333333326, 0.19999999999999996, 6, 5, 1.388888888888889, -1.24, 0, 0, 0, 1};
-        //verify correct raster geometry
-        for (int i = 0; i < metadata.length; i++) {
-            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
-        }
-
-        //test with scaleX and scaleY
-        newRaster = RasterEditors.resample(raster, 1.2, -1.4, 1, -1, true, null);
-        res = RasterOutputs.asMatrix(newRaster);
-        expectedRes = "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n" +
-                "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n" +
-                "| 4.0   4.0   5.0   6.0   6.0   9.0   9.0|\n" +
-                "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n" +
-                "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n";
-        //verify correct interpolation
-        assertEquals(expectedRes, res);
-        metadata = RasterAccessors.metadata(newRaster);
-        expectedMetadata = new double[]{-0.20000000298023224, 0.4000000059604645, 7.0, 5.0, 1.2, -1.4, 0.0, 0.0, 0.0, 1.0};
-        //verify correct raster geometry
-        for (int i = 0; i < metadata.length; i++) {
-            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
-        }
-    }
-
-    @Test
-    public void testResampleNoDataValueHandled() throws FactoryException, TransformException {
-        double[] values1 = {1,99,3,4,99,6,7,99,9,10,99,12};
-        double[] values2 = {10,11,-9999,13,14,15,-9999,17,18,19,-9999,21};
-        GridCoverage2D raster1 = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
-        raster1 = MapAlgebra.addBandFromArray(raster1, values1, 1, 99.0);
-        raster1 = MapAlgebra.addBandFromArray(raster1, values2, 2, -9999.0);
-
-        values1 = new double[] {1,2,3,4,5,6,7,8,9,10,99,12,13,14,15,16,17,18,19,20,21,22,23,24,25};
-        values2 = new double[] {10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,-9999};
-        GridCoverage2D raster2 = RasterConstructors.makeEmptyRaster(1, "d", 5, 5, 0, 0, 2, -2, 0, 0, 0);
-        raster2 = MapAlgebra.addBandFromArray(raster2, values1, 1, 99.0);
-        raster2 = MapAlgebra.addBandFromArray(raster2, values2, 2, -9999.0);
-
-        GridCoverage2D newRaster = RasterEditors.resample(raster1, 6, 5, 1, -1, false, "bilinear");
-
-        String res1 = RasterOutputs.asMatrix(newRaster, 1);
-        String res2 = RasterOutputs.asMatrix(newRaster, 2);
-        String expectedRes1 = "|99.000000  99.000000  99.000000  99.000000  99.000000  99.000000|\n" +
-                "|99.000000   3.838750  99.000000   4.479375   4.400208   4.495000|\n" +
-                "|99.000000  99.000000   5.985764   6.593403   6.169791  99.000000|\n" +
-                "|99.000000  99.000000   8.250487   7.955348   8.473751  99.000000|\n" +
-                "|99.000000   9.375000   9.895833  99.000000  99.000000  12.000000|\n";
-        String expectedRes2 = "|-9999.000000  -9999.000000  -9999.000000  -9999.000000  -9999.000000  -9999.000000|\n" +
-                "|-9999.000000     11.695000     12.482500  -9999.000000  -9999.000000     14.320000|\n" +
-                "|-9999.000000     14.175000     14.876389  -9999.000000  -9999.000000     16.800000|\n" +
-                "|-9999.000000     16.655001     17.270278  -9999.000000  -9999.000000     19.280001|\n" +
-                "|-9999.000000     18.375000     18.930555  -9999.000000  -9999.000000     21.000000|\n";
-
-        double[] metadata = RasterAccessors.metadata(newRaster);
-        double[] expectedMetadata = {-0.33333298563957214, 0.20000000298023224, 6.0, 5.0, 1.3888888309399288, -1.2400000005960465, 0.0, 0.0, 0.0, 2.0};
-        assertEquals(expectedRes1, res1);
-        assertEquals(expectedRes2, res2);
-        for (int i = 0; i < metadata.length; i++) {
-            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
-        }
-
-        newRaster = RasterEditors.resample(raster1, 6, 5, 1, -1, false, "bicubic");
-
-        res1 = RasterOutputs.asMatrix(newRaster, 1);
-        res2 = RasterOutputs.asMatrix(newRaster, 2);
-        expectedRes1 = "|99.000000  99.000000  99.000000  99.000000  99.000000  99.000000|\n" +
-                "|99.000000   3.539351  99.000000   4.273053   4.102367   4.205373|\n" +
-                "|99.000000  99.000000   5.866029   6.737416   6.227383  99.000000|\n" +
-                "|99.000000  99.000000   8.386340   8.053590   8.636799  99.000000|\n" +
-                "|99.000000   9.564744  10.207731  99.000000  99.000000  12.610778|\n";
-        expectedRes2 = "|-9999.000000  -9999.000000  -9999.000000  -9999.000000  -9999.000000  -9999.000000|\n" +
-                "|-9999.000000     11.252455     12.144701  -9999.000000  -9999.000000     13.989338|\n" +
-                "|-9999.000000     14.089166     14.862710  -9999.000000  -9999.000000     16.841017|\n" +
-                "|-9999.000000     16.901485     17.557348  -9999.000000  -9999.000000     19.668177|\n" +
-                "|-9999.000000     18.642647     19.225651  -9999.000000  -9999.000000     21.418527|\n";
-
-        metadata = RasterAccessors.metadata(newRaster);
-        expectedMetadata = new double[] {-0.33333298563957214, 0.20000000298023224, 6.0, 5.0, 1.3888888309399288, -1.2400000005960465, 0.0, 0.0, 0.0, 2.0};
-        assertEquals(expectedRes1, res1);
-        assertEquals(expectedRes2, res2);
-        for (int i = 0; i < metadata.length; i++) {
-            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
-        }
-
-        newRaster = RasterEditors.resample(raster2, 3, 3, 1, -1, false, "bilinear");
-
-        res1 = RasterOutputs.asMatrix(newRaster, 1);
-        res2 = RasterOutputs.asMatrix(newRaster, 2);
-        expectedRes1 = "|99.000000  99.000000  99.000000|\n" +
-                "|99.000000   9.500002  11.555557|\n" +
-                "|99.000000  19.777779  21.833334|\n";
-        expectedRes2 = "|-9999.000000  -9999.000000  -9999.000000|\n" +
-                "|-9999.000000     18.500002     20.555557|\n" +
-                "|-9999.000000     28.777779     29.718364|\n";
-
-        metadata = RasterAccessors.metadata(newRaster);
-        expectedMetadata = new double[] {-2.3333330154418945, 2.3333330154418945, 3.0, 3.0, 4.111111005147298, -4.111111005147298, 0.0, 0.0, 0.0, 2.0};
-        assertEquals(expectedRes1, res1);
-        assertEquals(expectedRes2, res2);
-        for (int i = 0; i < metadata.length; i++) {
-            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
-        }
-    }
-
-    @Test
-    public void testResampleResizeFlavor() throws FactoryException, TransformException {
-        double[] values = {1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10};
-        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
-        raster = MapAlgebra.addBandFromArray(raster, values, 1, null);
-        GridCoverage2D newRaster = RasterEditors.resample(raster, 6, 5, false, "nearestneighbor");
-        String res = RasterOutputs.asMatrix(newRaster);
-        String expectedRes = "| 1.0   2.0   2.0   3.0   5.0   5.0|\n" +
-                "| 1.0   2.0   2.0   3.0   5.0   5.0|\n" +
-                "| 4.0   5.0   5.0   6.0   9.0   9.0|\n" +
-                "| 7.0   8.0   8.0   9.0  10.0  10.0|\n" +
-                "| 7.0   8.0   8.0   9.0  10.0  10.0|\n";
-        //verify correct interpolation
-        assertEquals(expectedRes, res);
-        double[] metadata = RasterAccessors.metadata(newRaster);
-        double[] expectedMetadata = {0,0,6,5,1.3333333333333333,-1.2,0,0,0,1};
-        //verify correct raster geometry
-        for (int i = 0; i < metadata.length; i++) {
-            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
-        }
-
-        //check with scaleX and scaleY
-        newRaster = RasterEditors.resample(raster, 1.2, -1.4, true, null);
-        res = RasterOutputs.asMatrix(newRaster);
-        expectedRes = "|  1.0    1.0    2.0    3.0    3.0    5.0    5.0|\n" +
-                "|  4.0    4.0    5.0    6.0    6.0    9.0    9.0|\n" +
-                "|  4.0    4.0    5.0    6.0    6.0    9.0    9.0|\n" +
-                "|  7.0    7.0    8.0    9.0    9.0   10.0   10.0|\n" +
-                "|  NaN    NaN    NaN    NaN    NaN    NaN    NaN|\n";
-        //verify correct interpolation
-        assertEquals(expectedRes, res);
-        metadata = RasterAccessors.metadata(newRaster);
-        expectedMetadata = new double[]{0,0,7,5,1.2,-1.4,0,0,0,1};
-        //verify correct raster geometry
-        for (int i = 0; i < metadata.length; i++) {
-            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
-        }
-    }
-
-
-    @Test
-    public void testResampleRefRaster() throws FactoryException, TransformException {
-        double[] values = {1, 2, 3, 5, 4, 5, 6, 9, 7, 8, 9, 10};
-        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 4, 3, 0, 0, 2, -2, 0, 0, 0);
-        GridCoverage2D refRaster = RasterConstructors.makeEmptyRaster(2, "d", 6, 5, 1, -1, 1.2, -1.4, 0, 0, 0);
-        raster = MapAlgebra.addBandFromArray(raster, values, 1, null);
-
-        //test with height and width
-        GridCoverage2D newRaster = RasterEditors.resample(raster, refRaster, false, null);
-        String res = RasterOutputs.asMatrix(newRaster);
-        String expectedRes = "| 1.0   1.0   2.0   3.0   3.0   5.0|\n" +
-                "| 1.0   1.0   2.0   3.0   3.0   5.0|\n" +
-                "| 4.0   4.0   5.0   6.0   6.0   9.0|\n" +
-                "| 7.0   7.0   8.0   9.0   9.0  10.0|\n" +
-                "| 7.0   7.0   8.0   9.0   9.0  10.0|\n";
-        //verify correct interpolation
-        assertEquals(expectedRes, res);
-        double[] metadata = RasterAccessors.metadata(newRaster);
-        double[] expectedMetadata = {-0.33333333333333326,0.19999999999999996,6,5,1.388888888888889,-1.24,0,0,0,1};
-        //verify correct raster geometry
-        for (int i = 0; i < metadata.length; i++) {
-            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
-        }
-
-        //test with scaleX and scaleY
-        newRaster = RasterEditors.resample(raster, refRaster, true, null);
-        res = RasterOutputs.asMatrix(newRaster);
-        expectedRes = "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n" +
-                "| 1.0   1.0   2.0   3.0   3.0   5.0   5.0|\n" +
-                "| 4.0   4.0   5.0   6.0   6.0   9.0   9.0|\n" +
-                "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n" +
-                "| 7.0   7.0   8.0   9.0   9.0  10.0  10.0|\n";
-        //verify correct interpolation
-        assertEquals(expectedRes, res);
-        metadata = RasterAccessors.metadata(newRaster);
-        expectedMetadata = new double[]{-0.20000000298023224, 0.4000000059604645, 7.0, 5.0, 1.2, -1.4, 0.0, 0.0, 0.0, 1.0};
-        //verify correct raster geometry
-        for (int i = 0; i < metadata.length; i++) {
-            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
-        }
-    }
-
-    @Test
-    public void testResampleDiffAlgorithms() throws FactoryException, TransformException {
-        /*
-        Even though we cannot match interpolation with that of PostGIS for other algorithms, this is a sanity test case to detect potentially invalid changes to the function
-         */
-        double[] values = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 3, 3, 0, 0, 2, -2, 0, 0, 0);
-        raster = MapAlgebra.addBandFromArray(raster, values, 1, null);
-
-        //test bilinear
-        GridCoverage2D newRaster = RasterEditors.resample(raster, 5, 5, 0, 0, false, "bilinear");
-        String res = RasterOutputs.asMatrix(newRaster);
-        String expectedRes = "|       NaN         NaN         NaN         NaN         NaN|\n" +
-                "|       NaN    2.600000    3.200000    3.800000    4.200000|\n" +
-                "|       NaN    4.400000    5.000000    5.600000    6.000000|\n" +
-                "|       NaN    6.200000    6.800000    7.400000    7.800000|\n" +
-                "|       NaN    7.400000    8.000000    8.600000    9.000000|\n";
-        //verify correct interpolation
-        assertEquals(expectedRes, res);
-        double[] metadata = RasterAccessors.metadata(newRaster);
-        double[] expectedMetadata = {0, 0, 5, 5, 1.2, -1.2, 0, 0, 0, 1};
-        //verify correct raster geometry
-        for (int i = 0; i < metadata.length; i++) {
-            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
-        }
-
-
-
-        //test bicubic
-        newRaster = RasterEditors.resample(raster, 5, 5, 0, 0, false, "bicubic");
-        res = RasterOutputs.asMatrix(newRaster);
-        expectedRes = "|       NaN         NaN         NaN         NaN         NaN|\n" +
-                "|       NaN    2.305379    2.979034    3.648548    4.042909|\n" +
-                "|       NaN    4.326345    5.000000    5.669513    6.063874|\n" +
-                "|       NaN    6.334885    7.008540    7.678053    8.072415|\n" +
-                "|       NaN    7.517968    8.191623    8.861137    9.255498|\n";
-        //verify correct interpolation
-        assertEquals(expectedRes, res);
-        metadata = RasterAccessors.metadata(newRaster);
-        //verify correct raster geometry
-        for (int i = 0; i < metadata.length; i++) {
-            assertEquals(expectedMetadata[i], metadata[i], 1e-6);
-        }
-    }
-
-    @Test
-    public void testResampleRefRasterDiffSRID() throws FactoryException {
-        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 3, 3, 0, 0, 2, -2, 0, 0, 0);
-        GridCoverage2D refRaster = RasterConstructors.makeEmptyRaster(2, "d", 5, 5, 1, -1, 1.2, -1.2, 0, 0, 4326);
-        assertThrows("Provided input raster and reference raster have different SRIDs", IllegalArgumentException.class, () -> RasterEditors.resample(raster, refRaster, false, null));
-    }
-
-    @Test
-    public void testNormalizeAll() throws FactoryException {
-        GridCoverage2D raster1 = RasterConstructors.makeEmptyRaster(2, 4, 4, 0, 0, 1);
-        GridCoverage2D raster2 = RasterConstructors.makeEmptyRaster(2, 4, 4, 0, 0, 1);
-        GridCoverage2D raster3 = RasterConstructors.makeEmptyRaster(2, "I", 4, 4, 0, 0, 1);
-        GridCoverage2D raster4 = RasterConstructors.makeEmptyRaster(2, 4, 4, 0, 0, 1);
-        GridCoverage2D raster5 = RasterConstructors.makeEmptyRaster(2, 4, 4, 0, 0, 1);
-
-        for (int band = 1; band <= 2; band++) {
-            double[] bandValues1 = new double[4 * 4];
-            double[] bandValues2 = new double[4 * 4];
-            double[] bandValues3 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
-            double[] bandValues4 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0};
-            double[] bandValues5 = new double[4 * 4];
-            for (int i = 0; i < bandValues1.length; i++) {
-                bandValues1[i] = (i) * band;
-                bandValues2[i] = (1) * (band-1);
-                bandValues5[i] = i + ((band-1)*15);
-            }
-            raster1 = MapAlgebra.addBandFromArray(raster1, bandValues1, band);
-            raster2 = MapAlgebra.addBandFromArray(raster2, bandValues2, band);
-            raster3 = MapAlgebra.addBandFromArray(raster3, bandValues3, band);
-            raster4 = MapAlgebra.addBandFromArray(raster4, bandValues4, band);
-            raster4 = RasterBandEditors.setBandNoDataValue(raster4, band, 0.0);
-            raster5 = MapAlgebra.addBandFromArray(raster5, bandValues5, band);
-        }
-        raster3 = RasterBandEditors.setBandNoDataValue(raster3, 1, 16.0);
-        raster3 = RasterBandEditors.setBandNoDataValue(raster3, 2, 1.0);
-
-        GridCoverage2D normalizedRaster1 = RasterEditors.normalizeAll(raster1, 0, 255, false, -9999.0);
-        GridCoverage2D normalizedRaster2 = RasterEditors.normalizeAll(raster1, 256d, 511d, false, -9999.0);
-        GridCoverage2D normalizedRaster3 = RasterEditors.normalizeAll(raster2);
-        GridCoverage2D normalizedRaster4 = RasterEditors.normalizeAll(raster3, 0, 255, true, 95.0);
-        GridCoverage2D normalizedRaster5 = RasterEditors.normalizeAll(raster4, 0, 255, true, 255.0);
-        GridCoverage2D normalizedRaster6 = RasterEditors.normalizeAll(raster5, 0.0, 255.0, -9999.0, 0.0, 30.0);
-        GridCoverage2D normalizedRaster7 = RasterEditors.normalizeAll(raster5, 0, 255, false, -9999.0);
-        GridCoverage2D normalizedRaster8 = RasterEditors.normalizeAll(raster3, 0, 255);
-        GridCoverage2D normalizedRaster10 = RasterEditors.normalizeAll(raster3, 0, 255, false);
-
-        double[] expected1 = {0.0, 17.0, 34.0, 51.0, 68.0, 85.0, 102.0, 119.0, 136.0, 153.0, 170.0, 187.0, 204.0, 221.0, 238.0, 255.0};
-        double[] expected2 = {256.0, 273.0, 290.0, 307.0, 324.0, 341.0, 358.0, 375.0, 392.0, 409.0, 426.0, 443.0, 460.0, 477.0, 494.0, 511.0};
-        double[] expected3 = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-        double[] expected4 = {0.0, 17.0, 34.0, 51.0, 68.0, 85.0, 102.0, 119.0, 136.0, 153.0, 170.0, 187.0, 204.0, 221.0, 238.0, 95.0};
-        double[] expected5 = {95.0, 17.0, 34.0, 51.0, 68.0, 85.0, 102.0, 119.0, 136.0, 153.0, 170.0, 187.0, 204.0, 221.0, 238.0, 255.0};
-        double[] expected6 = {0.0, 18.214285714285715, 36.42857142857143, 54.642857142857146, 72.85714285714286, 91.07142857142857, 109.28571428571429, 127.5, 145.71428571428572, 163.92857142857142, 182.14285714285714, 200.35714285714286, 218.57142857142858, 236.78571428571428, 255.0, 255.0};
-        double[] expected7 = {0.0, 16.0, 33.0, 50.0, 67.0, 84.0, 101.0, 118.0, 135.0, 152.0, 169.0, 186.0, 203.0, 220.0, 237.0, 255.0};
-        double[] expected8 = {255.0, 16.0, 33.0, 50.0, 67.0, 84.0, 101.0, 118.0, 135.0, 152.0, 169.0, 186.0, 203.0, 220.0, 237.0, 254.0};
-        double[] expected9 = {0.0, 18.0, 36.0, 54.0, 72.0, 90.0, 108.0, 127.0, 145.0, 163.0, 181.0, 199.0, 217.0, 235.0, 254.0, 255.0};
-        double[] expected10 = {255.0, 0.0, 18.0, 36.0, 54.0, 72.0, 90.0, 108.0, 127.0, 145.0, 163.0, 181.0, 199.0, 217.0, 235.0, 254.0};
-
-        // Step 3: Validate the results for each band
-        for (int band = 1; band <= 2; band++) {
-            double[] normalizedBand1 = MapAlgebra.bandAsArray(normalizedRaster1, band);
-            double[] normalizedBand2 = MapAlgebra.bandAsArray(normalizedRaster2, band);
-            double[] normalizedBand5 = MapAlgebra.bandAsArray(normalizedRaster5, band);
-            double[] normalizedBand6 = MapAlgebra.bandAsArray(normalizedRaster6, band);
-            double[] normalizedBand7 = MapAlgebra.bandAsArray(normalizedRaster7, band);
-            double normalizedMin6 = Arrays.stream(normalizedBand6).min().getAsDouble();
-            double normalizedMax6 = Arrays.stream(normalizedBand6).max().getAsDouble();
-
-            assertEquals(Arrays.toString(expected1), Arrays.toString(normalizedBand1));
-            assertEquals(Arrays.toString(expected2), Arrays.toString(normalizedBand2));
-            assertEquals(Arrays.toString(expected6), Arrays.toString(normalizedBand5));
-            assertEquals(Arrays.toString(expected1), Arrays.toString(normalizedBand7));
-
-            assertEquals(0+((band-1)*127.5), normalizedMin6, 0.01d);
-            assertEquals(127.5+((band-1)*127.5), normalizedMax6, 0.01d);
-        }
-
-        assertEquals(95.0, RasterUtils.getNoDataValue(normalizedRaster4.getSampleDimension(0)), 0.01d);
-        assertEquals(95.0, RasterUtils.getNoDataValue(normalizedRaster4.getSampleDimension(1)), 0.01d);
-
-        assertEquals(Arrays.toString(expected3), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster3, 1)));
-        assertEquals(Arrays.toString(expected4), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster4, 1)));
-        assertEquals(Arrays.toString(expected5), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster4, 2)));
-        assertEquals(Arrays.toString(expected7), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster8, 1)));
-        assertEquals(Arrays.toString(expected8), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster8, 2)));
-        assertEquals(Arrays.toString(expected9), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster10, 1)));
-        assertEquals(Arrays.toString(expected10), Arrays.toString(MapAlgebra.bandAsArray(normalizedRaster10, 2)));
-    }
-
-    @Test
-    public void testNormalizeAll2() throws FactoryException {
-        String[] pixelTypes = {"B", "I", "S", "US", "F", "D"}; // Byte, Integer, Short, Unsigned Short, Float, Double
-        for (String pixelType : pixelTypes) {
-            testNormalizeAll2(10, 10, pixelType);
-        }
-    }
-
-    private void testNormalizeAll2(int width, int height, String pixelType) throws FactoryException {
-        // Create an empty raster with the specified pixel type
-        GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, pixelType, width, height, 10, 20, 1);
-
-        // Fill raster
-        double[] bandValues = new double[width * height];
-        for (int i = 0; i < bandValues.length; i++) {
-            bandValues[i] = i;
-        }
-        raster = MapAlgebra.addBandFromArray(raster, bandValues, 1);
-
-        GridCoverage2D normalizedRaster = RasterEditors.normalizeAll(raster, 0, 255);
-
-        // Check the normalized values and data type
-        double[] normalizedBandValues = MapAlgebra.bandAsArray(normalizedRaster, 1);
-        for (int i = 0; i < bandValues.length; i++) {
-            double expected = (bandValues[i] - 0) * (254 - 0) / (99 - 0);
-            double actual = normalizedBandValues[i];
-            switch (normalizedRaster.getRenderedImage().getSampleModel().getDataType()) {
-                case DataBuffer.TYPE_BYTE:
-                case DataBuffer.TYPE_SHORT:
-                case DataBuffer.TYPE_USHORT:
-                case DataBuffer.TYPE_INT:
-                    assertEquals((int) expected, (int) actual);
-                    break;
-                default:
-                    assertEquals(expected, actual, 0.01);
-            }
-        }
-
-        // Assert the data type remains as expected
-        int resultDataType = normalizedRaster.getRenderedImage().getSampleModel().getDataType();
-        int expectedDataType = RasterUtils.getDataTypeCode(pixelType);
-        assertEquals(expectedDataType, resultDataType);
-    }
-
-    @Test
-    public void testReprojectMatchCropping() throws Exception {
-        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
-        GridCoverage2D alignTo = RasterConstructors.makeEmptyRaster(1, 100, 80, -13091202, 4015754, 100, -100, 0, 0, 3857);
-        GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
-        verifyReprojectMatchResult(raster, alignTo, transformed);
-    }
-
-    @Test
-    public void testReprojectMatchExtending() throws Exception {
-        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
-        GridCoverage2D alignTo = RasterConstructors.makeEmptyRaster(1, 600, 500, -13102225, 4026420, 100, -100, 0, 0, 3857);
-        GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
-        verifyReprojectMatchResult(raster, alignTo, transformed);
-    }
-
-    @Test
-    public void testReprojectMatchIntersecting() throws Exception {
-        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
-        GridCoverage2D alignTo = RasterConstructors.makeEmptyRaster(1, 300, 310, -13070875, 4023162, 100, -100, 0, 0, 3857);
-        GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
-        verifyReprojectMatchResult(raster, alignTo, transformed);
-    }
-
-    @Test
-    public void testReprojectMatchDisjoint() throws Exception {
-        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
-        GridCoverage2D alignTo = RasterConstructors.makeEmptyRaster(1, 100, 100, -13027131, 3975625, 100, -100, 0, 0, 3857);
-        GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
-        verifyReprojectMatchResult(raster, alignTo, transformed);
-    }
-
-    @Test
-    public void testReprojectMatchDisjoint2() throws Exception {
-        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
-        GridCoverage2D alignTo = RasterConstructors.makeEmptyRaster(1, 100, 100, 490155, 3720761, 100, -100, 0, 0, 32611);
-        GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
-        verifyReprojectMatchResult(raster, alignTo, transformed);
-    }
-
-    @Test
-    public void testReprojectMatchReproject() throws Exception {
-        GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
-        GridCoverage2D alignTo = RasterConstructors.makeEmptyRaster(1, 300, 300, 453926, 3741637, 100, -100, 0, 0, 32611);
-        GridCoverage2D transformed = RasterEditors.reprojectMatch(raster, alignTo, "nearestneighbor");
-        verifyReprojectMatchResult(raster, alignTo, transformed);
-    }
-
-    private void verifyReprojectMatchResult(GridCoverage2D source, GridCoverage2D target, GridCoverage2D transformed)
-            throws TransformException, FactoryException {
-        // Check the envelope and CRS
-        Envelope expectedEnvelope = target.getEnvelope();
-        Envelope actualEnvelope = transformed.getEnvelope();
-        assertSameEnvelope(expectedEnvelope, actualEnvelope, 1e-6);
-        CoordinateReferenceSystem expectedCrs = target.getCoordinateReferenceSystem();
-        CoordinateReferenceSystem actualCrs = transformed.getCoordinateReferenceSystem();
-        Assert.assertTrue(CRS.equalsIgnoreMetadata(expectedCrs, actualCrs));
-
-        // Get no data values. Transformed pixels that does not have a corresponding source pixel will be filled with
-        // no data values
-        int numBands = source.getNumSampleDimensions();
-        double[] values = new double[numBands];
-        double[] expectedValues = new double[numBands];
-        double[] noDataValues = new double[numBands];
-        for (int k = 0; k < numBands; k++) {
-            double noData = RasterUtils.getNoDataValue(source.getSampleDimension(k));
-            noDataValues[k] = Double.isNaN(noData)? 0: noData;
-        }
-
-        // Compare the pixel values of the transformed raster with the source raster
-        AffineTransform2D affine = (AffineTransform2D) transformed.getGridGeometry().getGridToCRS();
-        double scaleX = affine.getScaleX();
-        double scaleY = affine.getScaleY();
-        double ipX = affine.getTranslateX();
-        double ipY = affine.getTranslateY();
-        MathTransform crsTrans = CRS.findMathTransform(actualCrs, source.getCoordinateReferenceSystem());
-        for (double worldY = ipY; worldY > expectedEnvelope.getMinimum(1); worldY += scaleY) {
-            for (double worldX = ipX; worldX < expectedEnvelope.getMaximum(0); worldX += scaleX) {
-                // Fetch the pixel values from the transformed raster
-                DirectPosition worldPos = new DirectPosition2D(worldX, worldY);
-                transformed.evaluate(worldPos, values);
-
-                // Find the corresponding grid coordinates on the source raster
-                DirectPosition srcWorldPos = crsTrans.transform(worldPos, null);
-                GridCoordinates2D sourceGridPos = source.getGridGeometry().worldToGrid(srcWorldPos);
-                GridEnvelope2D sourceGridRange = source.getGridGeometry().getGridRange2D();
-
-                if (!sourceGridRange.contains(sourceGridPos)) {
-                    // The point on transformed raster is outside the source raster. We should have nodata values.
-                    Assert.assertArrayEquals(noDataValues, values, 1e-6);
-                } else {
-                    // Should match with values retrieved from source raster. The transformed raster may not have the
-                    // same grid as the source raster so we need to fetch some nearby values from the source raster and
-                    // see if any of them matches the transformed value. Please note that this requires us to use the
-                    // nearest neighbor interpolation method.
-                    boolean found = false;
-                    for (int yoff = -1; yoff <= 1; yoff++) {
-                        for (int xoff = -1; xoff <= 1 ; xoff++) {
-                            int x = sourceGridPos.x + xoff;
-                            int y = sourceGridPos.y + yoff;
-                            if (!sourceGridRange.contains(x, y)) {
-                                continue;
-                            }
-                            source.evaluate(new GridCoordinates2D(x, y), expectedValues);
-                            if (Arrays.equals(values, expectedValues)) {
-                                found = true;
-                                break;
-                            }
-                        }
-                    }
-                    Assert.assertTrue(found);
-                }
-            }
-        }
-    }
+  }
 }

@@ -22,71 +22,61 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.log4j.Logger;
-import org.apache.sedona.viz.core.ImageSerializableWrapper;
-
-import javax.imageio.ImageIO;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import javax.imageio.ImageIO;
+import org.apache.log4j.Logger;
+import org.apache.sedona.viz.core.ImageSerializableWrapper;
 
-public class ImageWrapperSerializer
-        extends Serializer<ImageSerializableWrapper>
-{
-    final static Logger log = Logger.getLogger(ImageWrapperSerializer.class);
+public class ImageWrapperSerializer extends Serializer<ImageSerializableWrapper> {
+  static final Logger log = Logger.getLogger(ImageWrapperSerializer.class);
 
-    @Override
-    public void write(Kryo kryo, Output output, ImageSerializableWrapper object)
-    {
-        try {
-            log.debug("Serializing ImageSerializableWrapper...");
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            ImageIO.write(object.getImage(), "png", byteArrayOutputStream);
-            output.writeInt(byteArrayOutputStream.size());
-            output.write(byteArrayOutputStream.toByteArray());
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
+  @Override
+  public void write(Kryo kryo, Output output, ImageSerializableWrapper object) {
+    try {
+      log.debug("Serializing ImageSerializableWrapper...");
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      ImageIO.write(object.getImage(), "png", byteArrayOutputStream);
+      output.writeInt(byteArrayOutputStream.size());
+      output.write(byteArrayOutputStream.toByteArray());
+    } catch (IOException e) {
+      e.printStackTrace();
     }
+  }
 
-    public byte[] writeImage(ImageSerializableWrapper object)
-    {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        try {
-            ImageIO.write(object.getImage(), "png", byteArrayOutputStream);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        int arraySize = byteArrayOutputStream.size();
-        Output output = new Output(arraySize + 4);
-        output.writeInt(arraySize);
-        output.write(byteArrayOutputStream.toByteArray());
-        return output.toBytes();
+  public byte[] writeImage(ImageSerializableWrapper object) {
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    try {
+      ImageIO.write(object.getImage(), "png", byteArrayOutputStream);
+    } catch (IOException e) {
+      e.printStackTrace();
     }
+    int arraySize = byteArrayOutputStream.size();
+    Output output = new Output(arraySize + 4);
+    output.writeInt(arraySize);
+    output.write(byteArrayOutputStream.toByteArray());
+    return output.toBytes();
+  }
 
-    @Override
-    public ImageSerializableWrapper read(Kryo kryo, Input input, Class<ImageSerializableWrapper> type)
-    {
-        try {
-            log.debug("De-serializing ImageSerializableWrapper...");
-            int length = input.readInt();
-            byte[] inputData = new byte[length];
-            input.read(inputData);
-            return new ImageSerializableWrapper(ImageIO.read(new ByteArrayInputStream(inputData)));
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+  @Override
+  public ImageSerializableWrapper read(
+      Kryo kryo, Input input, Class<ImageSerializableWrapper> type) {
+    try {
+      log.debug("De-serializing ImageSerializableWrapper...");
+      int length = input.readInt();
+      byte[] inputData = new byte[length];
+      input.read(inputData);
+      return new ImageSerializableWrapper(ImageIO.read(new ByteArrayInputStream(inputData)));
+    } catch (IOException e) {
+      e.printStackTrace();
     }
+    return null;
+  }
 
-    public ImageSerializableWrapper readImage(byte[] inputArray)
-    {
-        Kryo kryo = new Kryo();
-        Input input = new Input(inputArray);
-        return read(kryo, input, ImageSerializableWrapper.class);
-    }
+  public ImageSerializableWrapper readImage(byte[] inputArray) {
+    Kryo kryo = new Kryo();
+    Input input = new Input(inputArray);
+    return read(kryo, input, ImageSerializableWrapper.class);
+  }
 }

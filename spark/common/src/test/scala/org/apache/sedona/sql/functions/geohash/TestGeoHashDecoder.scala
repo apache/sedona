@@ -24,8 +24,13 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 
-class TestGeoHashDecoder extends AnyFunSuite with Matchers with TableDrivenPropertyChecks with FunctionsHelper{
-  for ((statement: String, geoHash: String, precision: Int, geometry: String) <- Fixtures.geometriesFromGeoHash) {
+class TestGeoHashDecoder
+    extends AnyFunSuite
+    with Matchers
+    with TableDrivenPropertyChecks
+    with FunctionsHelper {
+  for ((statement: String, geoHash: String, precision: Int, geometry: String) <-
+      Fixtures.geometriesFromGeoHash) {
     test("it should decode " + statement) {
       Fixtures.decodeGeoHash(geoHash, precision) shouldBe wktReader.read(geometry)
     }

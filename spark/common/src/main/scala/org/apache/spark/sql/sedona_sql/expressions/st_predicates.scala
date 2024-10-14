@@ -46,6 +46,16 @@ object st_predicates extends DataFrameAPI {
   def ST_Touches(a: Column, b: Column): Column = wrapExpression[ST_Touches](a, b)
   def ST_Touches(a: String, b: String): Column = wrapExpression[ST_Touches](a, b)
 
+  def ST_Relate(a: Column, b: Column): Column = wrapExpression[ST_Relate](a, b)
+  def ST_Relate(a: String, b: String): Column = wrapExpression[ST_Relate](a, b)
+  def ST_Relate(a: Column, b: Column, intersectionMatrix: Column): Column =
+    wrapExpression[ST_Relate](a, b, intersectionMatrix)
+  def ST_Relate(a: String, b: String, intersectionMatrix: String): Column =
+    wrapExpression[ST_Relate](a, b, intersectionMatrix)
+
+  def ST_RelateMatch(a: Column, b: Column): Column = wrapExpression[ST_RelateMatch](a, b)
+  def ST_RelateMatch(a: String, b: String): Column = wrapExpression[ST_RelateMatch](a, b)
+
   def ST_Within(a: Column, b: Column): Column = wrapExpression[ST_Within](a, b)
   def ST_Within(a: String, b: String): Column = wrapExpression[ST_Within](a, b)
 
@@ -54,8 +64,21 @@ object st_predicates extends DataFrameAPI {
 
   def ST_CoveredBy(a: Column, b: Column): Column = wrapExpression[ST_CoveredBy](a, b)
   def ST_CoveredBy(a: String, b: String): Column = wrapExpression[ST_CoveredBy](a, b)
-  def ST_DWithin(a: Column, b: Column, distance: Column): Column = wrapExpression[ST_DWithin](a, b, distance)
-  def ST_DWithin(a: String, b: String, distance: Double): Column = wrapExpression[ST_DWithin](a, b, distance)
-  def ST_DWithin(a: Column, b: Column, distance: Column, useSphere: Column): Column = wrapExpression[ST_DWithin](a, b, distance, useSphere)
-  def ST_DWithin(a: String, b: String, distance: Double, useSphere: Boolean): Column = wrapExpression[ST_DWithin](a, b, distance, useSphere)
+  def ST_DWithin(a: Column, b: Column, distance: Column): Column =
+    wrapExpression[ST_DWithin](a, b, distance)
+  def ST_DWithin(a: String, b: String, distance: Double): Column =
+    wrapExpression[ST_DWithin](a, b, distance)
+  def ST_DWithin(a: Column, b: Column, distance: Column, useSphere: Column): Column =
+    wrapExpression[ST_DWithin](a, b, distance, useSphere)
+  def ST_DWithin(a: String, b: String, distance: Double, useSphere: Boolean): Column =
+    wrapExpression[ST_DWithin](a, b, distance, useSphere)
+
+  def ST_KNN(a: Column, b: Column, distance: Column): Column =
+    wrapExpression[ST_KNN](a, b, distance)
+  def ST_KNN(a: String, b: String, distance: Double): Column =
+    wrapExpression[ST_KNN](a, b, distance)
+  def ST_KNN(a: Column, b: Column, distance: Column, useSphere: Column): Column =
+    wrapExpression[ST_KNN](a, b, distance, useSphere)
+  def ST_KNN(a: String, b: String, distance: Double, useSphere: Boolean): Column =
+    wrapExpression[ST_KNN](a, b, distance, useSphere)
 }

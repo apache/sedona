@@ -348,6 +348,8 @@ Provided band index 3 does not lie in the raster
 
 Introduction: Returns the georeference metadata of raster as a string in GDAL or ESRI format. Default is GDAL if not specified.
 
+For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
+
 !!!note
     If you are using `show()` to display the output, it will show special characters as escape sequences. To get the expected behavior use the following code:
 
@@ -450,14 +452,14 @@ SELECT RS_GeoReferrence(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1,
 
 ### RS_GeoTransform
 
-Introduction: Returns an array of parameters that represent the GeoTransformation of the raster. The array contains the following values:
+Introduction: Returns a struct of parameters that represent the GeoTransformation of the raster. The struct has the following schema:
 
-- 0: pixel width along west-east axis (x-axis)
-- 1: pixel height along north-south axis (y-axis)
-- 2: Rotation of the raster
-- 3: Angular separation between x-axis and y-axis
-- 4: X ordinate of upper-left coordinate
-- 5: Y ordinate of upper-left coordinate
+- magnitudeI: size of a pixel along the transformed i axis
+- magnitudeJ: size of a pixel along the transformed j axis
+- thetaI: angle by which the raster is rotated (Radians positive clockwise)
+- thetaIJ: angle from transformed i axis to transformed j axis (Radians positive counter-clockwise)
+- offsetX: X ordinate of the upper-left corner of the upper-left pixel
+- offsetY: Y ordinate of the upper-left corner of the upper-left pixel
 
 !!!note
     Refer to [this image](https://www.researchgate.net/figure/Relation-between-the-cartesian-axes-x-y-and-i-j-axes-of-the-pixels_fig3_313860913) for a clear understanding between i & j axis and x & y-axis.
@@ -477,7 +479,7 @@ SELECT RS_GeoTransform(
 Output:
 
 ```
-[2.23606797749979, 2.23606797749979, -1.1071487177940904, -2.214297435588181, 1.0, 2.0]
+{2.23606797749979, 2.23606797749979, -1.1071487177940904, -2.214297435588181, 1.0, 2.0}
 ```
 
 ### RS_Height
@@ -585,11 +587,14 @@ Output:
 ### RS_ScaleX
 
 Introduction: Returns the pixel width of the raster in CRS units.
+
 !!!Note
     RS_ScaleX attempts to get an Affine transform on the grid in order to return scaleX (See [World File](https://en.wikipedia.org/wiki/World_file) for more details). If the transform on the geometry is not an Affine transform, RS_ScaleX will throw an UnsupportedException:
     ```
     UnsupportedOperationException("Only AffineTransform2D is supported")
     ```
+
+For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
 
 Format: `RS_ScaleX(raster: Raster)`
 
@@ -610,11 +615,14 @@ Output:
 ### RS_ScaleY
 
 Introduction: Returns the pixel height of the raster in CRS units.
+
 !!!Note
     RS_ScaleY attempts to get an Affine transform on the grid in order to return scaleX (See [World File](https://en.wikipedia.org/wiki/World_file) for more details). If the transform on the geometry is not an Affine transform, RS_ScaleY will throw an UnsupportedException:
     ```
     UnsupportedOperationException("Only AffineTransform2D is supported")
     ```
+
+For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
 
 Format: `RS_ScaleY(raster: Raster)`
 
@@ -1086,7 +1094,7 @@ Output:
 
 ### RS_SummaryStatsAll
 
-Introduction: Returns summary stats consisting of count, sum, mean, stddev, min, max for a given band in raster. If band is not specified then it defaults to `1`.
+Introduction: Returns summary stats struct consisting of count, sum, mean, stddev, min, max for a given band in raster. If band is not specified then it defaults to `1`.
 
 !!!Note
     If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster.
@@ -1114,7 +1122,7 @@ SELECT RS_SummaryStatsAll(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1, 
 Output:
 
 ```
-25.0, 204.0, 8.16, 9.4678403028357, 0.0, 25.0
+{25.0, 204.0, 8.16, 9.4678403028357, 0.0, 25.0}
 ```
 
 SQL Example
@@ -1126,7 +1134,7 @@ SELECT RS_SummaryStatsAll(RS_MakeEmptyRaster(2, 5, 5, 0, 0, 1, -1, 0, 0, 0), 1)
 Output:
 
 ```
-14.0, 204.0, 14.571428571428571, 11.509091348732502, 1.0, 25.0
+{14.0, 204.0, 14.571428571428571, 11.509091348732502, 1.0, 25.0}
 ```
 
 ### RS_ZonalStats
@@ -1199,17 +1207,17 @@ Output:
 
 ### RS_ZonalStatsAll
 
-Introduction: Returns an array of statistic values, where each statistic is computed over a region defined by the `zone` geometry. The array contains the following values:
+Introduction: Returns a struct of statistic values, where each statistic is computed over a region defined by the `zone` geometry. The struct has the following schema:
 
-- 0: Count of the pixels.
-- 1: Sum of the pixel values.
-- 2: Arithmetic mean.
-- 3: Median.
-- 4: Mode.
-- 5: Standard deviation.
-- 6: Variance.
-- 7: Minimum value of the zone.
-- 8: Maximum value of the zone.
+- count: Count of the pixels.
+- sum: Sum of the pixel values.
+- mean: Arithmetic mean.
+- median: Median.
+- mode: Mode.
+- stddev: Standard deviation.
+- variance: Variance.
+- min: Minimum value of the zone.
+- max: Maximum value of the zone.
 
 !!!note
     If the coordinate reference system (CRS) of the input `zone` geometry differs from that of the `raster`, then `zone` will be transformed to match the CRS of the `raster` before computation.
@@ -1250,7 +1258,7 @@ RS_ZonalStatsAll(rast1, geom1, 1, false)
 Output:
 
 ```
-[184792.0, 1.0690406E7, 57.851021689230684, 0.0, 0.0, 92.13277429243035, 8488.448098819916, 0.0, 255.0]
+{184792.0, 1.0690406E7, 57.851021689230684, 0.0, 0.0, 92.13277429243035, 8488.448098819916, 0.0, 255.0}
 ```
 
 SQL Example
@@ -1262,7 +1270,7 @@ RS_ZonalStatsAll(rast2, geom2, 1, true)
 Output:
 
 ```
-[14184.0, 3213526.0, 226.55992667794473, 255.0, 255.0, 74.87605357255357, 5606.423398599913, 1.0, 255.0]
+{14184.0, 3213526.0, 226.55992667794473, 255.0, 255.0, 74.87605357255357, 5606.423398599913, 1.0, 255.0}
 ```
 
 ## Raster Predicates
@@ -1420,9 +1428,14 @@ Introduction: Returns a raster that is clipped by the given geometry.
 If `crop` is not specified then it will default to `true`, meaning it will make the resulting raster shrink to the geometry's extent and if `noDataValue` is not specified then the resulting raster will have the minimum possible value for the band pixel data type.
 
 !!!Note
-    Since `v1.5.1`, if the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`. If the `raster` or `geom` doesn't have a CRS then it will default to `4326/WGS84`.
+    - Since `v1.5.1`, if the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`. If the `raster` or `geom` doesn't have a CRS then it will default to `4326/WGS84`.
+    - Since `v1.7.0`, `RS_Clip` function will return `null` if the `raster` and `geometry` geometry do not intersect. If you want to throw an exception in this case, you can set the `lenient` parameter to `false`.
 
 Format:
+
+```
+RS_Clip(raster: Raster, band: Integer, geom: Geometry, noDataValue: Double, crop: Boolean, lenient: Boolean)
+```
 
 ```
 RS_Clip(raster: Raster, band: Integer, geom: Geometry, noDataValue: Double, crop: Boolean)
@@ -1533,18 +1546,26 @@ Output (Shown as heatmap):
 
 ### RS_MetaData
 
-Introduction: Returns the metadata of the raster as an array of double. The array contains the following values:
+Introduction: Returns the metadata of the raster as a struct. The struct has the following schema:
 
-- 0: upper left x coordinate of the raster, in terms of CRS units
-- 1: upper left y coordinate of the raster, in terms of CRS units
-- 2: width of the raster, in terms of pixels
-- 3: height of the raster, in terms of pixels
-- 4: width of a pixel, in terms of CRS units (scaleX)
-- 5: height of a pixel, in terms of CRS units (scaleY), may be negative
-- 6: skew in x direction (rotation x)
-- 7: skew in y direction (rotation y)
-- 8: srid of the raster
-- 9: number of bands
+- upperLeftX: upper left x coordinate of the raster, in terms of CRS units
+- upperLeftX: upper left y coordinate of the raster, in terms of CRS units
+- gridWidth: width of the raster, in terms of pixels
+- gridHeight: height of the raster, in terms of pixels
+- scaleX: ScaleX: the scaling factor in the x direction
+- scaleY: ScaleY: the scaling factor in the y direction
+- skewX: skew in x direction (rotation x)
+- skewY: skew in y direction (rotation y)
+- srid: srid of the raster
+- numSampleDimensions: number of bands
+- tileWidth: (Since `v1.6.1`) width of tiles in the raster
+- tileHeight: (Since `v1.6.1`) height of tiles in the raster
+
+For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
+
+`tileWidth` and `tileHeight` are available since `v1.6.1`, they are the dimensions of the tiles in the raster. For example,
+rasters written by `RS_FromGeoTiff` uses the tiling scheme of the loaded GeoTIFF file. For rasters that has only 1 tile,
+`tileWidth` and `tileHeight` will be equal to `gridWidth` and `gridHeight` respectively.
 
 Format: `RS_MetaData (raster: Raster)`
 
@@ -1559,7 +1580,7 @@ SELECT RS_MetaData(raster) FROM raster_table
 Output:
 
 ```
-[-1.3095817809482181E7, 4021262.7487925636, 512.0, 517.0, 72.32861272132695, -72.32861272132695, 0.0, 0.0, 3857.0, 1.0]
+{-1.3095817809482181E7, 4021262.7487925636, 512, 517, 72.32861272132695, -72.32861272132695, 0.0, 0.0, 3857, 1, 256, 256}
 ```
 
 ### RS_NormalizeAll
@@ -1688,6 +1709,9 @@ Following are valid values for the algorithm parameter (Case-insensitive):
 
 !!!Tip
     If you just want to resize or rescale an input raster, you can use RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, useScale: Boolean, algorithm: String)
+
+For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
+
 Format:
 
 ```sql
@@ -1829,6 +1853,8 @@ Output:
 
 Introduction: Sets the Georeference information of an object in a single call. Accepts inputs in `GDAL` and `ESRI` format.
 Default format is `GDAL`. If all 6 parameters are not provided then will return null.
+
+For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
 
 Format:
 
@@ -2090,6 +2116,53 @@ Output:
 
 ```
 3857
+```
+
+### RS_Union
+
+Introduction: Returns a combined multi-band raster from 2 or more input Rasters. The order of bands in the resultant raster will be in the order of the input rasters. For example if `RS_Union` is called on two 2-banded raster, raster1 and raster2, the first 2 bands of the resultant 4-banded raster will be from raster1 and the last 2 from raster 2.
+
+!!!note
+    If the provided input Rasters don't have same shape an IllegalArgumentException will be thrown.
+
+Format:
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster)
+```
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster, raster3: Raster)
+```
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster)
+```
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster, raster5: Raster)
+```
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster, raster5: Raster, raster6: Raster)
+```
+
+```sql
+RS_Union (raster1: Raster, raster2: Raster, raster3: Raster, raster4: Raster, raster5: Raster, raster6: Raster, raster7: Raster)
+```
+
+Since: `v1.6.0`
+
+SQL Example
+
+```sql
+SELECT RS_Union(raster1, raster2, raster3, raster4) FROM rasters
+```
+
+Output:
+
+```
+GridCoverage2D["g...
 ```
 
 ### RS_Value
