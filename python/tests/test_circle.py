@@ -16,7 +16,6 @@
 #  under the License.
 
 import pytest
-
 import shapely
 from shapely import wkt
 from shapely.geometry import Point

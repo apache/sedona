@@ -15,20 +15,20 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-import pytest
-import os.path
 import json
+import os.path
 
-from shapely.geometry import Point
-from shapely.geometry import LineString
+import geopandas
+import pytest
+from shapely.geometry import LineString, Point
 from shapely.geometry.base import BaseGeometry
 from shapely.wkt import loads as wkt_loads
-import geopandas
-
+from tests import (
+    geoparquet_input_location,
+    legacy_parquet_input_location,
+    plain_parquet_input_location,
+)
 from tests.test_base import TestBase
-from tests import geoparquet_input_location
-from tests import plain_parquet_input_location
-from tests import legacy_parquet_input_location
 
 
 class TestGeoParquet(TestBase):

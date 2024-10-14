@@ -30,17 +30,11 @@ MD034: false
 # no-emphasis-as-heading - Emphasis used instead of a heading
 MD036: false
 
-# no-space-in-code - Spaces inside code span elements
-MD038: false
-
 # fenced-code-language - Fenced code blocks should have a language specified
 MD040: false
 
 # first-line-heading/first-line-h1 - First line in a file should be a top-level heading
 MD041: false
-
-# no-alt-text - Images should have alternate text (alt text)
-MD045: false
 
 # code-block-style - Code block style
 MD046: false

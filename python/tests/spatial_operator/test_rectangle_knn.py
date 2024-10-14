@@ -17,14 +17,14 @@
 
 import os
 
-from shapely.geometry import Point, Polygon, LineString
+from shapely.geometry import LineString, Point, Polygon
+from tests.test_base import TestBase
+from tests.tools import distance_sorting_functions, tests_resource
 
-from sedona.core.SpatialRDD import RectangleRDD
-from sedona.core.enums import IndexType, FileDataSplitter
+from sedona.core.enums import FileDataSplitter, IndexType
 from sedona.core.geom.envelope import Envelope
 from sedona.core.spatialOperator import KNNQuery
-from tests.test_base import TestBase
-from tests.tools import tests_resource, distance_sorting_functions
+from sedona.core.SpatialRDD import RectangleRDD
 
 inputLocation = os.path.join(tests_resource, "zcta510-small.csv")
 queryWindowSet = os.path.join(tests_resource, "zcta510-small.csv")

@@ -15,14 +15,13 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+import os
+import sys
 from typing import Optional
 from warnings import warn
-import sys
-import os
 
 import shapely
 from shapely.geometry.base import BaseGeometry
-
 
 speedup_enabled = False
 
@@ -70,17 +69,17 @@ try:
     elif shapely.__version__.startswith("1."):
         # Shapely 1.x uses ctypes.CDLL to load geos_c library. We can obtain the
         # handle of geos_c library from `shapely.geos._lgeos._handle`
-        import shapely.geos
         import shapely.geometry.base
+        import shapely.geos
         from shapely.geometry import (
-            Point,
-            LineString,
-            LinearRing,
-            Polygon,
-            MultiPoint,
-            MultiLineString,
-            MultiPolygon,
             GeometryCollection,
+            LinearRing,
+            LineString,
+            MultiLineString,
+            MultiPoint,
+            MultiPolygon,
+            Point,
+            Polygon,
         )
 
         lgeos_handle = shapely.geos._lgeos._handle
@@ -130,10 +129,10 @@ try:
 
     else:
         # fallback to our general pure python implementation
-        from .geometry_serde_general import serialize, deserialize
+        from .geometry_serde_general import deserialize, serialize
 
 except Exception as e:
     warn(
         f"Cannot load geomserde_speedup, fallback to general python implementation. Reason: {e}"
     )
-    from .geometry_serde_general import serialize, deserialize
+    from .geometry_serde_general import deserialize, serialize

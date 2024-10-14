@@ -18,9 +18,9 @@
 import attr
 from pyspark import SparkContext
 
-from sedona.core.SpatialRDD import PolygonRDD, PointRDD, LineStringRDD
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.formatMapper.geo_reader import GeoDataReader
+from sedona.core.SpatialRDD import LineStringRDD, PointRDD, PolygonRDD
+from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.utils.meta import MultipleMeta
 
 

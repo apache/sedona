@@ -22,7 +22,7 @@ import org.apache.sedona.stats.Util.getGeometryColumnName
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_Distance, ST_DistanceSpheroid}
-import org.apache.spark.sql.{Column, DataFrame, SparkSession}
+import org.apache.spark.sql.{Column, DataFrame}
 import org.graphframes.GraphFrame
 
 object DBSCAN {
@@ -59,9 +59,6 @@ object DBSCAN {
       geometry: String = null,
       includeOutliers: Boolean = true,
       useSpheroid: Boolean = false): DataFrame = {
-
-    // We want to disable broadcast joins because the broadcast reference were using too much driver memory
-    val spark = SparkSession.getActiveSession.get
 
     val geometryCol = geometry match {
       case null => getGeometryColumnName(dataframe)

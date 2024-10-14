@@ -16,19 +16,17 @@
 #  under the License.
 import inspect
 import sys
-
 from functools import partial
 from typing import Optional, Union
 
 from pyspark.sql import Column
 
 from sedona.sql.dataframe_api import (
-    call_sedona_function,
     ColumnOrName,
     ColumnOrNameOrNumber,
+    call_sedona_function,
     validate_argument_types,
 )
-
 
 _call_st_function = partial(call_sedona_function, "st_functions")
 

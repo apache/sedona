@@ -16,20 +16,19 @@
 #  under the License.
 
 import pickle
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 
 import attr
 from py4j.java_gateway import get_field
-from pyspark import SparkContext, RDD
+from pyspark import RDD, SparkContext, StorageLevel
 from pyspark.sql import SparkSession
-from pyspark import StorageLevel
 
-from sedona.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
-from sedona.core.enums.grid_type import GridTypeJvm, GridType
-from sedona.core.enums.index_type import IndexTypeJvm, IndexType
+from sedona.core.enums.grid_type import GridType, GridTypeJvm
+from sedona.core.enums.index_type import IndexType, IndexTypeJvm
 from sedona.core.enums.spatial import SpatialType
 from sedona.core.geom.envelope import Envelope
-from sedona.core.jvm.translate import SedonaPythonConverter, JvmSedonaPythonConverter
+from sedona.core.jvm.translate import JvmSedonaPythonConverter, SedonaPythonConverter
+from sedona.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from sedona.utils.decorators import require
 from sedona.utils.jvm import JvmStorageLevel
 from sedona.utils.spatial_rdd_parser import SedonaPickler

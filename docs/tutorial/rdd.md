@@ -28,7 +28,7 @@ A generic SpatialRDD is not typed to a certain geometry type and open to more sc
 
 #### From WKT/WKB
 
-Geometries in a WKT and WKB file always occupy a single column no matter how many coordinates they have. Sedona provides `WktReader ` and `WkbReader` to create generic SpatialRDD.
+Geometries in a WKT and WKB file always occupy a single column no matter how many coordinates they have. Sedona provides `WktReader` and `WkbReader` to create generic SpatialRDD.
 
 Suppose we have a `checkin.tsv` WKT TSV file at Path `/Download/checkin.tsv` as follows:
 

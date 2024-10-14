@@ -20,25 +20,25 @@ import logging
 import pyspark
 import pytest
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import expr
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col, expr
+from tests import (
+    area_lm_point_input_location,
+    geojson_id_input_location,
+    geojson_input_location,
+    mixed_wkt_geometry_input_location,
+    shape_file_input_location,
+    shape_file_with_missing_trailing_input_location,
+)
+from tests.test_base import TestBase
 
 from sedona import version
-from sedona.core.SpatialRDD import PolygonRDD, CircleRDD
 from sedona.core.enums import FileDataSplitter, GridType, IndexType
 from sedona.core.formatMapper.shapefileParser.shape_file_reader import ShapefileReader
 from sedona.core.geom.envelope import Envelope
 from sedona.core.jvm.config import is_greater_or_equal_version
 from sedona.core.spatialOperator import JoinQuery
+from sedona.core.SpatialRDD import CircleRDD, PolygonRDD
 from sedona.utils.adapter import Adapter
-from tests import (
-    geojson_input_location,
-    shape_file_with_missing_trailing_input_location,
-    geojson_id_input_location,
-)
-from tests import shape_file_input_location, area_lm_point_input_location
-from tests import mixed_wkt_geometry_input_location
-from tests.test_base import TestBase
 
 
 class TestAdapter(TestBase):

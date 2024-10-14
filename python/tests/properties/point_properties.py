@@ -17,9 +17,10 @@
 
 import os
 
+from tests.tools import tests_resource
+
 from sedona.core.enums import FileDataSplitter
 from sedona.core.geom.envelope import Envelope
-from tests.tools import tests_resource
 
 input_location = os.path.join(tests_resource, "arealm-small.csv")
 query_window_set = os.path.join(tests_resource, "zcta510-small.csv")

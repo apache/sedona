@@ -15,15 +15,14 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+import numpy as np
 import pytest
 import rasterio
-import numpy as np
-
-from tests.test_base import TestBase
 from pyspark.sql.functions import expr
-from sedona.sql.types import RasterType
-
 from tests import world_map_raster_input_location
+from tests.test_base import TestBase
+
+from sedona.sql.types import RasterType
 
 
 class TestRasterSerde(TestBase):

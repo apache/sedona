@@ -18,8 +18,7 @@
 import pytest
 from pytest import approx
 
-from sedona.raster.meta import AffineTransform
-from sedona.raster.meta import PixelAnchor
+from sedona.raster.meta import AffineTransform, PixelAnchor
 
 
 class TestAffineTransform:

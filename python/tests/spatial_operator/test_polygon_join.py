@@ -15,15 +15,16 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-import pytest
 import os
+
+import pytest
+from tests.spatial_operator.test_join_base import TestJoinBase
+from tests.tools import tests_resource
 
 from sedona.core.enums import FileDataSplitter, GridType, IndexType
 from sedona.core.enums.join_build_side import JoinBuildSide
 from sedona.core.spatialOperator import JoinQuery
 from sedona.core.spatialOperator.join_params import JoinParams
-from tests.spatial_operator.test_join_base import TestJoinBase
-from tests.tools import tests_resource
 
 input_location = os.path.join(tests_resource, "primaryroads-polygon.csv")
 query_window_set = os.path.join(tests_resource, "zcta510-small.csv")
