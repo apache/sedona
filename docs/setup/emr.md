@@ -51,7 +51,7 @@ When you create an EMR cluster, in the software configuration, add the following
 ```
 
 !!!note
-	If you use Sedona 1.3.1-incubating, please use `sedona-python-adpater-3.0_2.12` jar in the content above, instead of `sedona-spark-shaded-3.0_2.12`.
+	If you use Sedona 1.3.1-incubating, please use `sedona-python-adapter-3.0_2.12` jar in the content above, instead of `sedona-spark-shaded-3.0_2.12`.
 
 ## Verify installation
 
