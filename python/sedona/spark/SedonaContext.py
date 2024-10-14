@@ -24,8 +24,10 @@ from sedona.utils import KryoSerializer, SedonaKryoRegistrator
 try:
     from pyspark.sql.utils import is_remote
 except ImportError:
+
     def is_remote():
         return False
+
 
 @attr.s
 class SedonaContext:
