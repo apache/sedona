@@ -35,7 +35,7 @@ object LocalOutlierFactor {
    * column name must be provided.
    *
    * @param dataframe
-   *   apache sedona idDataframe containing the point geometries
+   *   dataframe containing the point geometries
    * @param k
    *   number of nearest neighbors that will be considered for the LOF calculation
    * @param geometry
@@ -46,7 +46,7 @@ object LocalOutlierFactor {
    *   whether to use a cartesian or spheroidal distance calculation. Default is false
    *
    * @return
-   *   A PySpark DataFrame containing the lof for each row
+   *   A DataFrame containing the lof for each row
    */
   def localOutlierFactor(
       dataframe: DataFrame,

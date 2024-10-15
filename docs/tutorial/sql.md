@@ -842,7 +842,7 @@ The first parameter is the dataframe, the next two are the epsilon and min_point
 === "Scala"
 
 	```scala
-	import org.apache.sedona.stats.DBSCAN.dbscan
+	import org.apache.sedona.stats.clustering.DBSCAN.dbscan
 
 	dbscan(df, 0.1, 5).show()
 	```
@@ -850,7 +850,7 @@ The first parameter is the dataframe, the next two are the epsilon and min_point
 === "Java"
 
 	```java
-	import org.apache.sedona.stats.DBSCAN;
+	import org.apache.sedona.stats.clustering.DBSCAN;
 
 	DBSCAN.dbscan(df, 0.1, 5).show();
 	```
@@ -858,7 +858,7 @@ The first parameter is the dataframe, the next two are the epsilon and min_point
 === "Python"
 
 	```python
-	from sedona.stats.dbscan import dbscan
+	from sedona.stats.clustering.dbscan import dbscan
 
 	dbscan(df, 0.1, 5).show()
 	```
@@ -883,6 +883,67 @@ The output will look like this:
 |POINT (12.8 4.5)|  6| false|     -1|
 |     POINT (4 3)| 13| false|     -1|
 +----------------+---+------+-------+
+```
+
+## Calculate the Local Outlier Factor (LOF)
+
+Sedona provides an implementation of the [Local Outlier Factor](https://en.wikipedia.org/wiki/Local_outlier_factor) algorithm to identify anomalous data.
+
+The algorithm is available as a Scala and Python function called on a spatial dataframe. The returned dataframe has an additional column added containing the local outlier factor.
+
+The first parameter is the dataframe, the next is the number of nearest neighbors to consider use in calculating the score.
+
+=== "Scala"
+
+	```scala
+	import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor.localOutlierFactor
+
+    localOutlierFactor(df, 20).show()
+	```
+
+=== "Java"
+
+	```java
+	import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor;
+
+	LocalOutlierFactor.localOutlierFactor(df, 20).show();
+	```
+
+=== "Python"
+
+	```python
+	from sedona.stats.outlier_detection.local_outlier_factor import local_outlier_factor
+
+	local_outlier_factor(df, 20).show()
+	```
+
+The output will look like this:
+
+```
++--------------------+------------------+
+|            geometry|               lof|
++--------------------+------------------+
+|POINT (-2.0231305...| 0.952098153363662|
+|POINT (-2.0346944...|0.9975325496668104|
+|POINT (-2.2040074...|1.0825843906411081|
+|POINT (1.61573501...|1.7367129352162634|
+|POINT (-2.1176324...|1.5714144683150393|
+|POINT (-2.2349759...|0.9167275845938276|
+|POINT (1.65470192...| 1.046231536764447|
+|POINT (0.62624112...|1.1988700676990034|
+|POINT (2.01746261...|1.1060219481067417|
+|POINT (-2.0483857...|1.0775553430145446|
+|POINT (2.43969463...|1.1129132178576646|
+|POINT (-2.2425480...| 1.104108012697006|
+|POINT (-2.7859235...|  2.86371824574529|
+|POINT (-1.9738858...|1.0398822680356794|
+|POINT (2.00153403...| 0.927409656346015|
+|POINT (2.06422812...|0.9222203762264445|
+|POINT (-1.7533819...|1.0273650471626696|
+|POINT (-2.2030766...| 0.964744555830738|
+|POINT (-1.8509857...|1.0375927869698574|
+|POINT (2.10849080...|1.0753419197322656|
++--------------------+------------------+
 ```
 
 ## Run spatial queries
