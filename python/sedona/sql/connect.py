@@ -19,20 +19,7 @@ from typing import Any, Iterable, List
 
 import pyspark.sql.connect.functions as f
 from pyspark.sql.connect.column import Column
-from pyspark.sql.connect.expressions import CallFunction
-
-
-class SedonaFunction(CallFunction):
-    """
-    Simple child of CallFunction, that renders sedona function columns
-    as <function_name>(<args>,..).
-    """
-
-    def __repr__(self):
-        if len(self._args) > 0:
-            return f"{self._name}({', '.join([str(arg) for arg in self._args])})"
-        else:
-            return f"{self._name}()"
+from pyspark.sql.connect.expressions import UnresolvedFunction
 
 
 # mimic semantics of _convert_argument_to_java_column
@@ -50,4 +37,4 @@ def _convert_argument_to_connect_column(arg: Any) -> Column:
 def call_sedona_function_connect(function_name: str, args: List[Any]) -> Column:
 
     expressions = [_convert_argument_to_connect_column(arg)._expr for arg in args]
-    return Column(SedonaFunction(function_name, expressions))
+    return Column(UnresolvedFunction(function_name, expressions))
