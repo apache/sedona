@@ -2389,7 +2389,7 @@ Since: `v1.6.1`
 
 SQL Example:
 
-```SQL
+```sql
 SELECT ST_Length2D(ST_GeomFromWKT('LINESTRING(38 16,38 50,65 50,66 16,38 16)'))
 ```
 
@@ -3563,7 +3563,7 @@ Since: `v1.6.0`
 
 SQL example:
 
-```SQL
+```sql
 SELECT ST_ShiftLongitude(ST_GeomFromText('LINESTRING(177 10, 179 10, -179 10, -177 10)'))
 ```
 

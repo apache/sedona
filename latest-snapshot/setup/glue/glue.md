@@ -15,7 +15,7 @@ Sedona Jar: [Maven Central](https://repo1.maven.org/maven2/org/apache/sedona/sed
 Geotools Jar: [Maven Central](https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_geotools }}/geotools-wrapper-{{ sedona.current_geotools }}.jar)
 
 !!!note
-    If you use Sedona 1.3.1-incubating, please use `sedona-python-adpater-3.0_2.12` jar in the content above, instead
+    If you use Sedona 1.3.1-incubating, please use `sedona-python-adapter-3.0_2.12` jar in the content above, instead
     of `sedona-spark-shaded-3.0_2.12`. Ensure you pick a version for Scala 2.12 and Spark 3.0. The Spark 3.4 and Scala
     2.13 jars are not compatible with Glue 4.0.
 

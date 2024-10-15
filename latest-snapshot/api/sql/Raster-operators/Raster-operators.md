@@ -421,7 +421,7 @@ Output:
 SQL Example
 
 ```sql
-SELECT RS_GeoReferrence(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2, 0), "GDAL")
+SELECT RS_GeoReference(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2, 0), "GDAL")
 ```
 
 Output:
@@ -438,7 +438,7 @@ Output:
 SQL Example
 
 ```sql
-SELECT RS_GeoReferrence(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2, 0), "ERSI")
+SELECT RS_GeoReference(ST_MakeEmptyRaster(1, 3, 4, 100.0, 200.0,2.0, -3.0, 0.1, 0.2, 0), "ERSI")
 ```
 
 ```
