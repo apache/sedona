@@ -144,14 +144,14 @@ theme:
     logo: fontawesome/solid/earth-americas
     repo: fontawesome/brands/github
   features:
+    - content.code.copy
+    - search.highlight
+    - search.share
+    - search.suggest
+    - navigation.footer
     - navigation.instant
     - navigation.tabs
     - navigation.top
-    - search.suggest
-    - search.highlight
-    - search.share
-    - navigation.footer
-    - content.code.copy
 extra:
   version:
     provider: mike
