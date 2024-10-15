@@ -27,37 +27,37 @@ import scala.reflect.runtime.universe.{Type, typeOf}
 
 object InferredRasterExpression {
   def isRasterType(t: Type): Boolean =
-    isGeoToolsAvailable && InferrableRasterTypes.isRasterType(t)
+    isGeoToolsAvailable && InferableRasterTypes.isRasterType(t)
 
   def isRasterArrayType(t: Type): Boolean =
-    isGeoToolsAvailable && InferrableRasterTypes.isRasterArrayType(t)
+    isGeoToolsAvailable && InferableRasterTypes.isRasterArrayType(t)
 
   def rasterUDT: UserDefinedType[_] = if (isGeoToolsAvailable) {
-    InferrableRasterTypes.rasterUDT
+    InferableRasterTypes.rasterUDT
   } else {
     null
   }
 
   def rasterUDTArray: ArrayType = if (isGeoToolsAvailable) {
-    InferrableRasterTypes.rasterUDTArray
+    InferableRasterTypes.rasterUDTArray
   } else {
     null
   }
 
   val rasterExtractor: Expression => InternalRow => Any = if (isGeoToolsAvailable) {
-    InferrableRasterTypes.rasterExtractor
+    InferableRasterTypes.rasterExtractor
   } else { _ => _ =>
     null
   }
 
   val rasterSerializer: Any => Any = if (isGeoToolsAvailable) {
-    InferrableRasterTypes.rasterSerializer
+    InferableRasterTypes.rasterSerializer
   } else { (_: Any) =>
     null
   }
 
   val rasterArraySerializer: Any => Any = if (isGeoToolsAvailable) {
-    InferrableRasterTypes.rasterArraySerializer
+    InferableRasterTypes.rasterArraySerializer
   } else { (_: Any) =>
     null
   }

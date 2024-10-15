@@ -26,7 +26,7 @@ import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression,
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.{AbstractDataType, BooleanType, DataType}
 import org.locationtech.jts.geom.Geometry
-import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferableFunctionConverter._
 
 abstract class ST_Predicate
     extends Expression
@@ -219,8 +219,8 @@ case class ST_Touches(inputExpressions: Seq[Expression])
 
 case class ST_Relate(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction3(Predicates.relate),
-      inferrableFunction2(Predicates.relate)) {
+      inferableFunction3(Predicates.relate),
+      inferableFunction2(Predicates.relate)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -228,7 +228,7 @@ case class ST_Relate(inputExpressions: Seq[Expression])
 }
 
 case class ST_RelateMatch(inputExpressions: Seq[Expression])
-    extends InferredExpression(inferrableFunction2(Predicates.relateMatch)) {
+    extends InferredExpression(inferableFunction2(Predicates.relateMatch)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -292,8 +292,8 @@ case class ST_OrderingEquals(inputExpressions: Seq[Expression])
 
 case class ST_DWithin(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction3(Predicates.dWithin),
-      inferrableFunction4(Predicates.dWithin)) {
+      inferableFunction3(Predicates.dWithin),
+      inferableFunction4(Predicates.dWithin)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -308,8 +308,8 @@ case class ST_DWithin(inputExpressions: Seq[Expression])
  */
 case class ST_KNN(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction3(Predicates.knn),
-      inferrableFunction4(Predicates.knn)) {
+      inferableFunction3(Predicates.knn),
+      inferableFunction4(Predicates.knn)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

@@ -31,7 +31,7 @@ import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.types._
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom._
-import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferableFunctionConverter._
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.Utils
 
@@ -169,9 +169,9 @@ case class ST_NDims(inputExpressions: Seq[Expression])
  */
 case class ST_Buffer(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction2(Functions.buffer),
-      inferrableFunction3(Functions.buffer),
-      inferrableFunction4(Functions.buffer)) {
+      inferableFunction2(Functions.buffer),
+      inferableFunction3(Functions.buffer),
+      inferableFunction4(Functions.buffer)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -209,9 +209,9 @@ case class ST_Envelope(inputExpressions: Seq[Expression])
 
 case class ST_Expand(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction4(Functions.expand),
-      inferrableFunction3(Functions.expand),
-      inferrableFunction2(Functions.expand)) {
+      inferableFunction4(Functions.expand),
+      inferableFunction3(Functions.expand),
+      inferableFunction2(Functions.expand)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -278,9 +278,9 @@ case class ST_Centroid(inputExpressions: Seq[Expression])
  */
 case class ST_Transform(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction4(FunctionsGeoTools.transform),
-      inferrableFunction3(FunctionsGeoTools.transform),
-      inferrableFunction2(FunctionsGeoTools.transform)) {
+      inferableFunction4(FunctionsGeoTools.transform),
+      inferableFunction3(FunctionsGeoTools.transform),
+      inferableFunction2(FunctionsGeoTools.transform)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -373,7 +373,7 @@ case class ST_IsValidDetail(children: Seq[Expression])
 }
 
 case class ST_IsValidTrajectory(inputExpressions: Seq[Expression])
-    extends InferredExpression(inferrableFunction1(Functions.isValidTrajectory)) {
+    extends InferredExpression(inferableFunction1(Functions.isValidTrajectory)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -387,8 +387,8 @@ case class ST_IsValidTrajectory(inputExpressions: Seq[Expression])
  */
 case class ST_IsValid(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction2(Functions.isValid),
-      inferrableFunction1(Functions.isValid)) {
+      inferableFunction2(Functions.isValid),
+      inferableFunction1(Functions.isValid)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -460,8 +460,8 @@ case class ST_SimplifyVW(inputExpressions: Seq[Expression])
 
 case class ST_SimplifyPolygonHull(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction2(Functions.simplifyPolygonHull),
-      inferrableFunction3(Functions.simplifyPolygonHull)) {
+      inferableFunction2(Functions.simplifyPolygonHull),
+      inferableFunction3(Functions.simplifyPolygonHull)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -478,8 +478,8 @@ case class ST_AsText(inputExpressions: Seq[Expression])
 
 case class ST_AsGeoJSON(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction1(Functions.asGeoJson),
-      inferrableFunction2(Functions.asGeoJson)) {
+      inferableFunction1(Functions.asGeoJson),
+      inferableFunction2(Functions.asGeoJson)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -504,8 +504,8 @@ case class ST_AsEWKB(inputExpressions: Seq[Expression])
 
 case class ST_AsHEXEWKB(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction2(Functions.asHexEWKB),
-      inferrableFunction1(Functions.asHexEWKB)) {
+      inferableFunction2(Functions.asHexEWKB),
+      inferableFunction1(Functions.asHexEWKB)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -836,7 +836,7 @@ case class ST_NumInteriorRing(inputExpressions: Seq[Expression])
 }
 
 case class ST_AddMeasure(inputExpressions: Seq[Expression])
-    extends InferredExpression(inferrableFunction3(Functions.addMeasure)) {
+    extends InferredExpression(inferableFunction3(Functions.addMeasure)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -844,7 +844,7 @@ case class ST_AddMeasure(inputExpressions: Seq[Expression])
 }
 
 case class ST_AddPoint(inputExpressions: Seq[Expression])
-    extends InferredExpression(inferrableFunction3(Functions.addPoint)) {
+    extends InferredExpression(inferableFunction3(Functions.addPoint)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -852,7 +852,7 @@ case class ST_AddPoint(inputExpressions: Seq[Expression])
 }
 
 case class ST_RemovePoint(inputExpressions: Seq[Expression])
-    extends InferredExpression(inferrableFunction2(Functions.removePoint)) {
+    extends InferredExpression(inferableFunction2(Functions.removePoint)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -861,8 +861,8 @@ case class ST_RemovePoint(inputExpressions: Seq[Expression])
 
 case class ST_RemoveRepeatedPoints(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction2(Functions.removeRepeatedPoints),
-      inferrableFunction1(Functions.removeRepeatedPoints)) {
+      inferableFunction2(Functions.removeRepeatedPoints),
+      inferableFunction1(Functions.removeRepeatedPoints)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -985,8 +985,8 @@ case class ST_SubDivideExplode(children: Seq[Expression]) extends Generator with
 
 case class ST_MakeLine(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction2(Functions.makeLine),
-      inferrableFunction1(Functions.makeLine)) {
+      inferableFunction2(Functions.makeLine),
+      inferableFunction1(Functions.makeLine)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1019,8 +1019,8 @@ case class ST_Polygonize(inputExpressions: Seq[Expression])
 
 case class ST_Project(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction4(Functions.project),
-      inferrableFunction3(Functions.project)) {
+      inferableFunction4(Functions.project),
+      inferableFunction3(Functions.project)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1028,7 +1028,7 @@ case class ST_Project(inputExpressions: Seq[Expression])
 }
 
 case class ST_MakePolygon(inputExpressions: Seq[Expression])
-    extends InferredExpression(InferrableFunction.allowRightNull(Functions.makePolygon)) {
+    extends InferredExpression(InferableFunction.allowRightNull(Functions.makePolygon)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1112,7 +1112,7 @@ case class ST_SymDifference(inputExpressions: Seq[Expression])
 }
 
 case class ST_UnaryUnion(inputExpressions: Seq[Expression])
-    extends InferredExpression(inferrableFunction1(Functions.unaryUnion)) {
+    extends InferredExpression(inferableFunction1(Functions.unaryUnion)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1126,8 +1126,8 @@ case class ST_UnaryUnion(inputExpressions: Seq[Expression])
  */
 case class ST_Union(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction2(Functions.union),
-      inferrableFunction1(Functions.union)) {
+      inferableFunction2(Functions.union),
+      inferableFunction1(Functions.union)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1367,7 +1367,7 @@ case class ST_H3ToGeom(inputExpressions: Seq[Expression])
 }
 
 case class ST_CollectionExtract(inputExpressions: Seq[Expression])
-    extends InferredExpression(InferrableFunction.allowRightNull(Functions.collectionExtract)) {
+    extends InferredExpression(InferableFunction.allowRightNull(Functions.collectionExtract)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1383,7 +1383,7 @@ case class ST_CollectionExtract(inputExpressions: Seq[Expression])
  *   Geometry
  */
 case class ST_GeometricMedian(inputExpressions: Seq[Expression])
-    extends InferredExpression(inferrableFunction4(Functions.geometricMedian))
+    extends InferredExpression(inferableFunction4(Functions.geometricMedian))
     with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -1393,8 +1393,8 @@ case class ST_GeometricMedian(inputExpressions: Seq[Expression])
 
 case class ST_DistanceSphere(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction2(Haversine.distance),
-      inferrableFunction3(Haversine.distance)) {
+      inferableFunction2(Haversine.distance),
+      inferableFunction3(Haversine.distance)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1427,8 +1427,8 @@ case class ST_LengthSpheroid(inputExpressions: Seq[Expression])
 
 case class ST_LocateAlong(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction3(Functions.locateAlong),
-      inferrableFunction2(Functions.locateAlong)) {
+      inferableFunction3(Functions.locateAlong),
+      inferableFunction2(Functions.locateAlong)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1451,7 +1451,7 @@ case class ST_NumPoints(inputExpressions: Seq[Expression])
 }
 
 case class ST_Force3D(inputExpressions: Seq[Expression])
-    extends InferredExpression(inferrableFunction2(Functions.force3D)) {
+    extends InferredExpression(inferableFunction2(Functions.force3D)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1459,7 +1459,7 @@ case class ST_Force3D(inputExpressions: Seq[Expression])
 }
 
 case class ST_Force3DZ(inputExpressions: Seq[Expression])
-    extends InferredExpression(inferrableFunction2(Functions.force3D)) {
+    extends InferredExpression(inferableFunction2(Functions.force3D)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1467,7 +1467,7 @@ case class ST_Force3DZ(inputExpressions: Seq[Expression])
 }
 
 case class ST_Force3DM(inputExpressions: Seq[Expression])
-    extends InferredExpression(inferrableFunction2(Functions.force3DM)) {
+    extends InferredExpression(inferableFunction2(Functions.force3DM)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1476,8 +1476,8 @@ case class ST_Force3DM(inputExpressions: Seq[Expression])
 
 case class ST_Force4D(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction3(Functions.force4D),
-      inferrableFunction1(Functions.force4D)) {
+      inferableFunction3(Functions.force4D),
+      inferableFunction1(Functions.force4D)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1580,7 +1580,7 @@ case class ST_ForcePolygonCCW(inputExpressions: Seq[Expression])
 }
 
 case class ST_Translate(inputExpressions: Seq[Expression])
-    extends InferredExpression(inferrableFunction4(Functions.translate))
+    extends InferredExpression(inferableFunction4(Functions.translate))
     with FoldableExpression {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1596,7 +1596,7 @@ case class ST_TriangulatePolygon(inputExpressions: Seq[Expression])
 }
 
 case class ST_VoronoiPolygons(inputExpressions: Seq[Expression])
-    extends InferredExpression(nullTolerantInferrableFunction3(FunctionsGeoTools.voronoiPolygons))
+    extends InferredExpression(nullTolerantInferableFunction3(FunctionsGeoTools.voronoiPolygons))
     with FoldableExpression {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1613,8 +1613,8 @@ case class ST_FrechetDistance(inputExpressions: Seq[Expression])
 
 case class ST_Affine(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction13(Functions.affine),
-      inferrableFunction7(Functions.affine)) {
+      inferableFunction13(Functions.affine),
+      inferableFunction7(Functions.affine)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -1637,8 +1637,8 @@ case class ST_BoundingDiagonal(inputExpressions: Seq[Expression])
 
 case class ST_HausdorffDistance(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction3(Functions.hausdorffDistance),
-      inferrableFunction2(Functions.hausdorffDistance)) {
+      inferableFunction3(Functions.hausdorffDistance),
+      inferableFunction2(Functions.hausdorffDistance)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -1646,9 +1646,9 @@ case class ST_HausdorffDistance(inputExpressions: Seq[Expression])
 
 case class ST_Angle(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction4(Functions.angle _),
-      inferrableFunction3(Functions.angle _),
-      inferrableFunction2(Functions.angle _))
+      inferableFunction4(Functions.angle _),
+      inferableFunction3(Functions.angle _),
+      inferableFunction2(Functions.angle _))
     with FoldableExpression {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1673,9 +1673,9 @@ case class ST_Degrees(inputExpressions: Seq[Expression])
 
 case class ST_DelaunayTriangles(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction3(Functions.delaunayTriangle),
-      inferrableFunction2(Functions.delaunayTriangle),
-      inferrableFunction1(Functions.delaunayTriangle))
+      inferableFunction3(Functions.delaunayTriangle),
+      inferableFunction2(Functions.delaunayTriangle),
+      inferableFunction1(Functions.delaunayTriangle))
     with FoldableExpression {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1719,22 +1719,22 @@ case class ST_IsCollection(inputExpressions: Seq[Expression])
  */
 case class ST_IsValidReason(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction2(Functions.isValidReason),
-      inferrableFunction1(Functions.isValidReason)) {
+      inferableFunction2(Functions.isValidReason),
+      inferableFunction1(Functions.isValidReason)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
     copy(inputExpressions = newChildren)
 }
 
 case class ST_RotateX(inputExpressions: Seq[Expression])
-    extends InferredExpression(inferrableFunction2(Functions.rotateX)) {
+    extends InferredExpression(inferableFunction2(Functions.rotateX)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
     copy(inputExpressions = newChildren)
 }
 
 case class ST_RotateY(inputExpressions: Seq[Expression])
-    extends InferredExpression(inferrableFunction2(Functions.rotateY)) {
+    extends InferredExpression(inferableFunction2(Functions.rotateY)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
     copy(inputExpressions = newChildren)
@@ -1742,9 +1742,9 @@ case class ST_RotateY(inputExpressions: Seq[Expression])
 
 case class ST_Rotate(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction2(Functions.rotate),
-      inferrableFunction3(Functions.rotate),
-      inferrableFunction4(Functions.rotate)) {
+      inferableFunction2(Functions.rotate),
+      inferableFunction3(Functions.rotate),
+      inferableFunction4(Functions.rotate)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
     copy(inputExpressions = newChildren)
