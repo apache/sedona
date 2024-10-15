@@ -40,9 +40,10 @@ geometry column is present it will be used automatically. If two are present, th
 'geometry' will be used. If more than one are present and neither is named 'geometry', the
 column name must be provided.
 
-
 ### Parameters
+
 names in parentheses are python variable names
+
 - dataframe - dataframe containing the point geometries
 - k - number of nearest neighbors that will be considered for the LOF calculation
 - geometry - name of the geometry column
