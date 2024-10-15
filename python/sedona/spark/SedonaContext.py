@@ -42,7 +42,7 @@ class SedonaContext:
         """
         spark.sql("SELECT 1 as geom").count()
 
-        # with spark connect there is no local jvm
+        # with Spark Connect there is no local JVM
         if not is_remote():
             PackageImporter.import_jvm_lib(spark._jvm)
             spark._jvm.SedonaContext.create(spark._jsparkSession, "python")

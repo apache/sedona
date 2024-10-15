@@ -28,7 +28,7 @@ try:
     from pyspark.sql.connect.column import Column as ConnectColumn
     from pyspark.sql.utils import is_remote
 except ImportError:
-    # be backwards compatible with spark < 3.4
+    # be backwards compatible with Spark < 3.4
     def is_remote():
         return False
 
@@ -69,7 +69,7 @@ def call_sedona_function(
     ):
         args = [args]
 
-    # in spark-connect environments use connect api
+    # in spark-connect environments use connect API
     if is_remote():
         return call_sedona_function_connect(function_name, args)
 
@@ -103,7 +103,7 @@ def _get_type_list(annotated_type: Type) -> Tuple[Type, ...]:
     else:
         valid_types = (annotated_type,)
 
-    # functions accepting a Column should also accept the spark connect sort of Column
+    # functions accepting a Column should also accept the Spark Connect sort of Column
     if Column in valid_types:
         valid_types = valid_types + (ConnectColumn,)
 
