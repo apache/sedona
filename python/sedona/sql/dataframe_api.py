@@ -24,8 +24,23 @@ from typing import Any, Callable, Iterable, List, Mapping, Tuple, Type, Union
 from pyspark.sql import Column, SparkSession
 from pyspark.sql import functions as f
 
-ColumnOrName = Union[Column, str]
-ColumnOrNameOrNumber = Union[Column, str, float, int]
+try:
+    from pyspark.sql.connect.column import Column as ConnectColumn
+    from pyspark.sql.utils import is_remote
+except ImportError:
+    # be backwards compatible with Spark < 3.4
+    def is_remote():
+        return False
+
+    class ConnectColumn:
+        pass
+
+else:
+    from sedona.sql.connect import call_sedona_function_connect
+
+
+ColumnOrName = Union[Column, ConnectColumn, str]
+ColumnOrNameOrNumber = Union[Column, ConnectColumn, str, float, int]
 
 
 def _convert_argument_to_java_column(arg: Any) -> Column:
@@ -49,12 +64,14 @@ def call_sedona_function(
         )
 
     # apparently a Column is an Iterable so we need to check for it explicitly
-    if (
-        (not isinstance(args, Iterable))
-        or isinstance(args, str)
-        or isinstance(args, Column)
+    if (not isinstance(args, Iterable)) or isinstance(
+        args, (str, Column, ConnectColumn)
     ):
         args = [args]
+
+    # in spark-connect environments use connect API
+    if is_remote():
+        return call_sedona_function_connect(function_name, args)
 
     args = map(_convert_argument_to_java_column, args)
 
@@ -85,6 +102,10 @@ def _get_type_list(annotated_type: Type) -> Tuple[Type, ...]:
         valid_types = annotated_type.__args__
     else:
         valid_types = (annotated_type,)
+
+    # functions accepting a Column should also accept the Spark Connect sort of Column
+    if Column in valid_types:
+        valid_types = valid_types + (ConnectColumn,)
 
     return valid_types
 
@@ -159,7 +180,7 @@ def validate_argument_types(f: Callable) -> Callable:
         # all arguments are Columns or strings are always legal, so only check types when one of the arguments is not a column
         if not all(
             [
-                isinstance(x, Column) or isinstance(x, str)
+                isinstance(x, (Column, ConnectColumn)) or isinstance(x, str)
                 for x in itertools.chain(args, kwargs.values())
             ]
         ):
