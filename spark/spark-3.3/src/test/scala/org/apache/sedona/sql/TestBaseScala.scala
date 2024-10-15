@@ -36,7 +36,20 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     .master("local[*]")
     .appName("sedonasqlScalaTest")
     .config("spark.sql.warehouse.dir", warehouseLocation)
-    // We need to be explicit about broadcasting in tests.
+    .config("sedona.join.autoBroadcastJoinThreshold", "-1")
+    .config("spark.sql.session.timeZone", "UTC")
+    .getOrCreate()
+
+  val sparkSessionMinio = SedonaContext
+    .builder()
+    .master("local[*]")
+    .appName("sedonasqlScalaTest")
+    .config("spark.sql.warehouse.dir", warehouseLocation)
+    .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.0")
+    .config(
+      "spark.hadoop.fs.s3a.aws.credentials.provider",
+      "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider")
+    .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
     .config("sedona.join.autoBroadcastJoinThreshold", "-1")
     .getOrCreate()
 

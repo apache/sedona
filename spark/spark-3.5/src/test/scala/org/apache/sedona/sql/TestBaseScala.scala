@@ -40,6 +40,19 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     .config("sedona.join.autoBroadcastJoinThreshold", "-1")
     .getOrCreate()
 
+  val sparkSessionMinio = SedonaContext
+    .builder()
+    .master("local[*]")
+    .appName("sedonasqlScalaTest")
+    .config("spark.sql.warehouse.dir", warehouseLocation)
+    .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.0")
+    .config(
+      "spark.hadoop.fs.s3a.aws.credentials.provider",
+      "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider")
+    .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+    .config("sedona.join.autoBroadcastJoinThreshold", "-1")
+    .getOrCreate()
+
   val resourceFolder = System.getProperty("user.dir") + "/../common/src/test/resources/"
 
   override def beforeAll(): Unit = {
