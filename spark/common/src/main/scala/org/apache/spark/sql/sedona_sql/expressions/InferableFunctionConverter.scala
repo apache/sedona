@@ -21,8 +21,8 @@ package org.apache.spark.sql.sedona_sql.expressions
 import scala.reflect.runtime.universe.TypeTag
 
 /**
- * Implicit conversions from Java/Scala functions to [[InferableFunction]]. This should be used
- * in conjunction with [[InferredExpression]] to make wrapping Java/Scala functions as catalyst
+ * Implicit conversions from Java/Scala functions to [[InferableFunction]]. This should be used in
+ * conjunction with [[InferredExpression]] to make wrapping Java/Scala functions as catalyst
  * expressions much easier.
  */
 object InferableFunctionConverter {
@@ -738,8 +738,8 @@ object InferableFunctionConverter {
   // null values as function arguments. User needs to handle null arguments carefully in their function body when using
   // these functions.
 
-  def nullTolerantInferableFunction1[R: InferableType, A1: InferableType](f: (A1) => R)(
-      implicit typeTag: TypeTag[(A1) => R]): InferableFunction = InferableFunction(
+  def nullTolerantInferableFunction1[R: InferableType, A1: InferableType](f: (A1) => R)(implicit
+      typeTag: TypeTag[(A1) => R]): InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[(Any) => Any]
