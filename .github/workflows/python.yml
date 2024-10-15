@@ -159,7 +159,7 @@ jobs:
         run: |
           if [ ! -f "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/sbin/start-connect-server.sh" ]
           then
-            echo "Skipping connect tests for spark $SPARK_VERSION"
+            echo "Skipping connect tests for Spark $SPARK_VERSION"
             exit
           fi
 
