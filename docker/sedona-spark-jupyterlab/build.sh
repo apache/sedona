@@ -23,7 +23,7 @@ BUILD_MODE=$3
 GEOTOOLS_VERSION=${4:-auto}
 
 SEDONA_SPARK_VERSION=${SPARK_VERSION:0:3}
-if [ ${SPARK_VERSION:0:1} -eq "3" ] && [ ${SPARK_VERSION:2:1} -le "3" ]; then
+if [ "${SPARK_VERSION:0:1}" -eq "3" ] && [ "${SPARK_VERSION:2:1}" -le "3" ]; then
     # 3.0, 3.1, 3.2, 3.3
     SEDONA_SPARK_VERSION=3.0
 fi
@@ -42,7 +42,7 @@ get_latest_version_with_suffix() {
 
   # Fetch the maven-metadata.xml file
   METADATA_URL="${BASE_URL}maven-metadata.xml"
-  METADATA_XML=$(curl -s $METADATA_URL)
+  METADATA_XML=$(curl -s "$METADATA_URL")
 
   # Extract versions from the XML
   VERSIONS=$(echo "$METADATA_XML" | grep -o '<version>[^<]*</version>' | awk -F'[<>]' '{print $3}')
@@ -52,7 +52,7 @@ get_latest_version_with_suffix() {
   # Filter versions that end with the specified suffix and find the largest one
   for VERSION in $VERSIONS; do
     if [[ $VERSION == *$SUFFIX ]]; then
-      if [[ -z $LATEST_VERSION ]] || version_gt $VERSION $LATEST_VERSION; then
+      if [[ -z $LATEST_VERSION ]] || version_gt "$VERSION" "$LATEST_VERSION"; then
         LATEST_VERSION=$VERSION
       fi
     fi
@@ -61,7 +61,7 @@ get_latest_version_with_suffix() {
   if [[ -z $LATEST_VERSION ]]; then
     exit 1
   else
-    echo $LATEST_VERSION
+    echo "$LATEST_VERSION"
   fi
 }
 
@@ -80,7 +80,7 @@ if [ "$SEDONA_VERSION" = "latest" ]; then
     echo "Using latest geotools-wrapper version: $GEOTOOLS_WRAPPER_VERSION"
 
     # The compilation must take place outside Docker to avoid unnecessary maven packages
-    mvn clean install -DskipTests -Dspark=${SEDONA_SPARK_VERSION} -Dscala=2.12
+    mvn clean install -DskipTests -Dspark="${SEDONA_SPARK_VERSION}" -Dscala=2.12
 fi
 
 # -- Building the image
@@ -92,7 +92,7 @@ if [ -z "$BUILD_MODE" ] || [ "$BUILD_MODE" = "local" ]; then
     --build-arg sedona_version="${SEDONA_VERSION}" \
     --build-arg geotools_wrapper_version="${GEOTOOLS_WRAPPER_VERSION}" \
     -f docker/sedona-spark-jupyterlab/sedona-jupyterlab.dockerfile \
-    -t apache/sedona:${SEDONA_VERSION} .
+    -t apache/sedona:"${SEDONA_VERSION}" .
 else
     # If release, build the image for cross-platform
     docker buildx build --platform linux/amd64,linux/arm64 \
@@ -103,5 +103,5 @@ else
     --build-arg sedona_version="${SEDONA_VERSION}" \
     --build-arg geotools_wrapper_version="${GEOTOOLS_WRAPPER_VERSION}" \
     -f docker/sedona-spark-jupyterlab/sedona-jupyterlab.dockerfile \
-    -t apache/sedona:${SEDONA_VERSION} .
+    -t apache/sedona:"${SEDONA_VERSION}" .
 fi
