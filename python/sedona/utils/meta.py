@@ -79,7 +79,7 @@ class MultiMethod:
 
             if parm.annotation is inspect.Parameter.empty:
                 raise InvalidParametersException(
-                    "Argument {} must be annotated with a type".format(name)
+                    f"Argument {name} must be annotated with a type"
                 )
             if parm.default is not inspect.Parameter.empty:
                 self._methods[tuple(types)] = meth
