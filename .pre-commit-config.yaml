@@ -56,7 +56,7 @@ repos:
       - id: check-docstring-first
       - id: check-executables-have-shebangs
       - id: check-illegal-windows-names
-      # - id: check-json
+      - id: check-json
       - id: check-merge-conflict
       - id: check-shebang-scripts-are-executable
       - id: check-toml
