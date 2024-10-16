@@ -29,7 +29,7 @@ class GeometryParser(ABC):
         raise NotImplementedError
 
     @classmethod
-    def serialize(cls, obj: BaseGeometry, binary_buffer: "BinaryBuffer"):
+    def serialize(cls, obj: BaseGeometry):
         raise NotImplementedError("Parser has to implement serialize method")
 
     @classmethod

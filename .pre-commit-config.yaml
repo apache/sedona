@@ -10,6 +10,10 @@ repos:
     hooks:
       - id: identity
       - id: check-hooks-apply
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: v2.13
+    hooks:
+      - id: vulture
   - repo: https://github.com/psf/black-pre-commit-mirror
     rev: 24.10.0
     hooks:
