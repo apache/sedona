@@ -26,7 +26,7 @@ import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits.GeometryEnhancer
-import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferableFunctionConverter._
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 
@@ -503,7 +503,7 @@ case class ST_MakePointM(inputExpressions: Seq[Expression])
 }
 
 case class ST_MakePoint(inputExpressions: Seq[Expression])
-    extends InferredExpression(nullTolerantInferrableFunction4(Constructors.makePoint)) {
+    extends InferredExpression(nullTolerantInferableFunction4(Constructors.makePoint)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -517,8 +517,8 @@ case class ST_MakePoint(inputExpressions: Seq[Expression])
  */
 case class ST_MakeEnvelope(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction5(Constructors.makeEnvelope),
-      inferrableFunction4(Constructors.makeEnvelope)) {
+      inferableFunction5(Constructors.makeEnvelope),
+      inferableFunction4(Constructors.makeEnvelope)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -555,14 +555,14 @@ trait UserDataGenerator {
 }
 
 case class ST_GeomFromGeoHash(inputExpressions: Seq[Expression])
-    extends InferredExpression(InferrableFunction.allowRightNull(Constructors.geomFromGeoHash)) {
+    extends InferredExpression(InferableFunction.allowRightNull(Constructors.geomFromGeoHash)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
 case class ST_PointFromGeoHash(inputExpressions: Seq[Expression])
-    extends InferredExpression(InferrableFunction.allowRightNull(Constructors.pointFromGeoHash)) {
+    extends InferredExpression(InferableFunction.allowRightNull(Constructors.pointFromGeoHash)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

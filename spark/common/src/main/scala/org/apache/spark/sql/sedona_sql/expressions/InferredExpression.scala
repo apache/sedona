@@ -45,10 +45,10 @@ class InferredExpressionException(message: String, cause: Throwable)
  * This is the base class for wrapping Java/Scala functions as a catalyst expression in Spark SQL.
  * @param fSeq
  *   The functions to be wrapped. Subclasses can simply pass a function to this constructor, and
- *   the function will be converted to [[InferrableFunction]] by [[InferrableFunctionConverter]]
+ *   the function will be converted to [[InferableFunction]] by [[InferableFunctionConverter]]
  *   automatically.
  */
-abstract class InferredExpression(fSeq: InferrableFunction*)
+abstract class InferredExpression(fSeq: InferableFunction*)
     extends Expression
     with ImplicitCastInputTypes
     with SerdeAware
@@ -58,7 +58,7 @@ abstract class InferredExpression(fSeq: InferrableFunction*)
 
   def inputExpressions: Seq[Expression]
 
-  lazy val f: InferrableFunction = fSeq match {
+  lazy val f: InferableFunction = fSeq match {
     // If there is only one function, simply use it and let org.apache.sedona.sql.UDF.Catalog handle default arguments.
     case Seq(f) => f
     // If there are multiple overloaded functions, find the one with the same number of arguments as the input
@@ -154,46 +154,46 @@ object InferredExpression {
 // This is a compile time type shield for the types we are able to infer. Anything
 // other than these types will cause a compilation error. This is the Scala
 // 2 way of making a union type.
-class InferrableType[T: TypeTag]
-object InferrableType {
-  implicit val geometryInstance: InferrableType[Geometry] =
-    new InferrableType[Geometry] {}
-  implicit val geometryArrayInstance: InferrableType[Array[Geometry]] =
-    new InferrableType[Array[Geometry]] {}
-  implicit val javaDoubleInstance: InferrableType[java.lang.Double] =
-    new InferrableType[java.lang.Double] {}
-  implicit val javaIntegerInstance: InferrableType[java.lang.Integer] =
-    new InferrableType[java.lang.Integer] {}
-  implicit val javaLongInstance: InferrableType[java.lang.Long] =
-    new InferrableType[java.lang.Long] {}
-  implicit val doubleInstance: InferrableType[Double] =
-    new InferrableType[Double] {}
-  implicit val booleanInstance: InferrableType[Boolean] =
-    new InferrableType[Boolean] {}
-  implicit val booleanOptInstance: InferrableType[Option[Boolean]] =
-    new InferrableType[Option[Boolean]] {}
-  implicit val intInstance: InferrableType[Int] =
-    new InferrableType[Int] {}
-  implicit val longInstance: InferrableType[Long] =
-    new InferrableType[Long] {}
-  implicit val stringInstance: InferrableType[String] =
-    new InferrableType[String] {}
-  implicit val binaryInstance: InferrableType[Array[Byte]] =
-    new InferrableType[Array[Byte]] {}
-  implicit val intArrayInstance: InferrableType[Array[Int]] =
-    new InferrableType[Array[Int]] {}
-  implicit val javaIntArrayInstance: InferrableType[Array[java.lang.Integer]] =
-    new InferrableType[Array[java.lang.Integer]]
-  implicit val longArrayInstance: InferrableType[Array[Long]] =
-    new InferrableType[Array[Long]] {}
-  implicit val javaLongArrayInstance: InferrableType[Array[java.lang.Long]] =
-    new InferrableType[Array[java.lang.Long]] {}
-  implicit val doubleArrayInstance: InferrableType[Array[Double]] =
-    new InferrableType[Array[Double]] {}
-  implicit val javaDoubleListInstance: InferrableType[java.util.List[java.lang.Double]] =
-    new InferrableType[java.util.List[java.lang.Double]] {}
-  implicit val javaGeomListInstance: InferrableType[java.util.List[Geometry]] =
-    new InferrableType[java.util.List[Geometry]] {}
+class InferableType[T: TypeTag]
+object InferableType {
+  implicit val geometryInstance: InferableType[Geometry] =
+    new InferableType[Geometry] {}
+  implicit val geometryArrayInstance: InferableType[Array[Geometry]] =
+    new InferableType[Array[Geometry]] {}
+  implicit val javaDoubleInstance: InferableType[java.lang.Double] =
+    new InferableType[java.lang.Double] {}
+  implicit val javaIntegerInstance: InferableType[java.lang.Integer] =
+    new InferableType[java.lang.Integer] {}
+  implicit val javaLongInstance: InferableType[java.lang.Long] =
+    new InferableType[java.lang.Long] {}
+  implicit val doubleInstance: InferableType[Double] =
+    new InferableType[Double] {}
+  implicit val booleanInstance: InferableType[Boolean] =
+    new InferableType[Boolean] {}
+  implicit val booleanOptInstance: InferableType[Option[Boolean]] =
+    new InferableType[Option[Boolean]] {}
+  implicit val intInstance: InferableType[Int] =
+    new InferableType[Int] {}
+  implicit val longInstance: InferableType[Long] =
+    new InferableType[Long] {}
+  implicit val stringInstance: InferableType[String] =
+    new InferableType[String] {}
+  implicit val binaryInstance: InferableType[Array[Byte]] =
+    new InferableType[Array[Byte]] {}
+  implicit val intArrayInstance: InferableType[Array[Int]] =
+    new InferableType[Array[Int]] {}
+  implicit val javaIntArrayInstance: InferableType[Array[java.lang.Integer]] =
+    new InferableType[Array[java.lang.Integer]]
+  implicit val longArrayInstance: InferableType[Array[Long]] =
+    new InferableType[Array[Long]] {}
+  implicit val javaLongArrayInstance: InferableType[Array[java.lang.Long]] =
+    new InferableType[Array[java.lang.Long]] {}
+  implicit val doubleArrayInstance: InferableType[Array[Double]] =
+    new InferableType[Array[Double]] {}
+  implicit val javaDoubleListInstance: InferableType[java.util.List[java.lang.Double]] =
+    new InferableType[java.util.List[java.lang.Double]] {}
+  implicit val javaGeomListInstance: InferableType[java.util.List[Geometry]] =
+    new InferableType[java.util.List[Geometry]] {}
 }
 
 object InferredTypes {
@@ -311,14 +311,14 @@ object InferredTypes {
   }
 }
 
-case class InferrableFunction(
+case class InferableFunction(
     sparkInputTypes: Seq[AbstractDataType],
     sparkReturnType: DataType,
     serializer: Any => Any,
     argExtractorBuilders: Seq[Expression => InternalRow => Any],
     evaluatorBuilder: Array[InternalRow => Any] => InternalRow => Any)
 
-object InferrableFunction {
+object InferableFunction {
 
   /**
    * Infer input types and return type from a type tag, and construct builder for argument
@@ -328,18 +328,18 @@ object InferrableFunction {
    * @param evaluatorBuilder
    *   Builder for the evaluator.
    * @return
-   *   InferrableFunction.
+   *   InferableFunction.
    */
   def apply(
       typeTag: TypeTag[_],
-      evaluatorBuilder: Array[InternalRow => Any] => InternalRow => Any): InferrableFunction = {
+      evaluatorBuilder: Array[InternalRow => Any] => InternalRow => Any): InferableFunction = {
     val argTypes = typeTag.tpe.typeArgs.init
     val returnType = typeTag.tpe.typeArgs.last
     val sparkInputTypes: Seq[AbstractDataType] = argTypes.map(InferredTypes.inferSparkType)
     val sparkReturnType: DataType = InferredTypes.inferSparkType(returnType)
     val serializer = InferredTypes.buildSerializer(returnType)
     val argExtractorBuilders = argTypes.map(InferredTypes.buildArgumentExtractor)
-    InferrableFunction(
+    InferableFunction(
       sparkInputTypes,
       sparkReturnType,
       serializer,
@@ -360,10 +360,10 @@ object InferrableFunction {
    * @tparam A2
    *   Type of the second argument.
    * @return
-   *   InferrableFunction.
+   *   InferableFunction.
    */
   def allowRightNull[R, A1, A2](f: (A1, A2) => R)(implicit
-      typeTag: TypeTag[(A1, A2) => R]): InferrableFunction = {
+      typeTag: TypeTag[(A1, A2) => R]): InferableFunction = {
     apply(
       typeTag,
       extractors => {

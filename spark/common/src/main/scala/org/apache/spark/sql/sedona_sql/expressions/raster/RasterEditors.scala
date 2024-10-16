@@ -20,8 +20,8 @@ package org.apache.spark.sql.sedona_sql.expressions.raster
 
 import org.apache.sedona.common.raster.RasterEditors
 import org.apache.spark.sql.catalyst.expressions.Expression
-import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
-import org.apache.spark.sql.sedona_sql.expressions.InferrableRasterTypes._
+import org.apache.spark.sql.sedona_sql.expressions.InferableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferableRasterTypes._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
 case class RS_SetSRID(inputExpressions: Seq[Expression])
@@ -33,9 +33,9 @@ case class RS_SetSRID(inputExpressions: Seq[Expression])
 
 case class RS_SetGeoReference(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction2(RasterEditors.setGeoReference),
-      inferrableFunction3(RasterEditors.setGeoReference),
-      inferrableFunction7(RasterEditors.setGeoReference)) {
+      inferableFunction2(RasterEditors.setGeoReference),
+      inferableFunction3(RasterEditors.setGeoReference),
+      inferableFunction7(RasterEditors.setGeoReference)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -50,9 +50,9 @@ case class RS_SetPixelType(inputExpressions: Seq[Expression])
 
 case class RS_Resample(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      nullTolerantInferrableFunction4(RasterEditors.resample),
-      nullTolerantInferrableFunction5(RasterEditors.resample),
-      nullTolerantInferrableFunction7(RasterEditors.resample)) {
+      nullTolerantInferableFunction4(RasterEditors.resample),
+      nullTolerantInferableFunction5(RasterEditors.resample),
+      nullTolerantInferableFunction7(RasterEditors.resample)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -60,12 +60,12 @@ case class RS_Resample(inputExpressions: Seq[Expression])
 
 case class RS_NormalizeAll(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction1(RasterEditors.normalizeAll),
-      inferrableFunction3(RasterEditors.normalizeAll),
-      inferrableFunction4(RasterEditors.normalizeAll),
-      inferrableFunction5(RasterEditors.normalizeAll),
-      inferrableFunction6(RasterEditors.normalizeAll),
-      inferrableFunction7(RasterEditors.normalizeAll)) {
+      inferableFunction1(RasterEditors.normalizeAll),
+      inferableFunction3(RasterEditors.normalizeAll),
+      inferableFunction4(RasterEditors.normalizeAll),
+      inferableFunction5(RasterEditors.normalizeAll),
+      inferableFunction6(RasterEditors.normalizeAll),
+      inferableFunction7(RasterEditors.normalizeAll)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -80,12 +80,12 @@ case class RS_ReprojectMatch(inputExpressions: Seq[Expression])
 
 case class RS_Interpolate(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction1(RasterEditors.interpolate),
-      inferrableFunction2(RasterEditors.interpolate),
-      inferrableFunction3(RasterEditors.interpolate),
-      inferrableFunction4(RasterEditors.interpolate),
-      inferrableFunction5(RasterEditors.interpolate),
-      inferrableFunction6(RasterEditors.interpolate)) {
+      inferableFunction1(RasterEditors.interpolate),
+      inferableFunction2(RasterEditors.interpolate),
+      inferableFunction3(RasterEditors.interpolate),
+      inferableFunction4(RasterEditors.interpolate),
+      inferableFunction5(RasterEditors.interpolate),
+      inferableFunction6(RasterEditors.interpolate)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
