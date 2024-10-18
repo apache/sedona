@@ -2299,6 +2299,40 @@ def ST_IsCollection(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_Scale(
+    geometry: ColumnOrName,
+    scaleX: Union[ColumnOrNameOrNumber, float],
+    scaleY: Union[ColumnOrNameOrNumber, float],
+) -> Column:
+    """Scale geometry with X and Y axis.
+
+    @param geometry:
+    @param scaleX:
+    @param scaleY:
+    @return:
+    """
+    return _call_st_function("ST_Scale", (geometry, scaleX, scaleY))
+
+
+@validate_argument_types
+def ST_ScaleGeom(
+    geometry: ColumnOrName, factor: ColumnOrName, origin: Optional[ColumnOrName] = None
+) -> Column:
+    """Scale geometry with the corodinates of factor geometry
+
+    @param geometry:
+    @param factor:
+    @param origin:
+    @return:
+    """
+    if origin is not None:
+        args = (geometry, factor, origin)
+    else:
+        args = (geometry, factor)
+    return _call_st_function("ST_ScaleGeom", args)
+
+
+@validate_argument_types
 def ST_RotateX(geometry: ColumnOrName, angle: Union[ColumnOrName, float]) -> Column:
     """Returns geometry rotated by the given angle in X axis
 

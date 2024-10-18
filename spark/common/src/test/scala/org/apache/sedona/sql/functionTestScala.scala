@@ -3454,6 +3454,27 @@ class functionTestScala
     }
   }
 
+  it("Should pass ST_Scale") {
+    val baseDf =
+      sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (50 160, 50 50, 100 50)') AS geom")
+    val actual = baseDf.selectExpr("ST_AsText(ST_Scale(geom, -10, 5))").first().get(0)
+    val expected = "LINESTRING (-500 800, -500 250, -1000 250)"
+    assertEquals(expected, actual)
+  }
+
+  it("Should pass ST_ScaleGeom") {
+    val baseDf = sparkSession.sql(
+      "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1.5, 1.5 1.5, 1.5 0, 0 0))') AS geometry, ST_GeomFromWKT('POINT (1.8 2.1)') AS factor, ST_GeomFromWKT('POINT (0.32959 0.796483)') AS origin")
+    var actual = baseDf.selectExpr("ST_AsText(ST_ScaleGeom(geometry, factor))").first().get(0)
+    var expected = "POLYGON ((0 0, 0 3.1500000000000004, 2.7 3.1500000000000004, 2.7 0, 0 0))"
+    assertEquals(expected, actual)
+
+    actual = baseDf.selectExpr("ST_AsText(ST_ScaleGeom(geometry, factor, origin))").first().get(0)
+    expected =
+      "POLYGON ((-0.263672 -0.8761313000000002, -0.263672 2.2738687000000004, 2.436328 2.2738687000000004, 2.436328 -0.8761313000000002, -0.263672 -0.8761313000000002))"
+    assertEquals(expected, actual)
+  }
+
   it("Should pass ST_RotateX") {
     val geomTestCases = Map(
       (

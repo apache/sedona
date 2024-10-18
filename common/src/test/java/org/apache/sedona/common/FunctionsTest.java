@@ -3995,6 +3995,44 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void scale() throws ParseException {
+    Geometry geom = Constructors.geomFromWKT("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))", 0);
+    Geometry actual = Functions.scale(geom, 3, 2);
+    String expected = "POLYGON ((0 0, 0 2, 3 2, 3 0, 0 0))";
+    assertEquals(expected, actual.toString());
+
+    geom = Constructors.geomFromWKT("LINESTRING(0 1, 1 0)", 0);
+    actual = Functions.scale(geom, 10, 5);
+    expected = "LINESTRING (0 5, 10 0)";
+    assertEquals(expected, actual.toString());
+
+    geom = Constructors.geomFromWKT("POLYGON ((0 0, 0 1.5, 1.5 1.5, 1.5 0, 0 0))", 1111);
+    actual = Functions.scaleGeom(geom, Constructors.point(1.8, 2.1));
+    expected = "POLYGON ((0 0, 0 3.1500000000000004, 2.7 3.1500000000000004, 2.7 0, 0 0))";
+    assertEquals(expected, actual.toString());
+    assertEquals(1111, actual.getSRID());
+
+    actual =
+        Functions.scaleGeom(geom, Constructors.point(3, 2), Constructors.point(0.32959, 0.796483));
+    expected =
+        "POLYGON ((-0.6591799999999999 -0.796483, -0.6591799999999999 2.2035169999999997, 3.84082 2.2035169999999997, 3.84082 -0.796483, -0.6591799999999999 -0.796483))";
+    assertEquals(expected, actual.toString());
+
+    // test to check Z and M ordinate preservation
+    geom = Constructors.geomFromWKT("POLYGON ((0 0 1, 0 1.5 2, 1.5 1.5 2, 1.5 0 3, 0 0 1))", 0);
+    String actualWKT = Functions.asWKT(Functions.scale(geom, 3, 2));
+    expected = "POLYGON Z((0 0 1, 0 3 2, 4.5 3 2, 4.5 0 3, 0 0 1))";
+    assertEquals(expected, actualWKT);
+
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ZM((0 0 1 2, 0 1.5 2 2, 1.5 1.5 2 2, 1.5 0 3 2, 0 0 1 2))", 0);
+    actualWKT = Functions.asWKT(Functions.scale(geom, 3, 2));
+    expected = "POLYGON ZM((0 0 1 2, 0 3 2 2, 4.5 3 2 2, 4.5 0 3 2, 0 0 1 2))";
+    assertEquals(expected, actualWKT);
+  }
+
+  @Test
   public void rotateX() throws ParseException {
     Geometry lineString = Constructors.geomFromEWKT("LINESTRING (50 160, 50 50, 100 50)");
     String actual = Functions.asEWKT(Functions.rotateX(lineString, Math.PI));

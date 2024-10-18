@@ -496,6 +496,23 @@ object st_functions extends DataFrameAPI {
   def ST_Reverse(geometry: Column): Column = wrapExpression[ST_Reverse](geometry)
   def ST_Reverse(geometry: String): Column = wrapExpression[ST_Reverse](geometry)
 
+  def ST_Scale(geometry: Column, scaleX: Column, scaleY: Column): Column =
+    wrapExpression[ST_Scale](geometry, scaleX, scaleY)
+  def ST_Scale(geometry: String, scaleX: Double, scaleY: Double): Column =
+    wrapExpression[ST_Scale](geometry, scaleX, scaleY)
+  def ST_Scale(geometry: String, scaleX: String, scaleY: String): Column =
+    wrapExpression[ST_Scale](geometry, scaleX, scaleY)
+
+  def ST_ScaleGeom(geometry: Column, factor: Column): Column =
+    wrapExpression[ST_ScaleGeom](geometry, factor)
+  def ST_ScaleGeom(geometry: String, factor: String): Column =
+    wrapExpression[ST_ScaleGeom](geometry, factor)
+
+  def ST_ScaleGeom(geometry: Column, factor: Column, origin: Column): Column =
+    wrapExpression[ST_ScaleGeom](geometry, factor, origin)
+  def ST_ScaleGeom(geometry: String, factor: String, origin: String): Column =
+    wrapExpression[ST_ScaleGeom](geometry, factor, origin)
+
   def ST_RotateX(geometry: Column, angle: Column): Column =
     wrapExpression[ST_RotateX](geometry, angle)
   def ST_RotateX(geometry: String, angle: Double): Column =
