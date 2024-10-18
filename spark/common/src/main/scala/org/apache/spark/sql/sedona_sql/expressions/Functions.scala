@@ -1729,7 +1729,7 @@ case class ST_IsValidReason(inputExpressions: Seq[Expression])
 case class ST_Scale(inputExpressions: Seq[Expression])
     extends InferredExpression(inferrableFunction3(Functions.scale)) {
 
-  override protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
     copy(inputExpressions = newChildren)
 }
 
@@ -1738,7 +1738,7 @@ case class ST_ScaleGeom(inputExpressions: Seq[Expression])
       inferrableFunction3(Functions.scaleGeom),
       inferrableFunction2(Functions.scaleGeom)) {
 
-  override protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
     copy(inputExpressions = newChildren)
 }
 
