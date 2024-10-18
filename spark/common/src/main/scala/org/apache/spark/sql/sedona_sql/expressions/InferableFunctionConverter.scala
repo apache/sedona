@@ -21,14 +21,14 @@ package org.apache.spark.sql.sedona_sql.expressions
 import scala.reflect.runtime.universe.TypeTag
 
 /**
- * Implicit conversions from Java/Scala functions to [[InferrableFunction]]. This should be used
- * in conjunction with [[InferredExpression]] to make wrapping Java/Scala functions as catalyst
+ * Implicit conversions from Java/Scala functions to [[InferableFunction]]. This should be used in
+ * conjunction with [[InferredExpression]] to make wrapping Java/Scala functions as catalyst
  * expressions much easier.
  */
-object InferrableFunctionConverter {
+object InferableFunctionConverter {
   // scalastyle:off line.size.limit
-  implicit def inferrableFunction1[R: InferrableType, A1: InferrableType](f: (A1) => R)(implicit
-      typeTag: TypeTag[(A1) => R]): InferrableFunction = InferrableFunction(
+  implicit def inferableFunction1[R: InferableType, A1: InferableType](f: (A1) => R)(implicit
+      typeTag: TypeTag[(A1) => R]): InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[(Any) => Any]
@@ -43,9 +43,9 @@ object InferrableFunctionConverter {
       }
     })
 
-  implicit def inferrableFunction2[R: InferrableType, A1: InferrableType, A2: InferrableType](
-      f: (A1, A2) => R)(implicit typeTag: TypeTag[(A1, A2) => R]): InferrableFunction =
-    InferrableFunction(
+  implicit def inferableFunction2[R: InferableType, A1: InferableType, A2: InferableType](
+      f: (A1, A2) => R)(implicit typeTag: TypeTag[(A1, A2) => R]): InferableFunction =
+    InferableFunction(
       typeTag,
       argExtractors => {
         val func = f.asInstanceOf[(Any, Any) => Any]
@@ -62,12 +62,12 @@ object InferrableFunctionConverter {
         }
       })
 
-  implicit def inferrableFunction3[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType](f: (A1, A2, A3) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3) => R]): InferrableFunction = InferrableFunction(
+  implicit def inferableFunction3[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType](f: (A1, A2, A3) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3) => R]): InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[(Any, Any, Any) => Any]
@@ -86,13 +86,13 @@ object InferrableFunctionConverter {
       }
     })
 
-  implicit def inferrableFunction4[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType](f: (A1, A2, A3, A4) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3, A4) => R]): InferrableFunction = InferrableFunction(
+  implicit def inferableFunction4[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType](f: (A1, A2, A3, A4) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3, A4) => R]): InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[(Any, Any, Any, Any) => Any]
@@ -113,14 +113,14 @@ object InferrableFunctionConverter {
       }
     })
 
-  implicit def inferrableFunction5[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType](f: (A1, A2, A3, A4, A5) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3, A4, A5) => R]): InferrableFunction = InferrableFunction(
+  implicit def inferableFunction5[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType](f: (A1, A2, A3, A4, A5) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3, A4, A5) => R]): InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[(Any, Any, Any, Any, Any) => Any]
@@ -143,15 +143,15 @@ object InferrableFunctionConverter {
       }
     })
 
-  implicit def inferrableFunction6[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType](f: (A1, A2, A3, A4, A5, A6) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6) => R]): InferrableFunction = InferrableFunction(
+  implicit def inferableFunction6[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType](f: (A1, A2, A3, A4, A5, A6) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6) => R]): InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[(Any, Any, Any, Any, Any, Any) => Any]
@@ -176,17 +176,17 @@ object InferrableFunctionConverter {
       }
     })
 
-  implicit def inferrableFunction7[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType](f: (A1, A2, A3, A4, A5, A6, A7) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7) => R]): InferrableFunction =
-    InferrableFunction(
+  implicit def inferableFunction7[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType](f: (A1, A2, A3, A4, A5, A6, A7) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7) => R]): InferableFunction =
+    InferableFunction(
       typeTag,
       argExtractors => {
         val func = f.asInstanceOf[(Any, Any, Any, Any, Any, Any, Any) => Any]
@@ -213,18 +213,18 @@ object InferrableFunctionConverter {
         }
       })
 
-  implicit def inferrableFunction8[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType](f: (A1, A2, A3, A4, A5, A6, A7, A8) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8) => R]): InferrableFunction =
-    InferrableFunction(
+  implicit def inferableFunction8[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType](f: (A1, A2, A3, A4, A5, A6, A7, A8) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8) => R]): InferableFunction =
+    InferableFunction(
       typeTag,
       argExtractors => {
         val func = f.asInstanceOf[(Any, Any, Any, Any, Any, Any, Any, Any) => Any]
@@ -253,19 +253,19 @@ object InferrableFunctionConverter {
         }
       })
 
-  implicit def inferrableFunction9[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType,
-      A9: InferrableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9) => R]): InferrableFunction =
-    InferrableFunction(
+  implicit def inferableFunction9[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType,
+      A9: InferableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9) => R]): InferableFunction =
+    InferableFunction(
       typeTag,
       argExtractors => {
         val func = f.asInstanceOf[(Any, Any, Any, Any, Any, Any, Any, Any, Any) => Any]
@@ -296,20 +296,20 @@ object InferrableFunctionConverter {
         }
       })
 
-  implicit def inferrableFunction10[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType,
-      A9: InferrableType,
-      A10: InferrableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) => R]): InferrableFunction =
-    InferrableFunction(
+  implicit def inferableFunction10[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType,
+      A9: InferableType,
+      A10: InferableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) => R]): InferableFunction =
+    InferableFunction(
       typeTag,
       argExtractors => {
         val func = f.asInstanceOf[(Any, Any, Any, Any, Any, Any, Any, Any, Any, Any) => Any]
@@ -342,21 +342,21 @@ object InferrableFunctionConverter {
         }
       })
 
-  implicit def inferrableFunction11[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType,
-      A9: InferrableType,
-      A10: InferrableType,
-      A11: InferrableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) => R]): InferrableFunction =
-    InferrableFunction(
+  implicit def inferableFunction11[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType,
+      A9: InferableType,
+      A10: InferableType,
+      A11: InferableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) => R]): InferableFunction =
+    InferableFunction(
       typeTag,
       argExtractors => {
         val func = f.asInstanceOf[(Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any) => Any]
@@ -391,22 +391,22 @@ object InferrableFunctionConverter {
         }
       })
 
-  implicit def inferrableFunction12[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType,
-      A9: InferrableType,
-      A10: InferrableType,
-      A11: InferrableType,
-      A12: InferrableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12) => R)(implicit
+  implicit def inferableFunction12[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType,
+      A9: InferableType,
+      A10: InferableType,
+      A11: InferableType,
+      A12: InferableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12) => R)(implicit
       typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12) => R])
-      : InferrableFunction = InferrableFunction(
+      : InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func =
@@ -444,23 +444,23 @@ object InferrableFunctionConverter {
       }
     })
 
-  implicit def inferrableFunction13[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType,
-      A9: InferrableType,
-      A10: InferrableType,
-      A11: InferrableType,
-      A12: InferrableType,
-      A13: InferrableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) => R)(
+  implicit def inferableFunction13[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType,
+      A9: InferableType,
+      A10: InferableType,
+      A11: InferableType,
+      A12: InferableType,
+      A13: InferableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) => R)(
       implicit typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) => R])
-      : InferrableFunction = InferrableFunction(
+      : InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func =
@@ -500,25 +500,25 @@ object InferrableFunctionConverter {
       }
     })
 
-  implicit def inferrableFunction14[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType,
-      A9: InferrableType,
-      A10: InferrableType,
-      A11: InferrableType,
-      A12: InferrableType,
-      A13: InferrableType,
-      A14: InferrableType](
+  implicit def inferableFunction14[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType,
+      A9: InferableType,
+      A10: InferableType,
+      A11: InferableType,
+      A12: InferableType,
+      A13: InferableType,
+      A14: InferableType](
       f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) => R)(implicit
       typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) => R])
-      : InferrableFunction = InferrableFunction(
+      : InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[
@@ -574,26 +574,26 @@ object InferrableFunctionConverter {
       }
     })
 
-  implicit def inferrableFunction15[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType,
-      A9: InferrableType,
-      A10: InferrableType,
-      A11: InferrableType,
-      A12: InferrableType,
-      A13: InferrableType,
-      A14: InferrableType,
-      A15: InferrableType](
+  implicit def inferableFunction15[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType,
+      A9: InferableType,
+      A10: InferableType,
+      A11: InferableType,
+      A12: InferableType,
+      A13: InferableType,
+      A14: InferableType,
+      A15: InferableType](
       f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) => R)(implicit
       typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) => R])
-      : InferrableFunction = InferrableFunction(
+      : InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[
@@ -652,27 +652,27 @@ object InferrableFunctionConverter {
       }
     })
 
-  implicit def inferrableFunction16[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType,
-      A9: InferrableType,
-      A10: InferrableType,
-      A11: InferrableType,
-      A12: InferrableType,
-      A13: InferrableType,
-      A14: InferrableType,
-      A15: InferrableType,
-      A16: InferrableType](
+  implicit def inferableFunction16[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType,
+      A9: InferableType,
+      A10: InferableType,
+      A11: InferableType,
+      A12: InferableType,
+      A13: InferableType,
+      A14: InferableType,
+      A15: InferableType,
+      A16: InferableType](
       f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16) => R)(implicit
   typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16) => R])
-      : InferrableFunction = InferrableFunction(
+      : InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[
@@ -738,8 +738,8 @@ object InferrableFunctionConverter {
   // null values as function arguments. User needs to handle null arguments carefully in their function body when using
   // these functions.
 
-  def nullTolerantInferrableFunction1[R: InferrableType, A1: InferrableType](f: (A1) => R)(
-      implicit typeTag: TypeTag[(A1) => R]): InferrableFunction = InferrableFunction(
+  def nullTolerantInferableFunction1[R: InferableType, A1: InferableType](f: (A1) => R)(implicit
+      typeTag: TypeTag[(A1) => R]): InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[(Any) => Any]
@@ -750,9 +750,9 @@ object InferrableFunctionConverter {
       }
     })
 
-  def nullTolerantInferrableFunction2[R: InferrableType, A1: InferrableType, A2: InferrableType](
-      f: (A1, A2) => R)(implicit typeTag: TypeTag[(A1, A2) => R]): InferrableFunction =
-    InferrableFunction(
+  def nullTolerantInferableFunction2[R: InferableType, A1: InferableType, A2: InferableType](
+      f: (A1, A2) => R)(implicit typeTag: TypeTag[(A1, A2) => R]): InferableFunction =
+    InferableFunction(
       typeTag,
       argExtractors => {
         val func = f.asInstanceOf[(Any, Any) => Any]
@@ -765,12 +765,12 @@ object InferrableFunctionConverter {
         }
       })
 
-  def nullTolerantInferrableFunction3[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType](f: (A1, A2, A3) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3) => R]): InferrableFunction = InferrableFunction(
+  def nullTolerantInferableFunction3[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType](f: (A1, A2, A3) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3) => R]): InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[(Any, Any, Any) => Any]
@@ -785,13 +785,13 @@ object InferrableFunctionConverter {
       }
     })
 
-  def nullTolerantInferrableFunction4[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType](f: (A1, A2, A3, A4) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3, A4) => R]): InferrableFunction = InferrableFunction(
+  def nullTolerantInferableFunction4[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType](f: (A1, A2, A3, A4) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3, A4) => R]): InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[(Any, Any, Any, Any) => Any]
@@ -808,14 +808,14 @@ object InferrableFunctionConverter {
       }
     })
 
-  def nullTolerantInferrableFunction5[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType](f: (A1, A2, A3, A4, A5) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3, A4, A5) => R]): InferrableFunction = InferrableFunction(
+  def nullTolerantInferableFunction5[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType](f: (A1, A2, A3, A4, A5) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3, A4, A5) => R]): InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[(Any, Any, Any, Any, Any) => Any]
@@ -834,15 +834,15 @@ object InferrableFunctionConverter {
       }
     })
 
-  def nullTolerantInferrableFunction6[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType](f: (A1, A2, A3, A4, A5, A6) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6) => R]): InferrableFunction = InferrableFunction(
+  def nullTolerantInferableFunction6[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType](f: (A1, A2, A3, A4, A5, A6) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6) => R]): InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[(Any, Any, Any, Any, Any, Any) => Any]
@@ -863,17 +863,17 @@ object InferrableFunctionConverter {
       }
     })
 
-  def nullTolerantInferrableFunction7[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType](f: (A1, A2, A3, A4, A5, A6, A7) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7) => R]): InferrableFunction =
-    InferrableFunction(
+  def nullTolerantInferableFunction7[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType](f: (A1, A2, A3, A4, A5, A6, A7) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7) => R]): InferableFunction =
+    InferableFunction(
       typeTag,
       argExtractors => {
         val func = f.asInstanceOf[(Any, Any, Any, Any, Any, Any, Any) => Any]
@@ -896,18 +896,18 @@ object InferrableFunctionConverter {
         }
       })
 
-  def nullTolerantInferrableFunction8[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType](f: (A1, A2, A3, A4, A5, A6, A7, A8) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8) => R]): InferrableFunction =
-    InferrableFunction(
+  def nullTolerantInferableFunction8[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType](f: (A1, A2, A3, A4, A5, A6, A7, A8) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8) => R]): InferableFunction =
+    InferableFunction(
       typeTag,
       argExtractors => {
         val func = f.asInstanceOf[(Any, Any, Any, Any, Any, Any, Any, Any) => Any]
@@ -932,19 +932,19 @@ object InferrableFunctionConverter {
         }
       })
 
-  def nullTolerantInferrableFunction9[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType,
-      A9: InferrableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9) => R]): InferrableFunction =
-    InferrableFunction(
+  def nullTolerantInferableFunction9[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType,
+      A9: InferableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9) => R]): InferableFunction =
+    InferableFunction(
       typeTag,
       argExtractors => {
         val func = f.asInstanceOf[(Any, Any, Any, Any, Any, Any, Any, Any, Any) => Any]
@@ -971,20 +971,20 @@ object InferrableFunctionConverter {
         }
       })
 
-  def nullTolerantInferrableFunction10[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType,
-      A9: InferrableType,
-      A10: InferrableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) => R]): InferrableFunction =
-    InferrableFunction(
+  def nullTolerantInferableFunction10[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType,
+      A9: InferableType,
+      A10: InferableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) => R]): InferableFunction =
+    InferableFunction(
       typeTag,
       argExtractors => {
         val func = f.asInstanceOf[(Any, Any, Any, Any, Any, Any, Any, Any, Any, Any) => Any]
@@ -1013,21 +1013,21 @@ object InferrableFunctionConverter {
         }
       })
 
-  def nullTolerantInferrableFunction11[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType,
-      A9: InferrableType,
-      A10: InferrableType,
-      A11: InferrableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) => R)(implicit
-      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) => R]): InferrableFunction =
-    InferrableFunction(
+  def nullTolerantInferableFunction11[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType,
+      A9: InferableType,
+      A10: InferableType,
+      A11: InferableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) => R)(implicit
+      typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) => R]): InferableFunction =
+    InferableFunction(
       typeTag,
       argExtractors => {
         val func = f.asInstanceOf[(Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any) => Any]
@@ -1058,22 +1058,22 @@ object InferrableFunctionConverter {
         }
       })
 
-  def nullTolerantInferrableFunction12[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType,
-      A9: InferrableType,
-      A10: InferrableType,
-      A11: InferrableType,
-      A12: InferrableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12) => R)(implicit
+  def nullTolerantInferableFunction12[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType,
+      A9: InferableType,
+      A10: InferableType,
+      A11: InferableType,
+      A12: InferableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12) => R)(implicit
       typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12) => R])
-      : InferrableFunction = InferrableFunction(
+      : InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func =
@@ -1107,23 +1107,23 @@ object InferrableFunctionConverter {
       }
     })
 
-  def nullTolerantInferrableFunction13[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType,
-      A9: InferrableType,
-      A10: InferrableType,
-      A11: InferrableType,
-      A12: InferrableType,
-      A13: InferrableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) => R)(
+  def nullTolerantInferableFunction13[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType,
+      A9: InferableType,
+      A10: InferableType,
+      A11: InferableType,
+      A12: InferableType,
+      A13: InferableType](f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) => R)(
       implicit typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) => R])
-      : InferrableFunction = InferrableFunction(
+      : InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func =
@@ -1159,25 +1159,25 @@ object InferrableFunctionConverter {
       }
     })
 
-  def nullTolerantInferrableFunction14[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType,
-      A9: InferrableType,
-      A10: InferrableType,
-      A11: InferrableType,
-      A12: InferrableType,
-      A13: InferrableType,
-      A14: InferrableType](
+  def nullTolerantInferableFunction14[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType,
+      A9: InferableType,
+      A10: InferableType,
+      A11: InferableType,
+      A12: InferableType,
+      A13: InferableType,
+      A14: InferableType](
       f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) => R)(implicit
       typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) => R])
-      : InferrableFunction = InferrableFunction(
+      : InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[
@@ -1229,26 +1229,26 @@ object InferrableFunctionConverter {
       }
     })
 
-  def nullTolerantInferrableFunction15[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType,
-      A9: InferrableType,
-      A10: InferrableType,
-      A11: InferrableType,
-      A12: InferrableType,
-      A13: InferrableType,
-      A14: InferrableType,
-      A15: InferrableType](
+  def nullTolerantInferableFunction15[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType,
+      A9: InferableType,
+      A10: InferableType,
+      A11: InferableType,
+      A12: InferableType,
+      A13: InferableType,
+      A14: InferableType,
+      A15: InferableType](
       f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) => R)(implicit
       typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) => R])
-      : InferrableFunction = InferrableFunction(
+      : InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[
@@ -1303,27 +1303,27 @@ object InferrableFunctionConverter {
       }
     })
 
-  def nullTolerantInferrableFunction16[
-      R: InferrableType,
-      A1: InferrableType,
-      A2: InferrableType,
-      A3: InferrableType,
-      A4: InferrableType,
-      A5: InferrableType,
-      A6: InferrableType,
-      A7: InferrableType,
-      A8: InferrableType,
-      A9: InferrableType,
-      A10: InferrableType,
-      A11: InferrableType,
-      A12: InferrableType,
-      A13: InferrableType,
-      A14: InferrableType,
-      A15: InferrableType,
-      A16: InferrableType](
+  def nullTolerantInferableFunction16[
+      R: InferableType,
+      A1: InferableType,
+      A2: InferableType,
+      A3: InferableType,
+      A4: InferableType,
+      A5: InferableType,
+      A6: InferableType,
+      A7: InferableType,
+      A8: InferableType,
+      A9: InferableType,
+      A10: InferableType,
+      A11: InferableType,
+      A12: InferableType,
+      A13: InferableType,
+      A14: InferableType,
+      A15: InferableType,
+      A16: InferableType](
       f: (A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16) => R)(implicit
   typeTag: TypeTag[(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16) => R])
-      : InferrableFunction = InferrableFunction(
+      : InferableFunction = InferableFunction(
     typeTag,
     argExtractors => {
       val func = f.asInstanceOf[

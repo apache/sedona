@@ -28,11 +28,11 @@ import org.apache.spark.sql.types.{ArrayType, DataTypes, UserDefinedType}
 import scala.reflect.runtime.universe.{Type, typeOf}
 import org.geotools.coverage.grid.GridCoverage2D
 
-object InferrableRasterTypes {
-  implicit val gridCoverage2DInstance: InferrableType[GridCoverage2D] =
-    new InferrableType[GridCoverage2D] {}
-  implicit val gridCoverage2DArrayInstance: InferrableType[Array[GridCoverage2D]] =
-    new InferrableType[Array[GridCoverage2D]] {}
+object InferableRasterTypes {
+  implicit val gridCoverage2DInstance: InferableType[GridCoverage2D] =
+    new InferableType[GridCoverage2D] {}
+  implicit val gridCoverage2DArrayInstance: InferableType[Array[GridCoverage2D]] =
+    new InferableType[Array[GridCoverage2D]] {}
 
   def isRasterType(t: Type): Boolean = t =:= typeOf[GridCoverage2D]
   def isRasterArrayType(t: Type): Boolean = t =:= typeOf[Array[GridCoverage2D]]
