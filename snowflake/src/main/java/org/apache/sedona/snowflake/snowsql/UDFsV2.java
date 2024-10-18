@@ -1536,6 +1536,37 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "scaleX", "scaleY"},
+      argTypes = {"Geometry", "double", "double"},
+      returnTypes = "Geometry")
+  public static String ST_Scale(String geometry, double scaleX, double scaleY) {
+    return GeometrySerde.serGeoJson(
+        Functions.scale(GeometrySerde.deserGeoJson(geometry), scaleX, scaleY));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "factor", "origin"},
+      argTypes = {"Geometry", "Geometry", "Geometry"},
+      returnTypes = "Geometry")
+  public static String ST_ScaleGeom(String geometry, String factor, String origin) {
+    return GeometrySerde.serGeoJson(
+        Functions.scaleGeom(
+            GeometrySerde.deserGeoJson(geometry),
+            GeometrySerde.deserGeoJson(factor),
+            GeometrySerde.deserGeoJson(origin)));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "factor"},
+      argTypes = {"Geometry", "Geometry"},
+      returnTypes = "Geometry")
+  public static String ST_ScaleGeom(String geometry, String factor) {
+    return GeometrySerde.serGeoJson(
+        Functions.scaleGeom(
+            GeometrySerde.deserGeoJson(geometry), GeometrySerde.deserGeoJson(factor)));
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geometry", "angle"},
       argTypes = {"Geometry", "double"},
       returnTypes = "Geometry")
