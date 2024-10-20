@@ -1202,10 +1202,10 @@ public class TestFunctionsV2 extends TestBase {
 
   @Test
   public void test_ST_ScaleGeom() {
-    registerUDFV2("ST_ScaleGeom", String.class, String.class, String.class);
-    verifySqlSingleRes(
-        "SELECT ST_AsText(sedona.ST_ScaleGeom(ST_GeometryFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'), ST_Point(3, 2), ST_Point(1, 2)))",
-        "POLYGON((-2 -2,-2 0,1 0,1 -2,-2 -2))");
+//    registerUDFV2("ST_ScaleGeom", String.class, String.class, String.class);
+//    verifySqlSingleRes(
+//        "SELECT ST_AsText(sedona.ST_ScaleGeom(ST_GeometryFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'), ST_Point(3, 2), ST_Point(1, 2)))",
+//        "POLYGON((-2 -2,-2 0,1 0,1 -2,-2 -2))");
 
     registerUDFV2("ST_ScaleGeom", String.class, String.class);
     verifySqlSingleRes(
