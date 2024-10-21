@@ -133,6 +133,7 @@ jobs:
           pipenv install pyspark==${SPARK_VERSION}
           pipenv install --dev
           pipenv graph
+          pipenv run pip show pyspark
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
