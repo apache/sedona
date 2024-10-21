@@ -113,18 +113,6 @@ jobs:
         run: |
             SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
             mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dgeotools
-      - env:
-          SPARK_VERSION: ${{ matrix.spark }}
-          HADOOP_VERSION: ${{ matrix.hadoop }}
-        run: |
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
-          tar -xzf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz
-          mv -v jai_core-${JAI_CORE_VERSION}.jar spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/jars/
-          mv -v jai_codec-${JAI_CODEC_VERSION}.jar spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/jars/
-          mv -v jai_imageio-${JAI_IMAGEIO_VERSION}.jar spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/jars/
       - run: sudo apt-get -y install python3-pip python-dev-is-python3
       - run: sudo pip3 install -U setuptools
       - run: sudo pip3 install -U wheel
@@ -145,6 +133,17 @@ jobs:
           pipenv install pyspark==${SPARK_VERSION}
           pipenv install --dev
           pipenv graph
+      - env:
+          SPARK_VERSION: ${{ matrix.spark }}
+          HADOOP_VERSION: ${{ matrix.hadoop }}
+          PYTHON_VERSION: ${{ matrix.python }}
+        run: |
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
+          mv -v jai_core-${JAI_CORE_VERSION}.jar /usr/local/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
+          mv -v jai_codec-${JAI_CODEC_VERSION}.jar /usr/local/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
+          mv -v jai_imageio-${JAI_IMAGEIO_VERSION}.jar /usr/local/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
