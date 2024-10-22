@@ -107,8 +107,6 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3.19
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           SCALA_VERSION: ${{ matrix.scala }}
@@ -148,6 +146,8 @@ jobs:
           mv -v jai_core-${JAI_CORE_VERSION}.jar /home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
           mv -v jai_codec-${JAI_CODEC_VERSION}.jar /home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
           mv -v jai_imageio-${JAI_IMAGEIO_VERSION}.jar /home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3.19
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
