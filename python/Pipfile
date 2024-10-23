@@ -11,6 +11,8 @@ mkdocs="*"
 pytest-cov = "*"
 
 scikit-learn = "*"
+esda = "*"
+libpysal = "*"
 
 [packages]
 pandas="<=1.5.3"

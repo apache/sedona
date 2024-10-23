@@ -16,8 +16,10 @@
 #  under the License.
 import os
 from tempfile import mkdtemp
+from typing import Iterable, Union
 
 import pyspark
+from pyspark.sql import DataFrame
 
 from sedona.spark import *
 from sedona.utils.decorators import classproperty
@@ -60,3 +62,25 @@ class TestBase:
         if not hasattr(self, "__spark"):
             setattr(self, "__sc", self.spark._sc)
         return getattr(self, "__sc")
+
+    def assert_almost_equal(
+        self,
+        a: Union[Iterable[float], float],
+        b: Union[Iterable[float], float],
+        tolerance: float = 0.00001,
+    ):
+        assert type(a) is type(b)
+        if isinstance(a, Iterable):
+            assert len(a) == len(b)
+            for i in range(len(a)):
+                self.assert_almost_equal(a[i], b[i], tolerance)
+        elif isinstance(b, float):
+            assert abs(a - b) < tolerance
+        else:
+            raise TypeError("this function is only for floats and iterables of floats")
+
+    def assert_dataframes_equal(self, df1: DataFrame, df2: DataFrame):
+        df_diff1 = df1.exceptAll(df2)
+        df_diff2 = df2.exceptAll(df1)
+
+        assert df_diff1.isEmpty and df_diff2.isEmpty

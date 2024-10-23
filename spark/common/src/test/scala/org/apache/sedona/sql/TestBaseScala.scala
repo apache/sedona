@@ -318,4 +318,11 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     val hdfsCluster = builder.build
     (hdfsCluster, "hdfs://127.0.0.1:" + hdfsCluster.getNameNodePort + "/")
   }
+
+  protected def assertDataFramesEqual(df1: DataFrame, df2: DataFrame): Unit = {
+    val dfDiff1 = df1.except(df2)
+    val dfDiff2 = df2.except(df1)
+
+    assert(dfDiff1.isEmpty && dfDiff2.isEmpty)
+  }
 }
