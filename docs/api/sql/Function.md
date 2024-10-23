@@ -3512,7 +3512,7 @@ Output:
 
 ## ST_Scale
 
-Introduction: This function scales the geometry to a new size by multiplying the  ordinates with the corresponding scaling factors provided as parameters `scaleX` and `scaleY`.
+Introduction: This function scales the geometry to a new size by multiplying the ordinates with the corresponding scaling factors provided as parameters `scaleX` and `scaleY`.
 
 !!!Note
     This function is designed for scaling 2D geometries. While it currently doesn't support scaling the Z and M coordinates, it preserves these values during the scaling operation.
