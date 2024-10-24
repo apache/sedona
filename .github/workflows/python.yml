@@ -155,6 +155,8 @@ jobs:
           HADOOP_VERSION: ${{ matrix.hadoop }}
           PYTHON_VERSION: ${{ matrix.python }}
         run: (export SPARK_HOME=/home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark;cd python;pipenv run pytest tests)
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3.19
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
