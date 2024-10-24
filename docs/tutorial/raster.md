@@ -89,11 +89,11 @@ You can add additional Spark runtime config to the config builder. For example, 
 
 	config = SedonaContext.builder() .\
 	    config('spark.jars.packages',
-	           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
+	           'org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},'
 	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
 	    getOrCreate()
 	```
-    If you are using Spark versions >= 3.4, please replace the `3.0` in the package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
+    Please replace the `3.3` in the package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
 
 ==Sedona < 1.4.1==
 
@@ -142,11 +142,11 @@ The following method has been deprecated since Sedona 1.4.1. Please use the meth
 	    config("spark.serializer", KryoSerializer.getName). \
 	    config("spark.kryo.registrator", SedonaKryoRegistrator.getName). \
 	    config('spark.jars.packages',
-	           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
+	           'org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},'
 	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
 	    getOrCreate()
 	```
-    If you are using Spark versions >= 3.4, please replace the `3.0` in the package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
+    Please replace the `3.3` in the package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
 
 ## Initiate SedonaContext
 

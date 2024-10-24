@@ -35,8 +35,7 @@ python3 setup.py install
 
 Sedona Python needs one additional jar file called `sedona-spark-shaded` or `sedona-spark` to work properly. Please make sure you use the correct version for Spark and Scala.
 
-* For Spark 3.0 to 3.3 and Scala 2.12, it is called `sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar` or `sedona-spark-3.0_2.12-{{ sedona.current_version }}.jar`
-* For Spark 3.4+ and Scala 2.12, it is called `sedona-spark-shaded-3.4_2.12-{{ sedona.current_version }}.jar` or `sedona-spark-3.4_2.12-{{ sedona.current_version }}.jar`. If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version numbers.
+Please use Spark major.minor version number in artifact names.
 
 You can get it using one of the following methods:
 
@@ -48,7 +47,7 @@ You can get it using one of the following methods:
 from sedona.spark import *
 config = SedonaContext.builder(). \
     config('spark.jars.packages',
-           'org.apache.sedona:sedona-spark-3.0_2.12:{{ sedona.current_version }},'
+           'org.apache.sedona:sedona-spark-3.3_2.12:{{ sedona.current_version }},'
            'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
     config('spark.jars.repositories', 'https://artifacts.unidata.ucar.edu/repository/unidata-all'). \
     getOrCreate()
@@ -69,7 +68,7 @@ spark = SparkSession. \
     config("spark.serializer", KryoSerializer.getName). \
     config("spark.kryo.registrator", SedonaKryoRegistrator.getName). \
     config('spark.jars.packages',
-           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
+           'org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},'
            'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
     getOrCreate()
 SedonaRegistrator.registerAll(spark)
