@@ -25,8 +25,8 @@ import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{CreateArray, Expression, Generator, Literal}
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
-import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
-import org.apache.spark.sql.sedona_sql.expressions.InferrableRasterTypes._
+import org.apache.spark.sql.sedona_sql.expressions.InferableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferableRasterTypes._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 import org.apache.spark.sql.sedona_sql.expressions.raster.implicits.{RasterEnhancer, RasterInputExpressionEnhancer}
 import org.apache.spark.sql.types.{ArrayType, BooleanType, Decimal, IntegerType, NullType, StructType}
@@ -42,10 +42,10 @@ case class RS_FromArcInfoAsciiGrid(inputExpressions: Seq[Expression])
 
 case class RS_AsRaster(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction5(RasterConstructors.asRaster),
-      inferrableFunction3(RasterConstructors.asRaster),
-      inferrableFunction4(RasterConstructors.asRaster),
-      inferrableFunction6(RasterConstructors.asRaster)) {
+      inferableFunction5(RasterConstructors.asRaster),
+      inferableFunction3(RasterConstructors.asRaster),
+      inferableFunction4(RasterConstructors.asRaster),
+      inferableFunction6(RasterConstructors.asRaster)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -63,10 +63,10 @@ case class RS_FromGeoTiff(inputExpressions: Seq[Expression])
 
 case class RS_MakeEmptyRaster(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction6(RasterConstructors.makeEmptyRaster),
-      inferrableFunction7(RasterConstructors.makeEmptyRaster),
-      inferrableFunction10(RasterConstructors.makeEmptyRaster),
-      inferrableFunction11(RasterConstructors.makeEmptyRaster)) {
+      inferableFunction6(RasterConstructors.makeEmptyRaster),
+      inferableFunction7(RasterConstructors.makeEmptyRaster),
+      inferableFunction10(RasterConstructors.makeEmptyRaster),
+      inferableFunction11(RasterConstructors.makeEmptyRaster)) {
 
   override def foldable: Boolean = false
 
@@ -76,7 +76,7 @@ case class RS_MakeEmptyRaster(inputExpressions: Seq[Expression])
 }
 
 case class RS_MakeRaster(inputExpressions: Seq[Expression])
-    extends InferredExpression(inferrableFunction3(RasterConstructors.makeNonEmptyRaster)) {
+    extends InferredExpression(inferableFunction3(RasterConstructors.makeNonEmptyRaster)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -91,10 +91,10 @@ case class RS_MakeRasterForTesting(inputExpressions: Seq[Expression])
 
 case class RS_Tile(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      nullTolerantInferrableFunction3(RasterConstructors.rsTile),
-      nullTolerantInferrableFunction4(RasterConstructors.rsTile),
-      nullTolerantInferrableFunction5(RasterConstructors.rsTile),
-      nullTolerantInferrableFunction6(RasterConstructors.rsTile)) {
+      nullTolerantInferableFunction3(RasterConstructors.rsTile),
+      nullTolerantInferableFunction4(RasterConstructors.rsTile),
+      nullTolerantInferableFunction5(RasterConstructors.rsTile),
+      nullTolerantInferableFunction6(RasterConstructors.rsTile)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -206,8 +206,8 @@ object RS_TileExplode {
 
 case class RS_FromNetCDF(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction2(RasterConstructors.fromNetCDF),
-      inferrableFunction4(RasterConstructors.fromNetCDF)) {
+      inferableFunction2(RasterConstructors.fromNetCDF),
+      inferableFunction4(RasterConstructors.fromNetCDF)) {
 
   override def foldable: Boolean = false
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {

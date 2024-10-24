@@ -25,8 +25,8 @@ import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
-import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
-import org.apache.spark.sql.sedona_sql.expressions.InferrableRasterTypes._
+import org.apache.spark.sql.sedona_sql.expressions.InferableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferableRasterTypes._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 import org.apache.spark.sql.sedona_sql.expressions.raster.implicits.RasterInputExpressionEnhancer
 import org.apache.spark.sql.types.{AbstractDataType, ArrayType, DataType, DoubleType, IntegerType, StructType}
@@ -35,9 +35,9 @@ import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 
 case class RS_Value(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction2(PixelFunctions.value),
-      inferrableFunction3(PixelFunctions.value),
-      inferrableFunction4(PixelFunctions.value)) {
+      inferableFunction2(PixelFunctions.value),
+      inferableFunction3(PixelFunctions.value),
+      inferableFunction4(PixelFunctions.value)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -191,9 +191,9 @@ case class RS_PixelAsCentroids(inputExpressions: Seq[Expression])
 
 case class RS_Values(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction2(PixelFunctions.values),
-      inferrableFunction3(PixelFunctions.values),
-      inferrableFunction4(PixelFunctions.values)) {
+      inferableFunction2(PixelFunctions.values),
+      inferableFunction3(PixelFunctions.values),
+      inferableFunction4(PixelFunctions.values)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

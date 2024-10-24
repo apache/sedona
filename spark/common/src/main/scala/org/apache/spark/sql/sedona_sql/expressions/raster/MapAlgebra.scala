@@ -22,8 +22,8 @@ import org.apache.sedona.common.raster.MapAlgebra
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
-import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
-import org.apache.spark.sql.sedona_sql.expressions.InferrableRasterTypes._
+import org.apache.spark.sql.sedona_sql.expressions.InferableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferableRasterTypes._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
 /// Calculate Normalized Difference between two bands
@@ -203,9 +203,9 @@ case class RS_Normalize(inputExpressions: Seq[Expression])
 
 case class RS_AddBandFromArray(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      nullTolerantInferrableFunction3(MapAlgebra.addBandFromArray),
-      nullTolerantInferrableFunction4(MapAlgebra.addBandFromArray),
-      inferrableFunction2(MapAlgebra.addBandFromArray)) {
+      nullTolerantInferableFunction3(MapAlgebra.addBandFromArray),
+      nullTolerantInferableFunction4(MapAlgebra.addBandFromArray),
+      inferableFunction2(MapAlgebra.addBandFromArray)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -220,9 +220,9 @@ case class RS_BandAsArray(inputExpressions: Seq[Expression])
 
 case class RS_MapAlgebra(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      nullTolerantInferrableFunction3(MapAlgebra.mapAlgebra),
-      nullTolerantInferrableFunction4(MapAlgebra.mapAlgebra),
-      nullTolerantInferrableFunction5(MapAlgebra.mapAlgebra)) {
+      nullTolerantInferableFunction3(MapAlgebra.mapAlgebra),
+      nullTolerantInferableFunction4(MapAlgebra.mapAlgebra),
+      nullTolerantInferableFunction5(MapAlgebra.mapAlgebra)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

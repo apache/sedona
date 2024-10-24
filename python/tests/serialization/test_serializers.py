@@ -125,7 +125,7 @@ class TestsSerializers(TestBase):
         length = self.spark.sql("select st_area(geom) from polygon").collect()[0][0]
         assert length == 3.75
 
-    def test_geopandas_convertion(self):
+    def test_geopandas_conversion(self):
         gdf = gpd.read_file(
             os.path.join(tests_resource, "shapefiles/gis_osm_pois_free_1/")
         )
