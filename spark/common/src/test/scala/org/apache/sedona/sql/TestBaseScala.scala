@@ -32,6 +32,7 @@ import org.locationtech.jts.geom._
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 import java.io.File
+import java.nio.file.Files
 
 trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   Logger.getRootLogger.setLevel(Level.WARN)
@@ -97,6 +98,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   override def beforeAll(): Unit = {
     super.beforeAll()
     SedonaContext.create(sparkSession)
+    sc.setCheckpointDir(Files.createTempDirectory("checkpoints").toString)
   }
 
   override def afterAll(): Unit = {

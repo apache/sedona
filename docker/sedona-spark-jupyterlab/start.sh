@@ -29,7 +29,7 @@ convert_to_mb() {
       echo $(($mem_value * 1024))
       ;;
     [mM])
-      echo $mem_value
+      echo "$mem_value"
       ;;
     *)
       echo "Invalid memory unit: $mem_str" >&2
@@ -39,13 +39,13 @@ convert_to_mb() {
 }
 
 # Convert DRIVER_MEM and EXECUTOR_MEM to megabytes
-DRIVER_MEM_MB=$(convert_to_mb $DRIVER_MEM)
+DRIVER_MEM_MB=$(convert_to_mb "$DRIVER_MEM")
 if [ $? -ne 0 ]; then
   echo "Error converting DRIVER_MEM to megabytes." >&2
   exit 1
 fi
 
-EXECUTOR_MEM_MB=$(convert_to_mb $EXECUTOR_MEM)
+EXECUTOR_MEM_MB=$(convert_to_mb "$EXECUTOR_MEM")
 if [ $? -ne 0 ]; then
   echo "Error converting EXECUTOR_MEM to megabytes." >&2
   exit 1
@@ -58,7 +58,7 @@ TOTAL_PHYSICAL_MEM_MB=$(free -m | awk '/^Mem:/{print $2}')
 TOTAL_REQUIRED_MEM_MB=$(($DRIVER_MEM_MB + $EXECUTOR_MEM_MB))
 
 # Compare total required memory with total physical memory
-if [ $TOTAL_REQUIRED_MEM_MB -gt $TOTAL_PHYSICAL_MEM_MB ]; then
+if [ $TOTAL_REQUIRED_MEM_MB -gt "$TOTAL_PHYSICAL_MEM_MB" ]; then
     echo "Error: Insufficient memory" >&2
     echo "  total:    $TOTAL_PHYSICAL_MEM_MB MB" >&2
     echo "  required: $TOTAL_REQUIRED_MEM_MB MB (driver: $DRIVER_MEM_MB MB, executor: $EXECUTOR_MEM_MB MB)" >&2
@@ -68,14 +68,14 @@ if [ $TOTAL_REQUIRED_MEM_MB -gt $TOTAL_PHYSICAL_MEM_MB ]; then
 fi
 
 # Configure spark
-cp ${SPARK_HOME}/conf/spark-env.sh.template ${SPARK_HOME}/conf/spark-env.sh
-echo "SPARK_WORKER_MEMORY=${EXECUTOR_MEM}" >> ${SPARK_HOME}/conf/spark-env.sh
-echo "spark.driver.memory $DRIVER_MEM" >> ${SPARK_HOME}/conf/spark-defaults.conf
-echo "spark.executor.memory $EXECUTOR_MEM" >> ${SPARK_HOME}/conf/spark-defaults.conf
+cp "${SPARK_HOME}"/conf/spark-env.sh.template "${SPARK_HOME}"/conf/spark-env.sh
+echo "SPARK_WORKER_MEMORY=${EXECUTOR_MEM}" >> "${SPARK_HOME}"/conf/spark-env.sh
+echo "spark.driver.memory $DRIVER_MEM" >> "${SPARK_HOME}"/conf/spark-defaults.conf
+echo "spark.executor.memory $EXECUTOR_MEM" >> "${SPARK_HOME}"/conf/spark-defaults.conf
 
 # Start spark standalone cluster
 service ssh start
-${SPARK_HOME}/sbin/start-all.sh
+"${SPARK_HOME}"/sbin/start-all.sh
 
 # Start jupyter lab
 exec jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=

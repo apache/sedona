@@ -90,6 +90,8 @@ repos:
               python/tests/streaming/spark/cases_builder\.py|
               python/tests/tools\.py
           )$
+      - id: requirements-txt-fixer
+        files: ^docker/sedona-spark-jupyterlab/requirements\.txt$
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
         exclude: ^docs-overrides/main\.html$|\.Rd$
@@ -103,6 +105,10 @@ repos:
         exclude: ^\.github/.*$
         types: [markdown]
         files: \.(md|mdown|markdown)$
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.35.1
     hooks:
