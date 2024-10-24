@@ -10,6 +10,12 @@ repos:
     hooks:
       - id: identity
       - id: check-hooks-apply
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.18.0
+    hooks:
+      - id: pyupgrade
+        args: [--py36-plus]
+        exclude: ^python/sedona/sql/dataframe_api\.py$
   - repo: https://github.com/psf/black-pre-commit-mirror
     rev: 24.10.0
     hooks:
