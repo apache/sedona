@@ -160,8 +160,6 @@ jobs:
           cd python
           source /home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/bin/activate
           pytest tests
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3.19
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
