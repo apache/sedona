@@ -1238,6 +1238,27 @@ public class TestFunctions extends TestBase {
   }
 
   @Test
+  public void test_ST_Scale() {
+    registerUDF("ST_Scale", byte[].class, double.class, double.class);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_AsText(sedona.ST_Scale(sedona.ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'), 3, 2))",
+        "POLYGON ((0 0, 0 2, 3 2, 3 0, 0 0))");
+  }
+
+  @Test
+  public void test_ST_ScaleGeom() {
+    registerUDF("ST_ScaleGeom", byte[].class, byte[].class, byte[].class);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_AsText(sedona.ST_ScaleGeom(sedona.ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'), sedona.ST_Point(3, 2), sedona.ST_Point(1, 2)))",
+        "POLYGON ((-2 -2, -2 0, 1 0, 1 -2, -2 -2))");
+
+    registerUDF("ST_ScaleGeom", byte[].class, byte[].class);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_AsText(sedona.ST_ScaleGeom(sedona.ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'), sedona.ST_Point(3, 2)))",
+        "POLYGON ((0 0, 0 2, 3 2, 3 0, 0 0))");
+  }
+
+  @Test
   public void test_ST_RotateX() {
     registerUDF("ST_RotateX", byte[].class, double.class);
     verifySqlSingleRes(

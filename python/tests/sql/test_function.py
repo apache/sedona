@@ -1345,6 +1345,32 @@ class TestPredicateJoin(TestBase):
         ]
         assert collected_geometries[0] == "LINESTRING (0 0, 1 1, 1 0, 21 52)"
 
+    def test_st_scale(self):
+        baseDf = self.spark.sql(
+            "SELECT ST_GeomFromWKT('LINESTRING (50 160, 50 50, 100 50)') AS geom"
+        )
+        actual = baseDf.selectExpr("ST_AsText(ST_Scale(geom, -10, 5))").first()[0]
+        expected = "LINESTRING (-500 800, -500 250, -1000 250)"
+        assert expected == actual
+
+    def test_st_scalegeom(self):
+        baseDf = self.spark.sql(
+            "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1.5, 1.5 1.5, 1.5 0, 0 0))') AS geometry, ST_GeomFromWKT('POINT (1.8 2.1)') AS factor, ST_GeomFromWKT('POINT (0.32959 0.796483)') AS origin"
+        )
+        actual = baseDf.selectExpr("ST_AsText(ST_ScaleGeom(geometry, factor))").first()[
+            0
+        ]
+        expected = (
+            "POLYGON ((0 0, 0 3.1500000000000004, 2.7 3.1500000000000004, 2.7 0, 0 0))"
+        )
+        assert expected == actual
+
+        actual = baseDf.selectExpr(
+            "ST_AsText(ST_ScaleGeom(geometry, factor, origin))"
+        ).first()[0]
+        expected = "POLYGON ((-0.263672 -0.8761313000000002, -0.263672 2.2738687000000004, 2.436328 2.2738687000000004, 2.436328 -0.8761313000000002, -0.263672 -0.8761313000000002))"
+        assert expected == actual
+
     def test_st_rotate_x(self):
         baseDf = self.spark.sql(
             "SELECT ST_GeomFromWKT('LINESTRING (50 160, 50 50, 100 50)') as geom1, ST_GeomFromWKT('LINESTRING(1 2 3, 1 1 1)') AS geom2"
