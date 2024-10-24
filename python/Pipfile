@@ -11,6 +11,10 @@ mkdocs="*"
 pytest-cov = "*"
 
 scikit-learn = "*"
+esda = "*"
+libpysal = "*"
+matplotlib = "*" # implicit dependency of esda
+scipy = "<=1.10.0" # prevent incompatibility with pysal 4.7.0, which is what is resolved to when shapely >2 is specified
 
 [packages]
 pandas="<=1.5.3"

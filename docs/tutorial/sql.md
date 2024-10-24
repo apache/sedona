@@ -946,6 +946,67 @@ The output will look like this:
 +--------------------+------------------+
 ```
 
+## Perform Getis-Ord Gi(*) Hot Spot Analysis
+
+Sedona provides an implementation of the [Gi and Gi*](https://en.wikipedia.org/wiki/Getis%E2%80%93Ord_statistics) algorithms to identify local hotspots in spatial data
+
+The algorithm is available as a Scala and Python function called on a spatial dataframe. The returned dataframe has additional columns added containing G statistic, E[G], V[G], the Z score, and the p-value.
+
+Using Gi involves first generating the neighbors list for each record, then calling the g_local function.
+=== "Scala"
+
+	```scala
+	import org.apache.sedona.stats.Weighting.addBinaryDistanceBandColumn
+	import org.apache.sedona.stats.hotspotDetection.GetisOrd.gLocal
+
+	val distanceRadius = 1.0
+	val weightedDf = addBinaryDistanceBandColumn(df, distanceRadius)
+    gLocal(weightedDf, "val").show()
+	```
+
+=== "Java"
+
+	```java
+	import org.apache.sedona.stats.Weighting;
+	import org.apache.sedona.stats.hotspotDetection.GetisOrd;
+	import org.apache.spark.sql.DataFrame;
+
+	double distanceRadius = 1.0;
+	DataFrame weightedDf = Weighting.addBinaryDistanceBandColumn(df, distanceRadius);
+	GetisOrd.gLocal(weightedDf, "val").show();
+	```
+
+=== "Python"
+
+	```python
+	from sedona.stats.weighting import add_binary_distance_band_column
+	from sedona.stats.hotspot_detection.getis_ord import g_local
+
+	distance_radius = 1.0
+	weighted_df = addBinaryDistanceBandColumn(df, distance_radius)
+    g_local(weightedDf, "val").show()
+	```
+
+The output will look like this:
+
+```
++-----------+---+--------------------+-------------------+-------------------+--------------------+--------------------+--------------------+
+|   geometry|val|             weights|                  G|                 EG|                  VG|                   Z|                   P|
++-----------+---+--------------------+-------------------+-------------------+--------------------+--------------------+--------------------+
+|POINT (2 2)|0.9|[{{POINT (2 3), 1...| 0.4488188976377953|0.45454545454545453| 0.00356321373799772|-0.09593402008347063|  0.4617864875295957|
+|POINT (2 3)|1.2|[{{POINT (2 2), 0...|0.35433070866141736|0.36363636363636365|0.003325666155464539|-0.16136436037034918|  0.4359032175415549|
+|POINT (3 3)|1.2|[{{POINT (2 3), 1...|0.28346456692913385| 0.2727272727272727|0.002850570990398176| 0.20110780337013057| 0.42030714022155924|
+|POINT (3 2)|1.2|[{{POINT (2 2), 0...| 0.4488188976377953|0.45454545454545453| 0.00356321373799772|-0.09593402008347063|  0.4617864875295957|
+|POINT (3 1)|1.2|[{{POINT (3 2), 3...| 0.3622047244094489| 0.2727272727272727|0.002850570990398176|  1.6758983614177538| 0.04687905137429871|
+|POINT (2 1)|2.2|[{{POINT (2 2), 0...| 0.4330708661417323|0.36363636363636365|0.003325666155464539|  1.2040263812249166| 0.11428969105925013|
+|POINT (1 1)|1.2|[{{POINT (2 1), 5...| 0.2834645669291339| 0.2727272727272727|0.002850570990398176|  0.2011078033701316|  0.4203071402215588|
+|POINT (1 2)|0.2|[{{POINT (2 2), 0...|0.35433070866141736|0.45454545454545453| 0.00356321373799772|   -1.67884535146075|0.046591093685710794|
+|POINT (1 3)|1.2|[{{POINT (2 3), 1...| 0.2047244094488189| 0.2727272727272727|0.002850570990398176| -1.2736827546774914| 0.10138793530151635|
+|POINT (0 2)|1.0|[{{POINT (1 2), 7...|0.09448818897637795|0.18181818181818182|0.002137928242798632| -1.8887168824332323|0.029464887612748458|
+|POINT (4 2)|1.2|[{{POINT (3 2), 3...| 0.1889763779527559|0.18181818181818182|0.002137928242798632| 0.15481285921583854| 0.43848442662481324|
++-----------+---+--------------------+-------------------+-------------------+--------------------+--------------------+--------------------+
+```
+
 ## Run spatial queries
 
 After creating a Geometry type column, you are able to run spatial queries.
