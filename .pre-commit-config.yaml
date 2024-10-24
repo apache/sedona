@@ -91,6 +91,10 @@ repos:
         exclude: ^\.github/.*$
         types: [markdown]
         files: \.(md|mdown|markdown)$
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.35.1
     hooks:
