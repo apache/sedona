@@ -41,57 +41,44 @@ jobs:
           - spark: '3.5.0'
             scala: '2.12.8'
             python: '3.10'
-            hadoop: '3'
             shapely: '1'
           - spark: '3.5.0'
             scala: '2.12.8'
             python: '3.10'
-            hadoop: '3'
           - spark: '3.5.0'
             scala: '2.12.8'
             python: '3.9'
-            hadoop: '3'
           - spark: '3.5.0'
             scala: '2.12.8'
             python: '3.8'
-            hadoop: '3'
           - spark: '3.4.0'
             scala: '2.12.8'
             python: '3.10'
-            hadoop: '3'
           - spark: '3.4.0'
             scala: '2.12.8'
             python: '3.9'
-            hadoop: '3'
           - spark: '3.4.0'
             scala: '2.12.8'
             python: '3.8'
-            hadoop: '3'
           - spark: '3.4.0'
             scala: '2.12.8'
             python: '3.7'
-            hadoop: '3'
           - spark: '3.4.0'
             scala: '2.12.8'
             python: '3.7'
-            hadoop: '3'
             shapely: '1'
           - spark: '3.3.0'
             scala: '2.12.8'
             python: '3.8'
-            hadoop: '3'
           - spark: '3.2.0'
             scala: '2.12.8'
             python: '3.7'
-            hadoop: '2.7'
           - spark: '3.1.2'
             scala: '2.12.8'
             python: '3.7'
-            hadoop: '2.7'
           - spark: '3.0.3'
             scala: '2.12.8'
             python: '3.7'
-            hadoop: '2.7'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -136,8 +123,6 @@ jobs:
           pipenv graph
           pipenv run pip show pyspark
       - env:
-          SPARK_VERSION: ${{ matrix.spark }}
-          HADOOP_VERSION: ${{ matrix.hadoop }}
           PYTHON_VERSION: ${{ matrix.python }}
         run: |
           wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar
@@ -147,13 +132,9 @@ jobs:
           mv -v jai_codec-${JAI_CODEC_VERSION}.jar /home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
           mv -v jai_imageio-${JAI_IMAGEIO_VERSION}.jar /home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
       - env:
-          SPARK_VERSION: ${{ matrix.spark }}
-          HADOOP_VERSION: ${{ matrix.hadoop }}
           PYTHON_VERSION: ${{ matrix.python }}
         run: find spark-shaded/target -name sedona-*.jar -exec cp {} /home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars/ \;
       - env:
-          SPARK_VERSION: ${{ matrix.spark }}
-          HADOOP_VERSION: ${{ matrix.hadoop }}
           PYTHON_VERSION: ${{ matrix.python }}
         run: |
           export SPARK_HOME=/home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark
@@ -161,8 +142,7 @@ jobs:
           source /home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/bin/activate
           pytest tests
       - env:
-          SPARK_VERSION: ${{ matrix.spark }}
-          HADOOP_VERSION: ${{ matrix.hadoop }}
+          PYTHON_VERSION: ${{ matrix.python }}
         run: |
           if [ ! -f "/home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark/sbin/start-connect-server.sh" ]
           then
