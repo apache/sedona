@@ -17,9 +17,8 @@
 
 import os
 
-from setuptools import Extension, find_packages, setup
-
 from sedona import version
+from setuptools import Extension, find_packages, setup
 
 with open("README.md", "r") as fh:
     long_description = fh.read()

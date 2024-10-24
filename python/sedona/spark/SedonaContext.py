@@ -17,7 +17,6 @@
 
 import attr
 from pyspark.sql import SparkSession
-
 from sedona.register.geo_registrator import PackageImporter
 from sedona.utils import KryoSerializer, SedonaKryoRegistrator
 

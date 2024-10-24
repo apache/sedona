@@ -15,15 +15,14 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from shapely.geometry import LineString, Point, Polygon
-from shapely.geometry.base import BaseGeometry
-from tests.test_base import TestBase
-
 from sedona.core.enums import GridType, IndexType
 from sedona.core.spatialOperator import JoinQuery
 from sedona.core.SpatialRDD import CircleRDD, LineStringRDD, PointRDD, PolygonRDD
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.utils.spatial_rdd_parser import GeoData
+from shapely.geometry import LineString, Point, Polygon
+from shapely.geometry.base import BaseGeometry
+from tests.test_base import TestBase
 
 
 class TestJoinQueryCorrectness(TestBase):

@@ -10,8 +10,7 @@
 
 Apache Sedona provides different packages for each supported version of Spark.
 
-* For Spark 3.0 to 3.3, the artifact to use should be `sedona-spark-shaded-3.0_2.12`.
-* For Spark 3.4 or higher versions, please use the artifact with Spark major.minor version in the artifact name. For example, for Spark 3.4, the artifacts to use should be `sedona-spark-shaded-3.4_2.12`.
+Please use the artifact with Spark major.minor version in the artifact name. For example, for Spark 3.4, the artifacts to use should be `sedona-spark-shaded-3.4_2.12`.
 
 If you are using the Scala 2.13 builds of Spark, please use the corresponding packages for Scala 2.13, which are suffixed by `_2.13`.
 
@@ -19,12 +18,12 @@ The optional GeoTools library is required if you want to use CRS transformation,
 
 !!! abstract "Sedona with Apache Spark and Scala 2.12"
 
-	=== "Spark 3.0 to 3.3 and Scala 2.12"
+	=== "Spark 3.3 and Scala 2.12"
 
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-spark-shaded-3.0_2.12</artifactId>
+		  <artifactId>sedona-spark-shaded-3.3_2.12</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
@@ -68,12 +67,12 @@ The optional GeoTools library is required if you want to use CRS transformation,
 
 !!! abstract "Sedona with Apache Spark and Scala 2.13"
 
-	=== "Spark 3.0 to 3.3 and Scala 2.13"
+	=== "Spark 3.3 and Scala 2.13"
 
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-spark-shaded-3.0_2.13</artifactId>
+		  <artifactId>sedona-spark-shaded-3.3_2.13</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
@@ -204,8 +203,7 @@ Under BSD 3-clause (compatible with Apache 2.0 license)
 
 Apache Sedona provides different packages for each supported version of Spark.
 
-* For Spark 3.0 to 3.3, the artifacts to use should be `sedona-spark-3.0_2.12`.
-* For Spark 3.4 or higher versions, please use the artifacts with Spark major.minor version in the artifact name. For example, for Spark 3.4, the artifacts to use should be `sedona-spark-3.4_2.12`.
+Please use the artifacts with Spark major.minor version in the artifact name. For example, for Spark 3.4, the artifacts to use should be `sedona-spark-3.4_2.12`.
 
 If you are using the Scala 2.13 builds of Spark, please use the corresponding packages for Scala 2.13, which are suffixed by `_2.13`.
 
@@ -213,11 +211,11 @@ The optional GeoTools library is required if you want to use CRS transformation,
 
 !!! abstract "Sedona with Apache Spark and Scala 2.12"
 
-	=== "Spark 3.0 to 3.3 and Scala 2.12"
+	=== "Spark 3.3 and Scala 2.12"
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-spark-3.0_2.12</artifactId>
+		  <artifactId>sedona-spark-3.3_2.12</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		<dependency>
@@ -255,11 +253,11 @@ The optional GeoTools library is required if you want to use CRS transformation,
 
 !!! abstract "Sedona with Apache Spark and Scala 2.13"
 
-	=== "Spark 3.0+ and Scala 2.13"
+	=== "Spark 3.3 and Scala 2.13"
 		```xml
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-spark-3.0_2.13</artifactId>
+		  <artifactId>sedona-spark-3.3_2.13</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		<dependency>

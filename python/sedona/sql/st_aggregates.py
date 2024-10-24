@@ -19,7 +19,6 @@ import sys
 from functools import partial
 
 from pyspark.sql import Column
-
 from sedona.sql.dataframe_api import (
     ColumnOrName,
     call_sedona_function,

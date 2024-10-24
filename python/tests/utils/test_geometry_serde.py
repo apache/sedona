@@ -17,6 +17,7 @@
 import pytest
 from pyspark.sql.functions import expr
 from pyspark.sql.types import StringType, StructType
+from sedona.sql.types import GeometryType
 from shapely.geometry import (
     GeometryCollection,
     LineString,
@@ -28,8 +29,6 @@ from shapely.geometry import (
 )
 from shapely.wkt import loads as wkt_loads
 from tests.test_base import TestBase
-
-from sedona.sql.types import GeometryType
 
 
 class TestGeometrySerde(TestBase):

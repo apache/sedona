@@ -17,11 +17,10 @@
 
 import os
 
-from tests.test_base import TestBase
-from tests.tools import tests_resource
-
 from sedona.core.enums import FileDataSplitter
 from sedona.core.SpatialRDD import PointRDD, PolygonRDD
+from tests.test_base import TestBase
+from tests.tools import tests_resource
 
 point_path = os.path.join(tests_resource, "points.csv")
 counties_path = os.path.join(tests_resource, "county_small.tsv")

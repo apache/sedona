@@ -21,9 +21,8 @@ from typing import List
 
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import StructField, StructType
-from shapely import wkt
-
 from sedona.sql.types import GeometryType
+from shapely import wkt
 
 data_path = path.abspath(path.dirname(__file__))
 

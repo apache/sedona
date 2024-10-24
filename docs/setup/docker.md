@@ -107,7 +107,7 @@ Example:
 
 ### Notes
 
-This docker image can only be built against Sedona 1.4.1+ and Spark 3.0+
+This docker image can only be built against Sedona 1.7.0+ and Spark 3.3+
 
 ## Cluster Configuration
 

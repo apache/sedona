@@ -15,12 +15,11 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from shapely.geometry.base import BaseGeometry
-
 from sedona.core.spatialOperator.rdd import SedonaPairRDD, SedonaRDD
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.utils.decorators import require
 from sedona.utils.geometry_adapter import GeometryAdapter
+from shapely.geometry.base import BaseGeometry
 
 
 class RangeQueryRaw:

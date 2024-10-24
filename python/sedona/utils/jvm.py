@@ -16,7 +16,6 @@
 #  under the License.
 
 import attr
-
 from sedona.core.jvm.abstract import JvmObject
 from sedona.utils.decorators import require
 

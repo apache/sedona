@@ -15,6 +15,10 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+from sedona.core.enums import FileDataSplitter, GridType, IndexType
+from sedona.core.geom.envelope import Envelope
+from sedona.core.SpatialRDD import PolygonRDD
+from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from tests.properties.polygon_properties import (
     grid_type,
     input_boundary,
@@ -32,11 +36,6 @@ from tests.properties.polygon_properties import (
     splitter,
 )
 from tests.test_base import TestBase
-
-from sedona.core.enums import FileDataSplitter, GridType, IndexType
-from sedona.core.geom.envelope import Envelope
-from sedona.core.SpatialRDD import PolygonRDD
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 
 
 class TestPolygonRDD(TestBase):

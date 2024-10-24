@@ -15,6 +15,9 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+from sedona.core.enums import GridType, IndexType
+from sedona.core.geom.envelope import Envelope
+from sedona.core.SpatialRDD import LineStringRDD
 from tests.properties.linestring_properties import (
     grid_type,
     input_boundary,
@@ -27,10 +30,6 @@ from tests.properties.linestring_properties import (
     transformed_envelope_2,
 )
 from tests.test_base import TestBase
-
-from sedona.core.enums import GridType, IndexType
-from sedona.core.geom.envelope import Envelope
-from sedona.core.SpatialRDD import LineStringRDD
 
 
 class TestLineStringRDD(TestBase):

@@ -18,7 +18,6 @@ import os
 from tempfile import mkdtemp
 
 import pyspark
-
 from sedona.spark import *
 from sedona.utils.decorators import classproperty
 

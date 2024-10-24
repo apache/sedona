@@ -15,15 +15,14 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from tests.properties.crs_transform import *
-from tests.properties.polygon_properties import grid_type
-from tests.test_base import TestBase
-from tests.tools import distance_sorting_functions
-
 from sedona.core.enums import GridType
 from sedona.core.geom.circle import Circle
 from sedona.core.spatialOperator import JoinQuery, KNNQuery, RangeQuery
 from sedona.core.SpatialRDD import CircleRDD, PointRDD, PolygonRDD
+from tests.properties.crs_transform import *
+from tests.properties.polygon_properties import grid_type
+from tests.test_base import TestBase
+from tests.tools import distance_sorting_functions
 
 
 class TestCrsTransformation(TestBase):

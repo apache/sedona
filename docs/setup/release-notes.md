@@ -919,7 +919,7 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 
         config = SedonaContext.builder().\
            config('spark.jars.packages',
-               'org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.1,'
+               'org.apache.sedona:sedona-spark-shaded-3.3_2.12:1.4.1,'
                'org.datasyslab:geotools-wrapper:1.4.0-28.2'). \
            getOrCreate()
         sedona = SedonaContext.create(config)
