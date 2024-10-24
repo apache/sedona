@@ -129,6 +129,7 @@ jobs:
             echo "Patching Pipfile to use Shapely 1.x"
             sed -i 's/^shapely.*$/shapely="<2.0.0"/g' Pipfile
           fi
+          export WORKON_HOME=./.venv
           export PIPENV_CUSTOM_VENV_NAME=python-${PYTHON_VERSION}
           pipenv --python ${PYTHON_VERSION}
           pipenv install pyspark==${SPARK_VERSION}
@@ -143,20 +144,20 @@ jobs:
           wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar
           wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar
           wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
-          mv -v jai_core-${JAI_CORE_VERSION}.jar /home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
-          mv -v jai_codec-${JAI_CODEC_VERSION}.jar /home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
-          mv -v jai_imageio-${JAI_IMAGEIO_VERSION}.jar /home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
+          mv -v jai_core-${JAI_CORE_VERSION}.jar .venv/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
+          mv -v jai_codec-${JAI_CODEC_VERSION}.jar .venv/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
+          mv -v jai_imageio-${JAI_IMAGEIO_VERSION}.jar .venv/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
-        run: find spark-shaded/target -name sedona-*.jar -exec cp {} spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/jars/ \;
+        run: find spark-shaded/target -name sedona-*.jar -exec cp {} .venv/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars/ \;
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3.19
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
           PYTHON_VERSION: ${{ matrix.python }}
-        run: (export SPARK_HOME=/home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark;cd python;pipenv run pytest tests)
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3.19
+        run: (export SPARK_HOME=.venv/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark;cd python;pipenv run pytest tests)
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
@@ -167,7 +168,7 @@ jobs:
             exit
           fi
 
-          export SPARK_HOME=/home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark
+          export SPARK_HOME=.venv/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark
           export SPARK_REMOTE=local
 
           cd python
