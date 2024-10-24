@@ -16,7 +16,6 @@
 #  under the License.
 
 from pyspark import RDD, SparkContext, StorageLevel
-
 from sedona.core.enums import FileDataSplitter
 from sedona.core.enums.file_data_splitter import FileSplitterJvm
 from sedona.core.jvm.translate import PythonRddToJavaRDDAdapter

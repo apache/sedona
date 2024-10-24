@@ -15,9 +15,8 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from tests.test_base import TestBase
-
 from sedona.core.geom.envelope import Envelope
+from tests.test_base import TestBase
 
 
 class TestGeomPrimitives(TestBase):

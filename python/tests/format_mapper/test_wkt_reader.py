@@ -17,10 +17,9 @@
 
 import os
 
+from sedona.core.formatMapper import WktReader
 from tests.test_base import TestBase
 from tests.tools import tests_resource
-
-from sedona.core.formatMapper import WktReader
 
 
 class TestWktReader(TestBase):

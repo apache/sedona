@@ -17,9 +17,8 @@
 
 import os
 
-from tests.test_base import TestBase
-
 from sedona.core.jvm.config import SedonaMeta, SparkJars
+from tests.test_base import TestBase
 
 
 class TestCoreJVMConfig(TestBase):

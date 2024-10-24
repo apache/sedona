@@ -15,6 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+from sedona.core.SpatialRDD import CircleRDD, PointRDD
 from tests.properties.point_properties import (
     input_location,
     num_partitions,
@@ -22,8 +23,6 @@ from tests.properties.point_properties import (
     splitter,
 )
 from tests.test_base import TestBase
-
-from sedona.core.SpatialRDD import CircleRDD, PointRDD
 
 
 class TestSpatialRddAssignment(TestBase):

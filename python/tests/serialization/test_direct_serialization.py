@@ -15,11 +15,10 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+from sedona.utils.geometry_adapter import GeometryAdapter
 from shapely.geometry import Polygon
 from shapely.wkt import loads
 from tests.test_base import TestBase
-
-from sedona.utils.geometry_adapter import GeometryAdapter
 
 
 class TestDirectSerialization(TestBase):

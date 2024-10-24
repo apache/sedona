@@ -18,7 +18,6 @@
 import attr
 from py4j.java_gateway import java_import
 from pyspark.sql import SparkSession
-
 from sedona.core.jvm.config import deprecated
 from sedona.register.java_libs import SedonaJvmLib
 from sedona.utils.prep import assign_all

@@ -22,7 +22,6 @@ import attr
 from py4j.java_gateway import get_field
 from pyspark import RDD, SparkContext, StorageLevel
 from pyspark.sql import SparkSession
-
 from sedona.core.enums.grid_type import GridType, GridTypeJvm
 from sedona.core.enums.index_type import IndexType, IndexTypeJvm
 from sedona.core.enums.spatial import SpatialType

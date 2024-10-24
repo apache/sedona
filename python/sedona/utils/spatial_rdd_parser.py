@@ -28,10 +28,9 @@ try:
 except ImportError:
     from pyspark import PickleSerializer as CPickleSerializer
 
-from shapely.wkb import dumps
-
 from sedona.core.geom.circle import Circle
 from sedona.utils.binary_parser import BinaryParser
+from shapely.wkb import dumps
 
 
 class GeoData:

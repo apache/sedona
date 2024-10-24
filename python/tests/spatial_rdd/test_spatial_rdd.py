@@ -20,14 +20,13 @@ import os
 import pyspark
 import pytest
 from pyspark import RDD
-from shapely.geometry import Point
-from tests.test_base import TestBase
-from tests.tools import tests_resource
-
 from sedona.core.enums import FileDataSplitter, GridType, IndexType
 from sedona.core.formatMapper.geo_json_reader import GeoJsonReader
 from sedona.core.geom.envelope import Envelope
 from sedona.core.SpatialRDD import PointRDD
+from shapely.geometry import Point
+from tests.test_base import TestBase
+from tests.tools import tests_resource
 
 input_file_location = os.path.join(tests_resource, "arealm-small.csv")
 crs_test_point = os.path.join(tests_resource, "crs-test-point.csv")

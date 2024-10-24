@@ -21,6 +21,7 @@ import geopandas as gpd
 import pandas as pd
 from pyspark.sql import types as t
 from pyspark.sql.types import IntegerType
+from sedona.sql.types import GeometryType
 from shapely.geometry import (
     LineString,
     MultiLineString,
@@ -31,8 +32,6 @@ from shapely.geometry import (
 )
 from tests import tests_resource
 from tests.test_base import TestBase
-
-from sedona.sql.types import GeometryType
 
 
 class TestsSerializers(TestBase):

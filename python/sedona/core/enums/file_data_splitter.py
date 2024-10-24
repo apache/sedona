@@ -18,7 +18,6 @@
 from enum import Enum
 
 import attr
-
 from sedona.core.jvm.abstract import JvmObject
 from sedona.utils.decorators import require
 

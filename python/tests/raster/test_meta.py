@@ -17,7 +17,6 @@
 
 import pytest
 from pytest import approx
-
 from sedona.raster.meta import AffineTransform, PixelAnchor
 
 

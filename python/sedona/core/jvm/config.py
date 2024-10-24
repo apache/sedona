@@ -25,7 +25,6 @@ from typing import Optional, Tuple
 
 from py4j.protocol import Py4JJavaError
 from pyspark.sql import SparkSession
-
 from sedona.utils.decorators import classproperty
 
 string_types = (type(b""), type(""))
