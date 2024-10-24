@@ -149,9 +149,8 @@ jobs:
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
+          PYTHON_VERSION: ${{ matrix.python }}
         run: find spark-shaded/target -name sedona-*.jar -exec cp {} /home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars/ \;
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3.19
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
@@ -161,11 +160,13 @@ jobs:
           cd python
           source /home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/bin/activate
           pytest tests
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3.19
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           HADOOP_VERSION: ${{ matrix.hadoop }}
         run: |
-          if [ ! -f "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/sbin/start-connect-server.sh" ]
+          if [ ! -f "/home/runner/.local/share/virtualenvs/python-${PYTHON_VERSION}/lib/python${PYTHON_VERSION}/site-packages/pyspark/sbin/start-connect-server.sh" ]
           then
             echo "Skipping connect tests for Spark $SPARK_VERSION"
             exit
