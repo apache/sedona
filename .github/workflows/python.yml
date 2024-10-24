@@ -129,7 +129,7 @@ jobs:
             echo "Patching Pipfile to use Shapely 1.x"
             sed -i 's/^shapely.*$/shapely="<2.0.0"/g' Pipfile
           fi
-          export WORKON_HOME=./.venv
+          export WORKON_HOME=$PWD/.venv
           export PIPENV_CUSTOM_VENV_NAME=python-${PYTHON_VERSION}
           pipenv --python ${PYTHON_VERSION}
           pipenv install pyspark==${SPARK_VERSION}
