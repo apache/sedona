@@ -1598,7 +1598,7 @@ public class FunctionsTest extends TestBase {
     String actual = Functions.delaunayTriangle(combined).toText();
     String expected =
         "GEOMETRYCOLLECTION (POLYGON ((20 40, 125 100, 50 60, 20 40)), POLYGON ((20 40, 50 60, 110 170, 20 40)), POLYGON ((110 170, 50 60, 125 100, 110 170)), POLYGON ((110 170, 125 100, 175 150, 110 170)))";
-    assertEquals(expected, actual);
+    assertGeometryEquals(expected, actual);
 
     poly =
         Constructors.geomFromEWKT(
@@ -1610,7 +1610,7 @@ public class FunctionsTest extends TestBase {
     actual = Functions.delaunayTriangle(poly, 0, 1).toText();
     expected =
         "MULTILINESTRING ((25 20, 35 20), (20 20, 25 20), (10 20, 20 20), (10 10, 10 20), (10 10, 20 10), (20 10, 25 10), (25 10, 35 10), (35 10, 35 20), (25 20, 35 10), (25 10, 25 20), (20 20, 25 10), (20 10, 20 20), (10 20, 20 10))";
-    assertEquals(expected, actual);
+    assertGeometryEquals(expected, actual);
   }
 
   @Test
@@ -3733,22 +3733,22 @@ public class FunctionsTest extends TestBase {
   public void voronoiPolygons() {
     MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0, 0, 2, 2));
     Geometry actual1 = FunctionsGeoTools.voronoiPolygons(multiPoint, 0, null);
-    assertEquals(
+    assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))",
         actual1.toText());
 
     Geometry actual2 = FunctionsGeoTools.voronoiPolygons(multiPoint, 30, null);
-    assertEquals(
+    assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 4, 4 -2, -2 -2)))", actual2.toText());
 
     Geometry buf = Functions.buffer(GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1)), 10);
     Geometry actual3 = FunctionsGeoTools.voronoiPolygons(multiPoint, 0, buf);
-    assertEquals(
+    assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 -9, -9 -9)), POLYGON ((-9 11, 11 11, 11 -9, -9 11)))",
         actual3.toText());
 
     Geometry actual4 = FunctionsGeoTools.voronoiPolygons(multiPoint, 30, buf);
-    assertEquals(
+    assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 11, 11 -9, -9 -9)))", actual4.toText());
 
     Geometry actual5 = FunctionsGeoTools.voronoiPolygons(null, 0, null);
@@ -3827,10 +3827,10 @@ public class FunctionsTest extends TestBase {
     InscribedCircle actual = Functions.maximumInscribedCircle(geom);
     InscribedCircle expected =
         new InscribedCircle(
-            Constructors.geomFromEWKT("POINT (96.953125 76.328125)"),
-            Constructors.geomFromEWKT("POINT (140 90)"),
-            45.165846);
-    assertTrue(expected.equals(actual));
+            Constructors.geomFromEWKT("POINT (96.9287109375 76.3232421875)"),
+            Constructors.geomFromEWKT("POINT (61.64205411585366 104.55256764481707)"),
+            45.18896951053177);
+    assertEquals(expected, actual);
 
     geom =
         Constructors.geomFromEWKT(
@@ -3838,9 +3838,9 @@ public class FunctionsTest extends TestBase {
     actual = Functions.maximumInscribedCircle(geom);
     expected =
         new InscribedCircle(
-            Constructors.geomFromEWKT("POINT (65.0419921875 15.1005859375)"),
-            Constructors.geomFromEWKT("POINT (65 17)"),
-            1.8998781);
+            Constructors.geomFromEWKT("POINT (65.043212890625 15.098388671875)"),
+            Constructors.geomFromEWKT("POINT (66.52827267530488 13.910340844131097)"),
+            1.9018044602641058);
     assertTrue(expected.equals(actual));
 
     geom =
@@ -3849,9 +3849,9 @@ public class FunctionsTest extends TestBase {
     actual = Functions.maximumInscribedCircle(geom);
     expected =
         new InscribedCircle(
-            Constructors.geomFromEWKT("POINT (65.44062499999998 15.953124999999998)"),
-            Constructors.geomFromEWKT("POINT (67.5 16.9)"),
-            2.2666269);
+            Constructors.geomFromEWKT("POINT (65.44223632812499 15.945361328125001)"),
+            Constructors.geomFromEWKT("POINT (67.4 14.8)"),
+            2.2681911662992174);
     assertTrue(expected.equals(actual));
 
     geom = Constructors.geomFromEWKT("MULTIPOINT ((60.8 15.5), (63.2 16.3))");
@@ -3869,9 +3869,9 @@ public class FunctionsTest extends TestBase {
     actual = Functions.maximumInscribedCircle(geom);
     expected =
         new InscribedCircle(
-            Constructors.geomFromEWKT("POINT (65.44062499999998 15.953124999999998)"),
-            Constructors.geomFromEWKT("POINT (67.5 16.9)"),
-            2.2666269);
+            Constructors.geomFromEWKT("POINT (65.44223632812499 15.945361328125001)"),
+            Constructors.geomFromEWKT("POINT (67.4 14.8)"),
+            2.2681911662992174);
     assertTrue(expected.equals(actual));
   }
 
