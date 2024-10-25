@@ -1290,6 +1290,28 @@ public class UDFs {
         Functions.translate(GeometrySerde.deserialize(geom), deltaX, deltaY, deltaZ));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "scaleX", "scaleY"})
+  public static byte[] ST_Scale(byte[] geometry, double scaleX, double scaleY) {
+    return GeometrySerde.serialize(
+        Functions.scale(GeometrySerde.deserialize(geometry), scaleX, scaleY));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "factor", "origin"})
+  public static byte[] ST_ScaleGeom(byte[] geometry, byte[] factor, byte[] origin) {
+    return GeometrySerde.serialize(
+        Functions.scaleGeom(
+            GeometrySerde.deserialize(geometry),
+            GeometrySerde.deserialize(factor),
+            GeometrySerde.deserialize(origin)));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "factor"})
+  public static byte[] ST_ScaleGeom(byte[] geometry, byte[] factor) {
+    return GeometrySerde.serialize(
+        Functions.scaleGeom(
+            GeometrySerde.deserialize(geometry), GeometrySerde.deserialize(factor)));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "angle"})
   public static byte[] ST_RotateX(byte[] geometry, double angle) {
     return GeometrySerde.serialize(Functions.rotateX(GeometrySerde.deserialize(geometry), angle));

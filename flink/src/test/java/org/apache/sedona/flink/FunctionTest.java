@@ -2655,6 +2655,52 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testScale() {
+    Table tbl =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromWKT('POLYGON ((0 0, 2 0, 1 1, 2 2, 0 2, 1 1, 0 0))', 1010) AS geom");
+    Geometry actual =
+        (Geometry)
+            first(tbl.select(call(Functions.ST_Scale.class.getSimpleName(), $("geom"), 2, 3)))
+                .getField(0);
+    String expected = "POLYGON ((0 0, 4 0, 2 3, 4 6, 0 6, 2 3, 0 0))";
+    assertEquals(expected, actual.toString());
+    assertEquals(1010, actual.getSRID());
+  }
+
+  @Test
+  public void testScaleGeom() {
+    Table tbl =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromWKT('POLYGON ((0 0, 2 0, 1 1, 2 2, 0 2, 1 1, 0 0))', 1010) AS geom, ST_GeomFromWKT('POINT (2 3)') AS factor");
+    Geometry actual =
+        (Geometry)
+            first(
+                    tbl.select(
+                        call(Functions.ST_ScaleGeom.class.getSimpleName(), $("geom"), $("factor"))))
+                .getField(0);
+    String expected = "POLYGON ((0 0, 4 0, 2 3, 4 6, 0 6, 2 3, 0 0))";
+    assertEquals(expected, actual.toString());
+    assertEquals(1010, actual.getSRID());
+
+    tbl =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromWKT('POLYGON ((0 0, 2 0, 1 1, 2 2, 0 2, 1 1, 0 0))', 1010) AS geom, ST_GeomFromWKT('POINT (2 3)') AS factor, ST_GeomFromWKT('POINT (-1 0)') AS origin");
+    actual =
+        (Geometry)
+            first(
+                    tbl.select(
+                        call(
+                            Functions.ST_ScaleGeom.class.getSimpleName(),
+                            $("geom"),
+                            $("factor"),
+                            $("origin"))))
+                .getField(0);
+    expected = "POLYGON ((1 0, 5 0, 3 3, 5 6, 1 6, 3 3, 1 0))";
+    assertEquals(expected, actual.toString());
+  }
+
+  @Test
   public void testRotateX() {
     Table tbl =
         tableEnv.sqlQuery(
