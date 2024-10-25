@@ -2364,9 +2364,9 @@ def ST_RotateY(geometry: ColumnOrName, angle: Union[ColumnOrName, float]) -> Col
 def ST_Rotate(
     geometry: ColumnOrName,
     angle: Union[ColumnOrName, float],
-    originX: Union[ColumnOrName, float] = None,
-    originY: Union[ColumnOrName, float] = None,
-    pointOrigin: ColumnOrName = None,
+    originX: Optional[Union[ColumnOrName, float]] = None,
+    originY: Optional[Union[ColumnOrName, float]] = None,
+    pointOrigin: Optional[ColumnOrName] = None,
 ) -> Column:
     """Return a counter-clockwise rotated geometry along the specified origin.
 
