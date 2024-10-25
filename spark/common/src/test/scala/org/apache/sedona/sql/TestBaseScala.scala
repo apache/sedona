@@ -28,7 +28,9 @@ import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.junit.Assert.fail
 import org.locationtech.jts.geom._
+import org.locationtech.jts.io.WKTReader
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 import java.io.File
@@ -317,5 +319,43 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     val builder = new MiniDFSCluster.Builder(hdfsConf)
     val hdfsCluster = builder.build
     (hdfsCluster, "hdfs://127.0.0.1:" + hdfsCluster.getNameNodePort + "/")
+  }
+
+  def assertGeometryEquals(expectedWkt: String, actualWkt: String, tolerance: Double): Unit = {
+    val reader = new WKTReader
+    val expectedGeom = reader.read(expectedWkt)
+    val actualGeom = reader.read(actualWkt)
+    assertGeometryEquals(expectedGeom, actualGeom, tolerance)
+  }
+
+  def assertGeometryEquals(expectedWkt: String, actualGeom: Geometry, tolerance: Double): Unit = {
+    val reader = new WKTReader
+    val expectedGeom = reader.read(expectedWkt)
+    assertGeometryEquals(expectedGeom, actualGeom, tolerance)
+  }
+
+  def assertGeometryEquals(
+      expectedGeom: Geometry,
+      actualGeom: Geometry,
+      tolerance: Double): Unit = {
+    if (!(expectedGeom == actualGeom)) {
+      if (!expectedGeom
+          .buffer(tolerance)
+          .contains(actualGeom) || !actualGeom.buffer(tolerance).contains(expectedGeom)) {
+        fail(String.format("Geometry %s should equal to %s", actualGeom, expectedGeom))
+      }
+    }
+  }
+
+  def assertGeometryEquals(expectedGeom: Geometry, actualGeom: Geometry): Unit = {
+    assertGeometryEquals(expectedGeom, actualGeom, 1e-6)
+  }
+
+  def assertGeometryEquals(expectedWkt: String, actualWkt: String): Unit = {
+    assertGeometryEquals(expectedWkt, actualWkt, 1e-6)
+  }
+
+  def assertGeometryEquals(expectedWkt: String, actualGeom: Geometry): Unit = {
+    assertGeometryEquals(expectedWkt, actualGeom, 1e-6)
   }
 }

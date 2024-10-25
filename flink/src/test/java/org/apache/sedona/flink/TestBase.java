@@ -19,6 +19,7 @@
 package org.apache.sedona.flink;
 
 import static org.apache.flink.table.api.Expressions.*;
+import static org.junit.Assert.fail;
 
 import com.google.common.math.DoubleMath;
 import java.sql.Timestamp;
@@ -482,5 +483,25 @@ public class TestBase {
       it.next();
     }
     return count;
+  }
+
+  public void assertGeometryEquals(String expectedWkt, String actualWkt, double tolerance) {
+    WKTReader reader = new WKTReader();
+    try {
+      Geometry expectedGeom = reader.read(expectedWkt);
+      Geometry actualGeom = reader.read(actualWkt);
+      if (!expectedGeom.equals(actualGeom)) {
+        if (!expectedGeom.buffer(tolerance).contains(actualGeom)
+            || !actualGeom.buffer(tolerance).contains(expectedGeom)) {
+          fail(String.format("Geometry %s should equal to %s", actualWkt, expectedWkt));
+        }
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void assertGeometryEquals(String expectedWkt, String actualWkt) {
+    assertGeometryEquals(expectedWkt, actualWkt, 1e-6);
   }
 }

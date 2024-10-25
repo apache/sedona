@@ -205,6 +205,26 @@ public class TestBase extends TestCase {
     }
   }
 
+  public void verifyGeometry(String sql, String expectWkt, double tolerance) {
+    try {
+      ResultSet res = snowClient.executeQuery(sql);
+      res.next();
+      Geometry e = Constructors.geomFromWKT(expectWkt, 0);
+      Geometry a = Constructors.geomFromWKT(res.getString(1), 0);
+      if (!e.equals(a)) {
+        if (!e.buffer(tolerance).contains(a) || !a.buffer(tolerance).contains(e)) {
+          fail(String.format("sql result %s does not equal to %s", a, e));
+        }
+      }
+    } catch (SQLException | ParseException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void verifyGeometry(String sql, String expectWkt) {
+    verifyGeometry(sql, expectWkt, 1e-6);
+  }
+
   public ResultSet sqlSingleRes(String sql) {
     try {
       ResultSet res = snowClient.executeQuery(sql);
