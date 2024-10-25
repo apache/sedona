@@ -846,6 +846,20 @@ test_configurations = [
         "LINESTRING (5 0, 4 0, 3 0, 2 0, 1 0, 0 0)",
     ),
     (
+        stf.ST_Scale,
+        ("poly", 3, 2),
+        "poly_and_point",
+        "",
+        "POLYGON ((0 0, 0 2, 3 2, 3 0, 0 0))",
+    ),
+    (
+        stf.ST_ScaleGeom,
+        ("poly", "point"),
+        "poly_and_point",
+        "",
+        "POLYGON ((0 0, 0 2, 3 2, 3 0, 0 0))",
+    ),
+    (
         stf.ST_RotateX,
         ("line", 10.0),
         "4D_line",
@@ -1316,6 +1330,8 @@ wrong_type_configurations = [
     (stf.ST_RemovePoint, ("", 1.0)),
     (stf.ST_RemoveRepeatedPoints, (None, None)),
     (stf.ST_Reverse, (None,)),
+    (stf.ST_Scale, (None, None, None)),
+    (stf.ST_ScaleGeom, (None, None, None)),
     (
         stf.ST_Rotate,
         (
@@ -1591,6 +1607,10 @@ class TestDataFrameAPI(TestBase):
         elif request.param == "array_polygons":
             return TestDataFrameAPI.spark.sql(
                 "SELECT array(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((-2 1, 2 1, 2 4, -2 4, -2 1))')) as polys"
+            )
+        elif request.param == "poly_and_point":
+            return TestDataFrameAPI.spark.sql(
+                "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))') AS poly, ST_GeomFromWKT('POINT (3 2)') AS point"
             )
         elif request.param == "poly_and_line":
             return TestDataFrameAPI.spark.sql(
