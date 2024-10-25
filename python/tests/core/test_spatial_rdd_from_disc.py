@@ -147,7 +147,6 @@ class TestDiscUtils(TestBase):
         assert point_rdd.indexedRawRDD is not None
         assert isinstance(point_rdd, PointRDD)
         point_rdd.analyze()
-        print(point_rdd.boundaryEnvelope)
 
         polygon_rdd = load_spatial_rdd_from_disc(
             self.sc, os.path.join(disc_location, "polygon"), GeoType.POLYGON
@@ -157,8 +156,6 @@ class TestDiscUtils(TestBase):
         )
         polygon_rdd.indexedRawRDD = polygon_index_rdd
         polygon_rdd.analyze()
-
-        print(polygon_rdd.boundaryEnvelope)
 
         assert polygon_rdd.indexedRawRDD is not None
         assert isinstance(polygon_rdd, PolygonRDD)
@@ -175,7 +172,6 @@ class TestDiscUtils(TestBase):
         assert isinstance(linestring_rdd, LineStringRDD)
 
         linestring_rdd.analyze()
-        print(linestring_rdd.boundaryEnvelope)
 
         linestring_rdd.spatialPartitioning(GridType.KDBTREE)
         polygon_rdd.spatialPartitioning(linestring_rdd.getPartitioner())
@@ -186,5 +182,4 @@ class TestDiscUtils(TestBase):
             linestring_rdd, polygon_rdd, True, True
         ).collect()
 
-        print(result)
         remove_directory(disc_location)

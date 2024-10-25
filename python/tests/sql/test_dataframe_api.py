@@ -1653,7 +1653,8 @@ class TestDataFrameAPI(TestBase):
         actual_result = df.collect()[0][0]
 
         if isinstance(actual_result, BaseGeometry):
-            actual_result = actual_result.wkt
+            self.assert_geometry_almost_equal(expected_result, actual_result)
+            return
         elif isinstance(actual_result, bytearray):
             actual_result = actual_result.hex()
         elif isinstance(actual_result, Row):
