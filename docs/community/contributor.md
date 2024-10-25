@@ -48,7 +48,7 @@ Current Sedona Committers are as follows:
 
 |      Name      | GitHub ID |     Apache ID     |
 |:--------------:|:---------:|:-----------------:|
-|  John Bampton  | jbampton  |      johnbam      |
+|  John Bampton  | jbampton  |      johnbam@apache.org      |
 | Nilesh Gajwani |  iGN5117  | nilesh@apache.org |
 
 ## Nominate a committer or PMC member
