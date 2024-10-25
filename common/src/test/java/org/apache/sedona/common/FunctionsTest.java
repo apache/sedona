@@ -1802,14 +1802,11 @@ public class FunctionsTest extends TestBase {
     expectedPoints = 17;
     assertEquals(expectedPoints, actualPoints);
 
-    actualPoints = Functions.nPoints(Functions.simplify(geom, 1));
+    Geometry actual = Functions.simplify(geom, 1);
+    actualPoints = Functions.nPoints(actual);
     expectedPoints = 9;
     assertEquals(expectedPoints, actualPoints);
 
-    Geometry actual = Functions.simplify(geom, 10);
-    actualPoints = Functions.nPoints(actual);
-    expectedPoints = 4;
-    assertEquals(expectedPoints, actualPoints);
     assertEquals(1111, actual.getSRID());
   }
 

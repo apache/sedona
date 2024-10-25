@@ -16,6 +16,7 @@
 #  under the License.
 import os
 from tempfile import mkdtemp
+from typing import Union
 
 import pyspark
 
