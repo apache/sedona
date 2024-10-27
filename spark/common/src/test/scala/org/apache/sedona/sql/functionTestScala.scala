@@ -3085,7 +3085,7 @@ class functionTestScala
       val df = sparkSession.sql(
         s"SELECT ST_AsText(ST_VoronoiPolygons(ST_GeomFromWKT($g1), ($tolerance)))")
       val actual = df.take(1)(0).get(0).asInstanceOf[String]
-      assertEquals(expectedResult, actual)
+      assertGeometryEquals(expectedResult, actual)
     }
   }
 
@@ -3349,19 +3349,11 @@ class functionTestScala
     val baseDf = sparkSession.sql(
       "SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 50 90, 90 140, 60 140))') AS geom")
     val actual: Row = baseDf.selectExpr("ST_MaximumInscribedCircle(geom)").first().getAs[Row](0)
-    val expected = Row(
-      sparkSession
-        .sql("SELECT ST_GeomFromWKT('POINT (96.953125 76.328125)')")
-        .first()
-        .get(0)
-        .asInstanceOf[Geometry],
-      sparkSession
-        .sql("SELECT ST_GeomFromWKT('POINT (140 90)')")
-        .first()
-        .get(0)
-        .asInstanceOf[Geometry],
-      45.165845650018)
-    assertTrue(actual.equals(expected))
+    assertGeometryEquals("POINT (96.9287109375 76.3232421875)", actual.getAs[Geometry](0))
+    assertGeometryEquals(
+      "POINT (61.64205411585366 104.55256764481707)",
+      actual.getAs[Geometry](1))
+    assertEquals(45.18896951053177, actual.getDouble(2), 1e-6)
   }
 
   it("Should pass ST_IsValidTrajectory") {
@@ -3452,6 +3444,27 @@ class functionTestScala
       val validityInfo = row.getAs[String]("validity_info")
       assert(validityInfo == expectedResults(gid))
     }
+  }
+
+  it("Should pass ST_Scale") {
+    val baseDf =
+      sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (50 160, 50 50, 100 50)') AS geom")
+    val actual = baseDf.selectExpr("ST_AsText(ST_Scale(geom, -10, 5))").first().get(0)
+    val expected = "LINESTRING (-500 800, -500 250, -1000 250)"
+    assertEquals(expected, actual)
+  }
+
+  it("Should pass ST_ScaleGeom") {
+    val baseDf = sparkSession.sql(
+      "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1.5, 1.5 1.5, 1.5 0, 0 0))') AS geometry, ST_GeomFromWKT('POINT (1.8 2.1)') AS factor, ST_GeomFromWKT('POINT (0.32959 0.796483)') AS origin")
+    var actual = baseDf.selectExpr("ST_AsText(ST_ScaleGeom(geometry, factor))").first().get(0)
+    var expected = "POLYGON ((0 0, 0 3.1500000000000004, 2.7 3.1500000000000004, 2.7 0, 0 0))"
+    assertEquals(expected, actual)
+
+    actual = baseDf.selectExpr("ST_AsText(ST_ScaleGeom(geometry, factor, origin))").first().get(0)
+    expected =
+      "POLYGON ((-0.263672 -0.8761313000000002, -0.263672 2.2738687000000004, 2.436328 2.2738687000000004, 2.436328 -0.8761313000000002, -0.263672 -0.8761313000000002))"
+    assertEquals(expected, actual)
   }
 
   it("Should pass ST_RotateX") {

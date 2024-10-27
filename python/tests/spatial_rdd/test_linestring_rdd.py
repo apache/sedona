@@ -128,7 +128,4 @@ class TestLineStringRDD(TestBase):
         rectangle_rdd = linestring_rdd.MinimumBoundingRectangle()
         result = rectangle_rdd.rawSpatialRDD.collect()
 
-        for el in result:
-            print(el)
-
         assert result.__len__() > -1
