@@ -125,7 +125,7 @@ object Adapter {
     import scala.jdk.CollectionConverters._
     if (spatialRDD.fieldNames != null)
       return toDf(spatialRDD, spatialRDD.fieldNames.asScala.toList, sparkSession)
-    toDf(spatialRDD = spatialRDD, fieldNames = null, sparkSession = sparkSession);
+    toDf(spatialRDD = spatialRDD, fieldNames = null, sparkSession = sparkSession)
   }
 
   def toDf[T <: Geometry](

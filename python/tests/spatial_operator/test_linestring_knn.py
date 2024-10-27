@@ -18,12 +18,12 @@
 import os
 
 from shapely.geometry import Point
-
-from sedona.core.SpatialRDD import LineStringRDD
-from sedona.core.enums import IndexType, FileDataSplitter
-from sedona.core.spatialOperator import KNNQuery
 from tests.test_base import TestBase
 from tests.tools import tests_resource
+
+from sedona.core.enums import FileDataSplitter, IndexType
+from sedona.core.spatialOperator import KNNQuery
+from sedona.core.SpatialRDD import LineStringRDD
 
 input_location = os.path.join(tests_resource, "primaryroads-linestring.csv")
 offset = 0
@@ -40,7 +40,9 @@ class TestLineStringKnn(TestBase):
     def test_spatial_knn_query(self):
         line_string_rdd = LineStringRDD(self.sc, input_location, splitter, True)
         for i in range(self.loop_times):
-            result = KNNQuery.SpatialKnnQuery(line_string_rdd, self.query_point, 5, False)
+            result = KNNQuery.SpatialKnnQuery(
+                line_string_rdd, self.query_point, 5, False
+            )
             assert result.__len__() > -1
             assert result[0].getUserData() is not None
 
@@ -48,6 +50,8 @@ class TestLineStringKnn(TestBase):
         line_string_rdd = LineStringRDD(self.sc, input_location, splitter, True)
         line_string_rdd.buildIndex(IndexType.RTREE, False)
         for i in range(self.loop_times):
-            result = KNNQuery.SpatialKnnQuery(line_string_rdd, self.query_point, 5, False)
+            result = KNNQuery.SpatialKnnQuery(
+                line_string_rdd, self.query_point, 5, False
+            )
             assert result.__len__() > -1
             assert result[0].getUserData() is not None

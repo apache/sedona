@@ -28,7 +28,7 @@ class GridType(Enum):
     KDBTREE = "KDBTREE"
 
     @classmethod
-    def from_str(cls, grid: str) -> 'GridType':
+    def from_str(cls, grid: str) -> "GridType":
         try:
             grid = getattr(cls, grid.upper())
         except AttributeError:

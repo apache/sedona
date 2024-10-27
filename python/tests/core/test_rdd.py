@@ -16,21 +16,25 @@
 #  under the License.
 
 import logging
-
-from shapely.geometry import Point
-
-from sedona.core.SpatialRDD import PointRDD, PolygonRDD, CircleRDD
-from sedona.core.enums import GridType, FileDataSplitter, IndexType
-from sedona.core.enums.join_build_side import JoinBuildSide
-from sedona.core.geom.envelope import Envelope
-from sedona.core.spatialOperator import RangeQuery, KNNQuery, JoinQuery
-from sedona.core.spatialOperator.join_params import JoinParams
 import os
 
-from tests.properties.polygon_properties import polygon_rdd_input_location, polygon_rdd_start_offset, polygon_rdd_end_offset, \
-    polygon_rdd_splitter, polygon_rdd_index_type
+from shapely.geometry import Point
+from tests.properties.polygon_properties import (
+    polygon_rdd_end_offset,
+    polygon_rdd_index_type,
+    polygon_rdd_input_location,
+    polygon_rdd_splitter,
+    polygon_rdd_start_offset,
+)
 from tests.test_base import TestBase
 from tests.tools import tests_resource
+
+from sedona.core.enums import FileDataSplitter, GridType, IndexType
+from sedona.core.enums.join_build_side import JoinBuildSide
+from sedona.core.geom.envelope import Envelope
+from sedona.core.spatialOperator import JoinQuery, KNNQuery, RangeQuery
+from sedona.core.spatialOperator.join_params import JoinParams
+from sedona.core.SpatialRDD import CircleRDD, PointRDD, PolygonRDD
 
 point_rdd_input_location = os.path.join(tests_resource, "arealm-small.csv")
 
@@ -56,7 +60,7 @@ class TestSpatialRDD(TestBase):
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
-            carryInputData=False
+            carryInputData=False,
         )
         object_rdd_copy = PointRDD()
         object_rdd_copy.rawJvmSpatialRDD = object_rdd.rawJvmSpatialRDD
@@ -68,7 +72,8 @@ class TestSpatialRDD(TestBase):
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
-            carryInputData=False)
+            carryInputData=False,
+        )
 
         for i in range(each_query_loop_times):
             result_size = RangeQuery.SpatialRangeQuery(
@@ -82,12 +87,13 @@ class TestSpatialRDD(TestBase):
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
-            carryInputData=False
+            carryInputData=False,
         )
         object_rdd.buildIndex(point_rdd_index_type, False)
         for i in range(each_query_loop_times):
             result_size = RangeQuery.SpatialRangeQuery(
-                object_rdd, range_query_window, False, True).count
+                object_rdd, range_query_window, False, True
+            ).count
 
     def test_knn_query(self):
         object_rdd = PointRDD(
@@ -95,7 +101,7 @@ class TestSpatialRDD(TestBase):
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
-            carryInputData=False
+            carryInputData=False,
         )
         for i in range(each_query_loop_times):
             result = KNNQuery.SpatialKnnQuery(object_rdd, knn_query_point, 1000, False)
@@ -106,10 +112,10 @@ class TestSpatialRDD(TestBase):
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
-            carryInputData=False
+            carryInputData=False,
         )
         object_rdd.buildIndex(point_rdd_index_type, False)
-        for i  in range(each_query_loop_times):
+        for i in range(each_query_loop_times):
             result = KNNQuery.SpatialKnnQuery(object_rdd, knn_query_point, 1000, True)
 
     def test_spaltial_join(self):
@@ -119,7 +125,7 @@ class TestSpatialRDD(TestBase):
             polygon_rdd_start_offset,
             polygon_rdd_end_offset,
             polygon_rdd_splitter,
-            True
+            True,
         )
 
         object_rdd = PointRDD(
@@ -127,7 +133,7 @@ class TestSpatialRDD(TestBase):
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
-            carryInputData=False
+            carryInputData=False,
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
@@ -135,7 +141,8 @@ class TestSpatialRDD(TestBase):
 
         for x in range(each_query_loop_times):
             result_size = JoinQuery.SpatialJoinQuery(
-                object_rdd, query_window_rdd, False, True).count
+                object_rdd, query_window_rdd, False, True
+            ).count
 
     def test_spatial_join_using_index(self):
         query_window = PolygonRDD(
@@ -144,14 +151,14 @@ class TestSpatialRDD(TestBase):
             polygon_rdd_start_offset,
             polygon_rdd_end_offset,
             polygon_rdd_splitter,
-            True
+            True,
         )
         object_rdd = PointRDD(
             sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
-            carryInputData=False
+            carryInputData=False,
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
@@ -161,7 +168,8 @@ class TestSpatialRDD(TestBase):
 
         for i in range(each_query_loop_times):
             result_size = JoinQuery.SpatialJoinQuery(
-                object_rdd, query_window, True, False).count()
+                object_rdd, query_window, True, False
+            ).count()
 
     def test_spatial_join_using_index_on_polygons(self):
         query_window = PolygonRDD(
@@ -170,14 +178,14 @@ class TestSpatialRDD(TestBase):
             polygon_rdd_start_offset,
             polygon_rdd_end_offset,
             polygon_rdd_splitter,
-            True
+            True,
         )
         object_rdd = PointRDD(
             sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
-            carryInputData=False
+            carryInputData=False,
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
@@ -187,10 +195,7 @@ class TestSpatialRDD(TestBase):
 
         for i in range(each_query_loop_times):
             result_size = JoinQuery.SpatialJoinQuery(
-                object_rdd,
-                query_window,
-                True,
-                False
+                object_rdd, query_window, True, False
             ).count()
 
     def test_spatial_join_query_using_index_on_polygons(self):
@@ -200,14 +205,14 @@ class TestSpatialRDD(TestBase):
             polygon_rdd_start_offset,
             polygon_rdd_end_offset,
             polygon_rdd_splitter,
-            True
+            True,
         )
         object_rdd = PointRDD(
             sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
-            carryInputData=False
+            carryInputData=False,
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
@@ -225,14 +230,14 @@ class TestSpatialRDD(TestBase):
             polygon_rdd_start_offset,
             polygon_rdd_end_offset,
             polygon_rdd_splitter,
-            True
+            True,
         )
         object_rdd = PointRDD(
             sparkContext=self.sc,
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
-            carryInputData=False
+            carryInputData=False,
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
@@ -240,10 +245,7 @@ class TestSpatialRDD(TestBase):
 
         for i in range(each_query_loop_times):
             result_size = JoinQuery.SpatialJoinQuery(
-                object_rdd,
-                query_window,
-                True,
-                False
+                object_rdd, query_window, True, False
             ).count()
 
     def test_spatial_join_query_and_build_index_on_polygons_on_the_fly(self):
@@ -253,7 +255,7 @@ class TestSpatialRDD(TestBase):
             polygon_rdd_start_offset,
             polygon_rdd_end_offset,
             polygon_rdd_splitter,
-            True
+            True,
         )
 
         object_rdd = PointRDD(
@@ -261,18 +263,18 @@ class TestSpatialRDD(TestBase):
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
-            carryInputData=False
+            carryInputData=False,
         )
         object_rdd.analyze()
         object_rdd.spatialPartitioning(join_query_partitionin_type)
         query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
 
         for i in range(each_query_loop_times):
-            join_params = JoinParams(True, False, polygon_rdd_index_type, JoinBuildSide.LEFT)
+            join_params = JoinParams(
+                True, False, polygon_rdd_index_type, JoinBuildSide.LEFT
+            )
             resultSize = JoinQuery.spatialJoin(
-                query_window_rdd,
-                object_rdd,
-                join_params
+                query_window_rdd, object_rdd, join_params
             ).count()
 
     def test_distance_join_query(self):
@@ -281,7 +283,7 @@ class TestSpatialRDD(TestBase):
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
-            carryInputData=False
+            carryInputData=False,
         )
         query_window_rdd = CircleRDD(object_rdd, 0.1)
         object_rdd.analyze()
@@ -290,10 +292,8 @@ class TestSpatialRDD(TestBase):
 
         for i in range(each_query_loop_times):
             result_size = JoinQuery.DistanceJoinQuery(
-                object_rdd,
-                query_window_rdd,
-                False,
-                True).count()
+                object_rdd, query_window_rdd, False, True
+            ).count()
 
     def test_distance_join_query_using_index(self):
         object_rdd = PointRDD(
@@ -301,7 +301,7 @@ class TestSpatialRDD(TestBase):
             InputLocation=point_rdd_input_location,
             Offset=point_rdd_offset,
             splitter=point_rdd_splitter,
-            carryInputData=False
+            carryInputData=False,
         )
         query_window_rdd = CircleRDD(object_rdd, 0.1)
         object_rdd.analyze()
@@ -312,8 +312,5 @@ class TestSpatialRDD(TestBase):
 
         for i in range(each_query_loop_times):
             result_size = JoinQuery.DistanceJoinQuery(
-                object_rdd,
-                query_window_rdd,
-                True,
-                True
+                object_rdd, query_window_rdd, True, True
             ).count

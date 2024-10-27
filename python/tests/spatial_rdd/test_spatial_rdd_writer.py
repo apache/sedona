@@ -19,21 +19,25 @@ import os
 import shutil
 
 import pytest
-
-from sedona.core.SpatialRDD import PointRDD
-from sedona.core.enums import FileDataSplitter
-from sedona.core.geom.envelope import Envelope
 from tests.test_base import TestBase
 from tests.tools import tests_resource
+
+from sedona.core.enums import FileDataSplitter
+from sedona.core.geom.envelope import Envelope
+from sedona.core.SpatialRDD import PointRDD
 
 wkb_folder = "wkb"
 wkt_folder = "wkt"
 
-test_save_as_wkb_with_data = os.path.join(tests_resource, wkb_folder, "testSaveAsWKBWithData")
+test_save_as_wkb_with_data = os.path.join(
+    tests_resource, wkb_folder, "testSaveAsWKBWithData"
+)
 test_save_as_wkb = os.path.join(tests_resource, wkb_folder, "testSaveAsWKB")
 test_save_as_empty_wkb = os.path.join(tests_resource, wkb_folder, "testSaveAsEmptyWKB")
 test_save_as_wkt = os.path.join(tests_resource, wkt_folder, "testSaveAsWKT")
-test_save_as_wkt_with_data = os.path.join(tests_resource, wkt_folder, "testSaveAsWKTWithData")
+test_save_as_wkt_with_data = os.path.join(
+    tests_resource, wkt_folder, "testSaveAsWKTWithData"
+)
 
 inputLocation = os.path.join(tests_resource, "arealm-small.csv")
 queryWindowSet = os.path.join(tests_resource, "zcta510-small.csv")
@@ -46,15 +50,13 @@ distance = 0.01
 queryPolygonSet = "primaryroads-polygon.csv"
 inputCount = 3000
 inputBoundary = Envelope(
-    minx=-173.120769,
-    maxx=-84.965961,
-    miny=30.244859,
-    maxy=71.355134
+    minx=-173.120769, maxx=-84.965961, miny=30.244859, maxy=71.355134
 )
 rectangleMatchCount = 103
 rectangleMatchWithOriginalDuplicatesCount = 103
 polygonMatchCount = 472
 polygonMatchWithOriginalDuplicatesCount = 562
+
 
 ## todo add missing tests
 def remove_directory(path: str) -> bool:
@@ -79,7 +81,7 @@ class TestSpatialRDDWriter(TestBase):
             Offset=offset,
             splitter=splitter,
             carryInputData=True,
-            partitions=numPartitions
+            partitions=numPartitions,
         )
 
         spatial_rdd.saveAsGeoJSON(test_save_as_wkb_with_data)
@@ -89,7 +91,7 @@ class TestSpatialRDDWriter(TestBase):
             InputLocation=test_save_as_wkb_with_data,
             splitter=FileDataSplitter.GEOJSON,
             carryInputData=True,
-            partitions=numPartitions
+            partitions=numPartitions,
         )
 
         assert result_wkb.rawSpatialRDD.count() == spatial_rdd.rawSpatialRDD.count()

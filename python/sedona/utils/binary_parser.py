@@ -33,7 +33,7 @@ size_dict = {
     "i": INT_SIZE,
     "b": BYTE_SIZE,
     "s": CHAR_SIZE,
-    "?": BOOLEAN_SIZE
+    "?": BOOLEAN_SIZE,
 }
 
 
@@ -47,8 +47,12 @@ class BinaryParser:
         self.bytes = self._convert_to_binary_array(no_negatives)
 
     def read_geometry(self, length: int):
-        geom_bytes = b"".join([struct.pack("b", el) if el < 128 else struct.pack("b", el - 256) for el in
-                               self.bytes[self.current_index: self.current_index + length]])
+        geom_bytes = b"".join(
+            [
+                struct.pack("b", el) if el < 128 else struct.pack("b", el - 256)
+                for el in self.bytes[self.current_index : self.current_index + length]
+            ]
+        )
         geom = loads(geom_bytes)
         self.current_index += length
         return geom
@@ -84,7 +88,7 @@ class BinaryParser:
         return data
 
     def read_string(self, length: int, encoding: str = "utf8"):
-        string = self.bytes[self.current_index: self.current_index + length]
+        string = self.bytes[self.current_index : self.current_index + length]
         self.current_index += length
 
         try:
@@ -97,7 +101,7 @@ class BinaryParser:
         array_length = length - self.current_index
         byte_array = sc._gateway.new_array(sc._jvm.Byte, array_length)
 
-        for index, bt in enumerate(self.bytes[self.current_index: length]):
+        for index, bt in enumerate(self.bytes[self.current_index : length]):
             byte_array[index] = self.bytes[self.current_index + index]
         decoded_string = sc._jvm.org.imbruced.geo_pyspark.serializers.GeoSerializerData.deserializeUserData(
             byte_array
@@ -107,12 +111,16 @@ class BinaryParser:
 
     def unpack(self, tp: str, bytes: bytearray):
         max_index = self.current_index + size_dict[tp]
-        bytes = self._convert_to_binary_array(bytes[self.current_index: max_index])
+        bytes = self._convert_to_binary_array(bytes[self.current_index : max_index])
         return struct.unpack(tp, bytes)[0]
 
     def unpack_reverse(self, tp: str, bytes: bytearray):
         max_index = self.current_index + size_dict[tp]
-        bytes = bytearray(reversed(self._convert_to_binary_array(bytes[self.current_index: max_index])))
+        bytes = bytearray(
+            reversed(
+                self._convert_to_binary_array(bytes[self.current_index : max_index])
+            )
+        )
         return struct.unpack(tp, bytes)[0]
 
     @classmethod

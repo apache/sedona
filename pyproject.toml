@@ -1,0 +1,5 @@
+[tool.bandit]
+skips = ["B101", "B403", "B405", "B608"]
+
+[tool.isort]
+profile = "black"

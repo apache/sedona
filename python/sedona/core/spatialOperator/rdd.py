@@ -15,7 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from pyspark import SparkContext, RDD
+from pyspark import RDD, SparkContext
 
 from sedona.core.jvm.translate import JvmSedonaPythonConverter
 from sedona.utils.spatial_rdd_parser import SedonaPickler
@@ -29,8 +29,9 @@ class SedonaRDD:
 
     def to_rdd(self) -> RDD:
         jvm = self.sc._jvm
-        serialized = JvmSedonaPythonConverter(jvm). \
-            translate_spatial_rdd_to_python(self.jsrdd)
+        serialized = JvmSedonaPythonConverter(jvm).translate_spatial_rdd_to_python(
+            self.jsrdd
+        )
 
         return RDD(serialized, self.sc, SedonaPickler())
 
@@ -43,8 +44,9 @@ class SedonaPairRDD:
 
     def to_rdd(self) -> RDD:
         jvm = self.sc._jvm
-        serialized = JvmSedonaPythonConverter(jvm). \
-            translate_spatial_pair_rdd_to_python(self.jsrdd)
+        serialized = JvmSedonaPythonConverter(jvm).translate_spatial_pair_rdd_to_python(
+            self.jsrdd
+        )
 
         return RDD(serialized, self.sc, SedonaPickler())
 
@@ -57,7 +59,8 @@ class SedonaPairRDDList:
 
     def to_rdd(self):
         jvm = self.sc._jvm
-        serialized = JvmSedonaPythonConverter(jvm). \
-            translate_spatial_pair_rdd_with_list_to_python(self.jsrdd)
+        serialized = JvmSedonaPythonConverter(
+            jvm
+        ).translate_spatial_pair_rdd_with_list_to_python(self.jsrdd)
 
         return RDD(serialized, self.sc, SedonaPickler())

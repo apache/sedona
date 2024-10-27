@@ -17,9 +17,10 @@
 
 import os
 
-from sedona.core.formatMapper import WktReader
 from tests.test_base import TestBase
 from tests.tools import tests_resource
+
+from sedona.core.formatMapper import WktReader
 
 
 class TestWktReader(TestBase):
@@ -28,4 +29,3 @@ class TestWktReader(TestBase):
         wkt_geometries = os.path.join(tests_resource, "county_small.tsv")
         wkt_rdd = WktReader.readToGeometryRDD(self.sc, wkt_geometries, 0, True, False)
         assert wkt_rdd.rawSpatialRDD.count() == 103
-        print(wkt_rdd.rawSpatialRDD.collect())

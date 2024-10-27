@@ -20,9 +20,9 @@ from typing import List
 from pyspark import RDD
 from pyspark.sql import DataFrame, SparkSession
 
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.enums.spatial import SpatialType
 from sedona.core.spatialOperator.rdd import SedonaPairRDD, SedonaRDD
+from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.utils.meta import MultipleMeta
 
 
@@ -33,17 +33,17 @@ class Adapter(metaclass=MultipleMeta):
 
     @staticmethod
     def _create_dataframe(jdf, sparkSession: SparkSession) -> DataFrame:
-        if hasattr(sparkSession, '_wrapped'):
+        if hasattr(sparkSession, "_wrapped"):
             # In Spark < 3.3, use the _wrapped SQLContext
             return DataFrame(jdf, sparkSession._wrapped)
         else:
             # In Spark >= 3.3, use the session directly
             return DataFrame(jdf, sparkSession)
 
-
     @classmethod
-    def toRdd(cls, dataFrame: DataFrame) -> 'JvmSpatialRDD':
+    def toRdd(cls, dataFrame: DataFrame) -> "JvmSpatialRDD":
         from sedona.core.SpatialRDD.spatial_rdd import JvmSpatialRDD
+
         sc = dataFrame._sc
         jvm = sc._jvm
 
@@ -70,7 +70,9 @@ class Adapter(metaclass=MultipleMeta):
         return spatial_rdd
 
     @classmethod
-    def toSpatialRdd(cls, dataFrame: DataFrame, geometryFieldName: str, fieldNames: List) -> SpatialRDD:
+    def toSpatialRdd(
+        cls, dataFrame: DataFrame, geometryFieldName: str, fieldNames: List
+    ) -> SpatialRDD:
         """
 
         :param dataFrame:
@@ -81,7 +83,9 @@ class Adapter(metaclass=MultipleMeta):
         sc = dataFrame._sc
         jvm = sc._jvm
 
-        srdd = jvm.PythonAdapterWrapper.toSpatialRdd(dataFrame._jdf, geometryFieldName, fieldNames)
+        srdd = jvm.PythonAdapterWrapper.toSpatialRdd(
+            dataFrame._jdf, geometryFieldName, fieldNames
+        )
 
         spatial_rdd = SpatialRDD(sc)
         spatial_rdd.set_srdd(srdd)
@@ -89,7 +93,9 @@ class Adapter(metaclass=MultipleMeta):
         return spatial_rdd
 
     @classmethod
-    def toDf(cls, spatialRDD: SpatialRDD, fieldNames: List, sparkSession: SparkSession) -> DataFrame:
+    def toDf(
+        cls, spatialRDD: SpatialRDD, fieldNames: List, sparkSession: SparkSession
+    ) -> DataFrame:
         """
 
         :param spatialRDD:
@@ -100,7 +106,9 @@ class Adapter(metaclass=MultipleMeta):
         sc = spatialRDD._sc
         jvm = sc._jvm
 
-        jdf = jvm.PythonAdapterWrapper.toDf(spatialRDD._srdd, fieldNames, sparkSession._jsparkSession)
+        jdf = jvm.PythonAdapterWrapper.toDf(
+            spatialRDD._srdd, fieldNames, sparkSession._jsparkSession
+        )
 
         df = Adapter._create_dataframe(jdf, sparkSession)
 
@@ -132,13 +140,24 @@ class Adapter(metaclass=MultipleMeta):
         :return:
         """
         spatial_pair_rdd_mapped = spatialPairRDD.map(
-            lambda x: [x[0].geom, *x[0].getUserData().split("\t"), x[1].geom, *x[1].getUserData().split("\t")]
+            lambda x: [
+                x[0].geom,
+                *x[0].getUserData().split("\t"),
+                x[1].geom,
+                *x[1].getUserData().split("\t"),
+            ]
         )
         df = sparkSession.createDataFrame(spatial_pair_rdd_mapped)
         return df
 
     @classmethod
-    def toDf(cls, spatialPairRDD: RDD, leftFieldnames: List, rightFieldNames: List, sparkSession: SparkSession):
+    def toDf(
+        cls,
+        spatialPairRDD: RDD,
+        leftFieldnames: List,
+        rightFieldNames: List,
+        sparkSession: SparkSession,
+    ):
         """
 
         :param spatialPairRDD:
@@ -164,15 +183,27 @@ class Adapter(metaclass=MultipleMeta):
         return df
 
     @classmethod
-    def toDf(cls, rawPairRDD: SedonaPairRDD, leftFieldnames: List, rightFieldNames: List, sparkSession: SparkSession):
+    def toDf(
+        cls,
+        rawPairRDD: SedonaPairRDD,
+        leftFieldnames: List,
+        rightFieldNames: List,
+        sparkSession: SparkSession,
+    ):
         jvm = sparkSession._jvm
         jdf = jvm.PythonAdapterWrapper.toDf(
-            rawPairRDD.jsrdd, leftFieldnames, rightFieldNames, sparkSession._jsparkSession)
+            rawPairRDD.jsrdd,
+            leftFieldnames,
+            rightFieldNames,
+            sparkSession._jsparkSession,
+        )
         df = Adapter._create_dataframe(jdf, sparkSession)
         return df
 
     @classmethod
-    def toDf(cls, spatialRDD: SedonaRDD, spark: SparkSession, fieldNames: List = None) -> DataFrame:
+    def toDf(
+        cls, spatialRDD: SedonaRDD, spark: SparkSession, fieldNames: List = None
+    ) -> DataFrame:
         srdd = SpatialRDD(spatialRDD.sc)
         srdd.setRawSpatialRDD(spatialRDD.jsrdd)
         if fieldNames:

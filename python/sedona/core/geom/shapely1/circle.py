@@ -17,7 +17,14 @@
 
 from math import sqrt
 
-from shapely.geometry import Polygon, Point, LineString, MultiPoint, MultiPolygon, MultiLineString
+from shapely.geometry import (
+    LineString,
+    MultiLineString,
+    MultiPoint,
+    MultiPolygon,
+    Point,
+    Polygon,
+)
 from shapely.geometry.base import BaseGeometry
 
 from sedona.core.geom.envelope import Envelope
@@ -32,19 +39,23 @@ class Circle(Polygon):
         center_geometry_mbr = Envelope.from_shapely_geom(self.centerGeometry)
         self.centerPoint = self.centerPoint = Point(
             (center_geometry_mbr.minx + center_geometry_mbr.maxx) / 2.0,
-            (center_geometry_mbr.miny + center_geometry_mbr.maxy) / 2.0
+            (center_geometry_mbr.miny + center_geometry_mbr.maxy) / 2.0,
         )
 
         width = center_geometry_mbr.maxx - center_geometry_mbr.minx
         length = center_geometry_mbr.maxy - center_geometry_mbr.miny
 
-        center_geometry_internal_radius = sqrt(width ** 2 + length ** 2) / 2.0
-        self.radius = givenRadius if givenRadius > center_geometry_internal_radius else center_geometry_internal_radius
+        center_geometry_internal_radius = sqrt(width**2 + length**2) / 2.0
+        self.radius = (
+            givenRadius
+            if givenRadius > center_geometry_internal_radius
+            else center_geometry_internal_radius
+        )
         self.MBR = Envelope(
             self.centerPoint.x - self.radius,
             self.centerPoint.x + self.radius,
             self.centerPoint.y - self.radius,
-            self.centerPoint.y + self.radius
+            self.centerPoint.y + self.radius,
         )
         super().__init__(self.centerPoint.buffer(self.radius))
 
@@ -61,13 +72,17 @@ class Circle(Polygon):
         center_geometry_mbr = Envelope.from_shapely_geom(self.centerGeometry)
         width = center_geometry_mbr.maxx - center_geometry_mbr.minx
         length = center_geometry_mbr.maxy - center_geometry_mbr.miny
-        center_geometry_internal_radius = sqrt(width ** 2 + length ** 2) / 2
-        self.radius = givenRadius if givenRadius > center_geometry_internal_radius else center_geometry_internal_radius
+        center_geometry_internal_radius = sqrt(width**2 + length**2) / 2
+        self.radius = (
+            givenRadius
+            if givenRadius > center_geometry_internal_radius
+            else center_geometry_internal_radius
+        )
         self.MBR = Envelope(
             self.centerPoint.x - self.radius,
             self.centerPoint.x + self.radius,
             self.centerPoint.y - self.radius,
-            self.centerPoint.y + self.radius
+            self.centerPoint.y + self.radius,
         )
 
     def covers(self, other: BaseGeometry) -> bool:
@@ -80,9 +95,13 @@ class Circle(Polygon):
         elif isinstance(other, MultiPoint):
             return all([self.covers_point(point) for point in other])
         elif isinstance(other, MultiPolygon):
-            return all([self.covers_linestring(polygon.exterior) for polygon in other.geoms])
+            return all(
+                [self.covers_linestring(polygon.exterior) for polygon in other.geoms]
+            )
         elif isinstance(other, MultiLineString):
-            return all([self.covers_linestring(linestring) for linestring in other.geoms])
+            return all(
+                [self.covers_linestring(linestring) for linestring in other.geoms]
+            )
         else:
             raise TypeError("Not supported")
 
@@ -114,7 +133,12 @@ class Circle(Polygon):
         return self.MBR
 
     def __str__(self):
-        return "Circle of radius " + str(self.radius) + " around " + str(self.centerGeometry)
+        return (
+            "Circle of radius "
+            + str(self.radius)
+            + " around "
+            + str(self.centerGeometry)
+        )
 
     @property
     def __array_interface__(self):

@@ -18,8 +18,7 @@
 import pytest
 from pytest import approx
 
-from sedona.raster.meta import AffineTransform
-from sedona.raster.meta import PixelAnchor
+from sedona.raster.meta import AffineTransform, PixelAnchor
 
 
 class TestAffineTransform:
@@ -32,7 +31,9 @@ class TestAffineTransform:
         ip_x = 100
         ip_y = 200
 
-        trans = AffineTransform(scale_x, skew_y, skew_x, scale_y, ip_x, ip_y, PixelAnchor.CENTER)
+        trans = AffineTransform(
+            scale_x, skew_y, skew_x, scale_y, ip_x, ip_y, PixelAnchor.CENTER
+        )
         trans_gdal = trans.with_anchor(PixelAnchor.UPPER_LEFT)
         assert trans_gdal.scale_x == approx(scale_x)
         assert trans_gdal.scale_y == approx(scale_y)
@@ -49,7 +50,9 @@ class TestAffineTransform:
         ip_x = 100
         ip_y = 200
 
-        trans_gdal = AffineTransform(scale_x, skew_y, skew_x, scale_y, ip_x, ip_y, PixelAnchor.UPPER_LEFT)
+        trans_gdal = AffineTransform(
+            scale_x, skew_y, skew_x, scale_y, ip_x, ip_y, PixelAnchor.UPPER_LEFT
+        )
         trans = trans_gdal.with_anchor(PixelAnchor.CENTER)
         assert trans.scale_x == approx(scale_x)
         assert trans.scale_y == approx(scale_y)

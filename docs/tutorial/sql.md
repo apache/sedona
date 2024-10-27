@@ -26,7 +26,7 @@ SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of 
 	myDataFrame.createOrReplaceTempView("spatialDf")
 	```
 
-Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.md). You can find example county data (i.e., `county_small.tsv`) in [Sedona GitHub repo](https://github.com/apache/sedona/tree/master/core/src/test/resources).
+Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.md). You can find example county data (i.e., `county_small.tsv`) in [Sedona GitHub repo](https://github.com/apache/sedona/tree/master/spark/common/src/test/resources).
 
 ## Set up dependencies
 
@@ -71,12 +71,12 @@ You can add additional Spark runtime config to the config builder. For example, 
 
 	SparkSession config = SedonaContext.builder()
 	.master("local[*]") // Delete this if run in cluster mode
-	.appName("readTestScala") // Change this to a proper name
+	.appName("readTestJava") // Change this to a proper name
 	.getOrCreate()
 	```
 	If you use SedonaViz together with SedonaSQL, please add the following line after `SedonaContext.builder()` to enable Sedona Kryo serializer:
-	```scala
-	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+	```java
+	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName()) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 	```
 
 === "Python"
@@ -86,11 +86,11 @@ You can add additional Spark runtime config to the config builder. For example, 
 
 	config = SedonaContext.builder() .\
 	    config('spark.jars.packages',
-	           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
+	           'org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},'
 	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
 	    getOrCreate()
 	```
-    If you are using Spark versions >= 3.4, please replace the `3.0` in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
+    If you are using a different Spark version, please replace the `3.3` in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
 
 ==Sedona < 1.4.1==
 
@@ -118,16 +118,16 @@ The following method has been deprecated since Sedona 1.4.1. Please use the meth
 	```java
 	SparkSession sparkSession = SparkSession.builder()
 	.master("local[*]") // Delete this if run in cluster mode
-	.appName("readTestScala") // Change this to a proper name
+	.appName("readTestJava") // Change this to a proper name
 	// Enable Sedona custom Kryo serializer
-	.config("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", SedonaKryoRegistrator.class.getName)
+	.config("spark.serializer", KryoSerializer.class.getName()) // org.apache.spark.serializer.KryoSerializer
+	.config("spark.kryo.registrator", SedonaKryoRegistrator.class.getName())
 	.getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
 	```
 	If you use SedonaViz together with SedonaSQL, please use the following two lines to enable Sedona Kryo serializer instead:
-	```scala
-	.config("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+	```java
+	.config("spark.serializer", KryoSerializer.class.getName()) // org.apache.spark.serializer.KryoSerializer
+	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName()) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 	```
 
 === "Python"
@@ -135,11 +135,11 @@ The following method has been deprecated since Sedona 1.4.1. Please use the meth
 	```python
 	sparkSession = SparkSession. \
 	    builder. \
-	    appName('appName'). \
-	    config("spark.serializer", KryoSerializer.getName). \
-	    config("spark.kryo.registrator", SedonaKryoRegistrator.getName). \
+	    appName('readTestPython'). \
+	    config("spark.serializer", KryoSerializer.getName()). \
+	    config("spark.kryo.registrator", SedonaKryoRegistrator.getName()). \
 	    config('spark.jars.packages',
-	           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
+	           'org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},'
 	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
 	    getOrCreate()
 	```
@@ -705,6 +705,98 @@ For Postgis there is no need to add a query to convert geometry types since it's
 		.withColumn("geom", f.expr("ST_GeomFromWKB(geom)")))
 	```
 
+## Load from geopackage
+
+Since v1.7.0, Sedona supports loading Geopackage file format as a DataFrame.
+
+=== "Scala/Java"
+
+	```scala
+	val df = sedona.read.format("geopackage").option("tableName", "tab").load("/path/to/geopackage")
+	```
+
+=== "Java"
+
+	```java
+	Dataset<Row> df = sedona.read().format("geopackage").option("tableName", "tab").load("/path/to/geopackage")
+	```
+
+=== "Python"
+
+	```python
+	df = sedona.read.format("geopackage").option("tableName", "tab").load("/path/to/geopackage")
+	```
+
+Geopackage files can contain vector data and raster data. To show the possible options from a file you can
+look into the metadata table by adding parameter showMetadata and set its value as true.
+
+=== "Scala/Java"
+
+	```scala
+	val df = sedona.read.format("geopackage").option("showMetadata", "true").load("/path/to/geopackage")
+	```
+
+=== "Java"
+
+	```java
+	Dataset<Row> df = sedona.read().format("geopackage").option("showMetadata", "true").load("/path/to/geopackage")
+	```
+
+=== "Python"
+
+	```python
+	df = sedona.read.format("geopackage").option("showMetadata", "true").load("/path/to/geopackage")
+
+Then you can see the metadata of the geopackage file like below.
+
+```
++--------------------+---------+--------------------+-----------+--------------------+----------+-----------------+----------+----------+------+
+|          table_name|data_type|          identifier|description|         last_change|     min_x|            min_y|     max_x|     max_y|srs_id|
++--------------------+---------+--------------------+-----------+--------------------+----------+-----------------+----------+----------+------+
+|gis_osm_water_a_f...| features|gis_osm_water_a_f...|           |2024-09-30 23:07:...|-9.0257084|57.96814069999999|33.4866675|80.4291867|  4326|
++--------------------+---------+--------------------+-----------+--------------------+----------+-----------------+----------+----------+------+
+```
+
+You can also load data from raster tables in the geopackage file. To load raster data, you can use the following code.
+
+=== "Scala/Java"
+
+	```scala
+	val df = sedona.read.format("geopackage").option("tableName", "raster_table").load("/path/to/geopackage")
+	```
+
+=== "Java"
+
+	```java
+	Dataset<Row> df = sedona.read().format("geopackage").option("tableName", "raster_table").load("/path/to/geopackage")
+	```
+
+=== "Python"
+
+	```python
+	df = sedona.read.format("geopackage").option("tableName", "raster_table").load("/path/to/geopackage")
+	```
+
+```
++---+----------+-----------+--------+--------------------+
+| id|zoom_level|tile_column|tile_row|           tile_data|
++---+----------+-----------+--------+--------------------+
+|  1|        11|        428|     778|GridCoverage2D["c...|
+|  2|        11|        429|     778|GridCoverage2D["c...|
+|  3|        11|        428|     779|GridCoverage2D["c...|
+|  4|        11|        429|     779|GridCoverage2D["c...|
+|  5|        11|        427|     777|GridCoverage2D["c...|
++---+----------+-----------+--------+--------------------+
+```
+
+Known limitations (v1.7.0):
+
+- webp rasters are not supported
+- ewkb geometries are not supported
+- filtering based on geometries envelopes are not supported
+
+All points above should be resolved soon, stay tuned !
+
 ## Transform the Coordinate Reference System
 
 Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in a Geometry column. The unit of all related distances in SedonaSQL is same as the unit of all geometries in a Geometry column.
@@ -737,6 +829,121 @@ The coordinates of polygons have been changed. The output will be like this:
 |POLYGON ((-116403...| 35|011|00933054|35011|    De Baca|      De Baca County| 06|
 |POLYGON ((-107880...| 31|109|00835876|31109|  Lancaster|    Lancaster County| 06|
 
+```
+
+## Cluster with DBSCAN
+
+Sedona provides an implementation of the [DBSCAN](https://en.wikipedia.org/wiki/Dbscan) algorithm to cluster spatial data.
+
+The algorithm is available as a Scala and Python function called on a spatial dataframe. The returned dataframe has an additional column added containing the unique identifier of the cluster that record is a member of and a boolean column indicating if the record is a core point.
+
+The first parameter is the dataframe, the next two are the epsilon and min_points parameters of the DBSCAN algorithm.
+
+=== "Scala"
+
+	```scala
+	import org.apache.sedona.stats.clustering.DBSCAN.dbscan
+
+	dbscan(df, 0.1, 5).show()
+	```
+
+=== "Java"
+
+	```java
+	import org.apache.sedona.stats.clustering.DBSCAN;
+
+	DBSCAN.dbscan(df, 0.1, 5).show();
+	```
+
+=== "Python"
+
+	```python
+	from sedona.stats.clustering.dbscan import dbscan
+
+	dbscan(df, 0.1, 5).show()
+	```
+
+The output will look like this:
+
+```
++----------------+---+------+-------+
+|        geometry| id|isCore|cluster|
++----------------+---+------+-------+
+|   POINT (2.5 4)|  3| false|      1|
+|     POINT (3 4)|  2| false|      1|
+|     POINT (3 5)|  5| false|      1|
+|     POINT (1 3)|  9|  true|      0|
+| POINT (2.5 4.5)|  7|  true|      1|
+|     POINT (1 2)|  1|  true|      0|
+| POINT (1.5 2.5)|  4|  true|      0|
+| POINT (1.2 2.5)|  8|  true|      0|
+|   POINT (1 2.5)| 11|  true|      0|
+|     POINT (1 5)| 10| false|     -1|
+|     POINT (5 6)| 12| false|     -1|
+|POINT (12.8 4.5)|  6| false|     -1|
+|     POINT (4 3)| 13| false|     -1|
++----------------+---+------+-------+
+```
+
+## Calculate the Local Outlier Factor (LOF)
+
+Sedona provides an implementation of the [Local Outlier Factor](https://en.wikipedia.org/wiki/Local_outlier_factor) algorithm to identify anomalous data.
+
+The algorithm is available as a Scala and Python function called on a spatial dataframe. The returned dataframe has an additional column added containing the local outlier factor.
+
+The first parameter is the dataframe, the next is the number of nearest neighbors to consider use in calculating the score.
+
+=== "Scala"
+
+	```scala
+	import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor.localOutlierFactor
+
+    localOutlierFactor(df, 20).show()
+	```
+
+=== "Java"
+
+	```java
+	import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor;
+
+	LocalOutlierFactor.localOutlierFactor(df, 20).show();
+	```
+
+=== "Python"
+
+	```python
+	from sedona.stats.outlier_detection.local_outlier_factor import local_outlier_factor
+
+	local_outlier_factor(df, 20).show()
+	```
+
+The output will look like this:
+
+```
++--------------------+------------------+
+|            geometry|               lof|
++--------------------+------------------+
+|POINT (-2.0231305...| 0.952098153363662|
+|POINT (-2.0346944...|0.9975325496668104|
+|POINT (-2.2040074...|1.0825843906411081|
+|POINT (1.61573501...|1.7367129352162634|
+|POINT (-2.1176324...|1.5714144683150393|
+|POINT (-2.2349759...|0.9167275845938276|
+|POINT (1.65470192...| 1.046231536764447|
+|POINT (0.62624112...|1.1988700676990034|
+|POINT (2.01746261...|1.1060219481067417|
+|POINT (-2.0483857...|1.0775553430145446|
+|POINT (2.43969463...|1.1129132178576646|
+|POINT (-2.2425480...| 1.104108012697006|
+|POINT (-2.7859235...|  2.86371824574529|
+|POINT (-1.9738858...|1.0398822680356794|
+|POINT (2.00153403...| 0.927409656346015|
+|POINT (2.06422812...|0.9222203762264445|
+|POINT (-1.7533819...|1.0273650471626696|
+|POINT (-2.2030766...| 0.964744555830738|
+|POINT (-1.8509857...|1.0375927869698574|
+|POINT (2.10849080...|1.0753419197322656|
++--------------------+------------------+
 ```
 
 ## Run spatial queries
@@ -822,7 +1029,7 @@ SedonaPyDeck.create_choropleth_map(df=groupedresult, plot_col='AirportCount')
 !!!Note
 	`plot_col` is a required argument informing SedonaPyDeck of the column name used to render the choropleth effect.
 
-![](../image/choropleth.gif)
+![Creating a Choropleth map using SedonaPyDeck](../image/choropleth.gif)
 
 The dataset used is available [here](https://github.com/apache/sedona/tree/4c5fa8333b2c61850d5664b878df9493c7915066/binder/data/ne_50m_airports) and
 can also be found in the example notebook available [here](https://github.com/apache/sedona/blob/4c5fa8333b2c61850d5664b878df9493c7915066/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)
@@ -837,7 +1044,7 @@ Example (referenced from overture notebook available via binder):
 SedonaPyDeck.create_geometry_map(df_building, elevation_col='height')
 ```
 
-![](../image/buildings.gif)
+![Creating a Geometry map using SedonaPyDeck](../image/buildings.gif)
 
 !!!Tip
 	`elevation_col` is an optional argument which can be used to render a 3D map. Pass the column with 'elevation' values for the geometries here.
@@ -852,7 +1059,7 @@ Example:
 SedonaPyDeck.create_scatterplot_map(df=crimes_df)
 ```
 
-![](../image/points.gif)
+![Creating a Scatterplot map using SedonaPyDeck](../image/points.gif)
 
 The dataset used here is the Chicago crimes dataset, available [here](https://github.com/apache/sedona/blob/sedona-1.5.0/spark/common/src/test/resources/Chicago_Crimes.csv)
 
@@ -866,7 +1073,7 @@ Example:
 SedonaPyDeck.create_heatmap(df=crimes_df)
 ```
 
-![](../image/heatmap.gif)
+![Creating a heatmap using SedonaPyDeck](../image/heatmap.gif)
 
 The dataset used here is the Chicago crimes dataset, available [here](https://github.com/apache/sedona/blob/sedona-1.5.0/spark/common/src/test/resources/Chicago_Crimes.csv)
 
@@ -890,7 +1097,7 @@ Example (referenced from an example notebook via the binder):
 SedonaKepler.create_map(df=groupedresult, name="AirportCount")
 ```
 
-![](../image/sedona_customization.gif)
+![Visualize geospatial data using SedonaKepler](../image/sedona_customization.gif)
 
 The dataset used is available [here](https://github.com/apache/sedona/tree/4c5fa8333b2c61850d5664b878df9493c7915066/binder/data/ne_50m_airports) and
 can also be found in the example notebook available [here](https://github.com/apache/sedona/blob/4c5fa8333b2c61850d5664b878df9493c7915066/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)

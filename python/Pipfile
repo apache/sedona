@@ -10,6 +10,8 @@ jupyter="*"
 mkdocs="*"
 pytest-cov = "*"
 
+scikit-learn = "*"
+
 [packages]
 pandas="<=1.5.3"
 numpy="<2"

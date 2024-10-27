@@ -15,14 +15,13 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+import os
+import sys
 from typing import Optional
 from warnings import warn
-import sys
-import os
 
 import shapely
 from shapely.geometry.base import BaseGeometry
-
 
 speedup_enabled = False
 
@@ -34,19 +33,24 @@ try:
 
     def find_geos_c_dll():
         packages_dir = os.path.dirname(os.path.dirname(shapely.__file__))
-        for lib_dirname in ['shapely.libs', 'Shapely.libs']:
+        for lib_dirname in ["shapely.libs", "Shapely.libs"]:
             lib_dirpath = os.path.join(packages_dir, lib_dirname)
             if not os.path.exists(lib_dirpath):
                 continue
             for filename in os.listdir(lib_dirpath):
-                if filename.lower().startswith('geos_c') and filename.lower().endswith('.dll'):
+                if filename.lower().startswith("geos_c") and filename.lower().endswith(
+                    ".dll"
+                ):
                     return os.path.join(lib_dirpath, filename)
-        raise RuntimeError('geos_c DLL not found in {}\\[S|s]hapely.libs'.format(packages_dir))
+        raise RuntimeError(
+            "geos_c DLL not found in {}\\[S|s]hapely.libs".format(packages_dir)
+        )
 
-    if shapely.__version__.startswith('2.'):
-        if sys.platform != 'win32':
+    if shapely.__version__.startswith("2."):
+        if sys.platform != "win32":
             # We load geos_c library indirectly by loading shapely.lib
             import shapely.lib
+
             geomserde_speedup.load_libgeos_c(shapely.lib.__file__)
         else:
             # Find geos_c library and load it
@@ -62,20 +66,20 @@ try:
 
         speedup_enabled = True
 
-    elif shapely.__version__.startswith('1.'):
+    elif shapely.__version__.startswith("1."):
         # Shapely 1.x uses ctypes.CDLL to load geos_c library. We can obtain the
         # handle of geos_c library from `shapely.geos._lgeos._handle`
-        import shapely.geos
         import shapely.geometry.base
+        import shapely.geos
         from shapely.geometry import (
-            Point,
-            LineString,
+            GeometryCollection,
             LinearRing,
-            Polygon,
-            MultiPoint,
+            LineString,
             MultiLineString,
+            MultiPoint,
             MultiPolygon,
-            GeometryCollection
+            Point,
+            Polygon,
         )
 
         lgeos_handle = shapely.geos._lgeos._handle
@@ -112,21 +116,23 @@ try:
             ob = BaseGeometry()
             geom_type = shapely.geometry.base.GEOMETRY_TYPES[geom_type_id]
             ob.__class__ = GEOMETRY_CLASSES[geom_type_id]
-            ob.__dict__['__geom__'] = g
-            ob.__dict__['__p__'] = None
+            ob.__dict__["__geom__"] = g
+            ob.__dict__["__p__"] = None
             if has_z != 0:
-                ob.__dict__['_ndim'] = 3
+                ob.__dict__["_ndim"] = 3
             else:
-                ob.__dict__['_ndim'] = 2
-            ob.__dict__['_is_empty'] = False
+                ob.__dict__["_ndim"] = 2
+            ob.__dict__["_is_empty"] = False
             return ob, bytes_read
 
         speedup_enabled = True
 
     else:
         # fallback to our general pure python implementation
-        from .geometry_serde_general import serialize, deserialize
+        from .geometry_serde_general import deserialize, serialize
 
 except Exception as e:
-    warn(f'Cannot load geomserde_speedup, fallback to general python implementation. Reason: {e}')
-    from .geometry_serde_general import serialize, deserialize
+    warn(
+        f"Cannot load geomserde_speedup, fallback to general python implementation. Reason: {e}"
+    )
+    from .geometry_serde_general import deserialize, serialize

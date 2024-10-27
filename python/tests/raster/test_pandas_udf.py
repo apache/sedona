@@ -15,23 +15,29 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+import numpy as np
+import pandas as pd
+import pyspark
 import pytest
-
-from tests.test_base import TestBase
+import rasterio
 from pyspark.sql.functions import expr, pandas_udf
 from pyspark.sql.types import IntegerType
-import pyspark
-import pandas as pd
-import numpy as np
-import rasterio
-
 from tests import world_map_raster_input_location
+from tests.test_base import TestBase
+
 
 class TestRasterPandasUDF(TestBase):
-    @pytest.mark.skipif(pyspark.__version__ < '3.4', reason="requires Spark 3.4 or higher")
+    @pytest.mark.skipif(
+        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
+    )
     def test_raster_as_param(self):
         spark = TestRasterPandasUDF.spark
-        df = spark.range(10).withColumn("rast", expr("RS_MakeRasterForTesting(1, 'I', 'PixelInterleavedSampleModel', 4, 3, 100, 100, 10, -10, 0, 0, 3857)"))
+        df = spark.range(10).withColumn(
+            "rast",
+            expr(
+                "RS_MakeRasterForTesting(1, 'I', 'PixelInterleavedSampleModel', 4, 3, 100, 100, 10, -10, 0, 0, 3857)"
+            ),
+        )
 
         # A Python Pandas UDF that takes a raster as input
         @pandas_udf(IntegerType())
@@ -67,10 +73,10 @@ class TestRasterPandasUDF(TestBase):
         rows = df_result.collect()
         assert len(rows) == 10
         for row in rows:
-            assert row['res'] == 66
+            assert row["res"] == 66
 
         df_result = df.selectExpr("pandas_udf_raster_as_param_2(rast) as res")
         rows = df_result.collect()
         assert len(rows) == 10
         for row in rows:
-            assert row['res'] == 66
+            assert row["res"] == 66

@@ -51,15 +51,15 @@ public class TestTableFunctions extends TestBase {
   @Test
   public void test_ST_MaximumInscribedCircle() {
     registerUDTF(ST_MaximumInscribedCircle.class);
-    verifySqlSingleRes(
+    verifyGeometry(
         "select sedona.ST_AsText(center) from table(sedona.ST_MaximumInscribedCircle(sedona.ST_GeomFromText('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 50 90, 90 140, 60 140))')))",
-        "POINT (96.953125 76.328125)");
-    verifySqlSingleRes(
+        "POINT (96.9287109375 76.3232421875)");
+    verifyGeometry(
         "select sedona.ST_AsText(nearest) from table(sedona.ST_MaximumInscribedCircle(sedona.ST_GeomFromText('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 50 90, 90 140, 60 140))')))",
-        "POINT (140 90)");
+        "POINT (61.64205411585366 104.55256764481707)");
     verifySqlSingleRes(
         "select radius from table(sedona.ST_MaximumInscribedCircle(sedona.ST_GeomFromText('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 50 90, 90 140, 60 140))')))",
-        45.165845650018);
+        45.18896951053177);
   }
 
   @Test
@@ -67,7 +67,7 @@ public class TestTableFunctions extends TestBase {
     registerUDTF(ST_IsValidDetail.class);
     verifySqlSingleRes(
         "select reason from table(sedona.ST_IsValidDetail(sedona.ST_GeomFromText('POLYGON ((30 10, 40 40, 20 40, 30 10, 10 20, 30 10))'), 0))",
-        "Ring Self-intersection at or near point (30.0, 10.0, NaN)");
+        "Ring Self-intersection at or near point (30.0, 10.0)");
     verifySqlSingleRes(
         "select valid from table(sedona.ST_IsValidDetail(sedona.ST_GeomFromText('POLYGON ((30 10, 40 40, 20 40, 30 10, 10 20, 30 10))'), 0))",
         false);

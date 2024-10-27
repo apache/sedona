@@ -15,12 +15,14 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from shapely.geometry import Polygon, Point
+import math
+import pickle
+
+from shapely.geometry import Point, Polygon
 from shapely.geometry.base import BaseGeometry
 
 from sedona.utils.decorators import require
-import math
-import pickle
+
 
 class Envelope(Polygon):
 
@@ -29,27 +31,29 @@ class Envelope(Polygon):
         self.maxx = maxx
         self.miny = miny
         self.maxy = maxy
-        super().__init__([
-            [self.minx, self.miny],
-            [self.minx, self.maxy],
-            [self.maxx, self.maxy],
-            [self.maxx, self.miny]
-        ])
+        super().__init__(
+            [
+                [self.minx, self.miny],
+                [self.minx, self.maxy],
+                [self.maxx, self.maxy],
+                [self.maxx, self.miny],
+            ]
+        )
 
     def isClose(self, a, b) -> bool:
         return math.isclose(a, b, rel_tol=1e-9)
 
     def __eq__(self, other) -> bool:
-        return self.isClose(self.minx, other.minx) and\
-                self.isClose(self.miny, other.miny) and\
-                self.isClose(self.maxx, other.maxx) and\
-                self.isClose(self.maxy, other.maxy)
+        return (
+            self.isClose(self.minx, other.minx)
+            and self.isClose(self.miny, other.miny)
+            and self.isClose(self.maxx, other.maxx)
+            and self.isClose(self.maxy, other.maxy)
+        )
 
     @require(["Envelope"])
     def create_jvm_instance(self, jvm):
-        return jvm.Envelope(
-            self.minx, self.maxx, self.miny, self.maxy
-        )
+        return jvm.Envelope(self.minx, self.maxx, self.miny, self.maxy)
 
     @classmethod
     def from_jvm_instance(cls, java_obj):
@@ -62,6 +66,7 @@ class Envelope(Polygon):
 
     def to_bytes(self):
         from sedona.utils.binary_parser import BinaryBuffer
+
         bin_buffer = BinaryBuffer()
         bin_buffer.put_double(self.minx)
         bin_buffer.put_double(self.maxx)
@@ -83,13 +88,16 @@ class Envelope(Polygon):
         return cls(min(x_coord), max(x_coord), min(y_coord), max(y_coord))
 
     def __reduce__(self):
-        return (self.__class__, (), dict(
-            minx=self.minx,
-            maxx=self.maxx,
-            miny=self.miny,
-            maxy=self.maxy,
-
-        ))
+        return (
+            self.__class__,
+            (),
+            dict(
+                minx=self.minx,
+                maxx=self.maxx,
+                miny=self.miny,
+                maxy=self.maxy,
+            ),
+        )
 
     def __getstate__(self):
         return dict(
@@ -97,7 +105,6 @@ class Envelope(Polygon):
             maxx=self.maxx,
             miny=self.miny,
             maxy=self.maxy,
-
         )
 
     def __setstate__(self, state):

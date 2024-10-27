@@ -17,9 +17,9 @@
 
 from pyspark import RDD
 
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.spatialOperator.join_params import JoinParams
 from sedona.core.spatialOperator.join_query_raw import JoinQueryRaw
+from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.utils.decorators import require
 
 
@@ -27,8 +27,13 @@ class JoinQuery:
 
     @classmethod
     @require(["JoinQuery"])
-    def SpatialJoinQuery(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool,
-                         considerBoundaryIntersection: bool) -> RDD:
+    def SpatialJoinQuery(
+        cls,
+        spatialRDD: SpatialRDD,
+        queryRDD: SpatialRDD,
+        useIndex: bool,
+        considerBoundaryIntersection: bool,
+    ) -> RDD:
         """
 
         :param spatialRDD: SpatialRDD
@@ -38,13 +43,20 @@ class JoinQuery:
         :return:
         """
 
-        pair_rdd = JoinQueryRaw.SpatialJoinQuery(spatialRDD, queryRDD, useIndex, considerBoundaryIntersection)
+        pair_rdd = JoinQueryRaw.SpatialJoinQuery(
+            spatialRDD, queryRDD, useIndex, considerBoundaryIntersection
+        )
         return pair_rdd.to_rdd()
 
     @classmethod
     @require(["JoinQuery"])
-    def DistanceJoinQuery(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool,
-                          considerBoundaryIntersection: bool) -> RDD:
+    def DistanceJoinQuery(
+        cls,
+        spatialRDD: SpatialRDD,
+        queryRDD: SpatialRDD,
+        useIndex: bool,
+        considerBoundaryIntersection: bool,
+    ) -> RDD:
         """
 
         :param spatialRDD: SpatialRDD
@@ -54,12 +66,16 @@ class JoinQuery:
         :return:
         """
 
-        pair_rdd = JoinQueryRaw.DistanceJoinQuery(spatialRDD, queryRDD, useIndex, considerBoundaryIntersection)
+        pair_rdd = JoinQueryRaw.DistanceJoinQuery(
+            spatialRDD, queryRDD, useIndex, considerBoundaryIntersection
+        )
         return pair_rdd.to_rdd()
 
     @classmethod
     @require(["JoinQuery"])
-    def spatialJoin(cls, queryWindowRDD: SpatialRDD, objectRDD: SpatialRDD, joinParams: JoinParams) -> RDD:
+    def spatialJoin(
+        cls, queryWindowRDD: SpatialRDD, objectRDD: SpatialRDD, joinParams: JoinParams
+    ) -> RDD:
         """
 
         :param queryWindowRDD: SpatialRDD
@@ -73,8 +89,13 @@ class JoinQuery:
 
     @classmethod
     @require(["JoinQuery"])
-    def DistanceJoinQueryFlat(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool,
-                              considerBoundaryIntersection: bool) -> RDD:
+    def DistanceJoinQueryFlat(
+        cls,
+        spatialRDD: SpatialRDD,
+        queryRDD: SpatialRDD,
+        useIndex: bool,
+        considerBoundaryIntersection: bool,
+    ) -> RDD:
         """
 
         :param spatialRDD: SpatialRDD
@@ -90,14 +111,20 @@ class JoinQuery:
         :return:
         """
 
-        pair_rdd = JoinQueryRaw.DistanceJoinQueryFlat(spatialRDD, queryRDD, useIndex,
-                                                      considerBoundaryIntersection)
+        pair_rdd = JoinQueryRaw.DistanceJoinQueryFlat(
+            spatialRDD, queryRDD, useIndex, considerBoundaryIntersection
+        )
         return pair_rdd.to_rdd()
 
     @classmethod
     @require(["JoinQuery"])
-    def SpatialJoinQueryFlat(cls, spatialRDD: SpatialRDD, queryRDD: SpatialRDD, useIndex: bool,
-                             considerBoundaryIntersection: bool) -> RDD:
+    def SpatialJoinQueryFlat(
+        cls,
+        spatialRDD: SpatialRDD,
+        queryRDD: SpatialRDD,
+        useIndex: bool,
+        considerBoundaryIntersection: bool,
+    ) -> RDD:
         """
         Function takes SpatialRDD and other SpatialRDD and based on two parameters
         - useIndex
@@ -117,6 +144,7 @@ class JoinQuery:
         [[GeoData(Polygon, ), GeoData()], [GeoData(), GeoData()], [GeoData(), GeoData()]]
         """
 
-        pair_rdd = JoinQueryRaw.SpatialJoinQueryFlat(spatialRDD, queryRDD, useIndex,
-                                                     considerBoundaryIntersection)
+        pair_rdd = JoinQueryRaw.SpatialJoinQueryFlat(
+            spatialRDD, queryRDD, useIndex, considerBoundaryIntersection
+        )
         return pair_rdd.to_rdd()

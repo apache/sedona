@@ -83,6 +83,8 @@ nav:
               - Parameter: api/sql/Parameter.md
           - RDD (core):
               - Scala/Java doc: api/java-api.md
+          - Stats:
+              - DataFrame: api/stats/sql.md
           - Viz:
               - DataFrame/SQL: api/viz/sql.md
               - RDD: api/viz/java-api.md
@@ -142,13 +144,14 @@ theme:
     logo: fontawesome/solid/earth-americas
     repo: fontawesome/brands/github
   features:
+    - content.code.copy
+    - search.highlight
+    - search.share
+    - search.suggest
+    - navigation.footer
     - navigation.instant
     - navigation.tabs
     - navigation.top
-    - search.suggest
-    - search.highlight
-    - search.share
-    - navigation.footer
 extra:
   version:
     provider: mike
@@ -197,7 +200,7 @@ markdown_extensions:
   - pymdownx.tilde
 plugins:
   - search:
-    #prebuild_index: true
+  # prebuild_index: true
   - macros
   - git-revision-date-localized:
       type: datetime

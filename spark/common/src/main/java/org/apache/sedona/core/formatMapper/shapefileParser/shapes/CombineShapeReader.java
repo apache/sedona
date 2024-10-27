@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
 
-  /** dubug logger */
+  /** debug logger */
   private static final Logger logger = LoggerFactory.getLogger(CombineShapeReader.class);
   /** suffix of attribute file */
   private static final String DBF_SUFFIX = "dbf";

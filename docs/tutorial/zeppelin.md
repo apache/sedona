@@ -1,4 +1,4 @@
-Sedona provides a Helium visualization plugin tailored for [Apache Zeppelin](https://zeppelin.apache.org/). This finally bridges the gap between Sedona and Zeppelin.  Please read [Install Sedona-Zeppelin](../setup/zeppelin.md) to learn how to install this plugin in Zeppelin.
+Sedona provides a Helium visualization plugin tailored for [Apache Zeppelin](https://zeppelin.apache.org/). This finally bridges the gap between Sedona and Zeppelin. Please read [Install Sedona-Zeppelin](../setup/zeppelin.md) to learn how to install this plugin in Zeppelin.
 
 Sedona-Zeppelin equips two approaches to visualize spatial data in Zeppelin. The first approach uses Zeppelin to plot all spatial objects on the map. The second one leverages SedonaViz to generate map images and overlay them on maps.
 
@@ -28,7 +28,7 @@ FROM wktpoint
 
 Select the geometry column to visualize:
 
-![](../image/sql-zeppelin.gif)
+![Create an SQL paragraph to fetch the data and then select the geometry column](../image/sql-zeppelin.gif)
 
 ## Large-scale with SedonaViz
 
@@ -57,7 +57,7 @@ FROM images
 
 Select the image and its geospatial boundary:
 
-![](../image/viz-zeppelin.gif)
+![Selecting the image and its boundary](../image/viz-zeppelin.gif)
 
 ## Zeppelin Spark notebook demo
 

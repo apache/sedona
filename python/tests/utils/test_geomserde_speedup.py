@@ -15,9 +15,6 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from sedona.utils import geometry_serde
-
-from shapely.geometry.base import BaseGeometry
 from shapely.geometry import (
     GeometryCollection,
     LineString,
@@ -27,18 +24,18 @@ from shapely.geometry import (
     Point,
     Polygon,
 )
+from shapely.geometry.base import BaseGeometry
 from shapely.wkt import loads as wkt_loads
+
+from sedona.utils import geometry_serde
+
 
 class TestGeomSerdeSpeedup:
     def test_speedup_enabled(self):
         assert geometry_serde.speedup_enabled
 
     def test_point(self):
-        points = [
-            wkt_loads("POINT EMPTY"),
-            Point(10, 20),
-            Point(10, 20, 30)
-        ]
+        points = [wkt_loads("POINT EMPTY"), Point(10, 20), Point(10, 20, 30)]
         self._test_serde_roundtrip(points)
 
     def test_linestring(self):
@@ -65,7 +62,9 @@ class TestGeomSerdeSpeedup:
             wkt_loads("MULTILINESTRING EMPTY"),
             MultiLineString([[(10, 20), (30, 40)]]),
             MultiLineString([[(10, 20), (30, 40)], [(50, 60), (70, 80)]]),
-            MultiLineString([[(10, 20, 30), (30, 40, 50)], [(50, 60, 70), (70, 80, 90)]]),
+            MultiLineString(
+                [[(10, 20, 30), (30, 40, 50)], [(50, 60, 70), (70, 80, 90)]]
+            ),
         ]
         self._test_serde_roundtrip(multi_linestrings)
 
@@ -90,32 +89,49 @@ class TestGeomSerdeSpeedup:
             MultiPolygon([Polygon(ext)]),
             MultiPolygon([Polygon(ext), Polygon(ext, [int0])]),
             MultiPolygon([Polygon(ext), Polygon(ext, [int0, int1])]),
-            MultiPolygon([Polygon(ext, [int1]), Polygon(ext), Polygon(ext, [int0, int1])]),
+            MultiPolygon(
+                [Polygon(ext, [int1]), Polygon(ext), Polygon(ext, [int0, int1])]
+            ),
         ]
         self._test_serde_roundtrip(multi_polygons)
 
     def test_geometry_collection(self):
         geometry_collections = [
             wkt_loads("GEOMETRYCOLLECTION EMPTY"),
-            GeometryCollection([Point(10, 20), LineString([(10, 20), (30, 40)]), Point(30, 40)]),
-            GeometryCollection([
-                MultiPoint([(10, 20), (30, 40)]),
-                MultiLineString([[(10, 20), (30, 40)], [(50, 60), (70, 80)]]),
-                MultiPolygon([
-                    Polygon(
-                        [(0, 0), (100, 0), (100, 100), (0, 100), (0, 0)],
-                        [[(10, 10), (10, 15), (15, 15), (15, 10), (10, 10)]])
-                ]),
-                Point(100, 200)
-            ]),
-            GeometryCollection([
-                GeometryCollection([Point(10, 20), LineString([(10, 20), (30, 40)]), Point(30, 40)]),
-                GeometryCollection([
+            GeometryCollection(
+                [Point(10, 20), LineString([(10, 20), (30, 40)]), Point(30, 40)]
+            ),
+            GeometryCollection(
+                [
                     MultiPoint([(10, 20), (30, 40)]),
                     MultiLineString([[(10, 20), (30, 40)], [(50, 60), (70, 80)]]),
-                    Point(10, 20)
-                ])
-            ])
+                    MultiPolygon(
+                        [
+                            Polygon(
+                                [(0, 0), (100, 0), (100, 100), (0, 100), (0, 0)],
+                                [[(10, 10), (10, 15), (15, 15), (15, 10), (10, 10)]],
+                            )
+                        ]
+                    ),
+                    Point(100, 200),
+                ]
+            ),
+            GeometryCollection(
+                [
+                    GeometryCollection(
+                        [Point(10, 20), LineString([(10, 20), (30, 40)]), Point(30, 40)]
+                    ),
+                    GeometryCollection(
+                        [
+                            MultiPoint([(10, 20), (30, 40)]),
+                            MultiLineString(
+                                [[(10, 20), (30, 40)], [(50, 60), (70, 80)]]
+                            ),
+                            Point(10, 20),
+                        ]
+                    ),
+                ]
+            ),
         ]
         self._test_serde_roundtrip(geometry_collections)
 
@@ -127,7 +143,9 @@ class TestGeomSerdeSpeedup:
             # GEOSGeom_createEmptyLineString in libgeos creates LineString with
             # Z dimension, This bug has been fixed by
             # https://github.com/libgeos/geos/pull/745
-            geom_actual_wkt = geom_actual.wkt.replace('LINESTRING Z EMPTY', 'LINESTRING EMPTY')
+            geom_actual_wkt = geom_actual.wkt.replace(
+                "LINESTRING Z EMPTY", "LINESTRING EMPTY"
+            )
             assert geom.wkt == geom_actual_wkt
 
     @staticmethod

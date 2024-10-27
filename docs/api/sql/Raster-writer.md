@@ -1,5 +1,5 @@
 !!!note
-	Sedona writers are available in Scala, Java and Python and have the same APIs.
+	Sedona writers are available in Scala. Java and Python have the same APIs.
 
 ## Write Raster DataFrame to raster files
 
@@ -148,7 +148,7 @@ Since: `v1.4.1`
 Available options:
 
 * rasterField:
-	* Default value: the `binary` type column in the DataFrame. If the input DataFrame has several binary columns, please specify which column you want to use.
+	* Default value: the `binary` type column in the DataFrame. If the input DataFrame has several binary columns, please specify which column you want to use. You can use one of the `RS_As*` functions mentioned above to convert the raster objects to binary raster file content to write.
 	* Allowed values: the name of the to-be-saved binary type column
 * fileExtension
 	* Default value: `.tiff`
@@ -164,27 +164,36 @@ The schema of the Raster dataframe to be written can be one of the following two
 
 ```html
 root
- |-- rs_asgeotiff(raster): binary (nullable = true)
+ |-- raster_binary: binary (nullable = true)
 ```
 
 or
 
 ```html
 root
- |-- rs_asgeotiff(raster): binary (nullable = true)
+ |-- raster_binary: binary (nullable = true)
  |-- path: string (nullable = true)
 ```
 
 Spark SQL example 1:
 
 ```scala
-sparkSession.write.format("raster").mode(SaveMode.Overwrite).save("my_raster_file")
+// Assume that df contains a raster column named "rast"
+df.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)"))\
+  .write.format("raster").mode("overwrite").save("my_raster_file")
 ```
 
 Spark SQL example 2:
 
 ```scala
-sparkSession.write.format("raster").option("rasterField", "raster").option("pathField", "path").option("fileExtension", ".tiff").mode(SaveMode.Overwrite).save("my_raster_file")
+// Assume that df contains a raster column named "rast" and a string column named "path"
+df.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)"))\
+  .write.format("raster")\
+  .option("rasterField", "raster_binary")\
+  .option("pathField", "path")\
+  .option("fileExtension", ".tiff")\
+  .mode("overwrite")\
+  .save("my_raster_file")
 ```
 
 The produced file structure will look like this:

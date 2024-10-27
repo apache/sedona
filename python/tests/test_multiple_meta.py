@@ -45,7 +45,7 @@ class TestMultipleMeta:
         assert A.help_function() == 5
         assert A.get("s") == "s" * 5
         assert A.get(1, 2) == 8
-        assert A.wget(4, "s") == 4*"s"
+        assert A.wget(4, "s") == 4 * "s"
         assert A.wget(4) == 4
 
     def test_static_methods(self):
@@ -61,6 +61,7 @@ class TestMultipleMeta:
             @classmethod
             def help_function(cls) -> int:
                 return A.get(1, 2) * A.get("s")
+
         assert A.help_function() == "sss"
 
     def test_basic_methods(self):
@@ -90,6 +91,7 @@ class TestMultipleMeta:
 
             def multiply_get(self, c: str):
                 return A.wget(1, 2) * A.wget(4) * c
+
         assert A().multiply_get() == 9
         assert A().multiply_get(10) == 120
         assert A().multiply_get("c") == 12 * "c"

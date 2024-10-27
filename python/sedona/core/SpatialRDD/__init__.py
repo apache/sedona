@@ -15,14 +15,17 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from .point_rdd import PointRDD
 from .circle_rdd import CircleRDD
 from .linestring_rdd import LineStringRDD
+from .point_rdd import PointRDD
 from .polygon_rdd import PolygonRDD
-from .rectangle_rdd import RectangleRDD
-from .rectangle_rdd import SpatialRDD
-
+from .rectangle_rdd import RectangleRDD, SpatialRDD
 
 __all__ = [
-    "PolygonRDD", "PointRDD", "CircleRDD", "LineStringRDD", "RectangleRDD", "SpatialRDD"
+    "PolygonRDD",
+    "PointRDD",
+    "CircleRDD",
+    "LineStringRDD",
+    "RectangleRDD",
+    "SpatialRDD",
 ]

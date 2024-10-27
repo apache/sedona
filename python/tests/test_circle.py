@@ -16,7 +16,6 @@
 #  under the License.
 
 import pytest
-
 import shapely
 from shapely import wkt
 from shapely.geometry import Point
@@ -30,14 +29,19 @@ class TestCircle:
     def test_get_center(self):
         point = Point(0.0, 0.0)
         circle = Circle(point, 0.1)
-        assert circle.centerGeometry.x == pytest.approx(point.x, 1e-6) and circle.centerGeometry.y == pytest.approx(point.y, 1e-6)
+        assert circle.centerGeometry.x == pytest.approx(
+            point.x, 1e-6
+        ) and circle.centerGeometry.y == pytest.approx(point.y, 1e-6)
 
     def test_get_radius(self):
         point = Point(0.0, 0.0)
         circle = Circle(point, 0.1)
         assert circle.getRadius() == pytest.approx(0.1, 0.01)
 
-    @pytest.mark.skipif(shapely.__version__.startswith('2.'), reason="Circle is immutable when working with Shapely 2.0")
+    @pytest.mark.skipif(
+        shapely.__version__.startswith("2."),
+        reason="Circle is immutable when working with Shapely 2.0",
+    )
     def test_set_radius(self):
         point = Point(0.0, 0.0)
         circle = Circle(point, 0.1)
@@ -63,20 +67,30 @@ class TestCircle:
         assert not circle.covers(wkt.loads("MULTIPOINT ((0.1 0.1), (1.2 0.4))"))
         assert not circle.covers(wkt.loads("MULTIPOINT ((1.1 0.1), (0.2 1.4))"))
 
-        assert circle.covers(wkt.loads("POLYGON ((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1))"))
+        assert circle.covers(
+            wkt.loads("POLYGON ((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1))")
+        )
         assert circle.covers(wkt.loads("POLYGON ((-0.5 0, 0 0.5, 0.5 0, -0.5 0))"))
         assert not circle.covers(wkt.loads("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
-        assert not circle.covers(wkt.loads("POLYGON ((0.4 0.4, 0.4 0.45, 0.45 0.45, 0.45 0.4, 0.4 0.4))"))
+        assert not circle.covers(
+            wkt.loads("POLYGON ((0.4 0.4, 0.4 0.45, 0.45 0.45, 0.45 0.4, 0.4 0.4))")
+        )
 
         assert circle.covers(
-            wkt.loads("MULTIPOLYGON (((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1)),((-0.5 0, 0 0.5, 0.5 0, -0.5 0)))")
+            wkt.loads(
+                "MULTIPOLYGON (((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1)),((-0.5 0, 0 0.5, 0.5 0, -0.5 0)))"
+            )
         )
 
         assert not circle.covers(
-            wkt.loads("MULTIPOLYGON (((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1)),((0 0, 0 1, 1 1, 1 0, 0 0)))")
+            wkt.loads(
+                "MULTIPOLYGON (((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1)),((0 0, 0 1, 1 1, 1 0, 0 0)))"
+            )
         )
         assert not circle.covers(
-            wkt.loads("MULTIPOLYGON (((0.4 0.4, 0.4 0.45, 0.45 0.45, 0.45 0.4, 0.4 0.4)),((0 0, 0 1, 1 1, 1 0, 0 0)))")
+            wkt.loads(
+                "MULTIPOLYGON (((0.4 0.4, 0.4 0.45, 0.45 0.45, 0.45 0.4, 0.4 0.4)),((0 0, 0 1, 1 1, 1 0, 0 0)))"
+            )
         )
 
         assert circle.covers(wkt.loads("LINESTRING (-0.1 0, 0.2 0.3)"))
@@ -87,14 +101,20 @@ class TestCircle:
 
         assert not circle.covers(wkt.loads("LINESTRING (0.4 0.4, 0.45 0.45)"))
 
-        assert circle.covers(wkt.loads("MULTILINESTRING ((-0.1 0, 0.2 0.3), (-0.5 0, 0 0.5, 0.5 0))"))
-        assert not circle.covers(wkt.loads("MULTILINESTRING ((-0.1 0, 0.2 0.3), (-0.1 0, 0 1))"))
-        assert not circle.covers(wkt.loads("MULTILINESTRING ((0.4 0.4, 0.45 0.45), (-0.1 0, 0 1))"))
+        assert circle.covers(
+            wkt.loads("MULTILINESTRING ((-0.1 0, 0.2 0.3), (-0.5 0, 0 0.5, 0.5 0))")
+        )
+        assert not circle.covers(
+            wkt.loads("MULTILINESTRING ((-0.1 0, 0.2 0.3), (-0.1 0, 0 1))")
+        )
+        assert not circle.covers(
+            wkt.loads("MULTILINESTRING ((0.4 0.4, 0.45 0.45), (-0.1 0, 0 1))")
+        )
 
     def test_intersects(self):
         circle = Circle(Point(0.0, 0.0), 0.5)
-        assert (circle.intersects(Point(0, 0)))
-        assert (circle.intersects(Point(0.1, 0.2)))
+        assert circle.intersects(Point(0, 0))
+        assert circle.intersects(Point(0.1, 0.2))
         assert not (circle.intersects(Point(0.4, 0.4)))
         assert not (circle.intersects(Point(-1, 0.4)))
 
@@ -102,33 +122,50 @@ class TestCircle:
         assert circle.intersects(wkt.loads("MULTIPOINT ((0.1 0.1), (1.2 0.4))"))
         assert not circle.intersects(wkt.loads("MULTIPOINT ((1.1 0.1), (0.2 1.4))"))
 
-        assert circle.intersects(wkt.loads("POLYGON ((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1))"))
+        assert circle.intersects(
+            wkt.loads("POLYGON ((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1))")
+        )
         assert circle.intersects(wkt.loads("POLYGON ((-0.5 0, 0 0.5, 0.5 0, -0.5 0))"))
 
         assert circle.intersects(wkt.loads("POLYGON ((0 0, 1 1, 1 0, 0 0))"))
 
-        assert circle.intersects(wkt.loads("POLYGON ((-1 -1, -1 1, 1 1, 1.5 0.5, 1 -1, -1 -1))"))
-
         assert circle.intersects(
-            wkt.loads("POLYGON ((-1 -1, -1 1, 1 1, 1 -1, -1 -1),(-0.1 -0.1, 0.1 -0.1, 0.1 0.1, -0.1 0.1, -0.1 -0.1))")
+            wkt.loads("POLYGON ((-1 -1, -1 1, 1 1, 1.5 0.5, 1 -1, -1 -1))")
         )
 
-        assert not circle.intersects(wkt.loads("POLYGON ((0.4 0.4, 0.4 0.45, 0.45 0.45, 0.45 0.4, 0.4 0.4))"))
-        assert not circle.intersects(wkt.loads("POLYGON ((-1 0, -1 1, 0 1, 0 2, -1 2, -1 0))"))
+        assert circle.intersects(
+            wkt.loads(
+                "POLYGON ((-1 -1, -1 1, 1 1, 1 -1, -1 -1),(-0.1 -0.1, 0.1 -0.1, 0.1 0.1, -0.1 0.1, -0.1 -0.1))"
+            )
+        )
+
         assert not circle.intersects(
-            wkt.loads("POLYGON ((-1 -1, -1 1, 1 1, 1 -1, -1 -1),(-0.6 -0.6, 0.6 -0.6, 0.6 0.6, -0.6 0.6, -0.6 -0.6))")
+            wkt.loads("POLYGON ((0.4 0.4, 0.4 0.45, 0.45 0.45, 0.45 0.4, 0.4 0.4))")
         )
-
-        assert circle.intersects(
-            wkt.loads("MULTIPOLYGON (((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1)),((-0.5 0, 0 0.5, 0.5 0, -0.5 0)))")
-        )
-        assert circle.intersects(
-            wkt.loads("MULTIPOLYGON (((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1)), ((-1 0, -1 1, 0 1, 0 2, -1 2, -1 0)))")
+        assert not circle.intersects(
+            wkt.loads("POLYGON ((-1 0, -1 1, 0 1, 0 2, -1 2, -1 0))")
         )
         assert not circle.intersects(
             wkt.loads(
-               "MULTIPOLYGON (((0.4 0.4, 0.4 0.45, 0.45 0.45, 0.45 0.4, 0.4 0.4)),((-1 0, -1 1, 0 1, 0 2, -1 2, -1 0)))"
-            ))
+                "POLYGON ((-1 -1, -1 1, 1 1, 1 -1, -1 -1),(-0.6 -0.6, 0.6 -0.6, 0.6 0.6, -0.6 0.6, -0.6 -0.6))"
+            )
+        )
+
+        assert circle.intersects(
+            wkt.loads(
+                "MULTIPOLYGON (((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1)),((-0.5 0, 0 0.5, 0.5 0, -0.5 0)))"
+            )
+        )
+        assert circle.intersects(
+            wkt.loads(
+                "MULTIPOLYGON (((-0.1 0.1, 0 0.4, 0.1 0.2, -0.1 0.1)), ((-1 0, -1 1, 0 1, 0 2, -1 2, -1 0)))"
+            )
+        )
+        assert not circle.intersects(
+            wkt.loads(
+                "MULTIPOLYGON (((0.4 0.4, 0.4 0.45, 0.45 0.45, 0.45 0.4, 0.4 0.4)),((-1 0, -1 1, 0 1, 0 2, -1 2, -1 0)))"
+            )
+        )
 
         assert circle.intersects(wkt.loads("LINESTRING (-1 -1, 1 1)"))
 
@@ -140,14 +177,24 @@ class TestCircle:
         assert not circle.intersects(wkt.loads("LINESTRING (-0.4 -0.4, -2 -3.2)"))
         assert not circle.intersects(wkt.loads("LINESTRING (0.1 0.5, 1 0.5)"))
 
-        assert circle.intersects(wkt.loads("MULTILINESTRING ((-1 -1, 1 1), (-1 0.5, 1 0.5))"))
-        assert circle.intersects(wkt.loads("MULTILINESTRING ((-1 -1, 1 1), (0.4 0.4, 1 1))"))
-        assert not circle.intersects(wkt.loads("MULTILINESTRING ((0.1 0.5, 1 0.5), (0.4 0.4, 1 1))"))
+        assert circle.intersects(
+            wkt.loads("MULTILINESTRING ((-1 -1, 1 1), (-1 0.5, 1 0.5))")
+        )
+        assert circle.intersects(
+            wkt.loads("MULTILINESTRING ((-1 -1, 1 1), (0.4 0.4, 1 1))")
+        )
+        assert not circle.intersects(
+            wkt.loads("MULTILINESTRING ((0.1 0.5, 1 0.5), (0.4 0.4, 1 1))")
+        )
 
     def test_equality(self):
-        assert Circle(Point(-112.574945, 45.987772), 0.01) == Circle(Point(-112.574945, 45.987772), 0.01)
+        assert Circle(Point(-112.574945, 45.987772), 0.01) == Circle(
+            Point(-112.574945, 45.987772), 0.01
+        )
 
-        assert Circle(Point(-112.574945, 45.987772), 0.01) == Circle(Point(-112.574945, 45.987772), 0.01)
+        assert Circle(Point(-112.574945, 45.987772), 0.01) == Circle(
+            Point(-112.574945, 45.987772), 0.01
+        )
 
     def test_radius(self):
         polygon = wkt.loads(

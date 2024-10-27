@@ -16,20 +16,19 @@
 #  under the License.
 
 import pickle
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 
 import attr
 from py4j.java_gateway import get_field
-from pyspark import SparkContext, RDD
+from pyspark import RDD, SparkContext, StorageLevel
 from pyspark.sql import SparkSession
-from pyspark import StorageLevel
 
-from sedona.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
-from sedona.core.enums.grid_type import GridTypeJvm, GridType
-from sedona.core.enums.index_type import IndexTypeJvm, IndexType
+from sedona.core.enums.grid_type import GridType, GridTypeJvm
+from sedona.core.enums.index_type import IndexType, IndexTypeJvm
 from sedona.core.enums.spatial import SpatialType
 from sedona.core.geom.envelope import Envelope
-from sedona.core.jvm.translate import SedonaPythonConverter, JvmSedonaPythonConverter
+from sedona.core.jvm.translate import JvmSedonaPythonConverter, SedonaPythonConverter
+from sedona.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from sedona.utils.decorators import require
 from sedona.utils.jvm import JvmStorageLevel
 from sedona.utils.spatial_rdd_parser import SedonaPickler
@@ -42,7 +41,7 @@ class SpatialPartitioner:
     jvm_partitioner = attr.ib()
 
     @classmethod
-    def from_java_class_name(cls, jvm_partitioner) -> 'SpatialPartitioner':
+    def from_java_class_name(cls, jvm_partitioner) -> "SpatialPartitioner":
         if jvm_partitioner is not None:
             jvm_full_name = jvm_partitioner.toString()
             full_class_name = jvm_full_name.split("@")[0]
@@ -63,7 +62,9 @@ class JvmSpatialRDD:
         self.jsrdd.saveAsObjectFile(location)
 
     def persist(self, storage_level: StorageLevel):
-        new_jsrdd = self.jsrdd.persist(JvmStorageLevel(self.sc._jvm, storage_level).jvm_instance)
+        new_jsrdd = self.jsrdd.persist(
+            JvmStorageLevel(self.sc._jvm, storage_level).jvm_instance
+        )
         self.jsrdd = new_jsrdd
 
     def count(self):
@@ -155,7 +156,9 @@ class SpatialRDD:
         java_boundary_envelope = get_field(self._srdd, "boundaryEnvelope")
         return Envelope.from_jvm_instance(java_boundary_envelope)
 
-    def buildIndex(self, indexType: Union[str, IndexType], buildIndexOnSpatialPartitionedRDD: bool) -> bool:
+    def buildIndex(
+        self, indexType: Union[str, IndexType], buildIndexOnSpatialPartitionedRDD: bool
+    ) -> bool:
         """
 
         :param indexType:
@@ -171,8 +174,7 @@ class SpatialRDD:
             else:
                 raise TypeError("indexType should be str or IndexType")
             return self._srdd.buildIndex(
-                index_type.jvm_instance,
-                buildIndexOnSpatialPartitionedRDD
+                index_type.jvm_instance, buildIndexOnSpatialPartitionedRDD
             )
         else:
             raise AttributeError("Please run spatial partitioning before")
@@ -224,12 +226,17 @@ class SpatialRDD:
         :return:
         """
 
-        serialized_spatial_rdd = SedonaPythonConverter(self._jvm).translate_spatial_rdd_to_python(
-            self._srdd.getRawSpatialRDD())
+        serialized_spatial_rdd = SedonaPythonConverter(
+            self._jvm
+        ).translate_spatial_rdd_to_python(self._srdd.getRawSpatialRDD())
 
         if not hasattr(self, "_raw_spatial_rdd"):
             RDD.saveAsObjectFile = lambda x, path: x._jrdd.saveAsObjectFile(path)
-            setattr(self, "_raw_spatial_rdd", RDD(serialized_spatial_rdd, self._sc, SedonaPickler()))
+            setattr(
+                self,
+                "_raw_spatial_rdd",
+                RDD(serialized_spatial_rdd, self._sc, SedonaPickler()),
+            )
         else:
             self._raw_spatial_rdd._jrdd = serialized_spatial_rdd
 
@@ -269,7 +276,10 @@ class SpatialRDD:
         if jvm_grids:
             number_of_grids = jvm_grids.size()
 
-            envelopes = [Envelope.from_jvm_instance(jvm_grids[index]) for index in range(number_of_grids)]
+            envelopes = [
+                Envelope.from_jvm_instance(jvm_grids[index])
+                for index in range(number_of_grids)
+            ]
 
             return envelopes
         else:
@@ -338,7 +348,9 @@ class SpatialRDD:
             self._jvm = spatial_rdd._jvm
             self._spatial_partitioned = spatial_rdd._spatial_partitioned
         elif isinstance(spatial_rdd, RDD):
-            jrdd = JvmSedonaPythonConverter(self._jvm).translate_python_rdd_to_java(spatial_rdd._jrdd)
+            jrdd = JvmSedonaPythonConverter(self._jvm).translate_python_rdd_to_java(
+                spatial_rdd._jrdd
+            )
             self._srdd.setRawSpatialRDD(jrdd)
         else:
             self._srdd.setRawSpatialRDD(spatial_rdd)
@@ -387,18 +399,28 @@ class SpatialRDD:
 
         :return:
         """
-        serialized_spatial_rdd = SedonaPythonConverter(self._jvm).translate_spatial_rdd_to_python(
-            get_field(self._srdd, "spatialPartitionedRDD"))
+        serialized_spatial_rdd = SedonaPythonConverter(
+            self._jvm
+        ).translate_spatial_rdd_to_python(
+            get_field(self._srdd, "spatialPartitionedRDD")
+        )
 
         if not hasattr(self, "_spatial_partitioned_rdd"):
-            setattr(self, "_spatial_partitioned_rdd", RDD(serialized_spatial_rdd, self._sc, SedonaPickler()))
+            setattr(
+                self,
+                "_spatial_partitioned_rdd",
+                RDD(serialized_spatial_rdd, self._sc, SedonaPickler()),
+            )
         else:
             self._spatial_partitioned_rdd._jrdd = serialized_spatial_rdd
 
         return getattr(self, "_spatial_partitioned_rdd")
 
-    def spatialPartitioning(self, partitioning: Union[str, GridType, SpatialPartitioner, List[Envelope]],
-                            num_partitions: Optional[int] = None) -> bool:
+    def spatialPartitioning(
+        self,
+        partitioning: Union[str, GridType, SpatialPartitioner, List[Envelope]],
+        num_partitions: Optional[int] = None,
+    ) -> bool:
         """
 
         :param partitioning: partitioning type
@@ -435,7 +457,11 @@ class SpatialRDD:
         return self._srdd
 
     def getRawJvmSpatialRDD(self) -> JvmSpatialRDD:
-        return JvmSpatialRDD(jsrdd=self._srdd.getRawSpatialRDD(), sc=self._sc, tp=SpatialType.from_str(self.name))
+        return JvmSpatialRDD(
+            jsrdd=self._srdd.getRawSpatialRDD(),
+            sc=self._sc,
+            tp=SpatialType.from_str(self.name),
+        )
 
     @property
     def rawJvmSpatialRDD(self) -> JvmSpatialRDD:
@@ -444,7 +470,9 @@ class SpatialRDD:
     @rawJvmSpatialRDD.setter
     def rawJvmSpatialRDD(self, jsrdd_p: JvmSpatialRDD):
         if jsrdd_p.tp.value.lower() != self.name:
-            raise TypeError(f"value should be type {self.name} but {jsrdd_p.tp} was found")
+            raise TypeError(
+                f"value should be type {self.name} but {jsrdd_p.tp} was found"
+            )
 
         self._sc = jsrdd_p.sc
         self._jvm = self._sc._jvm
@@ -452,8 +480,10 @@ class SpatialRDD:
         self.setRawSpatialRDD(jsrdd_p.jsrdd)
 
     def getJvmSpatialPartitionedRDD(self) -> JvmSpatialRDD:
-        return JvmSpatialRDD(jsrdd=get_field(
-            self._srdd, "spatialPartitionedRDD"), sc=self._sc, tp=SpatialType.from_str(self.name)
+        return JvmSpatialRDD(
+            jsrdd=get_field(self._srdd, "spatialPartitionedRDD"),
+            sc=self._sc,
+            tp=SpatialType.from_str(self.name),
         )
 
     @property
@@ -463,7 +493,9 @@ class SpatialRDD:
     @jvmSpatialPartitionedRDD.setter
     def jvmSpatialPartitionedRDD(self, jsrdd_p: JvmSpatialRDD):
         if jsrdd_p.tp.value.lower() != self.name:
-            raise TypeError(f"value should be type {self.name} but {jsrdd_p.tp} was found")
+            raise TypeError(
+                f"value should be type {self.name} but {jsrdd_p.tp} was found"
+            )
 
         self._sc = jsrdd_p.sc
         self._jvm = self._sc._jvm

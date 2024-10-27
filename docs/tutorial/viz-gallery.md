@@ -1,5 +1,5 @@
-![](../image/usrail.png)
+![USA rail](../image/usrail.png)
 
-![](../image/ustweet.png)
+![USA tweets](../image/ustweet.png)
 
-![](../image/heatmapnycsmall.png)
+![Heatmap of New York City](../image/heatmapnycsmall.png)

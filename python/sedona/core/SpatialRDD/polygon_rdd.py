@@ -15,12 +15,12 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from pyspark import SparkContext, StorageLevel, RDD
+from pyspark import RDD, SparkContext, StorageLevel
 
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD, JvmSpatialRDD
-from sedona.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
-from sedona.core.enums.file_data_splitter import FileSplitterJvm, FileDataSplitter
+from sedona.core.enums.file_data_splitter import FileDataSplitter, FileSplitterJvm
 from sedona.core.jvm.translate import PythonRddToJavaRDDAdapter
+from sedona.core.SpatialRDD.spatial_rdd import JvmSpatialRDD, SpatialRDD
+from sedona.core.SpatialRDD.spatial_rdd_factory import SpatialRDDFactory
 from sedona.utils.meta import MultipleMeta
 
 
@@ -28,7 +28,9 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
 
     def __init__(self, rdd: RDD):
         super().__init__(rdd.ctx)
-        spatial_rdd = PythonRddToJavaRDDAdapter(self._jvm).deserialize_to_polygon_raw_rdd(rdd._jrdd)
+        spatial_rdd = PythonRddToJavaRDDAdapter(
+            self._jvm
+        ).deserialize_to_polygon_raw_rdd(rdd._jrdd)
         srdd = self._jvm_spatial_rdd(spatial_rdd)
         self._srdd = srdd
 
@@ -45,8 +47,16 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
         jsrdd = rawSpatialRDD.jsrdd
         self._srdd = self._jvm_spatial_rdd(jsrdd)
 
-    def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
-                 splitter: FileDataSplitter, carryInputData: bool, partitions: int):
+    def __init__(
+        self,
+        sparkContext: SparkContext,
+        InputLocation: str,
+        startOffset: int,
+        endOffset: int,
+        splitter: FileDataSplitter,
+        carryInputData: bool,
+        partitions: int,
+    ):
         """
 
         :param sparkContext: SparkContext, the spark context
@@ -67,11 +77,18 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
             endOffset,
             jvm_splitter.jvm_instance,
             carryInputData,
-            partitions
+            partitions,
         )
 
-    def __init__(self, sparkContext: SparkContext, InputLocation: str, startOffset: int, endOffset: int,
-                 splitter: FileDataSplitter, carryInputData: bool):
+    def __init__(
+        self,
+        sparkContext: SparkContext,
+        InputLocation: str,
+        startOffset: int,
+        endOffset: int,
+        splitter: FileDataSplitter,
+        carryInputData: bool,
+    ):
         """
 
         :param sparkContext: SparkContext, the spark context
@@ -90,11 +107,17 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
             startOffset,
             endOffset,
             jvm_splitter.jvm_instance,
-            carryInputData
+            carryInputData,
         )
 
-    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter,
-                 carryInputData: bool, partitions: int):
+    def __init__(
+        self,
+        sparkContext: SparkContext,
+        InputLocation: str,
+        splitter: FileDataSplitter,
+        carryInputData: bool,
+        partitions: int,
+    ):
         """
 
         :param sparkContext: SparkContext, the spark context
@@ -112,11 +135,16 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
             InputLocation,
             jvm_splitter.jvm_instance,
             carryInputData,
-            partitions
+            partitions,
         )
 
-    def __init__(self, sparkContext: SparkContext, InputLocation: str, splitter: FileDataSplitter,
-                 carryInputData: bool):
+    def __init__(
+        self,
+        sparkContext: SparkContext,
+        InputLocation: str,
+        splitter: FileDataSplitter,
+        carryInputData: bool,
+    ):
         """
 
         :param sparkContext: SparkContext, the spark context
@@ -129,14 +157,12 @@ class PolygonRDD(SpatialRDD, metaclass=MultipleMeta):
         jvm_splitter = FileSplitterJvm(self._jvm, splitter)
 
         self._srdd = self._jvm_spatial_rdd(
-            self._jsc,
-            InputLocation,
-            jvm_splitter.jvm_instance,
-            carryInputData
+            self._jsc, InputLocation, jvm_splitter.jvm_instance, carryInputData
         )
 
     def MinimumBoundingRectangle(self):
         from sedona.core.SpatialRDD import RectangleRDD
+
         rectangle_rdd = RectangleRDD()
         srdd = self._srdd.MinimumBoundingRectangle()
 

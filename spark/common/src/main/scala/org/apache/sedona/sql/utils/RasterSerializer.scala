@@ -32,7 +32,7 @@ object RasterSerializer {
    *   Array of bites represents this geometry
    */
   def serialize(raster: GridCoverage2D): Array[Byte] = {
-    Serde.serialize(raster);
+    Serde.serialize(raster)
   }
 
   /**
@@ -44,6 +44,6 @@ object RasterSerializer {
    *   GridCoverage2D
    */
   def deserialize(value: Array[Byte]): GridCoverage2D = {
-    Serde.deserialize(value);
+    Serde.deserialize(value)
   }
 }

@@ -32,6 +32,7 @@ import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.*;
+import org.locationtech.jts.algorithm.Angle;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.algorithm.construct.LargestEmptyCircle;
@@ -59,6 +60,7 @@ import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.operation.valid.TopologyValidationError;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
 import org.locationtech.jts.precision.MinimumClearance;
+import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
 import org.locationtech.jts.simplify.PolygonHullSimplifier;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.locationtech.jts.simplify.VWSimplifier;
@@ -1048,7 +1050,7 @@ public class Functions {
     // All non-polygonal geometries use LargestEmptyCircle
     if (!geometry.getClass().getSimpleName().equals("Polygon")
         && !geometry.getClass().getSimpleName().equals("MultiPolygon")) {
-      LargestEmptyCircle largestEmptyCircle = new LargestEmptyCircle(geometry, tolerance);
+      LargestEmptyCircle largestEmptyCircle = new LargestEmptyCircle(geometry, null, tolerance);
       center = largestEmptyCircle.getCenter();
       nearest = largestEmptyCircle.getRadiusPoint();
       radius = largestEmptyCircle.getRadiusLine().getLength();
@@ -1353,6 +1355,45 @@ public class Functions {
     return dimension;
   }
 
+  public static Geometry project(Geometry point, double distance, double azimuth, boolean lenient) {
+    if (!point.getClass().getSimpleName().equals("Point")) {
+      if (lenient) {
+        return point.getFactory().createPoint();
+      } else {
+        throw new IllegalArgumentException(
+            String.format(
+                "Input geometry is %s. It should be a Point type geometry",
+                point.getClass().getSimpleName()));
+      }
+    }
+
+    // Normalize azimuth if it is out of (-360, 360) range
+    // by calculating the number of orbits and subtracting it
+    int orbit = (int) Math.floor(azimuth / Angle.PI_TIMES_2);
+    azimuth -= Angle.PI_TIMES_2 * orbit;
+    // Convert azimuth to conventional slope
+    double slope = Angle.PI_TIMES_2 - azimuth + Angle.PI_OVER_2;
+    if (slope > Angle.PI_TIMES_2) slope -= Angle.PI_TIMES_2;
+    if (slope < -Angle.PI_TIMES_2) slope += Angle.PI_TIMES_2;
+
+    Coordinate projectedCoordinate = Angle.project(point.getCoordinate(), slope, distance);
+
+    if (Functions.hasZ(point)) {
+      projectedCoordinate.setZ(point.getCoordinate().getZ());
+    }
+
+    if (Functions.hasM(point)) {
+      CoordinateXYZM projectedCoordinateM = new CoordinateXYZM(projectedCoordinate);
+      projectedCoordinateM.setM(point.getCoordinate().getM());
+      return point.getFactory().createPoint(projectedCoordinateM);
+    }
+    return point.getFactory().createPoint(projectedCoordinate);
+  }
+
+  public static Geometry project(Geometry point, double distance, double azimuth) {
+    return project(point, distance, azimuth, false);
+  }
+
   /**
    * get the coordinates of a geometry and transform to Google s2 cell id
    *
@@ -1501,6 +1542,10 @@ public class Functions {
       }
     }
     return polygons.toArray(new Polygon[0]);
+  }
+
+  public static Geometry simplify(Geometry geom, double distanceTolerance) {
+    return DouglasPeuckerSimplifier.simplify(geom, distanceTolerance);
   }
 
   // create static function named simplifyPreserveTopology
@@ -2221,6 +2266,45 @@ public class Functions {
     return geometry.getFactory().createMultiPointFromCoords(coordinates);
   }
 
+  public static Geometry scale(Geometry geometry, double scaleX, double scaleY) {
+    return scaleGeom(geometry, Constructors.point(scaleX, scaleY));
+  }
+
+  public static Geometry scaleGeom(Geometry geometry, Geometry factor) {
+    return scaleGeom(geometry, factor, null);
+  }
+
+  public static Geometry scaleGeom(Geometry geometry, Geometry factor, Geometry origin) {
+    if (geometry == null || factor == null || geometry.isEmpty() || factor.isEmpty()) {
+      return geometry;
+    }
+
+    if (!factor.getGeometryType().equalsIgnoreCase(Geometry.TYPENAME_POINT)) {
+      throw new IllegalArgumentException("Scale factor geometry should be a Point type.");
+    }
+
+    Geometry resultGeom = null;
+    AffineTransformation scaleInstance = null;
+    Coordinate factorCoordinate = factor.getCoordinate();
+
+    if (origin == null || origin.isEmpty()) {
+      scaleInstance =
+          AffineTransformation.scaleInstance(factorCoordinate.getX(), factorCoordinate.getY());
+      resultGeom = scaleInstance.transform(geometry);
+    } else {
+      Coordinate falseOrigin = origin.getCoordinate();
+      scaleInstance =
+          AffineTransformation.scaleInstance(
+              factorCoordinate.getX(),
+              factorCoordinate.getY(),
+              falseOrigin.getX(),
+              falseOrigin.getY());
+      resultGeom = scaleInstance.transform(geometry);
+    }
+
+    return resultGeom;
+  }
+
   public static Geometry rotateX(Geometry geometry, double angle) {
     if (GeomUtils.isAnyGeomEmpty(geometry)) {
       return geometry;
@@ -2228,6 +2312,15 @@ public class Functions {
     double sinAngle = Math.sin(angle);
     double cosAngle = Math.cos(angle);
     return affine(geometry, 1, 0, 0, 0, cosAngle, -sinAngle, 0, sinAngle, cosAngle, 0, 0, 0);
+  }
+
+  public static Geometry rotateY(Geometry geometry, double angle) {
+    if (GeomUtils.isAnyGeomEmpty(geometry)) {
+      return geometry;
+    }
+    double sinAngle = Math.sin(angle);
+    double cosAngle = Math.cos(angle);
+    return affine(geometry, cosAngle, 0, sinAngle, 0, 1, 0, -sinAngle, 0, cosAngle, 0, 0, 0);
   }
 
   /**

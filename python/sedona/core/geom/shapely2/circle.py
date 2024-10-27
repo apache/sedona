@@ -17,7 +17,15 @@
 
 from math import sqrt
 
-from shapely.geometry import Polygon, Point, LineString, MultiPoint, MultiPolygon, MultiLineString, box
+from shapely.geometry import (
+    LineString,
+    MultiLineString,
+    MultiPoint,
+    MultiPolygon,
+    Point,
+    Polygon,
+    box,
+)
 from shapely.geometry.base import BaseGeometry
 
 from sedona.core.geom.envelope import Envelope
@@ -67,9 +75,13 @@ class Circle(Polygon):
         elif isinstance(other, MultiPoint):
             return all([self.covers_point(point) for point in other.geoms])
         elif isinstance(other, MultiPolygon):
-            return all([self.covers_linestring(polygon.exterior) for polygon in other.geoms])
+            return all(
+                [self.covers_linestring(polygon.exterior) for polygon in other.geoms]
+            )
         elif isinstance(other, MultiLineString):
-            return all([self.covers_linestring(linestring) for linestring in other.geoms])
+            return all(
+                [self.covers_linestring(linestring) for linestring in other.geoms]
+            )
         else:
             raise TypeError("Not supported")
 
@@ -103,4 +115,9 @@ class Circle(Polygon):
         return Envelope(minx, maxx, miny, maxy)
 
     def __str__(self):
-        return "Circle of radius " + str(self.getRadius()) + " around " + str(self.centerGeometry)
+        return (
+            "Circle of radius "
+            + str(self.getRadius())
+            + " around "
+            + str(self.centerGeometry)
+        )

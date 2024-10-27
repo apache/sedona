@@ -17,12 +17,28 @@
 
 from typing import List
 
-from shapely.geometry import Point, MultiPoint, Polygon, MultiPolygon, LineString, MultiLineString, GeometryCollection
+from shapely.geometry import (
+    GeometryCollection,
+    LineString,
+    MultiLineString,
+    MultiPoint,
+    MultiPolygon,
+    Point,
+    Polygon,
+)
 from shapely.geometry.base import BaseGeometry
 
 
 def assign_all() -> bool:
-    geoms = [Point, MultiPoint, Polygon, MultiPolygon, LineString, MultiLineString, GeometryCollection]
+    geoms = [
+        Point,
+        MultiPoint,
+        Polygon,
+        MultiPolygon,
+        LineString,
+        MultiLineString,
+        GeometryCollection,
+    ]
     assign_udt_shapely_objects(geoms=geoms)
     assign_user_data_to_shapely_objects(geoms=geoms)
     return True
@@ -30,6 +46,7 @@ def assign_all() -> bool:
 
 def assign_udt_shapely_objects(geoms: List[type(BaseGeometry)]) -> bool:
     from sedona.sql.types import GeometryType
+
     for geom in geoms:
         geom.__UDT__ = GeometryType()
     return True

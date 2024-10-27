@@ -16,7 +16,7 @@
 #  under the License.
 
 from enum import Enum
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 
 class PixelAnchor(Enum):
@@ -26,6 +26,7 @@ class PixelAnchor(Enum):
     transformation between these conventions.
 
     """
+
     CENTER = 1
     UPPER_LEFT = 2
 
@@ -39,7 +40,9 @@ class AffineTransform:
     ip_y: float
     pixel_anchor: PixelAnchor
 
-    def __init__(self, scale_x, skew_y, skew_x, scale_y, ip_x, ip_y, pixel_anchor: PixelAnchor):
+    def __init__(
+        self, scale_x, skew_y, skew_x, scale_y, ip_x, ip_y, pixel_anchor: PixelAnchor
+    ):
         self.scale_x = scale_x
         self.skew_y = skew_y
         self.skew_x = skew_x
@@ -56,8 +59,15 @@ class AffineTransform:
     def translate(self, offset_x: float, offset_y: float):
         new_ipx = self.ip_x + offset_x * self.scale_x + offset_y * self.skew_x
         new_ipy = self.ip_y + offset_x * self.skew_y + offset_y * self.scale_y
-        return AffineTransform(self.scale_x, self.skew_y, self.skew_x, self.scale_y,
-                               new_ipx, new_ipy, self.pixel_anchor)
+        return AffineTransform(
+            self.scale_x,
+            self.skew_y,
+            self.skew_x,
+            self.scale_y,
+            new_ipx,
+            new_ipy,
+            self.pixel_anchor,
+        )
 
     def _do_change_pixel_anchor(self, from_anchor: PixelAnchor, to_anchor: PixelAnchor):
         assert from_anchor != to_anchor
@@ -88,18 +98,21 @@ class AffineTransform:
         new_m10 = old_m10 * m00 + old_m11 * m10
         new_m11 = old_m10 * m01 + old_m11 * m11
         new_m12 = old_m10 * m02 + old_m11 * m12 + old_m12
-        return AffineTransform(new_m00, new_m10, new_m01, new_m11, new_m02, new_m12, to_anchor)
+        return AffineTransform(
+            new_m00, new_m10, new_m01, new_m11, new_m02, new_m12, to_anchor
+        )
 
     def __repr__(self):
-        return ("[ {} {} {}\n".format(self.scale_x, self.skew_x, self.ip_x) +
-                "  {} {} {}\n".format(self.skew_y, self.scale_y, self.ip_y) +
-                "   0  0  1 ]")
+        return (
+            "[ {} {} {}\n".format(self.scale_x, self.skew_x, self.ip_x)
+            + "  {} {} {}\n".format(self.skew_y, self.scale_y, self.ip_y)
+            + "   0  0  1 ]"
+        )
 
 
 class SampleDimension:
-    """Raster band metadata.
+    """Raster band metadata."""
 
-    """
     description: str
     offset: float
     scale: float

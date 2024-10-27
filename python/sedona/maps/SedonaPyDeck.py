@@ -17,7 +17,15 @@
 
 from types import ModuleType
 
-from pyspark.sql.types import FloatType, DoubleType, IntegerType, LongType, DecimalType, ShortType, ByteType
+from pyspark.sql.types import (
+    ByteType,
+    DecimalType,
+    DoubleType,
+    FloatType,
+    IntegerType,
+    LongType,
+    ShortType,
+)
 
 from sedona.maps.SedonaMapUtils import SedonaMapUtils
 
@@ -26,8 +34,18 @@ class SedonaPyDeck:
 
     # User Facing APIs
     @classmethod
-    def create_choropleth_map(cls, df, fill_color=None, plot_col=None, initial_view_state=None, map_style=None,
-                              map_provider=None, elevation_col=0, api_keys=None, stroked=True):
+    def create_choropleth_map(
+        cls,
+        df,
+        fill_color=None,
+        plot_col=None,
+        initial_view_state=None,
+        map_style=None,
+        map_provider=None,
+        elevation_col=0,
+        api_keys=None,
+        stroked=True,
+    ):
         """
         Create a pydeck map with a choropleth layer added
         :param elevation_col: Optional elevation for the polygons
@@ -43,17 +61,28 @@ class SedonaPyDeck:
         """
 
         for field in df.schema.fields:
-            if field.name == plot_col and field.dataType not in [IntegerType(), FloatType(), DoubleType(), LongType(),
-                                                                 DecimalType(), ShortType(), ByteType()]:
-                message = (f"'{field.name}' must be of numeric type. \nIf you are importing data from csv set "
-                           f"'inferSchema' option as true")
+            if field.name == plot_col and field.dataType not in [
+                IntegerType(),
+                FloatType(),
+                DoubleType(),
+                LongType(),
+                DecimalType(),
+                ShortType(),
+                ByteType(),
+            ]:
+                message = (
+                    f"'{field.name}' must be of numeric type. \nIf you are importing data from csv set "
+                    f"'inferSchema' option as true"
+                )
                 raise TypeError(message) from None
 
         pdk = _try_import_pydeck()
 
         if initial_view_state is None:
             gdf = SedonaPyDeck._prepare_df_(df, add_coords=True)
-            initial_view_state = pdk.data_utils.compute_view(gdf['coordinate_array_sedona'])
+            initial_view_state = pdk.data_utils.compute_view(
+                gdf["coordinate_array_sedona"]
+            )
         else:
             gdf = SedonaPyDeck._prepare_df_(df)
 
@@ -61,7 +90,7 @@ class SedonaPyDeck:
             fill_color = SedonaPyDeck._create_default_fill_color_(gdf, plot_col)
 
         choropleth_layer = pdk.Layer(
-            'GeoJsonLayer',  # `type` positional argument is here
+            "GeoJsonLayer",  # `type` positional argument is here
             data=gdf,
             auto_highlight=True,
             get_fill_color=fill_color,
@@ -70,16 +99,30 @@ class SedonaPyDeck:
             stroked=stroked,
             extruded=True,
             wireframe=True,
-            pickable=True
+            pickable=True,
         )
 
-        return SedonaPyDeck._create_map_obj(layer=choropleth_layer, initial_view_state=initial_view_state, map_style=map_style,
-                                            map_provider=map_provider, api_keys=api_keys)
+        return SedonaPyDeck._create_map_obj(
+            layer=choropleth_layer,
+            initial_view_state=initial_view_state,
+            map_style=map_style,
+            map_provider=map_provider,
+            api_keys=api_keys,
+        )
 
     @classmethod
-    def create_geometry_map(cls, df, fill_color="[85, 183, 177, 255]", line_color="[85, 183, 177, 255]",
-                            elevation_col=0, initial_view_state=None,
-                            map_style=None, map_provider=None, api_keys=None, stroked=True):
+    def create_geometry_map(
+        cls,
+        df,
+        fill_color="[85, 183, 177, 255]",
+        line_color="[85, 183, 177, 255]",
+        elevation_col=0,
+        initial_view_state=None,
+        map_style=None,
+        map_provider=None,
+        api_keys=None,
+        stroked=True,
+    ):
         """
         Create a pydeck map with a GeoJsonLayer added for plotting given geometries.
         :param line_color:
@@ -102,22 +145,44 @@ class SedonaPyDeck:
         #     if line_color == "[85, 183, 177, 255]":
         #         line_color = "[237, 119, 79]"
 
-        layer = SedonaPyDeck._create_fat_layer_(gdf, fill_color=fill_color, elevation_col=elevation_col,
-                                                line_color=line_color, stroked=stroked)
+        layer = SedonaPyDeck._create_fat_layer_(
+            gdf,
+            fill_color=fill_color,
+            elevation_col=elevation_col,
+            line_color=line_color,
+            stroked=stroked,
+        )
 
         if initial_view_state is None:
-            initial_view_state = pdk.data_utils.compute_view(gdf['coordinate_array_sedona'])
+            initial_view_state = pdk.data_utils.compute_view(
+                gdf["coordinate_array_sedona"]
+            )
 
         if elevation_col != 0 and geom_type == "Polygon":
             initial_view_state.pitch = 45  # If polygons are elevated, change the pitch to visualize the elevation better
 
-        return SedonaPyDeck._create_map_obj(layer=layer, initial_view_state=initial_view_state, map_style=map_style,
-                                            map_provider=map_provider, api_keys=api_keys)
+        return SedonaPyDeck._create_map_obj(
+            layer=layer,
+            initial_view_state=initial_view_state,
+            map_style=map_style,
+            map_provider=map_provider,
+            api_keys=api_keys,
+        )
 
     @classmethod
-    def create_scatterplot_map(cls, df, fill_color="[255, 140, 0]", radius_col=1, radius_min_pixels=1,
-                               radius_max_pixels=10, radius_scale=1, initial_view_state=None, map_style=None,
-                               map_provider=None, api_keys=None):
+    def create_scatterplot_map(
+        cls,
+        df,
+        fill_color="[255, 140, 0]",
+        radius_col=1,
+        radius_min_pixels=1,
+        radius_max_pixels=10,
+        radius_scale=1,
+        initial_view_state=None,
+        map_style=None,
+        map_provider=None,
+        api_keys=None,
+    ):
         """
         Create a pydeck map with a scatterplot layer
         :param radius_scale:
@@ -145,19 +210,35 @@ class SedonaPyDeck:
             radius_min_pixels=radius_min_pixels,
             radius_max_pixels=radius_max_pixels,
             radius_scale=radius_scale,
-            get_position='coordinate_array_sedona',
+            get_position="coordinate_array_sedona",
             get_fill_color=fill_color,
         )
 
         if initial_view_state is None:
-            initial_view_state = pdk.data_utils.compute_view(gdf['coordinate_array_sedona'])
+            initial_view_state = pdk.data_utils.compute_view(
+                gdf["coordinate_array_sedona"]
+            )
 
-        return SedonaPyDeck._create_map_obj(layer=layer, initial_view_state=initial_view_state, map_style=map_style,
-                                            map_provider=map_provider, api_keys=api_keys)
+        return SedonaPyDeck._create_map_obj(
+            layer=layer,
+            initial_view_state=initial_view_state,
+            map_style=map_style,
+            map_provider=map_provider,
+            api_keys=api_keys,
+        )
 
     @classmethod
-    def create_heatmap(cls, df, color_range=None, weight=1, aggregation="SUM", initial_view_state=None, map_style=None,
-                       map_provider=None, api_keys=None):
+    def create_heatmap(
+        cls,
+        df,
+        color_range=None,
+        weight=1,
+        aggregation="SUM",
+        initial_view_state=None,
+        map_style=None,
+        map_provider=None,
+        api_keys=None,
+    ):
         """
         Create a pydeck map with a heatmap layer added
         :param df: SedonaDataFrame to be used to plot the heatmap
@@ -181,7 +262,7 @@ class SedonaPyDeck:
                 [254, 178, 76],
                 [253, 141, 60],
                 [240, 59, 32],
-                [240, 59, 32]
+                [240, 59, 32],
             ]
 
         layer = pdk.Layer(
@@ -190,17 +271,24 @@ class SedonaPyDeck:
             pickable=True,
             opacity=0.8,
             filled=True,
-            get_position='coordinate_array_sedona',
+            get_position="coordinate_array_sedona",
             aggregation=pdk.types.String(aggregation),
             color_range=color_range,
-            get_weight=weight
+            get_weight=weight,
         )
 
         if initial_view_state is None:
-            initial_view_state = pdk.data_utils.compute_view(gdf['coordinate_array_sedona'])
+            initial_view_state = pdk.data_utils.compute_view(
+                gdf["coordinate_array_sedona"]
+            )
 
-        return SedonaPyDeck._create_map_obj(layer=layer, initial_view_state=initial_view_state, map_style=map_style,
-                                            map_provider=map_provider, api_keys=api_keys)
+        return SedonaPyDeck._create_map_obj(
+            layer=layer,
+            initial_view_state=initial_view_state,
+            map_style=map_style,
+            map_provider=map_provider,
+            api_keys=api_keys,
+        )
 
     @classmethod
     def _prepare_df_(cls, df, add_coords=False, geometry_col=None):
@@ -212,11 +300,12 @@ class SedonaPyDeck:
         """
         if geometry_col is None:
             geometry_col = SedonaMapUtils.__get_geometry_col__(df=df)
-        gdf = SedonaMapUtils.__convert_to_gdf_or_pdf__(df, rename=False, geometry_col=geometry_col)
+        gdf = SedonaMapUtils.__convert_to_gdf_or_pdf__(
+            df, rename=False, geometry_col=geometry_col
+        )
         if add_coords is True:
             SedonaPyDeck._create_coord_column_(gdf=gdf, geometry_col=geometry_col)
         return gdf
-
 
     @classmethod
     def _create_default_fill_color_(cls, gdf, plot_col):
@@ -236,14 +325,18 @@ class SedonaPyDeck:
         :param geometry_col: column with ST_Points
         """
         type_list = []
-        gdf['coordinate_array_sedona'] = gdf.apply(
-            lambda val: list(SedonaMapUtils.__extract_coordinate__(val[geometry_col], type_list)), axis=1)
+        gdf["coordinate_array_sedona"] = gdf.apply(
+            lambda val: list(
+                SedonaMapUtils.__extract_coordinate__(val[geometry_col], type_list)
+            ),
+            axis=1,
+        )
 
     @classmethod
     def _create_fat_layer_(cls, gdf, fill_color, line_color, elevation_col, stroked):
         pdk = _try_import_pydeck()
         layer = pdk.Layer(
-            'GeoJsonLayer',  # `type` positional argument is here
+            "GeoJsonLayer",  # `type` positional argument is here
             data=gdf,
             auto_highlight=True,
             get_fill_color=fill_color,
@@ -253,31 +346,38 @@ class SedonaPyDeck:
             get_elevation=elevation_col,
             get_line_color=line_color,
             pickable=True,
-            get_line_width=3
+            get_line_width=3,
         )
 
         return layer
 
     # creates the final map object and handles the parameters for pydeck
     @classmethod
-    def _create_map_obj(cls, layer, initial_view_state, map_style, map_provider, api_keys):
+    def _create_map_obj(
+        cls, layer, initial_view_state, map_style, map_provider, api_keys
+    ):
         pdk = _try_import_pydeck()
 
         if map_provider is None:
-            map_provider = 'carto'
+            map_provider = "carto"
 
         if map_style is None:
-            map_style = 'dark'
+            map_style = "dark"
 
         # Default to mapbox if user selects 'satellite' map_style as pydeck uses mapbox and google maps for satellite basemap
-        if map_style == 'satellite' and map_provider != 'google_maps':
-            map_provider = 'mapbox'
+        if map_style == "satellite" and map_provider != "google_maps":
+            map_provider = "mapbox"
 
         if api_keys is not None:
             api_keys = api_keys
 
-        return pdk.Deck(layers=[layer], initial_view_state=initial_view_state, map_style=map_style,
-                        map_provider=map_provider, api_keys=api_keys)
+        return pdk.Deck(
+            layers=[layer],
+            initial_view_state=initial_view_state,
+            map_style=map_style,
+            map_provider=map_provider,
+            api_keys=api_keys,
+        )
 
 
 def _try_import_pydeck() -> ModuleType:

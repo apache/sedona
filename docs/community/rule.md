@@ -13,7 +13,7 @@ It is important to confirm that your contribution is acceptable. You should crea
 Code contributions should include the following:
 
 * Detailed documentations on classes and methods.
-* Unit Tests to demonstrate code correctness and allow this to be maintained going forward.  In the case of bug fixes the unit test should demonstrate the bug in the absence of the fix (if any).  Unit Tests can be JUnit test or Scala test. Some Sedona functions need to be tested in both Scala and Java.
+* Unit Tests to demonstrate code correctness and allow this to be maintained going forward. In the case of bug fixes the unit test should demonstrate the bug in the absence of the fix (if any). Unit Tests can be JUnit test or Scala test. Some Sedona functions need to be tested in both Scala and Java.
 * Updates on corresponding Sedona documentation if necessary.
 
 Code contributions must include an Apache 2.0 license header at the top of each file.

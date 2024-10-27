@@ -369,6 +369,19 @@ object st_functions extends DataFrameAPI {
   def ST_Polygonize(geoms: Column): Column = wrapExpression[ST_Polygonize](geoms)
   def ST_Polygonize(geoms: String): Column = wrapExpression[ST_Polygonize](geoms)
 
+  def ST_Project(point: Column, distance: Column, azimuth: Column, lenient: Column): Column =
+    wrapExpression[ST_Project](point, distance, azimuth, lenient)
+  def ST_Project(point: String, distance: String, azimuth: String, lenient: String): Column =
+    wrapExpression[ST_Project](point, distance, azimuth, lenient)
+  def ST_Project(point: String, distance: Double, azimuth: Double, lenient: Boolean): Column =
+    wrapExpression[ST_Project](point, distance, azimuth, lenient)
+  def ST_Project(point: Column, distance: Column, azimuth: Column): Column =
+    wrapExpression[ST_Project](point, distance, azimuth)
+  def ST_Project(point: String, distance: String, azimuth: String): Column =
+    wrapExpression[ST_Project](point, distance, azimuth)
+  def ST_Project(point: String, distance: Double, azimuth: Double): Column =
+    wrapExpression[ST_Project](point, distance, azimuth)
+
   def ST_MakePolygon(lineString: Column): Column =
     wrapExpression[ST_MakePolygon](lineString, null)
   def ST_MakePolygon(lineString: String): Column =
@@ -483,12 +496,36 @@ object st_functions extends DataFrameAPI {
   def ST_Reverse(geometry: Column): Column = wrapExpression[ST_Reverse](geometry)
   def ST_Reverse(geometry: String): Column = wrapExpression[ST_Reverse](geometry)
 
+  def ST_Scale(geometry: Column, scaleX: Column, scaleY: Column): Column =
+    wrapExpression[ST_Scale](geometry, scaleX, scaleY)
+  def ST_Scale(geometry: String, scaleX: Double, scaleY: Double): Column =
+    wrapExpression[ST_Scale](geometry, scaleX, scaleY)
+  def ST_Scale(geometry: String, scaleX: String, scaleY: String): Column =
+    wrapExpression[ST_Scale](geometry, scaleX, scaleY)
+
+  def ST_ScaleGeom(geometry: Column, factor: Column): Column =
+    wrapExpression[ST_ScaleGeom](geometry, factor)
+  def ST_ScaleGeom(geometry: String, factor: String): Column =
+    wrapExpression[ST_ScaleGeom](geometry, factor)
+
+  def ST_ScaleGeom(geometry: Column, factor: Column, origin: Column): Column =
+    wrapExpression[ST_ScaleGeom](geometry, factor, origin)
+  def ST_ScaleGeom(geometry: String, factor: String, origin: String): Column =
+    wrapExpression[ST_ScaleGeom](geometry, factor, origin)
+
   def ST_RotateX(geometry: Column, angle: Column): Column =
     wrapExpression[ST_RotateX](geometry, angle)
   def ST_RotateX(geometry: String, angle: Double): Column =
     wrapExpression[ST_RotateX](geometry, angle)
   def ST_RotateX(geometry: String, angle: String): Column =
     wrapExpression[ST_RotateX](geometry, angle)
+
+  def ST_RotateY(geometry: Column, angle: Column): Column =
+    wrapExpression[ST_RotateY](geometry, angle)
+  def ST_RotateY(geometry: String, angle: Double): Column =
+    wrapExpression[ST_RotateY](geometry, angle)
+  def ST_RotateY(geometry: String, angle: String): Column =
+    wrapExpression[ST_RotateY](geometry, angle)
 
   def ST_Rotate(geometry: Column, angle: Column): Column =
     wrapExpression[ST_Rotate](geometry, angle)
@@ -575,6 +612,11 @@ object st_functions extends DataFrameAPI {
     wrapExpression[ST_Transform](geometry, targetCRS)
   def ST_Transform(geometry: Column, targetCRS: Column): Column =
     wrapExpression[ST_Transform](geometry, targetCRS)
+
+  def ST_Simplify(geometry: Column, distanceTolerance: Column): Column =
+    wrapExpression[ST_Simplify](geometry, distanceTolerance)
+  def ST_Simplify(geometry: String, distanceTolerance: Double): Column =
+    wrapExpression[ST_Simplify](geometry, distanceTolerance)
 
   def ST_SimplifyVW(geometry: Column, distanceTolerance: Column): Column =
     wrapExpression[ST_SimplifyVW](geometry, distanceTolerance)
@@ -868,13 +910,13 @@ object st_functions extends DataFrameAPI {
     wrapExpression[ST_HausdorffDistance](g1, g2, -1)
 
   def ST_HausdorffDistance(g1: String, g2: String) =
-    wrapExpression[ST_HausdorffDistance](g1, g2, -1);
+    wrapExpression[ST_HausdorffDistance](g1, g2, -1)
 
   def ST_HausdorffDistance(g1: Column, g2: Column, densityFrac: Column) =
-    wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac);
+    wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac)
 
   def ST_HausdorffDistance(g1: String, g2: String, densityFrac: Double) =
-    wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac);
+    wrapExpression[ST_HausdorffDistance](g1, g2, densityFrac)
 
   def ST_CoordDim(geometry: Column): Column = wrapExpression[ST_CoordDim](geometry)
 

@@ -17,8 +17,8 @@
 
 from shapely.geometry.base import BaseGeometry
 
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.spatialOperator.rdd import SedonaPairRDD, SedonaRDD
+from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.utils.decorators import require
 from sedona.utils.geometry_adapter import GeometryAdapter
 
@@ -27,8 +27,13 @@ class RangeQueryRaw:
 
     @classmethod
     @require(["RangeQuery", "GeometryAdapter", "GeoSerializerData"])
-    def SpatialRangeQuery(self, spatialRDD: SpatialRDD, rangeQueryWindow: BaseGeometry,
-                          considerBoundaryIntersection: bool, usingIndex: bool) -> SedonaRDD:
+    def SpatialRangeQuery(
+        self,
+        spatialRDD: SpatialRDD,
+        rangeQueryWindow: BaseGeometry,
+        considerBoundaryIntersection: bool,
+        usingIndex: bool,
+    ) -> SedonaRDD:
         """
 
         :param spatialRDD:
@@ -41,14 +46,12 @@ class RangeQueryRaw:
         jvm = spatialRDD._jvm
         sc = spatialRDD._sc
 
-        jvm_geom = GeometryAdapter.create_jvm_geometry_from_base_geometry(jvm, rangeQueryWindow)
+        jvm_geom = GeometryAdapter.create_jvm_geometry_from_base_geometry(
+            jvm, rangeQueryWindow
+        )
 
-        srdd = jvm. \
-            RangeQuery.SpatialRangeQuery(
-            spatialRDD._srdd,
-            jvm_geom,
-            considerBoundaryIntersection,
-            usingIndex
+        srdd = jvm.RangeQuery.SpatialRangeQuery(
+            spatialRDD._srdd, jvm_geom, considerBoundaryIntersection, usingIndex
         )
 
         return SedonaRDD(srdd, sc)

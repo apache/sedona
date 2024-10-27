@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.raster.serde.Serde;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.processing.CannotCropException;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
@@ -245,6 +246,29 @@ public class RasterBandEditorsTest extends RasterTestBase {
     actualValues = PixelFunctions.values(croppedRaster, points, 1).toArray(new Double[0]);
     expectedValues = new Double[] {0.0, 0.0, 0.0, 0.0, null};
     assertTrue(Arrays.equals(expectedValues, actualValues));
+  }
+
+  @Test
+  public void testClipLenient()
+      throws FactoryException, IOException, ParseException, TransformException {
+    GridCoverage2D raster =
+        rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+
+    // Construct a polygon that does not intersect with the raster
+    Geometry nonIntersectingGeom =
+        Constructors.geomFromWKT(
+            "POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))",
+            0);
+
+    // Throws an exception in non-lenient mode
+    assertThrows(
+        CannotCropException.class,
+        () -> RasterBandEditors.clip(raster, 1, nonIntersectingGeom, 200, false, false));
+
+    // Returns null in lenient mode
+    GridCoverage2D result = RasterBandEditors.clip(raster, 1, nonIntersectingGeom, 200, false);
+    assertNull(result);
+    raster.dispose(true);
   }
 
   @Test

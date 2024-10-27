@@ -873,6 +873,18 @@ public class UDFs {
     return GeometrySerde.serialize(Constructors.polygonFromEnvelope(minX, minY, maxX, maxY));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"point", "distance", "azimuth"})
+  public static byte[] ST_Project(byte[] point, double distance, double azimuth) {
+    return GeometrySerde.serialize(
+        Functions.project(GeometrySerde.deserialize(point), distance, azimuth));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"point", "distance", "azimuth", "lenient"})
+  public static byte[] ST_Project(byte[] point, double distance, double azimuth, boolean lenient) {
+    return GeometrySerde.serialize(
+        Functions.project(GeometrySerde.deserialize(point), distance, azimuth, lenient));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"minX", "minY", "maxX", "maxY"})
   public static byte[] ST_MakeEnvelope(double minX, double minY, double maxX, double maxY) {
     return GeometrySerde.serialize(Constructors.makeEnvelope(minX, minY, maxX, maxY));
@@ -953,6 +965,12 @@ public class UDFs {
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "srid"})
   public static byte[] ST_SetSRID(byte[] geometry, int srid) {
     return GeometrySerde.serialize(Functions.setSRID(GeometrySerde.deserialize(geometry), srid));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "distanceTolerance"})
+  public static byte[] ST_Simplify(byte[] geometry, double distanceTolerance) {
+    return GeometrySerde.serialize(
+        Functions.simplify(GeometrySerde.deserialize(geometry), distanceTolerance));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "distanceTolerance"})
@@ -1272,9 +1290,36 @@ public class UDFs {
         Functions.translate(GeometrySerde.deserialize(geom), deltaX, deltaY, deltaZ));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "scaleX", "scaleY"})
+  public static byte[] ST_Scale(byte[] geometry, double scaleX, double scaleY) {
+    return GeometrySerde.serialize(
+        Functions.scale(GeometrySerde.deserialize(geometry), scaleX, scaleY));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "factor", "origin"})
+  public static byte[] ST_ScaleGeom(byte[] geometry, byte[] factor, byte[] origin) {
+    return GeometrySerde.serialize(
+        Functions.scaleGeom(
+            GeometrySerde.deserialize(geometry),
+            GeometrySerde.deserialize(factor),
+            GeometrySerde.deserialize(origin)));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "factor"})
+  public static byte[] ST_ScaleGeom(byte[] geometry, byte[] factor) {
+    return GeometrySerde.serialize(
+        Functions.scaleGeom(
+            GeometrySerde.deserialize(geometry), GeometrySerde.deserialize(factor)));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "angle"})
   public static byte[] ST_RotateX(byte[] geometry, double angle) {
     return GeometrySerde.serialize(Functions.rotateX(GeometrySerde.deserialize(geometry), angle));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "angle"})
+  public static byte[] ST_RotateY(byte[] geometry, double angle) {
+    return GeometrySerde.serialize(Functions.rotateY(GeometrySerde.deserialize(geometry), angle));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom", "angle"})

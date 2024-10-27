@@ -258,7 +258,7 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       df.createOrReplaceTempView("df10parts")
 
       val query =
-        "SELECT * FROM df10parts JOIN dfEmpty WHERE ST_Intersects(df10parts.geom, dfEmpty.geom)";
+        "SELECT * FROM df10parts JOIN dfEmpty WHERE ST_Intersects(df10parts.geom, dfEmpty.geom)"
       withConf(Map(spatialJoinPartitionSideConfKey -> "left")) {
         val resultRows = sparkSession.sql(query).collect()
         assert(resultRows.isEmpty)

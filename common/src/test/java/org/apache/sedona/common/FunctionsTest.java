@@ -658,6 +658,41 @@ public class FunctionsTest extends TestBase {
     assertEquals(actualResult, expectedResult);
   }
 
+  @Test
+  public void project() throws ParseException {
+    Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    String actual = Functions.asWKT(Functions.project(point, 100000, Math.toRadians(45.0)));
+    String expected = "POINT (70710.67811865476 70710.67811865475)";
+    assertEquals(expected, actual);
+
+    actual =
+        Functions.asWKT(Functions.project(Constructors.makeEnvelope(0, 1, 0, 1), 10, 10, true));
+    expected = "POINT EMPTY";
+    assertEquals(expected, actual);
+
+    point = Constructors.geomFromWKT("POINT Z(10 15 12)", 1111);
+    Geometry actualPoint = Functions.project(point, 1000, Math.toRadians(300.0));
+    actual = Functions.asWKT(actualPoint);
+    expected = "POINT Z(-856.0254037844385 515.0000000000003 12)";
+    assertEquals(expected, actual);
+    assertEquals(1111, actualPoint.getSRID());
+
+    point = Constructors.geomFromWKT("POINT M(10 15 12)", 1111);
+    actual = Functions.asWKT(Functions.project(point, 1000, Math.toRadians(300.0)));
+    expected = "POINT M(-856.0254037844385 515.0000000000003 12)";
+    assertEquals(expected, actual);
+
+    point = Constructors.geomFromWKT("POINT ZM(10 15 12 2)", 1111);
+    actual = Functions.asWKT(Functions.project(point, 1000, Math.toRadians(300.0)));
+    expected = "POINT ZM(-856.0254037844385 515.0000000000003 12 2)";
+    assertEquals(expected, actual);
+
+    point = Constructors.geomFromWKT("POINT(2 -1)", 0);
+    actual = Functions.asWKT(Functions.project(point, 100, Math.toRadians(470)));
+    expected = Functions.asWKT(Functions.project(point, 100, Math.toRadians(110)));
+    assertEquals(expected, actual);
+  }
+
   private static boolean intersects(Set<?> s1, Set<?> s2) {
     Set<?> copy = new HashSet<>(s1);
     copy.retainAll(s2);
@@ -1490,7 +1525,7 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void pologonize() throws ParseException {
+  public void polygonize() throws ParseException {
     LineString line1 = GEOMETRY_FACTORY.createLineString(coordArray(180, 40, 30, 20, 20, 90));
     LineString line2 = GEOMETRY_FACTORY.createLineString(coordArray(180, 40, 160, 160));
     LineString line3 = GEOMETRY_FACTORY.createLineString(coordArray(80, 60, 120, 130, 150, 80));
@@ -1563,7 +1598,7 @@ public class FunctionsTest extends TestBase {
     String actual = Functions.delaunayTriangle(combined).toText();
     String expected =
         "GEOMETRYCOLLECTION (POLYGON ((20 40, 125 100, 50 60, 20 40)), POLYGON ((20 40, 50 60, 110 170, 20 40)), POLYGON ((110 170, 50 60, 125 100, 110 170)), POLYGON ((110 170, 125 100, 175 150, 110 170)))";
-    assertEquals(expected, actual);
+    assertGeometryEquals(expected, actual);
 
     poly =
         Constructors.geomFromEWKT(
@@ -1575,7 +1610,7 @@ public class FunctionsTest extends TestBase {
     actual = Functions.delaunayTriangle(poly, 0, 1).toText();
     expected =
         "MULTILINESTRING ((25 20, 35 20), (20 20, 25 20), (10 20, 20 20), (10 10, 10 20), (10 10, 20 10), (20 10, 25 10), (25 10, 35 10), (35 10, 35 20), (25 20, 35 10), (25 10, 25 20), (20 20, 25 10), (20 10, 20 20), (10 20, 20 10))";
-    assertEquals(expected, actual);
+    assertGeometryEquals(expected, actual);
   }
 
   @Test
@@ -1753,6 +1788,26 @@ public class FunctionsTest extends TestBase {
     assertEquals(expected, actual);
     int actualSRID = Functions.getSRID(actualGeom);
     assertEquals(6000, actualSRID);
+  }
+
+  @Test
+  public void simplify() throws ParseException {
+    Geometry geom = Constructors.geomFromWKT("POINT (1 2)", 1111);
+    geom = Functions.buffer(geom, 10, false, "quad_segs=12");
+    int actualPoints = Functions.nPoints(Functions.simplify(geom, 0.1));
+    int expectedPoints = 33;
+    assertEquals(expectedPoints, actualPoints);
+
+    actualPoints = Functions.nPoints(Functions.simplify(geom, 0.5));
+    expectedPoints = 17;
+    assertEquals(expectedPoints, actualPoints);
+
+    Geometry actual = Functions.simplify(geom, 1);
+    actualPoints = Functions.nPoints(actual);
+    expectedPoints = 9;
+    assertEquals(expectedPoints, actualPoints);
+
+    assertEquals(1111, actual.getSRID());
   }
 
   @Test
@@ -3675,22 +3730,22 @@ public class FunctionsTest extends TestBase {
   public void voronoiPolygons() {
     MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0, 0, 2, 2));
     Geometry actual1 = FunctionsGeoTools.voronoiPolygons(multiPoint, 0, null);
-    assertEquals(
+    assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))",
         actual1.toText());
 
     Geometry actual2 = FunctionsGeoTools.voronoiPolygons(multiPoint, 30, null);
-    assertEquals(
+    assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 4, 4 -2, -2 -2)))", actual2.toText());
 
     Geometry buf = Functions.buffer(GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1)), 10);
     Geometry actual3 = FunctionsGeoTools.voronoiPolygons(multiPoint, 0, buf);
-    assertEquals(
+    assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 -9, -9 -9)), POLYGON ((-9 11, 11 11, 11 -9, -9 11)))",
         actual3.toText());
 
     Geometry actual4 = FunctionsGeoTools.voronoiPolygons(multiPoint, 30, buf);
-    assertEquals(
+    assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 11, 11 -9, -9 -9)))", actual4.toText());
 
     Geometry actual5 = FunctionsGeoTools.voronoiPolygons(null, 0, null);
@@ -3769,10 +3824,10 @@ public class FunctionsTest extends TestBase {
     InscribedCircle actual = Functions.maximumInscribedCircle(geom);
     InscribedCircle expected =
         new InscribedCircle(
-            Constructors.geomFromEWKT("POINT (96.953125 76.328125)"),
-            Constructors.geomFromEWKT("POINT (140 90)"),
-            45.165846);
-    assertTrue(expected.equals(actual));
+            Constructors.geomFromEWKT("POINT (96.9287109375 76.3232421875)"),
+            Constructors.geomFromEWKT("POINT (61.64205411585366 104.55256764481707)"),
+            45.18896951053177);
+    assertEquals(expected, actual);
 
     geom =
         Constructors.geomFromEWKT(
@@ -3780,9 +3835,9 @@ public class FunctionsTest extends TestBase {
     actual = Functions.maximumInscribedCircle(geom);
     expected =
         new InscribedCircle(
-            Constructors.geomFromEWKT("POINT (65.0419921875 15.1005859375)"),
-            Constructors.geomFromEWKT("POINT (65 17)"),
-            1.8998781);
+            Constructors.geomFromEWKT("POINT (65.043212890625 15.098388671875)"),
+            Constructors.geomFromEWKT("POINT (66.52827267530488 13.910340844131097)"),
+            1.9018044602641058);
     assertTrue(expected.equals(actual));
 
     geom =
@@ -3791,9 +3846,9 @@ public class FunctionsTest extends TestBase {
     actual = Functions.maximumInscribedCircle(geom);
     expected =
         new InscribedCircle(
-            Constructors.geomFromEWKT("POINT (65.44062499999998 15.953124999999998)"),
-            Constructors.geomFromEWKT("POINT (67.5 16.9)"),
-            2.2666269);
+            Constructors.geomFromEWKT("POINT (65.44223632812499 15.945361328125001)"),
+            Constructors.geomFromEWKT("POINT (67.4 14.8)"),
+            2.2681911662992174);
     assertTrue(expected.equals(actual));
 
     geom = Constructors.geomFromEWKT("MULTIPOINT ((60.8 15.5), (63.2 16.3))");
@@ -3811,9 +3866,9 @@ public class FunctionsTest extends TestBase {
     actual = Functions.maximumInscribedCircle(geom);
     expected =
         new InscribedCircle(
-            Constructors.geomFromEWKT("POINT (65.44062499999998 15.953124999999998)"),
-            Constructors.geomFromEWKT("POINT (67.5 16.9)"),
-            2.2666269);
+            Constructors.geomFromEWKT("POINT (65.44223632812499 15.945361328125001)"),
+            Constructors.geomFromEWKT("POINT (67.4 14.8)"),
+            2.2681911662992174);
     assertTrue(expected.equals(actual));
   }
 
@@ -3937,6 +3992,44 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void scale() throws ParseException {
+    Geometry geom = Constructors.geomFromWKT("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))", 0);
+    Geometry actual = Functions.scale(geom, 3, 2);
+    String expected = "POLYGON ((0 0, 0 2, 3 2, 3 0, 0 0))";
+    assertEquals(expected, actual.toString());
+
+    geom = Constructors.geomFromWKT("LINESTRING(0 1, 1 0)", 0);
+    actual = Functions.scale(geom, 10, 5);
+    expected = "LINESTRING (0 5, 10 0)";
+    assertEquals(expected, actual.toString());
+
+    geom = Constructors.geomFromWKT("POLYGON ((0 0, 0 1.5, 1.5 1.5, 1.5 0, 0 0))", 1111);
+    actual = Functions.scaleGeom(geom, Constructors.point(1.8, 2.1));
+    expected = "POLYGON ((0 0, 0 3.1500000000000004, 2.7 3.1500000000000004, 2.7 0, 0 0))";
+    assertEquals(expected, actual.toString());
+    assertEquals(1111, actual.getSRID());
+
+    actual =
+        Functions.scaleGeom(geom, Constructors.point(3, 2), Constructors.point(0.32959, 0.796483));
+    expected =
+        "POLYGON ((-0.6591799999999999 -0.796483, -0.6591799999999999 2.2035169999999997, 3.84082 2.2035169999999997, 3.84082 -0.796483, -0.6591799999999999 -0.796483))";
+    assertEquals(expected, actual.toString());
+
+    // test to check Z and M ordinate preservation
+    geom = Constructors.geomFromWKT("POLYGON ((0 0 1, 0 1.5 2, 1.5 1.5 2, 1.5 0 3, 0 0 1))", 0);
+    String actualWKT = Functions.asWKT(Functions.scale(geom, 3, 2));
+    expected = "POLYGON Z((0 0 1, 0 3 2, 4.5 3 2, 4.5 0 3, 0 0 1))";
+    assertEquals(expected, actualWKT);
+
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ZM((0 0 1 2, 0 1.5 2 2, 1.5 1.5 2 2, 1.5 0 3 2, 0 0 1 2))", 0);
+    actualWKT = Functions.asWKT(Functions.scale(geom, 3, 2));
+    expected = "POLYGON ZM((0 0 1 2, 0 3 2 2, 4.5 3 2 2, 4.5 0 3 2, 0 0 1 2))";
+    assertEquals(expected, actualWKT);
+  }
+
+  @Test
   public void rotateX() throws ParseException {
     Geometry lineString = Constructors.geomFromEWKT("LINESTRING (50 160, 50 50, 100 50)");
     String actual = Functions.asEWKT(Functions.rotateX(lineString, Math.PI));
@@ -3947,6 +4040,21 @@ public class FunctionsTest extends TestBase {
     Geometry geomActual = Functions.rotateX(lineString, Math.PI / 2);
     actual = Functions.asWKT(geomActual);
     expected = "LINESTRING Z(1 -3 2, 1 -0.9999999999999999 1)";
+    assertEquals(1234, geomActual.getSRID());
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void rotateY() throws ParseException {
+    Geometry lineString = Constructors.geomFromEWKT("LINESTRING (50 160, 50 50, 100 50)");
+    String actual = Functions.asEWKT(Functions.rotateY(lineString, Math.PI));
+    String expected = "LINESTRING (-50 160, -50 50, -100 50)";
+    assertEquals(expected, actual);
+
+    lineString = Constructors.geomFromWKT("LINESTRING(1 2 3, 1 1 1)", 1234);
+    Geometry geomActual = Functions.rotateY(lineString, Math.PI / 2);
+    actual = Functions.asWKT(geomActual);
+    expected = "LINESTRING Z(3 2 -0.9999999999999998, 1 1 -0.9999999999999999)";
     assertEquals(1234, geomActual.getSRID());
     assertEquals(expected, actual);
   }

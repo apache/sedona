@@ -16,6 +16,7 @@
 #  under the License.
 
 import json
+
 from sedona.sql.types import GeometryType
 
 
@@ -34,7 +35,9 @@ class SedonaMapUtils:
         if geometry_col is None:
             geometry_col = SedonaMapUtils.__get_geometry_col__(df)
         pandas_df = df.toPandas()
-        if geometry_col is None:  # No geometry column found even after searching schema, return Pandas Dataframe
+        if (
+            geometry_col is None
+        ):  # No geometry column found even after searching schema, return Pandas Dataframe
             return pandas_df
         try:
             import geopandas as gpd
@@ -73,14 +76,14 @@ class SedonaMapUtils:
             geom_type = geom.geom_type
         if geom_type not in type_list:
             type_list.append(geom_type)
-        if geom_type == 'Polygon':
+        if geom_type == "Polygon":
             return geom.exterior.coords[0]
         else:
             return geom.coords[0]
 
     @classmethod
     def __extract_point_coordinate__(cls, geom):
-        if geom.geom_type == 'Point':
+        if geom.geom_type == "Point":
             return geom.coords[0]
 
     @classmethod
@@ -91,5 +94,9 @@ class SedonaMapUtils:
 
     @classmethod
     def __is_geom_collection__(cls, geom_type):
-        return geom_type == 'MultiPolygon' or geom_type == 'MultiLineString' or geom_type == 'MultiPoint' \
-               or geom_type == 'GeometryCollection'
+        return (
+            geom_type == "MultiPolygon"
+            or geom_type == "MultiLineString"
+            or geom_type == "MultiPoint"
+            or geom_type == "GeometryCollection"
+        )

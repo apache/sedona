@@ -17,14 +17,14 @@
 
 import inspect
 import types
+from typing import Any
 
 from sedona.exceptions import InvalidParametersException
-
-from typing import Any
 
 try:
     from typing import GenericMeta
 except ImportError:
+
     class GenericMeta(type):
         pass
 
@@ -58,7 +58,9 @@ class MultiMethod:
         :param meth:
         :return:
         """
-        if str(meth).startswith("<classmethod") or str(meth).startswith("<staticmethod"):
+        if str(meth).startswith("<classmethod") or str(meth).startswith(
+            "<staticmethod"
+        ):
             sig = inspect.signature(meth.__get__(self))
             self._is_static = True
         else:
@@ -67,17 +69,17 @@ class MultiMethod:
         # Build a type-signature from the method's annotations
         types = []
         for name, parm in sig.parameters.items():
-            if name == 'self':
+            if name == "self":
                 continue
             if name == "args" or name == "kwargs":
                 raise InvalidParametersException("Can not be used with args and kwargs")
 
-            if name == 'cls':
+            if name == "cls":
                 continue
 
             if parm.annotation is inspect.Parameter.empty:
                 raise InvalidParametersException(
-                    'Argument {} must be annotated with a type'.format(name)
+                    "Argument {} must be annotated with a type".format(name)
                 )
             if parm.default is not inspect.Parameter.empty:
                 self._methods[tuple(types)] = meth
@@ -107,10 +109,14 @@ class MultiMethod:
         methods_which_are_correct = []
 
         for function_methods in methods_shortened_to_args:
-            is_instances = all([
-                is_subclass_with_typing(from_args, from_definition)
-                for from_args, from_definition in zip(types_from_args, function_methods[0])
-            ])
+            is_instances = all(
+                [
+                    is_subclass_with_typing(from_args, from_definition)
+                    for from_args, from_definition in zip(
+                        types_from_args, function_methods[0]
+                    )
+                ]
+            )
 
             if is_instances:
                 methods_which_are_correct.append(function_methods[1:])

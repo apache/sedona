@@ -18,12 +18,12 @@
 import os
 
 import pytest
-
-from sedona.core.SpatialRDD import RectangleRDD
-from sedona.core.enums import IndexType, GridType, FileDataSplitter
-from sedona.core.geom.envelope import Envelope
 from tests.test_base import TestBase
 from tests.tools import tests_resource
+
+from sedona.core.enums import FileDataSplitter, GridType, IndexType
+from sedona.core.geom.envelope import Envelope
+from sedona.core.SpatialRDD import RectangleRDD
 
 inputLocation = os.path.join(tests_resource, "zcta510-small.csv")
 queryWindowSet = os.path.join(tests_resource, "zcta510-small.csv")
@@ -35,7 +35,9 @@ numPartitions = 11
 distance = 0.001
 queryPolygonSet = os.path.join(tests_resource, "primaryroads-polygon.csv")
 inputCount = 3000
-inputBoundary = Envelope(minx=-171.090042, maxx=145.830505, miny=-14.373765, maxy=49.00127)
+inputBoundary = Envelope(
+    minx=-171.090042, maxx=145.830505, miny=-14.373765, maxy=49.00127
+)
 matchCount = 17599
 matchWithOriginalDuplicatesCount = 17738
 
@@ -49,7 +51,7 @@ class TestRectangleRDD(TestBase):
             Offset=offset,
             splitter=splitter,
             carryInputData=True,
-            partitions=numPartitions
+            partitions=numPartitions,
         )
 
         spatial_rdd.analyze()
@@ -58,12 +60,7 @@ class TestRectangleRDD(TestBase):
         assert inputBoundary == spatial_rdd.boundaryEnvelope
 
         spatial_rdd = RectangleRDD(
-            self.sc,
-            inputLocation,
-            offset,
-            splitter,
-            True,
-            numPartitions
+            self.sc, inputLocation, offset, splitter, True, numPartitions
         )
 
         spatial_rdd.analyze()
@@ -78,7 +75,7 @@ class TestRectangleRDD(TestBase):
             Offset=offset,
             splitter=splitter,
             carryInputData=True,
-            partitions=numPartitions
+            partitions=numPartitions,
         )
 
         spatial_rdd.analyze()
@@ -95,7 +92,7 @@ class TestRectangleRDD(TestBase):
             Offset=offset,
             splitter=splitter,
             carryInputData=True,
-            partitions=numPartitions
+            partitions=numPartitions,
         )
 
         spatial_rdd.analyze()

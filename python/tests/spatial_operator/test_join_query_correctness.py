@@ -15,15 +15,15 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from shapely.geometry import Point, Polygon, LineString
+from shapely.geometry import LineString, Point, Polygon
 from shapely.geometry.base import BaseGeometry
-
-from sedona.core.SpatialRDD import LineStringRDD, PolygonRDD, CircleRDD, PointRDD
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
-from sedona.core.enums import IndexType, GridType
-from sedona.core.spatialOperator import JoinQuery
-from sedona.utils.spatial_rdd_parser import GeoData
 from tests.test_base import TestBase
+
+from sedona.core.enums import GridType, IndexType
+from sedona.core.spatialOperator import JoinQuery
+from sedona.core.SpatialRDD import CircleRDD, LineStringRDD, PointRDD, PolygonRDD
+from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
+from sedona.utils.spatial_rdd_parser import GeoData
 
 
 class TestJoinQueryCorrectness(TestBase):
@@ -39,10 +39,14 @@ class TestJoinQueryCorrectness(TestBase):
         object_rdd = PointRDD(self.sc.parallelize(self.test_inside_point_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
-        result = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, True, False).collect()
+        result = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, True, False
+        ).collect()
         self.verify_join_result(result)
 
-        result_no_index = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, False, False).collect()
+        result_no_index = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, False, False
+        ).collect()
         self.verify_join_result(result_no_index)
 
     def test_on_boundary_point_join_correctness(self):
@@ -50,10 +54,14 @@ class TestJoinQueryCorrectness(TestBase):
         object_rdd = PointRDD(self.sc.parallelize(self.test_on_boundary_point_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
-        result = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, True, False).collect()
+        result = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, True, False
+        ).collect()
         self.verify_join_result(result)
 
-        result_no_index = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, False, False).collect()
+        result_no_index = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, False, False
+        ).collect()
         self.verify_join_result(result_no_index)
 
     def test_outside_point_join_correctness(self):
@@ -62,46 +70,64 @@ class TestJoinQueryCorrectness(TestBase):
         object_rdd = PointRDD(self.sc.parallelize(self.test_outside_point_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
-        result = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, True, False).collect()
+        result = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, True, False
+        ).collect()
         assert 0 == result.__len__()
 
-        result_no_index = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, False, False).collect()
+        result_no_index = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, False, False
+        ).collect()
         assert 0 == result_no_index.__len__()
 
     def test_inside_linestring_join_correctness(self):
-        window_rdd = PolygonRDD(
-            self.sc.parallelize(self.test_polygon_window_set)
-        )
+        window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set))
         object_rdd = LineStringRDD(self.sc.parallelize(self.test_inside_linestring_set))
 
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
-        result = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, True, False).collect()
+        result = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, True, False
+        ).collect()
         self.verify_join_result(result)
 
-        result_no_index = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, False, False).collect()
+        result_no_index = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, False, False
+        ).collect()
         self.verify_join_result(result_no_index)
 
     def test_overlapped_linestring_join_correctness(self):
         window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set))
-        object_rdd = LineStringRDD(self.sc.parallelize(self.test_overlapped_linestring_set))
+        object_rdd = LineStringRDD(
+            self.sc.parallelize(self.test_overlapped_linestring_set)
+        )
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
-        result = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, True, True).collect()
+        result = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, True, True
+        ).collect()
         self.verify_join_result(result)
 
-        result_no_index = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, False, True).collect()
+        result_no_index = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, False, True
+        ).collect()
         self.verify_join_result(result_no_index)
 
     def test_outside_line_string_join_correctness(self):
         window_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set))
-        object_rdd = LineStringRDD(self.sc.parallelize(self.test_outside_linestring_set))
+        object_rdd = LineStringRDD(
+            self.sc.parallelize(self.test_outside_linestring_set)
+        )
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
-        result = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, True, False).collect()
+        result = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, True, False
+        ).collect()
         assert 0 == result.__len__()
 
-        result_no_index = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, False, False).collect()
+        result_no_index = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, False, False
+        ).collect()
         assert 0 == result_no_index.__len__()
 
     def test_inside_polygon_join_correctness(self):
@@ -110,10 +136,14 @@ class TestJoinQueryCorrectness(TestBase):
         object_rdd = PolygonRDD(self.sc.parallelize(self.test_inside_polygon_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
-        result = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, True, False).collect()
+        result = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, True, False
+        ).collect()
         self.verify_join_result(result)
 
-        result_no_index = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, False, False).collect()
+        result_no_index = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, False, False
+        ).collect()
         self.verify_join_result(result_no_index)
 
     def test_overlapped_polygon_join_correctness(self):
@@ -121,10 +151,14 @@ class TestJoinQueryCorrectness(TestBase):
         object_rdd = PolygonRDD(self.sc.parallelize(self.test_overlapped_polygon_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
-        result = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, True, True).collect()
+        result = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, True, True
+        ).collect()
         self.verify_join_result(result)
 
-        result_no_index = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, False, True).collect()
+        result_no_index = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, False, True
+        ).collect()
         self.verify_join_result(result_no_index)
 
     def test_outside_polygon_join_correctness(self):
@@ -132,49 +166,73 @@ class TestJoinQueryCorrectness(TestBase):
         object_rdd = PolygonRDD(self.sc.parallelize(self.test_outside_polygon_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
-        result = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, True, False).collect()
+        result = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, True, False
+        ).collect()
         assert 0 == result.__len__()
 
-        result_no_index = JoinQuery.SpatialJoinQuery(object_rdd, window_rdd, False, False).collect()
+        result_no_index = JoinQuery.SpatialJoinQuery(
+            object_rdd, window_rdd, False, False
+        ).collect()
         assert 0 == result_no_index.__len__()
 
     def test_inside_polygon_distance_join_correctness(self):
-        center_geometry_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set))
+        center_geometry_rdd = PolygonRDD(
+            self.sc.parallelize(self.test_polygon_window_set)
+        )
         window_rdd = CircleRDD(center_geometry_rdd, 0.1)
         object_rdd = PolygonRDD(self.sc.parallelize(self.test_inside_polygon_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
-        result = JoinQuery.DistanceJoinQuery(object_rdd, window_rdd, True, False).collect()
+        result = JoinQuery.DistanceJoinQuery(
+            object_rdd, window_rdd, True, False
+        ).collect()
         self.verify_join_result(result)
 
-        result_no_index = JoinQuery.DistanceJoinQuery(object_rdd, window_rdd, False, False).collect()
+        result_no_index = JoinQuery.DistanceJoinQuery(
+            object_rdd, window_rdd, False, False
+        ).collect()
         self.verify_join_result(result_no_index)
 
     def test_overlapped_polygon_distance_join_correctness(self):
-        center_geometry_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set))
+        center_geometry_rdd = PolygonRDD(
+            self.sc.parallelize(self.test_polygon_window_set)
+        )
         window_rdd = CircleRDD(center_geometry_rdd, 0.1)
         object_rdd = PolygonRDD(self.sc.parallelize(self.test_overlapped_polygon_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
-        result = JoinQuery.DistanceJoinQuery(object_rdd, window_rdd, True, True).collect()
+        result = JoinQuery.DistanceJoinQuery(
+            object_rdd, window_rdd, True, True
+        ).collect()
         self.verify_join_result(result)
 
-        result_no_index = JoinQuery.DistanceJoinQuery(object_rdd, window_rdd, False, True).collect()
+        result_no_index = JoinQuery.DistanceJoinQuery(
+            object_rdd, window_rdd, False, True
+        ).collect()
         self.verify_join_result(result_no_index)
 
     def test_outside_polygon_distance_join_correctness(self):
-        center_geometry_rdd = PolygonRDD(self.sc.parallelize(self.test_polygon_window_set))
+        center_geometry_rdd = PolygonRDD(
+            self.sc.parallelize(self.test_polygon_window_set)
+        )
         window_rdd = CircleRDD(center_geometry_rdd, 0.1)
         object_rdd = PolygonRDD(self.sc.parallelize(self.test_outside_polygon_set))
         self.prepare_rdd(object_rdd, window_rdd, GridType.QUADTREE)
 
-        result = JoinQuery.DistanceJoinQuery(object_rdd, window_rdd, True, True).collect()
+        result = JoinQuery.DistanceJoinQuery(
+            object_rdd, window_rdd, True, True
+        ).collect()
         assert 0 == result.__len__()
 
-        result_no_index = JoinQuery.DistanceJoinQuery(object_rdd, window_rdd, False, True).collect()
+        result_no_index = JoinQuery.DistanceJoinQuery(
+            object_rdd, window_rdd, False, True
+        ).collect()
         assert 0 == result_no_index.__len__()
 
-    def prepare_rdd(self, object_rdd: SpatialRDD, window_rdd: SpatialRDD, grid_type: GridType):
+    def prepare_rdd(
+        self, object_rdd: SpatialRDD, window_rdd: SpatialRDD, grid_type: GridType
+    ):
         object_rdd.analyze()
         window_rdd.analyze()
         object_rdd.rawSpatialRDD.repartition(4)
@@ -188,7 +246,12 @@ class TestJoinQueryCorrectness(TestBase):
 
     @classmethod
     def make_square(cls, minx: float, miny: float, side: float) -> Polygon:
-        coordinates = [(minx, miny), (minx + side, miny), (minx + side, miny + side), (minx, miny + side)]
+        coordinates = [
+            (minx, miny),
+            (minx + side, miny),
+            (minx + side, miny + side),
+            (minx, miny + side),
+        ]
 
         polygon = Polygon(coordinates)
 
@@ -196,7 +259,7 @@ class TestJoinQueryCorrectness(TestBase):
 
     @classmethod
     def make_square_line(cls, minx: float, miny: float, side: float):
-        coordinates = [(minx, miny), (minx+side, miny), (minx + side, miny+side)]
+        coordinates = [(minx, miny), (minx + side, miny), (minx + side, miny + side)]
         return LineString(coordinates)
 
     @classmethod
@@ -226,32 +289,72 @@ class TestJoinQueryCorrectness(TestBase):
                 a = "a:" + id
                 b = "b:" + id
 
-                cls.test_polygon_window_set.append(cls.wrap(cls.make_square(base_x, base_y, 5), a))
-                cls.test_polygon_window_set.append(cls.wrap(cls.make_square(base_x, base_y, 5), b))
+                cls.test_polygon_window_set.append(
+                    cls.wrap(cls.make_square(base_x, base_y, 5), a)
+                )
+                cls.test_polygon_window_set.append(
+                    cls.wrap(cls.make_square(base_x, base_y, 5), b)
+                )
 
-                cls.test_inside_polygon_set.append(cls.wrap(cls.make_square(base_x + 2, base_y + 2, 2), a))
-                cls.test_inside_polygon_set.append(cls.wrap(cls.make_square(base_x + 2, base_y + 2, 2), b))
+                cls.test_inside_polygon_set.append(
+                    cls.wrap(cls.make_square(base_x + 2, base_y + 2, 2), a)
+                )
+                cls.test_inside_polygon_set.append(
+                    cls.wrap(cls.make_square(base_x + 2, base_y + 2, 2), b)
+                )
 
-                cls.test_overlapped_polygon_set.append(cls.wrap(cls.make_square(base_x + 3, base_y + 3, 3), a))
-                cls.test_overlapped_polygon_set.append(cls.wrap(cls.make_square(base_x + 3, base_y + 3, 3), b))
+                cls.test_overlapped_polygon_set.append(
+                    cls.wrap(cls.make_square(base_x + 3, base_y + 3, 3), a)
+                )
+                cls.test_overlapped_polygon_set.append(
+                    cls.wrap(cls.make_square(base_x + 3, base_y + 3, 3), b)
+                )
 
-                cls.test_outside_polygon_set.append(cls.wrap(cls.make_square(base_x + 6, base_y + 6, 3), a))
-                cls.test_outside_polygon_set.append(cls.wrap(cls.make_square(base_x + 6, base_y + 6, 3), b))
+                cls.test_outside_polygon_set.append(
+                    cls.wrap(cls.make_square(base_x + 6, base_y + 6, 3), a)
+                )
+                cls.test_outside_polygon_set.append(
+                    cls.wrap(cls.make_square(base_x + 6, base_y + 6, 3), b)
+                )
 
-                cls.test_inside_linestring_set.append(cls.wrap(cls.make_square_line(base_x + 2, base_y + 2, 2), a))
-                cls.test_inside_linestring_set.append(cls.wrap(cls.make_square_line(base_x + 2, base_y + 2, 2), b))
+                cls.test_inside_linestring_set.append(
+                    cls.wrap(cls.make_square_line(base_x + 2, base_y + 2, 2), a)
+                )
+                cls.test_inside_linestring_set.append(
+                    cls.wrap(cls.make_square_line(base_x + 2, base_y + 2, 2), b)
+                )
 
-                cls.test_overlapped_linestring_set.append(cls.wrap(cls.make_square_line(base_x + 3, base_y + 3, 3), a))
-                cls.test_overlapped_linestring_set.append(cls.wrap(cls.make_square_line(base_x + 3, base_y + 3, 3), b))
+                cls.test_overlapped_linestring_set.append(
+                    cls.wrap(cls.make_square_line(base_x + 3, base_y + 3, 3), a)
+                )
+                cls.test_overlapped_linestring_set.append(
+                    cls.wrap(cls.make_square_line(base_x + 3, base_y + 3, 3), b)
+                )
 
-                cls.test_outside_linestring_set.append(cls.wrap(cls.make_square_line(base_x + 6, base_y + 6, 3), a))
-                cls.test_outside_linestring_set.append(cls.wrap(cls.make_square_line(base_x + 6, base_y + 6, 3), b))
+                cls.test_outside_linestring_set.append(
+                    cls.wrap(cls.make_square_line(base_x + 6, base_y + 6, 3), a)
+                )
+                cls.test_outside_linestring_set.append(
+                    cls.wrap(cls.make_square_line(base_x + 6, base_y + 6, 3), b)
+                )
 
-                cls.test_inside_point_set.append(cls.wrap(cls.make_point(base_x + 2.5, base_y + 2.5), a))
-                cls.test_inside_point_set.append(cls.wrap(cls.make_point(base_x + 2.5, base_y + 2.5), b))
+                cls.test_inside_point_set.append(
+                    cls.wrap(cls.make_point(base_x + 2.5, base_y + 2.5), a)
+                )
+                cls.test_inside_point_set.append(
+                    cls.wrap(cls.make_point(base_x + 2.5, base_y + 2.5), b)
+                )
 
-                cls.test_on_boundary_point_set.append(cls.wrap(cls.make_point(base_x + 5, base_y + 5), a))
-                cls.test_on_boundary_point_set.append(cls.wrap(cls.make_point(base_x + 5, base_y + 5), b))
+                cls.test_on_boundary_point_set.append(
+                    cls.wrap(cls.make_point(base_x + 5, base_y + 5), a)
+                )
+                cls.test_on_boundary_point_set.append(
+                    cls.wrap(cls.make_point(base_x + 5, base_y + 5), b)
+                )
 
-                cls.test_outside_point_set.append(cls.wrap(cls.make_point(base_x + 6, base_y + 6), a))
-                cls.test_outside_point_set.append(cls.wrap(cls.make_point(base_x + 6, base_y + 6), b))
+                cls.test_outside_point_set.append(
+                    cls.wrap(cls.make_point(base_x + 6, base_y + 6), a)
+                )
+                cls.test_outside_point_set.append(
+                    cls.wrap(cls.make_point(base_x + 6, base_y + 6), b)
+                )

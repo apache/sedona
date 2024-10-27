@@ -71,7 +71,7 @@
         <geotools.version>28.2</geotools.version>
         <hadoop.version>3.2.4</hadoop.version>
         <jackson.version>2.13.4</jackson.version>
-        <jts.version>1.19.0</jts.version>
+        <jts.version>1.20.0</jts.version>
         <jts2geojson.version>0.16.1</jts2geojson.version>
         <spatial4j.version>0.8</spatial4j.version>
 
@@ -85,6 +85,7 @@
         <spark.version>3.3.0</spark.version>
         <spark.compat.version>3.3</spark.compat.version>
         <log4j.version>2.17.2</log4j.version>
+        <graphframe.version>0.8.3-spark3.4</graphframe.version>
 
         <flink.version>1.19.0</flink.version>
         <slf4j.version>1.7.36</slf4j.version>
@@ -394,6 +395,10 @@
                 <enabled>true</enabled>
             </releases>
         </repository>
+        <repository>
+            <id>Spark Packages</id>
+            <url>https://repos.spark-packages.org/</url>
+        </repository>
     </repositories>
     <build>
         <pluginManagement>
@@ -578,6 +583,8 @@
                         <scala.compat.version>${scala.compat.version}</scala.compat.version>
                         <spark.version>${spark.version}</spark.version>
                         <scala.version>${scala.version}</scala.version>
+                        <log4j.version>${log4j.version}</log4j.version>
+                        <graphframe.version>${graphframe.version}</graphframe.version>
                     </properties>
                 </configuration>
                 <executions>
@@ -674,57 +681,6 @@
             </repositories>
         </profile>
         <profile>
-            <!-- This profile works for Spark 3.0 -->
-            <id>sedona-spark-3.0</id>
-            <activation>
-                <property>
-                    <name>spark</name>
-                    <value>3.0</value>
-                </property>
-            </activation>
-            <properties>
-                <spark.version>3.0.3</spark.version>
-                <spark.compat.version>3.0</spark.compat.version>
-                <log4j.version>2.17.2</log4j.version>
-                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
-                <skip.deploy.common.modules>true</skip.deploy.common.modules>
-            </properties>
-        </profile>
-        <profile>
-            <!-- This profile works for Spark 3.1 -->
-            <id>sedona-spark-3.1</id>
-            <activation>
-                <property>
-                    <name>spark</name>
-                    <value>3.1</value>
-                </property>
-            </activation>
-            <properties>
-                <spark.version>3.1.2</spark.version>
-                <spark.compat.version>3.1</spark.compat.version>
-                <log4j.version>2.17.2</log4j.version>
-                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
-                <skip.deploy.common.modules>true</skip.deploy.common.modules>
-            </properties>
-        </profile>
-        <profile>
-            <!-- This profile works for Spark 3.2 -->
-            <id>sedona-spark-3.2</id>
-            <activation>
-                <property>
-                    <name>spark</name>
-                    <value>3.2</value>
-                </property>
-            </activation>
-            <properties>
-                <spark.version>3.2.0</spark.version>
-                <spark.compat.version>3.2</spark.compat.version>
-                <log4j.version>2.17.2</log4j.version>
-                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
-                <skip.deploy.common.modules>true</skip.deploy.common.modules>
-            </properties>
-        </profile>
-        <profile>
             <!-- This profile works for Spark 3.3 -->
             <id>sedona-spark-3.3</id>
             <activation>
@@ -738,6 +694,7 @@
                 <spark.version>3.3.0</spark.version>
                 <spark.compat.version>3.3</spark.compat.version>
                 <log4j.version>2.17.2</log4j.version>
+                <graphframe.version>0.8.3-spark3.4</graphframe.version>
             </properties>
         </profile>
         <profile>
@@ -752,6 +709,7 @@
                 <spark.version>3.4.0</spark.version>
                 <spark.compat.version>3.4</spark.compat.version>
                 <log4j.version>2.19.0</log4j.version>
+                <graphframe.version>0.8.3-spark3.4</graphframe.version>
                 <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
                 <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>
@@ -768,6 +726,7 @@
                 <spark.version>3.5.0</spark.version>
                 <spark.compat.version>3.5</spark.compat.version>
                 <log4j.version>2.20.0</log4j.version>
+                <graphframe.version>0.8.3-spark3.5</graphframe.version>
                 <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
                 <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>

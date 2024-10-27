@@ -15,10 +15,10 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from pyspark import SparkContext, RDD
+from pyspark import RDD, SparkContext
 
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.core.formatMapper.geo_reader import GeoDataReader
+from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.utils.meta import MultipleMeta
 
 
@@ -32,17 +32,20 @@ class GeoJsonReader(GeoDataReader, metaclass=MultipleMeta):
         :return: SpatialRDD
         """
         jvm = sc._jvm
-        srdd = jvm.GeoJsonReader.readToGeometryRDD(
-            sc._jsc, inputPath
-        )
+        srdd = jvm.GeoJsonReader.readToGeometryRDD(sc._jsc, inputPath)
 
         spatial_rdd = SpatialRDD(sc)
         spatial_rdd.set_srdd(srdd)
         return spatial_rdd
 
     @classmethod
-    def readToGeometryRDD(cls, sc: SparkContext, inputPath: str, allowInvalidGeometries: bool,
-                          skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
+    def readToGeometryRDD(
+        cls,
+        sc: SparkContext,
+        inputPath: str,
+        allowInvalidGeometries: bool,
+        skipSyntacticallyInvalidGeometries: bool,
+    ) -> SpatialRDD:
         """
 
         :param sc: SparkContext
@@ -53,7 +56,10 @@ class GeoJsonReader(GeoDataReader, metaclass=MultipleMeta):
         """
         jvm = sc._jvm
         srdd = jvm.GeoJsonReader.readToGeometryRDD(
-            sc._jsc, inputPath, allowInvalidGeometries, skipSyntacticallyInvalidGeometries
+            sc._jsc,
+            inputPath,
+            allowInvalidGeometries,
+            skipSyntacticallyInvalidGeometries,
         )
 
         spatial_rdd = SpatialRDD(sc)
@@ -70,17 +76,19 @@ class GeoJsonReader(GeoDataReader, metaclass=MultipleMeta):
         sc = rawTextRDD.ctx
         jvm = sc._jvm
 
-        srdd = jvm.GeoJsonReader.readToGeometryRDD(
-            rawTextRDD._jrdd
-        )
+        srdd = jvm.GeoJsonReader.readToGeometryRDD(rawTextRDD._jrdd)
 
         spatial_rdd = SpatialRDD(sc)
         spatial_rdd.set_srdd(srdd)
         return spatial_rdd
 
     @classmethod
-    def readToGeometryRDD(cls, rawTextRDD: RDD, allowInvalidGeometries: bool,
-                          skipSyntacticallyInvalidGeometries: bool) -> SpatialRDD:
+    def readToGeometryRDD(
+        cls,
+        rawTextRDD: RDD,
+        allowInvalidGeometries: bool,
+        skipSyntacticallyInvalidGeometries: bool,
+    ) -> SpatialRDD:
         """
 
         :param rawTextRDD: RDD

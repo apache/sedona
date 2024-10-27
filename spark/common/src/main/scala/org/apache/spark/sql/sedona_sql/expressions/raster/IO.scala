@@ -22,7 +22,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes, UnsafeArrayData}
 import org.apache.spark.sql.catalyst.util.GenericArrayData
-import org.apache.spark.sql.sedona_sql.expressions.UserDataGeneratator
+import org.apache.spark.sql.sedona_sql.expressions.UserDataGenerator
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 
@@ -36,7 +36,7 @@ case class RS_Array(inputExpressions: Seq[Expression])
     extends Expression
     with ImplicitCastInputTypes
     with CodegenFallback
-    with UserDataGeneratator {
+    with UserDataGenerator {
   override def nullable: Boolean = false
 
   override def eval(inputRow: InternalRow): Any = {

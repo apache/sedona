@@ -2344,7 +2344,7 @@ Since: `v1.6.1`
 
 Example:
 
-```SQL
+```sql
 SELECT ST_Length2D(ST_GeomFromWKT('LINESTRING(38 16,38 50,65 50,66 16,38 16)'))
 ```
 
@@ -3139,6 +3139,48 @@ Output:
 GEOMETRYCOLLECTION (POLYGON ((0 2, 1 3, 2 4, 2 3, 2 2, 1 2, 0 2)), POLYGON ((2 2, 2 3, 2 4, 3 3, 4 2, 3 2, 2 2)))
 ```
 
+## ST_Project
+
+Introduction: Calculates a new point location given a starting point, distance, and azimuth. The azimuth indicates the direction, expressed in radians, and is measured in a clockwise manner starting from true north. The system can handle azimuth values that are negative or exceed 2π (360 degrees). The optional `lenient` parameter prevents an error if the input geometry is not a Point. Its default value is `false`.
+
+Format:
+
+```
+ST_Project(point: Geometry, distance: Double, azimuth: Double, lenient: Boolean = False)
+```
+
+```
+ST_Project(point: Geometry, distance: Double, Azimuth: Double)
+```
+
+Since: `v1.7.0`
+
+SQL Example:
+
+```sql
+SELECT ST_Project(ST_GeomFromText('POINT (10 15)'), 100, radians(90))
+```
+
+Output:
+
+```
+POINT (110 14.999999999999975)
+```
+
+SQL Example:
+
+```sql
+SELECT ST_Project(
+        ST_GeomFromText('POLYGON ((1 5, 1 1, 3 3, 5 3, 1 5))'),
+        25, radians(270), true)
+```
+
+Output:
+
+```
+POINT EMPTY
+```
+
 ## ST_ReducePrecision
 
 Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded.
@@ -3321,6 +3363,26 @@ Output:
 SRID=4326;POLYGON ((0 0, 1 0, 1 -0.8390715290764524, 0 0))
 ```
 
+## ST_RotateY
+
+Introduction: Performs a counter-clockwise rotation of the specified geometry around the Y-axis by the given angle measured in radians.
+
+Format: `ST_RotateY(geometry: Geometry, angle: Double)`
+
+Since: `v1.7.0`
+
+SQL Example:
+
+```sql
+SELECT ST_RotateY(ST_GeomFromEWKT('SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 0))'), 10)
+```
+
+Output:
+
+```
+SRID=4326;POLYGON ((0 0, -0.8390715290764524 0, -0.8390715290764524 1, 0 0))
+```
+
 ## ST_S2CellIDs
 
 Introduction: Cover the geometry with Google S2 Cells, return the corresponding cell IDs with the given level.
@@ -3366,6 +3428,79 @@ Output:
 
 ```
 [POLYGON ((-36.609392788630245 -38.169532607255846, -36.609392706252954 -38.169532607255846, -36.609392706252954 -38.169532507473015, -36.609392788630245 -38.169532507473015, -36.609392788630245 -38.169532607255846))]
+```
+
+## ST_Scale
+
+Introduction: This function scales the geometry to a new size by multiplying the ordinates with the corresponding scaling factors provided as parameters `scaleX` and `scaleY`.
+
+!!!Note
+    This function is designed for scaling 2D geometries. While it currently doesn't support scaling the Z and M coordinates, it preserves these values during the scaling operation.
+
+Format: `ST_Scale(geometry: Geometry, scaleX: Double, scaleY: Double)`
+
+Since: `v1.7.0`
+
+SQL Example:
+
+```sql
+SELECT ST_Scale(
+        ST_GeomFromWKT('POLYGON ((0 0, 0 1.5, 1.5 1.5, 1.5 0, 0 0))'),
+       3, 2
+)
+```
+
+Output:
+
+```
+POLYGON ((0 0, 0 3, 4.5 3, 4.5 0, 0 0))
+```
+
+## ST_ScaleGeom
+
+Introduction: This function scales the input geometry (`geometry`) to a new size. It does this by multiplying the coordinates of the input geometry with corresponding values from another geometry (`factor`) representing the scaling factors.
+
+To scale the geometry relative to a point other than the true origin (e.g., scaling a polygon in place using its centroid), you can use the three-geometry variant of this function. This variant requires an additional geometry (`origin`) representing the "false origin" for the scaling operation. If no `origin` is provided, the scaling occurs relative to the true origin, with all coordinates of the input geometry simply multiplied by the corresponding scale factors.
+
+!!!Note
+    This function is designed for scaling 2D geometries. While it currently doesn't support scaling the Z and M coordinates, it preserves these values during the scaling operation.
+
+Format:
+
+`ST_ScaleGeom(geometry: Geometry, factor: Geometry, origin: Geometry)`
+
+`ST_ScaleGeom(geometry: Geometry, factor: Geometry)`
+
+Since: `v1.7.0`
+
+SQL Example:
+
+```sql
+SELECT ST_Scale(
+        ST_GeomFromWKT('POLYGON ((0 0, 0 1.5, 1.5 1.5, 1.5 0, 0 0))'),
+       ST_Point(3, 2)
+)
+```
+
+Output:
+
+```
+POLYGON ((0 0, 0 3, 4.5 3, 4.5 0, 0 0))
+```
+
+SQL Example:
+
+```sql
+SELECT ST_Scale(
+        ST_GeomFromWKT('POLYGON ((0 0, 0 1.5, 1.5 1.5, 1.5 0, 0 0))'),
+       ST_Point(3, 2), ST_Point(1, 2)
+)
+```
+
+Output:
+
+```
+POLYGON ((-2 -2, -2 1, 2.5 1, 2.5 -2, -2 -2))
 ```
 
 ## ST_SetPoint
@@ -3421,7 +3556,7 @@ Since: `v1.6.0`
 
 SQL example:
 
-```SQL
+```sql
 SELECT ST_ShiftLongitude(ST_GeomFromText('LINESTRING(177 10, 179 10, -179 10, -177 10)'))
 ```
 
@@ -3449,6 +3584,29 @@ Output:
 
 ```
 3021
+```
+
+## ST_Simplify
+
+Introduction: This function simplifies the input geometry by applying the Douglas-Peucker algorithm.
+
+!!!Note
+    The simplification may not preserve topology, potentially producing invalid geometries. Use [ST_SimplifyPreserveTopology](#st_simplifypreservetopology) to retain valid topology after simplification.
+
+Format: `ST_Simplify(geom: Geometry, tolerance: Double)`
+
+Since: `v1.7.0`
+
+SQL Example:
+
+```sql
+SELECT ST_Simplify(ST_Buffer(ST_GeomFromWKT('POINT (0 2)'), 10), 1)
+```
+
+Output:
+
+```
+POLYGON ((10 2, 7.0710678118654755 -5.071067811865475, 0.0000000000000006 -8, -7.071067811865475 -5.0710678118654755, -10 1.9999999999999987, -7.071067811865477 9.071067811865476, -0.0000000000000018 12, 7.071067811865474 9.071067811865477, 10 2))
 ```
 
 ## ST_SimplifyPolygonHull
