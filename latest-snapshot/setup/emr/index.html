@@ -4075,7 +4075,7 @@
 sudo<span class="w"> </span>mkdir<span class="w"> </span>/jars
 
 <span class="c1"># Download Sedona jar</span>
-sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/sedona-spark-shaded-3.0_2.12-1.6.1.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.0_2.12/1.6.1/sedona-spark-shaded-3.0_2.12-1.6.1.jar&quot;</span>
+sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/sedona-spark-shaded-3.3_2.12-1.6.1.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.3_2.12/1.6.1/sedona-spark-shaded-3.3_2.12-1.6.1.jar&quot;</span>
 
 <span class="c1"># Download GeoTools jar</span>
 sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/geotools-wrapper-1.6.1-28.2.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.6.1-28.2/geotools-wrapper-1.6.1-28.2.jar&quot;</span>
@@ -4095,7 +4095,7 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
 <span class="w">  </span><span class="o">{</span>
 <span class="w">    </span><span class="s2">&quot;Classification&quot;</span>:<span class="s2">&quot;spark-defaults&quot;</span>,
 <span class="w">    </span><span class="s2">&quot;Properties&quot;</span>:<span class="o">{</span>
-<span class="w">      </span><span class="s2">&quot;spark.yarn.dist.jars&quot;</span>:<span class="w"> </span><span class="s2">&quot;/jars/sedona-spark-shaded-3.0_2.12-1.6.1.jar,/jars/geotools-wrapper-1.6.1-28.2.jar&quot;</span>,
+<span class="w">      </span><span class="s2">&quot;spark.yarn.dist.jars&quot;</span>:<span class="w"> </span><span class="s2">&quot;/jars/sedona-spark-shaded-3.3_2.12-1.6.1.jar,/jars/geotools-wrapper-1.6.1-28.2.jar&quot;</span>,
 <span class="w">      </span><span class="s2">&quot;spark.serializer&quot;</span>:<span class="w"> </span><span class="s2">&quot;org.apache.spark.serializer.KryoSerializer&quot;</span>,
 <span class="w">      </span><span class="s2">&quot;spark.kryo.registrator&quot;</span>:<span class="w"> </span><span class="s2">&quot;org.apache.sedona.core.serde.SedonaKryoRegistrator&quot;</span>,
 <span class="w">      </span><span class="s2">&quot;spark.sql.extensions&quot;</span>:<span class="w"> </span><span class="s2">&quot;org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions&quot;</span>
@@ -4103,10 +4103,6 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
 <span class="w">  </span><span class="o">}</span>
 <span class="o">]</span>
 </code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you use Sedona 1.3.1-incubating, please use <code>sedona-python-adapter-3.0_2.12</code> jar in the content above, instead of <code>sedona-spark-shaded-3.0_2.12</code>.</p>
-</div>
 <h2 id="verify-installation">Verify installation<a class="headerlink" href="#verify-installation" title="Permanent link">&para;</a></h2>
 <p>After the cluster is created, you can verify the installation by running the following code in a Jupyter notebook:</p>
 <div class="highlight"><pre><span></span><code><span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT ST_Point(0, 0)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -4132,7 +4128,7 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">October 15, 2024 04:28:21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">October 27, 2024 23:29:29</span>
   </span>
 
     
