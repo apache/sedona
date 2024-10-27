@@ -15,10 +15,6 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from sedona.core.enums import GridType, IndexType
-from sedona.core.geom.envelope import Envelope
-from sedona.core.SpatialRDD import PointRDD
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from tests.properties.point_properties import (
     crs_envelope,
     crs_envelope_transformed,
@@ -32,6 +28,11 @@ from tests.properties.point_properties import (
     transformed_envelope,
 )
 from tests.test_base import TestBase
+
+from sedona.core.enums import GridType, IndexType
+from sedona.core.geom.envelope import Envelope
+from sedona.core.SpatialRDD import PointRDD
+from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 
 
 class TestPointRDD(TestBase):

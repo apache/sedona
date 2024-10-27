@@ -18,9 +18,10 @@
 import math
 import pickle
 
-from sedona.utils.decorators import require
 from shapely.geometry import Point, Polygon
 from shapely.geometry.base import BaseGeometry
+
+from sedona.utils.decorators import require
 
 
 class Envelope(Polygon):

@@ -22,11 +22,12 @@ from typing import Any, List, Optional
 
 import pytest
 from pyspark.sql.types import Row, StructField, StructType
-from sedona.sql.types import GeometryType
 from shapely import wkb, wkt
 from tests import tests_resource
 from tests.streaming.spark.cases_builder import SuiteContainer
 from tests.test_base import TestBase
+
+from sedona.sql.types import GeometryType
 
 SCHEMA = StructType([StructField("geom", GeometryType())])
 

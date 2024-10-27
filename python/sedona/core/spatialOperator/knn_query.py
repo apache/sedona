@@ -16,13 +16,14 @@
 #  under the License.
 
 import attr
+from shapely.geometry.base import BaseGeometry
+
 from sedona.core.jvm.translate import JvmSedonaPythonConverter
 from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.utils.binary_parser import BinaryParser
 from sedona.utils.decorators import require
 from sedona.utils.geometry_adapter import GeometryAdapter
 from sedona.utils.spatial_rdd_parser import SpatialRDDParserData
-from shapely.geometry.base import BaseGeometry
 
 
 @attr.s

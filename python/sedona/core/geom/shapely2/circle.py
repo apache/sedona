@@ -17,7 +17,6 @@
 
 from math import sqrt
 
-from sedona.core.geom.envelope import Envelope
 from shapely.geometry import (
     LineString,
     MultiLineString,
@@ -28,6 +27,8 @@ from shapely.geometry import (
     box,
 )
 from shapely.geometry.base import BaseGeometry
+
+from sedona.core.geom.envelope import Envelope
 
 
 class Circle(Polygon):

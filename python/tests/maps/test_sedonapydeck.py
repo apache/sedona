@@ -19,9 +19,10 @@ import json
 
 import geopandas as gpd
 import pydeck as pdk
-from sedona.maps.SedonaPyDeck import SedonaPyDeck
 from tests import chicago_crimes_input_location, google_buildings_input_location
 from tests.test_base import TestBase
+
+from sedona.maps.SedonaPyDeck import SedonaPyDeck
 
 
 class TestVisualization(TestBase):

@@ -19,6 +19,9 @@ import os
 import shutil
 
 import pytest
+from tests.test_base import TestBase
+from tests.tools import tests_resource
+
 from sedona.core.enums import GridType, IndexType
 from sedona.core.formatMapper.disc_utils import (
     GeoType,
@@ -27,8 +30,6 @@ from sedona.core.formatMapper.disc_utils import (
 )
 from sedona.core.spatialOperator import JoinQuery
 from sedona.core.SpatialRDD import LineStringRDD, PointRDD, PolygonRDD
-from tests.test_base import TestBase
-from tests.tools import tests_resource
 
 
 def remove_directory(path: str) -> bool:

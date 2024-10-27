@@ -15,10 +15,11 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+from shapely.geometry.base import BaseGeometry
+
 from sedona.core.geom.envelope import Envelope
 from sedona.core.jvm.translate import JvmGeometryAdapter
 from sedona.utils.spatial_rdd_parser import GeometryFactory
-from shapely.geometry.base import BaseGeometry
 
 
 class GeometryAdapter:

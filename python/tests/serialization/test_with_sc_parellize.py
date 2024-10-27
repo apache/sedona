@@ -15,11 +15,12 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from sedona.core.SpatialRDD import LineStringRDD, PointRDD, PolygonRDD
-from sedona.utils.spatial_rdd_parser import GeoData
 from shapely.geometry import LineString, Point, Polygon
 from shapely.wkt import loads
 from tests.test_base import TestBase
+
+from sedona.core.SpatialRDD import LineStringRDD, PointRDD, PolygonRDD
+from sedona.utils.spatial_rdd_parser import GeoData
 
 
 class TestWithScParallelize(TestBase):

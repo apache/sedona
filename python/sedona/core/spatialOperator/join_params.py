@@ -16,6 +16,7 @@
 #  under the License.
 
 import attr
+
 from sedona.core.enums import IndexType
 from sedona.core.enums.join_build_side import JoinBuildSide
 from sedona.core.jvm.abstract import JvmObject

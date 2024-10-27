@@ -17,12 +17,13 @@
 
 import os
 
-from sedona.core.enums import FileDataSplitter, IndexType
-from sedona.core.spatialOperator import KNNQuery
-from sedona.core.SpatialRDD import PointRDD
 from shapely.geometry import Point
 from tests.test_base import TestBase
 from tests.tools import distance_sorting_functions, tests_resource
+
+from sedona.core.enums import FileDataSplitter, IndexType
+from sedona.core.spatialOperator import KNNQuery
+from sedona.core.SpatialRDD import PointRDD
 
 input_location = os.path.join(tests_resource, "arealm-small.csv")
 queryWindowSet = os.path.join(tests_resource, "zcta510-small.csv")

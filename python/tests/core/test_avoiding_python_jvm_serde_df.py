@@ -17,6 +17,10 @@
 import os
 
 from pyspark.sql.types import StructField, StructType
+from shapely.wkt import loads
+from tests.test_base import TestBase
+from tests.tools import tests_resource
+
 from sedona.core.enums import GridType, IndexType
 from sedona.core.formatMapper import WktReader
 from sedona.core.spatialOperator.join_params import JoinParams
@@ -25,9 +29,6 @@ from sedona.core.spatialOperator.range_query_raw import RangeQueryRaw
 from sedona.core.SpatialRDD import CircleRDD
 from sedona.sql.types import GeometryType
 from sedona.utils.adapter import Adapter
-from shapely.wkt import loads
-from tests.test_base import TestBase
-from tests.tools import tests_resource
 
 bank_csv_path = os.path.join(tests_resource, "small/points.csv")
 areas_csv_path = os.path.join(tests_resource, "small/areas.csv")

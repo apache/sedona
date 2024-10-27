@@ -17,8 +17,9 @@
 
 from os import path
 
-from sedona.utils.spatial_rdd_parser import GeoData
 from shapely.geometry import Point
+
+from sedona.utils.spatial_rdd_parser import GeoData
 
 tests_path = path.abspath(path.join(__file__, "../../../spark/common/src/test/"))
 tests_resource = path.abspath(

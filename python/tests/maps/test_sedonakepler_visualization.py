@@ -18,13 +18,14 @@
 import geopandas as gpd
 from keplergl import KeplerGl
 from pyspark.sql.functions import explode, hex
-from sedona.maps.SedonaKepler import SedonaKepler
 from tests import (
     csv_point_input_location,
     mixed_wkt_geometry_input_location,
     world_map_raster_input_location,
 )
 from tests.test_base import TestBase
+
+from sedona.maps.SedonaKepler import SedonaKepler
 
 
 class TestVisualization(TestBase):

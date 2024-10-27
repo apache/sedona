@@ -31,6 +31,7 @@ class TestStFunctionImport(TestBase):
 
     def test_geometry_type_should_be_a_sql_type(self):
         from pyspark.sql.types import UserDefinedType
+
         from sedona.spark import GeometryType
 
         assert isinstance(GeometryType(), UserDefinedType)
