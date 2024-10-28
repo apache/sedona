@@ -119,7 +119,7 @@ class TestRectangleKNN(TestBase):
             rectangle_rdd, self.query_polygon, self.top_k, False
         )
 
-        print(result_no_index)
+        assert len(result_no_index) > 0
 
     def test_spatial_knn_using_linestring(self):
         rectangle_rdd = RectangleRDD(self.sc, inputLocation, offset, splitter, True)
@@ -128,4 +128,4 @@ class TestRectangleKNN(TestBase):
             rectangle_rdd, self.query_line, self.top_k, False
         )
 
-        print(result_no_index)
+        assert len(result_no_index) > 0

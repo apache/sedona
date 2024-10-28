@@ -8,24 +8,16 @@ Start `spark-sql` as following (replace `<VERSION>` with actual version like `{{
 
 !!! abstract "Run spark-sql with Apache Sedona"
 
-	=== "Spark 3.0 to 3.3 and Scala 2.12"
+	=== "Spark 3.3+ and Scala 2.12"
 
         ```sh
-        spark-sql --packages org.apache.sedona:sedona-spark-shaded-3.0_2.12:<VERSION>,org.datasyslab:geotools-wrapper:<VERSION>-28.2 \
+        spark-sql --packages org.apache.sedona:sedona-spark-shaded-3.3_2.12:<VERSION>,org.datasyslab:geotools-wrapper:<VERSION>-28.2 \
           --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
           --conf spark.kryo.registrator=org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator \
           --conf spark.sql.extensions=org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
         ```
 
-	=== "Spark 3.4+ and Scala 2.12"
-
-        ```sh
-        spark-sql --packages org.apache.sedona:sedona-spark-shaded-3.4_2.12:<VERSION>,org.datasyslab:geotools-wrapper:<VERSION>-28.2 \
-          --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
-          --conf spark.kryo.registrator=org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator \
-          --conf spark.sql.extensions=org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
-        ```
-        If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version of Spark.
+        Please replace the `3.3` in artifact names with the corresponding major.minor version of Spark.
 
 This will register all Sedona types, functions and optimizations in SedonaSQL and SedonaViz.
 

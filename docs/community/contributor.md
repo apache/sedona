@@ -11,25 +11,26 @@ A committer will be promoted to a PMC member when the community thinks he/she is
 
 Current Sedona PMC members are as follows:
 
-|         Name         |   GitHub ID   |        Apache ID        |
-|:--------------------:|:-------------:|:-----------------------:|
-|     Adam Binford     |  Kimahriman   |  kimahriman@apache.org  |
-|  Kanchan Chowdhury   |  kanchanchy   |  kanchanchy@apache.org  |
-|  Kristin Cowalcijk   | Kontinuation  | kontinuation@apache.org |
-|    Paweł Kociński    |   Imbruced    |   imbruced@apache.org   |
-|       Yitao Li       |   yitao-li    |   yitaoli@apache.org    |
-|    Netanel Malka     |  netanel246   |    malka@apache.org     |
-|    Mohamed Sarwat    |    Sarwat     |   mosarwat@apache.org   |
-|      Kengo Seki      |    sekikn     |    sekikn@apache.org    |
-|     Sachio Wakai     |   SW186000    |    swakai@apache.org    |
-|      Jinxuan Wu      |    jinxuan    |   jinxuanw@apache.org   |
-|        Jia Yu        |   jiayuasu    |    jiayu@apache.org     |
-|     Zongsi Zhang     |  zongsizhang  | zongsizhang@apache.org  |
-|     Felix Cheung     |               | felixcheung@apache.org  |
-|     Von Gosling      |               |  vongosling@apache.org  |
-|    Sunil Govindan    |               |    sunilg@apache.org    |
-| Jean-Baptiste Onofré |               |   jbonofre@apache.org   |
-|   George Percivall   |               |  percivall@apache.org   |
+|         Name         |  GitHub ID   |        Apache ID        |
+|:--------------------:|:------------:|:-----------------------:|
+|     Adam Binford     |  Kimahriman  |  kimahriman@apache.org  |
+|  Kanchan Chowdhury   |  kanchanchy  |  kanchanchy@apache.org  |
+|  Kristin Cowalcijk   | Kontinuation | kontinuation@apache.org |
+|     Furqaan Khan     | furqaankhan  |   furqaan@apache.org    |
+|    Paweł Kociński    |   Imbruced   |   imbruced@apache.org   |
+|       Yitao Li       |   yitao-li   |   yitaoli@apache.org    |
+|    Netanel Malka     |  netanel246  |    malka@apache.org     |
+|    Mohamed Sarwat    |    Sarwat    |   mosarwat@apache.org   |
+|      Kengo Seki      |    sekikn    |    sekikn@apache.org    |
+|     Sachio Wakai     |   SW186000   |    swakai@apache.org    |
+|      Jinxuan Wu      |   jinxuan    |   jinxuanw@apache.org   |
+|        Jia Yu        |   jiayuasu   |    jiayu@apache.org     |
+|     Zongsi Zhang     | zongsizhang  | zongsizhang@apache.org  |
+|     Felix Cheung     |              | felixcheung@apache.org  |
+|     Von Gosling      |              |  vongosling@apache.org  |
+|    Sunil Govindan    |              |    sunilg@apache.org    |
+| Jean-Baptiste Onofré |              |   jbonofre@apache.org   |
+|   George Percivall   |              |  percivall@apache.org   |
 
 ## Become a committer
 
@@ -45,10 +46,10 @@ The PMC also adds new PMC members. PMC members are expected to carry out PMC res
 
 Current Sedona Committers are as follows:
 
-|      Name      |  GitHub ID  |      Apache ID       |
-|:--------------:|:-----------:|:--------------------:|
-| Nilesh Gajwani |   iGN5117   |  nilesh@apache.org   |
-|  Furqaan Khan  | furqaankhan |  furqaan@apache.org  |
+|      Name      | GitHub ID |     Apache ID      |
+|:--------------:|:---------:|:------------------:|
+|  John Bampton  | jbampton  | johnbam@apache.org |
+| Nilesh Gajwani |  iGN5117  | nilesh@apache.org  |
 
 ## Nominate a committer or PMC member
 

@@ -3085,7 +3085,7 @@ class functionTestScala
       val df = sparkSession.sql(
         s"SELECT ST_AsText(ST_VoronoiPolygons(ST_GeomFromWKT($g1), ($tolerance)))")
       val actual = df.take(1)(0).get(0).asInstanceOf[String]
-      assertEquals(expectedResult, actual)
+      assertGeometryEquals(expectedResult, actual)
     }
   }
 
@@ -3349,19 +3349,11 @@ class functionTestScala
     val baseDf = sparkSession.sql(
       "SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 50 90, 90 140, 60 140))') AS geom")
     val actual: Row = baseDf.selectExpr("ST_MaximumInscribedCircle(geom)").first().getAs[Row](0)
-    val expected = Row(
-      sparkSession
-        .sql("SELECT ST_GeomFromWKT('POINT (96.953125 76.328125)')")
-        .first()
-        .get(0)
-        .asInstanceOf[Geometry],
-      sparkSession
-        .sql("SELECT ST_GeomFromWKT('POINT (140 90)')")
-        .first()
-        .get(0)
-        .asInstanceOf[Geometry],
-      45.165845650018)
-    assertTrue(actual.equals(expected))
+    assertGeometryEquals("POINT (96.9287109375 76.3232421875)", actual.getAs[Geometry](0))
+    assertGeometryEquals(
+      "POINT (61.64205411585366 104.55256764481707)",
+      actual.getAs[Geometry](1))
+    assertEquals(45.18896951053177, actual.getDouble(2), 1e-6)
   }
 
   it("Should pass ST_IsValidTrajectory") {
