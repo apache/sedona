@@ -19,7 +19,6 @@ FROM ubuntu:22.04
 
 ARG shared_workspace=/opt/workspace
 ARG spark_version=3.4.1
-ARG hadoop_version=3
 ARG hadoop_s3_version=3.3.4
 ARG aws_sdk_version=1.12.402
 ARG spark_xml_version=0.16.0
@@ -29,8 +28,7 @@ ARG spark_extension_version=2.11.0
 
 # Set up envs
 ENV SHARED_WORKSPACE=${shared_workspace}
-ENV SPARK_HOME /opt/spark
-RUN mkdir ${SPARK_HOME}
+ENV SPARK_HOME /usr/local/lib/python3.10/dist-packages/pyspark
 ENV SEDONA_HOME /opt/sedona
 RUN mkdir ${SEDONA_HOME}
 
@@ -44,7 +42,7 @@ COPY ./ ${SEDONA_HOME}/
 
 RUN chmod +x ${SEDONA_HOME}/docker/spark.sh
 RUN chmod +x ${SEDONA_HOME}/docker/sedona.sh
-RUN ${SEDONA_HOME}/docker/spark.sh ${spark_version} ${hadoop_version} ${hadoop_s3_version} ${aws_sdk_version} ${spark_xml_version}
+RUN ${SEDONA_HOME}/docker/spark.sh ${spark_version} ${hadoop_s3_version} ${aws_sdk_version} ${spark_xml_version}
 
 # Install Python dependencies
 COPY docker/sedona-spark-jupyterlab/requirements.txt /opt/requirements.txt
