@@ -2640,6 +2640,75 @@ Output:
 +------------------------------------------------------------------------------------------------------------------------------+
 ```
 
+## ST_Scale
+
+Introduction: This function scales the geometry to a new size by multiplying the ordinates with the corresponding scaling factors provided as parameters `scaleX` and `scaleY`.
+
+!!!Note
+    This function is designed for scaling 2D geometries. While it currently doesn't support scaling the Z and M coordinates, it preserves these values during the scaling operation.
+
+Format: `ST_Scale(geometry: Geometry, scaleX: Double, scaleY: Double)`
+
+SQL Example:
+
+```sql
+SELECT ST_Scale(
+        ST_GeomFromWKT('POLYGON ((0 0, 0 1.5, 1.5 1.5, 1.5 0, 0 0))'),
+       3, 2
+)
+```
+
+Output:
+
+```
+POLYGON ((0 0, 0 3, 4.5 3, 4.5 0, 0 0))
+```
+
+## ST_ScaleGeom
+
+Introduction: This function scales the input geometry (`geometry`) to a new size. It does this by multiplying the coordinates of the input geometry with corresponding values from another geometry (`factor`) representing the scaling factors.
+
+To scale the geometry relative to a point other than the true origin (e.g., scaling a polygon in place using its centroid), you can use the three-geometry variant of this function. This variant requires an additional geometry (`origin`) representing the "false origin" for the scaling operation. If no `origin` is provided, the scaling occurs relative to the true origin, with all coordinates of the input geometry simply multiplied by the corresponding scale factors.
+
+!!!Note
+    This function is designed for scaling 2D geometries. While it currently doesn't support scaling the Z and M coordinates, it preserves these values during the scaling operation.
+
+Format:
+
+`ST_ScaleGeom(geometry: Geometry, factor: Geometry, origin: Geometry)`
+
+`ST_ScaleGeom(geometry: Geometry, factor: Geometry)`
+
+SQL Example:
+
+```sql
+SELECT ST_Scale(
+        ST_GeomFromWKT('POLYGON ((0 0, 0 1.5, 1.5 1.5, 1.5 0, 0 0))'),
+       ST_Point(3, 2)
+)
+```
+
+Output:
+
+```
+POLYGON ((0 0, 0 3, 4.5 3, 4.5 0, 0 0))
+```
+
+SQL Example:
+
+```sql
+SELECT ST_Scale(
+        ST_GeomFromWKT('POLYGON ((0 0, 0 1.5, 1.5 1.5, 1.5 0, 0 0))'),
+       ST_Point(3, 2), ST_Point(1, 2)
+)
+```
+
+Output:
+
+```
+POLYGON ((-2 -2, -2 1, 2.5 1, 2.5 -2, -2 -2))
+```
+
 ## ST_SetPoint
 
 Introduction: Replace Nth point of linestring with given point. Index is 0-based. Negative index are counted backwards, e.g., -1 is last point.

@@ -18,6 +18,7 @@ import os
 from tempfile import mkdtemp
 from typing import Iterable, Union
 
+
 import pyspark
 from pyspark.sql import DataFrame
 
@@ -25,6 +26,9 @@ from sedona.spark import *
 from sedona.utils.decorators import classproperty
 
 SPARK_REMOTE = os.getenv("SPARK_REMOTE")
+
+from shapely import wkt
+from shapely.geometry.base import BaseGeometry
 
 
 class TestBase:
@@ -63,6 +67,7 @@ class TestBase:
             setattr(self, "__sc", self.spark._sc)
         return getattr(self, "__sc")
 
+    @classmethod
     def assert_almost_equal(
         self,
         a: Union[Iterable[float], float],
@@ -79,8 +84,35 @@ class TestBase:
         else:
             raise TypeError("this function is only for floats and iterables of floats")
 
+    @classmethod
     def assert_dataframes_equal(self, df1: DataFrame, df2: DataFrame):
         df_diff1 = df1.exceptAll(df2)
         df_diff2 = df2.exceptAll(df1)
 
         assert df_diff1.isEmpty and df_diff2.isEmpty
+
+    @classmethod
+    def assert_geometry_almost_equal(
+        cls,
+        left_geom: Union[str, BaseGeometry],
+        right_geom: Union[str, BaseGeometry],
+        tolerance=1e-6,
+    ):
+        expected_geom = (
+            wkt.loads(left_geom) if isinstance(left_geom, str) else left_geom
+        )
+        actual_geom = (
+            wkt.loads(right_geom) if isinstance(right_geom, str) else right_geom
+        )
+
+        if not actual_geom.equals_exact(expected_geom, tolerance=tolerance):
+            # If the exact equals check fails, perform a buffer check with tolerance
+            if actual_geom.buffer(tolerance).contains(
+                expected_geom
+            ) and expected_geom.buffer(tolerance).contains(actual_geom):
+                return
+            else:
+                # fail the test with error message
+                raise ValueError(
+                    f"Geometry equality check failed for {left_geom} and {right_geom}"
+                )

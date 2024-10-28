@@ -41,57 +41,37 @@ jobs:
           - spark: '3.5.0'
             scala: '2.12.8'
             python: '3.10'
-            hadoop: '3'
             shapely: '1'
           - spark: '3.5.0'
             scala: '2.12.8'
             python: '3.10'
-            hadoop: '3'
           - spark: '3.5.0'
             scala: '2.12.8'
             python: '3.9'
-            hadoop: '3'
           - spark: '3.5.0'
             scala: '2.12.8'
             python: '3.8'
-            hadoop: '3'
           - spark: '3.4.0'
             scala: '2.12.8'
             python: '3.10'
-            hadoop: '3'
           - spark: '3.4.0'
             scala: '2.12.8'
             python: '3.9'
-            hadoop: '3'
           - spark: '3.4.0'
             scala: '2.12.8'
             python: '3.8'
-            hadoop: '3'
           - spark: '3.4.0'
             scala: '2.12.8'
             python: '3.7'
-            hadoop: '3'
           - spark: '3.4.0'
             scala: '2.12.8'
             python: '3.7'
-            hadoop: '3'
             shapely: '1'
           - spark: '3.3.0'
             scala: '2.12.8'
             python: '3.8'
-            hadoop: '3'
-          - spark: '3.2.0'
-            scala: '2.12.8'
-            python: '3.7'
-            hadoop: '2.7'
-          - spark: '3.1.2'
-            scala: '2.12.8'
-            python: '3.7'
-            hadoop: '2.7'
-          - spark: '3.0.3'
-            scala: '2.12.8'
-            python: '3.7'
-            hadoop: '2.7'
+    env:
+      VENV_PATH: /home/runner/.local/share/virtualenvs/python-${{ matrix.python }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -113,18 +93,6 @@ jobs:
         run: |
             SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
             mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dgeotools
-      - env:
-          SPARK_VERSION: ${{ matrix.spark }}
-          HADOOP_VERSION: ${{ matrix.hadoop }}
-        run: |
-          wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz
-          wget https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar
-          wget https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar
-          wget https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
-          tar -xzf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz
-          mv -v jai_core-${JAI_CORE_VERSION}.jar spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/jars/
-          mv -v jai_codec-${JAI_CODEC_VERSION}.jar spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/jars/
-          mv -v jai_imageio-${JAI_IMAGEIO_VERSION}.jar spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/jars/
       - run: sudo apt-get -y install python3-pip python-dev-is-python3
       - run: sudo pip3 install -U setuptools
       - run: sudo pip3 install -U wheel
@@ -141,32 +109,43 @@ jobs:
             echo "Patching Pipfile to use Shapely 1.x"
             sed -i 's/^shapely.*$/shapely="<2.0.0"/g' Pipfile
           fi
+          export PIPENV_CUSTOM_VENV_NAME=python-${PYTHON_VERSION}
           pipenv --python ${PYTHON_VERSION}
           pipenv install pyspark==${SPARK_VERSION}
           pipenv install --dev
           pipenv graph
       - env:
-          SPARK_VERSION: ${{ matrix.spark }}
-          HADOOP_VERSION: ${{ matrix.hadoop }}
-        run: find spark-shaded/target -name sedona-*.jar -exec cp {} spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/jars/ \;
-      - env:
-          SPARK_VERSION: ${{ matrix.spark }}
-          HADOOP_VERSION: ${{ matrix.hadoop }}
-        run: (export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION};export PYTHONPATH=$SPARK_HOME/python;cd python;pipenv run pytest tests)
-      - env:
-          SPARK_VERSION: ${{ matrix.spark }}
-          HADOOP_VERSION: ${{ matrix.hadoop }}
+          PYTHON_VERSION: ${{ matrix.python }}
         run: |
-          if [ ! -f "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/sbin/start-connect-server.sh" ]
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
+          mv -v jai_core-${JAI_CORE_VERSION}.jar ${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
+          mv -v jai_codec-${JAI_CODEC_VERSION}.jar ${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
+          mv -v jai_imageio-${JAI_IMAGEIO_VERSION}.jar ${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
+      - env:
+          PYTHON_VERSION: ${{ matrix.python }}
+        run: find spark-shaded/target -name sedona-*.jar -exec cp {} ${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars/ \;
+      - env:
+          PYTHON_VERSION: ${{ matrix.python }}
+        run: |
+          export SPARK_HOME=${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark
+          cd python
+          source ${VENV_PATH}/bin/activate
+          pytest tests
+      - env:
+          PYTHON_VERSION: ${{ matrix.python }}
+        run: |
+          if [ ! -f "${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark/sbin/start-connect-server.sh" ]
           then
             echo "Skipping connect tests for Spark $SPARK_VERSION"
             exit
           fi
 
-          export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}
-          export PYTHONPATH=$SPARK_HOME/python
+          export SPARK_HOME=${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark
           export SPARK_REMOTE=local
 
           cd python
-          pipenv install "pyspark[connect]==${SPARK_VERSION}"
-          pipenv run pytest tests/sql/test_dataframe_api.py
+          source ${VENV_PATH}/bin/activate
+          pip install "pyspark[connect]==${SPARK_VERSION}"
+          pytest tests/sql/test_dataframe_api.py

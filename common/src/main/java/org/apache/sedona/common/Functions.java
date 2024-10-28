@@ -1050,7 +1050,7 @@ public class Functions {
     // All non-polygonal geometries use LargestEmptyCircle
     if (!geometry.getClass().getSimpleName().equals("Polygon")
         && !geometry.getClass().getSimpleName().equals("MultiPolygon")) {
-      LargestEmptyCircle largestEmptyCircle = new LargestEmptyCircle(geometry, tolerance);
+      LargestEmptyCircle largestEmptyCircle = new LargestEmptyCircle(geometry, null, tolerance);
       center = largestEmptyCircle.getCenter();
       nearest = largestEmptyCircle.getRadiusPoint();
       radius = largestEmptyCircle.getRadiusLine().getLength();
@@ -2264,6 +2264,45 @@ public class Functions {
 
     // Creating a MultiPoint from the extracted coordinates
     return geometry.getFactory().createMultiPointFromCoords(coordinates);
+  }
+
+  public static Geometry scale(Geometry geometry, double scaleX, double scaleY) {
+    return scaleGeom(geometry, Constructors.point(scaleX, scaleY));
+  }
+
+  public static Geometry scaleGeom(Geometry geometry, Geometry factor) {
+    return scaleGeom(geometry, factor, null);
+  }
+
+  public static Geometry scaleGeom(Geometry geometry, Geometry factor, Geometry origin) {
+    if (geometry == null || factor == null || geometry.isEmpty() || factor.isEmpty()) {
+      return geometry;
+    }
+
+    if (!factor.getGeometryType().equalsIgnoreCase(Geometry.TYPENAME_POINT)) {
+      throw new IllegalArgumentException("Scale factor geometry should be a Point type.");
+    }
+
+    Geometry resultGeom = null;
+    AffineTransformation scaleInstance = null;
+    Coordinate factorCoordinate = factor.getCoordinate();
+
+    if (origin == null || origin.isEmpty()) {
+      scaleInstance =
+          AffineTransformation.scaleInstance(factorCoordinate.getX(), factorCoordinate.getY());
+      resultGeom = scaleInstance.transform(geometry);
+    } else {
+      Coordinate falseOrigin = origin.getCoordinate();
+      scaleInstance =
+          AffineTransformation.scaleInstance(
+              factorCoordinate.getX(),
+              factorCoordinate.getY(),
+              falseOrigin.getX(),
+              falseOrigin.getY());
+      resultGeom = scaleInstance.transform(geometry);
+    }
+
+    return resultGeom;
   }
 
   public static Geometry rotateX(Geometry geometry, double angle) {
