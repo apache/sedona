@@ -2821,6 +2821,54 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#using-getis-ord-gi" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using Getis-Ord Gi(*)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Getis-Ord Gi(*)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-the-distance-weighting-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using the Distance Weighting Function
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using the Distance Weighting Function">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4105,6 +4153,54 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#using-getis-ord-gi" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using Getis-Ord Gi(*)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Getis-Ord Gi(*)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-the-distance-weighting-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using the Distance Weighting Function
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using the Distance Weighting Function">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4168,6 +4264,58 @@ column name must be provided.</p>
 <li>handleTies (handle_ties) - whether to handle ties in the k-distance calculation. Default is false</li>
 <li>useSpheroid (use_spheroid) - whether to use a cartesian or spheroidal distance calculation. Default is false</li>
 </ul>
+<p>The output is the input DataFrame with the lof added to each row.</p>
+<h2 id="using-getis-ord-gi">Using Getis-Ord Gi(*)<a class="headerlink" href="#using-getis-ord-gi" title="Permanent link">&para;</a></h2>
+<p>The G Local function is provided at <code>org.apache.sedona.stats.hotspotDetection.GetisOrd.gLocal</code> in scala/java and <code>sedona.stats.hotspot_detection.getis_ord.g_local</code> in python.</p>
+<p>Performs the Gi or Gi* statistic on the x column of the dataframe.</p>
+<p>Weights should be the neighbors of this row. The members of the weights should be comprised
+of structs containing a value column and a neighbor column. The neighbor column should be the
+contents of the neighbors with the same types as the parent row (minus neighbors). Reference the <em>Using the Distance
+Weighting Function</em> header for instructions on generating this column. To calculate the Gi*
+statistic, ensure the focal observation is in the neighbors array (i.e. the row is in the
+weights column) and <code>star=true</code>. Significance is calculated with a z score.</p>
+<h3 id="parameters_2">Parameters<a class="headerlink" href="#parameters_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>dataframe - the dataframe to perform the G statistic on</li>
+<li>x - The column name we want to perform hotspot analysis on</li>
+<li>weights - The column name containing the neighbors array. The neighbor column should be the contents of the neighbors with the same types as the parent row (minus neighbors). You can use <code>Weighting</code> class functions to achieve this.</li>
+<li>star - Whether the focal observation is in the neighbors array. If true this calculates Gi*, otherwise Gi</li>
+</ul>
+<p>The output is the input DataFrame with the following columns added: G, E[G], V[G], Z, P.</p>
+<h2 id="using-the-distance-weighting-function">Using the Distance Weighting Function<a class="headerlink" href="#using-the-distance-weighting-function" title="Permanent link">&para;</a></h2>
+<p>The Weighting functions are provided at <code>org.apache.sedona.stats.Weighting</code> in scala/java and <code>sedona.stats.weighting</code> in python.</p>
+<p>The function generates a column containing an array of structs containing a value column and a neighbor column.</p>
+<p>The generic <code>addDistanceBandColumn</code> (<code>add_distance_band_column</code> in python) function annotates a dataframe with a weights column containing the other records within the threshold and their weight.</p>
+<p>The dataframe should contain at least one <code>GeometryType</code> column. Rows must be unique. If one
+geometry column is present it will be used automatically. If two are present, the one named
+'geometry' will be used. If more than one are present and neither is named 'geometry', the
+column name must be provided. The new column will be named 'cluster'.</p>
+<h3 id="parameters_3">Parameters<a class="headerlink" href="#parameters_3" title="Permanent link">&para;</a></h3>
+<h4 id="adddistancebandcolumn">addDistanceBandColumn<a class="headerlink" href="#adddistancebandcolumn" title="Permanent link">&para;</a></h4>
+<p>names in parentheses are python variable names</p>
+<ul>
+<li>dataframe - DataFrame with geometry column</li>
+<li>threshold - Distance threshold for considering neighbors</li>
+<li>binary - whether to use binary weights or inverse distance weights for neighbors (dist^alpha)</li>
+<li>alpha - alpha to use for inverse distance weights ignored when binary is true</li>
+<li>includeZeroDistanceNeighbors (include_zero_distance_neighbors) - whether to include neighbors that are 0 distance. If 0 distance neighbors are included and binary is false, values are infinity as per the floating point spec (divide by 0)</li>
+<li>includeSelf (include_self) - whether to include self in the list of neighbors</li>
+<li>selfWeight (self_weight) - the value to use for the self weight</li>
+<li>geometry - name of the geometry column</li>
+<li>useSpheroid (use_spheroid) - whether to use a cartesian or spheroidal distance calculation. Default is false</li>
+</ul>
+<h4 id="addbinarydistancebandcolumn">addBinaryDistanceBandColumn<a class="headerlink" href="#addbinarydistancebandcolumn" title="Permanent link">&para;</a></h4>
+<p>names in parentheses are python variable names</p>
+<ul>
+<li>dataframe - DataFrame with geometry column</li>
+<li>threshold - Distance threshold for considering neighbors</li>
+<li>includeZeroDistanceNeighbors (include_zero_distance_neighbors) - whether to include neighbors that are 0 distance. If 0 distance neighbors are included and binary is false, values are infinity as per the floating point spec (divide by 0)</li>
+<li>includeSelf (include_self) - whether to include self in the list of neighbors</li>
+<li>selfWeight (self_weight) - the value to use for the self weight</li>
+<li>geometry - name of the geometry column</li>
+<li>useSpheroid (use_spheroid) - whether to use a cartesian or spheroidal distance calculation. Default is false</li>
+</ul>
+<p>In both cases the output is the input DataFrame with the weights column added to each row.</p>
 
 
 
@@ -4188,7 +4336,7 @@ column name must be provided.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">October 16, 2024 03:49:18</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">October 28, 2024 21:14:40</span>
   </span>
 
     
