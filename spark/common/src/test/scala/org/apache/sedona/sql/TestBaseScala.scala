@@ -28,7 +28,6 @@ import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.junit.Assert.fail
 import org.locationtech.jts.geom._
 import org.locationtech.jts.io.WKTReader
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
@@ -326,6 +325,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     val dfDiff2 = df2.except(df1)
 
     assert(dfDiff1.isEmpty && dfDiff2.isEmpty)
+  }
 
   def assertGeometryEquals(expectedWkt: String, actualWkt: String, tolerance: Double): Unit = {
     val reader = new WKTReader
