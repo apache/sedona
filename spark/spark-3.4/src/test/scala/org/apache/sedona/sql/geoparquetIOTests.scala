@@ -32,15 +32,15 @@ import org.apache.spark.sql.functions.{col, expr}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors.{ST_Point, ST_PolygonFromEnvelope}
 import org.apache.spark.sql.sedona_sql.expressions.st_predicates.ST_Intersects
-import org.apache.spark.sql.types.IntegerType
-import org.apache.spark.sql.types.StructField
-import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.types.{IntegerType, StructField, StructType, TimestampNTZType}
 import org.json4s.jackson.parseJson
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTReader
 import org.scalatest.BeforeAndAfterAll
 
 import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Collections
 import java.util.concurrent.atomic.AtomicLong
 import scala.collection.JavaConverters._
@@ -729,6 +729,32 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         assert(covering.bbox.xmax == Seq("test_cov2", "xmax"))
         assert(covering.bbox.ymax == Seq("test_cov2", "ymax"))
       }
+    }
+  }
+
+  describe("Spark types tests") {
+    it("should support timestamp_ntz") {
+      // Write geoparquet files with a TimestampNTZ column
+      val schema = StructType(
+        Seq(
+          StructField("id", IntegerType, nullable = false),
+          StructField("timestamp_ntz", TimestampNTZType, nullable = false)))
+      val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+      val data = Seq(
+        Row(1, LocalDateTime.parse("2024-10-04 12:34:56", formatter)),
+        Row(2, LocalDateTime.parse("2024-10-04 15:30:00", formatter)))
+      val df = sparkSession
+        .createDataFrame(sparkSession.sparkContext.parallelize(data), schema)
+        .withColumn("geom", expr("ST_Point(id, id)"))
+      df.write.format("geoparquet").mode("overwrite").save(geoparquetoutputlocation)
+
+      // Read it back
+      val df2 =
+        sparkSession.read.format("geoparquet").load(geoparquetoutputlocation).sort(col("id"))
+      assert(df2.schema.fields(1).dataType == TimestampNTZType)
+      val data1 = df.sort(col("id")).collect()
+      val data2 = df2.collect()
+      assert(data1 sameElements data2)
     }
   }
 

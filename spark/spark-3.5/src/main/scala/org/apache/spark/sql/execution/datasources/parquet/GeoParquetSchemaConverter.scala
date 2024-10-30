@@ -42,6 +42,8 @@ import org.apache.spark.sql.types._
  *   Whether unannotated BINARY fields should be assumed to be Spark SQL [[StringType]] fields.
  * @param assumeInt96IsTimestamp
  *   Whether unannotated INT96 fields should be assumed to be Spark SQL [[TimestampType]] fields.
+ * @param inferTimestampNTZ
+ *   Whether TimestampNTZType type is enabled.
  * @param parameters
  *   Options for reading GeoParquet files.
  */
@@ -49,6 +51,7 @@ class GeoParquetToSparkSchemaConverter(
     keyValueMetaData: java.util.Map[String, String],
     assumeBinaryIsString: Boolean = SQLConf.PARQUET_BINARY_AS_STRING.defaultValue.get,
     assumeInt96IsTimestamp: Boolean = SQLConf.PARQUET_INT96_AS_TIMESTAMP.defaultValue.get,
+    inferTimestampNTZ: Boolean = SQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.defaultValue.get,
     parameters: Map[String, String]) {
 
   private val geoParquetMetaData: GeoParquetMetaData =
@@ -61,6 +64,7 @@ class GeoParquetToSparkSchemaConverter(
     keyValueMetaData = keyValueMetaData,
     assumeBinaryIsString = conf.isParquetBinaryAsString,
     assumeInt96IsTimestamp = conf.isParquetINT96AsTimestamp,
+    inferTimestampNTZ = conf.parquetInferTimestampNTZEnabled,
     parameters = parameters)
 
   def this(
@@ -70,7 +74,15 @@ class GeoParquetToSparkSchemaConverter(
     keyValueMetaData = keyValueMetaData,
     assumeBinaryIsString = conf.get(SQLConf.PARQUET_BINARY_AS_STRING.key).toBoolean,
     assumeInt96IsTimestamp = conf.get(SQLConf.PARQUET_INT96_AS_TIMESTAMP.key).toBoolean,
+    inferTimestampNTZ = conf.get(SQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.key).toBoolean,
     parameters = parameters)
+
+  /**
+   * Returns true if TIMESTAMP_NTZ type is enabled in this ParquetToSparkSchemaConverter.
+   */
+  def isTimestampNTZEnabled(): Boolean = {
+    inferTimestampNTZ
+  }
 
   /**
    * Converts Parquet [[MessageType]] `parquetSchema` to a Spark SQL [[StructType]].
