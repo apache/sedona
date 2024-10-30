@@ -746,7 +746,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val df = sparkSession
         .createDataFrame(sparkSession.sparkContext.parallelize(data), schema)
         .withColumn("geom", expr("ST_Point(id, id)"))
-      df.write.format("geoparquet").save(geoparquetoutputlocation)
+      df.write.format("geoparquet").mode("overwrite").save(geoparquetoutputlocation)
 
       // Read it back
       val df2 =
