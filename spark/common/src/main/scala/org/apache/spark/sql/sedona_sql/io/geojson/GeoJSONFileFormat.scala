@@ -151,8 +151,8 @@ class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
         allowArrayAsStructs = true)
       val dataSource = JsonDataSource(parsedOptions)
 
-      dataSource
-        .readFile(broadcastedHadoopConf.value.value, file, parser, actualSchema)
+      SparkCompatUtil
+        .readFile(dataSource, broadcastedHadoopConf.value.value, file, parser, actualSchema)
         .map(row => {
           val newRow = GeoJSONUtils.convertGeoJsonToGeometry(row, alteredSchema)
           newRow

@@ -18,10 +18,14 @@
  */
 package org.apache.spark.sql.sedona_sql.io.geojson
 
+import org.apache.hadoop.conf.Configuration
+import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.analysis.Resolver
 import org.apache.spark.sql.catalyst.json.{JSONOptions, JacksonParser}
 import org.apache.spark.sql.catalyst.util.{DateFormatter, TimestampFormatter}
 import org.apache.spark.sql.catalyst.util.LegacyDateFormats.LegacyDateFormat
+import org.apache.spark.sql.execution.datasources.PartitionedFile
+import org.apache.spark.sql.execution.datasources.json.JsonDataSource
 import org.apache.spark.sql.types.{DataType, StructField, StructType}
 
 import scala.reflect.runtime.{universe => ru}
@@ -155,6 +159,45 @@ object SparkCompatUtil {
               .asInstanceOf[JacksonParser]
           case None =>
             throw new Exception("No suitable constructor found in JacksonParser")
+        }
+    }
+  }
+
+  def readFile(
+      jsonDataSource: JsonDataSource,
+      conf: Configuration,
+      file: PartitionedFile,
+      parser: JacksonParser,
+      schema: StructType): Iterator[InternalRow] = {
+    val readFileMethods =
+      jsonDataSource.getClass.getDeclaredMethods.filter(_.getName == "readFile")
+    // Get the number of input arguments of the readFile method
+    readFileMethods.find(_.getParameterCount == 4) match {
+      case Some(readFileMethod) =>
+        // The readFile method defined by open-source Apache Spark:
+        // def readFile(
+        //    conf: Configuration,
+        //    file: PartitionedFile,
+        //    parser: JacksonParser,
+        //    schema: StructType): Iterator[InternalRow]
+        readFileMethod
+          .invoke(jsonDataSource, conf, file, parser, schema)
+          .asInstanceOf[Iterator[InternalRow]]
+      case None =>
+        readFileMethods.find(_.getParameterCount == 5) match {
+          case Some(readFileMethod) =>
+            // The readFile method defined by DBR:
+            // def readFile(
+            //    conf: Configuration,
+            //    file: PartitionedFile,
+            //    parser: JacksonParser,
+            //    schema: StructType,
+            //    badRecordsWriter: Option[BadRecordsWriter]): Iterator[InternalRow]
+            readFileMethod
+              .invoke(jsonDataSource, conf, file, parser, schema, None)
+              .asInstanceOf[Iterator[InternalRow]]
+          case None =>
+            throw new Exception("No suitable readFile method found in JsonDataSource")
         }
     }
   }
