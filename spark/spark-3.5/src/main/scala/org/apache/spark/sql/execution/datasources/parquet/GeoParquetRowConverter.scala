@@ -318,15 +318,17 @@ private[parquet] class GeoParquetRowConverter(
         }
 
       case TimestampNTZType
-        if canReadAsTimestampNTZ(parquetType) &&
-          parquetType.getLogicalTypeAnnotation
-            .asInstanceOf[TimestampLogicalTypeAnnotation].getUnit == TimeUnit.MICROS =>
+          if canReadAsTimestampNTZ(parquetType) &&
+            parquetType.getLogicalTypeAnnotation
+              .asInstanceOf[TimestampLogicalTypeAnnotation]
+              .getUnit == TimeUnit.MICROS =>
         new ParquetPrimitiveConverter(updater)
 
       case TimestampNTZType
-        if canReadAsTimestampNTZ(parquetType) &&
-          parquetType.getLogicalTypeAnnotation
-            .asInstanceOf[TimestampLogicalTypeAnnotation].getUnit == TimeUnit.MILLIS =>
+          if canReadAsTimestampNTZ(parquetType) &&
+            parquetType.getLogicalTypeAnnotation
+              .asInstanceOf[TimestampLogicalTypeAnnotation]
+              .getUnit == TimeUnit.MILLIS =>
         new ParquetPrimitiveConverter(updater) {
           override def addLong(value: Long): Unit = {
             val micros = DateTimeUtils.millisToMicros(value)
@@ -409,7 +411,8 @@ private[parquet] class GeoParquetRowConverter(
       parquetType.asPrimitiveType().getPrimitiveTypeName == INT64 &&
       parquetType.getLogicalTypeAnnotation.isInstanceOf[TimestampLogicalTypeAnnotation] &&
       !parquetType.getLogicalTypeAnnotation
-        .asInstanceOf[TimestampLogicalTypeAnnotation].isAdjustedToUTC
+        .asInstanceOf[TimestampLogicalTypeAnnotation]
+        .isAdjustedToUTC
 
   /**
    * Parquet converter for strings. A dictionary is used to minimize string decoding cost.

@@ -738,23 +738,22 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
   describe("Spark types tests") {
     it("should support timestamp_ntz") {
       // Write geoparquet files with a TimestampNTZ column
-      val schema = StructType(Seq(
-        StructField("id", IntegerType, nullable = false),
-        StructField("timestamp_ntz", TimestampNTZType, nullable = false)
-      ))
+      val schema = StructType(
+        Seq(
+          StructField("id", IntegerType, nullable = false),
+          StructField("timestamp_ntz", TimestampNTZType, nullable = false)))
       val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
       val data = Seq(
         Row(1, LocalDateTime.parse("2024-10-04 12:34:56", formatter)),
-        Row(2, LocalDateTime.parse("2024-10-04 15:30:00", formatter))
-      )
-      val df = sparkSession.createDataFrame(
-        sparkSession.sparkContext.parallelize(data),
-        schema
-      ).withColumn("geom", expr("ST_Point(id, id)"))
+        Row(2, LocalDateTime.parse("2024-10-04 15:30:00", formatter)))
+      val df = sparkSession
+        .createDataFrame(sparkSession.sparkContext.parallelize(data), schema)
+        .withColumn("geom", expr("ST_Point(id, id)"))
       df.write.format("geoparquet").save(geoparquetoutputlocation)
 
       // Read it back
-      val df2 = sparkSession.read.format("geoparquet").load(geoparquetoutputlocation).sort(col("id"))
+      val df2 =
+        sparkSession.read.format("geoparquet").load(geoparquetoutputlocation).sort(col("id"))
       assert(df2.schema.fields(1).dataType == TimestampNTZType)
       val data1 = df.sort(col("id")).collect()
       val data2 = df2.collect()
