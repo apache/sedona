@@ -2,7 +2,7 @@ This tutorial will guide you through the process of installing Sedona on Azure S
 
 ## Before you begin
 
-This tutorial focuses on getting you up and running Sedona 1.6.1 on Spark 3.4 Python 3.10
+This tutorial focuses on getting you up and running with Sedona 1.6.1 on Spark 3.4 Python 3.10
 
 If you want to run newer version, you will need to dive into the detailed build and diagnose process detailed in lower part of this document.
 
@@ -79,16 +79,16 @@ If you see the output of the point, then the installation is successful. Are you
 ## Packages for Sedona 1.6.0 on Spark 3.4 Python 10
 
 ```
-spark-xml_2.12-0.17.0.jar	
-sedona-spark-shaded-3.4_2.12-1.6.0.jar	
+spark-xml_2.12-0.17.0.jar
+sedona-spark-shaded-3.4_2.12-1.6.0.jar
 
-click_plugins-1.1.1-py2.py3-none-any.whl	
-affine-2.4.0-py3-none-any.whl	
-apache_sedona-1.6.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl	
-cligj-0.7.2-py3-none-any.whl	
-rasterio-1.3.10-cp310-cp310-manylinux2014_x86_64.whl	
-shapely-2.0.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl	
-snuggs-1.4.7-py3-none-any.whl	
+click_plugins-1.1.1-py2.py3-none-any.whl
+affine-2.4.0-py3-none-any.whl
+apache_sedona-1.6.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+cligj-0.7.2-py3-none-any.whl
+rasterio-1.3.10-cp310-cp310-manylinux2014_x86_64.whl
+shapely-2.0.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+snuggs-1.4.7-py3-none-any.whl
 geotools-wrapper-1.6.0-28.2.jar
 ```
 
