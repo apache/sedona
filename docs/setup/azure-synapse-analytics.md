@@ -39,8 +39,7 @@ From PyPi
 
 - [numpy-2.1.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl](https://files.pythonhosted.org/packages/fb/25/ba023652a39a2c127200e85aed975fc6119b421e2c348e5d0171e2046edb/numpy-2.1.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl)
 
-
-### Step 2: Upload packages to Synapse Workspace 
+### Step 2: Upload packages to Synapse Workspace
 
 https://learn.microsoft.com/en-us/azure/synapse-analytics/spark/apache-spark-manage-workspace-packages
 
@@ -49,7 +48,6 @@ https://learn.microsoft.com/en-us/azure/synapse-analytics/spark/apache-spark-man
 This tutorial used the second method on this page: **If you are updating from the Synapse Studio**
 
 https://learn.microsoft.com/en-us/azure/synapse-analytics/spark/apache-spark-manage-pool-packages#manage-packages-from-synapse-studio-or-azure-portal
-
 
 ### Step 4: Notebook
 
@@ -120,7 +118,6 @@ Important settings if using Hyper-V
 - Cores 2
 - Disable Dynamic Memory (fix at 8Gb), forgetting this setting causes havoc.
 
-
 ### Step 4: patch the VM
 
 Connect the VM. Note: it will take longer to first boot than you'd expect
@@ -155,7 +152,6 @@ Identify the ip of the VM (I'm using Hyper-V on windows 10 desktop)
 Get-VMNetworkAdapter -VMName "Synapse Spark 3.4 Python 3.10 Sedona 1.6.1" | Select-Object -ExpandProperty IPAddresses
 ```
 
-
 ### Step 6: install Miniconda
 
 ```bash
@@ -176,7 +172,7 @@ sudo tdnf -y install gcc g++
 Download the virtual env spec
 
 ```bash
-wget -O Synapse-Python310-CPU.yml https://raw.githubusercontent.com/microsoft/synapse-spark-runtime/refs/heads/main/Synapse/spark3.4/Synapse-Python310-CPU.yml source 
+wget -O Synapse-Python310-CPU.yml https://raw.githubusercontent.com/microsoft/synapse-spark-runtime/refs/heads/main/Synapse/spark3.4/Synapse-Python310-CPU.yml source
 ```
 
 ```bash
