@@ -4,7 +4,7 @@ This tutorial will guide you through the process of installing Sedona on Azure S
 
 This tutorial focuses on getting you up and running with Sedona 1.6.1 on Spark 3.4 Python 3.10
 
-If you want to run newer version, you will need to dive into the detailed build and diagnose process detailed in lower part of this document.
+If you want to run newer version, you will need to dive into the detailed build and diagnose process detailed in the lower part of this document.
 
 ## Strong recommendations
 
