@@ -61,7 +61,7 @@ from sedona.spark import SedonaContext
 config = SedonaContext.builder() \
     .config("spark.serializer","org.apache.spark.serializer.KryoSerializer") \
     .config("spark.kryo.registrator", "org.apache.sedona.core.serde.SedonaKryoRegistrator") \
-    .config("spark.sql.extensions", "org.apache.sedona.viz.sql.SedonaVizExtensions") \
+    .config("spark.sql.extensions", "org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions") \
     .getOrCreate()
 
 sedona = SedonaContext.create(config)
