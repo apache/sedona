@@ -96,9 +96,9 @@ geotools-wrapper-1.6.0-28.2.jar
 
 Warning: this process is going to require some tenacious technical skills and troubleshooting.
 
-Broad steps: build a linux VM from the same image as the deployed Spark Pool, configure for Synapse, install Sedona packages, idenitify required packages over and above baseline Synapse config.
+Broad steps: build a linux VM from the same image as the deployed Spark Pool, configure for Synapse, install Sedona packages, identify required packages over and above baseline Synapse config.
 
-This is the process for Sedona 1.6.1 on Spark 3.4 Python 3.10. (I previsouly also had success with 1.6.0)
+This is the process for Sedona 1.6.1 on Spark 3.4 Python 3.10. (The same process was used for Sedona 1.6.0)
 
 ### Step 1: Identify the Linux image of the Spark Pool by version
 
