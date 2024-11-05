@@ -10,15 +10,22 @@ repos:
     hooks:
       - id: identity
       - id: check-hooks-apply
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.5
+    hooks:
+      - id: insert-license
+        name: Add license for all TOML files
+        files: \.toml$
+        args:
+          - --comment-style
+          - "|#|"
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
   - repo: https://github.com/psf/black-pre-commit-mirror
     rev: 24.10.0
     hooks:
       - id: black-jupyter
-  # - repo: https://github.com/pycqa/isort
-  #   rev: 5.13.2
-  #   hooks:
-  #     - id: isort
-  #       name: isort (python)
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v19.1.1
     hooks:

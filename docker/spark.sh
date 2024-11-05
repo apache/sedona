@@ -19,10 +19,9 @@ set -e
 
 # Define variables
 spark_version=$1
-hadoop_version=$2
-hadoop_s3_version=$3
-aws_sdk_version=$4
-spark_xml_version=$5
+hadoop_s3_version=$2
+aws_sdk_version=$3
+spark_xml_version=$4
 
 # Set up OS libraries
 apt-get update
@@ -30,9 +29,6 @@ apt-get install -y openjdk-19-jdk-headless curl python3-pip maven
 pip3 install --upgrade pip && pip3 install pipenv
 
 # Download Spark jar and set up PySpark
-curl https://archive.apache.org/dist/spark/spark-"${spark_version}"/spark-"${spark_version}"-bin-hadoop"${hadoop_version}".tgz -o spark.tgz
-tar -xf spark.tgz && mv spark-"${spark_version}"-bin-hadoop"${hadoop_version}"/* "${SPARK_HOME}"/
-rm spark.tgz && rm -rf spark-"${spark_version}"-bin-hadoop"${hadoop_version}"
 pip3 install pyspark=="${spark_version}"
 
 # Add S3 jars
@@ -41,9 +37,6 @@ curl https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/"${aws_sdk
 
 # Add spark-xml jar
 curl https://repo1.maven.org/maven2/com/databricks/spark-xml_2.12/"${spark_xml_version}"/spark-xml_2.12-"${spark_xml_version}".jar -o "${SPARK_HOME}"/jars/spark-xml_2.12-"${spark_xml_version}".jar
-
-# Set up master IP address and executor memory
-cp "${SPARK_HOME}"/conf/spark-defaults.conf.template "${SPARK_HOME}"/conf/spark-defaults.conf
 
 # Install required libraries for GeoPandas on Apple chip mac
 apt-get install -y gdal-bin libgdal-dev
