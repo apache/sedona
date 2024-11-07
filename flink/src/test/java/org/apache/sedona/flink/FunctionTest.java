@@ -765,6 +765,16 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testPerimeter() {
+    Table pointTable = createPolygonTable(testDataSize);
+    Table perimeterTable =
+        pointTable.select(
+            call(Functions.ST_Perimeter.class.getSimpleName(), $(polygonColNames[0])));
+    Double perimeter = (Double) first(perimeterTable).getField(0);
+    assertEquals(4.0, perimeter, FP_TOLERANCE);
+  }
+
+  @Test
   public void testPointOnSurface() {
     Table pointTable = createPointTable_real(testDataSize);
     Table surfaceTable =

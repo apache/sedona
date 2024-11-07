@@ -358,6 +358,9 @@ object st_functions extends DataFrameAPI {
   def ST_MakeLine(geom1: String, geom2: String): Column =
     wrapExpression[ST_MakeLine](geom1, geom2)
 
+  def ST_Perimeter(geom: Column): Column = wrapExpression[ST_Perimeter](geom)
+  def ST_Perimeter(geom: String): Column = wrapExpression[ST_Perimeter](geom)
+
   def ST_Points(geom: Column): Column = wrapExpression[ST_Points](geom)
   def ST_Points(geom: String): Column = wrapExpression[ST_Points](geom)
 

@@ -1169,6 +1169,15 @@ def ST_MakeLine(geom1: ColumnOrName, geom2: Optional[ColumnOrName] = None) -> Co
     args = (geom1,) if geom2 is None else (geom1, geom2)
     return _call_st_function("ST_MakeLine", args)
 
+@validate_argument_types
+def ST_Perimeter(geom: ColumnOrName) -> Column:
+    """ Returns the perimeter of a Polygon/MultiPolygon geometries. Otherwise, returns 0
+
+    @param geom: Polygonal geometry
+    @return: Perimeter of a Polygon/MultiPolygon geometries
+    """
+    return _call_st_function("ST_Perimeter", geom)
+
 
 @validate_argument_types
 def ST_Points(geometry: ColumnOrName) -> Column:

@@ -942,6 +942,14 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"},
+      returnTypes = "double")
+  public static double ST_Perimeter(String geometry) {
+    return Functions.perimeter(GeometrySerde.deserGeoJson(geometry));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry"},
+      argTypes = {"Geometry"},
       returnTypes = "Geometry")
   public static String ST_PointOnSurface(String geometry) {
     return GeometrySerde.serGeoJson(Functions.pointOnSurface(GeometrySerde.deserGeoJson(geometry)));

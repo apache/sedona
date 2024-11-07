@@ -66,6 +66,8 @@ import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.locationtech.jts.simplify.VWSimplifier;
 import org.locationtech.jts.triangulate.DelaunayTriangulationBuilder;
 import org.locationtech.jts.triangulate.polygon.ConstrainedDelaunayTriangulator;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 import org.wololo.geojson.Feature;
 import org.wololo.geojson.FeatureCollection;
 import org.wololo.jts2geojson.GeoJSONWriter;
@@ -1092,6 +1094,47 @@ public class Functions {
     LengthIndexedLine indexedLine = new LengthIndexedLine(geom);
     Coordinate interPoint = indexedLine.extractPoint(length * fraction);
     return geom.getFactory().createPoint(interPoint);
+  }
+
+  public static double perimeter(Geometry geometry, boolean use_spheroid, boolean lenient) {
+    if (use_spheroid && geometry.getSRID() != 4326) {
+      if (lenient) {
+        return 0;
+      } else {
+        throw new IllegalArgumentException("For spheroidal perimeter calculations, the input geometry must be in the WGS84 CRS (SRID 4326).");
+      }
+    }
+
+    String geomType = geometry.getGeometryType();
+    if (geomType.equalsIgnoreCase(Geometry.TYPENAME_POLYGON)) {
+      return calculateLength(geometry, use_spheroid);
+    } else if (geomType.equalsIgnoreCase(Geometry.TYPENAME_MULTIPOLYGON)) {
+      return calculateLength(geometry, use_spheroid);
+    } else if (geomType.equalsIgnoreCase(Geometry.TYPENAME_GEOMETRYCOLLECTION)) {
+      double perimeter = 0;
+      for (int i = 0; i < geometry.getNumGeometries(); i++) {
+        perimeter += perimeter(geometry.getGeometryN(i), use_spheroid, lenient);
+      }
+      return perimeter;
+    } else {
+      return 0;
+    }
+  }
+
+  private static double calculateLength(Geometry geometry, boolean use_spheroid) {
+    if (use_spheroid) {
+      return Spheroid.length(geometry);
+    } else {
+      return length(geometry);
+    }
+  }
+
+  public static double perimeter(Geometry geometry, boolean use_spheroid) {
+    return perimeter(geometry, use_spheroid, true);
+  }
+
+  public static double perimeter(Geometry geometry) {
+    return perimeter(geometry, false);
   }
 
   /**

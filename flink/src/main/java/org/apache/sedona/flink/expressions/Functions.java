@@ -568,6 +568,16 @@ public class Functions {
     }
   }
 
+  public static class ST_Perimeter extends ScalarFunction {
+    @DataTypeHint(value = "Double")
+    public Double eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.perimeter(geom);
+    }
+  }
+
   public static class ST_PointOnSurface extends ScalarFunction {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(

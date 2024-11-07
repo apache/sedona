@@ -731,6 +731,13 @@ test_configurations = [
     ),
     (stf.ST_MaxDistance, ("a", "b"), "overlapping_polys", "", 3.1622776601683795),
     (
+        stf.ST_Perimeter,
+        ("geom",),
+        "triangle_geom",
+        "",
+        3.414213562373095
+    ),
+    (
         stf.ST_Points,
         ("line",),
         "linestring_geom",

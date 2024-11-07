@@ -3103,6 +3103,26 @@ Output:
 3
 ```
 
+## ST_Perimeter
+
+Introduction:
+
+Format: `ST_Perimeter(geom: Geometry)`
+
+Since: `v1.7.0`
+
+SQL Example:
+
+```sql
+
+```
+
+Output:
+
+```
+
+```
+
 ## ST_PointN
 
 Introduction: Return the Nth point in a single linestring or circular linestring in the geometry. Negative values are counted backwards from the end of the LineString, so that -1 is the last point. Returns NULL if there is no linestring in the geometry.

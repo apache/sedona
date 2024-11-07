@@ -808,6 +808,11 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+  public static double ST_Perimeter(byte[] geometry) {
+    return Functions.perimeter(GeometrySerde.deserialize(geometry));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static byte[] ST_PointOnSurface(byte[] geometry) {
     return GeometrySerde.serialize(Functions.pointOnSurface(GeometrySerde.deserialize(geometry)));
   }

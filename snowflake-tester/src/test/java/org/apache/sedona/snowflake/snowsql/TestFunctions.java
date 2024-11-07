@@ -770,6 +770,14 @@ public class TestFunctions extends TestBase {
   }
 
   @Test
+  public void test_ST_Perimeter() {
+    registerUDF("ST_Perimeter", byte[].class);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_Perimeter(sedona.ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))'))",
+        20.0);
+  }
+
+  @Test
   public void test_ST_PointOnSurface() {
     registerUDF("ST_PointOnSurface", byte[].class);
     verifySqlSingleRes(

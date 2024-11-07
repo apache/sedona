@@ -1101,6 +1101,57 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void testPerimeter() throws ParseException {
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "MULTIPOLYGON(((763104.471273676 2949418.44119003,763104.477769673 2949418.42538203,763104.189609677 2949418.22343004,763104.471273676 2949418.44119003)),((763104.471273676 2949418.44119003,763095.804579742 2949436.33850239,763086.132105649 2949451.46730207,763078.452329651 2949462.11549407,763075.354136904 2949466.17407812,763064.362142565 2949477.64291974,763059.953961626 2949481.28983009,762994.637609571 2949532.04103014,762990.568508415 2949535.06640477,762986.710889563 2949539.61421415,763117.237897679 2949709.50493431,763235.236617789 2949617.95619822,763287.718121842 2949562.20592617,763111.553321674 2949423.91664605,763104.471273676 2949418.44119003)))",
+            2249);
+    double actual = Functions.perimeter(geom);
+    double expected = 845.227713366824;
+    assertEquals(expected, actual, FP_TOLERANCE);
+
+    geom =
+        Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION (POLYGON ((0 0, 1 0, 1 1, 0.5 1.5, 0 1, 0 0)), MULTIPOLYGON (((2 2, 2 3, 3 3, 3 2, 2 2)), ((4 4, 4 5, 5 5, 5 4, 4 4), (4.2 4.2, 4.8 4.2, 4.8 4.8, 4.2 4.8, 4.2 4.2))))",
+            0);
+    actual = Functions.perimeter(geom);
+    expected = 14.814213562373094;
+    assertEquals(expected, actual, FP_TOLERANCE);
+
+    geom = Constructors.geomFromWKT("LINESTRING (0 0, 100 100)", 0);
+    actual = Functions.perimeter(geom);
+    expected = 0;
+    assertEquals(expected, actual, FP_TOLERANCE);
+
+    geom =
+        Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION(LINESTRING (6 6, 7 7, 8 6), POINT (9 9), POINT (10 10))", 0);
+    actual = Functions.perimeter(geom);
+    expected = 0;
+    assertEquals(expected, actual, FP_TOLERANCE);
+  }
+
+  @Test
+  public void testPerimeterSpherical() throws ParseException {
+    Geometry geom =
+            Constructors.geomFromWKT(
+                    "MULTIPOLYGON (((-122.33 47.61, -122.32 47.62, -122.31 47.61, -122.30 47.62, -122.29 47.61, -122.30 47.60, -122.31 47.59, -122.32 47.60, -122.33 47.61), (-122.315 47.605, -122.305 47.615, -122.295 47.605, -122.305 47.595, -122.315 47.605)), ((-122.35 47.65, -122.34 47.66, -122.33 47.65, -122.32 47.66, -122.31 47.65, -122.32 47.64, -122.33 47.63, -122.34 47.64, -122.35 47.65)))",
+                    4326);
+    double actual = Functions.perimeter(geom, true, false);
+    double expected = 28099.014566508205;
+//    System.out.println(actual);
+//    assertEquals(expected, actual, FP_TOLERANCE);
+
+    geom = Constructors.geomFromWKT("POLYGON((-122.33 47.61, -122.32 47.62, -122.31 47.61, -122.30 47.62, -122.29 47.61, -122.30 47.60, -122.31 47.59, -122.32 47.60, -122.33 47.61), (-122.315 47.605, -122.305 47.615, -122.295 47.605, -122.305 47.595, -122.315 47.605))", 4326);
+    actual = Functions.perimeter(geom, true, false);
+    System.out.println(actual);
+
+    geom = Constructors.geomFromWKT("POLYGON((-122.33 47.61, -122.32 47.62, -122.31 47.61, -122.30 47.62, -122.29 47.61, -122.30 47.60, -122.31 47.59, -122.32 47.60, -122.33 47.61))", 4326);
+    actual = Functions.perimeter(geom, true, false);
+//    System.out.println(actual);
+  }
+
+  @Test
   public void testForcePolygonCW() throws ParseException {
     Geometry polyCCW =
         Constructors.geomFromWKT(

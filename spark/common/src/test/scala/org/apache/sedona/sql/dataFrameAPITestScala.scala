@@ -760,6 +760,14 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult.toText() == expectedResult)
     }
 
+    it("Passed ST_Perimeter") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON((743238 2967416,743238 2967450,743265 2967450,743265.625 2967416,743238 2967416))') AS geom")
+      val actual = baseDf.select(ST_Perimeter("geom")).first().get(0)
+      val expected = 122.63074400009504
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_Project") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POINT(0 0)') as point, ST_MakeEnvelope(0, 1, 2, 0) as poly")
