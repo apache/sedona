@@ -34,8 +34,8 @@ Join the Sedona monthly community office hour: [Google Calendar](https://calenda
 
 ## What is Apache Sedona?
 
-Apache Sedona™ is a spatial computing engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as [Apache Spark](https://spark.apache.org/) and [Apache Flink](https://flink.apache.org/).
-Sedona developers can express their spatial data processing tasks in [Spatial SQL](https://carto.com/spatial-sql), Spatial Python or Spatial R. Internally, Sedona provides spatial data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
+Apache Sedona™ is a [spatial computing](https://en.wikipedia.org/wiki/Spatial_computing) engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as [Apache Spark](https://spark.apache.org/) and [Apache Flink](https://flink.apache.org/).
+Sedona developers can express their spatial data processing tasks in [Spatial SQL](https://carto.com/spatial-sql), [Spatial Python](https://docs.scipy.org/doc/scipy/reference/spatial.html) or [Spatial R](https://r-spatial.org/). Internally, Sedona provides spatial data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
 
 ![Sedona Ecosystem](docs/image/sedona-ecosystem.png "Sedona Ecosystem")
 
