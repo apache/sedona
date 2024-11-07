@@ -65,7 +65,7 @@ jobs:
           fi
       - run: mkdir staging
       - run: cp -r site/* staging/
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: generated-docs
           path: staging
