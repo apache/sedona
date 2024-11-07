@@ -1614,30 +1614,36 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void spheroidLength() {
+  public void spheroidLength() throws ParseException {
     Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
-    assertEquals(0, Spheroid.length(point), 0.1);
+    assertEquals(0, Spheroid.length(point), FP_TOLERANCE2);
 
     LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 90, 0));
-    assertEquals(1.0018754171394622E7, Spheroid.length(line), 0.1);
+    assertEquals(1.0018754171394622E7, Spheroid.length(line), FP_TOLERANCE2);
 
     Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 90, 0, 0, 0));
-    assertEquals(2.0037508342789244E7, Spheroid.length(polygon), 0.1);
+    assertEquals(2.0037508342789244E7, Spheroid.length(polygon), FP_TOLERANCE2);
 
     MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPoint(new Point[] {point, point});
-    assertEquals(0, Spheroid.length(multiPoint), 0.1);
+    assertEquals(0, Spheroid.length(multiPoint), FP_TOLERANCE2);
 
     MultiLineString multiLineString =
         GEOMETRY_FACTORY.createMultiLineString(new LineString[] {line, line});
-    assertEquals(2.0037508342789244E7, Spheroid.length(multiLineString), 0.1);
+    assertEquals(2.0037508342789244E7, Spheroid.length(multiLineString), FP_TOLERANCE2);
 
     MultiPolygon multiPolygon =
         GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon, polygon});
-    assertEquals(4.007501668557849E7, Spheroid.length(multiPolygon), 0.1);
+    assertEquals(4.007501668557849E7, Spheroid.length(multiPolygon), FP_TOLERANCE2);
 
     GeometryCollection geometryCollection =
         GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point, line, multiLineString});
-    assertEquals(3.0056262514183864E7, Spheroid.length(geometryCollection), 0.1);
+    assertEquals(3.0056262514183864E7, Spheroid.length(geometryCollection), FP_TOLERANCE2);
+
+    Geometry polygonWithHole =
+        Constructors.geomFromWKT(
+            "POLYGON((-122.33 47.61, -122.32 47.62, -122.31 47.61, -122.30 47.62, -122.29 47.61, -122.30 47.60, -122.31 47.59, -122.32 47.60, -122.33 47.61), (-122.315 47.605, -122.305 47.615, -122.295 47.605, -122.305 47.595, -122.315 47.605))",
+            4326);
+    assertEquals(16106.506409488933, Spheroid.length(polygonWithHole), FP_TOLERANCE2);
   }
 
   @Test
