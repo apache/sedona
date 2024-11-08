@@ -80,7 +80,8 @@ public class Spheroid {
    */
   public static double length(Geometry geom) {
     String geomType = geom.getGeometryType();
-    if (geomType.equals(Geometry.TYPENAME_LINEARRING) || geomType.equals(Geometry.TYPENAME_LINESTRING)) {
+    if (geomType.equals(Geometry.TYPENAME_LINEARRING)
+        || geomType.equals(Geometry.TYPENAME_LINESTRING)) {
       PolygonArea p = new PolygonArea(Geodesic.WGS84, true);
       Coordinate[] coordinates = geom.getCoordinates();
       for (int i = 0; i < coordinates.length; i++) {

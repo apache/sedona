@@ -34,7 +34,8 @@ Join the Sedona monthly community office hour: [Google Calendar](https://calenda
 
 ## What is Apache Sedona?
 
-Apache Sedona™ is a spatial computing engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as Apache Spark and Apache Flink. Sedona developers can express their spatial data processing tasks in Spatial SQL, Spatial Python or Spatial R. Internally, Sedona provides spatial data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
+Apache Sedona™ is a [spatial computing](https://en.wikipedia.org/wiki/Spatial_computing) engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as [Apache Spark](https://spark.apache.org/) and [Apache Flink](https://flink.apache.org/).
+Sedona developers can express their spatial data processing tasks in [Spatial SQL](https://carto.com/spatial-sql), [Spatial Python](https://docs.scipy.org/doc/scipy/reference/spatial.html) or [Spatial R](https://r-spatial.org/). Internally, Sedona provides spatial data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
 
 ![Sedona Ecosystem](docs/image/sedona-ecosystem.png "Sedona Ecosystem")
 
@@ -42,17 +43,17 @@ Apache Sedona™ is a spatial computing engine that enables developers to easily
 
 Some of the key features of Apache Sedona include:
 
-* Support for a wide range of geospatial data formats, including GeoJSON, WKT, and ESRI Shapefile.
+* Support for a wide range of geospatial data formats, including [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON), [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry), and [ESRI](https://www.esri.com) [Shapefile](https://en.wikipedia.org/wiki/Shapefile).
 * Scalable distributed processing of large vector and raster datasets.
 * Tools for spatial indexing, spatial querying, and spatial join operations.
-* Integration with popular geospatial python tools such as GeoPandas.
-* Integration with popular big data tools, such as Spark, Hadoop, Hive, and Flink for data storage and querying.
-* A user-friendly API for working with geospatial data in the SQL, Python, Scala and Java languages.
+* Integration with popular geospatial Python tools such as [GeoPandas](https://geopandas.org).
+* Integration with popular big data tools, such as Spark, [Hadoop](https://hadoop.apache.org/), [Hive](https://hive.apache.org/), and Flink for data storage and querying.
+* A user-friendly API for working with geospatial data in the [SQL](https://en.wikipedia.org/wiki/SQL), [Python](https://www.python.org/), [Scala](https://www.scala-lang.org/) and [Java](https://www.java.com) languages.
 * Flexible deployment options, including standalone, local, and cluster modes.
 
 These are some of the key features of Apache Sedona, but it may offer additional capabilities depending on the specific version and configuration.
 
-Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=docs/usecases) and play the interactive Sedona Python Jupyter Notebook immediately!
+Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=docs/usecases) and play the interactive Sedona Python [Jupyter](https://jupyter.org/) Notebook immediately!
 
 ## When to use Sedona?
 
@@ -150,5 +151,6 @@ Please visit [Apache Sedona website](http://sedona.apache.org/) for detailed inf
 ## Powered by
 
 <a href="https://www.apache.org/">
-  <img alt="The Apache Software Foundation" src="https://www.apache.org/foundation/press/kit/asf_logo_wide.png" width="500" class="center">
+  <img alt="The Apache Software Foundation" class="center" src="https://www.apache.org/foundation/press/kit/asf_logo_wide.png"
+    title="The Apache Software Foundation" width="500">
 </a>
