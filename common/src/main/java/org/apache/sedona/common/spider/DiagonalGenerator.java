@@ -45,6 +45,12 @@ public class DiagonalGenerator extends PointBasedGenerator {
       PointBasedParameter pointBasedParameter = PointBasedParameter.create(conf);
       double percentage = Double.parseDouble(conf.getOrDefault("percentage", "0.5"));
       double buffer = Double.parseDouble(conf.getOrDefault("buffer", "0.5"));
+      if (percentage < 0 || percentage > 1) {
+        throw new IllegalArgumentException("Percentage must be between 0 and 1");
+      }
+      if (buffer < 0) {
+        throw new IllegalArgumentException("Buffer must be a non-negative number");
+      }
       return new DiagonalParameter(pointBasedParameter, percentage, buffer);
     }
   }
