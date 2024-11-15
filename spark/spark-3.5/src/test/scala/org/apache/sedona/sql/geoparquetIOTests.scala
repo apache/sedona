@@ -762,7 +762,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
   }
 
   describe("loading one file geoparquet and filtering") {
-    it("filtering one file geoparquet") {
+    it("should not fail when bbox is not available in geoparquet metadata") {
       val numberOfRecords = sparkSession.read
         .format("geoparquet")
         .load(overtureBBOX)
