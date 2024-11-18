@@ -2377,4 +2377,57 @@ public class Functions {
     AffineTransformation rotation = AffineTransformation.rotationInstance(angle, originX, originY);
     return rotation.transform(geometry);
   }
+
+  /**
+   * This function returns the m coordinate of the closest point in a LineString to a Point. If the
+   * LineString does not have M values, it will interpolate the M value.
+   *
+   * @param geom1 The LineString (with or without M values) to be evaluated.
+   * @param geom2 The Point object to find the closest point to.
+   * @return The interpolated M value of the closest point on the LineString.
+   */
+  public static double interpolatePoint(Geometry geom1, Geometry geom2) {
+    if (!(Geometry.TYPENAME_LINESTRING.equalsIgnoreCase(geom1.getGeometryType()))) {
+      throw new IllegalArgumentException(
+          String.format(
+              "First argument is of type %s, should be a LineString.", geom1.getGeometryType()));
+    }
+    if (!(Geometry.TYPENAME_POINT.equalsIgnoreCase(geom2.getGeometryType()))) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Second argument is of type %s, should be a Point.", geom2.getGeometryType()));
+    }
+    if (Float.isNaN((float) geom1.getCoordinate().getM())) {
+      throw new IllegalArgumentException("The given linestring does not have a measure value.");
+    }
+
+    if (geom1.getSRID() != geom2.getSRID()) {
+      throw new IllegalArgumentException(
+          String.format(
+              "The Line has SRID %d and Point has SRID %d. The Line and Point should be in the same SRID.",
+              geom1.getSRID(), geom2.getSRID()));
+    }
+
+    LineString line = (LineString) geom1;
+    Point point = (Point) geom2;
+
+    // Find the closest point on the line to the input point
+    Coordinate closestPoint = DistanceOp.nearestPoints(line, point)[0];
+
+    // Use LengthIndexedLine to extract the index at the closest point
+    LengthIndexedLine indexedLine = new LengthIndexedLine(line);
+    double index = indexedLine.indexOf(closestPoint);
+
+    // Extract the point at that index and compute its length fraction
+    double totalLength = indexedLine.getEndIndex();
+    double fractionAlongLine = index / totalLength;
+
+    // Get the start and end coordinates of the line
+    Geometry start = line.getStartPoint();
+    Geometry end = line.getEndPoint();
+
+    // Interpolate the M value
+    return fractionAlongLine * (end.getCoordinate().getM() - start.getCoordinate().getM())
+        + start.getCoordinate().getM();
+  }
 }
