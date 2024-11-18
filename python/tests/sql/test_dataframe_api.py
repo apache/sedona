@@ -611,6 +611,7 @@ test_configurations = [
         "",
         "POLYGON ((2 0, 1 0, 1 1, 2 1, 2 0))",
     ),
+    (stf.ST_InterpolatePoint, ("linem", "point"), "linestringm_and_point", "", 1.0),
     (stf.ST_IsCollection, ("geom",), "geom_collection", "", True),
     (stf.ST_IsClosed, ("geom",), "closed_linestring_geom", "", True),
     (stf.ST_IsEmpty, ("geom",), "empty_geom", "", True),
@@ -1620,6 +1621,8 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql(
                 "SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION (LINESTRING (2 0, 2 1, 2 2), LINESTRING (2 2, 2 3, 2 4), LINESTRING (0 2, 1 2, 2 2), LINESTRING (2 2, 3 2, 4 2), LINESTRING (0 2, 1 3, 2 4), LINESTRING (2 4, 3 3, 4 2))') as geom"
             )
+        elif request.param == "linestringm_and_point":
+            return TestDataFrameAPI.spark.sql("SELECT ST_GeomFromWKT('LINESTRING M (0 0 0, 2 0 2, 4 0 4)') as linem, ST_GeomFromWKT('POINT (1 1)') as point")
         raise ValueError(f"Invalid base_df name passed: {request.param}")
 
     def _id_test_configuration(val):
