@@ -2068,4 +2068,15 @@ public class Functions {
       return org.apache.sedona.common.Functions.rotate(geom1, angle, originX, originY);
     }
   }
+
+  public static class ST_InterpolatePoint extends ScalarFunction {
+    @DataTypeHint("Double")
+    public double eval(
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object o1,
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object o2) {
+      Geometry geom1 = (Geometry) o1;
+      Geometry geom2 = (Geometry) o2;
+      return org.apache.sedona.common.Functions.interpolatePoint(geom1, geom2);
+    }
+  }
 }
