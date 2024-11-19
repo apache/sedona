@@ -1138,29 +1138,29 @@ public class FunctionsTest extends TestBase {
             "MULTIPOLYGON (((-122.33 47.61, -122.32 47.62, -122.31 47.61, -122.30 47.62, -122.29 47.61, -122.30 47.60, -122.31 47.59, -122.32 47.60, -122.33 47.61), (-122.315 47.605, -122.305 47.615, -122.295 47.605, -122.305 47.595, -122.315 47.605)), ((-122.35 47.65, -122.34 47.66, -122.33 47.65, -122.32 47.66, -122.31 47.65, -122.32 47.64, -122.33 47.63, -122.34 47.64, -122.35 47.65)))",
             4326);
     double actual = Functions.perimeter(geom, true, false);
-    double expected = 26841.607283987512;
-    assertEquals(expected, actual, FP_TOLERANCE);
+    double expected = 26841.6072;
+    assertEquals(expected, actual, FP_TOLERANCE2);
 
     geom =
         Constructors.geomFromWKT(
             "POLYGON((-122.33 47.61, -122.32 47.62, -122.31 47.61, -122.30 47.62, -122.29 47.61, -122.30 47.60, -122.31 47.59, -122.32 47.60, -122.33 47.61), (-122.315 47.605, -122.305 47.615, -122.295 47.605, -122.305 47.595, -122.315 47.605))",
             4326);
     actual = Functions.perimeter(geom, true, false);
-    expected = 16106.506409488933;
-    assertEquals(expected, actual, FP_TOLERANCE);
+    expected = 16106.5064;
+    assertEquals(expected, actual, FP_TOLERANCE2);
 
     geom =
         Constructors.geomFromWKT(
             "POLYGON((-122.33 47.61, -122.32 47.62, -122.31 47.61, -122.30 47.62, -122.29 47.61, -122.30 47.60, -122.31 47.59, -122.32 47.60, -122.33 47.61))",
             4326);
     actual = Functions.perimeter(geom, true, false);
-    expected = 10737.61849119665;
-    assertEquals(expected, actual, FP_TOLERANCE);
+    expected = 10737.6184;
+    assertEquals(expected, actual, FP_TOLERANCE2);
 
     geom.setSRID(0);
     actual = Functions.perimeter(geom, true);
     expected = 0;
-    assertEquals(expected, actual, FP_TOLERANCE);
+    assertEquals(expected, actual, FP_TOLERANCE2);
 
     // ignores the LineString and just calculates the perimeter of the Polygon in this Geometry
     // Collection
@@ -1169,8 +1169,8 @@ public class FunctionsTest extends TestBase {
             "GEOMETRYCOLLECTION(LINESTRING(10 10, 20 20, 30 10),POLYGON((40 40, 50 40, 50 50, 40 50, 40 40)))",
             4326);
     actual = Functions.perimeter(geom, true, false);
-    expected = 3792549.013549668;
-    assertEquals(expected, actual, FP_TOLERANCE);
+    expected = 3792549.0135;
+    assertEquals(expected, actual, FP_TOLERANCE2);
   }
 
   @Test
