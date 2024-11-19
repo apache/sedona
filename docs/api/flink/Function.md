@@ -2017,6 +2017,32 @@ Output:
 LINEARRING (1 1, 2 1, 2 2, 1 2, 1 1)
 ```
 
+## ST_InterpolatePoint
+
+Introduction: Returns the interpolated measure value of a linear measured LineString at the point closest to the specified point.
+
+!!!Note
+    Make sure that both geometries have the same SRID, otherwise the function will throw an IllegalArgumentException.
+
+Format: `ST_InterpolatePoint(linestringM: Geometry, point: Geometry)`
+
+Since: `v1.7.0`
+
+SQL Example
+
+```sql
+SELECT ST_InterpolatePoint(
+    ST_GeomFromWKT("LINESTRING M (0 0 0, 2 0 2, 4 0 4)"),
+    ST_GeomFromWKT("POINT (1 1)")
+    )
+```
+
+Output:
+
+```
+1.0
+```
+
 ## ST_Intersection
 
 Introduction: Return the intersection geometry of A and B

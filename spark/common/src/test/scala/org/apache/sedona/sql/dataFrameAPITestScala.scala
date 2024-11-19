@@ -2383,5 +2383,30 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(exception2.getMessage.contains("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
       assert(exception2.getMessage.contains("ST_MakeLine"))
     }
+
+    it("Passed ST_InterpolatePoint") {
+      val testData = Seq(
+        ("LINESTRING M (0 0 0, 2 0 2, 4 0 4)", "POINT(1 1)", 1.0),
+        ("LINESTRING M (0 0 0, -2 2 2, -4 4 4)", "POINT(-1 1)", 1.0),
+        ("LINESTRING M (0 0 0, 2 2 2, 4 0 4)", "POINT(2 0)", 1.0),
+        ("LINESTRING M (0 0 0, 2 2 2, 4 0 4)", "POINT(2.5 1)", 2.75)).toDF(
+        "lineEWKT",
+        "pointEWKT",
+        "expectedResult")
+
+      val geomDf = testData
+        .withColumn("line", ST_GeomFromEWKT(col("lineEWKT")))
+        .withColumn("point", ST_GeomFromEWKT(col("pointEWKT")))
+
+      geomDf
+        .withColumn("result", ST_InterpolatePoint(col("line"), col("point")))
+        .select("result", "expectedResult")
+        .collect()
+        .foreach { row =>
+          val actual = row.getAs[Double]("result")
+          val expected = row.getAs[Double]("expectedResult")
+          assert(actual == expected, s"Expected $expected but got $actual")
+        }
+    }
   }
 }

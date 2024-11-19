@@ -88,6 +88,7 @@ public class Catalog {
       new Functions.ST_DelaunayTriangles(),
       new Functions.ST_EndPoint(),
       new Functions.ST_GeometryType(),
+      new Functions.ST_InterpolatePoint(),
       new Functions.ST_Intersection(),
       new Functions.ST_Length(),
       new Functions.ST_Length2D(),

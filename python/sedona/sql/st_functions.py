@@ -2393,6 +2393,21 @@ def ST_Rotate(
     return _call_st_function("ST_Rotate", args)
 
 
+@validate_argument_types
+def ST_InterpolatePoint(geom1: ColumnOrName, geom2: ColumnOrName) -> Column:
+    """Returns the interpolated Measure value at the point on the given linestring M that is closest to the given point.
+
+    :param geom1: LineString M Geometry column or name.
+    :type geom1: ColumnOrName
+    :param geom2: Point Geometry column or name.
+    :type geom2: ColumnOrName
+    :rtype: Column
+    """
+
+    args = (geom1, geom2)
+    return _call_st_function("ST_InterpolatePoint", args)
+
+
 # Automatically populate __all__
 __all__ = [
     name

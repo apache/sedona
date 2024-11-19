@@ -4086,4 +4086,29 @@ public class FunctionsTest extends TestBase {
         "LINESTRING (0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0)",
         result);
   }
+
+  @Test
+  public void interpolatePoint() throws ParseException {
+    Geometry line = Constructors.geomFromEWKT("LINESTRING M (0 0 0, 2 0 2, 4 0 4)");
+    Geometry point = Constructors.geomFromEWKT("POINT(1 1)");
+
+    double actual = Functions.interpolatePoint(line, point);
+    double expected = 1.0;
+    assertEquals(expected, actual, 1e-6);
+
+    line = Constructors.geomFromEWKT("LINESTRING M (0 0 0, -2 2 2, -4 4 4)");
+    point = Constructors.geomFromEWKT("POINT(-1 1)");
+    actual = Functions.interpolatePoint(line, point);
+    assertEquals(expected, actual, 1e-6);
+
+    line = Constructors.geomFromEWKT("LINESTRING M (0 0 0, 2 2 2, 4 0 4)");
+    point = Constructors.geomFromEWKT("POINT(2 0)");
+    actual = Functions.interpolatePoint(line, point);
+    assertEquals(expected, actual, 1e-6);
+
+    point = Constructors.geomFromEWKT("POINT(2.5 1)");
+    actual = Functions.interpolatePoint(line, point);
+    expected = 2.75;
+    assertEquals(expected, actual, 1e-6);
+  }
 }

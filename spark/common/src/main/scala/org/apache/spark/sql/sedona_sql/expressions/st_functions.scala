@@ -926,4 +926,10 @@ object st_functions extends DataFrameAPI {
 
   def ST_IsCollection(geometry: String): Column = wrapExpression[ST_IsCollection](geometry)
 
+  def ST_InterpolatePoint(geom1: Column, geom2: Column): Column =
+    wrapExpression[ST_InterpolatePoint](geom1, geom2)
+
+  def ST_InterpolatePoint(geom1: String, geom2: String): Column =
+    wrapExpression[ST_InterpolatePoint](geom1, geom2)
+
 }
