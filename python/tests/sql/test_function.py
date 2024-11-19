@@ -1650,10 +1650,23 @@ class TestPredicateJoin(TestBase):
             assert actual == expected
 
     def test_st_perimeter(self):
-        baseDf = self.spark.sql("SELECT ST_GeomFromWKT('POLYGON((743238 2967416,743238 2967450,743265 2967450,743265.625 2967416,743238 2967416))') AS geom")
+        baseDf = self.spark.sql(
+            "SELECT ST_GeomFromWKT('POLYGON((743238 2967416,743238 2967450,743265 2967450,743265.625 2967416,743238 2967416))') AS geom"
+        )
         actual = baseDf.selectExpr("ST_Perimeter(geom)").take(1)[0][0]
         expected = 122.63074400009504
         assert actual == expected
+
+        actual = baseDf.selectExpr("ST_Perimeter(geom, true)").first()[0]
+        expected = 0
+        assert expected == actual
+
+        baseDf = self.spark.sql(
+            "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))', 4326) AS geom"
+        )
+        actual = baseDf.selectExpr("ST_Perimeter(geom, true, false)").first()[0]
+        expected = 443770.91724830196
+        assert expected == actual
 
     def test_st_points(self):
         # Given

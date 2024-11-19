@@ -730,12 +730,14 @@ test_configurations = [
         0.2927864015850548,
     ),
     (stf.ST_MaxDistance, ("a", "b"), "overlapping_polys", "", 3.1622776601683795),
+    (stf.ST_Perimeter, ("geom",), "triangle_geom", "", 3.414213562373095),
+    (stf.ST_Perimeter, ("geom", True), "triangle_geom", "", 0.0),
     (
         stf.ST_Perimeter,
-        ("geom",),
+        (lambda: stf.ST_SetSRID("geom", 4326), True),
         "triangle_geom",
-        "",
-        3.414213562373095
+        "ceil(geom)",
+        378794,
     ),
     (
         stf.ST_Points,

@@ -596,10 +596,20 @@ class functionTestScala
     }
 
     it("Passed ST_Perimeter") {
-      val baseDf = sparkSession.sql(
+      var baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POLYGON((743238 2967416,743238 2967450,743265 2967450,743265.625 2967416,743238 2967416))') AS geom")
-      val actual = baseDf.selectExpr("ST_Perimeter(geom)").first().get(0)
-      val expected = 122.63074400009504
+      var actual = baseDf.selectExpr("ST_Perimeter(geom)").first().get(0)
+      var expected = 122.63074400009504
+      assertEquals(expected, actual)
+
+      actual = baseDf.selectExpr("ST_Perimeter(geom, true)").first().get(0)
+      expected = 0
+      assertEquals(expected, actual)
+
+      baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))', 4326) AS geom")
+      actual = baseDf.selectExpr("ST_Perimeter(geom, true, false)").first().get(0)
+      expected = 443770.91724830196
       assertEquals(expected, actual)
     }
 

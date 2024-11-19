@@ -1169,14 +1169,29 @@ def ST_MakeLine(geom1: ColumnOrName, geom2: Optional[ColumnOrName] = None) -> Co
     args = (geom1,) if geom2 is None else (geom1, geom2)
     return _call_st_function("ST_MakeLine", args)
 
+
 @validate_argument_types
-def ST_Perimeter(geom: ColumnOrName) -> Column:
-    """ Returns the perimeter of a Polygon/MultiPolygon geometries. Otherwise, returns 0
+def ST_Perimeter(
+    geom: ColumnOrName,
+    use_spheroid: Optional[Union[ColumnOrName, bool]] = None,
+    lenient: Optional[Union[ColumnOrName, bool]] = None,
+) -> Column:
+    """Returns the perimeter of a Polygon/MultiPolygon geometries. Otherwise, returns 0
 
     @param geom: Polygonal geometry
+    @param use_spheroid: Use Spheroid
+    @param lenient: suppresses the exception
     @return: Perimeter of a Polygon/MultiPolygon geometries
     """
-    return _call_st_function("ST_Perimeter", geom)
+
+    args = (geom, use_spheroid, lenient)
+
+    if lenient is None:
+        if use_spheroid is None:
+            args = (geom,)
+        else:
+            args = (geom, use_spheroid)
+    return _call_st_function("ST_Perimeter", args)
 
 
 @validate_argument_types

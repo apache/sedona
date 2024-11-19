@@ -66,8 +66,6 @@ import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.locationtech.jts.simplify.VWSimplifier;
 import org.locationtech.jts.triangulate.DelaunayTriangulationBuilder;
 import org.locationtech.jts.triangulate.polygon.ConstrainedDelaunayTriangulator;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 import org.wololo.geojson.Feature;
 import org.wololo.geojson.FeatureCollection;
 import org.wololo.jts2geojson.GeoJSONWriter;
@@ -1101,7 +1099,8 @@ public class Functions {
       if (lenient) {
         return 0;
       } else {
-        throw new IllegalArgumentException("For spheroidal perimeter calculations, the input geometry must be in the WGS84 CRS (SRID 4326).");
+        throw new IllegalArgumentException(
+            "For spheroidal perimeter calculations, the input geometry must be in the WGS84 CRS (SRID 4326).");
       }
     }
 
