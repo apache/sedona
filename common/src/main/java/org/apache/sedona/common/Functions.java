@@ -2379,7 +2379,8 @@ public class Functions {
   }
 
   /**
-   * This function returns the m coordinate of the closest point in a LineString to the specified Point.
+   * This function returns the m coordinate of the closest point in a LineString to the specified
+   * Point.
    *
    * @param geom1 The LineString (with or without M values) to be evaluated.
    * @param geom2 The Point object to find the closest point to.
