@@ -1159,7 +1159,7 @@ public class FunctionsTest extends TestBase {
 
     geom.setSRID(0);
     actual = Functions.perimeter(geom, true);
-    expected = 0;
+    expected = 10737.6184;
     assertEquals(expected, actual, FP_TOLERANCE2);
 
     // ignores the LineString and just calculates the perimeter of the Polygon in this Geometry

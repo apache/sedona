@@ -787,7 +787,7 @@ public class FunctionTest extends TestBase {
     perimeterTable =
         polygonTable.select(call(Functions.ST_Perimeter.class.getSimpleName(), $("geom"), true));
     perimeter = (Double) first(perimeterTable).getField(0);
-    assertEquals(0, perimeter, FP_TOLERANCE);
+    assertEquals(443770.91724830196, perimeter, FP_TOLERANCE);
   }
 
   @Test

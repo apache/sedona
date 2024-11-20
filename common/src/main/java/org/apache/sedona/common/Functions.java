@@ -1096,9 +1096,7 @@ public class Functions {
 
   public static double perimeter(Geometry geometry, boolean use_spheroid, boolean lenient) {
     if (use_spheroid && geometry.getSRID() != 4326) {
-      if (lenient) {
-        return 0;
-      } else {
+      if (!lenient) {
         throw new IllegalArgumentException(
             "For spheroidal perimeter calculations, the input geometry must be in the WGS84 CRS (SRID 4326).");
       }
