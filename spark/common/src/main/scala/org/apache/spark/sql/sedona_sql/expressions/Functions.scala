@@ -993,6 +993,17 @@ case class ST_MakeLine(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Perimeter(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction3(Functions.perimeter),
+      inferrableFunction2(Functions.perimeter),
+      inferrableFunction1(Functions.perimeter)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_Points(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.points _) {
 
@@ -1762,6 +1773,12 @@ case class ST_Rotate(inputExpressions: Seq[Expression])
       inferrableFunction3(Functions.rotate),
       inferrableFunction4(Functions.rotate)) {
 
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
+    copy(inputExpressions = newChildren)
+}
+
+case class ST_InterpolatePoint(inputExpressions: Seq[Expression])
+    extends InferredExpression(inferrableFunction2(Functions.interpolatePoint)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
     copy(inputExpressions = newChildren)
 }

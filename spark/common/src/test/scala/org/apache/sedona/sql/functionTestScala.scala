@@ -595,6 +595,24 @@ class functionTestScala
       assert(row.get(1).asInstanceOf[Geometry].toText.equals("LINESTRING (5 6, 7 8, 9 10)"))
     }
 
+    it("Passed ST_Perimeter") {
+      var baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON((743238 2967416,743238 2967450,743265 2967450,743265.625 2967416,743238 2967416))') AS geom")
+      var actual = baseDf.selectExpr("ST_Perimeter(geom)").first().get(0)
+      var expected = 122.63074400009504
+      assertEquals(expected, actual)
+
+      baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))', 4326) AS geom")
+      actual = baseDf.selectExpr("ST_Perimeter(geom, true)").first().get(0)
+      expected = 443770.91724830196
+      assertEquals(expected, actual)
+
+      actual = baseDf.selectExpr("ST_Perimeter(geom, true, false)").first().get(0)
+      expected = 443770.91724830196
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_Points") {
 
       val testtable = sparkSession.sql(
@@ -3609,6 +3627,67 @@ class functionTestScala
       invalidOriginDf.collect()
     }
     exception.getMessage should include("The origin must be a non-empty Point geometry.")
+  }
+
+  it("Should pass ST_InterpolatePoint") {
+    val geomTestCases = Map(
+      ("'LINESTRING M (0 0 0, 2 0 2, 4 0 4)'", "'POINT(1 1)'") -> 1.0,
+      ("'LINESTRING M (0 0 0, -2 2 2, -4 4 4)'", "'POINT(-1 1)'") -> 1.0,
+      ("'LINESTRING M (0 0 0, 2 2 2, 4 0 4)'", "'POINT(2 0)'") -> 1.0,
+      ("'LINESTRING M (0 0 0, 2 2 2, 4 0 4)'", "'POINT(2.5 1)'") -> 2.75)
+
+    for (((geom1, geom2), expectedResult) <- geomTestCases) {
+      val df = sparkSession.sql(s"""
+                                   |SELECT
+                                   |   ST_InterpolatePoint(
+                                   |     ST_GeomFromEWKT($geom1),
+                                   |     ST_GeomFromEWKT($geom2)
+                                   |   ) AS mValue
+         """.stripMargin)
+
+      val actual = df.take(1)(0).get(0).asInstanceOf[Double]
+      assert(actual == expectedResult)
+    }
+
+    // Test invalid arguments
+    var invalidOriginDf = sparkSession.sql("""
+                                             |SELECT ST_InterpolatePoint(ST_GeomFromText('LINESTRING (50 160, 50 50, 100 50)'), ST_GeomFromText('POINT (1 1)')) as result
+    """.stripMargin)
+
+    var exception = intercept[Exception] {
+      invalidOriginDf.collect()
+    }
+    exception.getMessage should include("The given linestring does not have a measure value.")
+
+    invalidOriginDf = sparkSession.sql("""
+                                         |SELECT ST_InterpolatePoint(ST_GeomFromText('POINT (0 1)'), ST_GeomFromText('POINT (1 1)')) as result
+    """.stripMargin)
+
+    exception = intercept[Exception] {
+      invalidOriginDf.collect()
+    }
+    exception.getMessage should include(
+      "First argument is of type Point, should be a LineString.")
+
+    invalidOriginDf = sparkSession.sql("""
+                                         |SELECT ST_InterpolatePoint(ST_GeomFromText('LINESTRING M (0 0 0, 2 0 2, 4 0 4)'), ST_GeomFromText('LINESTRING (50 160, 50 50, 100 50)')) as result
+    """.stripMargin)
+
+    exception = intercept[Exception] {
+      invalidOriginDf.collect()
+    }
+    exception.getMessage should include(
+      "Second argument is of type LineString, should be a Point.")
+
+    invalidOriginDf = sparkSession.sql("""
+                                         |SELECT ST_InterpolatePoint(ST_SetSRID(ST_GeomFromText('LINESTRING M (0 0 0, 2 0 2, 4 0 4)'), 4326), ST_SetSRID(ST_GeomFromText('POINT (1 1)'), 3857)) as result
+    """.stripMargin)
+
+    exception = intercept[Exception] {
+      invalidOriginDf.collect()
+    }
+    exception.getMessage should include(
+      "The Line has SRID 4326 and Point has SRID 3857. The Line and Point should be in the same SRID.")
   }
 
 }

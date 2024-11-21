@@ -760,6 +760,25 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult.toText() == expectedResult)
     }
 
+    it("Passed ST_Perimeter") {
+      var baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON((743238 2967416,743238 2967450,743265 2967450,743265.625 2967416,743238 2967416))') AS geom")
+      var actual = baseDf.select(ST_Perimeter("geom")).first().get(0)
+      var expected = 122.63074400009504
+      assertEquals(expected, actual)
+
+      baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))', 4326) AS geom")
+      actual = baseDf.select(ST_Perimeter("geom", use_spheroid = true)).first().get(0)
+      expected = 443770.91724830196
+      assertEquals(expected, actual)
+
+      actual =
+        baseDf.select(ST_Perimeter("geom", use_spheroid = true, lenient = false)).first().get(0)
+      expected = 443770.91724830196
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_Project") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POINT(0 0)') as point, ST_MakeEnvelope(0, 1, 2, 0) as poly")
@@ -2382,6 +2401,31 @@ class dataFrameAPITestScala extends TestBaseScala {
       }
       assert(exception2.getMessage.contains("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"))
       assert(exception2.getMessage.contains("ST_MakeLine"))
+    }
+
+    it("Passed ST_InterpolatePoint") {
+      val testData = Seq(
+        ("LINESTRING M (0 0 0, 2 0 2, 4 0 4)", "POINT(1 1)", 1.0),
+        ("LINESTRING M (0 0 0, -2 2 2, -4 4 4)", "POINT(-1 1)", 1.0),
+        ("LINESTRING M (0 0 0, 2 2 2, 4 0 4)", "POINT(2 0)", 1.0),
+        ("LINESTRING M (0 0 0, 2 2 2, 4 0 4)", "POINT(2.5 1)", 2.75)).toDF(
+        "lineEWKT",
+        "pointEWKT",
+        "expectedResult")
+
+      val geomDf = testData
+        .withColumn("line", ST_GeomFromEWKT(col("lineEWKT")))
+        .withColumn("point", ST_GeomFromEWKT(col("pointEWKT")))
+
+      geomDf
+        .withColumn("result", ST_InterpolatePoint(col("line"), col("point")))
+        .select("result", "expectedResult")
+        .collect()
+        .foreach { row =>
+          val actual = row.getAs[Double]("result")
+          val expected = row.getAs[Double]("expectedResult")
+          assert(actual == expected, s"Expected $expected but got $actual")
+        }
     }
   }
 }

@@ -942,6 +942,30 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"},
+      returnTypes = "double")
+  public static double ST_Perimeter(String geometry) {
+    return Functions.perimeter(GeometrySerde.deserGeoJson(geometry));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "use_spheroid"},
+      argTypes = {"Geometry", "boolean"},
+      returnTypes = "double")
+  public static double ST_Perimeter(String geometry, boolean use_spheroid) {
+    return Functions.perimeter(GeometrySerde.deserGeoJson(geometry), use_spheroid);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "use_spheroid", "lenient"},
+      argTypes = {"Geometry", "boolean", "boolean"},
+      returnTypes = "double")
+  public static double ST_Perimeter(String geometry, boolean use_spheroid, boolean lenient) {
+    return Functions.perimeter(GeometrySerde.deserGeoJson(geometry), use_spheroid, lenient);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry"},
+      argTypes = {"Geometry"},
       returnTypes = "Geometry")
   public static String ST_PointOnSurface(String geometry) {
     return GeometrySerde.serGeoJson(Functions.pointOnSurface(GeometrySerde.deserGeoJson(geometry)));

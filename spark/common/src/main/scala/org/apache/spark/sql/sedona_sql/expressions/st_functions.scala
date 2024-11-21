@@ -358,6 +358,17 @@ object st_functions extends DataFrameAPI {
   def ST_MakeLine(geom1: String, geom2: String): Column =
     wrapExpression[ST_MakeLine](geom1, geom2)
 
+  def ST_Perimeter(geom: Column): Column = wrapExpression[ST_Perimeter](geom)
+  def ST_Perimeter(geom: String): Column = wrapExpression[ST_Perimeter](geom)
+  def ST_Perimeter(geom: Column, use_spheroid: Column): Column =
+    wrapExpression[ST_Perimeter](geom, use_spheroid)
+  def ST_Perimeter(geom: String, use_spheroid: Boolean): Column =
+    wrapExpression[ST_Perimeter](geom, use_spheroid)
+  def ST_Perimeter(geom: Column, use_spheroid: Column, lenient: Column): Column =
+    wrapExpression[ST_Perimeter](geom, use_spheroid, lenient)
+  def ST_Perimeter(geom: String, use_spheroid: Boolean, lenient: Boolean): Column =
+    wrapExpression[ST_Perimeter](geom, use_spheroid, lenient)
+
   def ST_Points(geom: Column): Column = wrapExpression[ST_Points](geom)
   def ST_Points(geom: String): Column = wrapExpression[ST_Points](geom)
 
@@ -925,5 +936,11 @@ object st_functions extends DataFrameAPI {
   def ST_IsCollection(geometry: Column): Column = wrapExpression[ST_IsCollection](geometry)
 
   def ST_IsCollection(geometry: String): Column = wrapExpression[ST_IsCollection](geometry)
+
+  def ST_InterpolatePoint(geom1: Column, geom2: Column): Column =
+    wrapExpression[ST_InterpolatePoint](geom1, geom2)
+
+  def ST_InterpolatePoint(geom1: String, geom2: String): Column =
+    wrapExpression[ST_InterpolatePoint](geom1, geom2)
 
 }

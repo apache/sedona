@@ -2017,6 +2017,32 @@ Output:
 LINEARRING (1 1, 2 1, 2 2, 1 2, 1 1)
 ```
 
+## ST_InterpolatePoint
+
+Introduction: Returns the interpolated measure value of a linear measured LineString at the point closest to the specified point.
+
+!!!Note
+    Make sure that both geometries have the same SRID, otherwise the function will throw an IllegalArgumentException.
+
+Format: `ST_InterpolatePoint(linestringM: Geometry, point: Geometry)`
+
+Since: `v1.7.0`
+
+SQL Example
+
+```sql
+SELECT ST_InterpolatePoint(
+    ST_GeomFromWKT("LINESTRING M (0 0 0, 2 0 2, 4 0 4)"),
+    ST_GeomFromWKT("POINT (1 1)")
+    )
+```
+
+Output:
+
+```
+1.0
+```
+
 ## ST_Intersection
 
 Introduction: Return the intersection geometry of A and B
@@ -3016,6 +3042,51 @@ Output:
 
 ```
 2
+```
+
+## ST_Perimeter
+
+Introduction: This function calculates the 2D perimeter of a given geometry. It supports Polygon, MultiPolygon, and GeometryCollection geometries (as long as the GeometryCollection contains polygonal geometries). For other types, it returns 0. To measure lines, use [ST_Length](#st_length).
+
+To get the perimeter in meters, set `use_spheroid` to `true`. This calculates the geodesic perimeter using the WGS84 spheroid. When using `use_spheroid`, the `lenient` parameter defaults to true, assuming the geometry uses EPSG:4326. To throw an exception instead, set `lenient` to `false`.
+
+Format:
+
+`ST_Perimeter(geom: Geometry)`
+
+`ST_Perimeter(geom: Geometry, use_spheroid: Boolean)`
+
+`ST_Perimeter(geom: Geometry, use_spheroid: Boolean, lenient: Boolean = True)`
+
+Since: `v1.7.0`
+
+SQL Example:
+
+```sql
+SELECT ST_Perimeter(
+        ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))')
+)
+```
+
+Output:
+
+```
+20.0
+```
+
+SQL Example:
+
+```sql
+SELECT ST_Perimeter(
+        ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))', 4326),
+        true, false
+)
+```
+
+Output:
+
+```
+2216860.5497177234
 ```
 
 ## ST_PointN

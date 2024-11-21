@@ -568,6 +568,33 @@ public class Functions {
     }
   }
 
+  public static class ST_Perimeter extends ScalarFunction {
+    @DataTypeHint(value = "Double")
+    public Double eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.perimeter(geom);
+    }
+
+    @DataTypeHint(value = "Double")
+    public Double eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        Boolean use_spheroid) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.perimeter(geom, use_spheroid);
+    }
+
+    @DataTypeHint(value = "Double")
+    public Double eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        Boolean use_spheroid,
+        boolean lenient) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.perimeter(geom, use_spheroid, lenient);
+    }
+  }
+
   public static class ST_PointOnSurface extends ScalarFunction {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(
@@ -2066,6 +2093,17 @@ public class Functions {
         @DataTypeHint(value = "Double") Double originY) {
       Geometry geom1 = (Geometry) o1;
       return org.apache.sedona.common.Functions.rotate(geom1, angle, originX, originY);
+    }
+  }
+
+  public static class ST_InterpolatePoint extends ScalarFunction {
+    @DataTypeHint("Double")
+    public double eval(
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object o1,
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object o2) {
+      Geometry geom1 = (Geometry) o1;
+      Geometry geom2 = (Geometry) o2;
+      return org.apache.sedona.common.Functions.interpolatePoint(geom1, geom2);
     }
   }
 }

@@ -1094,6 +1094,46 @@ public class Functions {
     return geom.getFactory().createPoint(interPoint);
   }
 
+  public static double perimeter(Geometry geometry, boolean use_spheroid, boolean lenient) {
+    if (use_spheroid && geometry.getSRID() != 4326) {
+      if (!lenient) {
+        throw new IllegalArgumentException(
+            "For spheroidal perimeter calculations, the input geometry must be in the WGS84 CRS (SRID 4326).");
+      }
+    }
+
+    String geomType = geometry.getGeometryType();
+    if (geomType.equalsIgnoreCase(Geometry.TYPENAME_POLYGON)) {
+      return calculateLength(geometry, use_spheroid);
+    } else if (geomType.equalsIgnoreCase(Geometry.TYPENAME_MULTIPOLYGON)) {
+      return calculateLength(geometry, use_spheroid);
+    } else if (geomType.equalsIgnoreCase(Geometry.TYPENAME_GEOMETRYCOLLECTION)) {
+      double perimeter = 0;
+      for (int i = 0; i < geometry.getNumGeometries(); i++) {
+        perimeter += perimeter(geometry.getGeometryN(i), use_spheroid, lenient);
+      }
+      return perimeter;
+    } else {
+      return 0;
+    }
+  }
+
+  private static double calculateLength(Geometry geometry, boolean use_spheroid) {
+    if (use_spheroid) {
+      return Spheroid.length(geometry);
+    } else {
+      return length(geometry);
+    }
+  }
+
+  public static double perimeter(Geometry geometry, boolean use_spheroid) {
+    return perimeter(geometry, use_spheroid, true);
+  }
+
+  public static double perimeter(Geometry geometry) {
+    return perimeter(geometry, false);
+  }
+
   /**
    * Forces a Polygon/MultiPolygon to use clockwise orientation for the exterior ring and a
    * counter-clockwise for the interior ring(s).
@@ -2376,5 +2416,58 @@ public class Functions {
     double originY = origin.getY();
     AffineTransformation rotation = AffineTransformation.rotationInstance(angle, originX, originY);
     return rotation.transform(geometry);
+  }
+
+  /**
+   * This function returns the m coordinate of the closest point in a LineString to the specified
+   * Point.
+   *
+   * @param geom1 The LineString (with or without M values) to be evaluated.
+   * @param geom2 The Point object to find the closest point to.
+   * @return The interpolated M value of the closest point on the LineString.
+   */
+  public static double interpolatePoint(Geometry geom1, Geometry geom2) {
+    if (!(Geometry.TYPENAME_LINESTRING.equalsIgnoreCase(geom1.getGeometryType()))) {
+      throw new IllegalArgumentException(
+          String.format(
+              "First argument is of type %s, should be a LineString.", geom1.getGeometryType()));
+    }
+    if (!(Geometry.TYPENAME_POINT.equalsIgnoreCase(geom2.getGeometryType()))) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Second argument is of type %s, should be a Point.", geom2.getGeometryType()));
+    }
+    if (Float.isNaN((float) geom1.getCoordinate().getM())) {
+      throw new IllegalArgumentException("The given linestring does not have a measure value.");
+    }
+
+    if (geom1.getSRID() != geom2.getSRID()) {
+      throw new IllegalArgumentException(
+          String.format(
+              "The Line has SRID %d and Point has SRID %d. The Line and Point should be in the same SRID.",
+              geom1.getSRID(), geom2.getSRID()));
+    }
+
+    LineString line = (LineString) geom1;
+    Point point = (Point) geom2;
+
+    // Find the closest point on the line to the input point
+    Coordinate closestPoint = DistanceOp.nearestPoints(line, point)[0];
+
+    // Use LengthIndexedLine to extract the index at the closest point
+    LengthIndexedLine indexedLine = new LengthIndexedLine(line);
+    double index = indexedLine.indexOf(closestPoint);
+
+    // Extract the point at that index and compute its length fraction
+    double totalLength = indexedLine.getEndIndex();
+    double fractionAlongLine = index / totalLength;
+
+    // Get the start and end coordinates of the line
+    Geometry start = line.getStartPoint();
+    Geometry end = line.getEndPoint();
+
+    // Interpolate the M value
+    return fractionAlongLine * (end.getCoordinate().getM() - start.getCoordinate().getM())
+        + start.getCoordinate().getM();
   }
 }

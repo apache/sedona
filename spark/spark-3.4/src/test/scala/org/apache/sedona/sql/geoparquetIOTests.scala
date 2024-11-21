@@ -54,6 +54,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
   val legacyparquetdatalocation: String =
     resourceFolder + "parquet/legacy-parquet-nested-columns.snappy.parquet"
   val geoparquetoutputlocation: String = resourceFolder + "geoparquet/geoparquet_output/"
+  val overtureBBOX: String = resourceFolder + "geoparquet/overture/bbox.geoparquet"
 
   override def afterAll(): Unit = FileUtils.deleteDirectory(new File(geoparquetoutputlocation))
 
@@ -755,6 +756,18 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val data1 = df.sort(col("id")).collect()
       val data2 = df2.collect()
       assert(data1 sameElements data2)
+    }
+  }
+
+  describe("loading one file geoparquet and filtering") {
+    it("should not fail when bbox is not available in geoparquet metadata") {
+      val numberOfRecords = sparkSession.read
+        .format("geoparquet")
+        .load(overtureBBOX)
+        .where("ST_Intersects(geometry, ST_PolygonFromEnvelope(0, 0, 1, 1))")
+        .count()
+
+      assert(numberOfRecords == 9)
     }
   }
 

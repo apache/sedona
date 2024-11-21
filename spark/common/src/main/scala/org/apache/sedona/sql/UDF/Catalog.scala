@@ -22,7 +22,7 @@ import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, ExpressionInfo, Literal}
 import org.apache.spark.sql.expressions.Aggregator
-import org.apache.spark.sql.sedona_sql.expressions._
+import org.apache.spark.sql.sedona_sql.expressions.{ST_InterpolatePoint, _}
 import org.apache.spark.sql.sedona_sql.expressions.collect.ST_Collect
 import org.apache.spark.sql.sedona_sql.expressions.raster._
 import org.locationtech.jts.geom.Geometry
@@ -55,6 +55,7 @@ object Catalog {
     function[ST_GeomFromGML](),
     function[ST_GeomFromKML](),
     function[ST_CoordDim](),
+    function[ST_Perimeter](),
     function[ST_Point](),
     function[ST_Points](),
     function[ST_MakeEnvelope](),
@@ -150,6 +151,7 @@ object Catalog {
     function[ST_H3ToGeom](),
     function[ST_H3KRing](),
     function[ST_InteriorRingN](),
+    function[ST_InterpolatePoint](),
     function[ST_Dump](),
     function[ST_DumpPoints](),
     function[ST_IsClosed](),

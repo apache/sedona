@@ -765,6 +765,32 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testPerimeter() {
+    Table polygonTable = createPolygonTable(testDataSize);
+    Table perimeterTable =
+        polygonTable.select(
+            call(Functions.ST_Perimeter.class.getSimpleName(), $(polygonColNames[0])));
+    Double perimeter = (Double) first(perimeterTable).getField(0);
+    assertEquals(4.0, perimeter, FP_TOLERANCE);
+
+    polygonTable =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))', 4326) AS geom");
+    perimeterTable =
+        polygonTable.select(
+            call(Functions.ST_Perimeter.class.getSimpleName(), $("geom"), true, false));
+    perimeter = (Double) first(perimeterTable).getField(0);
+    assertEquals(443770.91724830196, perimeter, FP_TOLERANCE);
+
+    polygonTable =
+        tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))') AS geom");
+    perimeterTable =
+        polygonTable.select(call(Functions.ST_Perimeter.class.getSimpleName(), $("geom"), true));
+    perimeter = (Double) first(perimeterTable).getField(0);
+    assertEquals(443770.91724830196, perimeter, FP_TOLERANCE);
+  }
+
+  @Test
   public void testPointOnSurface() {
     Table pointTable = createPointTable_real(testDataSize);
     Table surfaceTable =
@@ -2775,5 +2801,72 @@ public class FunctionTest extends TestBase {
     expected =
         "POLYGON ((0.0700679430157733 0.5247497074078575, 2 0, 1.2974088252118154 1.227340882196042, 2.5247497074078575 1.9299320569842267, 0.5948176504236309 2.454681764392084, 1.2974088252118154 1.227340882196042, 0.0700679430157733 0.5247497074078575))";
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testInterpolatePoint() {
+    // Create a table with the test geometries
+    Table tbl =
+        tableEnv.sqlQuery(
+            "SELECT "
+                + "ST_GeomFromEWKT('LINESTRING M (0 0 0, 2 0 2, 4 0 4)') AS line1, "
+                + "ST_GeomFromEWKT('POINT(1 1)') AS point1, "
+                + "ST_GeomFromEWKT('LINESTRING M (0 0 0, -2 2 2, -4 4 4)') AS line2, "
+                + "ST_GeomFromEWKT('POINT(-1 1)') AS point2, "
+                + "ST_GeomFromEWKT('LINESTRING M (0 0 0, 2 2 2, 4 0 4)') AS line3, "
+                + "ST_GeomFromEWKT('POINT(2 0)') AS point3, "
+                + "ST_GeomFromEWKT('POINT(2.5 1)') AS point4");
+
+    double actual =
+        (double)
+            first(
+                    tbl.select(
+                            call(
+                                Functions.ST_InterpolatePoint.class.getSimpleName(),
+                                $("line1"),
+                                $("point1")))
+                        .as("result"))
+                .getField(0);
+    double expected = 1.0; // Closest point on line is (1, 0) and interpolated M is 1
+    assertEquals(expected, actual, 1e-6);
+
+    actual =
+        (double)
+            first(
+                    tbl.select(
+                            call(
+                                Functions.ST_InterpolatePoint.class.getSimpleName(),
+                                $("line2"),
+                                $("point2")))
+                        .as("result"))
+                .getField(0);
+    expected = 1.0; // Interpolated M value
+    assertEquals(expected, actual, 1e-6);
+
+    actual =
+        (double)
+            first(
+                    tbl.select(
+                            call(
+                                Functions.ST_InterpolatePoint.class.getSimpleName(),
+                                $("line3"),
+                                $("point3")))
+                        .as("result"))
+                .getField(0);
+    expected = 1.0; // Interpolated M value
+    assertEquals(expected, actual, 1e-6);
+
+    actual =
+        (double)
+            first(
+                    tbl.select(
+                            call(
+                                Functions.ST_InterpolatePoint.class.getSimpleName(),
+                                $("line3"),
+                                $("point4")))
+                        .as("result"))
+                .getField(0);
+    expected = 2.75;
+    assertEquals(expected, actual, 1e-6);
   }
 }
