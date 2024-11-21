@@ -782,7 +782,7 @@ public class TestFunctions extends TestBase {
         2216861.0);
 
     registerUDF("ST_Perimeter", byte[].class, boolean.class, boolean.class);
-    registerUDFV2("ST_GeomFromText", String.class, int.class);
+    registerUDF("ST_GeomFromText", byte[].class, int.class);
     verifySqlSingleRes(
         "SELECT CEIL(sedona.ST_Perimeter(sedona.ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))', 4326), true, false))",
         2216861.0);
