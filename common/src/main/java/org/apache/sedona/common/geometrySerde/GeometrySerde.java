@@ -111,7 +111,12 @@ public class GeometrySerde extends Serializer implements Serializable {
           double xMax = input.readDouble();
           double yMin = input.readDouble();
           double yMax = input.readDouble();
-          return new Envelope(xMin, xMax, yMin, yMax);
+          if (xMin <= xMax) {
+            return new Envelope(xMin, xMax, yMin, yMax);
+          } else {
+            // Null envelope cannot be constructed using Envelope(xMin, xMax, yMin, yMax)
+            return new Envelope();
+          }
         }
       default:
         throw new UnsupportedOperationException(
