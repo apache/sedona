@@ -568,6 +568,33 @@ public class Functions {
     }
   }
 
+  public static class ST_Perimeter extends ScalarFunction {
+    @DataTypeHint(value = "Double")
+    public Double eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.perimeter(geom);
+    }
+
+    @DataTypeHint(value = "Double")
+    public Double eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        Boolean use_spheroid) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.perimeter(geom, use_spheroid);
+    }
+
+    @DataTypeHint(value = "Double")
+    public Double eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        Boolean use_spheroid,
+        boolean lenient) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.perimeter(geom, use_spheroid, lenient);
+    }
+  }
+
   public static class ST_PointOnSurface extends ScalarFunction {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(

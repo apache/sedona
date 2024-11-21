@@ -765,6 +765,32 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testPerimeter() {
+    Table polygonTable = createPolygonTable(testDataSize);
+    Table perimeterTable =
+        polygonTable.select(
+            call(Functions.ST_Perimeter.class.getSimpleName(), $(polygonColNames[0])));
+    Double perimeter = (Double) first(perimeterTable).getField(0);
+    assertEquals(4.0, perimeter, FP_TOLERANCE);
+
+    polygonTable =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))', 4326) AS geom");
+    perimeterTable =
+        polygonTable.select(
+            call(Functions.ST_Perimeter.class.getSimpleName(), $("geom"), true, false));
+    perimeter = (Double) first(perimeterTable).getField(0);
+    assertEquals(443770.91724830196, perimeter, FP_TOLERANCE);
+
+    polygonTable =
+        tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))') AS geom");
+    perimeterTable =
+        polygonTable.select(call(Functions.ST_Perimeter.class.getSimpleName(), $("geom"), true));
+    perimeter = (Double) first(perimeterTable).getField(0);
+    assertEquals(443770.91724830196, perimeter, FP_TOLERANCE);
+  }
+
+  @Test
   public void testPointOnSurface() {
     Table pointTable = createPointTable_real(testDataSize);
     Table surfaceTable =

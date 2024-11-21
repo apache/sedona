@@ -3129,6 +3129,51 @@ Output:
 3
 ```
 
+## ST_Perimeter
+
+Introduction: This function calculates the 2D perimeter of a given geometry. It supports Polygon, MultiPolygon, and GeometryCollection geometries (as long as the GeometryCollection contains polygonal geometries). For other types, it returns 0. To measure lines, use [ST_Length](#st_length).
+
+To get the perimeter in meters, set `use_spheroid` to `true`. This calculates the geodesic perimeter using the WGS84 spheroid. When using `use_spheroid`, the `lenient` parameter defaults to true, assuming the geometry uses EPSG:4326. To throw an exception instead, set `lenient` to `false`.
+
+Format:
+
+`ST_Perimeter(geom: Geometry)`
+
+`ST_Perimeter(geom: Geometry, use_spheroid: Boolean)`
+
+`ST_Perimeter(geom: Geometry, use_spheroid: Boolean, lenient: Boolean = True)`
+
+Since: `v1.7.0`
+
+SQL Example:
+
+```sql
+SELECT ST_Perimeter(
+        ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))')
+)
+```
+
+Output:
+
+```
+20.0
+```
+
+SQL Example:
+
+```sql
+SELECT ST_Perimeter(
+        ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))', 4326),
+        true, false
+)
+```
+
+Output:
+
+```
+2216860.5497177234
+```
+
 ## ST_PointN
 
 Introduction: Return the Nth point in a single linestring or circular linestring in the geometry. Negative values are counted backwards from the end of the LineString, so that -1 is the last point. Returns NULL if there is no linestring in the geometry.

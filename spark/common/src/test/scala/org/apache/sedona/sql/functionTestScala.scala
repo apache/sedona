@@ -595,6 +595,24 @@ class functionTestScala
       assert(row.get(1).asInstanceOf[Geometry].toText.equals("LINESTRING (5 6, 7 8, 9 10)"))
     }
 
+    it("Passed ST_Perimeter") {
+      var baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON((743238 2967416,743238 2967450,743265 2967450,743265.625 2967416,743238 2967416))') AS geom")
+      var actual = baseDf.selectExpr("ST_Perimeter(geom)").first().get(0)
+      var expected = 122.63074400009504
+      assertEquals(expected, actual)
+
+      baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))', 4326) AS geom")
+      actual = baseDf.selectExpr("ST_Perimeter(geom, true)").first().get(0)
+      expected = 443770.91724830196
+      assertEquals(expected, actual)
+
+      actual = baseDf.selectExpr("ST_Perimeter(geom, true, false)").first().get(0)
+      expected = 443770.91724830196
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_Points") {
 
       val testtable = sparkSession.sql(

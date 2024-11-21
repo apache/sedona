@@ -55,6 +55,7 @@ object Catalog {
     function[ST_GeomFromGML](),
     function[ST_GeomFromKML](),
     function[ST_CoordDim](),
+    function[ST_Perimeter](),
     function[ST_Point](),
     function[ST_Points](),
     function[ST_MakeEnvelope](),

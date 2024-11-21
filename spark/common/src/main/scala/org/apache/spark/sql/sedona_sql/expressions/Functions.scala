@@ -993,6 +993,17 @@ case class ST_MakeLine(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_Perimeter(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction3(Functions.perimeter),
+      inferrableFunction2(Functions.perimeter),
+      inferrableFunction1(Functions.perimeter)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 case class ST_Points(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.points _) {
 
