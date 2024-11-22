@@ -1734,15 +1734,22 @@ Introduction: Return the geodesic perimeter of A using WGS84 spheroid. Unit is m
 
 Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lat/lon== order. You can use ==ST_FlipCoordinates== to swap lat and lon.
 
+!!!Warning
+    This function only supports LineString, MultiLineString, and GeometryCollections containing linear geometries. Use [ST_Perimeter](#st_perimeter) for polygons.
+
 Format: `ST_LengthSpheroid (A:geometry)`
 
 SQL example:
 
 ```sql
-SELECT ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 0 90, 0 0))'))
+SELECT ST_LengthSpheroid(ST_GeomFromWKT('LINESTRING (0 0, 2 0)'))
 ```
 
-Output: `20037508.342789244`
+Output:
+
+```
+222638.98158654713
+```
 
 ## ST_LineFromMultiPoint
 

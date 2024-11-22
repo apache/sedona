@@ -2891,7 +2891,7 @@ class functionTestScala
     val geomTestCases = Map(
       ("'POINT (-0.56 51.3168)'") -> "0.0",
       ("'LineString (0 0, 90 0)'") -> "10018754.17139462",
-      ("'Polygon ((0 0, 90 0, 0 0))'") -> "20037508.34278924")
+      ("'Polygon ((0 0, 90 0, 0 0))'") -> "0.0")
     for (((geom1), expectedResult) <- geomTestCases) {
       val df = sparkSession.sql(
         s"SELECT ST_LengthSpheroid(ST_GeomFromWKT($geom1)), " +

@@ -1695,7 +1695,7 @@ public class FunctionsTest extends TestBase {
     assertEquals(1.0018754171394622E7, Spheroid.length(line), FP_TOLERANCE2);
 
     Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 90, 0, 0, 0));
-    assertEquals(2.0037508342789244E7, Spheroid.length(polygon), FP_TOLERANCE2);
+    assertEquals(0.0, Spheroid.length(polygon), FP_TOLERANCE2);
 
     MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPoint(new Point[] {point, point});
     assertEquals(0, Spheroid.length(multiPoint), FP_TOLERANCE2);
@@ -1706,17 +1706,44 @@ public class FunctionsTest extends TestBase {
 
     MultiPolygon multiPolygon =
         GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon, polygon});
-    assertEquals(4.007501668557849E7, Spheroid.length(multiPolygon), FP_TOLERANCE2);
+    assertEquals(0.0, Spheroid.length(multiPolygon), FP_TOLERANCE2);
 
     GeometryCollection geometryCollection =
         GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point, line, multiLineString});
     assertEquals(3.0056262514183864E7, Spheroid.length(geometryCollection), FP_TOLERANCE2);
+  }
+
+  @Test
+  public void spheroidBaseLength() throws ParseException {
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
+    assertEquals(0, Spheroid.baseLength(point), FP_TOLERANCE2);
+
+    LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 90, 0));
+    assertEquals(1.0018754171394622E7, Spheroid.baseLength(line), FP_TOLERANCE2);
+
+    Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 90, 0, 0, 0));
+    assertEquals(2.0037508342789244E7, Spheroid.baseLength(polygon), FP_TOLERANCE2);
+
+    MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPoint(new Point[] {point, point});
+    assertEquals(0, Spheroid.baseLength(multiPoint), FP_TOLERANCE2);
+
+    MultiLineString multiLineString =
+        GEOMETRY_FACTORY.createMultiLineString(new LineString[] {line, line});
+    assertEquals(2.0037508342789244E7, Spheroid.baseLength(multiLineString), FP_TOLERANCE2);
+
+    MultiPolygon multiPolygon =
+        GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon, polygon});
+    assertEquals(4.007501668557849E7, Spheroid.baseLength(multiPolygon), FP_TOLERANCE2);
+
+    GeometryCollection geometryCollection =
+        GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point, line, multiLineString});
+    assertEquals(3.0056262514183864E7, Spheroid.baseLength(geometryCollection), FP_TOLERANCE2);
 
     Geometry polygonWithHole =
         Constructors.geomFromWKT(
             "POLYGON((-122.33 47.61, -122.32 47.62, -122.31 47.61, -122.30 47.62, -122.29 47.61, -122.30 47.60, -122.31 47.59, -122.32 47.60, -122.33 47.61), (-122.315 47.605, -122.305 47.615, -122.295 47.605, -122.305 47.595, -122.315 47.605))",
             4326);
-    assertEquals(16106.506409488933, Spheroid.length(polygonWithHole), FP_TOLERANCE2);
+    assertEquals(16106.506409488933, Spheroid.baseLength(polygonWithHole), FP_TOLERANCE2);
   }
 
   @Test

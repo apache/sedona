@@ -1190,8 +1190,8 @@ public class TestFunctions extends TestBase {
   public void test_ST_LengthSpheroid() {
     registerUDF("ST_LengthSpheroid", byte[].class);
     verifySqlSingleRes(
-        "select sedona.ST_LengthSpheroid(sedona.ST_GeomFromWKT('Polygon ((0 0, 90 0, 0 0))'))",
-        20037508.342789244);
+        "select CEIL(sedona.ST_LengthSpheroid(sedona.ST_GeomFromWKT('LINESTRING (0 0, 2 0)')))",
+            222639.0);
   }
 
   @Test

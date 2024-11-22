@@ -654,8 +654,8 @@ public class FunctionTest extends TestBase {
   @Test
   public void testLengthSpheroid() {
     Table tbl =
-        tableEnv.sqlQuery("SELECT ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 90 0, 0 0))'))");
-    Double expected = 20037508.342789244;
+        tableEnv.sqlQuery("SELECT ST_LengthSpheroid(ST_GeomFromWKT('LINESTRING (0 0, 2 0)'))");
+    Double expected = 222638.98158654713;
     Double actual = (Double) first(tbl).getField(0);
     assertEquals(expected, actual, 0.1);
   }

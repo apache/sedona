@@ -1120,7 +1120,7 @@ public class Functions {
 
   private static double calculateLength(Geometry geometry, boolean use_spheroid) {
     if (use_spheroid) {
-      return Spheroid.length(geometry);
+      return Spheroid.baseLength(geometry);
     } else {
       return length(geometry);
     }
