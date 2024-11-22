@@ -2344,6 +2344,9 @@ false
 
 Introduction: Returns the perimeter of A.
 
+!!!Warning
+    Since `v1.7.0`, this function only supports LineString, MultiLineString, and GeometryCollections containing linear geometries. Use [ST_Perimeter](#st_perimeter) for polygons.
+
 Format: `ST_Length (A: Geometry)`
 
 Since: `v1.3.0`
@@ -2363,6 +2366,9 @@ Output:
 ## ST_Length2D
 
 Introduction: Returns the perimeter of A. This function is an alias of [ST_Length](#st_length).
+
+!!!Warning
+    Since `v1.7.0`, this function only supports LineString, MultiLineString, and GeometryCollections containing linear geometries. Use [ST_Perimeter](#st_perimeter) for polygons.
 
 Format: ST_Length2D (A:geometry)
 

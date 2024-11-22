@@ -1687,6 +1687,30 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void length() {
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
+    assertEquals(0, Functions.length(point), FP_TOLERANCE2);
+
+    LineString line = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 90, 0));
+    assertEquals(90.0, Functions.length(line), FP_TOLERANCE2);
+
+    Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 90, 0, 0, 0));
+    assertEquals(0.0, Functions.length(polygon), FP_TOLERANCE2);
+
+    MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPoint(new Point[] {point, point});
+    assertEquals(0, Functions.length(multiPoint), FP_TOLERANCE2);
+
+    MultiLineString multiLineString =
+        GEOMETRY_FACTORY.createMultiLineString(new LineString[] {line, line});
+    assertEquals(180.0, Functions.length(multiLineString), FP_TOLERANCE2);
+
+    GeometryCollection geometryCollection =
+        GEOMETRY_FACTORY.createGeometryCollection(
+            new Geometry[] {point, line, multiLineString, polygon});
+    assertEquals(270.0, Functions.length(geometryCollection), FP_TOLERANCE2);
+  }
+
+  @Test
   public void spheroidLength() throws ParseException {
     Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
     assertEquals(0, Spheroid.length(point), FP_TOLERANCE2);
