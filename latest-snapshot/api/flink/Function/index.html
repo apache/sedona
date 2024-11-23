@@ -8266,13 +8266,17 @@ Collection types are the following:</p>
 <p class="admonition-title">Note</p>
 <p>By default, this function uses lon/lat order since <code>v1.5.0</code>. Before, it used lat/lon order.</p>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Since <code>v1.7.0</code>, this function only supports LineString, MultiLineString, and GeometryCollections containing linear geometries. Use <a href="#st_perimeter">ST_Perimeter</a> for polygons.</p>
+</div>
 <p>Format: <code>ST_LengthSpheroid (A: Geometry)</code></p>
 <p>Since: <code>v1.4.1</code></p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_LengthSpheroid</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;Polygon ((0 0, 90 0, 0 0))&#39;</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_LengthSpheroid</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING (0 0, 2 0)&#39;</span><span class="p">))</span>
 </code></pre></div>
 <p>Output:</p>
-<div class="highlight"><pre><span></span><code>20037508.342789244
+<div class="highlight"><pre><span></span><code>222638.98158654713
 </code></pre></div>
 <h2 id="st_linefrommultipoint">ST_LineFromMultiPoint<a class="headerlink" href="#st_linefrommultipoint" title="Permanent link">&para;</a></h2>
 <p>Introduction: Creates a LineString from a MultiPoint geometry.</p>
@@ -9369,7 +9373,7 @@ You need to make sure that the input geometry is in lon/lat order. If the input 
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">November 21, 2024 05:39:30</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">November 23, 2024 05:59:09</span>
   </span>
 
     
