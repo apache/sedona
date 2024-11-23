@@ -274,18 +274,16 @@ class TestPredicateJoin(TestBase):
         )
 
         polygon_wkt_df.createOrReplaceTempView("polygontable")
-        polygon_wkt_df.show()
 
         polygon_df = self.spark.sql(
             "select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable"
         )
         polygon_df.createOrReplaceTempView("polygondf")
-        polygon_df.show()
 
         function_df = self.spark.sql(
             "select ST_Length(polygondf.countyshape) from polygondf"
         )
-        function_df.show()
+        assert function_df.take(1)[0][0] == 0.0
 
     def test_st_length2d(self):
         polygon_wkt_df = (
@@ -305,7 +303,7 @@ class TestPredicateJoin(TestBase):
         function_df = self.spark.sql(
             "select ST_Length2D(polygondf.countyshape) from polygondf"
         )
-        assert function_df.take(1)[0][0] == 1.6244272911181594
+        assert function_df.take(1)[0][0] == 0.0
 
     def test_st_area(self):
         polygon_wkt_df = (

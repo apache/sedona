@@ -1706,6 +1706,9 @@ gid  |                  validity_info
 
 Introduction: Returns the perimeter of A.
 
+!!!Warning
+    This function only supports LineString, MultiLineString, and GeometryCollections containing linear geometries. Use [ST_Perimeter](#st_perimeter) for polygons.
+
 Format: ST_Length (A:geometry)
 
 SQL example:
@@ -1718,6 +1721,9 @@ FROM polygondf
 ## ST_Length2D
 
 Introduction: Returns the perimeter of A. This function is an alias of [ST_Length](#st_length).
+
+!!!Warning
+    This function only supports LineString, MultiLineString, and GeometryCollections containing linear geometries. Use [ST_Perimeter](#st_perimeter) for polygons.
 
 Format: ST_Length2D (A:geometry)
 

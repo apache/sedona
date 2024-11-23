@@ -632,23 +632,24 @@ public class FunctionTest extends TestBase {
 
   @Test
   public void testLength() {
-    Table polygonTable = createPolygonTable(1);
+    Table polygonTable = createLineStringTable(1);
     Table resultTable =
-        polygonTable.select(call(Functions.ST_Length.class.getSimpleName(), $(polygonColNames[0])));
+        polygonTable.select(
+            call(Functions.ST_Length.class.getSimpleName(), $(linestringColNames[0])));
     assertNotNull(first(resultTable).getField(0));
     double result = (double) first(resultTable).getField(0);
-    assertEquals(4, result, 0);
+    assertEquals(1.4142135623730951, result, FP_TOLERANCE);
   }
 
   @Test
   public void testLength2D() {
-    Table polygonTable = createPolygonTable(1);
+    Table polygonTable = createLineStringTable(1);
     Table resultTable =
         polygonTable.select(
-            call(Functions.ST_Length2D.class.getSimpleName(), $(polygonColNames[0])));
+            call(Functions.ST_Length2D.class.getSimpleName(), $(linestringColNames[0])));
     assertNotNull(first(resultTable).getField(0));
     double result = (double) first(resultTable).getField(0);
-    assertEquals(4, result, 0);
+    assertEquals(1.4142135623730951, result, FP_TOLERANCE);
   }
 
   @Test
