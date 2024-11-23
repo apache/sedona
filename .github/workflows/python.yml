@@ -150,7 +150,7 @@ jobs:
           export SPARK_HOME=${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark
           cd python
           source ${VENV_PATH}/bin/activate
-          pytest -sv tests
+          pytest -v tests
       - name: Run basic tests without rasterio
         env:
           PYTHON_VERSION: ${{ matrix.python }}
@@ -159,7 +159,7 @@ jobs:
           cd python
           source ${VENV_PATH}/bin/activate
           pip uninstall -y rasterio
-          pytest -sv tests/core/test_rdd.py tests/sql/test_dataframe_api.py
+          pytest -v tests/core/test_rdd.py tests/sql/test_dataframe_api.py
       - name: Run Spark Connect tests
         env:
           PYTHON_VERSION: ${{ matrix.python }}
@@ -176,4 +176,4 @@ jobs:
           cd python
           source ${VENV_PATH}/bin/activate
           pip install "pyspark[connect]==${SPARK_VERSION}"
-          pytest tests/sql/test_dataframe_api.py
+          pytest -v tests/sql/test_dataframe_api.py
