@@ -632,30 +632,31 @@ public class FunctionTest extends TestBase {
 
   @Test
   public void testLength() {
-    Table polygonTable = createPolygonTable(1);
+    Table polygonTable = createLineStringTable(1);
     Table resultTable =
-        polygonTable.select(call(Functions.ST_Length.class.getSimpleName(), $(polygonColNames[0])));
+        polygonTable.select(
+            call(Functions.ST_Length.class.getSimpleName(), $(linestringColNames[0])));
     assertNotNull(first(resultTable).getField(0));
     double result = (double) first(resultTable).getField(0);
-    assertEquals(4, result, 0);
+    assertEquals(1.4142135623730951, result, FP_TOLERANCE);
   }
 
   @Test
   public void testLength2D() {
-    Table polygonTable = createPolygonTable(1);
+    Table polygonTable = createLineStringTable(1);
     Table resultTable =
         polygonTable.select(
-            call(Functions.ST_Length2D.class.getSimpleName(), $(polygonColNames[0])));
+            call(Functions.ST_Length2D.class.getSimpleName(), $(linestringColNames[0])));
     assertNotNull(first(resultTable).getField(0));
     double result = (double) first(resultTable).getField(0);
-    assertEquals(4, result, 0);
+    assertEquals(1.4142135623730951, result, FP_TOLERANCE);
   }
 
   @Test
   public void testLengthSpheroid() {
     Table tbl =
-        tableEnv.sqlQuery("SELECT ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 90 0, 0 0))'))");
-    Double expected = 20037508.342789244;
+        tableEnv.sqlQuery("SELECT ST_LengthSpheroid(ST_GeomFromWKT('LINESTRING (0 0, 2 0)'))");
+    Double expected = 222638.98158654713;
     Double actual = (Double) first(tbl).getField(0);
     assertEquals(expected, actual, 0.1);
   }

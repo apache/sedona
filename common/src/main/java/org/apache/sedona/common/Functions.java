@@ -457,8 +457,26 @@ public class Functions {
     return new Distance3DOp(left, right).distance();
   }
 
-  public static double length(Geometry geometry) {
+  public static double baseLength(Geometry geometry) {
     return geometry.getLength();
+  }
+
+  public static double length(Geometry geometry) {
+    String geomType = geometry.getGeometryType();
+    if (geomType.equalsIgnoreCase(Geometry.TYPENAME_LINESTRING)
+        || geomType.equalsIgnoreCase(Geometry.TYPENAME_POINT)
+        || geomType.equalsIgnoreCase(Geometry.TYPENAME_MULTIPOINT)
+        || geomType.equalsIgnoreCase(Geometry.TYPENAME_MULTILINESTRING)) {
+      return baseLength(geometry);
+    } else if (geomType.equalsIgnoreCase(Geometry.TYPENAME_GEOMETRYCOLLECTION)) {
+      double length = 0;
+      for (int i = 0; i < geometry.getNumGeometries(); i++) {
+        length += length(geometry.getGeometryN(i));
+      }
+      return length;
+    } else {
+      return 0;
+    }
   }
 
   public static Geometry normalize(Geometry geometry) {
@@ -1120,9 +1138,9 @@ public class Functions {
 
   private static double calculateLength(Geometry geometry, boolean use_spheroid) {
     if (use_spheroid) {
-      return Spheroid.length(geometry);
+      return Spheroid.baseLength(geometry);
     } else {
-      return length(geometry);
+      return baseLength(geometry);
     }
   }
 
