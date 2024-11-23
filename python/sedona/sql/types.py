@@ -17,8 +17,21 @@
 
 from pyspark.sql.types import BinaryType, UserDefinedType
 
-from ..raster import raster_serde
-from ..raster.sedona_raster import SedonaRaster
+# Only support RasterType when rasterio is installed
+try:
+    import rasterio
+except ImportError:
+    rasterio = None
+
+if rasterio is not None:
+    from ..raster import raster_serde
+    from ..raster.sedona_raster import SedonaRaster
+else:
+    # We'll skip RasterType UDT registration and raise error when deserializing
+    # RasterUDT objects if rasterio is not installed
+    raster_serde = None
+    SedonaRaster = None
+
 from ..utils import geometry_serde
 
 
@@ -57,7 +70,12 @@ class RasterType(UserDefinedType):
         raise NotImplementedError("RasterType.serialize is not implemented yet")
 
     def deserialize(self, datum):
-        return raster_serde.deserialize(datum)
+        if raster_serde is not None:
+            return raster_serde.deserialize(datum)
+        else:
+            raise NotImplementedError(
+                "rasterio is not installed. Please install it to support RasterType deserialization"
+            )
 
     @classmethod
     def module(cls):
@@ -71,4 +89,5 @@ class RasterType(UserDefinedType):
         return "org.apache.spark.sql.sedona_sql.UDT.RasterUDT"
 
 
-SedonaRaster.__UDT__ = RasterType()
+if SedonaRaster is not None:
+    SedonaRaster.__UDT__ = RasterType()

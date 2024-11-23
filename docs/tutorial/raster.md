@@ -615,6 +615,9 @@ raster.as_numpy_masked() # numpy array with nodata values masked as nan
 If you want to work with the raster data using `rasterio`, you can retrieve a `rasterio.DatasetReader` object using the
 `as_rasterio` method.
 
+!!!note
+    You need to have the `rasterio` package installed (version >= 1.2.10) to use this method. You can install it using `pip install rasterio`.
+
 ```python
 ds = raster.as_rasterio()  # rasterio.DatasetReader object
 # Work with the raster using rasterio
