@@ -1094,7 +1094,7 @@ SedonaPyDeck.create_choropleth_map(df=groupedresult, plot_col='AirportCount')
 
 ![Creating a Choropleth map using SedonaPyDeck](../image/choropleth.gif)
 
-The dataset used is available [here](https://github.com/apache/sedona/tree/master/docs/usecases/data/ne_50m_airports) and
+The dataset used is available [here](https://github.com/apache/sedona/tree/b66e768155866a38ba2e3404f1151cac14fad5ea/docs/usecases/data/ne_50m_airports) and
 can also be found in the example notebook available [here](https://github.com/apache/sedona/blob/master/docs/usecases/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)
 
 #### Creating a Geometry map using SedonaPyDeck
@@ -1162,7 +1162,7 @@ SedonaKepler.create_map(df=groupedresult, name="AirportCount")
 
 ![Visualize geospatial data using SedonaKepler](../image/sedona_customization.gif)
 
-The dataset used is available [here](https://github.com/apache/sedona/tree/master/docs/usecases/data/ne_50m_airports) and
+The dataset used is available [here](https://github.com/apache/sedona/tree/b66e768155866a38ba2e3404f1151cac14fad5ea/docs/usecases/data/ne_50m_airports) and
 can also be found in the example notebook available [here](https://github.com/apache/sedona/blob/master/docs/usecases/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)
 
 Details on all the APIs available by SedonaKepler are listed in the [SedonaKepler API docs](../api/sql/Visualization_SedonaKepler.md)
