@@ -2434,6 +2434,9 @@ Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lon/lat== orde
 !!!note
     By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
+!!!Warning
+    Since `v1.7.0`, this function only supports LineString, MultiLineString, and GeometryCollections containing linear geometries. Use [ST_Perimeter](#st_perimeter) for polygons.
+
 Format: `ST_LengthSpheroid (A: Geometry)`
 
 Since: `v1.4.1`
@@ -2441,13 +2444,13 @@ Since: `v1.4.1`
 SQL Example
 
 ```sql
-SELECT ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 90 0, 0 0))'))
+SELECT ST_LengthSpheroid(ST_GeomFromWKT('LINESTRING (0 0, 2 0)'))
 ```
 
 Output:
 
 ```
-20037508.342789244
+222638.98158654713
 ```
 
 ## ST_LineFromMultiPoint
