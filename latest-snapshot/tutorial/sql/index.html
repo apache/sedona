@@ -5853,8 +5853,8 @@ df = sedona.read.format("geopackage").option("showMetadata", "true").load("/path
 <p><code>plot_col</code> is a required argument informing SedonaPyDeck of the column name used to render the choropleth effect.</p>
 </div>
 <p><img alt="Creating a Choropleth map using SedonaPyDeck" src="../../image/choropleth.gif" /></p>
-<p>The dataset used is available <a href="https://github.com/apache/sedona/tree/4c5fa8333b2c61850d5664b878df9493c7915066/binder/data/ne_50m_airports">here</a> and
-can also be found in the example notebook available <a href="https://github.com/apache/sedona/blob/4c5fa8333b2c61850d5664b878df9493c7915066/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb">here</a></p>
+<p>The dataset used is available <a href="https://github.com/apache/sedona/tree/b66e768155866a38ba2e3404f1151cac14fad5ea/docs/usecases/data/ne_50m_airports">here</a> and
+can also be found in the example notebook available <a href="https://github.com/apache/sedona/blob/master/docs/usecases/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb">here</a></p>
 <h4 id="creating-a-geometry-map-using-sedonapydeck">Creating a Geometry map using SedonaPyDeck<a class="headerlink" href="#creating-a-geometry-map-using-sedonapydeck" title="Permanent link">&para;</a></h4>
 <p>SedonaPyDeck exposes a create_geometry_map API which can be used to visualize a passed SedonaDataFrame containing any type of geometries:</p>
 <p>Example (referenced from overture notebook available via binder):</p>
@@ -5893,8 +5893,8 @@ can also be found in the example notebook available <a href="https://github.com/
 <div class="highlight"><pre><span></span><code><span class="n">SedonaKepler</span><span class="o">.</span><span class="n">create_map</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">groupedresult</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;AirportCount&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p><img alt="Visualize geospatial data using SedonaKepler" src="../../image/sedona_customization.gif" /></p>
-<p>The dataset used is available <a href="https://github.com/apache/sedona/tree/4c5fa8333b2c61850d5664b878df9493c7915066/binder/data/ne_50m_airports">here</a> and
-can also be found in the example notebook available <a href="https://github.com/apache/sedona/blob/4c5fa8333b2c61850d5664b878df9493c7915066/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb">here</a></p>
+<p>The dataset used is available <a href="https://github.com/apache/sedona/tree/b66e768155866a38ba2e3404f1151cac14fad5ea/docs/usecases/data/ne_50m_airports">here</a> and
+can also be found in the example notebook available <a href="https://github.com/apache/sedona/blob/master/docs/usecases/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb">here</a></p>
 <p>Details on all the APIs available by SedonaKepler are listed in the <a href="../../api/sql/Visualization_SedonaKepler/">SedonaKepler API docs</a></p>
 <h2 id="create-a-user-defined-function-udf">Create a User-Defined Function (UDF)<a class="headerlink" href="#create-a-user-defined-function-udf" title="Permanent link">&para;</a></h2>
 <p>User-Defined Functions (UDFs) are user-created procedures that can perform operations on a single row of information. To cover almost all use cases, we will showcase 4 types of UDFs for a better understanding of how to use geometry with UDFs. Sedona's serializer deserializes the SQL geometry type to <a href="https://locationtech.github.io/jts/javadoc-1.18.0/org/locationtech/jts/geom/Geometry.html">JTS Geometry</a> (Scala/Java) or <a href="https://shapely.readthedocs.io/en/stable/geometry.html">Shapely Geometry</a> (Python). You can implement any custom logic using the rich ecosystem around these two libraries.</p>
@@ -6374,7 +6374,7 @@ case. Columns for the left and right user data must be provided.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">October 31, 2024 01:48:25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">November 24, 2024 07:21:59</span>
   </span>
 
     
