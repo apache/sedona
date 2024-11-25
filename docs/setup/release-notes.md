@@ -122,6 +122,8 @@ This release is a major release that includes new features, improvements, bug fi
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-680'>SEDONA-680</a>] -         Remove rasterio from mandatory dependency
 </li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-681'>SEDONA-681</a>] -         Bump GeoTools version from 28.2 to 28.5
+</li>
 </ul>
 
 ## Sedona 1.6.1
