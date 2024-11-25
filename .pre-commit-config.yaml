@@ -31,6 +31,15 @@ repos:
     rev: v1.5.5
     hooks:
       - id: insert-license
+        name: Add license for all Makefile files
+        files: ^Makefile$
+        args:
+          - --comment-style
+          - "|#|"
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
         name: Add license for all TOML files
         files: \.toml$
         args:
