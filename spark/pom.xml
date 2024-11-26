@@ -48,7 +48,6 @@
         <profile>
             <id>enable-all-submodules</id>
             <modules>
-                <module>spark-3.3</module>
                 <module>spark-3.4</module>
                 <module>spark-3.5</module>
             </modules>
