@@ -18,15 +18,14 @@
  */
 package org.apache.sedona.sql.datasources.geopackage
 
-import org.apache.sedona.sql.datasources.geopackage.model.{GeoPackageLoadOptions, GeoPackageOptions}
+import org.apache.sedona.sql.datasources.geopackage.model.GeoPackageOptions
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.read.Scan
-import org.apache.spark.sql.execution.datasources.{InMemoryFileIndex, PartitioningAwareFileIndex}
 import org.apache.spark.sql.execution.datasources.v2.FileScanBuilder
+import org.apache.spark.sql.execution.datasources.{InMemoryFileIndex, PartitioningAwareFileIndex}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
-
-import scala.jdk.CollectionConverters.mapAsScalaMapConverter
+import scala.jdk.CollectionConverters._
 
 class GeoPackageScanBuilder(
     sparkSession: SparkSession,
