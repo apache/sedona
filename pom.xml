@@ -765,6 +765,7 @@
                 <module>common</module>
                 <module>spark</module>
                 <module>spark-shaded</module>
+                <module>shade-proto</module>
             </modules>
         </profile>
         <profile>
@@ -788,6 +789,7 @@
                 <module>flink</module>
                 <module>flink-shaded</module>
                 <module>snowflake</module>
+                <module>shade-proto</module>
             </modules>
         </profile>
         <profile>
