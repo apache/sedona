@@ -47,6 +47,8 @@ This release is a major release that includes new features, improvements, bug fi
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-677'>SEDONA-677</a>] -         Kryo deserialization for null envelopes results in unit envelopes
 </li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-682'>SEDONA-682</a>] -         Sedona Spark 3.3 does not compile on Scala 2.13
+</li>
 </ul>
 
 ### New Feature
@@ -123,6 +125,8 @@ This release is a major release that includes new features, improvements, bug fi
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-680'>SEDONA-680</a>] -         Remove rasterio from mandatory dependency
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-681'>SEDONA-681</a>] -         Bump GeoTools version from 28.2 to 28.5
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-683'>SEDONA-683</a>] -         Exclude some repetitive dependencies
 </li>
 </ul>
 
