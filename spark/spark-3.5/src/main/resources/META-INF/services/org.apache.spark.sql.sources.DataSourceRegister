@@ -2,3 +2,4 @@ org.apache.spark.sql.execution.datasources.parquet.GeoParquetFileFormat
 org.apache.spark.sql.execution.datasources.v2.geoparquet.metadata.GeoParquetMetadataDataSource
 org.apache.sedona.sql.datasources.shapefile.ShapefileDataSource
 org.apache.sedona.sql.datasources.geopackage.GeoPackageDataSource
+org.apache.sedona.sql.datasources.osm.OsmPbfFormat
