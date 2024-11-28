@@ -19,7 +19,9 @@
 package org.apache.sedona.sql
 
 import org.apache.sedona.spark.SedonaContext
+import org.apache.spark.SparkContext
 import org.apache.spark.sql.SparkSessionExtensions
+import org.apache.spark.sql.parser.ParserFactory
 
 class SedonaSqlExtensions extends (SparkSessionExtensions => Unit) {
   def apply(e: SparkSessionExtensions): Unit = {
@@ -27,5 +29,16 @@ class SedonaSqlExtensions extends (SparkSessionExtensions => Unit) {
       SedonaContext.create(spark)
       _ => ()
     })
+
+    if (SedonaSqlExtensions.enableParser) {
+      e.injectParser { case (_, parser) =>
+        ParserFactory.getParser("org.apache.sedona.sql.parser.SedonaSqlParser", parser)
+      }
+    }
   }
+}
+
+object SedonaSqlExtensions {
+  private lazy val enableParser =
+    SparkContext.getOrCreate().getConf.get("spark.sedona.enableParserExtension", "true").toBoolean
 }

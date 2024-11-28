@@ -65,9 +65,6 @@ object SedonaContext {
     RasterRegistrator.registerAll(sparkSession)
     UdtRegistrator.registerAll()
     UdfRegistrator.registerAll(sparkSession)
-    if (sparkSession.conf.get("spark.sedona.enableParserExtension", "true").toBoolean) {
-      ParserRegistrator.register(sparkSession)
-    }
     sparkSession
   }
 

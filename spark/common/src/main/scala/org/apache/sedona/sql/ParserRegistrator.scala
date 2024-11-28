@@ -38,21 +38,6 @@ object ParserRegistrator {
       val field = sparkSession.sessionState.getClass.getDeclaredField("sqlParser")
       field.setAccessible(true)
       field.set(sparkSession.sessionState, parser)
-      return // return if the new constructor is available
-    } catch {
-      case _: Exception =>
-    }
-
-    // try to register the parser with the legacy constructor for spark 3.0
-    try {
-      val parserClassName = "org.apache.sedona.sql.parser.SedonaSqlParser"
-      val delegate: ParserInterface = sparkSession.sessionState.sqlParser
-
-      val parser =
-        ParserFactory.getParser(parserClassName, sparkSession.sessionState.conf, delegate)
-      val field = sparkSession.sessionState.getClass.getDeclaredField("sqlParser")
-      field.setAccessible(true)
-      field.set(sparkSession.sessionState, parser)
     } catch {
       case _: Exception =>
     }

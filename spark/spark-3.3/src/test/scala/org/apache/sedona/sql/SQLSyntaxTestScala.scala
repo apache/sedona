@@ -44,14 +44,25 @@ class SQLSyntaxTestScala extends TestBaseScala with TableDrivenPropertyChecks {
 
     it(
       "should be able to create a regular table with geometry column should work without a workaround") {
-      sparkSession.sql("CREATE TABLE T_TEST_EXPLICIT_GEOMETRY (GEO_COL GEOMETRY)")
-      sparkSession.catalog.tableExists("T_TEST_EXPLICIT_GEOMETRY") should be(true)
+      try {
+        sparkSession.sql("CREATE TABLE T_TEST_EXPLICIT_GEOMETRY (GEO_COL GEOMETRY)")
+        sparkSession.catalog.tableExists("T_TEST_EXPLICIT_GEOMETRY") should be(true)
+        enableParser should be("true")
+      } catch {
+        case _: Exception => enableParser should be("false")
+      }
     }
 
     it(
       "should be able to create a regular table with regular and geometry column should work without a workaround") {
-      sparkSession.sql("CREATE TABLE T_TEST_EXPLICIT_GEOMETRY_2 (INT_COL INT, GEO_COL GEOMETRY)")
-      sparkSession.catalog.tableExists("T_TEST_EXPLICIT_GEOMETRY_2") should be(true)
+      try {
+        sparkSession.sql(
+          "CREATE TABLE T_TEST_EXPLICIT_GEOMETRY_2 (INT_COL INT, GEO_COL GEOMETRY)")
+        sparkSession.catalog.tableExists("T_TEST_EXPLICIT_GEOMETRY_2") should be(true)
+        enableParser should be("true")
+      } catch {
+        case _: Exception => enableParser should be("false")
+      }
     }
   }
 }
