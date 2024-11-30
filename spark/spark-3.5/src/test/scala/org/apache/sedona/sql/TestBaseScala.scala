@@ -23,6 +23,8 @@ import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.sql.DataFrame
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
+import java.util.concurrent.ThreadLocalRandom
+
 trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   Logger.getRootLogger().setLevel(Level.WARN)
   Logger.getLogger("org.apache").setLevel(Level.WARN)
@@ -30,6 +32,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   Logger.getLogger("akka").setLevel(Level.WARN)
   Logger.getLogger("org.apache.sedona.core").setLevel(Level.WARN)
 
+  val keyParserExtension = "spark.sedona.enableParserExtension"
   val warehouseLocation = System.getProperty("user.dir") + "/target/"
   val sparkSession = SedonaContext
     .builder()
@@ -38,6 +41,8 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     .config("spark.sql.warehouse.dir", warehouseLocation)
     // We need to be explicit about broadcasting in tests.
     .config("sedona.join.autoBroadcastJoinThreshold", "-1")
+    .config("spark.sql.extensions", "org.apache.sedona.sql.SedonaSqlExtensions")
+    .config(keyParserExtension, ThreadLocalRandom.current().nextBoolean())
     .getOrCreate()
 
   val sparkSessionMinio = SedonaContext
