@@ -182,13 +182,13 @@ extra:
     - icon: fontawesome/brands/discord
       link: 'https://share.hsforms.com/1Ndql_ZigTdmLlVQc_d1o4gqga4q'
   sedona:
-    current_version: 1.6.1
-    current_geotools: 1.6.1-28.2
+    current_version: 1.7.0
+    current_geotools: 1.7.0-28.5
   sedona_create_release:
     current_version: 1.7.0
     current_git_tag: sedona-1.7.0-rc1
     current_rc: 1.7.0-rc1
-    current_snapshot: 1.7.0-SNAPSHOT
+    current_snapshot: 1.7.1-SNAPSHOT
     next_version: 1.7.1
 copyright: Copyright © 2024 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="https://www.apache.org/">Apache Software Foundation</a> for more details.<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f3e121f6-c909-4592-8be6-5bd345768cba" />
 

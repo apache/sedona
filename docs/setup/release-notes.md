@@ -11,6 +11,7 @@ This release is a major release that includes new features, improvements, bug fi
 * @MohammadLotfiA made their first contribution in https://github.com/apache/sedona/pull/1659
 * @golfalot made their first contribution in https://github.com/apache/sedona/pull/1673
 * @AmirTallap made their first contribution in https://github.com/apache/sedona/pull/1675
+* @freamdx made their first contribution in https://github.com/apache/sedona/pull/1704
 
 ### Highlights
 
