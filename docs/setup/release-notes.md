@@ -30,6 +30,7 @@ This release is a major release that includes new features, improvements, bug fi
 * @MohammadLotfiA made their first contribution in https://github.com/apache/sedona/pull/1659
 * @golfalot made their first contribution in https://github.com/apache/sedona/pull/1673
 * @AmirTallap made their first contribution in https://github.com/apache/sedona/pull/1675
+* @freamdx made their first contribution in https://github.com/apache/sedona/pull/1704
 
 ### Highlights
 
@@ -65,6 +66,8 @@ This release is a major release that includes new features, improvements, bug fi
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-673'>SEDONA-673</a>] -         Cannot load GeoParquet without bbox metadata when spatial filter is applied
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-677'>SEDONA-677</a>] -         Kryo deserialization for null envelopes results in unit envelopes
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-682'>SEDONA-682</a>] -         Sedona Spark 3.3 does not compile on Scala 2.13
 </li>
 </ul>
 
@@ -142,6 +145,8 @@ This release is a major release that includes new features, improvements, bug fi
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-680'>SEDONA-680</a>] -         Remove rasterio from mandatory dependency
 </li>
 <li>[<a href='https://issues.apache.org/jira/browse/SEDONA-681'>SEDONA-681</a>] -         Bump GeoTools version from 28.2 to 28.5
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-683'>SEDONA-683</a>] -         Exclude some repetitive dependencies
 </li>
 </ul>
 

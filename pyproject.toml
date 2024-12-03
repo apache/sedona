@@ -17,3 +17,7 @@
 
 [tool.bandit]
 skips = ["B101", "B403", "B405", "B608"]
+
+[tool.codespell]
+ignore-words = '.github/linters/codespell.txt'
+skip = './docs/image,./docs/usecases,./site,./spark/common/src/test/resources,./tools/maven/scalafmt.conf'

@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.sedona</groupId>
         <artifactId>sedona-parent</artifactId>
-        <version>1.6.1-SNAPSHOT</version>
+        <version>1.7.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 	<artifactId>sedona-spark-parent-${spark.compat.version}_${scala.compat.version}</artifactId>
@@ -48,7 +48,6 @@
         <profile>
             <id>enable-all-submodules</id>
             <modules>
-                <module>spark-3.3</module>
                 <module>spark-3.4</module>
                 <module>spark-3.5</module>
             </modules>
