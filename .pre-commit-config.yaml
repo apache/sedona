@@ -62,7 +62,7 @@ repos:
     hooks:
       - id: black-jupyter
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v19.1.1
+    rev: v19.1.4
     hooks:
       - id: clang-format
         args: [--style=Google]
@@ -81,7 +81,7 @@ repos:
         args: [--ignore-words=.github/linters/codespell.txt]
         exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases|^tools/maven/scalafmt
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.20.1
+    rev: v8.21.2
     hooks:
       - id: gitleaks
   - repo: https://github.com/shssoichiro/oxipng
@@ -138,7 +138,7 @@ repos:
         args: [--markdown-linebreak-ext=md]
         exclude: ^docs-overrides/main\.html$|\.Rd$
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.42.0
+    rev: v0.43.0
     hooks:
       - id: markdownlint
         name: Run markdownlint
