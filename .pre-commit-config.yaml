@@ -31,6 +31,16 @@ repos:
     rev: v1.5.5
     hooks:
       - id: insert-license
+        name: Add license for all Markdown files
+        files: \.md$
+        args:
+          - --comment-style
+          - "<!--|| -->"
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+        exclude: ^docs/index\.md$|^\.github/pull_request_template\.md$|\.github/issue_template\.md$
+      - id: insert-license
         name: Add license for all Makefile files
         files: ^Makefile$
         args:
