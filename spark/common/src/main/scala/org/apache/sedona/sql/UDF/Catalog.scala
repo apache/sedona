@@ -339,7 +339,13 @@ object Catalog {
     function[RS_Resample](),
     function[RS_ReprojectMatch]("nearestneighbor"),
     function[RS_FromNetCDF](),
-    function[RS_NetCDFInfo]())
+    function[RS_NetCDFInfo](),
+    // geostats functions
+    function[ST_DBSCAN](),
+    function[ST_LocalOutlierFactor](),
+    function[ST_GLocal](),
+    function[ST_BinaryDistanceBandColumn](),
+    function[ST_WeightedDistanceBandColumn]())
 
   // Aggregate functions with Geometry as buffer
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] =

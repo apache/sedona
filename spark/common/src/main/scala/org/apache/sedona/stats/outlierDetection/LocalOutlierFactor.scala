@@ -19,7 +19,7 @@
 package org.apache.sedona.stats.outlierDetection
 
 import org.apache.sedona.stats.Util.getGeometryColumnName
-import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_Distance, ST_DistanceSpheroid}
+import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_Distance, ST_DistanceSphere}
 import org.apache.spark.sql.{Column, DataFrame, SparkSession, functions => f}
 
 object LocalOutlierFactor {
@@ -42,8 +42,10 @@ object LocalOutlierFactor {
    *   name of the geometry column
    * @param handleTies
    *   whether to handle ties in the k-distance calculation. Default is false
-   * @param useSpheroid
+   * @param useSphere
    *   whether to use a cartesian or spheroidal distance calculation. Default is false
+   * @param resultColumnName
+   *   the name of the column containing the lof for each row. Default is "lof"
    *
    * @return
    *   A DataFrame containing the lof for each row
@@ -53,7 +55,8 @@ object LocalOutlierFactor {
       k: Int = 20,
       geometry: String = null,
       handleTies: Boolean = false,
-      useSpheroid: Boolean = false): DataFrame = {
+      useSphere: Boolean = false,
+      resultColumnName: String = "lof"): DataFrame = {
 
     if (k < 1)
       throw new IllegalArgumentException("k must be a positive integer")
@@ -67,8 +70,8 @@ object LocalOutlierFactor {
     } else "false" // else case to make compiler happy
 
     val distanceFunction: (Column, Column) => Column =
-      if (useSpheroid) ST_DistanceSpheroid else ST_Distance
-    val useSpheroidString = if (useSpheroid) "True" else "False" // for the SQL expression
+      if (useSphere) ST_DistanceSphere else ST_Distance
+    val useSpheroidString = if (useSphere) "True" else "False" // for the SQL expression
 
     val geometryColumn = if (geometry == null) getGeometryColumnName(dataframe) else geometry
 
@@ -136,8 +139,8 @@ object LocalOutlierFactor {
       .groupBy("a_id")
       .agg(
         f.first(CONTENTS_COLUMN_NAME).alias(CONTENTS_COLUMN_NAME),
-        (f.sum("b_lrd") / (f.count("b_lrd") * f.first("a_lrd"))).alias("lof"))
-      .select(f.col(f"$CONTENTS_COLUMN_NAME.*"), f.col("lof"))
+        (f.sum("b_lrd") / (f.count("b_lrd") * f.first("a_lrd"))).alias(resultColumnName))
+      .select(f.col(f"$CONTENTS_COLUMN_NAME.*"), f.col(resultColumnName))
 
     if (handleTies)
       SparkSession.getActiveSession.get.conf
