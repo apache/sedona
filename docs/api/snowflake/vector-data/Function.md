@@ -148,13 +148,15 @@ Introduction: Calculates and returns an anchor point for a given geometry. The a
 Format:
 
 ```sql
-ST_Anchor(geometry:Geometry)
+ST_Anchor(geometry: Geometry)
 ```
+
 ```sql
-ST_Anchor(geometry:Geometry, stepSize: Interger)
+ST_Anchor(geometry: Geometry, stepSize: Integer)
 ```
+
 ```sql
-ST_Anchor(geometry:Geometry, stepSize: Interger, goodnessThreshold: Double)
+ST_Anchor(geometry: Geometry, stepSize: Integer, goodnessThreshold: Double)
 ```
 
 SQL Example:
@@ -192,7 +194,6 @@ Output:
 ```
 SRID=4326;POINT (-112.0722602222832 33.53914975012836)
 ```
-
 
 ## ST_Angle
 

@@ -181,13 +181,15 @@ Introduction: Calculates and returns an anchor point for a given geometry. The a
 Format:
 
 ```sql
-ST_Anchor(geometry:Geometry)
+ST_Anchor(geometry: Geometry)
 ```
+
 ```sql
-ST_Anchor(geometry:Geometry, stepSize: Interger)
+ST_Anchor(geometry: Geometry, stepSize: Integer)
 ```
+
 ```sql
-ST_Anchor(geometry:Geometry, stepSize: Interger, goodnessThreshold: Double)
+ST_Anchor(geometry: Geometry, stepSize: Integer, goodnessThreshold: Double)
 ```
 
 Since: `v1.7.1`
