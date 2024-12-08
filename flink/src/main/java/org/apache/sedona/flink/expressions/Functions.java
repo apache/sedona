@@ -40,6 +40,33 @@ public class Functions {
     }
   }
 
+  public static class ST_Anchor extends ScalarFunction {
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.anchor(geom);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint("Integer") Integer stepSize) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.anchor(geom, stepSize);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint("Integer") Integer stepSize,
+        @DataTypeHint("Double") Double goodnessThreshold) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.anchor(geom, stepSize, goodnessThreshold);
+    }
+  }
+
   public static class ST_Area extends ScalarFunction {
     @DataTypeHint("Double")
     public Double eval(
