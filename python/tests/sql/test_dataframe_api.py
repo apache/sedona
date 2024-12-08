@@ -268,6 +268,27 @@ test_configurations = [
         "LINESTRING (0 0, 1 1, 1 0, 2 0, 3 0, 4 0, 5 0)",
     ),
     (
+        stf.ST_Anchor,
+        ("geom"),
+        "triangle_geom",
+        "",
+        "POINT (0.6666666666666666 0.3333333333333333)",
+    ),
+    (
+        stf.ST_Anchor,
+        ("geom", 1),
+        "triangle_geom",
+        "",
+        "POINT (0.6666666666666666 0.3333333333333333)",
+    ),
+    (
+        stf.ST_Anchor,
+        ("geom", 1, 0.5),
+        "triangle_geom",
+        "",
+        "POINT (0.6666666666666666 0.3333333333333333)",
+    ),
+    (
         stf.ST_Angle,
         (
             "p1",
@@ -1222,6 +1243,7 @@ wrong_type_configurations = [
     (stf.ST_AddMeasure, ("", None, "")),
     (stf.ST_AddPoint, (None, "")),
     (stf.ST_AddPoint, ("", None)),
+    (stf.ST_Anchor, ("", None)),
     (stf.ST_Area, (None,)),
     (stf.ST_AsBinary, (None,)),
     (stf.ST_AsEWKB, (None,)),
