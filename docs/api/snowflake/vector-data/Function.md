@@ -127,6 +127,73 @@ Input: `POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))`
 
 Output: `POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))`
 
+## ST_Anchor
+
+Introduction: Calculates and returns an anchor point for a given geometry. The anchor point is determined as a point inside the geometry, prioritizing proximity to the centroid and distance from the boundaries. For collections, the largest polygon by area is used.
+
+`ST_Anchor` takes upto 3 arguments,
+
+- `geometry`: input geometry (e.g., a polygon or GeometryCollection) for which the anchor point is to be calculated.
+- `stepSize` (Optional, default is 2.0): Controls the resolution of the grid search for refining the anchor point. Smaller values provide finer refinement but increase computation time.
+- `goodnessThreshold` (Optional, default is 0.2): Determines the minimum acceptable “goodness” value for the anchor point. Higher thresholds prioritize points farther from boundaries but may require more computation.
+
+!!!note
+    - `ST_Anchor` throws an `IllegalArgumentException` if the input geometry has an area of zero or less.
+    - Holes within polygons are respected, and the anchor is always placed inside the outer boundary, not inside a hole.
+    - For GeometryCollection, only the largest polygon by area is considered.
+
+!!!tip
+    Use `ST_Anchor` for tasks such as label placement, identifying representative points for polygons, or other spatial analyses requiring an internal reference point.
+
+Format:
+
+```sql
+ST_Anchor(geometry:Geometry)
+```
+```sql
+ST_Anchor(geometry:Geometry, stepSize: Interger)
+```
+```sql
+ST_Anchor(geometry:Geometry, stepSize: Interger, goodnessThreshold: Double)
+```
+
+SQL Example:
+
+```
+SELECT ST_Anchor(ST_GeomFromWKT('POLYGON((0 0, 4 0, 4 4, 0 4, 0 0))'))
+```
+
+Output:
+
+```
+POINT (2 2)
+```
+
+SQL Example:
+
+```
+SELECT ST_Anchor(ST_GeomFromWKT('GEOMETRYCOLLECTION(POLYGON ((-112.840785 33.435962, -112.840785 33.708284, -112.409597 33.708284, -112.409597 33.435962, -112.840785 33.435962)), POLYGON ((-112.309264 33.398167, -112.309264 33.746007, -111.787444 33.746007, -111.787444 33.398167, -112.309264 33.398167)))'))
+```
+
+Output:
+
+```
+POINT (-112.04835399999999 33.57208699999999)
+```
+
+SQL Example:
+
+```
+SELECT ST_Anchor(ST_GeomFromWKT('POLYGON ((-112.654072 33.114485, -112.313516 33.653431, -111.63515 33.314399, -111.497829 33.874913, -111.692825 33.431378, -112.376684 33.788215, -112.654072 33.114485))', 4326))
+```
+
+Output:
+
+```
+SRID=4326;POINT (-112.0722602222832 33.53914975012836)
+```
+
+
 ## ST_Angle
 
 Introduction: Computes and returns the angle between two vectors represented by the provided points or linestrings.
