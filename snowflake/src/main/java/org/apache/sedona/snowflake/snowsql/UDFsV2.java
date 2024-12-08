@@ -102,6 +102,27 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geom"},
+      argTypes = {"Geometry"})
+  public static Geometry ST_Anchor(String geom) {
+    return Functions.anchor(GeometrySerde.deserGeoJson(geom));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geom", "stepSize"},
+      argTypes = {"Geometry", "int"})
+  public static Geometry ST_Anchor(String geom, int stepSize) {
+    return Functions.anchor(GeometrySerde.deserGeoJson(geom), stepSize);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geom", "stepSize", "goodnessThreshold"},
+      argTypes = {"Geometry", "int", "double"})
+  public static Geometry ST_Anchor(String geom, int stepSize, double goodnessThreshold) {
+    return Functions.anchor(GeometrySerde.deserGeoJson(geom), stepSize, goodnessThreshold);
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geom1", "geom2"},
       argTypes = {"Geometry", "Geometry"})
   public static double ST_Angle(String geom1, String geom2) {

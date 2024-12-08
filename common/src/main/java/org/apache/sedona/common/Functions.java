@@ -80,6 +80,123 @@ public class Functions {
     return geometry.getArea();
   }
 
+  public static Geometry anchor(Geometry geometry) {
+    return anchor(geometry, 2, 0.2);
+  }
+
+  public static Geometry anchor(Geometry geometry, double stepSize) {
+    return anchor(geometry, stepSize, 0.2);
+  }
+
+  public static Geometry anchor(Geometry geometry, double stepSize, double goodnessThreshold) {
+    if (geometry.getArea() <= 0) {
+      throw new IllegalArgumentException("Geometry must have a positive area");
+    }
+
+    GeometryFactory geometryFactory = new GeometryFactory();
+
+    // If the geometry is a collection, find the largest polygon
+    if (geometry instanceof GeometryCollection) {
+      GeometryCollection gc = (GeometryCollection) geometry;
+      Geometry largestPolygon = null;
+      double maxArea = Double.MIN_VALUE;
+
+      for (int i = 0; i < gc.getNumGeometries(); i++) {
+        Geometry geom = gc.getGeometryN(i);
+        double area = geom.getArea();
+        if (area > maxArea) {
+          largestPolygon = geom;
+          maxArea = area;
+        }
+      }
+
+      // Recursively process the largest polygon
+      if (largestPolygon instanceof Polygon) {
+        return polygonToAnchor(
+            (Polygon) largestPolygon, stepSize, goodnessThreshold, geometryFactory);
+      } else {
+        throw new IllegalArgumentException("GeometryCollection must contain at least one Polygon");
+      }
+    }
+
+    // If the geometry is a polygon, process it
+    if (geometry instanceof Polygon) {
+      return polygonToAnchor((Polygon) geometry, stepSize, goodnessThreshold, geometryFactory);
+    }
+
+    throw new IllegalArgumentException(
+        "Geometry must be a Polygon or a GeometryCollection containing Polygons");
+  }
+
+  private static Point polygonToAnchor(
+      Polygon polygon, double stepSize, double goodnessThreshold, GeometryFactory geometryFactory) {
+    if (polygon.getArea() <= 0) {
+      throw new IllegalArgumentException("Polygon must have a positive area");
+    }
+
+    Envelope env = polygon.getEnvelopeInternal();
+    double xmin = env.getMinX();
+    double ymin = env.getMinY();
+    double xmax = env.getMaxX();
+    double ymax = env.getMaxY();
+
+    Point centroid = polygon.getCentroid();
+    double radius = Math.sqrt(polygon.getArea() / Math.PI);
+    goodnessThreshold = radius * goodnessThreshold;
+
+    double bestGoodness = labelGoodness(polygon, centroid);
+    //    System.out.println(bestGoodness + ", " + goodnessThreshold);
+
+    if (bestGoodness < goodnessThreshold) {
+      for (int sub = 2; sub < 32; sub++) {
+        //        System.out.println("Loop " + (sub - 1));
+        if ((xmax - xmin) <= stepSize * sub || (ymax - ymin) <= stepSize * sub) break;
+
+        for (int x = 1; x < sub; x++) {
+          for (int y = 1; y < sub; y++) {
+            Point candidate =
+                geometryFactory.createPoint(
+                    new Coordinate(xmin + x * (xmax - xmin) / sub, ymin + y * (ymax - ymin) / sub));
+
+            double candidateGoodness = labelGoodness(polygon, candidate);
+
+            if (candidateGoodness > bestGoodness) {
+              centroid = candidate;
+              bestGoodness = candidateGoodness;
+            }
+          }
+        }
+
+        if (bestGoodness > goodnessThreshold) {
+          return centroid;
+        }
+      }
+    }
+
+    return centroid;
+  }
+
+  private static double labelGoodness(Geometry geometry, Point point) {
+    if (!geometry.intersects(point)) {
+      return 0.0;
+    }
+
+    double closest = Double.POSITIVE_INFINITY;
+    Coordinate[] coordinates = geometry.getCoordinates();
+
+    for (Coordinate coord : coordinates) {
+      double dx = coord.x - point.getX();
+      double dy = coord.y - point.getY();
+      double distanceSquared = dx * dx + dy * dy;
+
+      if (distanceSquared < closest) {
+        closest = distanceSquared;
+      }
+    }
+
+    return Math.sqrt(closest);
+  }
+
   public static double azimuth(Geometry left, Geometry right) {
     Coordinate leftCoordinate = left.getCoordinate();
     Coordinate rightCoordinate = right.getCoordinate();
