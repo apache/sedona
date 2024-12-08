@@ -87,6 +87,21 @@ public class UDFs {
     return Functions.angle(GeometrySerde.deserialize(geom1), GeometrySerde.deserialize(geom2));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geom"})
+  public static Geometry ST_Anchor(byte[] geom) {
+    return Functions.anchor(GeometrySerde.deserialize(geom));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geom", "stepSize"})
+  public static Geometry ST_Anchor(byte[] geom, Integer stepSize) {
+    return Functions.anchor(GeometrySerde.deserialize(geom), stepSize);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geom", "stepSize", "goodnessThreshold"})
+  public static Geometry ST_Anchor(byte[] geom, Integer stepSize, double goodnessThreshold) {
+    return Functions.anchor(GeometrySerde.deserialize(geom), stepSize, goodnessThreshold);
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2", "geom3"})
   public static double ST_Angle(byte[] geom1, byte[] geom2, byte[] geom3) {
     return Functions.angle(
