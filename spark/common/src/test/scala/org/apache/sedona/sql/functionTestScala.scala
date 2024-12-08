@@ -49,6 +49,36 @@ class functionTestScala
 
   describe("Sedona-SQL Function Test") {
 
+    it("Passed ST_Anchor") {
+      var geomDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON ((-112.637484 33.440546, -112.546852 33.477209, -112.489177 33.550488, -112.41777 33.751684, -111.956371 33.719707, -111.766868 33.616843, -111.775107 33.527595, -111.640533 33.504695, -111.440044 33.463462, -111.415326 33.374055, -111.514197 33.309809, -111.643279 33.222542, -111.893203 33.174278, -111.96461 33.250109, -112.123903 33.261593, -112.252985 33.35341, -112.406784 33.346527, -112.667694 33.316695, -112.637484 33.440546))') AS geom, 2 AS stepSize, 0.2 AS GoodnessThreshold")
+      geomDf.createOrReplaceTempView("geomDf")
+      var result =
+        sparkSession.sql(
+          "SELECT ST_AsEWKT(ST_Anchor(geom, stepSize, goodnessThreshold)) FROM geomDf")
+      var expected = "POINT (-112.04278737349767 33.46420809489905)"
+      assertEquals(expected, result.take(1)(0).get(0).asInstanceOf[String])
+
+      geomDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION(POLYGON ((-112.840785 33.435962, -112.840785 33.708284, -112.409597 33.708284, -112.409597 33.435962, -112.840785 33.435962)), POLYGON ((-112.309264 33.398167, -112.309264 33.746007, -111.787444 33.746007, -111.787444 33.398167, -112.309264 33.398167)))') AS geom")
+      geomDf.createOrReplaceTempView("geomDf")
+      result = sparkSession.sql("SELECT ST_AsEWKT(ST_Anchor(geom, 1)) FROM geomDf")
+      expected = "POINT (-112.04835399999999 33.57208699999999)"
+      assertEquals(expected, result.take(1)(0).get(0).asInstanceOf[String])
+
+      geomDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON ((-112.654072 33.114485, -112.313516 33.653431, -111.63515 33.314399, -111.497829 33.874913, -111.692825 33.431378, -112.376684 33.788215, -112.654072 33.114485))') AS geom, 0.01 AS goodnessThreshold")
+      geomDf.createOrReplaceTempView("geomDf")
+      result =
+        sparkSession.sql("SELECT ST_AsEWKT(ST_Anchor(geom, 2, goodnessThreshold)) FROM geomDf")
+      expected = "POINT (-112.0722602222832 33.53914975012836)"
+      assertEquals(expected, result.take(1)(0).get(0).asInstanceOf[String])
+
+      result = sparkSession.sql("SELECT ST_AsEWKT(ST_Anchor(geom)) FROM geomDf")
+      expected = "POINT (-112.0722602222832 33.53914975012836)"
+      assertEquals(expected, result.take(1)(0).get(0).asInstanceOf[String])
+    }
+
     it("Passed ST_ConcaveHull") {
       var polygonWktDf = sparkSession.read
         .format("csv")
