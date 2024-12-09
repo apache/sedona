@@ -354,7 +354,7 @@ test_that("spark_read_geoparquet() works as expected, ex 2", {
   lifecycle::expect_deprecated({
     geoparquet_sdf <- spark_read_geoparquet(sc, geoparquet("example2.parquet"), name = sdf_name)
   })
-  
+
   ## Right data (first row)
   expect_equivalent(
     geoparquet_sdf %>% head(1) %>% select(name, geometry) %>%  mutate(geometry = geometry %>% st_astext()) %>% collect() %>% as.list(),

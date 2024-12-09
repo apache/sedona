@@ -390,14 +390,14 @@ sedona_read_shapefile <- function(sc,
 #' Read geospatial data into a Spark DataFrame.
 #'
 #' @description `r lifecycle::badge("deprecated")`
-#' 
-#' These functions are deprecated and will be removed in a future release. Sedona has 
-#' been implementing readers as spark DataFrame sources, so you can use `spark_read_source` 
-#' with the right sources ("shapefile", "geojson", "geoparquet") to read geospatial data. 
-#' 
+#'
+#' These functions are deprecated and will be removed in a future release. Sedona has
+#' been implementing readers as spark DataFrame sources, so you can use `spark_read_source`
+#' with the right sources ("shapefile", "geojson", "geoparquet") to read geospatial data.
+#'
 #' Functions to read geospatial data from a variety of formats into Spark DataFrames.
-#' 
-#' 
+#'
+#'
 #' * `spark_read_shapefile`: from a shapefile
 #' * `spark_read_geojson`: from a geojson file
 #' * `spark_read_geoparquet`: from a geoparquet file
@@ -426,7 +426,7 @@ spark_read_shapefile <- function(sc,
                                  path = name,
                                  options = list(),
                                  ...) {
-  
+
   lifecycle::deprecate_soft(
     "1.7.1",
     "spark_read_shapefile()",
@@ -458,7 +458,7 @@ spark_read_geojson <- function(sc,
                                repartition = 0,
                                memory = TRUE,
                                overwrite = TRUE) {
-  
+
   lifecycle::deprecate_soft(
     "1.7.1",
     "spark_read_geojson()",
@@ -498,7 +498,7 @@ spark_read_geoparquet <- function(sc,
                                   repartition = 0,
                                   memory = TRUE,
                                   overwrite = TRUE) {
-  
+
   lifecycle::deprecate_soft(
     "1.7.1",
     "spark_read_geoparquet()",
@@ -628,12 +628,12 @@ sedona_save_spatial_rdd <- function(x,
 #' Write geospatial data from a Spark DataFrame.
 #'
 #' @description `r lifecycle::badge("deprecated")`
-#' 
-#' These functions are deprecated and will be removed in a future release. Sedona has 
-#' been implementing writers as spark DataFrame sources, so you can use `spark_write_source` 
-#' with the right sources ("shapefile", "geojson", "geoparquet") to write geospatial data. 
+#'
+#' These functions are deprecated and will be removed in a future release. Sedona has
+#' been implementing writers as spark DataFrame sources, so you can use `spark_write_source`
+#' with the right sources ("shapefile", "geojson", "geoparquet") to write geospatial data.
 
-#' 
+#'
 #' Functions to write geospatial data into a variety of formats from Spark DataFrames.
 #'
 #' * `spark_write_geojson`: to GeoJSON
@@ -675,7 +675,7 @@ spark_write_geojson <- function(x,
                                 options = list(),
                                 partition_by = NULL,
                                 ...) {
-  
+
   lifecycle::deprecate_soft(
     "1.7.1",
     "spark_write_geojson()",
@@ -721,7 +721,7 @@ spark_write_geoparquet <- function(x,
     "spark_write_geoparquet()",
     with = "spark_read_source()"
   )
-  
+
   spark_write_source(
     x = x,
     source = "geoparquet",
@@ -744,7 +744,7 @@ spark_write_raster <- function(x,
                                    options = list(),
                                    partition_by = NULL,
                                    ...) {
-  
+
   lifecycle::deprecate_soft(
     "1.7.1",
     "spark_write_raster()",
