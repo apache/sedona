@@ -212,9 +212,10 @@ test_that("Should read geotiff using binary source and write geotiff back to dis
   binary_sdf <- spark_read_binary(sc, dir = test_data("raster"), name = sdf_name)
 
   tmp_dest <- tempfile()
-
+  lifecycle::expect_deprecated({
   binary_sdf %>%
     spark_write_raster(path = tmp_dest)
+  })
 
   sdf_name_2 <- random_string("spatial_sdf_2")
   binary_2_sdf <- spark_read_binary(sc, dir = tmp_dest, name = sdf_name_2, recursive_file_lookup = TRUE)

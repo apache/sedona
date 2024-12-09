@@ -43,7 +43,7 @@ Supports the \samp{"hdfs://"}, \samp{"s3a://"} and \samp{"file://"} protocols.}
   table already exists. Supported values include: 'error', 'append', 'overwrite' and
   ignore. Notice that 'overwrite' will also change the column structure.
 
-  For more details see also \url{https://spark.apache.org/docs/latest/sql-programming-guide.html}
+  For more details see also \url{https://spark.apache.org/docs/latest/sql-programming-guide.html#save-modes}
   for your version of Spark.}
 
 \item{options}{A list of strings with additional options.}
@@ -53,6 +53,12 @@ Supports the \samp{"hdfs://"}, \samp{"s3a://"} and \samp{"file://"} protocols.}
 \item{...}{Optional arguments; currently unused.}
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+These functions are deprecated and will be removed in a future release. Sedona has
+been implementing writers as spark DataFrame sources, so you can use \code{spark_write_source}
+with the right sources ("shapefile", "geojson", "geoparquet") to write geospatial data.
+
 Functions to write geospatial data into a variety of formats from Spark DataFrames.
 \itemize{
 \item \code{spark_write_geojson}: to GeoJSON

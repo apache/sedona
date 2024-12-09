@@ -43,7 +43,7 @@ if (!inherits(sc, "test_connection")) {
     type = "polygon"
   )
   sdf <- sdf_register(rdd)
-  
+
   input_location <- "/dev/null" # replace it with the path to your input file
   rdd <- sedona_read_dsv_to_typed_rdd(
     sc,
