@@ -17,7 +17,7 @@ as.spark.dataframe: lower level function with more fine-grained control on non-s
 
     <a class="navbar-brand me-2" href="../index.html">apache.sedona</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0.900</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,7 +98,7 @@ resulting Spark Dataframe. By default (NULL) it will import all field names if t
 <span class="r-in"><span>    type <span class="op">=</span> <span class="st">"polygon"</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">sdf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/sparklyr/man/sdf_register.html" class="external-link">sdf_register</a></span><span class="op">(</span><span class="va">rdd</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  </span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="va">input_location</span> <span class="op">&lt;-</span> <span class="st">"/dev/null"</span> <span class="co"># replace it with the path to your input file</span></span></span>
 <span class="r-in"><span>  <span class="va">rdd</span> <span class="op">&lt;-</span> <span class="fu"><a href="sedona_read_dsv_to_typed_rdd.html">sedona_read_dsv_to_typed_rdd</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="va">sc</span>,</span></span>
