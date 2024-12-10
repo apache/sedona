@@ -36,7 +36,8 @@ spark_read_geoparquet(
 \item{path}{The path to the file. Needs to be accessible from the cluster.
 Supports the \samp{"hdfs://"}, \samp{"s3a://"} and \samp{"file://"} protocols.}
 
-\item{options}{A list of strings with additional options. See \url{https://spark.apache.org/docs/latest/sql-programming-guide.html}.}
+\item{options}{A list of strings with additional options.
+See \url{https://spark.apache.org/docs/latest/sql-programming-guide.html#configuration}.}
 
 \item{...}{Optional arguments; currently unused.}
 
@@ -53,6 +54,12 @@ already exists?}
 A tbl
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+These functions are deprecated and will be removed in a future release. Sedona has
+been implementing readers as spark DataFrame sources, so you can use \code{spark_read_source}
+with the right sources ("shapefile", "geojson", "geoparquet") to read geospatial data.
+
 Functions to read geospatial data from a variety of formats into Spark DataFrames.
 \itemize{
 \item \code{spark_read_shapefile}: from a shapefile
