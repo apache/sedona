@@ -86,7 +86,7 @@ nav:
                   - DataFrame Style functions: api/sql/DataFrameAPI.md
                   - Query optimization: api/sql/Optimizer.md
                   - Nearest-Neighbour searching: api/sql/NearestNeighbourSearching.md
-                  - "Spider:Spatial Data Generator": api/sql/Spider.md
+                  - 'Spider:Spatial Data Generator': api/sql/Spider.md
                   - Reading Legacy Parquet Files: api/sql/Reading-legacy-parquet.md
                   - Visualization:
                       - SedonaPyDeck: api/sql/Visualization_SedonaPyDeck.md

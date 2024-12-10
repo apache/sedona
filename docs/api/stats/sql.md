@@ -71,16 +71,16 @@ names in parentheses are python variable names
 
 The output is the input DataFrame with the lof added to each row.
 
-## Using Getis-Ord Gi(*)
+## Using Getis-Ord Gi(\*)
 
 The G Local function is provided at `org.apache.sedona.stats.hotspotDetection.GetisOrd.gLocal` in scala/java and `sedona.stats.hotspot_detection.getis_ord.g_local` in python.
 
-Performs the Gi or Gi* statistic on the x column of the dataframe.
+Performs the Gi or Gi\* statistic on the x column of the dataframe.
 
 Weights should be the neighbors of this row. The members of the weights should be comprised
 of structs containing a value column and a neighbor column. The neighbor column should be the
 contents of the neighbors with the same types as the parent row (minus neighbors). Reference the _Using the Distance
-Weighting Function_ header for instructions on generating this column. To calculate the Gi*
+Weighting Function_ header for instructions on generating this column. To calculate the Gi\*
 statistic, ensure the focal observation is in the neighbors array (i.e. the row is in the
 weights column) and `star=true`. Significance is calculated with a z score.
 
@@ -89,7 +89,7 @@ weights column) and `star=true`. Significance is calculated with a z score.
 - dataframe - the dataframe to perform the G statistic on
 - x - The column name we want to perform hotspot analysis on
 - weights - The column name containing the neighbors array. The neighbor column should be the contents of the neighbors with the same types as the parent row (minus neighbors). You can use `Weighting` class functions to achieve this.
-- star - Whether the focal observation is in the neighbors array. If true this calculates Gi*, otherwise Gi
+- star - Whether the focal observation is in the neighbors array. If true this calculates Gi\*, otherwise Gi
 
 The output is the input DataFrame with the following columns added: G, E[G], V[G], Z, P.
 
@@ -134,4 +134,4 @@ names in parentheses are python variable names
 - geometry - name of the geometry column
 - useSpheroid (use_spheroid) - whether to use a cartesian or spheroidal distance calculation. Default is false
 
-In both cases the output is the input DataFrame with the weights column added to each row.
+In both cases the output is the input DataFrame with the weights column added to each r

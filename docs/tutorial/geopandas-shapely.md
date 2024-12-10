@@ -20,7 +20,7 @@
 # Work with GeoPandas and Shapely
 
 !!! note
-	Sedona before 1.6.0 only works with Shapely 1.x. If you want to work with Shapely 2.x, please use Sedona no earlier than 1.6.0.
+Sedona before 1.6.0 only works with Shapely 1.x. If you want to work with Shapely 2.x, please use Sedona no earlier than 1.6.0.
 
     If you use Sedona < 1.6.0, please use GeoPandas <= `0.11.1` since GeoPandas > 0.11.1 will automatically install Shapely 2.0. If you use Shapely, please use <= `1.8.5`.
 
@@ -120,7 +120,7 @@ gdf.plot(
 ### Supported Shapely objects
 
 | shapely object     | Available          |
-|--------------------|--------------------|
+| ------------------ | ------------------ |
 | Point              | :heavy_check_mark: |
 | MultiPoint         | :heavy_check_mark: |
 | LineString         | :heavy_check_mark: |
@@ -129,7 +129,7 @@ gdf.plot(
 | MultiPolygon       | :heavy_check_mark: |
 | GeometryCollection | :heavy_check_mark: |
 
-To create Spark DataFrame based on mentioned Geometry types, please use <b> GeometryType </b> from  <b> sedona.sql.types </b> module. Converting works for list or tuple with shapely objects.
+To create Spark DataFrame based on mentioned Geometry types, please use <b> GeometryType </b> from <b> sedona.sql.types </b> module. Converting works for list or tuple with shapely objects.
 
 Schema for target table with integer id and geometry type can be defined as follows:
 

@@ -19,11 +19,11 @@
 
 Sedona Spatial operators fully supports Apache SparkSQL query optimizer. It has the following query optimization features:
 
-* Automatically optimizes range join query and distance join query.
-* Automatically performs predicate pushdown.
+- Automatically optimizes range join query and distance join query.
+- Automatically performs predicate pushdown.
 
 !!! tip
-	Sedona join performance is heavily affected by the number of partitions. If the join performance is not ideal, please increase the number of partitions by doing `df.repartition(XXX)` right after you create the original DataFrame.
+Sedona join performance is heavily affected by the number of partitions. If the join performance is not ideal, please increase the number of partitions by doing `df.repartition(XXX)` right after you create the original DataFrame.
 
 ## Range join
 
@@ -68,7 +68,7 @@ RangeJoin polygonshape#20: geometry, pointshape#43: geometry, false
 ```
 
 !!!note
-	All join queries in SedonaSQL are inner joins
+All join queries in SedonaSQL are inner joins
 
 ## Distance join
 
@@ -76,7 +76,7 @@ Introduction: Find geometries from A and geometries from B such that the distanc
 
 Spark SQL Example for planar Euclidean distance:
 
-*Only consider ==fully within a certain distance==*
+_Only consider ==fully within a certain distance==_
 
 ```sql
 SELECT *
@@ -96,7 +96,7 @@ FROM pointDf, polygonDF
 WHERE ST_FrechetDistance(pointDf.pointshape, polygonDf.polygonshape) < 2
 ```
 
-*Consider ==intersects within a certain distance==*
+_Consider ==intersects within a certain distance==_
 
 ```sql
 SELECT *
@@ -128,11 +128,11 @@ DistanceJoin pointshape1#12: geometry, pointshape2#33: geometry, 2.0, true
 ```
 
 !!!warning
-	If you use planar euclidean distance functions like `ST_Distance`, `ST_HausdorffDistance` or `ST_FrechetDistance` as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of `distance` should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See [ST_Transform](Function.md#st_transform). If you don't want to transform your data, please consider using `ST_DistanceSpheroid` or `ST_DistanceSphere`.
+If you use planar euclidean distance functions like `ST_Distance`, `ST_HausdorffDistance` or `ST_FrechetDistance` as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of `distance` should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See [ST_Transform](Function.md#st_transform). If you don't want to transform your data, please consider using `ST_DistanceSpheroid` or `ST_DistanceSphere`.
 
 Spark SQL Example for meter-based geodesic distance `ST_DistanceSpheroid` (works for `ST_DistanceSphere` too):
 
-*Less than a certain distance==*
+_Less than a certain distance==_
 
 ```sql
 SELECT *
@@ -140,7 +140,7 @@ FROM pointdf1, pointdf2
 WHERE ST_DistanceSpheroid(pointdf1.pointshape1,pointdf2.pointshape2) < 2
 ```
 
-*Less than or equal to a certain distance==*
+_Less than or equal to a certain distance==_
 
 ```sql
 SELECT *
@@ -149,7 +149,7 @@ WHERE ST_DistanceSpheroid(pointdf1.pointshape1,pointdf2.pointshape2) <= 2
 ```
 
 !!!warning
-	If you use `ST_DistanceSpheroid` or `ST_DistanceSphere` as the predicate, the unit of the distance is meter. Currently, distance join with geodesic distance calculators work best for point data. For non-point data, it only considers their centroids.
+If you use `ST_DistanceSpheroid` or `ST_DistanceSphere` as the predicate, the unit of the distance is meter. Currently, distance join with geodesic distance calculators work best for point data. For non-point data, it only considers their centroids.
 
 ## Broadcast index join
 
@@ -160,11 +160,11 @@ Sedona will create a spatial index on the broadcasted table.
 Sedona uses broadcast join only if the correct side has a broadcast hint.
 The supported join type - broadcast side combinations are:
 
-* Inner - either side, preferring to broadcast left if both sides have the hint
-* Left semi - broadcast right
-* Left anti - broadcast right
-* Left outer - broadcast right
-* Right outer - broadcast left
+- Inner - either side, preferring to broadcast left if both sides have the hint
+- Left semi - broadcast right
+- Left anti - broadcast right
+- Left outer - broadcast right
+- Right outer - broadcast left
 
 ```scala
 pointDf.alias("pointDf").join(broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
@@ -232,7 +232,7 @@ These queries could be planned as RangeJoin or BroadcastIndexJoin. Here is an ex
 
 ## Google S2 based approximate equi-join
 
-If the performance of Sedona optimized join is not ideal, which is possibly caused by  complicated and overlapping geometries, you can resort to Sedona built-in Google S2-based approximate equi-join. This equi-join leverages Spark's internal equi-join algorithm and might be performant given that you can opt to skip the refinement step  by sacrificing query accuracy.
+If the performance of Sedona optimized join is not ideal, which is possibly caused by complicated and overlapping geometries, you can resort to Sedona built-in Google S2-based approximate equi-join. This equi-join leverages Spark's internal equi-join algorithm and might be performant given that you can opt to skip the refinement step by sacrificing query accuracy.
 
 Please use the following steps:
 
@@ -274,7 +274,7 @@ WHERE lcs.cellId = rcs.cellId AND ST_Contains(lcs.geom, rcs.geom)
 As you see, compared to the query in Step 2, we added one more filter, which is `ST_Contains`, to remove false positives. You can also use `ST_Intersects` and so on.
 
 !!!tip
-	You can skip this step if you don't need 100% accuracy and want faster query speed.
+You can skip this step if you don't need 100% accuracy and want faster query speed.
 
 ### 4. Optional: De-duplicate
 
@@ -297,7 +297,7 @@ GROUP BY (lcs_geom, rcs_geom)
 ```
 
 !!!note
-	If you are doing point-in-polygon join, this is not a problem and you can safely discard this issue. This issue only happens when you do polygon-polygon, polygon-linestring, linestring-linestring join.
+If you are doing point-in-polygon join, this is not a problem and you can safely discard this issue. This issue only happens when you do polygon-polygon, polygon-linestring, linestring-linestring join.
 
 ### S2 for distance join
 
@@ -355,12 +355,12 @@ ORDER BY geohash
 The following figure is the visualization of a GeoParquet dataset. `bbox`es of all GeoParquet files were plotted as blue rectangles and the query window was plotted as a red rectangle. Sedona will only scan 1 of the 6 files to
 answer queries such as `SELECT * FROM geoparquet_dataset WHERE ST_Intersects(geom, <query window>)`, thus only part of the data covered by the light green rectangle needs to be scanned.
 
-![Visualization of a GeoParquet dataset](../../image/geoparquet-pred-pushdown.png "Visualization of a GeoParquet dataset")
+![Visualization of a GeoParquet dataset](../../image/geoparquet-pred-pushdown.png 'Visualization of a GeoParquet dataset')
 
 We can compare the metrics of querying the GeoParquet dataset with or without the spatial predicate and observe that querying with spatial predicate results in fewer number of rows scanned.
 
-| Without spatial predicate                                                                       | With spatial predicate |
-|-------------------------------------------------------------------------------------------------| ----------- |
+| Without spatial predicate                                                                       | With spatial predicate                                                                    |
+| ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | ![Scan geoparquet without spatial predicate](../../image/scan-parquet-without-spatial-pred.png) | ![Scan geoparquet with spatial predicate](../../image/scan-parquet-with-spatial-pred.png) |
 
 Spatial predicate push-down to GeoParquet is enabled by default. Users can manually disable it by setting the Spark configuration `spark.sedona.geoparquet.spatialFilterPushDown` to `false`.

@@ -21,8 +21,8 @@ Before starting the Sedona journey, you need to make sure your Apache Spark clus
 
 There are two ways to use a Scala or Java library with Apache Spark. You can user either one to run Sedona.
 
-* Spark interactive Scala or SQL shell: easy to start, good for new learners to try simple functions
-* Self-contained Scala / Java project: a steep learning curve of package management, but good for large projects
+- Spark interactive Scala or SQL shell: easy to start, good for new learners to try simple functions
+- Self-contained Scala / Java project: a steep learning curve of package management, but good for large projects
 
 ## Spark Scala shell
 
@@ -53,8 +53,8 @@ Please refer to [Sedona Maven Central coordinates](maven-coordinates.md) to sele
 1. Have your Spark cluster ready.
 
 2. Download Sedona jars:
-	* Download the pre-compiled jars from [Sedona Releases](../download.md)
-	* Download / Git clone Sedona source code and compile the code by yourself (see [Compile Sedona](compile.md))
+   - Download the pre-compiled jars from [Sedona Releases](../download.md)
+   - Download / Git clone Sedona source code and compile the code by yourself (see [Compile Sedona](compile.md))
 3. Run Spark shell with `--jars` option.
 
 ```
@@ -91,4 +91,4 @@ A self-contained project allows you to create multiple Scala / Java files and wr
 ```
 
 !!!note
-	The detailed explanation of spark-submit is available on [Spark website](https://spark.apache.org/docs/latest/submitting-applications.html).
+The detailed explanation of spark-submit is available on [Spark website](https://spark.apache.org/docs/latest/submitting-applications.html).

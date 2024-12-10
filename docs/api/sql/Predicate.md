@@ -216,7 +216,7 @@ Introduction: The first variant of the function computes and returns the [Dimens
 The second variant of the function evaluates whether the two input geometries satisfy a specific spatial relationship defined by the provided `intersectionMatrix` pattern.
 
 !!!Note
-    It is important to note that this function is not optimized for use in spatial join operations. Certain DE-9IM relationships can hold true for geometries that do not intersect or are disjoint. As a result, it is recommended to utilize other dedicated spatial functions specifically optimized for spatial join processing.
+It is important to note that this function is not optimized for use in spatial join operations. Certain DE-9IM relationships can hold true for geometries that do not intersect or are disjoint. As a result, it is recommended to utilize other dedicated spatial functions specifically optimized for spatial join processing.
 
 Format:
 
@@ -262,7 +262,7 @@ true
 Introduction: This function tests the relationship between two [Dimensionally Extended 9-Intersection Model (DE-9IM)](https://en.wikipedia.org/wiki/DE-9IM) matrices representing geometry intersections. It evaluates whether the DE-9IM matrix specified in `matrix1` satisfies the intersection pattern defined by `matrix2`. The `matrix2` parameter can be an exact DE-9IM value or a pattern containing wildcard characters.
 
 !!!Note
-    It is important to note that this function is not optimized for use in spatial join operations. Certain DE-9IM relationships can hold true for geometries that do not intersect or are disjoint. As a result, it is recommended to utilize other dedicated spatial functions specifically optimized for spatial join processing.
+It is important to note that this function is not optimized for use in spatial join operations. Certain DE-9IM relationships can hold true for geometries that do not intersect or are disjoint. As a result, it is recommended to utilize other dedicated spatial functions specifically optimized for spatial join processing.
 
 Format: `ST_RelateMatch(matrix1: String, matrix2: String)`
 

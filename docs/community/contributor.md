@@ -31,7 +31,7 @@ A committer will be promoted to a PMC member when the community thinks he/she is
 Current Sedona PMC members are as follows:
 
 |         Name         |  GitHub ID   |        Apache ID        |
-|:--------------------:|:------------:|:-----------------------:|
+| :------------------: | :----------: | :---------------------: |
 |     Adam Binford     |  Kimahriman  |  kimahriman@apache.org  |
 |  Kanchan Chowdhury   |  kanchanchy  |  kanchanchy@apache.org  |
 |  Kristin Cowalcijk   | Kontinuation | kontinuation@apache.org |
@@ -57,16 +57,16 @@ To get started contributing to Sedona, learn [how to contribute](rule.md) – an
 
 The PMC regularly adds new committers from the active contributors, based on their contributions to Sedona. The qualifications for new committers include:
 
-* Sustained contributions to Sedona: Committers should have a history of major contributions to Sedona.
-* Quality of contributions: Committers more than any other community member should submit simple, well-tested, and well-designed patches. In addition, they should show sufficient expertise to be able to review patches.
-* Community involvement: Committers should have a constructive and friendly attitude in all community interactions. They should also be active on the dev mailing list & Discord, and help mentor newer contributors and users.
+- Sustained contributions to Sedona: Committers should have a history of major contributions to Sedona.
+- Quality of contributions: Committers more than any other community member should submit simple, well-tested, and well-designed patches. In addition, they should show sufficient expertise to be able to review patches.
+- Community involvement: Committers should have a constructive and friendly attitude in all community interactions. They should also be active on the dev mailing list & Discord, and help mentor newer contributors and users.
 
 The PMC also adds new PMC members. PMC members are expected to carry out PMC responsibilities as described in Apache Guidance, including helping vote on releases, enforce Apache project trademarks, take responsibility for legal and license issues, and ensure the project follows Apache project mechanics. The PMC periodically adds committers to the PMC who have shown they understand and can help with these activities.
 
 Current Sedona Committers are as follows:
 
 |      Name      | GitHub ID |     Apache ID      |
-|:--------------:|:---------:|:------------------:|
+| :------------: | :-------: | :----------------: |
 |  John Bampton  | jbampton  | johnbam@apache.org |
 | Nilesh Gajwani |  iGN5117  | nilesh@apache.org  |
 

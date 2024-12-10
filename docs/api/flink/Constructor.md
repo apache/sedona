@@ -103,7 +103,7 @@ POINT(40.7128 -74.006)
 Introduction: Construct a Geometry from GML.
 
 !!!note
-    This function only supports GML1 and GML2. GML3 is not supported.
+This function only supports GML1 and GML2. GML3 is not supported.
 
 Format:
 `ST_GeomFromGML (gml: String)`
@@ -249,7 +249,7 @@ LINESTRING (-71.1663 42.2614, -71.1667 42.2616)
 
 ## ST_GeomFromText
 
-Introduction: Construct a Geometry from WKT. Alias of  [ST_GeomFromWKT](#st_geomfromwkt)
+Introduction: Construct a Geometry from WKT. Alias of [ST_GeomFromWKT](#st_geomfromwkt)
 
 Format:
 `ST_GeomFromText (Wkt: String)`
@@ -390,7 +390,7 @@ LINESTRING (1 2, 3 4)
 Introduction: Construct a LineString geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format.
 
 !!!note
-    Returns null if geometry is not of type LineString.
+Returns null if geometry is not of type LineString.
 
 Format:
 
@@ -418,7 +418,7 @@ LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061
 
 ## ST_LineStringFromText
 
-Introduction: Construct a LineString from Text, delimited by Delimiter (Optional). Alias of  [ST_LineFromText](#st_linefromtext)
+Introduction: Construct a LineString from Text, delimited by Delimiter (Optional). Alias of [ST_LineFromText](#st_linefromtext)
 
 Format: `ST_LineStringFromText (Text: String, Delimiter: Char)`
 
@@ -441,7 +441,7 @@ LINESTRING (-74.0428197 40.6867969, -74.0421975 40.6921336, -74.050802 40.691279
 Introduction: Construct a LineString geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format and it is an alias of [ST_LineFromWKB](#st_linefromwkb).
 
 !!!Note
-    Returns null if geometry is not of type LineString.
+Returns null if geometry is not of type LineString.
 
 Format:
 
@@ -771,7 +771,7 @@ POINT ZM(1.2345 2.3456 3.4567, 100)
 Introduction: Construct a Point geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format.
 
 !!!note
-    Returns null if geometry is not of type Point.
+Returns null if geometry is not of type Point.
 
 Format:
 

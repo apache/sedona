@@ -70,8 +70,8 @@ Make sure you reload the `pom.xml` or reload the maven project. The IDE will ask
 
 In a terminal, go to the Sedona root folder. Run `mvn clean install`. All tests will take more than 15 minutes. To only build the project jars, run `mvn clean install -DskipTests`.
 !!!Note
-    `mvn clean install` will compile Sedona with Spark 3.3 and Scala 2.12. If you have a different version of Spark in $SPARK_HOME, make sure to specify that using -Dspark command line arg.
-    For example, to compile sedona with Spark 3.4 and Scala 2.12, use: `mvn clean install -Dspark=3.4 -Dscala=2.12`
+`mvn clean install` will compile Sedona with Spark 3.3 and Scala 2.12. If you have a different version of Spark in $SPARK_HOME, make sure to specify that using -Dspark command line arg.
+For example, to compile sedona with Spark 3.4 and Scala 2.12, use: `mvn clean install -Dspark=3.4 -Dscala=2.12`
 
 More details can be found on [Compile Sedona](../setup/compile.md)
 

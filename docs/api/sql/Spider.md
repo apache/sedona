@@ -91,15 +91,15 @@ You can browse the [SpiderWeb](https://spider.cs.ucr.edu/) website to play with 
 
 The following parameters are common to all distributions.
 
-| Parameter | Description | Default Value |
-| --------- | ----------- | ------------- |
-| n         | Number of records to generate | 100 |
-| distribution | Distribution type. See [Distributions](#distributions) for details. | `uniform` |
-| numPartitions | Number of partitions to generate | The default parallelism of your Spark Context |
-| seed | Random seed | Current timestamp in milliseconds |
+| Parameter     | Description                                                         | Default Value                                 |
+| ------------- | ------------------------------------------------------------------- | --------------------------------------------- |
+| n             | Number of records to generate                                       | 100                                           |
+| distribution  | Distribution type. See [Distributions](#distributions) for details. | `uniform`                                     |
+| numPartitions | Number of partitions to generate                                    | The default parallelism of your Spark Context |
+| seed          | Random seed                                                         | Current timestamp in milliseconds             |
 
 !!! warning
-    The same `seed` parameter may produce different results with different Java versions or Sedona versions.
+The same `seed` parameter may produce different results with different Java versions or Sedona versions.
 
 ## Distributions
 
@@ -109,14 +109,14 @@ Spider supports generating random points, boxes and polygons under various distr
 
 The uniform distribution generates random geometries in the unit square `[0, 1] x [0, 1]`. This distribution can be selected by setting the `distribution` parameter to `uniform`.
 
-| Parameter | Description | Default Value |
-| --------- | ----------- | ------------- |
-| geometryType | Geometry type, either `point`, `box` or `polygon` | `point` |
-| maxWidth | Maximum width of the generated boxes | 0.01 |
-| maxHeight | Maximum height of the generated boxes | 0.01 |
-| minSegment | Minimum number of segments of the generated polygons | 3 |
-| maxSegment | Maximum number of segments of the generated polygons | 3 |
-| maxSize | Maximum size of the generated polygons | 0.01 |
+| Parameter    | Description                                          | Default Value |
+| ------------ | ---------------------------------------------------- | ------------- |
+| geometryType | Geometry type, either `point`, `box` or `polygon`    | `point`       |
+| maxWidth     | Maximum width of the generated boxes                 | 0.01          |
+| maxHeight    | Maximum height of the generated boxes                | 0.01          |
+| minSegment   | Minimum number of segments of the generated polygons | 3             |
+| maxSegment   | Maximum number of segments of the generated polygons | 3             |
+| maxSize      | Maximum size of the generated polygons               | 0.01          |
 
 Example:
 
@@ -132,14 +132,14 @@ gpd.GeoDataFrame(df.toPandas(), geometry='geometry').boundary.plot()
 
 The Gaussian distribution generates random geometries in a Gaussian distribution with mean `[0.5, 0.5]` and standard deviation `[0.1, 0.1]`. This distribution can be selected by setting the `distribution` parameter to `gaussian`.
 
-| Parameter | Description | Default Value |
-| --------- | ----------- | ------------- |
-| geometryType | Geometry type, either `point`, `box` or `polygon` | `point` |
-| maxWidth | Maximum width of the generated boxes | 0.01 |
-| maxHeight | Maximum height of the generated boxes | 0.01 |
-| minSegment | Minimum number of segments of the generated polygons | 3 |
-| maxSegment | Maximum number of segments of the generated polygons | 3 |
-| maxSize | Maximum size of the generated polygons | 0.01 |
+| Parameter    | Description                                          | Default Value |
+| ------------ | ---------------------------------------------------- | ------------- |
+| geometryType | Geometry type, either `point`, `box` or `polygon`    | `point`       |
+| maxWidth     | Maximum width of the generated boxes                 | 0.01          |
+| maxHeight    | Maximum height of the generated boxes                | 0.01          |
+| minSegment   | Minimum number of segments of the generated polygons | 3             |
+| maxSegment   | Maximum number of segments of the generated polygons | 3             |
+| maxSize      | Maximum size of the generated polygons               | 0.01          |
 
 Example:
 
@@ -155,16 +155,16 @@ gpd.GeoDataFrame(df.toPandas(), geometry='geometry').boundary.plot()
 
 The bit distribution generates random geometries in a bit distribution. This distribution can be selected by setting the `distribution` parameter to `bit`.
 
-| Parameter | Description | Default Value |
-| --------- | ----------- | ------------- |
-| geometryType | Geometry type, either `point`, `box` or `polygon` | `point` |
-| probability | Probability of setting a bit | 0.2 |
-| digits | Number of digits in the generated data | 10 |
-| maxWidth | Maximum width of the generated boxes | 0.01 |
-| maxHeight | Maximum height of the generated boxes | 0.01 |
-| minSegment | Minimum number of segments of the generated polygons | 3 |
-| maxSegment | Maximum number of segments of the generated polygons | 3 |
-| maxSize | Maximum size of the generated polygons | 0.01 |
+| Parameter    | Description                                          | Default Value |
+| ------------ | ---------------------------------------------------- | ------------- |
+| geometryType | Geometry type, either `point`, `box` or `polygon`    | `point`       |
+| probability  | Probability of setting a bit                         | 0.2           |
+| digits       | Number of digits in the generated data               | 10            |
+| maxWidth     | Maximum width of the generated boxes                 | 0.01          |
+| maxHeight    | Maximum height of the generated boxes                | 0.01          |
+| minSegment   | Minimum number of segments of the generated polygons | 3             |
+| maxSegment   | Maximum number of segments of the generated polygons | 3             |
+| maxSize      | Maximum size of the generated polygons               | 0.01          |
 
 Example:
 
@@ -180,16 +180,16 @@ gpd.GeoDataFrame(df.toPandas(), geometry='geometry').plot(markersize=1)
 
 The diagonal distribution generates random geometries on the diagonal line `y = x` with some dispersion for geometries that are not exactly on the diagonal. This distribution can be selected by setting the `distribution` parameter to `diagonal`.
 
-| Parameter | Description | Default Value |
-| --------- | ----------- | ------------- |
-| geometryType | Geometry type, either `point`, `box` or `polygon` | `point` |
-| percentage | The percentage of records that are perfectly on the diagonal | 0.5 |
-| buffer | For points not exactly on the diagonal, the buffer in which they are dispersed | 0.5 |
-| maxWidth | Maximum width of the generated boxes | 0.01 |
-| maxHeight | Maximum height of the generated boxes | 0.01 |
-| minSegment | Minimum number of segments of the generated polygons | 3 |
-| maxSegment | Maximum number of segments of the generated polygons | 3 |
-| maxSize | Maximum size of the generated polygons | 0.01 |
+| Parameter    | Description                                                                    | Default Value |
+| ------------ | ------------------------------------------------------------------------------ | ------------- |
+| geometryType | Geometry type, either `point`, `box` or `polygon`                              | `point`       |
+| percentage   | The percentage of records that are perfectly on the diagonal                   | 0.5           |
+| buffer       | For points not exactly on the diagonal, the buffer in which they are dispersed | 0.5           |
+| maxWidth     | Maximum width of the generated boxes                                           | 0.01          |
+| maxHeight    | Maximum height of the generated boxes                                          | 0.01          |
+| minSegment   | Minimum number of segments of the generated polygons                           | 3             |
+| maxSegment   | Maximum number of segments of the generated polygons                           | 3             |
+| maxSize      | Maximum size of the generated polygons                                         | 0.01          |
 
 Example:
 
@@ -205,14 +205,14 @@ gpd.GeoDataFrame(df.toPandas(), geometry='geometry').plot(markersize=1)
 
 The Sierpinski distribution generates random geometries distributed on a Sierpinski triangle. This distribution can be selected by setting the `distribution` parameter to `sierpinski`.
 
-| Parameter | Description | Default Value |
-| --------- | ----------- | ------------- |
-| geometryType | Geometry type, either `point`, `box` or `polygon` | `point` |
-| maxWidth | Maximum width of the generated boxes | 0.01 |
-| maxHeight | Maximum height of the generated boxes | 0.01 |
-| minSegment | Minimum number of segments of the generated polygons | 3 |
-| maxSegment | Maximum number of segments of the generated polygons | 3 |
-| maxSize | Maximum size of the generated polygons | 0.01 |
+| Parameter    | Description                                          | Default Value |
+| ------------ | ---------------------------------------------------- | ------------- |
+| geometryType | Geometry type, either `point`, `box` or `polygon`    | `point`       |
+| maxWidth     | Maximum width of the generated boxes                 | 0.01          |
+| maxHeight    | Maximum height of the generated boxes                | 0.01          |
+| minSegment   | Minimum number of segments of the generated polygons | 3             |
+| maxSegment   | Maximum number of segments of the generated polygons | 3             |
+| maxSize      | Maximum size of the generated polygons               | 0.01          |
 
 Example:
 
@@ -228,10 +228,10 @@ gpd.GeoDataFrame(df.toPandas(), geometry='geometry').plot(markersize=1)
 
 This generator produces boxes that resemble parcel areas. It works by recursively splitting the input domain (unit square) along the longest dimension and then randomly dithering each generated box to add some randomness. This generator can only generate boxes. This distribution can be selected by setting the `distribution` parameter to `parcel`.
 
-| Parameter | Description | Default Value |
-| --------- | ----------- | ------------- |
-| dither | The amount of dithering as a ratio of the side length. Allowed range [0, 1] | 0.5 |
-| splitRange | The allowed range for splitting boxes. Allowed range [0.0, 0.5] 0.0 means all values are allowed. 0.5 means always split in half. | 0.5 |
+| Parameter  | Description                                                                                                                       | Default Value |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| dither     | The amount of dithering as a ratio of the side length. Allowed range [0, 1]                                                       | 0.5           |
+| splitRange | The allowed range for splitting boxes. Allowed range [0.0, 0.5] 0.0 means all values are allowed. 0.5 means always split in half. | 0.5           |
 
 Example:
 
@@ -244,7 +244,7 @@ gpd.GeoDataFrame(df.toPandas(), geometry='geometry').boundary.plot()
 ![Parcel Distribution](../../image/spider/spider-parcel.png)
 
 !!!note
-    The number of partitions generated by the `parcel` distribution is always power of 4. This is for guaranteeing the quality of the generated data. If the specified `numPartitions` is not a power of 4, it will be automatically adjusted to the nearest power of 4 smaller or equal to the specified value.
+The number of partitions generated by the `parcel` distribution is always power of 4. This is for guaranteeing the quality of the generated data. If the specified `numPartitions` is not a power of 4, it will be automatically adjusted to the nearest power of 4 smaller or equal to the specified value.
 
 ## Affine Transformation
 
@@ -254,14 +254,14 @@ The following code demonstrates how to generate random spatial data in a differe
 
 The affine transformation parameters are:
 
-| Parameter | Description | Default Value |
-| --------- | ----------- | ------------- |
-| translateX | Translate the data horizontally | 0 |
-| translateY | Translate the data vertically | 0 |
-| scaleX | Scale the data horizontally | 1 |
-| scaleY | Scale the data vertically | 1 |
-| skewX | Skew the data horizontally | 0 |
-| skewY | Skew the data vertically | 0 |
+| Parameter  | Description                     | Default Value |
+| ---------- | ------------------------------- | ------------- |
+| translateX | Translate the data horizontally | 0             |
+| translateY | Translate the data vertically   | 0             |
+| scaleX     | Scale the data horizontally     | 1             |
+| scaleY     | Scale the data vertically       | 1             |
+| skewX      | Skew the data horizontally      | 0             |
+| skewY      | Skew the data vertically        | 0             |
 
 The affine transformation is applied to the generated data as follows:
 

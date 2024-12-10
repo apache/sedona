@@ -22,7 +22,7 @@
 This page is for Sedona PMC to publish Sedona releases.
 
 !!!warning
-    All scripts on this page should be run in your local Sedona Git repo under master branch via a single script file.
+All scripts on this page should be run in your local Sedona Git repo under master branch via a single script file.
 
 ## 0. Prepare an empty script file
 
@@ -71,13 +71,13 @@ Make sure the Sedona version in the following files are {{ sedona_create_release
 
 ## 3. Update mkdocs.yml
 
-* Please change the following variables in `mkdocs.yml` to the version you want to publish.
-    * `sedona_create_release.current_version`
-    * `sedona_create_release.current_rc`
-    * `sedona_create_release.current_git_tag`
-    * `sedona_create_release.current_snapshot`
-* Then compile the website by `mkdocs serve`. This will generate the scripts listed on this page in your local browser.
-* You can also publish this website if needed. See the instruction at bottom.
+- Please change the following variables in `mkdocs.yml` to the version you want to publish.
+  - `sedona_create_release.current_version`
+  - `sedona_create_release.current_rc`
+  - `sedona_create_release.current_git_tag`
+  - `sedona_create_release.current_snapshot`
+- Then compile the website by `mkdocs serve`. This will generate the scripts listed on this page in your local browser.
+- You can also publish this website if needed. See the instruction at bottom.
 
 ## 4. Stage and upload release candidates
 

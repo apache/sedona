@@ -20,7 +20,7 @@
 After the installation done, you can start using Sedona functions. Please log in to Snowflake again using the user that has the privilege to access the database.
 
 !!!note
-	Please always keep the schema name `SEDONA` (e.g., `SEDONA.ST_GeomFromWKT`) when you use Sedona functions to avoid conflicting with Snowflake's built-in functions.
+Please always keep the schema name `SEDONA` (e.g., `SEDONA.ST_GeomFromWKT`) when you use Sedona functions to avoid conflicting with Snowflake's built-in functions.
 
 ## Create a sample table
 
@@ -89,21 +89,21 @@ FROM city_tbl
 ```
 
 !!!note
-	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL API](../../api/snowflake/vector-data/Constructor.md).
+SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL API](../../api/snowflake/vector-data/Constructor.md).
 
 ## Check the lon/lat order
 
 In SedonaSnow `v1.4.1` and before, we use lat/lon order in the following functions:
 
-* ST_Transform
-* ST_DistanceSphere
-* ST_DistanceSpheroid
+- ST_Transform
+- ST_DistanceSphere
+- ST_DistanceSpheroid
 
 We use `lon/lat` order in the following functions:
 
-* ST_GeomFromGeoHash
-* ST_GeoHash
-* ST_S2CellIDs
+- ST_GeomFromGeoHash
+- ST_GeoHash
+- ST_S2CellIDs
 
 In Sedona `v1.5.0` and above, all functions will be fixed to lon/lat order.
 
@@ -144,7 +144,7 @@ FROM city_tbl_geom
 ```
 
 !!!note
-	SedonaSQL provides lots of functions to save the Geometry column, please read [SedonaSQL API](../../api/snowflake/vector-data/Function.md).
+SedonaSQL provides lots of functions to save the Geometry column, please read [SedonaSQL API](../../api/snowflake/vector-data/Function.md).
 
 ## Transform the Coordinate Reference System
 
@@ -159,7 +159,7 @@ The second EPSG code EPSG:3857 in `ST_Transform` is the target CRS of the geomet
 This `ST_Transform` transform the CRS of these geometries from EPSG:4326 to EPSG:3857. The details CRS information can be found on [EPSG.io](https://epsg.io/).
 
 !!!note
-	This function follows lon/order in 1.5.0+ and lat/lon order in 1.4.1 and before. You can use `ST_FlipCoordinates` to swap X and Y.
+This function follows lon/order in 1.5.0+ and lat/lon order in 1.4.1 and before. You can use `ST_FlipCoordinates` to swap X and Y.
 
 We can transform our sample data as follows
 
@@ -216,7 +216,7 @@ WHERE Sedona.ST_Contains(Sedona.ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0),
 ```
 
 !!!note
-	Read [SedonaSQL API](../../api/snowflake/vector-data/Constructor.md) to learn how to create a Geometry type query window.
+Read [SedonaSQL API](../../api/snowflake/vector-data/Constructor.md) to learn how to create a Geometry type query window.
 
 ## KNN query
 
@@ -234,7 +234,7 @@ LIMIT 5
 ## Range join query
 
 !!!warning
-	Sedona range join in Snowflake does not trigger Sedona's optimized spatial join algorithm while Sedona Spark does. It uses Snowflake's default Cartesian join which is very slow. Therefore, it is recommended to use Sedona's S2-based join or Snowflake's native ST functions + native `Geography` type to do range join, which will trigger Snowflake's `GeoJoin` algorithm.
+Sedona range join in Snowflake does not trigger Sedona's optimized spatial join algorithm while Sedona Spark does. It uses Snowflake's default Cartesian join which is very slow. Therefore, it is recommended to use Sedona's S2-based join or Snowflake's native ST functions + native `Geography` type to do range join, which will trigger Snowflake's `GeoJoin` algorithm.
 
 Introduction: Find geometries from A and geometries from B such that each geometry pair satisfies a certain predicate.
 
@@ -261,7 +261,7 @@ WHERE ST_Within(pointdf.pointshape, polygondf.polygonshape)
 ## Distance join
 
 !!!warning
-	Sedona distance join in Snowflake does not trigger Sedona's optimized spatial join algorithm while Sedona Spark does. It uses Snowflake's default Cartesian join which is very slow. Therefore, it is recommended to use Sedona's S2-based join or Snowflake's native ST functions + native `Geography` type to do range join, which will trigger Snowflake's `GeoJoin` algorithm.
+Sedona distance join in Snowflake does not trigger Sedona's optimized spatial join algorithm while Sedona Spark does. It uses Snowflake's default Cartesian join which is very slow. Therefore, it is recommended to use Sedona's S2-based join or Snowflake's native ST functions + native `Geography` type to do range join, which will trigger Snowflake's `GeoJoin` algorithm.
 
 Introduction: Find geometries from A and geometries from B such that the distance of each geometry pair is less or equal than a certain distance. It supports the planar Euclidean distance calculators `ST_Distance`, `ST_HausdorffDistance`, `ST_FrechetDistance` and the meter-based geodesic distance calculators `ST_DistanceSpheroid` and `ST_DistanceSphere`.
 
@@ -286,7 +286,7 @@ WHERE ST_FrechetDistance(pointDf.pointshape, polygonDf.polygonshape) < 2
 ```
 
 !!!warning
-	If you use planar Euclidean distance functions like `ST_Distance`, `ST_HausdorffDistance` or `ST_FrechetDistance` as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of `distance` should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See [ST_Transform](../../api/snowflake/vector-data/Function.md#st_transform). If you don't want to transform your data, please consider using `ST_DistanceSpheroid` or `ST_DistanceSphere`.
+If you use planar Euclidean distance functions like `ST_Distance`, `ST_HausdorffDistance` or `ST_FrechetDistance` as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of `distance` should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See [ST_Transform](../../api/snowflake/vector-data/Function.md#st_transform). If you don't want to transform your data, please consider using `ST_DistanceSpheroid` or `ST_DistanceSphere`.
 
 ```sql
 SELECT *
@@ -296,7 +296,7 @@ WHERE ST_DistanceSpheroid(pointdf1.pointshape1,pointdf2.pointshape2) < 2
 
 ## Google S2 based approximate equi-join
 
-You can use Sedona built-in Google S2 functions to perform an approximate equi-join. This algorithm leverages Snowflake's internal equi-join algorithm and might be performant given that you can opt to skip the refinement step  by sacrificing query accuracy.
+You can use Sedona built-in Google S2 functions to perform an approximate equi-join. This algorithm leverages Snowflake's internal equi-join algorithm and might be performant given that you can opt to skip the refinement step by sacrificing query accuracy.
 
 Please use the following steps:
 
@@ -336,7 +336,7 @@ WHERE lcs.cellId = rcs.cellId AND ST_Contains(lcs.geom, rcs.geom)
 As you see, compared to the query in Step 2, we added one more filter, which is `ST_Contains`, to remove false positives. You can also use `ST_Intersects` and so on.
 
 !!!tip
-	You can skip this step if you don't need 100% accuracy and want faster query speed.
+You can skip this step if you don't need 100% accuracy and want faster query speed.
 
 ### 4. Optional: De-duplicate
 
@@ -359,7 +359,7 @@ GROUP BY (lcs_geom, rcs_geom)
 ```
 
 !!!note
-	If you are doing point-in-polygon join, this is not a problem, and you can safely discard this issue. This issue only happens when you do polygon-polygon, polygon-linestring, linestring-linestring join.
+If you are doing point-in-polygon join, this is not a problem, and you can safely discard this issue. This issue only happens when you do polygon-polygon, polygon-linestring, linestring-linestring join.
 
 ### S2 for distance join
 
@@ -378,14 +378,14 @@ FROM lefts
 
 Sedona implements over 200 geospatial vector and raster functions, which are much more than what Snowflake native functions offer. For example:
 
-* [ST_3DDistance](../../api/snowflake/vector-data/Function.md#st_3ddistance)
-* [ST_Force2D](../../api/snowflake/vector-data/Function.md#st_force_2d)
-* [ST_GeometryN](../../api/snowflake/vector-data/Function.md#st_geometryn)
-* [ST_MakeValid](../../api/snowflake/vector-data/Function.md#st_makevalid)
-* [ST_Multi](../../api/snowflake/vector-data/Function.md#st_multi)
-* [ST_NumGeometries](../../api/snowflake/vector-data/Function.md#st_numgeometries)
-* [ST_ReducePrecision](../../api/snowflake/vector-data/Function.md#st_reduceprecision)
-* [ST_SubdivideExplode](../../api/snowflake/vector-data/Function.md#st_subdivideexplode)
+- [ST_3DDistance](../../api/snowflake/vector-data/Function.md#st_3ddistance)
+- [ST_Force2D](../../api/snowflake/vector-data/Function.md#st_force_2d)
+- [ST_GeometryN](../../api/snowflake/vector-data/Function.md#st_geometryn)
+- [ST_MakeValid](../../api/snowflake/vector-data/Function.md#st_makevalid)
+- [ST_Multi](../../api/snowflake/vector-data/Function.md#st_multi)
+- [ST_NumGeometries](../../api/snowflake/vector-data/Function.md#st_numgeometries)
+- [ST_ReducePrecision](../../api/snowflake/vector-data/Function.md#st_reduceprecision)
+- [ST_SubdivideExplode](../../api/snowflake/vector-data/Function.md#st_subdivideexplode)
 
 You can click the links above to learn more about these functions. More functions can be found in [SedonaSQL API](../../api/snowflake/vector-data/Function.md).
 
@@ -393,8 +393,8 @@ You can click the links above to learn more about these functions. More function
 
 Sedona can interoperate with Snowflake native functions seamlessly. There are two ways to do this:
 
-* Use `Sedona functions` to create a Geometry column, then use Snowflake native functions and Sedona functions to query it.
-* Use `Snowflake native functions` to create a Geometry/Geography column, then use Snowflake native functions and Sedona functions to query it.
+- Use `Sedona functions` to create a Geometry column, then use Snowflake native functions and Sedona functions to query it.
+- Use `Snowflake native functions` to create a Geometry/Geography column, then use Snowflake native functions and Sedona functions to query it.
 
 Now we will show you how to do this.
 
@@ -422,9 +422,9 @@ SELECT ST_AREA(to_geometry(SEDONA.ST_GeomFromText('POLYGON((0 0, 0 1, 1 1, 1 0, 
 
 Sedona geometry constructors are more powerful than Snowflake native functions. It has the following advantages:
 
-* Sedona offers more constructors especially for 3D (XYZ) geometries, but Snowflake native functions don't.
-* WKB serialization is more efficient. If you need to use multiple Sedona functions, it is more efficient to use this method, which might bring in 2X performance improvement.
-* SRID information of geometries is preserved. The method below will lose SRID information.
+- Sedona offers more constructors especially for 3D (XYZ) geometries, but Snowflake native functions don't.
+- WKB serialization is more efficient. If you need to use multiple Sedona functions, it is more efficient to use this method, which might bring in 2X performance improvement.
+- SRID information of geometries is preserved. The method below will lose SRID information.
 
 ### Geometry / Geography created by Snowflake Geometry / Geography constructors
 
@@ -440,7 +440,7 @@ As you can see, you can use Sedona functions and Snowflake native functions toge
 
 #### Pros:
 
-* You don't need to convert the geometry type, which is more convenient.
+- You don't need to convert the geometry type, which is more convenient.
 
 Note that: Snowflake natively serializes Geometry type data to GeoJSON String and sends to UDF as input. GeoJSON spec does not include SRID. So the SRID information will be lost if you mix-match Snowflake functions and Sedona functions directly without using `WKB`.
 
@@ -461,11 +461,11 @@ SRID=0;POINT(1 2)
 1. Sedona Snowflake doesn't support `M` dimension due to the limitation of WKB serialization. Sedona Spark and Sedona Flink support XYZM because it uses our in-house serialization format. Although Sedona Snowflake has functions related to `M` dimension, all `M` values will be ignored.
 2. Sedona H3 functions are not supported because Snowflake does not allow embedded C code in UDF.
 3. All User Defined Table Functions only work with geometries created by Sedona constructors due to Snowflake current limitation `Data type GEOMETRY is not supported in non-SQL UDTF return type`. This includes:
-   	* ST_MinimumBoundingRadius
-   	* ST_Intersection_Aggr
-   	* ST_SubDivideExplode
-   	* ST_Envelope_Aggr
-   	* ST_Union_Aggr
-   	* ST_Collect
-   	* ST_Dump
+   - ST_MinimumBoundingRadius
+   - ST_Intersection_Aggr
+   - ST_SubDivideExplode
+   - ST_Envelope_Aggr
+   - ST_Union_Aggr
+   - ST_Collect
+   - ST_Dump
 4. Only Sedona ST functions are available in Snowflake. Raster functions (RS functions) are not available in Snowflake yet.

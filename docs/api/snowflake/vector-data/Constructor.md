@@ -18,7 +18,7 @@
  -->
 
 !!!note
-    Please always keep the schema name `SEDONA` (e.g., `SEDONA.ST_GeomFromWKT`) when you use Sedona functions to avoid conflicting with Snowflake's built-in functions.
+Please always keep the schema name `SEDONA` (e.g., `SEDONA.ST_GeomFromWKT`) when you use Sedona functions to avoid conflicting with Snowflake's built-in functions.
 
 ## ST_GeomCollFromText
 
@@ -100,7 +100,7 @@ POINT(40.7128 -74.006)
 Introduction: Construct a Geometry from GML.
 
 !!!note
-    This function only supports GML1 and GML2. GML3 is not supported.
+This function only supports GML1 and GML2. GML3 is not supported.
 
 Format:
 `ST_GeomFromGML (gml:string)`
@@ -356,7 +356,7 @@ LINESTRING (1 2, 3 4)
 Introduction: Construct a LineString geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format.
 
 !!!note
-    Returns null if geometry is not of type LineString.
+Returns null if geometry is not of type LineString.
 
 Format:
 
@@ -403,7 +403,7 @@ LINESTRING (-74.0428197 40.6867969, -74.0421975 40.6921336, -74.050802 40.691279
 Introduction: Construct a LineString geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format and it is an alias of [ST_LineFromWKB](#st_linefromwkb).
 
 !!!Note
-    Returns null if geometry is not of type LineString.
+Returns null if geometry is not of type LineString.
 
 Format:
 
@@ -620,7 +620,7 @@ POINT Z(1.2345 2.3456 3.4567)
 Introduction: Construct a Point geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format.
 
 !!!note
-    Returns null if geometry is not of type Point.
+Returns null if geometry is not of type Point.
 
 Format:
 

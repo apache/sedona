@@ -19,15 +19,15 @@
 
 # Sedona modules for Apache Flink
 
-| Name |  Introduction|
-|---|---|
-|flink|Spatial Table and DataStream implementation|
-|flink-shaded| shaded version |
+| Name         | Introduction                                |
+| ------------ | ------------------------------------------- |
+| flink        | Spatial Table and DataStream implementation |
+| flink-shaded | shaded version                              |
 
 ## API availability
 
 |            | **DataStream** | **Table** |
-|:----------:|:------------:|:-----------------:|
-| Scala/Java |✅|✅|
-|   Python   |no|no|
-|      R     |no|no|
+| :--------: | :------------: | :-------: |
+| Scala/Java |       ✅       |    ✅     |
+|   Python   |       no       |    no     |
+|     R      |       no       |    no     |

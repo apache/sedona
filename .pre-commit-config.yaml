@@ -21,12 +21,22 @@ default_stages: [pre-commit, pre-push]
 default_language_version:
   # force all unspecified Python hooks to run python3
   python: python3
+  node: 22.2.0
 minimum_pre_commit_version: '3.2.0'
 repos:
   - repo: meta
     hooks:
       - id: identity
       - id: check-hooks-apply
+  - repo: local
+    hooks:
+      - id: prettier
+        name: run prettier
+        description: format files with prettier
+        entry: prettier --write .
+        files: \.(md|ya?ml)$
+        language: node
+        additional_dependencies: ['prettier@3.3.3']
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
@@ -35,7 +45,7 @@ repos:
         files: \.md$
         args:
           - --comment-style
-          - "<!--|| -->"
+          - '<!--|| -->'
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
@@ -45,7 +55,7 @@ repos:
         files: ^Makefile$
         args:
           - --comment-style
-          - "|#|"
+          - '|#|'
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
@@ -54,7 +64,7 @@ repos:
         files: \.toml$
         args:
           - --comment-style
-          - "|#|"
+          - '|#|'
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
@@ -63,7 +73,7 @@ repos:
         files: \.ya?ml$
         args:
           - --comment-style
-          - "|#|"
+          - '|#|'
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
@@ -81,7 +91,7 @@ repos:
     rev: 1.7.10
     hooks:
       - id: bandit
-        args: ["-c=pyproject.toml", "-r"]
+        args: ['-c=pyproject.toml', '-r']
   - repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
     hooks:
@@ -98,7 +108,7 @@ repos:
     rev: v9.1.2
     hooks:
       - id: oxipng
-        args: ["-o", "4", "--strip", "safe", "--alpha"]
+        args: ['-o', '4', '--strip', 'safe', '--alpha']
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:

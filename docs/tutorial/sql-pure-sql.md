@@ -27,7 +27,7 @@ Start `spark-sql` as following (replace `<VERSION>` with actual version like `{{
 
 !!! abstract "Run spark-sql with Apache Sedona"
 
-	=== "Spark 3.3+ and Scala 2.12"
+    === "Spark 3.3+ and Scala 2.12"
 
         ```sh
         spark-sql --packages org.apache.sedona:sedona-spark-shaded-3.3_2.12:<VERSION>,org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }} \

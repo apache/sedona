@@ -103,7 +103,7 @@ POINT(40.7128 -74.006)
 Introduction: Construct a Geometry from GML.
 
 !!!note
-    This function only supports GML 1 and GML 2. GML 3 is not supported.
+This function only supports GML 1 and GML 2. GML 3 is not supported.
 
 Format:
 `ST_GeomFromGML (gml: String)`
@@ -153,7 +153,7 @@ POLYGON ((0.703125 0.87890625, 0.703125 1.0546875, 1.0546875 1.0546875, 1.054687
 ## ST_GeomFromGeoJSON
 
 !!!note
-	This method is not recommended. Please use [Sedona GeoJSON data source](../../tutorial/sql.md#load-geojson-data) to read GeoJSON files.
+This method is not recommended. Please use [Sedona GeoJSON data source](../../tutorial/sql.md#load-geojson-data) to read GeoJSON files.
 
 Introduction: Construct a Geometry from GeoJson
 
@@ -223,7 +223,7 @@ POLYGON ((-87.621765 34.873444, -87.617535 34.873369, -87.62119 34.85053, -87.62
 ```
 
 !!!warning
-	The way that SedonaSQL reads GeoJSON is different from that in SparkSQL
+The way that SedonaSQL reads GeoJSON is different from that in SparkSQL
 
 ## ST_GeomFromKML
 
@@ -391,7 +391,7 @@ LINESTRING (1 2, 3 4)
 Introduction: Construct a LineString geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format.
 
 !!!note
-	Returns null if geometry is not of type LineString.
+Returns null if geometry is not of type LineString.
 
 Format:
 
@@ -442,7 +442,7 @@ LINESTRING (-74.0428197 40.6867969, -74.0421975 40.6921336, -74.050802 40.691279
 Introduction: Construct a LineString geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format and it is an alias of [ST_LineFromWKB](#st_linefromwkb).
 
 !!!Note
-	Returns null if geometry is not of type LineString.
+Returns null if geometry is not of type LineString.
 
 Format:
 
@@ -775,7 +775,7 @@ POINT ZM(1.2345 2.3456 3.4567, 100)
 Introduction: Construct a Point geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format.
 
 !!!note
-	Returns null if geometry is not of type Point.
+Returns null if geometry is not of type Point.
 
 Format:
 

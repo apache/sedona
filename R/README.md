@@ -46,8 +46,8 @@ devtools::install_github("apache/sedona/R")
 
 To get the latest Sedona jars you can:
 
-* **Compile the Sedona code yourself**, see [Compile the code](https://sedona.apache.org/latest-snapshot/setup/compile/)
-* **Get the latest generated jars** from the [GitHub 'Java build' action](https://github.com/apache/sedona/actions/workflows/java.yml); click on the latest run, the generated jars are at the bottom of the page
+- **Compile the Sedona code yourself**, see [Compile the code](https://sedona.apache.org/latest-snapshot/setup/compile/)
+- **Get the latest generated jars** from the [GitHub 'Java build' action](https://github.com/apache/sedona/actions/workflows/java.yml); click on the latest run, the generated jars are at the bottom of the page
 
 The path to the sedona-spark-shaded jars needs to be put in the `SEDONA_JAR_FILES` environment variables (see below).
 

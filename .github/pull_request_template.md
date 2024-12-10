@@ -12,12 +12,9 @@
   - this is a documentation update. The PR name follows the format `[DOCS] my subject`
   - this is a CI update. The PR name follows the format `[CI] my subject`
 
-
 ## What changes were proposed in this PR?
 
-
 ## How was this patch tested?
-
 
 ## Did this PR include necessary documentation updates?
 

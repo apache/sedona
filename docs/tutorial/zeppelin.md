@@ -24,7 +24,7 @@ Sedona-Zeppelin equips two approaches to visualize spatial data in Zeppelin. The
 ## Small-scale without SedonaViz
 
 !!! danger
-	Zeppelin is just a front-end visualization framework. This approach is not scalable and will fail at large-scale geospatial data. Please scroll down to read SedonaViz solution.
+Zeppelin is just a front-end visualization framework. This approach is not scalable and will fail at large-scale geospatial data. Please scroll down to read SedonaViz solution.
 
 You can use Apache Zeppelin to plot a small number of spatial objects, such as 1000 points. Assume you already have a Spatial DataFrame, you need to convert the geometry column to WKT string column use the following command in your Zeppelin Spark notebook Scala paragraph:
 

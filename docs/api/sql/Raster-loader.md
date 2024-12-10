@@ -18,7 +18,7 @@
  -->
 
 !!!note
-	Sedona loader are available in Scala, Java and Python and have the same APIs.
+Sedona loader are available in Scala, Java and Python and have the same APIs.
 
 The raster loader of Sedona leverages Spark built-in binary data source and works with several RS constructors to produce Raster type. Each raster is a row in the resulting DataFrame and stored in a `Raster` format.
 
@@ -76,20 +76,14 @@ Format:
 RS_MakeEmptyRaster(numBands: Integer, bandDataType: String = 'D', width: Integer, height: Integer, upperleftX: Double, upperleftY: Double, cellSize: Double)
 ```
 
-* NumBands: The number of bands in the raster. If not specified, the raster will have a single band.
-* BandDataType: Optional parameter specifying the data types of all the bands in the created raster.
-Accepts one of:
-    1. "D" - 64 bits Double
-    2. "F" - 32 bits Float
-    3. "I" - 32 bits signed Integer
-    4. "S" - 16 bits signed Short
-    5. "US" - 16 bits unsigned Short
-    6. "B" - 8 bits unsigned Byte
-* Width: The width of the raster in pixels.
-* Height: The height of the raster in pixels.
-* UpperleftX: The X coordinate of the upper left corner of the raster, in terms of the CRS units.
-* UpperleftY: The Y coordinate of the upper left corner of the raster, in terms of the CRS units.
-* Cell Size (pixel size): The size of the cells in the raster, in terms of the CRS units.
+- NumBands: The number of bands in the raster. If not specified, the raster will have a single band.
+- BandDataType: Optional parameter specifying the data types of all the bands in the created raster.
+  Accepts one of: 1. "D" - 64 bits Double 2. "F" - 32 bits Float 3. "I" - 32 bits signed Integer 4. "S" - 16 bits signed Short 5. "US" - 16 bits unsigned Short 6. "B" - 8 bits unsigned Byte
+- Width: The width of the raster in pixels.
+- Height: The height of the raster in pixels.
+- UpperleftX: The X coordinate of the upper left corner of the raster, in terms of the CRS units.
+- UpperleftY: The Y coordinate of the upper left corner of the raster, in terms of the CRS units.
+- Cell Size (pixel size): The size of the cells in the raster, in terms of the CRS units.
 
 It uses the default Cartesian coordinate system.
 
@@ -99,29 +93,23 @@ Format:
 RS_MakeEmptyRaster(numBands: Integer, bandDataType: String = 'D', width: Integer, height: Integer, upperleftX: Double, upperleftY: Double, scaleX: Double, scaleY: Double, skewX: Double, skewY: Double, srid: Integer)
 ```
 
-* NumBands: The number of bands in the raster. If not specified, the raster will have a single band.
-* BandDataType: Optional parameter specifying the data types of all the bands in the created raster.
-Accepts one of:
-    1. "D" - 64 bits Double
-    2. "F" - 32 bits Float
-    3. "I" - 32 bits signed Integer
-    4. "S" - 16 bits signed Short
-    5. "US" - 16 bits unsigned Short
-    6. "B" - 8 bits Byte
-* Width: The width of the raster in pixels.
-* Height: The height of the raster in pixels.
-* UpperleftX: The X coordinate of the upper left corner of the raster, in terms of the CRS units.
-* UpperleftY: The Y coordinate of the upper left corner of the raster, in terms of the CRS units.
-* ScaleX: The scaling factor of the cells on the X axis
-* ScaleY: The scaling factor of the cells on the Y axis
-* SkewX: The skew of the raster on the X axis, effectively tilting them in the horizontal direction
-* SkewY: The skew of the raster on the Y axis, effectively tilting them in the vertical direction
-* SRID: The SRID of the raster. Use 0 if you want to use the default Cartesian coordinate system. Use 4326 if you want to use WGS84.
+- NumBands: The number of bands in the raster. If not specified, the raster will have a single band.
+- BandDataType: Optional parameter specifying the data types of all the bands in the created raster.
+  Accepts one of: 1. "D" - 64 bits Double 2. "F" - 32 bits Float 3. "I" - 32 bits signed Integer 4. "S" - 16 bits signed Short 5. "US" - 16 bits unsigned Short 6. "B" - 8 bits Byte
+- Width: The width of the raster in pixels.
+- Height: The height of the raster in pixels.
+- UpperleftX: The X coordinate of the upper left corner of the raster, in terms of the CRS units.
+- UpperleftY: The Y coordinate of the upper left corner of the raster, in terms of the CRS units.
+- ScaleX: The scaling factor of the cells on the X axis
+- ScaleY: The scaling factor of the cells on the Y axis
+- SkewX: The skew of the raster on the X axis, effectively tilting them in the horizontal direction
+- SkewY: The skew of the raster on the Y axis, effectively tilting them in the vertical direction
+- SRID: The SRID of the raster. Use 0 if you want to use the default Cartesian coordinate system. Use 4326 if you want to use WGS84.
 
 For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
 
 !!!Note
-    If any other value than the accepted values for the bandDataType is provided, RS_MakeEmptyRaster defaults to double as the data type for the raster.
+If any other value than the accepted values for the bandDataType is provided, RS_MakeEmptyRaster defaults to double as the data type for the raster.
 
 Spark SQL example 1 (with 2 bands):
 
@@ -197,9 +185,9 @@ Since: `v1.6.0`
 
 Format: `RS_MakeRaster(refRaster: Raster, bandDataType: String, data: ARRAY[Double])`
 
-* refRaster: The reference raster from which the width, height, geo-reference information, and the CRS will be taken.
-* bandDataType: The data type of the bands in the resulting raster. Please refer to the `RS_MakeEmptyRaster` function for the accepted values.
-* data: The array of pixel values. The size of the array cannot be 0, and should be multiple of width * height of the reference raster.
+- refRaster: The reference raster from which the width, height, geo-reference information, and the CRS will be taken.
+- bandDataType: The data type of the bands in the resulting raster. Please refer to the `RS_MakeEmptyRaster` function for the accepted values.
+- data: The array of pixel values. The size of the array cannot be 0, and should be multiple of width \* height of the reference raster.
 
 SQL example:
 
@@ -221,12 +209,12 @@ Output:
 ### RS_FromNetCDF
 
 Introduction: Returns a raster geometry representing the given record variable short name from a NetCDF file.
-This API reads the array data of the record variable *in memory* along with all its dimensions
+This API reads the array data of the record variable _in memory_ along with all its dimensions
 Since the netCDF format has many variants, the reader might not work for your test case, if that is so, please report this using the public forums.
 
 This API has been tested for netCDF classic (NetCDF 1, 2, 5) and netCDF4/HDF5 files.
 
-This API requires the name of the record variable. It is assumed that a variable of the given name exists, and its last 2 dimensions are 'lat' and 'lon' dimensions *respectively*.
+This API requires the name of the record variable. It is assumed that a variable of the given name exists, and its last 2 dimensions are 'lat' and 'lon' dimensions _respectively_.
 
 If this assumption does not hold true for your case, you can choose to pass the lonDimensionName and latDimensionName explicitly.
 

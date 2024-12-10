@@ -16,31 +16,31 @@
 # under the License.
 
 notifications:
-    commits:    commits@sedona.apache.org
-    issues_status:    dev@sedona.apache.org
-    issues_comment:    issues@sedona.apache.org
-    pullrequests_status:    dev@sedona.apache.org
-    pullrequests_comment:    issues@sedona.apache.org
-    jira_options: link label worklog
+  commits: commits@sedona.apache.org
+  issues_status: dev@sedona.apache.org
+  issues_comment: issues@sedona.apache.org
+  pullrequests_status: dev@sedona.apache.org
+  pullrequests_comment: issues@sedona.apache.org
+  jira_options: link label worklog
 github:
-    description: "A cluster computing framework for processing large-scale geospatial data"
-    homepage: https://sedona.apache.org/
-    autolink_jira:
-        - SEDONA
-    labels:
-        - geospatial
-        - cluster-computing
-        - spatial-query
-        - spatial-analysis
-        - spatial-sql
-        - scala
-        - java
-        - python
-    features:
-        # Enable wiki for documentation
-        wiki: false
-        # Enable issue management
-        issues: true
-        # Enable projects for project management boards
-        projects: false
-    ghp_branch:
+  description: 'A cluster computing framework for processing large-scale geospatial data'
+  homepage: https://sedona.apache.org/
+  autolink_jira:
+    - SEDONA
+  labels:
+    - geospatial
+    - cluster-computing
+    - spatial-query
+    - spatial-analysis
+    - spatial-sql
+    - scala
+    - java
+    - python
+  features:
+    # Enable wiki for documentation
+    wiki: false
+    # Enable issue management
+    issues: true
+    # Enable projects for project management boards
+    projects: false
+  ghp_branch:

@@ -45,7 +45,7 @@ SedonaVizRegistrator.registerAll(sparkSession)
 Introduction: Given the weight of a pixel, return the corresponding color. The weight can be the spatial aggregation of spatial objects or spatial observations such as temperature and humidity.
 
 !!!note
-	The color is encoded to an Integer type value in DataFrame. When you print it, it will show some nonsense values. You can just treat them as colors in GeoSparkViz.
+The color is encoded to an Integer type value in DataFrame. When you print it, it will show some nonsense values. You can just treat them as colors in GeoSparkViz.
 
 Format:
 
@@ -129,7 +129,7 @@ FROM polygondf
 Introduction: Return the map tile name for a given zoom level. Please refer to [OpenStreetMap ZoomLevel](http://wiki.openstreetmap.org/wiki/Zoom_levels) and [OpenStreetMap tile name](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames).
 
 !!!note
-	Tile name is formatted as a "Z-X-Y" string. Z is zoom level. X is tile coordinate on X axis. Y is tile coordinate on Y axis.
+Tile name is formatted as a "Z-X-Y" string. Z is zoom level. X is tile coordinate on X axis. Y is tile coordinate on Y axis.
 
 Format: `ST_TileName (A: Pixel, ZoomLevel: Integer)`
 

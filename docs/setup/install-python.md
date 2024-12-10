@@ -21,27 +21,27 @@ Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/g
 
 Apache Sedona extends pyspark functions which depends on libraries:
 
-* pyspark
-* shapely
-* attrs
+- pyspark
+- shapely
+- attrs
 
 You need to install necessary packages if your system does not have them installed. See ["packages" in our Pipfile](https://github.com/apache/sedona/blob/master/python/Pipfile).
 
 ### Install sedona
 
-* Installing from PyPI repositories. You can find the latest Sedona Python on [PyPI](https://pypi.org/project/apache-sedona/). [There is a known issue in Sedona v1.0.1 and earlier versions](release-notes.md#known-issue).
+- Installing from PyPI repositories. You can find the latest Sedona Python on [PyPI](https://pypi.org/project/apache-sedona/). [There is a known issue in Sedona v1.0.1 and earlier versions](release-notes.md#known-issue).
 
 ```bash
 pip install apache-sedona
 ```
 
-* Since Sedona v1.1.0, pyspark is an optional dependency of Sedona Python because spark comes pre-installed on many spark platforms. To install pyspark along with Sedona Python in one go, use the `spark` extra:
+- Since Sedona v1.1.0, pyspark is an optional dependency of Sedona Python because spark comes pre-installed on many spark platforms. To install pyspark along with Sedona Python in one go, use the `spark` extra:
 
 ```bash
 pip install apache-sedona[spark]
 ```
 
-* Installing from Sedona Python source
+- Installing from Sedona Python source
 
 Clone Sedona GitHub source code and run the following command
 
@@ -60,7 +60,7 @@ You can get it using one of the following methods:
 
 1. If you run Sedona in Databricks, AWS EMR, or other cloud platform's notebook, use the `shaded jar`: Download [sedona-spark-shaded jar](https://repo.maven.apache.org/maven2/org/apache/sedona/) and [geotools-wrapper jar](https://repo.maven.apache.org/maven2/org/datasyslab/geotools-wrapper/) from Maven Central, and put them in SPARK_HOME/jars/ folder.
 2. If you run Sedona in an IDE or a local Jupyter notebook, use the `unshaded jar`. Call the [Maven Central coordinate](maven-coordinates.md) in your python program. For example,
-==Sedona >= 1.4.1==
+   ==Sedona >= 1.4.1==
 
 ```python
 from sedona.spark import *
@@ -97,13 +97,13 @@ SedonaRegistrator.registerAll(spark)
 
 If you manually copy the sedona-spark-shaded jar to `SPARK_HOME/jars/` folder, you need to setup two environment variables
 
-* SPARK_HOME. For example, run the command in your terminal
+- SPARK_HOME. For example, run the command in your terminal
 
 ```bash
 export SPARK_HOME=~/Downloads/spark-3.0.1-bin-hadoop2.7
 ```
 
-* PYTHONPATH. For example, run the command in your terminal
+- PYTHONPATH. For example, run the command in your terminal
 
 ```bash
 export PYTHONPATH=$SPARK_HOME/python

@@ -34,11 +34,11 @@ GeoSpark Perspective and Beyond"** is the full research paper that talks about t
 
 GeoSpark were evaluated by papers published on database top venues. It is worth noting that we do not have any collaboration with the authors.
 
-* SIGMOD 2020 paper ["Architecting a Query Compiler for Spatial Workloads"](https://dl.acm.org/doi/abs/10.1145/3318464.3389701) Ruby Y. Tahboub, Tiark  Rompf (Purdue University).
+- SIGMOD 2020 paper ["Architecting a Query Compiler for Spatial Workloads"](https://dl.acm.org/doi/abs/10.1145/3318464.3389701) Ruby Y. Tahboub, Tiark Rompf (Purdue University).
 
 > In Figure 16a, GeoSpark distance join query runs around 7x - 9x faster than Simba, a spatial extension on Spark, on 1 - 24 core machines.
 
-* PVLDB 2018 paper ["How Good Are Modern Spatial Analytics Systems?"](http://www.vldb.org/pvldb/vol11/p1661-pandey.pdf) Varun Pandey, Andreas Kipf, Thomas Neumann, Alfons Kemper (Technical University of Munich), quoted as follows:
+- PVLDB 2018 paper ["How Good Are Modern Spatial Analytics Systems?"](http://www.vldb.org/pvldb/vol11/p1661-pandey.pdf) Varun Pandey, Andreas Kipf, Thomas Neumann, Alfons Kemper (Technical University of Munich), quoted as follows:
 
 > GeoSpark comes close to a complete spatial analytics system. It also exhibits the best performance in most cases.
 
@@ -49,9 +49,9 @@ GeoSpark were evaluated by papers published on database top venues. It is worth 
 ["Spatial Data Management in Apache Spark: The
 GeoSpark Perspective and Beyond"](https://jiayuasu.github.io/files/paper/GeoSpark_Geoinformatica_2018.pdf) (research paper). Jia Yu, Zongsi Zhang, Mohamed Sarwat. Geoinformatica Journal 2019.
 
- ["A Demonstration of GeoSpark: A Cluster Computing Framework for Processing Big Spatial Data"](https://jiayuasu.github.io/files/paper/GeoSpark_DemoPaper.pdf) (demo paper). Jia Yu, Jinxuan Wu, Mohamed Sarwat. In Proceeding of IEEE International Conference on Data Engineering ICDE 2016, Helsinki, FI, May 2016
+["A Demonstration of GeoSpark: A Cluster Computing Framework for Processing Big Spatial Data"](https://jiayuasu.github.io/files/paper/GeoSpark_DemoPaper.pdf) (demo paper). Jia Yu, Jinxuan Wu, Mohamed Sarwat. In Proceeding of IEEE International Conference on Data Engineering ICDE 2016, Helsinki, FI, May 2016
 
- ["GeoSpark: A Cluster Computing Framework for Processing Large-Scale Spatial Data"](https://jiayuasu.github.io/files/paper/GeoSpark_ShortPaper.pdf) (short paper). Jia Yu, Jinxuan Wu, Mohamed Sarwat. In Proceeding of the ACM International Conference on Advances in Geographic Information Systems ACM SIGSPATIAL GIS 2015, Seattle, WA, USA November 2015
+["GeoSpark: A Cluster Computing Framework for Processing Large-Scale Spatial Data"](https://jiayuasu.github.io/files/paper/GeoSpark_ShortPaper.pdf) (short paper). Jia Yu, Jinxuan Wu, Mohamed Sarwat. In Proceeding of the ACM International Conference on Advances in Geographic Information Systems ACM SIGSPATIAL GIS 2015, Seattle, WA, USA November 2015
 
 ### GeoSparkViz Visualization System
 

@@ -1,4 +1,3 @@
-
 <!--
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -34,8 +33,8 @@ Sedona Jar: [Maven Central](https://repo1.maven.org/maven2/org/apache/sedona/sed
 Geotools Jar: [Maven Central](https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_geotools }}/geotools-wrapper-{{ sedona.current_geotools }}.jar)
 
 !!!note
-    Ensure you pick a version for Scala 2.12 and Spark 3.3. The Spark 3.4 and Scala
-    2.13 jars are not compatible with Glue 4.0.
+Ensure you pick a version for Scala 2.12 and Spark 3.3. The Spark 3.4 and Scala
+2.13 jars are not compatible with Glue 4.0.
 
 ## Configure Glue Job
 
@@ -43,7 +42,7 @@ Once you have your jar links, you can configure your Glue job to use them, as we
 package. How you do this varies slightly between the notebook and the script job types.
 
 !!!note
-    Always ensure that the Sedona version of the jars and the Python package match.
+Always ensure that the Sedona version of the jars and the Python package match.
 
 ### Notebook Job
 

@@ -28,7 +28,7 @@ Sedona offers APIs to visualize a raster in an image form. This API only works f
 Introduction: Returns a base64 encoded string of the given raster. If the datatype is integral then this function internally takes the first 4 bands as RGBA, and converts them to the PNG format, finally produces a base64 string. When the datatype is not integral, the function converts the raster to TIFF format, and then generates a base64 string. To visualize other bands, please use it together with `RS_Band`. You can take the resulting base64 string in [an online viewer](https://base64-viewer.onrender.com/) to check how the image looks like.
 
 !!!Warning
-    This is not recommended for large files.
+This is not recommended for large files.
 
 Format:
 
@@ -72,7 +72,7 @@ Output:
 ```
 
 !!!Tip
-    RS_AsImage can be paired with SedonaUtils.display_image(df) wrapper inside a Jupyter notebook to directly print the raster as an image in the output, where the 'df' parameter is the dataframe containing the HTML data provided by RS_AsImage
+RS_AsImage can be paired with SedonaUtils.display_image(df) wrapper inside a Jupyter notebook to directly print the raster as an image in the output, where the 'df' parameter is the dataframe containing the HTML data provided by RS_AsImage
 
 Example:
 
@@ -95,13 +95,13 @@ Introduction: Returns a string, that when printed, outputs the raster band as a 
 RS_AsMatrix expects a raster, and optionally a band (default: 1) and postDecimalPrecision (default: 6). The band parameter is 1-indexed.
 
 !!!Note
-    If the provided band is not present in the raster, RS_AsMatrix throws an IllegalArgumentException
+If the provided band is not present in the raster, RS_AsMatrix throws an IllegalArgumentException
 
 !!!Note
-    If the provided raster has integral values, postDecimalPrecision (if any) is simply ignored and integers are printed in the resultant string
+If the provided raster has integral values, postDecimalPrecision (if any) is simply ignored and integers are printed in the resultant string
 
 !!!note
-    If you are using `show()` to display the output, it will show special characters as escape sequences. To get the expected behavior use the following code:
+If you are using `show()` to display the output, it will show special characters as escape sequences. To get the expected behavior use the following code:
 
     === "Scala"
 

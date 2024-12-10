@@ -25,14 +25,14 @@ You just need to install the Sedona jars and Sedona Python on Databricks using D
 
 ### Install libraries
 
-1) From the Libraries tab install from Maven Coordinates
+1. From the Libraries tab install from Maven Coordinates
 
 ```
 org.apache.sedona:sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}
 org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
 ```
 
-2) For enabling python support, from the Libraries tab install from PyPI
+2. For enabling python support, from the Libraries tab install from PyPI
 
 ```
 apache-sedona=={{ sedona.current_version }}
@@ -64,11 +64,11 @@ In Databricks advanced editions, you need to install Sedona via [cluster init-sc
 
 In Spark 3.2, `org.apache.spark.sql.catalyst.expressions.Generator` class added a field `nodePatterns`. Any SQL functions that rely on Generator class may have issues if compiled for a runtime with a differing spark version. For Sedona, those functions are:
 
-* ST_MakeValid
-* ST_SubDivideExplode
+- ST_MakeValid
+- ST_SubDivideExplode
 
 !!!note
-    The following steps use DBR including Apache Spark 3.4.x as an example. Please change the Spark version according to your DBR version.
+The following steps use DBR including Apache Spark 3.4.x as an example. Please change the Spark version according to your DBR version.
 
 ### Download Sedona jars
 
@@ -90,10 +90,10 @@ Of course, you can also do the steps above manually.
 ### Create an init script
 
 !!!warning
-    Starting from December 2023, Databricks has disabled all DBFS based init script (/dbfs/XXX/<script-name>.sh). So you will have to store the init script from a workspace level (`/Workspace/Users/<user-name>/<script-name>.sh`) or Unity Catalog volume (`/Volumes/<catalog>/<schema>/<volume>/<path-to-script>/<script-name>.sh`). Please see [Databricks init scripts](https://docs.databricks.com/en/init-scripts/cluster-scoped.html#configure-a-cluster-scoped-init-script-using-the-ui) for more information.
+Starting from December 2023, Databricks has disabled all DBFS based init script (/dbfs/XXX/<script-name>.sh). So you will have to store the init script from a workspace level (`/Workspace/Users/<user-name>/<script-name>.sh`) or Unity Catalog volume (`/Volumes/<catalog>/<schema>/<volume>/<path-to-script>/<script-name>.sh`). Please see [Databricks init scripts](https://docs.databricks.com/en/init-scripts/cluster-scoped.html#configure-a-cluster-scoped-init-script-using-the-ui) for more information.
 
 !!!note
-    If you are creating a Shared cluster, you won't be able to use init scripts and jars stored under `Workspace`. Please instead store them in `Volumes`. The overall process should be the same.
+If you are creating a Shared cluster, you won't be able to use init scripts and jars stored under `Workspace`. Please instead store them in `Volumes`. The overall process should be the same.
 
 Create an init script in `Workspace` that loads the Sedona jars into the cluster's default jar directory. You can create that from any notebook by running:
 
@@ -130,8 +130,8 @@ spark.kryo.registrator org.apache.sedona.core.serde.SedonaKryoRegistrator
 
 From your cluster configuration (`Cluster` -> `Edit` -> `Configuration` -> `Advanced options` -> `Init Scripts`) add the newly created `Workspace` init script
 
-| Type | File path |
-|------|-----------|
+| Type      | File path                     |
+| --------- | ----------------------------- |
 | Workspace | /Shared/sedona/sedona-init.sh |
 
 For enabling python support, from the Libraries tab install from PyPI
@@ -144,7 +144,7 @@ pydeck==0.8.0
 ```
 
 !!!tips
-	You need to install the Sedona libraries via init script because the libraries installed via UI are installed after the cluster has already started, and therefore the classes specified by the config `spark.sql.extensions`, `spark.serializer`, and `spark.kryo.registrator` are not available at startup time.*
+You need to install the Sedona libraries via init script because the libraries installed via UI are installed after the cluster has already started, and therefore the classes specified by the config `spark.sql.extensions`, `spark.serializer`, and `spark.kryo.registrator` are not available at startup time.\*
 
 ### Verify installation
 
