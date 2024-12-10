@@ -422,7 +422,7 @@ spark_read_shapefile <- function(sc,
 
   lapply(names(options), function(name) {
     if (!name %in% c("")) {
-      warning(paste0("Ignoring unknown option '", name,"'"))
+      warning(paste0("Ignoring unknown option '", name, "'"))
     }
   })
 
@@ -451,7 +451,7 @@ spark_read_geojson <- function(sc,
   if ("skip_syntactically_invalid_geometries" %in% names(options)) final_skip <- options[["skip_syntactically_invalid_geometries"]] else final_skip <- TRUE
   lapply(names(options), function(name) {
     if (!name %in% c("allow_invalid_geometries", "skip_syntactically_invalid_geometries")) {
-      warning(paste0("Ignoring unknown option '", name,"'"))
+      warning(paste0("Ignoring unknown option '", name, "'"))
     }
   })
 
