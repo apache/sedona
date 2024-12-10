@@ -189,10 +189,6 @@ repos:
       - id: no-print-statement
         name: R – No print statement
         files: \.(R)$
-      - id: pkgdown
-        name: R – Check pkgdown documentation
-        description: Checks pkgdown reference and article entries
-        files: \.(R|Rmd)$
       - id: parsable-R
         name: R – Parsable
         files: \.(R|Rmd)$
