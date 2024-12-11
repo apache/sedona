@@ -447,7 +447,7 @@ Or change at runtime:
 ```{r}
 spark_session(sc) %>%
   invoke("conf") %>%
-  invoke("set", "sedona.global.index","false")
+  invoke("set", "sedona.global.index", "false")
 
 invoke_new(sc, "org.apache.sedona.core.utils.SedonaConf", invoke(spark_session(sc), "conf"))
 ```
