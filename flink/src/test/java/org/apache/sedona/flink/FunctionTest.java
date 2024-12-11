@@ -49,6 +49,36 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testAnchor() {
+    String actual =
+        (String)
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_AsText(ST_ReducePrecision(ST_Anchor(ST_GeomFromWKT('POLYGON ((-112.637484 33.440546, -112.546852 33.477209, -112.489177 33.550488, -112.41777 33.751684, -111.956371 33.719707, -111.766868 33.616843, -111.775107 33.527595, -111.640533 33.504695, -111.440044 33.463462, -111.415326 33.374055, -111.514197 33.309809, -111.643279 33.222542, -111.893203 33.174278, -111.96461 33.250109, -112.123903 33.261593, -112.252985 33.35341, -112.406784 33.346527, -112.667694 33.316695, -112.637484 33.440546))'), 2, 0.2), 4))"))
+                .getField(0);
+    String expected = "POINT (-112.0428 33.4642)";
+    assertEquals(expected, actual);
+
+    actual =
+        (String)
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_AsText(ST_ReducePrecision(ST_Anchor(ST_GeomFromWKT('GEOMETRYCOLLECTION(POLYGON ((-112.840785 33.435962, -112.840785 33.708284, -112.409597 33.708284, -112.409597 33.435962, -112.840785 33.435962)), POLYGON ((-112.309264 33.398167, -112.309264 33.746007, -111.787444 33.746007, -111.787444 33.398167, -112.309264 33.398167)))'), 4), 4))"))
+                .getField(0);
+    expected = "POINT (-112.0484 33.5721)";
+    assertEquals(expected, actual);
+
+    actual =
+        (String)
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_AsText(ST_ReducePrecision(ST_Anchor(ST_GeomFromWKT('POLYGON ((-112.654072 33.114485, -112.313516 33.653431, -111.63515 33.314399, -111.497829 33.874913, -111.692825 33.431378, -112.376684 33.788215, -112.654072 33.114485))')), 4))"))
+                .getField(0);
+    expected = "POINT (-112.0723 33.5391)";
+    assertEquals(expected, actual);
+  }
+
+  @Test
   public void testArea() {
     Table polygonTable = createPolygonTable(1);
     Table ResultTable =

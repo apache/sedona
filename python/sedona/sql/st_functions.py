@@ -101,6 +101,36 @@ def ST_AddPoint(
 
 
 @validate_argument_types
+def ST_Anchor(
+    geometry: ColumnOrName,
+    stepSize: Optional[Union[ColumnOrNameOrNumber, int]] = None,
+    goodnessThreshold: Optional[Union[ColumnOrNameOrNumber, float]] = None,
+) -> Column:
+    """Calculate an anchor point for a given geometry column.
+
+    :param geometry: Input geometry column to calculate the anchor for.
+    :type geometry: ColumnOrName
+    :param stepSize: Optional step size for grid search when determining the best anchor point.
+                     Defaults to 2 if not provided.
+    :type stepSize: Optional[Union[ColumnOrNameOrNumber, int]], optional
+    :param goodnessThreshold: Optional threshold for the minimum "goodness" value.
+                              Determines when to stop refining the anchor search.
+                              Defaults to 0.2 if not provided.
+    :type goodnessThreshold: Optional[Union[ColumnOrNameOrNumber, float]], optional
+    :return: Anchor point as a geometry column.
+    :rtype: Column
+    """
+    if stepSize is None and goodnessThreshold is None:
+        args = (geometry,)
+    elif goodnessThreshold is None:
+        args = (geometry, stepSize)
+    else:
+        args = (geometry, stepSize, goodnessThreshold)
+
+    return _call_st_function("ST_Anchor", args)
+
+
+@validate_argument_types
 def ST_Area(geometry: ColumnOrName) -> Column:
     """Calculate the area of a geometry.
 

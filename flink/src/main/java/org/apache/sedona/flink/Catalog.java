@@ -58,6 +58,7 @@ public class Catalog {
       new Constructors.ST_MLineFromText(),
       new Constructors.ST_GeomCollFromText(),
       new Functions.GeometryType(),
+      new Functions.ST_Anchor(),
       new Functions.ST_Area(),
       new Functions.ST_AreaSpheroid(),
       new Functions.ST_Azimuth(),
