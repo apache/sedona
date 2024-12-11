@@ -746,6 +746,25 @@
             </properties>
         </profile>
         <profile>
+            <id>sedona-spark-4.0</id>
+            <activation>
+                <property>
+                    <name>spark</name>
+                    <value>4.0</value>
+                </property>
+            </activation>
+            <properties>
+                <spark.version>4.0.0-preview2</spark.version>
+                <spark.compat.version>3.5</spark.compat.version>
+                <log4j.version>2.22.1</log4j.version>
+                <graphframe.version>0.8.3-spark3.5</graphframe.version>
+                <scala.version>2.13.12</scala.version>
+                <scala.compat.version>2.13</scala.compat.version>
+                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
+                <skip.deploy.common.modules>true</skip.deploy.common.modules>
+            </properties>
+        </profile>
+        <profile>
             <id>scala2.13</id>
             <activation>
                 <property>
