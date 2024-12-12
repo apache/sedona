@@ -101,7 +101,7 @@ def ST_AddPoint(
 
 
 @validate_argument_types
-def ST_Anchor(
+def ST_LabelPoint(
     geometry: ColumnOrName,
     stepSize: Optional[Union[ColumnOrNameOrNumber, int]] = None,
     goodnessThreshold: Optional[Union[ColumnOrNameOrNumber, float]] = None,
@@ -127,7 +127,7 @@ def ST_Anchor(
     else:
         args = (geometry, stepSize, goodnessThreshold)
 
-    return _call_st_function("ST_Anchor", args)
+    return _call_st_function("ST_LabelPoint", args)
 
 
 @validate_argument_types

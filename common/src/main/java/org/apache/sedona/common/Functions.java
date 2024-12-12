@@ -80,15 +80,15 @@ public class Functions {
     return geometry.getArea();
   }
 
-  public static Geometry anchor(Geometry geometry) {
-    return anchor(geometry, 2, 0.2);
+  public static Geometry labelPoint(Geometry geometry) {
+    return labelPoint(geometry, 2, 0.2);
   }
 
-  public static Geometry anchor(Geometry geometry, double stepSize) {
-    return anchor(geometry, stepSize, 0.2);
+  public static Geometry labelPoint(Geometry geometry, double stepSize) {
+    return labelPoint(geometry, stepSize, 0.2);
   }
 
-  public static Geometry anchor(Geometry geometry, double stepSize, double goodnessThreshold) {
+  public static Geometry labelPoint(Geometry geometry, double stepSize, double goodnessThreshold) {
     if (geometry.getArea() <= 0) {
       throw new IllegalArgumentException("Geometry must have a positive area");
     }
@@ -112,7 +112,7 @@ public class Functions {
 
       // Recursively process the largest polygon
       if (largestPolygon instanceof Polygon) {
-        return polygonToAnchor(
+        return polygonToLabel(
             (Polygon) largestPolygon, stepSize, goodnessThreshold, geometryFactory);
       } else {
         throw new IllegalArgumentException("GeometryCollection must contain at least one Polygon");
@@ -121,14 +121,14 @@ public class Functions {
 
     // If the geometry is a polygon, process it
     if (geometry instanceof Polygon) {
-      return polygonToAnchor((Polygon) geometry, stepSize, goodnessThreshold, geometryFactory);
+      return polygonToLabel((Polygon) geometry, stepSize, goodnessThreshold, geometryFactory);
     }
 
     throw new IllegalArgumentException(
         "Geometry must be a Polygon or a GeometryCollection containing Polygons");
   }
 
-  private static Point polygonToAnchor(
+  private static Point polygonToLabel(
       Polygon polygon, double stepSize, double goodnessThreshold, GeometryFactory geometryFactory) {
     if (polygon.getArea() <= 0) {
       throw new IllegalArgumentException("Polygon must have a positive area");
@@ -145,11 +145,9 @@ public class Functions {
     goodnessThreshold = radius * goodnessThreshold;
 
     double bestGoodness = labelGoodness(polygon, centroid);
-    //    System.out.println(bestGoodness + ", " + goodnessThreshold);
 
     if (bestGoodness < goodnessThreshold) {
       for (int sub = 2; sub < 32; sub++) {
-        //        System.out.println("Loop " + (sub - 1));
         if ((xmax - xmin) <= stepSize * sub || (ymax - ymin) <= stepSize * sub) break;
 
         for (int x = 1; x < sub; x++) {

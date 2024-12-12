@@ -104,22 +104,22 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"geom"},
       argTypes = {"Geometry"})
-  public static Geometry ST_Anchor(String geom) {
-    return Functions.anchor(GeometrySerde.deserGeoJson(geom));
+  public static Geometry ST_LabelPoint(String geom) {
+    return Functions.labelPoint(GeometrySerde.deserGeoJson(geom));
   }
 
   @UDFAnnotations.ParamMeta(
       argNames = {"geom", "stepSize"},
       argTypes = {"Geometry", "int"})
-  public static Geometry ST_Anchor(String geom, int stepSize) {
-    return Functions.anchor(GeometrySerde.deserGeoJson(geom), stepSize);
+  public static Geometry ST_LabelPoint(String geom, int stepSize) {
+    return Functions.labelPoint(GeometrySerde.deserGeoJson(geom), stepSize);
   }
 
   @UDFAnnotations.ParamMeta(
       argNames = {"geom", "stepSize", "goodnessThreshold"},
       argTypes = {"Geometry", "int", "double"})
-  public static Geometry ST_Anchor(String geom, int stepSize, double goodnessThreshold) {
-    return Functions.anchor(GeometrySerde.deserGeoJson(geom), stepSize, goodnessThreshold);
+  public static Geometry ST_LabelPoint(String geom, int stepSize, double goodnessThreshold) {
+    return Functions.labelPoint(GeometrySerde.deserGeoJson(geom), stepSize, goodnessThreshold);
   }
 
   @UDFAnnotations.ParamMeta(

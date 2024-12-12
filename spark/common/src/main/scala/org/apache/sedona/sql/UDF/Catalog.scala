@@ -38,7 +38,7 @@ object Catalog {
   val expressions: Seq[FunctionDescription] = Seq(
     // Expression for vectors
     function[GeometryType](),
-    function[ST_Anchor](),
+    function[ST_LabelPoint](),
     function[ST_PointFromText](),
     function[ST_PointFromWKB](),
     function[ST_LineFromWKB](),

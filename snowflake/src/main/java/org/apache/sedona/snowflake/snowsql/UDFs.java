@@ -88,18 +88,18 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom"})
-  public static Geometry ST_Anchor(byte[] geom) {
-    return Functions.anchor(GeometrySerde.deserialize(geom));
+  public static Geometry ST_LabelPoint(byte[] geom) {
+    return Functions.labelPoint(GeometrySerde.deserialize(geom));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom", "stepSize"})
-  public static Geometry ST_Anchor(byte[] geom, Integer stepSize) {
-    return Functions.anchor(GeometrySerde.deserialize(geom), stepSize);
+  public static Geometry ST_LabelPoint(byte[] geom, Integer stepSize) {
+    return Functions.labelPoint(GeometrySerde.deserialize(geom), stepSize);
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom", "stepSize", "goodnessThreshold"})
-  public static Geometry ST_Anchor(byte[] geom, Integer stepSize, double goodnessThreshold) {
-    return Functions.anchor(GeometrySerde.deserialize(geom), stepSize, goodnessThreshold);
+  public static Geometry ST_LabelPoint(byte[] geom, Integer stepSize, double goodnessThreshold) {
+    return Functions.labelPoint(GeometrySerde.deserialize(geom), stepSize, goodnessThreshold);
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2", "geom3"})

@@ -40,13 +40,13 @@ public class Functions {
     }
   }
 
-  public static class ST_Anchor extends ScalarFunction {
+  public static class ST_LabelPoint extends ScalarFunction {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
             Object o) {
       Geometry geom = (Geometry) o;
-      return org.apache.sedona.common.Functions.anchor(geom);
+      return org.apache.sedona.common.Functions.labelPoint(geom);
     }
 
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
@@ -54,7 +54,7 @@ public class Functions {
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
         @DataTypeHint("Integer") Integer stepSize) {
       Geometry geom = (Geometry) o;
-      return org.apache.sedona.common.Functions.anchor(geom, stepSize);
+      return org.apache.sedona.common.Functions.labelPoint(geom, stepSize);
     }
 
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
@@ -63,7 +63,7 @@ public class Functions {
         @DataTypeHint("Integer") Integer stepSize,
         @DataTypeHint("Double") Double goodnessThreshold) {
       Geometry geom = (Geometry) o;
-      return org.apache.sedona.common.Functions.anchor(geom, stepSize, goodnessThreshold);
+      return org.apache.sedona.common.Functions.labelPoint(geom, stepSize, goodnessThreshold);
     }
   }
 
