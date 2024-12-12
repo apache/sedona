@@ -43,7 +43,10 @@ public class JoinQueryDeduplicationTest extends TestBase {
     sc.stop();
   }
 
-  /** See https://issues.apache.org/jira/browse/SEDONA-233 */
+  /**
+   * See <a
+   * href="https://issues.apache.org/jira/browse/SEDONA-233">https://issues.apache.org/jira/browse/SEDONA-233</a>
+   */
   @Test
   public void testDeduplication() throws Exception {
     SpatialRDD<Geometry> leftRDD = new SpatialRDD<>();
