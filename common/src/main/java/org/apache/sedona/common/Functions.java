@@ -95,37 +95,39 @@ public class Functions {
 
     GeometryFactory geometryFactory = new GeometryFactory();
 
-    // If the geometry is a collection, find the largest polygon
+    // Find the largest polygon
+    Polygon largestPolygon = findLargestPolygon(geometry);
+
+    if (largestPolygon == null) {
+      throw new IllegalArgumentException("Geometry must contain at least one Polygon");
+    }
+
+    return polygonToLabel(largestPolygon, stepSize, goodnessThreshold, geometryFactory);
+  }
+
+  private static Polygon findLargestPolygon(Geometry geometry) {
+    if (geometry instanceof Polygon) {
+      return (Polygon) geometry;
+    }
+
     if (geometry instanceof GeometryCollection) {
       GeometryCollection gc = (GeometryCollection) geometry;
-      Geometry largestPolygon = null;
+      Polygon largestPolygon = null;
       double maxArea = Double.MIN_VALUE;
 
       for (int i = 0; i < gc.getNumGeometries(); i++) {
-        Geometry geom = gc.getGeometryN(i);
-        double area = geom.getArea();
-        if (area > maxArea) {
-          largestPolygon = geom;
-          maxArea = area;
+        Geometry subGeometry = gc.getGeometryN(i);
+        Polygon candidate = findLargestPolygon(subGeometry);
+
+        if (candidate != null && candidate.getArea() > maxArea) {
+          largestPolygon = candidate;
+          maxArea = candidate.getArea();
         }
       }
-
-      // Recursively process the largest polygon
-      if (largestPolygon instanceof Polygon) {
-        return polygonToLabel(
-            (Polygon) largestPolygon, stepSize, goodnessThreshold, geometryFactory);
-      } else {
-        throw new IllegalArgumentException("GeometryCollection must contain at least one Polygon");
-      }
+      return largestPolygon;
     }
 
-    // If the geometry is a polygon, process it
-    if (geometry instanceof Polygon) {
-      return polygonToLabel((Polygon) geometry, stepSize, goodnessThreshold, geometryFactory);
-    }
-
-    throw new IllegalArgumentException(
-        "Geometry must be a Polygon or a GeometryCollection containing Polygons");
+    return null;
   }
 
   private static Point polygonToLabel(
