@@ -52,18 +52,18 @@ public class Functions {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
-        @DataTypeHint("Integer") Integer stepSize) {
+        @DataTypeHint("Integer") Double gridResolution) {
       Geometry geom = (Geometry) o;
-      return org.apache.sedona.common.Functions.labelPoint(geom, stepSize);
+      return org.apache.sedona.common.Functions.labelPoint(geom, gridResolution);
     }
 
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(
         @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
-        @DataTypeHint("Integer") Integer stepSize,
+        @DataTypeHint("Integer") Double gridResolution,
         @DataTypeHint("Double") Double goodnessThreshold) {
       Geometry geom = (Geometry) o;
-      return org.apache.sedona.common.Functions.labelPoint(geom, stepSize, goodnessThreshold);
+      return org.apache.sedona.common.Functions.labelPoint(geom, gridResolution, goodnessThreshold);
     }
   }
 

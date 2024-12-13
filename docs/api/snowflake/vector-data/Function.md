@@ -130,6 +130,7 @@ Output: `POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))`
 ## ST_LabelPoint
 
 Introduction: `ST_LabelPoint` computes and returns a label point for a given polygon or geometry collection. The label point is chosen to:
+
 - Be near the center of the polygon.
 - Stay far from boundaries for optimal placement.
 

@@ -109,17 +109,19 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
-      argNames = {"geom", "stepSize"},
-      argTypes = {"Geometry", "int"})
-  public static Geometry ST_LabelPoint(String geom, int stepSize) {
-    return Functions.labelPoint(GeometrySerde.deserGeoJson(geom), stepSize);
+      argNames = {"geom", "gridResolution"},
+      argTypes = {"Geometry", "double"})
+  public static Geometry ST_LabelPoint(String geom, double gridResolution) {
+    return Functions.labelPoint(GeometrySerde.deserGeoJson(geom), gridResolution);
   }
 
   @UDFAnnotations.ParamMeta(
-      argNames = {"geom", "stepSize", "goodnessThreshold"},
-      argTypes = {"Geometry", "int", "double"})
-  public static Geometry ST_LabelPoint(String geom, int stepSize, double goodnessThreshold) {
-    return Functions.labelPoint(GeometrySerde.deserGeoJson(geom), stepSize, goodnessThreshold);
+      argNames = {"geom", "gridResolution", "goodnessThreshold"},
+      argTypes = {"Geometry", "double", "double"})
+  public static Geometry ST_LabelPoint(
+      String geom, double gridResolution, double goodnessThreshold) {
+    return Functions.labelPoint(
+        GeometrySerde.deserGeoJson(geom), gridResolution, goodnessThreshold);
   }
 
   @UDFAnnotations.ParamMeta(

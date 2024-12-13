@@ -92,14 +92,15 @@ public class UDFs {
     return Functions.labelPoint(GeometrySerde.deserialize(geom));
   }
 
-  @UDFAnnotations.ParamMeta(argNames = {"geom", "stepSize"})
-  public static Geometry ST_LabelPoint(byte[] geom, Integer stepSize) {
-    return Functions.labelPoint(GeometrySerde.deserialize(geom), stepSize);
+  @UDFAnnotations.ParamMeta(argNames = {"geom", "gridResolution"})
+  public static Geometry ST_LabelPoint(byte[] geom, double gridResolution) {
+    return Functions.labelPoint(GeometrySerde.deserialize(geom), gridResolution);
   }
 
-  @UDFAnnotations.ParamMeta(argNames = {"geom", "stepSize", "goodnessThreshold"})
-  public static Geometry ST_LabelPoint(byte[] geom, Integer stepSize, double goodnessThreshold) {
-    return Functions.labelPoint(GeometrySerde.deserialize(geom), stepSize, goodnessThreshold);
+  @UDFAnnotations.ParamMeta(argNames = {"geom", "gridResolution", "goodnessThreshold"})
+  public static Geometry ST_LabelPoint(
+      byte[] geom, double gridResolution, double goodnessThreshold) {
+    return Functions.labelPoint(GeometrySerde.deserialize(geom), gridResolution, goodnessThreshold);
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2", "geom3"})

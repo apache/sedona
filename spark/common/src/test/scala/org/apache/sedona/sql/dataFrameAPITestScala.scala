@@ -413,9 +413,9 @@ class dataFrameAPITestScala extends TestBaseScala {
     // functions
     it("Passed ST_LabelPoint") {
       var geomDf = sparkSession.sql(
-        "SELECT ST_GeomFromWKT('POLYGON ((-112.637484 33.440546, -112.546852 33.477209, -112.489177 33.550488, -112.41777 33.751684, -111.956371 33.719707, -111.766868 33.616843, -111.775107 33.527595, -111.640533 33.504695, -111.440044 33.463462, -111.415326 33.374055, -111.514197 33.309809, -111.643279 33.222542, -111.893203 33.174278, -111.96461 33.250109, -112.123903 33.261593, -112.252985 33.35341, -112.406784 33.346527, -112.667694 33.316695, -112.637484 33.440546))') AS geom, 2 AS stepSize, 0.2 AS goodnessThreshold")
+        "SELECT ST_GeomFromWKT('POLYGON ((-112.637484 33.440546, -112.546852 33.477209, -112.489177 33.550488, -112.41777 33.751684, -111.956371 33.719707, -111.766868 33.616843, -111.775107 33.527595, -111.640533 33.504695, -111.440044 33.463462, -111.415326 33.374055, -111.514197 33.309809, -111.643279 33.222542, -111.893203 33.174278, -111.96461 33.250109, -112.123903 33.261593, -112.252985 33.35341, -112.406784 33.346527, -112.667694 33.316695, -112.637484 33.440546))') AS geom, 2.0 AS gridResolution, 0.2 AS goodnessThreshold")
       var result = geomDf.select(
-        ST_LabelPoint(col("geom"), col("stepSize"), col("goodnessThreshold")).as("geom"))
+        ST_LabelPoint(col("geom"), col("gridResolution"), col("goodnessThreshold")).as("geom"))
       var actualResult = result.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       var expected = "POINT (-112.04278737349767 33.46420809489905)"
       assertEquals(expected, actualResult)

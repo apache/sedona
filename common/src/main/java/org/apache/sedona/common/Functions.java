@@ -84,11 +84,12 @@ public class Functions {
     return labelPoint(geometry, 2, 0.2);
   }
 
-  public static Geometry labelPoint(Geometry geometry, double stepSize) {
-    return labelPoint(geometry, stepSize, 0.2);
+  public static Geometry labelPoint(Geometry geometry, double gridResolution) {
+    return labelPoint(geometry, gridResolution, 0.2);
   }
 
-  public static Geometry labelPoint(Geometry geometry, double stepSize, double goodnessThreshold) {
+  public static Geometry labelPoint(
+      Geometry geometry, double gridResolution, double goodnessThreshold) {
     if (geometry.getArea() <= 0) {
       throw new IllegalArgumentException("Geometry must have a positive area");
     }
@@ -102,7 +103,7 @@ public class Functions {
       throw new IllegalArgumentException("Geometry must contain at least one Polygon");
     }
 
-    return polygonToLabel(largestPolygon, stepSize, goodnessThreshold, geometryFactory);
+    return polygonToLabel(largestPolygon, gridResolution, goodnessThreshold, geometryFactory);
   }
 
   private static Polygon findLargestPolygon(Geometry geometry) {
@@ -131,7 +132,10 @@ public class Functions {
   }
 
   private static Point polygonToLabel(
-      Polygon polygon, double stepSize, double goodnessThreshold, GeometryFactory geometryFactory) {
+      Polygon polygon,
+      double gridResolution,
+      double goodnessThreshold,
+      GeometryFactory geometryFactory) {
     if (polygon.getArea() <= 0) {
       throw new IllegalArgumentException("Polygon must have a positive area");
     }
@@ -142,6 +146,10 @@ public class Functions {
     double xmax = env.getMaxX();
     double ymax = env.getMaxY();
 
+    // Calculate step size based on grid resolution
+    double stepSizeX = (xmax - xmin) / gridResolution;
+    double stepSizeY = (ymax - ymin) / gridResolution;
+
     Point centroid = polygon.getCentroid();
     double radius = Math.sqrt(polygon.getArea() / Math.PI);
     goodnessThreshold = radius * goodnessThreshold;
@@ -149,26 +157,18 @@ public class Functions {
     double bestGoodness = labelGoodness(polygon, centroid);
 
     if (bestGoodness < goodnessThreshold) {
-      for (int sub = 2; sub < 32; sub++) {
-        if ((xmax - xmin) <= stepSize * sub || (ymax - ymin) <= stepSize * sub) break;
+      for (int x = 0; x < gridResolution; x++) {
+        for (int y = 0; y < gridResolution; y++) {
+          double candidateX = xmin + x * stepSizeX;
+          double candidateY = ymin + y * stepSizeY;
+          Point candidate = geometryFactory.createPoint(new Coordinate(candidateX, candidateY));
 
-        for (int x = 1; x < sub; x++) {
-          for (int y = 1; y < sub; y++) {
-            Point candidate =
-                geometryFactory.createPoint(
-                    new Coordinate(xmin + x * (xmax - xmin) / sub, ymin + y * (ymax - ymin) / sub));
+          double candidateGoodness = labelGoodness(polygon, candidate);
 
-            double candidateGoodness = labelGoodness(polygon, candidate);
-
-            if (candidateGoodness > bestGoodness) {
-              centroid = candidate;
-              bestGoodness = candidateGoodness;
-            }
+          if (candidateGoodness > bestGoodness) {
+            centroid = candidate;
+            bestGoodness = candidateGoodness;
           }
-        }
-
-        if (bestGoodness > goodnessThreshold) {
-          return centroid;
         }
       }
     }
