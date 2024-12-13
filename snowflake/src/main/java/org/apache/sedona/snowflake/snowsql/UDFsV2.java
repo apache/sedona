@@ -111,15 +111,14 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"geom", "gridResolution"},
       argTypes = {"Geometry", "double"})
-  public static Geometry ST_LabelPoint(String geom, double gridResolution) {
+  public static Geometry ST_LabelPoint(String geom, int gridResolution) {
     return Functions.labelPoint(GeometrySerde.deserGeoJson(geom), gridResolution);
   }
 
   @UDFAnnotations.ParamMeta(
       argNames = {"geom", "gridResolution", "goodnessThreshold"},
       argTypes = {"Geometry", "double", "double"})
-  public static Geometry ST_LabelPoint(
-      String geom, double gridResolution, double goodnessThreshold) {
+  public static Geometry ST_LabelPoint(String geom, int gridResolution, double goodnessThreshold) {
     return Functions.labelPoint(
         GeometrySerde.deserGeoJson(geom), gridResolution, goodnessThreshold);
   }

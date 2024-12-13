@@ -103,7 +103,7 @@ def ST_AddPoint(
 @validate_argument_types
 def ST_LabelPoint(
     geometry: ColumnOrName,
-    gridResolution: Optional[Union[ColumnOrNameOrNumber, float]] = None,
+    gridResolution: Optional[Union[ColumnOrNameOrNumber, int]] = None,
     goodnessThreshold: Optional[Union[ColumnOrNameOrNumber, float]] = None,
 ) -> Column:
     """Calculate an anchor point for a given geometry column.
@@ -112,7 +112,7 @@ def ST_LabelPoint(
     :type geometry: ColumnOrName
     :param gridResolution: Optional step size for grid search when determining the best anchor point.
                      Defaults to 2 if not provided.
-    :type gridResolution: Optional[Union[ColumnOrNameOrNumber, float]], optional
+    :type gridResolution: Optional[Union[ColumnOrNameOrNumber, int]], optional
     :param goodnessThreshold: Optional threshold for the minimum "goodness" value.
                               Determines when to stop refining the anchor search.
                               Defaults to 0.2 if not provided.

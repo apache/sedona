@@ -81,15 +81,15 @@ public class Functions {
   }
 
   public static Geometry labelPoint(Geometry geometry) {
-    return labelPoint(geometry, 2, 0.2);
+    return labelPoint(geometry, 16, 0.2);
   }
 
-  public static Geometry labelPoint(Geometry geometry, double gridResolution) {
+  public static Geometry labelPoint(Geometry geometry, int gridResolution) {
     return labelPoint(geometry, gridResolution, 0.2);
   }
 
   public static Geometry labelPoint(
-      Geometry geometry, double gridResolution, double goodnessThreshold) {
+      Geometry geometry, int gridResolution, double goodnessThreshold) {
     if (geometry.getArea() <= 0) {
       throw new IllegalArgumentException("Geometry must have a positive area");
     }
@@ -133,7 +133,7 @@ public class Functions {
 
   private static Point polygonToLabel(
       Polygon polygon,
-      double gridResolution,
+      int gridResolution,
       double goodnessThreshold,
       GeometryFactory geometryFactory) {
     if (polygon.getArea() <= 0) {

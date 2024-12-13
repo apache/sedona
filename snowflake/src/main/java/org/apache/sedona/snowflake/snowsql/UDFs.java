@@ -93,13 +93,12 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom", "gridResolution"})
-  public static Geometry ST_LabelPoint(byte[] geom, double gridResolution) {
+  public static Geometry ST_LabelPoint(byte[] geom, int gridResolution) {
     return Functions.labelPoint(GeometrySerde.deserialize(geom), gridResolution);
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom", "gridResolution", "goodnessThreshold"})
-  public static Geometry ST_LabelPoint(
-      byte[] geom, double gridResolution, double goodnessThreshold) {
+  public static Geometry ST_LabelPoint(byte[] geom, int gridResolution, double goodnessThreshold) {
     return Functions.labelPoint(GeometrySerde.deserialize(geom), gridResolution, goodnessThreshold);
   }
 

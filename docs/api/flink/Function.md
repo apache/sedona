@@ -176,7 +176,7 @@ The algorithm is inspired by Tippecanoe’s `polygon_to_anchor`, an approximate 
 `ST_LabelPoint` takes upto 3 arguments,
 
 - `geometry`: input geometry (e.g., a polygon or GeometryCollection) for which the anchor point is to be calculated.
-- `stepSize` (Optional, default is 2): Controls the resolution of the grid search for refining the anchor point. Smaller values provide finer refinement but increase computation time.
+- `gridResolution` (Optional, default is 16): Controls the resolution of the search grid for refining the label point. A higher resolution increases the grid density, providing more accurate results but at the cost of additional computation. For example, a gridResolution of 16 divides the bounding box of the polygon into a 16x16 grid.
 - `goodnessThreshold` (Optional, default is 0.2): Determines the minimum acceptable “goodness” value for the anchor point. Higher thresholds prioritize points farther from boundaries but may require more computation.
 
 !!!note
@@ -195,11 +195,11 @@ ST_LabelPoint(geometry: Geometry)
 ```
 
 ```sql
-ST_LabelPoint(geometry: Geometry, stepSize: Integer)
+ST_LabelPoint(geometry: Geometry, gridResolution: Integer)
 ```
 
 ```sql
-ST_LabelPoint(geometry: Geometry, stepSize: Integer, goodnessThreshold: Double)
+ST_LabelPoint(geometry: Geometry, gridResolution: Integer, goodnessThreshold: Double)
 ```
 
 Since: `v1.7.1`

@@ -78,7 +78,7 @@ public class FunctionsTest extends TestBase {
         Constructors.geomFromWKT(
             "GEOMETRYCOLLECTION(POLYGON ((-112.840785 33.435962, -112.840785 33.708284, -112.409597 33.708284, -112.409597 33.435962, -112.840785 33.435962)), POLYGON ((-112.309264 33.398167, -112.309264 33.746007, -111.787444 33.746007, -111.787444 33.398167, -112.309264 33.398167)))",
             4326);
-    labelPoint = Functions.asEWKT(Functions.labelPoint(geom, 1));
+    labelPoint = Functions.asEWKT(Functions.labelPoint(geom, 32));
     expected = "SRID=4326;POINT (-112.04835399999999 33.57208699999999)";
     assertEquals(expected, labelPoint);
 
@@ -86,11 +86,10 @@ public class FunctionsTest extends TestBase {
         Constructors.geomFromWKT(
             "POLYGON ((-112.654072 33.114485, -112.313516 33.653431, -111.63515 33.314399, -111.497829 33.874913, -111.692825 33.431378, -112.376684 33.788215, -112.654072 33.114485))",
             4326);
-    labelPoint = Functions.asEWKT(Functions.labelPoint(geom, 1, 0.01));
+    labelPoint = Functions.asEWKT(Functions.labelPoint(geom, 32, 0.01));
     expected = "SRID=4326;POINT (-112.0722602222832 33.53914975012836)";
     assertEquals(expected, labelPoint);
 
-    // Test 4: Nested GeometryCollection
     geom =
         Constructors.geomFromWKT(
             "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POLYGON ((-112.840785 33.435962, -112.840785 33.708284, -112.409597 33.708284, -112.409597 33.435962, -112.840785 33.435962)), POLYGON ((-112.309264 33.398167, -112.309264 33.746007, -111.787444 33.746007, -111.787444 33.398167, -112.309264 33.398167))), POLYGON ((-113.001222 33.223156, -112.991385 33.565242, -112.650316 33.452315, -113.001222 33.223156)))",
