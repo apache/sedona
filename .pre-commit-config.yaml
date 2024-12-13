@@ -170,25 +170,3 @@ repos:
         args: [--strict, -c=.github/linters/.yaml-lint.yml]
         types: [yaml]
         files: \.ya?ml$
-  - repo: https://github.com/lorenzwalthert/precommit
-    rev: v0.4.3
-    hooks:
-      - id: style-files
-        name: R – Run styler
-        description: Run styler for R code
-        args: [--scope=spaces, --strict=FALSE]
-        files: \.(R|Rmd)$
-      - id: lintr
-        name: R – Run lintr
-        description: Run lintr for R code
-        args: [--warn_only]
-        files: \.(R|Rmd|Rd)$
-      - id: no-browser-statement
-        name: R – No browser statement
-        files: \.(R)$
-      - id: no-print-statement
-        name: R – No print statement
-        files: \.(R)$
-      - id: parsable-R
-        name: R – Parsable
-        files: \.(R|Rmd)$
