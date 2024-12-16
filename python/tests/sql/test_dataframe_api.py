@@ -269,7 +269,7 @@ test_configurations = [
     ),
     (
         stf.ST_LabelPoint,
-        "geom",
+        ("geom",),
         "triangle_geom",
         "",
         "POINT (0.6666666666666666 0.3333333333333333)",
