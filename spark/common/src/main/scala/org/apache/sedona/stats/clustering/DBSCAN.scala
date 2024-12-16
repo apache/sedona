@@ -141,7 +141,7 @@ object DBSCAN {
       epsilon: Double,
       minPts: Int,
       geometry: String): Unit = {
-    require(epsilon > 0, "epsilon must be greater than 0")
+    require(epsilon >= 0, "epsilon must not be negative")
     require(minPts > 0, "minPts must be greater than 0")
     require(geo_df.columns.contains(geometry), "geometry column not found in dataframe")
     require(

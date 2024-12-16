@@ -1,3 +1,22 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
 # Make a Sedona release
 
 This page is for Sedona PMC to publish Sedona releases.
@@ -80,10 +99,10 @@ echo "Now the releases are staged. A tag and two commits have been created on Se
 
 echo "*****Step 2: Upload the Release Candidate to https://repository.apache.org."
 
-# For Spark 3.0 and Scala 2.12
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.0 -Dscala=2.12" -Dspark=3.0 -Dscala=2.12
+# For Spark 3.3 and Scala 2.12
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.3 -Dscala=2.12" -Dspark=3.3 -Dscala=2.12
 
-# For Spark 3.0 and Scala 2.13
+# For Spark 3.3 and Scala 2.13
 ## Note that we use maven-release-plugin 2.3.2 instead of more recent version (e.g., 3.0.1) to get rid of a bug of maven-release-plugin,
 ## which prevent us from cloning git repo with user specified -Dtag=<tag>.
 ## Please refer to https://issues.apache.org/jira/browse/MRELEASE-933 and https://issues.apache.org/jira/browse/SCM-729 for details.
@@ -91,7 +110,7 @@ mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionU
 ## Please also note that system properties `-Dspark` and `-Dscala` has to be specified both for release:perform and the actual build parameters
 ## in `-Darguments`, because the build profiles activated for release:perform task will also affect the actual build task. It is safer to specify
 ## these system properties for both tasks.
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.0 -Dscala=2.13" -Dspark=3.0 -Dscala=2.13
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.3 -Dscala=2.13" -Dspark=3.3 -Dscala=2.13
 
 # For Spark 3.4 and Scala 2.12
 mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.4 -Dscala=2.12" -Dspark=3.4 -Dscala=2.12
@@ -127,12 +146,12 @@ echo "Compiling the source code..."
 
 mkdir apache-sedona-{{ sedona_create_release.current_version }}-bin
 
-cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=3.0 -Dscala=2.12 && cd ..
+cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=3.3 -Dscala=2.12 && cd ..
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/spark-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/flink-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/snowflake/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 
-cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=3.0 -Dscala=2.13 && cd ..
+cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=3.3 -Dscala=2.13 && cd ..
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/spark-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 
 cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=3.4 -Dscala=2.12 && cd ..
@@ -352,11 +371,11 @@ git pull
 rm -f release.*
 rm -f pom.xml.*
 
-# For Spark 3.0 and Scala 2.12
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.0 -Dscala=2.12" -Dspark=3.0 -Dscala=2.12
+# For Spark 3.3 and Scala 2.12
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.3 -Dscala=2.12" -Dspark=3.3 -Dscala=2.12
 
-# For Spark 3.0 and Scala 2.13
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.0 -Dscala=2.13" -Dspark=3.0 -Dscala=2.13
+# For Spark 3.3 and Scala 2.13
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.3 -Dscala=2.13" -Dspark=3.3 -Dscala=2.13
 
 # For Spark 3.4 and Scala 2.12
 mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.4 -Dscala=2.12" -Dspark=3.4 -Dscala=2.12

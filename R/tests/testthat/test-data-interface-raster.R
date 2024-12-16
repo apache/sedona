@@ -33,7 +33,7 @@ test_that("Passed RS_FromGeoTiff from binary", {
     mutate(raster = RS_FromGeoTiff(content))
 
   expect_equal(
-    raster_sdf %>% sdf_schema() ,
+    raster_sdf %>% sdf_schema(),
     list(
       path             = list(name = "path", type = "StringType"),
       modificationTime = list(name = "modificationTime", type = "TimestampType"),
@@ -65,7 +65,7 @@ test_that("Passed RS_FromArcInfoAsciiGrid from binary", {
     mutate(raster = RS_FromArcInfoAsciiGrid(content))
 
   expect_equal(
-    raster_sdf %>% sdf_schema() ,
+    raster_sdf %>% sdf_schema(),
     list(
       path             = list(name = "path", type = "StringType"),
       modificationTime = list(name = "modificationTime", type = "TimestampType"),
@@ -101,7 +101,7 @@ test_that("Passed RS_Envelope with raster", {
     )
 
   expect_equal(
-    raster_sdf %>% sdf_schema() ,
+    raster_sdf %>% sdf_schema(),
     list(
       path             = list(name = "path", type = "StringType"),
       modificationTime = list(name = "modificationTime", type = "TimestampType"),
@@ -212,9 +212,10 @@ test_that("Should read geotiff using binary source and write geotiff back to dis
   binary_sdf <- spark_read_binary(sc, dir = test_data("raster"), name = sdf_name)
 
   tmp_dest <- tempfile()
-
+  lifecycle::expect_deprecated({
   binary_sdf %>%
     spark_write_raster(path = tmp_dest)
+  })
 
   sdf_name_2 <- random_string("spatial_sdf_2")
   binary_2_sdf <- spark_read_binary(sc, dir = tmp_dest, name = sdf_name_2, recursive_file_lookup = TRUE)

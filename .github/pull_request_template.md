@@ -1,5 +1,3 @@
-
-
 ## Did you read the Contributor Guide?
 
 - Yes, I have read the [Contributor Rules](https://sedona.apache.org/latest-snapshot/community/rule/) and [Contributor Development Guide](https://sedona.apache.org/latest-snapshot/community/develop/)
