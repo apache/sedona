@@ -97,7 +97,7 @@ Output:
 Introduction: Returns a point geometry of the specified pixel's upper-left corner. The pixel coordinates specified are 1-indexed.
 
 !!!Note
-    If the pixel coordinates specified do not exist in the raster (out of bounds), RS_PixelAsPoint throws an IndexOutOfBoundsException.
+If the pixel coordinates specified do not exist in the raster (out of bounds), RS_PixelAsPoint throws an IndexOutOfBoundsException.
 
 Format: `RS_PixelAsPoint(raster: Raster, colX: Integer, rowY: Integer)`
 
@@ -301,7 +301,7 @@ If no band is specified, all the bands are considered when creating the min conv
 The created geometry representing the min convex hull has world coordinates of the raster in its CRS as the corner coordinates.
 
 !!!Note
-    If the specified band does not exist in the raster, RS_MinConvexHull throws an IllegalArgumentException
+If the specified band does not exist in the raster, RS_MinConvexHull throws an IllegalArgumentException
 
 Format:
 
@@ -370,7 +370,7 @@ Introduction: Returns the georeference metadata of raster as a string in GDAL or
 For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
 
 !!!note
-    If you are using `show()` to display the output, it will show special characters as escape sequences. To get the expected behavior use the following code:
+If you are using `show()` to display the output, it will show special characters as escape sequences. To get the expected behavior use the following code:
 
     === "Scala"
 
@@ -481,7 +481,7 @@ Introduction: Returns a struct of parameters that represent the GeoTransformatio
 - offsetY: Y ordinate of the upper-left corner of the upper-left pixel
 
 !!!note
-    Refer to [this image](https://www.researchgate.net/figure/Relation-between-the-cartesian-axes-x-y-and-i-j-axes-of-the-pixels_fig3_313860913) for a clear understanding between i & j axis and x & y-axis.
+Refer to [this image](https://www.researchgate.net/figure/Relation-between-the-cartesian-axes-x-y-and-i-j-axes-of-the-pixels_fig3_313860913) for a clear understanding between i & j axis and x & y-axis.
 
 Format: `RS_GeoTransform(raster: Raster)`
 
@@ -608,10 +608,8 @@ Output:
 Introduction: Returns the pixel width of the raster in CRS units.
 
 !!!Note
-    RS_ScaleX attempts to get an Affine transform on the grid in order to return scaleX (See [World File](https://en.wikipedia.org/wiki/World_file) for more details). If the transform on the geometry is not an Affine transform, RS_ScaleX will throw an UnsupportedException:
-    ```
-    UnsupportedOperationException("Only AffineTransform2D is supported")
-    ```
+RS_ScaleX attempts to get an Affine transform on the grid in order to return scaleX (See [World File](https://en.wikipedia.org/wiki/World_file) for more details). If the transform on the geometry is not an Affine transform, RS_ScaleX will throw an UnsupportedException:
+`UnsupportedOperationException("Only AffineTransform2D is supported")`
 
 For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
 
@@ -636,10 +634,8 @@ Output:
 Introduction: Returns the pixel height of the raster in CRS units.
 
 !!!Note
-    RS_ScaleY attempts to get an Affine transform on the grid in order to return scaleX (See [World File](https://en.wikipedia.org/wiki/World_file) for more details). If the transform on the geometry is not an Affine transform, RS_ScaleY will throw an UnsupportedException:
-    ```
-    UnsupportedOperationException("Only AffineTransform2D is supported")
-    ```
+RS_ScaleY attempts to get an Affine transform on the grid in order to return scaleX (See [World File](https://en.wikipedia.org/wiki/World_file) for more details). If the transform on the geometry is not an Affine transform, RS_ScaleY will throw an UnsupportedException:
+`UnsupportedOperationException("Only AffineTransform2D is supported")`
 
 For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
 
@@ -796,7 +792,7 @@ POINT (2 1)
 ```
 
 !!!Note
-    If the given geometry point is not in the same CRS as the given raster, the given geometry will be transformed to the given raster's CRS. You can use [ST_Transform](Function.md#st_transform) to transform the geometry beforehand.
+If the given geometry point is not in the same CRS as the given raster, the given geometry will be transformed to the given raster's CRS. You can use [ST_Transform](Function.md#st_transform) to transform the geometry beforehand.
 
 ### RS_WorldToRasterCoordX
 
@@ -835,7 +831,7 @@ Output:
 ```
 
 !!!Tip
-    For non-skewed rasters, you can provide any value for latitude and the intended value of world longitude, to get the desired answer
+For non-skewed rasters, you can provide any value for latitude and the intended value of world longitude, to get the desired answer
 
 ### RS_WorldToRasterCoordY
 
@@ -874,7 +870,7 @@ Output:
 ```
 
 !!!Tip
-    For non-skewed rasters, you can provide any value for longitude and the intended value of world latitude, to get the desired answer
+For non-skewed rasters, you can provide any value for longitude and the intended value of world latitude, to get the desired answer
 
 ## Raster Band Accessors
 
@@ -914,7 +910,7 @@ Output:
 Introduction: Returns the no data value of the given band of the given raster. If no band is given, band 1 is assumed. The band parameter is 1-indexed. If there is no data value associated with the given band, RS_BandNoDataValue returns null.
 
 !!!Note
-    If the given band does not lie in the raster, RS_BandNoDataValue throws an IllegalArgumentException
+If the given band does not lie in the raster, RS_BandNoDataValue throws an IllegalArgumentException
 
 Format: `RS_BandNoDataValue (raster: Raster, band: Integer = 1)`
 
@@ -981,7 +977,7 @@ true
 
 Introduction: Returns the datatype of each pixel in the given band of the given raster in string format. The band parameter is 1-indexed. If no band is specified, band 1 is assumed.
 !!!Note
-    If the given band index does not exist in the given raster, RS_BandPixelType throws an IllegalArgumentException.
+If the given band index does not exist in the given raster, RS_BandPixelType throws an IllegalArgumentException.
 Following are the possible values returned by RS_BandPixelType:
 
 1. `REAL_64BITS` - For Double values
@@ -1032,11 +1028,11 @@ IllegalArgumentException: Provided band index 3 is not present in the raster
 Introduction: Returns the number of pixels in a given band. If band is not specified then it defaults to `1`.
 
 !!!Note
-    If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster.
-    Set excludeNoDataValue to `false` to get count of all pixels in raster.
+If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster.
+Set excludeNoDataValue to `false` to get count of all pixels in raster.
 
 !!!Note
-    If the mentioned band index doesn't exist, this will throw an `IllegalArgumentException`.
+If the mentioned band index doesn't exist, this will throw an `IllegalArgumentException`.
 
 Format:
 
@@ -1086,8 +1082,8 @@ Introduction: Returns summary statistic for a particular band based on the `stat
 - `max`: Maximum pixel value in the specified band
 
 !!!Note
-    If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster.
-    Set excludeNoDataValue to `false` to get count of all pixels in raster.
+If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster.
+Set excludeNoDataValue to `false` to get count of all pixels in raster.
 
 Formats:
 
@@ -1116,11 +1112,11 @@ Output:
 Introduction: Returns summary stats struct consisting of count, sum, mean, stddev, min, max for a given band in raster. If band is not specified then it defaults to `1`.
 
 !!!Note
-    If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster.
-    Set excludeNoDataValue to `false` to get count of all pixels in raster.
+If excludeNoDataValue is set `true` then it will only count pixels with value not equal to the nodata value of the raster.
+Set excludeNoDataValue to `false` to get count of all pixels in raster.
 
 !!!Note
-    If the mentioned band index doesn't exist, this will throw an `IllegalArgumentException`.
+If the mentioned band index doesn't exist, this will throw an `IllegalArgumentException`.
 
 Formats:
 
@@ -1171,7 +1167,7 @@ Introduction: This returns a statistic value specified by `statType` over the re
 - `max`: Maximum value in the region.
 
 !!!note
-    If the coordinate reference system (CRS) of the input `zone` geometry differs from that of the `raster`, then `zone` will be transformed to match the CRS of the `raster` before computation.
+If the coordinate reference system (CRS) of the input `zone` geometry differs from that of the `raster`, then `zone` will be transformed to match the CRS of the `raster` before computation.
 
     The following conditions will throw an `IllegalArgumentException` if they are not met:
 
@@ -1239,7 +1235,7 @@ Introduction: Returns a struct of statistic values, where each statistic is comp
 - max: Maximum value of the zone.
 
 !!!note
-    If the coordinate reference system (CRS) of the input `zone` geometry differs from that of the `raster`, then `zone` will be transformed to match the CRS of the `raster` before computation.
+If the coordinate reference system (CRS) of the input `zone` geometry differs from that of the `raster`, then `zone` will be transformed to match the CRS of the `raster` before computation.
 
     The following conditions will throw an `IllegalArgumentException` if they are not met:
 
@@ -1406,7 +1402,7 @@ Introduction: Adds a new band to a raster `toRaster` at a specified index `toRas
 If no `toRasterIndex` is provided, the new band is appended to the end of `toRaster`. If no `fromBand` is specified, band `1` from `fromRaster` is copied by default.
 
 !!!Note
-    IllegalArgumentException will be thrown in these cases:
+IllegalArgumentException will be thrown in these cases:
 
     - The provided Rasters, `toRaster` & `fromRaster` don't have same shape.
     - The provided `fromBand` is not in `fromRaster`.
@@ -1446,9 +1442,7 @@ Introduction: Returns a raster that is clipped by the given geometry.
 
 If `crop` is not specified then it will default to `true`, meaning it will make the resulting raster shrink to the geometry's extent and if `noDataValue` is not specified then the resulting raster will have the minimum possible value for the band pixel data type.
 
-!!!Note
-    - Since `v1.5.1`, if the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`. If the `raster` or `geom` doesn't have a CRS then it will default to `4326/WGS84`.
-    - Since `v1.7.0`, `RS_Clip` function will return `null` if the `raster` and `geometry` geometry do not intersect. If you want to throw an exception in this case, you can set the `lenient` parameter to `false`.
+!!!Note - Since `v1.5.1`, if the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`. If the `raster` or `geom` doesn't have a CRS then it will default to `4326/WGS84`. - Since `v1.7.0`, `RS_Clip` function will return `null` if the `raster` and `geometry` geometry do not intersect. If you want to throw an exception in this case, you can set the `lenient` parameter to `false`.
 
 Format:
 
@@ -1472,7 +1466,7 @@ Since: `v1.5.1`
 
 Original Raster:
 
-![Original raster](../../image/original-raster-clip.png "Original raster")
+![Original raster](../../image/original-raster-clip.png 'Original raster')
 
 SQL Example
 
@@ -1486,7 +1480,7 @@ SELECT RS_Clip(
 
 Output:
 
-![Cropped raster](../../image/cropped-raster.png "Cropped raster")
+![Cropped raster](../../image/cropped-raster.png 'Cropped raster')
 
 SQL Example
 
@@ -1500,7 +1494,7 @@ SELECT RS_Clip(
 
 Output:
 
-![Clipped raster](../../image/clipped-raster.png "Clipped raster")
+![Clipped raster](../../image/clipped-raster.png 'Clipped raster')
 
 ### RS_Interpolate
 
@@ -1509,7 +1503,7 @@ Introduction: This function performs interpolation on a raster using the Inverse
 This technique is effective in scenarios where continuity of spatial data is important, and it is essential to estimate values for locations that do not have direct measurements, often represented by NaN or noDataValue in raster data.
 
 !!!note
-    This method assumes that the spatial influence of a variable diminishes with distance. In geospatial analysis, this means features or phenomena closer to a point of interest are given more weight than those further away. For example, in environmental data analysis, measurements from nearby locations have a greater impact on interpolated values than distant ones, reflecting the natural gradation and spatial continuity.
+This method assumes that the spatial influence of a variable diminishes with distance. In geospatial analysis, this means features or phenomena closer to a point of interest are given more weight than those further away. For example, in environmental data analysis, measurements from nearby locations have a greater impact on interpolated values than distant ones, reflecting the natural gradation and spatial continuity.
 
 Formats:
 
@@ -1560,8 +1554,8 @@ SELECT RS_Interpolate(raster, 1, 2.0, 'Variable', 12, 1000)
 
 Output (Shown as heatmap):
 
-![Original raster](../../image/heatmap_Interpolate.png "Original raster")
-![Interpolated raster](../../image/heatmap_Interpolate2.png "Interpolated raster")
+![Original raster](../../image/heatmap_Interpolate.png 'Original raster')
+![Interpolated raster](../../image/heatmap_Interpolate2.png 'Interpolated raster')
 
 ### RS_MetaData
 
@@ -1615,7 +1609,7 @@ Introduction: Normalizes values in all bands of a raster between a given normali
 A Safety mode is triggered when `noDataValue` is not given. This sets `noDataValue` to `maxLim` and normalizes valid data values to the range [minLim, maxLim-1]. This is to avoid replacing valid data that might coincide with the new `noDataValue`.
 
 !!! Warning
-    Using a noDataValue that falls within the normalization range can lead to loss of valid data. If any data value within a raster band matches the specified noDataValue, it will be replaced and cannot be distinguished or recovered later. Exercise caution in selecting a noDataValue to avoid unintentional data alteration.
+Using a noDataValue that falls within the normalization range can lead to loss of valid data. If any data value within a raster band matches the specified noDataValue, it will be replaced and cannot be distinguished or recovered later. Exercise caution in selecting a noDataValue to avoid unintentional data alteration.
 
 Formats:
 
@@ -1727,7 +1721,7 @@ Following are valid values for the algorithm parameter (Case-insensitive):
 3. Bicubic
 
 !!!Tip
-    If you just want to resize or rescale an input raster, you can use RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, useScale: Boolean, algorithm: String)
+If you just want to resize or rescale an input raster, you can use RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, useScale: Boolean, algorithm: String)
 
 For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
 
@@ -1833,7 +1827,7 @@ Introduction: This sets the no data value for a specified band in the raster. If
 Since `v1.5.1`, this function supports the ability to replace the current no-data value with the new `noDataValue`.
 
 !!!Note
-    When `replace` is true, any pixels matching the provided `noDataValue` will be considered as no-data in the output raster.
+When `replace` is true, any pixels matching the provided `noDataValue` will be considered as no-data in the output raster.
 
     An `IllegalArgumentException` will be thrown if the input raster does not already have a no-data value defined. Replacing existing values with `noDataValue` requires a defined no-data baseline to evaluate against.
 
@@ -1981,7 +1975,7 @@ The `dataType` parameter accepts one of the following strings.
 - "B" - 8 bits unsigned Byte
 
 !!!note
-    If the specified `dataType` is narrower than the original data type, the function will truncate the pixel values to fit the new data type range.
+If the specified `dataType` is narrower than the original data type, the function will truncate the pixel values to fit the new data type range.
 
 Format:
 
@@ -2037,7 +2031,7 @@ of the rectangular region. The new values to be assigned to the pixels in this r
 to this function.
 
 !!!Note
-    Since `v1.5.1`, if the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`. If the `raster` or `geom` doesn't have a CRS then it will default to `4326/WGS84`.
+Since `v1.5.1`, if the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`. If the `raster` or `geom` doesn't have a CRS then it will default to `4326/WGS84`.
 
 Format:
 
@@ -2057,10 +2051,10 @@ set to the corresponding value in `newValues`. The `newValues` should be provide
 The geometry variant of this function accepts all types of Geometries, and it sets the `newValue` in the specified region under the `geom`.
 
 !!!note
-    If the shape of `newValues` doesn't match with provided `width` and `height`, `IllegalArgumentException` is thrown.
+If the shape of `newValues` doesn't match with provided `width` and `height`, `IllegalArgumentException` is thrown.
 
 !!!Note
-    If the mentioned `bandIndex` doesn't exist, this will throw an `IllegalArgumentException`.
+If the mentioned `bandIndex` doesn't exist, this will throw an `IllegalArgumentException`.
 
 SQL Example
 
@@ -2142,7 +2136,7 @@ Output:
 Introduction: Returns a combined multi-band raster from 2 or more input Rasters. The order of bands in the resultant raster will be in the order of the input rasters. For example if `RS_Union` is called on two 2-banded raster, raster1 and raster2, the first 2 bands of the resultant 4-banded raster will be from raster1 and the last 2 from raster 2.
 
 !!!note
-    If the provided input Rasters don't have same shape an IllegalArgumentException will be thrown.
+If the provided input Rasters don't have same shape an IllegalArgumentException will be thrown.
 
 Format:
 
@@ -2189,7 +2183,7 @@ GridCoverage2D["g...
 Introduction: Returns the value at the given point in the raster. If no band number is specified it defaults to 1.
 
 !!!Note
-    Since `v1.5.1`, if the coordinate reference system (CRS) of the input `point` geometry differs from that of the `raster`, then `point` will be transformed to match the CRS of the `raster`. If the `raster` or `point` doesn't have a CRS then it will default to `4326/WGS84`.
+Since `v1.5.1`, if the coordinate reference system (CRS) of the input `point` geometry differs from that of the `raster`, then `point` will be transformed to match the CRS of the `raster`. If the `raster` or `point` doesn't have a CRS then it will default to `4326/WGS84`.
 
 Format:
 
@@ -2229,7 +2223,7 @@ RS_Values is similar to RS_Value but operates on an array of points or grid coor
 RS_Values can be significantly faster since a raster only has to be loaded once for several points.
 
 !!!Note
-    Since `v1.5.1`, if the coordinate reference system (CRS) of the input `points` geometries differs from that of the `raster`, then `points` will be transformed to match the CRS of the `raster`. If the `raster` or `points` doesn't have a CRS then it will default to `4326/WGS84`.
+Since `v1.5.1`, if the coordinate reference system (CRS) of the input `points` geometries differs from that of the `raster`, then `points` will be transformed to match the CRS of the `raster`. If the `raster` or `points` doesn't have a CRS then it will default to `4326/WGS84`.
 
 Format:
 
@@ -2466,7 +2460,7 @@ In order to remove an existing noDataValue from an existing band, pass null as t
 Note that: `bandIndex == RS_NumBands(raster) + 1` is an experimental feature and might lead to the loss of raster metadata and properties such as color models.
 
 !!!Note
-    RS_AddBandFromArray typecasts the double band values to the given datatype of the raster. This can lead to overflow values if values beyond the range of the raster's datatype are provided.
+RS_AddBandFromArray typecasts the double band values to the given datatype of the raster. This can lead to overflow values if values beyond the range of the raster's datatype are provided.
 
 SQL Example
 

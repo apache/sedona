@@ -195,14 +195,14 @@ Computes the angle formed by vectors represented by point2 - point1 and point2 -
 Computes the angle formed by vectors S1 - E1 and S2 - E2, where S and E denote start and end points respectively
 
 !!!Note
-    If any other geometry type is provided, ST_Angle throws an IllegalArgumentException.
-    Additionally, if any of the provided geometry is empty, ST_Angle throws an IllegalArgumentException.
+If any other geometry type is provided, ST_Angle throws an IllegalArgumentException.
+Additionally, if any of the provided geometry is empty, ST_Angle throws an IllegalArgumentException.
 
 !!!Note
-    If a 3D geometry is provided, ST_Angle computes the angle ignoring the z ordinate, equivalent to calling ST_Angle for corresponding 2D geometries.
+If a 3D geometry is provided, ST_Angle computes the angle ignoring the z ordinate, equivalent to calling ST_Angle for corresponding 2D geometries.
 
 !!!Tip
-    ST_Angle returns the angle in radian between 0 and 2\Pi. To convert the angle to degrees, use [ST_Degrees](#st_degrees).
+ST_Angle returns the angle in radian between 0 and 2\Pi. To convert the angle to degrees, use [ST_Degrees](#st_degrees).
 
 Format: `ST_Angle(p1, p2, p3, p4) | ST_Angle(p1, p2, p3) | ST_Angle(line1, line2)`
 
@@ -271,7 +271,7 @@ Introduction: Return the geodesic area of A using WGS84 spheroid. Unit is square
 Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lon/lat== order. You can use ==ST_FlipCoordinates== to swap lat and lon.
 
 !!!note
-    By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
+By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
 Format: `ST_AreaSpheroid (A: Geometry)`
 
@@ -386,7 +386,7 @@ POINT ZM(1 1 1 1)
 ## ST_AsGeoJSON
 
 !!!note
-	This method is not recommended. Please use [Sedona GeoJSON data source](../../tutorial/sql.md#save-as-geojson) to write GeoJSON files.
+This method is not recommended. Please use [Sedona GeoJSON data source](../../tutorial/sql.md#save-as-geojson) to write GeoJSON files.
 
 Introduction: Return the [GeoJSON](https://geojson.org/) string representation of a geometry
 
@@ -414,13 +414,15 @@ Output:
 
 ```json
 {
-  "type":"Polygon",
-  "coordinates":[
-    [[1.0,1.0],
-      [8.0,1.0],
-      [8.0,8.0],
-      [1.0,8.0],
-      [1.0,1.0]]
+  "type": "Polygon",
+  "coordinates": [
+    [
+      [1.0, 1.0],
+      [8.0, 1.0],
+      [8.0, 8.0],
+      [1.0, 8.0],
+      [1.0, 1.0]
+    ]
   ]
 }
 ```
@@ -431,16 +433,18 @@ Output:
 
 ```json
 {
-  "type":"Feature",
+  "type": "Feature",
   "geometry": {
-      "type":"Polygon",
-      "coordinates":[
-        [[1.0,1.0],
-          [8.0,1.0],
-          [8.0,8.0],
-          [1.0,8.0],
-          [1.0,1.0]]
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [1.0, 1.0],
+        [8.0, 1.0],
+        [8.0, 8.0],
+        [1.0, 8.0],
+        [1.0, 1.0]
       ]
+    ]
   }
 }
 ```
@@ -451,18 +455,21 @@ Output:
 
 ```json
 {
-  "type":"FeatureCollection",
-  "features": [{
-      "type":"Feature",
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
       "geometry": {
-          "type":"Polygon",
-          "coordinates":[
-            [[1.0,1.0],
-              [8.0,1.0],
-              [8.0,8.0],
-              [1.0,8.0],
-              [1.0,1.0]]
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [1.0, 1.0],
+            [8.0, 1.0],
+            [8.0, 8.0],
+            [1.0, 8.0],
+            [1.0, 1.0]
           ]
+        ]
       }
     }
   ]
@@ -616,7 +623,7 @@ Introduction: Returns the estimated most appropriate Spatial Reference Identifie
 - For Geometries that cross the IDL, `ST_BestSRID` defaults the SRID to Mercator. Currently, `ST_BestSRID` does not handle geometries crossing the IDL.
 
 !!!Warning
-    `ST_BestSRID` is designed to estimate a suitable SRID from a set of approximately 125 EPSG codes and works best for geometries that fit within the UTM zones. It should not be solely relied upon to determine the most accurate SRID, especially for specialized or high-precision spatial requirements.
+`ST_BestSRID` is designed to estimate a suitable SRID from a set of approximately 125 EPSG codes and works best for geometries that fit within the UTM zones. It should not be solely relied upon to determine the most accurate SRID, especially for specialized or high-precision spatial requirements.
 
 Format: `ST_BestSRID(geom: Geometry)`
 
@@ -692,16 +699,16 @@ The optional third parameter, `useSpheroid`, controls the mode of buffer calcula
 
 - Planar Buffering (default): When `useSpheroid` is false, `ST_Buffer` performs standard planar buffering based on the provided parameters.
 - Spheroidal Buffering:
-    - When `useSpheroid` is set to true, the function returns the spheroidal buffer polygon for more accurate representation over the Earth. In this mode, the unit of the buffer distance is interpreted as meters.
-    - ST_Buffer first determines the most appropriate Spatial Reference Identifier (SRID) for a given geometry, based on its spatial extent and location, using `ST_BestSRID`.
-    - The geometry is then transformed from its original SRID to the selected SRID. If the input geometry does not have a set SRID, `ST_Buffer` defaults to using WGS 84 (SRID 4326) as its original SRID.
-    - The standard planar buffer operation is then applied in this coordinate system.
-    - Finally, the buffered geometry is transformed back to its original SRID, or to WGS 84 if the original SRID was not set.
+  - When `useSpheroid` is set to true, the function returns the spheroidal buffer polygon for more accurate representation over the Earth. In this mode, the unit of the buffer distance is interpreted as meters.
+  - ST_Buffer first determines the most appropriate Spatial Reference Identifier (SRID) for a given geometry, based on its spatial extent and location, using `ST_BestSRID`.
+  - The geometry is then transformed from its original SRID to the selected SRID. If the input geometry does not have a set SRID, `ST_Buffer` defaults to using WGS 84 (SRID 4326) as its original SRID.
+  - The standard planar buffer operation is then applied in this coordinate system.
+  - Finally, the buffered geometry is transformed back to its original SRID, or to WGS 84 if the original SRID was not set.
 
 !!!note
-    As of now, spheroidal buffering only supports lon/lat coordinate systems and will throw an `IllegalArgumentException` for input geometries in meter based coordinate systems.
+As of now, spheroidal buffering only supports lon/lat coordinate systems and will throw an `IllegalArgumentException` for input geometries in meter based coordinate systems.
 !!!note
-    Spheroidal buffering may not produce accurate output buffer for input geometries larger than a UTM zone.
+Spheroidal buffering may not produce accurate output buffer for input geometries larger than a UTM zone.
 
 Buffer Style Parameters:
 
@@ -714,7 +721,7 @@ The optional forth parameter controls the buffer accuracy and style. Buffer accu
 - `side=both|left|right` : The option `left` or `right` enables a single-sided buffer operation on the geometry, with the buffered side aligned according to the direction of the line. This functionality is specific to LINESTRING geometry and has no impact on POINT or POLYGON geometries. By default, square end caps are applied.
 
 !!!note
-    `ST_Buffer` throws an `IllegalArgumentException` if the correct format, parameters, or options are not provided.
+`ST_Buffer` throws an `IllegalArgumentException` if the correct format, parameters, or options are not provided.
 
 Format:
 
@@ -741,8 +748,8 @@ SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10, false, 'quad_segs=2')
 
 Output:
 
-![Point buffer with 8 quadrant segments](../../image/point-buffer-quad-8.png "Point buffer with 8 quadrant segments")
-![Point buffer with 2 quadrant segments](../../image/point-buffer-quad-2.png "Point buffer with 2 quadrant segments")
+![Point buffer with 8 quadrant segments](../../image/point-buffer-quad-8.png 'Point buffer with 8 quadrant segments')
+![Point buffer with 2 quadrant segments](../../image/point-buffer-quad-2.png 'Point buffer with 2 quadrant segments')
 
 8 Segments &ensp; 2 Segments
 
@@ -754,8 +761,8 @@ SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(0 0, 50 70, 100 100)'), 10, false, '
 
 Output:
 
-![Original Linestring](../../image/linestring-og.png "Original Linestring")
-![Original Linestring with buffer on the left side](../../image/linestring-left-side.png "Original Linestring with buffer on the left side")
+![Original Linestring](../../image/linestring-og.png 'Original Linestring')
+![Original Linestring with buffer on the left side](../../image/linestring-left-side.png 'Original Linestring with buffer on the left side')
 
 Original Linestring &emsp; Left side buffed Linestring
 
@@ -1009,10 +1016,10 @@ Output:
 Introduction: This function determines if a given geometry crosses the International Date Line. It operates by checking if the difference in longitude between any pair of consecutive points in the geometry exceeds 180 degrees. If such a difference is found, it is assumed that the geometry crosses the Date Line. It returns true if the geometry crosses the Date Line, and false otherwise.
 
 !!!note
-    The function assumes that the provided geometry is in lon/lat coordinate reference system where longitude values range from -180 to 180 degrees.
+The function assumes that the provided geometry is in lon/lat coordinate reference system where longitude values range from -180 to 180 degrees.
 
 !!!note
-    For multi-geometries (e.g., MultiPolygon, MultiLineString), this function will return true if any one of the geometries within the multi-geometry crosses the International Date Line.
+For multi-geometries (e.g., MultiPolygon, MultiLineString), this function will return true if any one of the geometries within the multi-geometry crosses the International Date Line.
 
 Format: `ST_CrossesDateLine(geometry: Geometry)`
 
@@ -1031,7 +1038,7 @@ true
 ```
 
 !!!Warning
-    For geometries that span more than 180 degrees in longitude without actually crossing the Date Line, this function may still return true, indicating a crossing.
+For geometries that span more than 180 degrees in longitude without actually crossing the Date Line, this function may still return true, indicating a crossing.
 
 ## ST_Degrees
 
@@ -1055,7 +1062,7 @@ Output:
 
 ## ST_DelaunayTriangles
 
-Introduction: This function computes the [Delaunay triangulation](https://en.wikipedia.org/wiki/Delaunay_triangulation) for the set of vertices in the input geometry. An optional `tolerance` parameter allows snapping nearby input vertices together prior to triangulation and can improve robustness in certain scenarios by handling near-coincident vertices. The default for  `tolerance` is 0. The Delaunay triangulation geometry is bounded by the convex hull of the input vertex set.
+Introduction: This function computes the [Delaunay triangulation](https://en.wikipedia.org/wiki/Delaunay_triangulation) for the set of vertices in the input geometry. An optional `tolerance` parameter allows snapping nearby input vertices together prior to triangulation and can improve robustness in certain scenarios by handling near-coincident vertices. The default for `tolerance` is 0. The Delaunay triangulation geometry is bounded by the convex hull of the input vertex set.
 
 The output geometry representation depends on the provided `flag`:
 
@@ -1153,7 +1160,7 @@ Introduction: Return the haversine / great-circle distance of A using a given ea
 Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lon/lat== order. You can use ==ST_FlipCoordinates== to swap lat and lon. For non-point data, we first take the centroids of both geometries and then compute the distance.
 
 !!!note
-    By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
+By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
 Format: `ST_DistanceSphere (A: Geometry)`
 
@@ -1190,7 +1197,7 @@ Introduction: Return the geodesic distance of A using WGS84 spheroid. Unit is me
 Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lon/lat== order. You can use ==ST_FlipCoordinates== to swap lat and lon. For non-point data, we first take the centroids of both geometries and then compute the distance.
 
 !!!note
-    By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
+By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
 Format: `ST_DistanceSpheroid (A: Geometry)`
 
@@ -1297,7 +1304,7 @@ Introduction: Returns a geometry expanded from the bounding box of the input. Th
 2. Uniformly across all axes using the `uniformDelta` parameter.
 
 !!!Note
-    Things to consider when using this function:
+Things to consider when using this function:
 
     1. The `uniformDelta` parameter expands Z dimensions for XYZ geometries; otherwise, it only affects XY dimensions.
     2. For XYZ geometries, specifying only `deltaX` and `deltaY` will preserve the original Z dimension.
@@ -1396,7 +1403,7 @@ If the given geometry is 3-dimensional, no change is performed on it.
 If the given geometry is empty, no change is performed on it.
 
 !!!Note
-    Example output is after calling ST_AsText() on returned geometry, which adds Z for in the WKT for 3D geometries
+Example output is after calling ST_AsText() on returned geometry, which adds Z for in the WKT for 3D geometries
 
 Format: `ST_Force3D(geometry: Geometry, zValue: Double)`
 
@@ -1443,7 +1450,7 @@ LINESTRING EMPTY
 Introduction: Forces the geometry into XYM mode. Retains any existing M coordinate, but removes the Z coordinate if present. Assigns a default M value of 0.0 if `mValue` is not specified.
 
 !!!Note
-    Example output is after calling ST_AsText() on returned geometry, which adds M for in the WKT.
+Example output is after calling ST_AsText() on returned geometry, which adds M for in the WKT.
 
 Format: `ST_Force3DM(geometry: Geometry, mValue: Double = 0.0)`
 
@@ -1493,7 +1500,7 @@ If the given geometry is 3-dimensional, no change is performed on it.
 If the given geometry is empty, no change is performed on it. This function is an alias for [ST_Force3D](#st_force3d).
 
 !!!Note
-    Example output is after calling ST_AsText() on returned geometry, which adds Z for in the WKT for 3D geometries
+Example output is after calling ST_AsText() on returned geometry, which adds Z for in the WKT for 3D geometries
 
 Format: `ST_Force3DZ(geometry: Geometry, zValue: Double)`
 
@@ -1528,7 +1535,7 @@ LINESTRING Z(0 1 2.3, 1 0 2.3, 2 0 2.3)
 Introduction: Converts the input geometry to 4D XYZM representation. Retains original Z and M values if present. Assigning 0.0 defaults if `mValue` and `zValue` aren't specified. The output contains X, Y, Z, and M coordinates. For geometries already in 4D form, the function returns the original geometry unmodified.
 
 !!!Note
-    Example output is after calling ST_AsText() on returned geometry, which adds Z for in the WKT for 3D geometries
+Example output is after calling ST_AsText() on returned geometry, which adds Z for in the WKT for 3D geometries
 
 Format:
 
@@ -1692,7 +1699,7 @@ SELECT ST_GeneratePoints(
 Output:
 
 !!!Note
-    Due to the pseudo-random nature of point generation, the output of this function will vary between executions and may not match any provided examples.
+Due to the pseudo-random nature of point generation, the output of this function will vary between executions and may not match any provided examples.
 
 ```
 MULTIPOINT ((0.2393028905520183 0.9721563442837837), (0.3805848547053376 0.7546556656982678), (0.0950295778200995 0.2494334895495989), (0.4133520939987385 0.3447046312451945))
@@ -1804,6 +1811,7 @@ ST_LINESTRING
 
 Introduction: return result of h3 function [gridDistance(cel1, cell2)](https://h3geo.org/docs/api/traversal#griddistance).
 As described by H3 documentation
+
 > Finding the distance can fail because the two indexes are not comparable (different resolutions), too far apart, or are separated by pentagonal distortion. This is the same set of limitations as the local IJ coordinate space functions.
 
 In this case, Sedona use in-house implementation of estimation the shortest path and return the size as distance.
@@ -1848,6 +1856,7 @@ Choose the option according to your use case.
 
 For the lineString, sedona will call gridPathCells(https://h3geo.org/docs/api/traversal#gridpathcells) per segment.
 From H3's documentation
+
 > This function may fail to find the line between two indexes, for example if they are very far apart. It may also fail when finding distances for indexes on opposite sides of a pentagon.
 
 When the `gridPathCells` function throw error, Sedona implemented in-house approximate implementation to generate the shortest path, which can cover the corner cases.
@@ -1914,7 +1923,7 @@ Introduction: Return the result of H3 function [cellsToMultiPolygon(cells)](http
 Converts an array of Uber H3 cell indices into an array of Polygon geometries, where each polygon represents a hexagonal H3 cell.
 
 !!!Hint
-    To convert a Polygon array to MultiPolygon, use [ST_Collect](#st_collect). However, the result may be an invalid geometry. Apply [ST_MakeValid](#st_makevalid) to the `ST_Collect` output to ensure a valid MultiPolygon.
+To convert a Polygon array to MultiPolygon, use [ST_Collect](#st_collect). However, the result may be an invalid geometry. Apply [ST_MakeValid](#st_makevalid) to the `ST_Collect` output to ensure a valid MultiPolygon.
 
     An alternative approach to consolidate a Polygon array into a Polygon/MultiPolygon, use the [ST_Union](#st_union) function.
 
@@ -1989,10 +1998,10 @@ Hence, the lower the densityFrac value, the more accurate is the computed hausdo
 If any of the geometry is empty, 0.0 is returned.
 
 !!!Note
-    Accepted range of densityFrac is (0.0, 1.0], if any other value is provided, ST_HausdorffDistance throws an IllegalArgumentException
+Accepted range of densityFrac is (0.0, 1.0], if any other value is provided, ST_HausdorffDistance throws an IllegalArgumentException
 
 !!!Note
-    Even though the function accepts 3D geometry, the z ordinate is ignored and the computed hausdorff distance is equivalent to the geometries not having the z ordinate.
+Even though the function accepts 3D geometry, the z ordinate is ignored and the computed hausdorff distance is equivalent to the geometries not having the z ordinate.
 
 Format: `ST_HausdorffDistance(g1: Geometry, g2: Geometry, densityFrac: Double)`
 
@@ -2047,7 +2056,7 @@ LINESTRING (1 1, 2 1, 2 2, 1 2, 1 1)
 Introduction: Returns the interpolated measure value of a linear measured LineString at the point closest to the specified point.
 
 !!!Note
-    Make sure that both geometries have the same SRID, otherwise the function will throw an IllegalArgumentException.
+Make sure that both geometries have the same SRID, otherwise the function will throw an IllegalArgumentException.
 
 Format: `ST_InterpolatePoint(linestringM: Geometry, point: Geometry)`
 
@@ -2409,7 +2418,7 @@ false
 Introduction: Returns the perimeter of A.
 
 !!!Warning
-    Since `v1.7.0`, this function only supports LineString, MultiLineString, and GeometryCollections containing linear geometries. Use [ST_Perimeter](#st_perimeter) for polygons.
+Since `v1.7.0`, this function only supports LineString, MultiLineString, and GeometryCollections containing linear geometries. Use [ST_Perimeter](#st_perimeter) for polygons.
 
 Format: `ST_Length (A: Geometry)`
 
@@ -2432,7 +2441,7 @@ Output:
 Introduction: Returns the perimeter of A. This function is an alias of [ST_Length](#st_length).
 
 !!!Warning
-    Since `v1.7.0`, this function only supports LineString, MultiLineString, and GeometryCollections containing linear geometries. Use [ST_Perimeter](#st_perimeter) for polygons.
+Since `v1.7.0`, this function only supports LineString, MultiLineString, and GeometryCollections containing linear geometries. Use [ST_Perimeter](#st_perimeter) for polygons.
 
 Format: ST_Length2D (A:geometry)
 
@@ -2457,10 +2466,10 @@ Introduction: Return the geodesic perimeter of A using WGS84 spheroid. Unit is m
 Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lon/lat== order. You can use ==ST_FlipCoordinates== to swap lat and lon.
 
 !!!note
-    By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
+By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
 !!!Warning
-    Since `v1.7.0`, this function only supports LineString, MultiLineString, and GeometryCollections containing linear geometries. Use [ST_Perimeter](#st_perimeter) for polygons.
+Since `v1.7.0`, this function only supports LineString, MultiLineString, and GeometryCollections containing linear geometries. Use [ST_Perimeter](#st_perimeter) for polygons.
 
 Format: `ST_LengthSpheroid (A: Geometry)`
 
@@ -2543,7 +2552,7 @@ Output:
 Introduction: Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.
 
 !!!note
-    Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
+Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
 
 Format: `ST_LineMerge (A: Geometry)`
 
@@ -2793,7 +2802,7 @@ Result:
 ```
 
 !!!note
-    In Sedona up to and including version 1.2 the behaviour of ST_MakeValid was different.
+In Sedona up to and including version 1.2 the behaviour of ST_MakeValid was different.
 Be sure to check you code when upgrading. The previous implementation only worked for (multi)polygons and had a different interpretation of the second, boolean, argument.
 It would also sometimes return multiple geometries for a single geometry input.
 
@@ -3043,7 +3052,7 @@ Output:
 ## ST_NRings
 
 Introduction: Returns the number of rings in a Polygon or MultiPolygon. Contrary to ST_NumInteriorRings,
-this function also takes into account the number of  exterior rings.
+this function also takes into account the number of exterior rings.
 
 This function returns 0 for an empty Polygon or MultiPolygon.
 If the geometry is not a Polygon or MultiPolygon, an IllegalArgument Exception is thrown.
@@ -3072,7 +3081,7 @@ Output: `Unsupported geometry type: LineString, only Polygon or MultiPolygon geo
 
 ## ST_NumGeometries
 
-Introduction: Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the number of geometries, for single geometries will return 1.
+Introduction: Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI\*) return the number of geometries, for single geometries will return 1.
 
 Format: `ST_NumGeometries (A: Geometry)`
 
@@ -3135,9 +3144,9 @@ Output:
 Introduction: Returns number of points in a LineString
 
 !!!note
-    If any other geometry is provided as an argument, an IllegalArgumentException is thrown.
-    Example:
-    `SELECT ST_NumPoints(ST_GeomFromWKT('MULTIPOINT ((0 0), (1 1), (0 1), (2 2))'))`
+If any other geometry is provided as an argument, an IllegalArgumentException is thrown.
+Example:
+`SELECT ST_NumPoints(ST_GeomFromWKT('MULTIPOINT ((0 0), (1 1), (0 1), (2 2))'))`
 
     Output: `IllegalArgumentException: Unsupported geometry type: MultiPoint, only LineString geometry is supported.`
 
@@ -3300,7 +3309,7 @@ POLYGON((75 29 1, 77 29 2, 77 29 3, 75 29 1))
 Introduction: Generates a GeometryCollection composed of polygons that are formed from the linework of an input GeometryCollection. When the input does not contain any linework that forms a polygon, the function will return an empty GeometryCollection.
 
 !!!note
-    `ST_Polygonize` function assumes that the input geometries form a valid and simple closed linestring that can be turned into a polygon. If the input geometries are not noded or do not form such linestrings, the resulting GeometryCollection may be empty or may not contain the expected polygons.
+`ST_Polygonize` function assumes that the input geometries form a valid and simple closed linestring that can be turned into a polygon. If the input geometries are not noded or do not form such linestrings, the resulting GeometryCollection may be empty or may not contain the expected polygons.
 
 Format: `ST_Polygonize(geom: Geometry)`
 
@@ -3589,7 +3598,7 @@ Output:
 Introduction: Returns an array of Polygons for the corresponding S2 cell IDs.
 
 !!!Hint
-    To convert a Polygon array to MultiPolygon, use [ST_Collect](#st_collect). However, the result may be an invalid geometry. Apply [ST_MakeValid](#st_makevalid) to the `ST_Collect` output to ensure a valid MultiPolygon.
+To convert a Polygon array to MultiPolygon, use [ST_Collect](#st_collect). However, the result may be an invalid geometry. Apply [ST_MakeValid](#st_makevalid) to the `ST_Collect` output to ensure a valid MultiPolygon.
 
     An alternative approach to consolidate a Polygon array into a Polygon/MultiPolygon, use the [ST_Union](#st_union) function.
 
@@ -3614,7 +3623,7 @@ Output:
 Introduction: This function scales the geometry to a new size by multiplying the ordinates with the corresponding scaling factors provided as parameters `scaleX` and `scaleY`.
 
 !!!Note
-    This function is designed for scaling 2D geometries. While it currently doesn't support scaling the Z and M coordinates, it preserves these values during the scaling operation.
+This function is designed for scaling 2D geometries. While it currently doesn't support scaling the Z and M coordinates, it preserves these values during the scaling operation.
 
 Format: `ST_Scale(geometry: Geometry, scaleX: Double, scaleY: Double)`
 
@@ -3642,7 +3651,7 @@ Introduction: This function scales the input geometry (`geometry`) to a new size
 To scale the geometry relative to a point other than the true origin (e.g., scaling a polygon in place using its centroid), you can use the three-geometry variant of this function. This variant requires an additional geometry (`origin`) representing the "false origin" for the scaling operation. If no `origin` is provided, the scaling occurs relative to the true origin, with all coordinates of the input geometry simply multiplied by the corresponding scale factors.
 
 !!!Note
-    This function is designed for scaling 2D geometries. While it currently doesn't support scaling the Z and M coordinates, it preserves these values during the scaling operation.
+This function is designed for scaling 2D geometries. While it currently doesn't support scaling the Z and M coordinates, it preserves these values during the scaling operation.
 
 Format:
 
@@ -3727,7 +3736,7 @@ SRID=3021;POLYGON ((1 1, 8 1, 8 8, 1 8, 1 1))
 Introduction: Modifies longitude coordinates in geometries, shifting values between -180..0 degrees to 180..360 degrees and vice versa. This is useful for normalizing data across the International Date Line and standardizing coordinate ranges for visualization and spheroidal calculations.
 
 !!!note
-    This function is only applicable to geometries that use lon/lat coordinate systems.
+This function is only applicable to geometries that use lon/lat coordinate systems.
 
 Format: `ST_ShiftLongitude (geom: geometry)`
 
@@ -3750,7 +3759,7 @@ LINESTRING(177 10, 179 10, 181 10, 183 10)
 Introduction: This function simplifies the input geometry by applying the Douglas-Peucker algorithm.
 
 !!!Note
-    The simplification may not preserve topology, potentially producing invalid geometries. Use [ST_SimplifyPreserveTopology](#st_simplifypreservetopology) to retain valid topology after simplification.
+The simplification may not preserve topology, potentially producing invalid geometries. Use [ST_SimplifyPreserveTopology](#st_simplifypreservetopology) to retain valid topology after simplification.
 
 Format: `ST_Simplify(geom: Geometry, tolerance: Double)`
 
@@ -3844,7 +3853,7 @@ POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))
 Introduction: This function simplifies the input geometry by applying the Visvalingam-Whyatt algorithm.
 
 !!!Note
-    The simplification may not preserve topology, potentially producing invalid geometries. Use [ST_SimplifyPreserveTopology](#st_simplifypreservetopology) to retain valid topology after simplification.
+The simplification may not preserve topology, potentially producing invalid geometries. Use [ST_SimplifyPreserveTopology](#st_simplifypreservetopology) to retain valid topology after simplification.
 
 Format: `ST_SimplifyVW(geom: Geometry, tolerance: Double)`
 
@@ -3874,7 +3883,7 @@ Format: `ST_Snap(input: Geometry, reference: Geometry, tolerance: double)`
 
 Input geometry:
 
-![ST_Snap base example](../../image/st_snap/st-snap-base-example.png "ST_Snap base example")
+![ST_Snap base example](../../image/st_snap/st-snap-base-example.png 'ST_Snap base example')
 
 SQL Example:
 
@@ -3888,7 +3897,7 @@ SELECT
 
 Output:
 
-![ST_Snap applied example](../../image/st_snap/st-snap-applied.png "ST_Snap applied example")
+![ST_Snap applied example](../../image/st_snap/st-snap-applied.png 'ST_Snap applied example')
 
 ```
 POLYGON ((236877.58 -6.61, 236878.29 -8.35, 236879.98 -8.33, 236879.72 -7.63, 236880.69 -6.81, 236877.58 -6.61), (236878.45 -7.01, 236878.43 -7.52, 236879.29 -7.5, 236878.63 -7.22, 236878.76 -6.89, 236878.45 -7.01))
@@ -4153,10 +4162,10 @@ PROJCS["WGS 84 / Pseudo-Mercator",
 ```
 
 !!!note
-    By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
+By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
 !!!note
-    By default, ==ST_Transform== follows the `lenient` mode which tries to fix issues by itself. You can append a boolean value at the end to enable the `strict` mode. In `strict` mode, ==ST_Transform== will throw an error if it finds any issue.
+By default, ==ST_Transform== follows the `lenient` mode which tries to fix issues by itself. You can append a boolean value at the end to enable the `strict` mode. In `strict` mode, ==ST_Transform== will throw an error if it finds any issue.
 
 Format:
 

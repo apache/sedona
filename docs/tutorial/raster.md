@@ -18,10 +18,10 @@
  -->
 
 !!!note
-    Sedona uses 1-based indexing for all raster functions except [map algebra function](../api/sql/Raster-map-algebra.md), which uses 0-based indexing.
+Sedona uses 1-based indexing for all raster functions except [map algebra function](../api/sql/Raster-map-algebra.md), which uses 0-based indexing.
 
 !!!note
-    Since v`1.5.0`, Sedona assumes geographic coordinates to be in longitude/latitude order. If your data is lat/lon order, please use `ST_FlipCoordinates` to swap X and Y.
+Since v`1.5.0`, Sedona assumes geographic coordinates to be in longitude/latitude order. If your data is lat/lon order, please use `ST_FlipCoordinates` to swap X and Y.
 
 Starting from `v1.1.0`, Sedona SQL supports raster data sources and raster operators in DataFrame and SQL. Raster support is available in all Sedona language bindings including ==Scala, Java, Python, and R==.
 
@@ -29,24 +29,24 @@ This page outlines the steps to manage raster data using SedonaSQL.
 
 === "Scala"
 
-	```scala
-	var myDataFrame = sedona.sql("YOUR_SQL")
-	myDataFrame.createOrReplaceTempView("rasterDf")
-	```
+    ```scala
+    var myDataFrame = sedona.sql("YOUR_SQL")
+    myDataFrame.createOrReplaceTempView("rasterDf")
+    ```
 
 === "Java"
 
-	```java
-	Dataset<Row> myDataFrame = sedona.sql("YOUR_SQL")
-	myDataFrame.createOrReplaceTempView("rasterDf")
-	```
+    ```java
+    Dataset<Row> myDataFrame = sedona.sql("YOUR_SQL")
+    myDataFrame.createOrReplaceTempView("rasterDf")
+    ```
 
 === "Python"
 
-	```python
-	myDataFrame = sedona.sql("YOUR_SQL")
-	myDataFrame.createOrReplaceTempView("rasterDf")
-	```
+    ```python
+    myDataFrame = sedona.sql("YOUR_SQL")
+    myDataFrame.createOrReplaceTempView("rasterDf")
+    ```
 
 Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.md). You can find example raster data in [Sedona GitHub repo](https://github.com/apache/sedona/blob/0eae42576c2588fe278f75cef3b17fee600eac90/spark/common/src/test/resources/raster/raster_with_no_data/test5.tiff).
 
@@ -54,14 +54,14 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.
 
 === "Scala/Java"
 
-	1. Read [Sedona Maven Central coordinates](../setup/maven-coordinates.md) and add Sedona dependencies in build.sbt or pom.xml.
-	2. Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql) in build.sbt or pom.xml.
-	3. Please see [SQL example project](demo.md)
+    1. Read [Sedona Maven Central coordinates](../setup/maven-coordinates.md) and add Sedona dependencies in build.sbt or pom.xml.
+    2. Add [Apache Spark core](https://mvnrepository.com/artifact/org.apache.spark/spark-core), [Apache SparkSQL](https://mvnrepository.com/artifact/org.apache.spark/spark-sql) in build.sbt or pom.xml.
+    3. Please see [SQL example project](demo.md)
 
 === "Python"
 
-	1. Please read [Quick start](../setup/install-python.md) to install Sedona Python.
-	2. This tutorial is based on [Sedona SQL Jupyter Notebook example](jupyter-notebook.md). You can interact with Sedona Python Jupyter Notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=docs/usecases) to interact with Sedona Python Jupyter notebook immediately on Binder.
+    1. Please read [Quick start](../setup/install-python.md) to install Sedona Python.
+    2. This tutorial is based on [Sedona SQL Jupyter Notebook example](jupyter-notebook.md). You can interact with Sedona Python Jupyter Notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=docs/usecases) to interact with Sedona Python Jupyter notebook immediately on Binder.
 
 ## Create Sedona config
 
@@ -73,45 +73,45 @@ You can add additional Spark runtime config to the config builder. For example, 
 
 === "Scala"
 
-	```scala
-	import org.apache.sedona.spark.SedonaContext
+    ```scala
+    import org.apache.sedona.spark.SedonaContext
 
-	val config = SedonaContext.builder()
-	.master("local[*]") // Delete this if run in cluster mode
-	.appName("readTestScala") // Change this to a proper name
-	.getOrCreate()
-	```
-	If you use SedonaViz together with SedonaSQL, please add the following line after `SedonaContext.builder()` to enable Sedona Kryo serializer:
-	```scala
-	.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
-	```
+    val config = SedonaContext.builder()
+    .master("local[*]") // Delete this if run in cluster mode
+    .appName("readTestScala") // Change this to a proper name
+    .getOrCreate()
+    ```
+    If you use SedonaViz together with SedonaSQL, please add the following line after `SedonaContext.builder()` to enable Sedona Kryo serializer:
+    ```scala
+    .config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+    ```
 
 === "Java"
 
-	```java
-	import org.apache.sedona.spark.SedonaContext;
+    ```java
+    import org.apache.sedona.spark.SedonaContext;
 
-	SparkSession config = SedonaContext.builder()
-	.master("local[*]") // Delete this if run in cluster mode
-	.appName("readTestScala") // Change this to a proper name
-	.getOrCreate()
-	```
-	If you use SedonaViz together with SedonaSQL, please add the following line after `SedonaContext.builder()` to enable Sedona Kryo serializer:
-	```scala
-	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
-	```
+    SparkSession config = SedonaContext.builder()
+    .master("local[*]") // Delete this if run in cluster mode
+    .appName("readTestScala") // Change this to a proper name
+    .getOrCreate()
+    ```
+    If you use SedonaViz together with SedonaSQL, please add the following line after `SedonaContext.builder()` to enable Sedona Kryo serializer:
+    ```scala
+    .config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+    ```
 
 === "Python"
 
-	```python
-	from sedona.spark import *
+    ```python
+    from sedona.spark import *
 
-	config = SedonaContext.builder() .\
-	    config('spark.jars.packages',
-	           'org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},'
-	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
-	    getOrCreate()
-	```
+    config = SedonaContext.builder() .\
+        config('spark.jars.packages',
+               'org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},'
+               'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
+        getOrCreate()
+    ```
     Please replace the `3.3` in the package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
 
 ==Sedona < 1.4.1==
@@ -120,51 +120,51 @@ The following method has been deprecated since Sedona 1.4.1. Please use the meth
 
 === "Scala"
 
-	```scala
-	var sparkSession = SparkSession.builder()
-	.master("local[*]") // Delete this if run in cluster mode
-	.appName("readTestScala") // Change this to a proper name
-	// Enable Sedona custom Kryo serializer
-	.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName)
-	.getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
-	```
-	If you use SedonaViz together with SedonaSQL, please use the following two lines to enable Sedona Kryo serializer instead:
-	```scala
-	.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
-	```
+    ```scala
+    var sparkSession = SparkSession.builder()
+    .master("local[*]") // Delete this if run in cluster mode
+    .appName("readTestScala") // Change this to a proper name
+    // Enable Sedona custom Kryo serializer
+    .config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
+    .config("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName)
+    .getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
+    ```
+    If you use SedonaViz together with SedonaSQL, please use the following two lines to enable Sedona Kryo serializer instead:
+    ```scala
+    .config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
+    .config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+    ```
 
 === "Java"
 
-	```java
-	SparkSession sparkSession = SparkSession.builder()
-	.master("local[*]") // Delete this if run in cluster mode
-	.appName("readTestScala") // Change this to a proper name
-	// Enable Sedona custom Kryo serializer
-	.config("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", SedonaKryoRegistrator.class.getName)
-	.getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
-	```
-	If you use SedonaViz together with SedonaSQL, please use the following two lines to enable Sedona Kryo serializer instead:
-	```scala
-	.config("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
-	```
+    ```java
+    SparkSession sparkSession = SparkSession.builder()
+    .master("local[*]") // Delete this if run in cluster mode
+    .appName("readTestScala") // Change this to a proper name
+    // Enable Sedona custom Kryo serializer
+    .config("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
+    .config("spark.kryo.registrator", SedonaKryoRegistrator.class.getName)
+    .getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
+    ```
+    If you use SedonaViz together with SedonaSQL, please use the following two lines to enable Sedona Kryo serializer instead:
+    ```scala
+    .config("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
+    .config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
+    ```
 
 === "Python"
 
-	```python
-	sparkSession = SparkSession. \
-	    builder. \
-	    appName('appName'). \
-	    config("spark.serializer", KryoSerializer.getName). \
-	    config("spark.kryo.registrator", SedonaKryoRegistrator.getName). \
-	    config('spark.jars.packages',
-	           'org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},'
-	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
-	    getOrCreate()
-	```
+    ```python
+    sparkSession = SparkSession. \
+        builder. \
+        appName('appName'). \
+        config("spark.serializer", KryoSerializer.getName). \
+        config("spark.kryo.registrator", SedonaKryoRegistrator.getName). \
+        config('spark.jars.packages',
+               'org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},'
+               'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
+        getOrCreate()
+    ```
     Please replace the `3.3` in the package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
 
 ## Initiate SedonaContext
@@ -175,27 +175,27 @@ Add the following line after creating the Sedona config. If you already have a S
 
 === "Scala"
 
-	```scala
-	import org.apache.sedona.spark.SedonaContext
+    ```scala
+    import org.apache.sedona.spark.SedonaContext
 
-	val sedona = SedonaContext.create(config)
-	```
+    val sedona = SedonaContext.create(config)
+    ```
 
 === "Java"
 
-	```java
-	import org.apache.sedona.spark.SedonaContext;
+    ```java
+    import org.apache.sedona.spark.SedonaContext;
 
-	SparkSession sedona = SedonaContext.create(config)
-	```
+    SparkSession sedona = SedonaContext.create(config)
+    ```
 
 === "Python"
 
-	```python
-	from sedona.spark import *
+    ```python
+    from sedona.spark import *
 
-	sedona = SedonaContext.create(config)
-	```
+    sedona = SedonaContext.create(config)
+    ```
 
 ==Sedona < 1.4.1==
 
@@ -203,23 +203,23 @@ The following method has been deprecated since Sedona 1.4.1. Please use the meth
 
 === "Scala"
 
-	```scala
-	SedonaSQLRegistrator.registerAll(sparkSession)
-	```
+    ```scala
+    SedonaSQLRegistrator.registerAll(sparkSession)
+    ```
 
 === "Java"
 
-	```java
-	SedonaSQLRegistrator.registerAll(sparkSession)
-	```
+    ```java
+    SedonaSQLRegistrator.registerAll(sparkSession)
+    ```
 
 === "Python"
 
-	```python
-	from sedona.register import SedonaRegistrator
+    ```python
+    from sedona.register import SedonaRegistrator
 
-	SedonaRegistrator.registerAll(spark)
-	```
+    SedonaRegistrator.registerAll(spark)
+    ```
 
 You can also register everything by passing `--conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions` to `spark-submit` or `spark-shell`.
 
@@ -230,25 +230,25 @@ Assume we have a single raster data file called rasterData.tiff, [at Path](https
 Use the following code to load the data and create a raw Dataframe.
 
 === "Scala"
-    ```scala
+`scala
     var rawDf = sedona.read.format("binaryFile").load(path_to_raster_data)
     rawDf.createOrReplaceTempView("rawdf")
     rawDf.show()
-    ```
+    `
 
 === "Java"
-    ```java
+`java
     Dataset<Row> rawDf = sedona.read.format("binaryFile").load(path_to_raster_data)
     rawDf.createOrReplaceTempView("rawdf")
     rawDf.show()
-    ```
+    `
 
 === "Python"
-    ```python
+`python
     rawDf = sedona.read.format("binaryFile").load(path_to_raster_data)
     rawDf.createOrReplaceTempView("rawdf")
     rawDf.show()
-    ```
+    `
 
 The output will look like this:
 
@@ -261,28 +261,28 @@ The output will look like this:
 For multiple raster data files use the following code to load the data [from path](https://github.com/apache/sedona/blob/0eae42576c2588fe278f75cef3b17fee600eac90/spark/common/src/test/resources/raster/) and create raw DataFrame.
 
 !!!note
-    The above code works too for loading multiple raster data files. If the raster files are in separate directories and the option also makes sure that only `.tif` or `.tiff` files are being loaded.
+The above code works too for loading multiple raster data files. If the raster files are in separate directories and the option also makes sure that only `.tif` or `.tiff` files are being loaded.
 
 === "Scala"
-    ```scala
+`scala
     var rawDf = sedona.read.format("binaryFile").option("recursiveFileLookup", "true").option("pathGlobFilter", "*.tif*").load(path_to_raster_data_folder)
     rawDf.createOrReplaceTempView("rawdf")
     rawDf.show()
-    ```
+    `
 
 === "Java"
-    ```java
+`java
     Dataset<Row> rawDf = sedona.read.format("binaryFile").option("recursiveFileLookup", "true").option("pathGlobFilter", "*.tif*").load(path_to_raster_data_folder);
     rawDf.createOrReplaceTempView("rawdf");
     rawDf.show();
-    ```
+    `
 
 === "Python"
-    ```python
+`python
     rawDf = sedona.read.format("binaryFile").option("recursiveFileLookup", "true").option("pathGlobFilter", "*.tif*").load(path_to_raster_data_folder)
     rawDf.createOrReplaceTempView("rawdf")
     rawDf.show()
-    ```
+    `
 
 The output will look like this:
 
@@ -377,7 +377,7 @@ World files are used to georeference and geolocate images by establishing an ima
 Since `v1.5.0` there have been many additions to manipulate raster data, we will show you a few example queries.
 
 !!!note
-    Read [SedonaSQL Raster operators](../api/sql/Raster-operators.md) to learn how you can use Sedona for raster manipulation.
+Read [SedonaSQL Raster operators](../api/sql/Raster-operators.md) to learn how you can use Sedona for raster manipulation.
 
 ### Coordinate translation
 
@@ -501,7 +501,7 @@ The image created is as below for the vector:
 ![Rasterized vector](../image/rasterized-image.png)
 
 !!!note
-    The vector coordinates are buffed up to showcase the output, the real use case, may or may not match the example.
+The vector coordinates are buffed up to showcase the output, the real use case, may or may not match the example.
 
 ### Spatial range query
 
@@ -520,7 +520,7 @@ SELECT r.rast, g.geom FROM rasterDf r, geomDf g WHERE RS_Interest(r.rast, g.geom
 ```
 
 !!!note
-    These range and join queries will filter rasters using the provided geometric boundary and the spatial boundary of the raster.
+These range and join queries will filter rasters using the provided geometric boundary and the spatial boundary of the raster.
 
     Sedona offers more raster predicates to do spatial range queries and spatial join queries. Please refer to [raster predicates docs](../api/sql/Raster-operators.md#raster-predicates).
 
@@ -635,7 +635,7 @@ If you want to work with the raster data using `rasterio`, you can retrieve a `r
 `as_rasterio` method.
 
 !!!note
-    You need to have the `rasterio` package installed (version >= 1.2.10) to use this method. You can install it using `pip install rasterio`.
+You need to have the `rasterio` package installed (version >= 1.2.10) to use this method. You can install it using `pip install rasterio`.
 
 ```python
 ds = raster.as_rasterio()  # rasterio.DatasetReader object

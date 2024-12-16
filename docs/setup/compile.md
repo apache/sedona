@@ -25,51 +25,51 @@
 
 Sedona Scala/Java code is a project with multiple modules. Each module is a Scala/Java mixed project which is managed by Apache Maven 3.
 
-* Make sure your Linux/Mac machine has Java 1.8, Apache Maven 3.3.1+, and Python3.7+. The compilation of Sedona is not tested on Windows machines.
+- Make sure your Linux/Mac machine has Java 1.8, Apache Maven 3.3.1+, and Python3.7+. The compilation of Sedona is not tested on Windows machines.
 
 To compile all modules, please make sure you are in the root folder of all modules. Then enter the following command in the terminal:
 
 === "Without unit tests"
-	```bash
+`bash
 	mvn clean install -DskipTests
-	```
-	This command will first delete the old binary files and compile all modules. This compilation will skip the unit tests. To compile a single module, please make sure you are in the folder of that module. Then enter the same command.
+	`
+This command will first delete the old binary files and compile all modules. This compilation will skip the unit tests. To compile a single module, please make sure you are in the folder of that module. Then enter the same command.
 
 === "With unit tests"
-	```bash
+`bash
 	mvn clean install
-	```
-	The maven unit tests of all modules may take up to 30 minutes.
+	`
+The maven unit tests of all modules may take up to 30 minutes.
 
 === "With Geotools jars packaged"
-	```bash
+`bash
 	mvn clean install -DskipTests -Dgeotools
-	```
-	Geotools jars will be packaged into the produced fat jars.
+	`
+Geotools jars will be packaged into the produced fat jars.
 
 !!!note
-	By default, this command will compile Sedona with Spark 3.3 and Scala 2.12
+By default, this command will compile Sedona with Spark 3.3 and Scala 2.12
 
 ### Compile with different targets
 
 User can specify `-Dspark` and `-Dscala` command line options to compile with different targets. Available targets are:
 
-* `-Dspark`: `{major}.{minor}`: For example, specify `-Dspark=3.4` to build for Spark 3.4.
-* `-Dscala`: `2.12` or `2.13`
+- `-Dspark`: `{major}.{minor}`: For example, specify `-Dspark=3.4` to build for Spark 3.4.
+- `-Dscala`: `2.12` or `2.13`
 
 === "Spark 3.3+ Scala 2.12"
-	```
+`
 	mvn clean install -DskipTests -Dspark=3.3 -Dscala=2.12
-	```
-    Please replace `3.3` with Spark major.minor version when building for higher Spark versions.
+	`
+Please replace `3.3` with Spark major.minor version when building for higher Spark versions.
 === "Spark 3.3+ Scala 2.13"
-	```
+`
 	mvn clean install -DskipTests -Dspark=3.4 -Dscala=2.13
-	```
-    Please replace `3.3` with Spark major.minor version when building for higher Spark versions.
+	`
+Please replace `3.3` with Spark major.minor version when building for higher Spark versions.
 
 !!!tip
-	To get the Sedona Spark Shaded jar with all GeoTools jars included, simply append `-Dgeotools` option. The command is like this:`mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0 -Dgeotools`
+To get the Sedona Spark Shaded jar with all GeoTools jars included, simply append `-Dgeotools` option. The command is like this:`mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0 -Dgeotools`
 
 ### Download staged jars
 
@@ -113,8 +113,7 @@ sudo pip3 install -U virtualenvwrapper
 sudo pip3 install -U pipenv
 ```
 
-Homebrew can be used to install libgeos-dev in macOS: `brew install geos`
-5. Set up pipenv to the desired Python version: 3.7, 3.8, or 3.9
+Homebrew can be used to install libgeos-dev in macOS: `brew install geos` 5. Set up pipenv to the desired Python version: 3.7, 3.8, or 3.9
 
 ```
 cd python
@@ -130,8 +129,7 @@ pipenv install --dev
 ```
 
 `pipenv install pyspark` installs the latest version of pyspark.
-In order to remain consistent with the installed spark version, use `pipenv install pyspark==<spark_version>`
-7. Run the Python tests
+In order to remain consistent with the installed spark version, use `pipenv install pyspark==<spark_version>` 7. Run the Python tests
 
 ```
 cd python

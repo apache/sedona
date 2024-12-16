@@ -56,18 +56,18 @@ Since v1.5.1, GeoParquet supports reading legacy Parquet files. you can use `"ge
 
 === "Scala/Java"
 
-	```scala
-	val df = sedona.read.format("geoparquet").option("legacyMode", "true").load("path/to/legacy-parquet-files")
-	```
+    ```scala
+    val df = sedona.read.format("geoparquet").option("legacyMode", "true").load("path/to/legacy-parquet-files")
+    ```
 
 === "Java"
 
-	```java
-	Dataset<Row> df = sedona.read.format("geoparquet").option("legacyMode", "true").load("path/to/legacy-parquet-files")
-	```
+    ```java
+    Dataset<Row> df = sedona.read.format("geoparquet").option("legacyMode", "true").load("path/to/legacy-parquet-files")
+    ```
 
 === "Python"
 
-	```python
-	df = sedona.read.format("geoparquet").option("legacyMode", "true").load("path/to/legacy-parquet-files")
-	```
+    ```python
+    df = sedona.read.format("geoparquet").option("legacyMode", "true").load("path/to/legacy-parquet-files")
+    ```

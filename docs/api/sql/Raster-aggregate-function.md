@@ -22,7 +22,7 @@
 Introduction: This function combines multiple rasters into a single multiband raster by stacking the bands of each input raster sequentially. The function arranges the bands in the output raster according to the order specified by the index column in the input. It is typically used in scenarios where rasters are grouped by certain criteria (e.g., time and/or location) and an aggregated raster output is desired.
 
 !!!Note
-    RS_Union_Aggr expects the following input, if not satisfied then will throw an IllegalArgumentException:
+RS_Union_Aggr expects the following input, if not satisfied then will throw an IllegalArgumentException:
 
     - Indexes to be in an arithmetic sequence without any gaps.
     - Indexes to be unique and not repeated.

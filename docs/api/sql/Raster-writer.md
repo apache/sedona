@@ -18,7 +18,7 @@
  -->
 
 !!!note
-	Sedona writers are available in Scala. Java and Python have the same APIs.
+Sedona writers are available in Scala. Java and Python have the same APIs.
 
 ## Write Raster DataFrame to raster files
 
@@ -57,10 +57,7 @@ SELECT RS_AsArcGrid(raster, 1) FROM my_raster_table
 Output:
 
 ```html
-+--------------------+
-|             arcgrid|
-+--------------------+
-|[4D 4D 00 2A 00 0...|
++--------------------+ | arcgrid| +--------------------+ |[4D 4D 00 2A 00 0...|
 +--------------------+
 ```
 
@@ -102,10 +99,7 @@ SELECT RS_AsGeoTiff(raster, 'LZW', '0.75') FROM my_raster_table
 Output:
 
 ```html
-+--------------------+
-|             geotiff|
-+--------------------+
-|[4D 4D 00 2A 00 0...|
++--------------------+ | geotiff| +--------------------+ |[4D 4D 00 2A 00 0...|
 +--------------------+
 ```
 
@@ -121,10 +115,10 @@ root
 Introduction: Returns a PNG byte array, that can be written to raster files as PNGs using the [sedona function](#write-a-binary-dataframe-to-raster-files). This function can only accept pixel data type of unsigned integer. PNG can accept 1 or 3 bands of data from the raster, refer to [RS_Band](Raster-operators.md#rs_band) for more details.
 
 !!!Note
-	Raster having `UNSIGNED_8BITS` pixel data type will have range of `0 - 255`, whereas rasters having `UNSIGNED_16BITS` pixel data type will have range of `0 - 65535`. If provided pixel value is greater than either `255` for `UNSIGNED_8BITS` or `65535` for `UNSIGNED_16BITS`, then the extra bit will be truncated.
+Raster having `UNSIGNED_8BITS` pixel data type will have range of `0 - 255`, whereas rasters having `UNSIGNED_16BITS` pixel data type will have range of `0 - 65535`. If provided pixel value is greater than either `255` for `UNSIGNED_8BITS` or `65535` for `UNSIGNED_16BITS`, then the extra bit will be truncated.
 
 !!!Note
-	Raster that have float or double values will result in an empty byte array. PNG only accepts Integer values, if you want to write your raster to an image file, please refer to [RS_AsGeoTiff](#rs_asgeotiff).
+Raster that have float or double values will result in an empty byte array. PNG only accepts Integer values, if you want to write your raster to an image file, please refer to [RS_AsGeoTiff](#rs_asgeotiff).
 
 Format:
 
@@ -166,32 +160,30 @@ Since: `v1.4.1`
 
 Available options:
 
-* rasterField:
-	* Default value: the `binary` type column in the DataFrame. If the input DataFrame has several binary columns, please specify which column you want to use. You can use one of the `RS_As*` functions mentioned above to convert the raster objects to binary raster file content to write.
-	* Allowed values: the name of the to-be-saved binary type column
-* fileExtension
-	* Default value: `.tiff`
-	* Allowed values: any string values such as `.png`, `.jpeg`, `.asc`
-* pathField
-	* No default value. If you use this option, then the column specified in this option must exist in the DataFrame schema. If this option is not used, each produced raster image will have a random UUID file name.
-	* Allowed values: any column name that indicates the paths of each raster file
-* useDirectCommitter (Since: `v1.6.1`)
-	* Default value: `true`. If set to `true`, the output files will be written directly to the target location. If set to `false`, the output files will be written to a temporary location and finally be committed to their target location. It is usually slower to write large amount of raster files with `useDirectCommitter` set to `false`, especially when writing to object stores such as S3.
-	* Allowed values: `true` or `false`
+- rasterField:
+  - Default value: the `binary` type column in the DataFrame. If the input DataFrame has several binary columns, please specify which column you want to use. You can use one of the `RS_As*` functions mentioned above to convert the raster objects to binary raster file content to write.
+  - Allowed values: the name of the to-be-saved binary type column
+- fileExtension
+  - Default value: `.tiff`
+  - Allowed values: any string values such as `.png`, `.jpeg`, `.asc`
+- pathField
+  - No default value. If you use this option, then the column specified in this option must exist in the DataFrame schema. If this option is not used, each produced raster image will have a random UUID file name.
+  - Allowed values: any column name that indicates the paths of each raster file
+- useDirectCommitter (Since: `v1.6.1`)
+  - Default value: `true`. If set to `true`, the output files will be written directly to the target location. If set to `false`, the output files will be written to a temporary location and finally be committed to their target location. It is usually slower to write large amount of raster files with `useDirectCommitter` set to `false`, especially when writing to object stores such as S3.
+  - Allowed values: `true` or `false`
 
 The schema of the Raster dataframe to be written can be one of the following two schemas:
 
 ```html
-root
- |-- raster_binary: binary (nullable = true)
+root |-- raster_binary: binary (nullable = true)
 ```
 
 or
 
 ```html
-root
- |-- raster_binary: binary (nullable = true)
- |-- path: string (nullable = true)
+root |-- raster_binary: binary (nullable = true) |-- path: string (nullable =
+true)
 ```
 
 Spark SQL example 1:
@@ -218,17 +210,11 @@ df.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)"))\
 The produced file structure will look like this:
 
 ```html
-my_raster_file
-- part-00000-6c7af016-c371-4564-886d-1690f3b27ca8-c000
-	- test1.tiff
-	- .test1.tiff.crc
-- part-00001-6c7af016-c371-4564-886d-1690f3b27ca8-c000
-	- test2.tiff
-	- .test2.tiff.crc
-- part-00002-6c7af016-c371-4564-886d-1690f3b27ca8-c000
-	- test3.tiff
-	- .test3.tiff.crc
-- _SUCCESS
+my_raster_file - part-00000-6c7af016-c371-4564-886d-1690f3b27ca8-c000 -
+test1.tiff - .test1.tiff.crc -
+part-00001-6c7af016-c371-4564-886d-1690f3b27ca8-c000 - test2.tiff -
+.test2.tiff.crc - part-00002-6c7af016-c371-4564-886d-1690f3b27ca8-c000 -
+test3.tiff - .test3.tiff.crc - _SUCCESS
 ```
 
 To read it back to Sedona Raster DataFrame, you can use the following command (note the `*` in the path):
@@ -269,14 +255,14 @@ RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String)
 Since: `v1.5.0`
 
 !!!note
-	The function doesn't support rasters that have any one of the following properties:
-	```
+The function doesn't support rasters that have any one of the following properties:
+`
 	ScaleX < 0
 	ScaleY > 0
 	SkewX != 0
 	SkewY != 0
-	```
-	If a raster is provided with anyone of these properties then IllegalArgumentException is thrown.
+	`
+If a raster is provided with anyone of these properties then IllegalArgumentException is thrown.
 
 For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](Raster-affine-transformation.md) section.
 

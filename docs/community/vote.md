@@ -23,11 +23,11 @@ This page is for Sedona community to vote a Sedona release. The script below is 
 
 In order to vote a Sedona release, you must provide your checklist including the following minimum requirement:
 
-* Download links are valid
-* Checksums and PGP signatures are valid
-* DISCLAIMER and NOTICE are included
-* Source code artifacts have correct names matching the current release
-* The project can compile from the source code
+- Download links are valid
+- Checksums and PGP signatures are valid
+- DISCLAIMER and NOTICE are included
+- Source code artifacts have correct names matching the current release
+- The project can compile from the source code
 
 To make your life easier, we have provided an [online Jupyter notebook](https://github.com/jiayuasu/sedona-tools) using MyBinder. Please click this button to open the notebook and verify the release: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jiayuasu/sedona-tools/HEAD?labpath=binder%2Fverify-release.ipynb). Then you can vote `+1` in the vote email.
 
@@ -44,7 +44,7 @@ You can skip this step if you installed these software before.
 
 ## Run the verify script
 
-Please replace SEDONA\_CURRENT\_RC and SEDONA\_CURRENT\_VERSION with the correct versions. Then paste the content in a script called `verify.sh` and re-direct the output to a file. To run a script, do the following:
+Please replace SEDONA_CURRENT_RC and SEDONA_CURRENT_VERSION with the correct versions. Then paste the content in a script called `verify.sh` and re-direct the output to a file. To run a script, do the following:
 
 ```bash
 #!/bin/bash
@@ -90,7 +90,7 @@ tar -xvf apache-sedona-$SEDONA_CURRENT_VERSION-src.tar.gz
 
 ```
 
-* If successful, in the output file, you should be able to see something similar to the following text. It should include `Good signature from` and the final 4 lines should be two pairs of checksum matching each other.
+- If successful, in the output file, you should be able to see something similar to the following text. It should include `Good signature from` and the final 4 lines should be two pairs of checksum matching each other.
 
 ```
 gpg: key 3A79A47AC26FF4CD: "Jia Yu <jiayu@apache.org>" not changed
@@ -119,7 +119,7 @@ d3bdfd4d870838ebe63f21cb93634d2421ec1ac1b8184636206a5dc0d89a78a88257798b1f17371a
 64cea38dd3ca171ee4e2a7365dbce999773862f2a11599bd0f27e9551d740659a519a9b976b3e7b0826088010967093e6acc9462f7073e9737c24b007a2df846  apache-sedona-1.2.0-incubating-bin.tar.gz
 ```
 
-* At the end of the output, you should also see the `BUILD SUCCESS` if you can compile the source code. If this step fails, you can contact Sedona PMC and see if this is just because of your environment.
+- At the end of the output, you should also see the `BUILD SUCCESS` if you can compile the source code. If this step fails, you can contact Sedona PMC and see if this is just because of your environment.
 
 ## Check files manually
 

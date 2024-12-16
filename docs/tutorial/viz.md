@@ -24,7 +24,7 @@ SedonaViz provides native support for general cartographic design by extending S
 SedonaViz offers Map Visualization SQL. This gives users a more flexible way to design beautiful map visualization effects including scatter plots and heat maps. SedonaViz RDD API is also available.
 
 !!!note
-	All SedonaViz SQL/DataFrame APIs are explained in [SedonaViz API](../api/viz/sql.md). Please see [Viz example project](https://github.com/apache/sedona/tree/master/examples/spark-viz)
+All SedonaViz SQL/DataFrame APIs are explained in [SedonaViz API](../api/viz/sql.md). Please see [Viz example project](https://github.com/apache/sedona/tree/master/examples/spark-viz)
 
 ## Why scalable map visualization?
 
@@ -148,10 +148,10 @@ SELECT pixel, shape FROM pointtable
 LATERAL VIEW explode(ST_Pixelize(ST_Transform(shape, 'epsg:4326','epsg:3857'), 256, 256, (SELECT ST_Transform(bound, 'epsg:4326','epsg:3857') FROM boundtable))) AS pixel
 ```
 
-This will give you a 256*256 resolution image after you run ST_Render at the end of this tutorial.
+This will give you a 256\*256 resolution image after you run ST_Render at the end of this tutorial.
 
 !!!warning
-	We highly suggest that you should use ST_Transform to transform coordinates to a visualization-specific coordinate system such as epsg:3857, otherwise you map may look distorted.
+We highly suggest that you should use ST_Transform to transform coordinates to a visualization-specific coordinate system such as epsg:3857, otherwise you map may look distorted.
 
 ### Aggregate pixels
 
@@ -211,7 +211,7 @@ If you are a map professional, you may need to generate map tiles for different 
 
 ### Pixelization and pixel aggregation
 
-Please first do pixelization and pixel aggregation using the same commands in single image generation. In ST_Pixelize, you need specify a very high resolution, such as 1000*1000. Note that, each dimension should be divisible by 2^zoom-level
+Please first do pixelization and pixel aggregation using the same commands in single image generation. In ST_Pixelize, you need specify a very high resolution, such as 1000\*1000. Note that, each dimension should be divisible by 2^zoom-level
 
 ### Create tile name
 

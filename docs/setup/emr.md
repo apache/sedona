@@ -22,7 +22,7 @@ We recommend Sedona-1.3.1-incubating and above for EMR. In the tutorial, we use 
 This tutorial is tested on EMR on EC2 with EMR Studio (notebooks). EMR on EC2 uses YARN to manage resources.
 
 !!!note
-	If you are using Spark 3.4+ and Scala 2.12, please use `sedona-spark-shaded-3.4_2.12`. Please pay attention to the Spark version postfix and Scala version postfix.
+If you are using Spark 3.4+ and Scala 2.12, please use `sedona-spark-shaded-3.4_2.12`. Please pay attention to the Spark version postfix and Scala version postfix.
 
 ## Prepare initialization script
 

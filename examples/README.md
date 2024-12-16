@@ -21,14 +21,14 @@
 
 This repository contains template projects for Sedona on Spark and Flink. The template projects have been configured properly.
 
-Note that, although the template projects are written in Scala, the same APIs can be  used in Java as well.
+Note that, although the template projects are written in Scala, the same APIs can be used in Java as well.
 
 ## Folder structure
 
 The folder structure of this repository is as follows.
 
-* spark-sql: a Scala template shows how to use Sedona RDD, DataFrame and SQL API
-* flink-sql: a Java template show how to use Sedona SQL via Flink Table APIs
+- spark-sql: a Scala template shows how to use Sedona RDD, DataFrame and SQL API
+- flink-sql: a Java template show how to use Sedona SQL via Flink Table APIs
 
 ## Compile and package
 
@@ -36,8 +36,8 @@ The folder structure of this repository is as follows.
 
 Please make sure you have the following software installed on your local machine:
 
-* For Scala: Scala 2.12
-* For Java: JDK 1.8, Apache Maven 3
+- For Scala: Scala 2.12
+- For Java: JDK 1.8, Apache Maven 3
 
 ### Compile
 
@@ -49,11 +49,11 @@ After running the command mentioned above, you are able to see a fat jar in `./t
 
 To run the jar in this way, you need to:
 
-* Either change Spark Master Address in template projects or simply delete it. Currently, they are hard coded to `local[*]` which means run locally with all cores.
+- Either change Spark Master Address in template projects or simply delete it. Currently, they are hard coded to `local[*]` which means run locally with all cores.
 
-* Change the dependency packaging scope of Apache Spark from "compile" to "provided". This is a common packaging strategy in Maven and SBT which means do not package Spark into your fat jar. Otherwise, this may lead to a huge jar and version conflicts!
+- Change the dependency packaging scope of Apache Spark from "compile" to "provided". This is a common packaging strategy in Maven and SBT which means do not package Spark into your fat jar. Otherwise, this may lead to a huge jar and version conflicts!
 
-* Make sure the dependency versions in build.sbt are consistent with your Spark version.
+- Make sure the dependency versions in build.sbt are consistent with your Spark version.
 
 ## Run template projects locally
 

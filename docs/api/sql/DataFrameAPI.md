@@ -25,18 +25,15 @@ Every function can take all `Column` arguments. Additionally, overloaded forms c
 
 In general the following rules apply (although check the documentation of specific functions for any exceptions):
 
-=== "Scala"
-	1. Every function returns a `Column` so that it can be used interchangeably with Spark functions as well as `DataFrame` methods such as `DataFrame.select` or `DataFrame.join`.
-	2. Every function has a form that takes all `Column` arguments.
-	These are the most versatile of the forms.
-	3. Most functions have a form that takes a mix of `String` arguments with other Scala types.
+=== "Scala" 1. Every function returns a `Column` so that it can be used interchangeably with Spark functions as well as `DataFrame` methods such as `DataFrame.select` or `DataFrame.join`. 2. Every function has a form that takes all `Column` arguments.
+These are the most versatile of the forms. 3. Most functions have a form that takes a mix of `String` arguments with other Scala types.
 
 === "Python"
 
-	1. `Column` type arguments are passed straight through and are always accepted.
-	2. `str` type arguments are always assumed to be names of columns and are wrapped in a `Column` to support that.
-	If an actual string literal needs to be passed then it will need to be wrapped in a `Column` using `pyspark.sql.functions.lit`.
-	3. Any other types of arguments are checked on a per function basis. Generally, arguments that could reasonably support a python native type are accepted and passed through.	4. Shapely `Geometry` objects are not currently accepted in any of the functions.
+    1. `Column` type arguments are passed straight through and are always accepted.
+    2. `str` type arguments are always assumed to be names of columns and are wrapped in a `Column` to support that.
+    If an actual string literal needs to be passed then it will need to be wrapped in a `Column` using `pyspark.sql.functions.lit`.
+    3. Any other types of arguments are checked on a per function basis. Generally, arguments that could reasonably support a python native type are accepted and passed through.	4. Shapely `Geometry` objects are not currently accepted in any of the functions.
 
 The exact mixture of argument types allowed is function specific.
 However, in these instances, all `String` arguments are assumed to be the names of columns and will be wrapped in a `Column` automatically.
@@ -46,27 +43,27 @@ A short example of using this API (uses the `array_min` and `array_max` Spark fu
 
 === "Scala"
 
-	```scala
-	val values_df = spark.sql("SELECT array(0.0, 1.0, 2.0) AS values")
-	val min_value = array_min("values")
-	val max_value = array_max("values")
-	val point_df = values_df.select(ST_Point(min_value, max_value).as("point"))
-	```
+    ```scala
+    val values_df = spark.sql("SELECT array(0.0, 1.0, 2.0) AS values")
+    val min_value = array_min("values")
+    val max_value = array_max("values")
+    val point_df = values_df.select(ST_Point(min_value, max_value).as("point"))
+    ```
 
 === "Python"
 
-	```python3
-	from pyspark.sql import functions as f
+    ```python3
+    from pyspark.sql import functions as f
 
-	from sedona.spark import *
+    from sedona.spark import *
 
-	df = spark.sql("SELECT array(0.0, 1.0, 2.0) AS values")
+    df = spark.sql("SELECT array(0.0, 1.0, 2.0) AS values")
 
-	min_value = f.array_min("values")
-	max_value = f.array_max("values")
+    min_value = f.array_min("values")
+    max_value = f.array_max("values")
 
-	df = df.select(ST_Point(min_value, max_value).alias("point"))
-	```
+    df = df.select(ST_Point(min_value, max_value).alias("point"))
+    ```
 
 The above code will generate the following dataframe:
 

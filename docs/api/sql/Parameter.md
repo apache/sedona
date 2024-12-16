@@ -56,47 +56,47 @@ If you set the same parameter through both `sedona` and `spark.sedona` prefixes,
 
 ## Explanation
 
-* sedona.global.index
-	* Use spatial index (currently, only supports in SQL range join and SQL distance join)
-	* Default: true
-	* Possible values: true, false
-* sedona.global.indextype
-	* Spatial index type, only valid when "sedona.global.index" is true
-	* Default: rtree
-	* Possible values: rtree, quadtree
-* sedona.join.autoBroadcastJoinThreshold
-	* Configures the maximum size in bytes for a table that will be broadcast to all worker nodes when performing a join.
-      By setting this value to -1 automatic broadcasting can be disabled.
-	* Default: The default value is the same as spark.sql.autoBroadcastJoinThreshold
-	* Possible values: any integer with a byte suffix i.e. 10MB or 512KB
-* sedona.join.gridtype
-	* Spatial partitioning grid type for join query
-	* Default: kdbtree
-	* Possible values: quadtree, kdbtree
-* spark.sedona.join.knn.includeTieBreakers
-	* KNN join will include all ties in the result, possibly returning more than k results
-	* Default: false
-	* Possible values: true, false
-* sedona.join.indexbuildside **(Advanced users only!)**
-	* The side which Sedona builds spatial indices on
-	* Default: left
-	* Possible values: left, right
-* sedona.join.numpartition **(Advanced users only!)**
-	* Number of partitions for both sides in a join query
-	* Default: -1, which means use the existing partitions
-	* Possible values: any integers
-* sedona.join.spatitionside **(Advanced users only!)**
-	* The dominant side in spatial partitioning stage
-	* Default: left
-	* Possible values: left, right
-* sedona.join.optimizationmode **(Advanced users only!)**
-	* When should Sedona optimize spatial join SQL queries
-	* Default: nonequi
-	* Possible values:
-		* all: Always optimize spatial join queries, even for equi-joins.
-		* none: Disable optimization for spatial joins.
-		* nonequi: Optimize spatial join queries that are not equi-joins.
-* spark.sedona.enableParserExtension
-	* Enable the parser extension to parse GEOMETRY data type in SQL DDL statements
-	* Default: true
-	* Possible values: true, false
+- sedona.global.index
+  - Use spatial index (currently, only supports in SQL range join and SQL distance join)
+  - Default: true
+  - Possible values: true, false
+- sedona.global.indextype
+  - Spatial index type, only valid when "sedona.global.index" is true
+  - Default: rtree
+  - Possible values: rtree, quadtree
+- sedona.join.autoBroadcastJoinThreshold
+  - Configures the maximum size in bytes for a table that will be broadcast to all worker nodes when performing a join.
+    By setting this value to -1 automatic broadcasting can be disabled.
+  - Default: The default value is the same as spark.sql.autoBroadcastJoinThreshold
+  - Possible values: any integer with a byte suffix i.e. 10MB or 512KB
+- sedona.join.gridtype
+  - Spatial partitioning grid type for join query
+  - Default: kdbtree
+  - Possible values: quadtree, kdbtree
+- spark.sedona.join.knn.includeTieBreakers
+  - KNN join will include all ties in the result, possibly returning more than k results
+  - Default: false
+  - Possible values: true, false
+- sedona.join.indexbuildside **(Advanced users only!)**
+  - The side which Sedona builds spatial indices on
+  - Default: left
+  - Possible values: left, right
+- sedona.join.numpartition **(Advanced users only!)**
+  - Number of partitions for both sides in a join query
+  - Default: -1, which means use the existing partitions
+  - Possible values: any integers
+- sedona.join.spatitionside **(Advanced users only!)**
+  - The dominant side in spatial partitioning stage
+  - Default: left
+  - Possible values: left, right
+- sedona.join.optimizationmode **(Advanced users only!)**
+  - When should Sedona optimize spatial join SQL queries
+  - Default: nonequi
+  - Possible values:
+    - all: Always optimize spatial join queries, even for equi-joins.
+    - none: Disable optimization for spatial joins.
+    - nonequi: Optimize spatial join queries that are not equi-joins.
+- spark.sedona.enableParserExtension
+  - Enable the parser extension to parse GEOMETRY data type in SQL DDL statements
+  - Default: true
+  - Possible values: true, false

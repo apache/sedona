@@ -32,10 +32,10 @@ Generally, the `RS_MapAlgebra` function is more flexible and can be used to perf
 RS_MapAlgebra(rast: Raster, pixelType: String, script: String, [noDataValue: Double])
 ```
 
-* `rast`: The raster to apply the map algebra expression to.
-* `pixelType`: The data type of the output raster. This can be one of `D` (double), `F` (float), `I` (integer), `S` (short), `US` (unsigned short) or `B` (byte). If specified `NULL`, the output raster will have the same data type as the input raster.
-* `script`: The map algebra script. [Refer here for more details on the format.](#:~:text=The Jiffle script is,current output pixel value)
-* `noDataValue`: (Optional) The nodata value of the output raster.
+- `rast`: The raster to apply the map algebra expression to.
+- `pixelType`: The data type of the output raster. This can be one of `D` (double), `F` (float), `I` (integer), `S` (short), `US` (unsigned short) or `B` (byte). If specified `NULL`, the output raster will have the same data type as the input raster.
+- `script`: The map algebra script. [Refer here for more details on the format.](#:~:text=The Jiffle script is,current output pixel value)
+- `noDataValue`: (Optional) The nodata value of the output raster.
 
 As of version `v1.5.1`, the `RS_MapAlgebra` function allows two raster column inputs, with multi-band rasters supported. The function accepts 5 parameters:
 
@@ -43,11 +43,11 @@ As of version `v1.5.1`, the `RS_MapAlgebra` function allows two raster column in
 RS_MapAlgebra(rast0: Raster, rast1: Raster, pixelType: String, script: String, noDataValue: Double)
 ```
 
-* `rast0`: The first raster to apply the map algebra expression to.
-* `rast1`: The second raster to apply the map algebra expression to.
-* `pixelType`: The data type of the output raster. This can be one of `D` (double), `F` (float), `I` (integer), `S` (short), `US` (unsigned short) or `B` (byte). If specified `NULL`, the output raster will have the same data type as the input raster.
-* `script`: The map algebra script. [Refer here for more details on the format.](#:~:text=The Jiffle script is,current output pixel value)
-* `noDataValue`: (Not optional) The nodata value of the output raster, `null` is allowed.
+- `rast0`: The first raster to apply the map algebra expression to.
+- `rast1`: The second raster to apply the map algebra expression to.
+- `pixelType`: The data type of the output raster. This can be one of `D` (double), `F` (float), `I` (integer), `S` (short), `US` (unsigned short) or `B` (byte). If specified `NULL`, the output raster will have the same data type as the input raster.
+- `script`: The map algebra script. [Refer here for more details on the format.](#:~:text=The Jiffle script is,current output pixel value)
+- `noDataValue`: (Not optional) The nodata value of the output raster, `null` is allowed.
 
 Spark SQL Example for two raster input `RS_MapAlgebra`:
 
@@ -59,7 +59,7 @@ RS_MapAlgebra(rast0, rast1, 'D', 'out = rast0[0] * 0.5 + rast1[0] * 0.5;', null)
 execution. We'll demonstrate both approaches to implementing commonly used map algebra operations.
 
 !!!Note
-    The `RS_MapAlgebra` function can cast the output raster to a different data type specified by `pixelType`:
+The `RS_MapAlgebra` function can cast the output raster to a different data type specified by `pixelType`:
 
     - If `pixelType` is smaller than the input raster data type, narrowing casts will be performed, which may result in loss of data.
 
@@ -138,5 +138,5 @@ FROM raster_table) t
 
 ### Further Reading
 
-* [Jiffle language summary](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle---language-summary)
-* [Raster operators](Raster-operators.md)
+- [Jiffle language summary](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle---language-summary)
+- [Raster operators](Raster-operators.md)

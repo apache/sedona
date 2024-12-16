@@ -48,15 +48,15 @@ If no SedonaDataFrame object is passed, an empty map (with config applied if pas
 A map config can be passed optionally to apply pre-apply customizations to the map.
 
 !!!Note
-    The map config references every customization with the name assigned to the SedonaDataFrame being displayed, if there is a mismatch in the name, the config will not be applied to the map object.
+The map config references every customization with the name assigned to the SedonaDataFrame being displayed, if there is a mismatch in the name, the config will not be applied to the map object.
 
 !!! abstract "Example usage (Referenced from Sedona Jupyter examples)"
 
-	=== "Python"
-		```python
-		map = SedonaKepler.create_map(df=groupedresult, name="AirportCount")
-		map
-		```
+    === "Python"
+    	```python
+    	map = SedonaKepler.create_map(df=groupedresult, name="AirportCount")
+    	map
+    	```
 
 ### **Adding SedonaDataFrame to a map object using SedonaKepler.add_df**
 
@@ -71,15 +71,15 @@ This API can be used to add a SedonaDataFrame to an already created map object. 
 The parameters name has the same conditions as 'create_map'
 
 !!!Tip
-    This method can be used to add multiple dataframes to a map object to be able to visualize them together.
+This method can be used to add multiple dataframes to a map object to be able to visualize them together.
 
 !!! abstract "Example usage (Referenced from Sedona Jupyter examples)"
-    === "Python"
-    ```python
+=== "Python"
+`python
     map = SedonaKepler.create_map()
     SedonaKepler.add_df(map, groupedresult, name="AirportCount")
     map
-    ```
+    `
 
 ### **Setting a config via the map**
 
@@ -90,5 +90,5 @@ A map rendered by accessing the map object created by SedonaKepler includes a co
 A map object's current config can be accessed by accessing its 'config' attribute like `map.config`. This config can be saved for future use or use across notebooks if the exact same map is to be rendered every time.
 
 !!!Note
-    The map config references each applied customization with the name given to the dataframe and hence will work only on maps with the same name of dataframe supplied.
-    For more details refer to keplerGl documentation [here](https://docs.kepler.gl/docs/keplergl-jupyter#6.-match-config-with-data)
+The map config references each applied customization with the name given to the dataframe and hence will work only on maps with the same name of dataframe supplied.
+For more details refer to keplerGl documentation [here](https://docs.kepler.gl/docs/keplergl-jupyter#6.-match-config-with-data)

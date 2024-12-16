@@ -20,8 +20,8 @@
 # Storing large raster geometries in Parquet files
 
 !!!warning
-    Always convert the raster geometries to a well known format with the RS_AsXXX functions before saving them.
-    It is possible to save the raw bytes of the raster geometries, but they will be stored in an internal Sedona format that is not guaranteed to be stable across versions.
+Always convert the raster geometries to a well known format with the RS_AsXXX functions before saving them.
+It is possible to save the raw bytes of the raster geometries, but they will be stored in an internal Sedona format that is not guaranteed to be stable across versions.
 
 The default settings in Spark are not well suited for storing large binaries like raster geometries.
 It is very much worth the time to tune and benchmark your settings.

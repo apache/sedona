@@ -64,7 +64,7 @@ SedonaFlinkRegistrator.registerFunc(tableEnv);
 ```
 
 !!!warning
-	Sedona has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
+Sedona has a suite of well-written geometry and index serializers. Forgetting to enable these serializers will lead to high memory consumption.
 
 This function will register Sedona User Defined Type and User Defined Function
 
@@ -138,7 +138,7 @@ The output will be like this:
 ```
 
 !!!note
-	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL constructor API](../../api/flink/Constructor.md).
+SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL constructor API](../../api/flink/Constructor.md).
 
 ## Transform the Coordinate Reference System
 
@@ -158,7 +158,7 @@ The second EPSG code EPSG:3857 in `ST_Transform` is the target CRS of the geomet
 This `ST_Transform` transform the CRS of these geometries from EPSG:4326 to EPSG:3857. The details CRS information can be found on [EPSG.io](https://epsg.io/)
 
 !!!note
-	Read [SedonaSQL ST_Transform API](../../api/flink/Function.md#st_transform) to learn different spatial query predicates.
+Read [SedonaSQL ST_Transform API](../../api/flink/Function.md#st_transform) to learn different spatial query predicates.
 
 For example, a Table that has coordinates in the US will become like this.
 
@@ -219,7 +219,7 @@ geomTable.execute().print()
 ```
 
 !!!note
-	Read [SedonaSQL Predicate API](../../api/flink/Predicate.md) to learn different spatial query predicates.
+Read [SedonaSQL Predicate API](../../api/flink/Predicate.md) to learn different spatial query predicates.
 
 ## KNN query
 
@@ -240,7 +240,7 @@ geomTable.execute().print()
 
 ## Join query
 
-This equi-join leverages Flink's internal equi-join algorithm. You can opt to skip the Sedona refinement step  by sacrificing query accuracy. A running example is in [SQL example project](../demo.md).
+This equi-join leverages Flink's internal equi-join algorithm. You can opt to skip the Sedona refinement step by sacrificing query accuracy. A running example is in [SQL example project](../demo.md).
 
 Please use the following steps:
 
@@ -296,7 +296,7 @@ WHERE lcs.cellId = rcs.cellId AND ST_Contains(lcs.geom, rcs.geom)
 As you see, compared to the query in Step 2, we added one more filter, which is `ST_Contains`, to remove false positives. You can also use `ST_Intersects` and so on.
 
 !!!tip
-	You can skip this step if you don't need 100% accuracy and want faster query speed.
+You can skip this step if you don't need 100% accuracy and want faster query speed.
 
 ### 5. Optional: De-duplicate
 
@@ -319,7 +319,7 @@ GROUP BY (lcs_geom, rcs_geom)
 ```
 
 !!!note
-	If you are doing point-in-polygon join, this is not a problem, and you can safely discard this issue. This issue only happens when you do polygon-polygon, polygon-linestring, linestring-linestring join.
+If you are doing point-in-polygon join, this is not a problem, and you can safely discard this issue. This issue only happens when you do polygon-polygon, polygon-linestring, linestring-linestring join.
 
 ### S2 for distance join
 
@@ -426,7 +426,7 @@ The output will be
 
 ### Create Geometries using Sedona FormatUtils
 
-* Create a Geometry from a WKT string
+- Create a Geometry from a WKT string
 
 ```java
 import org.apache.sedona.common.utils.FormatUtils;
@@ -442,7 +442,7 @@ DataStream<Geometry> geometries = text.map(new MapFunction<String, Geometry>() {
         })
 ```
 
-* Create a Point from a String `1.1, 2.2`. Use `,` as the delimiter.
+- Create a Point from a String `1.1, 2.2`. Use `,` as the delimiter.
 
 ```java
 import org.apache.sedona.common.utils.FormatUtils;
@@ -458,7 +458,7 @@ DataStream<Geometry> geometries = text.map(new MapFunction<String, Geometry>() {
         })
 ```
 
-* Create a Polygon from a String `1.1, 1.1, 10.1, 10.1`. This is a rectangle with (1.1, 1.1) and (10.1, 10.1) as their min/max corners.
+- Create a Polygon from a String `1.1, 1.1, 10.1, 10.1`. This is a rectangle with (1.1, 1.1) and (10.1, 10.1) as their min/max corners.
 
 ```java
 import org.apache.sedona.common.utils.FormatUtils;

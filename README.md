@@ -22,20 +22,20 @@
 [![Scala and Java build](https://github.com/apache/sedona/actions/workflows/java.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/java.yml) [![Python build](https://github.com/apache/sedona/actions/workflows/python.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/python.yml) [![R build](https://github.com/apache/sedona/actions/workflows/r.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/r.yml) [![Docker image build](https://github.com/apache/sedona/actions/workflows/docker-build.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docker-build.yml) [![Example project build](https://github.com/apache/sedona/actions/workflows/example.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/example.yml) [![Docs build](https://github.com/apache/sedona/actions/workflows/docs.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docs.yml)
 
 | Download statistics        | **Maven**  | **PyPI**                                                                                                                                                                                                                                                                                                                                     | Conda-forge                                                                                                                                     | **CRAN**                                                                                                                                                                                                                                                                                                    | **DockerHub**                                                                                                                  |
-|----------------------------|------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| -------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | Apache Sedona              | 225k/month | [![PyPI - Downloads](https://img.shields.io/pypi/dm/apache-sedona)](https://pepy.tech/project/apache-sedona) [![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/apache-sedona) | [![Anaconda-Server Badge](https://anaconda.org/conda-forge/apache-sedona/badges/downloads.svg)](https://anaconda.org/conda-forge/apache-sedona) | [![CRAN monthly downloads](https://cranlogs.r-pkg.org/badges/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) [![Total CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) | [![Docker pulls](https://img.shields.io/docker/pulls/apache/sedona?color=brightgreen)](https://hub.docker.com/r/apache/sedona) |
 | Archived GeoSpark releases | 10k/month  | [![PyPI - Downloads](https://img.shields.io/pypi/dm/geospark)](https://pepy.tech/project/geospark)[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/geospark)                      |                                                                                                                                                 |                                                                                                                                                                                                                                                                                                             |                                                                                                                                |
 
-* [Join the community](#join-the-community)
-* [What is Apache Sedona?](#what-is-apache-sedona)
-  * [Features](#features)
-* [When to use Sedona?](#when-to-use-sedona)
-  * [Use Cases](#use-cases)
-  * [Code Example](#code-example)
-* [Docker image](#docker-image)
-* [Building Sedona](#building-sedona)
-* [Documentation](#documentation)
-* [Powered by](#powered-by)
+- [Join the community](#join-the-community)
+- [What is Apache Sedona?](#what-is-apache-sedona)
+  - [Features](#features)
+- [When to use Sedona?](#when-to-use-sedona)
+  - [Use Cases](#use-cases)
+  - [Code Example](#code-example)
+- [Docker image](#docker-image)
+- [Building Sedona](#building-sedona)
+- [Documentation](#documentation)
+- [Powered by](#powered-by)
 
 ## Join the community
 
@@ -49,26 +49,26 @@ Join the Sedona monthly community office hour: [Google Calendar](https://calenda
 
 [Sedona Mailing Lists](https://lists.apache.org/list.html?sedona.apache.org): [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org): project development, general questions or tutorials.
 
-* Please first subscribe and then post emails. To subscribe, please send an email (leave the subject and content blank) to dev-subscribe@sedona.apache.org
+- Please first subscribe and then post emails. To subscribe, please send an email (leave the subject and content blank) to dev-subscribe@sedona.apache.org
 
 ## What is Apache Sedona?
 
 Apache Sedona™ is a [spatial computing](https://en.wikipedia.org/wiki/Spatial_computing) engine that enables developers to easily process spatial data at any scale within modern cluster computing systems such as [Apache Spark](https://spark.apache.org/) and [Apache Flink](https://flink.apache.org/).
 Sedona developers can express their spatial data processing tasks in [Spatial SQL](https://carto.com/spatial-sql), [Spatial Python](https://docs.scipy.org/doc/scipy/reference/spatial.html) or [Spatial R](https://r-spatial.org/). Internally, Sedona provides spatial data loading, indexing, partitioning, and query processing/optimization functionality that enable users to efficiently analyze spatial data at any scale.
 
-![Sedona Ecosystem](docs/image/sedona-ecosystem.png "Sedona Ecosystem")
+![Sedona Ecosystem](docs/image/sedona-ecosystem.png 'Sedona Ecosystem')
 
 ### Features
 
 Some of the key features of Apache Sedona include:
 
-* Support for a wide range of geospatial data formats, including [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON), [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry), and [ESRI](https://www.esri.com) [Shapefile](https://en.wikipedia.org/wiki/Shapefile).
-* Scalable distributed processing of large vector and raster datasets.
-* Tools for spatial indexing, spatial querying, and spatial join operations.
-* Integration with popular geospatial Python tools such as [GeoPandas](https://geopandas.org).
-* Integration with popular big data tools, such as Spark, [Hadoop](https://hadoop.apache.org/), [Hive](https://hive.apache.org/), and Flink for data storage and querying.
-* A user-friendly API for working with geospatial data in the [SQL](https://en.wikipedia.org/wiki/SQL), [Python](https://www.python.org/), [Scala](https://www.scala-lang.org/) and [Java](https://www.java.com) languages.
-* Flexible deployment options, including standalone, local, and cluster modes.
+- Support for a wide range of geospatial data formats, including [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON), [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry), and [ESRI](https://www.esri.com) [Shapefile](https://en.wikipedia.org/wiki/Shapefile).
+- Scalable distributed processing of large vector and raster datasets.
+- Tools for spatial indexing, spatial querying, and spatial join operations.
+- Integration with popular geospatial Python tools such as [GeoPandas](https://geopandas.org).
+- Integration with popular big data tools, such as Spark, [Hadoop](https://hadoop.apache.org/), [Hive](https://hive.apache.org/), and Flink for data storage and querying.
+- A user-friendly API for working with geospatial data in the [SQL](https://en.wikipedia.org/wiki/SQL), [Python](https://www.python.org/), [Scala](https://www.scala-lang.org/) and [Java](https://www.java.com) languages.
+- Flexible deployment options, including standalone, local, and cluster modes.
 
 These are some of the key features of Apache Sedona, but it may offer additional capabilities depending on the specific version and configuration.
 
@@ -80,11 +80,11 @@ Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/g
 
 Apache Sedona is a widely used framework for working with spatial data, and it has many different use cases and applications. Some of the main use cases for Apache Sedona include:
 
-* Automotive data analytics: Apache Sedona is widely used in geospatial analytics applications, where it is used to perform spatial analysis and data mining on large and complex datasets collected from fleets.
-* Urban planning and development: Apache Sedona is commonly used in urban planning and development applications to analyze and visualize spatial data sets related to urban environments, such as land use, transportation networks, and population density.
-* Location-based services: Apache Sedona is often used in location-based services, such as mapping and navigation applications, where it is used to process and analyze spatial data to provide location-based information and services to users.
-* Environmental modeling and analysis: Apache Sedona is used in many different environmental modeling and analysis applications, where it is used to process and analyze spatial data related to environmental factors, such as air quality, water quality, and weather patterns.
-* Disaster response and management: Apache Sedona is used in disaster response and management applications to process and analyze spatial data related to disasters, such as floods, earthquakes, and other natural disasters, in order to support emergency response and recovery efforts.
+- Automotive data analytics: Apache Sedona is widely used in geospatial analytics applications, where it is used to perform spatial analysis and data mining on large and complex datasets collected from fleets.
+- Urban planning and development: Apache Sedona is commonly used in urban planning and development applications to analyze and visualize spatial data sets related to urban environments, such as land use, transportation networks, and population density.
+- Location-based services: Apache Sedona is often used in location-based services, such as mapping and navigation applications, where it is used to process and analyze spatial data to provide location-based information and services to users.
+- Environmental modeling and analysis: Apache Sedona is used in many different environmental modeling and analysis applications, where it is used to process and analyze spatial data related to environmental factors, such as air quality, water quality, and weather patterns.
+- Disaster response and management: Apache Sedona is used in disaster response and management applications to process and analyze spatial data related to disasters, such as floods, earthquakes, and other natural disasters, in order to support emergency response and recovery efforts.
 
 ### Code Example:
 
@@ -136,18 +136,18 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
 
 ## Building Sedona
 
-* To install the Python package:
+- To install the Python package:
 
   ```
   pip install apache-sedona
   ```
 
-* To compile the source code, please refer to [Sedona website](https://sedona.apache.org/latest-snapshot/setup/compile/)
+- To compile the source code, please refer to [Sedona website](https://sedona.apache.org/latest-snapshot/setup/compile/)
 
-* Modules in the source code
+- Modules in the source code
 
 | Name             | API                                      | Introduction                                           |
-|------------------|------------------------------------------|--------------------------------------------------------|
+| ---------------- | ---------------------------------------- | ------------------------------------------------------ |
 | common           | Java                                     | Core geometric operation logics, serialization, index  |
 | spark            | Spark RDD/DataFrame Scala/Java/SQL       | Distributed geospatial data processing on Apache Spark |
 | flink            | Flink DataStream/Table in Scala/Java/SQL | Distributed geospatial data processing on Apache Flink |
@@ -161,9 +161,9 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
 
 ## Documentation
 
-* [Spatial SQL in Sedona](https://sedona.apache.org/latest-snapshot/tutorial/sql/)
-* [Integrate with GeoPandas and Shapely](https://sedona.apache.org/latest-snapshot/tutorial/geopandas-shapely/)
-* [Working with Spatial R in Sedona](https://sedona.apache.org/latest-snapshot/api/rdocs/)
+- [Spatial SQL in Sedona](https://sedona.apache.org/latest-snapshot/tutorial/sql/)
+- [Integrate with GeoPandas and Shapely](https://sedona.apache.org/latest-snapshot/tutorial/geopandas-shapely/)
+- [Working with Spatial R in Sedona](https://sedona.apache.org/latest-snapshot/api/rdocs/)
 
 Please visit [Apache Sedona website](http://sedona.apache.org/) for detailed information
 

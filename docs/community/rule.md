@@ -31,9 +31,9 @@ It is important to confirm that your contribution is acceptable. You should crea
 
 Code contributions should include the following:
 
-* Detailed documentations on classes and methods.
-* Unit Tests to demonstrate code correctness and allow this to be maintained going forward. In the case of bug fixes the unit test should demonstrate the bug in the absence of the fix (if any). Unit Tests can be JUnit test or Scala test. Some Sedona functions need to be tested in both Scala and Java.
-* Updates on corresponding Sedona documentation if necessary.
+- Detailed documentations on classes and methods.
+- Unit Tests to demonstrate code correctness and allow this to be maintained going forward. In the case of bug fixes the unit test should demonstrate the bug in the absence of the fix (if any). Unit Tests can be JUnit test or Scala test. Some Sedona functions need to be tested in both Scala and Java.
+- Updates on corresponding Sedona documentation if necessary.
 
 Code contributions must include an Apache 2.0 license header at the top of each file.
 
@@ -43,12 +43,12 @@ Please run `mvn spotless:apply` to format the code before making a pull request.
 
 Documentation contributions should satisfy the following requirements:
 
-* Detailed explanation with examples.
-* Place a newly added document in a proper folder
-* Change the ==mkdocs.yml== if necessary
+- Detailed explanation with examples.
+- Place a newly added document in a proper folder
+- Change the ==mkdocs.yml== if necessary
 
 !!!note
-	Please read [Compile the source code](../setup/compile.md#compile-the-documentation) to learn how to compile Sedona website.
+Please read [Compile the source code](../setup/compile.md#compile-the-documentation) to learn how to compile Sedona website.
 
 ## Make a Pull Request
 
@@ -62,11 +62,11 @@ When a PR is submitted, GitHub Action will check the build correctness. Please c
 
 ## Review a Pull Request
 
-* Every PR requires (1) at least 1 approval from a committer and (2) no disapproval from a committer. Everyone is welcome to review a PR but only the committer can make the final decision.
-* Other reviewers, including community members and committers, may comment on the changes and suggest modifications. Changes can be added by simply pushing more commits to the same branch.
-* Lively, polite, rapid technical debate is encouraged from everyone in the community even if the outcome may be a rejection of the entire change.
-* Keep in mind that changes to more critical parts of Sedona, like Sedona core and spatial join algorithms, will be subjected to more review, and may require more testing and proof of its correctness than other changes.
-* Sometimes, other changes will be merged which conflict with your pull request’s changes. The PR can’t be merged until the conflict is resolved. This can be resolved by resolving the conflicts by hand, then pushing the result to your branch.
+- Every PR requires (1) at least 1 approval from a committer and (2) no disapproval from a committer. Everyone is welcome to review a PR but only the committer can make the final decision.
+- Other reviewers, including community members and committers, may comment on the changes and suggest modifications. Changes can be added by simply pushing more commits to the same branch.
+- Lively, polite, rapid technical debate is encouraged from everyone in the community even if the outcome may be a rejection of the entire change.
+- Keep in mind that changes to more critical parts of Sedona, like Sedona core and spatial join algorithms, will be subjected to more review, and may require more testing and proof of its correctness than other changes.
+- Sometimes, other changes will be merged which conflict with your pull request’s changes. The PR can’t be merged until the conflict is resolved. This can be resolved by resolving the conflicts by hand, then pushing the result to your branch.
 
 ## Code of Conduct
 

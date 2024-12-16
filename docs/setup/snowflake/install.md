@@ -1,4 +1,3 @@
-
 <!--
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,7 +18,7 @@
  -->
 
 !!! note
-    This tutorial is for you to manually install Sedona on Snowflake. If you want to use Sedona on Snowflake without manually installing it, you can use the free [SedonaSnow](https://app.snowflake.com/marketplace/listing/GZTYZF0RTY3/wherobots-sedonasnow) native app shipped by [Wherobots](https://wherobots.com/).
+This tutorial is for you to manually install Sedona on Snowflake. If you want to use Sedona on Snowflake without manually installing it, you can use the free [SedonaSnow](https://app.snowflake.com/marketplace/listing/GZTYZF0RTY3/wherobots-sedonasnow) native app shipped by [Wherobots](https://wherobots.com/).
 
 ## Prerequisites
 
@@ -51,8 +50,8 @@ You can refer to [Snowflake Documentation](https://docs.snowflake.com/en/sql-ref
 
 You will need to download the following 2 JAR files:
 
-* sedona-snowflake-{{ sedona.current_version }}.jar: [Sedona's Maven Central repository](https://central.sonatype.com/artifact/org.apache.sedona/sedona-snowflake/versions)
-* geotools-wrapper-{{ sedona.current_geotools }}.jar: [GeoTools-wrapper's Maven Central repository](https://central.sonatype.com/artifact/org.datasyslab/geotools-wrapper/versions)
+- sedona-snowflake-{{ sedona.current_version }}.jar: [Sedona's Maven Central repository](https://central.sonatype.com/artifact/org.apache.sedona/sedona-snowflake/versions)
+- geotools-wrapper-{{ sedona.current_geotools }}.jar: [GeoTools-wrapper's Maven Central repository](https://central.sonatype.com/artifact/org.datasyslab/geotools-wrapper/versions)
 
 Then you can upload the 2 JAR files to the stage created in the previous step.
 

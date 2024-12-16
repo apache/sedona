@@ -64,7 +64,7 @@ jobs:
           cache: true
           extra-packages: |
             any::pkgdown
-          working-directory : './R'
+          working-directory: './R'
       - run: Rscript -e 'pkgdown::build_site(pkg = "./R", preview = FALSE, override = list(destination = "../docs/api/rdocs"))'
       - run: git config --global user.name = "GitHub Action"
       - run: git config --global user.email = "test@abc.com"
