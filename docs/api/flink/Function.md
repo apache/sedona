@@ -166,26 +166,24 @@ Output: `POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))`
 
 ## ST_LabelPoint
 
-Introduction: `ST_LabelPoint` computes and returns a label point for a given polygon or geometry collection. The label point is chosen to:
+Introduction: `ST_LabelPoint` computes and returns a label point for a given polygon or geometry collection. The label point is chosen to be sufficiently far from boundaries of the geometry. For a regular Polygon this will be the
+centroid.
 
-- Be near the center of the polygon.
-- Stay far from boundaries for optimal placement.
+The algorithm is derived from Tippecanoe’s `polygon_to_anchor`, an approximate solution for label point generation, designed to be faster than optimal algorithms like `polylabel`. It searches for a “good enough” label point within a limited number of iterations. For geometry collections, only the largest Polygon by area is considered. While `ST_Centroid` is a fast algorithm to calculate the center of mass of a (Multi)Polygon, it may place the point outside of the Polygon or near a boundary for concave shapes, polygons with holes, or MultiPolygons.
 
-The algorithm is inspired by Tippecanoe’s `polygon_to_anchor`, an approximate solution for label point generation, designed to be faster than iterative algorithms like `polylabel`. It may not produce the globally optimal result, but it ensures a “good enough” label point within a limited number of iterations. For geometry collections, only the largest polygon by area is considered. While `ST_Centroid` is a fast algorithm to calculate the center of mass of a polygon, assuming uniform density, it may place the point outside the polygon or near a boundary, especially for irregular shapes or polygons with holes.
+`ST_LabelPoint` takes up to 3 arguments,
 
-`ST_LabelPoint` takes upto 3 arguments,
-
-- `geometry`: input geometry (e.g., a polygon or GeometryCollection) for which the anchor point is to be calculated.
-- `gridResolution` (Optional, default is 16): Controls the resolution of the search grid for refining the label point. A higher resolution increases the grid density, providing more accurate results but at the cost of additional computation. For example, a gridResolution of 16 divides the bounding box of the polygon into a 16x16 grid.
+- `geometry`: input geometry (e.g., a Polygon or GeometryCollection) for which the anchor point is to be calculated.
+- `gridResolution` (Optional, default is 16): Controls the resolution of the search grid for refining the label point. A higher resolution increases the grid density, providing a higher chance of finding a good enough result at the cost of runtime. For example, a gridResolution of 16 divides the bounding box of the polygon into a 16x16 grid.
 - `goodnessThreshold` (Optional, default is 0.2): Determines the minimum acceptable “goodness” value for the anchor point. Higher thresholds prioritize points farther from boundaries but may require more computation.
 
 !!!note
     - `ST_LabelPoint` throws an `IllegalArgumentException` if the input geometry has an area of zero or less.
-    - Holes within polygons are respected, and the anchor is always placed inside the outer boundary, not inside a hole.
-    - For GeometryCollection, only the largest polygon by area is considered.
+    - Holes within polygons are respected. Points within a hole are given a goodness of 0.
+    - For GeometryCollections, only the largest polygon by area is considered.
 
 !!!tip
-    - Use `ST_LabelPoint` for tasks such as label placement, identifying representative points for polygons, or other spatial analyses requiring an internal reference point.
+    - Use `ST_LabelPoint` for tasks such as label placement, identifying representative points for polygons, or other spatial analyses where an internal reference point is preferred but not required. If intersection of the point and the original geometry is required, use of an algorithm like `polylabel` should be considered.
     - `ST_LabelPoint` offers a faster, approximate solution for label point generation, making it ideal for large datasets or real-time applications.
 
 Format:
