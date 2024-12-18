@@ -83,7 +83,7 @@ public class TestFunctionsV2 extends TestBase {
   @Test
   public void test_ST_LabelPoint() {
     registerUDFV2("ST_LabelPoint", String.class, int.class, double.class);
-    registerUDFV2("ST_ReducePrecision", String.class, int.class)
+    registerUDFV2("ST_ReducePrecision", String.class, int.class);
     verifyGeometry(
         "SELECT ST_AsText(sedona.ST_ReducePrecision(sedona.ST_LabelPoint(ST_GeometryFromWKT('POLYGON ((-112.637484 33.440546, -112.546852 33.477209, -112.489177 33.550488, -112.41777 33.751684, -111.956371 33.719707, -111.766868 33.616843, -111.775107 33.527595, -111.640533 33.504695, -111.440044 33.463462, -111.415326 33.374055, -111.514197 33.309809, -111.643279 33.222542, -111.893203 33.174278, -111.96461 33.250109, -112.123903 33.261593, -112.252985 33.35341, -112.406784 33.346527, -112.667694 33.316695, -112.637484 33.440546))'), 2, 0.2), 4))",
         "POINT (-112.0428 33.4642)");
