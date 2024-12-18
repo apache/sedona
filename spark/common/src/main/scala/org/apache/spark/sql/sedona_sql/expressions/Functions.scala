@@ -35,6 +35,17 @@ import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.Utils
 
+case class ST_LabelPoint(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction1(Functions.labelPoint),
+      inferrableFunction2(Functions.labelPoint),
+      inferrableFunction3(Functions.labelPoint)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
  * Return the distance between two geometries.
  *

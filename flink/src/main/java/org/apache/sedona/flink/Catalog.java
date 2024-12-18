@@ -90,6 +90,7 @@ public class Catalog {
       new Functions.ST_GeometryType(),
       new Functions.ST_InterpolatePoint(),
       new Functions.ST_Intersection(),
+      new Functions.ST_LabelPoint(),
       new Functions.ST_Length(),
       new Functions.ST_Length2D(),
       new Functions.ST_LengthSpheroid(),

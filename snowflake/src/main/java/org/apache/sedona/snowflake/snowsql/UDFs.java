@@ -87,6 +87,23 @@ public class UDFs {
     return Functions.angle(GeometrySerde.deserialize(geom1), GeometrySerde.deserialize(geom2));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geom"})
+  public static byte[] ST_LabelPoint(byte[] geom) {
+    return GeometrySerde.serialize(Functions.labelPoint(GeometrySerde.deserialize(geom)));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geom", "gridResolution"})
+  public static byte[] ST_LabelPoint(byte[] geom, int gridResolution) {
+    return GeometrySerde.serialize(
+        Functions.labelPoint(GeometrySerde.deserialize(geom), gridResolution));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geom", "gridResolution", "goodnessThreshold"})
+  public static byte[] ST_LabelPoint(byte[] geom, int gridResolution, double goodnessThreshold) {
+    return GeometrySerde.serialize(
+        Functions.labelPoint(GeometrySerde.deserialize(geom), gridResolution, goodnessThreshold));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geom1", "geom2", "geom3"})
   public static double ST_Angle(byte[] geom1, byte[] geom2, byte[] geom3) {
     return Functions.angle(

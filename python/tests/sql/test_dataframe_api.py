@@ -268,6 +268,27 @@ test_configurations = [
         "LINESTRING (0 0, 1 1, 1 0, 2 0, 3 0, 4 0, 5 0)",
     ),
     (
+        stf.ST_LabelPoint,
+        ("geom",),
+        "triangle_geom",
+        "",
+        "POINT (0.6666666666666666 0.3333333333333333)",
+    ),
+    (
+        stf.ST_LabelPoint,
+        ("geom", 1),
+        "triangle_geom",
+        "",
+        "POINT (0.6666666666666666 0.3333333333333333)",
+    ),
+    (
+        stf.ST_LabelPoint,
+        ("geom", 1, 0.5),
+        "triangle_geom",
+        "",
+        "POINT (0.6666666666666666 0.3333333333333333)",
+    ),
+    (
         stf.ST_Angle,
         (
             "p1",
@@ -1287,6 +1308,7 @@ wrong_type_configurations = [
     (stf.ST_IsValidDetail, (None,)),
     (stf.ST_IsValid, (None,)),
     (stf.ST_IsValidReason, (None,)),
+    (stf.ST_LabelPoint, (None,)),
     (stf.ST_Length, (None,)),
     (stf.ST_Length2D, (None,)),
     (stf.ST_LineFromMultiPoint, (None,)),
