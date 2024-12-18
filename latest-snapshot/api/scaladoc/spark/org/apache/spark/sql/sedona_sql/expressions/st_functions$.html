@@ -643,6 +643,10 @@
                         <a href="ST_KNN.html" title="Test if leftGeometry is one of the k nearest neighbors (KNN) of rightGeometry based on approximate distance metric.">ST_KNN</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="ST_LabelPoint.html" title=""></a>
+                        <a href="ST_LabelPoint.html" title="">ST_LabelPoint</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="ST_Length.html" title="Return the length measurement of a Geometry"></a>
                         <a href="ST_Length.html" title="Return the length measurement of a Geometry">ST_Length</a>
                       </li><li class="current-entities indented6">
@@ -4795,6 +4799,102 @@
       </span>
       <span class="symbol">
         <span class="name">ST_IsValidTrajectory</span><span class="params">(<span name="geometry">geometry: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.st_functions#ST_LabelPoint" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_LabelPoint(geometry:String,gridResolution:Integer,goodnessThreshold:Double):org.apache.spark.sql.Column"></a><a id="ST_LabelPoint(String,Integer,Double):Column"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/st_functions$.html#ST_LabelPoint(geometry:String,gridResolution:Integer,goodnessThreshold:Double):org.apache.spark.sql.Column" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ST_LabelPoint</span><span class="params">(<span name="geometry">geometry: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="gridResolution">gridResolution: <span class="extype" name="java.lang.Integer">Integer</span></span>, <span name="goodnessThreshold">goodnessThreshold: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.st_functions#ST_LabelPoint" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_LabelPoint(geometry:org.apache.spark.sql.Column,gridResolution:org.apache.spark.sql.Column,goodnessThreshold:org.apache.spark.sql.Column):org.apache.spark.sql.Column"></a><a id="ST_LabelPoint(Column,Column,Column):Column"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/st_functions$.html#ST_LabelPoint(geometry:org.apache.spark.sql.Column,gridResolution:org.apache.spark.sql.Column,goodnessThreshold:org.apache.spark.sql.Column):org.apache.spark.sql.Column" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ST_LabelPoint</span><span class="params">(<span name="geometry">geometry: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>, <span name="gridResolution">gridResolution: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>, <span name="goodnessThreshold">goodnessThreshold: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.st_functions#ST_LabelPoint" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_LabelPoint(geometry:String,gridResolution:Integer):org.apache.spark.sql.Column"></a><a id="ST_LabelPoint(String,Integer):Column"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/st_functions$.html#ST_LabelPoint(geometry:String,gridResolution:Integer):org.apache.spark.sql.Column" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ST_LabelPoint</span><span class="params">(<span name="geometry">geometry: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="gridResolution">gridResolution: <span class="extype" name="java.lang.Integer">Integer</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.st_functions#ST_LabelPoint" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_LabelPoint(geometry:org.apache.spark.sql.Column,gridResolution:org.apache.spark.sql.Column):org.apache.spark.sql.Column"></a><a id="ST_LabelPoint(Column,Column):Column"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/st_functions$.html#ST_LabelPoint(geometry:org.apache.spark.sql.Column,gridResolution:org.apache.spark.sql.Column):org.apache.spark.sql.Column" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ST_LabelPoint</span><span class="params">(<span name="geometry">geometry: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>, <span name="gridResolution">gridResolution: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.st_functions#ST_LabelPoint" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_LabelPoint(geometry:String):org.apache.spark.sql.Column"></a><a id="ST_LabelPoint(String):Column"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/st_functions$.html#ST_LabelPoint(geometry:String):org.apache.spark.sql.Column" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ST_LabelPoint</span><span class="params">(<span name="geometry">geometry: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.st_functions#ST_LabelPoint" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ST_LabelPoint(geometry:org.apache.spark.sql.Column):org.apache.spark.sql.Column"></a><a id="ST_LabelPoint(Column):Column"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/st_functions$.html#ST_LabelPoint(geometry:org.apache.spark.sql.Column):org.apache.spark.sql.Column" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ST_LabelPoint</span><span class="params">(<span name="geometry">geometry: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
       </span>
       
       
