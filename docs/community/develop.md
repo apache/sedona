@@ -23,7 +23,7 @@
 
 ### IDE
 
-We recommend [Intellij IDEA](https://www.jetbrains.com/idea/) with Scala plugin installed. Please make sure that the IDE has JDK 1.8 set as project default.
+We recommend [Intellij IDEA](https://www.jetbrains.com/idea/) with Scala plugin installed. Please make sure that the Project has the SDK set to a JDK 1.8.
 
 ### Import the project
 
