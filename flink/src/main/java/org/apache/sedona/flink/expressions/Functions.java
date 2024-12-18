@@ -40,6 +40,33 @@ public class Functions {
     }
   }
 
+  public static class ST_LabelPoint extends ScalarFunction {
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.labelPoint(geom);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint("Integer") Integer gridResolution) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.labelPoint(geom, gridResolution);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint("Integer") Integer gridResolution,
+        @DataTypeHint("Double") Double goodnessThreshold) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.labelPoint(geom, gridResolution, goodnessThreshold);
+    }
+  }
+
   public static class ST_Area extends ScalarFunction {
     @DataTypeHint("Double")
     public Double eval(

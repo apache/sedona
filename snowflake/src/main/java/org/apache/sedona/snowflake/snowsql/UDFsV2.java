@@ -102,6 +102,29 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geom"},
+      argTypes = {"Geometry"})
+  public static String ST_LabelPoint(String geom) {
+    return GeometrySerde.serGeoJson(Functions.labelPoint(GeometrySerde.deserGeoJson(geom)));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geom", "gridResolution"},
+      argTypes = {"Geometry", "int"})
+  public static String ST_LabelPoint(String geom, int gridResolution) {
+    return GeometrySerde.serGeoJson(
+        Functions.labelPoint(GeometrySerde.deserGeoJson(geom), gridResolution));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geom", "gridResolution", "goodnessThreshold"},
+      argTypes = {"Geometry", "int", "double"})
+  public static String ST_LabelPoint(String geom, int gridResolution, double goodnessThreshold) {
+    return GeometrySerde.serGeoJson(
+        Functions.labelPoint(GeometrySerde.deserGeoJson(geom), gridResolution, goodnessThreshold));
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geom1", "geom2"},
       argTypes = {"Geometry", "Geometry"})
   public static double ST_Angle(String geom1, String geom2) {

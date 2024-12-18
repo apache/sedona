@@ -80,6 +80,123 @@ public class Functions {
     return geometry.getArea();
   }
 
+  public static Geometry labelPoint(Geometry geometry) {
+    return labelPoint(geometry, 16, 0.2);
+  }
+
+  public static Geometry labelPoint(Geometry geometry, int gridResolution) {
+    return labelPoint(geometry, gridResolution, 0.2);
+  }
+
+  public static Geometry labelPoint(
+      Geometry geometry, int gridResolution, double goodnessThreshold) {
+    if (geometry.getArea() <= 0) {
+      throw new IllegalArgumentException("Geometry must have a positive area");
+    }
+
+    GeometryFactory geometryFactory = new GeometryFactory();
+
+    // Find the largest polygon
+    Polygon largestPolygon = findLargestPolygon(geometry);
+
+    if (largestPolygon == null) {
+      throw new IllegalArgumentException("Geometry must contain at least one Polygon");
+    }
+
+    return polygonToLabel(largestPolygon, gridResolution, goodnessThreshold, geometryFactory);
+  }
+
+  private static Polygon findLargestPolygon(Geometry geometry) {
+    if (geometry instanceof Polygon) {
+      return (Polygon) geometry;
+    }
+
+    if (geometry instanceof GeometryCollection) {
+      GeometryCollection gc = (GeometryCollection) geometry;
+      Polygon largestPolygon = null;
+      double maxArea = Double.MIN_VALUE;
+
+      for (int i = 0; i < gc.getNumGeometries(); i++) {
+        Geometry subGeometry = gc.getGeometryN(i);
+        Polygon candidate = findLargestPolygon(subGeometry);
+
+        if (candidate != null && candidate.getArea() > maxArea) {
+          largestPolygon = candidate;
+          maxArea = candidate.getArea();
+        }
+      }
+      return largestPolygon;
+    }
+
+    return null;
+  }
+
+  private static Point polygonToLabel(
+      Polygon polygon,
+      int gridResolution,
+      double goodnessThreshold,
+      GeometryFactory geometryFactory) {
+    if (polygon.getArea() <= 0) {
+      throw new IllegalArgumentException("Polygon must have a positive area");
+    }
+
+    Envelope env = polygon.getEnvelopeInternal();
+    double xmin = env.getMinX();
+    double ymin = env.getMinY();
+    double xmax = env.getMaxX();
+    double ymax = env.getMaxY();
+
+    // Calculate step size based on grid resolution
+    double stepSizeX = (xmax - xmin) / gridResolution;
+    double stepSizeY = (ymax - ymin) / gridResolution;
+
+    Point centroid = polygon.getCentroid();
+    double radius = Math.sqrt(polygon.getArea() / Math.PI);
+    goodnessThreshold = radius * goodnessThreshold;
+
+    double bestGoodness = labelGoodness(polygon, centroid);
+
+    if (bestGoodness < goodnessThreshold) {
+      for (int x = 0; x < gridResolution; x++) {
+        for (int y = 0; y < gridResolution; y++) {
+          double candidateX = xmin + x * stepSizeX;
+          double candidateY = ymin + y * stepSizeY;
+          Point candidate = geometryFactory.createPoint(new Coordinate(candidateX, candidateY));
+
+          double candidateGoodness = labelGoodness(polygon, candidate);
+
+          if (candidateGoodness > bestGoodness) {
+            centroid = candidate;
+            bestGoodness = candidateGoodness;
+          }
+        }
+      }
+    }
+
+    return centroid;
+  }
+
+  private static double labelGoodness(Geometry geometry, Point point) {
+    if (!geometry.intersects(point)) {
+      return 0.0;
+    }
+
+    double closest = Double.POSITIVE_INFINITY;
+    Coordinate[] coordinates = geometry.getCoordinates();
+
+    for (Coordinate coord : coordinates) {
+      double dx = coord.x - point.getX();
+      double dy = coord.y - point.getY();
+      double distanceSquared = dx * dx + dy * dy;
+
+      if (distanceSquared < closest) {
+        closest = distanceSquared;
+      }
+    }
+
+    return Math.sqrt(closest);
+  }
+
   public static double azimuth(Geometry left, Geometry right) {
     Coordinate leftCoordinate = left.getCoordinate();
     Coordinate rightCoordinate = right.getCoordinate();

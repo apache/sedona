@@ -45,6 +45,22 @@ object st_functions extends DataFrameAPI {
   def ST_AddPoint(lineString: String, point: String, index: Int): Column =
     wrapExpression[ST_AddPoint](lineString, point, index)
 
+  def ST_LabelPoint(geometry: Column): Column =
+    wrapExpression[ST_LabelPoint](geometry)
+  def ST_LabelPoint(geometry: String): Column =
+    wrapExpression[ST_LabelPoint](geometry)
+  def ST_LabelPoint(geometry: Column, gridResolution: Column): Column =
+    wrapExpression[ST_LabelPoint](geometry, gridResolution)
+  def ST_LabelPoint(geometry: String, gridResolution: Integer): Column =
+    wrapExpression[ST_LabelPoint](geometry, gridResolution)
+  def ST_LabelPoint(geometry: Column, gridResolution: Column, goodnessThreshold: Column): Column =
+    wrapExpression[ST_LabelPoint](geometry, gridResolution, goodnessThreshold)
+  def ST_LabelPoint(
+      geometry: String,
+      gridResolution: Integer,
+      goodnessThreshold: Double): Column =
+    wrapExpression[ST_LabelPoint](geometry, gridResolution, goodnessThreshold)
+
   def ST_Area(geometry: Column): Column = wrapExpression[ST_Area](geometry)
   def ST_Area(geometry: String): Column = wrapExpression[ST_Area](geometry)
 
