@@ -113,7 +113,7 @@ jobs:
           echo "os-name=$OS_NAME" >> $GITHUB_OUTPUT
       - name: Cache Spark installations
         if: runner.os != 'Windows'
-        uses: actions/cache@master
+        uses: actions/cache@4
         with:
           path: ~/spark
           key: apache.sedona-apache-spark-${{ steps.os-name.outputs.os-name }}-${{ env.SPARK_VERSION }}
