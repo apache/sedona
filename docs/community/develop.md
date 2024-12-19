@@ -23,7 +23,7 @@
 
 ### IDE
 
-We recommend [Intellij IDEA](https://www.jetbrains.com/idea/) with Scala plugin installed. Please make sure that the IDE has JDK 1.8 set as project default.
+We recommend [Intellij IDEA](https://www.jetbrains.com/idea/) with Scala plugin installed. Please make sure that the Project has the SDK set to a JDK 1.8.
 
 ### Import the project
 
@@ -119,6 +119,18 @@ sun.misc.Unsafe
 You can fix this issue by disabling `Use '--release' option for cross-compilation` in the IDE settings.
 
 ![Disable "Use '--release' option for cross-compilation" when using Java 11](../image/ide-java-13.png)
+
+### Run Tests with Different Spark/Scala Versions
+
+If you want to test changes with different Spark/Scala versions, you can select the Spark and Scala profile in the Maven panel. Once you have selected the desired versions, reload the sedona-parent project. See picture below
+
+!!!Note
+    The profile change won't update the module names in the IDE. Don't be misled if a module still has a `-3.3-2.12` suffix in the name.
+
+!!!Note
+    Not all combinations of spark and scala versions are supported and so they will fail to compile.
+
+![Select Spark and Scala Profiles](../image/ide-java-14.png)
 
 ## Python developers
 
