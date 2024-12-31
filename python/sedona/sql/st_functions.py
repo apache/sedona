@@ -20,6 +20,7 @@ from functools import partial
 from typing import Optional, Union
 
 from pyspark.sql import Column
+from pyspark.sql.functions import lit
 
 from sedona.sql.dataframe_api import (
     ColumnOrName,
