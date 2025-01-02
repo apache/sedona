@@ -435,9 +435,9 @@
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="org.apache.sedona.stats.outlierDetection.LocalOutlierFactor#localOutlierFactor" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="localOutlierFactor(dataframe:org.apache.spark.sql.DataFrame,k:Int,geometry:String,handleTies:Boolean,useSpheroid:Boolean):org.apache.spark.sql.DataFrame"></a><a id="localOutlierFactor(DataFrame,Int,String,Boolean,Boolean):DataFrame"></a>
+      <a id="localOutlierFactor(dataframe:org.apache.spark.sql.DataFrame,k:Int,geometry:String,handleTies:Boolean,useSphere:Boolean,resultColumnName:String):org.apache.spark.sql.DataFrame"></a><a id="localOutlierFactor(DataFrame,Int,String,Boolean,Boolean,String):DataFrame"></a>
       <span class="permalink">
-      <a href="../../../../../org/apache/sedona/stats/outlierDetection/LocalOutlierFactor$.html#localOutlierFactor(dataframe:org.apache.spark.sql.DataFrame,k:Int,geometry:String,handleTies:Boolean,useSpheroid:Boolean):org.apache.spark.sql.DataFrame" title="Permalink">
+      <a href="../../../../../org/apache/sedona/stats/outlierDetection/LocalOutlierFactor$.html#localOutlierFactor(dataframe:org.apache.spark.sql.DataFrame,k:Int,geometry:String,handleTies:Boolean,useSphere:Boolean,resultColumnName:String):org.apache.spark.sql.DataFrame" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -446,7 +446,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">localOutlierFactor</span><span class="params">(<span name="dataframe">dataframe: <a href="../../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">20</span></span>, <span name="geometry">geometry: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="handleTies">handleTies: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="useSpheroid">useSpheroid: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <a href="../../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>
+        <span class="name">localOutlierFactor</span><span class="params">(<span name="dataframe">dataframe: <a href="../../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">20</span></span>, <span name="geometry">geometry: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="handleTies">handleTies: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="useSphere">useSphere: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="resultColumnName">resultColumnName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;lof&quot;</span></span>)</span><span class="result">: <a href="../../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>
       </span>
       
       <p class="shortcomment cmt">Annotates a dataframe with a column containing the local outlier factor for each data record.</p><div class="fullcomment"><div class="comment cmt"><p>Annotates a dataframe with a column containing the local outlier factor for each data record.
@@ -458,8 +458,9 @@ column name must be provided.
   dataframe containing the point geometries</p></dd><dt class="param">k</dt><dd class="cmt"><p>
   number of nearest neighbors that will be considered for the LOF calculation</p></dd><dt class="param">geometry</dt><dd class="cmt"><p>
   name of the geometry column</p></dd><dt class="param">handleTies</dt><dd class="cmt"><p>
-  whether to handle ties in the k-distance calculation. Default is false</p></dd><dt class="param">useSpheroid</dt><dd class="cmt"><p>
-  whether to use a cartesian or spheroidal distance calculation. Default is false</p></dd><dt>returns</dt><dd class="cmt"><p>
+  whether to handle ties in the k-distance calculation. Default is false</p></dd><dt class="param">useSphere</dt><dd class="cmt"><p>
+  whether to use a cartesian or spheroidal distance calculation. Default is false</p></dd><dt class="param">resultColumnName</dt><dd class="cmt"><p>
+  the name of the column containing the lof for each row. Default is &quot;lof&quot;</p></dd><dt>returns</dt><dd class="cmt"><p>
   A DataFrame containing the lof for each row</p></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>

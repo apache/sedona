@@ -327,9 +327,9 @@
               
         </dd></dl></div>
     </li><li name="org.apache.sedona.stats.clustering.DBSCAN#dbscan" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="dbscan(dataframe:org.apache.spark.sql.DataFrame,epsilon:Double,minPts:Int,geometry:String,includeOutliers:Boolean,useSpheroid:Boolean):org.apache.spark.sql.DataFrame"></a><a id="dbscan(DataFrame,Double,Int,String,Boolean,Boolean):DataFrame"></a>
+      <a id="dbscan(dataframe:org.apache.spark.sql.DataFrame,epsilon:Double,minPts:Int,geometry:String,includeOutliers:Boolean,useSpheroid:Boolean,isCoreColumnName:String,clusterColumnName:String):org.apache.spark.sql.DataFrame"></a><a id="dbscan(DataFrame,Double,Int,String,Boolean,Boolean,String,String):DataFrame"></a>
       <span class="permalink">
-      <a href="../../../../../org/apache/sedona/stats/clustering/DBSCAN$.html#dbscan(dataframe:org.apache.spark.sql.DataFrame,epsilon:Double,minPts:Int,geometry:String,includeOutliers:Boolean,useSpheroid:Boolean):org.apache.spark.sql.DataFrame" title="Permalink">
+      <a href="../../../../../org/apache/sedona/stats/clustering/DBSCAN$.html#dbscan(dataframe:org.apache.spark.sql.DataFrame,epsilon:Double,minPts:Int,geometry:String,includeOutliers:Boolean,useSpheroid:Boolean,isCoreColumnName:String,clusterColumnName:String):org.apache.spark.sql.DataFrame" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -338,7 +338,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">dbscan</span><span class="params">(<span name="dataframe">dataframe: <a href="../../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>, <span name="epsilon">epsilon: <span class="extype" name="scala.Double">Double</span></span>, <span name="minPts">minPts: <span class="extype" name="scala.Int">Int</span></span>, <span name="geometry">geometry: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="includeOutliers">includeOutliers: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="useSpheroid">useSpheroid: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <a href="../../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>
+        <span class="name">dbscan</span><span class="params">(<span name="dataframe">dataframe: <a href="../../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>, <span name="epsilon">epsilon: <span class="extype" name="scala.Double">Double</span></span>, <span name="minPts">minPts: <span class="extype" name="scala.Int">Int</span></span>, <span name="geometry">geometry: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="includeOutliers">includeOutliers: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="useSpheroid">useSpheroid: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="isCoreColumnName">isCoreColumnName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;isCore&quot;</span></span>, <span name="clusterColumnName">clusterColumnName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;cluster&quot;</span></span>)</span><span class="result">: <a href="../../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>
       </span>
       
       <p class="shortcomment cmt">Annotates a dataframe with a cluster label for each data record using the DBSCAN algorithm.</p><div class="fullcomment"><div class="comment cmt"><p>Annotates a dataframe with a cluster label for each data record using the DBSCAN algorithm.
@@ -352,7 +352,10 @@ column name must be provided. The new column will be named 'cluster'.
   minimum number of points parameter of DBSCAN algorithm</p></dd><dt class="param">geometry</dt><dd class="cmt"><p>
   name of the geometry column</p></dd><dt class="param">includeOutliers</dt><dd class="cmt"><p>
   whether to include outliers in the output. Default is false</p></dd><dt class="param">useSpheroid</dt><dd class="cmt"><p>
-  whether to use a cartesian or spheroidal distance calculation. Default is false</p></dd><dt>returns</dt><dd class="cmt"><p>
+  whether to use a cartesian or spheroidal distance calculation. Default is false</p></dd><dt class="param">isCoreColumnName</dt><dd class="cmt"><p>
+  what the name of the column indicating if this is a core point should be. Default is
+  &quot;isCore&quot;</p></dd><dt class="param">clusterColumnName</dt><dd class="cmt"><p>
+  what the name of the column indicating the cluster id should be. Default is &quot;cluster&quot;</p></dd><dt>returns</dt><dd class="cmt"><p>
   The input DataFrame with the cluster label added to each row. Outlier will have a cluster
   value of -1 if included.</p></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">

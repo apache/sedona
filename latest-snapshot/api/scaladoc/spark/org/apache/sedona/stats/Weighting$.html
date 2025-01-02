@@ -319,9 +319,9 @@
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="org.apache.sedona.stats.Weighting#addBinaryDistanceBandColumn" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="addBinaryDistanceBandColumn(dataframe:org.apache.spark.sql.DataFrame,threshold:Double,includeZeroDistanceNeighbors:Boolean,includeSelf:Boolean,geometry:String,useSpheroid:Boolean):org.apache.spark.sql.DataFrame"></a><a id="addBinaryDistanceBandColumn(DataFrame,Double,Boolean,Boolean,String,Boolean):DataFrame"></a>
+      <a id="addBinaryDistanceBandColumn(dataframe:org.apache.spark.sql.DataFrame,threshold:Double,includeZeroDistanceNeighbors:Boolean,includeSelf:Boolean,geometry:String,useSpheroid:Boolean,savedAttributes:Seq[String],resultName:String):org.apache.spark.sql.DataFrame"></a><a id="addBinaryDistanceBandColumn(DataFrame,Double,Boolean,Boolean,String,Boolean,Seq[String],String):DataFrame"></a>
       <span class="permalink">
-      <a href="../../../../org/apache/sedona/stats/Weighting$.html#addBinaryDistanceBandColumn(dataframe:org.apache.spark.sql.DataFrame,threshold:Double,includeZeroDistanceNeighbors:Boolean,includeSelf:Boolean,geometry:String,useSpheroid:Boolean):org.apache.spark.sql.DataFrame" title="Permalink">
+      <a href="../../../../org/apache/sedona/stats/Weighting$.html#addBinaryDistanceBandColumn(dataframe:org.apache.spark.sql.DataFrame,threshold:Double,includeZeroDistanceNeighbors:Boolean,includeSelf:Boolean,geometry:String,useSpheroid:Boolean,savedAttributes:Seq[String],resultName:String):org.apache.spark.sql.DataFrame" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -330,7 +330,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addBinaryDistanceBandColumn</span><span class="params">(<span name="dataframe">dataframe: <a href="../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>, <span name="threshold">threshold: <span class="extype" name="scala.Double">Double</span></span>, <span name="includeZeroDistanceNeighbors">includeZeroDistanceNeighbors: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="includeSelf">includeSelf: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="geometry">geometry: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="useSpheroid">useSpheroid: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <a href="../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>
+        <span class="name">addBinaryDistanceBandColumn</span><span class="params">(<span name="dataframe">dataframe: <a href="../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>, <span name="threshold">threshold: <span class="extype" name="scala.Double">Double</span></span>, <span name="includeZeroDistanceNeighbors">includeZeroDistanceNeighbors: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="includeSelf">includeSelf: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="geometry">geometry: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="useSpheroid">useSpheroid: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="savedAttributes">savedAttributes: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">null</span></span>, <span name="resultName">resultName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;weights&quot;</span></span>)</span><span class="result">: <a href="../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>
       </span>
       
       <p class="shortcomment cmt">Annotates a dataframe with a weights column for each data record containing the other members
@@ -347,13 +347,15 @@ provided. The new column will be named 'cluster'.
   binary is false, values are infinity as per the floating point spec (divide by 0)</p></dd><dt class="param">includeSelf</dt><dd class="cmt"><p>
   whether to include self in the list of neighbors</p></dd><dt class="param">geometry</dt><dd class="cmt"><p>
   name of the geometry column</p></dd><dt class="param">useSpheroid</dt><dd class="cmt"><p>
-  whether to use a cartesian or spheroidal distance calculation. Default is false</p></dd><dt>returns</dt><dd class="cmt"><p>
+  whether to use a cartesian or spheroidal distance calculation. Default is false</p></dd><dt class="param">savedAttributes</dt><dd class="cmt"><p>
+  the attributes to save in the neighbor column. Default is all columns.</p></dd><dt class="param">resultName</dt><dd class="cmt"><p>
+  the name of the resulting column. Default is 'weights'.</p></dd><dt>returns</dt><dd class="cmt"><p>
   The input DataFrame with a weight column added containing neighbors and their weights
   (always 1) added to each row.</p></dd></dl></div>
     </li><li name="org.apache.sedona.stats.Weighting#addDistanceBandColumn" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="addDistanceBandColumn(dataframe:org.apache.spark.sql.DataFrame,threshold:Double,binary:Boolean,alpha:Double,includeZeroDistanceNeighbors:Boolean,includeSelf:Boolean,selfWeight:Double,geometry:String,useSpheroid:Boolean):org.apache.spark.sql.DataFrame"></a><a id="addDistanceBandColumn(DataFrame,Double,Boolean,Double,Boolean,Boolean,Double,String,Boolean):DataFrame"></a>
+      <a id="addDistanceBandColumn(dataframe:org.apache.spark.sql.DataFrame,threshold:Double,binary:Boolean,alpha:Double,includeZeroDistanceNeighbors:Boolean,includeSelf:Boolean,selfWeight:Double,geometry:String,useSpheroid:Boolean,savedAttributes:Seq[String],resultName:String):org.apache.spark.sql.DataFrame"></a><a id="addDistanceBandColumn(DataFrame,Double,Boolean,Double,Boolean,Boolean,Double,String,Boolean,Seq[String],String):DataFrame"></a>
       <span class="permalink">
-      <a href="../../../../org/apache/sedona/stats/Weighting$.html#addDistanceBandColumn(dataframe:org.apache.spark.sql.DataFrame,threshold:Double,binary:Boolean,alpha:Double,includeZeroDistanceNeighbors:Boolean,includeSelf:Boolean,selfWeight:Double,geometry:String,useSpheroid:Boolean):org.apache.spark.sql.DataFrame" title="Permalink">
+      <a href="../../../../org/apache/sedona/stats/Weighting$.html#addDistanceBandColumn(dataframe:org.apache.spark.sql.DataFrame,threshold:Double,binary:Boolean,alpha:Double,includeZeroDistanceNeighbors:Boolean,includeSelf:Boolean,selfWeight:Double,geometry:String,useSpheroid:Boolean,savedAttributes:Seq[String],resultName:String):org.apache.spark.sql.DataFrame" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -362,7 +364,7 @@ provided. The new column will be named 'cluster'.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addDistanceBandColumn</span><span class="params">(<span name="dataframe">dataframe: <a href="../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>, <span name="threshold">threshold: <span class="extype" name="scala.Double">Double</span></span>, <span name="binary">binary: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="alpha">alpha: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">-1.0</span></span>, <span name="includeZeroDistanceNeighbors">includeZeroDistanceNeighbors: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="includeSelf">includeSelf: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="selfWeight">selfWeight: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">1.0</span></span>, <span name="geometry">geometry: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="useSpheroid">useSpheroid: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <a href="../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>
+        <span class="name">addDistanceBandColumn</span><span class="params">(<span name="dataframe">dataframe: <a href="../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>, <span name="threshold">threshold: <span class="extype" name="scala.Double">Double</span></span>, <span name="binary">binary: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="alpha">alpha: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">-1.0</span></span>, <span name="includeZeroDistanceNeighbors">includeZeroDistanceNeighbors: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="includeSelf">includeSelf: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="selfWeight">selfWeight: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">1.0</span></span>, <span name="geometry">geometry: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="useSpheroid">useSpheroid: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="savedAttributes">savedAttributes: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">null</span></span>, <span name="resultName">resultName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;weights&quot;</span></span>)</span><span class="result">: <a href="../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>
       </span>
       
       <p class="shortcomment cmt">Annotates a dataframe with a weights column for each data record containing the other members
@@ -382,9 +384,47 @@ neither is named 'geometry', the column name must be provided. The new column wi
   whether to include self in the list of neighbors</p></dd><dt class="param">selfWeight</dt><dd class="cmt"><p>
   the value to use for the self weight</p></dd><dt class="param">geometry</dt><dd class="cmt"><p>
   name of the geometry column</p></dd><dt class="param">useSpheroid</dt><dd class="cmt"><p>
-  whether to use a cartesian or spheroidal distance calculation. Default is false</p></dd><dt>returns</dt><dd class="cmt"><p>
+  whether to use a cartesian or spheroidal distance calculation. Default is false</p></dd><dt class="param">savedAttributes</dt><dd class="cmt"><p>
+  the attributes to save in the neighbor column. Default is all columns.</p></dd><dt class="param">resultName</dt><dd class="cmt"><p>
+  the name of the resulting column. Default is 'weights'.</p></dd><dt>returns</dt><dd class="cmt"><p>
   The input DataFrame with a weight column added containing neighbors and their weights added
   to each row.</p></dd></dl></div>
+    </li><li name="org.apache.sedona.stats.Weighting#addWeightedDistanceBandColumn" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addWeightedDistanceBandColumn(dataframe:org.apache.spark.sql.DataFrame,threshold:Double,alpha:Double,includeZeroDistanceNeighbors:Boolean,includeSelf:Boolean,selfWeight:Double,geometry:String,useSpheroid:Boolean,savedAttributes:Seq[String],resultName:String):org.apache.spark.sql.DataFrame"></a><a id="addWeightedDistanceBandColumn(DataFrame,Double,Double,Boolean,Boolean,Double,String,Boolean,Seq[String],String):DataFrame"></a>
+      <span class="permalink">
+      <a href="../../../../org/apache/sedona/stats/Weighting$.html#addWeightedDistanceBandColumn(dataframe:org.apache.spark.sql.DataFrame,threshold:Double,alpha:Double,includeZeroDistanceNeighbors:Boolean,includeSelf:Boolean,selfWeight:Double,geometry:String,useSpheroid:Boolean,savedAttributes:Seq[String],resultName:String):org.apache.spark.sql.DataFrame" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addWeightedDistanceBandColumn</span><span class="params">(<span name="dataframe">dataframe: <a href="../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>, <span name="threshold">threshold: <span class="extype" name="scala.Double">Double</span></span>, <span name="alpha">alpha: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">-1.0</span></span>, <span name="includeZeroDistanceNeighbors">includeZeroDistanceNeighbors: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="includeSelf">includeSelf: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="selfWeight">selfWeight: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">1.0</span></span>, <span name="geometry">geometry: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="useSpheroid">useSpheroid: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="savedAttributes">savedAttributes: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">null</span></span>, <span name="resultName">resultName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;weights&quot;</span></span>)</span><span class="result">: <a href="../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Annotates a dataframe with a weights column for each data record containing the other members
+within the threshold and their weight.</p><div class="fullcomment"><div class="comment cmt"><p>Annotates a dataframe with a weights column for each data record containing the other members
+within the threshold and their weight. Weights will be dist^alpha. The dataframe should
+contain at least one GeometryType column. Rows must be unique. If one geometry column is
+present it will be used automatically. If two are present, the one named 'geometry' will be
+used. If more than one are present and neither is named 'geometry', the column name must be
+provided. The new column will be named 'cluster'.
+</p></div><dl class="paramcmts block"><dt class="param">dataframe</dt><dd class="cmt"><p>
+  DataFrame with geometry column</p></dd><dt class="param">threshold</dt><dd class="cmt"><p>
+  Distance threshold for considering neighbors</p></dd><dt class="param">alpha</dt><dd class="cmt"><p>
+  alpha to use for inverse distance weights. Computation is dist^alpha. Default is -1.0</p></dd><dt class="param">includeZeroDistanceNeighbors</dt><dd class="cmt"><p>
+  whether to include neighbors that are 0 distance. If 0 distance neighbors are included and
+  binary is false, values are infinity as per the floating point spec (divide by 0)</p></dd><dt class="param">includeSelf</dt><dd class="cmt"><p>
+  whether to include self in the list of neighbors</p></dd><dt class="param">selfWeight</dt><dd class="cmt"><p>
+  the weight to provide for the self as its own neighbor. Default is 1.0</p></dd><dt class="param">geometry</dt><dd class="cmt"><p>
+  name of the geometry column</p></dd><dt class="param">useSpheroid</dt><dd class="cmt"><p>
+  whether to use a cartesian or spheroidal distance calculation. Default is false</p></dd><dt class="param">savedAttributes</dt><dd class="cmt"><p>
+  the attributes to save in the neighbor column. Default is all columns.</p></dd><dt class="param">resultName</dt><dd class="cmt"><p>
+  the name of the resulting column. Default is 'weights'.</p></dd><dt>returns</dt><dd class="cmt"><p>
+  The input DataFrame with a weight column added containing neighbors and their weights
+  (dist^alpha) added to each row.</p></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
