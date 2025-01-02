@@ -582,6 +582,10 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
       return Nil
     }
 
+    // validate the k value
+    val kValue: Int = distance.eval().asInstanceOf[Int]
+    require(kValue >= 1, "The number of neighbors (k) must be equal or greater than 1.")
+
     val leftShape = children.head
     val rightShape = children.tail.head
 
@@ -711,6 +715,10 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
 
     if (spatialPredicate == SpatialPredicate.KNN) {
       {
+        // validate the k value for KNN join
+        val kValue: Int = distance.get.eval().asInstanceOf[Int]
+        require(kValue >= 1, "The number of neighbors (k) must be equal or greater than 1.")
+
         val leftShape = children.head
         val rightShape = children.tail.head
 

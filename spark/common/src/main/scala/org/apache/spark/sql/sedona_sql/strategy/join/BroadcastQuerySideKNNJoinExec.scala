@@ -127,7 +127,7 @@ case class BroadcastQuerySideKNNJoinExec(
       sedonaConf: SedonaConf): Unit = {
     require(numPartitions > 0, "The number of partitions must be greater than 0.")
     val kValue: Int = this.k.eval().asInstanceOf[Int]
-    require(kValue > 0, "The number of neighbors must be greater than 0.")
+    require(kValue >= 1, "The number of neighbors (k) must be equal or greater than 1.")
     objectsShapes.setNeighborSampleNumber(kValue)
 
     val joinPartitions: Integer = numPartitions
