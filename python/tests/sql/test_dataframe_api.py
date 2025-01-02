@@ -1714,3 +1714,19 @@ class TestDataFrameAPI(TestBase):
             match=f"Incorrect argument type: [A-Za-z_0-9]+ for {func.__name__} should be [A-Za-z0-9\\[\\]_, ]+ but received [A-Za-z0-9_]+.",
         ):
             func(*args)
+
+    def test_dbscan(self):
+        df = self.spark.createDataFrame([{"id": 1, "x": 2, "y": 3}]).withColumn(
+            "geometry", f.expr("ST_Point(x, y)")
+        )
+
+        df.withColumn("dbscan", ST_DBSCAN("geometry", 1.0, 2, False)).collect()
+
+    def test_lof(self):
+        df = self.spark.createDataFrame([{"id": 1, "x": 2, "y": 3}]).withColumn(
+            "geometry", f.expr("ST_Point(x, y)")
+        )
+
+        df.withColumn(
+            "localOutlierFactor", ST_LocalOutlierFactor("geometry", 2, False)
+        ).collect()
