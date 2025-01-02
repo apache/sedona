@@ -34,6 +34,8 @@ def dbscan(
     geometry: Optional[str] = None,
     include_outliers: bool = True,
     use_spheroid=False,
+    is_core_column_name="isCore",
+    cluster_column_name="cluster",
 ):
     """Annotates a dataframe with a cluster label for each data record using the DBSCAN algorithm.
 
@@ -49,6 +51,8 @@ def dbscan(
         include_outliers: whether to return outlier points. If True, outliers are returned with a cluster value of -1.
             Default is False
         use_spheroid: whether to use a cartesian or spheroidal distance calculation. Default is false
+        is_core_column_name: what the name of the column indicating if this is a core point should be. Default is "isCore"
+        cluster_column_name: what the name of the column indicating the cluster id should be. Default is "cluster"
 
     Returns:
         A PySpark DataFrame containing the cluster label for each row
@@ -62,6 +66,8 @@ def dbscan(
         geometry,
         include_outliers,
         use_spheroid,
+        is_core_column_name,
+        cluster_column_name,
     )
 
     return DataFrame(result_df, sedona)

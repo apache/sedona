@@ -54,6 +54,10 @@ object Weighting {
    *   name of the geometry column
    * @param useSpheroid
    *   whether to use a cartesian or spheroidal distance calculation. Default is false
+   * @param savedAttributes
+   *   the attributes to save in the neighbor column. Default is all columns.
+   * @param resultName
+   *   the name of the resulting column. Default is 'weights'.
    * @return
    *   The input DataFrame with a weight column added containing neighbors and their weights added
    *   to each row.
@@ -67,7 +71,9 @@ object Weighting {
       includeSelf: Boolean = false,
       selfWeight: Double = 1.0,
       geometry: String = null,
-      useSpheroid: Boolean = false): DataFrame = {
+      useSpheroid: Boolean = false,
+      savedAttributes: Seq[String] = null,
+      resultName: String = "weights"): DataFrame = {
 
     require(threshold >= 0, "Threshold must be greater than or equal to 0")
     require(alpha < 0, "Alpha must be less than 0")
@@ -80,6 +86,12 @@ object Weighting {
           s"Geometry column $geometry not found in dataframe")
         geometry
     }
+
+    // Always include the geometry column in the saved attributes
+    val savedAttributesWithGeom =
+      if (savedAttributes == null) null
+      else if (!savedAttributes.contains(geometryColumn)) savedAttributes :+ geometryColumn
+      else savedAttributes
 
     val distanceFunction: (Column, Column) => Column =
       if (useSpheroid) ST_DistanceSpheroid else ST_Distance
@@ -96,14 +108,6 @@ object Weighting {
 
     val formattedDataFrame = dataframe.withColumn(ID_COLUMN, sha2(to_json(struct("*")), 256))
 
-    // Since spark 3.0 doesn't support dropFields, we need a work around
-    val withoutId = (prefix: String, colFunc: String => Column) => {
-      formattedDataFrame.schema.fields
-        .map(_.name)
-        .filter(name => name != ID_COLUMN)
-        .map(x => colFunc(prefix + "." + x).alias(x))
-    }
-
     formattedDataFrame
       .alias("l")
       .join(
@@ -116,7 +120,13 @@ object Weighting {
         col(s"l.$ID_COLUMN"),
         struct("l.*").alias("left_contents"),
         struct(
-          struct(withoutId("r", col): _*).alias("neighbor"),
+          (
+            savedAttributesWithGeom match {
+              case null => struct(col("r.*")).dropFields(ID_COLUMN)
+              case _ =>
+                struct(savedAttributesWithGeom.map(c => col(s"r.$c")): _*)
+            }
+          ).alias("neighbor"),
           if (!binary)
             pow(distanceFunction(col(s"l.$geometryColumn"), col(s"r.$geometryColumn")), alpha)
               .alias("value")
@@ -127,14 +137,18 @@ object Weighting {
         concat(
           collect_list(col("weight")),
           if (includeSelf)
-            array(
-              struct(
-                struct(withoutId("left_contents", first): _*).alias("neighbor"),
-                lit(selfWeight).alias("value")))
-          else array()).alias("weights"))
-      .select("left_contents.*", "weights")
+            array(struct(
+              (savedAttributesWithGeom match {
+                case null => first("left_contents").dropFields(ID_COLUMN)
+                case _ =>
+                  struct(
+                    savedAttributesWithGeom.map(c => first(s"left_contents.$c").alias(c)): _*)
+              }).alias("neighbor"),
+              lit(selfWeight).alias("value")))
+          else array()).alias(resultName))
+      .select("left_contents.*", resultName)
       .drop(ID_COLUMN)
-      .withColumn("weights", filter(col("weights"), _(f"neighbor")(geometryColumn).isNotNull))
+      .withColumn(resultName, filter(col(resultName), _(f"neighbor")(geometryColumn).isNotNull))
   }
 
   /**
@@ -158,6 +172,10 @@ object Weighting {
    *   name of the geometry column
    * @param useSpheroid
    *   whether to use a cartesian or spheroidal distance calculation. Default is false
+   * @param savedAttributes
+   *   the attributes to save in the neighbor column. Default is all columns.
+   * @param resultName
+   *   the name of the resulting column. Default is 'weights'.
    * @return
    *   The input DataFrame with a weight column added containing neighbors and their weights
    *   (always 1) added to each row.
@@ -168,13 +186,73 @@ object Weighting {
       includeZeroDistanceNeighbors: Boolean = true,
       includeSelf: Boolean = false,
       geometry: String = null,
-      useSpheroid: Boolean = false): DataFrame = addDistanceBandColumn(
+      useSpheroid: Boolean = false,
+      savedAttributes: Seq[String] = null,
+      resultName: String = "weights"): DataFrame = addDistanceBandColumn(
     dataframe,
     threshold,
     binary = true,
     includeZeroDistanceNeighbors = includeZeroDistanceNeighbors,
     includeSelf = includeSelf,
     geometry = geometry,
-    useSpheroid = useSpheroid)
+    useSpheroid = useSpheroid,
+    savedAttributes = savedAttributes,
+    resultName = resultName)
+
+  /**
+   * Annotates a dataframe with a weights column for each data record containing the other members
+   * within the threshold and their weight. Weights will be dist^alpha. The dataframe should
+   * contain at least one GeometryType column. Rows must be unique. If one geometry column is
+   * present it will be used automatically. If two are present, the one named 'geometry' will be
+   * used. If more than one are present and neither is named 'geometry', the column name must be
+   * provided. The new column will be named 'cluster'.
+   *
+   * @param dataframe
+   *   DataFrame with geometry column
+   * @param threshold
+   *   Distance threshold for considering neighbors
+   * @param alpha
+   *   alpha to use for inverse distance weights. Computation is dist^alpha. Default is -1.0
+   * @param includeZeroDistanceNeighbors
+   *   whether to include neighbors that are 0 distance. If 0 distance neighbors are included and
+   *   binary is false, values are infinity as per the floating point spec (divide by 0)
+   * @param includeSelf
+   *   whether to include self in the list of neighbors
+   * @param selfWeight
+   *   the weight to provide for the self as its own neighbor. Default is 1.0
+   * @param geometry
+   *   name of the geometry column
+   * @param useSpheroid
+   *   whether to use a cartesian or spheroidal distance calculation. Default is false
+   * @param savedAttributes
+   *   the attributes to save in the neighbor column. Default is all columns.
+   * @param resultName
+   *   the name of the resulting column. Default is 'weights'.
+   * @return
+   *   The input DataFrame with a weight column added containing neighbors and their weights
+   *   (dist^alpha) added to each row.
+   */
+  def addWeightedDistanceBandColumn(
+      dataframe: DataFrame,
+      threshold: Double,
+      alpha: Double = -1.0,
+      includeZeroDistanceNeighbors: Boolean = false,
+      includeSelf: Boolean = false,
+      selfWeight: Double = 1.0,
+      geometry: String = null,
+      useSpheroid: Boolean = false,
+      savedAttributes: Seq[String] = null,
+      resultName: String = "weights"): DataFrame = addDistanceBandColumn(
+    dataframe,
+    threshold,
+    alpha = alpha,
+    binary = false,
+    includeZeroDistanceNeighbors = includeZeroDistanceNeighbors,
+    includeSelf = includeSelf,
+    selfWeight = selfWeight,
+    geometry = geometry,
+    useSpheroid = useSpheroid,
+    savedAttributes = savedAttributes,
+    resultName = resultName)
 
 }

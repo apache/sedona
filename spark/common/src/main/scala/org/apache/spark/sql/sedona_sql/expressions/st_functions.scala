@@ -959,4 +959,46 @@ object st_functions extends DataFrameAPI {
   def ST_InterpolatePoint(geom1: String, geom2: String): Column =
     wrapExpression[ST_InterpolatePoint](geom1, geom2)
 
+  def ST_DBSCAN(geom: Column, epsilon: Column, minPoints: Column, useSpheroid: Column): Column =
+    wrapExpression[ST_DBSCAN](geom, epsilon, minPoints, useSpheroid)
+
+  def ST_LocalOutlierFactor(geom: Column, k: Column, useSpheroid: Column): Column =
+    wrapExpression[ST_LocalOutlierFactor](geom, k, useSpheroid)
+
+  def ST_GLocal(x: Column, weights: Column, star: Column): Column =
+    wrapExpression[ST_GLocal](x, weights, star)
+
+  def ST_BinaryDistanceBandColumn(
+      geometry: Column,
+      threshold: Column,
+      includeZeroDistanceNeighbors: Column,
+      includeSelf: Column,
+      useSpheroid: Column,
+      attributes: Column): Column =
+    wrapExpression[ST_BinaryDistanceBandColumn](
+      geometry,
+      threshold,
+      includeZeroDistanceNeighbors,
+      includeSelf,
+      useSpheroid,
+      attributes)
+
+  def ST_WeightedDistanceBandColumn(
+      geometry: Column,
+      threshold: Column,
+      alpha: Column,
+      includeZeroDistanceNeighbors: Column,
+      includeSelf: Column,
+      selfWeight: Column,
+      useSpheroid: Column,
+      attributes: Column): Column =
+    wrapExpression[ST_BinaryDistanceBandColumn](
+      geometry,
+      threshold,
+      alpha,
+      includeZeroDistanceNeighbors,
+      includeSelf,
+      selfWeight,
+      useSpheroid,
+      attributes)
 }
