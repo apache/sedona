@@ -16,6 +16,7 @@
 # under the License.
 
 site_name: Apache Sedona&trade;
+site_url: https://sedona.apache.org
 site_description: Apache Sedona&trade; is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark, Apache Flink, and Snowflake, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
 nav:
   - Home: index.md
@@ -174,6 +175,8 @@ theme:
 extra:
   version:
     provider: mike
+    default:
+      - latest
   social:
     - icon: fontawesome/brands/github-alt
       link: 'https://github.com/apache/sedona'
@@ -225,3 +228,5 @@ plugins:
       type: datetime
   - mkdocs-jupyter:
       include_source: True
+  - mike:
+      canonical_version: "latest"
