@@ -753,7 +753,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
             k = distance.get,
             useApproximate = false,
             spatialPredicate,
-            isGeography = false,
+            isGeography,
             condition = null,
             extraCondition = None) :: Nil
         } else {
@@ -768,7 +768,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
             k = distance.get,
             useApproximate = false,
             spatialPredicate,
-            isGeography = false,
+            isGeography,
             condition = null,
             extraCondition = None) :: Nil
         }
