@@ -37,4 +37,12 @@ public class SpheroidDistance implements ItemDistance {
       return Spheroid.distance(g1, g2);
     }
   }
+
+  public double distance(Geometry geometry1, Geometry geometry2) {
+    if (geometry1 == geometry2) {
+      return Double.MAX_VALUE;
+    } else {
+      return Spheroid.distance(geometry1, geometry2);
+    }
+  }
 }
