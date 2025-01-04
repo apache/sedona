@@ -589,7 +589,14 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
     val leftShape = children.head
     val rightShape = children.tail.head
 
-    val querySide = getKNNQuerySide(left, leftShape)
+    val querySide = matchExpressionsToPlans(leftShape, rightShape, left, right) match {
+      case Some((_, _, false)) =>
+        LeftSide
+      case Some((_, _, true)) =>
+        RightSide
+      case None =>
+        Nil
+    }
     val objectSidePlan = if (querySide == LeftSide) right else left
 
     checkObjectPlanFilterPushdown(objectSidePlan)
@@ -722,7 +729,14 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
         val leftShape = children.head
         val rightShape = children.tail.head
 
-        val querySide = getKNNQuerySide(left, leftShape)
+        val querySide = matchExpressionsToPlans(leftShape, rightShape, left, right) match {
+          case Some((_, _, false)) =>
+            LeftSide
+          case Some((_, _, true)) =>
+            RightSide
+          case None =>
+            Nil
+        }
         val objectSidePlan = if (querySide == LeftSide) right else left
 
         checkObjectPlanFilterPushdown(objectSidePlan)
@@ -862,27 +876,6 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
           s"Spatial join for $relationship with arguments not aligned " +
             "with join relations is not supported")
         Nil
-    }
-  }
-
-  /**
-   * Gets the query and object plans based on the left shape.
-   *
-   * This method checks if the left shape is part of the left or right plan and returns the query
-   * and object plans accordingly.
-   *
-   * @param leftShape
-   *   The left shape expression.
-   * @return
-   *   The join side where the left shape is located.
-   */
-  private def getKNNQuerySide(left: LogicalPlan, leftShape: Expression) = {
-    val isLeftQuerySide =
-      left.toString().toLowerCase().contains(leftShape.toString().toLowerCase())
-    if (isLeftQuerySide) {
-      LeftSide
-    } else {
-      RightSide
     }
   }
 

@@ -36,4 +36,12 @@ public class EuclideanItemDistance implements ItemDistance {
       return g1.distance(g2);
     }
   }
+
+  public double distance(Geometry geometry1, Geometry geometry2) {
+    if (geometry1 == geometry2) {
+      return Double.MAX_VALUE;
+    } else {
+      return geometry1.distance(geometry2);
+    }
+  }
 }
