@@ -5033,7 +5033,7 @@ If you use SedonaViz together with SedonaSQL, please add the following line afte
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p><div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.spark</span> <span class="kn">import</span> <span class="o">*</span>
+<p><div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span> <span class="o">.</span>\
     <span class="n">config</span><span class="p">(</span><span class="s1">&#39;spark.jars.packages&#39;</span><span class="p">,</span>
@@ -5110,7 +5110,7 @@ If you are using Spark versions &gt;= 3.4, please replace the <code>3.0</code> i
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.spark</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </code></pre></div>
@@ -5130,7 +5130,7 @@ If you are using Spark versions &gt;= 3.4, please replace the <code>3.0</code> i
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.register</span> <span class="kn">import</span> <span class="n">SedonaRegistrator</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.register</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaRegistrator</span>
 
 <span class="n">SedonaRegistrator</span><span class="o">.</span><span class="n">registerAll</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
 </code></pre></div>
@@ -5679,7 +5679,7 @@ df = sedona.read.format("geopackage").option("showMetadata", "true").load("/path
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.stats.clustering.dbscan</span> <span class="kn">import</span> <span class="n">dbscan</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.stats.clustering.dbscan</span><span class="w"> </span><span class="kn">import</span> <span class="n">dbscan</span>
 
 <span class="n">dbscan</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
@@ -5724,7 +5724,7 @@ df = sedona.read.format("geopackage").option("showMetadata", "true").load("/path
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.stats.outlier_detection.local_outlier_factor</span> <span class="kn">import</span> <span class="n">local_outlier_factor</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.stats.outlier_detection.local_outlier_factor</span><span class="w"> </span><span class="kn">import</span> <span class="n">local_outlier_factor</span>
 
 <span class="n">local_outlier_factor</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
@@ -5783,8 +5783,8 @@ df = sedona.read.format("geopackage").option("showMetadata", "true").load("/path
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.stats.weighting</span> <span class="kn">import</span> <span class="n">add_binary_distance_band_column</span>
-<span class="kn">from</span> <span class="nn">sedona.stats.hotspot_detection.getis_ord</span> <span class="kn">import</span> <span class="n">g_local</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.stats.weighting</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_binary_distance_band_column</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.stats.hotspot_detection.getis_ord</span><span class="w"> </span><span class="kn">import</span> <span class="n">g_local</span>
 
 <span class="n">distance_radius</span> <span class="o">=</span> <span class="mf">1.0</span>
 <span class="n">weighted_df</span> <span class="o">=</span> <span class="n">addBinaryDistanceBandColumn</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">distance_radius</span><span class="p">)</span>
@@ -5948,10 +5948,10 @@ can also be found in the example notebook available <a href="https://github.com/
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.sql.types</span> <span class="kn">import</span> <span class="n">GeometryType</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.types</span> <span class="kn">import</span> <span class="n">DoubleType</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DoubleType</span>
 
-<span class="k">def</span> <span class="nf">lengthPoly</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">()):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">lengthPoly</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">()):</span>
     <span class="k">return</span> <span class="n">geom</span><span class="o">.</span><span class="n">length</span>
 
 <span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;udf_lengthPoly&quot;</span><span class="p">,</span> <span class="n">lengthPoly</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
@@ -6000,10 +6000,10 @@ can also be found in the example notebook available <a href="https://github.com/
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.sql.types</span> <span class="kn">import</span> <span class="n">GeometryType</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.types</span> <span class="kn">import</span> <span class="n">DoubleType</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DoubleType</span>
 
-<span class="k">def</span> <span class="nf">bufferFixed</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">()):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bufferFixed</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">()):</span>
     <span class="k">return</span> <span class="n">geom</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mf">5.5</span><span class="p">)</span>
 
 <span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;udf_bufferFixed&quot;</span><span class="p">,</span> <span class="n">bufferFixed</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">())</span>
@@ -6051,10 +6051,10 @@ can also be found in the example notebook available <a href="https://github.com/
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.sql.types</span> <span class="kn">import</span> <span class="n">GeometryType</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.types</span> <span class="kn">import</span> <span class="n">DoubleType</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DoubleType</span>
 
-<span class="k">def</span> <span class="nf">bufferIt</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">(),</span> <span class="n">distance</span><span class="p">:</span> <span class="n">DoubleType</span><span class="p">()):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bufferIt</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">(),</span> <span class="n">distance</span><span class="p">:</span> <span class="n">DoubleType</span><span class="p">()):</span>
     <span class="k">return</span> <span class="n">geom</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
 
 <span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;udf_buffer&quot;</span><span class="p">,</span> <span class="n">bufferIt</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">())</span>
@@ -6126,15 +6126,15 @@ can also be found in the example notebook available <a href="https://github.com/
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.sql.types</span> <span class="kn">import</span> <span class="n">GeometryType</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.types</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">schemaUDF</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">([</span>
     <span class="n">StructField</span><span class="p">(</span><span class="s2">&quot;buffed&quot;</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">()),</span>
     <span class="n">StructField</span><span class="p">(</span><span class="s2">&quot;length&quot;</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
 <span class="p">])</span>
 
-<span class="k">def</span> <span class="nf">bufferAndLength</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">(),</span> <span class="n">distance</span><span class="p">:</span> <span class="n">DoubleType</span><span class="p">()):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bufferAndLength</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">(),</span> <span class="n">distance</span><span class="p">:</span> <span class="n">DoubleType</span><span class="p">()):</span>
     <span class="n">buffed</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">buffed</span><span class="o">.</span><span class="n">length</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">buffed</span><span class="p">,</span> <span class="n">length</span><span class="p">]</span>
@@ -6256,7 +6256,7 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.utils.adapter</span> <span class="kn">import</span> <span class="n">Adapter</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.utils.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Adapter</span>
 
 <span class="n">spatialRDD</span> <span class="o">=</span> <span class="n">Adapter</span><span class="o">.</span><span class="n">toSpatialRdd</span><span class="p">(</span><span class="n">spatialDf</span><span class="p">,</span> <span class="s2">&quot;usacounty&quot;</span><span class="p">)</span>
 </code></pre></div>
@@ -6281,7 +6281,7 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.utils.adapter</span> <span class="kn">import</span> <span class="n">Adapter</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.utils.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Adapter</span>
 
 <span class="n">spatialDf</span> <span class="o">=</span> <span class="n">Adapter</span><span class="o">.</span><span class="n">toDf</span><span class="p">(</span><span class="n">spatialRDD</span><span class="p">,</span> <span class="n">sedona</span><span class="p">)</span>
 </code></pre></div>
@@ -6324,7 +6324,7 @@ case. At least one column for the user data must be provided.</p>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.utils.adapter</span> <span class="kn">import</span> <span class="n">Adapter</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.utils.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Adapter</span>
 
 <span class="n">joinResultDf</span> <span class="o">=</span> <span class="n">Adapter</span><span class="o">.</span><span class="n">toDf</span><span class="p">(</span><span class="n">jvm_sedona_rdd</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;poi_from_id&quot;</span><span class="p">,</span> <span class="s2">&quot;poi_from_name&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;poi_to_id&quot;</span><span class="p">,</span> <span class="s2">&quot;poi_to_name&quot;</span><span class="p">],</span> <span class="n">spark</span><span class="p">))</span>
 </code></pre></div>
@@ -6345,7 +6345,7 @@ case. At least one column for the user data must be provided.</p>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.utils.adapter</span> <span class="kn">import</span> <span class="n">Adapter</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.utils.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Adapter</span>
 
 <span class="n">joinResultDf</span> <span class="o">=</span> <span class="n">Adapter</span><span class="o">.</span><span class="n">toDf</span><span class="p">(</span><span class="n">result_pair_rdd</span><span class="p">,</span> <span class="n">leftRdd</span><span class="o">.</span><span class="n">fieldNames</span><span class="p">,</span> <span class="n">rightRdd</span><span class="o">.</span><span class="n">fieldNames</span><span class="p">,</span> <span class="n">spark</span><span class="p">)</span>
 </code></pre></div>

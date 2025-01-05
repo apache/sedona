@@ -4509,11 +4509,11 @@ under the License.
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">display</span><span class="p">,</span> <span class="n">HTML</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
-<span class="kn">from</span> <span class="nn">pyspark</span> <span class="kn">import</span> <span class="n">StorageLevel</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.types</span> <span class="kn">import</span> <span class="p">(</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">display</span><span class="p">,</span> <span class="n">HTML</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark</span><span class="w"> </span><span class="kn">import</span> <span class="n">StorageLevel</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">StructType</span><span class="p">,</span>
     <span class="n">StructField</span><span class="p">,</span>
     <span class="n">StringType</span><span class="p">,</span>
@@ -4522,14 +4522,14 @@ under the License.
     <span class="n">DoubleType</span><span class="p">,</span>
     <span class="n">ArrayType</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">regexp_replace</span>
-<span class="kn">from</span> <span class="nn">sedona.register</span> <span class="kn">import</span> <span class="n">SedonaRegistrator</span>
-<span class="kn">from</span> <span class="nn">sedona.utils</span> <span class="kn">import</span> <span class="n">SedonaKryoRegistrator</span><span class="p">,</span> <span class="n">KryoSerializer</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">expr</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">udf</span><span class="p">,</span> <span class="n">lit</span>
-<span class="kn">from</span> <span class="nn">sedona.utils</span> <span class="kn">import</span> <span class="n">SedonaKryoRegistrator</span><span class="p">,</span> <span class="n">KryoSerializer</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">expr</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">udf</span><span class="p">,</span> <span class="n">lit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">regexp_replace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.register</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaRegistrator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaKryoRegistrator</span><span class="p">,</span> <span class="n">KryoSerializer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">expr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">udf</span><span class="p">,</span> <span class="n">lit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaKryoRegistrator</span><span class="p">,</span> <span class="n">KryoSerializer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">expr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">udf</span><span class="p">,</span> <span class="n">lit</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-2">from IPython.display import display, HTML
 from pyspark.sql import SparkSession
@@ -5632,7 +5632,7 @@ df_HTML.show(5)</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="k">def</span> <span class="nf">SumOfValues</span><span class="p">(</span><span class="n">band</span><span class="p">):</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">SumOfValues</span><span class="p">(</span><span class="n">band</span><span class="p">):</span>
     <span class="n">total</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">band</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">num</span> <span class="o">&gt;</span> <span class="mf">1000.0</span><span class="p">:</span>
@@ -5683,7 +5683,7 @@ sumDF.show()</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="k">def</span> <span class="nf">generatemask</span><span class="p">(</span><span class="n">band</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generatemask</span><span class="p">(</span><span class="n">band</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">band</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">%</span> <span class="n">width</span> <span class="o">&gt;=</span> <span class="mi">12</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">%</span> <span class="n">width</span> <span class="o">&lt;</span> <span class="mi">26</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
             <span class="n">i</span> <span class="o">%</span> <span class="n">height</span> <span class="o">&gt;=</span> <span class="mi">12</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">%</span> <span class="n">height</span> <span class="o">&lt;</span> <span class="mi">26</span>

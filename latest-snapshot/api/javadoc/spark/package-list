@@ -19,6 +19,7 @@ org.apache.sedona.core.spatialPartitioning.quadtree
 org.apache.sedona.core.spatialRDD
 org.apache.sedona.core.spatialRddTool
 org.apache.sedona.core.utils
+org.apache.sedona.core.wrapper
 org.apache.sedona.viz.core
 org.apache.sedona.viz.core.Serde
 org.apache.sedona.viz.extension.coloringRule

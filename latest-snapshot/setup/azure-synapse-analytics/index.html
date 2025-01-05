@@ -4504,7 +4504,7 @@
 <p><a href="https://learn.microsoft.com/en-us/azure/synapse-analytics/spark/apache-spark-manage-pool-packages#manage-packages-from-synapse-studio-or-azure-portal">https://learn.microsoft.com/en-us/azure/synapse-analytics/spark/apache-spark-manage-pool-packages#manage-packages-from-synapse-studio-or-azure-portal</a></p>
 <h3 id="step-4-notebook">Step 4: Notebook<a class="headerlink" href="#step-4-notebook" title="Permanent link">&para;</a></h3>
 <p>Start your notebook with:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.spark</span> <span class="kn">import</span> <span class="n">SedonaContext</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaContext</span>
 
 <span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span> \
     <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s1">&#39;spark.jars.packages&#39;</span><span class="p">,</span>

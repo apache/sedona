@@ -4191,12 +4191,12 @@ and the second installs the Sedona Python package directly from pip.</p>
 <span class="o">%</span><span class="n">additional_python_modules</span> <span class="n">apache</span><span class="o">-</span><span class="n">sedona</span><span class="o">==</span><span class="mf">1.7.0</span>
 
 
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">awsglue.transforms</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">awsglue.utils</span> <span class="kn">import</span> <span class="n">getResolvedOptions</span>
-<span class="kn">from</span> <span class="nn">pyspark.context</span> <span class="kn">import</span> <span class="n">SparkContext</span>
-<span class="kn">from</span> <span class="nn">awsglue.context</span> <span class="kn">import</span> <span class="n">GlueContext</span>
-<span class="kn">from</span> <span class="nn">awsglue.job</span> <span class="kn">import</span> <span class="n">Job</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">awsglue.transforms</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">awsglue.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">getResolvedOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">awsglue.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">GlueContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">awsglue.job</span><span class="w"> </span><span class="kn">import</span> <span class="n">Job</span>
 
 <span class="n">sc</span> <span class="o">=</span> <span class="n">SparkContext</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="n">glueContext</span> <span class="o">=</span> <span class="n">GlueContext</span><span class="p">(</span><span class="n">sc</span><span class="p">)</span>
@@ -4204,7 +4204,7 @@ and the second installs the Sedona Python package directly from pip.</p>
 <span class="n">job</span> <span class="o">=</span> <span class="n">Job</span><span class="p">(</span><span class="n">glueContext</span><span class="p">)</span>
 </code></pre></div>
 <p>You can confirm your installation by running the following cell:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.spark</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
 <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT ST_POINT(1., 2.) as geom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -4215,7 +4215,7 @@ the "Advanced properties" section. In the "Dependent JARs path" field, add the p
 <p>To add the Sedona Python package, navigate to the "Job Parameters" section and add a new parameter with the key
 <code>--additional-python-modules</code> and the value <code>apache-sedona==1.7.0</code>.</p>
 <p>To confirm the installation add the follow code to the script:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.spark</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>

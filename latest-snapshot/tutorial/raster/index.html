@@ -4779,7 +4779,7 @@ If you use SedonaViz together with SedonaSQL, please add the following line afte
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p><div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.spark</span> <span class="kn">import</span> <span class="o">*</span>
+<p><div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span> <span class="o">.</span>\
     <span class="n">config</span><span class="p">(</span><span class="s1">&#39;spark.jars.packages&#39;</span><span class="p">,</span>
@@ -4856,7 +4856,7 @@ Please replace the <code>3.3</code> in the package name of sedona-spark-shaded w
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.spark</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </code></pre></div>
@@ -4876,7 +4876,7 @@ Please replace the <code>3.3</code> in the package name of sedona-spark-shaded w
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.register</span> <span class="kn">import</span> <span class="n">SedonaRegistrator</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.register</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaRegistrator</span>
 
 <span class="n">SedonaRegistrator</span><span class="o">.</span><span class="n">registerAll</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
 </code></pre></div>
@@ -5151,9 +5151,9 @@ band data is organized in CHW order.</p>
 <h2 id="writing-python-udf-to-work-with-raster-data">Writing Python UDF to work with raster data<a class="headerlink" href="#writing-python-udf-to-work-with-raster-data" title="Permanent link">&para;</a></h2>
 <p>You can write Python UDFs to work with raster data in Python. The UDFs can take <code>SedonaRaster</code> objects as input and
 return any Spark data type as output. This is an example of a Python UDF that calculates the mean of the raster data.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">pyspark.sql.types</span> <span class="kn">import</span> <span class="n">DoubleType</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DoubleType</span>
 
-<span class="k">def</span> <span class="nf">mean_udf</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mean_udf</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
 
 <span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mean_udf&quot;</span><span class="p">,</span> <span class="n">mean_udf</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
@@ -5168,10 +5168,10 @@ return any Spark data type as output. This is an example of a Python UDF that ca
 <p>It is much trickier to write an UDF that returns a raster object, since Sedona does not support serializing Python raster
 objects yet. However, you can write a UDF that returns the band data as an array and then construct the raster object using
 <code>RS_MakeRaster</code>. This is an example of a Python UDF that creates a mask raster based on the first band of the input raster.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">pyspark.sql.types</span> <span class="kn">import</span> <span class="n">ArrayType</span><span class="p">,</span> <span class="n">DoubleType</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayType</span><span class="p">,</span> <span class="n">DoubleType</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="k">def</span> <span class="nf">mask_udf</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mask_udf</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
     <span class="n">band1</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">,:,:]</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">band1</span> <span class="o">&lt;</span> <span class="mi">1400</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">mask</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>

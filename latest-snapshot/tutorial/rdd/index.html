@@ -4643,8 +4643,8 @@ POINT (-88.221102 32.35078) restaurant
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.core.formatMapper</span> <span class="kn">import</span> <span class="n">WktReader</span>
-<span class="kn">from</span> <span class="nn">sedona.core.formatMapper</span> <span class="kn">import</span> <span class="n">WkbReader</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.formatMapper</span><span class="w"> </span><span class="kn">import</span> <span class="n">WktReader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.formatMapper</span><span class="w"> </span><span class="kn">import</span> <span class="n">WkbReader</span>
 
 <span class="n">WktReader</span><span class="o">.</span><span class="n">readToGeometryRDD</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">wkt_geometries_location</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
@@ -4683,7 +4683,7 @@ POINT (-88.221102 32.35078) restaurant
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.core.formatMapper</span> <span class="kn">import</span> <span class="n">GeoJsonReader</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.formatMapper</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoJsonReader</span>
 
 <span class="n">GeoJsonReader</span><span class="o">.</span><span class="n">readToGeometryRDD</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">geo_json_file_location</span><span class="p">)</span>
 </code></pre></div>
@@ -4708,7 +4708,7 @@ POINT (-88.221102 32.35078) restaurant
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.core.formatMapper.shapefileParser</span> <span class="kn">import</span> <span class="n">ShapefileReader</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.formatMapper.shapefileParser</span><span class="w"> </span><span class="kn">import</span> <span class="n">ShapefileReader</span>
 
 <span class="n">ShapefileReader</span><span class="o">.</span><span class="n">readToGeometryRDD</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">shape_file_location</span><span class="p">)</span>
 </code></pre></div>
@@ -4874,8 +4874,8 @@ POINT (-88.221102 32.35078) restaurant
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.core.geom.envelope</span> <span class="kn">import</span> <span class="n">Envelope</span>
-<span class="kn">from</span> <span class="nn">sedona.core.spatialOperator</span> <span class="kn">import</span> <span class="n">RangeQuery</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.geom.envelope</span><span class="w"> </span><span class="kn">import</span> <span class="n">Envelope</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.spatialOperator</span><span class="w"> </span><span class="kn">import</span> <span class="n">RangeQuery</span>
 
 <span class="n">range_query_window</span> <span class="o">=</span> <span class="n">Envelope</span><span class="p">(</span><span class="o">-</span><span class="mf">90.01</span><span class="p">,</span> <span class="o">-</span><span class="mf">80.01</span><span class="p">,</span> <span class="mf">30.01</span><span class="p">,</span> <span class="mf">40.01</span><span class="p">)</span>
 <span class="n">consider_boundary_intersection</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1">## Only return gemeotries fully covered by the window</span>
@@ -4889,9 +4889,9 @@ POINT (-88.221102 32.35078) restaurant
 <p class="admonition-title">Note</p>
 <p>Sedona Python users: Please use RangeQueryRaw from the same module if you want to avoid jvm python serde while converting to Spatial DataFrame. It takes the same parameters as RangeQuery but returns reference to jvm rdd which can be converted to dataframe without python - jvm serde using Adapter.</p>
 <p>Example:
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.core.geom.envelope</span> <span class="kn">import</span> <span class="n">Envelope</span>
-<span class="kn">from</span> <span class="nn">sedona.core.spatialOperator</span> <span class="kn">import</span> <span class="n">RangeQueryRaw</span>
-<span class="kn">from</span> <span class="nn">sedona.utils.adapter</span> <span class="kn">import</span> <span class="n">Adapter</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.geom.envelope</span><span class="w"> </span><span class="kn">import</span> <span class="n">Envelope</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.spatialOperator</span><span class="w"> </span><span class="kn">import</span> <span class="n">RangeQueryRaw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.utils.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Adapter</span>
 
 <span class="n">range_query_window</span> <span class="o">=</span> <span class="n">Envelope</span><span class="p">(</span><span class="o">-</span><span class="mf">90.01</span><span class="p">,</span> <span class="o">-</span><span class="mf">80.01</span><span class="p">,</span> <span class="mf">30.01</span><span class="p">,</span> <span class="mf">40.01</span><span class="p">)</span>
 <span class="n">consider_boundary_intersection</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1">## Only return gemeotries fully covered by the window</span>
@@ -4982,9 +4982,9 @@ POINT (-88.221102 32.35078) restaurant
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.core.geom.envelope</span> <span class="kn">import</span> <span class="n">Envelope</span>
-<span class="kn">from</span> <span class="nn">sedona.core.enums</span> <span class="kn">import</span> <span class="n">IndexType</span>
-<span class="kn">from</span> <span class="nn">sedona.core.spatialOperator</span> <span class="kn">import</span> <span class="n">RangeQuery</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.geom.envelope</span><span class="w"> </span><span class="kn">import</span> <span class="n">Envelope</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">IndexType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.spatialOperator</span><span class="w"> </span><span class="kn">import</span> <span class="n">RangeQuery</span>
 
 <span class="n">range_query_window</span> <span class="o">=</span> <span class="n">Envelope</span><span class="p">(</span><span class="o">-</span><span class="mf">90.01</span><span class="p">,</span> <span class="o">-</span><span class="mf">80.01</span><span class="p">,</span> <span class="mf">30.01</span><span class="p">,</span> <span class="mf">40.01</span><span class="p">)</span>
 <span class="n">consider_boundary_intersection</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1">## Only return gemeotries fully covered by the window</span>
@@ -5035,7 +5035,7 @@ Example:</p>
 ]
 </code></pre></div>
 <p>Or transformed to GeoPandas GeoDataFrame</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
     <span class="n">query_result</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">geom</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">userData</span><span class="p">])</span><span class="o">.</span><span class="n">collect</span><span class="p">(),</span>
     <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;geom&quot;</span><span class="p">,</span> <span class="s2">&quot;user_data&quot;</span><span class="p">],</span>
@@ -5067,8 +5067,8 @@ Example:</p>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.core.spatialOperator</span> <span class="kn">import</span> <span class="n">KNNQuery</span>
-<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Point</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.spatialOperator</span><span class="w"> </span><span class="kn">import</span> <span class="n">KNNQuery</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
 
 <span class="n">point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="o">-</span><span class="mf">84.01</span><span class="p">,</span> <span class="mf">34.01</span><span class="p">)</span>
 <span class="n">k</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c1">## K Nearest Neighbors</span>
@@ -5130,9 +5130,9 @@ Example:</p>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.core.spatialOperator</span> <span class="kn">import</span> <span class="n">KNNQuery</span>
-<span class="kn">from</span> <span class="nn">sedona.core.enums</span> <span class="kn">import</span> <span class="n">IndexType</span>
-<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Point</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.spatialOperator</span><span class="w"> </span><span class="kn">import</span> <span class="n">KNNQuery</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">IndexType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
 
 <span class="n">point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="o">-</span><span class="mf">84.01</span><span class="p">,</span> <span class="mf">34.01</span><span class="p">)</span>
 <span class="n">k</span> <span class="o">=</span> <span class="mi">5</span> <span class="c1">## K Nearest Neighbors</span>
@@ -5197,8 +5197,8 @@ The list has K GeoData objects.</p>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.core.enums</span> <span class="kn">import</span> <span class="n">GridType</span>
-<span class="kn">from</span> <span class="nn">sedona.core.spatialOperator</span> <span class="kn">import</span> <span class="n">JoinQuery</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">GridType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.spatialOperator</span><span class="w"> </span><span class="kn">import</span> <span class="n">JoinQuery</span>
 
 <span class="n">consider_boundary_intersection</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1">## Only return geometries fully covered by each query window in queryWindowRDD</span>
 <span class="n">using_index</span> <span class="o">=</span> <span class="kc">False</span>
@@ -5281,9 +5281,9 @@ Find the superheroes in each city</p>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.core.enums</span> <span class="kn">import</span> <span class="n">GridType</span>
-<span class="kn">from</span> <span class="nn">sedona.core.enums</span> <span class="kn">import</span> <span class="n">IndexType</span>
-<span class="kn">from</span> <span class="nn">sedona.core.spatialOperator</span> <span class="kn">import</span> <span class="n">JoinQuery</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">GridType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">IndexType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.spatialOperator</span><span class="w"> </span><span class="kn">import</span> <span class="n">JoinQuery</span>
 
 <span class="n">object_rdd</span><span class="o">.</span><span class="n">spatialPartitioning</span><span class="p">(</span><span class="n">GridType</span><span class="o">.</span><span class="n">KDBTREE</span><span class="p">)</span>
 <span class="n">query_window_rdd</span><span class="o">.</span><span class="n">spatialPartitioning</span><span class="p">(</span><span class="n">object_rdd</span><span class="o">.</span><span class="n">getPartitioner</span><span class="p">())</span>
@@ -5344,9 +5344,9 @@ Example:
 That approach allows to avoid costly serialization between Python
 and jvm and in result operating on python object instead of native geometries.</p>
 <p>Example:
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.core.SpatialRDD</span> <span class="kn">import</span> <span class="n">CircleRDD</span>
-<span class="kn">from</span> <span class="nn">sedona.core.enums</span> <span class="kn">import</span> <span class="n">GridType</span>
-<span class="kn">from</span> <span class="nn">sedona.core.spatialOperator</span> <span class="kn">import</span> <span class="n">JoinQueryRaw</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.SpatialRDD</span><span class="w"> </span><span class="kn">import</span> <span class="n">CircleRDD</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">GridType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.spatialOperator</span><span class="w"> </span><span class="kn">import</span> <span class="n">JoinQueryRaw</span>
 
 <span class="n">object_rdd</span><span class="o">.</span><span class="n">analyze</span><span class="p">()</span>
 
@@ -5403,9 +5403,9 @@ and jvm and in result operating on python object instead of native geometries.</
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.core.SpatialRDD</span> <span class="kn">import</span> <span class="n">CircleRDD</span>
-<span class="kn">from</span> <span class="nn">sedona.core.enums</span> <span class="kn">import</span> <span class="n">GridType</span>
-<span class="kn">from</span> <span class="nn">sedona.core.spatialOperator</span> <span class="kn">import</span> <span class="n">JoinQuery</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.SpatialRDD</span><span class="w"> </span><span class="kn">import</span> <span class="n">CircleRDD</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">GridType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.core.spatialOperator</span><span class="w"> </span><span class="kn">import</span> <span class="n">JoinQuery</span>
 
 <span class="n">object_rdd</span><span class="o">.</span><span class="n">analyze</span><span class="p">()</span>
 

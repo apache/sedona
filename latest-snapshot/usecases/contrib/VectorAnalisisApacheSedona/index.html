@@ -4466,11 +4466,11 @@ under the License.
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">display</span><span class="p">,</span> <span class="n">HTML</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
-<span class="kn">from</span> <span class="nn">pyspark</span> <span class="kn">import</span> <span class="n">StorageLevel</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.types</span> <span class="kn">import</span> <span class="p">(</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">display</span><span class="p">,</span> <span class="n">HTML</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark</span><span class="w"> </span><span class="kn">import</span> <span class="n">StorageLevel</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">StructType</span><span class="p">,</span>
     <span class="n">StructField</span><span class="p">,</span>
     <span class="n">StringType</span><span class="p">,</span>
@@ -4479,18 +4479,18 @@ under the License.
     <span class="n">DoubleType</span><span class="p">,</span>
     <span class="n">ArrayType</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">regexp_replace</span>
-<span class="kn">from</span> <span class="nn">sedona.register</span> <span class="kn">import</span> <span class="n">SedonaRegistrator</span>
-<span class="kn">from</span> <span class="nn">sedona.utils</span> <span class="kn">import</span> <span class="n">SedonaKryoRegistrator</span><span class="p">,</span> <span class="n">KryoSerializer</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">expr</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">udf</span><span class="p">,</span> <span class="n">lit</span>
-<span class="kn">from</span> <span class="nn">sedona.utils</span> <span class="kn">import</span> <span class="n">SedonaKryoRegistrator</span><span class="p">,</span> <span class="n">KryoSerializer</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">expr</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">udf</span><span class="p">,</span> <span class="n">lit</span><span class="p">,</span> <span class="n">flatten</span>
-<span class="kn">from</span> <span class="nn">pywebhdfs.webhdfs</span> <span class="kn">import</span> <span class="n">PyWebHdfsClient</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
-<span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">monotonically_increasing_id</span>
-<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">regexp_replace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.register</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaRegistrator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaKryoRegistrator</span><span class="p">,</span> <span class="n">KryoSerializer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">expr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">udf</span><span class="p">,</span> <span class="n">lit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaKryoRegistrator</span><span class="p">,</span> <span class="n">KryoSerializer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">expr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">udf</span><span class="p">,</span> <span class="n">lit</span><span class="p">,</span> <span class="n">flatten</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pywebhdfs.webhdfs</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyWebHdfsClient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">monotonically_increasing_id</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-1">from IPython.display import display, HTML
 from pyspark.sql import SparkSession
@@ -4677,8 +4677,8 @@ To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLeve
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">requests</span>
-<span class="kn">import</span> <span class="nn">json</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
 <span class="n">overpass_url</span> <span class="o">=</span> <span class="s2">"http://overpass-api.de/api/interpreter"</span>
 <span class="c1"># overpass_query = """</span>
@@ -4950,7 +4950,7 @@ df = spark.read.json(path, multiLine="true")</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">explode</span><span class="p">,</span> <span class="n">arrays_zip</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">explode</span><span class="p">,</span> <span class="n">arrays_zip</span>
 
 <span class="n">df</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"df"</span><span class="p">)</span>
 <span class="n">tb</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"select *, size(elements) total_nodes from df"</span><span class="p">)</span>
@@ -5840,7 +5840,7 @@ only showing top 5 rows
 <span class="n">id_current</span> <span class="o">=</span> <span class="n">closestostart</span>
 
 
-<span class="k">def</span> <span class="nf">choose_path</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">id_current</span><span class="p">,</span> <span class="n">visited</span><span class="p">,</span> <span class="n">copy_row</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">choose_path</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">id_current</span><span class="p">,</span> <span class="n">visited</span><span class="p">,</span> <span class="n">copy_row</span><span class="p">):</span>
 
     <span class="n">visited_frm</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">visited</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"["</span><span class="p">,</span> <span class="s2">"("</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"]"</span><span class="p">,</span> <span class="s2">")"</span><span class="p">)</span>
 
@@ -6158,7 +6158,7 @@ select geom, id, weight from touches_tb where touches = true and distance_toend 
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1">#</span>
 
-<span class="kn">import</span> <span class="nn">folium</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">folium</span>
 
 <span class="n">start_point_arr</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">25.4695946</span><span class="p">,</span> <span class="o">-</span><span class="mf">54.5909028</span><span class="p">]</span>
 <span class="n">end_point_arr</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">25.4786993</span><span class="p">,</span> <span class="o">-</span><span class="mf">54.57938</span><span class="p">]</span>
