@@ -34,7 +34,7 @@ class SedonaKepler:
         try:
             from keplergl import KeplerGl
         except ImportError:
-            msg = "Install sedona[kepler-map] to convert sedona dataframes to kepler maps."
+            msg = "Install apache-sedona[kepler-map] to convert sedona dataframes to kepler maps."
             raise ImportError(msg) from None
 
         kepler_map = KeplerGl()
