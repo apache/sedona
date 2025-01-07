@@ -10,6 +10,8 @@
       
       
       
+        <link rel="canonical" href="https://sedona.apache.org/latest/api/sql/Visualization_SedonaPyDeck/">
+      
       
         <link rel="prev" href="../Reading-legacy-parquet/">
       
@@ -18,7 +20,7 @@
       
       
       <link rel="icon" href="../../../image/sedona_logo_symbol.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.47">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.49">
     
     
       
@@ -4133,10 +4135,10 @@
 
 <p>SedonaPyDeck offers a number of APIs which aid in quick and interactive visualization of a geospatial data in a Jupyter notebook/lab environment.</p>
 <p>Inorder to start using SedonaPyDeck, simply import Sedona using:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.spark</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 </code></pre></div>
 <p>Alternatively it can also be imported using:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">sedona.maps.SedonaPyDeck</span> <span class="kn">import</span> <span class="n">SedonaPyDeck</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.maps.SedonaPyDeck</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaPyDeck</span>
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -4145,7 +4147,7 @@
 </div>
 <p>Following are details on all the APIs exposed via SedonaPyDeck:</p>
 <h3 id="geometry-map"><strong>Geometry Map</strong><a class="headerlink" href="#geometry-map" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_geometry_map</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[85, 183, 177, 255]&quot;</span><span class="p">,</span> <span class="n">line_color</span><span class="o">=</span><span class="s2">&quot;[85, 183, 177, 255]&quot;</span><span class="p">,</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_geometry_map</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[85, 183, 177, 255]&quot;</span><span class="p">,</span> <span class="n">line_color</span><span class="o">=</span><span class="s2">&quot;[85, 183, 177, 255]&quot;</span><span class="p">,</span>
                    <span class="n">elevation_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                    <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stroked</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 </code></pre></div>
@@ -4156,7 +4158,7 @@
 <p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code>, <code>api_keys</code> can be passed to configure the map as per user's liking.
 More details on the parameters and their default values can be found on the PyDeck website as well by deck.gl <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/geojson-layer.md">here</a></p>
 <h3 id="choropleth-map"><strong>Choropleth Map</strong><a class="headerlink" href="#choropleth-map" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_choropleth_map</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_choropleth_map</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">elevation_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stroked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
 <p>The parameter <code>fill_color</code> can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.</p>
@@ -4172,7 +4174,7 @@ SedonaPyDeck then creates a default color scheme based on the values of the colu
 <p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code>, <code>api_keys</code> can be passed to configure the map as per user's liking.
 More details on the parameters and their default values can be found on the PyDeck website.</p>
 <h3 id="scatterplot"><strong>Scatterplot</strong><a class="headerlink" href="#scatterplot" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_scatterplot_map</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[255, 140, 0]&quot;</span><span class="p">,</span> <span class="n">radius_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">radius_min_pixels</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">radius_max_pixels</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">radius_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_scatterplot_map</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[255, 140, 0]&quot;</span><span class="p">,</span> <span class="n">radius_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">radius_min_pixels</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">radius_max_pixels</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">radius_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                            <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </code></pre></div>
 <p>The parameter <code>fill_color</code> can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.</p>
@@ -4183,7 +4185,7 @@ More details on the parameters and their default values can be found on the PyDe
 <p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code>, <code>api_keys</code> can be passed to configure the map as per user's liking.
 More details on the parameters and their default values can be found on the PyDeck website as well by deck.gl <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/scatterplot-layer.md">here</a></p>
 <h3 id="heatmap"><strong>Heatmap</strong><a class="headerlink" href="#heatmap" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_heatmap</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">color_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">aggregation</span><span class="o">=</span><span class="s2">&quot;SUM&quot;</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_heatmap</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">color_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">aggregation</span><span class="o">=</span><span class="s2">&quot;SUM&quot;</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </code></pre></div>
 <p>The parameter <code>color_range</code> can be optionally given a list of RGB values, SedonaPyDeck by default uses <code>6-class YlOrRd</code> as color_range.
@@ -4350,10 +4352,10 @@ More details on the parameters and their default values can be found on the PyDe
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["content.code.copy", "search.highlight", "search.share", "search.suggest", "navigation.footer", "navigation.instant", "navigation.tabs", "navigation.top"], "search": "../../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["content.code.copy", "search.highlight", "search.share", "search.suggest", "navigation.footer", "navigation.instant", "navigation.tabs", "navigation.top"], "search": "../../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": ["latest"], "provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.83f73b43.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.88dd0f4e.min.js"></script>
       
     
   </body>
