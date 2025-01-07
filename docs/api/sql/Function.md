@@ -723,12 +723,14 @@ SQL Example
 
 ```sql
 ST_BinaryDistanceBandColumn(geometry, 1.0, true, true, false, struct(id, geometry))
-````
+```
 
 Output:
 
-```
+```sql
+{% raw %}
 [{{15, POINT (3 1.9)}, 1.0}, {{16, POINT (3 2)}, 1.0}, {{17, POINT (3 2.1)}, 1.0}, {{18, POINT (3 2.2)}, 1.0}]
+{% endraw %}
 ```
 
 ## ST_Boundary
@@ -3377,6 +3379,54 @@ Output:
 2216860.5497177234
 ```
 
+## ST_Perimeter2D
+
+Introduction: This function calculates the 2D perimeter of a given geometry. It supports Polygon, MultiPolygon, and GeometryCollection geometries (as long as the GeometryCollection contains polygonal geometries). For other types, it returns 0. To measure lines, use [ST_Length](#st_length).
+
+To get the perimeter in meters, set `use_spheroid` to `true`. This calculates the geodesic perimeter using the WGS84 spheroid. When using `use_spheroid`, the `lenient` parameter defaults to true, assuming the geometry uses EPSG:4326. To throw an exception instead, set `lenient` to `false`.
+
+!!!Note
+    This function is an alias for [ST_Perimeter](#st_perimeter).
+
+Format:
+
+`ST_Perimeter2D(geom: Geometry)`
+
+`ST_Perimeter2D(geom: Geometry, use_spheroid: Boolean)`
+
+`ST_Perimeter2D(geom: Geometry, use_spheroid: Boolean, lenient: Boolean = True)`
+
+Since: `v1.7.1`
+
+SQL Example:
+
+```sql
+SELECT ST_Perimeter2D(
+        ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))')
+)
+```
+
+Output:
+
+```
+20.0
+```
+
+SQL Example:
+
+```sql
+SELECT ST_Perimeter2D(
+        ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))', 4326),
+        true, false
+)
+```
+
+Output:
+
+```
+2216860.5497177234
+```
+
 ## ST_PointN
 
 Introduction: Return the Nth point in a single linestring or circular linestring in the geometry. Negative values are counted backwards from the end of the LineString, so that -1 is the last point. Returns NULL if there is no linestring in the geometry.
@@ -4531,12 +4581,14 @@ SQL Example
 
 ```sql
 ST_WeightedDistanceBandColumn(geometry, 1.0, -1.0, true, true, 1.0, false, struct(id, geometry))
-````
+```
 
 Output:
 
-```
+```sql
+{% raw %}
 [{{15, POINT (3 1.9)}, 1.0}, {{16, POINT (3 2)}, 9.999999999999991}, {{17, POINT (3 2.1)}, 4.999999999999996}, {{18, POINT (3 2.2)}, 3.3333333333333304}]
+{% endraw %}
 ```
 
 ## ST_X

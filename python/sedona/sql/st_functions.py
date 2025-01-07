@@ -1226,6 +1226,30 @@ def ST_Perimeter(
 
 
 @validate_argument_types
+def ST_Perimeter2D(
+    geom: ColumnOrName,
+    use_spheroid: Optional[Union[ColumnOrName, bool]] = None,
+    lenient: Optional[Union[ColumnOrName, bool]] = None,
+) -> Column:
+    """Returns the perimeter of a Polygon/MultiPolygon geometries. Otherwise, returns 0
+
+    @param geom: Polygonal geometry
+    @param use_spheroid: Use Spheroid
+    @param lenient: suppresses the exception
+    @return: Perimeter of a Polygon/MultiPolygon geometries
+    """
+
+    args = (geom, use_spheroid, lenient)
+
+    if lenient is None:
+        if use_spheroid is None:
+            args = (geom,)
+        else:
+            args = (geom, use_spheroid)
+    return _call_st_function("ST_Perimeter2D", args)
+
+
+@validate_argument_types
 def ST_Points(geometry: ColumnOrName) -> Column:
     """Creates a MultiPoint geometry consisting of all the coordinates of the input geometry
 

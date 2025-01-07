@@ -761,6 +761,15 @@ test_configurations = [
         "ceil(geom)",
         378794,
     ),
+    (stf.ST_Perimeter2D, ("geom",), "triangle_geom", "", 3.414213562373095),
+    (stf.ST_Perimeter2D, ("geom", True), "triangle_geom", "ceil(geom)", 378794),
+    (
+        stf.ST_Perimeter2D,
+        (lambda: stf.ST_SetSRID("geom", 4326), True),
+        "triangle_geom",
+        "ceil(geom)",
+        378794,
+    ),
     (
         stf.ST_Points,
         ("line",),

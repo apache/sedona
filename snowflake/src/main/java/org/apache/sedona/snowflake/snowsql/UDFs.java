@@ -840,6 +840,21 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+  public static double ST_Perimeter2D(byte[] geometry) {
+    return Functions.perimeter(GeometrySerde.deserialize(geometry));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "use_spheroid"})
+  public static double ST_Perimeter2D(byte[] geometry, boolean use_spheroid) {
+    return Functions.perimeter(GeometrySerde.deserialize(geometry), use_spheroid);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "use_spheroid", "lenient"})
+  public static double ST_Perimeter2D(byte[] geometry, boolean use_spheroid, boolean lenient) {
+    return Functions.perimeter(GeometrySerde.deserialize(geometry), use_spheroid, lenient);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static byte[] ST_PointOnSurface(byte[] geometry) {
     return GeometrySerde.serialize(Functions.pointOnSurface(GeometrySerde.deserialize(geometry)));
   }

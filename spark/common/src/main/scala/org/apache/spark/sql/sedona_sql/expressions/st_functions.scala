@@ -385,6 +385,17 @@ object st_functions extends DataFrameAPI {
   def ST_Perimeter(geom: String, use_spheroid: Boolean, lenient: Boolean): Column =
     wrapExpression[ST_Perimeter](geom, use_spheroid, lenient)
 
+  def ST_Perimeter2D(geom: Column): Column = wrapExpression[ST_Perimeter2D](geom)
+  def ST_Perimeter2D(geom: String): Column = wrapExpression[ST_Perimeter2D](geom)
+  def ST_Perimeter2D(geom: Column, use_spheroid: Column): Column =
+    wrapExpression[ST_Perimeter2D](geom, use_spheroid)
+  def ST_Perimeter2D(geom: String, use_spheroid: Boolean): Column =
+    wrapExpression[ST_Perimeter2D](geom, use_spheroid)
+  def ST_Perimeter2D(geom: Column, use_spheroid: Column, lenient: Column): Column =
+    wrapExpression[ST_Perimeter2D](geom, use_spheroid, lenient)
+  def ST_Perimeter2D(geom: String, use_spheroid: Boolean, lenient: Boolean): Column =
+    wrapExpression[ST_Perimeter2D](geom, use_spheroid, lenient)
+
   def ST_Points(geom: Column): Column = wrapExpression[ST_Points](geom)
   def ST_Points(geom: String): Column = wrapExpression[ST_Points](geom)
 
