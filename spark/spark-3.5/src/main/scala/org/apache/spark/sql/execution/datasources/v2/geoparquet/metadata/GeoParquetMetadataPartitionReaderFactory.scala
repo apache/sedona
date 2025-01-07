@@ -62,16 +62,29 @@ case class GeoParquetMetadataPartitionReaderFactory(
 }
 
 object GeoParquetMetadataPartitionReaderFactory {
+
   private def readFile(
       configuration: Configuration,
       partitionedFile: PartitionedFile,
       readDataSchema: StructType): Iterator[InternalRow] = {
-    val filePath = partitionedFile.toPath.toString
-    val metadata = ParquetFileReader
+    val reader = ParquetFileReader
       .open(HadoopInputFile.fromPath(partitionedFile.toPath, configuration))
-      .getFooter
-      .getFileMetaData
-      .getKeyValueMetaData
+
+    try {
+      readFile(configuration, partitionedFile, readDataSchema, reader)
+    } finally {
+      reader.close()
+    }
+  }
+
+  private def readFile(
+      configuration: Configuration,
+      partitionedFile: PartitionedFile,
+      readDataSchema: StructType,
+      reader: ParquetFileReader): Iterator[InternalRow] = {
+    val filePath = partitionedFile.toPath.toString
+
+    val metadata = reader.getFooter.getFileMetaData.getKeyValueMetaData
     val row = GeoParquetMetaData.parseKeyValueMetaData(metadata) match {
       case Some(geo) =>
         val geoColumnsMap = geo.columns.map { case (columnName, columnMetadata) =>
