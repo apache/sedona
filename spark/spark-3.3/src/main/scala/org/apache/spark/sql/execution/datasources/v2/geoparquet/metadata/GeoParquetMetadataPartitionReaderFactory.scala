@@ -19,7 +19,7 @@
 package org.apache.spark.sql.execution.datasources.v2.geoparquet.metadata
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.Path
+import org.apache.parquet.ParquetReadOptions
 import org.apache.parquet.hadoop.ParquetFileReader
 import org.apache.parquet.hadoop.util.HadoopInputFile
 import org.apache.spark.broadcast.Broadcast
@@ -66,23 +66,14 @@ object GeoParquetMetadataPartitionReaderFactory {
       configuration: Configuration,
       partitionedFile: PartitionedFile,
       readDataSchema: StructType): Iterator[InternalRow] = {
-    val reader = ParquetFileReader
-      .open(HadoopInputFile.fromPath(partitionedFile.toPath, configuration))
+    val inputFile = HadoopInputFile.fromPath(partitionedFile.toPath, configuration)
+    val inputStream = inputFile.newStream()
 
-    try {
-      readFile(configuration, partitionedFile, readDataSchema, reader)
-    } finally {
-      reader.close()
-    }
-  }
+    val footer = ParquetFileReader
+      .readFooter(inputFile, ParquetReadOptions.builder().build(), inputStream)
 
-  private def readFile(
-      configuration: Configuration,
-      partitionedFile: PartitionedFile,
-      readDataSchema: StructType,
-      reader: ParquetFileReader): Iterator[InternalRow] = {
-    val filePath = partitionedFile.filePath
-    val metadata = reader.getFooter.getFileMetaData.getKeyValueMetaData
+    val filePath = partitionedFile.toPath.toString
+    val metadata = footer.getFileMetaData.getKeyValueMetaData
     val row = GeoParquetMetaData.parseKeyValueMetaData(metadata) match {
       case Some(geo) =>
         val geoColumnsMap = geo.columns.map { case (columnName, columnMetadata) =>
