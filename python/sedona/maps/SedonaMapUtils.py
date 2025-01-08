@@ -42,7 +42,7 @@ class SedonaMapUtils:
         try:
             import geopandas as gpd
         except ImportError:
-            msg = "GeoPandas is missing. You can install it manually or via sedona[kepler-map] or sedona[pydeck-map]."
+            msg = "GeoPandas is missing. You can install it manually or via apache-sedona[kepler-map] or apache-sedona[pydeck-map]."
             raise ImportError(msg) from None
         geo_df = gpd.GeoDataFrame(pandas_df, geometry=geometry_col)
         if geometry_col != "geometry" and rename is True:
