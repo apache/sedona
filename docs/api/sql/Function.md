@@ -3385,7 +3385,7 @@ Introduction: This function calculates the 2D perimeter of a given geometry. It 
 
 To get the perimeter in meters, set `use_spheroid` to `true`. This calculates the geodesic perimeter using the WGS84 spheroid. When using `use_spheroid`, the `lenient` parameter defaults to true, assuming the geometry uses EPSG:4326. To throw an exception instead, set `lenient` to `false`.
 
-!!!Note
+!!!Info
     This function is an alias for [ST_Perimeter](#st_perimeter).
 
 Format:
