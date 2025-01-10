@@ -332,7 +332,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
     return spatialPartitioningWithId(partitioner);
   }
 
-  JavaPairRDD<Integer, T> spatialPartitioningWithId(final SpatialPartitioner partitioner) {
+  public JavaPairRDD<Integer, T> spatialPartitioningWithId(final SpatialPartitioner partitioner) {
     this.partitioner = partitioner;
     return this.rawSpatialRDD
         .flatMapToPair(

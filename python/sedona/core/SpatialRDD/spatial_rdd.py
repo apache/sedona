@@ -19,7 +19,7 @@ import pickle
 from typing import List, Optional, Union
 
 import attr
-from py4j.java_gateway import get_field
+from py4j.java_gateway import get_field, get_method
 from pyspark import RDD, SparkContext, StorageLevel
 from pyspark.sql import SparkSession
 
@@ -39,6 +39,15 @@ from sedona.utils.types import crs
 class SpatialPartitioner:
     name = attr.ib()
     jvm_partitioner = attr.ib()
+
+    def getGrids(self) -> List[Envelope]:
+        jvm_grids = get_method(self.jvm_partitioner, "getGrids")()
+        number_of_grids = jvm_grids.size()
+        envelopes = [
+            Envelope.from_jvm_instance(jvm_grids[index])
+            for index in range(number_of_grids)
+        ]
+        return envelopes
 
     @classmethod
     def from_java_class_name(cls, jvm_partitioner) -> "SpatialPartitioner":
