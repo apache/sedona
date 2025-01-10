@@ -327,12 +327,12 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
             true);
   }
 
-  public JavaPairRDD<Integer, T> spatialPartitioningWithId(GridType gridType, int numPartitions) throws Exception {
+  public JavaPairRDD<Integer, T> spatialPartitioningWithIds(GridType gridType, int numPartitions) throws Exception {
     calc_partitioner(gridType, numPartitions);
-    return spatialPartitioningWithId(partitioner);
+    return spatialPartitioningWithIds(partitioner);
   }
 
-  public JavaPairRDD<Integer, T> spatialPartitioningWithId(final SpatialPartitioner partitioner) {
+  public JavaPairRDD<Integer, T> spatialPartitioningWithIds(final SpatialPartitioner partitioner) {
     this.partitioner = partitioner;
     return this.rawSpatialRDD
         .flatMapToPair(
