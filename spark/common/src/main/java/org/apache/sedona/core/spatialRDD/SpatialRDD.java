@@ -327,7 +327,8 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
             true);
   }
 
-  public JavaPairRDD<Integer, T> spatialPartitioningWithIds(GridType gridType, int numPartitions) throws Exception {
+  public JavaPairRDD<Integer, T> spatialPartitioningWithIds(GridType gridType, int numPartitions)
+      throws Exception {
     calc_partitioner(gridType, numPartitions);
     return spatialPartitioningWithIds(partitioner);
   }
