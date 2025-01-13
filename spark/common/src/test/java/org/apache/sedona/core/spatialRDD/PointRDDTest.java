@@ -21,7 +21,10 @@ package org.apache.sedona.core.spatialRDD;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
+import java.util.Map;
+
 import org.apache.sedona.core.enums.IndexType;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -55,26 +58,22 @@ public class PointRDDTest extends SpatialRDDTestBase {
     spatialRDD.analyze();
     assertEquals(inputCount, spatialRDD.approximateTotalCount);
     assertEquals(inputBoundary, spatialRDD.boundaryEnvelope);
-    assert spatialRDD
-        .rawSpatialRDD
+    assert spatialRDD.rawSpatialRDD
         .take(9)
         .get(0)
         .getUserData()
         .equals("testattribute0\ttestattribute1\ttestattribute2");
-    assert spatialRDD
-        .rawSpatialRDD
+    assert spatialRDD.rawSpatialRDD
         .take(9)
         .get(2)
         .getUserData()
         .equals("testattribute0\ttestattribute1\ttestattribute2");
-    assert spatialRDD
-        .rawSpatialRDD
+    assert spatialRDD.rawSpatialRDD
         .take(9)
         .get(4)
         .getUserData()
         .equals("testattribute0\ttestattribute1\ttestattribute2");
-    assert spatialRDD
-        .rawSpatialRDD
+    assert spatialRDD.rawSpatialRDD
         .take(9)
         .get(8)
         .getUserData()
@@ -137,5 +136,21 @@ public class PointRDDTest extends SpatialRDDTestBase {
     } else {
       List<Point> result = spatialRDD.indexedRDD.take(1).get(0).query(spatialRDD.boundaryEnvelope);
     }
+  }
+
+  @Test
+  public void testPartitionWithIds() throws Exception {
+    PointRDD spatialRDD = new PointRDD(sc, InputLocation, offset, splitter, true, numPartitions);
+    spatialRDD.analyze();
+    JavaPairRDD<Integer, Point> partitioned = spatialRDD.spatialPartitioningWithIds(gridType, 5);
+
+    // Make sure the output is partitioned
+    assertEquals(spatialRDD.getPartitioner().numPartitions(), partitioned.getNumPartitions());
+
+    Map<Integer, Long> partition_counts = partitioned.countByKey();
+    assertEquals(partitioned.getNumPartitions(), partition_counts.size());
+
+    // Make sure the count is the same
+    assertEquals(spatialRDD.rawSpatialRDD.count(), partitioned.count());
   }
 }
