@@ -22,7 +22,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 import java.util.Map;
-
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.junit.AfterClass;
@@ -58,22 +57,26 @@ public class PointRDDTest extends SpatialRDDTestBase {
     spatialRDD.analyze();
     assertEquals(inputCount, spatialRDD.approximateTotalCount);
     assertEquals(inputBoundary, spatialRDD.boundaryEnvelope);
-    assert spatialRDD.rawSpatialRDD
+    assert spatialRDD
+        .rawSpatialRDD
         .take(9)
         .get(0)
         .getUserData()
         .equals("testattribute0\ttestattribute1\ttestattribute2");
-    assert spatialRDD.rawSpatialRDD
+    assert spatialRDD
+        .rawSpatialRDD
         .take(9)
         .get(2)
         .getUserData()
         .equals("testattribute0\ttestattribute1\ttestattribute2");
-    assert spatialRDD.rawSpatialRDD
+    assert spatialRDD
+        .rawSpatialRDD
         .take(9)
         .get(4)
         .getUserData()
         .equals("testattribute0\ttestattribute1\ttestattribute2");
-    assert spatialRDD.rawSpatialRDD
+    assert spatialRDD
+        .rawSpatialRDD
         .take(9)
         .get(8)
         .getUserData()
