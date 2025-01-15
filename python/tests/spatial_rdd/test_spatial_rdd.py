@@ -126,6 +126,10 @@ class TestSpatialRDD(TestBase):
             else:
                 assert spatial_rdd.getPartitioner().name == "FlatGridPartitioner"
 
+            grids = spatial_rdd.getPartitioner().getGrids()
+            assert len(grids) > 0
+            assert all(isinstance(grid, Envelope) for grid in grids)
+
     def test_get_raw_spatial_rdd(self):
         spatial_rdd = self.create_spatial_rdd()
         assert isinstance(spatial_rdd.getRawSpatialRDD(), RDD)
