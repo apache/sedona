@@ -127,22 +127,13 @@ case class BroadcastQuerySideKNNJoinExec(
       sedonaConf: SedonaConf): Unit = {
     require(numPartitions > 0, "The number of partitions must be greater than 0.")
     val kValue: Int = this.k.eval().asInstanceOf[Int]
-    require(kValue > 0, "The number of neighbors must be greater than 0.")
+    require(kValue >= 1, "The number of neighbors (k) must be equal or greater than 1.")
     objectsShapes.setNeighborSampleNumber(kValue)
 
-    val joinPartitions: Integer = numPartitions
-    broadcastJoin = false
-
-    // expand the boundary for partition to include both RDDs
-    objectsShapes.analyze()
-    queryShapes.analyze()
-    objectsShapes.boundaryEnvelope.expandToInclude(queryShapes.boundaryEnvelope)
-
-    objectsShapes.spatialPartitioning(GridType.QUADTREE_RTREE, joinPartitions)
-    queryShapes.spatialPartitioning(
-      objectsShapes.getPartitioner.asInstanceOf[QuadTreeRTPartitioner].nonOverlappedPartitioner())
-
-    objectsShapes.buildIndex(IndexType.RTREE, true)
+    // index the objects on regular partitions (not spatial partitions)
+    // this avoids the cost of spatial partitioning
+    objectsShapes.buildIndex(IndexType.RTREE, false)
+    broadcastJoin = true
   }
 
   /**

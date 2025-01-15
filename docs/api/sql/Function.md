@@ -708,6 +708,31 @@ Output:
 32618
 ```
 
+## ST_BinaryDistanceBandColumn
+
+Introduction: Introduction: Returns a `weights` column containing every record in a dataframe within a specified `threshold` distance.
+
+The `weights` column is an array of structs containing the `attributes` from each neighbor and that neighbor's weight. Since this is a binary distance band function, weights of neighbors within the threshold will always be
+`1.0`.
+
+Format: `ST_BinaryDistanceBandColumn(geometry:Geometry, threshold: Double, includeZeroDistanceNeighbors: boolean, includeSelf: boolean, useSpheroid: boolean, attributes: Struct)`
+
+Since: `v1.7.1`
+
+SQL Example
+
+```sql
+ST_BinaryDistanceBandColumn(geometry, 1.0, true, true, false, struct(id, geometry))
+```
+
+Output:
+
+```sql
+{% raw %}
+[{{15, POINT (3 1.9)}, 1.0}, {{16, POINT (3 2)}, 1.0}, {{17, POINT (3 2.1)}, 1.0}, {{18, POINT (3 2.2)}, 1.0}]
+{% endraw %}
+```
+
 ## ST_Boundary
 
 Introduction: Returns the closure of the combinatorial boundary of this Geometry.
@@ -1106,6 +1131,31 @@ true
 
 !!!Warning
     For geometries that span more than 180 degrees in longitude without actually crossing the Date Line, this function may still return true, indicating a crossing.
+
+## ST_DBSCAN
+
+Introduction: Performs a DBSCAN clustering across the entire dataframe.
+
+Returns a struct containing the cluster ID and a boolean indicating if the record is a core point in the cluster.
+
+- `epsilon` is the maximum distance between two points for them to be considered as part of the same cluster.
+- `minPoints` is the minimum number of neighbors a single record must have to form a cluster.
+
+Format: `ST_DBSCAN(geom: Geometry, epsilon: Double, minPoints: Integer)`
+
+Since: `v1.7.1`
+
+SQL Example
+
+```sql
+SELECT ST_DBSCAN(geom, 1.0, 2)
+```
+
+Output:
+
+```
+{true, 85899345920}
+```
 
 ## ST_Degrees
 
@@ -1872,6 +1922,31 @@ Output:
 
 ```
 ST_LINESTRING
+```
+
+## ST_GLocal
+
+Introduction: Runs Getis and Ord's G Local (Gi or Gi*) statistic on the geometry given the `weights` and `level`.
+
+Getis and Ord's Gi and Gi* statistics are used to identify data points with locally high values (hot spots) and low
+values (cold spots) in a spatial dataset.
+
+The `ST_WeightedDistanceBand` and `ST_BinaryDistanceBand` functions can be used to generate the `weights` column.
+
+Format: `ST_GLocal(geom: Geometry, weights: Struct, level: Int)`
+
+Since: `v1.7.1`
+
+SQL Example
+
+```sql
+ST_GLocal(myVariable, ST_BinaryDistanceBandColumn(geometry, 1.0, true, true, false, struct(myVariable, geometry)), true)
+```
+
+Output:
+
+```
+{0.5238095238095238, 0.4444444444444444, 0.001049802637104223, 2.4494897427831814, 0.00715293921771476}
 ```
 
 ## ST_H3CellDistance
@@ -2657,6 +2732,34 @@ Output:
 LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140.21046313888758)
 ```
 
+## ST_LocalOutlierFactor
+
+Introduction: Computes the Local Outlier Factor (LOF) for each point in the input dataset.
+
+Local Outlier Factor is an algorithm for determining the degree to which a single record is an inlier or outlier. It is
+based on how close a record is to its `k` nearest neighbors vs how close those neighbors are to their `k` nearest
+neighbors. Values substantially less than `1` imply that the record is an inlier, while values greater than `1` imply that
+the record is an outlier.
+
+!!!Note
+    ST_LocalOutlierFactor has a useSphere parameter rather than a useSpheroid parameter. This function thus uses a spherical model of the earth rather than an ellipsoidal model when calculating distance.
+
+Format: `ST_LocalOutlierFactor(geometry: Geometry, k: Int, useSphere: Boolean)`
+
+Since: `v1.7.1`
+
+SQL Example
+
+```sql
+SELECT ST_LocalOutlierFactor(geometry, 5, true)
+```
+
+Output:
+
+```
+1.0009256283408587
+```
+
 ## ST_LocateAlong
 
 Introduction: This function computes Point or MultiPoint geometries representing locations along a measured input geometry (LineString or MultiLineString) corresponding to the provided measure value(s). Polygonal geometry inputs are not supported. The output points lie directly on the input line at the specified measure positions.
@@ -3265,6 +3368,54 @@ SQL Example:
 
 ```sql
 SELECT ST_Perimeter(
+        ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))', 4326),
+        true, false
+)
+```
+
+Output:
+
+```
+2216860.5497177234
+```
+
+## ST_Perimeter2D
+
+Introduction: This function calculates the 2D perimeter of a given geometry. It supports Polygon, MultiPolygon, and GeometryCollection geometries (as long as the GeometryCollection contains polygonal geometries). For other types, it returns 0. To measure lines, use [ST_Length](#st_length).
+
+To get the perimeter in meters, set `use_spheroid` to `true`. This calculates the geodesic perimeter using the WGS84 spheroid. When using `use_spheroid`, the `lenient` parameter defaults to true, assuming the geometry uses EPSG:4326. To throw an exception instead, set `lenient` to `false`.
+
+!!!Info
+    This function is an alias for [ST_Perimeter](#st_perimeter).
+
+Format:
+
+`ST_Perimeter2D(geom: Geometry)`
+
+`ST_Perimeter2D(geom: Geometry, use_spheroid: Boolean)`
+
+`ST_Perimeter2D(geom: Geometry, use_spheroid: Boolean, lenient: Boolean = True)`
+
+Since: `v1.7.1`
+
+SQL Example:
+
+```sql
+SELECT ST_Perimeter2D(
+        ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))')
+)
+```
+
+Output:
+
+```
+20.0
+```
+
+SQL Example:
+
+```sql
+SELECT ST_Perimeter2D(
         ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))', 4326),
         true, false
 )
@@ -4414,6 +4565,30 @@ Output:
 
 ```
 GEOMETRYCOLLECTION(POLYGON((-1 2,2 -1,-1 -1,-1 2)),POLYGON((-1 2,2 2,2 -1,-1 2)))
+```
+
+## ST_WeightedDistanceBandColumn
+
+Introduction: Introduction: Returns a `weights` column containing every record in a dataframe within a specified `threshold` distance.
+
+The `weights` column is an array of structs containing the `attributes` from each neighbor and that neighbor's weight. Since this is a distance weighted distance band, weights will be distance^alpha.
+
+Format: `ST_WeightedDistanceBandColumn(geometry:Geometry, threshold: Double, alpha: Double, includeZeroDistanceNeighbors: boolean, includeSelf: boolean, selfWeight: Double, useSpheroid: boolean, attributes: Struct)`
+
+Since: `v1.7.1`
+
+SQL Example
+
+```sql
+ST_WeightedDistanceBandColumn(geometry, 1.0, -1.0, true, true, 1.0, false, struct(id, geometry))
+```
+
+Output:
+
+```sql
+{% raw %}
+[{{15, POINT (3 1.9)}, 1.0}, {{16, POINT (3 2)}, 9.999999999999991}, {{17, POINT (3 2.1)}, 4.999999999999996}, {{18, POINT (3 2.2)}, 3.3333333333333304}]
+{% endraw %}
 ```
 
 ## ST_X

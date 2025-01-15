@@ -25,6 +25,10 @@ import org.apache.sedona.sql.UDF.UdfRegistrator
 import org.apache.sedona.sql.UDT.UdtRegistrator
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet
+
+import org.apache.spark.sql.sedona_sql.optimization.ExtractGeoStatsFunctions
+import org.apache.spark.sql.sedona_sql.strategy.geostats.EvalGeoStatsFunctionStrategy
+
 import org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetector
 import org.apache.spark.sql.{SQLContext, SparkSession}
 
@@ -61,6 +65,17 @@ object SedonaContext {
       sparkSession.experimental.extraOptimizations ++= Seq(
         new SpatialFilterPushDownForGeoParquet(sparkSession))
     }
+
+    // Support geostats functions
+    if (!sparkSession.experimental.extraOptimizations.contains(ExtractGeoStatsFunctions)) {
+      sparkSession.experimental.extraOptimizations ++= Seq(ExtractGeoStatsFunctions)
+    }
+    if (!sparkSession.experimental.extraStrategies.exists(
+        _.isInstanceOf[EvalGeoStatsFunctionStrategy])) {
+      sparkSession.experimental.extraStrategies ++= Seq(
+        new EvalGeoStatsFunctionStrategy(sparkSession))
+    }
+
     addGeoParquetToSupportNestedFilterSources(sparkSession)
     RasterRegistrator.registerAll(sparkSession)
     UdtRegistrator.registerAll()

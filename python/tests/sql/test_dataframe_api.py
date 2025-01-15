@@ -761,6 +761,15 @@ test_configurations = [
         "ceil(geom)",
         378794,
     ),
+    (stf.ST_Perimeter2D, ("geom",), "triangle_geom", "", 3.414213562373095),
+    (stf.ST_Perimeter2D, ("geom", True), "triangle_geom", "ceil(geom)", 378794),
+    (
+        stf.ST_Perimeter2D,
+        (lambda: stf.ST_SetSRID("geom", 4326), True),
+        "triangle_geom",
+        "ceil(geom)",
+        378794,
+    ),
     (
         stf.ST_Points,
         ("line",),
@@ -1714,3 +1723,19 @@ class TestDataFrameAPI(TestBase):
             match=f"Incorrect argument type: [A-Za-z_0-9]+ for {func.__name__} should be [A-Za-z0-9\\[\\]_, ]+ but received [A-Za-z0-9_]+.",
         ):
             func(*args)
+
+    def test_dbscan(self):
+        df = self.spark.createDataFrame([{"id": 1, "x": 2, "y": 3}]).withColumn(
+            "geometry", f.expr("ST_Point(x, y)")
+        )
+
+        df.withColumn("dbscan", ST_DBSCAN("geometry", 1.0, 2, False)).collect()
+
+    def test_lof(self):
+        df = self.spark.createDataFrame([{"id": 1, "x": 2, "y": 3}]).withColumn(
+            "geometry", f.expr("ST_Point(x, y)")
+        )
+
+        df.withColumn(
+            "localOutlierFactor", ST_LocalOutlierFactor("geometry", 2, False)
+        ).collect()

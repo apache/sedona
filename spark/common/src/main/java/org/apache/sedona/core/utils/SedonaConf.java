@@ -59,6 +59,9 @@ public class SedonaConf implements Serializable {
   // Parameters for knn joins
   private boolean includeTieBreakersInKNNJoins = false;
 
+  // Parameters for geostats
+  private Boolean DBSCANIncludeOutliers = true;
+
   public static SedonaConf fromActiveSession() {
     return new SedonaConf(SparkSession.active().conf());
   }
@@ -98,6 +101,10 @@ public class SedonaConf implements Serializable {
     // Parameters for knn joins
     this.includeTieBreakersInKNNJoins =
         Boolean.parseBoolean(getConfigValue(runtimeConfig, "join.knn.includeTieBreakers", "false"));
+
+    // Parameters for geostats
+    this.DBSCANIncludeOutliers =
+        Boolean.parseBoolean(runtimeConfig.get("spark.sedona.dbscan.includeOutliers", "true"));
   }
 
   // Helper method to prioritize `sedona.*` over `spark.sedona.*`
@@ -181,5 +188,9 @@ public class SedonaConf implements Serializable {
 
   public SpatialJoinOptimizationMode getSpatialJoinOptimizationMode() {
     return spatialJoinOptimizationMode;
+  }
+
+  public Boolean getDBSCANIncludeOutliers() {
+    return DBSCANIncludeOutliers;
   }
 }

@@ -57,6 +57,7 @@ object Catalog {
     function[ST_GeomFromKML](),
     function[ST_CoordDim](),
     function[ST_Perimeter](),
+    function[ST_Perimeter2D](),
     function[ST_Point](),
     function[ST_Points](),
     function[ST_MakeEnvelope](),
@@ -339,7 +340,13 @@ object Catalog {
     function[RS_Resample](),
     function[RS_ReprojectMatch]("nearestneighbor"),
     function[RS_FromNetCDF](),
-    function[RS_NetCDFInfo]())
+    function[RS_NetCDFInfo](),
+    // geostats functions
+    function[ST_DBSCAN](),
+    function[ST_LocalOutlierFactor](),
+    function[ST_GLocal](),
+    function[ST_BinaryDistanceBandColumn](),
+    function[ST_WeightedDistanceBandColumn]())
 
   // Aggregate functions with Geometry as buffer
   val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] =

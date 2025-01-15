@@ -37,13 +37,11 @@ class GeoPackageScanBuilder(
     extends FileScanBuilder(sparkSession, fileIndex, dataSchema) {
 
   override def build(): Scan = {
-    val paths = fileIndex.allFiles().map(_.getPath.toString)
-
     val fileIndexAdjusted =
       if (loadOptions.showMetadata)
         new InMemoryFileIndex(
           sparkSession,
-          paths.slice(0, 1).map(new org.apache.hadoop.fs.Path(_)),
+          fileIndex.inputFiles.slice(0, 1).map(new org.apache.hadoop.fs.Path(_)),
           options.asCaseSensitiveMap.asScala.toMap,
           userDefinedSchema)
       else fileIndex

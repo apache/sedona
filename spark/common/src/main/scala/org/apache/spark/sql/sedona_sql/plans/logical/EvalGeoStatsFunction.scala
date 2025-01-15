@@ -16,32 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.core.knnJudgement;
+package org.apache.spark.sql.sedona_sql.plans.logical
 
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.index.strtree.ItemBoundable;
-import org.locationtech.jts.index.strtree.ItemDistance;
+import org.apache.spark.sql.catalyst.expressions.Attribute
+import org.apache.spark.sql.catalyst.expressions.AttributeSet
+import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
+import org.apache.spark.sql.catalyst.plans.logical.UnaryNode
 
-public class EuclideanItemDistance implements ItemDistance {
+case class EvalGeoStatsFunction(
+    function: Expression,
+    resultAttrs: Seq[Attribute],
+    child: LogicalPlan)
+    extends UnaryNode {
 
-  public EuclideanItemDistance() {}
+  override def output: Seq[Attribute] = child.output ++ resultAttrs
 
-  @Override
-  public double distance(ItemBoundable item1, ItemBoundable item2) {
-    if (item1 == item2) {
-      return Double.MAX_VALUE;
-    } else {
-      Geometry g1 = (Geometry) item1.getItem();
-      Geometry g2 = (Geometry) item2.getItem();
-      return g1.distance(g2);
-    }
-  }
+  override def producedAttributes: AttributeSet = AttributeSet(resultAttrs)
 
-  public double distance(Geometry geometry1, Geometry geometry2) {
-    if (geometry1 == geometry2) {
-      return Double.MAX_VALUE;
-    } else {
-      return geometry1.distance(geometry2);
-    }
-  }
+  override protected def withNewChildInternal(newChild: LogicalPlan): LogicalPlan =
+    copy(child = newChild)
 }

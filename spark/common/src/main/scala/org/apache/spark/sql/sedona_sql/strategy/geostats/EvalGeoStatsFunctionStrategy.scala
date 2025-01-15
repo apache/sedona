@@ -16,32 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.core.knnJudgement;
+package org.apache.spark.sql.sedona_sql.strategy.geostats
 
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.index.strtree.ItemBoundable;
-import org.locationtech.jts.index.strtree.ItemDistance;
+import org.apache.spark.sql.Strategy
+import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
+import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.sedona_sql.plans.logical.EvalGeoStatsFunction
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction
 
-public class EuclideanItemDistance implements ItemDistance {
+class EvalGeoStatsFunctionStrategy(spark: SparkSession) extends Strategy {
 
-  public EuclideanItemDistance() {}
-
-  @Override
-  public double distance(ItemBoundable item1, ItemBoundable item2) {
-    if (item1 == item2) {
-      return Double.MAX_VALUE;
-    } else {
-      Geometry g1 = (Geometry) item1.getItem();
-      Geometry g2 = (Geometry) item2.getItem();
-      return g1.distance(g2);
-    }
-  }
-
-  public double distance(Geometry geometry1, Geometry geometry2) {
-    if (geometry1 == geometry2) {
-      return Double.MAX_VALUE;
-    } else {
-      return geometry1.distance(geometry2);
+  override def apply(plan: LogicalPlan): Seq[SparkPlan] = {
+    plan match {
+      case EvalGeoStatsFunction(function: ST_GeoStatsFunction, resultAttrs, child) =>
+        EvalGeoStatsFunctionExec(function, planLater(child), resultAttrs) :: Nil
+      case _ => Nil
     }
   }
 }
