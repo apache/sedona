@@ -858,6 +858,10 @@ The algorithm is available as a Scala and Python function called on a spatial da
 
 The first parameter is the dataframe, the next two are the epsilon and min_points parameters of the DBSCAN algorithm.
 
+!!!Note
+    The sparkContext's checkpoint directory must be set to use DBSCAN. Sedona's DBSCAN implementation uses Graphframes
+    which requires a checkpoint directory to be set. This can be done by calling `sparkContext.setCheckpointDir("path/to/checkpoint")`.
+
 === "Scala"
 
 	```scala
