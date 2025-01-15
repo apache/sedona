@@ -27,7 +27,7 @@ Create an issue with a reproducible example.  Please specify the Sedona version,
 
 ## Did you create a PR to fix a bug?
 
-Open a pull request and add "Fixes #issue_number" in the PR description.
+See [here](https://sedona.apache.org/latest/community/rule/#make-a-pull-request) for instructions on how to open PRs.
 
 We appreciate bug fixes - thank you in advance!
 
