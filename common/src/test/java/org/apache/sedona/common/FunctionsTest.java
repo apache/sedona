@@ -1854,6 +1854,24 @@ public class FunctionsTest extends TestBase {
     actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 2000));
     expected = "MULTIPOINT ((1 1))";
     assertEquals(expected, actual);
+
+    // The minimum number of coordinates in valid geometry shouldn't result in an empty geometry
+    geom = Constructors.geomFromWKT("POLYGON ((40 40, 70 70, 70 70, 40 40))", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom));
+    expected = "POLYGON ((40 40, 70 70, 70 70, 40 40))";
+    assertEquals(expected, actual);
+
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((40 40, 70 70, 70 70, 40 40), (40 40, 70 70, 50 50, 70 70, 40 40))", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom));
+    expected = "POLYGON ((40 40, 70 70, 70 70, 40 40), (40 40, 70 70, 50 50, 70 70, 40 40))";
+    assertEquals(expected, actual);
+
+    geom = Constructors.geomFromWKT("LINESTRING(0 0, 1 1)", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom));
+    expected = "LINESTRING (0 0, 1 1)";
+    assertEquals(expected, actual);
   }
 
   @Test
