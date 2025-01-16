@@ -151,6 +151,7 @@ nav:
       - Telemetry: asf/telemetry.md
 repo_url: https://github.com/apache/sedona
 repo_name: apache/sedona
+edit_uri: edit/master/docs/
 theme:
   font: false
   name: 'material'
@@ -165,12 +166,14 @@ theme:
     repo: fontawesome/brands/github
   features:
     - content.code.copy
+    - content.action.edit
     - search.highlight
     - search.share
     - search.suggest
     - navigation.footer
     - navigation.instant
     - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.top
 extra:
   version:
