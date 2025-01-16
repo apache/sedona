@@ -1948,6 +1948,13 @@ class functionTestScala
       .get(0)
     expected = "LINESTRING (0 0, 5 5, 2 2)"
     assertEquals(expected, actual)
+
+    actual = sparkSession
+      .sql("SELECT ST_AsText(ST_RemoveRepeatedPoints(ST_GeomFromWKT('POLYGON ((40 40, 70 70, 70 70, 40 40))')))")
+      .first()
+      .get(0)
+    expected = "POLYGON ((40 40, 70 70, 70 70, 40 40))"
+    assertEquals(expected, actual)
   }
 
   it("Should correctly set using ST_SetPoint") {
