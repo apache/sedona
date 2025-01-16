@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.common.raster;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.media.jai.RasterFactory;
+import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.inputstream.ByteArrayImageInputStream;
 import org.apache.sedona.common.raster.netcdf.NetCdfReader;
@@ -35,6 +36,7 @@ import org.apache.sedona.common.utils.ImageUtils;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.feature.DefaultFeatureCollection;
@@ -50,6 +52,7 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.util.factory.Hints;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -117,21 +120,29 @@ public class RasterConstructors {
       Geometry geom,
       GridCoverage2D raster,
       String pixelType,
+      boolean allTouched,
       double value,
       Double noDataValue,
       boolean useGeometryExtent)
       throws FactoryException {
     List<Object> objects =
-        rasterization(geom, raster, pixelType, value, noDataValue, useGeometryExtent);
+        Rasterization.rasterize(geom, raster, pixelType, value, useGeometryExtent, allTouched);
     WritableRaster writableRaster = (WritableRaster) objects.get(0);
     GridCoverage2D rasterized = (GridCoverage2D) objects.get(1);
 
-    return RasterUtils.clone(
-        writableRaster,
-        rasterized.getSampleDimensions(),
-        rasterized,
-        noDataValue,
-        false); // no need to original raster metadata since this is a new raster.
+    GridCoverage2D resultRaster =
+        RasterUtils.clone(
+            writableRaster,
+            rasterized.getSampleDimensions(),
+            rasterized,
+            noDataValue,
+            false); // no need to original raster metadata since this is a new raster.
+
+    if (noDataValue != null) {
+      resultRaster = RasterBandEditors.setBandNoDataValue(resultRaster, 1, noDataValue);
+    }
+
+    return resultRaster;
   }
 
   /**
@@ -147,9 +158,14 @@ public class RasterConstructors {
    * @throws FactoryException
    */
   public static GridCoverage2D asRaster(
-      Geometry geom, GridCoverage2D raster, String pixelType, double value, Double noDataValue)
+      Geometry geom,
+      GridCoverage2D raster,
+      String pixelType,
+      boolean allTouched,
+      double value,
+      Double noDataValue)
       throws FactoryException {
-    return asRaster(geom, raster, pixelType, value, noDataValue, true);
+    return asRaster(geom, raster, pixelType, allTouched, value, noDataValue, true);
   }
 
   /**
@@ -162,9 +178,10 @@ public class RasterConstructors {
    * @return Rasterized Geometry
    * @throws FactoryException
    */
-  public static GridCoverage2D asRaster(Geometry geom, GridCoverage2D raster, String pixelType)
+  public static GridCoverage2D asRaster(
+      Geometry geom, GridCoverage2D raster, String pixelType, boolean allTouched)
       throws FactoryException {
-    return asRaster(geom, raster, pixelType, 1, null);
+    return asRaster(geom, raster, pixelType, allTouched, 1, null);
   }
 
   /**
@@ -179,9 +196,9 @@ public class RasterConstructors {
    * @throws FactoryException
    */
   public static GridCoverage2D asRaster(
-      Geometry geom, GridCoverage2D raster, String pixelType, double value)
+      Geometry geom, GridCoverage2D raster, String pixelType, boolean allTouched, double value)
       throws FactoryException {
-    return asRaster(geom, raster, pixelType, value, null);
+    return asRaster(geom, raster, pixelType, allTouched, value, null);
   }
 
   private static List<Object> rasterization(
