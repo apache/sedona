@@ -441,6 +441,22 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
         resultAll.mkString should be("[0,6][0,7]")
       }
     }
+
+    it("KNN Join with exact algorithms should not fail with null geometries") {
+      val df1 = sparkSession.sql("SELECT ST_GeomFromText(col1) as geom1 from values ('POINT (0.0 0.0)'), (null)")
+      val df2 = sparkSession.sql("SELECT ST_Point(0.0, 0.0) as geom2")
+      df1.cache()
+      df2.cache()
+      df1.join(df2, expr("ST_KNN(geom1, geom2, 1)")).count() should be(1)
+    }
+
+    it("KNN Join with exact algorithms should not fail with empty geometries") {
+      val df1 = sparkSession.sql("SELECT ST_GeomFromText('POINT EMPTY') as geom1")
+      val df2 = sparkSession.sql("SELECT ST_Point(0.0, 0.0) as geom2")
+      df1.cache()
+      df2.cache()
+      df1.join(df2, expr("ST_KNN(geom1, geom2, 1)")).count() should be(0)
+    }
   }
 
   private def withOptimizationMode(mode: String)(body: => Unit): Unit = {
