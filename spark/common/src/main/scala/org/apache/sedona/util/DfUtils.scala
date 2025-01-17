@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.stats
+package org.apache.sedona.util
 
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 
-private[stats] object Util {
+object DfUtils {
   def getGeometryColumnName(dataframe: DataFrame): String = {
     val geomFields = dataframe.schema.fields.filter(_.dataType == GeometryUDT)
 
