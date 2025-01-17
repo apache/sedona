@@ -162,12 +162,14 @@ object Adapter {
       spatialRDD: SpatialRDD[T],
       schema: StructType,
       sparkSession: SparkSession): DataFrame = {
-    val rdd = spatialRDD.rawSpatialRDD.rdd.mapPartitions(iter => {
-      iter.map[Row](geom => {
-        val stringRow = extractUserData(geom)
-        castRowToSchema(stringRow = stringRow, schema = schema)
-      })
-    }, true)
+    val rdd = spatialRDD.rawSpatialRDD.rdd.mapPartitions(
+      iter => {
+        iter.map[Row](geom => {
+          val stringRow = extractUserData(geom)
+          castRowToSchema(stringRow = stringRow, schema = schema)
+        })
+      },
+      true)
 
     sparkSession.sqlContext.createDataFrame(rdd, schema)
   }
