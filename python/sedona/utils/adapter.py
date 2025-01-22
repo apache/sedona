@@ -212,7 +212,9 @@ class Adapter(metaclass=MultipleMeta):
             return Adapter.toDf(srdd, spark)
 
     @classmethod
-    def toDfPartitioned(cls, spatialRDD: SpatialRDD, sparkSession: SparkSession) -> DataFrame:
+    def toDfPartitioned(
+        cls, spatialRDD: SpatialRDD, sparkSession: SparkSession
+    ) -> DataFrame:
         """
 
         :param spatialRDD:
