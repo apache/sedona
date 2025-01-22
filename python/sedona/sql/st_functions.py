@@ -1070,6 +1070,24 @@ def ST_LineMerge(multi_line_string: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_LineSegments(
+    geom: ColumnOrName, lenient: Optional[Union[ColumnOrName, bool]] = None
+) -> Column:
+    """
+    Convert multi-coordinate LineString into an array of LineStrings that contain exactly 2 points.
+
+    @param geom: input LineString geometry column.
+    @param lenient: suppresses exception
+    @return: array of LineStrings
+    """
+    args = (geom, lenient)
+    if lenient is None:
+        args = (geom,)
+
+    return _call_st_function("ST_LineSegments", args)
+
+
+@validate_argument_types
 def ST_LineSubstring(
     line_string: ColumnOrName,
     start_fraction: ColumnOrNameOrNumber,

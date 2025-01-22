@@ -170,6 +170,7 @@ object Catalog {
     function[ST_IsPolygonCCW](),
     function[ST_ForcePolygonCCW](),
     function[ST_FlipCoordinates](),
+    function[ST_LineSegments](),
     function[ST_LineSubstring](),
     function[ST_LineInterpolatePoint](),
     function[ST_LineLocatePoint](),

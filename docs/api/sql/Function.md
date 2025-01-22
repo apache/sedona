@@ -2710,6 +2710,47 @@ Output:
 LINESTRING (-29 -27, -30 -29.7, -45 -33, -46 -32)
 ```
 
+## ST_LineSegments
+
+Introduction: This function transforms a LineString containing multiple coordinates into an array of LineStrings, each with precisely two coordinates. The `lenient` argument, true by default, prevents an exception from being raised if the input geometry is not a LineString.
+
+Format:
+
+`ST_LineSegments(geom: Geometry, lenient: Boolean)`
+
+`ST_LineSegments(geom: Geometry)`
+
+Since: `v1.7.1`
+
+SQL Example:
+
+```sql
+SELECT ST_LineSegments(
+        ST_GeomFromWKT('LINESTRING(0 0, 10 10, 20 20, 30 30, 40 40, 50 50)'),
+       false
+    )
+```
+
+Output:
+
+```
+[LINESTRING (0 0, 10 10), LINESTRING (10 10, 20 20), LINESTRING (20 20, 30 30), LINESTRING (30 30, 40 40), LINESTRING (40 40, 50 50)]
+```
+
+SQL Example:
+
+```sql
+SELECT ST_LineSegments(
+        ST_GeomFromWKT('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))')
+    )
+```
+
+Output:
+
+```
+[]
+```
+
 ## ST_LineSubstring
 
 Introduction: Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length. Second and third arguments are Double values between 0 and 1. This only works with LINESTRINGs.
