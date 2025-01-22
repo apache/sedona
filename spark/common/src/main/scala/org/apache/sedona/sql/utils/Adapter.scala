@@ -162,14 +162,10 @@ object Adapter {
       spatialRDD: SpatialRDD[T],
       schema: StructType,
       sparkSession: SparkSession): DataFrame = {
-    val rdd = spatialRDD.rawSpatialRDD.rdd.mapPartitions(
-      iter => {
-        iter.map[Row](geom => {
-          val stringRow = extractUserData(geom)
-          castRowToSchema(stringRow = stringRow, schema = schema)
-        })
-      },
-      true)
+    val rdd = spatialRDD.rawSpatialRDD.rdd.map[Row](geom => {
+      val stringRow = extractUserData(geom)
+      castRowToSchema(stringRow = stringRow, schema = schema)
+    })
 
     sparkSession.sqlContext.createDataFrame(rdd, schema)
   }
@@ -237,6 +233,46 @@ object Adapter {
     })
 
     sparkSession.sqlContext.createDataFrame(rdd, schema)
+  }
+
+  /**
+   * Convert a spatial RDD to DataFrame with a given schema keeping spatial partitioning
+   *
+   * Note that spatial partitioning methods that introduce duplicates will result in an output
+   * data frame with duplicate features. This property is essential for implementing correct
+   * joins; however, may introduce surprising results.
+   *
+   * @param spatialRDD
+   *   Spatial RDD
+   * @param fieldNames
+   *   Desired field names
+   * @param sparkSession
+   *   Spark Session
+   * @tparam T
+   *   Geometry
+   * @return
+   *   DataFrame with the specified field names with spatial partitioning preserved
+   */
+  def toDfPartitioned[T <: Geometry](
+      spatialRDD: SpatialRDD[T],
+      fieldNames: Seq[String],
+      sparkSession: SparkSession): DataFrame = {
+    val rowRdd = spatialRDD.spatialPartitionedRDD.map[Row](geom => {
+      val stringRow = extractUserData(geom)
+      Row.fromSeq(stringRow)
+    })
+    var cols: Seq[StructField] = Seq(StructField("geometry", GeometryUDT))
+    if (fieldNames != null && fieldNames.nonEmpty) {
+      cols = cols ++ fieldNames.map(f => StructField(f, StringType))
+    }
+    val schema = StructType(cols)
+    sparkSession.createDataFrame(rowRdd, schema)
+  }
+
+  def toDfPartitioned[T <: Geometry](
+      spatialRDD: SpatialRDD[T],
+      sparkSession: SparkSession): DataFrame = {
+    toDfPartitioned(spatialRDD, null, sparkSession)
   }
 
   /**

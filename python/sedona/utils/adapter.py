@@ -210,3 +210,20 @@ class Adapter(metaclass=MultipleMeta):
             return Adapter.toDf(srdd, fieldNames, spark)
         else:
             return Adapter.toDf(srdd, spark)
+
+    @classmethod
+    def toDfPartitioned(cls, spatialRDD: SpatialRDD, sparkSession: SparkSession) -> DataFrame:
+        """
+
+        :param spatialRDD:
+        :param sparkSession:
+        :return:
+        """
+        sc = spatialRDD._sc
+        jvm = sc._jvm
+
+        jdf = jvm.Adapter.toDfPartitioned(spatialRDD._srdd, sparkSession._jsparkSession)
+
+        df = Adapter._create_dataframe(jdf, sparkSession)
+
+        return df
