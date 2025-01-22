@@ -37,7 +37,6 @@ import org.apache.sedona.core.spatialPartitioning.quadtree.StandardQuadTree;
 import org.apache.sedona.core.spatialRddTool.IndexBuilder;
 import org.apache.sedona.core.spatialRddTool.StatCalculator;
 import org.apache.sedona.core.utils.RDDSampleUtils;
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
@@ -325,25 +324,6 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
               }
             },
             true);
-  }
-
-  public JavaPairRDD<Integer, T> spatialPartitioningWithIds(GridType gridType, int numPartitions)
-      throws Exception {
-    calc_partitioner(gridType, numPartitions);
-    return spatialPartitioningWithIds(partitioner);
-  }
-
-  public JavaPairRDD<Integer, T> spatialPartitioningWithIds(final SpatialPartitioner partitioner) {
-    this.partitioner = partitioner;
-    return this.rawSpatialRDD
-        .flatMapToPair(
-            new PairFlatMapFunction<T, Integer, T>() {
-              @Override
-              public Iterator<Tuple2<Integer, T>> call(T spatialObject) throws Exception {
-                return partitioner.placeObject(spatialObject);
-              }
-            })
-        .partitionBy(partitioner);
   }
 
   /**
