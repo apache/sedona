@@ -16,19 +16,26 @@
 #  under the License.
 
 import pyarrow as pa
-from pyspark.sql.functions import expr
 from tests.test_base import TestBase
 from pyspark.sql.types import StringType, StructType
 
 from sedona.utils.geoarrow import dataframe_to_arrow
 
 
-class TestGeometrySerde(TestBase):
+class TestGeoArrowSerde(TestBase):
     def test_to_geoarrow_no_geometry(self):
         schema = StructType().add("wkt", StringType())
-        wkt_df = TestGeometrySerde.spark.createDataFrame([zip(TEST_WKT)], schema)
+        wkt_df = TestGeoArrowSerde.spark.createDataFrame([zip(TEST_WKT)], schema)
         wkt_table = dataframe_to_arrow(wkt_df)
         assert wkt_table == pa.table({"wkt": TEST_WKT})
+
+    def test_to_geoarrow_with_geometry(self):
+        schema = StructType().add("wkt", StringType())
+        wkt_df = TestGeoArrowSerde.spark.createDataFrame([zip(TEST_WKT)], schema)
+        geo_df = wkt_df.selectExpr("ST_GeomFromText(geom) AS geom")
+
+        geo_table = dataframe_to_arrow(geo_df)
+        assert geo_table.colnames == ["geom"]
 
 
 TEST_WKT = [
