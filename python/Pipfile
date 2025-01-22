@@ -30,6 +30,7 @@ pyarrow="*"
 keplergl = "==0.3.2"
 pydeck = "===0.8.0"
 rasterio = ">=1.2.10"
+geoarrow-types = "*"
 
 [requires]
 python_version = "3.7"
