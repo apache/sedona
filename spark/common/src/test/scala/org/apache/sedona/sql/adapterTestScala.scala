@@ -553,5 +553,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
         }
       }
     }
+
+    // TODO: Add test for toDfPartitioned
   }
 }

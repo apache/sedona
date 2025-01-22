@@ -402,3 +402,5 @@ class TestAdapter(TestBase):
 
         assert spatial_df.columns == ["geometry", *spatial_columns]
         assert spatial_df.count() == 1001
+
+    # TODO: Add test for Adpater.toDfPartitioned()
