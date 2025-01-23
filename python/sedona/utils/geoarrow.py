@@ -19,7 +19,7 @@
 # with the ArrowStreamSerializer (instead of the ArrowCollectSerializer)
 
 import pyarrow as pa
-import geoarrow.types as gat
+
 from sedona.sql.types import GeometryType
 from sedona.sql.st_functions import ST_AsBinary
 
@@ -39,13 +39,37 @@ def dataframe_to_arrow(df):
     df_projected = df.select(*df_columns)
     table = dataframe_to_arrow_raw(df_projected)
 
-    target_type = gat.wkb().to_pyarrow()
-    new_cols = [
-        target_type.wrap_array(col) if is_geom else col
-        for is_geom, col in zip(col_is_geometry, table.columns)
-    ]
+    try:
+        # Using geoarrow-types is the preferred mechanism for Arrow output.
+        # Using the extension type ensures that the type and its metadata will
+        # propagate through all pyarrow transformations.
+        import geoarrow.types as gat
+        from geoarrow.types.type_pyarrow import register_extension_types
 
-    return pa.table(new_cols, table.column_names)
+        register_extension_types()
+        target_type = gat.wkb().to_pyarrow()
+
+        new_cols = [
+            target_type.wrap_array(col) if is_geom else col
+            for is_geom, col in zip(col_is_geometry, table.columns)
+        ]
+
+        return pa.table(new_cols, table.column_names)
+    except ImportError:
+        # In the event that we don't have access to GeoArrow extension types,
+        # we can still add field metadata that will propagate through some types
+        # of operations (e.g., writing this table to a file or passing it to
+        # DuckDB as long as no intermediate transformations were applied).
+        new_fields = [
+            (
+                wrap_geoarrow_wkb(table.schema.field(i))
+                if is_geom
+                else table.schema.field(i)
+            )
+            for i, is_geom in enumerate(col_is_geometry)
+        ]
+
+        return table.from_arrays(table.columns, schema=pa.schema(new_fields))
 
 
 def dataframe_to_arrow_raw(df):
@@ -71,3 +95,9 @@ def dataframe_to_arrow_raw(df):
     # self_destruct (if enabled) is effective
     del batches
     return table
+
+
+def wrap_geoarrow_wkb(field):
+    return field.with_metadata(
+        {"ARROW:extension:name": "geoarrow.wkb", "ARROW:extension:metadata": "{}"}
+    )
