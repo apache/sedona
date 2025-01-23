@@ -1162,7 +1162,7 @@ public class Functions {
         return new Geometry[] {};
       } else {
         throw new IllegalArgumentException(
-                "Geometry is not a LineString. This function expects input geometry to be a LineString.");
+            "Geometry is not a LineString. This function expects input geometry to be a LineString.");
       }
     }
 
