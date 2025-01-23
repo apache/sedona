@@ -25,6 +25,14 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.index.strtree.STRtree;
 import scala.Tuple2;
 
+/**
+ * The IndexedGridPartitioner is used when there is already a set of grids which the data should be
+ * partitioned into. It leverages an STRTree to quickly find the grids to place a geometry into. If
+ * you have very few objects to place, it may make more sense to use the FlatGridPartitioner. If you
+ * do not have a strict requirement to use a specific set of grids, it may make more sense to use
+ * another partitioner that generates its own grids from space-partitioning tree, e.g. the
+ * KDBTreePartitioner or the QuadTreePartitioner.
+ */
 public class IndexedGridPartitioner extends FlatGridPartitioner {
   private final STRtree index;
 
