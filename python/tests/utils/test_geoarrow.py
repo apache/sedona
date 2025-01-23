@@ -35,7 +35,7 @@ class TestGeoArrowSerde(TestBase):
         geo_df = wkt_df.selectExpr("wkt", "ST_GeomFromText(wkt) AS geom")
 
         geo_table = dataframe_to_arrow(geo_df)
-        assert geo_table.colnames == ["wkt", "geom"]
+        assert geo_table.column_names == ["wkt", "geom"]
 
         geom = geo_table["geom"]
         if isinstance(geom.type, pa.ExtensionType):
