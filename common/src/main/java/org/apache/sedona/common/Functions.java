@@ -1157,26 +1157,22 @@ public class Functions {
   }
 
   public static Geometry[] lineSegments(Geometry geometry, boolean lenient) {
-    LineString line;
-    try {
-      line = (LineString) geometry;
-    } catch (Exception e) {
+    if (!(geometry instanceof LineString)) {
       if (lenient) {
         return new Geometry[] {};
       } else {
         throw new IllegalArgumentException(
-            "Geometry is not a LineString. This function expects input geometry to be a LineString.");
+                "Geometry is not a LineString. This function expects input geometry to be a LineString.");
       }
     }
 
+    LineString line = (LineString) geometry;
     Coordinate[] coords = line.getCoordinates();
-    GeometryFactory geometryFactory = geometry.getFactory();
-    if (coords.length == 2) {
+    if (coords.length == 2 || coords.length == 0) {
       return new Geometry[] {line};
-    } else if (coords.length == 0) {
-      return new Geometry[] {geometryFactory.createLineString()};
     }
 
+    GeometryFactory geometryFactory = geometry.getFactory();
     List<Geometry> resultList = new ArrayList<>();
     for (int i = 1; i < coords.length; i++) {
       resultList.add(geometryFactory.createLineString(new Coordinate[] {coords[i - 1], coords[i]}));
