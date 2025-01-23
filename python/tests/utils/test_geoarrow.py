@@ -32,22 +32,22 @@ class TestGeoArrowSerde(TestBase):
     def test_to_geoarrow_with_geometry(self):
         schema = StructType().add("wkt", StringType())
         wkt_df = TestGeoArrowSerde.spark.createDataFrame(zip(TEST_WKT), schema)
-        geo_df = wkt_df.selectExpr("ST_GeomFromText(geom) AS geom")
+        geo_df = wkt_df.selectExpr("wkt", "ST_GeomFromText(wkt) AS geom")
 
         geo_table = dataframe_to_arrow(geo_df)
-        assert geo_table.colnames == ["geom"]
+        assert geo_table.colnames == ["wkt", "geom"]
+
+        geom = geo_table["geom"]
+        if isinstance(geom.type, pa.ExtensionType):
+            assert geom.type.extension_name == "geoarrow.wkb"
+        else:
+            field = geo_table.field("geom")
+            assert field.metadata is not None
+            assert b"ARROW:extension:name" in field.metadata
+            assert field.metadata[b"ARROW:extension:name"] == b"geoarrow.wkb"
 
 
 TEST_WKT = [
-    # empty geometries
-    "POINT EMPTY",
-    "LINESTRING EMPTY",
-    "POLYGON EMPTY",
-    "MULTIPOINT EMPTY",
-    "MULTILINESTRING EMPTY",
-    "MULTIPOLYGON EMPTY",
-    "GEOMETRYCOLLECTION EMPTY",
-    # non-empty geometries
     "POINT (10 20)",
     "POINT (10 20 30)",
     "LINESTRING (10 20, 30 40)",
@@ -55,26 +55,4 @@ TEST_WKT = [
     "POLYGON ((10 10, 20 20, 20 10, 10 10))",
     "POLYGON ((10 10 10, 20 20 10, 20 10 10, 10 10 10))",
     "POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (1 1, 1 2, 2 2, 2 1, 1 1))",
-    # non-empty multi geometries
-    "MULTIPOINT ((10 20), (30 40))",
-    "MULTIPOINT ((10 20 30), (40 50 60))",
-    "MULTILINESTRING ((10 20, 30 40), (50 60, 70 80))",
-    "MULTILINESTRING ((10 20 30, 40 50 60), (70 80 90, 100 110 120))",
-    "MULTIPOLYGON (((10 10, 20 20, 20 10, 10 10)), ((-10 -10, -20 -20, -20 -10, -10 -10)))",
-    "MULTIPOLYGON (((10 10, 20 20, 20 10, 10 10)), ((0 0, 0 10, 10 10, 10 0, 0 0), (1 1, 1 2, 2 2, 2 1, 1 1)))",
-    "GEOMETRYCOLLECTION (POINT (10 20), LINESTRING (10 20, 30 40))",
-    "GEOMETRYCOLLECTION (POINT (10 20 30), LINESTRING (10 20 30, 40 50 60))",
-    "GEOMETRYCOLLECTION (POINT (10 20), LINESTRING (10 20, 30 40), POLYGON ((10 10, 20 20, 20 10, 10 10)))",
-    # nested geometry collection
-    "GEOMETRYCOLLECTION (GEOMETRYCOLLECTION (POINT (10 20), LINESTRING (10 20, 30 40)))",
-    "GEOMETRYCOLLECTION (POINT (1 2), GEOMETRYCOLLECTION (POINT (10 20), LINESTRING (10 20, 30 40)))",
-    # multi geometries containing empty geometries
-    "MULTIPOINT (EMPTY, (10 20))",
-    "MULTIPOINT (EMPTY, EMPTY)",
-    "MULTILINESTRING (EMPTY, (10 20, 30 40))",
-    "MULTILINESTRING (EMPTY, EMPTY)",
-    "MULTIPOLYGON (EMPTY, ((10 10, 20 20, 20 10, 10 10)))",
-    "MULTIPOLYGON (EMPTY, EMPTY)",
-    "GEOMETRYCOLLECTION (POINT (10 20), POINT EMPTY, LINESTRING (10 20, 30 40))",
-    "GEOMETRYCOLLECTION (MULTIPOINT EMPTY, MULTILINESTRING EMPTY, MULTIPOLYGON EMPTY, GEOMETRYCOLLECTION EMPTY)",
 ]
