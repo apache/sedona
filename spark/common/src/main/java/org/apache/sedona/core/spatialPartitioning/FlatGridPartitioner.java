@@ -28,18 +28,30 @@ import org.locationtech.jts.geom.Geometry;
 import scala.Tuple2;
 
 public class FlatGridPartitioner extends SpatialPartitioner {
-  public FlatGridPartitioner(GridType gridType, List<Envelope> grids) {
+  protected final Boolean preserveUncontainedGeometries;
+
+  public FlatGridPartitioner(
+      GridType gridType, List<Envelope> grids, Boolean preserveUncontainedGeometries) {
     super(gridType, grids);
+    this.preserveUncontainedGeometries = preserveUncontainedGeometries;
+  }
+
+  public FlatGridPartitioner(GridType gridType, List<Envelope> grids) {
+    this(gridType, grids, true);
+  }
+
+  public FlatGridPartitioner(List<Envelope> grids, Boolean preserveUncontainedGeometries) {
+    this(null, grids, preserveUncontainedGeometries);
   }
 
   // For backwards compatibility (see SpatialRDD.spatialPartitioning(otherGrids))
   public FlatGridPartitioner(List<Envelope> grids) {
-    super(null, grids);
+    this(null, grids);
   }
 
   @Override
   public Iterator<Tuple2<Integer, Geometry>> placeObject(Geometry spatialObject) throws Exception {
-    EqualPartitioning partitioning = new EqualPartitioning(grids);
+    EqualPartitioning partitioning = new EqualPartitioning(grids, preserveUncontainedGeometries);
     return partitioning.placeObject(spatialObject);
   }
 
@@ -61,7 +73,7 @@ public class FlatGridPartitioner extends SpatialPartitioner {
 
   @Override
   public int numPartitions() {
-    return grids.size() + 1 /* overflow partition */;
+    return grids.size() + (preserveUncontainedGeometries ? 1 : 0);
   }
 
   @Override
