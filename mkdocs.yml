@@ -75,6 +75,8 @@ nav:
       - Examples:
           - Scala/Java: tutorial/demo.md
           - Python: tutorial/jupyter-notebook.md
+      - Concepts:
+          - Clustering Algorithms: tutorial/concepts/clustering-algorithms.md
   - API Docs:
       - Sedona with Apache Spark:
           - SQL:
