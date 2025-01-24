@@ -572,7 +572,8 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
       assert(numSpatialPartitions >= 16)
 
       var partitionedDF = Adapter.toDfPartitioned(srcRdd, sparkSession)
-      assert(partitionedDF.groupBy(spark_partition_id).count() == numSpatialPartitions)
+      val dfPartitions: Long = partitionedDF.select(spark_partition_id).distinct().count()
+      assert(dfPartitions == numSpatialPartitions)
     }
   }
 }
