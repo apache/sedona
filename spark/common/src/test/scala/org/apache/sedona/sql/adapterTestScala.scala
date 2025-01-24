@@ -27,8 +27,10 @@ import org.apache.sedona.core.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
 import org.apache.sedona.sql.utils.Adapter
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
+import org.apache.spark.sql.functions.spark_partition_id
 import org.locationtech.jts.geom.Point
 import org.scalatest.GivenWhenThen
+import org.apache.spark.sql.Row
 
 class adapterTestScala extends TestBaseScala with GivenWhenThen {
 
@@ -566,11 +568,11 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
       var srcRdd = Adapter.toSpatialRdd(pointDf, "arealandmark")
       srcRdd.analyze()
       srcRdd.spatialPartitioning(GridType.KDBTREE, 16)
-      assert(srcRdd.spatialPartitionedRDD.getNumPartitions >= 16)
+      var numSpatialPartitions = srcRdd.spatialPartitionedRDD.getNumPartitions
+      assert(numSpatialPartitions >= 16)
 
       var partitionedDF = Adapter.toDfPartitioned(srcRdd, sparkSession)
-
-      // TODO: test the partitioning of the partitionedDF
+      assert(partitionedDF.groupBy(spark_partition_id).count() == numSpatialPartitions)
     }
   }
 }
