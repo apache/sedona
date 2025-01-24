@@ -79,7 +79,7 @@ public class IndexedGridPartitioner extends FlatGridPartitioner {
         if (grid.covers(envelope)) {
           result.add(new Tuple2(i, spatialObject));
           containFlag = true;
-        } else if (grid.intersects(envelope) || envelope.covers(grid)) {
+        } else if (grid.intersects(envelope)) {
           result.add(new Tuple2<>(i, spatialObject));
         }
       }
