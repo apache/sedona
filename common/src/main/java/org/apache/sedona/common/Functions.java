@@ -1173,12 +1173,13 @@ public class Functions {
     }
 
     GeometryFactory geometryFactory = geometry.getFactory();
-    List<Geometry> resultList = new ArrayList<>();
+    Geometry[] resultArray = new Geometry[coords.length - 1];
     for (int i = 1; i < coords.length; i++) {
-      resultList.add(geometryFactory.createLineString(new Coordinate[] {coords[i - 1], coords[i]}));
+      resultArray[i - 1] =
+          geometryFactory.createLineString(new Coordinate[] {coords[i - 1], coords[i]});
     }
 
-    return resultList.toArray(new Geometry[0]);
+    return resultArray;
   }
 
   public static Geometry[] lineSegments(Geometry geometry) {
