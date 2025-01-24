@@ -16,7 +16,6 @@
 #  under the License.
 
 import logging
-import random
 import tempfile
 import glob
 
@@ -408,9 +407,10 @@ class TestAdapter(TestBase):
         assert spatial_df.count() == 1001
 
     def test_to_df_partitioned(self):
-        random.seed(1234)
-        xys = [(i, random.random(), random.random()) for i in range(1_000)]
-        df = self.spark.createDataFrame(xys, ["id", "x", "y"]).selectExpr("id", "ST_Point(x, y) AS geom")
+        xys = [(i, i // 100, i % 100) for i in range(1_000)]
+        df = self.spark.createDataFrame(xys, ["id", "x", "y"]).selectExpr(
+            "id", "ST_Point(x, y) AS geom"
+        )
 
         rdd = Adapter.toSpatialRdd(df, "geom")
         rdd.analyze()

@@ -28,6 +28,7 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.locationtech.jts.geom.Geometry
+import org.slf4j.LoggerFactory
 
 object Adapter {
 
@@ -257,6 +258,10 @@ object Adapter {
       spatialRDD: SpatialRDD[T],
       fieldNames: Seq[String],
       sparkSession: SparkSession): DataFrame = {
+    @transient lazy val log = LoggerFactory.getLogger(getClass.getName)
+    log.warn(
+      "toDfParitioned() may introduce duplicates when used with non-specialized partitioning")
+
     val rowRdd = spatialRDD.spatialPartitionedRDD.map[Row](geom => {
       val stringRow = extractUserData(geom)
       Row.fromSeq(stringRow)
